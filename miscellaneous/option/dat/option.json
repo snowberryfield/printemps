@@ -1,0 +1,41 @@
+{
+    "iteration_max": 100,
+    "time_offset": 0,
+    "time_max": 1200,
+    "penalty_coefficient_relaxing_ratio": 0.5,
+    "penalty_coefficient_tightening_ratio": 1.0,
+    "initial_penalty_coefficient": 1E6,
+    "is_enabled_local_search": false,
+    "is_enabled_grouping_penalty_coefficient": false,
+    "is_enabled_initial_value_correction": true,
+    "is_enabled_parallel_evaluation": true,
+    "is_enabled_parallel_neighborhood_update": true,
+    "target_objective_value": -1E100,
+    "verbose": 0,
+    "local_search": {
+        "iteration_max": 1000,
+        "time_max": 120,
+        "time_offset": 0,
+        "log_interval": 10,
+        "seed": 1
+    },
+    "tabu_search": {
+        "iteration_max": 1000,
+        "time_max": 120,
+        "time_offset": 0,
+        "log_interval": 10,
+        "initial_tabu_tenure": 10,
+        "tabu_mode": 1,
+        "move_preserve_rate": 0.0,
+        "frequency_penalty_coefficient": 1E-5,
+        "is_enabled_improvability_screening": false,
+        "is_enabled_shuffle": false,
+        "is_enabled_move_curtail": false,
+        "is_enabled_automatic_break": true,
+        "is_enabled_automatic_tabu_tenure_adjustment": true,
+        "ignore_tabu_if_augmented_incumbent": false,
+        "ignore_tabu_if_feasible_incumbent": true,
+        "number_of_initial_modification": 0,
+        "seed": 1
+    }
+}
