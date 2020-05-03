@@ -55,58 +55,23 @@ class VariableProxy : public AbstractMultiArray {
 
     /*************************************************************************/
     VariableProxy(const int a_ID) : AbstractMultiArray(a_ID) {
-        /**
-         * m_variable.resize(this->number_of_elements()) does not work because
-         * default constructor of Variable class is deleted.
-         */
-        m_variables.reserve(this->number_of_elements());
-        for (std::size_t i = 0; i < this->number_of_elements(); i++) {
-            m_variables.emplace_back(
-                Variable<T_Variable, T_Expression>::create_instance());
-        }
-
-        int flat_index = 0;
-
-        std::vector<int> multi_dimensional_index(this->number_of_dimensions());
-        for (auto &&variable : m_variables) {
-            variable.set_id(a_ID);
-            variable.set_flat_index(flat_index);
-            this->update_multi_dimensional_index(&multi_dimensional_index,
-                                                 flat_index);
-            variable.set_multi_dimensional_index(multi_dimensional_index);
-            flat_index++;
-        }
+        this->setup_variables();
     }
 
     /*************************************************************************/
     VariableProxy(const int a_ID, const int a_NUMBER_OF_ELEMENTS)
         : AbstractMultiArray(a_ID, a_NUMBER_OF_ELEMENTS) {
-        /**
-         * m_variable.resize(this->number_of_elements()) does not work because
-         * default constructor of Variable class is deleted.
-         */
-        m_variables.reserve(this->number_of_elements());
-        for (std::size_t i = 0; i < this->number_of_elements(); i++) {
-            m_variables.emplace_back(
-                Variable<T_Variable, T_Expression>::create_instance());
-        }
-
-        int flat_index = 0;
-
-        std::vector<int> multi_dimensional_index(this->number_of_dimensions());
-        for (auto &&variable : m_variables) {
-            variable.set_id(a_ID);
-            variable.set_flat_index(flat_index);
-            this->update_multi_dimensional_index(&multi_dimensional_index,
-                                                 flat_index);
-            variable.set_multi_dimensional_index(multi_dimensional_index);
-            flat_index++;
-        }
+        this->setup_variables();
     }
 
     /*************************************************************************/
     VariableProxy(const int a_ID, const std::vector<int> &a_SHAPE)
         : AbstractMultiArray(a_ID, a_SHAPE) {
+        this->setup_variables();
+    }
+
+    /*************************************************************************/
+    inline constexpr void setup_variables(void) {
         /**
          * m_variable.resize(this->number_of_elements()) does not work because
          * default constructor of Variable class is deleted.
@@ -121,7 +86,7 @@ class VariableProxy : public AbstractMultiArray {
 
         std::vector<int> multi_dimensional_index(this->number_of_dimensions());
         for (auto &&variable : m_variables) {
-            variable.set_id(a_ID);
+            variable.set_id(m_id);
             variable.set_flat_index(flat_index);
             this->update_multi_dimensional_index(&multi_dimensional_index,
                                                  flat_index);
