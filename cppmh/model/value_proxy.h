@@ -99,7 +99,7 @@ class ValueProxy : public AbstractMultiArray {
 
     /*************************************************************************/
     inline constexpr T_Value values(
-        const std::vector<int> a_MULTI_DIMENSIONAL_INDEX) const {
+        const std::vector<int> &a_MULTI_DIMENSIONAL_INDEX) const {
         if (this->number_of_dimensions() != a_MULTI_DIMENSIONAL_INDEX.size()) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,

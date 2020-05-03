@@ -1,0 +1,36 @@
+name: GitHub Actions
+on: [pull_request]
+jobs:
+  build:
+    runs-on: ${{ matrix.cfg.os }}
+    strategy:
+     matrix:
+      cfg:
+      # For Ubuntu 16.04, the available compilers are specified according to
+      # https://github.com/actions/virtual-environments/blob/master/images/linux/Ubuntu1604-README.md
+      - { os: ubuntu-16.04, cc: gcc-7, cxx: g++-7 } # 7.4.0
+      - { os: ubuntu-16.04, cc: gcc-8, cxx: g++-8 } # 8.3.0
+      - { os: ubuntu-16.04, cc: gcc-9, cxx: g++-9 } # 9.2.1
+      - { os: ubuntu-16.04, cc: clang-6.0, cxx: clang++-6.0 } # 6.0.0
+      - { os: ubuntu-16.04, cc: clang-8, cxx: clang++-8 } # 8.0.0
+      - { os: ubuntu-16.04, cc: clang-9, cxx: clang++-9 } # 9.0.1
+      # For Ubuntu 18.04, the available compilers are specified according to
+      # https://github.com/actions/virtual-environments/blob/master/images/linux/Ubuntu1804-README.md
+      - { os: ubuntu-18.04, cc: gcc-7, cxx: g++-7 } # 7.5.0
+      - { os: ubuntu-18.04, cc: gcc-8, cxx: g++-8 } # 8.4.0
+      - { os: ubuntu-18.04, cc: gcc-9, cxx: g++-9 } # 9.2.1
+      - { os: ubuntu-16.04, cc: clang-6.0, cxx: clang++-6.0 } # 6.0.0
+      - { os: ubuntu-16.04, cc: clang-8, cxx: clang++-8 } # 8.0.0
+      - { os: ubuntu-16.04, cc: clang-9, cxx: clang++-9 } # 9.0.0
+      # For macOS 10.15, the available compilers are specified according to
+      # https://github.com/actions/virtual-environments/blob/master/images/macos/macos-10.15-Readme.md
+      - { os: macos-10.15, cc: gcc-8, cxx: g++-8 } # 8.4.0 Homebrew
+      - { os: macos-10.15, cc: gcc-9, cxx: g++-9 } # 9.3.0 Homebrew
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install googletest
+      run: make -f makefile/Makefile.external CC=${{ matrix.cfg.cc }} CXX=${{ matrix.cfg.cxx }}
+
+    - name: Run tests. 
+      run: make -f makefile/Makefile.test CC=${{ matrix.cfg.cc }} CXX=${{ matrix.cfg.cxx }}
