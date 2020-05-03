@@ -1,11 +1,12 @@
 # cpp_metaheuristics
+![GitHub Actions](https://github.com/snowberryfield/cpp_metaheuristics/workflows/GitHub%20Actions/badge.svg) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/b990a9488ea14ead982cfecfb5a1ba00)](https://www.codacy.com/manual/snowberryfield/cpp_metaheuristics?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=snowberryfield/cpp_metaheuristics&amp;utm_campaign=Badge_Grade)
 
 __cpp_metaheuristics__ (hereinafter referred to as __cppmh__) is a C++ metaheuristics modeler/solver library for general combinatorial optimization problems. cppmh emphasizes on the following aspects:
 - __Portability.__ cppmh is implemented as a header-only library which does not depend on any other proprietary or open-source libraries. Users can integrate cppmh in to their own codes by just copying necessary files. 
 
 - __Intuitiveness in modeling.__ cppmh provides an intuitive modeling environment to define a optimization model as a program code. Users can define constraint and objective functions using arithmetic operations on decision variables.
 
-- __Flexibility to define neighborhood.__ cppmh automatically detects the neighborhood structure of the problem based on ranges of variables and constraints. In addition to this, cppmh also accepts user-defined neighborhood.
+- __Flexibility to define neighborhood.__ cppmh automatically detects the neighborhood structure of the problem. In addition to this, cppmh also accepts user-defined neighborhood.
 
 ## Optimization in cpp_metaheuristics
 cppmh can compute approximate solutions for __linear and nonlinear integer optimization problems__. cppmh employs __Tabu Search__ [1], a metaheuristics technique, to solve problems. In solving, cppmh replaces constraints with penalty functions which return violations to the corresponding constraints, and the penalty functions multiplied by positive penalty coefficients are added to the objective function. The penalty coefficients are updated iteratively and automatically in a method similar (not exact same) to the one proposed in paper [2].
@@ -77,13 +78,14 @@ $g++ -std=c++14 -O2 -I path/to/cppmh [-fopenmp] sample/knapsack.cpp -o knapsack.
 
 The option `-fopenmp` is required to activate parallel computation. See [Solver Options](document/solver_options.md) for details.
 
-Following combinations of compiler and operating system are confirmed compilation possible:
+Following combinations of operating systems and compilers are confirmed compilation possible:
 
-| Compiler |           Version            |   Operating System    |
-|:--------:|:----------------------------:|:---------------------:|
-|   g++    | 9.2.0 (install via homebrew) | macOS Mojave 10.14.16 |
-|   g++    |            7.5.0             |     Ubuntu 18.04      |
-| clang++  |            6.0.0             |     Ubuntu 18.04      |
+|   Operating System   |                      Compiler (version)                      |
+|:--------------------:|:------------------------------------------------------------:|
+|  macOS Mojave 10.14  |                     gcc (9.3.0 Homebrew)                     |
+| macOS Catalina 10.15 |                 gcc (8.4.0, 9.3.0 Homebrew)                  |
+|     Ubuntu 16.04     | gcc (7.4.0, 8.3.0, 9.2.1) <br /> clang (6.0.0, 8.0.0, 9.0.1) |
+|     Ubuntu 18.04     | gcc (7.5.0, 8.4.0, 9.2.1) <br /> clang (6.0.0, 8.0.0, 9.0.0) |
 
 ## Documents
 - [Starter Guide](document/starter_guide.md) describes the basic usage of cppmh including modeling of optimization problems, running the solver, and accessing the optimization results.
