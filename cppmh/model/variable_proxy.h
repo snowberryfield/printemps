@@ -71,7 +71,7 @@ class VariableProxy : public AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr void setup_variables(void) {
+    inline void setup_variables(void) {
         /**
          * m_variable.resize(this->number_of_elements()) does not work because
          * default constructor of Variable class is deleted.
