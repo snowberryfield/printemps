@@ -43,60 +43,23 @@ class ExpressionProxy : public AbstractMultiArray {
 
     /*************************************************************************/
     ExpressionProxy(const int a_ID) : AbstractMultiArray(a_ID) {
-        /**
-         * m_expression.resize(this->number_of_elements()) does not work
-         * because default constructor of Expression class are deleted. for
-         * reference:
-         * https://cpprefjp.github.io/reference/vector/vector/resize.html
-         */
-        m_expressions.reserve(this->number_of_elements());
-        for (std::size_t i = 0; i < this->number_of_elements(); i++) {
-            m_expressions.emplace_back(
-                Expression<T_Variable, T_Expression>::create_instance());
-        }
-
-        int flat_index = 0;
-
-        std::vector<int> multi_dimensional_index(this->number_of_dimensions());
-        for (auto &&expression : m_expressions) {
-            expression.set_flat_index(flat_index);
-            this->update_multi_dimensional_index(&multi_dimensional_index,
-                                                 flat_index);
-            expression.set_multi_dimensional_index(multi_dimensional_index);
-            flat_index++;
-        }
+        this->setup_expressions();
     }
 
     /*************************************************************************/
     ExpressionProxy(const int a_ID, const int a_NUMBER_OF_ELEMENTS)
         : AbstractMultiArray(a_ID, a_NUMBER_OF_ELEMENTS) {
-        /**
-         * m_expression.resize(this->number_of_elements()) does not work
-         * because default constructor of Expression class are deleted. for
-         * reference:
-         * https://cpprefjp.github.io/reference/vector/vector/resize.html
-         */
-        m_expressions.reserve(this->number_of_elements());
-        for (std::size_t i = 0; i < this->number_of_elements(); i++) {
-            m_expressions.emplace_back(
-                Expression<T_Variable, T_Expression>::create_instance());
-        }
-
-        int flat_index = 0;
-
-        std::vector<int> multi_dimensional_index(this->number_of_dimensions());
-        for (auto &&expression : m_expressions) {
-            expression.set_flat_index(flat_index);
-            this->update_multi_dimensional_index(&multi_dimensional_index,
-                                                 flat_index);
-            expression.set_multi_dimensional_index(multi_dimensional_index);
-            flat_index++;
-        }
+        this->setup_expressions();
     }
 
     /*************************************************************************/
     ExpressionProxy(int a_ID, const std::vector<int> &a_SHAPE)
         : AbstractMultiArray(a_ID, a_SHAPE) {
+        this->setup_expressions();
+    }
+
+    /*************************************************************************/
+    inline constexpr void setup_expressions(void) {
         /**
          * m_expression.resize(this->number_of_elements()) does not work
          * because default constructor of Expression class are deleted. for
