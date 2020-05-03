@@ -64,7 +64,7 @@ class ConstraintProxy : public AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr void setup_constraints(void) {
+    inline void setup_constraints(void) {
         /**
          * m_constraints.resize(this->number_of_elements()) does not work
          * because default constructor of Expression class are deleted. for
