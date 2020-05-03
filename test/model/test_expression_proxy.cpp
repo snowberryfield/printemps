@@ -1530,26 +1530,8 @@ TEST_F(TestExpressionProxy, two_dimensional_dot_arg_indice_vector) {
     auto& variable_proxy   = model.create_variables("x", {2, 3});
     auto& expression_proxy = model.create_expressions("e", {2, 3});
 
-    for (std::size_t i = 0; i < expression_proxy.number_of_elements(); i++) {
-        for (std::size_t j = 0; j < expression_proxy.number_of_dimensions();
-             j++) {
-            std::cout << i << " " << j << " "
-                      << expression_proxy[i].multi_dimensional_index()[j]
-                      << std::endl;
-        }
-    }
-
     for (std::size_t i = 0; i < variable_proxy.number_of_elements(); i++) {
         expression_proxy[i] = variable_proxy[i];
-    }
-
-    for (std::size_t i = 0; i < expression_proxy.number_of_elements(); i++) {
-        for (std::size_t j = 0; j < expression_proxy.number_of_dimensions();
-             j++) {
-            std::cout << i << " " << j << " "
-                      << expression_proxy[i].multi_dimensional_index()[j]
-                      << std::endl;
-        }
     }
 
     std::vector<double> sensitivities_0;
