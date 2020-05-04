@@ -80,6 +80,8 @@ model::NamedSolution<T_Variable, T_Expression> solve(
     model->setup_default_neighborhood(
         master_option.is_enabled_parallel_neighborhood_update);
 
+    model->setup_fixed_sensitivities();
+
     /**
      * If the user-defined_neighborhood is set, default neighborhood should
      * be disabled to avoid possible inconsistencies.

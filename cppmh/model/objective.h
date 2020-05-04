@@ -154,6 +154,7 @@ class Objective {
         this->initialize();
         m_is_linear  = true;
         m_expression = a_EXPRESSION;
+        m_expression.setup_fixed_sensitivities();
     }
 
     /*************************************************************************/
@@ -193,6 +194,11 @@ class Objective {
         } else {
             m_value = m_function(a_MOVE);
         }
+    }
+
+    /*************************************************************************/
+    inline constexpr Expression<T_Variable, T_Expression> &expression(void) {
+        return m_expression;
     }
 
     /*************************************************************************/

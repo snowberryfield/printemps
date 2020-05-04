@@ -42,7 +42,7 @@ TEST_F(TestConstraintProxy, scalar_create_instance) {
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraintProxy, scalar_constraints_arg_void) {
+TEST_F(TestConstraintProxy, scalar_flat_indexed_constraints_arg_void) {
     cppmh::model::Model<int, double> model;
     auto& constraint_proxy = model.create_constraint("c");
 
@@ -66,7 +66,7 @@ TEST_F(TestConstraintProxy, scalar_constraints_arg_void) {
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraintProxy, scalar_constraints_arg_int) {
+TEST_F(TestConstraintProxy, scalar_flat_indexed_constraints_arg_int) {
     cppmh::model::Model<int, double> model;
     auto& constraint_proxy = model.create_constraint("c");
 
@@ -263,7 +263,7 @@ TEST_F(TestConstraintProxy, one_dimensional_create_instance) {
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraintProxy, one_dimensional_constraints_arg_void) {
+TEST_F(TestConstraintProxy, one_dimensional_flat_indexed_constraints_arg_void) {
     cppmh::model::Model<int, double> model;
     auto& constraint_proxy = model.create_constraints("c", 2);
 
@@ -296,7 +296,7 @@ TEST_F(TestConstraintProxy, one_dimensional_constraints_arg_void) {
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraintProxy, one_dimensional_constraints_arg_int) {
+TEST_F(TestConstraintProxy, one_dimensional_flat_indexed_constraints_arg_int) {
     cppmh::model::Model<int, double> model;
     auto& constraint_proxy = model.create_constraints("c", 2);
 
@@ -514,7 +514,7 @@ TEST_F(TestConstraintProxy, two_dimensional_create_instance) {
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraintProxy, two_dimensional_constraints_arg_void) {
+TEST_F(TestConstraintProxy, two_dimensional_flat_indexed_constraints_arg_void) {
     cppmh::model::Model<int, double> model;
     auto& constraint_proxy = model.create_constraints("c", {2, 3});
 
@@ -549,7 +549,7 @@ TEST_F(TestConstraintProxy, two_dimensional_constraints_arg_void) {
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraintProxy, two_dimensional_constraints_arg_int) {
+TEST_F(TestConstraintProxy, two_dimensional_flat_indexed_constraints_arg_int) {
     cppmh::model::Model<int, double> model;
     auto& constraint_proxy = model.create_constraints("c", {2, 3});
 
@@ -862,16 +862,16 @@ TEST_F(TestConstraintProxy,
 
     auto  variable = cppmh::model::Variable<int, double>::create_instance();
     auto& constraint_proxy = model.create_constraints("c", {2, 3, 4, 5});
-    auto  sentisivity_0    = random_integer();
-    auto  sentisivity_1    = random_integer();
+    auto  sensitivity_0    = random_integer();
+    auto  sensitivity_1    = random_integer();
 
-    constraint_proxy({0, 0, 0, 0}) = (sentisivity_0 * variable == 0);
-    constraint_proxy({1, 2, 3, 4}) = (sentisivity_1 * variable == 0);
-    EXPECT_EQ(sentisivity_0, constraint_proxy({0, 0, 0, 0})
+    constraint_proxy({0, 0, 0, 0}) = (sensitivity_0 * variable == 0);
+    constraint_proxy({1, 2, 3, 4}) = (sensitivity_1 * variable == 0);
+    EXPECT_EQ(sensitivity_0, constraint_proxy({0, 0, 0, 0})
                                  .expression()
                                  .sensitivities()
                                  .at(&variable));
-    EXPECT_EQ(sentisivity_1, constraint_proxy({1, 2, 3, 4})
+    EXPECT_EQ(sensitivity_1, constraint_proxy({1, 2, 3, 4})
                                  .expression()
                                  .sensitivities()
                                  .at(&variable));

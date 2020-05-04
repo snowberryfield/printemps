@@ -106,6 +106,10 @@ TEST_F(TestExpressionProxy, scalar_evaluate_arg_move) {
     expression_proxy =
         sensitivity_0 * variable_0 + sensitivity_1 * variable_1 + constant;
 
+    for (auto&& expression : expression_proxy.flat_indexed_expressions()) {
+        expression.setup_fixed_sensitivities();
+    }
+
     auto value_0 = random_integer();
     auto value_1 = random_integer();
 
@@ -170,6 +174,10 @@ TEST_F(TestExpressionProxy, scalar_update_arg_move) {
     expression_proxy =
         sensitivity_0 * variable_0 + sensitivity_1 * variable_1 + constant;
 
+    for (auto&& expression : expression_proxy.flat_indexed_expressions()) {
+        expression.setup_fixed_sensitivities();
+    }
+
     auto value_0 = random_integer();
     auto value_1 = random_integer();
 
@@ -198,7 +206,7 @@ TEST_F(TestExpressionProxy, scalar_value) {
 }
 
 /*****************************************************************************/
-TEST_F(TestExpressionProxy, scalar_expressions_arg_void) {
+TEST_F(TestExpressionProxy, scalar_flat_indexed_expressions_arg_void) {
     cppmh::model::Model<int, double> model;
     auto& expression_proxy = model.create_expression("e");
 
@@ -229,7 +237,7 @@ TEST_F(TestExpressionProxy, scalar_expressions_arg_void) {
 }
 
 /*****************************************************************************/
-TEST_F(TestExpressionProxy, scalar_expressions_arg_int) {
+TEST_F(TestExpressionProxy, scalar_flat_indexed_expressions_arg_int) {
     cppmh::model::Model<int, double> model;
     auto& expression_proxy = model.create_expression("e");
 
@@ -789,7 +797,7 @@ TEST_F(TestExpressionProxy, one_dimensional_value) {
 }
 
 /*****************************************************************************/
-TEST_F(TestExpressionProxy, one_dimensional_expressions_arg_void) {
+TEST_F(TestExpressionProxy, one_dimensional_flat_indexed_expressions_arg_void) {
     cppmh::model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", 2);
 
@@ -832,7 +840,7 @@ TEST_F(TestExpressionProxy, one_dimensional_expressions_arg_void) {
 }
 
 /*****************************************************************************/
-TEST_F(TestExpressionProxy, one_dimensional_expressions_arg_int) {
+TEST_F(TestExpressionProxy, one_dimensional_flat_indexed_expressions_arg_int) {
     cppmh::model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", 2);
 
@@ -1305,7 +1313,7 @@ TEST_F(TestExpressionProxy, two_dimensional_value) {
 }
 
 /*****************************************************************************/
-TEST_F(TestExpressionProxy, two_dimensional_expressions_arg_void) {
+TEST_F(TestExpressionProxy, two_dimensional_flat_indexed_expressions_arg_void) {
     cppmh::model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", {2, 3});
 
@@ -1351,7 +1359,7 @@ TEST_F(TestExpressionProxy, two_dimensional_expressions_arg_void) {
 }
 
 /*****************************************************************************/
-TEST_F(TestExpressionProxy, two_dimensional_expressions_arg_int) {
+TEST_F(TestExpressionProxy, two_dimensional_flat_indexed_expressions_arg_int) {
     cppmh::model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", {2, 3});
 
