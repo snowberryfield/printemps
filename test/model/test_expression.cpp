@@ -43,11 +43,11 @@ TEST_F(TestExpression, initialize) {
 
 /*****************************************************************************/
 TEST_F(TestExpression, set_flat_index) {
-    auto variable = cppmh::model::Variable<int, double>::create_instance();
+    auto expression = cppmh::model::Expression<int, double>::create_instance();
 
     auto flat_index = random_integer();
-    variable.set_flat_index(flat_index);
-    EXPECT_EQ(flat_index, variable.flat_index());
+    expression.set_flat_index(flat_index);
+    EXPECT_EQ(flat_index, expression.flat_index());
 }
 
 /*****************************************************************************/
@@ -57,16 +57,18 @@ TEST_F(TestExpression, flat_index) {
 
 /*****************************************************************************/
 TEST_F(TestExpression, set_multi_dimensional_index) {
-    auto variable = cppmh::model::Variable<int, double>::create_instance();
+    auto expression = cppmh::model::Expression<int, double>::create_instance();
 
     auto multi_dimensional_index_1 = random_integer();
     auto multi_dimensional_index_2 = random_integer();
 
-    variable.set_multi_dimensional_index(
+    expression.set_multi_dimensional_index(
         {multi_dimensional_index_1, multi_dimensional_index_2});
 
-    EXPECT_EQ(multi_dimensional_index_1, variable.multi_dimensional_index()[0]);
-    EXPECT_EQ(multi_dimensional_index_2, variable.multi_dimensional_index()[1]);
+    EXPECT_EQ(multi_dimensional_index_1,
+              expression.multi_dimensional_index()[0]);
+    EXPECT_EQ(multi_dimensional_index_2,
+              expression.multi_dimensional_index()[1]);
 }
 
 /*****************************************************************************/
@@ -99,6 +101,11 @@ TEST_F(TestExpression, set_sensitivities) {
 /*****************************************************************************/
 TEST_F(TestExpression, sensitivities) {
     /// This method is tested in set_sensitivities().
+}
+
+/*****************************************************************************/
+TEST_F(TestExpression, setup_fixed_sensitivities) {
+    /// This method is tested in test_fixed_size_hash_map().
 }
 
 /*****************************************************************************/
@@ -153,6 +160,7 @@ TEST_F(TestExpression, evaluate_arg_move) {
 
     expression =
         sensitivity_0 * variable_0 + sensitivity_1 * variable_1 + constant;
+    expression.setup_fixed_sensitivities();
 
     auto v_value_0 = random_integer();
     auto v_value_1 = random_integer();
@@ -219,6 +227,7 @@ TEST_F(TestExpression, update_arg_move) {
 
     expression =
         sensitivity_0 * variable_0 + sensitivity_1 * variable_1 + constant;
+    expression.setup_fixed_sensitivities();
 
     auto v_value_0 = random_integer();
     auto v_value_1 = random_integer();

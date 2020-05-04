@@ -512,6 +512,15 @@ class Model {
     }
 
     /*************************************************************************/
+    inline constexpr void setup_fixed_sensitivities(void) {
+        for (auto &&proxy : m_expression_proxies) {
+            for (auto &&expression : proxy.flat_indexed_expressions()) {
+                expression.setup_fixed_sensitivities();
+            }
+        }
+    }
+
+    /*************************************************************************/
     inline constexpr void reset_variable_sense(void) {
         for (auto &&proxy : m_variable_proxies) {
             for (auto &&variable : proxy.flat_indexed_variables()) {
@@ -1124,7 +1133,7 @@ class Model {
         void) const {
         return m_constraint_names;
     }
-};  // namespace model
+};
 using IPModel = Model<int, double>;
 }  // namespace model
 }  // namespace cppmh

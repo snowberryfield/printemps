@@ -249,6 +249,8 @@ class Constraint {
         m_sense      = a_SENSE;
         m_is_linear  = true;
 
+        m_expression.setup_fixed_sensitivities();
+
         m_constraint_function =
             [this](const Move<T_Variable, T_Expression> &a_MOVE) {
                 return m_expression.evaluate(a_MOVE);
