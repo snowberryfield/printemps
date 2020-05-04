@@ -9,6 +9,7 @@
 #include <vector>
 #include <unordered_map>
 
+#include "fixed_size_hash_map.h"
 #include "move.h"
 
 namespace cppmh {
@@ -62,6 +63,9 @@ class Expression {
 
     std::unordered_map<Variable<T_Variable, T_Expression> *, T_Expression>
         m_sensitivities;
+
+    FixedSizeHashMap<Variable<T_Variable, T_Expression> *, T_Expression>
+        m_fixed_sensitivities;
 
     /*************************************************************************/
     /// Default constructor
@@ -134,8 +138,7 @@ class Expression {
         m_value                   = 0;
         m_is_enabled              = true;
         m_sensitivities.clear();
-        m_sensitivities.reserve(
-            ExpressionConstant::DEFAULT_SENSITIVITY_RESERVE_SIZE);
+        m_fixed_sensitivities.initialize();
     }
 
     /*************************************************************************/
@@ -175,6 +178,18 @@ class Expression {
     }
 
     /*************************************************************************/
+    inline constexpr void setup_fixed_sensitivities(void) {
+        /**
+         * std::unordered_map is slow in hashing because it uses modulo
+         * operations. For efficient evaluations of solutions, a hash map
+         * without modulo operations is set up by converting from the
+         * std::unordered map.
+         */
+        m_fixed_sensitivities.setup(m_sensitivities,
+                                    sizeof(Variable<T_Variable, T_Expression>));
+    }
+
+    /*************************************************************************/
     inline constexpr T_Expression constant_value(void) const {
         return m_constant_value;
     }
@@ -191,22 +206,15 @@ class Expression {
 
     /*************************************************************************/
     inline constexpr T_Expression evaluate(
-        const Move<T_Variable, T_Expression> &a_MOVE) noexcept {
-        /**
-         * This method is not const to use std::unordered_map.operator[] which
-         * is non-const method.
-         */
+        const Move<T_Variable, T_Expression> &a_MOVE) const noexcept {
         if (a_MOVE.alterations.size() == 0) {
             return this->evaluate();
         }
 
         T_Expression new_value = m_value;
         for (const auto &alteration : a_MOVE.alterations) {
-            if (m_sensitivities.find(alteration.first) !=
-                m_sensitivities.end()) {
-                new_value += m_sensitivities[alteration.first] *
-                             (alteration.second - alteration.first->value());
-            }
+            new_value += m_fixed_sensitivities.at(alteration.first) *
+                         (alteration.second - alteration.first->value());
         }
         return new_value;
     }
@@ -318,15 +326,9 @@ class Expression {
     inline constexpr Expression<T_Variable, T_Expression> &operator+=(
         const Expression<T_Variable, T_Expression> &a_EXPRESSION) {
         for (const auto &append : a_EXPRESSION.m_sensitivities) {
-            bool has_same_variable = false;
-            for (auto &&original : m_sensitivities) {
-                if (append.first == original.first) {
-                    original.second += append.second;
-                    has_same_variable = true;
-                    break;
-                }
-            }
-            if (!has_same_variable) {
+            if (m_sensitivities.find(append.first) != m_sensitivities.end()) {
+                m_sensitivities[append.first] += append.second;
+            } else {
                 m_sensitivities[append.first] = append.second;
             }
         }
@@ -378,7 +380,7 @@ class Expression {
         m_constant_value /= a_VALUE;
         return *this;
     }
-};
+};  // namespace model
 using IPExpression = Expression<int, double>;
 }  // namespace model
 }  // namespace cppmh

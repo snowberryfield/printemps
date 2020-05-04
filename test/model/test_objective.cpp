@@ -131,6 +131,7 @@ TEST_F(TestObjective, evaluate_function_arg_void) {
     auto constant    = random_integer();
 
     expression = sensitivity * variable + constant;
+    expression.setup_fixed_sensitivities();
 
     auto f = [&expression](const cppmh::model::Move<int, double> &a_MOVE) {
         return expression.evaluate(a_MOVE);
@@ -178,6 +179,7 @@ TEST_F(TestObjective, evaluate_function_arg_move) {
     auto constant    = random_integer();
 
     expression = sensitivity * variable + constant;
+    expression.setup_fixed_sensitivities();
 
     auto f = [&expression,
               &variable](const cppmh::model::Move<int, double> &a_MOVE) {
