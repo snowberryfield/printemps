@@ -1,5 +1,5 @@
 name: GitHub Actions
-on: [pull_request]
+on: [push]
 jobs:
   build:
     runs-on: ${{ matrix.cfg.os }}
