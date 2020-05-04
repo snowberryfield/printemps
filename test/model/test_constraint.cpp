@@ -202,6 +202,7 @@ TEST_F(TestConstraint, setup_arg_function) {
     auto target      = random_integer();
 
     expression = sensitivity * variable + constant;
+
     std::function<double(const cppmh::model::Move<int, double> &)> f =
         [&expression, target](const cppmh::model::Move<int, double> &a_MOVE) {
             return expression.evaluate(a_MOVE) - target;
@@ -329,6 +330,7 @@ TEST_F(TestConstraint, evaluate_function_arg_void) {
     auto target      = random_integer();
 
     expression = sensitivity * variable + constant;
+
     std::function<double(const cppmh::model::Move<int, double> &)> f =
         [&expression, target](const cppmh::model::Move<int, double> &a_MOVE) {
             return expression.evaluate(a_MOVE) - target;
@@ -380,6 +382,8 @@ TEST_F(TestConstraint, evaluate_function_arg_move) {
     auto target      = random_integer();
 
     expression = sensitivity * variable + constant;
+    expression.setup_fixed_sensitivities();
+
     std::function<double(const cppmh::model::Move<int, double> &)> f =
         [&expression, target](const cppmh::model::Move<int, double> &a_MOVE) {
             return expression.evaluate(a_MOVE) - target;
@@ -465,6 +469,7 @@ TEST_F(TestConstraint, evaluate_violation_function_arg_void) {
     auto target      = random_integer();
 
     expression = sensitivity * variable + constant;
+
     std::function<double(const cppmh::model::Move<int, double> &)> f =
         [&expression, target](const cppmh::model::Move<int, double> &a_MOVE) {
             return expression.evaluate(a_MOVE) - target;
@@ -590,6 +595,8 @@ TEST_F(TestConstraint, evaluate_violation_function_arg_move) {
     auto target      = random_integer();
 
     expression = sensitivity * variable + constant;
+    expression.setup_fixed_sensitivities();
+
     std::function<double(const cppmh::model::Move<int, double> &)> f =
         [&expression, target](const cppmh::model::Move<int, double> &a_MOVE) {
             return expression.evaluate(a_MOVE) - target;
@@ -888,6 +895,7 @@ TEST_F(TestConstraint, operator_equal_function) {
     auto target      = random_integer();
 
     expression = sensitivity * variable + constant;
+
     std::function<double(const cppmh::model::Move<int, double> &)> f =
         [&expression, target](const cppmh::model::Move<int, double> &a_MOVE) {
             return expression.evaluate(a_MOVE) - target;

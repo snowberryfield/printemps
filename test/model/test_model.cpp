@@ -550,6 +550,11 @@ TEST_F(TestModel, setup_has_fixed_variables) {
 }
 
 /*****************************************************************************/
+TEST_F(TestModel, setup_fixed_sensitivities) {
+    /// This method is tested in test_expression.h
+}
+
+/*****************************************************************************/
 TEST_F(TestModel, reset_variable_sense) {
     cppmh::model::Model<int, double> model;
 
@@ -1115,6 +1120,10 @@ TEST_F(TestModel, update_arg_move) {
     auto& expression_proxy =
         model.create_expression("e", variable_proxy.dot(sequence) + 1);
     model.create_constraint("c", variable_proxy.selection());
+
+    for (auto&& expression : expression_proxy.flat_indexed_expressions()) {
+        expression.setup_fixed_sensitivities();
+    }
 
     variable_proxy[0] = 1;
 
