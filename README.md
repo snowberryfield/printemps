@@ -1,5 +1,5 @@
 # cpp_metaheuristics
-![GitHub Actions](https://github.com/snowberryfield/cpp_metaheuristics/workflows/GitHub%20Actions/badge.svg) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/b990a9488ea14ead982cfecfb5a1ba00)](https://www.codacy.com/manual/snowberryfield/cpp_metaheuristics?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=snowberryfield/cpp_metaheuristics&amp;utm_campaign=Badge_Grade)
+![GitHub Actions](https://github.com/snowberryfield/cpp_metaheuristics/workflows/GitHub%20Actions/badge.svg) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/b990a9488ea14ead982cfecfb5a1ba00)](https://www.codacy.com/manual/snowberryfield/cpp_metaheuristics?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=snowberryfield/cpp_metaheuristics&amp;utm_campaign=Badge_Grade) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 __cpp_metaheuristics__ (hereinafter referred to as __cppmh__) is a C++ metaheuristics modeler/solver library for general combinatorial optimization problems. cppmh emphasizes on the following aspects:
 - __Portability.__ cppmh is implemented as a header-only library which does not depend on any other proprietary or open-source libraries. Users can integrate cppmh in to their own codes by just copying necessary files. 
