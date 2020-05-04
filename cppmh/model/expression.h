@@ -181,7 +181,7 @@ class Expression {
     inline constexpr void setup_fixed_sensitivities(void) {
         /**
          * std::unordered_map is slow in hashing because it uses modulo
-         * operations. For efficient evaluations of solutions, A hash map
+         * operations. For efficient evaluations of solutions, a hash map
          * without modulo operations is set up by converting from the
          * std::unordered map.
          */
@@ -326,15 +326,9 @@ class Expression {
     inline constexpr Expression<T_Variable, T_Expression> &operator+=(
         const Expression<T_Variable, T_Expression> &a_EXPRESSION) {
         for (const auto &append : a_EXPRESSION.m_sensitivities) {
-            bool has_same_variable = false;
-            for (auto &&original : m_sensitivities) {
-                if (append.first == original.first) {
-                    original.second += append.second;
-                    has_same_variable = true;
-                    break;
-                }
-            }
-            if (!has_same_variable) {
+            if (m_sensitivities.find(append.first) != m_sensitivities.end()) {
+                m_sensitivities[append.first] += append.second;
+            } else {
                 m_sensitivities[append.first] = append.second;
             }
         }
