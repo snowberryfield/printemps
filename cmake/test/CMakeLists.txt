@@ -37,6 +37,7 @@ link_directories(
 
 include(test_model.cmake)
 include(test_solver.cmake)
+include(test_utility.cmake)
 
 ###############################################################################
 ## END
