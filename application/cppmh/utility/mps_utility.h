@@ -159,14 +159,14 @@ inline MPS read_mps(const std::string &a_FILE_NAME) {
      * Read and store entire part of the mps file.
      */
     {
-        std::ifstream input_file_stream;
+        std::ifstream ifs;
         std::string   buffer;
 
-        input_file_stream.open(a_FILE_NAME.c_str());
-        while (std::getline(input_file_stream, buffer)) {
+        ifs.open(a_FILE_NAME.c_str());
+        while (std::getline(ifs, buffer)) {
             lines.push_back(buffer);
         }
-        input_file_stream.close();
+        ifs.close();
     }
 
     MPSReadMode      read_mode      = MPSReadMode::Initial;
