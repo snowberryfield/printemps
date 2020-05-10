@@ -67,7 +67,7 @@ class ExpressionProxy : public AbstractMultiArray {
          * https://cpprefjp.github.io/reference/vector/vector/resize.html
          */
         m_expressions.reserve(this->number_of_elements());
-        for (std::size_t i = 0; i < this->number_of_elements(); i++) {
+        for (auto i = 0; i < this->number_of_elements(); i++) {
             m_expressions.emplace_back(
                 Expression<T_Variable, T_Expression>::create_instance());
         }
@@ -80,6 +80,7 @@ class ExpressionProxy : public AbstractMultiArray {
             this->update_multi_dimensional_index(&multi_dimensional_index,
                                                  flat_index);
             expression.set_multi_dimensional_index(multi_dimensional_index);
+
             flat_index++;
         }
     }
@@ -204,6 +205,26 @@ class ExpressionProxy : public AbstractMultiArray {
     }
 
     /*************************************************************************/
+    inline constexpr void set_name(const std::string &a_NAME) {
+        if (this->number_of_elements() != 1) {
+            throw std::logic_error(utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "The number of elements is not one."));
+        }
+        m_expressions[0].set_name(a_NAME);
+    }
+
+    /*************************************************************************/
+    inline constexpr const std::string &name(void) const {
+        if (this->number_of_elements() != 1) {
+            throw std::logic_error(utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "The number of elements is not one."));
+        }
+        return m_expressions[0].name();
+    }
+
+    /*************************************************************************/
     inline constexpr std::vector<Expression<T_Variable, T_Expression>>
         &flat_indexed_expressions(void) {
         return m_expressions;
@@ -228,10 +249,14 @@ class ExpressionProxy : public AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr ValueProxy<T_Expression> export_values(void) const {
+    inline constexpr ValueProxy<T_Expression> export_values_and_names(
+        void) const {
         ValueProxy<T_Expression> proxy(m_id, m_shape);
-        for (std::size_t i = 0; i < this->number_of_elements(); i++) {
-            proxy[i] = m_expressions[i].value();
+
+        int number_of_elements = this->number_of_elements();
+        for (auto i = 0; i < number_of_elements; i++) {
+            proxy.flat_indexed_values()[i] = m_expressions[i].value();
+            proxy.flat_indexed_names()[i]  = m_expressions[i].name();
         }
         return proxy;
     }
@@ -259,14 +284,15 @@ class ExpressionProxy : public AbstractMultiArray {
     /*************************************************************************/
     inline constexpr Expression<T_Variable, T_Expression> sum(
         const std::vector<int> &a_MULTI_DIMENSIONAL_INDEX) const {
-        if (this->number_of_dimensions() != a_MULTI_DIMENSIONAL_INDEX.size()) {
+        int multi_dimensional_index_size = a_MULTI_DIMENSIONAL_INDEX.size();
+        if (this->number_of_dimensions() != multi_dimensional_index_size) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "Number of dimensions does not match."));
         }
 
         int number_of_partial_elements = 1;
-        for (std::size_t j = 0; j < this->number_of_dimensions(); j++) {
+        for (auto j = 0; j < this->number_of_dimensions(); j++) {
             if (a_MULTI_DIMENSIONAL_INDEX[j] == Range::All) {
                 number_of_partial_elements *= m_shape[j];
             }
@@ -276,9 +302,9 @@ class ExpressionProxy : public AbstractMultiArray {
             expression_ptrs;
         expression_ptrs.reserve(number_of_partial_elements);
 
-        for (std::size_t i = 0; i < this->number_of_elements(); i++) {
+        for (auto i = 0; i < this->number_of_elements(); i++) {
             bool is_covered = true;
-            for (std::size_t j = 0; j < this->number_of_dimensions(); j++) {
+            for (auto j = 0; j < this->number_of_dimensions(); j++) {
                 if (a_MULTI_DIMENSIONAL_INDEX[j] != Range::All &&
                     m_expressions[i].multi_dimensional_index()[j] !=
                         a_MULTI_DIMENSIONAL_INDEX[j]) {
@@ -308,15 +334,15 @@ class ExpressionProxy : public AbstractMultiArray {
                 __FILE__, __LINE__, __func__,
                 "Number of dimensions does not 1."));
         }
-
-        if (this->number_of_elements() != a_COEFFICIENTS.size()) {
+        int coefficient_size = a_COEFFICIENTS.size();
+        if (this->number_of_elements() != coefficient_size) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "Number of elements does not match."));
         }
 
         auto result = Expression<T_Variable, T_Expression>::create_instance();
-        for (std::size_t i = 0; i < this->number_of_elements(); i++) {
+        for (auto i = 0; i < this->number_of_elements(); i++) {
             result += m_expressions[i] * a_COEFFICIENTS[i];
         }
 
@@ -328,7 +354,8 @@ class ExpressionProxy : public AbstractMultiArray {
     inline constexpr Expression<T_Variable, T_Expression> dot(
         const std::vector<int> &a_MULTI_DIMENSIONAL_INDEX,
         const T_Array &         a_COEFFICIENTS) {
-        if (this->number_of_dimensions() != a_MULTI_DIMENSIONAL_INDEX.size()) {
+        int multi_dimensional_index_size = a_MULTI_DIMENSIONAL_INDEX.size();
+        if (this->number_of_dimensions() != multi_dimensional_index_size) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "Number of dimensions does not match."));
@@ -342,7 +369,7 @@ class ExpressionProxy : public AbstractMultiArray {
         }
 
         int number_of_partial_elements = 1;
-        for (std::size_t j = 0; j < this->number_of_dimensions(); j++) {
+        for (auto j = 0; j < this->number_of_dimensions(); j++) {
             if (a_MULTI_DIMENSIONAL_INDEX[j] == Range::All) {
                 number_of_partial_elements *= m_shape[j];
             }
@@ -352,9 +379,9 @@ class ExpressionProxy : public AbstractMultiArray {
             expression_ptrs;
         expression_ptrs.reserve(number_of_partial_elements);
 
-        for (std::size_t i = 0; i < this->number_of_elements(); i++) {
+        for (auto i = 0; i < this->number_of_elements(); i++) {
             bool is_covered = true;
-            for (std::size_t j = 0; j < this->number_of_dimensions(); j++) {
+            for (auto j = 0; j < this->number_of_dimensions(); j++) {
                 if (a_MULTI_DIMENSIONAL_INDEX[j] != Range::All &&
                     m_expressions[i].multi_dimensional_index()[j] !=
                         a_MULTI_DIMENSIONAL_INDEX[j]) {
@@ -374,7 +401,9 @@ class ExpressionProxy : public AbstractMultiArray {
         }
 
         auto result = Expression<T_Variable, T_Expression>::create_instance();
-        for (std::size_t i = 0; i < expression_ptrs.size(); i++) {
+
+        int expression_ptrs_size = expression_ptrs.size();
+        for (auto i = 0; i < expression_ptrs_size; i++) {
             result += (*expression_ptrs[i]) * a_COEFFICIENTS[i];
         }
 
@@ -601,7 +630,8 @@ class ExpressionProxy : public AbstractMultiArray {
     /*************************************************************************/
     inline constexpr Expression<T_Variable, T_Expression> &operator()(
         const std::vector<int> &a_MULTI_DIMENSIONAL_INDEX) {
-        if (this->number_of_dimensions() != a_MULTI_DIMENSIONAL_INDEX.size()) {
+        int multi_dimensional_index_size = a_MULTI_DIMENSIONAL_INDEX.size();
+        if (this->number_of_dimensions() != multi_dimensional_index_size) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of dimensions does not match."));
@@ -617,7 +647,8 @@ class ExpressionProxy : public AbstractMultiArray {
     /*************************************************************************/
     inline constexpr const Expression<T_Variable, T_Expression> &operator()(
         const std::vector<int> &a_MULTI_DIMENSIONAL_INDEX) const {
-        if (this->number_of_dimensions() != a_MULTI_DIMENSIONAL_INDEX.size()) {
+        int multi_dimensional_index_size = a_MULTI_DIMENSIONAL_INDEX.size();
+        if (this->number_of_dimensions() != multi_dimensional_index_size) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of dimensions does not match."));

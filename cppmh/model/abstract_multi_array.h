@@ -18,8 +18,8 @@ namespace model {
 class AbstractMultiArray {
    protected:
     int              m_id;
-    std::size_t      m_number_of_dimensions;
-    std::size_t      m_number_of_elements;
+    int              m_number_of_dimensions;
+    int              m_number_of_elements;
     int              m_max_digits;
     std::vector<int> m_shape;
     std::vector<int> m_strides;
@@ -37,7 +37,6 @@ class AbstractMultiArray {
         /// nothing to do
     }
 
-   public:
     /*************************************************************************/
     AbstractMultiArray(const int a_ID) {
         m_id                   = a_ID;
@@ -75,6 +74,7 @@ class AbstractMultiArray {
         /// nothing to do
     }
 
+   public:
     /*************************************************************************/
     inline int flat_index(
         const std::vector<int> &a_MULTI_DIMENSIONAL_INDEX) const {
@@ -91,7 +91,7 @@ class AbstractMultiArray {
         std::vector<int> result(m_number_of_dimensions);
 
         int remain = a_FLAT_INDEX;
-        for (std::size_t i = 0; i < m_number_of_dimensions; i++) {
+        for (auto i = 0; i < m_number_of_dimensions; i++) {
             result[i] = remain / m_strides[i];
             remain    = remain % m_strides[i];
         }
@@ -107,7 +107,7 @@ class AbstractMultiArray {
          * std::vector<int>.
          */
         int remain = a_FLAT_INDEX;
-        for (std::size_t i = 0; i < m_number_of_dimensions; i++) {
+        for (auto i = 0; i < m_number_of_dimensions; i++) {
             (*a_multi_dimensional_index)[i] = remain / m_strides[i];
             remain                          = remain % m_strides[i];
         }
@@ -125,7 +125,7 @@ class AbstractMultiArray {
         std::string label  = "";
         std::string format = "%" + std::to_string(m_max_digits) + "d";
 
-        for (std::size_t i = 0; i < m_number_of_dimensions; i++) {
+        for (auto i = 0; i < m_number_of_dimensions; i++) {
             label += utility::to_string(multi_dimensional_index[i], format);
             if (i != m_number_of_dimensions - 1) {
                 label += ", ";
@@ -150,12 +150,12 @@ class AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr std::size_t number_of_dimensions(void) const {
+    inline constexpr int number_of_dimensions(void) const {
         return m_number_of_dimensions;
     }
 
     /*************************************************************************/
-    inline constexpr std::size_t number_of_elements(void) const {
+    inline constexpr int number_of_elements(void) const {
         return m_number_of_elements;
     }
 };

@@ -310,10 +310,12 @@ class Neighborhood {
         m_selection_moves.resize(m_selection_variable_ptrs.size());
         auto selection_move_updater = [this,
                                        a_IS_ENABLED_PARALLEL](auto *a_moves) {
+            int number_of_selection_variable_ptrs =
+                m_selection_variable_ptrs.size();
 #ifdef _OPENMP
 #pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
 #endif
-            for (std::size_t i = 0; i < m_selection_variable_ptrs.size(); i++) {
+            for (auto i = 0; i < number_of_selection_variable_ptrs; i++) {
                 (*a_moves)[i].alterations.clear();
                 (*a_moves)[i].sense = MoveSense::Selection;
 
@@ -342,10 +344,11 @@ class Neighborhood {
         m_binary_moves.resize(m_binary_variable_ptrs.size());
         auto binary_move_updater = [this,
                                     a_IS_ENABLED_PARALLEL](auto *a_moves) {
+            int number_of_binary_variable_ptrs = m_binary_variable_ptrs.size();
 #ifdef _OPENMP
 #pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
 #endif
-            for (std::size_t i = 0; i < m_binary_variable_ptrs.size(); i++) {
+            for (auto i = 0; i < number_of_binary_variable_ptrs; i++) {
                 (*a_moves)[i].alterations.clear();
                 (*a_moves)[i].sense = MoveSense::Binary;
                 (*a_moves)[i].alterations.emplace_back(
@@ -369,10 +372,12 @@ class Neighborhood {
         m_integer_moves.resize(2 * m_integer_variable_ptrs.size());
         auto integer_move_updater = [this,
                                      a_IS_ENABLED_PARALLEL](auto *a_moves) {
+            int number_of_integer_variable_ptrs =
+                m_integer_variable_ptrs.size();
 #ifdef _OPENMP
 #pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
 #endif
-            for (std::size_t i = 0; i < m_integer_variable_ptrs.size(); i++) {
+            for (auto i = 0; i < number_of_integer_variable_ptrs; i++) {
                 (*a_moves)[2 * i].alterations.clear();
                 (*a_moves)[2 * i].sense = MoveSense::Integer;
                 (*a_moves)[2 * i].alterations.emplace_back(
