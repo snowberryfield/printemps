@@ -45,16 +45,15 @@ int main([[maybe_unused]] int argc, char *argv[]) {
     auto result = cppmh::solver::solve(&model, option);
 
     /**
-     * Print the result.
+     * Print the result summary.
      */
-    result.print_variable_values();
-    result.print_expression_values();
-    result.print_constraint_values();
     cppmh::utility::print_info(
         "status: " + std::to_string(result.is_feasible()), true);
 
     cppmh::utility::print_info(
         "objective: " + std::to_string(result.objective()), true);
+
+    result.write_json_by_name("result.json");
 
     return 0;
 }

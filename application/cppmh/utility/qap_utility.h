@@ -25,14 +25,14 @@ struct QuadraticAssignmentProblem {
 QuadraticAssignmentProblem read_qaplib(const std::string& a_FILE_NAME) {
     QuadraticAssignmentProblem problem_instance;
 
-    std::ifstream input_file_stream;
+    std::ifstream ifs;
     std::string   line;
     std::string   buffer;
-    input_file_stream.open(a_FILE_NAME.c_str());
+    ifs.open(a_FILE_NAME.c_str());
 
     /// Read the problem size.
     while (true) {
-        std::getline(input_file_stream, line);
+        std::getline(ifs, line);
         if (cppmh::utility::trim(line).size() > 0) {
             problem_instance.N = atoi(line.c_str());
             problem_instance.A.resize(problem_instance.N);
@@ -45,7 +45,7 @@ QuadraticAssignmentProblem read_qaplib(const std::string& a_FILE_NAME) {
 
     // Read the matrix A.
     while (count < problem_instance.N) {
-        std::getline(input_file_stream, line);
+        std::getline(ifs, line);
         if (cppmh::utility::trim(line).size() > 0) {
             std::stringstream stream(line);
             while (stream >> buffer) {
@@ -58,7 +58,7 @@ QuadraticAssignmentProblem read_qaplib(const std::string& a_FILE_NAME) {
     // Read the matrix B.
     count = 0;
     while (count < problem_instance.N) {
-        std::getline(input_file_stream, line);
+        std::getline(ifs, line);
         if (cppmh::utility::trim(line).size() > 0) {
             std::stringstream stream(line);
             while (stream >> buffer) {
