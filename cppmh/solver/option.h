@@ -23,7 +23,7 @@ struct OptionConstant {
     static constexpr double DEFAULT_PENALTY_COEFFICIENT_RELAXING_RATIO = 0.5;
     static constexpr double DEFAULT_PENALTY_COEFFICIENT_TIGHTENING_RATIO = 1.0;
     static constexpr double DEFAULT_INITIAL_PENALTY_COEFFICIENT          = 1E6;
-    static constexpr bool   DEFAULT_IS_ENABLED_LOCAL_SEARCH = false;
+    static constexpr bool   DEFAULT_IS_ENABLED_LOCAL_SEARCH = true;
     static constexpr bool   DEFAULT_IS_ENABLED_GROUPING_PENALTY_COEFFICIENT =
         false;
     static constexpr bool DEFAULT_IS_ENABLED_INITIAL_VALUE_CORRECTION = true;
