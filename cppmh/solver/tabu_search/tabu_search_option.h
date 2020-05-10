@@ -11,7 +11,7 @@ namespace solver {
 namespace tabu_search {
 /*****************************************************************************/
 struct TabuSearchOptionConstant {
-    static constexpr int    DEFAULT_ITERATION_MAX                 = 500;
+    static constexpr int    DEFAULT_ITERATION_MAX                 = 200;
     static constexpr double DEFAULT_TIME_MAX                      = 120.0;
     static constexpr double DEFAULT_TIME_OFFSET                   = 0.0;
     static constexpr int    DEFAULT_LOG_INTERVAL                  = 10;

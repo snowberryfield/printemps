@@ -9,6 +9,7 @@
 #include <vector>
 #include <unordered_map>
 
+#include "abstract_multi_array_element.h"
 #include "fixed_size_hash_map.h"
 #include "move.h"
 
@@ -33,7 +34,7 @@ struct ExpressionConstant {
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-class Expression {
+class Expression : public AbstractMultiArrayElement {
     /**
      * [Access controls for special member functions]
      *  -- Default constructor : default, private
@@ -55,11 +56,9 @@ class Expression {
     friend class Constraint<T_Variable, T_Expression>;
 
    private:
-    int              m_flat_index;
-    std::vector<int> m_multi_dimensional_index;
-    T_Expression     m_constant_value;
-    T_Expression     m_value;
-    bool             m_is_enabled;
+    T_Expression m_constant_value;
+    T_Expression m_value;
+    bool         m_is_enabled;
 
     std::unordered_map<Variable<T_Variable, T_Expression> *, T_Expression>
         m_sensitivities;
@@ -79,14 +78,11 @@ class Expression {
 
     /*************************************************************************/
     Expression(const std::unordered_map<Variable<T_Variable, T_Expression> *,
-                                        T_Expression> &a_sensitivity,
-               const T_Expression                      a_CONSTANT_VALUE)
-        : m_flat_index(0),
-          m_multi_dimensional_index({0}),
-          m_constant_value(a_CONSTANT_VALUE),
-          m_value(0),
-          m_is_enabled(true),
-          m_sensitivities(a_sensitivity) {  /// nothing to do
+                                        T_Expression> &a_SENSITIVITIES,
+               const T_Expression                      a_CONSTANT_VALUE) {
+        this->initialize();
+        m_sensitivities  = a_SENSITIVITIES;
+        m_constant_value = a_CONSTANT_VALUE;
     }
 
    public:
@@ -132,35 +128,12 @@ class Expression {
 
     /*************************************************************************/
     inline constexpr void initialize(void) {
-        m_flat_index              = 0;
-        m_multi_dimensional_index = {0};
-        m_constant_value          = 0;
-        m_value                   = 0;
-        m_is_enabled              = true;
+        AbstractMultiArrayElement::initialize();
+        m_constant_value = 0;
+        m_value          = 0;
+        m_is_enabled     = true;
         m_sensitivities.clear();
         m_fixed_sensitivities.initialize();
-    }
-
-    /*************************************************************************/
-    inline constexpr void set_flat_index(const int a_FLAT_INDEX) {
-        m_flat_index = a_FLAT_INDEX;
-    }
-
-    /*************************************************************************/
-    inline constexpr int flat_index(void) const {
-        return m_flat_index;
-    }
-
-    /*************************************************************************/
-    inline constexpr void set_multi_dimensional_index(
-        const std::vector<int> &a_MULTI_DIMENSIONAL_INDEX) {
-        m_multi_dimensional_index = a_MULTI_DIMENSIONAL_INDEX;
-    }
-
-    /*************************************************************************/
-    inline constexpr const std::vector<int> &multi_dimensional_index(
-        void) const {
-        return m_multi_dimensional_index;
     }
 
     /*************************************************************************/

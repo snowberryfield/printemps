@@ -11,7 +11,7 @@ namespace solver {
 namespace local_search {
 /*****************************************************************************/
 struct LocalSearchOptionConstant {
-    static constexpr int    DEFAULT_ITERATION_MAX = 1000;
+    static constexpr int    DEFAULT_ITERATION_MAX = 10000;
     static constexpr double DEFAULT_TIME_MAX      = 120.0;
     static constexpr double DEFAULT_TIME_OFFSET   = 0.0;
     static constexpr int    DEFAULT_LOG_INTERVAL  = 10;

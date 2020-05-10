@@ -34,60 +34,20 @@ class TestVariable : public ::testing::Test {
 TEST_F(TestVariable, initialize) {
     auto variable = cppmh::model::Variable<int, double>::create_instance();
 
-    EXPECT_EQ(-1, variable.id());
+    /// Check the initial values of the base class members.
+    EXPECT_EQ(0, variable.id());
     EXPECT_EQ(0, variable.flat_index());
     EXPECT_EQ(0, variable.multi_dimensional_index()[0]);
+    EXPECT_EQ("", variable.name());
+
+    /// Check the initial values of the derived class members.
     EXPECT_EQ(false, variable.is_fixed());
     EXPECT_EQ(0, variable.value());
     EXPECT_EQ(std::numeric_limits<int>::min() + 1, variable.lower_bound());
     EXPECT_EQ(std::numeric_limits<int>::max() - 1, variable.upper_bound());
-}
-
-/*****************************************************************************/
-TEST_F(TestVariable, set_id) {
-    auto variable = cppmh::model::Variable<int, double>::create_instance();
-
-    auto id = random_integer();
-    variable.set_id(id);
-    EXPECT_EQ(id, variable.id());
-}
-
-/*****************************************************************************/
-TEST_F(TestVariable, id) {
-    /// This method is tested in set_id().
-}
-
-/*****************************************************************************/
-TEST_F(TestVariable, set_flat_index) {
-    auto variable = cppmh::model::Variable<int, double>::create_instance();
-
-    auto flat_index = random_integer();
-    variable.set_flat_index(flat_index);
-    EXPECT_EQ(flat_index, variable.flat_index());
-}
-
-/*****************************************************************************/
-TEST_F(TestVariable, flat_index) {
-    /// This method is tested in set_flat_index().
-}
-
-/*****************************************************************************/
-TEST_F(TestVariable, set_multi_dimensional_index) {
-    auto variable = cppmh::model::Variable<int, double>::create_instance();
-
-    auto multi_dimensional_index_1 = random_integer();
-    auto multi_dimensional_index_2 = random_integer();
-
-    variable.set_multi_dimensional_index(
-        {multi_dimensional_index_1, multi_dimensional_index_2});
-
-    EXPECT_EQ(multi_dimensional_index_1, variable.multi_dimensional_index()[0]);
-    EXPECT_EQ(multi_dimensional_index_2, variable.multi_dimensional_index()[1]);
-}
-
-/*****************************************************************************/
-TEST_F(TestVariable, multi_dimensional_index) {
-    /// This method is tested in set_multi_dimensional_index().
+    EXPECT_EQ(false, variable.has_bounds());
+    EXPECT_EQ(cppmh::model::VariableSense::Integer, variable.sense());
+    EXPECT_EQ(nullptr, variable.selection_ptr());
 }
 
 /*****************************************************************************/
@@ -211,13 +171,13 @@ TEST_F(TestVariable, sense) {
 }
 
 /*****************************************************************************/
-TEST_F(TestVariable, reset_sense) {
+TEST_F(TestVariable, setup_sense) {
     auto variable = cppmh::model::Variable<int, double>::create_instance();
     variable.set_bound(0, 1);
     cppmh::model::Selection<int, double> selection;
     variable.set_selection_ptr(&selection);
     EXPECT_EQ(cppmh::model::VariableSense::Selection, variable.sense());
-    variable.reset_sense();
+    variable.setup_sense();
     EXPECT_EQ(cppmh::model::VariableSense::Binary, variable.sense());
 }
 
@@ -227,13 +187,24 @@ TEST_F(TestVariable, set_bound) {
 
     auto lower_bound = random_integer();
     auto upper_bound = lower_bound + random_positive_integer();
+
     variable.set_bound(lower_bound, upper_bound);
     EXPECT_EQ(lower_bound, variable.lower_bound());
     EXPECT_EQ(upper_bound, variable.upper_bound());
-    EXPECT_EQ(true, variable.is_defined_bounds());
+    EXPECT_EQ(true, variable.has_bounds());
 
     ASSERT_THROW(variable.set_bound(upper_bound, lower_bound),
                  std::logic_error);
+
+    variable.reset_bound();
+    EXPECT_EQ(std::numeric_limits<int>::min() + 1, variable.lower_bound());
+    EXPECT_EQ(std::numeric_limits<int>::max() - 1, variable.upper_bound());
+    EXPECT_EQ(false, variable.has_bounds());
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, reset_bound) {
+    /// This method is tested in set_bound().
 }
 
 /*****************************************************************************/
@@ -247,18 +218,18 @@ TEST_F(TestVariable, upper_bound) {
 }
 
 /*****************************************************************************/
-TEST_F(TestVariable, is_defined_bounds) {
+TEST_F(TestVariable, has_bounds) {
     /// This method is tested in set_bound().
 }
 
 /*****************************************************************************/
 TEST_F(TestVariable, set_selection_ptr) {
-    /// This method is tested in reset_sense().
+    /// This method is tested in setup_sense().
 }
 
 /*****************************************************************************/
 TEST_F(TestVariable, selection_ptr) {
-    /// This method is tested in reset_sense().
+    /// This method is tested in setup_sense().
 }
 
 /*****************************************************************************/

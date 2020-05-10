@@ -46,7 +46,7 @@ inline void print_line_break(int        a_number_of_line_breaks,
     if (!a_IS_ENABLED) {
         return;
     }
-    for (int i = 0; i < a_number_of_line_breaks; i++) {
+    for (auto i = 0; i < a_number_of_line_breaks; i++) {
         std::cout << std::endl;
     }
 }
