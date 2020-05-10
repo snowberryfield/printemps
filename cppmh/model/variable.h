@@ -7,6 +7,7 @@
 #define CPPMH_MODEL_VARIABLE_H__
 
 #include <unordered_map>
+#include "abstract_multi_array_element.h"
 
 namespace cppmh {
 namespace model {
@@ -27,7 +28,7 @@ enum class VariableSense {
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-class Variable {
+class Variable : public AbstractMultiArrayElement {
     /**
      * [Access controls for special member functions]
      *  -- Default constructor : default, private
@@ -38,15 +39,12 @@ class Variable {
      */
 
    private:
-    int              m_id;
-    int              m_flat_index;
-    std::vector<int> m_multi_dimensional_index;
-    int              m_is_fixed;
-    T_Variable       m_value;
-    T_Variable       m_lower_bound;
-    T_Variable       m_upper_bound;
-    bool             m_is_defined_bounds;
-    VariableSense    m_sense;
+    bool          m_is_fixed;
+    T_Variable    m_value;
+    T_Variable    m_lower_bound;
+    T_Variable    m_upper_bound;
+    bool          m_has_bounds;
+    VariableSense m_sense;
 
     Selection<T_Variable, T_Expression> *m_selection_ptr;
 
@@ -88,54 +86,20 @@ class Variable {
 
     /*************************************************************************/
     inline constexpr void initialize(void) {
-        m_id                      = -1;
-        m_flat_index              = 0;
-        m_multi_dimensional_index = {0};
-        m_is_fixed                = false;
-        m_value                   = 0;
+        AbstractMultiArrayElement::initialize();
+        m_is_fixed = false;
+        m_value    = 0;
 
         /**
          * The default lower and upper bounds of a decision variable are set by
          * sufficiently large negative and positive integer, respectively. The
          * default bounds have margin to avoid overflows in calculating moves.
          */
-        m_lower_bound       = std::numeric_limits<int>::min() + 1;
-        m_upper_bound       = std::numeric_limits<int>::max() - 1;
-        m_is_defined_bounds = false;
-        m_sense             = VariableSense::Integer;
-        m_selection_ptr     = nullptr;
-    }
-
-    /*************************************************************************/
-    inline constexpr void set_id(const int a_ID) {
-        m_id = a_ID;
-    }
-
-    /*************************************************************************/
-    inline constexpr int id(void) const {
-        return m_id;
-    }
-
-    /*************************************************************************/
-    inline constexpr void set_flat_index(const int a_FLAT_INDEX) {
-        m_flat_index = a_FLAT_INDEX;
-    }
-
-    /*************************************************************************/
-    inline constexpr int flat_index(void) const {
-        return m_flat_index;
-    }
-
-    /*************************************************************************/
-    inline constexpr void set_multi_dimensional_index(
-        const std::vector<int> &a_MULTI_DIMENSIONAL_INDEX) {
-        m_multi_dimensional_index = a_MULTI_DIMENSIONAL_INDEX;
-    }
-
-    /*************************************************************************/
-    inline constexpr const std::vector<int> &multi_dimensional_index(
-        void) const {
-        return m_multi_dimensional_index;
+        m_lower_bound   = std::numeric_limits<int>::min() + 1;
+        m_upper_bound   = std::numeric_limits<int>::max() - 1;
+        m_has_bounds    = false;
+        m_sense         = VariableSense::Integer;
+        m_selection_ptr = nullptr;
     }
 
     /*************************************************************************/
@@ -217,28 +181,18 @@ class Variable {
         }
         m_lower_bound = a_LOWER_BOUND;
         m_upper_bound = a_UPPER_BOUND;
+        m_has_bounds  = true;
 
-        if (m_lower_bound == 0 && m_upper_bound == 1) {
-            m_sense = VariableSense::Binary;
-        } else {
-            m_sense = VariableSense::Integer;
-        }
-
-        m_is_defined_bounds = true;
+        this->setup_sense();
     }
 
     /*************************************************************************/
-    inline constexpr VariableSense sense(void) const {
-        return m_sense;
-    }
-
-    /*************************************************************************/
-    inline constexpr void reset_sense(void) {
-        if (m_lower_bound == 0 && m_upper_bound == 1) {
-            m_sense = VariableSense::Binary;
-        } else {
-            m_sense = VariableSense::Integer;
-        }
+    inline constexpr void reset_bound(void) {
+        m_lower_bound   = std::numeric_limits<int>::min() + 1;
+        m_upper_bound   = std::numeric_limits<int>::max() - 1;
+        m_has_bounds    = false;
+        m_sense         = VariableSense::Integer;
+        m_selection_ptr = nullptr;
     }
 
     /*************************************************************************/
@@ -252,8 +206,22 @@ class Variable {
     }
 
     /*************************************************************************/
-    inline constexpr bool is_defined_bounds(void) const {
-        return m_is_defined_bounds;
+    inline constexpr bool has_bounds(void) const {
+        return m_has_bounds;
+    }
+
+    /*************************************************************************/
+    inline constexpr VariableSense sense(void) const {
+        return m_sense;
+    }
+
+    /*************************************************************************/
+    inline constexpr void setup_sense(void) {
+        if (m_lower_bound == 0 && m_upper_bound == 1) {
+            m_sense = VariableSense::Binary;
+        } else {
+            m_sense = VariableSense::Integer;
+        }
     }
 
     /*************************************************************************/

@@ -85,7 +85,7 @@ LocalSearchResult<T_Variable, T_Expression> solve(
     int total_update_status = 0;
 
     utility::print_single_line(option.verbose >= Verbose::Full);
-    utility::print_message("Local Search starts.",
+    utility::print_message("Local search starts.",
                            option.verbose >= Verbose::Full);
     print_table_header(option.verbose >= Verbose::Full);
     print_table_initial(model, solution_score, incumbent_holder,

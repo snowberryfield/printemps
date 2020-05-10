@@ -72,7 +72,7 @@ TEST_F(TestModel, create_variable_scalar_without_bound) {
                   variable_proxy.lower_bound());
         EXPECT_EQ(std::numeric_limits<int>::max() - 1,
                   variable_proxy.upper_bound());
-        EXPECT_EQ(false, variable_proxy.is_defined_bounds());
+        EXPECT_EQ(false, variable_proxy.has_bounds());
         EXPECT_EQ(cppmh::model::VariableSense::Integer, variable_proxy.sense());
         EXPECT_EQ(&variable_proxy, &model.variable_proxies().back());
         EXPECT_EQ(name, model.variable_names().back());
@@ -91,7 +91,7 @@ TEST_F(TestModel, create_variable_scalar_with_bound) {
         EXPECT_EQ(i, variable_proxy.id());
         EXPECT_EQ(0, variable_proxy.lower_bound());
         EXPECT_EQ(1, variable_proxy.upper_bound());
-        EXPECT_EQ(true, variable_proxy.is_defined_bounds());
+        EXPECT_EQ(true, variable_proxy.has_bounds());
         EXPECT_EQ(cppmh::model::VariableSense::Binary, variable_proxy.sense());
         EXPECT_EQ(&variable_proxy, &model.variable_proxies().back());
         EXPECT_EQ(name, model.variable_names().back());
@@ -112,7 +112,7 @@ TEST_F(TestModel, create_variable_one_dimensional_without_bound) {
                   variable_proxy[0].lower_bound());
         EXPECT_EQ(std::numeric_limits<int>::max() - 1,
                   variable_proxy[0].upper_bound());
-        EXPECT_EQ(false, variable_proxy[0].is_defined_bounds());
+        EXPECT_EQ(false, variable_proxy[0].has_bounds());
         EXPECT_EQ(cppmh::model::VariableSense::Integer,
                   variable_proxy[0].sense());
         EXPECT_EQ(&variable_proxy, &model.variable_proxies().back());
@@ -132,7 +132,7 @@ TEST_F(TestModel, create_variable_one_dimensional_with_bound) {
         EXPECT_EQ(i, variable_proxy.id());
         EXPECT_EQ(0, variable_proxy[0].lower_bound());
         EXPECT_EQ(1, variable_proxy[0].upper_bound());
-        EXPECT_EQ(true, variable_proxy[0].is_defined_bounds());
+        EXPECT_EQ(true, variable_proxy[0].has_bounds());
         EXPECT_EQ(cppmh::model::VariableSense::Binary,
                   variable_proxy[0].sense());
         EXPECT_EQ(&variable_proxy, &model.variable_proxies().back());
@@ -154,7 +154,7 @@ TEST_F(TestModel, create_variable_two_dimensional_without_bound) {
                   variable_proxy[0].lower_bound());
         EXPECT_EQ(std::numeric_limits<int>::max() - 1,
                   variable_proxy[0].upper_bound());
-        EXPECT_EQ(false, variable_proxy[0].is_defined_bounds());
+        EXPECT_EQ(false, variable_proxy[0].has_bounds());
         EXPECT_EQ(cppmh::model::VariableSense::Integer,
                   variable_proxy[0].sense());
         EXPECT_EQ(&variable_proxy, &model.variable_proxies().back());
@@ -174,7 +174,7 @@ TEST_F(TestModel, create_variable_two_dimensional_with_bound) {
         EXPECT_EQ(i, variable_proxy.id());
         EXPECT_EQ(0, variable_proxy[0].lower_bound());
         EXPECT_EQ(1, variable_proxy[0].upper_bound());
-        EXPECT_EQ(true, variable_proxy[0].is_defined_bounds());
+        EXPECT_EQ(true, variable_proxy[0].has_bounds());
         EXPECT_EQ(cppmh::model::VariableSense::Binary,
                   variable_proxy[0].sense());
         EXPECT_EQ(&variable_proxy, &model.variable_proxies().back());
@@ -535,13 +535,60 @@ TEST_F(TestModel, number_of_variables) {
 }
 
 /*****************************************************************************/
+TEST_F(TestModel, number_of_constraints) {
+    cppmh::model::Model<int, double> model;
+
+    [[maybe_unused]] auto& g0 = model.create_constraint("g0");
+    [[maybe_unused]] auto& g1 = model.create_constraints("g1", 10);
+    [[maybe_unused]] auto& g2 = model.create_constraints("g2", {20, 30});
+    EXPECT_EQ(1 + 10 + 20 * 30, model.number_of_constraints());
+}
+
+/*****************************************************************************/
 TEST_F(TestModel, neighborhood) {
     /// This method is tested in test_neighborhood.h
 }
 
 /*****************************************************************************/
-TEST_F(TestModel, setup_default_neighborhood) {
-    /// This method is tested in test_neighborhood.h
+TEST_F(TestModel, setup_variable_sense) {
+    cppmh::model::Model<int, double> model;
+
+    auto& variable_proxy = model.create_variables("x", 10, 0, 1);
+    model.create_constraint("c", variable_proxy.selection());
+    model.setup_default_neighborhood(false, false);
+    for (const auto& variable : variable_proxy.flat_indexed_variables()) {
+        EXPECT_EQ(cppmh::model::VariableSense::Selection, variable.sense());
+    }
+
+    model.setup_variable_sense();
+    for (const auto& variable : variable_proxy.flat_indexed_variables()) {
+        EXPECT_EQ(cppmh::model::VariableSense::Binary, variable.sense());
+    }
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, setup_unique_name) {
+    cppmh::model::Model<int, double> model;
+
+    auto& variable_proxy   = model.create_variable("x");
+    auto& expression_proxy = model.create_variables("e", {10});
+    auto& constraint_proxy = model.create_variables("c", {20, 30});
+    variable_proxy.set_name("_x");
+    expression_proxy(0).set_name("_e_0");
+    expression_proxy(9).set_name("_e_9");
+    constraint_proxy(0, 0).set_name("_c_0_0");
+    constraint_proxy(19, 29).set_name("_c_19_29");
+    model.setup_unique_name();
+
+    EXPECT_EQ("_x", variable_proxy.name());
+    EXPECT_EQ("_e_0", expression_proxy(0).name());
+    EXPECT_EQ("e[ 1]", expression_proxy(1).name());
+    EXPECT_EQ("e[ 8]", expression_proxy(8).name());
+    EXPECT_EQ("_e_9", expression_proxy(9).name());
+    EXPECT_EQ("_c_0_0", constraint_proxy(0, 0).name());
+    EXPECT_EQ("c[ 0,  1]", constraint_proxy(0, 1).name());
+    EXPECT_EQ("c[19, 28]", constraint_proxy(19, 28).name());
+    EXPECT_EQ("_c_19_29", constraint_proxy(19, 29).name());
 }
 
 /*****************************************************************************/
@@ -550,33 +597,11 @@ TEST_F(TestModel, setup_has_fixed_variables) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModel, setup_fixed_sensitivities) {
-    /// This method is tested in test_expression.h
-}
-
-/*****************************************************************************/
-TEST_F(TestModel, reset_variable_sense) {
-    cppmh::model::Model<int, double> model;
-
-    auto& variable_proxy = model.create_variables("x", 10, 0, 1);
-    model.create_constraint("c", variable_proxy.selection());
-    model.setup_default_neighborhood(false);
-    for (const auto& variable : variable_proxy.flat_indexed_variables()) {
-        EXPECT_EQ(cppmh::model::VariableSense::Selection, variable.sense());
-    }
-
-    model.reset_variable_sense();
-    for (const auto& variable : variable_proxy.flat_indexed_variables()) {
-        EXPECT_EQ(cppmh::model::VariableSense::Binary, variable.sense());
-    }
-}
-
-/*****************************************************************************/
 TEST_F(TestModel, verify_problem) {
     /// No decision variables.
     {
         cppmh::model::Model<int, double> model;
-        ASSERT_THROW(model.verify_problem(), std::logic_error);
+        ASSERT_THROW(model.verify_problem(false), std::logic_error);
     }
 
     /// No constraint functions.
@@ -584,7 +609,7 @@ TEST_F(TestModel, verify_problem) {
         cppmh::model::Model<int, double> model;
         auto& variable_proxy = model.create_variable("x");
         model.minimize(variable_proxy);
-        model.verify_problem();
+        model.verify_problem(false);
     }
 
     /// No objective function.
@@ -592,30 +617,25 @@ TEST_F(TestModel, verify_problem) {
         cppmh::model::Model<int, double> model;
         auto& variable_proxy = model.create_variable("x");
         model.create_constraint("c", variable_proxy == 1);
-        model.verify_problem();
+        model.verify_problem(false);
     }
 
     /// No constraint functions and no objective function
     {
         cppmh::model::Model<int, double> model;
         [[maybe_unused]] auto& variable_proxy = model.create_variable("x");
-        ASSERT_THROW(model.verify_problem(), std::logic_error);
+        ASSERT_THROW(model.verify_problem(false), std::logic_error);
     }
 }
 
 /*****************************************************************************/
-TEST_F(TestModel, verify_bounds) {
-    {
-        cppmh::model::Model<int, double> model;
-        [[maybe_unused]] auto&           variable_proxy =
-            model.create_variable("x", 0, 1);
-    }
+TEST_F(TestModel, setup_default_neighborhood) {
+    /// This method is tested in test_neighborhood.h
+}
 
-    {
-        cppmh::model::Model<int, double> model;
-        [[maybe_unused]] auto& variable_proxy = model.create_variable("x");
-        ASSERT_THROW(model.verify_bounds(), std::logic_error);
-    }
+/*****************************************************************************/
+TEST_F(TestModel, setup_fixed_sensitivities) {
+    /// This method is tested in test_expression.h
 }
 
 /*****************************************************************************/
@@ -628,8 +648,8 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
         model.create_constraint("c", variable_proxy.selection());
         variable_proxy[0].fix_by(2);
 
-        model.setup_default_neighborhood(false);
-        model.setup_has_fixed_variables();
+        model.setup_default_neighborhood(false, false);
+        model.setup_has_fixed_variables(false);
 
         ASSERT_THROW(
             model.verify_and_correct_selection_variables_initial_values(true,
@@ -645,8 +665,8 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
         model.create_constraint("c", variable_proxy.selection());
         variable_proxy[0].fix_by(2);
 
-        model.setup_default_neighborhood(false);
-        model.setup_has_fixed_variables();
+        model.setup_default_neighborhood(false, false);
+        model.setup_has_fixed_variables(false);
 
         ASSERT_THROW(
             model.verify_and_correct_selection_variables_initial_values(false,
@@ -662,8 +682,8 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
         model.create_constraint("c", variable_proxy.selection());
         variable_proxy[0].fix_by(1);
 
-        model.setup_default_neighborhood(false);
-        model.setup_has_fixed_variables();
+        model.setup_default_neighborhood(false, false);
+        model.setup_has_fixed_variables(false);
 
         model.verify_and_correct_selection_variables_initial_values(true,
                                                                     false);
@@ -678,8 +698,8 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
         model.create_constraint("c", variable_proxy.selection());
         variable_proxy[0].fix_by(1);
 
-        model.setup_default_neighborhood(false);
-        model.setup_has_fixed_variables();
+        model.setup_default_neighborhood(false, false);
+        model.setup_has_fixed_variables(false);
 
         model.verify_and_correct_selection_variables_initial_values(false,
                                                                     false);
@@ -695,8 +715,8 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
         variable_proxy[0].fix_by(1);
         variable_proxy[1].fix_by(1);
 
-        model.setup_default_neighborhood(false);
-        model.setup_has_fixed_variables();
+        model.setup_default_neighborhood(false, false);
+        model.setup_has_fixed_variables(false);
 
         ASSERT_THROW(
             model.verify_and_correct_selection_variables_initial_values(true,
@@ -713,8 +733,8 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
         variable_proxy[0].fix_by(1);
         variable_proxy[1].fix_by(1);
 
-        model.setup_default_neighborhood(false);
-        model.setup_has_fixed_variables();
+        model.setup_default_neighborhood(false, false);
+        model.setup_has_fixed_variables(false);
 
         ASSERT_THROW(
             model.verify_and_correct_selection_variables_initial_values(false,
@@ -731,8 +751,8 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
         variable_proxy[0] = 2;
         variable_proxy[1] = 3;
 
-        model.setup_default_neighborhood(false);
-        model.setup_has_fixed_variables();
+        model.setup_default_neighborhood(false, false);
+        model.setup_has_fixed_variables(false);
 
         model.verify_and_correct_selection_variables_initial_values(true,
                                                                     false);
@@ -750,8 +770,8 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
         variable_proxy[0] = 2;
         variable_proxy[1] = 3;
 
-        model.setup_default_neighborhood(false);
-        model.setup_has_fixed_variables();
+        model.setup_default_neighborhood(false, false);
+        model.setup_has_fixed_variables(false);
 
         ASSERT_THROW(
             model.verify_and_correct_selection_variables_initial_values(false,
@@ -766,8 +786,8 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
         auto& variable_proxy = model.create_variables("x", 10, 0, 1);
         model.create_constraint("c", variable_proxy.selection());
 
-        model.setup_default_neighborhood(false);
-        model.setup_has_fixed_variables();
+        model.setup_default_neighborhood(false, false);
+        model.setup_has_fixed_variables(false);
 
         model.verify_and_correct_selection_variables_initial_values(true,
                                                                     false);
@@ -785,8 +805,8 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
         auto& variable_proxy = model.create_variables("x", 10, 0, 1);
         model.create_constraint("c", variable_proxy.selection());
 
-        model.setup_default_neighborhood(false);
-        model.setup_has_fixed_variables();
+        model.setup_default_neighborhood(false, false);
+        model.setup_has_fixed_variables(false);
 
         ASSERT_THROW(
             model.verify_and_correct_selection_variables_initial_values(false,
@@ -802,8 +822,8 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
         model.create_constraint("c", variable_proxy.selection());
         variable_proxy[0] = 1;
 
-        model.setup_default_neighborhood(false);
-        model.setup_has_fixed_variables();
+        model.setup_default_neighborhood(false, false);
+        model.setup_has_fixed_variables(false);
 
         model.verify_and_correct_selection_variables_initial_values(true,
                                                                     false);
@@ -819,8 +839,8 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
         model.create_constraint("c", variable_proxy.selection());
         variable_proxy[0] = 1;
 
-        model.setup_default_neighborhood(false);
-        model.setup_has_fixed_variables();
+        model.setup_default_neighborhood(false, false);
+        model.setup_has_fixed_variables(false);
 
         model.verify_and_correct_selection_variables_initial_values(false,
                                                                     false);
@@ -837,8 +857,8 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
         variable_proxy[0] = 1;
         variable_proxy[1] = 1;
 
-        model.setup_default_neighborhood(false);
-        model.setup_has_fixed_variables();
+        model.setup_default_neighborhood(false, false);
+        model.setup_has_fixed_variables(false);
 
         model.verify_and_correct_selection_variables_initial_values(true,
                                                                     false);
@@ -856,8 +876,8 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
         variable_proxy[0] = 1;
         variable_proxy[1] = 1;
 
-        model.setup_default_neighborhood(false);
-        model.setup_has_fixed_variables();
+        model.setup_default_neighborhood(false, false);
+        model.setup_has_fixed_variables(false);
 
         ASSERT_THROW(
             model.verify_and_correct_selection_variables_initial_values(false,
@@ -874,8 +894,8 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
         variable_proxy[0] = 1;
         variable_proxy[1].fix_by(1);
 
-        model.setup_default_neighborhood(false);
-        model.setup_has_fixed_variables();
+        model.setup_default_neighborhood(false, false);
+        model.setup_has_fixed_variables(false);
 
         model.verify_and_correct_selection_variables_initial_values(true,
                                                                     false);
@@ -892,8 +912,8 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
         variable_proxy[0] = 1;
         variable_proxy[1].fix_by(1);
 
-        model.setup_default_neighborhood(false);
-        model.setup_has_fixed_variables();
+        model.setup_default_neighborhood(false, false);
+        model.setup_has_fixed_variables(false);
 
         ASSERT_THROW(
             model.verify_and_correct_selection_variables_initial_values(false,
@@ -911,8 +931,8 @@ TEST_F(TestModel, verify_and_correct_binary_variables_initial_values) {
         auto& variable_proxy = model.create_variables("x", 10, 0, 1);
         variable_proxy[0].fix_by(2);
 
-        model.setup_default_neighborhood(false);
-        model.setup_has_fixed_variables();
+        model.setup_default_neighborhood(false, false);
+        model.setup_has_fixed_variables(false);
 
         ASSERT_THROW(model.verify_and_correct_binary_variables_initial_values(
                          true, false),
@@ -926,8 +946,8 @@ TEST_F(TestModel, verify_and_correct_binary_variables_initial_values) {
         auto& variable_proxy = model.create_variables("x", 10, 0, 1);
         variable_proxy[0].fix_by(-1);
 
-        model.setup_default_neighborhood(false);
-        model.setup_has_fixed_variables();
+        model.setup_default_neighborhood(false, false);
+        model.setup_has_fixed_variables(false);
 
         ASSERT_THROW(model.verify_and_correct_binary_variables_initial_values(
                          false, false),
@@ -942,8 +962,8 @@ TEST_F(TestModel, verify_and_correct_binary_variables_initial_values) {
         variable_proxy[0]    = 2;
         variable_proxy[1]    = -1;
 
-        model.setup_default_neighborhood(false);
-        model.setup_has_fixed_variables();
+        model.setup_default_neighborhood(false, false);
+        model.setup_has_fixed_variables(false);
 
         model.verify_and_correct_binary_variables_initial_values(true, false);
         EXPECT_EQ(1, variable_proxy[0].value());
@@ -958,8 +978,8 @@ TEST_F(TestModel, verify_and_correct_binary_variables_initial_values) {
         variable_proxy[0]    = 2;
         variable_proxy[1]    = -1;
 
-        model.setup_default_neighborhood(false);
-        model.setup_has_fixed_variables();
+        model.setup_default_neighborhood(false, false);
+        model.setup_has_fixed_variables(false);
 
         ASSERT_THROW(model.verify_and_correct_binary_variables_initial_values(
                          false, false),
@@ -976,8 +996,8 @@ TEST_F(TestModel, verify_and_correct_integer_variables_initial_values) {
         auto& variable_proxy = model.create_variables("x", 10, -10, 10);
         variable_proxy[0].fix_by(11);
 
-        model.setup_default_neighborhood(false);
-        model.setup_has_fixed_variables();
+        model.setup_default_neighborhood(false, false);
+        model.setup_has_fixed_variables(false);
 
         ASSERT_THROW(model.verify_and_correct_integer_variables_initial_values(
                          true, false),
@@ -991,8 +1011,8 @@ TEST_F(TestModel, verify_and_correct_integer_variables_initial_values) {
         auto& variable_proxy = model.create_variables("x", 10, -10, 10);
         variable_proxy[0].fix_by(-11);
 
-        model.setup_default_neighborhood(false);
-        model.setup_has_fixed_variables();
+        model.setup_default_neighborhood(false, false);
+        model.setup_has_fixed_variables(false);
 
         ASSERT_THROW(model.verify_and_correct_integer_variables_initial_values(
                          false, false),
@@ -1007,8 +1027,8 @@ TEST_F(TestModel, verify_and_correct_integer_variables_initial_values) {
         variable_proxy[0]    = 11;
         variable_proxy[1]    = -11;
 
-        model.setup_default_neighborhood(false);
-        model.setup_has_fixed_variables();
+        model.setup_default_neighborhood(false, false);
+        model.setup_has_fixed_variables(false);
 
         model.verify_and_correct_integer_variables_initial_values(true, false);
         EXPECT_EQ(10, variable_proxy[0].value());
@@ -1023,8 +1043,8 @@ TEST_F(TestModel, verify_and_correct_integer_variables_initial_values) {
         variable_proxy[0]    = 11;
         variable_proxy[1]    = -11;
 
-        model.setup_default_neighborhood(false);
-        model.setup_has_fixed_variables();
+        model.setup_default_neighborhood(false, false);
+        model.setup_has_fixed_variables(false);
 
         ASSERT_THROW(model.verify_and_correct_integer_variables_initial_values(
                          false, false),
@@ -1128,7 +1148,7 @@ TEST_F(TestModel, update_arg_move) {
     variable_proxy[0] = 1;
 
     model.minimize(expression_proxy);
-    model.setup_default_neighborhood(false);
+    model.setup_default_neighborhood(false, false);
 
     model.update();
 
@@ -1176,7 +1196,7 @@ TEST_F(TestModel, evaluate) {
                 global_penalty_coefficient_proxy};
 
         model.minimize(expression_proxy);
-        model.setup_default_neighborhood(false);
+        model.setup_default_neighborhood(false, false);
 
         for (auto&& variable : variable_proxy.flat_indexed_variables()) {
             variable = 1;
@@ -1251,7 +1271,7 @@ TEST_F(TestModel, evaluate) {
                 global_penalty_coefficient_proxy};
 
         model.maximize(expression_proxy);
-        model.setup_default_neighborhood(false);
+        model.setup_default_neighborhood(false, false);
 
         for (auto&& variable : variable_proxy.flat_indexed_variables()) {
             variable = 1;
@@ -1313,16 +1333,16 @@ TEST_F(TestModel, generate_variable_parameter_proxies) {
     auto parameter_proxies =
         model.generate_variable_parameter_proxies(fill_value);
     EXPECT_EQ(x0.id(), parameter_proxies[0].id());
-    EXPECT_EQ(1, static_cast<int>(parameter_proxies[0].number_of_dimensions()));
-    EXPECT_EQ(1, static_cast<int>(parameter_proxies[0].number_of_elements()));
+    EXPECT_EQ(1, parameter_proxies[0].number_of_dimensions());
+    EXPECT_EQ(1, parameter_proxies[0].number_of_elements());
 
     EXPECT_EQ(x1.id(), parameter_proxies[1].id());
-    EXPECT_EQ(1, static_cast<int>(parameter_proxies[1].number_of_dimensions()));
-    EXPECT_EQ(10, static_cast<int>(parameter_proxies[1].number_of_elements()));
+    EXPECT_EQ(1, parameter_proxies[1].number_of_dimensions());
+    EXPECT_EQ(10, parameter_proxies[1].number_of_elements());
 
     EXPECT_EQ(x2.id(), parameter_proxies[2].id());
-    EXPECT_EQ(2, static_cast<int>(parameter_proxies[2].number_of_dimensions()));
-    EXPECT_EQ(100, static_cast<int>(parameter_proxies[2].number_of_elements()));
+    EXPECT_EQ(2, parameter_proxies[2].number_of_dimensions());
+    EXPECT_EQ(100, parameter_proxies[2].number_of_elements());
     for (auto&& value : parameter_proxies[0].flat_indexed_values()) {
         EXPECT_EQ(fill_value, value);
     }
@@ -1347,16 +1367,16 @@ TEST_F(TestModel, generate_expression_parameter_proxies) {
     auto parameter_proxies =
         model.generate_expression_parameter_proxies(fill_value);
     EXPECT_EQ(e0.id(), parameter_proxies[0].id());
-    EXPECT_EQ(1, static_cast<int>(parameter_proxies[0].number_of_dimensions()));
-    EXPECT_EQ(1, static_cast<int>(parameter_proxies[0].number_of_elements()));
+    EXPECT_EQ(1, parameter_proxies[0].number_of_dimensions());
+    EXPECT_EQ(1, parameter_proxies[0].number_of_elements());
 
     EXPECT_EQ(e1.id(), parameter_proxies[1].id());
-    EXPECT_EQ(1, static_cast<int>(parameter_proxies[1].number_of_dimensions()));
-    EXPECT_EQ(10, static_cast<int>(parameter_proxies[1].number_of_elements()));
+    EXPECT_EQ(1, parameter_proxies[1].number_of_dimensions());
+    EXPECT_EQ(10, parameter_proxies[1].number_of_elements());
 
     EXPECT_EQ(e2.id(), parameter_proxies[2].id());
-    EXPECT_EQ(2, static_cast<int>(parameter_proxies[2].number_of_dimensions()));
-    EXPECT_EQ(100, static_cast<int>(parameter_proxies[2].number_of_elements()));
+    EXPECT_EQ(2, parameter_proxies[2].number_of_dimensions());
+    EXPECT_EQ(100, parameter_proxies[2].number_of_elements());
     for (auto&& value : parameter_proxies[0].flat_indexed_values()) {
         EXPECT_EQ(fill_value, value);
     }
@@ -1381,16 +1401,16 @@ TEST_F(TestModel, generate_constraint_parameter_proxies) {
     auto parameter_proxies =
         model.generate_constraint_parameter_proxies(fill_value);
     EXPECT_EQ(c0.id(), parameter_proxies[0].id());
-    EXPECT_EQ(1, static_cast<int>(parameter_proxies[0].number_of_dimensions()));
-    EXPECT_EQ(1, static_cast<int>(parameter_proxies[0].number_of_elements()));
+    EXPECT_EQ(1, parameter_proxies[0].number_of_dimensions());
+    EXPECT_EQ(1, parameter_proxies[0].number_of_elements());
 
     EXPECT_EQ(c1.id(), parameter_proxies[1].id());
-    EXPECT_EQ(1, static_cast<int>(parameter_proxies[1].number_of_dimensions()));
-    EXPECT_EQ(10, static_cast<int>(parameter_proxies[1].number_of_elements()));
+    EXPECT_EQ(1, parameter_proxies[1].number_of_dimensions());
+    EXPECT_EQ(10, parameter_proxies[1].number_of_elements());
 
     EXPECT_EQ(c2.id(), parameter_proxies[2].id());
-    EXPECT_EQ(2, static_cast<int>(parameter_proxies[2].number_of_dimensions()));
-    EXPECT_EQ(100, static_cast<int>(parameter_proxies[2].number_of_elements()));
+    EXPECT_EQ(2, parameter_proxies[2].number_of_dimensions());
+    EXPECT_EQ(100, parameter_proxies[2].number_of_elements());
     for (auto&& value : parameter_proxies[0].flat_indexed_values()) {
         EXPECT_EQ(fill_value, value);
     }

@@ -85,7 +85,7 @@ TEST_F(TestBinpacking, bin_packing) {
     auto& objective = model.create_expression("objective");
 
     objective = number_of_used_bins;
-    for (int m = 0; m < number_of_bins; m++) {
+    for (auto m = 0; m < number_of_bins; m++) {
         objective += 1E-5 * m * total_volume(m);
     }
 

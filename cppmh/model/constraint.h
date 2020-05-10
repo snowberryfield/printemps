@@ -8,6 +8,8 @@
 
 #include <functional>
 #include <vector>
+
+#include "abstract_multi_array_element.h"
 #include "move.h"
 
 namespace cppmh {
@@ -25,7 +27,7 @@ enum class ConstraintSense {
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-class Constraint {
+class Constraint : public AbstractMultiArrayElement {
     /**
      * [Access controls for special member functions]
      *  -- Default constructor : default, private
@@ -44,9 +46,6 @@ class Constraint {
 
     std::function<T_Expression(const Move<T_Variable, T_Expression> &)>
         m_violation_function;
-
-    int              m_flat_index;
-    std::vector<int> m_multi_dimensional_index;
 
     Expression<T_Variable, T_Expression> m_expression;
     ConstraintSense                      m_sense;
@@ -148,6 +147,8 @@ class Constraint {
 
     /*************************************************************************/
     inline constexpr void initialize(void) {
+        AbstractMultiArrayElement::initialize();
+
         m_function =  //
             []([[maybe_unused]] const Move<T_Variable, T_Expression> &a_MOVE) {
                 return static_cast<T_Expression>(0);
@@ -161,36 +162,12 @@ class Constraint {
                 return static_cast<T_Expression>(0);
             };
 
-        m_flat_index              = 0;
-        m_multi_dimensional_index = {0};
         m_expression.initialize();
         m_sense            = ConstraintSense::Lower;
         m_constraint_value = 0;
         m_violation_value  = 0;
         m_is_linear        = true;
         m_is_enabled       = true;
-    }
-
-    /*************************************************************************/
-    inline constexpr void set_flat_index(const int a_FLAT_INDEX) {
-        m_flat_index = a_FLAT_INDEX;
-    }
-
-    /*************************************************************************/
-    inline constexpr int flat_index(void) const {
-        return m_flat_index;
-    }
-
-    /*************************************************************************/
-    inline constexpr void set_multi_dimensional_index(
-        const std::vector<int> &a_MULTI_DIMENSIONAL_INDEX) {
-        m_multi_dimensional_index = a_MULTI_DIMENSIONAL_INDEX;
-    }
-
-    /*************************************************************************/
-    inline constexpr const std::vector<int> &multi_dimensional_index(
-        void) const {
-        return m_multi_dimensional_index;
     }
 
     /*************************************************************************/

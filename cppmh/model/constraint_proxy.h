@@ -72,7 +72,7 @@ class ConstraintProxy : public AbstractMultiArray {
          * https://cpprefjp.github.io/reference/vector/vector/resize.html
          */
         m_constraints.reserve(this->number_of_elements());
-        for (std::size_t i = 0; i < this->number_of_elements(); i++) {
+        for (auto i = 0; i < this->number_of_elements(); i++) {
             m_constraints.emplace_back(
                 Constraint<T_Variable, T_Expression>::create_instance());
         }
@@ -134,6 +134,26 @@ class ConstraintProxy : public AbstractMultiArray {
     }
 
     /*************************************************************************/
+    inline constexpr void set_name(const std::string &a_NAME) {
+        if (this->number_of_elements() != 1) {
+            throw std::logic_error(utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "The number of elements is not one."));
+        }
+        m_constraints[0].set_name(a_NAME);
+    }
+
+    /*************************************************************************/
+    inline constexpr const std::string &name(void) const {
+        if (this->number_of_elements() != 1) {
+            throw std::logic_error(utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "The number of elements is not one."));
+        }
+        return m_constraints[0].name();
+    }
+
+    /*************************************************************************/
     inline constexpr std::vector<Constraint<T_Variable, T_Expression>>
         &flat_indexed_constraints(void) {
         return m_constraints;
@@ -178,19 +198,28 @@ class ConstraintProxy : public AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr ValueProxy<T_Expression> export_values(void) const {
+    inline constexpr ValueProxy<T_Expression> export_values_and_names(
+        void) const {
         ValueProxy<T_Expression> proxy(m_id, m_shape);
-        for (std::size_t i = 0; i < this->number_of_elements(); i++) {
-            proxy[i] = m_constraints[i].constraint_value();
+
+        int number_of_elements = this->number_of_elements();
+        for (auto i = 0; i < number_of_elements; i++) {
+            proxy.flat_indexed_values()[i] =
+                m_constraints[i].constraint_value();
+            proxy.flat_indexed_names()[i] = m_constraints[i].name();
         }
         return proxy;
     }
 
     /*************************************************************************/
-    inline constexpr ValueProxy<T_Expression> export_violations(void) const {
+    inline constexpr ValueProxy<T_Expression> export_violations_and_names(
+        void) const {
         ValueProxy<T_Expression> proxy(m_id, m_shape);
-        for (std::size_t i = 0; i < this->number_of_elements(); i++) {
-            proxy[i] = m_constraints[i].violation_value();
+
+        int number_of_elements = this->number_of_elements();
+        for (auto i = 0; i < number_of_elements; i++) {
+            proxy.flat_indexed_values()[i] = m_constraints[i].violation_value();
+            proxy.flat_indexed_names()[i]  = m_constraints[i].name();
         }
         return proxy;
     }
@@ -236,7 +265,8 @@ class ConstraintProxy : public AbstractMultiArray {
     /*************************************************************************/
     inline constexpr Constraint<T_Variable, T_Expression> &operator()(
         const std::vector<int> &a_MULTI_DIMENSIONAL_INDEX) {
-        if (this->number_of_dimensions() != a_MULTI_DIMENSIONAL_INDEX.size()) {
+        int multi_dimensional_index_size = a_MULTI_DIMENSIONAL_INDEX.size();
+        if (this->number_of_dimensions() != multi_dimensional_index_size) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of dimensions does not match."));
@@ -290,7 +320,7 @@ class ConstraintProxy : public AbstractMultiArray {
         m_constraints[0] = a_CONSTRAINT;
         return *this;
     }
-};
+};  // namespace model
 using IPConstraintProxy = ConstraintProxy<int, double>;
 }  // namespace model
 }  // namespace cppmh
