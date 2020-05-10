@@ -34,11 +34,13 @@ class TestVariableProxy : public ::testing::Test {
 TEST_F(TestVariableProxy, scalar_create_instance) {
     cppmh::model::Model<int, double> model;
     auto& variable_proxy = model.create_variable("x");
+
+    /// Check the initial values of the base class members.
     EXPECT_EQ(0, variable_proxy.id());
     EXPECT_EQ(1, variable_proxy.shape()[0]);
     EXPECT_EQ(1, variable_proxy.strides()[0]);
-    EXPECT_EQ(1, static_cast<int>(variable_proxy.number_of_dimensions()));
-    EXPECT_EQ(1, static_cast<int>(variable_proxy.number_of_elements()));
+    EXPECT_EQ(1, variable_proxy.number_of_dimensions());
+    EXPECT_EQ(1, variable_proxy.number_of_elements());
 }
 
 /*****************************************************************************/
@@ -150,7 +152,6 @@ TEST_F(TestVariableProxy, scalar_sense) {
         auto& variable_proxy = model.create_variable("x", 0, 1);
         EXPECT_EQ(cppmh::model::VariableSense::Binary, variable_proxy.sense());
     }
-
     {
         cppmh::model::Model<int, double> model;
 
@@ -172,7 +173,7 @@ TEST_F(TestVariableProxy, scaler_set_bound) {
 
     EXPECT_EQ(lower_bound, variable_proxy.lower_bound());
     EXPECT_EQ(upper_bound, variable_proxy.upper_bound());
-    EXPECT_EQ(true, variable_proxy.is_defined_bounds());
+    EXPECT_EQ(true, variable_proxy.has_bounds());
 
     ASSERT_THROW(variable_proxy.set_bound(upper_bound, lower_bound),
                  std::logic_error);
@@ -180,17 +181,31 @@ TEST_F(TestVariableProxy, scaler_set_bound) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, scaler_lower_bound) {
-    /// tested in scaler_set_bound()
+    /// This method is tested in scaler_set_bound().
 }
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, scaler_upper_bound) {
-    /// tested in scaler_set_bound()
+    /// This method is tested in scaler_set_bound().
 }
 
 /*****************************************************************************/
-TEST_F(TestVariableProxy, scaler_is_defined_bounds) {
-    /// tested in scaler_set_bound()
+TEST_F(TestVariableProxy, scaler_has_bounds) {
+    /// This method is tested in scaler_set_bound().
+}
+
+/*****************************************************************************/
+TEST_F(TestVariableProxy, scalar_set_name) {
+    cppmh::model::Model<int, double> model;
+
+    auto& variable_proxy = model.create_variable("x");
+    variable_proxy.set_name("_x");
+    EXPECT_EQ("_x", variable_proxy.name());
+}
+
+/*****************************************************************************/
+TEST_F(TestVariableProxy, scalar_name) {
+    /// This method is tested in scalar_set_name().
 }
 
 /*****************************************************************************/
@@ -220,7 +235,7 @@ TEST_F(TestVariableProxy, scalar_export_values) {
     auto& variable_proxy = model.create_variable("x");
     auto  value          = random_integer();
     variable_proxy       = value;
-    EXPECT_EQ(value, variable_proxy.export_values().value());
+    EXPECT_EQ(value, variable_proxy.export_values_and_names().value());
 }
 
 /*****************************************************************************/
@@ -240,7 +255,7 @@ TEST_F(TestVariableProxy, scalar_sum_arg_void) {
     auto  expression = cppmh::model::Expression<int, double>::create_instance();
     expression       = variable_proxy.sum();
 
-    for (std::size_t i = 0; i < variable_proxy.number_of_elements(); i++) {
+    for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
         variable_proxy[i] = 1;
     }
 
@@ -256,7 +271,7 @@ TEST_F(TestVariableProxy, scalar_sum_arg_indices) {
     auto  expression = cppmh::model::Expression<int, double>::create_instance();
     expression       = variable_proxy.sum({cppmh::model::Range::All});
 
-    for (std::size_t i = 0; i < variable_proxy.number_of_elements(); i++) {
+    for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
         variable_proxy[i] = 1;
     }
 
@@ -279,7 +294,7 @@ TEST_F(TestVariableProxy, scalar_dot_arg_vector) {
     auto expression = cppmh::model::Expression<int, double>::create_instance();
     expression      = variable_proxy.dot(sensitivities);
 
-    for (std::size_t i = 0; i < variable_proxy.number_of_elements(); i++) {
+    for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
         variable_proxy[i] = 1;
     }
 
@@ -300,7 +315,7 @@ TEST_F(TestVariableProxy, scalar_dot_arg_indice_vector) {
     auto expression = cppmh::model::Expression<int, double>::create_instance();
     expression = variable_proxy.dot({cppmh::model::Range::All}, sensitivities);
 
-    for (std::size_t i = 0; i < variable_proxy.number_of_elements(); i++) {
+    for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
         variable_proxy[i] = 1;
     }
 
@@ -405,11 +420,13 @@ TEST_F(TestVariableProxy, one_dimensional_create_instance) {
     cppmh::model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", 2);
+
+    /// Check the initial values of the base class members.
     EXPECT_EQ(0, variable_proxy.id());
     EXPECT_EQ(2, variable_proxy.shape()[0]);
     EXPECT_EQ(1, variable_proxy.strides()[0]);
-    EXPECT_EQ(1, static_cast<int>(variable_proxy.number_of_dimensions()));
-    EXPECT_EQ(2, static_cast<int>(variable_proxy.number_of_elements()));
+    EXPECT_EQ(1, variable_proxy.number_of_dimensions());
+    EXPECT_EQ(2, variable_proxy.number_of_elements());
 }
 
 /*****************************************************************************/
@@ -495,7 +512,7 @@ TEST_F(TestVariableProxy, one_dimensional_sense) {
 
         auto& variable_proxy = model.create_variables("x", 2, 0, 1);
         model.create_constraint("c", variable_proxy.selection());
-        model.setup_default_neighborhood(false);
+        model.setup_default_neighborhood(false, false);
         for (const auto& variable : variable_proxy.flat_indexed_variables()) {
             EXPECT_EQ(cppmh::model::VariableSense::Selection, variable.sense());
         }
@@ -524,14 +541,14 @@ TEST_F(TestVariableProxy, one_dimensional_set_bound) {
 
     EXPECT_EQ(lower_bound, variable_proxy[0].lower_bound());
     EXPECT_EQ(upper_bound, variable_proxy[0].upper_bound());
-    EXPECT_EQ(true, variable_proxy[0].is_defined_bounds());
+    EXPECT_EQ(true, variable_proxy[0].has_bounds());
     EXPECT_EQ(lower_bound, variable_proxy[1].lower_bound());
     EXPECT_EQ(upper_bound, variable_proxy[1].upper_bound());
-    EXPECT_EQ(true, variable_proxy[0].is_defined_bounds());
+    EXPECT_EQ(true, variable_proxy[0].has_bounds());
 
     ASSERT_THROW(variable_proxy.lower_bound(), std::logic_error);
     ASSERT_THROW(variable_proxy.upper_bound(), std::logic_error);
-    ASSERT_THROW(variable_proxy.is_defined_bounds(), std::logic_error);
+    ASSERT_THROW(variable_proxy.has_bounds(), std::logic_error);
     ASSERT_THROW(variable_proxy.set_bound(upper_bound, lower_bound),
                  std::logic_error);
 }
@@ -547,8 +564,23 @@ TEST_F(TestVariableProxy, one_dimensional_upper_bound) {
 }
 
 /*****************************************************************************/
-TEST_F(TestVariableProxy, one_dimensional_is_defined_bounds) {
+TEST_F(TestVariableProxy, one_dimensional_has_bounds) {
     /// This method is tested in one_dimensional_set_bound.
+}
+
+/*****************************************************************************/
+TEST_F(TestVariableProxy, one_dimensional_set_name) {
+    cppmh::model::Model<int, double> model;
+
+    auto& variable_proxy = model.create_variables("x", 2);
+
+    ASSERT_THROW(variable_proxy.set_name("_x"), std::logic_error);
+    ASSERT_THROW(variable_proxy.name(), std::logic_error);
+}
+
+/*****************************************************************************/
+TEST_F(TestVariableProxy, one_dimensional_name) {
+    /// This method is tested in one_dimensional_set_name().
 }
 
 /*****************************************************************************/
@@ -586,8 +618,8 @@ TEST_F(TestVariableProxy, one_dimensional_export_values) {
     auto  value_1        = random_integer();
     variable_proxy[0]    = value_0;
     variable_proxy[1]    = value_1;
-    EXPECT_EQ(value_0, variable_proxy.export_values().values(0));
-    EXPECT_EQ(value_1, variable_proxy.export_values().values(1));
+    EXPECT_EQ(value_0, variable_proxy.export_values_and_names().values(0));
+    EXPECT_EQ(value_1, variable_proxy.export_values_and_names().values(1));
 }
 
 /*****************************************************************************/
@@ -607,7 +639,7 @@ TEST_F(TestVariableProxy, one_dimensional_sum_arg_void) {
 
     expression = variable_proxy.sum();
 
-    for (std::size_t i = 0; i < variable_proxy.number_of_elements(); i++) {
+    for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
         variable_proxy[i] = 1;
     }
 
@@ -625,7 +657,7 @@ TEST_F(TestVariableProxy, one_dimensional_sum_arg_indices) {
 
     expression = variable_proxy.sum({cppmh::model::Range::All});
 
-    for (std::size_t i = 0; i < variable_proxy.number_of_elements(); i++) {
+    for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
         variable_proxy[i] = 1;
     }
 
@@ -643,14 +675,14 @@ TEST_F(TestVariableProxy, one_dimensional_dot_arg_vector) {
     auto& variable_proxy = model.create_variables("x", 2);
 
     std::vector<double> sensitivities;
-    for (std::size_t i = 0; i < variable_proxy.number_of_elements(); i++) {
+    for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
         sensitivities.push_back(random_integer());
     }
 
     auto expression = cppmh::model::Expression<int, double>::create_instance();
     expression      = variable_proxy.dot(sensitivities);
 
-    for (std::size_t i = 0; i < variable_proxy.number_of_elements(); i++) {
+    for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
         variable_proxy[i] = 1;
     }
 
@@ -668,14 +700,14 @@ TEST_F(TestVariableProxy, one_dimensional_dot_arg_indice_vector) {
     auto& variable_proxy = model.create_variables("x", 2);
 
     std::vector<double> sensitivities;
-    for (std::size_t i = 0; i < variable_proxy.number_of_elements(); i++) {
+    for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
         sensitivities.push_back(random_integer());
     }
 
     auto expression = cppmh::model::Expression<int, double>::create_instance();
     expression      = variable_proxy.dot(sensitivities);
 
-    for (std::size_t i = 0; i < variable_proxy.number_of_elements(); i++) {
+    for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
         variable_proxy[i] = 1;
     }
 
@@ -792,13 +824,15 @@ TEST_F(TestVariableProxy, one_dimensional_operator_round_bracket_with_indices) {
 TEST_F(TestVariableProxy, two_dimensional_create_instance) {
     cppmh::model::Model<int, double> model;
     auto& variable_proxy = model.create_variables("x", {2, 3});
+
+    /// Check the initial values of the base class members.
     EXPECT_EQ(0, variable_proxy.id());
     EXPECT_EQ(2, variable_proxy.shape()[0]);
     EXPECT_EQ(3, variable_proxy.shape()[1]);
     EXPECT_EQ(3, variable_proxy.strides()[0]);
     EXPECT_EQ(1, variable_proxy.strides()[1]);
-    EXPECT_EQ(2, static_cast<int>(variable_proxy.number_of_dimensions()));
-    EXPECT_EQ(2 * 3, static_cast<int>(variable_proxy.number_of_elements()));
+    EXPECT_EQ(2, variable_proxy.number_of_dimensions());
+    EXPECT_EQ(2 * 3, variable_proxy.number_of_elements());
 }
 
 /*****************************************************************************/
@@ -893,7 +927,7 @@ TEST_F(TestVariableProxy, two_dimensional_sense) {
 
         auto& variable_proxy = model.create_variables("x", {2, 3}, 0, 1);
         model.create_constraint("c", variable_proxy.selection());
-        model.setup_default_neighborhood(false);
+        model.setup_default_neighborhood(false, false);
         for (const auto& variable : variable_proxy.flat_indexed_variables()) {
             EXPECT_EQ(cppmh::model::VariableSense::Selection, variable.sense());
         }
@@ -913,14 +947,14 @@ TEST_F(TestVariableProxy, two_dimensional_set_bound) {
 
     EXPECT_EQ(lower_bound, variable_proxy[0].lower_bound());
     EXPECT_EQ(upper_bound, variable_proxy[0].upper_bound());
-    EXPECT_EQ(true, variable_proxy[0].is_defined_bounds());
+    EXPECT_EQ(true, variable_proxy[0].has_bounds());
     EXPECT_EQ(lower_bound, variable_proxy[2 * 3 - 1].lower_bound());
     EXPECT_EQ(upper_bound, variable_proxy[2 * 3 - 1].upper_bound());
-    EXPECT_EQ(true, variable_proxy[2 * 3 - 1].is_defined_bounds());
+    EXPECT_EQ(true, variable_proxy[2 * 3 - 1].has_bounds());
 
     ASSERT_THROW(variable_proxy.lower_bound(), std::logic_error);
     ASSERT_THROW(variable_proxy.upper_bound(), std::logic_error);
-    ASSERT_THROW(variable_proxy.is_defined_bounds(), std::logic_error);
+    ASSERT_THROW(variable_proxy.has_bounds(), std::logic_error);
     ASSERT_THROW(variable_proxy.set_bound(upper_bound, lower_bound),
                  std::logic_error);
 }
@@ -936,8 +970,23 @@ TEST_F(TestVariableProxy, two_dimensional_upper_bound) {
 }
 
 /*****************************************************************************/
-TEST_F(TestVariableProxy, two_dimensional_is_defined_bounds) {
+TEST_F(TestVariableProxy, two_dimensional_has_bounds) {
     /// This method is tested in two_dimensional_set_bound.
+}
+
+/*****************************************************************************/
+TEST_F(TestVariableProxy, two_dimensional_set_name) {
+    cppmh::model::Model<int, double> model;
+
+    auto& variable_proxy = model.create_variables("x", {2, 3});
+
+    ASSERT_THROW(variable_proxy.set_name("_x"), std::logic_error);
+    ASSERT_THROW(variable_proxy.name(), std::logic_error);
+}
+
+/*****************************************************************************/
+TEST_F(TestVariableProxy, two_dimensional_name) {
+    /// This method is tested in two_dimensional_set_name().
 }
 
 /*****************************************************************************/
@@ -977,8 +1026,8 @@ TEST_F(TestVariableProxy, two_dimensional_export_values) {
     auto  value_1             = random_integer();
     variable_proxy[0]         = value_0;
     variable_proxy[2 * 3 - 1] = value_1;
-    EXPECT_EQ(value_0, variable_proxy.export_values().values(0, 0));
-    EXPECT_EQ(value_1, variable_proxy.export_values().values(1, 2));
+    EXPECT_EQ(value_0, variable_proxy.export_values_and_names().values(0, 0));
+    EXPECT_EQ(value_1, variable_proxy.export_values_and_names().values(1, 2));
 }
 
 /*****************************************************************************/
@@ -998,7 +1047,7 @@ TEST_F(TestVariableProxy, two_dimensional_sum_arg_void) {
 
     expression = variable_proxy.sum();
 
-    for (std::size_t i = 0; i < variable_proxy.number_of_elements(); i++) {
+    for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
         variable_proxy[i] = 1;
     }
 
@@ -1025,7 +1074,7 @@ TEST_F(TestVariableProxy, two_dimensional_sum_arg_indices) {
     expression_01 = variable_proxy.sum(
         {cppmh::model::Range::All, cppmh::model::Range::All});
 
-    for (std::size_t i = 0; i < variable_proxy.number_of_elements(); i++) {
+    for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
         variable_proxy[i] = 1;
     }
 
@@ -1056,7 +1105,7 @@ TEST_F(TestVariableProxy, two_dimensional_dot_arg_vector) {
     auto  expression = cppmh::model::Expression<int, double>::create_instance();
 
     std::vector<double> sensitivities;
-    for (std::size_t i = 0; i < variable_proxy.number_of_elements(); i++) {
+    for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
         sensitivities.push_back(random_integer());
     }
     ASSERT_THROW(variable_proxy.dot(sensitivities), std::logic_error);
@@ -1070,20 +1119,20 @@ TEST_F(TestVariableProxy, two_dimensional_dot_arg_indice_vector) {
 
     std::vector<double> sensitivities_0;
     auto                sum_0 = 0;
-    for (std::size_t i = 0; i < 2; i++) {
+    for (auto i = 0; i < 2; i++) {
         sensitivities_0.push_back(random_integer());
         sum_0 += sensitivities_0.back();
     }
 
     std::vector<double> sensitivities_1;
     auto                sum_1 = 0;
-    for (std::size_t i = 0; i < 3; i++) {
+    for (auto i = 0; i < 3; i++) {
         sensitivities_1.push_back(random_integer());
         sum_1 += sensitivities_1.back();
     }
 
     std::vector<double> sensitivities_01;
-    for (std::size_t i = 0; i < variable_proxy.number_of_elements(); i++) {
+    for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
         sensitivities_01.push_back(random_integer());
     }
 
@@ -1099,7 +1148,7 @@ TEST_F(TestVariableProxy, two_dimensional_dot_arg_indice_vector) {
     expression_1 =
         variable_proxy.dot({0, cppmh::model::Range::All}, sensitivities_1);
 
-    for (std::size_t i = 0; i < variable_proxy.number_of_elements(); i++) {
+    for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
         variable_proxy[i] = 1;
     }
 
@@ -1257,6 +1306,8 @@ TEST_F(TestVariableProxy, two_dimensional_operator_round_bracket_with_indices) {
 TEST_F(TestVariableProxy, three_dimensional_create_instance) {
     cppmh::model::Model<int, double> model;
     auto& variable_proxy = model.create_variables("x", {2, 3, 4});
+
+    /// Check the initial values of the base class members.
     EXPECT_EQ(0, variable_proxy.id());
     EXPECT_EQ(2, variable_proxy.shape()[0]);
     EXPECT_EQ(3, variable_proxy.shape()[1]);
@@ -1264,8 +1315,8 @@ TEST_F(TestVariableProxy, three_dimensional_create_instance) {
     EXPECT_EQ(12, variable_proxy.strides()[0]);
     EXPECT_EQ(4, variable_proxy.strides()[1]);
     EXPECT_EQ(1, variable_proxy.strides()[2]);
-    EXPECT_EQ(3, static_cast<int>(variable_proxy.number_of_dimensions()));
-    EXPECT_EQ(2 * 3 * 4, static_cast<int>(variable_proxy.number_of_elements()));
+    EXPECT_EQ(3, variable_proxy.number_of_dimensions());
+    EXPECT_EQ(2 * 3 * 4, variable_proxy.number_of_elements());
 }
 
 /*****************************************************************************/
@@ -1299,6 +1350,8 @@ TEST_F(TestVariableProxy,
 TEST_F(TestVariableProxy, four_dimensional_create_instance) {
     cppmh::model::Model<int, double> model;
     auto& variable_proxy = model.create_variables("x", {2, 3, 4, 5});
+
+    /// Check the initial values of the base class members.
     EXPECT_EQ(0, variable_proxy.id());
     EXPECT_EQ(2, variable_proxy.shape()[0]);
     EXPECT_EQ(3, variable_proxy.shape()[1]);
@@ -1308,9 +1361,8 @@ TEST_F(TestVariableProxy, four_dimensional_create_instance) {
     EXPECT_EQ(20, variable_proxy.strides()[1]);
     EXPECT_EQ(5, variable_proxy.strides()[2]);
     EXPECT_EQ(1, variable_proxy.strides()[3]);
-    EXPECT_EQ(4, static_cast<int>(variable_proxy.number_of_dimensions()));
-    EXPECT_EQ(2 * 3 * 4 * 5,
-              static_cast<int>(variable_proxy.number_of_elements()));
+    EXPECT_EQ(4, variable_proxy.number_of_dimensions());
+    EXPECT_EQ(2 * 3 * 4 * 5, variable_proxy.number_of_elements());
 }
 
 /*****************************************************************************/

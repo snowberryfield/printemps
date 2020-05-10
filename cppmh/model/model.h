@@ -494,43 +494,110 @@ class Model {
     }
 
     /*************************************************************************/
+    inline constexpr int number_of_constraints(void) const {
+        int result = 0;
+        for (auto &&proxy : m_constraint_proxies) {
+            result += proxy.number_of_elements();
+        }
+        return result;
+    }
+
+    /*************************************************************************/
     inline constexpr Neighborhood<T_Variable, T_Expression> &neighborhood(
         void) {
         return m_neighborhood;
     }
 
     /*************************************************************************/
-    inline constexpr void setup_default_neighborhood(
-        const bool a_IS_ENABLED_PARALLEL) {
-        m_neighborhood.setup_default_neighborhood(
-            &m_variable_proxies, &m_constraint_proxies, a_IS_ENABLED_PARALLEL);
-    }
+    inline constexpr void setup_variable_sense(void) {
+        /**
+         * This methods does not show information for the standard output.
+         **/
 
-    /*************************************************************************/
-    inline constexpr void setup_has_fixed_variables(void) {
-        m_neighborhood.setup_has_fixed_variables(m_variable_proxies);
-    }
+        /**
+         * This method is for re-optimizations. After an optimization, the
+         * senses of the "Binary" decision variables can be changed to
+         * "Selection" by automatic detection of the neighborhood. This method
+         * recovers the "Selection" decision variables into "Binary".
+         */
 
-    /*************************************************************************/
-    inline constexpr void setup_fixed_sensitivities(void) {
-        for (auto &&proxy : m_expression_proxies) {
-            for (auto &&expression : proxy.flat_indexed_expressions()) {
-                expression.setup_fixed_sensitivities();
-            }
-        }
-    }
-
-    /*************************************************************************/
-    inline constexpr void reset_variable_sense(void) {
         for (auto &&proxy : m_variable_proxies) {
             for (auto &&variable : proxy.flat_indexed_variables()) {
-                variable.reset_sense();
+                variable.setup_sense();
             }
         }
     }
 
     /*************************************************************************/
-    inline constexpr void verify_problem(void) {
+    inline constexpr void setup_unique_name() {
+        /**
+         * This methods does not show information for the standard output.
+         **/
+        int variable_proxies_size   = m_variable_proxies.size();
+        int expression_proxies_size = m_expression_proxies.size();
+        int constraint_proxies_size = m_constraint_proxies.size();
+
+        for (auto i = 0; i < variable_proxies_size; i++) {
+            int number_of_elements = m_variable_proxies[i].number_of_elements();
+            for (auto j = 0; j < number_of_elements; j++) {
+                auto &variable =
+                    m_variable_proxies[i].flat_indexed_variables(j);
+
+                if (variable.name() == "") {
+                    variable.set_name(m_variable_names[i] +
+                                      m_variable_proxies[i].indices_label(j));
+                }
+            }
+        }
+
+        /// Expression
+        for (auto i = 0; i < expression_proxies_size; i++) {
+            int number_of_elements =
+                m_expression_proxies[i].number_of_elements();
+            for (auto j = 0; j < number_of_elements; j++) {
+                auto &expression =
+                    m_expression_proxies[i].flat_indexed_expressions(j);
+
+                if (expression.name() == "") {
+                    expression.set_name(
+                        m_expression_names[i] +
+                        m_expression_proxies[i].indices_label(j));
+                }
+            }
+        }
+
+        /// Constraint
+        for (auto i = 0; i < constraint_proxies_size; i++) {
+            int number_of_elements =
+                m_constraint_proxies[i].number_of_elements();
+            for (auto j = 0; j < number_of_elements; j++) {
+                auto &constraint =
+                    m_constraint_proxies[i].flat_indexed_constraints(j);
+
+                if (constraint.name() == "") {
+                    constraint.set_name(
+                        m_constraint_names[i] +
+                        m_constraint_proxies[i].indices_label(j));
+                }
+            }
+        }
+    }
+
+    /*************************************************************************/
+    inline constexpr void setup_has_fixed_variables(
+        const bool a_IS_ENABLED_PRINT) {
+        utility::print_single_line(a_IS_ENABLED_PRINT);
+        utility::print_message("Processing on the fixed decision variables...",
+                               a_IS_ENABLED_PRINT);
+        m_neighborhood.setup_has_fixed_variables(m_variable_proxies);
+        utility::print_message("Done.", a_IS_ENABLED_PRINT);
+    }
+
+    /*************************************************************************/
+    inline constexpr void verify_problem(const bool a_IS_ENABLED_PRINT) {
+        utility::print_single_line(a_IS_ENABLED_PRINT);
+        utility::print_message("Verifying the problem...", a_IS_ENABLED_PRINT);
+
         if (m_variable_proxies.size() == 0) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -541,25 +608,44 @@ class Model {
                 __FILE__, __LINE__, __func__,
                 "Neither objective nor constraint functions are defined."));
         }
+        utility::print_message("Done.", a_IS_ENABLED_PRINT);
     }
 
     /*************************************************************************/
-    inline constexpr void verify_bounds(void) {
-        /// This method is not used
-        for (const auto &proxy : m_variable_proxies) {
-            for (const auto &variable : proxy.flat_indexed_variables()) {
-                if (!variable.is_defined_bounds()) {
-                    throw std::logic_error(utility::format_error_location(
-                        __FILE__, __LINE__, __func__,
-                        "There are one or more unbounded variables."));
-                }
+    inline constexpr void setup_default_neighborhood(
+        const bool a_IS_ENABLED_PARALLEL, const bool a_IS_ENABLED_PRINT) {
+        utility::print_single_line(a_IS_ENABLED_PRINT);
+        utility::print_message("Detecting the neighborhood structures...",
+                               a_IS_ENABLED_PRINT);
+        m_neighborhood.setup_default_neighborhood(
+            &m_variable_proxies, &m_constraint_proxies, a_IS_ENABLED_PARALLEL);
+        utility::print_message("Done.", a_IS_ENABLED_PRINT);
+    }
+
+    /*************************************************************************/
+    inline constexpr void setup_fixed_sensitivities(
+        const bool a_IS_ENABLED_PRINT) {
+        utility::print_single_line(a_IS_ENABLED_PRINT);
+        utility::print_message("Creating the sensitivity matrix...",
+                               a_IS_ENABLED_PRINT);
+
+        for (auto &&proxy : m_expression_proxies) {
+            for (auto &&expression : proxy.flat_indexed_expressions()) {
+                expression.setup_fixed_sensitivities();
             }
         }
+        utility::print_message("Done.", a_IS_ENABLED_PRINT);
     }
 
     /*************************************************************************/
     inline constexpr void verify_and_correct_selection_variables_initial_values(
         const bool a_IS_ENABLED_CORRECTON, const bool a_IS_ENABLED_PRINT) {
+        utility::print_single_line(a_IS_ENABLED_PRINT);
+        utility::print_message(
+            "Verifying the initial values of the binary decision variables "
+            "included in the selection constraints...",
+            a_IS_ENABLED_PRINT);
+
         for (auto &&selection : m_neighborhood.selections()) {
             std::vector<Variable<T_Variable, T_Expression> *>
                 fixed_selected_variable_ptrs;
@@ -623,23 +709,23 @@ class Model {
                         utility::print_warning(
                             "The initial value " + label + " = " +
                                 std::to_string(old_value) +
-                                " is corrected automatically as " + label +
-                                " = " + std::to_string(new_value) +
-                                " to satisfy binary constraint.",
+                                " is corrected to " +
+                                std::to_string(new_value) + ".",
                             a_IS_ENABLED_PRINT);
                     }
 
                 } else {
                     throw std::logic_error(utility::format_error_location(
                         __FILE__, __LINE__, __func__,
-                        "There is a variable of which initial value violates "
+                        "There is a variable of which initial value "
+                        "violates "
                         "binary constraint."));
                 }
             }
 
             /**
-             * Correct initial values or return logic error if there are more
-             * than 1 selected variables.
+             * Correct initial values or return logic error if there are
+             * more than 1 selected variables.
              */
             if (selected_variable_ptrs.size() > 1) {
                 if (a_IS_ENABLED_CORRECTON) {
@@ -666,9 +752,8 @@ class Model {
                             utility::print_warning(
                                 "The initial value " + label + " = " +
                                     std::to_string(old_value) +
-                                    " is corrected automatically as " + label +
-                                    " = " + std::to_string(new_value) +
-                                    " to satisfy binary constraint.",
+                                    " is corrected to " +
+                                    std::to_string(new_value) + ".",
                                 a_IS_ENABLED_PRINT);
                         }
                     }
@@ -702,9 +787,8 @@ class Model {
                             utility::print_warning(
                                 "The initial value " + label + " = " +
                                     std::to_string(old_value) +
-                                    " is corrected automatically as " + label +
-                                    " = " + std::to_string(new_value) +
-                                    " to satisfy binary constraint.",
+                                    " is corrected to " +
+                                    std::to_string(new_value) + ".",
                                 a_IS_ENABLED_PRINT);
                             is_corrected = true;
                             break;
@@ -713,7 +797,8 @@ class Model {
                     if (!is_corrected) {
                         throw std::logic_error(utility::format_error_location(
                             __FILE__, __LINE__, __func__,
-                            "The initial value could not be modified because "
+                            "The initial value could not be modified "
+                            "because "
                             "all variables are fixed."));
                     };
                 } else {
@@ -725,11 +810,18 @@ class Model {
                 selected_variable_ptrs.front()->select();
             }
         }
+        utility::print_message("Done.", a_IS_ENABLED_PRINT);
     }
 
     /*************************************************************************/
     inline constexpr void verify_and_correct_binary_variables_initial_values(
         const bool a_IS_ENABLED_CORRECTON, const bool a_IS_ENABLED_PRINT) {
+        utility::print_single_line(a_IS_ENABLED_PRINT);
+        utility::print_message(
+            "Verifying the initial values of the binary decision "
+            "variables.",
+            a_IS_ENABLED_PRINT);
+
         for (auto &&proxy : m_variable_proxies) {
             for (auto &&variable : proxy.flat_indexed_variables()) {
                 if (variable.sense() == VariableSense::Binary) {
@@ -759,9 +851,8 @@ class Model {
                             utility::print_warning(
                                 "The initial value " + label + " = " +
                                     std::to_string(old_value) +
-                                    " is corrected automatically as " + label +
-                                    " = " + std::to_string(new_value) +
-                                    " to satisfy binary constraint.",
+                                    " is corrected to " +
+                                    std::to_string(new_value) + ".",
                                 a_IS_ENABLED_PRINT);
                         } else {
                             throw std::logic_error(
@@ -774,11 +865,18 @@ class Model {
                 }
             }
         }
+        utility::print_message("Done.", a_IS_ENABLED_PRINT);
     }
 
     /*************************************************************************/
     inline constexpr void verify_and_correct_integer_variables_initial_values(
         const bool a_IS_ENABLED_CORRECTON, const bool a_IS_ENABLED_PRINT) {
+        utility::print_single_line(a_IS_ENABLED_PRINT);
+        utility::print_message(
+            "Verifying the initial values of the integer decision "
+            "variables.",
+            a_IS_ENABLED_PRINT);
+
         for (auto &&proxy : m_variable_proxies) {
             for (auto &&variable : proxy.flat_indexed_variables()) {
                 if (variable.sense() == VariableSense::Integer &&
@@ -806,19 +904,20 @@ class Model {
                         utility::print_warning(
                             "The initial value " + label + " = " +
                                 std::to_string(old_value) +
-                                " is corrected automatically as " + label +
-                                " = " + std::to_string(new_value) +
-                                " to satisfy lower or upper bound constraint.",
+                                " is corrected to " +
+                                std::to_string(new_value) + ".",
                             a_IS_ENABLED_PRINT);
                     } else {
                         throw std::logic_error(utility::format_error_location(
                             __FILE__, __LINE__, __func__,
-                            "An initial value violates the lower or upper "
+                            "An initial value violates the lower or "
+                            "upper "
                             "bound constraint."));
                     }
                 }
             }
         }
+        utility::print_message("Done.", a_IS_ENABLED_PRINT);
     }
 
     /*************************************************************************/
@@ -917,20 +1016,21 @@ class Model {
         double local_penalty  = 0.0;
         double global_penalty = 0.0;
 
-        std::size_t number_of_constraint_proxies = m_constraint_proxies.size();
-        bool        is_constraint_improvable     = false;
-        bool        is_feasible                  = true;
+        int  constraint_proxies_size  = m_constraint_proxies.size();
+        bool is_constraint_improvable = false;
+        bool is_feasible              = true;
 
-        for (std::size_t i = 0; i < number_of_constraint_proxies; i++) {
+        for (auto i = 0; i < constraint_proxies_size; i++) {
             auto &constraints =
                 m_constraint_proxies[i].flat_indexed_constraints();
-            int number_of_constraint = constraints.size();
 
-            for (auto j = 0; j < number_of_constraint; j++) {
+            int constraints_size = constraints.size();
+            for (auto j = 0; j < constraints_size; j++) {
                 if (!constraints[j].is_enabled()) {
                     continue;
                 }
                 auto violation = constraints[j].evaluate_violation(a_MOVE);
+
                 if (violation < constraints[j].violation_value()) {
                     is_constraint_improvable = true;
                 }
@@ -950,11 +1050,9 @@ class Model {
             }
         }
 
-        double objective             = m_objective.evaluate(a_MOVE);
-        double objective_improvement = m_objective.value() - objective;
-
-        objective *= this->sign();
-        objective_improvement *= this->sign();
+        double objective = m_objective.evaluate(a_MOVE) * this->sign();
+        double objective_improvement =
+            (m_objective.value() - objective) * this->sign();
 
         double local_augmented_objective  = objective + local_penalty;
         double global_augmented_objective = objective + global_penalty;
@@ -1032,17 +1130,20 @@ class Model {
         Solution<T_Variable, T_Expression> solution;
 
         for (const auto &proxy : m_variable_proxies) {
-            solution.variable_value_proxies.push_back(proxy.export_values());
+            solution.variable_value_proxies.push_back(
+                proxy.export_values_and_names());
         }
 
         for (const auto &proxy : m_expression_proxies) {
-            solution.expression_value_proxies.push_back(proxy.export_values());
+            solution.expression_value_proxies.push_back(
+                proxy.export_values_and_names());
         }
 
         for (const auto &proxy : m_constraint_proxies) {
-            solution.constraint_value_proxies.push_back(proxy.export_values());
+            solution.constraint_value_proxies.push_back(
+                proxy.export_values_and_names());
             solution.violation_value_proxies.push_back(
-                proxy.export_violations());
+                proxy.export_violations_and_names());
         }
 
         solution.objective = m_objective.value();
@@ -1064,22 +1165,30 @@ class Model {
         /// cannot be constexpr by clang
         NamedSolution<T_Variable, T_Expression> named_solution;
 
-        for (std::size_t i = 0; i < m_variable_names.size(); i++) {
+        int variable_proxies_size   = m_variable_proxies.size();
+        int expression_proxies_size = m_expression_proxies.size();
+        int constraint_proxies_size = m_constraint_proxies.size();
+
+        /// Decision variables
+        for (auto i = 0; i < variable_proxies_size; i++) {
             named_solution.m_variable_value_proxies[m_variable_names[i]] =
                 a_SOLUTION.variable_value_proxies[i];
         }
 
-        for (std::size_t i = 0; i < m_expression_names.size(); i++) {
+        /// Expression
+        for (auto i = 0; i < expression_proxies_size; i++) {
             named_solution.m_expression_value_proxies[m_expression_names[i]] =
                 a_SOLUTION.expression_value_proxies[i];
         }
 
-        for (std::size_t i = 0; i < m_constraint_names.size(); i++) {
+        /// Constraint
+        for (auto i = 0; i < constraint_proxies_size; i++) {
             named_solution.m_constraint_value_proxies[m_constraint_names[i]] =
                 a_SOLUTION.constraint_value_proxies[i];
         }
 
-        for (std::size_t i = 0; i < m_constraint_names.size(); i++) {
+        /// Violation
+        for (auto i = 0; i < constraint_proxies_size; i++) {
             named_solution.m_violation_value_proxies[m_constraint_names[i]] =
                 a_SOLUTION.violation_value_proxies[i];
         }
@@ -1133,7 +1242,7 @@ class Model {
         void) const {
         return m_constraint_names;
     }
-};
+};  // namespace model
 using IPModel = Model<int, double>;
 }  // namespace model
 }  // namespace cppmh

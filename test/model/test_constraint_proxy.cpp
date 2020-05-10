@@ -34,11 +34,27 @@ class TestConstraintProxy : public ::testing::Test {
 TEST_F(TestConstraintProxy, scalar_create_instance) {
     cppmh::model::Model<int, double> model;
     auto& constraint_proxy = model.create_constraint("c");
+
+    /// Check the initial values of the base class members.
     EXPECT_EQ(0, constraint_proxy.id());
     EXPECT_EQ(1, constraint_proxy.shape()[0]);
     EXPECT_EQ(1, constraint_proxy.strides()[0]);
-    EXPECT_EQ(1, static_cast<int>(constraint_proxy.number_of_dimensions()));
-    EXPECT_EQ(1, static_cast<int>(constraint_proxy.number_of_elements()));
+    EXPECT_EQ(1, constraint_proxy.number_of_dimensions());
+    EXPECT_EQ(1, constraint_proxy.number_of_elements());
+}
+
+/*****************************************************************************/
+TEST_F(TestConstraintProxy, scalar_set_name) {
+    cppmh::model::Model<int, double> model;
+
+    auto& constraint_proxy = model.create_constraint("c");
+    constraint_proxy.set_name("_c");
+    EXPECT_EQ("_c", constraint_proxy.name());
+}
+
+/*****************************************************************************/
+TEST_F(TestConstraintProxy, scalar_name) {
+    /// This method is tested in scalar_set_name().
 }
 
 /*****************************************************************************/
@@ -120,7 +136,7 @@ TEST_F(TestConstraintProxy, scalar_violation_value) {
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraintProxy, scalar_export_values) {
+TEST_F(TestConstraintProxy, scalar_export_values_and_names) {
     cppmh::model::Model<int, double> model;
     auto& constraint_proxy = model.create_constraint("c");
 
@@ -138,11 +154,12 @@ TEST_F(TestConstraintProxy, scalar_export_values) {
     constraint_proxy[0].update();
     auto expected_value = sensitivity * value - target;
 
-    EXPECT_EQ(expected_value, constraint_proxy.export_values().values(0));
+    EXPECT_EQ(expected_value,
+              constraint_proxy.export_values_and_names().values(0));
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraintProxy, scalar_export_violations) {
+TEST_F(TestConstraintProxy, scalar_export_violations_and_names) {
     cppmh::model::Model<int, double> model;
     auto& constraint_proxy = model.create_constraint("c");
 
@@ -160,7 +177,8 @@ TEST_F(TestConstraintProxy, scalar_export_violations) {
     constraint_proxy[0].update();
     auto expected_value = abs(sensitivity * value - target);
 
-    EXPECT_EQ(expected_value, constraint_proxy.export_violations().value());
+    EXPECT_EQ(expected_value,
+              constraint_proxy.export_violations_and_names().value());
 }
 
 /*****************************************************************************/
@@ -255,11 +273,28 @@ TEST_F(TestConstraintProxy, one_dimensional_create_instance) {
     cppmh::model::Model<int, double> model;
 
     auto& expression_proxy = model.create_expressions("e", 2);
+
+    /// Check the initial values of the base class members.
     EXPECT_EQ(0, expression_proxy.id());
     EXPECT_EQ(2, expression_proxy.shape()[0]);
     EXPECT_EQ(1, expression_proxy.strides()[0]);
-    EXPECT_EQ(1, static_cast<int>(expression_proxy.number_of_dimensions()));
-    EXPECT_EQ(2, static_cast<int>(expression_proxy.number_of_elements()));
+    EXPECT_EQ(1, expression_proxy.number_of_dimensions());
+    EXPECT_EQ(2, expression_proxy.number_of_elements());
+}
+
+/*****************************************************************************/
+TEST_F(TestConstraintProxy, one_dimensional_set_name) {
+    cppmh::model::Model<int, double> model;
+
+    auto& constraint_proxy = model.create_constraints("c", 2);
+
+    ASSERT_THROW(constraint_proxy.set_name("_c"), std::logic_error);
+    ASSERT_THROW(constraint_proxy.name(), std::logic_error);
+}
+
+/*****************************************************************************/
+TEST_F(TestConstraintProxy, one_dimensional_name) {
+    /// This method is tested in one_dimensional_set_name().
 }
 
 /*****************************************************************************/
@@ -343,7 +378,7 @@ TEST_F(TestConstraintProxy, one_dimensional_violation_value) {
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraintProxy, one_dimensional_export_values) {
+TEST_F(TestConstraintProxy, one_dimensional_export_values_and_names) {
     cppmh::model::Model<int, double> model;
     auto& constraint_proxy = model.create_constraints("c", 2);
 
@@ -369,12 +404,14 @@ TEST_F(TestConstraintProxy, one_dimensional_export_values) {
     auto expected_value_0 = sensitivity * value - target;
     auto expected_value_1 = 2 * (sensitivity * value - target);
 
-    EXPECT_EQ(expected_value_0, constraint_proxy.export_values().values(0));
-    EXPECT_EQ(expected_value_1, constraint_proxy.export_values().values(1));
+    EXPECT_EQ(expected_value_0,
+              constraint_proxy.export_values_and_names().values(0));
+    EXPECT_EQ(expected_value_1,
+              constraint_proxy.export_values_and_names().values(1));
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraintProxy, one_dimensional_export_violations) {
+TEST_F(TestConstraintProxy, one_dimensional_export_violations_and_names) {
     cppmh::model::Model<int, double> model;
     auto& constraint_proxy = model.create_constraints("c", 2);
 
@@ -400,8 +437,10 @@ TEST_F(TestConstraintProxy, one_dimensional_export_violations) {
     auto expected_value_0 = abs(sensitivity * value - target);
     auto expected_value_1 = 2 * abs(sensitivity * value - target);
 
-    EXPECT_EQ(expected_value_0, constraint_proxy.export_violations().values(0));
-    EXPECT_EQ(expected_value_1, constraint_proxy.export_violations().values(1));
+    EXPECT_EQ(expected_value_0,
+              constraint_proxy.export_violations_and_names().values(0));
+    EXPECT_EQ(expected_value_1,
+              constraint_proxy.export_violations_and_names().values(1));
 }
 
 /*****************************************************************************/
@@ -504,13 +543,30 @@ TEST_F(TestConstraintProxy, two_dimensional_create_instance) {
     cppmh::model::Model<int, double> model;
 
     auto& expression_proxy = model.create_expressions("e", {2, 3});
+
+    /// Check the initial values of the base class members.
     EXPECT_EQ(0, expression_proxy.id());
     EXPECT_EQ(2, expression_proxy.shape()[0]);
     EXPECT_EQ(3, expression_proxy.shape()[1]);
     EXPECT_EQ(3, expression_proxy.strides()[0]);
     EXPECT_EQ(1, expression_proxy.strides()[1]);
-    EXPECT_EQ(2, static_cast<int>(expression_proxy.number_of_dimensions()));
-    EXPECT_EQ(2 * 3, static_cast<int>(expression_proxy.number_of_elements()));
+    EXPECT_EQ(2, expression_proxy.number_of_dimensions());
+    EXPECT_EQ(2 * 3, expression_proxy.number_of_elements());
+}
+
+/*****************************************************************************/
+TEST_F(TestConstraintProxy, two_dimensional_set_name) {
+    cppmh::model::Model<int, double> model;
+
+    auto& constraint_proxy = model.create_constraints("c", {2, 3});
+
+    ASSERT_THROW(constraint_proxy.set_name("_c"), std::logic_error);
+    ASSERT_THROW(constraint_proxy.name(), std::logic_error);
+}
+
+/*****************************************************************************/
+TEST_F(TestConstraintProxy, two_dimensional_name) {
+    /// This method is tested in two_dimensional_set_name().
 }
 
 /*****************************************************************************/
@@ -597,7 +653,7 @@ TEST_F(TestConstraintProxy, two_dimensional_violation_value) {
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraintProxy, two_dimensional_export_values) {
+TEST_F(TestConstraintProxy, two_dimensional_export_values_and_names) {
     cppmh::model::Model<int, double> model;
     auto& constraint_proxy = model.create_constraints("c", {2, 3});
 
@@ -623,12 +679,14 @@ TEST_F(TestConstraintProxy, two_dimensional_export_values) {
     auto expected_value_0 = sensitivity * value - target;
     auto expected_value_1 = 2 * 3 * (sensitivity * value - target);
 
-    EXPECT_EQ(expected_value_0, constraint_proxy.export_values().values(0, 0));
-    EXPECT_EQ(expected_value_1, constraint_proxy.export_values().values(1, 2));
+    EXPECT_EQ(expected_value_0,
+              constraint_proxy.export_values_and_names().values(0, 0));
+    EXPECT_EQ(expected_value_1,
+              constraint_proxy.export_values_and_names().values(1, 2));
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraintProxy, two_dimensional_export_violations) {
+TEST_F(TestConstraintProxy, two_dimensional_export_violations_and_names) {
     cppmh::model::Model<int, double> model;
     auto& constraint_proxy = model.create_constraints("c", {2, 3});
 
@@ -655,9 +713,9 @@ TEST_F(TestConstraintProxy, two_dimensional_export_violations) {
     auto expected_value_1 = 2 * 3 * abs(sensitivity * value - target);
 
     EXPECT_EQ(expected_value_0,
-              constraint_proxy.export_violations().values(0, 0));
+              constraint_proxy.export_violations_and_names().values(0, 0));
     EXPECT_EQ(expected_value_1,
-              constraint_proxy.export_violations().values(1, 2));
+              constraint_proxy.export_violations_and_names().values(1, 2));
 }
 
 /*****************************************************************************/
@@ -764,6 +822,8 @@ TEST_F(TestConstraintProxy, three_dimensional_create_instance) {
     cppmh::model::Model<int, double> model;
 
     auto& constraint_proxy = model.create_constraints("c", {2, 3, 4});
+
+    /// Check the initial values of the base class members.
     EXPECT_EQ(0, constraint_proxy.id());
     EXPECT_EQ(2, constraint_proxy.shape()[0]);
     EXPECT_EQ(3, constraint_proxy.shape()[1]);
@@ -771,9 +831,8 @@ TEST_F(TestConstraintProxy, three_dimensional_create_instance) {
     EXPECT_EQ(12, constraint_proxy.strides()[0]);
     EXPECT_EQ(4, constraint_proxy.strides()[1]);
     EXPECT_EQ(1, constraint_proxy.strides()[2]);
-    EXPECT_EQ(3, static_cast<int>(constraint_proxy.number_of_dimensions()));
-    EXPECT_EQ(2 * 3 * 4,
-              static_cast<int>(constraint_proxy.number_of_elements()));
+    EXPECT_EQ(3, constraint_proxy.number_of_dimensions());
+    EXPECT_EQ(2 * 3 * 4, constraint_proxy.number_of_elements());
 }
 
 /*****************************************************************************/
@@ -820,6 +879,8 @@ TEST_F(TestConstraintProxy, four_dimensional_create_instance) {
     cppmh::model::Model<int, double> model;
 
     auto& constraint_proxy = model.create_constraints("c", {2, 3, 4, 5});
+
+    /// Check the initial values of the base class members.
     EXPECT_EQ(0, constraint_proxy.id());
     EXPECT_EQ(2, constraint_proxy.shape()[0]);
     EXPECT_EQ(3, constraint_proxy.shape()[1]);
@@ -829,9 +890,8 @@ TEST_F(TestConstraintProxy, four_dimensional_create_instance) {
     EXPECT_EQ(20, constraint_proxy.strides()[1]);
     EXPECT_EQ(5, constraint_proxy.strides()[2]);
     EXPECT_EQ(1, constraint_proxy.strides()[3]);
-    EXPECT_EQ(4, static_cast<int>(constraint_proxy.number_of_dimensions()));
-    EXPECT_EQ(2 * 3 * 4 * 5,
-              static_cast<int>(constraint_proxy.number_of_elements()));
+    EXPECT_EQ(4, constraint_proxy.number_of_dimensions());
+    EXPECT_EQ(2 * 3 * 4 * 5, constraint_proxy.number_of_elements());
 }
 
 /*****************************************************************************/

@@ -34,46 +34,17 @@ class TestExpression : public ::testing::Test {
 TEST_F(TestExpression, initialize) {
     auto expression = cppmh::model::Expression<int, double>::create_instance();
 
+    /// Check the initial values of the base class members.
+    EXPECT_EQ(0, expression.id());
     EXPECT_EQ(0, expression.flat_index());
     EXPECT_EQ(0, expression.multi_dimensional_index()[0]);
+    EXPECT_EQ("", expression.name());
+
+    /// Check the initial values of the derived class members.
     EXPECT_EQ(0, expression.constant_value());
     EXPECT_EQ(0, expression.value());
     EXPECT_EQ(true, expression.sensitivities().empty());
-}
-
-/*****************************************************************************/
-TEST_F(TestExpression, set_flat_index) {
-    auto expression = cppmh::model::Expression<int, double>::create_instance();
-
-    auto flat_index = random_integer();
-    expression.set_flat_index(flat_index);
-    EXPECT_EQ(flat_index, expression.flat_index());
-}
-
-/*****************************************************************************/
-TEST_F(TestExpression, flat_index) {
-    /// This method is tested in set_flat_index().
-}
-
-/*****************************************************************************/
-TEST_F(TestExpression, set_multi_dimensional_index) {
-    auto expression = cppmh::model::Expression<int, double>::create_instance();
-
-    auto multi_dimensional_index_1 = random_integer();
-    auto multi_dimensional_index_2 = random_integer();
-
-    expression.set_multi_dimensional_index(
-        {multi_dimensional_index_1, multi_dimensional_index_2});
-
-    EXPECT_EQ(multi_dimensional_index_1,
-              expression.multi_dimensional_index()[0]);
-    EXPECT_EQ(multi_dimensional_index_2,
-              expression.multi_dimensional_index()[1]);
-}
-
-/*****************************************************************************/
-TEST_F(TestExpression, multi_dimensional_index) {
-    /// This method is tested in set_multi_dimensional_index().
+    EXPECT_EQ(true, expression.is_enabled());
 }
 
 /*****************************************************************************/
