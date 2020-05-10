@@ -103,14 +103,14 @@ An optimization using cppmh consists of three steps; (1) modeling, (2) optimizat
 Let us consider the following optimization problem:
 
 ```
-(P2):  minimize  f
+(P2):  minimize  f_1 + f_2
          x,y
-      subject to x_1 + x_2 + x_2              >= 2,
+      subject to x_1 + x_2 + x_3              >= 2,
                                    y_1 + y_2   = 1,
                  x_1             + y_1         = 1,
                  x_1, x_2, x_3, y_1, y_2 \in {0, 1},
 
-        where    f_1 = 2 x_1 + 7 x_2 + 9 x_3,
+        where    f_1 = 2 x_1 + 7 x_2 + 9 x_3 + 1,
                  f_2 = 5 y_1 + 6 y_2.
 ```
 
@@ -171,7 +171,7 @@ auto& f = model.create_expressions("f", 2);
 auto& g = model.create_constraints("g", 3);
 
 // Define expressions.
-f(0) = 2 * x(0) + 7 * x(1) + 9 * x(2);
+f(0) = 2 * x(0) + 7 * x(1) + 9 * x(2) + 1;
 f(1) = 5 * y(0) + 6 * y(1);
 
 // Define constraints.
@@ -204,11 +204,11 @@ auto& f = model.create_expressions("f", 2);
 auto& g = model.create_constraints("g", 3);
 
 // Create coefficient vectors.
-std::vector<int> c = {2, 5, 7};
+std::vector<int> c = {2, 7, 9};
 std::vector<int> d = {5, 6};
 
 // Define expressions.
-f(0) = x.dot(c);
+f(0) = x.dot(c) + 1;
 f(1) = y.dot(d);
 
 // Define constraints.

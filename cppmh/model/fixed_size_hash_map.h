@@ -15,31 +15,32 @@ namespace cppmh {
 namespace model {
 /*****************************************************************************/
 struct FixedSizeHashMapConstant {
-    static constexpr std::size_t DEFAULT_BUCKET_SIZE = 16;
-    static constexpr int         LOAD_MARGIN         = 2;
+    static constexpr std::uint_fast32_t DEFAULT_BUCKET_SIZE = 16;
+    static constexpr int                LOAD_MARGIN         = 100;
 };
 
 /*****************************************************************************/
 template <class T_Key, class T_Value>
 class FixedSizeHashMap {
    private:
-    unsigned int m_shift_size;
-    std::size_t  m_bucket_size;
+    std::uint_fast8_t  m_shift_size;
+    std::uint_fast32_t m_bucket_size;
+    std::uint_fast32_t m_mask;
 
-    std::vector<T_Key>   m_keys;
-    std::vector<T_Value> m_values;
-    std::vector<bool>    m_is_occupied;
+    std::vector<T_Key>        m_keys;
+    std::vector<T_Value>      m_values;
+    std::vector<uint_fast8_t> m_is_occupied;
 
     /*************************************************************************/
-    inline constexpr std::size_t compute_hash(const T_Key a_KEY) const
+    inline constexpr std::uint_fast32_t compute_hash(const T_Key a_KEY) const
         noexcept {
-        return reinterpret_cast<std::size_t>(a_KEY) >> m_shift_size;
+        return reinterpret_cast<std::uint_fast64_t>(a_KEY) >> m_shift_size;
     }
 
     /*************************************************************************/
-    inline constexpr std::size_t compute_index(const std::size_t a_HASH) const
-        noexcept {
-        return a_HASH & (m_bucket_size - 1);
+    inline constexpr std::uint_fast32_t compute_index(
+        const std::uint_fast32_t a_HASH) const noexcept {
+        return a_HASH & m_mask;
     }
 
     /*************************************************************************/
@@ -47,12 +48,12 @@ class FixedSizeHashMap {
         /**
          * This method is provided as private and is called only by setup().
          */
-        std::size_t index = this->compute_index(this->compute_hash(a_KEY));
+        std::uint_fast32_t index = this->compute_hash(a_KEY) & m_mask;
         while (m_is_occupied[index]) {
-            index = compute_index(index + 1);
+            index = (index + 1) & m_mask;
         }
 
-        m_is_occupied[index] = true;
+        m_is_occupied[index] = 1;
         m_keys[index]        = a_KEY;
         m_values[index]      = a_VALUE;
     }
@@ -65,7 +66,7 @@ class FixedSizeHashMap {
 
     /*************************************************************************/
     FixedSizeHashMap(const std::unordered_map<T_Key, T_Value> &a_UNORDERED_MAP,
-                     const std::size_t                         a_KEY_SIZE) {
+                     const std::uint_fast32_t                  a_KEY_SIZE) {
         this->setup(a_UNORDERED_MAP, a_KEY_SIZE);
     }
 
@@ -73,27 +74,29 @@ class FixedSizeHashMap {
     inline constexpr void initialize(void) {
         m_shift_size  = 0;
         m_bucket_size = FixedSizeHashMapConstant::DEFAULT_BUCKET_SIZE;
+        m_mask        = m_bucket_size - 1;
         m_keys.resize(m_bucket_size, 0);
         m_values.resize(m_bucket_size, 0);
         m_is_occupied.resize(m_bucket_size, 0);
 
         std::fill(m_keys.begin(), m_keys.end(), static_cast<T_Key>(0));
         std::fill(m_values.begin(), m_values.end(), static_cast<T_Value>(0));
-        std::fill(m_is_occupied.begin(), m_is_occupied.end(), false);
+        std::fill(m_is_occupied.begin(), m_is_occupied.end(), 0);
     }
 
     /*************************************************************************/
     inline void setup(const std::unordered_map<T_Key, T_Value> &a_UNORDERED_MAP,
-                      const std::size_t                         a_KEY_SIZE) {
+                      const std::uint_fast32_t                  a_KEY_SIZE) {
         m_shift_size = floor(log2(a_KEY_SIZE));
 
-        std::size_t minimum_bucket_size =
+        std::uint_fast32_t minimum_bucket_size =
             a_UNORDERED_MAP.size() * FixedSizeHashMapConstant::LOAD_MARGIN;
-        std::size_t bucket_size = 1;
+        std::uint_fast32_t bucket_size = 1;
         while (bucket_size < minimum_bucket_size) {
             bucket_size <<= 1;
         }
         m_bucket_size = bucket_size;
+        m_mask        = m_bucket_size - 1;
 
         m_keys.resize(m_bucket_size);
         m_values.resize(m_bucket_size);
@@ -101,7 +104,7 @@ class FixedSizeHashMap {
 
         std::fill(m_keys.begin(), m_keys.end(), static_cast<T_Key>(0));
         std::fill(m_values.begin(), m_values.end(), static_cast<T_Value>(0));
-        std::fill(m_is_occupied.begin(), m_is_occupied.end(), false);
+        std::fill(m_is_occupied.begin(), m_is_occupied.end(), 0);
 
         for (const auto &item : a_UNORDERED_MAP) {
             this->insert(item.first, item.second);
@@ -109,8 +112,10 @@ class FixedSizeHashMap {
     }
 
     /*************************************************************************/
-    inline constexpr const T_Value at(const T_Key a_KEY) const noexcept {
-        std::size_t index = this->compute_index(this->compute_hash(a_KEY));
+    inline constexpr T_Value at(const T_Key a_KEY) const noexcept {
+        std::uint_fast32_t index =
+            (reinterpret_cast<std::uint_fast64_t>(a_KEY) >> m_shift_size) &
+            m_mask;
         if (!m_is_occupied[index]) {
             return 0;
         }
@@ -119,18 +124,18 @@ class FixedSizeHashMap {
             if (!m_is_occupied[index]) {
                 return 0;
             }
-            index = compute_index(index + 1);
+            index = (index + 1) & m_mask;
         }
         return m_values[index];
     }
 
     /*************************************************************************/
-    inline constexpr unsigned int shift_size(void) const {
+    inline constexpr std::uint_fast8_t shift_size(void) const {
         return m_shift_size;
     }
 
     /*************************************************************************/
-    inline constexpr std::size_t bucket_size(void) const {
+    inline constexpr std::uint_fast32_t bucket_size(void) const {
         return m_bucket_size;
     }
 
@@ -145,7 +150,7 @@ class FixedSizeHashMap {
     }
 
     /*************************************************************************/
-    inline constexpr const std::vector<bool> &is_occupied(void) const {
+    inline constexpr const std::vector<uint_fast8_t> &is_occupied(void) const {
         return m_is_occupied;
     }
 };

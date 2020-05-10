@@ -32,7 +32,23 @@ struct Solution {
 
     /*************************************************************************/
     Solution(void) : objective(0), is_feasible(false) {
+        this->initialize();
+    }
+
+    /*************************************************************************/
+    virtual ~Solution(void) {
         /// nothing to do
+    }
+
+    /*************************************************************************/
+    inline void initialize(void) {
+        this->variable_value_proxies.clear();
+        this->expression_value_proxies.clear();
+        this->constraint_value_proxies.clear();
+        this->violation_value_proxies.clear();
+
+        this->objective   = 0;
+        this->is_feasible = false;
     }
 };
 
@@ -61,11 +77,11 @@ class NamedSolution {
                            a_VALUE_PROXIES,
         const std::string& a_CATEGORY) {
         for (const auto& umap : a_VALUE_PROXIES) {
-            auto&       proxy = umap.second;
-            std::string name  = umap.first;
-            for (std::size_t i = 0; i < proxy.number_of_elements(); i++) {
-                utility::print(a_CATEGORY + "." + name +
-                               proxy.indices_label(i) + " = " +
+            auto& proxy              = umap.second;
+            int   number_of_elements = proxy.number_of_elements();
+            for (auto i = 0; i < number_of_elements; i++) {
+                utility::print(a_CATEGORY + "." + proxy.flat_indexed_names(i) +
+                               " = " +
                                std::to_string(proxy.flat_indexed_values(i)));
             }
         }
@@ -165,7 +181,7 @@ class NamedSolution {
     inline bool is_feasible(void) const {
         return m_is_feasible;
     }
-};
+};  // namespace model
 using IPSolution      = Solution<int, double>;
 using IPNamedSolution = NamedSolution<int, double>;
 }  // namespace model

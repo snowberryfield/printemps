@@ -189,7 +189,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
 #pragma omp parallel for if (option.is_enabled_parallel_evaluation) \
     schedule(static)
 #endif
-        for (int i_move = 0; i_move < number_of_moves; i_move++) {
+        for (auto i_move = 0; i_move < number_of_moves; i_move++) {
             trial_solution_scores[i_move] =
                 model->evaluate(*trial_move_ptrs[i_move],           //
                                 local_penalty_coefficient_proxies,  //
@@ -230,11 +230,11 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                 total_scores[i_move] = HUGE_VALF;
             }
         }
-        std::size_t argmin_global_augmented_objective =
+        int argmin_global_augmented_objective =
             utility::argmin(global_augmented_objectives);
 
-        std::size_t argmin_total_score = utility::argmin(total_scores);
-        std::size_t selected_index     = 0;
+        int argmin_total_score = utility::argmin(total_scores);
+        int selected_index     = 0;
 
         if (iteration < option.tabu_search.number_of_initial_modification) {
             /**

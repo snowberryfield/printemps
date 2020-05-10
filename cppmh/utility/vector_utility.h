@@ -14,15 +14,14 @@ namespace cppmh {
 namespace utility {
 /*****************************************************************************/
 template <class T, class A>
-inline constexpr std::size_t count_duplicate(const std::vector<T, A> &a_ARRAY) {
+inline constexpr int count_duplicate(const std::vector<T, A> &a_ARRAY) {
     std::set<T> set(a_ARRAY.begin(), a_ARRAY.end());
     return a_ARRAY.size() - set.size();
 }
 
 /*****************************************************************************/
 template <class T, class A>
-inline constexpr std::size_t count(const std::vector<T, A> &a_ARRAY,
-                                   const T                  a_VALUE) {
+inline constexpr int count(const std::vector<T, A> &a_ARRAY, const T a_VALUE) {
     return std::count(a_ARRAY.begin(), a_ARRAY.end(), a_VALUE);
 }
 
@@ -46,14 +45,14 @@ inline constexpr T max_abs(const std::vector<T, A> &a_ARRAY) {
 
 /*****************************************************************************/
 template <class T, class A>
-inline constexpr std::size_t argmin(const std::vector<T, A> &a_ARRAY) {
+inline constexpr int argmin(const std::vector<T, A> &a_ARRAY) {
     return (std::distance(a_ARRAY.begin(),
                           min_element(a_ARRAY.begin(), a_ARRAY.end())));
 }
 
 /*****************************************************************************/
 template <class T, class A>
-inline constexpr std::size_t argmax(const std::vector<T, A> &a_ARRAY) {
+inline constexpr int argmax(const std::vector<T, A> &a_ARRAY) {
     return (std::distance(a_ARRAY.begin(),
                           max_element(a_ARRAY.begin(), a_ARRAY.end())));
 }

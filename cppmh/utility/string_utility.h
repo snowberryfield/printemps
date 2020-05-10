@@ -14,10 +14,11 @@ namespace cppmh {
 namespace utility {
 /******************************************************************************/
 inline std::string trim(const std::string &a_ORIGINAL) {
-    std::size_t start_position = 0;
-    std::size_t end_position   = a_ORIGINAL.size() - 1;
+    int start_position = 0;
+    int end_position   = a_ORIGINAL.size() - 1;
 
-    for (std::size_t i_pos = 0; i_pos < a_ORIGINAL.size(); i_pos++) {
+    int size = a_ORIGINAL.size();
+    for (auto i_pos = 0; i_pos < size; i_pos++) {
         if (a_ORIGINAL[i_pos] == ' ') {
             start_position++;
         } else {
@@ -25,7 +26,7 @@ inline std::string trim(const std::string &a_ORIGINAL) {
         }
     }
 
-    for (std::size_t i_pos = 0; i_pos < a_ORIGINAL.size(); i_pos++) {
+    for (auto i_pos = 0; i_pos < size; i_pos++) {
         if (a_ORIGINAL[a_ORIGINAL.size() - 1 - i_pos] == ' ') {
             end_position--;
         } else {
