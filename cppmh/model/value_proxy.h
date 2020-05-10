@@ -72,7 +72,7 @@ class ValueProxy : public AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr std::string flat_indexed_names(
+    inline constexpr std::string &flat_indexed_names(
         const int a_FLAT_INDEX) const {
         return m_names[a_FLAT_INDEX];
     }
@@ -163,7 +163,7 @@ class ValueProxy : public AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr std::string name(void) const {
+    inline constexpr std::string &name(void) const {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -188,7 +188,7 @@ class ValueProxy : public AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr std::string names(
+    inline std::string &names(
         const std::vector<int> &a_MULTI_DIMENSIONAL_INDEX) const {
         if (this->number_of_dimensions() != a_MULTI_DIMENSIONAL_INDEX.size()) {
             throw std::logic_error(utility::format_error_location(
@@ -210,7 +210,8 @@ class ValueProxy : public AbstractMultiArray {
 
     /*************************************************************************/
     template <class... Args>
-    inline constexpr std::string names(Args... args) const {
+    inline std::string names(Args... args) const {
+        /// This method cannot be constexpr for Clang-6.
         return this->names({args...});
     }
 
