@@ -19,6 +19,7 @@
 #include "objective.h"
 #include "value_proxy.h"
 #include "solution.h"
+#include "named_solution.h"
 #include "solution_score.h"
 #include "neighborhood.h"
 
@@ -615,7 +616,7 @@ class Model {
     inline constexpr void setup_default_neighborhood(
         const bool a_IS_ENABLED_PARALLEL, const bool a_IS_ENABLED_PRINT) {
         utility::print_single_line(a_IS_ENABLED_PRINT);
-        utility::print_message("Detecting the neighborhood structures...",
+        utility::print_message("Detecting the neighborhood structure...",
                                a_IS_ENABLED_PRINT);
         m_neighborhood.setup_default_neighborhood(
             &m_variable_proxies, &m_constraint_proxies, a_IS_ENABLED_PARALLEL);
