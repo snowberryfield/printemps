@@ -19,6 +19,7 @@
 #include "objective.h"
 #include "value_proxy.h"
 #include "solution.h"
+#include "named_solution.h"
 #include "solution_score.h"
 #include "neighborhood.h"
 
