@@ -1,0 +1,33 @@
+CONFIG ?= Release
+TOP_DIR = $(CURDIR)
+BUILD_DIR = $(CURDIR)/build/application/$(CONFIG)
+
+CXX = g++
+CC = gcc
+
+default: build
+
+.PHONY: build 
+build: cmake
+	cmake --build $(BUILD_DIR) 
+
+.PHONY: cmake 
+cmake:
+	mkdir -p $(BUILD_DIR) && \
+	cd $(BUILD_DIR) && \
+	cmake -DCMAKE_BUILD_TYPE=$(CONFIG) -DCMAKE_CXX_COMPILER=$(CXX) -DCMAKE_C_COMPILER=$(CC) -DTOP_DIR=$(TOP_DIR) $(TOP_DIR)/cmake/application
+
+.PHONY: cmake-debug
+cmake-debug:
+	mkdir -p $(BUILD_DIR) && \
+	cd $(BUILD_DIR) && \
+	cmake -DCMAKE_BUILD_TYPE=$(CONFIG) -DCMAKE_CXX_COMPILER=$(CXX) -DCMAKE_C_COMPILER=$(CC) -DTOP_DIR=$(TOP_DIR) -DCMAKE_EXE_LINKER_FLAGS=-pg -DCMAKE_SHARED_LINKER_FLAGS=-pg $(TOP_DIR)/cmake/application
+
+.PHONY: remove
+remove:
+	rm -rf $(BUILD_DIR)
+
+.PHONY: clean
+clean:
+	rm -rf build/application
+
