@@ -77,7 +77,7 @@ class VariableProxy : public AbstractMultiArray {
          * default constructor of Variable class is deleted.
          */
         m_variables.reserve(this->number_of_elements());
-        for (std::size_t i = 0; i < this->number_of_elements(); i++) {
+        for (auto i = 0; i < this->number_of_elements(); i++) {
             m_variables.emplace_back(
                 Variable<T_Variable, T_Expression>::create_instance());
         }
@@ -221,16 +221,6 @@ class VariableProxy : public AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr VariableSense sense(void) const {
-        if (this->number_of_elements() != 1) {
-            throw std::logic_error(utility::format_error_location(
-                __FILE__, __LINE__, __func__,
-                "The number of elements is not one."));
-        }
-        return m_variables[0].sense();
-    }
-
-    /*************************************************************************/
     inline constexpr void set_bound(const T_Variable a_LOWER_BOUND,
                                     const T_Variable a_UPPER_BOUND) {
         if (a_LOWER_BOUND > a_UPPER_BOUND) {
@@ -241,6 +231,13 @@ class VariableProxy : public AbstractMultiArray {
         }
         for (auto &&variable : m_variables) {
             variable.set_bound(a_LOWER_BOUND, a_UPPER_BOUND);
+        }
+    }
+
+    /*************************************************************************/
+    inline constexpr void reset_bound(void) {
+        for (auto &&variable : m_variables) {
+            variable.rest_bound();
         }
     }
 
@@ -265,13 +262,53 @@ class VariableProxy : public AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr bool is_defined_bounds(void) const {
+    inline constexpr bool has_bounds(void) const {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of elements is not one."));
         }
-        return m_variables[0].is_defined_bounds();
+        return m_variables[0].has_bounds();
+    }
+
+    /*************************************************************************/
+    inline constexpr VariableSense sense(void) const {
+        if (this->number_of_elements() != 1) {
+            throw std::logic_error(utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "The number of elements is not one."));
+        }
+        return m_variables[0].sense();
+    }
+
+    /*************************************************************************/
+    inline constexpr void setup_sense(void) const {
+        if (this->number_of_elements() != 1) {
+            throw std::logic_error(utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "The number of elements is not one."));
+        }
+        m_variables[0].setup_sense();
+    }
+
+    /*************************************************************************/
+    inline constexpr void set_name(const std::string &a_NAME) {
+        if (this->number_of_elements() != 1) {
+            throw std::logic_error(utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "The number of elements is not one."));
+        }
+        m_variables[0].set_name(a_NAME);
+    }
+
+    /*************************************************************************/
+    inline constexpr const std::string &name(void) const {
+        if (this->number_of_elements() != 1) {
+            throw std::logic_error(utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "The number of elements is not one."));
+        }
+        return m_variables[0].name();
     }
 
     /*************************************************************************/
@@ -299,10 +336,14 @@ class VariableProxy : public AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr ValueProxy<T_Variable> export_values(void) const {
+    inline constexpr ValueProxy<T_Variable> export_values_and_names(
+        void) const {
         ValueProxy<T_Variable> proxy(m_id, m_shape);
-        for (std::size_t i = 0; i < this->number_of_elements(); i++) {
-            proxy[i] = m_variables[i].value();
+
+        int number_of_elements = this->number_of_elements();
+        for (auto i = 0; i < number_of_elements; i++) {
+            proxy.flat_indexed_values()[i] = m_variables[i].value();
+            proxy.flat_indexed_names()[i]  = m_variables[i].name();
         }
         return proxy;
     }
@@ -324,7 +365,7 @@ class VariableProxy : public AbstractMultiArray {
             sensitivities;
         sensitivities.reserve(this->number_of_elements());
 
-        for (std::size_t i = 0; i < this->number_of_elements(); i++) {
+        for (auto i = 0; i < this->number_of_elements(); i++) {
             sensitivities[m_variables[i].reference()] = 1;
         }
         auto result = Expression<T_Variable, T_Expression>::create_instance();
@@ -336,14 +377,15 @@ class VariableProxy : public AbstractMultiArray {
     /*************************************************************************/
     inline constexpr Expression<T_Variable, T_Expression> sum(
         const std::vector<int> &a_MULTI_DIMENSIONAL_INDEX) const {
-        if (this->number_of_dimensions() != a_MULTI_DIMENSIONAL_INDEX.size()) {
+        int multi_dimensional_index_size = a_MULTI_DIMENSIONAL_INDEX.size();
+        if (this->number_of_dimensions() != multi_dimensional_index_size) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of dimensions does not match."));
         }
 
         int number_of_partial_elements = 1;
-        for (std::size_t j = 0; j < this->number_of_dimensions(); j++) {
+        for (auto j = 0; j < this->number_of_dimensions(); j++) {
             if (a_MULTI_DIMENSIONAL_INDEX[j] == Range::All) {
                 number_of_partial_elements *= m_shape[j];
             }
@@ -352,9 +394,9 @@ class VariableProxy : public AbstractMultiArray {
         std::vector<Variable<T_Variable, T_Expression> *> variable_ptrs;
         variable_ptrs.reserve(number_of_partial_elements);
 
-        for (std::size_t i = 0; i < this->number_of_elements(); i++) {
+        for (auto i = 0; i < this->number_of_elements(); i++) {
             bool is_covered = true;
-            for (std::size_t j = 0; j < this->number_of_dimensions(); j++) {
+            for (auto j = 0; j < this->number_of_dimensions(); j++) {
                 if (a_MULTI_DIMENSIONAL_INDEX[j] != Range::All &&
                     m_variables[i].multi_dimensional_index()[j] !=
                         a_MULTI_DIMENSIONAL_INDEX[j]) {
@@ -391,7 +433,8 @@ class VariableProxy : public AbstractMultiArray {
                 "The number of dimensions does not one."));
         }
 
-        if (this->number_of_elements() != a_COEFFICIENTS.size()) {
+        int coefficients_size = a_COEFFICIENTS.size();
+        if (this->number_of_elements() != coefficients_size) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of elements does not match."));
@@ -401,7 +444,7 @@ class VariableProxy : public AbstractMultiArray {
             sensitivities;
         sensitivities.reserve(this->number_of_elements());
 
-        for (std::size_t i = 0; i < this->number_of_elements(); i++) {
+        for (auto i = 0; i < this->number_of_elements(); i++) {
             sensitivities[m_variables[i].reference()] = a_COEFFICIENTS[i];
         }
 
@@ -416,7 +459,8 @@ class VariableProxy : public AbstractMultiArray {
     inline constexpr Expression<T_Variable, T_Expression> dot(
         const std::vector<int> &a_MULTI_DIMENSIONAL_INDEX,
         const T_Array &         a_COEFFICIENTS) {
-        if (this->number_of_dimensions() != a_MULTI_DIMENSIONAL_INDEX.size()) {
+        int multi_dimensional_index_size = a_MULTI_DIMENSIONAL_INDEX.size();
+        if (this->number_of_dimensions() != multi_dimensional_index_size) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of dimensions does not match."));
@@ -430,7 +474,7 @@ class VariableProxy : public AbstractMultiArray {
         }
 
         int number_of_partial_elements = 1;
-        for (std::size_t j = 0; j < this->number_of_dimensions(); j++) {
+        for (auto j = 0; j < this->number_of_dimensions(); j++) {
             if (a_MULTI_DIMENSIONAL_INDEX[j] == Range::All) {
                 number_of_partial_elements *= m_shape[j];
             }
@@ -439,9 +483,9 @@ class VariableProxy : public AbstractMultiArray {
         std::vector<Variable<T_Variable, T_Expression> *> variable_ptrs;
         variable_ptrs.reserve(number_of_partial_elements);
 
-        for (std::size_t i = 0; i < this->number_of_elements(); i++) {
+        for (auto i = 0; i < this->number_of_elements(); i++) {
             bool is_covered = true;
-            for (std::size_t j = 0; j < this->number_of_dimensions(); j++) {
+            for (auto j = 0; j < this->number_of_dimensions(); j++) {
                 if (a_MULTI_DIMENSIONAL_INDEX[j] != Range::All &&
                     m_variables[i].multi_dimensional_index()[j] !=
                         a_MULTI_DIMENSIONAL_INDEX[j]) {
@@ -464,7 +508,8 @@ class VariableProxy : public AbstractMultiArray {
             sensitivities;
         sensitivities.reserve(number_of_partial_elements);
 
-        for (std::size_t i = 0; i < variable_ptrs.size(); i++) {
+        int number_of_variable_ptrs = variable_ptrs.size();
+        for (auto i = 0; i < number_of_variable_ptrs; i++) {
             sensitivities[variable_ptrs[i]] = a_COEFFICIENTS[i];
         }
 
@@ -535,7 +580,8 @@ class VariableProxy : public AbstractMultiArray {
     /*************************************************************************/
     inline constexpr Variable<T_Variable, T_Expression> &operator()(
         const std::vector<int> &a_MULTI_DIMENSIONAL_INDEX) {
-        if (this->number_of_dimensions() != a_MULTI_DIMENSIONAL_INDEX.size()) {
+        int multi_dimensional_index_size = a_MULTI_DIMENSIONAL_INDEX.size();
+        if (this->number_of_dimensions() != multi_dimensional_index_size) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of dimensions does not match."));

@@ -78,13 +78,12 @@ class Memory {
     /*************************************************************************/
     inline void print_last_update_iterations(void) {
         /// This method is for debug.
-        std::size_t number_of_variable_proxies = m_variable_names.size();
-        for (std::size_t i = 0; i < number_of_variable_proxies; i++) {
+        int variable_proxies_size = m_variable_names.size();
+        for (auto i = 0; i < variable_proxies_size; i++) {
             auto &      last_update_iteration = m_last_update_iterations[i];
             std::string name                  = m_variable_names[i];
-
-            for (std::size_t j = 0;
-                 j < last_update_iteration.number_of_elements(); j++) {
+            int number_of_elements = last_update_iteration.number_of_elements();
+            for (auto j = 0; j < number_of_elements; j++) {
                 utility::print(
                     name + last_update_iteration.indices_label(j) + " = " +
                     std::to_string(
@@ -96,13 +95,13 @@ class Memory {
     /*************************************************************************/
     inline void print_update_counts(void) {
         /// This method is for debug.
-        std::size_t number_of_variable_proxies = m_variable_names.size();
-        for (std::size_t i = 0; i < number_of_variable_proxies; i++) {
+        int variable_proxies_size = m_variable_names.size();
+        for (auto i = 0; i < variable_proxies_size; i++) {
             auto &      update_count = m_update_counts[i];
             std::string name         = m_variable_names[i];
 
-            for (std::size_t j = 0; j < update_count.number_of_elements();
-                 j++) {
+            int number_of_elements = update_count.number_of_elements();
+            for (auto j = 0; j < number_of_elements; j++) {
                 utility::print(
                     name + update_count.indices_label(j) + " = " +
                     std::to_string(update_count.flat_indexed_values(j)));
@@ -113,13 +112,12 @@ class Memory {
     /*************************************************************************/
     inline void print_frequency(void) {
         /// This method is for debug.
-        std::size_t number_of_variable_proxies = m_variable_names.size();
-        for (std::size_t i = 0; i < number_of_variable_proxies; i++) {
-            auto &      update_count = m_update_counts[i];
-            std::string name         = m_variable_names[i];
-
-            for (std::size_t j = 0; j < update_count.number_of_elements();
-                 j++) {
+        int variable_proxies_size = m_variable_names.size();
+        for (auto i = 0; i < variable_proxies_size; i++) {
+            auto &      update_count       = m_update_counts[i];
+            std::string name               = m_variable_names[i];
+            int         number_of_elements = update_count.number_of_elements();
+            for (auto j = 0; j < number_of_elements; j++) {
                 utility::print(
                     name + update_count.indices_label(j) + " = " +
                     std::to_string(update_count.flat_indexed_values(j) /
@@ -136,13 +134,12 @@ class Memory {
 
     /*************************************************************************/
     inline double bias(void) const {
-        double result = 0.0;
-        ;
-        std::size_t number_of_variable_proxies = m_variable_names.size();
-        for (std::size_t i = 0; i < number_of_variable_proxies; i++) {
-            auto &update_count = m_update_counts[i];
-            for (std::size_t j = 0; j < update_count.number_of_elements();
-                 j++) {
+        double result                = 0.0;
+        int    variable_proxies_size = m_variable_names.size();
+        for (auto i = 0; i < variable_proxies_size; i++) {
+            auto &update_count       = m_update_counts[i];
+            int   number_of_elements = update_count.number_of_elements();
+            for (auto j = 0; j < number_of_elements; j++) {
                 auto frequency = update_count.flat_indexed_values(j) /
                                  static_cast<double>(m_total_update_counts);
                 result += frequency * frequency;

@@ -34,12 +34,17 @@ class TestConstraint : public ::testing::Test {
 TEST_F(TestConstraint, initialize) {
     auto constraint = cppmh::model::Constraint<int, double>::create_instance();
 
+    /// Check the initial values of the base class members.
+    EXPECT_EQ(0, constraint.id());
+    EXPECT_EQ(0, constraint.flat_index());
+    EXPECT_EQ(0, constraint.multi_dimensional_index()[0]);
+    EXPECT_EQ("", constraint.name());
+
+    /// Check the initial values of the derived class members.
     EXPECT_EQ(0, constraint.evaluate_constraint());
     EXPECT_EQ(0, constraint.evaluate_constraint({}));
     EXPECT_EQ(0, constraint.evaluate_violation());
     EXPECT_EQ(0, constraint.evaluate_violation({}));
-    EXPECT_EQ(0, constraint.flat_index());
-    EXPECT_EQ(0, constraint.multi_dimensional_index()[0]);
     EXPECT_EQ(true, constraint.expression().sensitivities().empty());
     EXPECT_EQ(0, constraint.expression().constant_value());
     EXPECT_EQ(cppmh::model::ConstraintSense::Lower, constraint.sense());
@@ -47,39 +52,6 @@ TEST_F(TestConstraint, initialize) {
     EXPECT_EQ(0, constraint.violation_value());
     EXPECT_EQ(true, constraint.is_linear());
     EXPECT_EQ(true, constraint.is_enabled());
-}
-
-/*****************************************************************************/
-TEST_F(TestConstraint, set_flat_index) {
-    auto variable = cppmh::model::Variable<int, double>::create_instance();
-
-    auto flat_index = random_integer();
-    variable.set_flat_index(flat_index);
-    EXPECT_EQ(flat_index, variable.flat_index());
-}
-
-/*****************************************************************************/
-TEST_F(TestConstraint, flat_index) {
-    /// This method is tested in set_flat_index().
-}
-
-/*****************************************************************************/
-TEST_F(TestConstraint, set_multi_dimensional_index) {
-    auto variable = cppmh::model::Variable<int, double>::create_instance();
-
-    auto multi_dimensional_index_1 = random_integer();
-    auto multi_dimensional_index_2 = random_integer();
-
-    variable.set_multi_dimensional_index(
-        {multi_dimensional_index_1, multi_dimensional_index_2});
-
-    EXPECT_EQ(multi_dimensional_index_1, variable.multi_dimensional_index()[0]);
-    EXPECT_EQ(multi_dimensional_index_2, variable.multi_dimensional_index()[1]);
-}
-
-/*****************************************************************************/
-TEST_F(TestConstraint, multi_dimensional_index) {
-    /// This method is tested in set_multi_dimensional_index().
 }
 
 /*****************************************************************************/
