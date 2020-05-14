@@ -279,7 +279,7 @@ model::NamedSolution<T_Variable, T_Expression> solve(
         }
 
         /**
-         *  Prepare an option object for local search.
+         *  Prepare an option object for tabu search.
          */
         Option option                  = master_option;
         option.tabu_search.time_offset = elapsed_time;
