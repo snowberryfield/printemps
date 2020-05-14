@@ -53,7 +53,7 @@ int main([[maybe_unused]] int argc, char *argv[]) {
     cppmh::utility::print_info(
         "objective: " + std::to_string(result.objective()), true);
 
-    result.write_json_by_name("result_name.json");
+    result.write_json_by_name("result.json");
 
     return 0;
 }
