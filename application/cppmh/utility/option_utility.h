@@ -150,7 +150,7 @@ inline cppmh::solver::Option read_option(const std::string &a_FILE_NAME) {
         /// local_search.seed
         read_json(&option.local_search.seed,  //
                   "seed",                     //
-                  option_object);
+                  option_object_local_search);
     }
 
     /**************************************************************************/
@@ -264,7 +264,7 @@ inline cppmh::solver::Option read_option(const std::string &a_FILE_NAME) {
         /// tabu_search.seed
         read_json(&option.tabu_search.seed,  //
                   "seed",                    //
-                  option_object);
+                  option_object_tabu_search);
     }
 
     return option;

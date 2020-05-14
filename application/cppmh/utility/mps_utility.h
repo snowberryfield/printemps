@@ -186,19 +186,19 @@ inline MPS read_mps(const std::string &a_FILE_NAME) {
         if (items.front() == "NAME") {
             read_mode = MPSReadMode::Name;
 
-        } else if (items.front() == "ROWS") {
+        } else if (items.front() == "ROWS" && items.size() == 1) {
             read_mode = MPSReadMode::Rows;
             continue;
-        } else if (items.front() == "COLUMNS") {
+        } else if (items.front() == "COLUMNS" && items.size() == 1) {
             read_mode = MPSReadMode::Columns;
             continue;
-        } else if (items.front() == "RHS") {
+        } else if (items.front() == "RHS" && items.size() == 1) {
             read_mode = MPSReadMode::Rhs;
             continue;
-        } else if (items.front() == "BOUNDS") {
+        } else if (items.front() == "BOUNDS" && items.size() == 1) {
             read_mode = MPSReadMode::Bounds;
             continue;
-        } else if (items.front() == "ENDATA") {
+        } else if (items.front() == "ENDATA" && items.size() == 1) {
             read_mode = MPSReadMode::Endata;
             break;
         }
