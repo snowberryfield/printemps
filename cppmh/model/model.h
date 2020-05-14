@@ -510,16 +510,33 @@ class Model {
     }
 
     /*************************************************************************/
+    inline constexpr void setup_variable_contributive_constraints(void) {
+        /**
+         * This methods does not show information for the standard output.
+         **/
+        for (auto &&proxy : m_constraint_proxies) {
+            for (auto &&constraint : proxy.flat_indexed_constraints()) {
+                for (auto &&sensitivity :
+                     constraint.expression().sensitivities()) {
+                    sensitivity.first->register_contributive_constraint_ptr(
+                        &constraint);
+                }
+            }
+        }
+    }
+
+    /*************************************************************************/
     inline constexpr void setup_variable_sense(void) {
         /**
          * This methods does not show information for the standard output.
          **/
 
         /**
-         * This method is for re-optimizations. After an optimization, the
-         * senses of the "Binary" decision variables can be changed to
-         * "Selection" by automatic detection of the neighborhood. This method
-         * recovers the "Selection" decision variables into "Binary".
+         * This method is for re-optimizations. After an optimization,
+         * the senses of the "Binary" decision variables can be changed
+         * to "Selection" by automatic detection of the neighborhood.
+         * This method recovers the "Selection" decision variables into
+         * "Binary".
          */
 
         for (auto &&proxy : m_variable_proxies) {
@@ -532,7 +549,8 @@ class Model {
     /*************************************************************************/
     inline constexpr void setup_unique_name() {
         /**
-         * This methods does not show information for the standard output.
+         * This methods does not show information for the standard
+         *output.
          **/
         int variable_proxies_size   = m_variable_proxies.size();
         int expression_proxies_size = m_expression_proxies.size();
@@ -607,7 +625,8 @@ class Model {
         if (m_constraint_proxies.size() == 0 && !m_is_defined_objective) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
-                "Neither objective nor constraint functions are defined."));
+                "Neither objective nor constraint functions are "
+                "defined."));
         }
         utility::print_message("Done.", a_IS_ENABLED_PRINT);
     }
@@ -643,7 +662,8 @@ class Model {
         const bool a_IS_ENABLED_CORRECTON, const bool a_IS_ENABLED_PRINT) {
         utility::print_single_line(a_IS_ENABLED_PRINT);
         utility::print_message(
-            "Verifying the initial values of the binary decision variables "
+            "Verifying the initial values of the binary decision "
+            "variables "
             "included in the selection constraints...",
             a_IS_ENABLED_PRINT);
 
@@ -682,18 +702,20 @@ class Model {
             }
 
             /**
-             * Return logic error if there are more than 1 fixed selected
-             * variables.
+             * Return logic error if there are more than 1 fixed
+             * selected variables.
              */
             if (fixed_selected_variable_ptrs.size() > 1) {
                 throw std::logic_error(utility::format_error_location(
                     __FILE__, __LINE__, __func__,
-                    "There are more than one fixed selected variables."));
+                    "There are more than one fixed selected "
+                    "variables."));
             }
 
             /**
-             * Correct initial values or return logic error if there is a
-             * variable of which initial value violates binary constraint.
+             * Correct initial values or return logic error if there is
+             * a variable of which initial value violates binary
+             * constraint.
              */
             if (invalid_variable_ptrs.size() > 0) {
                 if (a_IS_ENABLED_CORRECTON) {
@@ -718,7 +740,8 @@ class Model {
                 } else {
                     throw std::logic_error(utility::format_error_location(
                         __FILE__, __LINE__, __func__,
-                        "There is a variable of which initial value "
+                        "There is a variable of which initial "
+                        "value "
                         "violates "
                         "binary constraint."));
                 }
@@ -765,12 +788,13 @@ class Model {
                 } else {
                     throw std::logic_error(utility::format_error_location(
                         __FILE__, __LINE__, __func__,
-                        "There are more than one selected variables."));
+                        "There are more than one selected "
+                        "variables."));
                 }
             }
             /**
-             * Correct initial values or return logic error if there is no
-             * selected variables.
+             * Correct initial values or return logic error if there is
+             * no selected variables.
              */
             else if (selected_variable_ptrs.size() == 0) {
                 if (a_IS_ENABLED_CORRECTON) {
@@ -798,7 +822,8 @@ class Model {
                     if (!is_corrected) {
                         throw std::logic_error(utility::format_error_location(
                             __FILE__, __LINE__, __func__,
-                            "The initial value could not be modified "
+                            "The initial value could not be "
+                            "modified "
                             "because "
                             "all variables are fixed."));
                     };
@@ -831,7 +856,8 @@ class Model {
                             throw std::logic_error(
                                 utility::format_error_location(
                                     __FILE__, __LINE__, __func__,
-                                    "There is an invalid fixed variable."));
+                                    "There is an invalid fixed "
+                                    "variable."));
                         }
 
                         if (a_IS_ENABLED_CORRECTON) {
@@ -911,7 +937,8 @@ class Model {
                     } else {
                         throw std::logic_error(utility::format_error_location(
                             __FILE__, __LINE__, __func__,
-                            "An initial value violates the lower or "
+                            "An initial value violates the lower "
+                            "or "
                             "upper "
                             "bound constraint."));
                     }
