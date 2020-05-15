@@ -191,7 +191,8 @@ TabuSearchResult<T_Variable, T_Expression> solve(
 #endif
         for (auto i_move = 0; i_move < number_of_moves; i_move++) {
             trial_solution_scores[i_move] =
-                model->evaluate(*trial_move_ptrs[i_move],           //
+                model->evaluate(*trial_move_ptrs[i_move],
+                                solution_score,                     //
                                 local_penalty_coefficient_proxies,  //
                                 global_penalty_coefficient_proxies);
 

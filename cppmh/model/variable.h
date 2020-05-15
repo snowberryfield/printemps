@@ -7,7 +7,7 @@
 #define CPPMH_MODEL_VARIABLE_H__
 
 #include <unordered_map>
-#include <set>
+#include <unordered_set>
 #include "abstract_multi_array_element.h"
 
 namespace cppmh {
@@ -52,7 +52,7 @@ class Variable : public AbstractMultiArrayElement {
     VariableSense m_sense;
 
     Selection<T_Variable, T_Expression> *m_selection_ptr;
-    std::set<Constraint<T_Variable, T_Expression> *>
+    std::unordered_set<Constraint<T_Variable, T_Expression> *>
         m_contributive_constraint_ptrs;
 
     /*************************************************************************/
@@ -257,12 +257,12 @@ class Variable : public AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr void reset_contributive_constraint_ptr(void) {
+    inline constexpr void reset_contributive_constraint_ptrs(void) {
         m_contributive_constraint_ptrs.clear();
     }
 
     /*************************************************************************/
-    inline constexpr std::set<Constraint<T_Variable, T_Expression> *>
+    inline constexpr std::unordered_set<Constraint<T_Variable, T_Expression> *>
         &contributive_constraint_ptrs(void) {
         return m_contributive_constraint_ptrs;
     }

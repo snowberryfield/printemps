@@ -130,12 +130,13 @@ LocalSearchResult<T_Variable, T_Expression> solve(
         }
 
         for (const auto& move_ptr : move_ptrs) {
-            solution_score =
-                model->evaluate(*move_ptr, local_penalty_coefficient_proxies,
-                                global_penalty_coefficient_proxies);
+            auto trial_solution_score = model->evaluate(
+                *move_ptr, solution_score, local_penalty_coefficient_proxies,
+                global_penalty_coefficient_proxies);
             number_of_checked_moved++;
-            if (solution_score.local_augmented_objective <
+            if (trial_solution_score.local_augmented_objective <
                 incumbent_holder.local_augmented_incumbent_objective()) {
+                solution_score = trial_solution_score;
                 model->update(*move_ptr);
 
                 is_found_improving_solution = true;
