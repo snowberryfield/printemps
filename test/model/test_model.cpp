@@ -54,9 +54,11 @@ TEST_F(TestModel, initialize) {
     EXPECT_EQ(true, model.expression_names().empty());
     EXPECT_EQ(true, model.constraint_names().empty());
 
+    EXPECT_EQ(false, model.is_defined_objective());
+    EXPECT_EQ(false, model.has_nonlinear_constraint());
+    EXPECT_EQ(false, model.has_nonlinear_objective());
     EXPECT_EQ(true, model.is_minimization());
     EXPECT_EQ(1.0, model.sign());
-    EXPECT_EQ(false, model.is_defined_objective());
 }
 
 /*****************************************************************************/
@@ -368,6 +370,8 @@ TEST_F(TestModel, minimize_arg_function) {
     EXPECT_EQ(0, model.objective().expression().constant_value());
     EXPECT_EQ(false, model.objective().is_linear());
 
+    EXPECT_EQ(true, model.has_nonlinear_objective());
+
     for (auto&& variable : variable_proxy.flat_indexed_variables()) {
         variable = 1;
     }
@@ -448,6 +452,8 @@ TEST_F(TestModel, maximize_arg_function) {
     EXPECT_EQ(0, model.objective().expression().constant_value());
     EXPECT_EQ(false, model.objective().is_linear());
 
+    EXPECT_EQ(true, model.has_nonlinear_objective());
+
     for (auto&& variable : variable_proxy.flat_indexed_variables()) {
         variable = 1;
     }
@@ -515,6 +521,16 @@ TEST_F(TestModel, is_defined_objective) {
 }
 
 /*****************************************************************************/
+TEST_F(TestModel, has_nonlinear_constraint) {
+    /// This method is tested in setup_has_nonlinear_constraint().
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, has_nonlinear_objective) {
+    /// This method is tested in minimize_arg_function() and so on.
+}
+
+/*****************************************************************************/
 TEST_F(TestModel, is_minimization) {
     /// This method is tested in minimize_arg_function() and so on.
 }
@@ -546,6 +562,11 @@ TEST_F(TestModel, number_of_constraints) {
 
 /*****************************************************************************/
 TEST_F(TestModel, neighborhood) {
+    /// This method is tested in test_neighborhood.h
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, setup_has_nonlinear_constraint) {
     /// This method is tested in test_neighborhood.h
 }
 

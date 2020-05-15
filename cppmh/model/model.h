@@ -1156,7 +1156,6 @@ class Model {
         double local_penalty   = score.local_penalty;
         double global_penalty  = score.global_penalty;
 
-        // 実行可能性チェック
         for (auto &&constraint_ptr : a_MOVE.contributive_constraint_ptrs) {
             if (!constraint_ptr->is_enabled()) {
                 continue;
