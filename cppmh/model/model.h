@@ -55,6 +55,8 @@ class Model {
     std::vector<std::string> m_constraint_names;
 
     bool                                   m_is_defined_objective;
+    bool                                   m_has_nonlinear_constraint;
+    bool                                   m_has_nonlinear_objective;
     bool                                   m_is_minimization;
     Neighborhood<T_Variable, T_Expression> m_neighborhood;
     std::function<void(void)>              m_callback;
@@ -84,8 +86,10 @@ class Model {
         m_expression_names.clear();
         m_constraint_names.clear();
 
-        m_is_defined_objective = false;
-        m_is_minimization      = true;
+        m_is_defined_objective     = false;
+        m_has_nonlinear_constraint = false;
+        m_has_nonlinear_objective  = false;
+        m_is_minimization          = true;
         m_neighborhood.initialize();
         m_callback = [](void) {};
     }
@@ -409,6 +413,8 @@ class Model {
         m_objective            = objective;
         m_is_defined_objective = true;
         m_is_minimization      = true;
+
+        m_has_nonlinear_objective = true;
     }
 
     /*************************************************************************/
@@ -442,6 +448,8 @@ class Model {
         m_objective            = objective;
         m_is_defined_objective = true;
         m_is_minimization      = false;
+
+        m_has_nonlinear_objective = true;
     }
 
     /*************************************************************************/
@@ -468,6 +476,16 @@ class Model {
     /*************************************************************************/
     inline constexpr bool is_defined_objective(void) const {
         return m_is_defined_objective;
+    }
+
+    /*************************************************************************/
+    inline constexpr bool has_nonlinear_constraint(void) const {
+        return m_has_nonlinear_constraint;
+    }
+
+    /*************************************************************************/
+    inline constexpr bool has_nonlinear_objective(void) const {
+        return m_has_nonlinear_objective;
     }
 
     /*************************************************************************/
@@ -525,6 +543,21 @@ class Model {
                      constraint.expression().sensitivities()) {
                     sensitivity.first->register_contributive_constraint_ptr(
                         &constraint);
+                }
+            }
+        }
+    }
+
+    /*************************************************************************/
+    inline constexpr void setup_has_nonlinear_constraint(void) {
+        /**
+         * This methods does not show information for the standard output.
+         **/
+        for (auto &&proxy : m_constraint_proxies) {
+            for (auto &&constraint : proxy.flat_indexed_constraints()) {
+                if (!constraint.is_linear()) {
+                    m_has_nonlinear_constraint = true;
+                    return;
                 }
             }
         }
@@ -725,12 +758,12 @@ class Model {
             if (invalid_variable_ptrs.size() > 0) {
                 if (a_IS_ENABLED_CORRECTON) {
                     for (auto &&variable_ptr : invalid_variable_ptrs) {
-                        auto old_value = variable_ptr->value();
-                        auto new_value = 0;
+                        T_Variable old_value = variable_ptr->value();
+                        T_Variable new_value = 0;
 
                         variable_ptr->set_value_if_not_fixed(new_value);
 
-                        auto label =
+                        std::string label =
                             m_variable_names[variable_ptr->id()] +
                             m_variable_proxies[variable_ptr->id()]
                                 .indices_label(variable_ptr->flat_index());
@@ -769,12 +802,12 @@ class Model {
 
                     for (auto &&variable_ptr : selected_variable_ptrs) {
                         if (variable_ptr != selected_variable_ptr) {
-                            auto old_value = 1;
-                            auto new_value = 0;
+                            T_Variable old_value = 1;
+                            T_Variable new_value = 0;
 
                             variable_ptr->set_value_if_not_fixed(new_value);
 
-                            auto label =
+                            std::string label =
                                 m_variable_names[variable_ptr->id()] +
                                 m_variable_proxies[variable_ptr->id()]
                                     .indices_label(variable_ptr->flat_index());
@@ -803,14 +836,14 @@ class Model {
              */
             else if (selected_variable_ptrs.size() == 0) {
                 if (a_IS_ENABLED_CORRECTON) {
-                    auto old_value    = 0;
-                    auto new_value    = 1;
-                    bool is_corrected = false;
+                    T_Variable old_value    = 0;
+                    T_Variable new_value    = 1;
+                    bool       is_corrected = false;
                     for (auto &&variable_ptr : selection.variable_ptrs) {
                         if (!variable_ptr->is_fixed()) {
                             variable_ptr->set_value_if_not_fixed(new_value);
 
-                            auto label =
+                            std::string label =
                                 m_variable_names[variable_ptr->id()] +
                                 m_variable_proxies[variable_ptr->id()]
                                     .indices_label(variable_ptr->flat_index());
@@ -877,7 +910,7 @@ class Model {
 
                             variable.set_value_if_not_fixed(new_value);
 
-                            auto label =
+                            std::string label =
                                 m_variable_names[variable.id()] +
                                 proxy.indices_label(variable.flat_index());
                             utility::print_warning(
@@ -931,8 +964,9 @@ class Model {
 
                         variable.set_value_if_not_fixed(new_value);
 
-                        auto label = m_variable_names[variable.id()] +
-                                     proxy.indices_label(variable.flat_index());
+                        std::string label =
+                            m_variable_names[variable.id()] +
+                            proxy.indices_label(variable.flat_index());
                         utility::print_warning(
                             "The initial value " + label + " = " +
                                 std::to_string(old_value) +
@@ -987,16 +1021,14 @@ class Model {
          * Update in order of expressions -> objective, constraints. For
          * typical problem.
          */
-        for (auto &&expression_proxy : m_expression_proxies) {
-            for (auto &&expression :
-                 expression_proxy.flat_indexed_expressions()) {
+        for (auto &&proxy : m_expression_proxies) {
+            for (auto &&expression : proxy.flat_indexed_expressions()) {
                 expression.update();
             }
         }
 
-        for (auto &&constraint_proxy : m_constraint_proxies) {
-            for (auto &&constraint :
-                 constraint_proxy.flat_indexed_constraints()) {
+        for (auto &&proxy : m_constraint_proxies) {
+            for (auto &&constraint : proxy.flat_indexed_constraints()) {
                 constraint.update();
             }
         }
@@ -1012,18 +1044,16 @@ class Model {
          */
         m_objective.update(a_MOVE);
 
-        for (auto &&constraint_proxy : m_constraint_proxies) {
-            for (auto &&constraint :
-                 constraint_proxy.flat_indexed_constraints()) {
+        for (auto &&proxy : m_constraint_proxies) {
+            for (auto &&constraint : proxy.flat_indexed_constraints()) {
                 if (constraint.is_enabled()) {
                     constraint.update(a_MOVE);
                 }
             }
         }
 
-        for (auto &&expression_proxy : m_expression_proxies) {
-            for (auto &&expression :
-                 expression_proxy.flat_indexed_expressions()) {
+        for (auto &&proxy : m_expression_proxies) {
+            for (auto &&expression : proxy.flat_indexed_expressions()) {
                 if (expression.is_enabled()) {
                     expression.update(a_MOVE);
                 }
@@ -1062,7 +1092,7 @@ class Model {
                 if (!constraints[j].is_enabled()) {
                     continue;
                 }
-                auto violation = constraints[j].evaluate_violation(a_MOVE);
+                double violation = constraints[j].evaluate_violation(a_MOVE);
 
                 if (violation < constraints[j].violation_value()) {
                     is_constraint_improvable = true;
@@ -1127,13 +1157,12 @@ class Model {
         double global_penalty  = score.global_penalty;
 
         // 実行可能性チェック
-        // std::cout << "start" << std::endl;
         for (auto &&constraint_ptr : a_MOVE.contributive_constraint_ptrs) {
             if (!constraint_ptr->is_enabled()) {
                 continue;
             }
-            auto violation_diff = constraint_ptr->evaluate_violation(a_MOVE) -
-                                  constraint_ptr->violation_value();
+            double violation_diff = constraint_ptr->evaluate_violation(a_MOVE) -
+                                    constraint_ptr->violation_value();
             total_violation += violation_diff;
 
             if (violation_diff < 0) {
@@ -1142,20 +1171,6 @@ class Model {
 
             int id    = constraint_ptr->id();
             int index = constraint_ptr->flat_index();
-            /*
-                        std::cout
-                            << constraint_ptr->name() << " " << violation_diff
-               << "  "
-                            << constraint_ptr->evaluate_violation(a_MOVE) << " "
-                            << constraint_ptr->violation_value() << " "
-                            <<
-               a_LOCAL_PENALTY_COEFFICIENT_PROXIES[id].flat_indexed_values(
-                                   index)
-                            << " "
-                            <<
-               a_GLOBAL_PENALTY_COEFFICIENT_PROXIES[id].flat_indexed_values(
-                                   index)
-                            << std::endl;*/
 
             local_penalty +=
                 violation_diff *
@@ -1166,12 +1181,6 @@ class Model {
                 a_GLOBAL_PENALTY_COEFFICIENT_PROXIES[id].flat_indexed_values(
                     index);
         }
-
-        /*
-                std::cout << score.local_penalty << " " << local_penalty << " "
-                          << score.global_penalty << " " << global_penalty <<
-           std::endl;
-                          */
 
         double objective = m_objective.evaluate(a_MOVE) * this->sign();
         double objective_improvement =
@@ -1207,9 +1216,9 @@ class Model {
     generate_variable_parameter_proxies(const T_Value a_VALUE) const {
         std::vector<ValueProxy<T_Value>> variable_parameter_proxies;
 
-        for (const auto &variable_proxy : m_variable_proxies) {
-            ValueProxy<T_Value> variable_parameter_proxy(
-                variable_proxy.id(), variable_proxy.shape());
+        for (const auto &proxy : m_variable_proxies) {
+            ValueProxy<T_Value> variable_parameter_proxy(proxy.id(),
+                                                         proxy.shape());
             variable_parameter_proxy.fill(a_VALUE);
             variable_parameter_proxies.push_back(variable_parameter_proxy);
         }
@@ -1222,9 +1231,9 @@ class Model {
     generate_expression_parameter_proxies(const T_Value a_VALUE) const {
         std::vector<ValueProxy<T_Value>> expression_parameter_proxies;
 
-        for (const auto &expression_proxy : m_expression_proxies) {
-            ValueProxy<T_Value> expression_parameter_proxy(
-                expression_proxy.id(), expression_proxy.shape());
+        for (const auto &proxy : m_expression_proxies) {
+            ValueProxy<T_Value> expression_parameter_proxy(proxy.id(),
+                                                           proxy.shape());
             expression_parameter_proxy.fill(a_VALUE);
             expression_parameter_proxies.push_back(expression_parameter_proxy);
         }
@@ -1237,9 +1246,9 @@ class Model {
     generate_constraint_parameter_proxies(const T_Value a_VALUE) const {
         std::vector<ValueProxy<T_Value>> constraint_parameter_proxies;
 
-        for (const auto &constraint_proxy : m_constraint_proxies) {
-            ValueProxy<T_Value> constraint_parameter_proxy(
-                constraint_proxy.id(), constraint_proxy.shape());
+        for (const auto &proxy : m_constraint_proxies) {
+            ValueProxy<T_Value> constraint_parameter_proxy(proxy.id(),
+                                                           proxy.shape());
             constraint_parameter_proxy.fill(a_VALUE);
             constraint_parameter_proxies.push_back(constraint_parameter_proxy);
         }
