@@ -48,6 +48,8 @@ TEST_F(TestVariable, initialize) {
     EXPECT_EQ(false, variable.has_bounds());
     EXPECT_EQ(cppmh::model::VariableSense::Integer, variable.sense());
     EXPECT_EQ(nullptr, variable.selection_ptr());
+    EXPECT_EQ(0,
+              static_cast<int>(variable.contributive_constraint_ptrs().size()));
 }
 
 /*****************************************************************************/
@@ -224,12 +226,99 @@ TEST_F(TestVariable, has_bounds) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, set_selection_ptr) {
-    /// This method is tested in setup_sense().
+    auto variable_0 = cppmh::model::Variable<int, double>::create_instance();
+    auto variable_1 = cppmh::model::Variable<int, double>::create_instance();
+    variable_0.set_bound(0, 1);
+    variable_1.set_bound(0, 1);
+    cppmh::model::Selection<int, double> selection;
+    variable_0.set_selection_ptr(&selection);
+    variable_1.set_selection_ptr(&selection);
+
+    variable_0.select();
+    EXPECT_EQ(&variable_0, variable_0.selection_ptr()->selected_variable_ptr);
+    EXPECT_EQ(&variable_0, variable_1.selection_ptr()->selected_variable_ptr);
+
+    variable_1.select();
+    EXPECT_EQ(&variable_1, variable_0.selection_ptr()->selected_variable_ptr);
+    EXPECT_EQ(&variable_1, variable_1.selection_ptr()->selected_variable_ptr);
 }
 
 /*****************************************************************************/
 TEST_F(TestVariable, selection_ptr) {
-    /// This method is tested in setup_sense().
+    /// This method is tested in set_selection_ptr().
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, select) {
+    /// This method is tested in set_selection_ptr().
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, register_contributive_constraint_ptr) {
+    auto variable = cppmh::model::Variable<int, double>::create_instance();
+    auto constraint_0 =
+        cppmh::model::Constraint<int, double>::create_instance();
+    auto constraint_1 =
+        cppmh::model::Constraint<int, double>::create_instance();
+
+    EXPECT_EQ(0,
+              static_cast<int>(variable.contributive_constraint_ptrs().size()));
+    EXPECT_EQ(false,
+              variable.contributive_constraint_ptrs().find(&constraint_0) !=
+                  variable.contributive_constraint_ptrs().end());
+    EXPECT_EQ(false,
+              variable.contributive_constraint_ptrs().find(&constraint_1) !=
+                  variable.contributive_constraint_ptrs().end());
+
+    variable.register_contributive_constraint_ptr(&constraint_0);
+    EXPECT_EQ(1,
+              static_cast<int>(variable.contributive_constraint_ptrs().size()));
+    EXPECT_EQ(true,
+              variable.contributive_constraint_ptrs().find(&constraint_0) !=
+                  variable.contributive_constraint_ptrs().end());
+    EXPECT_EQ(false,
+              variable.contributive_constraint_ptrs().find(&constraint_1) !=
+                  variable.contributive_constraint_ptrs().end());
+
+    variable.register_contributive_constraint_ptr(&constraint_1);
+    EXPECT_EQ(2,
+              static_cast<int>(variable.contributive_constraint_ptrs().size()));
+    EXPECT_EQ(true,
+              variable.contributive_constraint_ptrs().find(&constraint_0) !=
+                  variable.contributive_constraint_ptrs().end());
+    EXPECT_EQ(true,
+              variable.contributive_constraint_ptrs().find(&constraint_1) !=
+                  variable.contributive_constraint_ptrs().end());
+
+    variable.register_contributive_constraint_ptr(&constraint_1);
+    EXPECT_EQ(2,
+              static_cast<int>(variable.contributive_constraint_ptrs().size()));
+    EXPECT_EQ(true,
+              variable.contributive_constraint_ptrs().find(&constraint_0) !=
+                  variable.contributive_constraint_ptrs().end());
+    EXPECT_EQ(true,
+              variable.contributive_constraint_ptrs().find(&constraint_1) !=
+                  variable.contributive_constraint_ptrs().end());
+
+    variable.reset_contributive_constraint_ptrs();
+    EXPECT_EQ(0,
+              static_cast<int>(variable.contributive_constraint_ptrs().size()));
+    EXPECT_EQ(false,
+              variable.contributive_constraint_ptrs().find(&constraint_0) !=
+                  variable.contributive_constraint_ptrs().end());
+    EXPECT_EQ(false,
+              variable.contributive_constraint_ptrs().find(&constraint_1) !=
+                  variable.contributive_constraint_ptrs().end());
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, reset_contributive_constraint_ptrs) {
+    /// This method is tested in register_contributive_constraint_ptr().
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, contributive_constraint_ptrs) {
+    /// This method is tested in register_contributive_constraint_ptr().
 }
 
 /*****************************************************************************/
