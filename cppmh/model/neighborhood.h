@@ -322,7 +322,9 @@ class Neighborhood {
 
         for (auto i = 0; i < selection_variable_ptrs_size; i++) {
             m_selection_moves[i].contributive_constraint_ptrs =
-                m_selection_variable_ptrs[i]->contributive_constraint_ptrs();
+                m_selection_variable_ptrs[i]
+                    ->selection_ptr()
+                    ->contributive_constraint_ptrs;
         }
 
         auto selection_move_updater = [this,

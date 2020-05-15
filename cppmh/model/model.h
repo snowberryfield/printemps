@@ -514,6 +514,11 @@ class Model {
         /**
          * This methods does not show information for the standard output.
          **/
+        for (auto &&proxy : m_variable_proxies) {
+            for (auto &&variable : proxy.flat_indexed_variables()) {
+                variable.reset_contributive_constraint_ptrs();
+            }
+        }
         for (auto &&proxy : m_constraint_proxies) {
             for (auto &&constraint : proxy.flat_indexed_constraints()) {
                 for (auto &&sensitivity :
@@ -1041,12 +1046,12 @@ class Model {
             &a_LOCAL_PENALTY_COEFFICIENT_PROXIES,
         const std::vector<ValueProxy<double>>
             &a_GLOBAL_PENALTY_COEFFICIENT_PROXIES) noexcept {
-        double local_penalty  = 0.0;
-        double global_penalty = 0.0;
+        double total_violation = 0.0;
+        double local_penalty   = 0.0;
+        double global_penalty  = 0.0;
 
         int  constraint_proxies_size  = m_constraint_proxies.size();
         bool is_constraint_improvable = false;
-        bool is_feasible              = true;
 
         for (auto i = 0; i < constraint_proxies_size; i++) {
             auto &constraints =
@@ -1062,10 +1067,7 @@ class Model {
                 if (violation < constraints[j].violation_value()) {
                     is_constraint_improvable = true;
                 }
-
-                if (violation > 0) {
-                    is_feasible = false;
-                }
+                total_violation += violation;
 
                 local_penalty +=
                     a_LOCAL_PENALTY_COEFFICIENT_PROXIES[i].flat_indexed_values(
@@ -1089,6 +1091,7 @@ class Model {
 
         score.objective                  = objective;
         score.objective_improvement      = objective_improvement;
+        score.total_violation            = total_violation;
         score.local_penalty              = local_penalty;
         score.global_penalty             = global_penalty;
         score.local_augmented_objective  = local_augmented_objective;
@@ -1102,7 +1105,98 @@ class Model {
             score.is_objective_improvable = false;
         }
         score.is_constraint_improvable = is_constraint_improvable;
-        score.is_feasible              = is_feasible;
+        score.is_feasible              = !(total_violation > 0);
+
+        return score;
+    }
+
+    /*************************************************************************/
+    inline SolutionScore evaluate(
+        const Move<T_Variable, T_Expression> &a_MOVE,
+        const SolutionScore &                 a_CURRENT_SCORE,
+        const std::vector<ValueProxy<double>>
+            &a_LOCAL_PENALTY_COEFFICIENT_PROXIES,
+        const std::vector<ValueProxy<double>>
+            &a_GLOBAL_PENALTY_COEFFICIENT_PROXIES) noexcept {
+        SolutionScore score = a_CURRENT_SCORE;
+
+        bool is_constraint_improvable = false;
+
+        double total_violation = score.total_violation;
+        double local_penalty   = score.local_penalty;
+        double global_penalty  = score.global_penalty;
+
+        // 実行可能性チェック
+        // std::cout << "start" << std::endl;
+        for (auto &&constraint_ptr : a_MOVE.contributive_constraint_ptrs) {
+            if (!constraint_ptr->is_enabled()) {
+                continue;
+            }
+            auto violation_diff = constraint_ptr->evaluate_violation(a_MOVE) -
+                                  constraint_ptr->violation_value();
+            total_violation += violation_diff;
+
+            if (violation_diff < 0) {
+                is_constraint_improvable = true;
+            }
+
+            int id    = constraint_ptr->id();
+            int index = constraint_ptr->flat_index();
+            /*
+                        std::cout
+                            << constraint_ptr->name() << " " << violation_diff
+               << "  "
+                            << constraint_ptr->evaluate_violation(a_MOVE) << " "
+                            << constraint_ptr->violation_value() << " "
+                            <<
+               a_LOCAL_PENALTY_COEFFICIENT_PROXIES[id].flat_indexed_values(
+                                   index)
+                            << " "
+                            <<
+               a_GLOBAL_PENALTY_COEFFICIENT_PROXIES[id].flat_indexed_values(
+                                   index)
+                            << std::endl;*/
+
+            local_penalty +=
+                violation_diff *
+                a_LOCAL_PENALTY_COEFFICIENT_PROXIES[id].flat_indexed_values(
+                    index);
+            global_penalty +=
+                violation_diff *
+                a_GLOBAL_PENALTY_COEFFICIENT_PROXIES[id].flat_indexed_values(
+                    index);
+        }
+
+        /*
+                std::cout << score.local_penalty << " " << local_penalty << " "
+                          << score.global_penalty << " " << global_penalty <<
+           std::endl;
+                          */
+
+        double objective = m_objective.evaluate(a_MOVE) * this->sign();
+        double objective_improvement =
+            (m_objective.value() - objective) * this->sign();
+
+        double local_augmented_objective  = objective + local_penalty;
+        double global_augmented_objective = objective + global_penalty;
+
+        score.objective                  = objective;
+        score.objective_improvement      = objective_improvement;
+        score.total_violation            = total_violation;
+        score.local_penalty              = local_penalty;
+        score.global_penalty             = global_penalty;
+        score.local_augmented_objective  = local_augmented_objective;
+        score.global_augmented_objective = global_augmented_objective;
+
+        if (m_is_minimization && objective < m_objective.value()) {
+            score.is_objective_improvable = true;
+        } else if (!m_is_minimization && objective < -m_objective.value()) {
+            score.is_objective_improvable = true;
+        } else {
+            score.is_objective_improvable = false;
+        }
+        score.is_constraint_improvable = is_constraint_improvable;
+        score.is_feasible              = !(total_violation > 0);
 
         return score;
     }

@@ -21,7 +21,7 @@ struct Selection {
     Variable<T_Variable, T_Expression> *              selected_variable_ptr;
     Constraint<T_Variable, T_Expression> *            constraint_ptr;
 
-    std::set<Constraint<T_Variable, T_Expression> *>
+    std::unordered_set<Constraint<T_Variable, T_Expression> *>
         contributive_constraint_ptrs;
 
     /*************************************************************************/

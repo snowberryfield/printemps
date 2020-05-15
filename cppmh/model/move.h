@@ -7,7 +7,7 @@
 #define CPPMH_MODEL_MOVE_H__
 
 #include <vector>
-#include <set>
+#include <unordered_set>
 
 namespace cppmh {
 namespace model {
@@ -36,7 +36,7 @@ template <class T_Variable, class T_Expression>
 struct Move {
     std::vector<Alteration<T_Variable, T_Expression>> alterations;
     MoveSense                                         sense;
-    std::set<Constraint<T_Variable, T_Expression> *>
+    std::unordered_set<Constraint<T_Variable, T_Expression> *>
         contributive_constraint_ptrs;
     Move(void) : sense(MoveSense::UserDefined) {
         ;

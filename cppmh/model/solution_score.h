@@ -15,6 +15,7 @@ namespace model {
 struct SolutionScore {
     double objective;
     double objective_improvement;
+    double total_violation;
 
     double local_penalty;
     double global_penalty;
@@ -29,6 +30,7 @@ struct SolutionScore {
     SolutionScore(void)
         : objective(0.0),
           objective_improvement(0.0),
+          total_violation(0.0),
           local_penalty(0.0),
           global_penalty(0.0),
           local_augmented_objective(0.0),
