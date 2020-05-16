@@ -55,8 +55,7 @@ TEST_F(TestModel, initialize) {
     EXPECT_EQ(true, model.constraint_names().empty());
 
     EXPECT_EQ(false, model.is_defined_objective());
-    EXPECT_EQ(false, model.has_nonlinear_constraint());
-    EXPECT_EQ(false, model.has_nonlinear_objective());
+    EXPECT_EQ(true, model.is_enabled_fast_evaluation());
     EXPECT_EQ(true, model.is_minimization());
     EXPECT_EQ(1.0, model.sign());
 }
@@ -360,8 +359,6 @@ TEST_F(TestModel, minimize_arg_function) {
     EXPECT_EQ(0, model.objective().expression().constant_value());
     EXPECT_EQ(false, model.objective().is_linear());
 
-    EXPECT_EQ(true, model.has_nonlinear_objective());
-
     for (auto&& element : x.flat_indexed_variables()) {
         element = 1;
     }
@@ -444,8 +441,6 @@ TEST_F(TestModel, maximize_arg_function) {
     EXPECT_EQ(0, model.objective().expression().constant_value());
     EXPECT_EQ(false, model.objective().is_linear());
 
-    EXPECT_EQ(true, model.has_nonlinear_objective());
-
     for (auto&& element : x.flat_indexed_variables()) {
         element = 1;
     }
@@ -513,13 +508,8 @@ TEST_F(TestModel, is_defined_objective) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModel, has_nonlinear_constraint) {
-    /// This method is tested in setup_has_nonlinear_constraint().
-}
-
-/*****************************************************************************/
-TEST_F(TestModel, has_nonlinear_objective) {
-    /// This method is tested in minimize_arg_function() and so on.
+TEST_F(TestModel, is_enabled_fast_evaluation) {
+    /// This method is tested in setup_is_enabled_fast_evaluation().
 }
 
 /*****************************************************************************/
@@ -558,6 +548,46 @@ TEST_F(TestModel, neighborhood) {
 }
 
 /*****************************************************************************/
+TEST_F(TestModel, setup) {
+    /// This method is tested in the following submethods.
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, verify_problem) {
+    /// No decision variables.
+    {
+        cppmh::model::Model<int, double> model;
+        ASSERT_THROW(model.verify_problem(false), std::logic_error);
+    }
+
+    /// No constraint functions.
+    {
+        cppmh::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x");
+        model.minimize(x);
+        model.verify_problem(false);
+    }
+
+    /// No objective function.
+    {
+        cppmh::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x");
+        model.create_constraint("g", x == 1);
+        model.verify_problem(false);
+    }
+
+    /// No constraint functions and no objective function
+    {
+        cppmh::model::Model<int, double> model;
+
+        [[maybe_unused]] auto& x = model.create_variable("x");
+        ASSERT_THROW(model.verify_problem(false), std::logic_error);
+    }
+}
+
+/*****************************************************************************/
 TEST_F(TestModel, setup_variable_related_constraints) {
     cppmh::model::Model<int, double> model;
 
@@ -592,11 +622,6 @@ TEST_F(TestModel, setup_variable_related_constraints) {
                                   y(i, j).related_constraint_ptrs().end());
         }
     }
-}
-
-/*****************************************************************************/
-TEST_F(TestModel, setup_has_nonlinear_constraint) {
-    /// This method is tested in test_neighborhood.h
 }
 
 /*****************************************************************************/
@@ -644,53 +669,89 @@ TEST_F(TestModel, setup_unique_name) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModel, setup_has_fixed_variables) {
-    /// This method is tested in test_neighborhood.h
-}
-
-/*****************************************************************************/
-TEST_F(TestModel, verify_problem) {
-    /// No decision variables.
-    {
-        cppmh::model::Model<int, double> model;
-        ASSERT_THROW(model.verify_problem(false), std::logic_error);
-    }
-
-    /// No constraint functions.
+TEST_F(TestModel, setup_is_enabled_fast_evaluation) {
+    /// Constraint: linear
+    /// Objective: linear
+    /// User-defined neighborhood: None
     {
         cppmh::model::Model<int, double> model;
 
         auto& x = model.create_variable("x");
+
+        model.create_constraint("g", x <= 0);
         model.minimize(x);
-        model.verify_problem(false);
+
+        model.setup_is_enabled_fast_evaluation();
+
+        EXPECT_EQ(true, model.is_enabled_fast_evaluation());
     }
 
-    /// No objective function.
+    /// Constraint: nonlinear (user-defined lambda)
+    /// Objective: linear
+    /// User-defined neighborhood: None
     {
         cppmh::model::Model<int, double> model;
 
         auto& x = model.create_variable("x");
-        model.create_constraint("g", x == 1);
-        model.verify_problem(false);
+
+        std::function<double(const cppmh::model::Move<int, double>&)> g =
+            [&x](const cppmh::model::Move<int, double>& a_MOVE) {
+                return x.evaluate(a_MOVE);
+            };
+
+        model.create_constraint("g", g <= 0);
+        model.minimize(x);
+
+        model.setup_is_enabled_fast_evaluation();
+
+        EXPECT_EQ(false, model.is_enabled_fast_evaluation());
     }
 
-    /// No constraint functions and no objective function
+    /// Constraint: linear
+    /// Objective: nonlinear (user-defined lambda)
+    /// User-defined neighborhood: None
     {
         cppmh::model::Model<int, double> model;
 
-        [[maybe_unused]] auto& x = model.create_variable("x");
-        ASSERT_THROW(model.verify_problem(false), std::logic_error);
+        auto& x = model.create_variable("x");
+
+        std::function<double(const cppmh::model::Move<int, double>&)> f =
+            [&x](const cppmh::model::Move<int, double>& a_MOVE) {
+                return x.evaluate(a_MOVE);
+            };
+
+        model.create_constraint("g", x <= 0);
+        model.minimize(f);
+
+        model.setup_is_enabled_fast_evaluation();
+
+        EXPECT_EQ(false, model.is_enabled_fast_evaluation());
+    }
+
+    /// Constraint: linear
+    /// Objective: linear
+    /// User-defined neighborhood: Yes
+    {
+        cppmh::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x");
+
+        model.create_constraint("g", x <= 0);
+        model.minimize(x);
+
+        auto move_updater =
+            [&x](std::vector<cppmh::model::Move<int, double>>* a_moves) { ; };
+
+        model.neighborhood().set_user_defined_move_updater(move_updater);
+        model.setup_is_enabled_fast_evaluation();
+
+        EXPECT_EQ(false, model.is_enabled_fast_evaluation());
     }
 }
 
 /*****************************************************************************/
 TEST_F(TestModel, setup_default_neighborhood) {
     /// This method is tested in test_neighborhood.h
-}
-
-/*****************************************************************************/
-TEST_F(TestModel, setup_fixed_sensitivities) {
-    /// This method is tested in test_expression.h
 }
 
 /*****************************************************************************/
@@ -705,7 +766,6 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
         x(0).fix_by(2);
 
         model.setup_default_neighborhood(false, false);
-        model.setup_has_fixed_variables(false);
 
         ASSERT_THROW(
             model.verify_and_correct_selection_variables_initial_values(true,
@@ -722,7 +782,6 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
         x(0).fix_by(2);
 
         model.setup_default_neighborhood(false, false);
-        model.setup_has_fixed_variables(false);
 
         ASSERT_THROW(
             model.verify_and_correct_selection_variables_initial_values(false,
@@ -739,7 +798,6 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
         x(0).fix_by(1);
 
         model.setup_default_neighborhood(false, false);
-        model.setup_has_fixed_variables(false);
 
         model.verify_and_correct_selection_variables_initial_values(true,
                                                                     false);
@@ -755,7 +813,6 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
         x(0).fix_by(1);
 
         model.setup_default_neighborhood(false, false);
-        model.setup_has_fixed_variables(false);
 
         model.verify_and_correct_selection_variables_initial_values(false,
                                                                     false);
@@ -772,7 +829,6 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
         x(1).fix_by(1);
 
         model.setup_default_neighborhood(false, false);
-        model.setup_has_fixed_variables(false);
 
         ASSERT_THROW(
             model.verify_and_correct_selection_variables_initial_values(true,
@@ -790,7 +846,6 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
         x(1).fix_by(1);
 
         model.setup_default_neighborhood(false, false);
-        model.setup_has_fixed_variables(false);
 
         ASSERT_THROW(
             model.verify_and_correct_selection_variables_initial_values(false,
@@ -808,7 +863,6 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
         x(1) = 3;
 
         model.setup_default_neighborhood(false, false);
-        model.setup_has_fixed_variables(false);
 
         model.verify_and_correct_selection_variables_initial_values(true,
                                                                     false);
@@ -827,7 +881,6 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
         x(1) = 3;
 
         model.setup_default_neighborhood(false, false);
-        model.setup_has_fixed_variables(false);
 
         ASSERT_THROW(
             model.verify_and_correct_selection_variables_initial_values(false,
@@ -843,7 +896,6 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
         model.create_constraint("g", x.selection());
 
         model.setup_default_neighborhood(false, false);
-        model.setup_has_fixed_variables(false);
 
         model.verify_and_correct_selection_variables_initial_values(true,
                                                                     false);
@@ -862,7 +914,6 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
         model.create_constraint("g", x.selection());
 
         model.setup_default_neighborhood(false, false);
-        model.setup_has_fixed_variables(false);
 
         ASSERT_THROW(
             model.verify_and_correct_selection_variables_initial_values(false,
@@ -879,7 +930,6 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
         x(0) = 1;
 
         model.setup_default_neighborhood(false, false);
-        model.setup_has_fixed_variables(false);
 
         model.verify_and_correct_selection_variables_initial_values(true,
                                                                     false);
@@ -896,7 +946,6 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
         x(0) = 1;
 
         model.setup_default_neighborhood(false, false);
-        model.setup_has_fixed_variables(false);
 
         model.verify_and_correct_selection_variables_initial_values(false,
                                                                     false);
@@ -914,7 +963,6 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
         x(1) = 1;
 
         model.setup_default_neighborhood(false, false);
-        model.setup_has_fixed_variables(false);
 
         model.verify_and_correct_selection_variables_initial_values(true,
                                                                     false);
@@ -933,7 +981,6 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
         x(1) = 1;
 
         model.setup_default_neighborhood(false, false);
-        model.setup_has_fixed_variables(false);
 
         ASSERT_THROW(
             model.verify_and_correct_selection_variables_initial_values(false,
@@ -951,7 +998,6 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
         x(1).fix_by(1);
 
         model.setup_default_neighborhood(false, false);
-        model.setup_has_fixed_variables(false);
 
         model.verify_and_correct_selection_variables_initial_values(true,
                                                                     false);
@@ -969,7 +1015,6 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
         x(1).fix_by(1);
 
         model.setup_default_neighborhood(false, false);
-        model.setup_has_fixed_variables(false);
 
         ASSERT_THROW(
             model.verify_and_correct_selection_variables_initial_values(false,
@@ -988,7 +1033,6 @@ TEST_F(TestModel, verify_and_correct_binary_variables_initial_values) {
         x(0).fix_by(2);
 
         model.setup_default_neighborhood(false, false);
-        model.setup_has_fixed_variables(false);
 
         ASSERT_THROW(model.verify_and_correct_binary_variables_initial_values(
                          true, false),
@@ -1003,7 +1047,6 @@ TEST_F(TestModel, verify_and_correct_binary_variables_initial_values) {
         x(0).fix_by(-1);
 
         model.setup_default_neighborhood(false, false);
-        model.setup_has_fixed_variables(false);
 
         ASSERT_THROW(model.verify_and_correct_binary_variables_initial_values(
                          false, false),
@@ -1019,7 +1062,6 @@ TEST_F(TestModel, verify_and_correct_binary_variables_initial_values) {
         x(1)    = -1;
 
         model.setup_default_neighborhood(false, false);
-        model.setup_has_fixed_variables(false);
 
         model.verify_and_correct_binary_variables_initial_values(true, false);
         EXPECT_EQ(1, x(0).value());
@@ -1035,7 +1077,6 @@ TEST_F(TestModel, verify_and_correct_binary_variables_initial_values) {
         x(1)    = -1;
 
         model.setup_default_neighborhood(false, false);
-        model.setup_has_fixed_variables(false);
 
         ASSERT_THROW(model.verify_and_correct_binary_variables_initial_values(
                          false, false),
@@ -1053,7 +1094,6 @@ TEST_F(TestModel, verify_and_correct_integer_variables_initial_values) {
         x(0).fix_by(11);
 
         model.setup_default_neighborhood(false, false);
-        model.setup_has_fixed_variables(false);
 
         ASSERT_THROW(model.verify_and_correct_integer_variables_initial_values(
                          true, false),
@@ -1068,7 +1108,6 @@ TEST_F(TestModel, verify_and_correct_integer_variables_initial_values) {
         x(0).fix_by(-11);
 
         model.setup_default_neighborhood(false, false);
-        model.setup_has_fixed_variables(false);
 
         ASSERT_THROW(model.verify_and_correct_integer_variables_initial_values(
                          false, false),
@@ -1084,7 +1123,6 @@ TEST_F(TestModel, verify_and_correct_integer_variables_initial_values) {
         x(1)    = -11;
 
         model.setup_default_neighborhood(false, false);
-        model.setup_has_fixed_variables(false);
 
         model.verify_and_correct_integer_variables_initial_values(true, false);
         EXPECT_EQ(10, x(0).value());
@@ -1100,12 +1138,16 @@ TEST_F(TestModel, verify_and_correct_integer_variables_initial_values) {
         x(1)    = -11;
 
         model.setup_default_neighborhood(false, false);
-        model.setup_has_fixed_variables(false);
 
         ASSERT_THROW(model.verify_and_correct_integer_variables_initial_values(
                          false, false),
                      std::logic_error);
     }
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, setup_fixed_sensitivities) {
+    /// This method is tested in test_expression.h
 }
 
 /*****************************************************************************/

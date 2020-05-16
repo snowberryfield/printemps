@@ -61,7 +61,6 @@ TEST_F(TestNeighborhood, setup_has_fixed_variables) {
         [[maybe_unused]] auto& y = model.create_variable("y", 0, 1);
 
         model.setup_default_neighborhood(false, false);
-        model.setup_has_fixed_variables(false);
         EXPECT_EQ(false, model.neighborhood().has_fixed_variables());
     }
 
@@ -73,7 +72,6 @@ TEST_F(TestNeighborhood, setup_has_fixed_variables) {
         x.fix_by(1);
 
         model.setup_default_neighborhood(false, false);
-        model.setup_has_fixed_variables(false);
         EXPECT_EQ(true, model.neighborhood().has_fixed_variables());
     }
 
@@ -85,7 +83,6 @@ TEST_F(TestNeighborhood, setup_has_fixed_variables) {
         y.fix_by(1);
 
         model.setup_default_neighborhood(false, false);
-        model.setup_has_fixed_variables(false);
         EXPECT_EQ(true, model.neighborhood().has_fixed_variables());
     }
 
@@ -100,7 +97,6 @@ TEST_F(TestNeighborhood, setup_has_fixed_variables) {
         y.unfix();
 
         model.setup_default_neighborhood(false, false);
-        model.setup_has_fixed_variables(false);
         EXPECT_EQ(false, model.neighborhood().has_fixed_variables());
     }
 
@@ -112,7 +108,6 @@ TEST_F(TestNeighborhood, setup_has_fixed_variables) {
         [[maybe_unused]] auto& y = model.create_variables("y", 10, 0, 1);
 
         model.setup_default_neighborhood(false, false);
-        model.setup_has_fixed_variables(false);
         EXPECT_EQ(false, model.neighborhood().has_fixed_variables());
     }
 
@@ -124,7 +119,6 @@ TEST_F(TestNeighborhood, setup_has_fixed_variables) {
         x(0).fix_by(1);
 
         model.setup_default_neighborhood(false, false);
-        model.setup_has_fixed_variables(false);
         EXPECT_EQ(true, model.neighborhood().has_fixed_variables());
     }
 
@@ -136,7 +130,6 @@ TEST_F(TestNeighborhood, setup_has_fixed_variables) {
         y(0).fix_by(1);
 
         model.setup_default_neighborhood(false, false);
-        model.setup_has_fixed_variables(false);
         EXPECT_EQ(true, model.neighborhood().has_fixed_variables());
     }
 
@@ -151,7 +144,6 @@ TEST_F(TestNeighborhood, setup_has_fixed_variables) {
         y(0).unfix();
 
         model.setup_default_neighborhood(false, false);
-        model.setup_has_fixed_variables(false);
         EXPECT_EQ(false, model.neighborhood().has_fixed_variables());
     }
 
@@ -163,7 +155,6 @@ TEST_F(TestNeighborhood, setup_has_fixed_variables) {
         [[maybe_unused]] auto& y = model.create_variables("y", {10, 10}, 0, 1);
 
         model.setup_default_neighborhood(false, false);
-        model.setup_has_fixed_variables(false);
         EXPECT_EQ(false, model.neighborhood().has_fixed_variables());
     }
 
@@ -175,7 +166,6 @@ TEST_F(TestNeighborhood, setup_has_fixed_variables) {
         x(0, 0).fix_by(1);
 
         model.setup_default_neighborhood(false, false);
-        model.setup_has_fixed_variables(false);
         EXPECT_EQ(true, model.neighborhood().has_fixed_variables());
     }
 
@@ -187,7 +177,6 @@ TEST_F(TestNeighborhood, setup_has_fixed_variables) {
         y(0, 0).fix_by(1);
 
         model.setup_default_neighborhood(false, false);
-        model.setup_has_fixed_variables(false);
         EXPECT_EQ(true, model.neighborhood().has_fixed_variables());
     }
 
@@ -202,8 +191,6 @@ TEST_F(TestNeighborhood, setup_has_fixed_variables) {
         y(0, 0).unfix();
 
         model.setup_default_neighborhood(false, false);
-        model.setup_has_fixed_variables(false);
-
         EXPECT_EQ(false, model.neighborhood().has_fixed_variables());
     }
 }
@@ -252,7 +239,6 @@ TEST_F(TestNeighborhood, categorize_variables_and_constraints) {
     model.create_constraint("c6", x4.selection());
 
     model.setup_default_neighborhood(false, false);
-    model.setup_has_fixed_variables(false);
 
     EXPECT_EQ(5, static_cast<int>(model.neighborhood().selections().size()));
 
@@ -537,8 +523,6 @@ TEST_F(TestNeighborhood, setup_move_updater) {
     y(0, 2) = 10;
 
     model.setup_default_neighborhood(false, false);
-    model.setup_has_fixed_variables(false);
-
     EXPECT_EQ(false, model.neighborhood().is_enabled_user_defined_move());
 
     /// Set initial values for selection variables.
@@ -694,8 +678,7 @@ TEST_F(TestNeighborhood, set_user_defined_move_updater) {
     model.neighborhood().disable_binary_move();
     model.neighborhood().disable_integer_move();
 
-    model.setup_has_fixed_variables(false);
-
+    model.setup_default_neighborhood(false, false);
     model.neighborhood().update_moves();
 
     EXPECT_EQ(false, model.neighborhood().is_enabled_selection_move());
@@ -728,7 +711,6 @@ TEST_F(TestNeighborhood, shuffle_moves) {
     [[maybe_unused]] auto& c = model.create_constraint("c", x.selection());
 
     model.setup_default_neighborhood(false, false);
-    model.setup_has_fixed_variables(false);
     model.neighborhood().update_moves();
 
     auto         before_move_ptrs = model.neighborhood().move_ptrs();

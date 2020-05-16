@@ -131,15 +131,15 @@ LocalSearchResult<T_Variable, T_Expression> solve(
 
         for (const auto& move_ptr : move_ptrs) {
             model::SolutionScore trial_solution_score;
-            if (model->has_nonlinear_constraint()) {
-                trial_solution_score = model->evaluate(
-                    *move_ptr, local_penalty_coefficient_proxies,
-                    global_penalty_coefficient_proxies);
-            } else {
+            if (model->is_enabled_fast_evaluation()) {
                 trial_solution_score =
                     model->evaluate(*move_ptr, solution_score,
                                     local_penalty_coefficient_proxies,
                                     global_penalty_coefficient_proxies);
+            } else {
+                trial_solution_score = model->evaluate(
+                    *move_ptr, local_penalty_coefficient_proxies,
+                    global_penalty_coefficient_proxies);
             }
 
             number_of_checked_moved++;
