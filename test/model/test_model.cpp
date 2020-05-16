@@ -57,6 +57,7 @@ TEST_F(TestModel, initialize) {
     EXPECT_EQ(false, model.is_defined_objective());
     EXPECT_EQ(false, model.has_nonlinear_constraint());
     EXPECT_EQ(false, model.has_nonlinear_objective());
+    EXPECT_EQ(true, model.is_enabled_fast_evaluation());
     EXPECT_EQ(true, model.is_minimization());
     EXPECT_EQ(1.0, model.sign());
 }
@@ -596,6 +597,11 @@ TEST_F(TestModel, setup_variable_related_constraints) {
 
 /*****************************************************************************/
 TEST_F(TestModel, setup_has_nonlinear_constraint) {
+    /// This method is tested in test_neighborhood.h
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, setup_is_enabled_fast_evaluation) {
     /// This method is tested in test_neighborhood.h
 }
 
