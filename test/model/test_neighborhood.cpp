@@ -199,53 +199,63 @@ TEST_F(TestNeighborhood, setup_has_fixed_variables) {
 TEST_F(TestNeighborhood, categorize_variables_and_constraints) {
     cppmh::model::Model<int, double> model;
 
-    auto&                  x0 = model.create_variables("x0", {10, 10}, 0, 1);
-    auto&                  x1 = model.create_variables("x1", {20, 20}, 0, 1);
-    auto&                  x2 = model.create_variables("x2", 1, 0, 1);
-    auto&                  x3 = model.create_variables("x3", 2, 0, 1);
-    auto&                  x4 = model.create_variables("x4", 3, 0, 1);
-    [[maybe_unused]] auto& y  = model.create_variables("y", {30, 30}, -10, 10);
+    auto& x0 = model.create_variables("x0", {10, 10}, 0, 1);
+    auto& x1 = model.create_variables("x1", {20, 20}, 0, 1);
+    auto& x2 = model.create_variables("x2", 2, 0, 1);
 
-    /// This constraint is parsed as a selection with no overlap. The
-    /// corresponding constraint will be disabled.
+    auto& y = model.create_variables("y", {30, 30}, -10, 10);
+
+    /**
+     * Selection constraint with 10 decision variables. The priority of this
+     * constraint is the third, and it will be employed for a swap
+     * neighborhood.
+     */
     model.create_constraint("c0", x0.selection({0, cppmh::model::Range::All}));
 
-    /// This constraint beyond two variable proxies is parsed as a selection
-    /// with no overlap. The corresponding constraint will be disabled.
+    /**
+     * Selection constraint with 32 decision variables. The priority of this
+     * constraint is the second, and it will NOT be employed for a swap
+     * neighborhood because higher-priority constraint c1 covers x1.
+     */
     model.create_constraint(
         "c1", (x0.sum({1, cppmh::model::Range::All}) +
-               x1.sum({1, cppmh::model::Range::All}) + x3(0) + x4(0)) == 1);
+               x1.sum({1, cppmh::model::Range::All}) + x2(0)) == 1);
 
-    /// This constraint is parsed as a selection 20 overlap variables. The
-    /// corresponding constraint will be still enabled.
-    model.create_constraint("c2", x0.selection());
+    /**
+     * Selection constraint with 400 decision variables. The priority of this
+     * constraint is the first, and it will be employed for a swap
+     * neighborhood.
+     */
+    model.create_constraint("c2", x1.selection());
 
-    /// This constraint is parsed as a selection 20 overlap variables. The
-    /// corresponding constraint will be still enabled.
-    model.create_constraint("c3", x1.selection());
-
-    /// This constraint is not parsed as a selection because the number of
-    /// covered variables is 1. The corresponding constraint will be still
-    /// enabled.
-    model.create_constraint("c4", x2.selection());
-
-    /// This constraint is not parsed as a selection because the number of
-    /// covered variables is 1 due to overlap. The corresponding constraint will
-    /// be still enabled.
-    model.create_constraint("c5", x3.selection());
-
-    /// This constraint is parsed as a selection with 2 variables. The
-    /// corresponding constraint will be still enabled.
-    model.create_constraint("c6", x4.selection());
+    /**
+     * Selection constraint with 2 decision variables. The priority of this
+     * constraint is the fourth, and it will be employed for a swap
+     * neighborhood.
+     */
+    model.create_constraint("c3", x2.selection());
 
     model.setup_default_neighborhood(false, false);
 
-    EXPECT_EQ(5, static_cast<int>(model.neighborhood().selections().size()));
+    EXPECT_EQ(3, static_cast<int>(model.neighborhood().selections().size()));
 
-    /// Check the numbers of covered variables and  variable pointers.
+    /**
+     * Check the numbers of covered variables and variable pointers.
+     */
+    {
+        /// Constraint c2
+        auto variable_ptrs = model.neighborhood().selections()[0].variable_ptrs;
+        EXPECT_EQ(400, static_cast<int>(variable_ptrs.size()));
+
+        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                                   &x1(0, 0)) != variable_ptrs.end()));
+        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                                   &x1(19, 19)) != variable_ptrs.end()));
+    }
+
     {
         /// Constraint c0
-        auto variable_ptrs = model.neighborhood().selections()[0].variable_ptrs;
+        auto variable_ptrs = model.neighborhood().selections()[1].variable_ptrs;
         EXPECT_EQ(10, static_cast<int>(variable_ptrs.size()));
 
         EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
@@ -257,210 +267,88 @@ TEST_F(TestNeighborhood, categorize_variables_and_constraints) {
     }
 
     {
-        /// Constraint c1
-        auto variable_ptrs = model.neighborhood().selections()[1].variable_ptrs;
-        EXPECT_EQ(10 + 20 + 1 + 1, static_cast<int>(variable_ptrs.size()));
-
-        EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x0(0, 9)) != variable_ptrs.end()));
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x0(1, 0)) != variable_ptrs.end()));
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x0(1, 9)) != variable_ptrs.end()));
-
-        EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x1(0, 9)) != variable_ptrs.end()));
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x1(1, 0)) != variable_ptrs.end()));
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x1(1, 19)) != variable_ptrs.end()));
-        EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x1(2, 0)) != variable_ptrs.end()));
-
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x3(0)) != variable_ptrs.end()));
-        EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x3(1)) != variable_ptrs.end()));
-
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x4(0)) != variable_ptrs.end()));
-        EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x4(1)) != variable_ptrs.end()));
-    }
-
-    {
-        /// Constraint c2
-        auto variable_ptrs = model.neighborhood().selections()[2].variable_ptrs;
-        EXPECT_EQ(10 * 10 - 20, static_cast<int>(variable_ptrs.size()));
-        EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x0(1, 9)) != variable_ptrs.end()));
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x0(2, 0)) != variable_ptrs.end()));
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x0(9, 9)) != variable_ptrs.end()));
-    }
-
-    {
         /// Constraint c3
-        auto variable_ptrs = model.neighborhood().selections()[3].variable_ptrs;
-        EXPECT_EQ(20 * 20 - 20, static_cast<int>(variable_ptrs.size()));
+        auto variable_ptrs = model.neighborhood().selections()[2].variable_ptrs;
+        EXPECT_EQ(2, static_cast<int>(variable_ptrs.size()));
         EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x1(0, 0)) != variable_ptrs.end()));
+                                   &x2(0)) != variable_ptrs.end()));
         EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x1(0, 19)) != variable_ptrs.end()));
-        EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x1(1, 0)) != variable_ptrs.end()));
-        EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x1(1, 19)) != variable_ptrs.end()));
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x1(2, 0)) != variable_ptrs.end()));
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x1(19, 19)) != variable_ptrs.end()));
+                                   &x2(1)) != variable_ptrs.end()));
     }
 
-    {
-        /// Constraint c6
-        auto variable_ptrs = model.neighborhood().selections()[4].variable_ptrs;
-        EXPECT_EQ(3 - 1, static_cast<int>(variable_ptrs.size()));
-
-        EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x4(0)) != variable_ptrs.end()));
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x4(1)) != variable_ptrs.end()));
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x4(2)) != variable_ptrs.end()));
-    }
-
-    /// Check whether the corresponding constraint is enabled or not.
-    /// Constraint c0
+    /**
+     * Check whether the corresponding constraint is enabled or not.
+     */
+    /// Constraint c2
     EXPECT_EQ(
         false,
         model.neighborhood().selections()[0].constraint_ptr->is_enabled());
 
-    /// Constraint c1
+    /// Constraint c0
     EXPECT_EQ(
         false,
         model.neighborhood().selections()[1].constraint_ptr->is_enabled());
 
-    /// Constraint c2
-    EXPECT_EQ(
-        true,
-        model.neighborhood().selections()[2].constraint_ptr->is_enabled());
-
     /// Constraint c3
     EXPECT_EQ(
-        true,
-        model.neighborhood().selections()[3].constraint_ptr->is_enabled());
+        false,
+        model.neighborhood().selections()[2].constraint_ptr->is_enabled());
 
-    /// Constraint c6
-    EXPECT_EQ(
-        true,
-        model.neighborhood().selections()[4].constraint_ptr->is_enabled());
-
-    /// Check the number of covered variables and variable pointers for each
-    /// category.
+    /**
+     * Check the number of covered variables and variable pointers for each
+     * category. */
 
     /// Selection
     {
         auto variable_ptrs = model.neighborhood().selection_variable_ptrs();
-        EXPECT_EQ(10 + 32 + 80 + 380 + 2,
-                  static_cast<int>(variable_ptrs.size()));
+        EXPECT_EQ(20 * 20 + 1 * 10 + 2, static_cast<int>(variable_ptrs.size()));
+
+        /// Constraint c2
+        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                                   &x1(0, 0)) != variable_ptrs.end()));
+        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                                   &x1(19, 19)) != variable_ptrs.end()));
 
         /// Constraint c0
         EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
                                    &x0(0, 0)) != variable_ptrs.end()));
         EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
                                    &x0(0, 9)) != variable_ptrs.end()));
-
-        /// Constraint c1
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x0(1, 0)) != variable_ptrs.end()));
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x0(1, 9)) != variable_ptrs.end()));
-
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x1(1, 0)) != variable_ptrs.end()));
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x1(1, 19)) != variable_ptrs.end()));
-
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x3(0)) != variable_ptrs.end()));
-
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x4(0)) != variable_ptrs.end()));
-
-        /// Constraint c2
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x0(2, 0)) != variable_ptrs.end()));
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x0(9, 9)) != variable_ptrs.end()));
+        EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                                    &x0(1, 0)) != variable_ptrs.end()));
 
         /// Constraint c3
         EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x1(0, 0)) != variable_ptrs.end()));
+                                   &x2(0)) != variable_ptrs.end()));
         EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x1(0, 19)) != variable_ptrs.end()));
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x1(2, 0)) != variable_ptrs.end()));
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x1(19, 19)) != variable_ptrs.end()));
-
-        /// Constraint c6
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x4(1)) != variable_ptrs.end()));
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x4(2)) != variable_ptrs.end()));
+                                   &x2(1)) != variable_ptrs.end()));
     }
 
     /// Binary
     {
         auto variable_ptrs = model.neighborhood().binary_variable_ptrs();
-        EXPECT_EQ(10 * 10 + 20 * 20 + 1 + 2 + 3 - (10 + 32 + 80 + 380 + 2),
+        EXPECT_EQ(10 * 10 + 20 * 20 + 2 - (20 * 20 + 1 * 10 + 2),
                   static_cast<int>(variable_ptrs.size()));
 
-        /// Constraint c0
-        EXPECT_EQ(!true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x0(0, 0)) != variable_ptrs.end()));
-        EXPECT_EQ(!true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x0(0, 9)) != variable_ptrs.end()));
-
-        /// Constraint c1
-        EXPECT_EQ(!true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x0(1, 0)) != variable_ptrs.end()));
-        EXPECT_EQ(!true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x0(1, 9)) != variable_ptrs.end()));
-
-        EXPECT_EQ(!true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x1(1, 0)) != variable_ptrs.end()));
-        EXPECT_EQ(!true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x1(1, 19)) != variable_ptrs.end()));
-
-        EXPECT_EQ(!true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x3(0)) != variable_ptrs.end()));
-
-        EXPECT_EQ(!true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x4(0)) != variable_ptrs.end()));
         /// Constraint c2
-        EXPECT_EQ(!true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x0(2, 0)) != variable_ptrs.end()));
-        EXPECT_EQ(!true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x0(9, 9)) != variable_ptrs.end()));
-
-        /// Constraint c3
-        EXPECT_EQ(!true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
+        EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
                                     &x1(0, 0)) != variable_ptrs.end()));
-        EXPECT_EQ(!true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x1(0, 19)) != variable_ptrs.end()));
-        EXPECT_EQ(!true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x1(2, 0)) != variable_ptrs.end()));
-        EXPECT_EQ(!true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
+        EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
                                     &x1(19, 19)) != variable_ptrs.end()));
 
-        /// Constraint c4
-        EXPECT_EQ(!true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x4(1)) != variable_ptrs.end()));
-        EXPECT_EQ(!true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x4(2)) != variable_ptrs.end()));
+        /// Constraint c0
+        EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                                    &x0(0, 0)) != variable_ptrs.end()));
+        EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                                    &x0(0, 9)) != variable_ptrs.end()));
+        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                                   &x0(1, 0)) != variable_ptrs.end()));
+
+        /// Constraint c3
+        EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                                    &x2(0)) != variable_ptrs.end()));
+        EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                                    &x2(1)) != variable_ptrs.end()));
     }
 
     /// Integer
@@ -479,44 +367,41 @@ TEST_F(TestNeighborhood, categorize_variables_and_constraints) {
 TEST_F(TestNeighborhood, setup_move_updater) {
     cppmh::model::Model<int, double> model;
 
-    auto&                  x0 = model.create_variables("x0", {10, 10}, 0, 1);
-    auto&                  x1 = model.create_variables("x1", {20, 20}, 0, 1);
-    auto&                  x2 = model.create_variables("x2", 1, 0, 1);
-    auto&                  x3 = model.create_variables("x3", 2, 0, 1);
-    auto&                  x4 = model.create_variables("x4", 3, 0, 1);
-    [[maybe_unused]] auto& y  = model.create_variables("y", {30, 30}, -10, 10);
+    auto& x0 = model.create_variables("x0", {10, 10}, 0, 1);
+    auto& x1 = model.create_variables("x1", {20, 20}, 0, 1);
+    auto& x2 = model.create_variables("x2", 2, 0, 1);
 
-    /// This constraint is parsed as a selection with no overlap. The
-    /// corresponding constraint will be disabled.
+    auto& y = model.create_variables("y", {30, 30}, -10, 10);
+
+    /**
+     * Selection constraint with 10 decision variables. The priority of this
+     * constraint is the third, and it will be employed for a swap
+     * neighborhood.
+     */
     model.create_constraint("c0", x0.selection({0, cppmh::model::Range::All}));
 
-    /// This constraint beyond two variable proxies is parsed as a selection
-    /// with no overlap. The corresponding constraint will be disabled.
+    /**
+     * Selection constraint with 32 decision variables. The priority of this
+     * constraint is the second, and it will NOT be employed for a swap
+     * neighborhood because higher-priority constraint c1 covers x1.
+     */
     model.create_constraint(
         "c1", (x0.sum({1, cppmh::model::Range::All}) +
-               x1.sum({1, cppmh::model::Range::All}) + x3(0) + x4(0)) == 1);
+               x1.sum({1, cppmh::model::Range::All}) + x2(0)) == 1);
 
-    /// This constraint is parsed as a selection 20 overlap variables. The
-    /// corresponding constraint will be still enabled.
-    model.create_constraint("c2", x0.selection());
+    /**
+     * Selection constraint with 400 decision variables. The priority of this
+     * constraint is the first, and it will be employed for a swap
+     * neighborhood.
+     */
+    model.create_constraint("c2", x1.selection());
 
-    /// This constraint is parsed as a selection 20 overlap variables. The
-    /// corresponding constraint will be still enabled.
-    model.create_constraint("c3", x1.selection());
-
-    /// This constraint is not parsed as a selection because the number of
-    /// covered variables is 1. The corresponding constraint will be still
-    /// enabled.
-    model.create_constraint("c4", x2.selection());
-
-    /// This constraint is not parsed as a selection because the number of
-    /// covered variables is 1 due to overlap. The corresponding constraint will
-    /// be still enabled.
-    model.create_constraint("c5", x3.selection());
-
-    /// This constraint is parsed as a selection with 2 variables. The
-    /// corresponding constraint will be still enabled.
-    model.create_constraint("c6", x4.selection());
+    /**
+     * Selection constraint with 2 decision variables. The priority of this
+     * constraint is the fourth, and it will be employed for a swap
+     * neighborhood.
+     */
+    model.create_constraint("c3", x2.selection());
 
     y(0, 0).fix_by(0);
     y(0, 1) = -10;
@@ -525,7 +410,9 @@ TEST_F(TestNeighborhood, setup_move_updater) {
     model.setup_default_neighborhood(false, false);
     EXPECT_EQ(false, model.neighborhood().is_enabled_user_defined_move());
 
-    /// Set initial values for selection variables.
+    /**
+     * Set initial values for selection variables.
+     */
     for (auto&& selection : model.neighborhood().selections()) {
         selection.variable_ptrs.front()->set_value_if_not_fixed(1);
         selection.variable_ptrs.front()->select();
@@ -533,7 +420,9 @@ TEST_F(TestNeighborhood, setup_move_updater) {
 
     model.neighborhood().update_moves();
 
-    /// Check the variable pointers and values in raw moves.
+    /**
+     * Check the variable pointers and values in raw moves.
+     */
     /// Selection
     {
         auto variable_ptrs = model.neighborhood().selection_variable_ptrs();
@@ -631,7 +520,9 @@ TEST_F(TestNeighborhood, setup_move_updater) {
         }
     }
 
-    /// Check the numbers of filtered moves.
+    /**
+     * Check the numbers of filtered moves. *
+     */
     {
         int selections_size = model.neighborhood().selections().size();
 
@@ -649,7 +540,7 @@ TEST_F(TestNeighborhood, setup_move_updater) {
                       + (2 * integer_variables_size - 2 - 1 - 1),  // Integer
                   static_cast<int>(model.neighborhood().move_ptrs().size()));
     }
-}  // namespace
+}
 
 /*****************************************************************************/
 TEST_F(TestNeighborhood, set_user_defined_move_updater) {
