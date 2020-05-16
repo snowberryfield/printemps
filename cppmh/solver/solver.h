@@ -94,39 +94,9 @@ model::NamedSolution<T_Variable, T_Expression> solve(
         master_option.print();
     }
 
-    model->verify_problem(master_option.verbose >= Verbose::Warning);
-
-    model->setup_variable_related_constraints();
-    model->setup_variable_sense();
-    model->setup_unique_name();
-
-    model->setup_default_neighborhood(
-        master_option.is_enabled_parallel_neighborhood_update,
-        master_option.verbose >= Verbose::Warning);
-
-    model->setup_fixed_sensitivities(master_option.verbose >= Verbose::Warning);
-
-    /**
-     * If the user-defined_neighborhood is set, default neighborhood should
-     * be disabled to avoid possible inconsistencies.
-     */
-    if (model->neighborhood().is_enabled_user_defined_move()) {
-        model->neighborhood().disable_default_move();
-    }
-
-    model->setup_has_fixed_variables(master_option.verbose >= Verbose::Warning);
-
-    model->verify_and_correct_selection_variables_initial_values(
-        master_option.is_enabled_initial_value_correction,
-        master_option.verbose >= Verbose::Warning);
-
-    model->verify_and_correct_binary_variables_initial_values(
-        master_option.is_enabled_initial_value_correction,
-        master_option.verbose >= Verbose::Warning);
-
-    model->verify_and_correct_integer_variables_initial_values(
-        master_option.is_enabled_initial_value_correction,
-        master_option.verbose >= Verbose::Warning);
+    model->setup(master_option.is_enabled_parallel_neighborhood_update,
+                 master_option.is_enabled_initial_value_correction,
+                 master_option.verbose >= Verbose::Warning);
 
     /**
      * Create local and global penalty coefficient for each constraint.
