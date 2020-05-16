@@ -227,35 +227,29 @@ class Neighborhood {
          * Add selection constraints extracted in STEP in dictionary order with
          * excluding used variables.
          */
+        std::sort(raw_selections.begin(), raw_selections.end(),
+                  [](auto const &a_LHS, auto const &a_RHS) {
+                      return a_LHS.variable_ptrs.size() >
+                             a_RHS.variable_ptrs.size();
+                  });
         for (auto &&selection : raw_selections) {
-            /// Check whether the variable is covered by other selection
-            /// constraint or not.
-            auto original_number_of_covered_variables =
-                selection.variable_ptrs.size();
-
-            selection.variable_ptrs.erase(
-                std::remove_if(
-                    selection.variable_ptrs.begin(),
-                    selection.variable_ptrs.end(),
-                    [&selection_variable_ptrs](const auto &a_VARIABLE_PTR) {
-                        return std::find(selection_variable_ptrs.begin(),
-                                         selection_variable_ptrs.end(),
-                                         a_VARIABLE_PTR) !=
-                               selection_variable_ptrs.end();
-                    }),
-                selection.variable_ptrs.end());
-
-            if (selection.variable_ptrs.size() >= 2) {
-                if (selection.variable_ptrs.size() ==
-                    original_number_of_covered_variables) {
-                    selection.constraint_ptr->disable();
+            bool has_eliminated_variable_ptr = false;
+            for (auto &&variable_ptr : selection.variable_ptrs) {
+                if (std::find(selection_variable_ptrs.begin(),
+                              selection_variable_ptrs.end(),
+                              variable_ptr) != selection_variable_ptrs.end()) {
+                    has_eliminated_variable_ptr = true;
+                    break;
                 }
-                selections.push_back(selection);
-                for (auto &&variable_ptr : selection.variable_ptrs) {
-                    selection_variable_ptrs.push_back(variable_ptr);
-                }
+            }
+            if (has_eliminated_variable_ptr) {
+                continue;
             } else {
-                /// nothing to do
+                selections.push_back(selection);
+                selection_variable_ptrs.insert(selection_variable_ptrs.end(),
+                                               selection.variable_ptrs.begin(),
+                                               selection.variable_ptrs.end());
+                selection.constraint_ptr->disable();
             }
         }
 
@@ -286,6 +280,10 @@ class Neighborhood {
         m_binary_variable_ptrs    = binary_variable_ptrs;
         m_integer_variable_ptrs   = integer_variable_ptrs;
 
+        /**
+         * The following block must be after setting m_selections because
+         * variables have pointers to a element of m_selections.
+         */
         for (auto &&selection : m_selections) {
             for (auto &&variable_ptr : selection.variable_ptrs) {
                 /**
