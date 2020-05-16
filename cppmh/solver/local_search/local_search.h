@@ -118,7 +118,7 @@ LocalSearchResult<T_Variable, T_Expression> solve(
         model->neighborhood().update_moves();
         model->neighborhood().shuffle_moves(&get_rand_mt);
 
-        bool is_found_improving_solution = false;
+        bool found_improving_solution = false;
 
         const auto& move_ptrs = model->neighborhood().move_ptrs();
 
@@ -130,19 +130,29 @@ LocalSearchResult<T_Variable, T_Expression> solve(
         }
 
         for (const auto& move_ptr : move_ptrs) {
-            solution_score =
-                model->evaluate(*move_ptr, local_penalty_coefficient_proxies,
-                                global_penalty_coefficient_proxies);
+            model::SolutionScore trial_solution_score;
+            if (model->has_nonlinear_constraint()) {
+                trial_solution_score = model->evaluate(
+                    *move_ptr, local_penalty_coefficient_proxies,
+                    global_penalty_coefficient_proxies);
+            } else {
+                trial_solution_score =
+                    model->evaluate(*move_ptr, solution_score,
+                                    local_penalty_coefficient_proxies,
+                                    global_penalty_coefficient_proxies);
+            }
+
             number_of_checked_moved++;
-            if (solution_score.local_augmented_objective <
+            if (trial_solution_score.local_augmented_objective <
                 incumbent_holder.local_augmented_incumbent_objective()) {
+                solution_score = trial_solution_score;
                 model->update(*move_ptr);
 
-                is_found_improving_solution = true;
+                found_improving_solution = true;
                 break;
             }
         }
-        if (!is_found_improving_solution) {
+        if (!found_improving_solution) {
             break;
         }
 

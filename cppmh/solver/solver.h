@@ -96,6 +96,7 @@ model::NamedSolution<T_Variable, T_Expression> solve(
 
     model->verify_problem(master_option.verbose >= Verbose::Warning);
 
+    model->setup_variable_related_constraints();
     model->setup_variable_sense();
     model->setup_unique_name();
 
@@ -284,8 +285,9 @@ model::NamedSolution<T_Variable, T_Expression> solve(
         Option option                  = master_option;
         option.tabu_search.time_offset = elapsed_time;
         option.tabu_search.seed += iteration;
-        if (last_total_update_status &
-            IncumbentHolderConstant::STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
+        if (!(last_total_update_status &
+              IncumbentHolderConstant::
+                  STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE)) {
             option.tabu_search.number_of_initial_modification =
                 last_tabu_tenure;
         }
