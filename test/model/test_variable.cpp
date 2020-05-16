@@ -55,28 +55,29 @@ TEST_F(TestVariable, initialize) {
 TEST_F(TestVariable, set_value_force) {
     auto variable = cppmh::model::Variable<int, double>::create_instance();
 
-    auto value_1 = random_integer();
-    variable     = value_1;
-    EXPECT_EQ(value_1, variable.value());
+    auto value_0 = random_integer();
+    variable     = value_0;
+    EXPECT_EQ(value_0, variable.value());
 
-    auto value_2 = random_integer();
+    auto value_1 = random_integer();
     variable.fix();
-    variable.set_value_force(value_2);
-    EXPECT_EQ(value_2, variable.value());
+    variable.set_value_force(value_1);
+    EXPECT_EQ(value_1, variable.value());
 }
 
 /*****************************************************************************/
 TEST_F(TestVariable, set_value_if_not_fixed) {
     auto variable = cppmh::model::Variable<int, double>::create_instance();
 
-    auto value_1 = random_integer();
-    variable     = value_1;
-    EXPECT_EQ(value_1, variable.value());
+    auto value_0 = random_integer();
+    variable     = value_0;
+    EXPECT_EQ(value_0, variable.value());
 
-    auto value_2 = random_integer();
     variable.fix();
-    variable.set_value_if_not_fixed(value_2);
-    EXPECT_EQ(value_1, variable.value());
+
+    auto value_1 = random_integer();
+    variable.set_value_if_not_fixed(value_1);
+    EXPECT_EQ(value_0, variable.value());
 }
 
 /*****************************************************************************/

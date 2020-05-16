@@ -1274,13 +1274,25 @@ TEST_F(TestModel, evaluate) {
                 }
             }
 
-            auto score_after_1 =
+            auto score_after_0 =
                 model.evaluate(move, local_penalty_coefficient_proxies,
                                global_penalty_coefficient_proxies);
 
-            auto score_after_2 = model.evaluate(
+            auto score_after_1 = model.evaluate(
                 move, score_before, local_penalty_coefficient_proxies,
                 global_penalty_coefficient_proxies);
+
+            EXPECT_EQ(46, score_after_0.objective);
+            EXPECT_EQ(5 + 1, score_after_0.total_violation);
+            EXPECT_EQ(5 * 100 + 100, score_after_0.local_penalty);
+            EXPECT_EQ(5 * 10000 + 10000, score_after_0.global_penalty);
+            EXPECT_EQ(46 + 5 * 100 + 100,
+                      score_after_0.local_augmented_objective);
+            EXPECT_EQ(46 + 5 * 10000 + 10000,
+                      score_after_0.global_augmented_objective);
+            EXPECT_EQ(false, score_after_0.is_objective_improvable);
+            EXPECT_EQ(false, score_after_0.is_constraint_improvable);
+            EXPECT_EQ(false, score_after_0.is_feasible);
 
             EXPECT_EQ(46, score_after_1.objective);
             EXPECT_EQ(5 + 1, score_after_1.total_violation);
@@ -1294,20 +1306,8 @@ TEST_F(TestModel, evaluate) {
             EXPECT_EQ(false, score_after_1.is_constraint_improvable);
             EXPECT_EQ(false, score_after_1.is_feasible);
 
-            EXPECT_EQ(46, score_after_2.objective);
-            EXPECT_EQ(5 + 1, score_after_2.total_violation);
-            EXPECT_EQ(5 * 100 + 100, score_after_2.local_penalty);
-            EXPECT_EQ(5 * 10000 + 10000, score_after_2.global_penalty);
-            EXPECT_EQ(46 + 5 * 100 + 100,
-                      score_after_2.local_augmented_objective);
-            EXPECT_EQ(46 + 5 * 10000 + 10000,
-                      score_after_2.global_augmented_objective);
-            EXPECT_EQ(false, score_after_2.is_objective_improvable);
-            EXPECT_EQ(false, score_after_2.is_constraint_improvable);
-            EXPECT_EQ(false, score_after_2.is_feasible);
-
             model.update(move);
-            score_before = score_after_2;
+            score_before = score_after_1;
         }
 
         {
@@ -1320,13 +1320,23 @@ TEST_F(TestModel, evaluate) {
                 }
             }
 
-            auto score_after_1 =
+            auto score_after_0 =
                 model.evaluate(move, local_penalty_coefficient_proxies,
                                global_penalty_coefficient_proxies);
 
-            auto score_after_2 = model.evaluate(
+            auto score_after_1 = model.evaluate(
                 move, score_before, local_penalty_coefficient_proxies,
                 global_penalty_coefficient_proxies);
+
+            EXPECT_EQ(1, score_after_0.objective);
+            EXPECT_EQ(0, score_after_0.total_violation);
+            EXPECT_EQ(0, score_after_0.local_penalty);
+            EXPECT_EQ(0, score_after_0.global_penalty);
+            EXPECT_EQ(1, score_after_0.local_augmented_objective);
+            EXPECT_EQ(1, score_after_0.global_augmented_objective);
+            EXPECT_EQ(true, score_after_0.is_objective_improvable);
+            EXPECT_EQ(true, score_after_0.is_constraint_improvable);
+            EXPECT_EQ(true, score_after_0.is_feasible);
 
             EXPECT_EQ(1, score_after_1.objective);
             EXPECT_EQ(0, score_after_1.total_violation);
@@ -1338,18 +1348,8 @@ TEST_F(TestModel, evaluate) {
             EXPECT_EQ(true, score_after_1.is_constraint_improvable);
             EXPECT_EQ(true, score_after_1.is_feasible);
 
-            EXPECT_EQ(1, score_after_2.objective);
-            EXPECT_EQ(0, score_after_2.total_violation);
-            EXPECT_EQ(0, score_after_2.local_penalty);
-            EXPECT_EQ(0, score_after_2.global_penalty);
-            EXPECT_EQ(1, score_after_2.local_augmented_objective);
-            EXPECT_EQ(1, score_after_2.global_augmented_objective);
-            EXPECT_EQ(true, score_after_2.is_objective_improvable);
-            EXPECT_EQ(true, score_after_2.is_constraint_improvable);
-            EXPECT_EQ(true, score_after_2.is_feasible);
-
             model.update(move);
-            score_before = score_after_2;
+            score_before = score_after_1;
         }
 
         {
@@ -1361,13 +1361,23 @@ TEST_F(TestModel, evaluate) {
                 }
             }
 
-            auto score_after_1 =
+            auto score_after_0 =
                 model.evaluate(move, local_penalty_coefficient_proxies,
                                global_penalty_coefficient_proxies);
 
-            auto score_after_2 = model.evaluate(
+            auto score_after_1 = model.evaluate(
                 move, score_before, local_penalty_coefficient_proxies,
                 global_penalty_coefficient_proxies);
+
+            EXPECT_EQ(11, score_after_0.objective);
+            EXPECT_EQ(1, score_after_0.total_violation);
+            EXPECT_EQ(100, score_after_0.local_penalty);
+            EXPECT_EQ(10000, score_after_0.global_penalty);
+            EXPECT_EQ(11 + 100, score_after_0.local_augmented_objective);
+            EXPECT_EQ(11 + 10000, score_after_0.global_augmented_objective);
+            EXPECT_EQ(false, score_after_0.is_objective_improvable);
+            EXPECT_EQ(false, score_after_0.is_constraint_improvable);
+            EXPECT_EQ(false, score_after_0.is_feasible);
 
             EXPECT_EQ(11, score_after_1.objective);
             EXPECT_EQ(1, score_after_1.total_violation);
@@ -1379,18 +1389,8 @@ TEST_F(TestModel, evaluate) {
             EXPECT_EQ(false, score_after_1.is_constraint_improvable);
             EXPECT_EQ(false, score_after_1.is_feasible);
 
-            EXPECT_EQ(11, score_after_2.objective);
-            EXPECT_EQ(1, score_after_2.total_violation);
-            EXPECT_EQ(100, score_after_2.local_penalty);
-            EXPECT_EQ(10000, score_after_2.global_penalty);
-            EXPECT_EQ(11 + 100, score_after_2.local_augmented_objective);
-            EXPECT_EQ(11 + 10000, score_after_2.global_augmented_objective);
-            EXPECT_EQ(false, score_after_2.is_objective_improvable);
-            EXPECT_EQ(false, score_after_2.is_constraint_improvable);
-            EXPECT_EQ(false, score_after_2.is_feasible);
-
             model.update(move);
-            score_before = score_after_2;
+            score_before = score_after_1;
         }
     }
 
@@ -1445,12 +1445,24 @@ TEST_F(TestModel, evaluate) {
                 }
             }
 
-            auto score_after_1 =
+            auto score_after_0 =
                 model.evaluate(move, local_penalty_coefficient_proxies,
                                global_penalty_coefficient_proxies);
-            auto score_after_2 = model.evaluate(
+            auto score_after_1 = model.evaluate(
                 move, score_before, local_penalty_coefficient_proxies,
                 global_penalty_coefficient_proxies);
+
+            EXPECT_EQ(-46, score_after_0.objective);
+            EXPECT_EQ(5 + 1, score_after_0.total_violation);
+            EXPECT_EQ(5 * 100 + 100, score_after_0.local_penalty);
+            EXPECT_EQ(5 * 10000 + 10000, score_after_0.global_penalty);
+            EXPECT_EQ(-46 + 5 * 100 + 100,
+                      score_after_0.local_augmented_objective);
+            EXPECT_EQ(-46 + 5 * 10000 + 10000,
+                      score_after_0.global_augmented_objective);
+            EXPECT_EQ(false, score_after_0.is_objective_improvable);
+            EXPECT_EQ(false, score_after_0.is_constraint_improvable);
+            EXPECT_EQ(false, score_after_0.is_feasible);
 
             EXPECT_EQ(-46, score_after_1.objective);
             EXPECT_EQ(5 + 1, score_after_1.total_violation);
@@ -1464,20 +1476,8 @@ TEST_F(TestModel, evaluate) {
             EXPECT_EQ(false, score_after_1.is_constraint_improvable);
             EXPECT_EQ(false, score_after_1.is_feasible);
 
-            EXPECT_EQ(-46, score_after_2.objective);
-            EXPECT_EQ(5 + 1, score_after_2.total_violation);
-            EXPECT_EQ(5 * 100 + 100, score_after_2.local_penalty);
-            EXPECT_EQ(5 * 10000 + 10000, score_after_2.global_penalty);
-            EXPECT_EQ(-46 + 5 * 100 + 100,
-                      score_after_2.local_augmented_objective);
-            EXPECT_EQ(-46 + 5 * 10000 + 10000,
-                      score_after_2.global_augmented_objective);
-            EXPECT_EQ(false, score_after_2.is_objective_improvable);
-            EXPECT_EQ(false, score_after_2.is_constraint_improvable);
-            EXPECT_EQ(false, score_after_2.is_feasible);
-
             model.update(move);
-            score_before = score_after_2;
+            score_before = score_after_1;
         }
         {
             cppmh::model::Move<int, double> move;
@@ -1489,16 +1489,26 @@ TEST_F(TestModel, evaluate) {
                 }
             }
 
-            auto score_after_1 =
+            auto score_after_0 =
                 model.evaluate(move, local_penalty_coefficient_proxies,
                                global_penalty_coefficient_proxies);
 
-            auto score_after_2 = model.evaluate(
+            auto score_after_1 = model.evaluate(
                 move, score_before, local_penalty_coefficient_proxies,
                 global_penalty_coefficient_proxies);
 
+            EXPECT_EQ(-1, score_after_0.objective);
+            EXPECT_EQ(0, score_after_0.total_violation);
+            EXPECT_EQ(0, score_after_0.local_penalty);
+            EXPECT_EQ(0, score_after_0.global_penalty);
+            EXPECT_EQ(-1, score_after_0.local_augmented_objective);
+            EXPECT_EQ(-1, score_after_0.global_augmented_objective);
+            EXPECT_EQ(false, score_after_0.is_objective_improvable);
+            EXPECT_EQ(true, score_after_0.is_constraint_improvable);
+            EXPECT_EQ(true, score_after_0.is_feasible);
+
             EXPECT_EQ(-1, score_after_1.objective);
-            EXPECT_EQ(0, score_after_1.total_violation);
+            EXPECT_EQ(0, score_after_0.total_violation);
             EXPECT_EQ(0, score_after_1.local_penalty);
             EXPECT_EQ(0, score_after_1.global_penalty);
             EXPECT_EQ(-1, score_after_1.local_augmented_objective);
@@ -1507,18 +1517,8 @@ TEST_F(TestModel, evaluate) {
             EXPECT_EQ(true, score_after_1.is_constraint_improvable);
             EXPECT_EQ(true, score_after_1.is_feasible);
 
-            EXPECT_EQ(-1, score_after_2.objective);
-            EXPECT_EQ(0, score_after_1.total_violation);
-            EXPECT_EQ(0, score_after_2.local_penalty);
-            EXPECT_EQ(0, score_after_2.global_penalty);
-            EXPECT_EQ(-1, score_after_2.local_augmented_objective);
-            EXPECT_EQ(-1, score_after_2.global_augmented_objective);
-            EXPECT_EQ(false, score_after_2.is_objective_improvable);
-            EXPECT_EQ(true, score_after_2.is_constraint_improvable);
-            EXPECT_EQ(true, score_after_2.is_feasible);
-
             model.update(move);
-            score_before = score_after_2;
+            score_before = score_after_1;
         }
 
         {
@@ -1530,13 +1530,23 @@ TEST_F(TestModel, evaluate) {
                 }
             }
 
-            auto score_after_1 =
+            auto score_after_0 =
                 model.evaluate(move, local_penalty_coefficient_proxies,
                                global_penalty_coefficient_proxies);
 
-            auto score_after_2 = model.evaluate(
+            auto score_after_1 = model.evaluate(
                 move, score_before, local_penalty_coefficient_proxies,
                 global_penalty_coefficient_proxies);
+
+            EXPECT_EQ(-11, score_after_0.objective);
+            EXPECT_EQ(1, score_after_0.total_violation);
+            EXPECT_EQ(100, score_after_0.local_penalty);
+            EXPECT_EQ(10000, score_after_0.global_penalty);
+            EXPECT_EQ(-11 + 100, score_after_0.local_augmented_objective);
+            EXPECT_EQ(-11 + 10000, score_after_0.global_augmented_objective);
+            EXPECT_EQ(true, score_after_0.is_objective_improvable);
+            EXPECT_EQ(false, score_after_0.is_constraint_improvable);
+            EXPECT_EQ(false, score_after_0.is_feasible);
 
             EXPECT_EQ(-11, score_after_1.objective);
             EXPECT_EQ(1, score_after_1.total_violation);
@@ -1548,18 +1558,8 @@ TEST_F(TestModel, evaluate) {
             EXPECT_EQ(false, score_after_1.is_constraint_improvable);
             EXPECT_EQ(false, score_after_1.is_feasible);
 
-            EXPECT_EQ(-11, score_after_2.objective);
-            EXPECT_EQ(1, score_after_2.total_violation);
-            EXPECT_EQ(100, score_after_2.local_penalty);
-            EXPECT_EQ(10000, score_after_2.global_penalty);
-            EXPECT_EQ(-11 + 100, score_after_2.local_augmented_objective);
-            EXPECT_EQ(-11 + 10000, score_after_2.global_augmented_objective);
-            EXPECT_EQ(true, score_after_2.is_objective_improvable);
-            EXPECT_EQ(false, score_after_2.is_constraint_improvable);
-            EXPECT_EQ(false, score_after_2.is_feasible);
-
             model.update(move);
-            score_before = score_after_2;
+            score_before = score_after_1;
         }
     }
 
