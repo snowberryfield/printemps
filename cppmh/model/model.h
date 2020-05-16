@@ -55,8 +55,6 @@ class Model {
     std::vector<std::string> m_constraint_names;
 
     bool                                   m_is_defined_objective;
-    bool                                   m_has_nonlinear_constraint;
-    bool                                   m_has_nonlinear_objective;
     bool                                   m_is_enabled_fast_evaluation;
     bool                                   m_is_minimization;
     Neighborhood<T_Variable, T_Expression> m_neighborhood;
@@ -88,8 +86,6 @@ class Model {
         m_constraint_names.clear();
 
         m_is_defined_objective       = false;
-        m_has_nonlinear_constraint   = false;
-        m_has_nonlinear_objective    = false;
         m_is_enabled_fast_evaluation = true;
         m_is_minimization            = true;
         m_neighborhood.initialize();
@@ -415,8 +411,6 @@ class Model {
         m_objective            = objective;
         m_is_defined_objective = true;
         m_is_minimization      = true;
-
-        m_has_nonlinear_objective = true;
     }
 
     /*************************************************************************/
@@ -450,8 +444,6 @@ class Model {
         m_objective            = objective;
         m_is_defined_objective = true;
         m_is_minimization      = false;
-
-        m_has_nonlinear_objective = true;
     }
 
     /*************************************************************************/
@@ -478,16 +470,6 @@ class Model {
     /*************************************************************************/
     inline constexpr bool is_defined_objective(void) const {
         return m_is_defined_objective;
-    }
-
-    /*************************************************************************/
-    inline constexpr bool has_nonlinear_constraint(void) const {
-        return m_has_nonlinear_constraint;
-    }
-
-    /*************************************************************************/
-    inline constexpr bool has_nonlinear_objective(void) const {
-        return m_has_nonlinear_objective;
     }
 
     /*************************************************************************/
@@ -545,7 +527,6 @@ class Model {
         this->setup_variable_sense();
         this->setup_unique_name();
 
-        this->setup_has_nonlinear_constraint();
         this->setup_is_enabled_fast_evaluation();
 
         this->setup_default_neighborhood(
@@ -558,8 +539,6 @@ class Model {
         if (m_neighborhood.is_enabled_user_defined_move()) {
             m_neighborhood.disable_default_move();
         }
-
-        this->setup_has_fixed_variables(a_IS_ENABLED_PRINT);
 
         this->verify_and_correct_selection_variables_initial_values(
             a_IS_ENABLED_INITIAL_VALUE_CORRECTION, a_IS_ENABLED_PRINT);
@@ -574,10 +553,26 @@ class Model {
     }
 
     /*************************************************************************/
+    inline constexpr void verify_problem(const bool a_IS_ENABLED_PRINT) {
+        utility::print_single_line(a_IS_ENABLED_PRINT);
+        utility::print_message("Verifying the problem...", a_IS_ENABLED_PRINT);
+
+        if (m_variable_proxies.size() == 0) {
+            throw std::logic_error(utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "No decision variables are defined."));
+        }
+        if (m_constraint_proxies.size() == 0 && !m_is_defined_objective) {
+            throw std::logic_error(utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "Neither objective nor constraint functions are "
+                "defined."));
+        }
+        utility::print_message("Done.", a_IS_ENABLED_PRINT);
+    }
+
+    /*************************************************************************/
     inline constexpr void setup_variable_related_constraints(void) {
-        /**
-         * This methods does not show information for the standard output.
-         **/
         for (auto &&proxy : m_variable_proxies) {
             for (auto &&variable : proxy.flat_indexed_variables()) {
                 variable.reset_related_constraint_ptrs();
@@ -595,45 +590,7 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void setup_has_nonlinear_constraint(void) {
-        /**
-         * This methods does not show information for the standard output.
-         **/
-        for (auto &&proxy : m_constraint_proxies) {
-            for (auto &&constraint : proxy.flat_indexed_constraints()) {
-                if (!constraint.is_linear()) {
-                    m_has_nonlinear_constraint = true;
-                    return;
-                }
-            }
-        }
-    }
-
-    /*************************************************************************/
-    inline constexpr void setup_is_enabled_fast_evaluation(void) {
-        /**
-         * This methods does not show information for the standard output.
-         **/
-        m_is_enabled_fast_evaluation = true;
-        if (m_has_nonlinear_constraint) {
-            m_is_enabled_fast_evaluation = false;
-        }
-
-        if (m_has_nonlinear_objective) {
-            m_is_enabled_fast_evaluation = false;
-        }
-
-        if (m_neighborhood.is_enabled_user_defined_move()) {
-            m_is_enabled_fast_evaluation = false;
-        }
-    }
-
-    /*************************************************************************/
     inline constexpr void setup_variable_sense(void) {
-        /**
-         * This methods does not show information for the standard output.
-         **/
-
         /**
          * This method is for re-optimizations. After an optimization,
          * the senses of the "Binary" decision variables can be changed
@@ -650,11 +607,7 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void setup_unique_name() {
-        /**
-         * This methods does not show information for the standard
-         *output.
-         **/
+    inline constexpr void setup_unique_name(void) {
         int variable_proxies_size   = m_variable_proxies.size();
         int expression_proxies_size = m_expression_proxies.size();
         int constraint_proxies_size = m_constraint_proxies.size();
@@ -706,32 +659,23 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void setup_has_fixed_variables(
-        const bool a_IS_ENABLED_PRINT) {
-        utility::print_single_line(a_IS_ENABLED_PRINT);
-        utility::print_message("Processing on the fixed decision variables...",
-                               a_IS_ENABLED_PRINT);
-        m_neighborhood.setup_has_fixed_variables(m_variable_proxies);
-        utility::print_message("Done.", a_IS_ENABLED_PRINT);
-    }
-
-    /*************************************************************************/
-    inline constexpr void verify_problem(const bool a_IS_ENABLED_PRINT) {
-        utility::print_single_line(a_IS_ENABLED_PRINT);
-        utility::print_message("Verifying the problem...", a_IS_ENABLED_PRINT);
-
-        if (m_variable_proxies.size() == 0) {
-            throw std::logic_error(utility::format_error_location(
-                __FILE__, __LINE__, __func__,
-                "No decision variables are defined."));
+    inline constexpr void setup_is_enabled_fast_evaluation(void) {
+        m_is_enabled_fast_evaluation = true;
+        for (auto &&proxy : m_constraint_proxies) {
+            for (auto &&constraint : proxy.flat_indexed_constraints()) {
+                if (!constraint.is_linear()) {
+                    m_is_enabled_fast_evaluation = false;
+                }
+            }
         }
-        if (m_constraint_proxies.size() == 0 && !m_is_defined_objective) {
-            throw std::logic_error(utility::format_error_location(
-                __FILE__, __LINE__, __func__,
-                "Neither objective nor constraint functions are "
-                "defined."));
+
+        if (!m_objective.is_linear()) {
+            m_is_enabled_fast_evaluation = false;
         }
-        utility::print_message("Done.", a_IS_ENABLED_PRINT);
+
+        if (m_neighborhood.is_enabled_user_defined_move()) {
+            m_is_enabled_fast_evaluation = false;
+        }
     }
 
     /*************************************************************************/
@@ -740,23 +684,9 @@ class Model {
         utility::print_single_line(a_IS_ENABLED_PRINT);
         utility::print_message("Detecting the neighborhood structure...",
                                a_IS_ENABLED_PRINT);
+        m_neighborhood.setup_has_fixed_variables(m_variable_proxies);
         m_neighborhood.setup_default_neighborhood(
             &m_variable_proxies, &m_constraint_proxies, a_IS_ENABLED_PARALLEL);
-        utility::print_message("Done.", a_IS_ENABLED_PRINT);
-    }
-
-    /*************************************************************************/
-    inline constexpr void setup_fixed_sensitivities(
-        const bool a_IS_ENABLED_PRINT) {
-        utility::print_single_line(a_IS_ENABLED_PRINT);
-        utility::print_message("Creating the sensitivity matrix...",
-                               a_IS_ENABLED_PRINT);
-
-        for (auto &&proxy : m_expression_proxies) {
-            for (auto &&expression : proxy.flat_indexed_expressions()) {
-                expression.setup_fixed_sensitivities();
-            }
-        }
         utility::print_message("Done.", a_IS_ENABLED_PRINT);
     }
 
@@ -1042,6 +972,21 @@ class Model {
                             "bound constraint."));
                     }
                 }
+            }
+        }
+        utility::print_message("Done.", a_IS_ENABLED_PRINT);
+    }
+
+    /*************************************************************************/
+    inline constexpr void setup_fixed_sensitivities(
+        const bool a_IS_ENABLED_PRINT) {
+        utility::print_single_line(a_IS_ENABLED_PRINT);
+        utility::print_message("Creating the sensitivity matrix...",
+                               a_IS_ENABLED_PRINT);
+
+        for (auto &&proxy : m_expression_proxies) {
+            for (auto &&expression : proxy.flat_indexed_expressions()) {
+                expression.setup_fixed_sensitivities();
             }
         }
         utility::print_message("Done.", a_IS_ENABLED_PRINT);
