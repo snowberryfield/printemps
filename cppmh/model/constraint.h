@@ -264,24 +264,24 @@ class Constraint : public AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr T_Expression evaluate_constraint(void) const {
+    inline constexpr T_Expression evaluate_constraint(void) const noexcept {
         return m_constraint_function({});
     }
 
     /*************************************************************************/
     inline constexpr T_Expression evaluate_constraint(
-        const Move<T_Variable, T_Expression> &a_MOVE) const {
+        const Move<T_Variable, T_Expression> &a_MOVE) const noexcept {
         return m_constraint_function(a_MOVE);
     }
 
     /*************************************************************************/
-    inline constexpr T_Expression evaluate_violation(void) const {
+    inline constexpr T_Expression evaluate_violation(void) const noexcept {
         return m_violation_function({});
     }
 
     /*************************************************************************/
     inline constexpr T_Expression evaluate_violation(
-        const Move<T_Variable, T_Expression> &a_MOVE) const {
+        const Move<T_Variable, T_Expression> &a_MOVE) const noexcept {
         return m_violation_function(a_MOVE);
     }
 

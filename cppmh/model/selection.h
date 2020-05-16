@@ -21,6 +21,9 @@ struct Selection {
     Variable<T_Variable, T_Expression> *              selected_variable_ptr;
     Constraint<T_Variable, T_Expression> *            constraint_ptr;
 
+    std::unordered_set<Constraint<T_Variable, T_Expression> *>
+        related_constraint_ptrs;
+
     /*************************************************************************/
     Selection(void) {
         this->initialize();
@@ -35,6 +38,7 @@ struct Selection {
         variable_ptrs.clear();
         selected_variable_ptr = nullptr;
         constraint_ptr        = nullptr;
+        related_constraint_ptrs.clear();
     }
 };
 }  // namespace model

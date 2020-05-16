@@ -75,14 +75,14 @@ TEST_F(TestAbstractMultiArrayElement, flat_index) {
 TEST_F(TestAbstractMultiArrayElement, set_multi_dimensional_index) {
     auto element = cppmh::model::Variable<int, double>::create_instance();
 
+    auto multi_dimensional_index_0 = random_integer();
     auto multi_dimensional_index_1 = random_integer();
-    auto multi_dimensional_index_2 = random_integer();
 
     element.set_multi_dimensional_index(
-        {multi_dimensional_index_1, multi_dimensional_index_2});
+        {multi_dimensional_index_0, multi_dimensional_index_1});
 
-    EXPECT_EQ(multi_dimensional_index_1, element.multi_dimensional_index()[0]);
-    EXPECT_EQ(multi_dimensional_index_2, element.multi_dimensional_index()[1]);
+    EXPECT_EQ(multi_dimensional_index_0, element.multi_dimensional_index()[0]);
+    EXPECT_EQ(multi_dimensional_index_1, element.multi_dimensional_index()[1]);
 }
 
 /*****************************************************************************/
