@@ -81,6 +81,7 @@ class ConstraintProxy : public AbstractMultiArray {
 
         std::vector<int> multi_dimensional_index(this->number_of_dimensions());
         for (auto &&constraint : m_constraints) {
+            constraint.set_id(m_id);
             constraint.set_flat_index(flat_index);
             this->update_multi_dimensional_index(&multi_dimensional_index,
                                                  flat_index);

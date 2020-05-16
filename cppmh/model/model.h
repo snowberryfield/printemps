@@ -55,6 +55,8 @@ class Model {
     std::vector<std::string> m_constraint_names;
 
     bool                                   m_is_defined_objective;
+    bool                                   m_has_nonlinear_constraint;
+    bool                                   m_has_nonlinear_objective;
     bool                                   m_is_minimization;
     Neighborhood<T_Variable, T_Expression> m_neighborhood;
     std::function<void(void)>              m_callback;
@@ -84,8 +86,10 @@ class Model {
         m_expression_names.clear();
         m_constraint_names.clear();
 
-        m_is_defined_objective = false;
-        m_is_minimization      = true;
+        m_is_defined_objective     = false;
+        m_has_nonlinear_constraint = false;
+        m_has_nonlinear_objective  = false;
+        m_is_minimization          = true;
         m_neighborhood.initialize();
         m_callback = [](void) {};
     }
@@ -409,6 +413,8 @@ class Model {
         m_objective            = objective;
         m_is_defined_objective = true;
         m_is_minimization      = true;
+
+        m_has_nonlinear_objective = true;
     }
 
     /*************************************************************************/
@@ -442,6 +448,8 @@ class Model {
         m_objective            = objective;
         m_is_defined_objective = true;
         m_is_minimization      = false;
+
+        m_has_nonlinear_objective = true;
     }
 
     /*************************************************************************/
@@ -468,6 +476,16 @@ class Model {
     /*************************************************************************/
     inline constexpr bool is_defined_objective(void) const {
         return m_is_defined_objective;
+    }
+
+    /*************************************************************************/
+    inline constexpr bool has_nonlinear_constraint(void) const {
+        return m_has_nonlinear_constraint;
+    }
+
+    /*************************************************************************/
+    inline constexpr bool has_nonlinear_objective(void) const {
+        return m_has_nonlinear_objective;
     }
 
     /*************************************************************************/
@@ -510,16 +528,53 @@ class Model {
     }
 
     /*************************************************************************/
+    inline constexpr void setup_variable_related_constraints(void) {
+        /**
+         * This methods does not show information for the standard output.
+         **/
+        for (auto &&proxy : m_variable_proxies) {
+            for (auto &&variable : proxy.flat_indexed_variables()) {
+                variable.reset_related_constraint_ptrs();
+            }
+        }
+        for (auto &&proxy : m_constraint_proxies) {
+            for (auto &&constraint : proxy.flat_indexed_constraints()) {
+                for (auto &&sensitivity :
+                     constraint.expression().sensitivities()) {
+                    sensitivity.first->register_related_constraint_ptr(
+                        &constraint);
+                }
+            }
+        }
+    }
+
+    /*************************************************************************/
+    inline constexpr void setup_has_nonlinear_constraint(void) {
+        /**
+         * This methods does not show information for the standard output.
+         **/
+        for (auto &&proxy : m_constraint_proxies) {
+            for (auto &&constraint : proxy.flat_indexed_constraints()) {
+                if (!constraint.is_linear()) {
+                    m_has_nonlinear_constraint = true;
+                    return;
+                }
+            }
+        }
+    }
+
+    /*************************************************************************/
     inline constexpr void setup_variable_sense(void) {
         /**
          * This methods does not show information for the standard output.
          **/
 
         /**
-         * This method is for re-optimizations. After an optimization, the
-         * senses of the "Binary" decision variables can be changed to
-         * "Selection" by automatic detection of the neighborhood. This method
-         * recovers the "Selection" decision variables into "Binary".
+         * This method is for re-optimizations. After an optimization,
+         * the senses of the "Binary" decision variables can be changed
+         * to "Selection" by automatic detection of the neighborhood.
+         * This method recovers the "Selection" decision variables into
+         * "Binary".
          */
 
         for (auto &&proxy : m_variable_proxies) {
@@ -532,7 +587,8 @@ class Model {
     /*************************************************************************/
     inline constexpr void setup_unique_name() {
         /**
-         * This methods does not show information for the standard output.
+         * This methods does not show information for the standard
+         *output.
          **/
         int variable_proxies_size   = m_variable_proxies.size();
         int expression_proxies_size = m_expression_proxies.size();
@@ -607,7 +663,8 @@ class Model {
         if (m_constraint_proxies.size() == 0 && !m_is_defined_objective) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
-                "Neither objective nor constraint functions are defined."));
+                "Neither objective nor constraint functions are "
+                "defined."));
         }
         utility::print_message("Done.", a_IS_ENABLED_PRINT);
     }
@@ -643,7 +700,8 @@ class Model {
         const bool a_IS_ENABLED_CORRECTON, const bool a_IS_ENABLED_PRINT) {
         utility::print_single_line(a_IS_ENABLED_PRINT);
         utility::print_message(
-            "Verifying the initial values of the binary decision variables "
+            "Verifying the initial values of the binary decision "
+            "variables "
             "included in the selection constraints...",
             a_IS_ENABLED_PRINT);
 
@@ -682,34 +740,35 @@ class Model {
             }
 
             /**
-             * Return logic error if there are more than 1 fixed selected
-             * variables.
+             * Return logic error if there are more than 1 fixed
+             * selected variables.
              */
             if (fixed_selected_variable_ptrs.size() > 1) {
                 throw std::logic_error(utility::format_error_location(
                     __FILE__, __LINE__, __func__,
-                    "There are more than one fixed selected variables."));
+                    "There are more than one fixed selected "
+                    "variables."));
             }
 
             /**
-             * Correct initial values or return logic error if there is a
-             * variable of which initial value violates binary constraint.
+             * Correct initial values or return logic error if there is
+             * a variable of which initial value violates binary
+             * constraint.
              */
             if (invalid_variable_ptrs.size() > 0) {
                 if (a_IS_ENABLED_CORRECTON) {
                     for (auto &&variable_ptr : invalid_variable_ptrs) {
-                        auto old_value = variable_ptr->value();
-                        auto new_value = 0;
+                        T_Variable old_value = variable_ptr->value();
+                        T_Variable new_value = 0;
 
                         variable_ptr->set_value_if_not_fixed(new_value);
 
-                        auto label =
-                            m_variable_names[variable_ptr->id()] +
-                            m_variable_proxies[variable_ptr->id()]
-                                .indices_label(variable_ptr->flat_index());
                         utility::print_warning(
-                            "The initial value " + label + " = " +
-                                std::to_string(old_value) +
+                            "The initial value " +
+                                m_variable_names[variable_ptr->id()] +
+                                m_variable_proxies[variable_ptr->id()]
+                                    .indices_label(variable_ptr->flat_index()) +
+                                " = " + std::to_string(old_value) +
                                 " is corrected to " +
                                 std::to_string(new_value) + ".",
                             a_IS_ENABLED_PRINT);
@@ -718,7 +777,8 @@ class Model {
                 } else {
                     throw std::logic_error(utility::format_error_location(
                         __FILE__, __LINE__, __func__,
-                        "There is a variable of which initial value "
+                        "There is a variable of which initial "
+                        "value "
                         "violates "
                         "binary constraint."));
                 }
@@ -741,18 +801,18 @@ class Model {
 
                     for (auto &&variable_ptr : selected_variable_ptrs) {
                         if (variable_ptr != selected_variable_ptr) {
-                            auto old_value = 1;
-                            auto new_value = 0;
+                            T_Variable old_value = 1;
+                            T_Variable new_value = 0;
 
                             variable_ptr->set_value_if_not_fixed(new_value);
 
-                            auto label =
-                                m_variable_names[variable_ptr->id()] +
-                                m_variable_proxies[variable_ptr->id()]
-                                    .indices_label(variable_ptr->flat_index());
                             utility::print_warning(
-                                "The initial value " + label + " = " +
-                                    std::to_string(old_value) +
+                                "The initial value " +
+                                    m_variable_names[variable_ptr->id()] +
+                                    m_variable_proxies[variable_ptr->id()]
+                                        .indices_label(
+                                            variable_ptr->flat_index()) +
+                                    " = " + std::to_string(old_value) +
                                     " is corrected to " +
                                     std::to_string(new_value) + ".",
                                 a_IS_ENABLED_PRINT);
@@ -765,29 +825,30 @@ class Model {
                 } else {
                     throw std::logic_error(utility::format_error_location(
                         __FILE__, __LINE__, __func__,
-                        "There are more than one selected variables."));
+                        "There are more than one selected "
+                        "variables."));
                 }
             }
             /**
-             * Correct initial values or return logic error if there is no
-             * selected variables.
+             * Correct initial values or return logic error if there is
+             * no selected variables.
              */
             else if (selected_variable_ptrs.size() == 0) {
                 if (a_IS_ENABLED_CORRECTON) {
-                    auto old_value    = 0;
-                    auto new_value    = 1;
-                    bool is_corrected = false;
+                    T_Variable old_value    = 0;
+                    T_Variable new_value    = 1;
+                    bool       is_corrected = false;
                     for (auto &&variable_ptr : selection.variable_ptrs) {
                         if (!variable_ptr->is_fixed()) {
                             variable_ptr->set_value_if_not_fixed(new_value);
 
-                            auto label =
-                                m_variable_names[variable_ptr->id()] +
-                                m_variable_proxies[variable_ptr->id()]
-                                    .indices_label(variable_ptr->flat_index());
                             utility::print_warning(
-                                "The initial value " + label + " = " +
-                                    std::to_string(old_value) +
+                                "The initial value " +
+                                    m_variable_names[variable_ptr->id()] +
+                                    m_variable_proxies[variable_ptr->id()]
+                                        .indices_label(
+                                            variable_ptr->flat_index()) +
+                                    " = " + std::to_string(old_value) +
                                     " is corrected to " +
                                     std::to_string(new_value) + ".",
                                 a_IS_ENABLED_PRINT);
@@ -798,7 +859,8 @@ class Model {
                     if (!is_corrected) {
                         throw std::logic_error(utility::format_error_location(
                             __FILE__, __LINE__, __func__,
-                            "The initial value could not be modified "
+                            "The initial value could not be "
+                            "modified "
                             "because "
                             "all variables are fixed."));
                     };
@@ -831,7 +893,8 @@ class Model {
                             throw std::logic_error(
                                 utility::format_error_location(
                                     __FILE__, __LINE__, __func__,
-                                    "There is an invalid fixed variable."));
+                                    "There is an invalid fixed "
+                                    "variable."));
                         }
 
                         if (a_IS_ENABLED_CORRECTON) {
@@ -846,12 +909,11 @@ class Model {
 
                             variable.set_value_if_not_fixed(new_value);
 
-                            auto label =
-                                m_variable_names[variable.id()] +
-                                proxy.indices_label(variable.flat_index());
                             utility::print_warning(
-                                "The initial value " + label + " = " +
-                                    std::to_string(old_value) +
+                                "The initial value " +
+                                    m_variable_names[variable.id()] +
+                                    proxy.indices_label(variable.flat_index()) +
+                                    " = " + std::to_string(old_value) +
                                     " is corrected to " +
                                     std::to_string(new_value) + ".",
                                 a_IS_ENABLED_PRINT);
@@ -900,18 +962,19 @@ class Model {
 
                         variable.set_value_if_not_fixed(new_value);
 
-                        auto label = m_variable_names[variable.id()] +
-                                     proxy.indices_label(variable.flat_index());
                         utility::print_warning(
-                            "The initial value " + label + " = " +
-                                std::to_string(old_value) +
+                            "The initial value " +
+                                m_variable_names[variable.id()] +
+                                proxy.indices_label(variable.flat_index()) +
+                                " = " + std::to_string(old_value) +
                                 " is corrected to " +
                                 std::to_string(new_value) + ".",
                             a_IS_ENABLED_PRINT);
                     } else {
                         throw std::logic_error(utility::format_error_location(
                             __FILE__, __LINE__, __func__,
-                            "An initial value violates the lower or "
+                            "An initial value violates the lower "
+                            "or "
                             "upper "
                             "bound constraint."));
                     }
@@ -955,16 +1018,14 @@ class Model {
          * Update in order of expressions -> objective, constraints. For
          * typical problem.
          */
-        for (auto &&expression_proxy : m_expression_proxies) {
-            for (auto &&expression :
-                 expression_proxy.flat_indexed_expressions()) {
+        for (auto &&proxy : m_expression_proxies) {
+            for (auto &&expression : proxy.flat_indexed_expressions()) {
                 expression.update();
             }
         }
 
-        for (auto &&constraint_proxy : m_constraint_proxies) {
-            for (auto &&constraint :
-                 constraint_proxy.flat_indexed_constraints()) {
+        for (auto &&proxy : m_constraint_proxies) {
+            for (auto &&constraint : proxy.flat_indexed_constraints()) {
                 constraint.update();
             }
         }
@@ -980,18 +1041,16 @@ class Model {
          */
         m_objective.update(a_MOVE);
 
-        for (auto &&constraint_proxy : m_constraint_proxies) {
-            for (auto &&constraint :
-                 constraint_proxy.flat_indexed_constraints()) {
+        for (auto &&proxy : m_constraint_proxies) {
+            for (auto &&constraint : proxy.flat_indexed_constraints()) {
                 if (constraint.is_enabled()) {
                     constraint.update(a_MOVE);
                 }
             }
         }
 
-        for (auto &&expression_proxy : m_expression_proxies) {
-            for (auto &&expression :
-                 expression_proxy.flat_indexed_expressions()) {
+        for (auto &&proxy : m_expression_proxies) {
+            for (auto &&expression : proxy.flat_indexed_expressions()) {
                 if (expression.is_enabled()) {
                     expression.update(a_MOVE);
                 }
@@ -1013,13 +1072,13 @@ class Model {
         const std::vector<ValueProxy<double>>
             &a_LOCAL_PENALTY_COEFFICIENT_PROXIES,
         const std::vector<ValueProxy<double>>
-            &a_GLOBAL_PENALTY_COEFFICIENT_PROXIES) noexcept {
-        double local_penalty  = 0.0;
-        double global_penalty = 0.0;
+            &a_GLOBAL_PENALTY_COEFFICIENT_PROXIES) const noexcept {
+        double total_violation = 0.0;
+        double local_penalty   = 0.0;
+        double global_penalty  = 0.0;
 
         int  constraint_proxies_size  = m_constraint_proxies.size();
         bool is_constraint_improvable = false;
-        bool is_feasible              = true;
 
         for (auto i = 0; i < constraint_proxies_size; i++) {
             auto &constraints =
@@ -1030,15 +1089,12 @@ class Model {
                 if (!constraints[j].is_enabled()) {
                     continue;
                 }
-                auto violation = constraints[j].evaluate_violation(a_MOVE);
+                double violation = constraints[j].evaluate_violation(a_MOVE);
 
                 if (violation < constraints[j].violation_value()) {
                     is_constraint_improvable = true;
                 }
-
-                if (violation > 0) {
-                    is_feasible = false;
-                }
+                total_violation += violation;
 
                 local_penalty +=
                     a_LOCAL_PENALTY_COEFFICIENT_PROXIES[i].flat_indexed_values(
@@ -1062,6 +1118,7 @@ class Model {
 
         score.objective                  = objective;
         score.objective_improvement      = objective_improvement;
+        score.total_violation            = total_violation;
         score.local_penalty              = local_penalty;
         score.global_penalty             = global_penalty;
         score.local_augmented_objective  = local_augmented_objective;
@@ -1075,7 +1132,76 @@ class Model {
             score.is_objective_improvable = false;
         }
         score.is_constraint_improvable = is_constraint_improvable;
-        score.is_feasible              = is_feasible;
+        score.is_feasible              = !(total_violation > 0);
+
+        return score;
+    }
+
+    /*************************************************************************/
+    inline SolutionScore evaluate(
+        const Move<T_Variable, T_Expression> &a_MOVE,
+        const SolutionScore &                 a_CURRENT_SCORE,
+        const std::vector<ValueProxy<double>>
+            &a_LOCAL_PENALTY_COEFFICIENT_PROXIES,
+        const std::vector<ValueProxy<double>>
+            &a_GLOBAL_PENALTY_COEFFICIENT_PROXIES) const noexcept {
+        SolutionScore score = a_CURRENT_SCORE;
+
+        bool is_constraint_improvable = false;
+
+        double total_violation = score.total_violation;
+        double local_penalty   = score.local_penalty;
+        double global_penalty  = score.global_penalty;
+
+        for (auto &&constraint_ptr : a_MOVE.related_constraint_ptrs) {
+            if (!constraint_ptr->is_enabled()) {
+                continue;
+            }
+            double violation_diff = constraint_ptr->evaluate_violation(a_MOVE) -
+                                    constraint_ptr->violation_value();
+            total_violation += violation_diff;
+
+            if (violation_diff < 0) {
+                is_constraint_improvable = true;
+            }
+
+            int id    = constraint_ptr->id();
+            int index = constraint_ptr->flat_index();
+
+            local_penalty +=
+                violation_diff *
+                a_LOCAL_PENALTY_COEFFICIENT_PROXIES[id].flat_indexed_values(
+                    index);
+            global_penalty +=
+                violation_diff *
+                a_GLOBAL_PENALTY_COEFFICIENT_PROXIES[id].flat_indexed_values(
+                    index);
+        }
+
+        double objective = m_objective.evaluate(a_MOVE) * this->sign();
+        double objective_improvement =
+            (m_objective.value() - objective) * this->sign();
+
+        double local_augmented_objective  = objective + local_penalty;
+        double global_augmented_objective = objective + global_penalty;
+
+        score.objective                  = objective;
+        score.objective_improvement      = objective_improvement;
+        score.total_violation            = total_violation;
+        score.local_penalty              = local_penalty;
+        score.global_penalty             = global_penalty;
+        score.local_augmented_objective  = local_augmented_objective;
+        score.global_augmented_objective = global_augmented_objective;
+
+        if (m_is_minimization && objective < m_objective.value()) {
+            score.is_objective_improvable = true;
+        } else if (!m_is_minimization && objective < -m_objective.value()) {
+            score.is_objective_improvable = true;
+        } else {
+            score.is_objective_improvable = false;
+        }
+        score.is_constraint_improvable = is_constraint_improvable;
+        score.is_feasible              = !(total_violation > 0);
 
         return score;
     }
@@ -1086,9 +1212,9 @@ class Model {
     generate_variable_parameter_proxies(const T_Value a_VALUE) const {
         std::vector<ValueProxy<T_Value>> variable_parameter_proxies;
 
-        for (const auto &variable_proxy : m_variable_proxies) {
-            ValueProxy<T_Value> variable_parameter_proxy(
-                variable_proxy.id(), variable_proxy.shape());
+        for (const auto &proxy : m_variable_proxies) {
+            ValueProxy<T_Value> variable_parameter_proxy(proxy.id(),
+                                                         proxy.shape());
             variable_parameter_proxy.fill(a_VALUE);
             variable_parameter_proxies.push_back(variable_parameter_proxy);
         }
@@ -1101,9 +1227,9 @@ class Model {
     generate_expression_parameter_proxies(const T_Value a_VALUE) const {
         std::vector<ValueProxy<T_Value>> expression_parameter_proxies;
 
-        for (const auto &expression_proxy : m_expression_proxies) {
-            ValueProxy<T_Value> expression_parameter_proxy(
-                expression_proxy.id(), expression_proxy.shape());
+        for (const auto &proxy : m_expression_proxies) {
+            ValueProxy<T_Value> expression_parameter_proxy(proxy.id(),
+                                                           proxy.shape());
             expression_parameter_proxy.fill(a_VALUE);
             expression_parameter_proxies.push_back(expression_parameter_proxy);
         }
@@ -1116,9 +1242,9 @@ class Model {
     generate_constraint_parameter_proxies(const T_Value a_VALUE) const {
         std::vector<ValueProxy<T_Value>> constraint_parameter_proxies;
 
-        for (const auto &constraint_proxy : m_constraint_proxies) {
-            ValueProxy<T_Value> constraint_parameter_proxy(
-                constraint_proxy.id(), constraint_proxy.shape());
+        for (const auto &proxy : m_constraint_proxies) {
+            ValueProxy<T_Value> constraint_parameter_proxy(proxy.id(),
+                                                           proxy.shape());
             constraint_parameter_proxy.fill(a_VALUE);
             constraint_parameter_proxies.push_back(constraint_parameter_proxy);
         }
