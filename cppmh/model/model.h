@@ -57,6 +57,7 @@ class Model {
     bool                                   m_is_defined_objective;
     bool                                   m_has_nonlinear_constraint;
     bool                                   m_has_nonlinear_objective;
+    bool                                   m_is_enabled_fast_evaluation;
     bool                                   m_is_minimization;
     Neighborhood<T_Variable, T_Expression> m_neighborhood;
     std::function<void(void)>              m_callback;
@@ -86,10 +87,11 @@ class Model {
         m_expression_names.clear();
         m_constraint_names.clear();
 
-        m_is_defined_objective     = false;
-        m_has_nonlinear_constraint = false;
-        m_has_nonlinear_objective  = false;
-        m_is_minimization          = true;
+        m_is_defined_objective       = false;
+        m_has_nonlinear_constraint   = false;
+        m_has_nonlinear_objective    = false;
+        m_is_enabled_fast_evaluation = true;
+        m_is_minimization            = true;
         m_neighborhood.initialize();
         m_callback = [](void) {};
     }
@@ -489,6 +491,11 @@ class Model {
     }
 
     /*************************************************************************/
+    inline constexpr bool is_enabled_fast_evaluation(void) const {
+        return m_is_enabled_fast_evaluation;
+    }
+
+    /*************************************************************************/
     inline constexpr bool is_minimization(void) const {
         return m_is_minimization;
     }
@@ -528,6 +535,45 @@ class Model {
     }
 
     /*************************************************************************/
+    inline constexpr void setup(
+        const bool a_IS_ENABLED_PARALLEL_NEIGHBORHOOD_UPDATE,
+        const bool a_IS_ENABLED_INITIAL_VALUE_CORRECTION,
+        const bool a_IS_ENABLED_PRINT) {
+        this->verify_problem(a_IS_ENABLED_PRINT);
+
+        this->setup_variable_related_constraints();
+        this->setup_variable_sense();
+        this->setup_unique_name();
+
+        this->setup_has_nonlinear_constraint();
+        this->setup_is_enabled_fast_evaluation();
+
+        this->setup_default_neighborhood(
+            a_IS_ENABLED_PARALLEL_NEIGHBORHOOD_UPDATE, a_IS_ENABLED_PRINT);
+
+        /**
+         * If the user-defined_neighborhood is set, default neighborhood should
+         * be disabled to avoid possible inconsistencies.
+         */
+        if (m_neighborhood.is_enabled_user_defined_move()) {
+            m_neighborhood.disable_default_move();
+        }
+
+        this->setup_has_fixed_variables(a_IS_ENABLED_PRINT);
+
+        this->verify_and_correct_selection_variables_initial_values(
+            a_IS_ENABLED_INITIAL_VALUE_CORRECTION, a_IS_ENABLED_PRINT);
+
+        this->verify_and_correct_binary_variables_initial_values(
+            a_IS_ENABLED_INITIAL_VALUE_CORRECTION, a_IS_ENABLED_PRINT);
+
+        this->verify_and_correct_integer_variables_initial_values(
+            a_IS_ENABLED_INITIAL_VALUE_CORRECTION, a_IS_ENABLED_PRINT);
+
+        this->setup_fixed_sensitivities(a_IS_ENABLED_PRINT);
+    }
+
+    /*************************************************************************/
     inline constexpr void setup_variable_related_constraints(void) {
         /**
          * This methods does not show information for the standard output.
@@ -560,6 +606,25 @@ class Model {
                     return;
                 }
             }
+        }
+    }
+
+    /*************************************************************************/
+    inline constexpr void setup_is_enabled_fast_evaluation(void) {
+        /**
+         * This methods does not show information for the standard output.
+         **/
+        m_is_enabled_fast_evaluation = true;
+        if (m_has_nonlinear_constraint) {
+            m_is_enabled_fast_evaluation = false;
+        }
+
+        if (m_has_nonlinear_objective) {
+            m_is_enabled_fast_evaluation = false;
+        }
+
+        if (m_neighborhood.is_enabled_user_defined_move()) {
+            m_is_enabled_fast_evaluation = false;
         }
     }
 
@@ -973,9 +1038,7 @@ class Model {
                     } else {
                         throw std::logic_error(utility::format_error_location(
                             __FILE__, __LINE__, __func__,
-                            "An initial value violates the lower "
-                            "or "
-                            "upper "
+                            "An initial value violates the lower or upper "
                             "bound constraint."));
                     }
                 }
@@ -1008,7 +1071,7 @@ class Model {
         }
         this->verify_and_correct_selection_variables_initial_values(false,
                                                                     false);
-        this->verify_and_correct_integer_variables_initial_values(false, false);
+        this->verify_and_correct_binary_variables_initial_values(false, false);
         this->verify_and_correct_integer_variables_initial_values(false, false);
     }
 
