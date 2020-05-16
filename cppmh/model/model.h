@@ -528,20 +528,20 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void setup_variable_contributive_constraints(void) {
+    inline constexpr void setup_variable_related_constraints(void) {
         /**
          * This methods does not show information for the standard output.
          **/
         for (auto &&proxy : m_variable_proxies) {
             for (auto &&variable : proxy.flat_indexed_variables()) {
-                variable.reset_contributive_constraint_ptrs();
+                variable.reset_related_constraint_ptrs();
             }
         }
         for (auto &&proxy : m_constraint_proxies) {
             for (auto &&constraint : proxy.flat_indexed_constraints()) {
                 for (auto &&sensitivity :
                      constraint.expression().sensitivities()) {
-                    sensitivity.first->register_contributive_constraint_ptr(
+                    sensitivity.first->register_related_constraint_ptr(
                         &constraint);
                 }
             }
@@ -1156,7 +1156,7 @@ class Model {
         double local_penalty   = score.local_penalty;
         double global_penalty  = score.global_penalty;
 
-        for (auto &&constraint_ptr : a_MOVE.contributive_constraint_ptrs) {
+        for (auto &&constraint_ptr : a_MOVE.related_constraint_ptrs) {
             if (!constraint_ptr->is_enabled()) {
                 continue;
             }

@@ -37,7 +37,7 @@ struct Move {
     std::vector<Alteration<T_Variable, T_Expression>> alterations;
     MoveSense                                         sense;
     std::unordered_set<Constraint<T_Variable, T_Expression> *>
-        contributive_constraint_ptrs;
+        related_constraint_ptrs;
     Move(void) : sense(MoveSense::UserDefined) {
         ;
     }

@@ -314,17 +314,17 @@ class Neighborhood {
 
         for (auto i = 0; i < selections_size; i++) {
             for (auto &variable_ptr : m_selections[i].variable_ptrs) {
-                auto &ptrs = variable_ptr->contributive_constraint_ptrs();
-                m_selections[i].contributive_constraint_ptrs.insert(
-                    ptrs.begin(), ptrs.end());
+                auto &ptrs = variable_ptr->related_constraint_ptrs();
+                m_selections[i].related_constraint_ptrs.insert(ptrs.begin(),
+                                                               ptrs.end());
             }
         }
 
         for (auto i = 0; i < selection_variable_ptrs_size; i++) {
-            m_selection_moves[i].contributive_constraint_ptrs =
+            m_selection_moves[i].related_constraint_ptrs =
                 m_selection_variable_ptrs[i]
                     ->selection_ptr()
-                    ->contributive_constraint_ptrs;
+                    ->related_constraint_ptrs;
         }
 
         auto selection_move_updater = [this,
@@ -363,8 +363,8 @@ class Neighborhood {
         m_binary_moves.resize(binary_variable_ptrs_size);
 
         for (auto i = 0; i < binary_variable_ptrs_size; i++) {
-            m_binary_moves[i].contributive_constraint_ptrs =
-                m_binary_variable_ptrs[i]->contributive_constraint_ptrs();
+            m_binary_moves[i].related_constraint_ptrs =
+                m_binary_variable_ptrs[i]->related_constraint_ptrs();
         }
 
         auto binary_move_updater = [this,
@@ -398,10 +398,10 @@ class Neighborhood {
         m_integer_moves.resize(2 * m_integer_variable_ptrs.size());
 
         for (auto i = 0; i < integer_variable_ptrs_size; i++) {
-            m_integer_moves[2 * i].contributive_constraint_ptrs =
-                m_integer_variable_ptrs[i]->contributive_constraint_ptrs();
-            m_integer_moves[2 * i + 1].contributive_constraint_ptrs =
-                m_integer_variable_ptrs[i]->contributive_constraint_ptrs();
+            m_integer_moves[2 * i].related_constraint_ptrs =
+                m_integer_variable_ptrs[i]->related_constraint_ptrs();
+            m_integer_moves[2 * i + 1].related_constraint_ptrs =
+                m_integer_variable_ptrs[i]->related_constraint_ptrs();
         }
 
         auto integer_move_updater = [this,

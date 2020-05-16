@@ -96,7 +96,7 @@ model::NamedSolution<T_Variable, T_Expression> solve(
 
     model->verify_problem(master_option.verbose >= Verbose::Warning);
 
-    model->setup_variable_contributive_constraints();
+    model->setup_variable_related_constraints();
     model->setup_variable_sense();
     model->setup_unique_name();
 

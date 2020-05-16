@@ -568,17 +568,17 @@ TEST_F(TestNeighborhood, setup_move_updater) {
             }
 
             for (auto& constraint_ptr :
-                 move.alterations[0].first->contributive_constraint_ptrs()) {
-                EXPECT_EQ(true, move.contributive_constraint_ptrs.find(
-                                    constraint_ptr) !=
-                                    move.contributive_constraint_ptrs.end());
+                 move.alterations[0].first->related_constraint_ptrs()) {
+                EXPECT_EQ(true,
+                          move.related_constraint_ptrs.find(constraint_ptr) !=
+                              move.related_constraint_ptrs.end());
             }
 
             for (auto& constraint_ptr :
-                 move.alterations[1].first->contributive_constraint_ptrs()) {
-                EXPECT_EQ(true, move.contributive_constraint_ptrs.find(
-                                    constraint_ptr) !=
-                                    move.contributive_constraint_ptrs.end());
+                 move.alterations[1].first->related_constraint_ptrs()) {
+                EXPECT_EQ(true,
+                          move.related_constraint_ptrs.find(constraint_ptr) !=
+                              move.related_constraint_ptrs.end());
             }
         }
     }
@@ -600,10 +600,10 @@ TEST_F(TestNeighborhood, setup_move_updater) {
             EXPECT_EQ(true, move.alterations[0].second);
 
             for (auto& constraint_ptr :
-                 move.alterations[0].first->contributive_constraint_ptrs()) {
-                EXPECT_EQ(true, move.contributive_constraint_ptrs.find(
-                                    constraint_ptr) !=
-                                    move.contributive_constraint_ptrs.end());
+                 move.alterations[0].first->related_constraint_ptrs()) {
+                EXPECT_EQ(true,
+                          move.related_constraint_ptrs.find(constraint_ptr) !=
+                              move.related_constraint_ptrs.end());
             }
         }
     }
@@ -624,13 +624,10 @@ TEST_F(TestNeighborhood, setup_move_updater) {
                       moves[2 * i].alterations[0].first->value() + 1);
 
             for (auto& constraint_ptr :
-                 moves[2 * i]
-                     .alterations[0]
-                     .first->contributive_constraint_ptrs()) {
-                EXPECT_EQ(true,
-                          moves[2 * i].contributive_constraint_ptrs.find(
-                              constraint_ptr) !=
-                              moves[2 * i].contributive_constraint_ptrs.end());
+                 moves[2 * i].alterations[0].first->related_constraint_ptrs()) {
+                EXPECT_EQ(true, moves[2 * i].related_constraint_ptrs.find(
+                                    constraint_ptr) !=
+                                    moves[2 * i].related_constraint_ptrs.end());
             }
 
             EXPECT_EQ(1, static_cast<int>(moves[2 * i + 1].alterations.size()));
@@ -639,15 +636,13 @@ TEST_F(TestNeighborhood, setup_move_updater) {
             EXPECT_EQ(moves[2 * i + 1].alterations[0].second,
                       moves[2 * i + 1].alterations[0].first->value() - 1);
 
-            for (auto& constraint_ptr :
-                 moves[2 * i + 1]
-                     .alterations[0]
-                     .first->contributive_constraint_ptrs()) {
-                EXPECT_EQ(
-                    true,
-                    moves[2 * i + 1].contributive_constraint_ptrs.find(
-                        constraint_ptr) !=
-                        moves[2 * i + 1].contributive_constraint_ptrs.end());
+            for (auto& constraint_ptr : moves[2 * i + 1]
+                                            .alterations[0]
+                                            .first->related_constraint_ptrs()) {
+                EXPECT_EQ(true,
+                          moves[2 * i + 1].related_constraint_ptrs.find(
+                              constraint_ptr) !=
+                              moves[2 * i + 1].related_constraint_ptrs.end());
             }
         }
     }

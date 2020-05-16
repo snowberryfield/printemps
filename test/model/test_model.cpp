@@ -566,7 +566,7 @@ TEST_F(TestModel, neighborhood) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModel, setup_variable_contributive_constraints) {
+TEST_F(TestModel, setup_variable_related_constraints) {
     cppmh::model::Model<int, double> model;
 
     auto& x = model.create_variables("x", 10, 0, 1);
@@ -577,30 +577,27 @@ TEST_F(TestModel, setup_variable_contributive_constraints) {
     g(1)    = y.selection();
     g(2)    = x(0) + y.sum({0, cppmh::model::All}) >= 1;
 
-    model.setup_variable_contributive_constraints();
+    model.setup_variable_related_constraints();
 
     for (auto i = 0; i < 10; i++) {
-        EXPECT_EQ(true, x(i).contributive_constraint_ptrs().find(&g(0)) !=
-                            x(i).contributive_constraint_ptrs().end());
-        EXPECT_EQ(false, x(i).contributive_constraint_ptrs().find(&g(1)) !=
-                             x(i).contributive_constraint_ptrs().end());
+        EXPECT_EQ(true, x(i).related_constraint_ptrs().find(&g(0)) !=
+                            x(i).related_constraint_ptrs().end());
+        EXPECT_EQ(false, x(i).related_constraint_ptrs().find(&g(1)) !=
+                             x(i).related_constraint_ptrs().end());
         /// Only x(0) is related to g(2).
-        EXPECT_EQ(i == 0, x(i).contributive_constraint_ptrs().find(&g(2)) !=
-                              x(i).contributive_constraint_ptrs().end());
+        EXPECT_EQ(i == 0, x(i).related_constraint_ptrs().find(&g(2)) !=
+                              x(i).related_constraint_ptrs().end());
     }
 
     for (auto i = 0; i < 10; i++) {
         for (auto j = 0; j < 10; j++) {
-            EXPECT_EQ(false,
-                      y(i, j).contributive_constraint_ptrs().find(&g(0)) !=
-                          y(i, j).contributive_constraint_ptrs().end());
-            EXPECT_EQ(true,
-                      y(i, j).contributive_constraint_ptrs().find(&g(1)) !=
-                          y(i, j).contributive_constraint_ptrs().end());
+            EXPECT_EQ(false, y(i, j).related_constraint_ptrs().find(&g(0)) !=
+                                 y(i, j).related_constraint_ptrs().end());
+            EXPECT_EQ(true, y(i, j).related_constraint_ptrs().find(&g(1)) !=
+                                y(i, j).related_constraint_ptrs().end());
             /// Only y(0,*) is related to g(2).
-            EXPECT_EQ(i == 0,
-                      y(i, j).contributive_constraint_ptrs().find(&g(2)) !=
-                          y(i, j).contributive_constraint_ptrs().end());
+            EXPECT_EQ(i == 0, y(i, j).related_constraint_ptrs().find(&g(2)) !=
+                                  y(i, j).related_constraint_ptrs().end());
         }
     }
 }
@@ -1258,7 +1255,7 @@ TEST_F(TestModel, evaluate) {
 
         model.minimize(p);
 
-        model.setup_variable_contributive_constraints();
+        model.setup_variable_related_constraints();
         model.setup_variable_sense();
         model.setup_default_neighborhood(false, false);
 
@@ -1276,8 +1273,8 @@ TEST_F(TestModel, evaluate) {
             for (auto&& element : x.flat_indexed_variables()) {
                 move.alterations.emplace_back(&element, 1);
                 for (auto&& constraint_ptr :
-                     element.contributive_constraint_ptrs()) {
-                    move.contributive_constraint_ptrs.insert(constraint_ptr);
+                     element.related_constraint_ptrs()) {
+                    move.related_constraint_ptrs.insert(constraint_ptr);
                 }
             }
 
@@ -1320,8 +1317,8 @@ TEST_F(TestModel, evaluate) {
             for (auto&& element : x.flat_indexed_variables()) {
                 move.alterations.emplace_back(&element, 0);
                 for (auto&& constraint_ptr :
-                     element.contributive_constraint_ptrs()) {
-                    move.contributive_constraint_ptrs.insert(constraint_ptr);
+                     element.related_constraint_ptrs()) {
+                    move.related_constraint_ptrs.insert(constraint_ptr);
                 }
             }
 
@@ -1359,9 +1356,8 @@ TEST_F(TestModel, evaluate) {
             cppmh::model::Move<int, double> move;
             for (auto i = 0; i < 5; i++) {
                 move.alterations.emplace_back(&x(i), 1);
-                for (auto&& constraint_ptr :
-                     x(i).contributive_constraint_ptrs()) {
-                    move.contributive_constraint_ptrs.insert(constraint_ptr);
+                for (auto&& constraint_ptr : x(i).related_constraint_ptrs()) {
+                    move.related_constraint_ptrs.insert(constraint_ptr);
                 }
             }
 
@@ -1425,7 +1421,7 @@ TEST_F(TestModel, evaluate) {
 
         model.maximize(p);
 
-        model.setup_variable_contributive_constraints();
+        model.setup_variable_related_constraints();
         model.setup_variable_sense();
         model.setup_default_neighborhood(false, false);
 
@@ -1442,8 +1438,8 @@ TEST_F(TestModel, evaluate) {
             for (auto&& element : x.flat_indexed_variables()) {
                 move.alterations.emplace_back(&element, 1);
                 for (auto&& constraint_ptr :
-                     element.contributive_constraint_ptrs()) {
-                    move.contributive_constraint_ptrs.insert(constraint_ptr);
+                     element.related_constraint_ptrs()) {
+                    move.related_constraint_ptrs.insert(constraint_ptr);
                 }
             }
 
@@ -1484,8 +1480,8 @@ TEST_F(TestModel, evaluate) {
             for (auto&& element : x.flat_indexed_variables()) {
                 move.alterations.emplace_back(&element, 0);
                 for (auto&& constraint_ptr :
-                     element.contributive_constraint_ptrs()) {
-                    move.contributive_constraint_ptrs.insert(constraint_ptr);
+                     element.related_constraint_ptrs()) {
+                    move.related_constraint_ptrs.insert(constraint_ptr);
                 }
             }
 
@@ -1523,9 +1519,8 @@ TEST_F(TestModel, evaluate) {
             cppmh::model::Move<int, double> move;
             for (auto i = 0; i < 5; i++) {
                 move.alterations.emplace_back(&x(i), 1);
-                for (auto&& constraint_ptr :
-                     x(i).contributive_constraint_ptrs()) {
-                    move.contributive_constraint_ptrs.insert(constraint_ptr);
+                for (auto&& constraint_ptr : x(i).related_constraint_ptrs()) {
+                    move.related_constraint_ptrs.insert(constraint_ptr);
                 }
             }
 
