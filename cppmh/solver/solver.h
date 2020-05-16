@@ -328,8 +328,7 @@ model::NamedSolution<T_Variable, T_Expression> solve(
              * infeasible.
              */
             for (auto& proxy : local_penalty_coefficient_proxies) {
-                int id = proxy.id();
-
+                int  id = proxy.id();
                 auto violation_values =
                     incumbent_inner.violation_value_proxies[id]
                         .flat_indexed_values();
@@ -339,7 +338,7 @@ model::NamedSolution<T_Variable, T_Expression> solve(
                      * Apply same penalty coefficient for constraints belonging
                      * to same group. (optional)
                      */
-                    auto max_violation = utility::max(violation_values);
+                    double max_violation = utility::max(violation_values);
                     for (auto&& element : proxy.flat_indexed_values()) {
                         element +=
                             master_option.penalty_coefficient_tightening_ratio *
