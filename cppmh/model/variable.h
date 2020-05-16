@@ -53,7 +53,7 @@ class Variable : public AbstractMultiArrayElement {
 
     Selection<T_Variable, T_Expression> *m_selection_ptr;
     std::unordered_set<Constraint<T_Variable, T_Expression> *>
-        m_contributive_constraint_ptrs;
+        m_related_constraint_ptrs;
 
     /*************************************************************************/
     /// Default constructor
@@ -107,7 +107,7 @@ class Variable : public AbstractMultiArrayElement {
         m_has_bounds    = false;
         m_sense         = VariableSense::Integer;
         m_selection_ptr = nullptr;
-        m_contributive_constraint_ptrs.clear();
+        m_related_constraint_ptrs.clear();
     }
 
     /*************************************************************************/
@@ -251,20 +251,20 @@ class Variable : public AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr void register_contributive_constraint_ptr(
-        Constraint<T_Variable, T_Expression> *a_contributive_constraint_ptr) {
-        m_contributive_constraint_ptrs.insert(a_contributive_constraint_ptr);
+    inline constexpr void register_related_constraint_ptr(
+        Constraint<T_Variable, T_Expression> *a_related_constraint_ptr) {
+        m_related_constraint_ptrs.insert(a_related_constraint_ptr);
     }
 
     /*************************************************************************/
-    inline constexpr void reset_contributive_constraint_ptrs(void) {
-        m_contributive_constraint_ptrs.clear();
+    inline constexpr void reset_related_constraint_ptrs(void) {
+        m_related_constraint_ptrs.clear();
     }
 
     /*************************************************************************/
     inline constexpr std::unordered_set<Constraint<T_Variable, T_Expression> *>
-        &contributive_constraint_ptrs(void) {
-        return m_contributive_constraint_ptrs;
+        &related_constraint_ptrs(void) {
+        return m_related_constraint_ptrs;
     }
 
     /*************************************************************************/
