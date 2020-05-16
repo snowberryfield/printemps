@@ -21,6 +21,7 @@ if(${CMAKE_BUILD_TYPE} STREQUAL "Release")
         -Wno-deprecated-copy
         -pthread
         -march=native
+        -mtune=native
     )
 else() # Debug
     add_compile_options(
