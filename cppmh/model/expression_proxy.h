@@ -76,6 +76,7 @@ class ExpressionProxy : public AbstractMultiArray {
 
         std::vector<int> multi_dimensional_index(this->number_of_dimensions());
         for (auto &&expression : m_expressions) {
+            expression.set_id(m_id);
             expression.set_flat_index(flat_index);
             this->update_multi_dimensional_index(&multi_dimensional_index,
                                                  flat_index);

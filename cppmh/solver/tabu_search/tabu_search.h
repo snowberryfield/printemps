@@ -190,10 +190,16 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     schedule(static)
 #endif
         for (auto i_move = 0; i_move < number_of_moves; i_move++) {
-            trial_solution_scores[i_move] =
-                model->evaluate(*trial_move_ptrs[i_move],           //
-                                local_penalty_coefficient_proxies,  //
-                                global_penalty_coefficient_proxies);
+            if (model->has_nonlinear_constraint()) {
+                trial_solution_scores[i_move] = model->evaluate(
+                    *trial_move_ptrs[i_move], local_penalty_coefficient_proxies,
+                    global_penalty_coefficient_proxies);
+            } else {
+                trial_solution_scores[i_move] =
+                    model->evaluate(*trial_move_ptrs[i_move], solution_score,
+                                    local_penalty_coefficient_proxies,
+                                    global_penalty_coefficient_proxies);
+            }
 
             trial_move_scores[i_move] =
                 MoveScore::evaluate_move(*trial_move_ptrs[i_move], iteration,

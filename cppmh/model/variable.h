@@ -7,6 +7,7 @@
 #define CPPMH_MODEL_VARIABLE_H__
 
 #include <unordered_map>
+#include <unordered_set>
 #include "abstract_multi_array_element.h"
 
 namespace cppmh {
@@ -14,6 +15,10 @@ namespace model {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class Expression;
+
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+class Constraint;
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
@@ -47,6 +52,8 @@ class Variable : public AbstractMultiArrayElement {
     VariableSense m_sense;
 
     Selection<T_Variable, T_Expression> *m_selection_ptr;
+    std::unordered_set<Constraint<T_Variable, T_Expression> *>
+        m_related_constraint_ptrs;
 
     /*************************************************************************/
     /// Default constructor
@@ -100,6 +107,7 @@ class Variable : public AbstractMultiArrayElement {
         m_has_bounds    = false;
         m_sense         = VariableSense::Integer;
         m_selection_ptr = nullptr;
+        m_related_constraint_ptrs.clear();
     }
 
     /*************************************************************************/
@@ -240,6 +248,23 @@ class Variable : public AbstractMultiArrayElement {
     /*************************************************************************/
     inline constexpr void select(void) const {
         m_selection_ptr->selected_variable_ptr = this->reference();
+    }
+
+    /*************************************************************************/
+    inline constexpr void register_related_constraint_ptr(
+        Constraint<T_Variable, T_Expression> *a_related_constraint_ptr) {
+        m_related_constraint_ptrs.insert(a_related_constraint_ptr);
+    }
+
+    /*************************************************************************/
+    inline constexpr void reset_related_constraint_ptrs(void) {
+        m_related_constraint_ptrs.clear();
+    }
+
+    /*************************************************************************/
+    inline constexpr std::unordered_set<Constraint<T_Variable, T_Expression> *>
+        &related_constraint_ptrs(void) {
+        return m_related_constraint_ptrs;
     }
 
     /*************************************************************************/

@@ -555,14 +555,30 @@ TEST_F(TestNeighborhood, setup_move_updater) {
         auto variable_ptrs = model.neighborhood().selection_variable_ptrs();
         auto moves         = model.neighborhood().selection_moves();
         EXPECT_EQ(variable_ptrs.size(), moves.size());
+
         for (auto& move : moves) {
             EXPECT_EQ(cppmh::model::MoveSense::Selection, move.sense);
             EXPECT_EQ(2, static_cast<int>(move.alterations.size()));
             EXPECT_EQ(1, move.alterations[0].first->value());
             EXPECT_EQ(0, move.alterations[0].second);
+
             if (move.alterations[0].first != move.alterations[1].first) {
                 EXPECT_EQ(0, move.alterations[1].first->value());
                 EXPECT_EQ(1, move.alterations[1].second);
+            }
+
+            for (auto& constraint_ptr :
+                 move.alterations[0].first->related_constraint_ptrs()) {
+                EXPECT_EQ(true,
+                          move.related_constraint_ptrs.find(constraint_ptr) !=
+                              move.related_constraint_ptrs.end());
+            }
+
+            for (auto& constraint_ptr :
+                 move.alterations[1].first->related_constraint_ptrs()) {
+                EXPECT_EQ(true,
+                          move.related_constraint_ptrs.find(constraint_ptr) !=
+                              move.related_constraint_ptrs.end());
             }
         }
     }
@@ -572,6 +588,7 @@ TEST_F(TestNeighborhood, setup_move_updater) {
         auto variable_ptrs = model.neighborhood().binary_variable_ptrs();
         auto moves         = model.neighborhood().binary_moves();
         EXPECT_EQ(variable_ptrs.size(), moves.size());
+
         for (auto& move : moves) {
             EXPECT_EQ(cppmh::model::MoveSense::Binary, move.sense);
             EXPECT_EQ(1, static_cast<int>(move.alterations.size()));
@@ -579,6 +596,15 @@ TEST_F(TestNeighborhood, setup_move_updater) {
                              move.alterations[0].first->value() == 1));
             EXPECT_EQ(move.alterations[0].second,
                       1 - move.alterations[0].first->value());
+
+            EXPECT_EQ(true, move.alterations[0].second);
+
+            for (auto& constraint_ptr :
+                 move.alterations[0].first->related_constraint_ptrs()) {
+                EXPECT_EQ(true,
+                          move.related_constraint_ptrs.find(constraint_ptr) !=
+                              move.related_constraint_ptrs.end());
+            }
         }
     }
 
@@ -597,11 +623,27 @@ TEST_F(TestNeighborhood, setup_move_updater) {
             EXPECT_EQ(moves[2 * i].alterations[0].second,
                       moves[2 * i].alterations[0].first->value() + 1);
 
+            for (auto& constraint_ptr :
+                 moves[2 * i].alterations[0].first->related_constraint_ptrs()) {
+                EXPECT_EQ(true, moves[2 * i].related_constraint_ptrs.find(
+                                    constraint_ptr) !=
+                                    moves[2 * i].related_constraint_ptrs.end());
+            }
+
             EXPECT_EQ(1, static_cast<int>(moves[2 * i + 1].alterations.size()));
             EXPECT_EQ(cppmh::model::MoveSense::Integer, moves[2 * i + 1].sense);
 
             EXPECT_EQ(moves[2 * i + 1].alterations[0].second,
                       moves[2 * i + 1].alterations[0].first->value() - 1);
+
+            for (auto& constraint_ptr : moves[2 * i + 1]
+                                            .alterations[0]
+                                            .first->related_constraint_ptrs()) {
+                EXPECT_EQ(true,
+                          moves[2 * i + 1].related_constraint_ptrs.find(
+                              constraint_ptr) !=
+                              moves[2 * i + 1].related_constraint_ptrs.end());
+            }
         }
     }
 
@@ -623,7 +665,7 @@ TEST_F(TestNeighborhood, setup_move_updater) {
                       + (2 * integer_variables_size - 2 - 1 - 1),  // Integer
                   static_cast<int>(model.neighborhood().move_ptrs().size()));
     }
-}
+}  // namespace
 
 /*****************************************************************************/
 TEST_F(TestNeighborhood, set_user_defined_move_updater) {
