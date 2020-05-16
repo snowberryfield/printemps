@@ -566,6 +566,46 @@ TEST_F(TestModel, neighborhood) {
 }
 
 /*****************************************************************************/
+TEST_F(TestModel, setup_variable_contributive_constraints) {
+    cppmh::model::Model<int, double> model;
+
+    auto& x = model.create_variables("x", 10, 0, 1);
+    auto& y = model.create_variables("y", {20, 30}, 0, 1);
+
+    auto& g = model.create_constraints("g", 3);
+    g(0)    = x.selection();
+    g(1)    = y.selection();
+    g(2)    = x(0) + y.sum({0, cppmh::model::All}) >= 1;
+
+    model.setup_variable_contributive_constraints();
+
+    for (auto i = 0; i < 10; i++) {
+        EXPECT_EQ(true, x(i).contributive_constraint_ptrs().find(&g(0)) !=
+                            x(i).contributive_constraint_ptrs().end());
+        EXPECT_EQ(false, x(i).contributive_constraint_ptrs().find(&g(1)) !=
+                             x(i).contributive_constraint_ptrs().end());
+        /// Only x(0) is related to g(2).
+        EXPECT_EQ(i == 0, x(i).contributive_constraint_ptrs().find(&g(2)) !=
+                              x(i).contributive_constraint_ptrs().end());
+    }
+
+    for (auto i = 0; i < 10; i++) {
+        for (auto j = 0; j < 10; j++) {
+            EXPECT_EQ(false,
+                      y(i, j).contributive_constraint_ptrs().find(&g(0)) !=
+                          y(i, j).contributive_constraint_ptrs().end());
+            EXPECT_EQ(true,
+                      y(i, j).contributive_constraint_ptrs().find(&g(1)) !=
+                          y(i, j).contributive_constraint_ptrs().end());
+            /// Only y(0,*) is related to g(2).
+            EXPECT_EQ(i == 0,
+                      y(i, j).contributive_constraint_ptrs().find(&g(2)) !=
+                          y(i, j).contributive_constraint_ptrs().end());
+        }
+    }
+}
+
+/*****************************************************************************/
 TEST_F(TestModel, setup_has_nonlinear_constraint) {
     /// This method is tested in test_neighborhood.h
 }
@@ -1195,72 +1235,164 @@ TEST_F(TestModel, evaluate) {
 
         auto sequence = cppmh::utility::sequence(10);
 
-        auto& variable_proxy = model.create_variables("x", 10, 0, 1);
-        auto& expression_proxy =
-            model.create_expression("e", variable_proxy.dot(sequence) + 1);
-        auto& constraint_proxy =
-            model.create_constraint("c", variable_proxy.sum() <= 5);
+        auto& x = model.create_variables("x", 10, 0, 1);
+        auto& p = model.create_expression("p", x.dot(sequence) + 1);
+        [[maybe_unused]] auto& g = model.create_constraint("g", x.sum() <= 5);
+        [[maybe_unused]] auto& h =
+            model.create_constraint("h", x(0) + x(1) <= 1);
 
-        cppmh::model::ValueProxy<double> local_penalty_coefficient_proxy(
-            constraint_proxy.id());
+        cppmh::model::ValueProxy<double> local_penalty_coefficient_proxy(1);
         local_penalty_coefficient_proxy.value() = 100;
 
-        cppmh::model::ValueProxy<double> global_penalty_coefficient_proxy(
-            constraint_proxy.id());
+        cppmh::model::ValueProxy<double> global_penalty_coefficient_proxy(1);
         global_penalty_coefficient_proxy.value() = 10000;
 
         std::vector<cppmh::model::ValueProxy<double>>
             local_penalty_coefficient_proxies = {
+                local_penalty_coefficient_proxy,
                 local_penalty_coefficient_proxy};
         std::vector<cppmh::model::ValueProxy<double>>
             global_penalty_coefficient_proxies = {
+                global_penalty_coefficient_proxy,
                 global_penalty_coefficient_proxy};
 
-        model.minimize(expression_proxy);
+        model.minimize(p);
+
+        model.setup_variable_contributive_constraints();
+        model.setup_variable_sense();
         model.setup_default_neighborhood(false, false);
 
-        for (auto&& variable : variable_proxy.flat_indexed_variables()) {
-            variable = 1;
+        for (auto&& element : x.flat_indexed_variables()) {
+            element = 1;
         }
+
         model.update();
+        auto score_before =
+            model.evaluate({}, local_penalty_coefficient_proxies,
+                           global_penalty_coefficient_proxies);
 
         {
             cppmh::model::Move<int, double> move;
-            for (auto&& variable : variable_proxy.flat_indexed_variables()) {
-                move.alterations.emplace_back(&variable, 1);
+            for (auto&& element : x.flat_indexed_variables()) {
+                move.alterations.emplace_back(&element, 1);
+                for (auto&& constraint_ptr :
+                     element.contributive_constraint_ptrs()) {
+                    move.contributive_constraint_ptrs.insert(constraint_ptr);
+                }
             }
 
-            auto score = model.evaluate(move, local_penalty_coefficient_proxies,
-                                        global_penalty_coefficient_proxies);
+            auto score_after_1 =
+                model.evaluate(move, local_penalty_coefficient_proxies,
+                               global_penalty_coefficient_proxies);
 
-            EXPECT_EQ(46, score.objective);
-            EXPECT_EQ(5 * 100, score.local_penalty);
-            EXPECT_EQ(5 * 10000, score.global_penalty);
-            EXPECT_EQ(46 + 5 * 100, score.local_augmented_objective);
-            EXPECT_EQ(46 + 5 * 10000, score.global_augmented_objective);
-            EXPECT_EQ(false, score.is_objective_improvable);
-            EXPECT_EQ(false, score.is_constraint_improvable);
-            EXPECT_EQ(false, score.is_feasible);
+            auto score_after_2 = model.evaluate(
+                move, score_before, local_penalty_coefficient_proxies,
+                global_penalty_coefficient_proxies);
+
+            EXPECT_EQ(46, score_after_1.objective);
+            EXPECT_EQ(5 * 100 + 100, score_after_1.local_penalty);
+            EXPECT_EQ(5 * 10000 + 10000, score_after_1.global_penalty);
+            EXPECT_EQ(46 + 5 * 100 + 100,
+                      score_after_1.local_augmented_objective);
+            EXPECT_EQ(46 + 5 * 10000 + 10000,
+                      score_after_1.global_augmented_objective);
+            EXPECT_EQ(false, score_after_1.is_objective_improvable);
+            EXPECT_EQ(false, score_after_1.is_constraint_improvable);
+            EXPECT_EQ(false, score_after_1.is_feasible);
+
+            EXPECT_EQ(46, score_after_2.objective);
+            EXPECT_EQ(5 * 100 + 100, score_after_2.local_penalty);
+            EXPECT_EQ(5 * 10000 + 10000, score_after_2.global_penalty);
+            EXPECT_EQ(46 + 5 * 100 + 100,
+                      score_after_2.local_augmented_objective);
+            EXPECT_EQ(46 + 5 * 10000 + 10000,
+                      score_after_2.global_augmented_objective);
+            EXPECT_EQ(false, score_after_2.is_objective_improvable);
+            EXPECT_EQ(false, score_after_2.is_constraint_improvable);
+            EXPECT_EQ(false, score_after_2.is_feasible);
+
             model.update(move);
+            score_before = score_after_2;
         }
+
         {
             cppmh::model::Move<int, double> move;
-            for (auto&& variable : variable_proxy.flat_indexed_variables()) {
-                move.alterations.emplace_back(&variable, 0);
+            for (auto&& element : x.flat_indexed_variables()) {
+                move.alterations.emplace_back(&element, 0);
+                for (auto&& constraint_ptr :
+                     element.contributive_constraint_ptrs()) {
+                    move.contributive_constraint_ptrs.insert(constraint_ptr);
+                }
             }
 
-            auto score = model.evaluate(move, local_penalty_coefficient_proxies,
-                                        global_penalty_coefficient_proxies);
+            auto score_after_1 =
+                model.evaluate(move, local_penalty_coefficient_proxies,
+                               global_penalty_coefficient_proxies);
 
-            EXPECT_EQ(1, score.objective);
-            EXPECT_EQ(0, score.local_penalty);
-            EXPECT_EQ(0, score.global_penalty);
-            EXPECT_EQ(1, score.local_augmented_objective);
-            EXPECT_EQ(1, score.global_augmented_objective);
-            EXPECT_EQ(true, score.is_objective_improvable);
-            EXPECT_EQ(true, score.is_constraint_improvable);
-            EXPECT_EQ(true, score.is_feasible);
+            auto score_after_2 = model.evaluate(
+                move, score_before, local_penalty_coefficient_proxies,
+                global_penalty_coefficient_proxies);
+
+            EXPECT_EQ(1, score_after_1.objective);
+            EXPECT_EQ(0, score_after_1.local_penalty);
+            EXPECT_EQ(0, score_after_1.global_penalty);
+            EXPECT_EQ(1, score_after_1.local_augmented_objective);
+            EXPECT_EQ(1, score_after_1.global_augmented_objective);
+            EXPECT_EQ(true, score_after_1.is_objective_improvable);
+            EXPECT_EQ(true, score_after_1.is_constraint_improvable);
+            EXPECT_EQ(true, score_after_1.is_feasible);
+
+            EXPECT_EQ(1, score_after_2.objective);
+            EXPECT_EQ(0, score_after_2.local_penalty);
+            EXPECT_EQ(0, score_after_2.global_penalty);
+            EXPECT_EQ(1, score_after_2.local_augmented_objective);
+            EXPECT_EQ(1, score_after_2.global_augmented_objective);
+            EXPECT_EQ(true, score_after_2.is_objective_improvable);
+            EXPECT_EQ(true, score_after_2.is_constraint_improvable);
+            EXPECT_EQ(true, score_after_2.is_feasible);
+
             model.update(move);
+            score_before = score_after_2;
+        }
+
+        {
+            cppmh::model::Move<int, double> move;
+            for (auto i = 0; i < 5; i++) {
+                move.alterations.emplace_back(&x(i), 1);
+                for (auto&& constraint_ptr :
+                     x(i).contributive_constraint_ptrs()) {
+                    move.contributive_constraint_ptrs.insert(constraint_ptr);
+                }
+            }
+
+            auto score_after_1 =
+                model.evaluate(move, local_penalty_coefficient_proxies,
+                               global_penalty_coefficient_proxies);
+
+            auto score_after_2 = model.evaluate(
+                move, score_before, local_penalty_coefficient_proxies,
+                global_penalty_coefficient_proxies);
+
+            EXPECT_EQ(11, score_after_1.objective);
+            EXPECT_EQ(100, score_after_1.local_penalty);
+            EXPECT_EQ(10000, score_after_1.global_penalty);
+            EXPECT_EQ(11 + 100, score_after_1.local_augmented_objective);
+            EXPECT_EQ(11 + 10000, score_after_1.global_augmented_objective);
+            EXPECT_EQ(false, score_after_1.is_objective_improvable);
+            EXPECT_EQ(false, score_after_1.is_constraint_improvable);
+            EXPECT_EQ(false, score_after_1.is_feasible);
+
+            EXPECT_EQ(11, score_after_2.objective);
+            EXPECT_EQ(100, score_after_2.local_penalty);
+            EXPECT_EQ(10000, score_after_2.global_penalty);
+            EXPECT_EQ(11 + 100, score_after_2.local_augmented_objective);
+            EXPECT_EQ(11 + 10000, score_after_2.global_augmented_objective);
+            EXPECT_EQ(false, score_after_2.is_objective_improvable);
+            EXPECT_EQ(false, score_after_2.is_constraint_improvable);
+            EXPECT_EQ(false, score_after_2.is_feasible);
+
+            model.update(move);
+            score_before = score_after_2;
         }
     }
 
@@ -1270,72 +1402,161 @@ TEST_F(TestModel, evaluate) {
 
         auto sequence = cppmh::utility::sequence(10);
 
-        auto& variable_proxy = model.create_variables("x", 10, 0, 1);
-        auto& expression_proxy =
-            model.create_expression("e", variable_proxy.dot(sequence) + 1);
-        auto& constraint_proxy =
-            model.create_constraint("c", variable_proxy.sum() <= 5);
+        auto& x = model.create_variables("x", 10, 0, 1);
+        auto& p = model.create_expression("p", x.dot(sequence) + 1);
+        [[maybe_unused]] auto& g = model.create_constraint("g", x.sum() <= 5);
+        [[maybe_unused]] auto& h =
+            model.create_constraint("h", x(0) + x(1) <= 1);
 
-        cppmh::model::ValueProxy<double> local_penalty_coefficient_proxy(
-            constraint_proxy.id());
+        cppmh::model::ValueProxy<double> local_penalty_coefficient_proxy(1);
         local_penalty_coefficient_proxy.value() = 100;
 
-        cppmh::model::ValueProxy<double> global_penalty_coefficient_proxy(
-            constraint_proxy.id());
+        cppmh::model::ValueProxy<double> global_penalty_coefficient_proxy(1);
         global_penalty_coefficient_proxy.value() = 10000;
 
         std::vector<cppmh::model::ValueProxy<double>>
             local_penalty_coefficient_proxies = {
+                local_penalty_coefficient_proxy,
                 local_penalty_coefficient_proxy};
         std::vector<cppmh::model::ValueProxy<double>>
             global_penalty_coefficient_proxies = {
+                global_penalty_coefficient_proxy,
                 global_penalty_coefficient_proxy};
 
-        model.maximize(expression_proxy);
+        model.maximize(p);
+
+        model.setup_variable_contributive_constraints();
+        model.setup_variable_sense();
         model.setup_default_neighborhood(false, false);
 
-        for (auto&& variable : variable_proxy.flat_indexed_variables()) {
-            variable = 1;
+        for (auto&& element : x.flat_indexed_variables()) {
+            element = 1;
         }
         model.update();
+        auto score_before =
+            model.evaluate({}, local_penalty_coefficient_proxies,
+                           global_penalty_coefficient_proxies);
 
         {
             cppmh::model::Move<int, double> move;
-            for (auto&& variable : variable_proxy.flat_indexed_variables()) {
-                move.alterations.emplace_back(&variable, 1);
+            for (auto&& element : x.flat_indexed_variables()) {
+                move.alterations.emplace_back(&element, 1);
+                for (auto&& constraint_ptr :
+                     element.contributive_constraint_ptrs()) {
+                    move.contributive_constraint_ptrs.insert(constraint_ptr);
+                }
             }
 
-            auto score = model.evaluate(move, local_penalty_coefficient_proxies,
-                                        global_penalty_coefficient_proxies);
+            auto score_after_1 =
+                model.evaluate(move, local_penalty_coefficient_proxies,
+                               global_penalty_coefficient_proxies);
+            auto score_after_2 = model.evaluate(
+                move, score_before, local_penalty_coefficient_proxies,
+                global_penalty_coefficient_proxies);
 
-            EXPECT_EQ(-46, score.objective);
-            EXPECT_EQ(5 * 100, score.local_penalty);
-            EXPECT_EQ(5 * 10000, score.global_penalty);
-            EXPECT_EQ(-46 + 5 * 100, score.local_augmented_objective);
-            EXPECT_EQ(-46 + 5 * 10000, score.global_augmented_objective);
-            EXPECT_EQ(false, score.is_objective_improvable);
-            EXPECT_EQ(false, score.is_constraint_improvable);
-            EXPECT_EQ(false, score.is_feasible);
+            EXPECT_EQ(-46, score_after_1.objective);
+            EXPECT_EQ(5 * 100 + 100, score_after_1.local_penalty);
+            EXPECT_EQ(5 * 10000 + 10000, score_after_1.global_penalty);
+            EXPECT_EQ(-46 + 5 * 100 + 100,
+                      score_after_1.local_augmented_objective);
+            EXPECT_EQ(-46 + 5 * 10000 + 10000,
+                      score_after_1.global_augmented_objective);
+            EXPECT_EQ(false, score_after_1.is_objective_improvable);
+            EXPECT_EQ(false, score_after_1.is_constraint_improvable);
+            EXPECT_EQ(false, score_after_1.is_feasible);
+
+            EXPECT_EQ(-46, score_after_2.objective);
+            EXPECT_EQ(5 * 100 + 100, score_after_2.local_penalty);
+            EXPECT_EQ(5 * 10000 + 10000, score_after_2.global_penalty);
+            EXPECT_EQ(-46 + 5 * 100 + 100,
+                      score_after_2.local_augmented_objective);
+            EXPECT_EQ(-46 + 5 * 10000 + 10000,
+                      score_after_2.global_augmented_objective);
+            EXPECT_EQ(false, score_after_2.is_objective_improvable);
+            EXPECT_EQ(false, score_after_2.is_constraint_improvable);
+            EXPECT_EQ(false, score_after_2.is_feasible);
+
             model.update(move);
+            score_before = score_after_2;
         }
         {
             cppmh::model::Move<int, double> move;
-            for (auto&& variable : variable_proxy.flat_indexed_variables()) {
-                move.alterations.emplace_back(&variable, 0);
+            for (auto&& element : x.flat_indexed_variables()) {
+                move.alterations.emplace_back(&element, 0);
+                for (auto&& constraint_ptr :
+                     element.contributive_constraint_ptrs()) {
+                    move.contributive_constraint_ptrs.insert(constraint_ptr);
+                }
             }
 
-            auto score = model.evaluate(move, local_penalty_coefficient_proxies,
-                                        global_penalty_coefficient_proxies);
+            auto score_after_1 =
+                model.evaluate(move, local_penalty_coefficient_proxies,
+                               global_penalty_coefficient_proxies);
 
-            EXPECT_EQ(-1, score.objective);
-            EXPECT_EQ(0, score.local_penalty);
-            EXPECT_EQ(0, score.global_penalty);
-            EXPECT_EQ(-1, score.local_augmented_objective);
-            EXPECT_EQ(-1, score.global_augmented_objective);
-            EXPECT_EQ(false, score.is_objective_improvable);
-            EXPECT_EQ(true, score.is_constraint_improvable);
-            EXPECT_EQ(true, score.is_feasible);
+            auto score_after_2 = model.evaluate(
+                move, score_before, local_penalty_coefficient_proxies,
+                global_penalty_coefficient_proxies);
+
+            EXPECT_EQ(-1, score_after_1.objective);
+            EXPECT_EQ(0, score_after_1.local_penalty);
+            EXPECT_EQ(0, score_after_1.global_penalty);
+            EXPECT_EQ(-1, score_after_1.local_augmented_objective);
+            EXPECT_EQ(-1, score_after_1.global_augmented_objective);
+            EXPECT_EQ(false, score_after_1.is_objective_improvable);
+            EXPECT_EQ(true, score_after_1.is_constraint_improvable);
+            EXPECT_EQ(true, score_after_1.is_feasible);
+
+            EXPECT_EQ(-1, score_after_2.objective);
+            EXPECT_EQ(0, score_after_2.local_penalty);
+            EXPECT_EQ(0, score_after_2.global_penalty);
+            EXPECT_EQ(-1, score_after_2.local_augmented_objective);
+            EXPECT_EQ(-1, score_after_2.global_augmented_objective);
+            EXPECT_EQ(false, score_after_2.is_objective_improvable);
+            EXPECT_EQ(true, score_after_2.is_constraint_improvable);
+            EXPECT_EQ(true, score_after_2.is_feasible);
+
             model.update(move);
+            score_before = score_after_2;
+        }
+
+        {
+            cppmh::model::Move<int, double> move;
+            for (auto i = 0; i < 5; i++) {
+                move.alterations.emplace_back(&x(i), 1);
+                for (auto&& constraint_ptr :
+                     x(i).contributive_constraint_ptrs()) {
+                    move.contributive_constraint_ptrs.insert(constraint_ptr);
+                }
+            }
+
+            auto score_after_1 =
+                model.evaluate(move, local_penalty_coefficient_proxies,
+                               global_penalty_coefficient_proxies);
+
+            auto score_after_2 = model.evaluate(
+                move, score_before, local_penalty_coefficient_proxies,
+                global_penalty_coefficient_proxies);
+
+            EXPECT_EQ(-11, score_after_1.objective);
+            EXPECT_EQ(100, score_after_1.local_penalty);
+            EXPECT_EQ(10000, score_after_1.global_penalty);
+            EXPECT_EQ(-11 + 100, score_after_1.local_augmented_objective);
+            EXPECT_EQ(-11 + 10000, score_after_1.global_augmented_objective);
+            EXPECT_EQ(true, score_after_1.is_objective_improvable);
+            EXPECT_EQ(false, score_after_1.is_constraint_improvable);
+            EXPECT_EQ(false, score_after_1.is_feasible);
+
+            EXPECT_EQ(-11, score_after_2.objective);
+            EXPECT_EQ(100, score_after_2.local_penalty);
+            EXPECT_EQ(10000, score_after_2.global_penalty);
+            EXPECT_EQ(-11 + 100, score_after_2.local_augmented_objective);
+            EXPECT_EQ(-11 + 10000, score_after_2.global_augmented_objective);
+            EXPECT_EQ(true, score_after_2.is_objective_improvable);
+            EXPECT_EQ(false, score_after_2.is_constraint_improvable);
+            EXPECT_EQ(false, score_after_2.is_feasible);
+
+            model.update(move);
+            score_before = score_after_2;
         }
     }
 
