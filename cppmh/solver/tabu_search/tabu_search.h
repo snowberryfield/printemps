@@ -223,11 +223,11 @@ TabuSearchResult<T_Variable, T_Expression> solve(
 
             if (option.tabu_search.is_enabled_improvability_screening &&
                 has_constraint) {
-                if (trial_solution_scores[i_move].is_feasible &&
+                if (solution_score.is_feasible &&
                     !trial_solution_scores[i_move].is_objective_improvable) {
                     total_scores[i_move] = HUGE_VALF;
                 }
-                if (!trial_solution_scores[i_move].is_feasible &&
+                if (!solution_score.is_feasible &&
                     !trial_solution_scores[i_move].is_constraint_improvable) {
                     total_scores[i_move] = HUGE_VALF;
                 }

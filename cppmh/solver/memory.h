@@ -140,8 +140,8 @@ class Memory {
             auto &update_count       = m_update_counts[i];
             int   number_of_elements = update_count.number_of_elements();
             for (auto j = 0; j < number_of_elements; j++) {
-                auto frequency = update_count.flat_indexed_values(j) /
-                                 static_cast<double>(m_total_update_counts);
+                double frequency = update_count.flat_indexed_values(j) /
+                                   static_cast<double>(m_total_update_counts);
                 result += frequency * frequency;
             }
         }
@@ -154,8 +154,8 @@ class Memory {
         const model::Move<T_Variable, T_Expression> &a_MOVE,
         const int                                    a_ITERATION) {
         for (const auto &alteration : a_MOVE.alterations) {
-            const auto id         = alteration.first->id();
-            const auto flat_index = alteration.first->flat_index();
+            int id         = alteration.first->id();
+            int flat_index = alteration.first->flat_index();
 
             m_last_update_iterations[id][flat_index] = a_ITERATION;
             m_update_counts[id][flat_index]++;
