@@ -763,13 +763,12 @@ class Model {
 
                         variable_ptr->set_value_if_not_fixed(new_value);
 
-                        std::string label =
-                            m_variable_names[variable_ptr->id()] +
-                            m_variable_proxies[variable_ptr->id()]
-                                .indices_label(variable_ptr->flat_index());
                         utility::print_warning(
-                            "The initial value " + label + " = " +
-                                std::to_string(old_value) +
+                            "The initial value " +
+                                m_variable_names[variable_ptr->id()] +
+                                m_variable_proxies[variable_ptr->id()]
+                                    .indices_label(variable_ptr->flat_index()) +
+                                " = " + std::to_string(old_value) +
                                 " is corrected to " +
                                 std::to_string(new_value) + ".",
                             a_IS_ENABLED_PRINT);
@@ -807,13 +806,13 @@ class Model {
 
                             variable_ptr->set_value_if_not_fixed(new_value);
 
-                            std::string label =
-                                m_variable_names[variable_ptr->id()] +
-                                m_variable_proxies[variable_ptr->id()]
-                                    .indices_label(variable_ptr->flat_index());
                             utility::print_warning(
-                                "The initial value " + label + " = " +
-                                    std::to_string(old_value) +
+                                "The initial value " +
+                                    m_variable_names[variable_ptr->id()] +
+                                    m_variable_proxies[variable_ptr->id()]
+                                        .indices_label(
+                                            variable_ptr->flat_index()) +
+                                    " = " + std::to_string(old_value) +
                                     " is corrected to " +
                                     std::to_string(new_value) + ".",
                                 a_IS_ENABLED_PRINT);
@@ -843,13 +842,13 @@ class Model {
                         if (!variable_ptr->is_fixed()) {
                             variable_ptr->set_value_if_not_fixed(new_value);
 
-                            std::string label =
-                                m_variable_names[variable_ptr->id()] +
-                                m_variable_proxies[variable_ptr->id()]
-                                    .indices_label(variable_ptr->flat_index());
                             utility::print_warning(
-                                "The initial value " + label + " = " +
-                                    std::to_string(old_value) +
+                                "The initial value " +
+                                    m_variable_names[variable_ptr->id()] +
+                                    m_variable_proxies[variable_ptr->id()]
+                                        .indices_label(
+                                            variable_ptr->flat_index()) +
+                                    " = " + std::to_string(old_value) +
                                     " is corrected to " +
                                     std::to_string(new_value) + ".",
                                 a_IS_ENABLED_PRINT);
@@ -910,12 +909,11 @@ class Model {
 
                             variable.set_value_if_not_fixed(new_value);
 
-                            std::string label =
-                                m_variable_names[variable.id()] +
-                                proxy.indices_label(variable.flat_index());
                             utility::print_warning(
-                                "The initial value " + label + " = " +
-                                    std::to_string(old_value) +
+                                "The initial value " +
+                                    m_variable_names[variable.id()] +
+                                    proxy.indices_label(variable.flat_index()) +
+                                    " = " + std::to_string(old_value) +
                                     " is corrected to " +
                                     std::to_string(new_value) + ".",
                                 a_IS_ENABLED_PRINT);
@@ -964,12 +962,11 @@ class Model {
 
                         variable.set_value_if_not_fixed(new_value);
 
-                        std::string label =
-                            m_variable_names[variable.id()] +
-                            proxy.indices_label(variable.flat_index());
                         utility::print_warning(
-                            "The initial value " + label + " = " +
-                                std::to_string(old_value) +
+                            "The initial value " +
+                                m_variable_names[variable.id()] +
+                                proxy.indices_label(variable.flat_index()) +
+                                " = " + std::to_string(old_value) +
                                 " is corrected to " +
                                 std::to_string(new_value) + ".",
                             a_IS_ENABLED_PRINT);
