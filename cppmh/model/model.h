@@ -1131,16 +1131,9 @@ class Model {
         score.global_penalty             = global_penalty;
         score.local_augmented_objective  = local_augmented_objective;
         score.global_augmented_objective = global_augmented_objective;
-
-        if (m_is_minimization && objective < m_objective.value()) {
-            score.is_objective_improvable = true;
-        } else if (!m_is_minimization && objective < -m_objective.value()) {
-            score.is_objective_improvable = true;
-        } else {
-            score.is_objective_improvable = false;
-        }
-        score.is_constraint_improvable = is_constraint_improvable;
-        score.is_feasible              = !(total_violation > 0);
+        score.is_objective_improvable    = objective_improvement > 0;
+        score.is_constraint_improvable   = is_constraint_improvable;
+        score.is_feasible                = !(total_violation > 0);
 
         return score;
     }
@@ -1173,17 +1166,17 @@ class Model {
                 is_constraint_improvable = true;
             }
 
-            int id    = constraint_ptr->id();
-            int index = constraint_ptr->flat_index();
+            int id         = constraint_ptr->id();
+            int flat_index = constraint_ptr->flat_index();
 
             local_penalty +=
                 violation_diff *
                 a_LOCAL_PENALTY_COEFFICIENT_PROXIES[id].flat_indexed_values(
-                    index);
+                    flat_index);
             global_penalty +=
                 violation_diff *
                 a_GLOBAL_PENALTY_COEFFICIENT_PROXIES[id].flat_indexed_values(
-                    index);
+                    flat_index);
         }
 
         double objective = m_objective.evaluate(a_MOVE) * this->sign();
@@ -1200,16 +1193,9 @@ class Model {
         score.global_penalty             = global_penalty;
         score.local_augmented_objective  = local_augmented_objective;
         score.global_augmented_objective = global_augmented_objective;
-
-        if (m_is_minimization && objective < m_objective.value()) {
-            score.is_objective_improvable = true;
-        } else if (!m_is_minimization && objective < -m_objective.value()) {
-            score.is_objective_improvable = true;
-        } else {
-            score.is_objective_improvable = false;
-        }
-        score.is_constraint_improvable = is_constraint_improvable;
-        score.is_feasible              = !(total_violation > 0);
+        score.is_objective_improvable    = objective_improvement > 0;
+        score.is_constraint_improvable   = is_constraint_improvable;
+        score.is_feasible                = !(total_violation > 0);
 
         return score;
     }
