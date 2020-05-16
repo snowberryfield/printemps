@@ -321,6 +321,7 @@ class Neighborhood {
         }
 
         for (auto i = 0; i < selection_variable_ptrs_size; i++) {
+            m_selection_moves[i].sense = MoveSense::Selection;
             m_selection_moves[i].related_constraint_ptrs =
                 m_selection_variable_ptrs[i]
                     ->selection_ptr()
@@ -335,8 +336,6 @@ class Neighborhood {
 #endif
             for (auto i = 0; i < selection_variable_ptrs_size; i++) {
                 (*a_moves)[i].alterations.clear();
-                (*a_moves)[i].sense = MoveSense::Selection;
-
                 (*a_moves)[i].alterations.emplace_back(
                     m_selection_variable_ptrs[i]
                         ->selection_ptr()
@@ -363,6 +362,7 @@ class Neighborhood {
         m_binary_moves.resize(binary_variable_ptrs_size);
 
         for (auto i = 0; i < binary_variable_ptrs_size; i++) {
+            m_binary_moves[i].sense = MoveSense::Binary;
             m_binary_moves[i].related_constraint_ptrs =
                 m_binary_variable_ptrs[i]->related_constraint_ptrs();
         }
@@ -375,7 +375,6 @@ class Neighborhood {
 #endif
             for (auto i = 0; i < binary_variable_ptrs_size; i++) {
                 (*a_moves)[i].alterations.clear();
-                (*a_moves)[i].sense = MoveSense::Binary;
                 (*a_moves)[i].alterations.emplace_back(
                     m_binary_variable_ptrs[i],
                     1 - m_binary_variable_ptrs[i]->value());
@@ -398,8 +397,11 @@ class Neighborhood {
         m_integer_moves.resize(2 * m_integer_variable_ptrs.size());
 
         for (auto i = 0; i < integer_variable_ptrs_size; i++) {
+            m_integer_moves[2 * i].sense = MoveSense::Integer;
             m_integer_moves[2 * i].related_constraint_ptrs =
                 m_integer_variable_ptrs[i]->related_constraint_ptrs();
+
+            m_integer_moves[2 * i + 1].sense = MoveSense::Integer;
             m_integer_moves[2 * i + 1].related_constraint_ptrs =
                 m_integer_variable_ptrs[i]->related_constraint_ptrs();
         }
@@ -412,13 +414,11 @@ class Neighborhood {
 #endif
             for (auto i = 0; i < integer_variable_ptrs_size; i++) {
                 (*a_moves)[2 * i].alterations.clear();
-                (*a_moves)[2 * i].sense = MoveSense::Integer;
                 (*a_moves)[2 * i].alterations.emplace_back(
                     m_integer_variable_ptrs[i],
                     m_integer_variable_ptrs[i]->value() + 1);
 
                 (*a_moves)[2 * i + 1].alterations.clear();
-                (*a_moves)[2 * i + 1].sense = MoveSense::Integer;
                 (*a_moves)[2 * i + 1].alterations.emplace_back(
                     m_integer_variable_ptrs[i],
                     m_integer_variable_ptrs[i]->value() - 1);
