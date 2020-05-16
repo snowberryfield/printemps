@@ -1075,7 +1075,7 @@ class Model {
         const std::vector<ValueProxy<double>>
             &a_LOCAL_PENALTY_COEFFICIENT_PROXIES,
         const std::vector<ValueProxy<double>>
-            &a_GLOBAL_PENALTY_COEFFICIENT_PROXIES) noexcept {
+            &a_GLOBAL_PENALTY_COEFFICIENT_PROXIES) const noexcept {
         double total_violation = 0.0;
         double local_penalty   = 0.0;
         double global_penalty  = 0.0;
@@ -1147,7 +1147,7 @@ class Model {
         const std::vector<ValueProxy<double>>
             &a_LOCAL_PENALTY_COEFFICIENT_PROXIES,
         const std::vector<ValueProxy<double>>
-            &a_GLOBAL_PENALTY_COEFFICIENT_PROXIES) noexcept {
+            &a_GLOBAL_PENALTY_COEFFICIENT_PROXIES) const noexcept {
         SolutionScore score = a_CURRENT_SCORE;
 
         bool is_constraint_improvable = false;
