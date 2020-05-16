@@ -180,6 +180,7 @@ class Expression : public AbstractMultiArrayElement {
     /*************************************************************************/
     inline constexpr T_Expression evaluate(
         const Move<T_Variable, T_Expression> &a_MOVE) const noexcept {
+        /// The following code is required for nonlinear objective functions.
         if (a_MOVE.alterations.size() == 0) {
             return this->evaluate();
         }

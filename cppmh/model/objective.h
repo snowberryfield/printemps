@@ -158,7 +158,7 @@ class Objective {
     }
 
     /*************************************************************************/
-    inline constexpr T_Expression evaluate(void) const {
+    inline constexpr T_Expression evaluate(void) const noexcept {
         if (m_is_linear) {
             return m_expression.evaluate();
         } else {
@@ -168,7 +168,7 @@ class Objective {
 
     /*************************************************************************/
     inline constexpr T_Expression evaluate(
-        const Move<T_Variable, T_Expression> &a_MOVE) {
+        const Move<T_Variable, T_Expression> &a_MOVE) const noexcept {
         if (m_is_linear) {
             return m_expression.evaluate(a_MOVE);
         } else {
