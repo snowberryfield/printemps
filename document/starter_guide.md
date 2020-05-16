@@ -437,15 +437,15 @@ g       = (2 * x + 3 * y + 5<= 10); // OK
 
 auto& h = model.create_expression("h", p >= 7 + 2); // OK
 
-auto& v = model.create_expression("u");
+auto& u = model.create_expression("u");
 // NG. Both sides are constants.
-// v = 4 <= 5;
+// u = 4 <= 5;
 
-auto& u = model.create_expressions("u", 10);
+auto& v = model.create_expressions("v", 10);
 for (auto i = 0; i < 10; i++) {
     // OK. This code is identical to the following code:
     // u(i) = z.sum({i, cppmh::model::All}) == 1;
-    u(i) = z.selection({i, cppmh::model::All});
+    v(i) = z.selection({i, cppmh::model::All});
 }
 ```
 
@@ -550,7 +550,7 @@ The method `dot()` gives an expression of an inner product between indexed varia
 The code
 
 ```c++
-std::vector<int> v = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+std::vector<int> a = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 
 cppmh::model::IPModel model;
 
@@ -558,13 +558,13 @@ cppmh::model::IPModel model;
 auto& x = model.create_variables("x", 10);
 
 // Create and define expressions.
-auto& p = model.create_expression("p", x.dot(v));
+auto& p = model.create_expression("p", x.dot(a));
 ```
 
 is identical to the following code:
 
 ```c++
-std::vector<int> v = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+std::vector<int> a = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 
 cppmh::model::IPModel model;
 
@@ -574,7 +574,7 @@ auto& x = model.create_variables("x", 10);
 // Create and define expressions.
 auto& p = model.create_expression("p");
 for (auto i = 0; i < 10; i++) {
-    p += v[i] * x(i);
+    p += a[i] * x(i);
 }
 ```
 
@@ -582,7 +582,7 @@ The method `dot()` is also applicable to two or higher-dimensional indexed decis
 The following code shows example of allowable and non-allowable usages.
 
 ```c++
-std::vector<int> v = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+std::vector<int> a = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 
 cppmh::model::IPModel model;
 
@@ -595,28 +595,28 @@ auto& p = model.create_expressions("p", 10);
 // OK. The following part is identical to
 // for (auto i=0; i<10; i++){
 //    for (auto j=0; j<10; j++){
-//        p(i) += v[j] * x(i, j);
+//        p(i) += a[j] * x(i, j);
 //    }
 // }
 for (auto i = 0; i < 10; i++) {
-    p[i] = x.dot(v, {i, cppmh::model::All});
+    p[i] = x.dot(a, {i, cppmh::model::All});
 }
 
 auto& q = model.create_expressions("q", 10);
 // OK. The following part is identical to
 // for (auto i=0; i<10; i++){
 //    for (auto j=0; j<10; j++){
-//        q(i) += v[j] * x(j, i);
+//        q(i) += a[j] * x(j, i);
 //    }
 // }
 for (auto i = 0; i < 10; i++) {
-    q[i] = x.dot(v, {cppmh::model::All, i});
+    q[i] = x.dot(a, {cppmh::model::All, i});
 }
 
 auto& r = model.create_expressions("r", 10);
 // NG. The number of indices for summation must be one.
 // for(auto i=0; i<10; i++){
-//     r[i] = x.dot(v, {cppmh::model::All, cppmh::model::All});
+//     r[i] = x.dot(a, {cppmh::model::All, cppmh::model::All});
 // }
 ```
 
