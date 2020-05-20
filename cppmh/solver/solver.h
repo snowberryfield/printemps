@@ -77,6 +77,14 @@ model::NamedSolution<T_Variable, T_Expression> solve(
     utility::print_single_line(  //
         master_option.verbose >= Verbose::Outer);
 
+    if (master_option.verbose >= Verbose::Outer) {
+        master_option.print();
+    }
+
+    model->setup(master_option.is_enabled_parallel_neighborhood_update,
+                 master_option.is_enabled_initial_value_correction,
+                 master_option.verbose >= Verbose::Warning);
+
     utility::print_message(  //
         "Optimization starts.", master_option.verbose >= Verbose::Outer);
 
@@ -90,13 +98,10 @@ model::NamedSolution<T_Variable, T_Expression> solve(
             utility::to_string(model->number_of_constraints(), "%d"),
         master_option.verbose >= Verbose::Outer);
 
-    if (master_option.verbose >= Verbose::Outer) {
-        master_option.print();
-    }
-
-    model->setup(master_option.is_enabled_parallel_neighborhood_update,
-                 master_option.is_enabled_initial_value_correction,
-                 master_option.verbose >= Verbose::Warning);
+    utility::print_info(
+        "The number of selection constraints: " +
+            utility::to_string(model->neighborhood().selections().size(), "%d"),
+        master_option.verbose >= Verbose::Outer);
 
     /**
      * Create local and global penalty coefficient for each constraint.
