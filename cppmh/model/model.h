@@ -669,10 +669,6 @@ class Model {
             }
         }
 
-        if (!m_objective.is_linear()) {
-            m_is_enabled_fast_evaluation = false;
-        }
-
         if (m_neighborhood.is_enabled_user_defined_move()) {
             m_is_enabled_fast_evaluation = false;
         }
