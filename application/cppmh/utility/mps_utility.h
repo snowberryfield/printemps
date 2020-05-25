@@ -189,7 +189,6 @@ inline MPS read_mps(const std::string &a_FILE_NAME) {
 
         if (items.front() == "NAME") {
             read_mode = MPSReadMode::Name;
-
         } else if (items.front() == "ROWS" && items.size() == 1) {
             read_mode = MPSReadMode::Rows;
             continue;
@@ -204,6 +203,11 @@ inline MPS read_mps(const std::string &a_FILE_NAME) {
             continue;
         } else if (items.front() == "ENDATA" && items.size() == 1) {
             read_mode = MPSReadMode::Endata;
+            break;
+        } else if (items.front() == "RANGES" && items.size() == 1) {
+            throw std::logic_error(utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "This program does not compatible to RANGES section."));
             break;
         }
         switch (read_mode) {
