@@ -152,6 +152,8 @@ struct MPS {
 inline MPS read_mps(const std::string &a_FILE_NAME) {
     MPS mps;
 
+    bool is_valid = false;
+
     std::vector<std::string> lines;
     std::string              item;
 
@@ -163,6 +165,11 @@ inline MPS read_mps(const std::string &a_FILE_NAME) {
         std::string   buffer;
 
         ifs.open(a_FILE_NAME.c_str());
+        if (ifs.fail()) {
+            throw std::logic_error(utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "Cannot open the specified MPS file: " + a_FILE_NAME));
+        }
         while (std::getline(ifs, buffer)) {
             lines.push_back(buffer);
         }
@@ -203,6 +210,7 @@ inline MPS read_mps(const std::string &a_FILE_NAME) {
             continue;
         } else if (items.front() == "ENDATA" && items.size() == 1) {
             read_mode = MPSReadMode::Endata;
+            is_valid  = true;
             break;
         } else if (items.front() == "RANGES" && items.size() == 1) {
             throw std::logic_error(utility::format_error_location(
@@ -378,6 +386,11 @@ inline MPS read_mps(const std::string &a_FILE_NAME) {
                 /// nothing to do
             }
         }
+    }
+
+    if (!is_valid) {
+        throw std::logic_error(utility::format_error_location(
+            __FILE__, __LINE__, __func__, "The MPS file is not valid."));
     }
 
     /**
