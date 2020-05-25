@@ -183,6 +183,10 @@ inline MPS read_mps(const std::string &a_FILE_NAME) {
         }
         int items_size = items.size();
 
+        if (items_size == 0) {
+            continue;
+        }
+
         if (items.front() == "NAME") {
             read_mode = MPSReadMode::Name;
 
