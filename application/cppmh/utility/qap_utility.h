@@ -29,6 +29,11 @@ QuadraticAssignmentProblem read_qaplib(const std::string& a_FILE_NAME) {
     std::string   line;
     std::string   buffer;
     ifs.open(a_FILE_NAME.c_str());
+    if (ifs.fail()) {
+        throw std::logic_error(utility::format_error_location(
+            __FILE__, __LINE__, __func__,
+            "Cannot open the specified QAPLIB file: " + a_FILE_NAME));
+    }
 
     /// Read the problem size.
     while (true) {
