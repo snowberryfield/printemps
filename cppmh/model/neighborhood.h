@@ -17,6 +17,9 @@ template <class T_Variable, class T_Expression>
 class Variable;
 
 /*****************************************************************************/
+enum SelectionMode : int { None, Smaller, Larger, Independent };
+
+/*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class Neighborhood {
    private:
@@ -94,10 +97,11 @@ class Neighborhood {
         std::vector<VariableProxy<T_Variable, T_Expression>>
             *a_variable_proxies,
         std::vector<ConstraintProxy<T_Variable, T_Expression>>
-            *      a_constraint_proxies,
-        const bool a_IS_ENABLED_PARALLEL) {
-        this->categorize_variables_and_constraints(a_variable_proxies,
-                                                   a_constraint_proxies);
+            *                a_constraint_proxies,
+        const bool           a_IS_ENABLED_PARALLEL,
+        const SelectionMode &a_SELECTION_MODE) {
+        this->categorize_variables_and_constraints(
+            a_variable_proxies, a_constraint_proxies, a_SELECTION_MODE);
         this->setup_selection_move_updater(a_IS_ENABLED_PARALLEL);
         this->setup_binary_move_updater(a_IS_ENABLED_PARALLEL);
         this->setup_integer_move_updater(a_IS_ENABLED_PARALLEL);
@@ -128,7 +132,8 @@ class Neighborhood {
         std::vector<VariableProxy<T_Variable, T_Expression>>
             *a_variable_proxies,
         std::vector<ConstraintProxy<T_Variable, T_Expression>>
-            *a_constraint_proxies) {
+            *                a_constraint_proxies,  //
+        const SelectionMode &a_SELECTION_MODE) {
         /**
          * pointers to binary variables which are includes in selection
          * constraints.
@@ -224,32 +229,88 @@ class Neighborhood {
 
         /**
          * STEP 2:
-         * Add selection constraints extracted in STEP in dictionary order with
-         * excluding used variables.
+         * Add selection constraints extracted in STEP 1.
          */
-        std::sort(raw_selections.begin(), raw_selections.end(),
-                  [](auto const &a_LHS, auto const &a_RHS) {
-                      return a_LHS.variable_ptrs.size() >
-                             a_RHS.variable_ptrs.size();
-                  });
-        for (auto &&selection : raw_selections) {
-            bool has_eliminated_variable_ptr = false;
-            for (auto &&variable_ptr : selection.variable_ptrs) {
-                if (std::find(selection_variable_ptrs.begin(),
-                              selection_variable_ptrs.end(),
-                              variable_ptr) != selection_variable_ptrs.end()) {
-                    has_eliminated_variable_ptr = true;
-                    break;
+        switch (a_SELECTION_MODE) {
+            case SelectionMode::None: {
+                break;
+            }
+            case SelectionMode::Smaller: {
+                std::sort(raw_selections.begin(), raw_selections.end(),
+                          [](auto const &a_LHS, auto const &a_RHS) {
+                              return a_LHS.variable_ptrs.size() <
+                                     a_RHS.variable_ptrs.size();
+                          });
+                break;
+            }
+            case SelectionMode::Larger: {
+                std::sort(raw_selections.begin(), raw_selections.end(),
+                          [](auto const &a_LHS, auto const &a_RHS) {
+                              return a_LHS.variable_ptrs.size() >
+                                     a_RHS.variable_ptrs.size();
+                          });
+                break;
+            }
+            case SelectionMode::Independent: {
+                break;
+            }
+            default: {
+            }
+        }
+
+        if (a_SELECTION_MODE == SelectionMode::Smaller ||
+            a_SELECTION_MODE == SelectionMode::Larger) {
+            for (auto &&selection : raw_selections) {
+                bool has_eliminated_variable_ptr = false;
+                for (auto &&variable_ptr : selection.variable_ptrs) {
+                    if (std::find(selection_variable_ptrs.begin(),
+                                  selection_variable_ptrs.end(),
+                                  variable_ptr) !=
+                        selection_variable_ptrs.end()) {
+                        has_eliminated_variable_ptr = true;
+                        break;
+                    }
+                }
+                if (has_eliminated_variable_ptr) {
+                    continue;
+                } else {
+                    selections.push_back(selection);
+                    selection_variable_ptrs.insert(
+                        selection_variable_ptrs.end(),
+                        selection.variable_ptrs.begin(),
+                        selection.variable_ptrs.end());
+                    selection.constraint_ptr->disable();
                 }
             }
-            if (has_eliminated_variable_ptr) {
-                continue;
-            } else {
-                selections.push_back(selection);
-                selection_variable_ptrs.insert(selection_variable_ptrs.end(),
-                                               selection.variable_ptrs.begin(),
-                                               selection.variable_ptrs.end());
-                selection.constraint_ptr->disable();
+        } else if (a_SELECTION_MODE == SelectionMode::Independent) {
+            int raw_selections_size = raw_selections.size();
+            for (auto i = 0; i < raw_selections_size; i++) {
+                bool has_overlap = false;
+                for (auto &&variable_ptr : raw_selections[i].variable_ptrs) {
+                    for (auto j = 0; j < raw_selections_size; j++) {
+                        if (j != i &&
+                            std::find(raw_selections[j].variable_ptrs.begin(),
+                                      raw_selections[j].variable_ptrs.end(),
+                                      variable_ptr) !=
+                                raw_selections[j].variable_ptrs.end()) {
+                            has_overlap = true;
+                            break;
+                        }
+                    }
+                    if (has_overlap) {
+                        break;
+                    }
+                }
+                if (has_overlap) {
+                    continue;
+                } else {
+                    selections.push_back(raw_selections[i]);
+                    selection_variable_ptrs.insert(
+                        selection_variable_ptrs.end(),
+                        raw_selections[i].variable_ptrs.begin(),
+                        raw_selections[i].variable_ptrs.end());
+                    raw_selections[i].constraint_ptr->disable();
+                }
             }
         }
 
@@ -667,7 +728,7 @@ class Neighborhood {
     inline constexpr void disable_user_defined_move(void) {
         m_is_enabled_user_defined_move = false;
     }
-};
+};  // namespace model
 }  // namespace model
 }  // namespace cppmh
 #endif
