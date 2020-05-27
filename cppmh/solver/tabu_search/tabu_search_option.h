@@ -19,7 +19,7 @@ struct TabuSearchOptionConstant {
     static constexpr double DEFAULT_MOVE_PRESERVE_RATE            = 1.0;
     static constexpr double DEFAULT_FREQUENCY_PENALTY_COEFFICIENT = 1E-5;
 
-    static constexpr bool   DEFAULT_IS_ENABLED_IMPROVABILITY_SCREENING = false;
+    static constexpr bool   DEFAULT_IS_ENABLED_IMPROVABILITY_SCREENING = true;
     static constexpr double DEFAULT_IS_ENABLED_SHUFFLE                 = false;
     static constexpr double DEFAULT_IS_ENABLED_MOVE_CURTAIL            = false;
     static constexpr bool   DEFAULT_IS_ENABLED_AUTOMATIC_BREAK         = true;

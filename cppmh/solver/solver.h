@@ -83,7 +83,8 @@ model::NamedSolution<T_Variable, T_Expression> solve(
 
     model->setup(master_option.is_enabled_parallel_neighborhood_update,
                  master_option.is_enabled_initial_value_correction,
-                 master_option.verbose >= Verbose::Warning);
+                 master_option.verbose >= Verbose::Warning,
+                 master_option.selection_mode);
 
     utility::print_message(  //
         "Optimization starts.", master_option.verbose >= Verbose::Outer);
