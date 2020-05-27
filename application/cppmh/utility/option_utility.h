@@ -101,6 +101,12 @@ inline cppmh::solver::Option read_option(const std::string &a_FILE_NAME) {
               option_object);
 
     /**************************************************************************/
+    /// selection_mode
+    read_json(&option.selection_mode,  //
+              "selection_mode",        //
+              option_object);
+
+    /**************************************************************************/
     /// target_objective_value
     read_json(&option.target_objective_value,  //
               "target_objective_value",        //

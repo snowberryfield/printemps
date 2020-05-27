@@ -23,32 +23,35 @@ struct OptionConstant {
     static constexpr double DEFAULT_PENALTY_COEFFICIENT_RELAXING_RATIO = 0.5;
     static constexpr double DEFAULT_PENALTY_COEFFICIENT_TIGHTENING_RATIO = 1.0;
     static constexpr double DEFAULT_INITIAL_PENALTY_COEFFICIENT          = 1E6;
-    static constexpr bool   DEFAULT_IS_ENABLED_LOCAL_SEARCH = true;
+    static constexpr bool   DEFAULT_IS_ENABLED_LOCAL_SEARCH              = true;
     static constexpr bool   DEFAULT_IS_ENABLED_GROUPING_PENALTY_COEFFICIENT =
         false;
     static constexpr bool DEFAULT_IS_ENABLED_INITIAL_VALUE_CORRECTION = true;
     static constexpr bool DEFAULT_IS_ENABLED_PARALLEL_EVALUATION      = true;
     static constexpr bool DEFAULT_IS_ENABLED_PARALLEL_NEIGHBORHOOD_UPDATE =
         true;
+    static constexpr model::SelectionMode DEFAULT_SELECTION_MODE =
+        model::SelectionMode::None;
     static constexpr double DEFAULT_TARGET_OBJECTIVE = -1E100;
     static constexpr bool   DEFAULT_VERBOSE          = Verbose::None;
 };
 
 /*****************************************************************************/
 struct Option {
-    int    iteration_max;
-    double time_offset;
-    double time_max;
-    double penalty_coefficient_relaxing_ratio;
-    double penalty_coefficient_tightening_ratio;
-    double initial_penalty_coefficient;
-    bool   is_enabled_local_search;
-    bool   is_enabled_grouping_penalty_coefficient;
-    bool   is_enabled_initial_value_correction;
-    bool   is_enabled_parallel_evaluation;
-    bool   is_enabled_parallel_neighborhood_update;
-    double target_objective_value;
-    int    verbose;
+    int                  iteration_max;
+    double               time_offset;
+    double               time_max;
+    double               penalty_coefficient_relaxing_ratio;
+    double               penalty_coefficient_tightening_ratio;
+    double               initial_penalty_coefficient;
+    bool                 is_enabled_local_search;
+    bool                 is_enabled_grouping_penalty_coefficient;
+    bool                 is_enabled_initial_value_correction;
+    bool                 is_enabled_parallel_evaluation;
+    bool                 is_enabled_parallel_neighborhood_update;
+    model::SelectionMode selection_mode;
+    double               target_objective_value;
+    int                  verbose;
 
     tabu_search::TabuSearchOption   tabu_search;
     local_search::LocalSearchOption local_search;
@@ -84,6 +87,7 @@ struct Option {
             OptionConstant::DEFAULT_IS_ENABLED_PARALLEL_EVALUATION;
         this->is_enabled_parallel_neighborhood_update =
             OptionConstant::DEFAULT_IS_ENABLED_PARALLEL_NEIGHBORHOOD_UPDATE;
+        this->selection_mode         = OptionConstant::DEFAULT_SELECTION_MODE;
         this->target_objective_value = OptionConstant::DEFAULT_TARGET_OBJECTIVE;
         this->verbose                = OptionConstant::DEFAULT_VERBOSE;
 
@@ -144,6 +148,10 @@ struct Option {
             " - is_enabled_parallel_neighborhood_update: " +  //
             utility::to_string(this->is_enabled_parallel_neighborhood_update,
                                "%d"));
+
+        utility::print(              //
+            " - selection_mode: " +  //
+            utility::to_string(this->selection_mode, "%d"));
 
         utility::print(                      //
             " - target_objective_value: " +  //

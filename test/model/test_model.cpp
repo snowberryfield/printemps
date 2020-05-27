@@ -631,7 +631,8 @@ TEST_F(TestModel, setup_variable_sense) {
     auto& x = model.create_variables("x", 10, 0, 1);
     model.create_constraint("g", x.selection());
 
-    model.setup_default_neighborhood(false, false);
+    model.setup_default_neighborhood(false, false,
+                                     cppmh::model::SelectionMode::Larger);
     for (const auto& element : x.flat_indexed_variables()) {
         EXPECT_EQ(cppmh::model::VariableSense::Selection, element.sense());
     }
@@ -740,7 +741,8 @@ TEST_F(TestModel, setup_is_enabled_fast_evaluation) {
         model.minimize(x);
 
         auto move_updater =
-            [&x](std::vector<cppmh::model::Move<int, double>>* a_moves) { ; };
+            [&x]([[maybe_unused]] std::vector<cppmh::model::Move<int, double>>*
+                     a_moves) { ; };
 
         model.neighborhood().set_user_defined_move_updater(move_updater);
         model.setup_is_enabled_fast_evaluation();
@@ -765,7 +767,8 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
         model.create_constraint("g", x.selection());
         x(0).fix_by(2);
 
-        model.setup_default_neighborhood(false, false);
+        model.setup_default_neighborhood(false, false,
+                                         cppmh::model::SelectionMode::Larger);
 
         ASSERT_THROW(
             model.verify_and_correct_selection_variables_initial_values(true,
@@ -781,7 +784,8 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
         model.create_constraint("g", x.selection());
         x(0).fix_by(2);
 
-        model.setup_default_neighborhood(false, false);
+        model.setup_default_neighborhood(false, false,
+                                         cppmh::model::SelectionMode::Larger);
 
         ASSERT_THROW(
             model.verify_and_correct_selection_variables_initial_values(false,
@@ -797,7 +801,8 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
         model.create_constraint("g", x.selection());
         x(0).fix_by(1);
 
-        model.setup_default_neighborhood(false, false);
+        model.setup_default_neighborhood(false, false,
+                                         cppmh::model::SelectionMode::Larger);
 
         model.verify_and_correct_selection_variables_initial_values(true,
                                                                     false);
@@ -812,7 +817,8 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
         model.create_constraint("g", x.selection());
         x(0).fix_by(1);
 
-        model.setup_default_neighborhood(false, false);
+        model.setup_default_neighborhood(false, false,
+                                         cppmh::model::SelectionMode::Larger);
 
         model.verify_and_correct_selection_variables_initial_values(false,
                                                                     false);
@@ -828,7 +834,8 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
         x(0).fix_by(1);
         x(1).fix_by(1);
 
-        model.setup_default_neighborhood(false, false);
+        model.setup_default_neighborhood(false, false,
+                                         cppmh::model::SelectionMode::Larger);
 
         ASSERT_THROW(
             model.verify_and_correct_selection_variables_initial_values(true,
@@ -845,7 +852,8 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
         x(0).fix_by(1);
         x(1).fix_by(1);
 
-        model.setup_default_neighborhood(false, false);
+        model.setup_default_neighborhood(false, false,
+                                         cppmh::model::SelectionMode::Larger);
 
         ASSERT_THROW(
             model.verify_and_correct_selection_variables_initial_values(false,
@@ -862,7 +870,8 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
         x(0) = 2;
         x(1) = 3;
 
-        model.setup_default_neighborhood(false, false);
+        model.setup_default_neighborhood(false, false,
+                                         cppmh::model::SelectionMode::Larger);
 
         model.verify_and_correct_selection_variables_initial_values(true,
                                                                     false);
@@ -880,7 +889,8 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
         x(0) = 2;
         x(1) = 3;
 
-        model.setup_default_neighborhood(false, false);
+        model.setup_default_neighborhood(false, false,
+                                         cppmh::model::SelectionMode::Larger);
 
         ASSERT_THROW(
             model.verify_and_correct_selection_variables_initial_values(false,
@@ -895,7 +905,8 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
         auto& x = model.create_variables("x", 10, 0, 1);
         model.create_constraint("g", x.selection());
 
-        model.setup_default_neighborhood(false, false);
+        model.setup_default_neighborhood(false, false,
+                                         cppmh::model::SelectionMode::Larger);
 
         model.verify_and_correct_selection_variables_initial_values(true,
                                                                     false);
@@ -913,7 +924,8 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
         auto& x = model.create_variables("x", 10, 0, 1);
         model.create_constraint("g", x.selection());
 
-        model.setup_default_neighborhood(false, false);
+        model.setup_default_neighborhood(false, false,
+                                         cppmh::model::SelectionMode::Larger);
 
         ASSERT_THROW(
             model.verify_and_correct_selection_variables_initial_values(false,
@@ -929,7 +941,8 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
         model.create_constraint("g", x.selection());
         x(0) = 1;
 
-        model.setup_default_neighborhood(false, false);
+        model.setup_default_neighborhood(false, false,
+                                         cppmh::model::SelectionMode::Larger);
 
         model.verify_and_correct_selection_variables_initial_values(true,
                                                                     false);
@@ -945,7 +958,8 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
         model.create_constraint("g", x.selection());
         x(0) = 1;
 
-        model.setup_default_neighborhood(false, false);
+        model.setup_default_neighborhood(false, false,
+                                         cppmh::model::SelectionMode::Larger);
 
         model.verify_and_correct_selection_variables_initial_values(false,
                                                                     false);
@@ -962,7 +976,8 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
         x(0) = 1;
         x(1) = 1;
 
-        model.setup_default_neighborhood(false, false);
+        model.setup_default_neighborhood(false, false,
+                                         cppmh::model::SelectionMode::Larger);
 
         model.verify_and_correct_selection_variables_initial_values(true,
                                                                     false);
@@ -980,7 +995,8 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
         x(0) = 1;
         x(1) = 1;
 
-        model.setup_default_neighborhood(false, false);
+        model.setup_default_neighborhood(false, false,
+                                         cppmh::model::SelectionMode::Larger);
 
         ASSERT_THROW(
             model.verify_and_correct_selection_variables_initial_values(false,
@@ -997,7 +1013,8 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
         x(0) = 1;
         x(1).fix_by(1);
 
-        model.setup_default_neighborhood(false, false);
+        model.setup_default_neighborhood(false, false,
+                                         cppmh::model::SelectionMode::Larger);
 
         model.verify_and_correct_selection_variables_initial_values(true,
                                                                     false);
@@ -1014,7 +1031,8 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
         x(0) = 1;
         x(1).fix_by(1);
 
-        model.setup_default_neighborhood(false, false);
+        model.setup_default_neighborhood(false, false,
+                                         cppmh::model::SelectionMode::Larger);
 
         ASSERT_THROW(
             model.verify_and_correct_selection_variables_initial_values(false,
@@ -1032,7 +1050,8 @@ TEST_F(TestModel, verify_and_correct_binary_variables_initial_values) {
         auto& x = model.create_variables("x", 10, 0, 1);
         x(0).fix_by(2);
 
-        model.setup_default_neighborhood(false, false);
+        model.setup_default_neighborhood(false, false,
+                                         cppmh::model::SelectionMode::Larger);
 
         ASSERT_THROW(model.verify_and_correct_binary_variables_initial_values(
                          true, false),
@@ -1046,7 +1065,8 @@ TEST_F(TestModel, verify_and_correct_binary_variables_initial_values) {
         auto& x = model.create_variables("x", 10, 0, 1);
         x(0).fix_by(-1);
 
-        model.setup_default_neighborhood(false, false);
+        model.setup_default_neighborhood(false, false,
+                                         cppmh::model::SelectionMode::Larger);
 
         ASSERT_THROW(model.verify_and_correct_binary_variables_initial_values(
                          false, false),
@@ -1061,7 +1081,8 @@ TEST_F(TestModel, verify_and_correct_binary_variables_initial_values) {
         x(0)    = 2;
         x(1)    = -1;
 
-        model.setup_default_neighborhood(false, false);
+        model.setup_default_neighborhood(false, false,
+                                         cppmh::model::SelectionMode::Larger);
 
         model.verify_and_correct_binary_variables_initial_values(true, false);
         EXPECT_EQ(1, x(0).value());
@@ -1076,7 +1097,8 @@ TEST_F(TestModel, verify_and_correct_binary_variables_initial_values) {
         x(0)    = 2;
         x(1)    = -1;
 
-        model.setup_default_neighborhood(false, false);
+        model.setup_default_neighborhood(false, false,
+                                         cppmh::model::SelectionMode::Larger);
 
         ASSERT_THROW(model.verify_and_correct_binary_variables_initial_values(
                          false, false),
@@ -1093,7 +1115,8 @@ TEST_F(TestModel, verify_and_correct_integer_variables_initial_values) {
         auto& x = model.create_variables("x", 10, -10, 10);
         x(0).fix_by(11);
 
-        model.setup_default_neighborhood(false, false);
+        model.setup_default_neighborhood(false, false,
+                                         cppmh::model::SelectionMode::Larger);
 
         ASSERT_THROW(model.verify_and_correct_integer_variables_initial_values(
                          true, false),
@@ -1107,7 +1130,8 @@ TEST_F(TestModel, verify_and_correct_integer_variables_initial_values) {
         auto& x = model.create_variables("x", 10, -10, 10);
         x(0).fix_by(-11);
 
-        model.setup_default_neighborhood(false, false);
+        model.setup_default_neighborhood(false, false,
+                                         cppmh::model::SelectionMode::Larger);
 
         ASSERT_THROW(model.verify_and_correct_integer_variables_initial_values(
                          false, false),
@@ -1122,7 +1146,8 @@ TEST_F(TestModel, verify_and_correct_integer_variables_initial_values) {
         x(0)    = 11;
         x(1)    = -11;
 
-        model.setup_default_neighborhood(false, false);
+        model.setup_default_neighborhood(false, false,
+                                         cppmh::model::SelectionMode::Larger);
 
         model.verify_and_correct_integer_variables_initial_values(true, false);
         EXPECT_EQ(10, x(0).value());
@@ -1137,7 +1162,8 @@ TEST_F(TestModel, verify_and_correct_integer_variables_initial_values) {
         x(0)    = 11;
         x(1)    = -11;
 
-        model.setup_default_neighborhood(false, false);
+        model.setup_default_neighborhood(false, false,
+                                         cppmh::model::SelectionMode::Larger);
 
         ASSERT_THROW(model.verify_and_correct_integer_variables_initial_values(
                          false, false),
@@ -1244,7 +1270,8 @@ TEST_F(TestModel, update_arg_move) {
     x(0) = 1;
 
     model.minimize(p);
-    model.setup_default_neighborhood(false, false);
+    model.setup_default_neighborhood(false, false,
+                                     cppmh::model::SelectionMode::Larger);
 
     model.update();
 
@@ -1295,7 +1322,8 @@ TEST_F(TestModel, evaluate) {
 
         model.setup_variable_related_constraints();
         model.setup_variable_sense();
-        model.setup_default_neighborhood(false, false);
+        model.setup_default_neighborhood(false, false,
+                                         cppmh::model::SelectionMode::Larger);
 
         for (auto&& element : x.flat_indexed_variables()) {
             element = 1;
@@ -1467,7 +1495,8 @@ TEST_F(TestModel, evaluate) {
 
         model.setup_variable_related_constraints();
         model.setup_variable_sense();
-        model.setup_default_neighborhood(false, false);
+        model.setup_default_neighborhood(false, false,
+                                         cppmh::model::SelectionMode::Larger);
 
         for (auto&& element : x.flat_indexed_variables()) {
             element = 1;
