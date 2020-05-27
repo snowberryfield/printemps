@@ -520,7 +520,7 @@ class Model {
     inline constexpr void setup(
         const bool a_IS_ENABLED_PARALLEL_NEIGHBORHOOD_UPDATE,
         const bool a_IS_ENABLED_INITIAL_VALUE_CORRECTION,
-        const bool a_IS_ENABLED_PRINT) {
+        const bool a_IS_ENABLED_PRINT, const SelectionMode &a_SELECTION_MODE) {
         this->verify_problem(a_IS_ENABLED_PRINT);
 
         this->setup_variable_related_constraints();
@@ -530,7 +530,8 @@ class Model {
         this->setup_is_enabled_fast_evaluation();
 
         this->setup_default_neighborhood(
-            a_IS_ENABLED_PARALLEL_NEIGHBORHOOD_UPDATE, a_IS_ENABLED_PRINT);
+            a_IS_ENABLED_PARALLEL_NEIGHBORHOOD_UPDATE, a_IS_ENABLED_PRINT,
+            a_SELECTION_MODE);
 
         /**
          * If the user-defined_neighborhood is set, default neighborhood should
@@ -676,13 +677,15 @@ class Model {
 
     /*************************************************************************/
     inline constexpr void setup_default_neighborhood(
-        const bool a_IS_ENABLED_PARALLEL, const bool a_IS_ENABLED_PRINT) {
+        const bool a_IS_ENABLED_PARALLEL, const bool a_IS_ENABLED_PRINT,
+        const SelectionMode &a_SELECTION_MODE) {
         utility::print_single_line(a_IS_ENABLED_PRINT);
         utility::print_message("Detecting the neighborhood structure...",
                                a_IS_ENABLED_PRINT);
         m_neighborhood.setup_has_fixed_variables(m_variable_proxies);
         m_neighborhood.setup_default_neighborhood(
-            &m_variable_proxies, &m_constraint_proxies, a_IS_ENABLED_PARALLEL);
+            &m_variable_proxies, &m_constraint_proxies, a_IS_ENABLED_PARALLEL,
+            a_SELECTION_MODE);
         utility::print_message("Done.", a_IS_ENABLED_PRINT);
     }
 
