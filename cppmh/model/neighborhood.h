@@ -17,7 +17,7 @@ template <class T_Variable, class T_Expression>
 class Variable;
 
 /*****************************************************************************/
-enum SelectionMode : int { None, Smaller, Larger, Independent };
+enum SelectionMode : int { None, Defined, Smaller, Larger, Independent };
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
@@ -235,6 +235,9 @@ class Neighborhood {
             case SelectionMode::None: {
                 break;
             }
+            case SelectionMode::Defined: {
+                break;
+            }
             case SelectionMode::Smaller: {
                 std::sort(raw_selections.begin(), raw_selections.end(),
                           [](auto const &a_LHS, auto const &a_RHS) {
@@ -258,7 +261,8 @@ class Neighborhood {
             }
         }
 
-        if (a_SELECTION_MODE == SelectionMode::Smaller ||
+        if (a_SELECTION_MODE == SelectionMode::Defined ||
+            a_SELECTION_MODE == SelectionMode::Smaller ||
             a_SELECTION_MODE == SelectionMode::Larger) {
             for (auto &&selection : raw_selections) {
                 bool has_eliminated_variable_ptr = false;
