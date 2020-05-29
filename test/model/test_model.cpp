@@ -1263,15 +1263,12 @@ TEST_F(TestModel, update_arg_move) {
     auto& p = model.create_expression("p", x.dot(sequence) + 1);
     model.create_constraint("g", x.selection());
 
-    for (auto&& element : p.flat_indexed_expressions()) {
-        element.setup_fixed_sensitivities();
-    }
-
     x(0) = 1;
 
     model.minimize(p);
     model.setup_default_neighborhood(false, false,
                                      cppmh::model::SelectionMode::Larger);
+    model.setup_fixed_sensitivities(false);
 
     model.update();
 
@@ -1324,6 +1321,7 @@ TEST_F(TestModel, evaluate) {
         model.setup_variable_sense();
         model.setup_default_neighborhood(false, false,
                                          cppmh::model::SelectionMode::Larger);
+        model.setup_fixed_sensitivities(false);
 
         for (auto&& element : x.flat_indexed_variables()) {
             element = 1;
@@ -1497,6 +1495,7 @@ TEST_F(TestModel, evaluate) {
         model.setup_variable_sense();
         model.setup_default_neighborhood(false, false,
                                          cppmh::model::SelectionMode::Larger);
+        model.setup_fixed_sensitivities(false);
 
         for (auto&& element : x.flat_indexed_variables()) {
             element = 1;
