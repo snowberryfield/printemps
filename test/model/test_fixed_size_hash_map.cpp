@@ -41,13 +41,6 @@ TEST_F(TestFixedSizeHashMap, initialize) {
 
     EXPECT_EQ(static_cast<unsigned int>(0), fixed_size_hash_map.shift_size());
     EXPECT_EQ(default_bucket_size, fixed_size_hash_map.bucket_size());
-    EXPECT_EQ(default_bucket_size, fixed_size_hash_map.keys().size());
-    EXPECT_EQ(default_bucket_size, fixed_size_hash_map.values().size());
-    EXPECT_EQ(default_bucket_size, fixed_size_hash_map.is_occupied().size());
-
-    EXPECT_EQ(0, fixed_size_hash_map.keys()[0]);
-    EXPECT_EQ(0, fixed_size_hash_map.values()[0]);
-    EXPECT_EQ(0, fixed_size_hash_map.is_occupied()[0]);
 }
 
 /*****************************************************************************/
@@ -86,9 +79,6 @@ TEST_F(TestFixedSizeHashMap, setup) {
     /// 4194304 < 24000 * 100(LOAD_MARGIN) < 4194304
     std::size_t expected_bucket_size = 4194304;
     EXPECT_EQ(expected_bucket_size, fixed_size_hash_map.bucket_size());
-    EXPECT_EQ(expected_bucket_size, fixed_size_hash_map.keys().size());
-    EXPECT_EQ(expected_bucket_size, fixed_size_hash_map.values().size());
-    EXPECT_EQ(expected_bucket_size, fixed_size_hash_map.is_occupied().size());
 
     for (const auto& element : unordered_map) {
         EXPECT_EQ(element.second, fixed_size_hash_map.at(element.first));
@@ -110,20 +100,6 @@ TEST_F(TestFixedSizeHashMap, bucket_size) {
     /// This method is tested in initialize() and setup().
 }
 
-/*****************************************************************************/
-TEST_F(TestFixedSizeHashMap, keys) {
-    /// This method is tested in initialize() and setup().
-}
-
-/*****************************************************************************/
-TEST_F(TestFixedSizeHashMap, values) {
-    /// This method is tested in initialize() and setup().
-}
-
-/*****************************************************************************/
-TEST_F(TestFixedSizeHashMap, is_occupied) {
-    /// This method is tested in initialize() and setup().
-}
 /*****************************************************************************/
 }  // namespace
 /*****************************************************************************/
