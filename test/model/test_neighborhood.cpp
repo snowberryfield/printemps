@@ -435,7 +435,7 @@ TEST_F(TestNeighborhood, categorize_variables_and_constraints_independent) {
     /// Constraint c0
     EXPECT_EQ(
         false,
-        model.neighborhood().selections()[1].constraint_ptr->is_enabled());
+        model.neighborhood().selections()[0].constraint_ptr->is_enabled());
 
     /**
      * Check the number of covered variables and variable pointers for each
