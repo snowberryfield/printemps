@@ -15,7 +15,7 @@ namespace cppmh {
 namespace model {
 /*****************************************************************************/
 struct FixedSizeHashMapConstant {
-    static constexpr std::uint_fast32_t DEFAULT_BUCKET_SIZE = 16;
+    static constexpr std::uint_fast32_t DEFAULT_BUCKET_SIZE = 1;
     static constexpr int                LOAD_MARGIN         = 100;
 };
 
@@ -27,9 +27,10 @@ class FixedSizeHashMap {
     std::uint_fast32_t m_bucket_size;
     std::uint_fast32_t m_mask;
 
-    std::vector<T_Key>        m_keys;
-    std::vector<T_Value>      m_values;
-    std::vector<uint_fast8_t> m_is_occupied;
+    bool     m_is_memory_allocated;
+    T_Key *  m_keys;
+    T_Value *m_values;
+    bool *   m_is_occupied;
 
     /*************************************************************************/
     inline constexpr std::uint_fast32_t compute_hash(const T_Key a_KEY) const
@@ -65,6 +66,16 @@ class FixedSizeHashMap {
     }
 
     /*************************************************************************/
+    virtual ~FixedSizeHashMap(void) {
+        if (m_is_memory_allocated) {
+            delete[] m_is_occupied;
+            delete[] m_keys;
+            delete[] m_values;
+            m_is_memory_allocated = false;
+        }
+    }
+
+    /*************************************************************************/
     FixedSizeHashMap(const std::unordered_map<T_Key, T_Value> &a_UNORDERED_MAP,
                      const std::uint_fast32_t                  a_KEY_SIZE) {
         this->setup(a_UNORDERED_MAP, a_KEY_SIZE);
@@ -72,16 +83,14 @@ class FixedSizeHashMap {
 
     /*************************************************************************/
     inline constexpr void initialize(void) {
-        m_shift_size  = 0;
-        m_bucket_size = FixedSizeHashMapConstant::DEFAULT_BUCKET_SIZE;
-        m_mask        = m_bucket_size - 1;
-        m_keys.resize(m_bucket_size, 0);
-        m_values.resize(m_bucket_size, 0);
-        m_is_occupied.resize(m_bucket_size, 0);
+        m_shift_size          = 0;
+        m_bucket_size         = FixedSizeHashMapConstant::DEFAULT_BUCKET_SIZE;
+        m_mask                = m_bucket_size - 1;
+        m_is_memory_allocated = false;
 
-        std::fill(m_keys.begin(), m_keys.end(), static_cast<T_Key>(0));
-        std::fill(m_values.begin(), m_values.end(), static_cast<T_Value>(0));
-        std::fill(m_is_occupied.begin(), m_is_occupied.end(), 0);
+        m_keys        = nullptr;
+        m_values      = nullptr;
+        m_is_occupied = nullptr;
     }
 
     /*************************************************************************/
@@ -98,13 +107,16 @@ class FixedSizeHashMap {
         m_bucket_size = bucket_size;
         m_mask        = m_bucket_size - 1;
 
-        m_keys.resize(m_bucket_size);
-        m_values.resize(m_bucket_size);
-        m_is_occupied.resize(m_bucket_size);
+        m_keys                = new T_Key[m_bucket_size];
+        m_values              = new T_Value[m_bucket_size];
+        m_is_occupied         = new bool[m_bucket_size];
+        m_is_memory_allocated = true;
 
-        std::fill(m_keys.begin(), m_keys.end(), static_cast<T_Key>(0));
-        std::fill(m_values.begin(), m_values.end(), static_cast<T_Value>(0));
-        std::fill(m_is_occupied.begin(), m_is_occupied.end(), 0);
+        for (std::uint_fast32_t i = 0; i < bucket_size; i++) {
+            m_keys[i]        = static_cast<T_Key>(0);
+            m_values[i]      = static_cast<T_Value>(0);
+            m_is_occupied[i] = false;
+        }
 
         for (const auto &item : a_UNORDERED_MAP) {
             this->insert(item.first, item.second);
@@ -116,6 +128,7 @@ class FixedSizeHashMap {
         std::uint_fast32_t index =
             (reinterpret_cast<std::uint_fast64_t>(a_KEY) >> m_shift_size) &
             m_mask;
+
         if (!m_is_occupied[index]) {
             return 0;
         }
@@ -137,21 +150,6 @@ class FixedSizeHashMap {
     /*************************************************************************/
     inline constexpr std::uint_fast32_t bucket_size(void) const {
         return m_bucket_size;
-    }
-
-    /*************************************************************************/
-    inline constexpr const std::vector<T_Key> &keys(void) const {
-        return m_keys;
-    }
-
-    /*************************************************************************/
-    inline constexpr const std::vector<T_Value> &values(void) const {
-        return m_values;
-    }
-
-    /*************************************************************************/
-    inline constexpr const std::vector<uint_fast8_t> &is_occupied(void) const {
-        return m_is_occupied;
     }
 };
 }  // namespace model
