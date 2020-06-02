@@ -1130,9 +1130,10 @@ class Model {
         score.global_penalty             = global_penalty;
         score.local_augmented_objective  = local_augmented_objective;
         score.global_augmented_objective = global_augmented_objective;
-        score.is_objective_improvable    = objective_improvement > 0;
-        score.is_constraint_improvable   = is_constraint_improvable;
-        score.is_feasible                = !(total_violation > 0);
+        score.is_objective_improvable =
+            objective_improvement > constant::EPSILON;
+        score.is_constraint_improvable = is_constraint_improvable;
+        score.is_feasible              = !(total_violation > constant::EPSILON);
 
         return score;
     }
@@ -1192,9 +1193,10 @@ class Model {
         score.global_penalty             = global_penalty;
         score.local_augmented_objective  = local_augmented_objective;
         score.global_augmented_objective = global_augmented_objective;
-        score.is_objective_improvable    = objective_improvement > 0;
-        score.is_constraint_improvable   = is_constraint_improvable;
-        score.is_feasible                = !(total_violation > 0);
+        score.is_objective_improvable =
+            objective_improvement > constant::EPSILON;
+        score.is_constraint_improvable = is_constraint_improvable;
+        score.is_feasible              = !(total_violation > constant::EPSILON);
 
         return score;
     }
@@ -1269,7 +1271,7 @@ class Model {
         solution.objective = m_objective.value();
         bool is_feasible   = true;
         for (const auto &proxy : solution.violation_value_proxies) {
-            if (utility::max(proxy.flat_indexed_values()) > 0) {
+            if (utility::max(proxy.flat_indexed_values()) > constant::EPSILON) {
                 is_feasible = false;
                 break;
             }
