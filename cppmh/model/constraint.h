@@ -175,11 +175,13 @@ class Constraint : public AbstractMultiArrayElement {
         const std::function<
             T_Expression(const Move<T_Variable, T_Expression> &)> &a_FUNCTION,
         const ConstraintSense                                      a_SENSE) {
-        this->initialize();
-
-        m_function  = a_FUNCTION;
-        m_sense     = a_SENSE;
-        m_is_linear = false;
+        m_function = a_FUNCTION;
+        m_expression.initialize();
+        m_sense            = a_SENSE;
+        m_constraint_value = 0;
+        m_violation_value  = 0;
+        m_is_linear        = false;
+        m_is_enabled       = true;
 
         m_constraint_function =
             [this](const Move<T_Variable, T_Expression> &a_MOVE) {
@@ -220,11 +222,16 @@ class Constraint : public AbstractMultiArrayElement {
     inline constexpr void setup(
         const Expression<T_Variable, T_Expression> &a_EXPRESSION,
         const ConstraintSense                       a_SENSE) {
-        this->initialize();
-
-        m_expression = a_EXPRESSION;
-        m_sense      = a_SENSE;
-        m_is_linear  = true;
+        m_function =  //
+            []([[maybe_unused]] const Move<T_Variable, T_Expression> &a_MOVE) {
+                return static_cast<T_Expression>(0);
+            };
+        m_expression       = a_EXPRESSION;
+        m_sense            = a_SENSE;
+        m_constraint_value = 0;
+        m_violation_value  = 0;
+        m_is_linear        = true;
+        m_is_enabled       = true;
 
         m_expression.setup_fixed_sensitivities();
 
