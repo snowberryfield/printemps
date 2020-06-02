@@ -772,9 +772,7 @@ class Model {
                     throw std::logic_error(utility::format_error_location(
                         __FILE__, __LINE__, __func__,
                         "There is a variable of which initial "
-                        "value "
-                        "violates "
-                        "binary constraint."));
+                        "value violates binary constraint."));
                 }
             }
 
@@ -819,8 +817,7 @@ class Model {
                 } else {
                     throw std::logic_error(utility::format_error_location(
                         __FILE__, __LINE__, __func__,
-                        "There are more than one selected "
-                        "variables."));
+                        "There are more than one selected variables."));
                 }
             }
             /**
@@ -853,9 +850,7 @@ class Model {
                     if (!is_corrected) {
                         throw std::logic_error(utility::format_error_location(
                             __FILE__, __LINE__, __func__,
-                            "The initial value could not be "
-                            "modified "
-                            "because "
+                            "The initial value could not be modified because "
                             "all variables are fixed."));
                     };
                 } else {
@@ -887,8 +882,7 @@ class Model {
                             throw std::logic_error(
                                 utility::format_error_location(
                                     __FILE__, __LINE__, __func__,
-                                    "There is an invalid fixed "
-                                    "variable."));
+                                    "There is an invalid fixed variable."));
                         }
 
                         if (a_IS_ENABLED_CORRECTON) {
