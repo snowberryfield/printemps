@@ -79,6 +79,10 @@ struct TabuSearchMoveScore {
         [[maybe_unused]] const int                   a_ITERATION,  //
         const Option &                               a_OPTION,     //
         [[maybe_unused]] const int                   a_TABU_TENURE) noexcept {
+        if (a_ITERATION == 0) {
+            return 0.0;
+        }
+
         const auto &update_counts = a_MEMORY.update_counts();
 
         int move_update_count = 0;
