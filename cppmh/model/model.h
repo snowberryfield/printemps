@@ -1148,7 +1148,7 @@ class Model {
         double local_penalty   = score.local_penalty;
         double global_penalty  = score.global_penalty;
 
-        for (auto &&constraint_ptr : a_MOVE.related_constraint_ptrs) {
+        for (const auto &constraint_ptr : a_MOVE.related_constraint_ptrs) {
             if (!constraint_ptr->is_enabled()) {
                 continue;
             }

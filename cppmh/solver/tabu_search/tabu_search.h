@@ -122,6 +122,8 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     int tabu_tenure = std::min(option.tabu_search.initial_tabu_tenure,
                                model->number_of_variables());
 
+    bool has_constraint(local_penalty_coefficient_proxies.size() > 0);
+
     double bias_previous       = 0.0;
     double bias_current        = 0.0;
     int    bias_increase_count = 0;
@@ -182,7 +184,6 @@ TabuSearchResult<T_Variable, T_Expression> solve(
         global_augmented_objectives.resize(number_of_moves);
         total_scores.resize(number_of_moves);
 
-        bool has_constraint(local_penalty_coefficient_proxies.size() > 0);
         bool is_aspirated = false;
 
 #ifdef _OPENMP
