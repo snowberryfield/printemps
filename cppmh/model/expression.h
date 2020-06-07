@@ -176,7 +176,7 @@ class Expression : public AbstractMultiArrayElement {
     inline constexpr T_Expression evaluate(void) const noexcept {
         T_Expression value = m_constant_value;
 
-        for (const auto sensitivity : m_sensitivities) {
+        for (const auto &sensitivity : m_sensitivities) {
             value += sensitivity.first->value() * sensitivity.second;
         }
         return value;
