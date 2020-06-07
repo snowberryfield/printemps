@@ -16,7 +16,7 @@ namespace model {
 /*****************************************************************************/
 struct FixedSizeHashMapConstant {
     static constexpr std::uint_fast32_t DEFAULT_BUCKET_SIZE = 1;
-    static constexpr int                LOAD_MARGIN         = 100;
+    static constexpr int                LOAD_MARGIN         = 10;
 };
 
 /*****************************************************************************/
