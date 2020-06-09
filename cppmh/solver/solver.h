@@ -74,17 +74,18 @@ model::NamedSolution<T_Variable, T_Expression> solve(
         }
     }
 
-    utility::print_single_line(  //
-        master_option.verbose >= Verbose::Outer);
-
     if (master_option.verbose >= Verbose::Outer) {
         master_option.print();
     }
 
     model->setup(master_option.is_enabled_parallel_neighborhood_update,
+                 master_option.is_enabled_presolve,
                  master_option.is_enabled_initial_value_correction,
                  master_option.verbose >= Verbose::Warning,
                  master_option.selection_mode);
+
+    utility::print_single_line(  //
+        master_option.verbose >= Verbose::Outer);
 
     utility::print_message(  //
         "Optimization starts.", master_option.verbose >= Verbose::Outer);
@@ -95,6 +96,11 @@ model::NamedSolution<T_Variable, T_Expression> solve(
         master_option.verbose >= Verbose::Outer);
 
     utility::print_info(
+        "The number of fixed decision variables: " +
+            utility::to_string(model->number_of_fixed_variables(), "%d"),
+        master_option.verbose >= Verbose::Outer);
+
+    utility::print_info(
         "The number of constraints: " +
             utility::to_string(model->number_of_constraints(), "%d"),
         master_option.verbose >= Verbose::Outer);
@@ -102,6 +108,11 @@ model::NamedSolution<T_Variable, T_Expression> solve(
     utility::print_info(
         "The number of selection constraints: " +
             utility::to_string(model->neighborhood().selections().size(), "%d"),
+        master_option.verbose >= Verbose::Outer);
+
+    utility::print_info(
+        "The number of disabled(removed) constraints: " +
+            utility::to_string(model->number_of_disabled_constraints(), "%d"),
         master_option.verbose >= Verbose::Outer);
 
     /**

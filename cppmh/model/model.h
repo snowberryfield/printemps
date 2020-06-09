@@ -10,6 +10,7 @@
 #include <string>
 #include <numeric>
 #include <functional>
+#include <cmath>
 
 #include "range.h"
 #include "move.h"
@@ -56,6 +57,7 @@ class Model {
 
     bool                                   m_is_defined_objective;
     bool                                   m_is_enabled_fast_evaluation;
+    bool                                   m_is_linear;
     bool                                   m_is_minimization;
     Neighborhood<T_Variable, T_Expression> m_neighborhood;
     std::function<void(void)>              m_callback;
@@ -87,6 +89,7 @@ class Model {
 
         m_is_defined_objective       = false;
         m_is_enabled_fast_evaluation = true;
+        m_is_linear                  = true;
         m_is_minimization            = true;
         m_neighborhood.initialize();
         m_callback = [](void) {};
@@ -478,6 +481,11 @@ class Model {
     }
 
     /*************************************************************************/
+    inline constexpr bool is_linear(void) const {
+        return m_is_linear;
+    }
+
+    /*************************************************************************/
     inline constexpr bool is_minimization(void) const {
         return m_is_minimization;
     }
@@ -495,8 +503,21 @@ class Model {
     /*************************************************************************/
     inline constexpr int number_of_variables(void) const {
         int result = 0;
-        for (auto &&proxy : m_variable_proxies) {
+        for (const auto &proxy : m_variable_proxies) {
             result += proxy.number_of_elements();
+        }
+        return result;
+    }
+
+    /*************************************************************************/
+    inline constexpr int number_of_fixed_variables(void) const {
+        int result = 0;
+        for (const auto &proxy : m_variable_proxies) {
+            for (const auto &variable : proxy.flat_indexed_variables()) {
+                if (variable.is_fixed()) {
+                    result++;
+                }
+            }
         }
         return result;
     }
@@ -511,6 +532,19 @@ class Model {
     }
 
     /*************************************************************************/
+    inline constexpr int number_of_disabled_constraints(void) const {
+        int result = 0;
+        for (const auto &proxy : m_constraint_proxies) {
+            for (const auto &constraints : proxy.flat_indexed_constraints()) {
+                if (!constraints.is_enabled()) {
+                    result++;
+                }
+            }
+        }
+        return result;
+    }
+
+    /*************************************************************************/
     inline constexpr Neighborhood<T_Variable, T_Expression> &neighborhood(
         void) {
         return m_neighborhood;
@@ -519,6 +553,7 @@ class Model {
     /*************************************************************************/
     inline constexpr void setup(
         const bool a_IS_ENABLED_PARALLEL_NEIGHBORHOOD_UPDATE,
+        const bool a_IS_ENABLED_PRESOLVE,
         const bool a_IS_ENABLED_INITIAL_VALUE_CORRECTION,
         const bool a_IS_ENABLED_PRINT, const SelectionMode &a_SELECTION_MODE) {
         this->verify_problem(a_IS_ENABLED_PRINT);
@@ -527,15 +562,24 @@ class Model {
         this->setup_variable_sense();
         this->setup_unique_name();
 
+        this->setup_is_linear();
         this->setup_is_enabled_fast_evaluation();
+
+        /**
+         * Presolve the problem by removing redundant constraints and fixing
+         * decision variables implicitly fixed.
+         */
+        if (a_IS_ENABLED_PRESOLVE) {
+            this->presolve(a_IS_ENABLED_PRINT);
+        }
 
         this->setup_default_neighborhood(
             a_IS_ENABLED_PARALLEL_NEIGHBORHOOD_UPDATE, a_IS_ENABLED_PRINT,
             a_SELECTION_MODE);
 
         /**
-         * If the user-defined_neighborhood is set, default neighborhood should
-         * be disabled to avoid possible inconsistencies.
+         * If the user-defined_neighborhood is set, default neighborhood
+         * should be disabled to avoid possible inconsistencies.
          */
         if (m_neighborhood.is_enabled_user_defined_move()) {
             m_neighborhood.disable_default_move();
@@ -660,6 +704,22 @@ class Model {
     }
 
     /*************************************************************************/
+    inline constexpr void setup_is_linear(void) {
+        m_is_linear = true;
+        for (auto &&proxy : m_constraint_proxies) {
+            for (auto &&constraint : proxy.flat_indexed_constraints()) {
+                if (!constraint.is_linear()) {
+                    m_is_linear = false;
+                }
+            }
+        }
+
+        if (!m_objective.is_linear()) {
+            m_is_linear = false;
+        }
+    }
+
+    /*************************************************************************/
     inline constexpr void setup_is_enabled_fast_evaluation(void) {
         m_is_enabled_fast_evaluation = true;
         for (auto &&proxy : m_constraint_proxies) {
@@ -695,8 +755,7 @@ class Model {
         utility::print_single_line(a_IS_ENABLED_PRINT);
         utility::print_message(
             "Verifying the initial values of the binary decision "
-            "variables "
-            "included in the selection constraints...",
+            "variables included in the selection constraints...",
             a_IS_ENABLED_PRINT);
 
         for (auto &&selection : m_neighborhood.selections()) {
@@ -850,7 +909,8 @@ class Model {
                     if (!is_corrected) {
                         throw std::logic_error(utility::format_error_location(
                             __FILE__, __LINE__, __func__,
-                            "The initial value could not be modified because "
+                            "The initial value could not be modified "
+                            "because "
                             "all variables are fixed."));
                     };
                 } else {
@@ -961,7 +1021,8 @@ class Model {
                     } else {
                         throw std::logic_error(utility::format_error_location(
                             __FILE__, __LINE__, __func__,
-                            "An initial value violates the lower or upper "
+                            "An initial value violates the lower or "
+                            "upper "
                             "bound constraint."));
                     }
                 }
@@ -994,6 +1055,366 @@ class Model {
     /*************************************************************************/
     inline constexpr void callback(void) {
         m_callback();
+    }
+    /*************************************************************************/
+    inline constexpr void presolve(const bool a_IS_ENABLED_PRINT) {
+        utility::print_single_line(a_IS_ENABLED_PRINT);
+        utility::print_message("Presolving...", a_IS_ENABLED_PRINT);
+
+        if (this->is_linear()) {
+            this->remove_independent_variables(a_IS_ENABLED_PRINT);
+        }
+
+        while (true) {
+            int number_of_newly_disabled_constaints = 0;
+            int number_of_newly_fixed_variables     = 0;
+
+            number_of_newly_disabled_constaints +=
+                this->remove_implicit_singleton_constraints(a_IS_ENABLED_PRINT);
+
+            number_of_newly_fixed_variables +=
+                this->fix_implicit_fixed_variables(a_IS_ENABLED_PRINT);
+
+            if (number_of_newly_disabled_constaints == 0 &&
+                number_of_newly_fixed_variables == 0) {
+                break;
+            }
+        }
+    }
+
+    /*************************************************************************/
+    inline constexpr int remove_independent_variables(
+        const bool a_IS_ENABLED_PRINT) {
+        int number_of_newly_fixed_variables = 0;
+        for (auto &&proxy : m_variable_proxies) {
+            for (auto &&variable : proxy.flat_indexed_variables()) {
+                /**
+                 * If the decision variable has already been fixed, the
+                 * following procedures will be skipped.
+                 */
+                if (variable.is_fixed()) {
+                    continue;
+                }
+                auto &objective_sensitivities =
+                    m_objective.expression().sensitivities();
+
+                if (variable.related_constraint_ptrs().size() == 0) {
+                    if (objective_sensitivities.find(&variable) ==
+                        objective_sensitivities.end()) {
+                        utility::print_message(
+                            "The value of decision variable " +
+                                variable.name() + " is fixed by " +
+                                std::to_string(0) +
+                                " because it does not have sensitivity to any "
+                                "constraint or objective function.",
+                            a_IS_ENABLED_PRINT);
+                        variable.fix_by(0);
+                        number_of_newly_fixed_variables++;
+                    } else {
+                        auto sensitivity =
+                            objective_sensitivities.at(&variable);
+
+                        if (sensitivity > 0) {
+                            if (this->is_minimization()) {
+                                auto fix_value = variable.lower_bound();
+                                utility::print_message(
+                                    "The value of decision variable " +
+                                        variable.name() +
+                                        " is fixed by its lower bound" +
+                                        std::to_string(fix_value) +
+                                        " because it does not have "
+                                        "sensitivity to any "
+                                        "constraint, and the sensitivity to "
+                                        "the objective function to be "
+                                        "minimized is positive",
+                                    a_IS_ENABLED_PRINT);
+                                variable.fix_by(fix_value);
+                                number_of_newly_fixed_variables++;
+                            } else {
+                                auto fix_value = variable.upper_bound();
+                                utility::print_message(
+                                    "The value of decision variable " +
+                                        variable.name() +
+                                        " is fixed by its upper bound" +
+                                        std::to_string(fix_value) +
+                                        " because it does not have "
+                                        "sensitivity to any "
+                                        "constraint, and the sensitivity to "
+                                        "the objective function to be "
+                                        "maximized is positive",
+                                    a_IS_ENABLED_PRINT);
+                                variable.fix_by(fix_value);
+                                number_of_newly_fixed_variables++;
+                            }
+                        } else {
+                            if (this->is_minimization()) {
+                                auto fix_value = variable.upper_bound();
+                                utility::print_message(
+                                    "The value of decision variable " +
+                                        variable.name() +
+                                        " is fixed by its upper bound" +
+                                        std::to_string(fix_value) +
+                                        " because it does not have "
+                                        "sensitivity to any "
+                                        "constraint, and the sensitivity to "
+                                        "the objective function to be "
+                                        "minimized is negative",
+                                    a_IS_ENABLED_PRINT);
+                                variable.fix_by(fix_value);
+                                number_of_newly_fixed_variables++;
+                            } else {
+                                auto fix_value = variable.lower_bound();
+                                utility::print_message(
+                                    "The value of decision variable " +
+                                        variable.name() +
+                                        " is fixed by its lower bound" +
+                                        std::to_string(fix_value) +
+                                        " because it does not have "
+                                        "sensitivity to any "
+                                        "constraint, and the sensitivity to "
+                                        "the objective function to be "
+                                        "maximized is positive",
+                                    a_IS_ENABLED_PRINT);
+                                variable.fix_by(fix_value);
+                                number_of_newly_fixed_variables++;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return number_of_newly_fixed_variables;
+    }
+
+    /*************************************************************************/
+    inline constexpr int remove_implicit_singleton_constraints(
+        const bool a_IS_ENABLED_PRINT) {
+        int number_of_newly_disabled_constraints = 0;
+        for (auto &&proxy : m_constraint_proxies) {
+            for (auto &&constraint : proxy.flat_indexed_constraints()) {
+                /**
+                 * If the constraint is nonlinear, the following procedures
+                 * will be skipped.
+                 */
+                if (!constraint.is_linear()) {
+                    continue;
+                }
+
+                /**
+                 * If the constraint has already been disabled, the following
+                 * procedures will be skipped.
+                 */
+                if (!constraint.is_enabled()) {
+                    continue;
+                }
+
+                auto &sensitivities  = constraint.expression().sensitivities();
+                auto  constant_value = constraint.expression().constant_value();
+
+                std::vector<std::pair<Variable<T_Variable, T_Expression> *,
+                                      T_Expression>>
+                    not_fixed_nonzero_sensitivities;
+
+                int number_of_fixed_variables                      = 0;
+                int number_of_not_fixed_zero_coefficient_variables = 0;
+
+                double fixed_value = 0.0;
+
+                for (const auto &sensitivity : sensitivities) {
+                    if (sensitivity.first->is_fixed()) {
+                        number_of_fixed_variables++;
+                        fixed_value +=
+                            sensitivity.second * sensitivity.first->value();
+                    } else {
+                        if (sensitivity.second == 0) {
+                            number_of_not_fixed_zero_coefficient_variables++;
+                        } else {
+                            not_fixed_nonzero_sensitivities.push_back(
+                                sensitivity);
+                        }
+                    }
+                }
+
+                /**
+                 * If the constraint is defined with more than one decision
+                 * variables which is not fixed, the following procedures will
+                 * be skipped.
+                 */
+                if (not_fixed_nonzero_sensitivities.size() > 1) {
+                    continue;
+                }
+
+                /**
+                 * The constraint will be removed if does not include any
+                 * not fixed decision variable and its constant (or fixed) term
+                 * satisfies the constraint.
+                 */
+                if (not_fixed_nonzero_sensitivities.size() == 0) {
+                    if ((constraint.sense() == ConstraintSense::Equal &&
+                         fixed_value + constant_value == 0) ||
+                        (constraint.sense() == ConstraintSense::Lower &&
+                         fixed_value + constant_value <= 0) ||
+                        (constraint.sense() == ConstraintSense::Upper &&
+                         fixed_value + constant_value >= 0)) {
+                        utility::print_message(
+                            "The constraint " + constraint.name() +
+                                " is removed because it is always "
+                                "satisfied.",
+                            a_IS_ENABLED_PRINT);
+
+                        if (constraint.is_enabled()) {
+                            constraint.disable();
+                            number_of_newly_disabled_constraints++;
+                        }
+                    }
+                    continue;
+                }
+
+                auto variable_ptr =
+                    not_fixed_nonzero_sensitivities.front().first;
+                auto coefficient =
+                    not_fixed_nonzero_sensitivities.front().second;
+
+                /**
+                 * The detected singleton constaint will be disabled instead
+                 * of fixing or tightening the lower and upper bounds of the
+                 * decision variable included in the constraint.
+                 */
+
+                auto lower_bound = variable_ptr->lower_bound();
+                auto upper_bound = variable_ptr->upper_bound();
+                auto bound_temp = -(constant_value + fixed_value) / coefficient;
+
+                switch (constraint.sense()) {
+                    case ConstraintSense::Equal: {
+                        /**
+                         * If the singleton constraint is defined by an
+                         * equality as ax+b=0, the value of the decision
+                         * variable x will be fixed by -b/a.
+                         */
+                        utility::print_message(
+                            "The singleton constraint " + constraint.name() +
+                                " is removed instead of fixing the value "
+                                "of the decision variable " +
+                                variable_ptr->name() + " by " +
+                                std::to_string(bound_temp) + ".",
+                            a_IS_ENABLED_PRINT);
+
+                        variable_ptr->fix_by(bound_temp);
+                        if (constraint.is_enabled()) {
+                            constraint.disable();
+                            number_of_newly_disabled_constraints++;
+                        }
+
+                        break;
+                    }
+                    case ConstraintSense::Lower: {
+                        /**
+                         * If the singleton constraint is defined by an
+                         * equality as ax+b<=0, the lower bound of the
+                         * decision variable will be tightened by -b/a.
+                         */
+                        auto bound_floor =
+                            static_cast<T_Variable>(std::floor(bound_temp));
+
+                        if (bound_floor < upper_bound) {
+                            utility::print_message(
+                                "The singleton constraint " +
+                                    constraint.name() +
+                                    " is removed instead of tightening the "
+                                    "upper bound of the decision variable " +
+                                    variable_ptr->name() + " by " +
+                                    std::to_string(bound_floor) + ".",
+                                a_IS_ENABLED_PRINT);
+                            variable_ptr->set_bound(lower_bound, bound_floor);
+                        } else {
+                            utility::print_message(
+                                "The singleton constraint " +
+                                    constraint.name() +
+                                    " is removed because it is redundant.",
+                                a_IS_ENABLED_PRINT);
+                        }
+                        if (constraint.is_enabled()) {
+                            constraint.disable();
+                            number_of_newly_disabled_constraints++;
+                        }
+                        break;
+                    }
+                    case ConstraintSense::Upper: {
+                        /**
+                         * If the singleton constraint is defined by an
+                         * equality as ax+b>=0, the upper bound of the
+                         * decision variable will be tightened by -b/a.
+                         */
+                        auto bound_ceil =
+                            static_cast<T_Variable>(std::ceil(bound_temp));
+
+                        if (bound_ceil > lower_bound) {
+                            utility::print_message(
+                                "The singleton constraint " +
+                                    constraint.name() +
+                                    " is removed instead of tightening the "
+                                    "lower bound of the decision variable " +
+                                    variable_ptr->name() + " by " +
+                                    std::to_string(bound_ceil) + ".",
+                                a_IS_ENABLED_PRINT);
+                            variable_ptr->set_bound(bound_ceil, upper_bound);
+                        } else {
+                            utility::print_message(
+                                "The singleton constraint " +
+                                    constraint.name() +
+                                    " is removed because it is redundant.",
+                                a_IS_ENABLED_PRINT);
+                        }
+                        if (constraint.is_enabled()) {
+                            constraint.disable();
+                            number_of_newly_disabled_constraints++;
+                        }
+                        break;
+                    }
+                    default: {
+                        /// nothing to do
+                    }
+                }
+            }
+        }
+        return number_of_newly_disabled_constraints;
+    }
+
+    /*************************************************************************/
+    inline constexpr int fix_implicit_fixed_variables(
+        const bool a_IS_ENABLED_PRINT) {
+        int number_of_newly_fixed_variables = 0;
+        for (auto &&proxy : m_variable_proxies) {
+            for (auto &&variable : proxy.flat_indexed_variables()) {
+                /**
+                 * If the decision variable has already been fixed, the
+                 * following procedures will be skipped.
+                 */
+                if (variable.is_fixed()) {
+                    continue;
+                }
+
+                auto lower_bound = variable.lower_bound();
+                auto upper_bound = variable.upper_bound();
+                if (lower_bound == upper_bound) {
+                    auto fixed_value = lower_bound;
+
+                    utility::print_message(
+                        "The value of decision variable " + variable.name() +
+                            " is fixed by " + std::to_string(fixed_value) +
+                            " because the lower bound " +
+                            std::to_string(lower_bound) +
+                            " and the upper_bound " +
+                            std::to_string(upper_bound) +
+                            " implicitly fix the value.",
+                        a_IS_ENABLED_PRINT);
+                    variable.fix_by(fixed_value);
+                    number_of_newly_fixed_variables++;
+                }
+            }
+        }
+        return number_of_newly_fixed_variables;
     }
 
     /*************************************************************************/
