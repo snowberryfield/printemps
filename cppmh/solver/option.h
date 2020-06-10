@@ -26,6 +26,7 @@ struct OptionConstant {
     static constexpr bool   DEFAULT_IS_ENABLED_LOCAL_SEARCH              = true;
     static constexpr bool   DEFAULT_IS_ENABLED_GROUPING_PENALTY_COEFFICIENT =
         false;
+    static constexpr bool DEFAULT_IS_ENABLED_PRESOLVE                 = true;
     static constexpr bool DEFAULT_IS_ENABLED_INITIAL_VALUE_CORRECTION = true;
     static constexpr bool DEFAULT_IS_ENABLED_PARALLEL_EVALUATION      = true;
     static constexpr bool DEFAULT_IS_ENABLED_PARALLEL_NEIGHBORHOOD_UPDATE =
@@ -46,6 +47,7 @@ struct Option {
     double               initial_penalty_coefficient;
     bool                 is_enabled_local_search;
     bool                 is_enabled_grouping_penalty_coefficient;
+    bool                 is_enabled_presolve;
     bool                 is_enabled_initial_value_correction;
     bool                 is_enabled_parallel_evaluation;
     bool                 is_enabled_parallel_neighborhood_update;
@@ -81,6 +83,7 @@ struct Option {
             OptionConstant::DEFAULT_IS_ENABLED_LOCAL_SEARCH;
         this->is_enabled_grouping_penalty_coefficient =
             OptionConstant::DEFAULT_IS_ENABLED_GROUPING_PENALTY_COEFFICIENT;
+        this->is_enabled_presolve = OptionConstant::DEFAULT_IS_ENABLED_PRESOLVE;
         this->is_enabled_initial_value_correction =
             OptionConstant::DEFAULT_IS_ENABLED_INITIAL_VALUE_CORRECTION;
         this->is_enabled_parallel_evaluation =
