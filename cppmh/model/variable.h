@@ -185,7 +185,9 @@ class Variable : public AbstractMultiArrayElement {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The specified lower bound is bigger than the specified upper "
-                "bound."));
+                "bound. lower bound: " +
+                    std::to_string(a_LOWER_BOUND) +
+                    ", upper bound: " + std::to_string(a_UPPER_BOUND)));
         }
         m_lower_bound = a_LOWER_BOUND;
         m_upper_bound = a_UPPER_BOUND;

@@ -56,6 +56,7 @@ TEST_F(TestModel, initialize) {
 
     EXPECT_EQ(false, model.is_defined_objective());
     EXPECT_EQ(true, model.is_enabled_fast_evaluation());
+    EXPECT_EQ(true, model.is_linear());
     EXPECT_EQ(true, model.is_minimization());
     EXPECT_EQ(1.0, model.sign());
 }
@@ -513,6 +514,11 @@ TEST_F(TestModel, is_enabled_fast_evaluation) {
 }
 
 /*****************************************************************************/
+TEST_F(TestModel, is_linear) {
+    /// This method is tested in setup_is_linear().
+}
+
+/*****************************************************************************/
 TEST_F(TestModel, is_minimization) {
     /// This method is tested in minimize_arg_function() and so on.
 }
@@ -526,20 +532,49 @@ TEST_F(TestModel, sign) {
 TEST_F(TestModel, number_of_variables) {
     cppmh::model::Model<int, double> model;
 
-    model.create_variable("scalar");
-    model.create_variables("one_dimensional", 10);
-    model.create_variables("two_dimensional", {20, 30});
+    model.create_variable("x");
+    model.create_variables("y", 10);
+    model.create_variables("z", {20, 30});
     EXPECT_EQ(1 + 10 + 20 * 30, model.number_of_variables());
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, number_of_fixed_variables) {
+    cppmh::model::Model<int, double> model;
+
+    auto& x = model.create_variable("x");
+    auto& y = model.create_variables("y", 10);
+    auto& z = model.create_variables("z", {20, 30});
+    x.fix_by(0);
+    y(0).fix_by(0);
+    z(0, 0).fix_by(0);
+
+    EXPECT_EQ(3, model.number_of_fixed_variables());
 }
 
 /*****************************************************************************/
 TEST_F(TestModel, number_of_constraints) {
     cppmh::model::Model<int, double> model;
 
-    model.create_constraint("scalar");
-    model.create_constraints("one_dimensional", 10);
-    model.create_constraints("two_dimensional", {20, 30});
+    model.create_constraint("g");
+    model.create_constraints("h", 10);
+    model.create_constraints("v", {20, 30});
+
     EXPECT_EQ(1 + 10 + 20 * 30, model.number_of_constraints());
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, number_of_disabled_constraints) {
+    cppmh::model::Model<int, double> model;
+
+    auto& g = model.create_constraint("g");
+    auto& h = model.create_constraints("h", 10);
+    auto& v = model.create_constraints("v", {20, 30});
+    g.disable();
+    h(0).disable();
+    v(0, 0).disable();
+
+    EXPECT_EQ(3, model.number_of_disabled_constraints());
 }
 
 /*****************************************************************************/
@@ -748,6 +783,89 @@ TEST_F(TestModel, setup_is_enabled_fast_evaluation) {
         model.setup_is_enabled_fast_evaluation();
 
         EXPECT_EQ(false, model.is_enabled_fast_evaluation());
+    }
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, setup_is_linear) {
+    /// Constraint: linear
+    /// Objective: linear
+    {
+        cppmh::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x");
+
+        model.create_constraint("g", x <= 0);
+        model.minimize(x);
+
+        model.setup_is_linear();
+
+        EXPECT_EQ(true, model.is_linear());
+    }
+
+    /// Constraint: nonlinear (user-defined lambda)
+    /// Objective: linear
+    {
+        cppmh::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x");
+
+        std::function<double(const cppmh::model::Move<int, double>&)> g =
+            [&x](const cppmh::model::Move<int, double>& a_MOVE) {
+                return x.evaluate(a_MOVE);
+            };
+
+        model.create_constraint("g", g <= 0);
+        model.minimize(x);
+
+        model.setup_is_linear();
+
+        EXPECT_EQ(false, model.is_linear());
+    }
+
+    /// Constraint: linear
+    /// Objective: nonlinear (user-defined lambda)
+    {
+        cppmh::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x");
+
+        std::function<double(const cppmh::model::Move<int, double>&)> f =
+            [&x](const cppmh::model::Move<int, double>& a_MOVE) {
+                return x.evaluate(a_MOVE);
+            };
+
+        model.create_constraint("g", x <= 0);
+        model.minimize(f);
+
+        model.setup_is_linear();
+
+        EXPECT_EQ(false, model.is_linear());
+    }
+
+    /// Constraint: nonlinear
+    /// Objective: nonlinear
+    {
+        cppmh::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x");
+
+        std::function<double(const cppmh::model::Move<int, double>&)> g =
+            [&x](const cppmh::model::Move<int, double>& a_MOVE) {
+                return x.evaluate(a_MOVE);
+            };
+
+        std::function<double(const cppmh::model::Move<int, double>&)> f =
+            [&x](const cppmh::model::Move<int, double>& a_MOVE) {
+                return x.evaluate(a_MOVE);
+            };
+
+        model.create_constraint("g", g <= 0);
+        model.minimize(f);
+
+        model.setup_is_linear();
+
+        EXPECT_EQ(false, model.is_linear());
     }
 }
 
@@ -1190,6 +1308,225 @@ TEST_F(TestModel, set_callback) {
 /*****************************************************************************/
 TEST_F(TestModel, callback) {
     /// This method is tested in set_callback.
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, presolve) {
+    cppmh::model::Model<int, double> model;
+
+    auto& x = model.create_variables("x", 10, -10, 10);
+    model.minimize(x.sum());
+    model.create_constraint("g_0", 2 * x(0) == 4);
+    model.create_constraint("g_1", 3 * x(1) <= 10);
+    model.create_constraint("g_2", 8 * x(1) >= 20);
+    model.create_constraint("g_3", x(1) + x(2) + 1 == 8);
+    model.setup_variable_related_constraints();
+    model.setup_is_linear();
+
+    model.presolve(false);
+
+    EXPECT_EQ(10, model.number_of_fixed_variables());
+    EXPECT_EQ(4, model.number_of_disabled_constraints());
+    EXPECT_EQ(true, x(0).is_fixed());
+    EXPECT_EQ(2, x(0).value());
+    EXPECT_EQ(true, x(1).is_fixed());
+    EXPECT_EQ(3, x(1).value());
+    EXPECT_EQ(true, x(2).is_fixed());
+    EXPECT_EQ(4, x(2).value());
+
+    for (auto i = 3; i < 10; i++) {
+        EXPECT_EQ(true, x(i).is_fixed());
+        EXPECT_EQ(-10, x(i).value());
+    }
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, remove_independent_variables) {
+    {
+        cppmh::model::Model<int, double> model;
+
+        auto& x = model.create_variables("x", 10, 0, 1);
+        model.minimize(x.sum());
+        model.setup_variable_related_constraints();
+        model.setup_is_linear();
+        model.remove_independent_variables(false);
+        for (auto i = 0; i < 10; i++) {
+            EXPECT_EQ(true, x(i).is_fixed());
+            EXPECT_EQ(0, x(i).value());
+        }
+        EXPECT_EQ(10, model.number_of_fixed_variables());
+    }
+    {
+        cppmh::model::Model<int, double> model;
+
+        auto& x = model.create_variables("x", 10, 0, 1);
+        model.maximize(x.sum());
+        model.setup_variable_related_constraints();
+        model.setup_is_linear();
+        model.remove_independent_variables(false);
+        for (auto i = 0; i < 10; i++) {
+            EXPECT_EQ(true, x(i).is_fixed());
+            EXPECT_EQ(1, x(i).value());
+        }
+        EXPECT_EQ(10, model.number_of_fixed_variables());
+    }
+    {
+        cppmh::model::Model<int, double> model;
+
+        auto& x = model.create_variables("x", 10, 0, 1);
+        model.minimize(-x.sum());
+        model.setup_variable_related_constraints();
+        model.setup_is_linear();
+        model.remove_independent_variables(false);
+        for (auto i = 0; i < 10; i++) {
+            EXPECT_EQ(true, x(i).is_fixed());
+            EXPECT_EQ(1, x(i).value());
+        }
+        EXPECT_EQ(10, model.number_of_fixed_variables());
+    }
+    {
+        cppmh::model::Model<int, double> model;
+
+        auto& x = model.create_variables("x", 10, 0, 1);
+        model.maximize(-x.sum());
+        model.setup_variable_related_constraints();
+        model.setup_is_linear();
+        model.remove_independent_variables(false);
+        for (auto i = 0; i < 10; i++) {
+            EXPECT_EQ(true, x(i).is_fixed());
+            EXPECT_EQ(0, x(i).value());
+        }
+        EXPECT_EQ(10, model.number_of_fixed_variables());
+    }
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, remove_implicit_singleton_constraints) {
+    {
+        cppmh::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x", 0, 10);
+        auto& g = model.create_constraint("g", 3 * x + 1 == 7);
+
+        model.remove_implicit_singleton_constraints(false);
+        EXPECT_EQ(true, x.is_fixed());
+        EXPECT_EQ(2, x.value());
+        EXPECT_EQ(false, g.is_enabled());
+    }
+    {
+        cppmh::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x", 0, 10);
+        auto& g = model.create_constraint("g", 3 * x + 1 <= 7);
+
+        model.remove_implicit_singleton_constraints(false);
+        EXPECT_EQ(false, x.is_fixed());
+        EXPECT_EQ(0, x.lower_bound());
+        EXPECT_EQ(2, x.upper_bound());
+        EXPECT_EQ(false, g.is_enabled());
+    }
+    {
+        cppmh::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x", 0, 10);
+        auto& g = model.create_constraint("g", 3 * x + 1 >= 7);
+
+        model.remove_implicit_singleton_constraints(false);
+        EXPECT_EQ(false, x.is_fixed());
+        EXPECT_EQ(2, x.lower_bound());
+        EXPECT_EQ(10, x.upper_bound());
+        EXPECT_EQ(false, g.is_enabled());
+    }
+    {
+        cppmh::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x", 0, 10);
+        auto& y = model.create_variable("y", 0, 1);
+        auto& g = model.create_constraint("g", 3 * x + y == 7);
+        y.fix_by(1);
+
+        model.remove_implicit_singleton_constraints(false);
+        EXPECT_EQ(true, x.is_fixed());
+        EXPECT_EQ(2, x.value());
+        EXPECT_EQ(false, g.is_enabled());
+    }
+    {
+        cppmh::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x", 0, 10);
+        auto& y = model.create_variable("y", 0, 1);
+        auto& g = model.create_constraint("g", 3 * x + y <= 7);
+        y.fix_by(1);
+
+        model.remove_implicit_singleton_constraints(false);
+        EXPECT_EQ(false, x.is_fixed());
+        EXPECT_EQ(0, x.lower_bound());
+        EXPECT_EQ(2, x.upper_bound());
+        EXPECT_EQ(false, g.is_enabled());
+    }
+    {
+        cppmh::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x", 0, 10);
+        auto& y = model.create_variable("y", 0, 1);
+        auto& g = model.create_constraint("g", 3 * x + y >= 7);
+        y.fix_by(1);
+
+        model.remove_implicit_singleton_constraints(false);
+        EXPECT_EQ(false, x.is_fixed());
+        EXPECT_EQ(2, x.lower_bound());
+        EXPECT_EQ(10, x.upper_bound());
+        EXPECT_EQ(false, g.is_enabled());
+    }
+    {
+        cppmh::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x", 0, 10);
+        auto& g = model.create_constraint("g", 3 * x + 1 == 7);
+        x.fix_by(2);
+
+        model.remove_implicit_singleton_constraints(false);
+        EXPECT_EQ(true, x.is_fixed());
+        EXPECT_EQ(false, g.is_enabled());
+    }
+    {
+        cppmh::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x", 0, 10);
+        auto& g = model.create_constraint("g", 3 * x + 1 <= 7);
+        x.fix_by(1);
+
+        model.remove_implicit_singleton_constraints(false);
+        EXPECT_EQ(true, x.is_fixed());
+        EXPECT_EQ(false, g.is_enabled());
+    }
+    {
+        cppmh::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x", 0, 10);
+        auto& g = model.create_constraint("g", 3 * x + 1 >= 7);
+        x.fix_by(3);
+
+        model.remove_implicit_singleton_constraints(false);
+        EXPECT_EQ(true, x.is_fixed());
+        EXPECT_EQ(false, g.is_enabled());
+    }
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, fix_implicit_fixed_variables) {
+    cppmh::model::Model<int, double> model;
+
+    auto& x = model.create_variables("x", 10, -10, 10);
+    x(0).set_bound(5, 5);
+    model.fix_implicit_fixed_variables(false);
+    EXPECT_EQ(5, x(0).value());
+    EXPECT_EQ(true, x(0).is_fixed());
+
+    for (auto i = 1; i < 10; i++) {
+        EXPECT_EQ(false, x(i).is_fixed());
+    }
+    EXPECT_EQ(1, model.number_of_fixed_variables());
 }
 
 /*****************************************************************************/

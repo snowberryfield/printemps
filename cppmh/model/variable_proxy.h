@@ -227,7 +227,9 @@ class VariableProxy : public AbstractMultiArray {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The specified lower bound is bigger than the specified upper "
-                "bound."));
+                "bound. lower bound: " +
+                    std::to_string(a_LOWER_BOUND) +
+                    ", upper bound: " + std::to_string(a_UPPER_BOUND)));
         }
         for (auto &&variable : m_variables) {
             variable.set_bound(a_LOWER_BOUND, a_UPPER_BOUND);
