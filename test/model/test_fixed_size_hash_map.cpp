@@ -76,8 +76,8 @@ TEST_F(TestFixedSizeHashMap, setup) {
               fixed_size_hash_map.shift_size());
 
     /// 10 * 20 + 20 * 30 * 40 = 200 + 24000
-    /// 262144 < 24000 * 10(LOAD_MARGIN) < 262144
-    std::size_t expected_bucket_size = 262144;
+    /// 4194304 < 24000 * 100(LOAD_MARGIN) < 4194304
+    std::size_t expected_bucket_size = 4194304;
     EXPECT_EQ(expected_bucket_size, fixed_size_hash_map.bucket_size());
 
     for (const auto& element : unordered_map) {

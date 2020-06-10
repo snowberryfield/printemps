@@ -76,7 +76,7 @@ A source code of program integrating cppmh can be compiled by C++14 standards co
 $g++ -std=c++14 -O2 -I path/to/cppmh [-fopenmp] sample/knapsack.cpp -o knapsack.exe
 ```
 
-The option `-fopenmp` is required to activate parallel computation. See [Solver Options](document/solver_option_guide.md) for details.
+The option `-fopenmp` is required to activate parallel computation. See [Solver Options](document/solver_options.md) for details.
 
 Following combinations of operating systems and compilers are confirmed compilation possible:
 
