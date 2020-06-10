@@ -7,9 +7,11 @@
     "initial_penalty_coefficient": 1E6,
     "is_enabled_local_search": true,
     "is_enabled_grouping_penalty_coefficient": false,
+    "is_enabled_presolve": true,
     "is_enabled_initial_value_correction": true,
     "is_enabled_parallel_evaluation": true,
     "is_enabled_parallel_neighborhood_update": true,
+    "selection_mode": 0,
     "target_objective_value": -1E100,
     "verbose": 0,
     "local_search": {
