@@ -1043,6 +1043,12 @@ class Model {
                 expression.setup_fixed_sensitivities();
             }
         }
+
+        /**
+         * The fixed sensitivities for the constraints and the objective are
+         * build in their own setup() methods.
+         */
+
         utility::print_message("Done.", a_IS_ENABLED_PRINT);
     }
 
@@ -1452,7 +1458,9 @@ class Model {
             }
         }
 
-        m_objective.update();
+        if (m_is_defined_objective) {
+            m_objective.update();
+        }
     }
 
     /*************************************************************************/
@@ -1461,7 +1469,9 @@ class Model {
          * Update in order of objective, constraints -> expressions ->
          * variables.
          */
-        m_objective.update(a_MOVE);
+        if (m_is_defined_objective) {
+            m_objective.update(a_MOVE);
+        }
 
         for (auto &&proxy : m_constraint_proxies) {
             for (auto &&constraint : proxy.flat_indexed_constraints()) {
@@ -1529,9 +1539,14 @@ class Model {
             }
         }
 
-        double objective = m_objective.evaluate(a_MOVE) * this->sign();
-        double objective_improvement =
-            (m_objective.value() - objective) * this->sign();
+        double objective             = 0.0;
+        double objective_improvement = 0.0;
+
+        if (m_is_defined_objective) {
+            objective = m_objective.evaluate(a_MOVE) * this->sign();
+            objective_improvement =
+                (m_objective.value() - objective) * this->sign();
+        }
 
         double local_augmented_objective  = objective + local_penalty;
         double global_augmented_objective = objective + global_penalty;
@@ -1594,9 +1609,14 @@ class Model {
                     flat_index);
         }
 
-        double objective = m_objective.evaluate(a_MOVE) * this->sign();
-        double objective_improvement =
-            (m_objective.value() - objective) * this->sign();
+        double objective             = 0.0;
+        double objective_improvement = 0.0;
+
+        if (m_is_defined_objective) {
+            objective = m_objective.evaluate(a_MOVE) * this->sign();
+            objective_improvement =
+                (m_objective.value() - objective) * this->sign();
+        }
 
         double local_augmented_objective  = objective + local_penalty;
         double global_augmented_objective = objective + global_penalty;
