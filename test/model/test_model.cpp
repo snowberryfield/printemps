@@ -1437,6 +1437,43 @@ TEST_F(TestModel, remove_implicit_singleton_constraints) {
         EXPECT_EQ(10, x.upper_bound());
         EXPECT_EQ(false, g.is_enabled());
     }
+
+    {
+        cppmh::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x", -10, 10);
+        auto& g = model.create_constraint("g", -3 * x + 1 == 7);
+
+        model.remove_implicit_singleton_constraints(false);
+        EXPECT_EQ(true, x.is_fixed());
+        EXPECT_EQ(-2, x.value());
+        EXPECT_EQ(false, g.is_enabled());
+    }
+    {
+        cppmh::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x", -10, 10);
+        auto& g = model.create_constraint("g", -3 * x + 1 <= 7);
+
+        model.remove_implicit_singleton_constraints(false);
+        EXPECT_EQ(false, x.is_fixed());
+        EXPECT_EQ(-2, x.lower_bound());
+        EXPECT_EQ(10, x.upper_bound());
+        EXPECT_EQ(false, g.is_enabled());
+    }
+    {
+        cppmh::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x", -10, 10);
+        auto& g = model.create_constraint("g", -3 * x + 1 >= 7);
+
+        model.remove_implicit_singleton_constraints(false);
+        EXPECT_EQ(false, x.is_fixed());
+        EXPECT_EQ(-10, x.lower_bound());
+        EXPECT_EQ(-2, x.upper_bound());
+        EXPECT_EQ(false, g.is_enabled());
+    }
+
     {
         cppmh::model::Model<int, double> model;
 
@@ -1481,6 +1518,48 @@ TEST_F(TestModel, remove_implicit_singleton_constraints) {
     {
         cppmh::model::Model<int, double> model;
 
+        auto& x = model.create_variable("x", -10, 10);
+        auto& y = model.create_variable("y", 0, 1);
+        auto& g = model.create_constraint("g", -3 * x + y == 7);
+        y.fix_by(1);
+
+        model.remove_implicit_singleton_constraints(false);
+        EXPECT_EQ(true, x.is_fixed());
+        EXPECT_EQ(-2, x.value());
+        EXPECT_EQ(false, g.is_enabled());
+    }
+    {
+        cppmh::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x", -10, 10);
+        auto& y = model.create_variable("y", 0, 1);
+        auto& g = model.create_constraint("g", -3 * x + y <= 7);
+        y.fix_by(1);
+
+        model.remove_implicit_singleton_constraints(false);
+        EXPECT_EQ(false, x.is_fixed());
+        EXPECT_EQ(-2, x.lower_bound());
+        EXPECT_EQ(10, x.upper_bound());
+        EXPECT_EQ(false, g.is_enabled());
+    }
+    {
+        cppmh::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x", -10, 10);
+        auto& y = model.create_variable("y", 0, 1);
+        auto& g = model.create_constraint("g", -3 * x + y >= 7);
+        y.fix_by(1);
+
+        model.remove_implicit_singleton_constraints(false);
+        EXPECT_EQ(false, x.is_fixed());
+        EXPECT_EQ(-10, x.lower_bound());
+        EXPECT_EQ(-2, x.upper_bound());
+        EXPECT_EQ(false, g.is_enabled());
+    }
+
+    {
+        cppmh::model::Model<int, double> model;
+
         auto& x = model.create_variable("x", 0, 10);
         auto& g = model.create_constraint("g", 3 * x + 1 == 7);
         x.fix_by(2);
@@ -1506,6 +1585,40 @@ TEST_F(TestModel, remove_implicit_singleton_constraints) {
         auto& x = model.create_variable("x", 0, 10);
         auto& g = model.create_constraint("g", 3 * x + 1 >= 7);
         x.fix_by(3);
+
+        model.remove_implicit_singleton_constraints(false);
+        EXPECT_EQ(true, x.is_fixed());
+        EXPECT_EQ(false, g.is_enabled());
+    }
+
+    {
+        cppmh::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x", -10, 10);
+        auto& g = model.create_constraint("g", -3 * x + 1 == 7);
+        x.fix_by(-2);
+
+        model.remove_implicit_singleton_constraints(false);
+        EXPECT_EQ(true, x.is_fixed());
+        EXPECT_EQ(false, g.is_enabled());
+    }
+    {
+        cppmh::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x", -10, 10);
+        auto& g = model.create_constraint("g", -3 * x + 1 <= 7);
+        x.fix_by(-2);
+
+        model.remove_implicit_singleton_constraints(false);
+        EXPECT_EQ(true, x.is_fixed());
+        EXPECT_EQ(false, g.is_enabled());
+    }
+    {
+        cppmh::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x", -10, 10);
+        auto& g = model.create_constraint("g", -3 * x + 1 >= 7);
+        x.fix_by(-2);
 
         model.remove_implicit_singleton_constraints(false);
         EXPECT_EQ(true, x.is_fixed());

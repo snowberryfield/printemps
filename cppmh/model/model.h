@@ -1291,95 +1291,87 @@ class Model {
                 auto upper_bound = variable_ptr->upper_bound();
                 auto bound_temp = -(constant_value + fixed_value) / coefficient;
 
-                switch (constraint.sense()) {
-                    case ConstraintSense::Equal: {
-                        /**
-                         * If the singleton constraint is defined by an
-                         * equality as ax+b=0, the value of the decision
-                         * variable x will be fixed by -b/a.
-                         */
+                if (constraint.sense() == ConstraintSense::Equal) {
+                    /**
+                     * If the singleton constraint is defined by an
+                     * equality as ax+b=0, the value of the decision
+                     * variable x will be fixed by -b/a.
+                     */
+                    utility::print_message(
+                        "The constraint " + constraint.name() +
+                            " is removed instead of fixing the value "
+                            "of the decision variable " +
+                            variable_ptr->name() + " by " +
+                            std::to_string(bound_temp) + ".",
+                        a_IS_ENABLED_PRINT);
+
+                    variable_ptr->fix_by(bound_temp);
+                    if (constraint.is_enabled()) {
+                        constraint.disable();
+                        number_of_newly_disabled_constraints++;
+                    }
+                } else if ((constraint.sense() == ConstraintSense::Lower &&
+                            coefficient > 0) ||
+                           (constraint.sense() == ConstraintSense::Upper &&
+                            coefficient < 0)) {
+                    /**
+                     * If the singleton constraint is defined by an
+                     * equality as ax+b<=0, the lower bound of the
+                     * decision variable will be tightened by -b/a.
+                     */
+                    auto bound_floor =
+                        static_cast<T_Variable>(std::floor(bound_temp));
+
+                    if (bound_floor < upper_bound) {
                         utility::print_message(
-                            "The singleton constraint " + constraint.name() +
-                                " is removed instead of fixing the value "
-                                "of the decision variable " +
+                            "The constraint " + constraint.name() +
+                                " is removed instead of tightening the "
+                                "upper bound of the decision variable " +
                                 variable_ptr->name() + " by " +
-                                std::to_string(bound_temp) + ".",
+                                std::to_string(bound_floor) + ".",
                             a_IS_ENABLED_PRINT);
-
-                        variable_ptr->fix_by(bound_temp);
-                        if (constraint.is_enabled()) {
-                            constraint.disable();
-                            number_of_newly_disabled_constraints++;
-                        }
-
-                        break;
+                        variable_ptr->set_bound(lower_bound, bound_floor);
+                    } else {
+                        utility::print_message(
+                            "The constraint " + constraint.name() +
+                                " is removed because it is redundant.",
+                            a_IS_ENABLED_PRINT);
                     }
-                    case ConstraintSense::Lower: {
-                        /**
-                         * If the singleton constraint is defined by an
-                         * equality as ax+b<=0, the lower bound of the
-                         * decision variable will be tightened by -b/a.
-                         */
-                        auto bound_floor =
-                            static_cast<T_Variable>(std::floor(bound_temp));
-
-                        if (bound_floor < upper_bound) {
-                            utility::print_message(
-                                "The singleton constraint " +
-                                    constraint.name() +
-                                    " is removed instead of tightening the "
-                                    "upper bound of the decision variable " +
-                                    variable_ptr->name() + " by " +
-                                    std::to_string(bound_floor) + ".",
-                                a_IS_ENABLED_PRINT);
-                            variable_ptr->set_bound(lower_bound, bound_floor);
-                        } else {
-                            utility::print_message(
-                                "The singleton constraint " +
-                                    constraint.name() +
-                                    " is removed because it is redundant.",
-                                a_IS_ENABLED_PRINT);
-                        }
-                        if (constraint.is_enabled()) {
-                            constraint.disable();
-                            number_of_newly_disabled_constraints++;
-                        }
-                        break;
+                    if (constraint.is_enabled()) {
+                        constraint.disable();
+                        number_of_newly_disabled_constraints++;
                     }
-                    case ConstraintSense::Upper: {
-                        /**
-                         * If the singleton constraint is defined by an
-                         * equality as ax+b>=0, the upper bound of the
-                         * decision variable will be tightened by -b/a.
-                         */
-                        auto bound_ceil =
-                            static_cast<T_Variable>(std::ceil(bound_temp));
 
-                        if (bound_ceil > lower_bound) {
-                            utility::print_message(
-                                "The singleton constraint " +
-                                    constraint.name() +
-                                    " is removed instead of tightening the "
-                                    "lower bound of the decision variable " +
-                                    variable_ptr->name() + " by " +
-                                    std::to_string(bound_ceil) + ".",
-                                a_IS_ENABLED_PRINT);
-                            variable_ptr->set_bound(bound_ceil, upper_bound);
-                        } else {
-                            utility::print_message(
-                                "The singleton constraint " +
-                                    constraint.name() +
-                                    " is removed because it is redundant.",
-                                a_IS_ENABLED_PRINT);
-                        }
-                        if (constraint.is_enabled()) {
-                            constraint.disable();
-                            number_of_newly_disabled_constraints++;
-                        }
-                        break;
+                } else if ((constraint.sense() == ConstraintSense::Upper &&
+                            coefficient > 0) ||
+                           (constraint.sense() == ConstraintSense::Lower &&
+                            coefficient < 0)) {
+                    /**
+                     * If the singleton constraint is defined by an
+                     * equality as ax+b>=0, the upper bound of the
+                     * decision variable will be tightened by -b/a.
+                     */
+                    auto bound_ceil =
+                        static_cast<T_Variable>(std::ceil(bound_temp));
+
+                    if (bound_ceil > lower_bound) {
+                        utility::print_message(
+                            "The constraint " + constraint.name() +
+                                " is removed instead of tightening the "
+                                "lower bound of the decision variable " +
+                                variable_ptr->name() + " by " +
+                                std::to_string(bound_ceil) + ".",
+                            a_IS_ENABLED_PRINT);
+                        variable_ptr->set_bound(bound_ceil, upper_bound);
+                    } else {
+                        utility::print_message(
+                            "The constraint " + constraint.name() +
+                                " is removed because it is redundant.",
+                            a_IS_ENABLED_PRINT);
                     }
-                    default: {
-                        /// nothing to do
+                    if (constraint.is_enabled()) {
+                        constraint.disable();
+                        number_of_newly_disabled_constraints++;
                     }
                 }
             }
