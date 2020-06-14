@@ -83,6 +83,12 @@ inline cppmh::solver::Option read_option(const std::string &a_FILE_NAME) {
               option_object);
 
     /**************************************************************************/
+    /// is_enabled_presolve
+    read_json(&option.is_enabled_presolve,  //
+              "is_enabled_presolve",        //
+              option_object);
+
+    /**************************************************************************/
     /// is_enabled_initial_value_correction
     read_json(&option.is_enabled_initial_value_correction,  //
               "is_enabled_initial_value_correction",        //
