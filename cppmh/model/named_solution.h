@@ -253,6 +253,7 @@ class NamedSolution {
 
         indent_level--;
         ofs << indent_spaces(indent_level) << "}" << std::endl;
+        ofs.close();
     }
 
     /*************************************************************************/
@@ -288,6 +289,26 @@ class NamedSolution {
 
         indent_level--;
         ofs << indent_spaces(indent_level) << "}" << std::endl;
+        ofs.close();
+    }
+
+    /*************************************************************************/
+    inline void write_solution(const std::string& a_FILE_NAME) const {
+        std::ofstream ofs(a_FILE_NAME.c_str());
+        if (m_is_feasible) {
+            ofs << "=obj= " << m_objective << std::endl;
+            for (const auto& item : m_variable_value_proxies) {
+                auto& proxy              = item.second;
+                int   number_of_elements = proxy.number_of_elements();
+                for (auto i = 0; i < number_of_elements; i++) {
+                    ofs << proxy.flat_indexed_names(i) << " "
+                        << proxy.flat_indexed_values(i) << std::endl;
+                }
+            }
+        } else {
+            ofs << "=infeas=" << std::endl;
+        }
+        ofs.close();
     }
 
     /*************************************************************************/
