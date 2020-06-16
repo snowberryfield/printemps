@@ -54,6 +54,7 @@ int main([[maybe_unused]] int argc, char *argv[]) {
         "objective: " + std::to_string(result.objective()), true);
 
     result.write_json_by_name("result.json");
+    result.write_solution("result.sol");
 
     return 0;
 }
