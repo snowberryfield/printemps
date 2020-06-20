@@ -153,7 +153,8 @@ int main(void) {
         answer[n].resize(N);
         for (auto m = 0; m < N; m++) {
             for (auto k = 0; k < N; k++) {
-                answer[n][m] += (k + 1) * result.variables("x").values(n, m, k);
+                answer[n][m] +=
+                    (k + 1) * result.solution.variables("x").values(n, m, k);
             }
         }
     }

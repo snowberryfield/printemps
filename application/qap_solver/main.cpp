@@ -48,13 +48,13 @@ int main([[maybe_unused]] int argc, char *argv[]) {
      * Print the result summary.
      */
     cppmh::utility::print_info(
-        "status: " + std::to_string(result.is_feasible()), true);
+        "status: " + std::to_string(result.solution.is_feasible()), true);
 
     cppmh::utility::print_info(
-        "objective: " + std::to_string(result.objective()), true);
+        "objective: " + std::to_string(result.solution.objective()), true);
 
-    result.write_json_by_name("result.json");
-    result.write_solution("result.sol");
+    result.solution.write_json_by_name("result.json");
+    result.solution.write_solution("result.sol");
 
     return 0;
 }

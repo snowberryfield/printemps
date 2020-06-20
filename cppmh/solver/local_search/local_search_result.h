@@ -18,6 +18,7 @@ namespace local_search {
 template <class T_Variable, class T_Expression>
 struct LocalSearchResult {
     IncumbentHolder<T_Variable, T_Expression> incumbent_holder;
+    Memory                                    memory;
     int                                       total_update_status;
 
     /*************************************************************************/
@@ -33,6 +34,7 @@ struct LocalSearchResult {
     /*************************************************************************/
     inline void constexpr initialize(void) {
         this->incumbent_holder.initialize();
+        this->memory.initialize();
         this->total_update_status = 0;
     }
 };

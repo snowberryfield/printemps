@@ -15,6 +15,7 @@
 
 #include "incumbent_holder.h"
 #include "option.h"
+#include "result.h"
 #include "tabu_search/tabu_search.h"
 #include "local_search/local_search.h"
 
@@ -22,7 +23,7 @@ namespace cppmh {
 namespace solver {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-model::NamedSolution<T_Variable, T_Expression> solve(
+Result<T_Variable, T_Expression> solve(
     model::Model<T_Variable, T_Expression>* a_model) {
     Option option;
     return solve(a_model, option);
@@ -30,7 +31,7 @@ model::NamedSolution<T_Variable, T_Expression> solve(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-model::NamedSolution<T_Variable, T_Expression> solve(
+Result<T_Variable, T_Expression> solve(
     model::Model<T_Variable, T_Expression>* a_model,  //
     const Option&                           a_OPTION) {
     /**
@@ -39,7 +40,6 @@ model::NamedSolution<T_Variable, T_Expression> solve(
     using Model_T          = model::Model<T_Variable, T_Expression>;
     using Solution_T       = model::Solution<T_Variable, T_Expression>;
     using IncumbetHolder_T = IncumbentHolder<T_Variable, T_Expression>;
-
     /**
      * Start to measure computational time.
      */
@@ -126,6 +126,12 @@ model::NamedSolution<T_Variable, T_Expression> solve(
     auto local_penalty_coefficient_proxies  = penalty_coefficient_proxies;
 
     /**
+     * Create an array which stores updating count for each decision variable.
+     */
+    std::vector<model::ValueProxy<int>> global_update_counts =
+        model->generate_variable_parameter_proxies(0);
+
+    /**
      * Compute expressions, constraints, and objective according to initial
      * values.
      */
@@ -204,6 +210,18 @@ model::NamedSolution<T_Variable, T_Expression> solve(
             update_status = incumbent_holder.try_update_incumbent(
                 result.incumbent_holder.feasible_incumbent_solution(),
                 result.incumbent_holder.feasible_incumbent_score());
+        }
+
+        /**
+         * Update the updating count for each decision variables
+         */
+        const auto& update_counts = result.memory.update_counts();
+        for (const auto& proxy : update_counts) {
+            int id         = proxy.id();
+            int flat_index = 0;
+            for (auto&& element : proxy.flat_indexed_values()) {
+                global_update_counts[id][flat_index++] += element;
+            }
         }
 
         elapsed_time = time_keeper.clock();
@@ -332,9 +350,20 @@ model::NamedSolution<T_Variable, T_Expression> solve(
         }
 
         /**
+         * Update the updating count for each decision variables
+         */
+        const auto& update_counts = result.memory.update_counts();
+        for (const auto& proxy : update_counts) {
+            int id         = proxy.id();
+            int flat_index = 0;
+            for (auto&& element : proxy.flat_indexed_values()) {
+                global_update_counts[id][flat_index++] += element;
+            }
+        }
+
+        /**
          * Update the local penalty coefficients.
          */
-
         double gap =
             incumbent_holder.global_augmented_incumbent_objective() -
             result.incumbent_holder.local_augmented_incumbent_objective();
@@ -468,7 +497,10 @@ model::NamedSolution<T_Variable, T_Expression> solve(
     incumbent = model->export_solution();
 
     auto named_solution = model->convert_to_named_solution(incumbent);
-    return named_solution;
+    Result<T_Variable, T_Expression> result;
+    result.solution = named_solution;
+
+    return result;
 }
 }  // namespace solver
 }  // namespace cppmh

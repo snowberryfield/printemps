@@ -17,6 +17,7 @@ namespace tabu_search {
 template <class T_Variable, class T_Expression>
 struct TabuSearchResult {
     IncumbentHolder<T_Variable, T_Expression> incumbent_holder;
+    Memory                                    memory;
     int                                       tabu_tenure;
     int                                       total_update_status;
 
@@ -33,6 +34,7 @@ struct TabuSearchResult {
     /*************************************************************************/
     inline void constexpr initialize(void) {
         this->incumbent_holder.initialize();
+        this->memory.initialize();
         this->tabu_tenure         = 0;
         this->total_update_status = 0;
     }

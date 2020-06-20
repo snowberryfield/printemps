@@ -435,6 +435,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
 
     Result_T result;
     result.incumbent_holder    = incumbent_holder;
+    result.memory              = memory;
     result.total_update_status = total_update_status;
     result.tabu_tenure         = tabu_tenure;
     return result;
