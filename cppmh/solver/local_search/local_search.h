@@ -84,6 +84,12 @@ LocalSearchResult<T_Variable, T_Expression> solve(
         incumbent_holder.try_update_incumbent(model, solution_score);
     int total_update_status = 0;
 
+    /**
+     * Create memory which records final updated iteration and updated count for
+     * each decision variable.
+     */
+    Memory memory(model);
+
     utility::print_single_line(option.verbose >= Verbose::Full);
     utility::print_message("Local search starts.",
                            option.verbose >= Verbose::Full);
@@ -147,6 +153,7 @@ LocalSearchResult<T_Variable, T_Expression> solve(
                 incumbent_holder.local_augmented_incumbent_objective()) {
                 solution_score = trial_solution_score;
                 model->update(*move_ptr);
+                memory.update(*move_ptr, iteration);
 
                 found_improving_solution = true;
                 break;
@@ -177,8 +184,10 @@ LocalSearchResult<T_Variable, T_Expression> solve(
     print_table_footer(option.verbose >= Verbose::Full);
 
     Result_T result;
-    result.incumbent_holder    = incumbent_holder;
-    result.total_update_status = total_update_status;
+    result.incumbent_holder     = incumbent_holder;
+    result.memory               = memory;
+    result.total_update_status  = total_update_status;
+    result.number_of_iterations = iteration;
     return result;
 }
 }  // namespace local_search

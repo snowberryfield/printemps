@@ -34,10 +34,10 @@ int main(void) {
 
     auto result = cppmh::solver::solve(&model);
 
-    result.print_variable_values();
-    result.print_expression_values();
-    result.print_constraint_values();
-    result.print_violation_values();
+    result.solution.print_variable_values();
+    result.solution.print_expression_values();
+    result.solution.print_constraint_values();
+    result.solution.print_violation_values();
 
     return 0;
 }

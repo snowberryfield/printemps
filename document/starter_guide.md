@@ -81,9 +81,9 @@ int main(void) {
     auto result = cppmh::solver::solve(&model);
 
     // (3) Accessing the Result
-    std::cout << "objective = " << result.objective() << std::endl;
-    std::cout << "x(0) = "      << result.variables("x").values(0) << std::endl;
-    std::cout << "x(1) = "      << result.variables("x").values(1) << std::endl;
+    std::cout << "objective = " << result.solution.objective() << std::endl;
+    std::cout << "x(0) = "      << result.solution.variables("x").values(0) << std::endl;
+    std::cout << "x(1) = "      << result.solution.variables("x").values(1) << std::endl;
 
     return 0;
 }
@@ -707,7 +707,7 @@ auto result = cppmh::solver::solve(&model);
 Users can configure the behavior of the solver by setting options. The options include those related to optimization parameters, log verbosity, multi-thread computation enabling, etc. [Solver Option Guide](doc/solver_option_guide.md) gives a detailed description of the options and their default values.
 
 ## Accessing the Result
-The result of the optimization is stored in the `NamedSolution` object, which is returned by the `solve()` function.
+The result of the optimization is stored in the member `solution` in the `Result` object, which is returned by the `solve()` function.
 If one or more feasible solution was found in the optimization, the best solution among the feasible solutions is to be selected as the final best solution. 
 Otherwise, the solution with the minimum augmented objective function value is to be selected. 
 The augmented objective function is the sum of the original objective function value and the penalty values for violating the constraints.
@@ -733,28 +733,28 @@ auto& h = model.create_constraints("h", {10, 10, 10});
 auto result = cppmh::solver::solve(&model);
 
 // Print whether a feasible solution was obtained or not and the objective
-// function of the final best solution.
-std::cout << result.is_feasible() << std::endl;
-std::cout << result.objective() << std::endl;
+// function value of the final best solution.
+std::cout << result.solution.is_feasible() << std::endl;
+std::cout << result.solution.objective() << std::endl;
 
 // Print the value of the decision variables "x" and "y(0)" in the final
 // best solution.
-std::cout << result.variables("x").value() << std::endl;
-std::cout << result.variables("y").values(0) << std::endl;
+std::cout << result.solution.variables("x").value() << std::endl;
+std::cout << result.solution.variables("y").values(0) << std::endl;
 
 // Print the value of the expressions "p" and "q(0, 0) "in final best solution.
-std::cout << result.expressions("p").value() << std::endl;
-std::cout << result.expressions("q").values(0, 0) << std::endl;
+std::cout << result.solution.expressions("p").value() << std::endl;
+std::cout << result.solution.expressions("q").values(0, 0) << std::endl;
 
 // Print the value of the constraints "g" and "h(0, 0, 0)" and the violations
 // for them in final best solution.
-std::cout << result.constraints("g").value() << std::endl;
-std::cout << result.constraints("h").values(0, 0, 0) << std::endl;
-std::cout << result.violations("g").value() << std::endl;
-std::cout << result.violations("h").values(0, 0, 0) << std::endl;
+std::cout << result.solution.constraints("g").value() << std::endl;
+std::cout << result.solution.constraints("h").values(0, 0, 0) << std::endl;
+std::cout << result.solution.violations("g").value() << std::endl;
+std::cout << result.solution.violations("h").values(0, 0, 0) << std::endl;
 ```
 
-For accessing the result, the following methods are provided as the members of the `NamedSolution` object.
+For accessing the result, the following methods are provided by the member `solution` in the `Result` object.
 
 -  __Methods for accessing the optimization status:__ 
     -  The method `is_feasible()` returns `true` if the final best solution is feasible, and returns `false` otherwise.
