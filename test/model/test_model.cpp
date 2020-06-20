@@ -2094,20 +2094,27 @@ TEST_F(TestModel, generate_variable_parameter_proxies) {
     auto& z = model.create_variables("z", {10, 10});
 
     int fill_value = random_integer();
+    model.setup_unique_name();
 
     auto parameter_proxies =
         model.generate_variable_parameter_proxies(fill_value);
     EXPECT_EQ(x.id(), parameter_proxies[0].id());
     EXPECT_EQ(1, parameter_proxies[0].number_of_dimensions());
     EXPECT_EQ(1, parameter_proxies[0].number_of_elements());
+    EXPECT_EQ("x", parameter_proxies[0].flat_indexed_names(0));
 
     EXPECT_EQ(y.id(), parameter_proxies[1].id());
     EXPECT_EQ(1, parameter_proxies[1].number_of_dimensions());
     EXPECT_EQ(10, parameter_proxies[1].number_of_elements());
+    EXPECT_EQ("y[ 0]", parameter_proxies[1].flat_indexed_names(0));
+    EXPECT_EQ("y[ 9]", parameter_proxies[1].flat_indexed_names(10 - 1));
 
     EXPECT_EQ(z.id(), parameter_proxies[2].id());
     EXPECT_EQ(2, parameter_proxies[2].number_of_dimensions());
     EXPECT_EQ(100, parameter_proxies[2].number_of_elements());
+    EXPECT_EQ("z[ 0,  0]", parameter_proxies[2].flat_indexed_names(0));
+    EXPECT_EQ("z[ 9,  9]", parameter_proxies[2].flat_indexed_names(100 - 1));
+
     for (auto&& value : parameter_proxies[0].flat_indexed_values()) {
         EXPECT_EQ(fill_value, value);
     }
@@ -2128,20 +2135,27 @@ TEST_F(TestModel, generate_expression_parameter_proxies) {
     auto& r = model.create_expressions("r", {10, 10});
 
     int fill_value = random_integer();
+    model.setup_unique_name();
 
     auto parameter_proxies =
         model.generate_expression_parameter_proxies(fill_value);
     EXPECT_EQ(p.id(), parameter_proxies[0].id());
     EXPECT_EQ(1, parameter_proxies[0].number_of_dimensions());
     EXPECT_EQ(1, parameter_proxies[0].number_of_elements());
+    EXPECT_EQ("p", parameter_proxies[0].flat_indexed_names(0));
 
     EXPECT_EQ(q.id(), parameter_proxies[1].id());
     EXPECT_EQ(1, parameter_proxies[1].number_of_dimensions());
     EXPECT_EQ(10, parameter_proxies[1].number_of_elements());
+    EXPECT_EQ("q[ 0]", parameter_proxies[1].flat_indexed_names(0));
+    EXPECT_EQ("q[ 9]", parameter_proxies[1].flat_indexed_names(10 - 1));
 
     EXPECT_EQ(r.id(), parameter_proxies[2].id());
     EXPECT_EQ(2, parameter_proxies[2].number_of_dimensions());
     EXPECT_EQ(100, parameter_proxies[2].number_of_elements());
+    EXPECT_EQ("r[ 0,  0]", parameter_proxies[2].flat_indexed_names(0));
+    EXPECT_EQ("r[ 9,  9]", parameter_proxies[2].flat_indexed_names(100 - 1));
+
     for (auto&& value : parameter_proxies[0].flat_indexed_values()) {
         EXPECT_EQ(fill_value, value);
     }
@@ -2162,20 +2176,27 @@ TEST_F(TestModel, generate_constraint_parameter_proxies) {
     auto& v = model.create_constraints("v", {10, 10});
 
     int fill_value = random_integer();
+    model.setup_unique_name();
 
     auto parameter_proxies =
         model.generate_constraint_parameter_proxies(fill_value);
     EXPECT_EQ(g.id(), parameter_proxies[0].id());
     EXPECT_EQ(1, parameter_proxies[0].number_of_dimensions());
     EXPECT_EQ(1, parameter_proxies[0].number_of_elements());
+    EXPECT_EQ("g", parameter_proxies[0].flat_indexed_names(0));
 
     EXPECT_EQ(h.id(), parameter_proxies[1].id());
     EXPECT_EQ(1, parameter_proxies[1].number_of_dimensions());
     EXPECT_EQ(10, parameter_proxies[1].number_of_elements());
+    EXPECT_EQ("h[ 0]", parameter_proxies[1].flat_indexed_names(0));
+    EXPECT_EQ("h[ 9]", parameter_proxies[1].flat_indexed_names(10 - 1));
 
     EXPECT_EQ(v.id(), parameter_proxies[2].id());
     EXPECT_EQ(2, parameter_proxies[2].number_of_dimensions());
     EXPECT_EQ(100, parameter_proxies[2].number_of_elements());
+    EXPECT_EQ("v[ 0,  0]", parameter_proxies[2].flat_indexed_names(0));
+    EXPECT_EQ("v[ 9,  9]", parameter_proxies[2].flat_indexed_names(100 - 1));
+
     for (auto&& value : parameter_proxies[0].flat_indexed_values()) {
         EXPECT_EQ(fill_value, value);
     }
