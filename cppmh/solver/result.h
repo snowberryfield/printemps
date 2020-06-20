@@ -13,7 +13,7 @@ namespace solver {
 template <class T_Variable, class T_Expression>
 struct Result {
     model::NamedSolution<T_Variable, T_Expression> solution;
-    // Status               status;
+    Status                                         status;
 
     /*************************************************************************/
     Result(void) {
@@ -28,7 +28,7 @@ struct Result {
     /*************************************************************************/
     inline void constexpr initialize(void) {
         this->solution.initialize();
-        // this->status.initialize();
+        this->status.initialize();
     }
 };
 }  // namespace solver

@@ -184,9 +184,10 @@ LocalSearchResult<T_Variable, T_Expression> solve(
     print_table_footer(option.verbose >= Verbose::Full);
 
     Result_T result;
-    result.incumbent_holder    = incumbent_holder;
-    result.memory              = memory;
-    result.total_update_status = total_update_status;
+    result.incumbent_holder     = incumbent_holder;
+    result.memory               = memory;
+    result.total_update_status  = total_update_status;
+    result.number_of_iterations = iteration;
     return result;
 }
 }  // namespace local_search

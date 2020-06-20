@@ -56,6 +56,8 @@ int main([[maybe_unused]] int argc, char *argv[]) {
     result.solution.write_json_by_name("result.json");
     result.solution.write_solution("result.sol");
 
+    result.status.write_json_by_name("status.json");
+
     return 0;
 }
 /*****************************************************************************/
