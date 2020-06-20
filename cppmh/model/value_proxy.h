@@ -254,8 +254,7 @@ class ValueProxy : public AbstractMultiArray {
     inline constexpr T_Value operator()(Args... args) const {
         return this->values({args...});
     }
-
-};  // namespace model
+};
 }  // namespace model
 }  // namespace cppmh
 #endif

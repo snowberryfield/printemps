@@ -204,8 +204,8 @@ TabuSearchResult<T_Variable, T_Expression> solve(
             }
 
             trial_move_scores[i_move] =
-                MoveScore::evaluate_move(*trial_move_ptrs[i_move], iteration,
-                                         memory, option, tabu_tenure);
+                evaluate_move(*trial_move_ptrs[i_move], iteration, memory,
+                              option, tabu_tenure);
 
             objective_improvements[i_move] =
                 trial_solution_scores[i_move].objective_improvement;

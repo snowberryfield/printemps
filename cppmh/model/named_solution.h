@@ -368,7 +368,7 @@ class NamedSolution {
     inline bool is_feasible(void) const {
         return m_is_feasible;
     }
-};  // namespace model
+};
 using IPNamedSolution = NamedSolution<int, double>;
 }  // namespace model
 }  // namespace cppmh
