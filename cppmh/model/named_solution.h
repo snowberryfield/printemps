@@ -58,22 +58,22 @@ class NamedSolution {
 
     /*************************************************************************/
     inline void print_variable_values(void) const {
-        model::print_values(m_variable_value_proxies, "variable");
+        print_values(m_variable_value_proxies, "variable");
     }
 
     /*************************************************************************/
     inline void print_expression_values(void) const {
-        model::print_values(m_expression_value_proxies, "expression");
+        print_values(m_expression_value_proxies, "expression");
     }
 
     /*************************************************************************/
     inline void print_constraint_values(void) const {
-        model::print_values(m_constraint_value_proxies, "constraint");
+        print_values(m_constraint_value_proxies, "constraint");
     }
 
     /*************************************************************************/
     inline void print_violation_values(void) const {
-        model::print_values(m_violation_value_proxies, "violation");
+        print_values(m_violation_value_proxies, "violation");
     }
 
     /*************************************************************************/
@@ -85,20 +85,20 @@ class NamedSolution {
         indent_level++;
 
         /// Decision variables
-        model::write_values_by_name(&ofs, m_variable_value_proxies,  //
-                                    "variables", indent_level);
+        write_values_by_name(&ofs, m_variable_value_proxies, "variables",
+                             indent_level);
 
         /// Expressions
-        model::write_values_by_name(&ofs, m_expression_value_proxies,
-                                    "expressions", indent_level);
+        write_values_by_name(&ofs, m_expression_value_proxies, "expressions",
+                             indent_level);
 
         /// Constraints
-        model::write_values_by_name(&ofs, m_constraint_value_proxies,
-                                    "constraints", indent_level);
+        write_values_by_name(&ofs, m_constraint_value_proxies, "constraints",
+                             indent_level);
 
         /// Violations
-        model::write_values_by_name(&ofs, m_violation_value_proxies,
-                                    "violations", indent_level);
+        write_values_by_name(&ofs, m_violation_value_proxies, "violations",
+                             indent_level);
 
         /// Others
         ofs << utility::indent_spaces(indent_level)
@@ -121,20 +121,20 @@ class NamedSolution {
         indent_level++;
 
         /// Decision variables
-        model::write_values_by_array(&ofs, m_variable_value_proxies,
-                                     "variables", indent_level);
+        write_values_by_array(&ofs, m_variable_value_proxies, "variables",
+                              indent_level);
 
         /// Expressions
-        model::write_values_by_array(&ofs, m_expression_value_proxies,
-                                     "expressions", indent_level);
+        write_values_by_array(&ofs, m_expression_value_proxies, "expressions",
+                              indent_level);
 
         /// Constraints
-        model::write_values_by_array(&ofs, m_constraint_value_proxies,
-                                     "constraints", indent_level);
+        write_values_by_array(&ofs, m_constraint_value_proxies, "constraints",
+                              indent_level);
 
         /// Violations
-        model::write_values_by_array(&ofs, m_violation_value_proxies,
-                                     "violations", indent_level);
+        write_values_by_array(&ofs, m_violation_value_proxies, "violations",
+                              indent_level);
 
         /// Others
         ofs << utility::indent_spaces(indent_level)

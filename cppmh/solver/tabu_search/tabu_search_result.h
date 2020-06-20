@@ -20,6 +20,7 @@ struct TabuSearchResult {
     Memory                                    memory;
     int                                       tabu_tenure;
     int                                       total_update_status;
+    int                                       number_of_iterations;
 
     /*************************************************************************/
     TabuSearchResult(void) {
@@ -35,8 +36,9 @@ struct TabuSearchResult {
     inline void constexpr initialize(void) {
         this->incumbent_holder.initialize();
         this->memory.initialize();
-        this->tabu_tenure         = 0;
-        this->total_update_status = 0;
+        this->tabu_tenure          = 0;
+        this->total_update_status  = 0;
+        this->number_of_iterations = 0;
     }
 };
 }  // namespace tabu_search

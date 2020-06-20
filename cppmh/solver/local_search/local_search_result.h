@@ -20,6 +20,7 @@ struct LocalSearchResult {
     IncumbentHolder<T_Variable, T_Expression> incumbent_holder;
     Memory                                    memory;
     int                                       total_update_status;
+    int                                       number_of_iterations;
 
     /*************************************************************************/
     LocalSearchResult(void) {
@@ -35,7 +36,8 @@ struct LocalSearchResult {
     inline void constexpr initialize(void) {
         this->incumbent_holder.initialize();
         this->memory.initialize();
-        this->total_update_status = 0;
+        this->total_update_status  = 0;
+        this->number_of_iterations = 0;
     }
 };
 }  // namespace local_search
