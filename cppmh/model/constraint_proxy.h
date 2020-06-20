@@ -321,7 +321,7 @@ class ConstraintProxy : public AbstractMultiArray {
         m_constraints[0] = a_CONSTRAINT;
         return *this;
     }
-};  // namespace model
+};
 using IPConstraintProxy = ConstraintProxy<int, double>;
 }  // namespace model
 }  // namespace cppmh
