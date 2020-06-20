@@ -75,6 +75,16 @@ inline std::string delete_crlf(const std::string &a_TARGET) {
     }
     return result;
 }
+
+/*****************************************************************************/
+inline std::string indent_spaces(const int a_INDENT_LEVEL) {
+    std::string indent_width  = "    ";
+    std::string indent_spaces = "";
+    for (auto i = 0; i < a_INDENT_LEVEL; i++) {
+        indent_spaces += indent_width;
+    }
+    return indent_spaces;
+}
 }  // namespace utility
 }  // namespace cppmh
 
