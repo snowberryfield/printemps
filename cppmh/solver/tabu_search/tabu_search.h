@@ -434,9 +434,11 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     print_table_footer(option.verbose >= Verbose::Full);
 
     Result_T result;
-    result.incumbent_holder    = incumbent_holder;
-    result.total_update_status = total_update_status;
-    result.tabu_tenure         = tabu_tenure;
+    result.incumbent_holder     = incumbent_holder;
+    result.memory               = memory;
+    result.total_update_status  = total_update_status;
+    result.tabu_tenure          = tabu_tenure;
+    result.number_of_iterations = iteration;
     return result;
 }
 }  // namespace tabu_search

@@ -9,6 +9,8 @@
 
 #include "abstract_multi_array.h"
 #include <vector>
+#include <iostream>
+#include <fstream>
 
 namespace cppmh {
 namespace model {
@@ -255,6 +257,137 @@ class ValueProxy : public AbstractMultiArray {
         return this->values({args...});
     }
 };
+
+/*****************************************************************************/
+template <class T_Value>
+inline void print_values(
+    const std::unordered_map<std::string, ValueProxy<T_Value>> a_VALUE_PROXIES,
+    const std::string &                                        a_CATEGORY) {
+    for (const auto &item : a_VALUE_PROXIES) {
+        auto &proxy              = item.second;
+        int   number_of_elements = proxy.number_of_elements();
+        for (auto i = 0; i < number_of_elements; i++) {
+            utility::print(a_CATEGORY + "." + proxy.flat_indexed_names(i) +
+                           " = " +
+                           std::to_string(proxy.flat_indexed_values(i)));
+        }
+    }
+}
+
+/*****************************************************************************/
+template <class T_Value>
+inline void write_values_by_name(
+    std::ofstream *                                            a_ofs,
+    const std::unordered_map<std::string, ValueProxy<T_Value>> a_VALUE_PROXIES,
+    const std::string &a_CATEGORY, const int a_INDENT_LEVEL) {
+    int indent_level = a_INDENT_LEVEL;
+
+    *a_ofs << utility::indent_spaces(indent_level)
+           << "\"" + a_CATEGORY + "\" : {" << std::endl;
+    indent_level++;
+
+    int count              = 0;
+    int value_proxies_size = a_VALUE_PROXIES.size();
+    for (const auto &item : a_VALUE_PROXIES) {
+        auto &proxy              = item.second;
+        int   number_of_elements = proxy.number_of_elements();
+        for (auto i = 0; i < number_of_elements; i++) {
+            *a_ofs << utility::indent_spaces(indent_level)
+                   << "\"" + proxy.flat_indexed_names(i) + "\" : " +
+                          std::to_string(proxy.flat_indexed_values(i));
+
+            if ((i == number_of_elements - 1) &&
+                (count == value_proxies_size - 1)) {
+                *a_ofs << std::endl;
+            } else {
+                *a_ofs << "," << std::endl;
+            }
+        }
+        count++;
+    }
+    indent_level--;
+    *a_ofs << utility::indent_spaces(indent_level) << "}," << std::endl;
+}
+
+/*****************************************************************************/
+template <class T_Value>
+inline void write_values_by_array(
+    std::ofstream *                                            a_ofs,
+    const std::unordered_map<std::string, ValueProxy<T_Value>> a_VALUE_PROXIES,
+    const std::string &a_CATEGORY, const int a_INDENT_LEVEL) {
+    int indent_level = a_INDENT_LEVEL;
+
+    *a_ofs << utility::indent_spaces(indent_level)
+           << "\"" + a_CATEGORY + "\" : {" << std::endl;
+    indent_level++;
+
+    int count              = 0;
+    int value_proxies_size = a_VALUE_PROXIES.size();
+    for (const auto &item : a_VALUE_PROXIES) {
+        auto &proxy                = item.second;
+        int   number_of_dimensions = proxy.number_of_dimensions();
+        int   number_of_elements   = proxy.number_of_elements();
+
+        *a_ofs << utility::indent_spaces(indent_level)
+               << "\"" + item.first + "\" : [" << std::endl;
+        indent_level++;
+
+        int current_dimension = 0;
+        for (auto i = 0; i < number_of_elements; i++) {
+            std::vector<int> index = proxy.multi_dimensional_index(i);
+
+            for (auto j = current_dimension; j < number_of_dimensions - 1;
+                 j++) {
+                if (index[j + 1] == 0) {
+                    *a_ofs << utility::indent_spaces(indent_level) << "["
+                           << std::endl;
+                    indent_level++;
+                    current_dimension++;
+                } else {
+                    break;
+                }
+            }
+            if (index[current_dimension] ==
+                proxy.shape()[current_dimension] - 1) {
+                *a_ofs << utility::indent_spaces(indent_level)
+                       << std::to_string(proxy.flat_indexed_values(i))
+                       << std::endl;
+            } else {
+                *a_ofs << utility::indent_spaces(indent_level)
+                       << std::to_string(proxy.flat_indexed_values(i)) << ","
+                       << std::endl;
+            }
+
+            for (auto j = current_dimension; j > 0; j--) {
+                if (index[j] == proxy.shape()[j] - 1) {
+                    indent_level--;
+                    current_dimension--;
+                    if (index[j - 1] == proxy.shape()[j - 1] - 1) {
+                        *a_ofs << utility::indent_spaces(indent_level) << "]"
+                               << std::endl;
+                    } else {
+                        *a_ofs << utility::indent_spaces(indent_level) << "],"
+                               << std::endl;
+                    }
+                } else {
+                    break;
+                }
+            }
+        }
+
+        indent_level--;
+        count++;
+
+        if (count == value_proxies_size) {
+            *a_ofs << utility::indent_spaces(indent_level) << "]" << std::endl;
+        } else {
+            *a_ofs << utility::indent_spaces(indent_level) << "]," << std::endl;
+        }
+    }
+
+    indent_level--;
+    *a_ofs << utility::indent_spaces(indent_level) << "}," << std::endl;
+}
 }  // namespace model
 }  // namespace cppmh
 #endif

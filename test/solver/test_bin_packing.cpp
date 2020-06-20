@@ -110,7 +110,7 @@ TEST_F(TestBinpacking, bin_packing) {
 
         /// solve
         auto result = cppmh::solver::solve(&model);
-        EXPECT_EQ(true, result.is_feasible());
+        EXPECT_EQ(true, result.solution.is_feasible());
     }
 
     /// Option case 1
@@ -156,7 +156,7 @@ TEST_F(TestBinpacking, bin_packing) {
         option.tabu_search.ignore_tabu_if_feasible_incumbent           = true;
 
         auto result = cppmh::solver::solve(&model, option);
-        EXPECT_EQ(true, result.is_feasible());
+        EXPECT_EQ(true, result.solution.is_feasible());
     }
 
     /// Option case 2
@@ -201,7 +201,7 @@ TEST_F(TestBinpacking, bin_packing) {
         option.tabu_search.ignore_tabu_if_feasible_incumbent           = false;
 
         auto result = cppmh::solver::solve(&model, option);
-        EXPECT_EQ(true, result.is_feasible());
+        EXPECT_EQ(true, result.solution.is_feasible());
     }
 }
 /*****************************************************************************/

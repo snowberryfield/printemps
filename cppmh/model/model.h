@@ -817,10 +817,7 @@ class Model {
                         variable_ptr->set_value_if_not_fixed(new_value);
 
                         utility::print_warning(
-                            "The initial value " +
-                                m_variable_names[variable_ptr->id()] +
-                                m_variable_proxies[variable_ptr->id()]
-                                    .indices_label(variable_ptr->flat_index()) +
+                            "The initial value " + variable_ptr->name() +
                                 " = " + std::to_string(old_value) +
                                 " is corrected to " +
                                 std::to_string(new_value) + ".",
@@ -858,11 +855,7 @@ class Model {
                             variable_ptr->set_value_if_not_fixed(new_value);
 
                             utility::print_warning(
-                                "The initial value " +
-                                    m_variable_names[variable_ptr->id()] +
-                                    m_variable_proxies[variable_ptr->id()]
-                                        .indices_label(
-                                            variable_ptr->flat_index()) +
+                                "The initial value " + variable_ptr->name() +
                                     " = " + std::to_string(old_value) +
                                     " is corrected to " +
                                     std::to_string(new_value) + ".",
@@ -893,11 +886,7 @@ class Model {
                             variable_ptr->set_value_if_not_fixed(new_value);
 
                             utility::print_warning(
-                                "The initial value " +
-                                    m_variable_names[variable_ptr->id()] +
-                                    m_variable_proxies[variable_ptr->id()]
-                                        .indices_label(
-                                            variable_ptr->flat_index()) +
+                                "The initial value " + variable_ptr->name() +
                                     " = " + std::to_string(old_value) +
                                     " is corrected to " +
                                     std::to_string(new_value) + ".",
@@ -958,10 +947,8 @@ class Model {
                             variable.set_value_if_not_fixed(new_value);
 
                             utility::print_warning(
-                                "The initial value " +
-                                    m_variable_names[variable.id()] +
-                                    proxy.indices_label(variable.flat_index()) +
-                                    " = " + std::to_string(old_value) +
+                                "The initial value " + variable.name() + " = " +
+                                    std::to_string(old_value) +
                                     " is corrected to " +
                                     std::to_string(new_value) + ".",
                                 a_IS_ENABLED_PRINT);
@@ -1011,10 +998,8 @@ class Model {
                         variable.set_value_if_not_fixed(new_value);
 
                         utility::print_warning(
-                            "The initial value " +
-                                m_variable_names[variable.id()] +
-                                proxy.indices_label(variable.flat_index()) +
-                                " = " + std::to_string(old_value) +
+                            "The initial value " + variable.name() + " = " +
+                                std::to_string(old_value) +
                                 " is corrected to " +
                                 std::to_string(new_value) + ".",
                             a_IS_ENABLED_PRINT);
@@ -1638,6 +1623,12 @@ class Model {
             ValueProxy<T_Value> variable_parameter_proxy(proxy.id(),
                                                          proxy.shape());
             variable_parameter_proxy.fill(a_VALUE);
+            int number_of_elements = proxy.number_of_elements();
+            for (auto i = 0; i < number_of_elements; i++) {
+                variable_parameter_proxy.flat_indexed_names(i) =
+                    proxy.flat_indexed_variables(i).name();
+            }
+
             variable_parameter_proxies.push_back(variable_parameter_proxy);
         }
         return variable_parameter_proxies;
@@ -1653,6 +1644,11 @@ class Model {
             ValueProxy<T_Value> expression_parameter_proxy(proxy.id(),
                                                            proxy.shape());
             expression_parameter_proxy.fill(a_VALUE);
+            int number_of_elements = proxy.number_of_elements();
+            for (auto i = 0; i < number_of_elements; i++) {
+                expression_parameter_proxy.flat_indexed_names(i) =
+                    proxy.flat_indexed_expressions(i).name();
+            }
             expression_parameter_proxies.push_back(expression_parameter_proxy);
         }
         return expression_parameter_proxies;
@@ -1668,6 +1664,11 @@ class Model {
             ValueProxy<T_Value> constraint_parameter_proxy(proxy.id(),
                                                            proxy.shape());
             constraint_parameter_proxy.fill(a_VALUE);
+            int number_of_elements = proxy.number_of_elements();
+            for (auto i = 0; i < number_of_elements; i++) {
+                constraint_parameter_proxy.flat_indexed_names(i) =
+                    proxy.flat_indexed_constraints(i).name();
+            }
             constraint_parameter_proxies.push_back(constraint_parameter_proxy);
         }
         return constraint_parameter_proxies;

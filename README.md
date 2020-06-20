@@ -51,9 +51,9 @@ int main(void) {
     auto result = cppmh::solver::solve(&model);
 
     // (3) Accessing the Result
-    std::cout << "objective = " << result.objective() << std::endl;
-    std::cout << "x(0) = "      << result.variables("x").values(0) << std::endl;
-    std::cout << "x(1) = "      << result.variables("x").values(1) << std::endl;
+    std::cout << "objective = " << result.solution.objective() << std::endl;
+    std::cout << "x(0) = "      << result.solution.variables("x").values(0) << std::endl;
+    std::cout << "x(1) = "      << result.solution.variables("x").values(1) << std::endl;
 
     return 0;
 }
