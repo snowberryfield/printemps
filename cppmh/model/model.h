@@ -1791,7 +1791,7 @@ class Model {
         void) const {
         return m_constraint_names;
     }
-};  // namespace model
+};
 using IPModel = Model<int, double>;
 }  // namespace model
 }  // namespace cppmh
