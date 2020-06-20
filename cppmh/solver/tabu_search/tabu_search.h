@@ -23,10 +23,6 @@ template <class T_Variable, class T_Expression>
 class IncumbentHolder;
 
 /*****************************************************************************/
-template <class T_Variable, class T_Expression>
-class Result;
-
-/*****************************************************************************/
 struct Option;
 
 namespace tabu_search {
