@@ -29,6 +29,15 @@ TEST_F(TestStringUtility, delete_space) {
 }
 
 /*****************************************************************************/
+TEST_F(TestStringUtility, has_space) {
+    EXPECT_EQ(true, cppmh::utility::has_space(" hoge hoge "));
+    EXPECT_EQ(true, cppmh::utility::has_space("hoge hoge "));
+    EXPECT_EQ(true, cppmh::utility::has_space(" hoge hoge"));
+    EXPECT_EQ(true, cppmh::utility::has_space("hoge hoge"));
+    EXPECT_EQ(false, cppmh::utility::has_space("hogehoge"));
+}
+
+/*****************************************************************************/
 TEST_F(TestStringUtility, to_string) {
     EXPECT_EQ(" 100", cppmh::utility::to_string(100, "%4d"));
     EXPECT_EQ("0100", cppmh::utility::to_string(100, "%04d"));
