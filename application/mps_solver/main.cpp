@@ -16,7 +16,8 @@ int main([[maybe_unused]] int argc, char *argv[]) {
      * exits.
      */
     if (argv[1] == nullptr) {
-        std::cout << "Usage: ./mps_solver.exe mps_file [option_file]"
+        std::cout << "Usage: ./mps_solver.exe mps_file [option_file] "
+                     "[initial_solution_file]"
                   << std::endl;
         exit(1);
     }
