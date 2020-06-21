@@ -819,7 +819,7 @@ class Model {
                         utility::print_warning(
                             "The initial value " + variable_ptr->name() +
                                 " = " + std::to_string(old_value) +
-                                " is corrected to " +
+                                " was corrected to " +
                                 std::to_string(new_value) + ".",
                             a_IS_ENABLED_PRINT);
                     }
@@ -857,7 +857,7 @@ class Model {
                             utility::print_warning(
                                 "The initial value " + variable_ptr->name() +
                                     " = " + std::to_string(old_value) +
-                                    " is corrected to " +
+                                    " was corrected to " +
                                     std::to_string(new_value) + ".",
                                 a_IS_ENABLED_PRINT);
                         }
@@ -888,7 +888,7 @@ class Model {
                             utility::print_warning(
                                 "The initial value " + variable_ptr->name() +
                                     " = " + std::to_string(old_value) +
-                                    " is corrected to " +
+                                    " was corrected to " +
                                     std::to_string(new_value) + ".",
                                 a_IS_ENABLED_PRINT);
                             is_corrected = true;
@@ -899,8 +899,7 @@ class Model {
                         throw std::logic_error(utility::format_error_location(
                             __FILE__, __LINE__, __func__,
                             "The initial value could not be modified "
-                            "because "
-                            "all variables are fixed."));
+                            "because all variables are fixed."));
                     };
                 } else {
                     throw std::logic_error(utility::format_error_location(
@@ -949,7 +948,7 @@ class Model {
                             utility::print_warning(
                                 "The initial value " + variable.name() + " = " +
                                     std::to_string(old_value) +
-                                    " is corrected to " +
+                                    " was corrected to " +
                                     std::to_string(new_value) + ".",
                                 a_IS_ENABLED_PRINT);
                         } else {
@@ -1000,15 +999,14 @@ class Model {
                         utility::print_warning(
                             "The initial value " + variable.name() + " = " +
                                 std::to_string(old_value) +
-                                " is corrected to " +
+                                " was corrected to " +
                                 std::to_string(new_value) + ".",
                             a_IS_ENABLED_PRINT);
                     } else {
                         throw std::logic_error(utility::format_error_location(
                             __FILE__, __LINE__, __func__,
                             "An initial value violates the lower or "
-                            "upper "
-                            "bound constraint."));
+                            "upper bound constraint."));
                     }
                 }
             }
@@ -1513,7 +1511,7 @@ class Model {
 
                     utility::print_message(
                         "The value of decision variable " + variable.name() +
-                            " is fixed by " + std::to_string(fixed_value) +
+                            " was fixed by " + std::to_string(fixed_value) +
                             " because the lower bound " +
                             std::to_string(lower_bound) +
                             " and the upper_bound " +
