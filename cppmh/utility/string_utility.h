@@ -43,6 +43,17 @@ inline std::string trim(const std::string &a_ORIGINAL) {
 }
 
 /******************************************************************************/
+inline bool has_space(const std::string &a_ORIGINAL) {
+    for (std::string::const_iterator it = a_ORIGINAL.begin();
+         it != a_ORIGINAL.end(); ++it) {
+        if (*it == ' ') {
+            return true;
+        }
+    }
+    return false;
+}
+
+/******************************************************************************/
 inline std::string delete_space(const std::string &a_ORIGINAL) {
     std::string result;
     for (std::string::const_iterator it = a_ORIGINAL.begin();
