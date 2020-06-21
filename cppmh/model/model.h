@@ -1949,8 +1949,12 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void import_solution(
+    inline void import_solution(
         const std::unordered_map<std::string, int> &a_SOLUTION) {
+        /**
+         *  This method cannot be constexpr due to
+         *  for (const auto &item : a_SOLUTION) { ... }
+         */
         for (const auto &item : a_SOLUTION) {
             for (auto &&proxy : m_variable_proxies) {
                 for (auto &&variable : proxy.flat_indexed_variables()) {
