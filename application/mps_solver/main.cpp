@@ -16,7 +16,8 @@ int main([[maybe_unused]] int argc, char *argv[]) {
      * exits.
      */
     if (argv[1] == nullptr) {
-        std::cout << "Usage: ./mps_solver.exe mps_file [option_file]"
+        std::cout << "Usage: ./mps_solver.exe mps_file [option_file] "
+                     "[initial_solution_file]"
                   << std::endl;
         exit(1);
     }
@@ -37,6 +38,19 @@ int main([[maybe_unused]] int argc, char *argv[]) {
     if (argv[2] != nullptr) {
         std::string option_file_name = argv[2];
         option = cppmh::utility::read_option(option_file_name);
+    }
+
+    /**
+     * If the solution file is given, the values of the decision variables in
+     * the file will be used as the initial values. Otherwise, the default
+     * values will be used.
+     */
+
+    cppmh::model::IPModel a_model;
+    if (argv[3] != nullptr) {
+        std::string solution_file_name = argv[3];
+        auto solution = cppmh::utility::read_solution(solution_file_name);
+        model.import_solution(solution);
     }
 
     /**

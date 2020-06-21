@@ -91,20 +91,44 @@ Result<T_Variable, T_Expression> solve(
     utility::print_message(  //
         "Optimization starts.", master_option.verbose >= Verbose::Outer);
 
-    utility::print_info(
-        "The number of decision variables: " +
-            utility::to_string(model->number_of_variables(), "%d"),
-        master_option.verbose >= Verbose::Outer);
+    if (model->number_of_fixed_variables() == 0) {
+        utility::print_info(
+            "The number of decision variables: " +
+                utility::to_string(model->number_of_variables(), "%d"),
+            master_option.verbose >= Verbose::Outer);
+    } else {
+        utility::print_info(
+            "The number of decision variables: " +
+                utility::to_string(model->number_of_variables(), "%d") +
+                "(reduced to " +
+                utility::to_string(model->number_of_variables() -
+                                       model->number_of_fixed_variables(),
+                                   "%d") +
+                ")",
+            master_option.verbose >= Verbose::Outer);
+    }
 
     utility::print_info(
         "The number of fixed decision variables: " +
             utility::to_string(model->number_of_fixed_variables(), "%d"),
         master_option.verbose >= Verbose::Outer);
 
-    utility::print_info(
-        "The number of constraints: " +
-            utility::to_string(model->number_of_constraints(), "%d"),
-        master_option.verbose >= Verbose::Outer);
+    if (model->number_of_disabled_constraints() == 0) {
+        utility::print_info(
+            "The number of constraints: " +
+                utility::to_string(model->number_of_constraints(), "%d"),
+            master_option.verbose >= Verbose::Outer);
+    } else {
+        utility::print_info(
+            "The number of constraints: " +
+                utility::to_string(model->number_of_constraints(), "%d") +
+                "(reduced to " +
+                utility::to_string(model->number_of_constraints() -
+                                       model->number_of_disabled_constraints(),
+                                   "%d") +
+                ")",
+            master_option.verbose >= Verbose::Outer);
+    }
 
     utility::print_info(
         "The number of selection constraints: " +
@@ -112,7 +136,7 @@ Result<T_Variable, T_Expression> solve(
         master_option.verbose >= Verbose::Outer);
 
     utility::print_info(
-        "The number of disabled(removed) constraints: " +
+        "The number of reduced constraints: " +
             utility::to_string(model->number_of_disabled_constraints(), "%d"),
         master_option.verbose >= Verbose::Outer);
 

@@ -98,13 +98,19 @@ class Model {
     /*************************************************************************/
     inline constexpr VariableProxy<T_Variable, T_Expression> &create_variable(
         const std::string &a_NAME) {
+        if (utility::has_space(a_NAME)) {
+            throw std::logic_error(utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "The name of decision variable must not contain spaces."));
+        }
+
         int id = m_variable_proxies.size();
 
         if (id >= ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
-                "The number of variable definitions must be equal to or "
-                "less than " +
+                "The number of decision variable definitions must be equal to "
+                "or less than " +
                     std::to_string(
                         ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES) +
                     "."));
@@ -121,7 +127,7 @@ class Model {
     inline constexpr VariableProxy<T_Variable, T_Expression> &create_variable(
         const std::string &a_NAME, const T_Variable a_LOWER_BOUND,
         const T_Variable a_UPPER_BOUND) {
-        auto &variable_proxy = create_variable(a_NAME);
+        auto &variable_proxy = this->create_variable(a_NAME);
         variable_proxy.set_bound(a_LOWER_BOUND, a_UPPER_BOUND);
 
         return m_variable_proxies.back();
@@ -130,13 +136,19 @@ class Model {
     /*************************************************************************/
     inline VariableProxy<T_Variable, T_Expression> &create_variables(
         const std::string &a_NAME, const int a_NUMBER_OF_ELEMENTS) {
+        if (utility::has_space(a_NAME)) {
+            throw std::logic_error(utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "The name of decision variable must not contain spaces."));
+        }
+
         int id = m_variable_proxies.size();
 
         if (id >= ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
-                "The number of variable definitions must be equal to or "
-                "less than " +
+                "The number of decision variable definitions must be equal to "
+                "or less than " +
                     std::to_string(
                         ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES) +
                     "."));
@@ -163,13 +175,19 @@ class Model {
     /*************************************************************************/
     inline constexpr VariableProxy<T_Variable, T_Expression> &create_variables(
         const std::string &a_NAME, const std::vector<int> &a_SHAPE) {
+        if (utility::has_space(a_NAME)) {
+            throw std::logic_error(utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "The name of decision variable must not contain spaces."));
+        }
+
         int id = m_variable_proxies.size();
 
         if (id >= ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
-                "The number of variable definitions must be equal to or "
-                "less than " +
+                "The number of decision variable definitions must be equal to "
+                "or less than " +
                     std::to_string(
                         ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES) +
                     "."));
@@ -196,6 +214,12 @@ class Model {
     /*************************************************************************/
     inline constexpr ExpressionProxy<T_Variable, T_Expression>
         &create_expression(const std::string &a_NAME) {
+        if (utility::has_space(a_NAME)) {
+            throw std::logic_error(utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "The name of expression must not contain spaces."));
+        }
+
         int id = m_expression_proxies.size();
 
         if (id >= ModelConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES) {
@@ -218,6 +242,12 @@ class Model {
     /*************************************************************************/
     inline constexpr ExpressionProxy<T_Variable, T_Expression> &
     create_expressions(const std::string &a_NAME, int a_NUMBER_OF_ELEMENTS) {
+        if (utility::has_space(a_NAME)) {
+            throw std::logic_error(utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "The name of expression must not contain spaces."));
+        }
+
         int id = m_expression_proxies.size();
 
         if (id >= ModelConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES) {
@@ -242,6 +272,12 @@ class Model {
     inline constexpr ExpressionProxy<T_Variable, T_Expression>
         &create_expressions(const std::string &     a_NAME,
                             const std::vector<int> &a_SHAPE) {
+        if (utility::has_space(a_NAME)) {
+            throw std::logic_error(utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "The name of expression must not contain spaces."));
+        }
+
         int id = m_expression_proxies.size();
 
         if (id >= ModelConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES) {
@@ -268,6 +304,12 @@ class Model {
     create_expression(
         const std::string &                               a_NAME,
         const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE) {
+        if (utility::has_space(a_NAME)) {
+            throw std::logic_error(utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "The name of expression must not contain spaces."));
+        }
+
         int id = m_expression_proxies.size();
 
         if (id >= ModelConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES) {
@@ -292,6 +334,12 @@ class Model {
         &create_expression(
             const std::string &                         a_NAME,
             const Expression<T_Variable, T_Expression> &a_EXPRESSION) {
+        if (utility::has_space(a_NAME)) {
+            throw std::logic_error(utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "The name of expression must not contain spaces."));
+        }
+
         int id = m_expression_proxies.size();
 
         if (id >= ModelConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES) {
@@ -314,6 +362,12 @@ class Model {
     /*************************************************************************/
     inline constexpr ConstraintProxy<T_Variable, T_Expression>
         &create_constraint(const std::string &a_NAME) {
+        if (utility::has_space(a_NAME)) {
+            throw std::logic_error(utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "The name of constraint must not contain spaces."));
+        }
+
         int id = m_constraint_proxies.size();
 
         if (id >= ModelConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES) {
@@ -336,6 +390,12 @@ class Model {
     /*************************************************************************/
     inline constexpr ConstraintProxy<T_Variable, T_Expression> &
     create_constraints(const std::string &a_NAME, int a_NUMBER_OF_ELEMENTS) {
+        if (utility::has_space(a_NAME)) {
+            throw std::logic_error(utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "The name of constraint must not contain spaces."));
+        }
+
         int id = m_constraint_proxies.size();
 
         if (id >= ModelConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES) {
@@ -360,6 +420,12 @@ class Model {
     inline constexpr ConstraintProxy<T_Variable, T_Expression>
         &create_constraints(const std::string &     a_NAME,
                             const std::vector<int> &a_SHAPE) {
+        if (utility::has_space(a_NAME)) {
+            throw std::logic_error(utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "The name of constraint must not contain spaces."));
+        }
+
         int id = m_constraint_proxies.size();
 
         if (id >= ModelConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES) {
@@ -385,6 +451,12 @@ class Model {
         &create_constraint(
             const std::string &                         a_NAME,
             const Constraint<T_Variable, T_Expression> &a_CONSTRAINT) {
+        if (utility::has_space(a_NAME)) {
+            throw std::logic_error(utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "The name of constraint must not contain spaces."));
+        }
+
         int id = m_constraint_proxies.size();
 
         if (id >= ModelConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES) {
@@ -1070,6 +1142,7 @@ class Model {
                 break;
             }
         }
+        utility::print_message("Done.", a_IS_ENABLED_PRINT);
     }
 
     /*************************************************************************/
@@ -1223,7 +1296,7 @@ class Model {
                  * The lower and bounds of a^{T}x and fixed value in b^{T}y in
                  * a^{T}x + b^{T}y + c <=(>=,=) 0, where a^{T}x are terms whose
                  * decision variables are not fixed, b^{T}y are terms with fixed
-                 * decition variables, and c is the constant term.
+                 * decision variables, and c is the constant term.
                  */
                 double not_fixed_term_lower_bound = 0.0;
                 double not_fixed_term_upper_bound = 0.0;
@@ -1278,7 +1351,7 @@ class Model {
                          0)) {
                     utility::print_message("The constraint " +
                                                constraint.name() +
-                                               " was removed for redanduncy.",
+                                               " was removed for redundancy.",
                                            a_IS_ENABLED_PRINT);
 
                     if (constraint.is_enabled()) {
@@ -1350,7 +1423,7 @@ class Model {
                         } else {
                             utility::print_message(
                                 "The constraint " + constraint.name() +
-                                    " was removed for redanduncy.",
+                                    " was removed for redundancy.",
                                 a_IS_ENABLED_PRINT);
                         }
                         if (constraint.is_enabled()) {
@@ -1395,7 +1468,7 @@ class Model {
                 }
 
                 /**
-                 * Thignten the lower and upper bounds of the decision variables
+                 * Tighten the lower and upper bounds of the decision variables
                  * based on the bounds of the rest part.
                  */
                 for (auto &sensitivity :
@@ -1873,6 +1946,24 @@ class Model {
         named_solution.m_is_feasible = a_SOLUTION.is_feasible;
 
         return named_solution;
+    }
+
+    /*************************************************************************/
+    inline void import_solution(
+        const std::unordered_map<std::string, int> &a_SOLUTION) {
+        /**
+         *  This method cannot be constexpr due to
+         *  for (const auto &item : a_SOLUTION) { ... }
+         */
+        for (const auto &item : a_SOLUTION) {
+            for (auto &&proxy : m_variable_proxies) {
+                for (auto &&variable : proxy.flat_indexed_variables()) {
+                    if (item.first == variable.name()) {
+                        variable = item.second;
+                    }
+                }
+            }
+        }
     }
 
     /*************************************************************************/

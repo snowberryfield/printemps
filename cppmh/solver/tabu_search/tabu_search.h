@@ -42,11 +42,11 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     /**
      * Define type aliases.
      */
-    using Model_T          = model::Model<T_Variable, T_Expression>;
-    using Result_T         = TabuSearchResult<T_Variable, T_Expression>;
-    using IncumbetHolder_T = IncumbentHolder<T_Variable, T_Expression>;
-    using Move_T           = model::Move<T_Variable, T_Expression>;
-    using MoveScore        = TabuSearchMoveScore;
+    using Model_T           = model::Model<T_Variable, T_Expression>;
+    using Result_T          = TabuSearchResult<T_Variable, T_Expression>;
+    using IncumbentHolder_T = IncumbentHolder<T_Variable, T_Expression>;
+    using Move_T            = model::Move<T_Variable, T_Expression>;
+    using MoveScore         = TabuSearchMoveScore;
 
     /**
      * Start to measure computational time.
@@ -64,7 +64,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     std::vector<model::ValueProxy<double>> global_penalty_coefficient_proxies =
         a_GLOBAL_PENALTY_COEFFICIENT_PROXIES;
 
-    IncumbetHolder_T incumbent_holder = a_INCUMBENT_HOLDER;
+    IncumbentHolder_T incumbent_holder = a_INCUMBENT_HOLDER;
 
     /**
      * Reset the local augmented incumbent.
@@ -115,8 +115,9 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     /**
      * Set up the tabu tenure and related parameters.
      */
-    int tabu_tenure = std::min(option.tabu_search.initial_tabu_tenure,
-                               model->number_of_variables());
+    int original_tabu_tenure = std::min(option.tabu_search.initial_tabu_tenure,
+                                        model->number_of_variables());
+    int tabu_tenure          = original_tabu_tenure;
 
     bool has_constraint(local_penalty_coefficient_proxies.size() > 0);
 
@@ -376,7 +377,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                  * or
                  * - There is no permissible solutions.
                  */
-                tabu_tenure = std::max(tabu_tenure - 1, 1);
+                tabu_tenure = std::max(tabu_tenure - 1, original_tabu_tenure);
                 last_tabu_tenure_updated_iteration = iteration;
                 bias_decrease_count                = 0;
                 bias_increase_count                = 0;
@@ -413,7 +414,8 @@ TabuSearchResult<T_Variable, T_Expression> solve(
 
                     if (bias_decrease_count > BIAS_DECREASE_COUNT_THRESHOLD) {
                         bias_decrease_count = 0;
-                        tabu_tenure         = std::max(tabu_tenure - 1, 1);
+                        tabu_tenure =
+                            std::max(tabu_tenure - 1, original_tabu_tenure);
                         last_tabu_tenure_updated_iteration = iteration;
 
                         utility::print_info("Tabu tenure decreased: " +
