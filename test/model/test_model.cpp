@@ -1401,14 +1401,16 @@ TEST_F(TestModel, remove_independent_variables) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModel, remove_implicit_singleton_constraints) {
+TEST_F(TestModel,
+       remove_redundant_constraints_with_tightening_variable_bounds) {
     {
         cppmh::model::Model<int, double> model;
 
         auto& x = model.create_variable("x", 0, 10);
         auto& g = model.create_constraint("g", 3 * x + 1 == 7);
 
-        model.remove_implicit_singleton_constraints(false);
+        model.remove_redundant_constraints_with_tightening_variable_bounds(
+            false);
         EXPECT_EQ(true, x.is_fixed());
         EXPECT_EQ(2, x.value());
         EXPECT_EQ(false, g.is_enabled());
@@ -1419,7 +1421,8 @@ TEST_F(TestModel, remove_implicit_singleton_constraints) {
         auto& x = model.create_variable("x", 0, 10);
         auto& g = model.create_constraint("g", 3 * x + 1 <= 7);
 
-        model.remove_implicit_singleton_constraints(false);
+        model.remove_redundant_constraints_with_tightening_variable_bounds(
+            false);
         EXPECT_EQ(false, x.is_fixed());
         EXPECT_EQ(0, x.lower_bound());
         EXPECT_EQ(2, x.upper_bound());
@@ -1431,7 +1434,8 @@ TEST_F(TestModel, remove_implicit_singleton_constraints) {
         auto& x = model.create_variable("x", 0, 10);
         auto& g = model.create_constraint("g", 3 * x + 1 >= 7);
 
-        model.remove_implicit_singleton_constraints(false);
+        model.remove_redundant_constraints_with_tightening_variable_bounds(
+            false);
         EXPECT_EQ(false, x.is_fixed());
         EXPECT_EQ(2, x.lower_bound());
         EXPECT_EQ(10, x.upper_bound());
@@ -1444,7 +1448,8 @@ TEST_F(TestModel, remove_implicit_singleton_constraints) {
         auto& x = model.create_variable("x", -10, 10);
         auto& g = model.create_constraint("g", -3 * x + 1 == 7);
 
-        model.remove_implicit_singleton_constraints(false);
+        model.remove_redundant_constraints_with_tightening_variable_bounds(
+            false);
         EXPECT_EQ(true, x.is_fixed());
         EXPECT_EQ(-2, x.value());
         EXPECT_EQ(false, g.is_enabled());
@@ -1455,7 +1460,8 @@ TEST_F(TestModel, remove_implicit_singleton_constraints) {
         auto& x = model.create_variable("x", -10, 10);
         auto& g = model.create_constraint("g", -3 * x + 1 <= 7);
 
-        model.remove_implicit_singleton_constraints(false);
+        model.remove_redundant_constraints_with_tightening_variable_bounds(
+            false);
         EXPECT_EQ(false, x.is_fixed());
         EXPECT_EQ(-2, x.lower_bound());
         EXPECT_EQ(10, x.upper_bound());
@@ -1467,7 +1473,8 @@ TEST_F(TestModel, remove_implicit_singleton_constraints) {
         auto& x = model.create_variable("x", -10, 10);
         auto& g = model.create_constraint("g", -3 * x + 1 >= 7);
 
-        model.remove_implicit_singleton_constraints(false);
+        model.remove_redundant_constraints_with_tightening_variable_bounds(
+            false);
         EXPECT_EQ(false, x.is_fixed());
         EXPECT_EQ(-10, x.lower_bound());
         EXPECT_EQ(-2, x.upper_bound());
@@ -1482,7 +1489,8 @@ TEST_F(TestModel, remove_implicit_singleton_constraints) {
         auto& g = model.create_constraint("g", 3 * x + y == 7);
         y.fix_by(1);
 
-        model.remove_implicit_singleton_constraints(false);
+        model.remove_redundant_constraints_with_tightening_variable_bounds(
+            false);
         EXPECT_EQ(true, x.is_fixed());
         EXPECT_EQ(2, x.value());
         EXPECT_EQ(false, g.is_enabled());
@@ -1495,7 +1503,8 @@ TEST_F(TestModel, remove_implicit_singleton_constraints) {
         auto& g = model.create_constraint("g", 3 * x + y <= 7);
         y.fix_by(1);
 
-        model.remove_implicit_singleton_constraints(false);
+        model.remove_redundant_constraints_with_tightening_variable_bounds(
+            false);
         EXPECT_EQ(false, x.is_fixed());
         EXPECT_EQ(0, x.lower_bound());
         EXPECT_EQ(2, x.upper_bound());
@@ -1509,7 +1518,8 @@ TEST_F(TestModel, remove_implicit_singleton_constraints) {
         auto& g = model.create_constraint("g", 3 * x + y >= 7);
         y.fix_by(1);
 
-        model.remove_implicit_singleton_constraints(false);
+        model.remove_redundant_constraints_with_tightening_variable_bounds(
+            false);
         EXPECT_EQ(false, x.is_fixed());
         EXPECT_EQ(2, x.lower_bound());
         EXPECT_EQ(10, x.upper_bound());
@@ -1523,7 +1533,8 @@ TEST_F(TestModel, remove_implicit_singleton_constraints) {
         auto& g = model.create_constraint("g", -3 * x + y == 7);
         y.fix_by(1);
 
-        model.remove_implicit_singleton_constraints(false);
+        model.remove_redundant_constraints_with_tightening_variable_bounds(
+            false);
         EXPECT_EQ(true, x.is_fixed());
         EXPECT_EQ(-2, x.value());
         EXPECT_EQ(false, g.is_enabled());
@@ -1536,7 +1547,8 @@ TEST_F(TestModel, remove_implicit_singleton_constraints) {
         auto& g = model.create_constraint("g", -3 * x + y <= 7);
         y.fix_by(1);
 
-        model.remove_implicit_singleton_constraints(false);
+        model.remove_redundant_constraints_with_tightening_variable_bounds(
+            false);
         EXPECT_EQ(false, x.is_fixed());
         EXPECT_EQ(-2, x.lower_bound());
         EXPECT_EQ(10, x.upper_bound());
@@ -1550,7 +1562,8 @@ TEST_F(TestModel, remove_implicit_singleton_constraints) {
         auto& g = model.create_constraint("g", -3 * x + y >= 7);
         y.fix_by(1);
 
-        model.remove_implicit_singleton_constraints(false);
+        model.remove_redundant_constraints_with_tightening_variable_bounds(
+            false);
         EXPECT_EQ(false, x.is_fixed());
         EXPECT_EQ(-10, x.lower_bound());
         EXPECT_EQ(-2, x.upper_bound());
@@ -1564,7 +1577,8 @@ TEST_F(TestModel, remove_implicit_singleton_constraints) {
         auto& g = model.create_constraint("g", 3 * x + 1 == 7);
         x.fix_by(2);
 
-        model.remove_implicit_singleton_constraints(false);
+        model.remove_redundant_constraints_with_tightening_variable_bounds(
+            false);
         EXPECT_EQ(true, x.is_fixed());
         EXPECT_EQ(false, g.is_enabled());
     }
@@ -1575,7 +1589,8 @@ TEST_F(TestModel, remove_implicit_singleton_constraints) {
         auto& g = model.create_constraint("g", 3 * x + 1 <= 7);
         x.fix_by(1);
 
-        model.remove_implicit_singleton_constraints(false);
+        model.remove_redundant_constraints_with_tightening_variable_bounds(
+            false);
         EXPECT_EQ(true, x.is_fixed());
         EXPECT_EQ(false, g.is_enabled());
     }
@@ -1586,7 +1601,8 @@ TEST_F(TestModel, remove_implicit_singleton_constraints) {
         auto& g = model.create_constraint("g", 3 * x + 1 >= 7);
         x.fix_by(3);
 
-        model.remove_implicit_singleton_constraints(false);
+        model.remove_redundant_constraints_with_tightening_variable_bounds(
+            false);
         EXPECT_EQ(true, x.is_fixed());
         EXPECT_EQ(false, g.is_enabled());
     }
@@ -1598,7 +1614,8 @@ TEST_F(TestModel, remove_implicit_singleton_constraints) {
         auto& g = model.create_constraint("g", -3 * x + 1 == 7);
         x.fix_by(-2);
 
-        model.remove_implicit_singleton_constraints(false);
+        model.remove_redundant_constraints_with_tightening_variable_bounds(
+            false);
         EXPECT_EQ(true, x.is_fixed());
         EXPECT_EQ(false, g.is_enabled());
     }
@@ -1609,7 +1626,8 @@ TEST_F(TestModel, remove_implicit_singleton_constraints) {
         auto& g = model.create_constraint("g", -3 * x + 1 <= 7);
         x.fix_by(-2);
 
-        model.remove_implicit_singleton_constraints(false);
+        model.remove_redundant_constraints_with_tightening_variable_bounds(
+            false);
         EXPECT_EQ(true, x.is_fixed());
         EXPECT_EQ(false, g.is_enabled());
     }
@@ -1620,9 +1638,68 @@ TEST_F(TestModel, remove_implicit_singleton_constraints) {
         auto& g = model.create_constraint("g", -3 * x + 1 >= 7);
         x.fix_by(-2);
 
-        model.remove_implicit_singleton_constraints(false);
+        model.remove_redundant_constraints_with_tightening_variable_bounds(
+            false);
         EXPECT_EQ(true, x.is_fixed());
         EXPECT_EQ(false, g.is_enabled());
+    }
+
+    {
+        cppmh::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x", 0, 10);
+        auto& y = model.create_variable("y", 0, 1);
+        auto& g = model.create_constraint("g", 3 * x + y <= 7);
+
+        model.remove_redundant_constraints_with_tightening_variable_bounds(
+            false);
+        EXPECT_EQ(false, x.is_fixed());
+        EXPECT_EQ(0, x.lower_bound());
+        EXPECT_EQ(2, x.upper_bound());
+        EXPECT_EQ(true, g.is_enabled());
+    }
+    {
+        cppmh::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x", 0, 10);
+        auto& y = model.create_variable("y", 0, 1);
+        auto& g = model.create_constraint("g", 3 * x + y >= 7);
+
+        model.remove_redundant_constraints_with_tightening_variable_bounds(
+            false);
+        EXPECT_EQ(false, x.is_fixed());
+        EXPECT_EQ(2, x.lower_bound());
+        EXPECT_EQ(10, x.upper_bound());
+        EXPECT_EQ(true, g.is_enabled());
+    }
+
+    {
+        cppmh::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x", -10, 10);
+        auto& y = model.create_variable("y", 0, 1);
+        auto& g = model.create_constraint("g", -3 * x + y <= 7);
+
+        model.remove_redundant_constraints_with_tightening_variable_bounds(
+            false);
+        EXPECT_EQ(false, x.is_fixed());
+        EXPECT_EQ(-2, x.lower_bound());
+        EXPECT_EQ(10, x.upper_bound());
+        EXPECT_EQ(true, g.is_enabled());
+    }
+    {
+        cppmh::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x", -10, 10);
+        auto& y = model.create_variable("y", 0, 1);
+        auto& g = model.create_constraint("g", -3 * x + y >= 7);
+
+        model.remove_redundant_constraints_with_tightening_variable_bounds(
+            false);
+        EXPECT_EQ(false, x.is_fixed());
+        EXPECT_EQ(-10, x.lower_bound());
+        EXPECT_EQ(-2, x.upper_bound());
+        EXPECT_EQ(true, g.is_enabled());
     }
 }
 

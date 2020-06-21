@@ -819,7 +819,7 @@ class Model {
                         utility::print_warning(
                             "The initial value " + variable_ptr->name() +
                                 " = " + std::to_string(old_value) +
-                                " is corrected to " +
+                                " was corrected to " +
                                 std::to_string(new_value) + ".",
                             a_IS_ENABLED_PRINT);
                     }
@@ -857,7 +857,7 @@ class Model {
                             utility::print_warning(
                                 "The initial value " + variable_ptr->name() +
                                     " = " + std::to_string(old_value) +
-                                    " is corrected to " +
+                                    " was corrected to " +
                                     std::to_string(new_value) + ".",
                                 a_IS_ENABLED_PRINT);
                         }
@@ -888,7 +888,7 @@ class Model {
                             utility::print_warning(
                                 "The initial value " + variable_ptr->name() +
                                     " = " + std::to_string(old_value) +
-                                    " is corrected to " +
+                                    " was corrected to " +
                                     std::to_string(new_value) + ".",
                                 a_IS_ENABLED_PRINT);
                             is_corrected = true;
@@ -899,8 +899,7 @@ class Model {
                         throw std::logic_error(utility::format_error_location(
                             __FILE__, __LINE__, __func__,
                             "The initial value could not be modified "
-                            "because "
-                            "all variables are fixed."));
+                            "because all variables are fixed."));
                     };
                 } else {
                     throw std::logic_error(utility::format_error_location(
@@ -949,7 +948,7 @@ class Model {
                             utility::print_warning(
                                 "The initial value " + variable.name() + " = " +
                                     std::to_string(old_value) +
-                                    " is corrected to " +
+                                    " was corrected to " +
                                     std::to_string(new_value) + ".",
                                 a_IS_ENABLED_PRINT);
                         } else {
@@ -1000,15 +999,14 @@ class Model {
                         utility::print_warning(
                             "The initial value " + variable.name() + " = " +
                                 std::to_string(old_value) +
-                                " is corrected to " +
+                                " was corrected to " +
                                 std::to_string(new_value) + ".",
                             a_IS_ENABLED_PRINT);
                     } else {
                         throw std::logic_error(utility::format_error_location(
                             __FILE__, __LINE__, __func__,
                             "An initial value violates the lower or "
-                            "upper "
-                            "bound constraint."));
+                            "upper bound constraint."));
                     }
                 }
             }
@@ -1061,7 +1059,8 @@ class Model {
             int number_of_newly_fixed_variables     = 0;
 
             number_of_newly_disabled_constaints +=
-                this->remove_implicit_singleton_constraints(a_IS_ENABLED_PRINT);
+                this->remove_redundant_constraints_with_tightening_variable_bounds(
+                    a_IS_ENABLED_PRINT);
 
             number_of_newly_fixed_variables +=
                 this->fix_implicit_fixed_variables(a_IS_ENABLED_PRINT);
@@ -1094,7 +1093,7 @@ class Model {
                         objective_sensitivities.end()) {
                         utility::print_message(
                             "The value of decision variable " +
-                                variable.name() + " is fixed by " +
+                                variable.name() + " was fixed by " +
                                 std::to_string(0) +
                                 " because it does not have sensitivity to any "
                                 "constraint or objective function.",
@@ -1111,7 +1110,7 @@ class Model {
                                 utility::print_message(
                                     "The value of decision variable " +
                                         variable.name() +
-                                        " is fixed by its lower bound" +
+                                        " was fixed by its lower bound" +
                                         std::to_string(fix_value) +
                                         " because it does not have "
                                         "sensitivity to any "
@@ -1126,7 +1125,7 @@ class Model {
                                 utility::print_message(
                                     "The value of decision variable " +
                                         variable.name() +
-                                        " is fixed by its upper bound" +
+                                        " was fixed by its upper bound" +
                                         std::to_string(fix_value) +
                                         " because it does not have "
                                         "sensitivity to any "
@@ -1143,7 +1142,7 @@ class Model {
                                 utility::print_message(
                                     "The value of decision variable " +
                                         variable.name() +
-                                        " is fixed by its upper bound" +
+                                        " was fixed by its upper bound" +
                                         std::to_string(fix_value) +
                                         " because it does not have "
                                         "sensitivity to any "
@@ -1158,7 +1157,7 @@ class Model {
                                 utility::print_message(
                                     "The value of decision variable " +
                                         variable.name() +
-                                        " is fixed by its lower bound" +
+                                        " was fixed by its lower bound" +
                                         std::to_string(fix_value) +
                                         " because it does not have "
                                         "sensitivity to any "
@@ -1178,7 +1177,8 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr int remove_implicit_singleton_constraints(
+    inline constexpr int
+    remove_redundant_constraints_with_tightening_variable_bounds(
         const bool a_IS_ENABLED_PRINT) {
         int number_of_newly_disabled_constraints = 0;
         for (auto &&proxy : m_constraint_proxies) {
@@ -1204,55 +1204,188 @@ class Model {
 
                 std::vector<std::pair<Variable<T_Variable, T_Expression> *,
                                       T_Expression>>
-                    not_fixed_nonzero_sensitivities;
+                    not_fixed_variable_sensitivities;
+                std::vector<std::pair<Variable<T_Variable, T_Expression> *,
+                                      T_Expression>>
+                    positive_coefficient_not_fixed_variable_sensitivities;
+                std::vector<std::pair<Variable<T_Variable, T_Expression> *,
+                                      T_Expression>>
+                    negative_coefficient_not_fixed_variable_sensitivities;
 
-                int number_of_fixed_variables                      = 0;
-                int number_of_not_fixed_zero_coefficient_variables = 0;
+                not_fixed_variable_sensitivities.reserve(sensitivities.size());
+                positive_coefficient_not_fixed_variable_sensitivities.reserve(
+                    sensitivities.size());
+                negative_coefficient_not_fixed_variable_sensitivities.reserve(
+                    sensitivities.size());
+                int number_of_fixed_variables = 0;
 
-                double fixed_value = 0.0;
+                /**
+                 * The lower and bounds of a^{T}x and fixed value in b^{T}y in
+                 * a^{T}x + b^{T}y + c <=(>=,=) 0, where a^{T}x are terms whose
+                 * decision variables are not fixed, b^{T}y are terms with fixed
+                 * decition variables, and c is the constant term.
+                 */
+                double not_fixed_term_lower_bound = 0.0;
+                double not_fixed_term_upper_bound = 0.0;
+                double fixed_term_value           = 0.0;
 
                 for (const auto &sensitivity : sensitivities) {
                     if (sensitivity.first->is_fixed()) {
                         number_of_fixed_variables++;
-                        fixed_value +=
-                            sensitivity.second * sensitivity.first->value();
+                        fixed_term_value +=
+                            sensitivity.first->value() * sensitivity.second;
                     } else {
-                        if (sensitivity.second == 0) {
-                            number_of_not_fixed_zero_coefficient_variables++;
+                        if (sensitivity.second > 0) {
+                            not_fixed_term_lower_bound +=
+                                sensitivity.first->lower_bound() *
+                                sensitivity.second;
+                            not_fixed_term_upper_bound +=
+                                sensitivity.first->upper_bound() *
+                                sensitivity.second;
+                            positive_coefficient_not_fixed_variable_sensitivities
+                                .push_back(sensitivity);
+                            not_fixed_variable_sensitivities.push_back(
+                                sensitivity);
                         } else {
-                            not_fixed_nonzero_sensitivities.push_back(
+                            not_fixed_term_lower_bound +=
+                                sensitivity.first->upper_bound() *
+                                sensitivity.second;
+                            not_fixed_term_upper_bound +=
+                                sensitivity.first->lower_bound() *
+                                sensitivity.second;
+                            negative_coefficient_not_fixed_variable_sensitivities
+                                .push_back(sensitivity);
+                            not_fixed_variable_sensitivities.push_back(
                                 sensitivity);
                         }
                     }
                 }
 
                 /**
-                 * If the constraint is defined with more than one decision
-                 * variables which is not fixed, the following procedures will
-                 * be skipped.
+                 * If the constraint is always satisfied obviously, it will be
+                 * removed.
                  */
-                if (not_fixed_nonzero_sensitivities.size() > 1) {
+                if ((constraint.sense() == ConstraintSense::Equal &&
+                     not_fixed_variable_sensitivities.size() == 0 &&
+                     fixed_term_value + constant_value == 0) ||
+                    (constraint.sense() == ConstraintSense::Lower &&
+                     not_fixed_term_upper_bound + fixed_term_value +
+                             constant_value <=
+                         0) ||
+                    (constraint.sense() == ConstraintSense::Upper &&
+                     not_fixed_term_lower_bound + fixed_term_value +
+                             constant_value >=
+                         0)) {
+                    utility::print_message("The constraint " +
+                                               constraint.name() +
+                                               " was removed for redanduncy.",
+                                           a_IS_ENABLED_PRINT);
+
+                    if (constraint.is_enabled()) {
+                        constraint.disable();
+                        number_of_newly_disabled_constraints++;
+                    }
                     continue;
                 }
 
                 /**
-                 * The constraint will be removed if does not include any
-                 * not fixed decision variable and its constant (or fixed) term
-                 * satisfies the constraint.
+                 * The detected singleton constaint will be disabled instead
+                 * of fixing or tightening the lower and upper bounds of the
+                 * decision variable included in the constraint.
                  */
-                if (not_fixed_nonzero_sensitivities.size() == 0) {
-                    if ((constraint.sense() == ConstraintSense::Equal &&
-                         fixed_value + constant_value == 0) ||
-                        (constraint.sense() == ConstraintSense::Lower &&
-                         fixed_value + constant_value <= 0) ||
-                        (constraint.sense() == ConstraintSense::Upper &&
-                         fixed_value + constant_value >= 0)) {
+                if (not_fixed_variable_sensitivities.size() == 1) {
+                    auto variable_ptr =
+                        not_fixed_variable_sensitivities.front().first;
+                    auto coefficient =
+                        not_fixed_variable_sensitivities.front().second;
+
+                    auto lower_bound = variable_ptr->lower_bound();
+                    auto upper_bound = variable_ptr->upper_bound();
+
+                    auto bound_temp =
+                        -(fixed_term_value + constant_value) / coefficient;
+
+                    if (constraint.sense() == ConstraintSense::Equal) {
+                        /**
+                         * If the singleton constraint is defined by an
+                         * equality as ax+b=0, the value of the decision
+                         * variable x will be fixed by -b/a.
+                         */
+
                         utility::print_message(
                             "The constraint " + constraint.name() +
-                                " is removed because it is always "
-                                "satisfied.",
+                                " was removed instead of fixing the value "
+                                "of the decision variable " +
+                                variable_ptr->name() + " by " +
+                                std::to_string(bound_temp) + ".",
                             a_IS_ENABLED_PRINT);
 
+                        variable_ptr->fix_by(bound_temp);
+                        if (constraint.is_enabled()) {
+                            constraint.disable();
+                            number_of_newly_disabled_constraints++;
+                        }
+                    } else if ((constraint.sense() == ConstraintSense::Lower &&
+                                coefficient > 0) ||
+                               (constraint.sense() == ConstraintSense::Upper &&
+                                coefficient < 0)) {
+                        /**
+                         * If the singleton constraint is defined by an
+                         * equality as ax+b<=0 with a>0 (or ax+b>=0 with a<0),
+                         * the lower bound of the decision variable will be
+                         * tightened by floor(-b/a).
+                         */
+                        auto bound_floor =
+                            static_cast<T_Variable>(std::floor(bound_temp));
+
+                        if (bound_floor < upper_bound) {
+                            utility::print_message(
+                                "The constraint " + constraint.name() +
+                                    " was removed instead of tightening the "
+                                    "upper bound of the decision variable " +
+                                    variable_ptr->name() + " by " +
+                                    std::to_string(bound_floor) + ".",
+                                a_IS_ENABLED_PRINT);
+                            variable_ptr->set_bound(lower_bound, bound_floor);
+                        } else {
+                            utility::print_message(
+                                "The constraint " + constraint.name() +
+                                    " was removed for redanduncy.",
+                                a_IS_ENABLED_PRINT);
+                        }
+                        if (constraint.is_enabled()) {
+                            constraint.disable();
+                            number_of_newly_disabled_constraints++;
+                        }
+
+                    } else if ((constraint.sense() == ConstraintSense::Upper &&
+                                coefficient > 0) ||
+                               (constraint.sense() == ConstraintSense::Lower &&
+                                coefficient < 0)) {
+                        /**
+                         * If the singleton constraint is defined by an
+                         * equality as ax+b>=0 with a>0 (or ax+b<=0 with a<0),
+                         * the upper bound of the decision variable will be
+                         * tightened by ceil(-b/a).
+                         */
+                        auto bound_ceil =
+                            static_cast<T_Variable>(std::ceil(bound_temp));
+
+                        if (bound_ceil > lower_bound) {
+                            utility::print_message(
+                                "The constraint " + constraint.name() +
+                                    " was removed instead of tightening the "
+                                    "lower bound of the decision variable " +
+                                    variable_ptr->name() + " by " +
+                                    std::to_string(bound_ceil) + ".",
+                                a_IS_ENABLED_PRINT);
+                            variable_ptr->set_bound(bound_ceil, upper_bound);
+                        } else {
+                            utility::print_message(
+                                "The constraint " + constraint.name() +
+                                    " was removed for redundancy.",
+                                a_IS_ENABLED_PRINT);
+                        }
                         if (constraint.is_enabled()) {
                             constraint.disable();
                             number_of_newly_disabled_constraints++;
@@ -1261,102 +1394,95 @@ class Model {
                     continue;
                 }
 
-                auto variable_ptr =
-                    not_fixed_nonzero_sensitivities.front().first;
-                auto coefficient =
-                    not_fixed_nonzero_sensitivities.front().second;
-
                 /**
-                 * The detected singleton constaint will be disabled instead
-                 * of fixing or tightening the lower and upper bounds of the
-                 * decision variable included in the constraint.
+                 * Thignten the lower and upper bounds of the decision variables
+                 * based on the bounds of the rest part.
                  */
+                for (auto &sensitivity :
+                     positive_coefficient_not_fixed_variable_sensitivities) {
+                    auto variable_ptr = sensitivity.first;
+                    auto coefficient  = sensitivity.second;
 
-                auto lower_bound = variable_ptr->lower_bound();
-                auto upper_bound = variable_ptr->upper_bound();
-                auto bound_temp = -(constant_value + fixed_value) / coefficient;
+                    auto lower_bound = variable_ptr->lower_bound();
+                    auto upper_bound = variable_ptr->upper_bound();
 
-                if (constraint.sense() == ConstraintSense::Equal) {
-                    /**
-                     * If the singleton constraint is defined by an
-                     * equality as ax+b=0, the value of the decision
-                     * variable x will be fixed by -b/a.
-                     */
-                    utility::print_message(
-                        "The constraint " + constraint.name() +
-                            " is removed instead of fixing the value "
-                            "of the decision variable " +
-                            variable_ptr->name() + " by " +
-                            std::to_string(bound_temp) + ".",
-                        a_IS_ENABLED_PRINT);
-
-                    variable_ptr->fix_by(bound_temp);
-                    if (constraint.is_enabled()) {
-                        constraint.disable();
-                        number_of_newly_disabled_constraints++;
+                    if (constraint.sense() == ConstraintSense::Upper) {
+                        auto bound_temp = -(not_fixed_term_upper_bound -
+                                            coefficient * upper_bound +
+                                            fixed_term_value + constant_value) /
+                                          coefficient;
+                        auto bound_ceil =
+                            static_cast<T_Variable>(std::ceil(bound_temp));
+                        if (bound_ceil > lower_bound) {
+                            utility::print_message(
+                                "The lower bound of the decision variable " +
+                                    variable_ptr->name() +
+                                    " was tightened by " +
+                                    std::to_string(bound_ceil) + ".",
+                                a_IS_ENABLED_PRINT);
+                            variable_ptr->set_bound(bound_ceil, upper_bound);
+                        }
+                    } else if (constraint.sense() == ConstraintSense::Lower) {
+                        auto bound_temp = -(not_fixed_term_lower_bound -
+                                            coefficient * lower_bound +
+                                            fixed_term_value + constant_value) /
+                                          coefficient;
+                        auto bound_floor =
+                            static_cast<T_Variable>(std::floor(bound_temp));
+                        if (bound_floor < upper_bound) {
+                            utility::print_message(
+                                "The upper bound of the decision variable " +
+                                    variable_ptr->name() +
+                                    " was tightened by " +
+                                    std::to_string(bound_floor) + ".",
+                                a_IS_ENABLED_PRINT);
+                            variable_ptr->set_bound(lower_bound, bound_floor);
+                        }
                     }
-                } else if ((constraint.sense() == ConstraintSense::Lower &&
-                            coefficient > 0) ||
-                           (constraint.sense() == ConstraintSense::Upper &&
-                            coefficient < 0)) {
-                    /**
-                     * If the singleton constraint is defined by an
-                     * equality as ax+b<=0, the lower bound of the
-                     * decision variable will be tightened by -b/a.
-                     */
-                    auto bound_floor =
-                        static_cast<T_Variable>(std::floor(bound_temp));
+                }
 
-                    if (bound_floor < upper_bound) {
-                        utility::print_message(
-                            "The constraint " + constraint.name() +
-                                " is removed instead of tightening the "
-                                "upper bound of the decision variable " +
-                                variable_ptr->name() + " by " +
-                                std::to_string(bound_floor) + ".",
-                            a_IS_ENABLED_PRINT);
-                        variable_ptr->set_bound(lower_bound, bound_floor);
-                    } else {
-                        utility::print_message(
-                            "The constraint " + constraint.name() +
-                                " is removed because it is redundant.",
-                            a_IS_ENABLED_PRINT);
-                    }
-                    if (constraint.is_enabled()) {
-                        constraint.disable();
-                        number_of_newly_disabled_constraints++;
+                for (auto &sensitivity :
+                     negative_coefficient_not_fixed_variable_sensitivities) {
+                    auto variable_ptr = sensitivity.first;
+                    auto coefficient  = sensitivity.second;
+
+                    auto lower_bound = variable_ptr->lower_bound();
+                    auto upper_bound = variable_ptr->upper_bound();
+
+                    if (constraint.sense() == ConstraintSense::Upper) {
+                        auto bound_temp = -(not_fixed_term_upper_bound -
+                                            coefficient * lower_bound +
+                                            fixed_term_value + constant_value) /
+                                          coefficient;
+                        auto bound_floor =
+                            static_cast<T_Variable>(std::floor(bound_temp));
+                        if (bound_floor < upper_bound) {
+                            utility::print_message(
+                                "The upper bound of the decision variable " +
+                                    variable_ptr->name() +
+                                    " was tightened by " +
+                                    std::to_string(bound_floor) + ".",
+                                a_IS_ENABLED_PRINT);
+                            variable_ptr->set_bound(lower_bound, bound_floor);
+                        }
                     }
 
-                } else if ((constraint.sense() == ConstraintSense::Upper &&
-                            coefficient > 0) ||
-                           (constraint.sense() == ConstraintSense::Lower &&
-                            coefficient < 0)) {
-                    /**
-                     * If the singleton constraint is defined by an
-                     * equality as ax+b>=0, the upper bound of the
-                     * decision variable will be tightened by -b/a.
-                     */
-                    auto bound_ceil =
-                        static_cast<T_Variable>(std::ceil(bound_temp));
-
-                    if (bound_ceil > lower_bound) {
-                        utility::print_message(
-                            "The constraint " + constraint.name() +
-                                " is removed instead of tightening the "
-                                "lower bound of the decision variable " +
-                                variable_ptr->name() + " by " +
-                                std::to_string(bound_ceil) + ".",
-                            a_IS_ENABLED_PRINT);
-                        variable_ptr->set_bound(bound_ceil, upper_bound);
-                    } else {
-                        utility::print_message(
-                            "The constraint " + constraint.name() +
-                                " is removed because it is redundant.",
-                            a_IS_ENABLED_PRINT);
-                    }
-                    if (constraint.is_enabled()) {
-                        constraint.disable();
-                        number_of_newly_disabled_constraints++;
+                    else if (constraint.sense() == ConstraintSense::Lower) {
+                        auto bound_temp = -(not_fixed_term_lower_bound -
+                                            coefficient * upper_bound +
+                                            fixed_term_value + constant_value) /
+                                          coefficient;
+                        auto bound_ceil =
+                            static_cast<T_Variable>(std::ceil(bound_temp));
+                        if (bound_ceil > lower_bound) {
+                            utility::print_message(
+                                "The lower bound of the decision variable " +
+                                    variable_ptr->name() +
+                                    " was tightened by " +
+                                    std::to_string(bound_ceil) + ".",
+                                a_IS_ENABLED_PRINT);
+                            variable_ptr->set_bound(bound_ceil, upper_bound);
+                        }
                     }
                 }
             }
@@ -1385,7 +1511,7 @@ class Model {
 
                     utility::print_message(
                         "The value of decision variable " + variable.name() +
-                            " is fixed by " + std::to_string(fixed_value) +
+                            " was fixed by " + std::to_string(fixed_value) +
                             " because the lower bound " +
                             std::to_string(lower_bound) +
                             " and the upper_bound " +
