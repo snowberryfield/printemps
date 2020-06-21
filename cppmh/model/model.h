@@ -1223,7 +1223,7 @@ class Model {
                  * The lower and bounds of a^{T}x and fixed value in b^{T}y in
                  * a^{T}x + b^{T}y + c <=(>=,=) 0, where a^{T}x are terms whose
                  * decision variables are not fixed, b^{T}y are terms with fixed
-                 * decition variables, and c is the constant term.
+                 * decision variables, and c is the constant term.
                  */
                 double not_fixed_term_lower_bound = 0.0;
                 double not_fixed_term_upper_bound = 0.0;
@@ -1278,7 +1278,7 @@ class Model {
                          0)) {
                     utility::print_message("The constraint " +
                                                constraint.name() +
-                                               " was removed for redanduncy.",
+                                               " was removed for redundancy.",
                                            a_IS_ENABLED_PRINT);
 
                     if (constraint.is_enabled()) {
@@ -1350,7 +1350,7 @@ class Model {
                         } else {
                             utility::print_message(
                                 "The constraint " + constraint.name() +
-                                    " was removed for redanduncy.",
+                                    " was removed for redundancy.",
                                 a_IS_ENABLED_PRINT);
                         }
                         if (constraint.is_enabled()) {
@@ -1395,7 +1395,7 @@ class Model {
                 }
 
                 /**
-                 * Thignten the lower and upper bounds of the decision variables
+                 * Tighten the lower and upper bounds of the decision variables
                  * based on the bounds of the rest part.
                  */
                 for (auto &sensitivity :

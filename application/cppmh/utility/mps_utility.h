@@ -479,17 +479,17 @@ class MPSReader {
             }
 
             switch (constraint.sense) {
-                case cppmh::utility::MPSConstraintSense::Lower: {
+                case MPSConstraintSense::Lower: {
                     constraint_proxy(count) = expression_temp <= constraint.rhs;
                     break;
                 }
 
-                case cppmh::utility::MPSConstraintSense::Equal: {
+                case MPSConstraintSense::Equal: {
                     constraint_proxy(count) = expression_temp == constraint.rhs;
                     break;
                 }
 
-                case cppmh::utility::MPSConstraintSense::Upper: {
+                case MPSConstraintSense::Upper: {
                     constraint_proxy(count) = expression_temp >= constraint.rhs;
                     break;
                 }
@@ -510,8 +510,6 @@ class MPSReader {
         return m_model;
     }
 };
-
-// namespace utility
 }  // namespace utility
 }  // namespace cppmh
 #endif
