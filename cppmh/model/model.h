@@ -1142,6 +1142,7 @@ class Model {
                 break;
             }
         }
+        utility::print_message("Done.", a_IS_ENABLED_PRINT);
     }
 
     /*************************************************************************/
@@ -1945,6 +1946,20 @@ class Model {
         named_solution.m_is_feasible = a_SOLUTION.is_feasible;
 
         return named_solution;
+    }
+
+    /*************************************************************************/
+    inline constexpr void import_solution(
+        const std::unordered_map<std::string, int> &a_SOLUTION) {
+        for (const auto &item : a_SOLUTION) {
+            for (auto &proxy : m_variable_proxies) {
+                for (auto &variable : proxy.flat_indexed_variables()) {
+                    if (item.first == variable.name()) {
+                        variable = item.second;
+                    }
+                }
+            }
+        }
     }
 
     /*************************************************************************/

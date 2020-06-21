@@ -40,6 +40,19 @@ int main([[maybe_unused]] int argc, char *argv[]) {
     }
 
     /**
+     * If the solution file is given, the values of the decision variables in
+     * the file will be used as the initial values. Otherwise, the default
+     * values will be used.
+     */
+
+    cppmh::model::IPModel a_model;
+    if (argv[3] != nullptr) {
+        std::string solution_file_name = argv[3];
+        auto solution = cppmh::utility::read_solution(solution_file_name);
+        model.import_solution(solution);
+    }
+
+    /**
      * Run the solver.
      */
     auto result = cppmh::solver::solve(&model, option);

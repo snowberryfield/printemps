@@ -510,6 +510,53 @@ class MPSReader {
         return m_model;
     }
 };
+
+/*****************************************************************************/
+std::unordered_map<std::string, int> read_solution(
+    const std::string &a_FILE_NAME) {
+    std::unordered_map<std::string, int> solution;
+
+    std::vector<std::string> lines;
+    std::string              item;
+
+    /**
+     * Read and store entire part of the solution file.
+     */
+    {
+        std::ifstream ifs;
+        std::string   buffer;
+
+        ifs.open(a_FILE_NAME.c_str());
+        if (ifs.fail()) {
+            throw std::logic_error(utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "Cannot open the specified solution file: " + a_FILE_NAME));
+        }
+        while (std::getline(ifs, buffer)) {
+            lines.push_back(buffer);
+        }
+        ifs.close();
+    }
+
+    /**
+     * Parse the solution file.
+     */
+    for (const auto &line : lines) {
+        std::stringstream        stream(line);
+        std::vector<std::string> items;
+        while (stream >> item) {
+            items.push_back(item);
+        }
+        int items_size = items.size();
+
+        if (items_size != 2) {
+            continue;
+        }
+        solution[items[0]] = atoi(items[1].c_str());
+    }
+
+    return solution;
+}
 }  // namespace utility
 }  // namespace cppmh
 #endif
