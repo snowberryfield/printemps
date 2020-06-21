@@ -24,6 +24,11 @@ TEST_F(TestStringUtility, trim) {
 }
 
 /*****************************************************************************/
+TEST_F(TestStringUtility, delete_space) {
+    EXPECT_EQ("hogehoge", cppmh::utility::delete_space(" hoge hoge "));
+}
+
+/*****************************************************************************/
 TEST_F(TestStringUtility, to_string) {
     EXPECT_EQ(" 100", cppmh::utility::to_string(100, "%4d"));
     EXPECT_EQ("0100", cppmh::utility::to_string(100, "%04d"));
