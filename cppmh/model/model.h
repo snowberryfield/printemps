@@ -1952,8 +1952,8 @@ class Model {
     inline constexpr void import_solution(
         const std::unordered_map<std::string, int> &a_SOLUTION) {
         for (const auto &item : a_SOLUTION) {
-            for (auto &proxy : m_variable_proxies) {
-                for (auto &variable : proxy.flat_indexed_variables()) {
+            for (auto &&proxy : m_variable_proxies) {
+                for (auto &&variable : proxy.flat_indexed_variables()) {
                     if (item.first == variable.name()) {
                         variable = item.second;
                     }
