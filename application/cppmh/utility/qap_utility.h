@@ -38,7 +38,7 @@ QuadraticAssignmentProblem read_qaplib(const std::string& a_FILE_NAME) {
     /// Read the problem size.
     while (true) {
         std::getline(ifs, line);
-        if (cppmh::utility::trim(line).size() > 0) {
+        if (trim(line).size() > 0) {
             problem_instance.N = atoi(line.c_str());
             problem_instance.A.resize(problem_instance.N);
             problem_instance.B.resize(problem_instance.N);
@@ -51,7 +51,7 @@ QuadraticAssignmentProblem read_qaplib(const std::string& a_FILE_NAME) {
     // Read the matrix A.
     while (count < problem_instance.N) {
         std::getline(ifs, line);
-        if (cppmh::utility::trim(line).size() > 0) {
+        if (trim(line).size() > 0) {
             std::stringstream stream(line);
             while (stream >> buffer) {
                 problem_instance.A[count].push_back(atof(buffer.c_str()));
@@ -64,7 +64,7 @@ QuadraticAssignmentProblem read_qaplib(const std::string& a_FILE_NAME) {
     count = 0;
     while (count < problem_instance.N) {
         std::getline(ifs, line);
-        if (cppmh::utility::trim(line).size() > 0) {
+        if (trim(line).size() > 0) {
             std::stringstream stream(line);
             while (stream >> buffer) {
                 problem_instance.B[count].push_back(atof(buffer.c_str()));
@@ -110,8 +110,8 @@ class QAPLIBReader {
         /*************************************************************************/
         /// Objective function definition
         /*************************************************************************/
-        std::function<double(const cppmh::model::IPMove&)> f =
-            [qap, &p](const cppmh::model::IPMove& a_MOVE) {
+        std::function<double(const model::IPMove&)> f =
+            [qap, &p](const model::IPMove& a_MOVE) {
                 double f = 0.0;
 
                 std::vector<int> p_values(qap.N);
@@ -132,8 +132,8 @@ class QAPLIBReader {
             p(n) = n;
         }
 
-        std::function<void(std::vector<cppmh::model::IPMove>*)> move_updater =
-            [qap, &p](std::vector<cppmh::model::IPMove>* a_moves) {
+        std::function<void(std::vector<model::IPMove>*)> move_updater =
+            [qap, &p](std::vector<model::IPMove>* a_moves) {
                 a_moves->resize(qap.N * (qap.N - 1) / 2 +
                                 qap.N * (qap.N - 1) * (qap.N - 2) / 3);
                 auto count = 0;
