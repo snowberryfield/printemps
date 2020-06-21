@@ -47,9 +47,9 @@ TEST_F(TestSimple1, simple_1) {
 
     /// Option default
     {
-        /// initial solution
-        x(0) = 0;
-        x(1) = 0;
+        /// initial solution(consider presolving)
+        x(0) = 18;
+        x(1) = 50;
 
         /// solve
         auto result = cppmh::solver::solve(&model);
@@ -58,9 +58,9 @@ TEST_F(TestSimple1, simple_1) {
 
     /// Option case 1
     {
-        /// initial value definition
-        x(0) = 0;
-        x(1) = 0;
+        /// initial solution(consider presolving)
+        x(0) = 18;
+        x(1) = 50;
 
         /// solve
         cppmh::solver::Option option;
@@ -95,9 +95,9 @@ TEST_F(TestSimple1, simple_1) {
 
     /// Option case 2
     {
-        /// initial solution
-        x(0) = 0;
-        x(1) = 0;
+        /// initial solution(consider presolving)
+        x(0) = 18;
+        x(1) = 50;
 
         /// solve
         cppmh::solver::Option option;
