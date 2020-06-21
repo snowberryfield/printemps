@@ -36,9 +36,9 @@ LocalSearchResult<T_Variable, T_Expression> solve(
     /**
      * Define type aliases.
      */
-    using Model_T          = model::Model<T_Variable, T_Expression>;
-    using Result_T         = LocalSearchResult<T_Variable, T_Expression>;
-    using IncumbetHolder_T = IncumbentHolder<T_Variable, T_Expression>;
+    using Model_T           = model::Model<T_Variable, T_Expression>;
+    using Result_T          = LocalSearchResult<T_Variable, T_Expression>;
+    using IncumbentHolder_T = IncumbentHolder<T_Variable, T_Expression>;
 
     /**
      * Start to measure computational time.
@@ -56,7 +56,7 @@ LocalSearchResult<T_Variable, T_Expression> solve(
     std::vector<model::ValueProxy<double>> global_penalty_coefficient_proxies =
         a_GLOBAL_PENALTY_COEFFICIENT_PROXIES;
 
-    IncumbetHolder_T incumbent_holder = a_INCUMBENT_HOLDER;
+    IncumbentHolder_T incumbent_holder = a_INCUMBENT_HOLDER;
 
     /**
      * Reset the local augmented incumbent.
