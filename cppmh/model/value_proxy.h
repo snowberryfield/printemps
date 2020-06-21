@@ -293,7 +293,9 @@ inline void write_values_by_name(
         int   number_of_elements = proxy.number_of_elements();
         for (auto i = 0; i < number_of_elements; i++) {
             *a_ofs << utility::indent_spaces(indent_level)
-                   << "\"" + proxy.flat_indexed_names(i) + "\" : " +
+                   << "\"" +
+                          utility::delete_space(proxy.flat_indexed_names(i)) +
+                          "\" : " +
                           std::to_string(proxy.flat_indexed_values(i));
 
             if ((i == number_of_elements - 1) &&

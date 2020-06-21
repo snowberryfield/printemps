@@ -43,6 +43,18 @@ inline std::string trim(const std::string &a_ORIGINAL) {
 }
 
 /******************************************************************************/
+inline std::string delete_space(const std::string &a_ORIGINAL) {
+    std::string result;
+    for (std::string::const_iterator it = a_ORIGINAL.begin();
+         it != a_ORIGINAL.end(); ++it) {
+        if (*it != ' ') {
+            result += *it;
+        }
+    }
+    return result;
+}
+
+/******************************************************************************/
 template <class T_Value>
 inline std::string to_string(const T_Value      a_VALUE,
                              const std::string &a_FORMAT) {
@@ -63,12 +75,12 @@ inline std::string format_error_location(const std::string &a_FILE_NAME,
 }
 
 /******************************************************************************/
-inline std::string delete_crlf(const std::string &a_TARGET) {
+inline std::string delete_crlf(const std::string &a_ORIGINAL) {
     const char  CR = '\r';
     const char  LF = '\n';
     std::string result;
-    for (std::string::const_iterator it = a_TARGET.begin();
-         it != a_TARGET.end(); ++it) {
+    for (std::string::const_iterator it = a_ORIGINAL.begin();
+         it != a_ORIGINAL.end(); ++it) {
         if (*it != CR && *it != LF) {
             result += *it;
         }
