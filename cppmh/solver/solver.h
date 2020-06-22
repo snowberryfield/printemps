@@ -410,7 +410,7 @@ Result<T_Variable, T_Expression> solve(
              */
             for (auto&& proxy : local_penalty_coefficient_proxies) {
                 for (auto&& element : proxy.flat_indexed_values()) {
-                    element *= master_option.penalty_coefficient_relaxing_ratio;
+                    element *= master_option.penalty_coefficient_relaxing_rate;
                 }
             }
         } else {
@@ -434,7 +434,7 @@ Result<T_Variable, T_Expression> solve(
                 int flat_index = 0;
                 for (auto&& element : proxy.flat_indexed_values()) {
                     element +=
-                        master_option.penalty_coefficient_tightening_ratio *
+                        master_option.penalty_coefficient_tightening_rate *
                         std::max(0.0, gap) / total_squared_penalty *
                         violation_values[flat_index++];
                 }

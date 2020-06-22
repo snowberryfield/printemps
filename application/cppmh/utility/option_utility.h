@@ -53,15 +53,15 @@ inline cppmh::solver::Option read_option(const std::string &a_FILE_NAME) {
               option_object);
 
     /**************************************************************************/
-    /// penalty_coefficient_relaxing_ratio
-    read_json(&option.penalty_coefficient_relaxing_ratio,  //
-              "penalty_coefficient_relaxing_ratio",        //
+    /// penalty_coefficient_relaxing_rate
+    read_json(&option.penalty_coefficient_relaxing_rate,  //
+              "penalty_coefficient_relaxing_rate",        //
               option_object);
 
     /**************************************************************************/
-    /// penalty_coefficient_tightening_ratio
-    read_json(&option.penalty_coefficient_tightening_ratio,  //
-              "penalty_coefficient_tightening_ratio",        //
+    /// penalty_coefficient_tightening_rate
+    read_json(&option.penalty_coefficient_tightening_rate,  //
+              "penalty_coefficient_tightening_rate",        //
               option_object);
 
     /**************************************************************************/
