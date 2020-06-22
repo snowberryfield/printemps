@@ -129,6 +129,10 @@ struct Option {
             " - initial_penalty_coefficient: " +  //
             utility::to_string(this->initial_penalty_coefficient, "%f"));
 
+        utility::print(                   //
+            " - is_enabled_presolve: " +  //
+            utility::to_string(this->is_enabled_presolve, "%d"));
+
         utility::print(                       //
             " - is_enabled_local_search: " +  //
             utility::to_string(this->is_enabled_local_search, "%d"));
@@ -236,11 +240,37 @@ struct Option {
             utility::to_string(this->tabu_search.is_enabled_automatic_break,
                                "%d"));
 
-        utility::print(                                                      //
-            " - tabu_search.is_enabled_automatic_tabu_tenure_adjustment:" +  //
+        utility::print(                                                       //
+            " - tabu_search.is_enabled_automatic_tabu_tenure_adjustment: " +  //
             utility::to_string(
                 this->tabu_search.is_enabled_automatic_tabu_tenure_adjustment,
                 "%d"));
+
+        utility::print(                                                     //
+            " - tabu_search.is_enabled_automatic_iteration_adjustment: " +  //
+            utility::to_string(
+                this->tabu_search.is_enabled_automatic_iteration_adjustment,
+                "%d"));
+
+        utility::print(                                         //
+            " - tabu_search.bias_increase_count_threshold: " +  //
+            utility::to_string(this->tabu_search.bias_increase_count_threshold,
+                               "%d"));
+
+        utility::print(                                         //
+            " - tabu_search.bias_decrease_count_threshold: " +  //
+            utility::to_string(this->tabu_search.bias_decrease_count_threshold,
+                               "%d"));
+
+        utility::print(                                   //
+            " - tabu_search.iteration_increase_rate: " +  //
+            utility::to_string(this->tabu_search.iteration_increase_rate,
+                               "%f"));
+
+        utility::print(                                   //
+            " - tabu_search.iteration_decrease_rate: " +  //
+            utility::to_string(this->tabu_search.iteration_decrease_rate,
+                               "%f"));
 
         utility::print(                                              //
             " - tabu_search.ignore_tabu_if_augmented_incumbent: " +  //

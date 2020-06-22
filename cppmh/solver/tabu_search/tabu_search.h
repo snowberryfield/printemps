@@ -400,9 +400,6 @@ TabuSearchResult<T_Variable, T_Expression> solve(
         }
 
         if (option.tabu_search.is_enabled_automatic_tabu_tenure_adjustment) {
-            constexpr int BIAS_INCRESE_COUNT_THRESHOLD  = 5;
-            constexpr int BIAS_DECREASE_COUNT_THRESHOLD = 10;
-
             if (is_aspirated || number_of_permissible_neighborhoods == 0) {
                 /**
                  * The tabu tenure is decreased if
@@ -431,7 +428,8 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                     bias_increase_count++;
                     bias_decrease_count = 0;
 
-                    if (bias_increase_count > BIAS_INCRESE_COUNT_THRESHOLD) {
+                    if (bias_increase_count >
+                        option.tabu_search.bias_increase_count_threshold) {
                         bias_increase_count = 0;
                         tabu_tenure         = std::min(tabu_tenure + 1,
                                                model->number_of_variables());
@@ -445,7 +443,8 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                     bias_decrease_count++;
                     bias_increase_count = 0;
 
-                    if (bias_decrease_count > BIAS_DECREASE_COUNT_THRESHOLD) {
+                    if (bias_decrease_count >
+                        option.tabu_search.bias_decrease_count_threshold) {
                         bias_decrease_count = 0;
                         tabu_tenure =
                             std::max(tabu_tenure - 1, original_tabu_tenure);
@@ -477,15 +476,6 @@ TabuSearchResult<T_Variable, T_Expression> solve(
         last_global_augmented_incumbent_update_iteration;
     result.last_feasible_incumbent_update_iteration =
         last_feasible_incumbent_update_iteration;
-
-    std::cout << "local "
-              << result.last_local_augmented_incumbent_update_iteration
-              << std::endl;
-    std::cout << "global "
-              << result.last_global_augmented_incumbent_update_iteration
-              << std::endl;
-    std::cout << "feasible " << result.last_feasible_incumbent_update_iteration
-              << std::endl;
 
     return result;
 }
