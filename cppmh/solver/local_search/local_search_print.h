@@ -79,14 +79,20 @@ inline void print_table_body(
     char mark_feasible_incumbent         = ' ';
 
     if (a_STATUS &
+        IncumbentHolderConstant::STATUS_LOCAL_AUGMENTED_INCUMBENT_UPDATE) {
+        mark_current = '!';
+    }
+
+    if (a_STATUS &
         IncumbentHolderConstant::STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
-        mark_current                    = '!';
-        mark_global_augmented_incumbent = '!';
+        mark_current                    = '#';
+        mark_global_augmented_incumbent = '#';
     }
 
     if (a_STATUS & IncumbentHolderConstant::STATUS_FEASIBLE_INCUMBENT_UPDATE) {
-        mark_current            = '*';
-        mark_feasible_incumbent = '*';
+        mark_current                    = '*';
+        mark_global_augmented_incumbent = '*';
+        mark_feasible_incumbent         = '*';
     }
 
     std::printf(
