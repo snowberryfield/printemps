@@ -322,7 +322,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
         memory.update(*move_ptr, iteration);
 
         if (iteration % std::max(option.tabu_search.log_interval, 1) == 0 ||
-            update_status > 1) {
+            update_status > 0) {
             print_table_body(model,                                //
                              iteration,                            //
                              number_of_all_neighborhoods,          //
