@@ -76,6 +76,9 @@ TabuSearchResult<T_Variable, T_Expression> solve(
      */
     std::mt19937 get_rand_mt(option.tabu_search.seed);
 
+    /**
+     * Initialize the solution and update the model.
+     */
     model->import_variable_values(a_INITIAL_VARIABLE_VALUE_PROXIES);
     model->update();
 
@@ -95,13 +98,30 @@ TabuSearchResult<T_Variable, T_Expression> solve(
      */
     Memory memory(model);
 
-    utility::print_single_line(option.verbose >= Verbose::Full);
-    utility::print_message("Tabu Search starts.",
-                           option.verbose >= Verbose::Full);
-    print_table_header(option.verbose >= Verbose::Full);
-    print_table_initial(model, solution_score, incumbent_holder,
-                        option.verbose >= Verbose::Full);
+    /**
+     * The boolean variable has_constraint is used to determine the behavior of
+     * improvability screening. If the model is unconstrained, improvability
+     * screening will be skipped.
+     */
+    bool has_constraint(local_penalty_coefficient_proxies.size() > 0);
 
+    /**
+     * Set up the tabu tenure and related parameters.
+     */
+    int original_tabu_tenure = std::min(option.tabu_search.initial_tabu_tenure,
+                                        model->number_of_variables());
+    int tabu_tenure          = original_tabu_tenure;
+
+    double bias_previous       = 0.0;
+    double bias_current        = 0.0;
+    int    bias_increase_count = 0;
+    int    bias_decrease_count = 0;
+
+    int last_tabu_tenure_updated_iteration = 0;
+
+    /**
+     * Prepare other local variables.
+     */
     std::vector<model::SolutionScore> trial_solution_scores;
     std::vector<MoveScore>            trial_move_scores;
 
@@ -112,21 +132,16 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     std::vector<double> global_augmented_objectives;
     std::vector<double> total_scores;
 
-    /**
-     * Set up the tabu tenure and related parameters.
-     */
-    int original_tabu_tenure = std::min(option.tabu_search.initial_tabu_tenure,
-                                        model->number_of_variables());
-    int tabu_tenure          = original_tabu_tenure;
+    int last_local_augmented_incumbent_update_iteration  = -1;
+    int last_global_augmented_incumbent_update_iteration = -1;
+    int last_feasible_incumbent_update_iteration         = -1;
 
-    bool has_constraint(local_penalty_coefficient_proxies.size() > 0);
-
-    double bias_previous       = 0.0;
-    double bias_current        = 0.0;
-    int    bias_increase_count = 0;
-    int    bias_decrease_count = 0;
-
-    int last_tabu_tenure_updated_iteration = 0;
+    utility::print_single_line(option.verbose >= Verbose::Full);
+    utility::print_message("Tabu Search starts.",
+                           option.verbose >= Verbose::Full);
+    print_table_header(option.verbose >= Verbose::Full);
+    print_table_initial(model, solution_score, incumbent_holder,
+                        option.verbose >= Verbose::Full);
 
     /**
      * Iterations start.
@@ -317,6 +332,24 @@ TabuSearchResult<T_Variable, T_Expression> solve(
         update_status =
             incumbent_holder.try_update_incumbent(model, solution_score);
 
+        if (update_status &
+            IncumbentHolderConstant::STATUS_LOCAL_AUGMENTED_INCUMBENT_UPDATE) {
+            last_local_augmented_incumbent_update_iteration = iteration;
+        }
+
+        if (update_status &
+            IncumbentHolderConstant::STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
+            last_local_augmented_incumbent_update_iteration  = iteration;
+            last_global_augmented_incumbent_update_iteration = iteration;
+        }
+
+        if (update_status &
+            IncumbentHolderConstant::STATUS_FEASIBLE_INCUMBENT_UPDATE) {
+            last_local_augmented_incumbent_update_iteration  = iteration;
+            last_global_augmented_incumbent_update_iteration = iteration;
+            last_feasible_incumbent_update_iteration         = iteration;
+        }
+
         total_update_status = update_status | total_update_status;
 
         memory.update(*move_ptr, iteration);
@@ -437,6 +470,23 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     result.total_update_status  = total_update_status;
     result.tabu_tenure          = tabu_tenure;
     result.number_of_iterations = iteration;
+
+    result.last_local_augmented_incumbent_update_iteration =
+        last_local_augmented_incumbent_update_iteration;
+    result.last_global_augmented_incumbent_update_iteration =
+        last_global_augmented_incumbent_update_iteration;
+    result.last_feasible_incumbent_update_iteration =
+        last_feasible_incumbent_update_iteration;
+
+    std::cout << "local "
+              << result.last_local_augmented_incumbent_update_iteration
+              << std::endl;
+    std::cout << "global "
+              << result.last_global_augmented_incumbent_update_iteration
+              << std::endl;
+    std::cout << "feasible " << result.last_feasible_incumbent_update_iteration
+              << std::endl;
+
     return result;
 }
 }  // namespace tabu_search
