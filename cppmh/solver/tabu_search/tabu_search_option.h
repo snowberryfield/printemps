@@ -25,10 +25,16 @@ struct TabuSearchOptionConstant {
     static constexpr bool   DEFAULT_IS_ENABLED_AUTOMATIC_BREAK         = true;
     static constexpr bool DEFAULT_IS_ENABLED_AUTOMATIC_TABU_TENURE_ADJUSTMENT =
         true;
-    static constexpr bool DEFAULT_IGNORE_TABU_IF_AUGMENTED_INCUMBENT = false;
-    static constexpr bool DEFAULT_IGNORE_TABU_IF_FEASIBLE_INCUMBENT  = true;
-    static constexpr bool DEFAULT_NUMBER_OF_INITIAL_MODIFICATION     = 0;
-    static constexpr int  DEFAULT_SEED                               = 1;
+    static constexpr bool DEFAULT_IS_ENABLED_AUTOMATIC_ITERATION_ADJUSTMENT =
+        true;
+    static constexpr int    DEFAULT_BIAS_INCREASE_COUNT_THRESHOLD      = 5;
+    static constexpr int    DEFAULT_BIAS_DECREASE_COUNT_THRESHOLD      = 10;
+    static constexpr double DEFAULT_ITERATION_INCREASE_RATE            = 1.5;
+    static constexpr double DEFAULT_ITERATION_DEREASE_RATE             = 0.9;
+    static constexpr double DEFAULT_IGNORE_TABU_IF_AUGMENTED_INCUMBENT = false;
+    static constexpr double DEFAULT_IGNORE_TABU_IF_FEASIBLE_INCUMBENT  = true;
+    static constexpr bool   DEFAULT_NUMBER_OF_INITIAL_MODIFICATION     = 0;
+    static constexpr int    DEFAULT_SEED                               = 1;
 };
 
 /*****************************************************************************/
@@ -52,6 +58,11 @@ struct TabuSearchOption {
     bool     is_enabled_move_curtail;
     bool     is_enabled_automatic_break;
     bool     is_enabled_automatic_tabu_tenure_adjustment;
+    bool     is_enabled_automatic_iteration_adjustment;
+    int      bias_increase_count_threshold;
+    int      bias_decrease_count_threshold;
+    double   iteration_increase_rate;
+    double   iteration_decrease_rate;
     bool     ignore_tabu_if_augmented_incumbent;
     bool     ignore_tabu_if_feasible_incumbent;
     int      number_of_initial_modification;
@@ -91,6 +102,17 @@ struct TabuSearchOption {
         this->is_enabled_automatic_tabu_tenure_adjustment =
             TabuSearchOptionConstant::
                 DEFAULT_IS_ENABLED_AUTOMATIC_TABU_TENURE_ADJUSTMENT;
+        this->is_enabled_automatic_iteration_adjustment =
+            TabuSearchOptionConstant::
+                DEFAULT_IS_ENABLED_AUTOMATIC_ITERATION_ADJUSTMENT;
+        this->bias_increase_count_threshold =
+            TabuSearchOptionConstant::DEFAULT_BIAS_INCREASE_COUNT_THRESHOLD;
+        this->bias_decrease_count_threshold =
+            TabuSearchOptionConstant::DEFAULT_BIAS_DECREASE_COUNT_THRESHOLD;
+        this->iteration_increase_rate =
+            TabuSearchOptionConstant::DEFAULT_ITERATION_INCREASE_RATE;
+        this->iteration_decrease_rate =
+            TabuSearchOptionConstant::DEFAULT_ITERATION_DEREASE_RATE;
         this->ignore_tabu_if_augmented_incumbent = TabuSearchOptionConstant::
             DEFAULT_IGNORE_TABU_IF_AUGMENTED_INCUMBENT;
         this->ignore_tabu_if_feasible_incumbent =
