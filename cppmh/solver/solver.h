@@ -38,9 +38,9 @@ Result<T_Variable, T_Expression> solve(
     /**
      * Define type aliases.
      */
-    using Model_T          = model::Model<T_Variable, T_Expression>;
-    using Solution_T       = model::Solution<T_Variable, T_Expression>;
-    using IncumbetHolder_T = IncumbentHolder<T_Variable, T_Expression>;
+    using Model_T           = model::Model<T_Variable, T_Expression>;
+    using Solution_T        = model::Solution<T_Variable, T_Expression>;
+    using IncumbentHolder_T = IncumbentHolder<T_Variable, T_Expression>;
     /**
      * Start to measure computational time.
      */
@@ -162,8 +162,8 @@ Result<T_Variable, T_Expression> solve(
      */
     model->update();
 
-    Solution_T       current_solution = model->export_solution();
-    IncumbetHolder_T incumbent_holder;
+    Solution_T        current_solution = model->export_solution();
+    IncumbentHolder_T incumbent_holder;
 
     model::SolutionScore current_solution_score =
         model->evaluate({},                                 //
@@ -284,6 +284,13 @@ Result<T_Variable, T_Expression> solve(
     int iteration                = 0;
     int last_total_update_status = IncumbentHolderConstant::STATUS_NO_UPDATED;
     int last_tabu_tenure         = 0;
+
+    /**
+     * The integer variable adjusted_iteration_max is used if the option
+     * tabu_search.is_enabled_automatic_iteration_adjustment is set true.
+     */
+    int adjusted_iteration_max = master_option.tabu_search.iteration_max;
+
     while (true) {
         /**
          *  Check the terminating condition.
@@ -318,7 +325,12 @@ Result<T_Variable, T_Expression> solve(
         /**
          *  Prepare an option object for tabu search.
          */
-        Option option                  = master_option;
+        Option option = master_option;
+
+        if (option.tabu_search.is_enabled_automatic_iteration_adjustment) {
+            option.tabu_search.iteration_max = adjusted_iteration_max;
+        }
+
         option.tabu_search.time_offset = elapsed_time;
         option.tabu_search.seed += iteration;
         if (!(last_total_update_status &
@@ -458,10 +470,38 @@ Result<T_Variable, T_Expression> solve(
             }
         }
 
+        /**
+         * Update the maximum number of iterations for the next loop.
+         */
+        if (master_option.tabu_search
+                .is_enabled_automatic_iteration_adjustment &&
+            !result.is_early_stopped) {
+            int adjusted_iteration_temp = 0;
+            if (last_total_update_status &
+                IncumbentHolderConstant::
+                    STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
+                adjusted_iteration_temp  //
+                    = static_cast<int>(ceil(
+                        result.last_local_augmented_incumbent_update_iteration *
+                        master_option.tabu_search.iteration_increase_rate));
+
+            } else {
+                adjusted_iteration_temp  //
+                    = static_cast<int>(ceil(
+                        option.tabu_search.iteration_max *
+                        master_option.tabu_search.iteration_increase_rate));
+            }
+            adjusted_iteration_max =
+                std::max(master_option.tabu_search.initial_tabu_tenure,
+                         std::min(master_option.tabu_search.iteration_max,
+                                  adjusted_iteration_temp));
+        }
+
         number_of_tabu_search_iterations += result.number_of_iterations;
         number_of_tabu_search_loops++;
 
         elapsed_time = time_keeper.clock();
+
         utility::print_message(
             "Tabu search loop (" + std::to_string(iteration + 1) + "/" +
                 std::to_string(master_option.iteration_max) +
@@ -485,21 +525,28 @@ Result<T_Variable, T_Expression> solve(
 
         if (last_total_update_status &
             IncumbentHolderConstant::STATUS_FEASIBLE_INCUMBENT_UPDATE) {
-            utility::print_message(
-                "Feasible incumbent objective has beed updated. ",
-                master_option.verbose >= Verbose::Outer);
+            utility::print_message("Feasible incumbent objective was updated. ",
+                                   master_option.verbose >= Verbose::Outer);
         } else if (last_total_update_status &
                    IncumbentHolderConstant::
                        STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
-            utility::print_message(
-                "Global incumbent objective has beed updated. ",
-                master_option.verbose >= Verbose::Outer);
+            utility::print_message("Global incumbent objective was updated. ",
+                                   master_option.verbose >= Verbose::Outer);
         } else {
             utility::print_message(
-                "Incumbent objective has not beed updated. For the initial " +
+                "Incumbent objective was not updated. For the initial " +
                     std::to_string(last_tabu_tenure) +
                     " iterations in the next loop, the solution will be "
                     "randomly updated to escape from the local minimum.",
+                master_option.verbose >= Verbose::Outer);
+        }
+
+        if (master_option.tabu_search
+                .is_enabled_automatic_iteration_adjustment) {
+            utility::print_message(
+                "The maximum number of iterations for the next loop was "
+                "set to " +
+                    std::to_string(adjusted_iteration_max) + ".",
                 master_option.verbose >= Verbose::Outer);
         }
 
@@ -508,12 +555,12 @@ Result<T_Variable, T_Expression> solve(
     }
 
     /**
-     * If a feasible solution is found in optimization, the incumbent
-     * solution is defined by the solution with the best objective function
-     * value among the feasible solutions. If no feasible solution is found,
-     * the incumbent solution is substituted by solution with the best
-     * augmented solution which has smallest sum of the objective function
-     * value and the penalty value.
+     * If a feasible solution is found in optimization, the incumbent solution
+     * is defined by the solution with the best objective function value among
+     * the feasible solutions. If no feasible solution is found, the incumbent
+     * solution is substituted by solution with the best augmented solution
+     * which has smallest sum of the objective function value and the penalty
+     * value.
      * */
 
     auto incumbent =
@@ -522,9 +569,8 @@ Result<T_Variable, T_Expression> solve(
             : incumbent_holder.global_augmented_incumbent_solution();
 
     /**
-     * All value of the expressions and the constraints are
-     * updated forcibly to take into account the cases they are
-     * disabled.
+     * All value of the expressions and the constraints are updated forcibly to
+     * take into account the cases they are disabled.
      */
     model->import_variable_values(incumbent.variable_value_proxies);
     model->update();

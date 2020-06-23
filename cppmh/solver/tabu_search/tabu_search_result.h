@@ -26,6 +26,8 @@ struct TabuSearchResult {
     int last_global_augmented_incumbent_update_iteration;
     int last_feasible_incumbent_update_iteration;
 
+    bool is_early_stopped;
+
     /*************************************************************************/
     TabuSearchResult(void) {
         this->initialize();
@@ -47,6 +49,8 @@ struct TabuSearchResult {
         this->last_local_augmented_incumbent_update_iteration  = -1;
         this->last_global_augmented_incumbent_update_iteration = -1;
         this->last_feasible_incumbent_update_iteration         = -1;
+
+        this->is_early_stopped = false;
     }
 };
 }  // namespace tabu_search
