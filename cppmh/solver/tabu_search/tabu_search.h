@@ -415,18 +415,19 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                  * or
                  * - There is no permissible solutions.
                  */
-                tabu_tenure = std::max(tabu_tenure - 1, original_tabu_tenure);
+                tabu_tenure = std::max(tabu_tenure - 1, 1);
                 last_tabu_tenure_updated_iteration = iteration;
                 bias_decrease_count                = 0;
                 bias_increase_count                = 0;
                 utility::print_info("Tabu tenure decreased: " +
                                         std::to_string(tabu_tenure) + ".",
                                     option.verbose >= Verbose::Debug);
-            } else if (((iteration - last_tabu_tenure_updated_iteration) %
-                        tabu_tenure) == 0) {
+            } else if ((iteration - last_tabu_tenure_updated_iteration) %
+                           (tabu_tenure + 1) ==
+                       0) {
                 /**
                  * The bias of searching is computed with the interval of
-                 * tabu_tenure. The tabu tenure is increased if the bias has
+                 * tabu_tenure+1. The tabu tenure is increased if the bias has
                  * grown up, and decreased if the bias is reduced.
                  */
                 bias_previous = bias_current;
@@ -454,8 +455,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                     if (bias_decrease_count >
                         option.tabu_search.bias_decrease_count_threshold) {
                         bias_decrease_count = 0;
-                        tabu_tenure =
-                            std::max(tabu_tenure - 1, original_tabu_tenure);
+                        tabu_tenure         = std::max(tabu_tenure - 1, 1);
                         last_tabu_tenure_updated_iteration = iteration;
 
                         utility::print_info("Tabu tenure decreased: " +
