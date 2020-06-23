@@ -15,6 +15,8 @@
 
 #include "incumbent_holder.h"
 #include "option.h"
+#include "status.h"
+#include "result.h"
 #include "tabu_search/tabu_search.h"
 #include "local_search/local_search.h"
 
@@ -22,7 +24,7 @@ namespace cppmh {
 namespace solver {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-model::NamedSolution<T_Variable, T_Expression> solve(
+Result<T_Variable, T_Expression> solve(
     model::Model<T_Variable, T_Expression>* a_model) {
     Option option;
     return solve(a_model, option);
@@ -30,16 +32,15 @@ model::NamedSolution<T_Variable, T_Expression> solve(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-model::NamedSolution<T_Variable, T_Expression> solve(
+Result<T_Variable, T_Expression> solve(
     model::Model<T_Variable, T_Expression>* a_model,  //
     const Option&                           a_OPTION) {
     /**
      * Define type aliases.
      */
-    using Model_T          = model::Model<T_Variable, T_Expression>;
-    using Solution_T       = model::Solution<T_Variable, T_Expression>;
-    using IncumbetHolder_T = IncumbentHolder<T_Variable, T_Expression>;
-
+    using Model_T           = model::Model<T_Variable, T_Expression>;
+    using Solution_T        = model::Solution<T_Variable, T_Expression>;
+    using IncumbentHolder_T = IncumbentHolder<T_Variable, T_Expression>;
     /**
      * Start to measure computational time.
      */
@@ -90,20 +91,44 @@ model::NamedSolution<T_Variable, T_Expression> solve(
     utility::print_message(  //
         "Optimization starts.", master_option.verbose >= Verbose::Outer);
 
-    utility::print_info(
-        "The number of decision variables: " +
-            utility::to_string(model->number_of_variables(), "%d"),
-        master_option.verbose >= Verbose::Outer);
+    if (model->number_of_fixed_variables() == 0) {
+        utility::print_info(
+            "The number of decision variables: " +
+                utility::to_string(model->number_of_variables(), "%d"),
+            master_option.verbose >= Verbose::Outer);
+    } else {
+        utility::print_info(
+            "The number of decision variables: " +
+                utility::to_string(model->number_of_variables(), "%d") +
+                "(reduced to " +
+                utility::to_string(model->number_of_variables() -
+                                       model->number_of_fixed_variables(),
+                                   "%d") +
+                ")",
+            master_option.verbose >= Verbose::Outer);
+    }
 
     utility::print_info(
         "The number of fixed decision variables: " +
             utility::to_string(model->number_of_fixed_variables(), "%d"),
         master_option.verbose >= Verbose::Outer);
 
-    utility::print_info(
-        "The number of constraints: " +
-            utility::to_string(model->number_of_constraints(), "%d"),
-        master_option.verbose >= Verbose::Outer);
+    if (model->number_of_disabled_constraints() == 0) {
+        utility::print_info(
+            "The number of constraints: " +
+                utility::to_string(model->number_of_constraints(), "%d"),
+            master_option.verbose >= Verbose::Outer);
+    } else {
+        utility::print_info(
+            "The number of constraints: " +
+                utility::to_string(model->number_of_constraints(), "%d") +
+                "(reduced to " +
+                utility::to_string(model->number_of_constraints() -
+                                       model->number_of_disabled_constraints(),
+                                   "%d") +
+                ")",
+            master_option.verbose >= Verbose::Outer);
+    }
 
     utility::print_info(
         "The number of selection constraints: " +
@@ -111,7 +136,7 @@ model::NamedSolution<T_Variable, T_Expression> solve(
         master_option.verbose >= Verbose::Outer);
 
     utility::print_info(
-        "The number of disabled(removed) constraints: " +
+        "The number of reduced constraints: " +
             utility::to_string(model->number_of_disabled_constraints(), "%d"),
         master_option.verbose >= Verbose::Outer);
 
@@ -126,13 +151,19 @@ model::NamedSolution<T_Variable, T_Expression> solve(
     auto local_penalty_coefficient_proxies  = penalty_coefficient_proxies;
 
     /**
+     * Create an array which stores updating count for each decision variable.
+     */
+    std::vector<model::ValueProxy<int>> global_update_counts =
+        model->generate_variable_parameter_proxies(0);
+
+    /**
      * Compute expressions, constraints, and objective according to initial
      * values.
      */
     model->update();
 
-    Solution_T       current_solution = model->export_solution();
-    IncumbetHolder_T incumbent_holder;
+    Solution_T        current_solution = model->export_solution();
+    IncumbentHolder_T incumbent_holder;
 
     model::SolutionScore current_solution_score =
         model->evaluate({},                                 //
@@ -141,6 +172,10 @@ model::NamedSolution<T_Variable, T_Expression> solve(
 
     [[maybe_unused]] int update_status = incumbent_holder.try_update_incumbent(
         current_solution, current_solution_score);
+
+    int number_of_local_search_iterations = 0;
+    int number_of_tabu_search_iterations  = 0;
+    int number_of_tabu_search_loops       = 0;
 
     /**
      * Run a local search to improve the initial solution (optional).
@@ -200,11 +235,25 @@ model::NamedSolution<T_Variable, T_Expression> solve(
          * Update the feasible incumbent solution if it was improved by the
          * local search
          */
-        if (result.incumbent_holder.found_feasible_solution()) {
+        if (result.incumbent_holder.is_found_feasible_solution()) {
             update_status = incumbent_holder.try_update_incumbent(
                 result.incumbent_holder.feasible_incumbent_solution(),
                 result.incumbent_holder.feasible_incumbent_score());
         }
+
+        /**
+         * Update the updating count for each decision variables
+         */
+        const auto& update_counts = result.memory.update_counts();
+        for (const auto& proxy : update_counts) {
+            int id         = proxy.id();
+            int flat_index = 0;
+            for (auto&& element : proxy.flat_indexed_values()) {
+                global_update_counts[id][flat_index++] += element;
+            }
+        }
+
+        number_of_local_search_iterations = result.number_of_iterations;
 
         elapsed_time = time_keeper.clock();
         utility::print_message(
@@ -235,6 +284,13 @@ model::NamedSolution<T_Variable, T_Expression> solve(
     int iteration                = 0;
     int last_total_update_status = IncumbentHolderConstant::STATUS_NO_UPDATED;
     int last_tabu_tenure         = 0;
+
+    /**
+     * The integer variable adjusted_iteration_max is used if the option
+     * tabu_search.is_enabled_automatic_iteration_adjustment is set true.
+     */
+    int adjusted_iteration_max = master_option.tabu_search.iteration_max;
+
     while (true) {
         /**
          *  Check the terminating condition.
@@ -269,7 +325,12 @@ model::NamedSolution<T_Variable, T_Expression> solve(
         /**
          *  Prepare an option object for tabu search.
          */
-        Option option                  = master_option;
+        Option option = master_option;
+
+        if (option.tabu_search.is_enabled_automatic_iteration_adjustment) {
+            option.tabu_search.iteration_max = adjusted_iteration_max;
+        }
+
         option.tabu_search.time_offset = elapsed_time;
         option.tabu_search.seed += iteration;
         if (!(last_total_update_status &
@@ -325,16 +386,27 @@ model::NamedSolution<T_Variable, T_Expression> solve(
          * Update the feasible incumbent solution if it was improved by the
          * tabu search.
          */
-        if (result.incumbent_holder.found_feasible_solution()) {
+        if (result.incumbent_holder.is_found_feasible_solution()) {
             update_status = incumbent_holder.try_update_incumbent(
                 result.incumbent_holder.feasible_incumbent_solution(),
                 result.incumbent_holder.feasible_incumbent_score());
         }
 
         /**
+         * Update the updating count for each decision variables
+         */
+        const auto& update_counts = result.memory.update_counts();
+        for (const auto& proxy : update_counts) {
+            int id         = proxy.id();
+            int flat_index = 0;
+            for (auto&& element : proxy.flat_indexed_values()) {
+                global_update_counts[id][flat_index++] += element;
+            }
+        }
+
+        /**
          * Update the local penalty coefficients.
          */
-
         double gap =
             incumbent_holder.global_augmented_incumbent_objective() -
             result.incumbent_holder.local_augmented_incumbent_objective();
@@ -350,7 +422,7 @@ model::NamedSolution<T_Variable, T_Expression> solve(
              */
             for (auto&& proxy : local_penalty_coefficient_proxies) {
                 for (auto&& element : proxy.flat_indexed_values()) {
-                    element *= master_option.penalty_coefficient_relaxing_ratio;
+                    element *= master_option.penalty_coefficient_relaxing_rate;
                 }
             }
         } else {
@@ -374,7 +446,7 @@ model::NamedSolution<T_Variable, T_Expression> solve(
                 int flat_index = 0;
                 for (auto&& element : proxy.flat_indexed_values()) {
                     element +=
-                        master_option.penalty_coefficient_tightening_ratio *
+                        master_option.penalty_coefficient_tightening_rate *
                         std::max(0.0, gap) / total_squared_penalty *
                         violation_values[flat_index++];
                 }
@@ -398,7 +470,38 @@ model::NamedSolution<T_Variable, T_Expression> solve(
             }
         }
 
+        /**
+         * Update the maximum number of iterations for the next loop.
+         */
+        if (master_option.tabu_search
+                .is_enabled_automatic_iteration_adjustment &&
+            !result.is_early_stopped) {
+            int adjusted_iteration_temp = 0;
+            if (last_total_update_status &
+                IncumbentHolderConstant::
+                    STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
+                adjusted_iteration_temp  //
+                    = static_cast<int>(ceil(
+                        result.last_local_augmented_incumbent_update_iteration *
+                        master_option.tabu_search.iteration_increase_rate));
+
+            } else {
+                adjusted_iteration_temp  //
+                    = static_cast<int>(ceil(
+                        option.tabu_search.iteration_max *
+                        master_option.tabu_search.iteration_increase_rate));
+            }
+            adjusted_iteration_max =
+                std::max(master_option.tabu_search.initial_tabu_tenure,
+                         std::min(master_option.tabu_search.iteration_max,
+                                  adjusted_iteration_temp));
+        }
+
+        number_of_tabu_search_iterations += result.number_of_iterations;
+        number_of_tabu_search_loops++;
+
         elapsed_time = time_keeper.clock();
+
         utility::print_message(
             "Tabu search loop (" + std::to_string(iteration + 1) + "/" +
                 std::to_string(master_option.iteration_max) +
@@ -422,21 +525,28 @@ model::NamedSolution<T_Variable, T_Expression> solve(
 
         if (last_total_update_status &
             IncumbentHolderConstant::STATUS_FEASIBLE_INCUMBENT_UPDATE) {
-            utility::print_message(
-                "Feasible incumbent objective has beed updated. ",
-                master_option.verbose >= Verbose::Outer);
+            utility::print_message("Feasible incumbent objective was updated. ",
+                                   master_option.verbose >= Verbose::Outer);
         } else if (last_total_update_status &
                    IncumbentHolderConstant::
                        STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
-            utility::print_message(
-                "Global incumbent objective has beed updated. ",
-                master_option.verbose >= Verbose::Outer);
+            utility::print_message("Global incumbent objective was updated. ",
+                                   master_option.verbose >= Verbose::Outer);
         } else {
             utility::print_message(
-                "Incumbent objective has not beed updated. For the initial " +
+                "Incumbent objective was not updated. For the initial " +
                     std::to_string(last_tabu_tenure) +
                     " iterations in the next loop, the solution will be "
                     "randomly updated to escape from the local minimum.",
+                master_option.verbose >= Verbose::Outer);
+        }
+
+        if (master_option.tabu_search
+                .is_enabled_automatic_iteration_adjustment) {
+            utility::print_message(
+                "The maximum number of iterations for the next loop was "
+                "set to " +
+                    std::to_string(adjusted_iteration_max) + ".",
                 master_option.verbose >= Verbose::Outer);
         }
 
@@ -445,30 +555,59 @@ model::NamedSolution<T_Variable, T_Expression> solve(
     }
 
     /**
-     * If a feasible solution is found in optimization, the incumbent
-     * solution is defined by the solution with the best objective function
-     * value among the feasible solutions. If no feasible solution is found,
-     * the incumbent solution is substituted by solution with the best
-     * augmented solution which has smallest sum of the objective function
-     * value and the penalty value.
+     * If a feasible solution is found in optimization, the incumbent solution
+     * is defined by the solution with the best objective function value among
+     * the feasible solutions. If no feasible solution is found, the incumbent
+     * solution is substituted by solution with the best augmented solution
+     * which has smallest sum of the objective function value and the penalty
+     * value.
      * */
 
     auto incumbent =
-        incumbent_holder.found_feasible_solution()
+        incumbent_holder.is_found_feasible_solution()
             ? incumbent_holder.feasible_incumbent_solution()
             : incumbent_holder.global_augmented_incumbent_solution();
 
     /**
-     * All value of the expressions and the constraints are
-     * updated forcibly to take into account the cases they are
-     * disabled.
+     * All value of the expressions and the constraints are updated forcibly to
+     * take into account the cases they are disabled.
      */
     model->import_variable_values(incumbent.variable_value_proxies);
     model->update();
     incumbent = model->export_solution();
 
     auto named_solution = model->convert_to_named_solution(incumbent);
-    return named_solution;
+    Result<T_Variable, T_Expression> result;
+    result.solution = named_solution;
+
+    std::unordered_map<std::string, model::ValueProxy<double>>
+        named_penalty_coefficients;
+
+    int        constraint_proxies_size = model->constraint_proxies().size();
+    const auto constraint_names        = model->constraint_names();
+    for (auto i = 0; i < constraint_proxies_size; i++) {
+        named_penalty_coefficients[constraint_names[i]] =
+            local_penalty_coefficient_proxies[i];
+    }
+
+    std::unordered_map<std::string, model::ValueProxy<int>> named_update_counts;
+    int         variable_proxies_size = model->variable_proxies().size();
+    const auto& variable_names        = model->variable_names();
+    for (auto i = 0; i < variable_proxies_size; i++) {
+        named_update_counts[variable_names[i]] = global_update_counts[i];
+    }
+
+    result.status.penalty_coefficients       = named_penalty_coefficients;
+    result.status.update_counts              = named_update_counts;
+    result.status.is_found_feasible_solution = named_solution.is_feasible();
+    result.status.elapsed_time               = time_keeper.elapsed_time();
+    result.status.number_of_local_search_iterations =
+        number_of_local_search_iterations;
+    result.status.number_of_tabu_search_iterations =
+        number_of_tabu_search_iterations;
+    result.status.number_of_tabu_search_loops = number_of_tabu_search_loops;
+
+    return result;
 }
 }  // namespace solver
 }  // namespace cppmh

@@ -63,7 +63,7 @@ inline void print_table_initial(
 template <class T_Variable, class T_Expression>
 inline void print_table_body(
     const model::Model<T_Variable, T_Expression> *a_MODEL,                    //
-    const int                                     a_ITERATIION,               //
+    const int                                     a_ITERATION,                //
     const int                                     a_NUMBER_OF_MOVES,          //
     const int                                     a_NUMBER_OF_CHECKED_MOVES,  //
     const model::SolutionScore &                  a_CURRENT_SOLUTION_SCORE,   //
@@ -79,19 +79,25 @@ inline void print_table_body(
     char mark_feasible_incumbent         = ' ';
 
     if (a_STATUS &
+        IncumbentHolderConstant::STATUS_LOCAL_AUGMENTED_INCUMBENT_UPDATE) {
+        mark_current = '!';
+    }
+
+    if (a_STATUS &
         IncumbentHolderConstant::STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
-        mark_current                    = '!';
-        mark_global_augmented_incumbent = '!';
+        mark_current                    = '#';
+        mark_global_augmented_incumbent = '#';
     }
 
     if (a_STATUS & IncumbentHolderConstant::STATUS_FEASIBLE_INCUMBENT_UPDATE) {
-        mark_current            = '*';
-        mark_feasible_incumbent = '*';
+        mark_current                    = '*';
+        mark_global_augmented_incumbent = '*';
+        mark_feasible_incumbent         = '*';
     }
 
     std::printf(
         "%8d |      %5d       %5d |%c%9.2e(%9.2e) |%c%9.2e %c%9.2e\n",
-        a_ITERATIION,               //
+        a_ITERATION,                //
         a_NUMBER_OF_MOVES,          //
         a_NUMBER_OF_CHECKED_MOVES,  //
         mark_current,               //

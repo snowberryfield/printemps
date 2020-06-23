@@ -13,7 +13,7 @@ namespace cppmh {
 namespace solver {
 /*****************************************************************************/
 struct IncumbentHolderConstant {
-    static constexpr bool   DEFAULT_FOUND_FEASIBLE_SOLUTION         = false;
+    static constexpr bool   DEFAULT_IS_FOUND_FEASIBLE_SOLUTION      = false;
     static constexpr double DEFAULT_OBJECTIVE                       = HUGE_VALF;
     static constexpr int    STATUS_NO_UPDATED                       = 0;
     static constexpr int    STATUS_LOCAL_AUGMENTED_INCUMBENT_UPDATE = 1;
@@ -25,7 +25,7 @@ struct IncumbentHolderConstant {
 template <class T_Variable, class T_Expression>
 class IncumbentHolder {
    private:
-    bool m_found_feasible_solution;
+    bool m_is_found_feasible_solution;
 
     model::Solution<T_Variable, T_Expression>
         m_local_augmented_incumbent_solution;
@@ -59,8 +59,8 @@ class IncumbentHolder {
 
     /*************************************************************************/
     inline constexpr void initialize(void) {
-        m_found_feasible_solution =
-            IncumbentHolderConstant::DEFAULT_FOUND_FEASIBLE_SOLUTION;
+        m_is_found_feasible_solution =
+            IncumbentHolderConstant::DEFAULT_IS_FOUND_FEASIBLE_SOLUTION;
 
         m_local_augmented_incumbent_objective =
             IncumbentHolderConstant::DEFAULT_OBJECTIVE;
@@ -82,7 +82,7 @@ class IncumbentHolder {
          * Following comparations must be based on SolutionScore objects
          * of which scores are computed as minimization problems.
          */
-        if (a_SCORE.local_augmented_objective <
+        if (a_SCORE.local_augmented_objective + constant::EPSILON <
             m_local_augmented_incumbent_objective) {
             status += IncumbentHolderConstant::
                 STATUS_LOCAL_AUGMENTED_INCUMBENT_UPDATE;
@@ -93,7 +93,7 @@ class IncumbentHolder {
                 a_SCORE.local_augmented_objective;
         }
 
-        if (a_SCORE.global_augmented_objective <
+        if (a_SCORE.global_augmented_objective + constant::EPSILON <
             m_global_augmented_incumbent_objective) {
             status += IncumbentHolderConstant::
                 STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE;
@@ -105,9 +105,10 @@ class IncumbentHolder {
         }
 
         if (a_SCORE.is_feasible) {
-            m_found_feasible_solution = true;
+            m_is_found_feasible_solution = true;
 
-            if (a_SCORE.objective < m_feasible_incumbent_objective) {
+            if (a_SCORE.objective + constant::EPSILON <
+                m_feasible_incumbent_objective) {
                 status +=
                     IncumbentHolderConstant::STATUS_FEASIBLE_INCUMBENT_UPDATE;
                 m_feasible_incumbent_score     = a_SCORE;
@@ -128,7 +129,7 @@ class IncumbentHolder {
         bool is_solution_updated = false;
 
         int status = IncumbentHolderConstant::STATUS_NO_UPDATED;
-        if (a_SCORE.local_augmented_objective <
+        if (a_SCORE.local_augmented_objective + constant::EPSILON <
             m_local_augmented_incumbent_objective) {
             status += IncumbentHolderConstant::
                 STATUS_LOCAL_AUGMENTED_INCUMBENT_UPDATE;
@@ -144,7 +145,7 @@ class IncumbentHolder {
                 a_SCORE.local_augmented_objective;
         }
 
-        if (a_SCORE.global_augmented_objective <
+        if (a_SCORE.global_augmented_objective + constant::EPSILON <
             m_global_augmented_incumbent_objective) {
             status += IncumbentHolderConstant::
                 STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE;
@@ -161,9 +162,10 @@ class IncumbentHolder {
         }
 
         if (a_SCORE.is_feasible) {
-            m_found_feasible_solution = true;
+            m_is_found_feasible_solution = true;
 
-            if (a_SCORE.objective < m_feasible_incumbent_objective) {
+            if (a_SCORE.objective + constant::EPSILON <
+                m_feasible_incumbent_objective) {
                 status +=
                     IncumbentHolderConstant::STATUS_FEASIBLE_INCUMBENT_UPDATE;
 
@@ -187,8 +189,8 @@ class IncumbentHolder {
     }
 
     /*************************************************************************/
-    inline constexpr bool found_feasible_solution(void) const {
-        return m_found_feasible_solution;
+    inline constexpr bool is_found_feasible_solution(void) const {
+        return m_is_found_feasible_solution;
     }
 
     /*************************************************************************/

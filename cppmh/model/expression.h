@@ -359,7 +359,7 @@ class Expression : public AbstractMultiArrayElement {
         m_constant_value /= a_VALUE;
         return *this;
     }
-};  // namespace model
+};
 using IPExpression = Expression<int, double>;
 }  // namespace model
 }  // namespace cppmh

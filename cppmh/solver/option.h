@@ -17,13 +17,13 @@ enum Verbose : int { None, Warning, Outer, Full, Debug };
 
 /*****************************************************************************/
 struct OptionConstant {
-    static constexpr int    DEFAULT_ITERATION_MAX                      = 20;
-    static constexpr double DEFAULT_TIME_MAX                           = 120.0;
-    static constexpr double DEFAULT_TIME_OFFSET                        = 0.0;
-    static constexpr double DEFAULT_PENALTY_COEFFICIENT_RELAXING_RATIO = 0.5;
-    static constexpr double DEFAULT_PENALTY_COEFFICIENT_TIGHTENING_RATIO = 1.0;
-    static constexpr double DEFAULT_INITIAL_PENALTY_COEFFICIENT          = 1E6;
-    static constexpr bool   DEFAULT_IS_ENABLED_LOCAL_SEARCH              = true;
+    static constexpr int    DEFAULT_ITERATION_MAX                       = 20;
+    static constexpr double DEFAULT_TIME_MAX                            = 120.0;
+    static constexpr double DEFAULT_TIME_OFFSET                         = 0.0;
+    static constexpr double DEFAULT_PENALTY_COEFFICIENT_RELAXING_RATE   = 0.5;
+    static constexpr double DEFAULT_PENALTY_COEFFICIENT_TIGHTENING_RATE = 1.0;
+    static constexpr double DEFAULT_INITIAL_PENALTY_COEFFICIENT         = 1E6;
+    static constexpr bool   DEFAULT_IS_ENABLED_LOCAL_SEARCH             = true;
     static constexpr bool   DEFAULT_IS_ENABLED_GROUPING_PENALTY_COEFFICIENT =
         false;
     static constexpr bool DEFAULT_IS_ENABLED_PRESOLVE                 = true;
@@ -42,8 +42,8 @@ struct Option {
     int                  iteration_max;
     double               time_offset;
     double               time_max;
-    double               penalty_coefficient_relaxing_ratio;
-    double               penalty_coefficient_tightening_ratio;
+    double               penalty_coefficient_relaxing_rate;
+    double               penalty_coefficient_tightening_rate;
     double               initial_penalty_coefficient;
     bool                 is_enabled_local_search;
     bool                 is_enabled_grouping_penalty_coefficient;
@@ -73,10 +73,10 @@ struct Option {
         this->iteration_max = OptionConstant::DEFAULT_ITERATION_MAX;
         this->time_max      = OptionConstant::DEFAULT_TIME_MAX;
         this->time_offset   = OptionConstant::DEFAULT_TIME_OFFSET;
-        this->penalty_coefficient_relaxing_ratio =
-            OptionConstant::DEFAULT_PENALTY_COEFFICIENT_RELAXING_RATIO;
-        this->penalty_coefficient_tightening_ratio =
-            OptionConstant::DEFAULT_PENALTY_COEFFICIENT_TIGHTENING_RATIO;
+        this->penalty_coefficient_relaxing_rate =
+            OptionConstant::DEFAULT_PENALTY_COEFFICIENT_RELAXING_RATE;
+        this->penalty_coefficient_tightening_rate =
+            OptionConstant::DEFAULT_PENALTY_COEFFICIENT_TIGHTENING_RATE;
         this->initial_penalty_coefficient =
             OptionConstant::DEFAULT_INITIAL_PENALTY_COEFFICIENT;
         this->is_enabled_local_search =
@@ -116,18 +116,22 @@ struct Option {
             " - time_max: " +  //
             utility::to_string(this->time_max, "%f"));
 
-        utility::print(                                  //
-            " - penalty_coefficient_relaxing_ratio: " +  //
-            utility::to_string(this->penalty_coefficient_relaxing_ratio, "%f"));
+        utility::print(                                 //
+            " - penalty_coefficient_relaxing_rate: " +  //
+            utility::to_string(this->penalty_coefficient_relaxing_rate, "%f"));
 
-        utility::print(                                    //
-            " - penalty_coefficient_tightening_ratio: " +  //
-            utility::to_string(this->penalty_coefficient_tightening_ratio,
+        utility::print(                                   //
+            " - penalty_coefficient_tightening_rate: " +  //
+            utility::to_string(this->penalty_coefficient_tightening_rate,
                                "%f"));
 
         utility::print(                           //
             " - initial_penalty_coefficient: " +  //
             utility::to_string(this->initial_penalty_coefficient, "%f"));
+
+        utility::print(                   //
+            " - is_enabled_presolve: " +  //
+            utility::to_string(this->is_enabled_presolve, "%d"));
 
         utility::print(                       //
             " - is_enabled_local_search: " +  //
@@ -236,11 +240,37 @@ struct Option {
             utility::to_string(this->tabu_search.is_enabled_automatic_break,
                                "%d"));
 
-        utility::print(                                                      //
-            " - tabu_search.is_enabled_automatic_tabu_tenure_adjustment:" +  //
+        utility::print(                                                       //
+            " - tabu_search.is_enabled_automatic_tabu_tenure_adjustment: " +  //
             utility::to_string(
                 this->tabu_search.is_enabled_automatic_tabu_tenure_adjustment,
                 "%d"));
+
+        utility::print(                                                     //
+            " - tabu_search.is_enabled_automatic_iteration_adjustment: " +  //
+            utility::to_string(
+                this->tabu_search.is_enabled_automatic_iteration_adjustment,
+                "%d"));
+
+        utility::print(                                         //
+            " - tabu_search.bias_increase_count_threshold: " +  //
+            utility::to_string(this->tabu_search.bias_increase_count_threshold,
+                               "%d"));
+
+        utility::print(                                         //
+            " - tabu_search.bias_decrease_count_threshold: " +  //
+            utility::to_string(this->tabu_search.bias_decrease_count_threshold,
+                               "%d"));
+
+        utility::print(                                   //
+            " - tabu_search.iteration_increase_rate: " +  //
+            utility::to_string(this->tabu_search.iteration_increase_rate,
+                               "%f"));
+
+        utility::print(                                   //
+            " - tabu_search.iteration_decrease_rate: " +  //
+            utility::to_string(this->tabu_search.iteration_decrease_rate,
+                               "%f"));
 
         utility::print(                                              //
             " - tabu_search.ignore_tabu_if_augmented_incumbent: " +  //

@@ -43,6 +43,29 @@ inline std::string trim(const std::string &a_ORIGINAL) {
 }
 
 /******************************************************************************/
+inline bool has_space(const std::string &a_ORIGINAL) {
+    for (std::string::const_iterator it = a_ORIGINAL.begin();
+         it != a_ORIGINAL.end(); ++it) {
+        if (*it == ' ') {
+            return true;
+        }
+    }
+    return false;
+}
+
+/******************************************************************************/
+inline std::string delete_space(const std::string &a_ORIGINAL) {
+    std::string result;
+    for (std::string::const_iterator it = a_ORIGINAL.begin();
+         it != a_ORIGINAL.end(); ++it) {
+        if (*it != ' ') {
+            result += *it;
+        }
+    }
+    return result;
+}
+
+/******************************************************************************/
 template <class T_Value>
 inline std::string to_string(const T_Value      a_VALUE,
                              const std::string &a_FORMAT) {
@@ -63,17 +86,27 @@ inline std::string format_error_location(const std::string &a_FILE_NAME,
 }
 
 /******************************************************************************/
-inline std::string delete_crlf(const std::string &a_TARGET) {
+inline std::string delete_crlf(const std::string &a_ORIGINAL) {
     const char  CR = '\r';
     const char  LF = '\n';
     std::string result;
-    for (std::string::const_iterator it = a_TARGET.begin();
-         it != a_TARGET.end(); ++it) {
+    for (std::string::const_iterator it = a_ORIGINAL.begin();
+         it != a_ORIGINAL.end(); ++it) {
         if (*it != CR && *it != LF) {
             result += *it;
         }
     }
     return result;
+}
+
+/*****************************************************************************/
+inline std::string indent_spaces(const int a_INDENT_LEVEL) {
+    std::string indent_width  = "    ";
+    std::string indent_spaces = "";
+    for (auto i = 0; i < a_INDENT_LEVEL; i++) {
+        indent_spaces += indent_width;
+    }
+    return indent_spaces;
 }
 }  // namespace utility
 }  // namespace cppmh

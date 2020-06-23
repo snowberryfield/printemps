@@ -732,7 +732,7 @@ class Neighborhood {
     inline constexpr void disable_user_defined_move(void) {
         m_is_enabled_user_defined_move = false;
     }
-};  // namespace model
+};
 }  // namespace model
 }  // namespace cppmh
 #endif
