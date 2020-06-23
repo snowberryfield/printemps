@@ -137,10 +137,10 @@ int main(void) {
     /// Run solver
     /*************************************************************************/
     cppmh::solver::Option option;
-    option.is_enabled_local_search   = false;
-    option.tabu_search.tabu_mode     = cppmh::solver::tabu_search::All;
-    option.tabu_search.iteration_max = 100000;
-    option.tabu_search.is_enabled_automatic_tabu_tenure_adjustment = true;
+    option.selection_mode            = cppmh::model::Defined;
+    option.tabu_search.iteration_max = 1000000;
+    option.tabu_search.tabu_mode     = cppmh::solver::tabu_search::Any;
+
     option.verbose = cppmh::solver::Full;
 
     auto result = cppmh::solver::solve(&model, option);
