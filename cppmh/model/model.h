@@ -1183,7 +1183,7 @@ class Model {
                                 utility::print_message(
                                     "The value of decision variable " +
                                         variable.name() +
-                                        " was fixed by its lower bound" +
+                                        " was fixed by its lower bound " +
                                         std::to_string(fix_value) +
                                         " because it does not have "
                                         "sensitivity to any "
@@ -1198,7 +1198,7 @@ class Model {
                                 utility::print_message(
                                     "The value of decision variable " +
                                         variable.name() +
-                                        " was fixed by its upper bound" +
+                                        " was fixed by its upper bound " +
                                         std::to_string(fix_value) +
                                         " because it does not have "
                                         "sensitivity to any "
@@ -1215,7 +1215,7 @@ class Model {
                                 utility::print_message(
                                     "The value of decision variable " +
                                         variable.name() +
-                                        " was fixed by its upper bound" +
+                                        " was fixed by its upper bound " +
                                         std::to_string(fix_value) +
                                         " because it does not have "
                                         "sensitivity to any "
@@ -1230,7 +1230,7 @@ class Model {
                                 utility::print_message(
                                     "The value of decision variable " +
                                         variable.name() +
-                                        " was fixed by its lower bound" +
+                                        " was fixed by its lower bound " +
                                         std::to_string(fix_value) +
                                         " because it does not have "
                                         "sensitivity to any "
