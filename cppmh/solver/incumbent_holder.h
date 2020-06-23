@@ -82,7 +82,7 @@ class IncumbentHolder {
          * Following comparations must be based on SolutionScore objects
          * of which scores are computed as minimization problems.
          */
-        if (a_SCORE.local_augmented_objective <
+        if (a_SCORE.local_augmented_objective + constant::EPSILON <
             m_local_augmented_incumbent_objective) {
             status += IncumbentHolderConstant::
                 STATUS_LOCAL_AUGMENTED_INCUMBENT_UPDATE;
@@ -93,7 +93,7 @@ class IncumbentHolder {
                 a_SCORE.local_augmented_objective;
         }
 
-        if (a_SCORE.global_augmented_objective <
+        if (a_SCORE.global_augmented_objective + constant::EPSILON <
             m_global_augmented_incumbent_objective) {
             status += IncumbentHolderConstant::
                 STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE;
@@ -107,7 +107,8 @@ class IncumbentHolder {
         if (a_SCORE.is_feasible) {
             m_is_found_feasible_solution = true;
 
-            if (a_SCORE.objective < m_feasible_incumbent_objective) {
+            if (a_SCORE.objective + constant::EPSILON <
+                m_feasible_incumbent_objective) {
                 status +=
                     IncumbentHolderConstant::STATUS_FEASIBLE_INCUMBENT_UPDATE;
                 m_feasible_incumbent_score     = a_SCORE;
@@ -128,7 +129,7 @@ class IncumbentHolder {
         bool is_solution_updated = false;
 
         int status = IncumbentHolderConstant::STATUS_NO_UPDATED;
-        if (a_SCORE.local_augmented_objective <
+        if (a_SCORE.local_augmented_objective + constant::EPSILON <
             m_local_augmented_incumbent_objective) {
             status += IncumbentHolderConstant::
                 STATUS_LOCAL_AUGMENTED_INCUMBENT_UPDATE;
@@ -144,7 +145,7 @@ class IncumbentHolder {
                 a_SCORE.local_augmented_objective;
         }
 
-        if (a_SCORE.global_augmented_objective <
+        if (a_SCORE.global_augmented_objective + constant::EPSILON <
             m_global_augmented_incumbent_objective) {
             status += IncumbentHolderConstant::
                 STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE;
@@ -163,7 +164,8 @@ class IncumbentHolder {
         if (a_SCORE.is_feasible) {
             m_is_found_feasible_solution = true;
 
-            if (a_SCORE.objective < m_feasible_incumbent_objective) {
+            if (a_SCORE.objective + constant::EPSILON <
+                m_feasible_incumbent_objective) {
                 status +=
                     IncumbentHolderConstant::STATUS_FEASIBLE_INCUMBENT_UPDATE;
 
