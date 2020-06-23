@@ -53,15 +53,15 @@ inline cppmh::solver::Option read_option(const std::string &a_FILE_NAME) {
               option_object);
 
     /**************************************************************************/
-    /// penalty_coefficient_relaxing_ratio
-    read_json(&option.penalty_coefficient_relaxing_ratio,  //
-              "penalty_coefficient_relaxing_ratio",        //
+    /// penalty_coefficient_relaxing_rate
+    read_json(&option.penalty_coefficient_relaxing_rate,  //
+              "penalty_coefficient_relaxing_rate",        //
               option_object);
 
     /**************************************************************************/
-    /// penalty_coefficient_tightening_ratio
-    read_json(&option.penalty_coefficient_tightening_ratio,  //
-              "penalty_coefficient_tightening_ratio",        //
+    /// penalty_coefficient_tightening_rate
+    read_json(&option.penalty_coefficient_tightening_rate,  //
+              "penalty_coefficient_tightening_rate",        //
               option_object);
 
     /**************************************************************************/
@@ -253,6 +253,37 @@ inline cppmh::solver::Option read_option(const std::string &a_FILE_NAME) {
             &option.tabu_search.is_enabled_automatic_tabu_tenure_adjustment,  //
             "is_enabled_automatic_tabu_tenure_adjustment",                    //
             option_object_tabu_search);
+
+        /**********************************************************************/
+        /// tabu_search.is_enabled_automatic_iteration_adjustment
+        read_json(
+            &option.tabu_search.is_enabled_automatic_iteration_adjustment,  //
+            "is_enabled_automatic_iteration_adjustment",                    //
+            option_object_tabu_search);
+
+        /**********************************************************************/
+        /// tabu_search.bias_increase_count_threshold
+        read_json(&option.tabu_search.bias_increase_count_threshold,  //
+                  "bias_increase_count_threshold",                    //
+                  option_object_tabu_search);
+
+        /**********************************************************************/
+        /// tabu_search.bias_decrease_count_threshold
+        read_json(&option.tabu_search.bias_decrease_count_threshold,  //
+                  "bias_decrease_count_threshold",                    //
+                  option_object_tabu_search);
+
+        /**********************************************************************/
+        /// tabu_search.iteration_increase_rate
+        read_json(&option.tabu_search.iteration_increase_rate,  //
+                  "iteration_increase_rate",                    //
+                  option_object_tabu_search);
+
+        /**********************************************************************/
+        /// tabu_search.iteration_decrease_rate
+        read_json(&option.tabu_search.iteration_decrease_rate,  //
+                  "iteration_decrease_rate",                    //
+                  option_object_tabu_search);
 
         /**********************************************************************/
         /// tabu_search.ignore_tabu_if_augmented_incumbent
