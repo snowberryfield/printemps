@@ -42,82 +42,82 @@ struct SolutionScore {
     {
         /// nothing to do
     }
-
-    /*************************************************************************/
-    inline static int argmax_index_objective_improvement(
-        const std::vector<SolutionScore> &a_SCORES) {
-        std::vector<double> objective_improvements(a_SCORES.size());
-
-        int scores_size = a_SCORES.size();
-        for (auto i_score = 0; i_score < scores_size; i_score++) {
-            objective_improvements[i_score] =
-                a_SCORES[i_score].objective_improvement;
-        }
-        return utility::argmax(objective_improvements);
-    }
-
-    /*************************************************************************/
-    inline static int argmin_index_objective(
-        const std::vector<SolutionScore> &a_SCORES) {
-        std::vector<double> objectives(a_SCORES.size());
-
-        int scores_size = a_SCORES.size();
-        for (auto i_score = 0; i_score < scores_size; i_score++) {
-            objectives[i_score] = a_SCORES[i_score].objective;
-        }
-        return utility::argmin(objectives);
-    }
-
-    /*************************************************************************/
-    inline static int argmin_index_local_penalty(
-        const std::vector<SolutionScore> &a_SCORES) {
-        std::vector<double> local_penalties(a_SCORES.size());
-
-        int scores_size = a_SCORES.size();
-        for (auto i_score = 0; i_score < scores_size; i_score++) {
-            local_penalties[i_score] = a_SCORES[i_score].local_penalty;
-        }
-        return utility::argmin(local_penalties);
-    }
-
-    /*************************************************************************/
-    inline static int argmin_index_global_penalty(
-        const std::vector<SolutionScore> &a_SCORES) {
-        std::vector<double> global_penalties(a_SCORES.size());
-
-        int scores_size = a_SCORES.size();
-        for (auto i_score = 0; i_score < scores_size; i_score++) {
-            global_penalties[i_score] = a_SCORES[i_score].global_penalty;
-        }
-        return utility::argmin(global_penalties);
-    }
-
-    /*************************************************************************/
-    inline static int argmin_index_local_augmented_objective(
-        const std::vector<SolutionScore> &a_SCORES) {
-        std::vector<double> local_augmented_objectives(a_SCORES.size());
-
-        int scores_size = a_SCORES.size();
-        for (auto i_score = 0; i_score < scores_size; i_score++) {
-            local_augmented_objectives[i_score] =
-                a_SCORES[i_score].local_augmented_objective;
-        }
-        return utility::argmin(local_augmented_objectives);
-    }
-
-    /*************************************************************************/
-    inline static int argmin_index_global_augmented_objective(
-        const std::vector<SolutionScore> &a_SCORES) {
-        std::vector<double> global_augmented_objectives(a_SCORES.size());
-
-        int scores_size = a_SCORES.size();
-        for (auto i_score = 0; i_score < scores_size; i_score++) {
-            global_augmented_objectives[i_score] =
-                a_SCORES[i_score].global_augmented_objective;
-        }
-        return utility::argmin(global_augmented_objectives);
-    }
 };
+
+/*****************************************************************************/
+inline int argmax_index_objective_improvement(
+    const std::vector<SolutionScore> &a_SCORES) {
+    std::vector<double> objective_improvements(a_SCORES.size());
+
+    int scores_size = a_SCORES.size();
+    for (auto i_score = 0; i_score < scores_size; i_score++) {
+        objective_improvements[i_score] =
+            a_SCORES[i_score].objective_improvement;
+    }
+    return utility::argmax(objective_improvements);
+}
+
+/*****************************************************************************/
+inline int argmin_index_objective(const std::vector<SolutionScore> &a_SCORES) {
+    std::vector<double> objectives(a_SCORES.size());
+
+    int scores_size = a_SCORES.size();
+    for (auto i_score = 0; i_score < scores_size; i_score++) {
+        objectives[i_score] = a_SCORES[i_score].objective;
+    }
+    return utility::argmin(objectives);
+}
+
+/*****************************************************************************/
+inline int argmin_index_local_penalty(
+    const std::vector<SolutionScore> &a_SCORES) {
+    std::vector<double> local_penalties(a_SCORES.size());
+
+    int scores_size = a_SCORES.size();
+    for (auto i_score = 0; i_score < scores_size; i_score++) {
+        local_penalties[i_score] = a_SCORES[i_score].local_penalty;
+    }
+    return utility::argmin(local_penalties);
+}
+
+/*****************************************************************************/
+inline int argmin_index_global_penalty(
+    const std::vector<SolutionScore> &a_SCORES) {
+    std::vector<double> global_penalties(a_SCORES.size());
+
+    int scores_size = a_SCORES.size();
+    for (auto i_score = 0; i_score < scores_size; i_score++) {
+        global_penalties[i_score] = a_SCORES[i_score].global_penalty;
+    }
+    return utility::argmin(global_penalties);
+}
+
+/*****************************************************************************/
+inline int argmin_index_local_augmented_objective(
+    const std::vector<SolutionScore> &a_SCORES) {
+    std::vector<double> local_augmented_objectives(a_SCORES.size());
+
+    int scores_size = a_SCORES.size();
+    for (auto i_score = 0; i_score < scores_size; i_score++) {
+        local_augmented_objectives[i_score] =
+            a_SCORES[i_score].local_augmented_objective;
+    }
+    return utility::argmin(local_augmented_objectives);
+}
+
+/*****************************************************************************/
+inline int argmin_index_global_augmented_objective(
+    const std::vector<SolutionScore> &a_SCORES) {
+    std::vector<double> global_augmented_objectives(a_SCORES.size());
+
+    int scores_size = a_SCORES.size();
+    for (auto i_score = 0; i_score < scores_size; i_score++) {
+        global_augmented_objectives[i_score] =
+            a_SCORES[i_score].global_augmented_objective;
+    }
+    return utility::argmin(global_augmented_objectives);
+}
+
 }  // namespace model
 }  // namespace cppmh
 #endif

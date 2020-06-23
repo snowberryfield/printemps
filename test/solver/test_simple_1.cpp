@@ -47,20 +47,20 @@ TEST_F(TestSimple1, simple_1) {
 
     /// Option default
     {
-        /// initial solution
-        x(0) = 0;
-        x(1) = 0;
+        /// initial solution(consider presolving)
+        x(0) = 18;
+        x(1) = 50;
 
         /// solve
         auto result = cppmh::solver::solve(&model);
-        EXPECT_EQ(true, result.is_feasible());
+        EXPECT_EQ(true, result.solution.is_feasible());
     }
 
     /// Option case 1
     {
-        /// initial value definition
-        x(0) = 0;
-        x(1) = 0;
+        /// initial solution(consider presolving)
+        x(0) = 18;
+        x(1) = 50;
 
         /// solve
         cppmh::solver::Option option;
@@ -88,16 +88,16 @@ TEST_F(TestSimple1, simple_1) {
         option.tabu_search.ignore_tabu_if_feasible_incumbent           = true;
 
         auto result = cppmh::solver::solve(&model, option);
-        EXPECT_EQ(true, result.is_feasible());
-        EXPECT_EQ(7, result.variables("x").values(0));
-        EXPECT_EQ(70, result.variables("x").values(1));
+        EXPECT_EQ(true, result.solution.is_feasible());
+        EXPECT_EQ(7, result.solution.variables("x").values(0));
+        EXPECT_EQ(70, result.solution.variables("x").values(1));
     }
 
     /// Option case 2
     {
-        /// initial solution
-        x(0) = 0;
-        x(1) = 0;
+        /// initial solution(consider presolving)
+        x(0) = 18;
+        x(1) = 50;
 
         /// solve
         cppmh::solver::Option option;
@@ -124,9 +124,9 @@ TEST_F(TestSimple1, simple_1) {
         option.tabu_search.ignore_tabu_if_feasible_incumbent           = false;
 
         auto result = cppmh::solver::solve(&model, option);
-        EXPECT_EQ(true, result.is_feasible());
-        EXPECT_EQ(7, result.variables("x").values(0));
-        EXPECT_EQ(70, result.variables("x").values(1));
+        EXPECT_EQ(true, result.solution.is_feasible());
+        EXPECT_EQ(7, result.solution.variables("x").values(0));
+        EXPECT_EQ(70, result.solution.variables("x").values(1));
     }
 }
 /*****************************************************************************/

@@ -63,282 +63,414 @@ TEST_F(TestModel, initialize) {
 
 /*****************************************************************************/
 TEST_F(TestModel, create_variable_scalar_without_bound) {
-    cppmh::model::Model<int, double> model;
-    for (auto i = 0;
-         i < cppmh::model::ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES; i++) {
-        auto  name = "x" + std::to_string(i);
-        auto& x    = model.create_variable(name);
-        EXPECT_EQ(i + 1, static_cast<int>(model.variable_proxies().size()));
-        EXPECT_EQ(i, x.id());
-        EXPECT_EQ(std::numeric_limits<int>::min() + 1, x.lower_bound());
-        EXPECT_EQ(std::numeric_limits<int>::max() - 1, x.upper_bound());
-        EXPECT_EQ(false, x.has_bounds());
-        EXPECT_EQ(cppmh::model::VariableSense::Integer, x.sense());
-        EXPECT_EQ(&x, &model.variable_proxies().back());
-        EXPECT_EQ(name, model.variable_names().back());
+    {
+        cppmh::model::Model<int, double> model;
+        for (auto i = 0;
+             i < cppmh::model::ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES;
+             i++) {
+            auto  name = "x" + std::to_string(i);
+            auto& x    = model.create_variable(name);
+            EXPECT_EQ(i + 1, static_cast<int>(model.variable_proxies().size()));
+            EXPECT_EQ(i, x.id());
+            EXPECT_EQ(std::numeric_limits<int>::min() + 1, x.lower_bound());
+            EXPECT_EQ(std::numeric_limits<int>::max() - 1, x.upper_bound());
+            EXPECT_EQ(false, x.has_bounds());
+            EXPECT_EQ(cppmh::model::VariableSense::Integer, x.sense());
+            EXPECT_EQ(&x, &model.variable_proxies().back());
+            EXPECT_EQ(name, model.variable_names().back());
+        }
+        ASSERT_THROW(model.create_variable("error"), std::logic_error);
     }
-    ASSERT_THROW(model.create_variable("error"), std::logic_error);
+    {
+        cppmh::model::Model<int, double> model;
+        ASSERT_THROW(model.create_variable("s p a c e"), std::logic_error);
+    }
 }
 
 /*****************************************************************************/
 TEST_F(TestModel, create_variable_scalar_with_bound) {
-    cppmh::model::Model<int, double> model;
-    for (auto i = 0;
-         i < cppmh::model::ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES; i++) {
-        auto  name = "x" + std::to_string(i);
-        auto& x    = model.create_variable(name, 0, 1);
-        EXPECT_EQ(i + 1, static_cast<int>(model.variable_proxies().size()));
-        EXPECT_EQ(i, x.id());
-        EXPECT_EQ(0, x.lower_bound());
-        EXPECT_EQ(1, x.upper_bound());
-        EXPECT_EQ(true, x.has_bounds());
-        EXPECT_EQ(cppmh::model::VariableSense::Binary, x.sense());
-        EXPECT_EQ(&x, &model.variable_proxies().back());
-        EXPECT_EQ(name, model.variable_names().back());
+    {
+        cppmh::model::Model<int, double> model;
+        for (auto i = 0;
+             i < cppmh::model::ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES;
+             i++) {
+            auto  name = "x" + std::to_string(i);
+            auto& x    = model.create_variable(name, 0, 1);
+            EXPECT_EQ(i + 1, static_cast<int>(model.variable_proxies().size()));
+            EXPECT_EQ(i, x.id());
+            EXPECT_EQ(0, x.lower_bound());
+            EXPECT_EQ(1, x.upper_bound());
+            EXPECT_EQ(true, x.has_bounds());
+            EXPECT_EQ(cppmh::model::VariableSense::Binary, x.sense());
+            EXPECT_EQ(&x, &model.variable_proxies().back());
+            EXPECT_EQ(name, model.variable_names().back());
+        }
+        ASSERT_THROW(model.create_variable("error", 0, 1), std::logic_error);
     }
-    ASSERT_THROW(model.create_variable("error", 0, 1), std::logic_error);
+    {
+        cppmh::model::Model<int, double> model;
+        ASSERT_THROW(model.create_variable("s p a c e", 0, 1),
+                     std::logic_error);
+    }
 }
 
 /*****************************************************************************/
 TEST_F(TestModel, create_variable_one_dimensional_without_bound) {
-    cppmh::model::Model<int, double> model;
-    for (auto i = 0;
-         i < cppmh::model::ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES; i++) {
-        auto  name = "x" + std::to_string(i);
-        auto& x    = model.create_variables(name, 2);
-        EXPECT_EQ(i + 1, static_cast<int>(model.variable_proxies().size()));
-        EXPECT_EQ(i, x.id());
-        EXPECT_EQ(std::numeric_limits<int>::min() + 1, x(0).lower_bound());
-        EXPECT_EQ(std::numeric_limits<int>::max() - 1, x(0).upper_bound());
-        EXPECT_EQ(false, x(0).has_bounds());
-        EXPECT_EQ(cppmh::model::VariableSense::Integer, x(0).sense());
-        EXPECT_EQ(&x, &model.variable_proxies().back());
-        EXPECT_EQ(name, model.variable_names().back());
+    {
+        cppmh::model::Model<int, double> model;
+        for (auto i = 0;
+             i < cppmh::model::ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES;
+             i++) {
+            auto  name = "x" + std::to_string(i);
+            auto& x    = model.create_variables(name, 2);
+            EXPECT_EQ(i + 1, static_cast<int>(model.variable_proxies().size()));
+            EXPECT_EQ(i, x.id());
+            EXPECT_EQ(std::numeric_limits<int>::min() + 1, x(0).lower_bound());
+            EXPECT_EQ(std::numeric_limits<int>::max() - 1, x(0).upper_bound());
+            EXPECT_EQ(false, x(0).has_bounds());
+            EXPECT_EQ(cppmh::model::VariableSense::Integer, x(0).sense());
+            EXPECT_EQ(&x, &model.variable_proxies().back());
+            EXPECT_EQ(name, model.variable_names().back());
+        }
+        ASSERT_THROW(model.create_variables("error", 2), std::logic_error);
     }
-    ASSERT_THROW(model.create_variables("error", 2), std::logic_error);
+    {
+        cppmh::model::Model<int, double> model;
+        ASSERT_THROW(model.create_variables("s p a c e", 2), std::logic_error);
+    }
 }
 
 /*****************************************************************************/
 TEST_F(TestModel, create_variable_one_dimensional_with_bound) {
-    cppmh::model::Model<int, double> model;
-    for (auto i = 0;
-         i < cppmh::model::ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES; i++) {
-        auto  name = "x" + std::to_string(i);
-        auto& x    = model.create_variables(name, 2, 0, 1);
-        EXPECT_EQ(i + 1, static_cast<int>(model.variable_proxies().size()));
-        EXPECT_EQ(i, x.id());
-        EXPECT_EQ(0, x(0).lower_bound());
-        EXPECT_EQ(1, x(0).upper_bound());
-        EXPECT_EQ(true, x(0).has_bounds());
-        EXPECT_EQ(cppmh::model::VariableSense::Binary, x(0).sense());
-        EXPECT_EQ(&x, &model.variable_proxies().back());
-        EXPECT_EQ(name, model.variable_names().back());
+    {
+        cppmh::model::Model<int, double> model;
+        for (auto i = 0;
+             i < cppmh::model::ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES;
+             i++) {
+            auto  name = "x" + std::to_string(i);
+            auto& x    = model.create_variables(name, 2, 0, 1);
+            EXPECT_EQ(i + 1, static_cast<int>(model.variable_proxies().size()));
+            EXPECT_EQ(i, x.id());
+            EXPECT_EQ(0, x(0).lower_bound());
+            EXPECT_EQ(1, x(0).upper_bound());
+            EXPECT_EQ(true, x(0).has_bounds());
+            EXPECT_EQ(cppmh::model::VariableSense::Binary, x(0).sense());
+            EXPECT_EQ(&x, &model.variable_proxies().back());
+            EXPECT_EQ(name, model.variable_names().back());
+        }
+        ASSERT_THROW(model.create_variables("error", 2, 0, 1),
+                     std::logic_error);
     }
-    ASSERT_THROW(model.create_variables("error", 2, 0, 1), std::logic_error);
+    {
+        cppmh::model::Model<int, double> model;
+        ASSERT_THROW(model.create_variables("s p a c e", 2, 0, 1),
+                     std::logic_error);
+    }
 }
 
 /*****************************************************************************/
 TEST_F(TestModel, create_variable_two_dimensional_without_bound) {
-    cppmh::model::Model<int, double> model;
-    for (auto i = 0;
-         i < cppmh::model::ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES; i++) {
-        auto  name = "x" + std::to_string(i);
-        auto& x    = model.create_variables(name, {2, 3});
-        EXPECT_EQ(i + 1, static_cast<int>(model.variable_proxies().size()));
-        EXPECT_EQ(i, x.id());
-        EXPECT_EQ(std::numeric_limits<int>::min() + 1, x(0, 0).lower_bound());
-        EXPECT_EQ(std::numeric_limits<int>::max() - 1, x(0, 0).upper_bound());
-        EXPECT_EQ(false, x(0, 0).has_bounds());
-        EXPECT_EQ(cppmh::model::VariableSense::Integer, x(0, 0).sense());
-        EXPECT_EQ(&x, &model.variable_proxies().back());
-        EXPECT_EQ(name, model.variable_names().back());
+    {
+        cppmh::model::Model<int, double> model;
+        for (auto i = 0;
+             i < cppmh::model::ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES;
+             i++) {
+            auto  name = "x" + std::to_string(i);
+            auto& x    = model.create_variables(name, {2, 3});
+            EXPECT_EQ(i + 1, static_cast<int>(model.variable_proxies().size()));
+            EXPECT_EQ(i, x.id());
+            EXPECT_EQ(std::numeric_limits<int>::min() + 1,
+                      x(0, 0).lower_bound());
+            EXPECT_EQ(std::numeric_limits<int>::max() - 1,
+                      x(0, 0).upper_bound());
+            EXPECT_EQ(false, x(0, 0).has_bounds());
+            EXPECT_EQ(cppmh::model::VariableSense::Integer, x(0, 0).sense());
+            EXPECT_EQ(&x, &model.variable_proxies().back());
+            EXPECT_EQ(name, model.variable_names().back());
+        }
+        ASSERT_THROW(model.create_variables("error", {2, 3}), std::logic_error);
     }
-    ASSERT_THROW(model.create_variables("error", {2, 3}), std::logic_error);
+    {
+        cppmh::model::Model<int, double> model;
+        ASSERT_THROW(model.create_variables("s p a c e", {2, 3}),
+                     std::logic_error);
+    }
 }
 
 /*****************************************************************************/
 TEST_F(TestModel, create_variable_two_dimensional_with_bound) {
-    cppmh::model::Model<int, double> model;
-    for (auto i = 0;
-         i < cppmh::model::ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES; i++) {
-        auto  name = "x" + std::to_string(i);
-        auto& x    = model.create_variables(name, {2, 3}, 0, 1);
-        EXPECT_EQ(i + 1, static_cast<int>(model.variable_proxies().size()));
-        EXPECT_EQ(i, x.id());
-        EXPECT_EQ(0, x(0, 0).lower_bound());
-        EXPECT_EQ(1, x(0, 0).upper_bound());
-        EXPECT_EQ(true, x(0, 0).has_bounds());
-        EXPECT_EQ(cppmh::model::VariableSense::Binary, x(0, 0).sense());
-        EXPECT_EQ(&x, &model.variable_proxies().back());
-        EXPECT_EQ(name, model.variable_names().back());
+    {
+        cppmh::model::Model<int, double> model;
+        for (auto i = 0;
+             i < cppmh::model::ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES;
+             i++) {
+            auto  name = "x" + std::to_string(i);
+            auto& x    = model.create_variables(name, {2, 3}, 0, 1);
+            EXPECT_EQ(i + 1, static_cast<int>(model.variable_proxies().size()));
+            EXPECT_EQ(i, x.id());
+            EXPECT_EQ(0, x(0, 0).lower_bound());
+            EXPECT_EQ(1, x(0, 0).upper_bound());
+            EXPECT_EQ(true, x(0, 0).has_bounds());
+            EXPECT_EQ(cppmh::model::VariableSense::Binary, x(0, 0).sense());
+            EXPECT_EQ(&x, &model.variable_proxies().back());
+            EXPECT_EQ(name, model.variable_names().back());
+        }
+        ASSERT_THROW(model.create_variables("error", {2, 3}, 0, 1),
+                     std::logic_error);
     }
-    ASSERT_THROW(model.create_variables("error", {2, 3}, 0, 1),
-                 std::logic_error);
+    {
+        cppmh::model::Model<int, double> model;
+        ASSERT_THROW(model.create_variables("s p a c e", {2, 3}, 0, 1),
+                     std::logic_error);
+    }
 }
 
 /*****************************************************************************/
 TEST_F(TestModel, create_expression_scalar) {
-    cppmh::model::Model<int, double> model;
-    for (auto i = 0;
-         i < cppmh::model::ModelConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES;
-         i++) {
-        auto  name = "p" + std::to_string(i);
-        auto& p    = model.create_expression(name);
-        EXPECT_EQ(i + 1, static_cast<int>(model.expression_proxies().size()));
-        EXPECT_EQ(i, p.id());
-        EXPECT_EQ(&p, &model.expression_proxies().back());
-        EXPECT_EQ(name, model.expression_names().back());
+    {
+        cppmh::model::Model<int, double> model;
+        for (auto i = 0;
+             i < cppmh::model::ModelConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES;
+             i++) {
+            auto  name = "p" + std::to_string(i);
+            auto& p    = model.create_expression(name);
+            EXPECT_EQ(i + 1,
+                      static_cast<int>(model.expression_proxies().size()));
+            EXPECT_EQ(i, p.id());
+            EXPECT_EQ(&p, &model.expression_proxies().back());
+            EXPECT_EQ(name, model.expression_names().back());
+        }
+        ASSERT_THROW(model.create_expression("error"), std::logic_error);
     }
-    ASSERT_THROW(model.create_expression("error"), std::logic_error);
+    {
+        cppmh::model::Model<int, double> model;
+        ASSERT_THROW(model.create_expression("s p a c e"), std::logic_error);
+    }
 }
 
 /*****************************************************************************/
 TEST_F(TestModel, create_expression_one_dimensional) {
-    cppmh::model::Model<int, double> model;
-    for (auto i = 0;
-         i < cppmh::model::ModelConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES;
-         i++) {
-        auto  name = "p" + std::to_string(i);
-        auto& p    = model.create_expressions(name, 2);
-        EXPECT_EQ(i + 1, static_cast<int>(model.expression_proxies().size()));
-        EXPECT_EQ(i, p.id());
-        EXPECT_EQ(&p, &model.expression_proxies().back());
-        EXPECT_EQ(name, model.expression_names().back());
+    {
+        cppmh::model::Model<int, double> model;
+        for (auto i = 0;
+             i < cppmh::model::ModelConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES;
+             i++) {
+            auto  name = "p" + std::to_string(i);
+            auto& p    = model.create_expressions(name, 2);
+            EXPECT_EQ(i + 1,
+                      static_cast<int>(model.expression_proxies().size()));
+            EXPECT_EQ(i, p.id());
+            EXPECT_EQ(&p, &model.expression_proxies().back());
+            EXPECT_EQ(name, model.expression_names().back());
+        }
+        ASSERT_THROW(model.create_expressions("error", 2), std::logic_error);
     }
-    ASSERT_THROW(model.create_expressions("error", 2), std::logic_error);
+    {
+        cppmh::model::Model<int, double> model;
+        ASSERT_THROW(model.create_expressions("s p a c e", 2),
+                     std::logic_error);
+    }
 }
 
 /*****************************************************************************/
 TEST_F(TestModel, create_expression_two_dimensional) {
-    cppmh::model::Model<int, double> model;
-    for (auto i = 0;
-         i < cppmh::model::ModelConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES;
-         i++) {
-        auto  name = "p" + std::to_string(i);
-        auto& p    = model.create_expressions(name, {2, 3});
-        EXPECT_EQ(i + 1, static_cast<int>(model.expression_proxies().size()));
-        EXPECT_EQ(i, p.id());
-        EXPECT_EQ(&p, &model.expression_proxies().back());
-        EXPECT_EQ(name, model.expression_names().back());
+    {
+        cppmh::model::Model<int, double> model;
+        for (auto i = 0;
+             i < cppmh::model::ModelConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES;
+             i++) {
+            auto  name = "p" + std::to_string(i);
+            auto& p    = model.create_expressions(name, {2, 3});
+            EXPECT_EQ(i + 1,
+                      static_cast<int>(model.expression_proxies().size()));
+            EXPECT_EQ(i, p.id());
+            EXPECT_EQ(&p, &model.expression_proxies().back());
+            EXPECT_EQ(name, model.expression_names().back());
+        }
+        ASSERT_THROW(model.create_expressions("error", {2, 3}),
+                     std::logic_error);
     }
-    ASSERT_THROW(model.create_expressions("error", {2, 3}), std::logic_error);
+    {
+        cppmh::model::Model<int, double> model;
+        ASSERT_THROW(model.create_expressions("s p a c e", {2, 3}),
+                     std::logic_error);
+    }
 }
 
 /*****************************************************************************/
 TEST_F(TestModel, create_expression_arg_expression_like) {
-    cppmh::model::Model<int, double> model;
+    {
+        cppmh::model::Model<int, double> model;
 
-    for (auto i = 0;
-         i < cppmh::model::ModelConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES;
-         i++) {
-        auto name     = "p" + std::to_string(i);
+        for (auto i = 0;
+             i < cppmh::model::ModelConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES;
+             i++) {
+            auto name = "p" + std::to_string(i);
+            auto variable =
+                cppmh::model::Variable<int, double>::create_instance();
+
+            auto& p = model.create_expression(name, variable);
+            EXPECT_EQ(i + 1,
+                      static_cast<int>(model.expression_proxies().size()));
+            EXPECT_EQ(i, p.id());
+            EXPECT_EQ(&p, &model.expression_proxies().back());
+            EXPECT_EQ(name, model.expression_names().back());
+        }
+
         auto variable = cppmh::model::Variable<int, double>::create_instance();
-
-        auto& p = model.create_expression(name, variable);
-        EXPECT_EQ(i + 1, static_cast<int>(model.expression_proxies().size()));
-        EXPECT_EQ(i, p.id());
-        EXPECT_EQ(&p, &model.expression_proxies().back());
-        EXPECT_EQ(name, model.expression_names().back());
+        ASSERT_THROW(model.create_expression("error", variable),
+                     std::logic_error);
     }
-
-    auto variable = cppmh::model::Variable<int, double>::create_instance();
-    ASSERT_THROW(model.create_expression("error", variable), std::logic_error);
+    {
+        cppmh::model::Model<int, double> model;
+        auto variable = cppmh::model::Variable<int, double>::create_instance();
+        ASSERT_THROW(model.create_expression("s p a c e", variable),
+                     std::logic_error);
+    }
 }
 
 /*****************************************************************************/
 TEST_F(TestModel, create_expression_arg_expression) {
-    cppmh::model::Model<int, double> model;
+    {
+        cppmh::model::Model<int, double> model;
 
-    for (auto i = 0;
-         i < cppmh::model::ModelConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES;
-         i++) {
-        auto name = "p" + std::to_string(i);
+        for (auto i = 0;
+             i < cppmh::model::ModelConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES;
+             i++) {
+            auto name = "p" + std::to_string(i);
+            auto expression =
+                cppmh::model::Expression<int, double>::create_instance();
+
+            auto& p = model.create_expression(name, expression);
+            EXPECT_EQ(i + 1,
+                      static_cast<int>(model.expression_proxies().size()));
+            EXPECT_EQ(i, p.id());
+            EXPECT_EQ(&p, &model.expression_proxies().back());
+            EXPECT_EQ(name, model.expression_names().back());
+        }
+
         auto expression =
             cppmh::model::Expression<int, double>::create_instance();
-
-        auto& p = model.create_expression(name, expression);
-        EXPECT_EQ(i + 1, static_cast<int>(model.expression_proxies().size()));
-        EXPECT_EQ(i, p.id());
-        EXPECT_EQ(&p, &model.expression_proxies().back());
-        EXPECT_EQ(name, model.expression_names().back());
+        ASSERT_THROW(model.create_expression("error", expression),
+                     std::logic_error);
     }
+    {
+        cppmh::model::Model<int, double> model;
 
-    auto expression = cppmh::model::Expression<int, double>::create_instance();
-    ASSERT_THROW(model.create_expression("error", expression),
-                 std::logic_error);
+        auto expression =
+            cppmh::model::Expression<int, double>::create_instance();
+        ASSERT_THROW(model.create_expression("s p a c e", expression),
+                     std::logic_error);
+    }
 }
 
 /*****************************************************************************/
 TEST_F(TestModel, create_constraint_scalar) {
-    cppmh::model::Model<int, double> model;
-    for (auto i = 0;
-         i < cppmh::model::ModelConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES;
-         i++) {
-        auto  name = "g" + std::to_string(i);
-        auto& g    = model.create_constraint(name);
-        EXPECT_EQ(i + 1, static_cast<int>(model.constraint_proxies().size()));
-        EXPECT_EQ(i, g.id());
-        EXPECT_EQ(&g, &model.constraint_proxies().back());
-        EXPECT_EQ(name, model.constraint_names().back());
+    {
+        cppmh::model::Model<int, double> model;
+        for (auto i = 0;
+             i < cppmh::model::ModelConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES;
+             i++) {
+            auto  name = "g" + std::to_string(i);
+            auto& g    = model.create_constraint(name);
+            EXPECT_EQ(i + 1,
+                      static_cast<int>(model.constraint_proxies().size()));
+            EXPECT_EQ(i, g.id());
+            EXPECT_EQ(&g, &model.constraint_proxies().back());
+            EXPECT_EQ(name, model.constraint_names().back());
+        }
+        ASSERT_THROW(model.create_constraint("error"), std::logic_error);
     }
-    ASSERT_THROW(model.create_constraint("error"), std::logic_error);
+    {
+        cppmh::model::Model<int, double> model;
+        ASSERT_THROW(model.create_constraint("s p a c e"), std::logic_error);
+    }
 }
 
 /*****************************************************************************/
 TEST_F(TestModel, create_constraint_one_dimensional) {
-    cppmh::model::Model<int, double> model;
-    for (auto i = 0;
-         i < cppmh::model::ModelConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES;
-         i++) {
-        auto  name = "g" + std::to_string(i);
-        auto& g    = model.create_constraints(name, 2);
-        EXPECT_EQ(i + 1, static_cast<int>(model.constraint_proxies().size()));
-        EXPECT_EQ(i, g.id());
-        EXPECT_EQ(&g, &model.constraint_proxies().back());
-        EXPECT_EQ(name, model.constraint_names().back());
+    {
+        cppmh::model::Model<int, double> model;
+        for (auto i = 0;
+             i < cppmh::model::ModelConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES;
+             i++) {
+            auto  name = "g" + std::to_string(i);
+            auto& g    = model.create_constraints(name, 2);
+            EXPECT_EQ(i + 1,
+                      static_cast<int>(model.constraint_proxies().size()));
+            EXPECT_EQ(i, g.id());
+            EXPECT_EQ(&g, &model.constraint_proxies().back());
+            EXPECT_EQ(name, model.constraint_names().back());
+        }
+        ASSERT_THROW(model.create_constraints("error", 2), std::logic_error);
     }
-    ASSERT_THROW(model.create_constraints("error", 2), std::logic_error);
+    {
+        cppmh::model::Model<int, double> model;
+        ASSERT_THROW(model.create_constraints("s p a c e", 2),
+                     std::logic_error);
+    }
 }
 
 /*****************************************************************************/
 TEST_F(TestModel, create_constraint_two_dimensional) {
-    cppmh::model::Model<int, double> model;
-    for (auto i = 0;
-         i < cppmh::model::ModelConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES;
-         i++) {
-        auto  name = "g" + std::to_string(i);
-        auto& g    = model.create_constraints(name, {2, 3});
-        EXPECT_EQ(i + 1, static_cast<int>(model.constraint_proxies().size()));
-        EXPECT_EQ(i, g.id());
-        EXPECT_EQ(&g, &model.constraint_proxies().back());
-        EXPECT_EQ(name, model.constraint_names().back());
+    {
+        cppmh::model::Model<int, double> model;
+        for (auto i = 0;
+             i < cppmh::model::ModelConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES;
+             i++) {
+            auto  name = "g" + std::to_string(i);
+            auto& g    = model.create_constraints(name, {2, 3});
+            EXPECT_EQ(i + 1,
+                      static_cast<int>(model.constraint_proxies().size()));
+            EXPECT_EQ(i, g.id());
+            EXPECT_EQ(&g, &model.constraint_proxies().back());
+            EXPECT_EQ(name, model.constraint_names().back());
+        }
+        ASSERT_THROW(model.create_constraints("error", {2, 3}),
+                     std::logic_error);
     }
-    ASSERT_THROW(model.create_constraints("error", {2, 3}), std::logic_error);
+    {
+        cppmh::model::Model<int, double> model;
+        ASSERT_THROW(model.create_constraints("s p a c e", {2, 3}),
+                     std::logic_error);
+    }
 }
 
 /*****************************************************************************/
-TEST_F(TestModel, create_constraint_arg_expression) {
-    cppmh::model::Model<int, double> model;
+TEST_F(TestModel, create_constraint_arg_constraint) {
+    {
+        cppmh::model::Model<int, double> model;
 
-    for (auto i = 0;
-         i < cppmh::model::ModelConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES;
-         i++) {
-        auto name = "g" + std::to_string(i);
+        for (auto i = 0;
+             i < cppmh::model::ModelConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES;
+             i++) {
+            auto name = "g" + std::to_string(i);
+            auto expression =
+                cppmh::model::Expression<int, double>::create_instance();
+            auto constraint = expression <= 1;
+
+            auto& g = model.create_constraint(name, constraint);
+            EXPECT_EQ(i + 1,
+                      static_cast<int>(model.constraint_proxies().size()));
+            EXPECT_EQ(i, g.id());
+            EXPECT_EQ(&g, &model.constraint_proxies().back());
+            EXPECT_EQ(name, model.constraint_names().back());
+        }
+
         auto expression =
             cppmh::model::Expression<int, double>::create_instance();
         auto constraint = expression <= 1;
-
-        auto& g = model.create_constraint(name, constraint);
-        EXPECT_EQ(i + 1, static_cast<int>(model.constraint_proxies().size()));
-        EXPECT_EQ(i, g.id());
-        EXPECT_EQ(&g, &model.constraint_proxies().back());
-        EXPECT_EQ(name, model.constraint_names().back());
+        ASSERT_THROW(model.create_constraint("error", constraint),
+                     std::logic_error);
     }
-
-    auto expression = cppmh::model::Expression<int, double>::create_instance();
-    auto constraint = expression <= 1;
-    ASSERT_THROW(model.create_constraint("error", constraint),
-                 std::logic_error);
+    {
+        cppmh::model::Model<int, double> model;
+        auto                             expression =
+            cppmh::model::Expression<int, double>::create_instance();
+        auto constraint = expression <= 1;
+        ASSERT_THROW(model.create_constraint("s p a c e", constraint),
+                     std::logic_error);
+    }
 }
 
 /*****************************************************************************/
@@ -1401,14 +1533,16 @@ TEST_F(TestModel, remove_independent_variables) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModel, remove_implicit_singleton_constraints) {
+TEST_F(TestModel,
+       remove_redundant_constraints_with_tightening_variable_bounds) {
     {
         cppmh::model::Model<int, double> model;
 
         auto& x = model.create_variable("x", 0, 10);
         auto& g = model.create_constraint("g", 3 * x + 1 == 7);
 
-        model.remove_implicit_singleton_constraints(false);
+        model.remove_redundant_constraints_with_tightening_variable_bounds(
+            false);
         EXPECT_EQ(true, x.is_fixed());
         EXPECT_EQ(2, x.value());
         EXPECT_EQ(false, g.is_enabled());
@@ -1419,7 +1553,8 @@ TEST_F(TestModel, remove_implicit_singleton_constraints) {
         auto& x = model.create_variable("x", 0, 10);
         auto& g = model.create_constraint("g", 3 * x + 1 <= 7);
 
-        model.remove_implicit_singleton_constraints(false);
+        model.remove_redundant_constraints_with_tightening_variable_bounds(
+            false);
         EXPECT_EQ(false, x.is_fixed());
         EXPECT_EQ(0, x.lower_bound());
         EXPECT_EQ(2, x.upper_bound());
@@ -1431,7 +1566,8 @@ TEST_F(TestModel, remove_implicit_singleton_constraints) {
         auto& x = model.create_variable("x", 0, 10);
         auto& g = model.create_constraint("g", 3 * x + 1 >= 7);
 
-        model.remove_implicit_singleton_constraints(false);
+        model.remove_redundant_constraints_with_tightening_variable_bounds(
+            false);
         EXPECT_EQ(false, x.is_fixed());
         EXPECT_EQ(2, x.lower_bound());
         EXPECT_EQ(10, x.upper_bound());
@@ -1444,7 +1580,8 @@ TEST_F(TestModel, remove_implicit_singleton_constraints) {
         auto& x = model.create_variable("x", -10, 10);
         auto& g = model.create_constraint("g", -3 * x + 1 == 7);
 
-        model.remove_implicit_singleton_constraints(false);
+        model.remove_redundant_constraints_with_tightening_variable_bounds(
+            false);
         EXPECT_EQ(true, x.is_fixed());
         EXPECT_EQ(-2, x.value());
         EXPECT_EQ(false, g.is_enabled());
@@ -1455,7 +1592,8 @@ TEST_F(TestModel, remove_implicit_singleton_constraints) {
         auto& x = model.create_variable("x", -10, 10);
         auto& g = model.create_constraint("g", -3 * x + 1 <= 7);
 
-        model.remove_implicit_singleton_constraints(false);
+        model.remove_redundant_constraints_with_tightening_variable_bounds(
+            false);
         EXPECT_EQ(false, x.is_fixed());
         EXPECT_EQ(-2, x.lower_bound());
         EXPECT_EQ(10, x.upper_bound());
@@ -1467,7 +1605,8 @@ TEST_F(TestModel, remove_implicit_singleton_constraints) {
         auto& x = model.create_variable("x", -10, 10);
         auto& g = model.create_constraint("g", -3 * x + 1 >= 7);
 
-        model.remove_implicit_singleton_constraints(false);
+        model.remove_redundant_constraints_with_tightening_variable_bounds(
+            false);
         EXPECT_EQ(false, x.is_fixed());
         EXPECT_EQ(-10, x.lower_bound());
         EXPECT_EQ(-2, x.upper_bound());
@@ -1482,7 +1621,8 @@ TEST_F(TestModel, remove_implicit_singleton_constraints) {
         auto& g = model.create_constraint("g", 3 * x + y == 7);
         y.fix_by(1);
 
-        model.remove_implicit_singleton_constraints(false);
+        model.remove_redundant_constraints_with_tightening_variable_bounds(
+            false);
         EXPECT_EQ(true, x.is_fixed());
         EXPECT_EQ(2, x.value());
         EXPECT_EQ(false, g.is_enabled());
@@ -1495,7 +1635,8 @@ TEST_F(TestModel, remove_implicit_singleton_constraints) {
         auto& g = model.create_constraint("g", 3 * x + y <= 7);
         y.fix_by(1);
 
-        model.remove_implicit_singleton_constraints(false);
+        model.remove_redundant_constraints_with_tightening_variable_bounds(
+            false);
         EXPECT_EQ(false, x.is_fixed());
         EXPECT_EQ(0, x.lower_bound());
         EXPECT_EQ(2, x.upper_bound());
@@ -1509,7 +1650,8 @@ TEST_F(TestModel, remove_implicit_singleton_constraints) {
         auto& g = model.create_constraint("g", 3 * x + y >= 7);
         y.fix_by(1);
 
-        model.remove_implicit_singleton_constraints(false);
+        model.remove_redundant_constraints_with_tightening_variable_bounds(
+            false);
         EXPECT_EQ(false, x.is_fixed());
         EXPECT_EQ(2, x.lower_bound());
         EXPECT_EQ(10, x.upper_bound());
@@ -1523,7 +1665,8 @@ TEST_F(TestModel, remove_implicit_singleton_constraints) {
         auto& g = model.create_constraint("g", -3 * x + y == 7);
         y.fix_by(1);
 
-        model.remove_implicit_singleton_constraints(false);
+        model.remove_redundant_constraints_with_tightening_variable_bounds(
+            false);
         EXPECT_EQ(true, x.is_fixed());
         EXPECT_EQ(-2, x.value());
         EXPECT_EQ(false, g.is_enabled());
@@ -1536,7 +1679,8 @@ TEST_F(TestModel, remove_implicit_singleton_constraints) {
         auto& g = model.create_constraint("g", -3 * x + y <= 7);
         y.fix_by(1);
 
-        model.remove_implicit_singleton_constraints(false);
+        model.remove_redundant_constraints_with_tightening_variable_bounds(
+            false);
         EXPECT_EQ(false, x.is_fixed());
         EXPECT_EQ(-2, x.lower_bound());
         EXPECT_EQ(10, x.upper_bound());
@@ -1550,7 +1694,8 @@ TEST_F(TestModel, remove_implicit_singleton_constraints) {
         auto& g = model.create_constraint("g", -3 * x + y >= 7);
         y.fix_by(1);
 
-        model.remove_implicit_singleton_constraints(false);
+        model.remove_redundant_constraints_with_tightening_variable_bounds(
+            false);
         EXPECT_EQ(false, x.is_fixed());
         EXPECT_EQ(-10, x.lower_bound());
         EXPECT_EQ(-2, x.upper_bound());
@@ -1564,7 +1709,8 @@ TEST_F(TestModel, remove_implicit_singleton_constraints) {
         auto& g = model.create_constraint("g", 3 * x + 1 == 7);
         x.fix_by(2);
 
-        model.remove_implicit_singleton_constraints(false);
+        model.remove_redundant_constraints_with_tightening_variable_bounds(
+            false);
         EXPECT_EQ(true, x.is_fixed());
         EXPECT_EQ(false, g.is_enabled());
     }
@@ -1575,7 +1721,8 @@ TEST_F(TestModel, remove_implicit_singleton_constraints) {
         auto& g = model.create_constraint("g", 3 * x + 1 <= 7);
         x.fix_by(1);
 
-        model.remove_implicit_singleton_constraints(false);
+        model.remove_redundant_constraints_with_tightening_variable_bounds(
+            false);
         EXPECT_EQ(true, x.is_fixed());
         EXPECT_EQ(false, g.is_enabled());
     }
@@ -1586,7 +1733,8 @@ TEST_F(TestModel, remove_implicit_singleton_constraints) {
         auto& g = model.create_constraint("g", 3 * x + 1 >= 7);
         x.fix_by(3);
 
-        model.remove_implicit_singleton_constraints(false);
+        model.remove_redundant_constraints_with_tightening_variable_bounds(
+            false);
         EXPECT_EQ(true, x.is_fixed());
         EXPECT_EQ(false, g.is_enabled());
     }
@@ -1598,7 +1746,8 @@ TEST_F(TestModel, remove_implicit_singleton_constraints) {
         auto& g = model.create_constraint("g", -3 * x + 1 == 7);
         x.fix_by(-2);
 
-        model.remove_implicit_singleton_constraints(false);
+        model.remove_redundant_constraints_with_tightening_variable_bounds(
+            false);
         EXPECT_EQ(true, x.is_fixed());
         EXPECT_EQ(false, g.is_enabled());
     }
@@ -1609,7 +1758,8 @@ TEST_F(TestModel, remove_implicit_singleton_constraints) {
         auto& g = model.create_constraint("g", -3 * x + 1 <= 7);
         x.fix_by(-2);
 
-        model.remove_implicit_singleton_constraints(false);
+        model.remove_redundant_constraints_with_tightening_variable_bounds(
+            false);
         EXPECT_EQ(true, x.is_fixed());
         EXPECT_EQ(false, g.is_enabled());
     }
@@ -1620,9 +1770,68 @@ TEST_F(TestModel, remove_implicit_singleton_constraints) {
         auto& g = model.create_constraint("g", -3 * x + 1 >= 7);
         x.fix_by(-2);
 
-        model.remove_implicit_singleton_constraints(false);
+        model.remove_redundant_constraints_with_tightening_variable_bounds(
+            false);
         EXPECT_EQ(true, x.is_fixed());
         EXPECT_EQ(false, g.is_enabled());
+    }
+
+    {
+        cppmh::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x", 0, 10);
+        auto& y = model.create_variable("y", 0, 1);
+        auto& g = model.create_constraint("g", 3 * x + y <= 7);
+
+        model.remove_redundant_constraints_with_tightening_variable_bounds(
+            false);
+        EXPECT_EQ(false, x.is_fixed());
+        EXPECT_EQ(0, x.lower_bound());
+        EXPECT_EQ(2, x.upper_bound());
+        EXPECT_EQ(true, g.is_enabled());
+    }
+    {
+        cppmh::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x", 0, 10);
+        auto& y = model.create_variable("y", 0, 1);
+        auto& g = model.create_constraint("g", 3 * x + y >= 7);
+
+        model.remove_redundant_constraints_with_tightening_variable_bounds(
+            false);
+        EXPECT_EQ(false, x.is_fixed());
+        EXPECT_EQ(2, x.lower_bound());
+        EXPECT_EQ(10, x.upper_bound());
+        EXPECT_EQ(true, g.is_enabled());
+    }
+
+    {
+        cppmh::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x", -10, 10);
+        auto& y = model.create_variable("y", 0, 1);
+        auto& g = model.create_constraint("g", -3 * x + y <= 7);
+
+        model.remove_redundant_constraints_with_tightening_variable_bounds(
+            false);
+        EXPECT_EQ(false, x.is_fixed());
+        EXPECT_EQ(-2, x.lower_bound());
+        EXPECT_EQ(10, x.upper_bound());
+        EXPECT_EQ(true, g.is_enabled());
+    }
+    {
+        cppmh::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x", -10, 10);
+        auto& y = model.create_variable("y", 0, 1);
+        auto& g = model.create_constraint("g", -3 * x + y >= 7);
+
+        model.remove_redundant_constraints_with_tightening_variable_bounds(
+            false);
+        EXPECT_EQ(false, x.is_fixed());
+        EXPECT_EQ(-10, x.lower_bound());
+        EXPECT_EQ(-2, x.upper_bound());
+        EXPECT_EQ(true, g.is_enabled());
     }
 }
 
@@ -2094,20 +2303,27 @@ TEST_F(TestModel, generate_variable_parameter_proxies) {
     auto& z = model.create_variables("z", {10, 10});
 
     int fill_value = random_integer();
+    model.setup_unique_name();
 
     auto parameter_proxies =
         model.generate_variable_parameter_proxies(fill_value);
     EXPECT_EQ(x.id(), parameter_proxies[0].id());
     EXPECT_EQ(1, parameter_proxies[0].number_of_dimensions());
     EXPECT_EQ(1, parameter_proxies[0].number_of_elements());
+    EXPECT_EQ("x", parameter_proxies[0].flat_indexed_names(0));
 
     EXPECT_EQ(y.id(), parameter_proxies[1].id());
     EXPECT_EQ(1, parameter_proxies[1].number_of_dimensions());
     EXPECT_EQ(10, parameter_proxies[1].number_of_elements());
+    EXPECT_EQ("y[ 0]", parameter_proxies[1].flat_indexed_names(0));
+    EXPECT_EQ("y[ 9]", parameter_proxies[1].flat_indexed_names(10 - 1));
 
     EXPECT_EQ(z.id(), parameter_proxies[2].id());
     EXPECT_EQ(2, parameter_proxies[2].number_of_dimensions());
     EXPECT_EQ(100, parameter_proxies[2].number_of_elements());
+    EXPECT_EQ("z[ 0,  0]", parameter_proxies[2].flat_indexed_names(0));
+    EXPECT_EQ("z[ 9,  9]", parameter_proxies[2].flat_indexed_names(100 - 1));
+
     for (auto&& value : parameter_proxies[0].flat_indexed_values()) {
         EXPECT_EQ(fill_value, value);
     }
@@ -2128,20 +2344,27 @@ TEST_F(TestModel, generate_expression_parameter_proxies) {
     auto& r = model.create_expressions("r", {10, 10});
 
     int fill_value = random_integer();
+    model.setup_unique_name();
 
     auto parameter_proxies =
         model.generate_expression_parameter_proxies(fill_value);
     EXPECT_EQ(p.id(), parameter_proxies[0].id());
     EXPECT_EQ(1, parameter_proxies[0].number_of_dimensions());
     EXPECT_EQ(1, parameter_proxies[0].number_of_elements());
+    EXPECT_EQ("p", parameter_proxies[0].flat_indexed_names(0));
 
     EXPECT_EQ(q.id(), parameter_proxies[1].id());
     EXPECT_EQ(1, parameter_proxies[1].number_of_dimensions());
     EXPECT_EQ(10, parameter_proxies[1].number_of_elements());
+    EXPECT_EQ("q[ 0]", parameter_proxies[1].flat_indexed_names(0));
+    EXPECT_EQ("q[ 9]", parameter_proxies[1].flat_indexed_names(10 - 1));
 
     EXPECT_EQ(r.id(), parameter_proxies[2].id());
     EXPECT_EQ(2, parameter_proxies[2].number_of_dimensions());
     EXPECT_EQ(100, parameter_proxies[2].number_of_elements());
+    EXPECT_EQ("r[ 0,  0]", parameter_proxies[2].flat_indexed_names(0));
+    EXPECT_EQ("r[ 9,  9]", parameter_proxies[2].flat_indexed_names(100 - 1));
+
     for (auto&& value : parameter_proxies[0].flat_indexed_values()) {
         EXPECT_EQ(fill_value, value);
     }
@@ -2162,20 +2385,27 @@ TEST_F(TestModel, generate_constraint_parameter_proxies) {
     auto& v = model.create_constraints("v", {10, 10});
 
     int fill_value = random_integer();
+    model.setup_unique_name();
 
     auto parameter_proxies =
         model.generate_constraint_parameter_proxies(fill_value);
     EXPECT_EQ(g.id(), parameter_proxies[0].id());
     EXPECT_EQ(1, parameter_proxies[0].number_of_dimensions());
     EXPECT_EQ(1, parameter_proxies[0].number_of_elements());
+    EXPECT_EQ("g", parameter_proxies[0].flat_indexed_names(0));
 
     EXPECT_EQ(h.id(), parameter_proxies[1].id());
     EXPECT_EQ(1, parameter_proxies[1].number_of_dimensions());
     EXPECT_EQ(10, parameter_proxies[1].number_of_elements());
+    EXPECT_EQ("h[ 0]", parameter_proxies[1].flat_indexed_names(0));
+    EXPECT_EQ("h[ 9]", parameter_proxies[1].flat_indexed_names(10 - 1));
 
     EXPECT_EQ(v.id(), parameter_proxies[2].id());
     EXPECT_EQ(2, parameter_proxies[2].number_of_dimensions());
     EXPECT_EQ(100, parameter_proxies[2].number_of_elements());
+    EXPECT_EQ("v[ 0,  0]", parameter_proxies[2].flat_indexed_names(0));
+    EXPECT_EQ("v[ 9,  9]", parameter_proxies[2].flat_indexed_names(100 - 1));
+
     for (auto&& value : parameter_proxies[0].flat_indexed_values()) {
         EXPECT_EQ(fill_value, value);
     }
