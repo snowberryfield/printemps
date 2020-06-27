@@ -166,7 +166,8 @@ LocalSearchResult<T_Variable, T_Expression> solve(
             /**
              * Update the incumbent if the evaluated solution improves it.
              */
-            if (trial_solution_score.local_augmented_objective <
+            if (trial_solution_score.local_augmented_objective +
+                    constant::EPSILON <
                 incumbent_holder.local_augmented_incumbent_objective()) {
                 solution_score           = trial_solution_score;
                 found_improving_solution = true;

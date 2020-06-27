@@ -323,7 +323,8 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                 if (!trial_move_scores[argmin_global_augmented_objective]
                          .is_permissible &&
                     trial_solution_scores[argmin_global_augmented_objective]
-                            .global_augmented_objective <
+                                .global_augmented_objective +
+                            constant::EPSILON <
                         incumbent_holder
                             .global_augmented_incumbent_objective()) {
                     selected_index = argmin_global_augmented_objective;
@@ -341,7 +342,8 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                     if (!trial_move_scores[argmin_global_augmented_objective]
                              .is_permissible &&
                         trial_solution_scores[argmin_global_augmented_objective]
-                                .global_augmented_objective <
+                                    .global_augmented_objective +
+                                constant::EPSILON <
                             incumbent_holder.feasible_incumbent_objective()) {
                         selected_index = argmin_global_augmented_objective;
                         is_aspirated   = true;
