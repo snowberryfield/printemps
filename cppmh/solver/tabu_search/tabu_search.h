@@ -67,11 +67,6 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     IncumbentHolder_T incumbent_holder = a_INCUMBENT_HOLDER;
 
     /**
-     * Reset the local augmented incumbent.
-     */
-    incumbent_holder.reset_local_augmented_incumbent();
-
-    /**
      * Prepare a random generator, which is used for shuffling moves.
      */
     std::mt19937 get_rand_mt(option.tabu_search.seed);
@@ -90,6 +85,10 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     int update_status =
         incumbent_holder.try_update_incumbent(model, solution_score);
 
+    /**
+     * Reset the local augmented incumbent.
+     */
+    incumbent_holder.reset_local_augmented_incumbent();
     int total_update_status = IncumbentHolderConstant::STATUS_NO_UPDATED;
 
     /**
