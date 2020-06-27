@@ -1958,18 +1958,12 @@ class Model {
     }
 
     /*************************************************************************/
-    inline void import_solution(
+    inline constexpr void import_solution(
         const std::unordered_map<std::string, int> &a_SOLUTION) {
-        /**
-         *  This method cannot be constexpr due to
-         *  for (const auto &item : a_SOLUTION) { ... }
-         */
-        for (const auto &item : a_SOLUTION) {
-            for (auto &&proxy : m_variable_proxies) {
-                for (auto &&variable : proxy.flat_indexed_variables()) {
-                    if (item.first == variable.name()) {
-                        variable = item.second;
-                    }
+        for (auto &&proxy : m_variable_proxies) {
+            for (auto &&variable : proxy.flat_indexed_variables()) {
+                if (a_SOLUTION.find(variable.name()) != a_SOLUTION.end()) {
+                    variable = a_SOLUTION.at(variable.name());
                 }
             }
         }
