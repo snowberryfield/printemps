@@ -1253,6 +1253,8 @@ class Model {
     inline constexpr int
     remove_redundant_constraints_with_tightening_variable_bounds(
         const bool a_IS_ENABLED_PRINT) {
+        const int BOUND_LIMIT = 100000;
+
         int number_of_newly_disabled_constraints = 0;
         for (auto &&proxy : m_constraint_proxies) {
             for (auto &&constraint : proxy.flat_indexed_constraints()) {
@@ -1411,7 +1413,8 @@ class Model {
                         auto bound_floor =
                             static_cast<T_Variable>(std::floor(bound_temp));
 
-                        if (bound_floor < upper_bound) {
+                        if (bound_floor < upper_bound &&
+                            abs(bound_floor) < BOUND_LIMIT) {
                             utility::print_message(
                                 "The constraint " + constraint.name() +
                                     " was removed instead of tightening the "
@@ -1444,7 +1447,8 @@ class Model {
                         auto bound_ceil =
                             static_cast<T_Variable>(std::ceil(bound_temp));
 
-                        if (bound_ceil > lower_bound) {
+                        if (bound_ceil > lower_bound &&
+                            abs(bound_ceil) < BOUND_LIMIT) {
                             utility::print_message(
                                 "The constraint " + constraint.name() +
                                     " was removed instead of tightening the "
@@ -1486,7 +1490,8 @@ class Model {
                                           coefficient;
                         auto bound_ceil =
                             static_cast<T_Variable>(std::ceil(bound_temp));
-                        if (bound_ceil > lower_bound) {
+                        if (bound_ceil > lower_bound &&
+                            abs(bound_ceil) < BOUND_LIMIT) {
                             utility::print_message(
                                 "The lower bound of the decision variable " +
                                     variable_ptr->name() +
@@ -1502,7 +1507,8 @@ class Model {
                                           coefficient;
                         auto bound_floor =
                             static_cast<T_Variable>(std::floor(bound_temp));
-                        if (bound_floor < upper_bound) {
+                        if (bound_floor < upper_bound &&
+                            abs(bound_floor) < BOUND_LIMIT) {
                             utility::print_message(
                                 "The upper bound of the decision variable " +
                                     variable_ptr->name() +
@@ -1529,7 +1535,8 @@ class Model {
                                           coefficient;
                         auto bound_floor =
                             static_cast<T_Variable>(std::floor(bound_temp));
-                        if (bound_floor < upper_bound) {
+                        if (bound_floor < upper_bound &&
+                            abs(bound_floor) < BOUND_LIMIT) {
                             utility::print_message(
                                 "The upper bound of the decision variable " +
                                     variable_ptr->name() +
@@ -1547,7 +1554,8 @@ class Model {
                                           coefficient;
                         auto bound_ceil =
                             static_cast<T_Variable>(std::ceil(bound_temp));
-                        if (bound_ceil > lower_bound) {
+                        if (bound_ceil > lower_bound &&
+                            abs(bound_ceil) < BOUND_LIMIT) {
                             utility::print_message(
                                 "The lower bound of the decision variable " +
                                     variable_ptr->name() +
