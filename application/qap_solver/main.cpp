@@ -34,7 +34,7 @@ int main([[maybe_unused]] int argc, char *argv[]) {
      */
     cppmh::solver::Option option;
     option.verbose = cppmh::solver::Full;
-    if (argv[2] != nullptr) {
+    if (argc > 2) {
         std::string option_file_name = argv[2];
         option = cppmh::utility::read_option(option_file_name);
     }
