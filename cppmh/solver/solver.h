@@ -368,11 +368,7 @@ Result<T_Variable, T_Expression> solve(
         auto result_global_solution =
             result.incumbent_holder.global_augmented_incumbent_solution();
 
-        if (result_local_solution.is_feasible) {
-            current_solution = result_local_solution;
-        } else {
-            current_solution = result_global_solution;
-        }
+        current_solution = result_global_solution;
 
         /**
          * Update the global augmented incumbent solution if it was improved by
@@ -411,7 +407,7 @@ Result<T_Variable, T_Expression> solve(
             incumbent_holder.global_augmented_incumbent_objective() -
             result.incumbent_holder.local_augmented_incumbent_objective();
 
-        if (result_local_solution.is_feasible || gap < constant::EPSILON) {
+        if (result_local_solution.is_feasible || gap < -constant::EPSILON) {
             /**
              * Relax the local penalty coefficients if
              * (1) The local augmented incumbent solution obtained in the last
@@ -425,9 +421,11 @@ Result<T_Variable, T_Expression> solve(
                     element *= master_option.penalty_coefficient_relaxing_rate;
                 }
             }
-        } else {
+        } else if (gap > constant::EPSILON) {
             /**
-             * Tighten the local penalty coefficients otherwise.
+             * If The gap the (global augmented incumbent objective) - (the
+             * local augmented incumbent objective obtained in the last tabu
+             * search) is positive, tighten the local penalty coefficients.
              */
             double total_squared_penalty = 0.0;
             for (const auto& proxy :
@@ -468,6 +466,10 @@ Result<T_Variable, T_Expression> solve(
                         element, master_option.initial_penalty_coefficient);
                 }
             }
+        } else {
+            /**
+             * Otherwise, the penalty coefficients will not change.
+             */
         }
 
         /**
