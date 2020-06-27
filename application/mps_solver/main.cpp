@@ -35,7 +35,7 @@ int main([[maybe_unused]] int argc, char *argv[]) {
      */
     cppmh::solver::Option option;
     option.verbose = cppmh::solver::Full;
-    if (argv[2] != nullptr) {
+    if (argc > 2) {
         std::string option_file_name = argv[2];
         option = cppmh::utility::read_option(option_file_name);
     }
@@ -47,7 +47,7 @@ int main([[maybe_unused]] int argc, char *argv[]) {
      */
 
     cppmh::model::IPModel a_model;
-    if (argv[3] != nullptr) {
+    if (argc > 3) {
         std::string solution_file_name = argv[3];
         auto solution = cppmh::utility::read_solution(solution_file_name);
         model.import_solution(solution);

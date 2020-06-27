@@ -65,7 +65,6 @@ struct MPSVariable {
         continuous_lower_bound = 0;
         continuous_upper_bound = HUGE_VAL;
         continuous_fixed_value = 0;
-        is_bounded             = false;
         is_bound_defined       = false;
         is_fixed               = false;
     }
@@ -328,7 +327,6 @@ inline MPS read_mps(const std::string &a_FILE_NAME) {
                 }
                 if (items_size == 3) {
                     if (category == "FR") {
-                        mps.variables[v_name].is_bounded       = false;
                         mps.variables[v_name].is_bound_defined = true;
                         mps.variables[v_name].integer_lower_bound =
                             std::numeric_limits<int>::min() + 1;
@@ -338,40 +336,49 @@ inline MPS read_mps(const std::string &a_FILE_NAME) {
                             -HUGE_VAL;
                         mps.variables[v_name].continuous_upper_bound = HUGE_VAL;
                     } else if (category == "BV") {
-                        mps.variables[v_name].is_bounded          = true;
                         mps.variables[v_name].is_bound_defined    = true;
                         mps.variables[v_name].integer_lower_bound = 0;
                         mps.variables[v_name].integer_upper_bound = 1;
+                    } else if (category == "MI") {
+                        mps.variables[v_name].is_bound_defined = true;
+                        mps.variables[v_name].integer_lower_bound =
+                            std::numeric_limits<int>::min() + 1;
+                        mps.variables[v_name].integer_upper_bound = 0;
+                        mps.variables[v_name].continuous_lower_bound =
+                            -HUGE_VAL;
+                        mps.variables[v_name].continuous_upper_bound = 0;
+                    } else if (category == "PL") {
+                        mps.variables[v_name].is_bound_defined    = true;
+                        mps.variables[v_name].integer_lower_bound = 0;
+                        mps.variables[v_name].integer_upper_bound =
+                            std::numeric_limits<int>::max() - 1;
+                        mps.variables[v_name].continuous_lower_bound = 0;
+                        mps.variables[v_name].continuous_upper_bound = HUGE_VAL;
                     }
                 } else if (items_size == 4) {
                     int    integer_value    = atoi(items[3].c_str());
                     double continuous_value = atof(items[3].c_str());
                     if (category == "LO") {
-                        mps.variables[v_name].is_bounded       = true;
                         mps.variables[v_name].is_bound_defined = true;
                         mps.variables[v_name].integer_lower_bound =
                             integer_value;
                         mps.variables[v_name].continuous_lower_bound =
                             continuous_value;
                     } else if (category == "LI") {
-                        mps.variables[v_name].is_bounded       = true;
                         mps.variables[v_name].is_bound_defined = true;
                         mps.variables[v_name].integer_lower_bound =
                             integer_value;
                     } else if (category == "UP") {
-                        mps.variables[v_name].is_bounded       = true;
                         mps.variables[v_name].is_bound_defined = true;
                         mps.variables[v_name].integer_upper_bound =
                             integer_value;
                         mps.variables[v_name].continuous_upper_bound =
                             continuous_value;
                     } else if (category == "UI") {
-                        mps.variables[v_name].is_bounded       = true;
                         mps.variables[v_name].is_bound_defined = true;
                         mps.variables[v_name].integer_upper_bound =
                             integer_value;
                     } else if (category == "FX") {
-                        mps.variables[v_name].is_bounded       = false;
                         mps.variables[v_name].is_bound_defined = true;
                         mps.variables[v_name].is_fixed         = true;
                         mps.variables[v_name].integer_fixed_value =
@@ -450,10 +457,10 @@ class MPSReader {
                     "The problem defined in the MPS file must not include "
                     "continuous variables."));
             }
-            if (variable.is_bounded) {
-                variable_proxy(count).set_bound(variable.integer_lower_bound,
-                                                variable.integer_upper_bound);
-            }
+
+            variable_proxy(count).set_bound(variable.integer_lower_bound,
+                                            variable.integer_upper_bound);
+
             if (variable.is_fixed) {
                 variable_proxy(count).fix_by(variable.integer_fixed_value);
             }
