@@ -1707,7 +1707,8 @@ class Model {
                 }
                 double violation = constraints[j].evaluate_violation(a_MOVE);
 
-                if (violation < constraints[j].violation_value()) {
+                if (violation + constant::EPSILON <
+                    constraints[j].violation_value()) {
                     is_constraint_improvable = true;
                 }
                 total_violation += violation;
@@ -1776,7 +1777,7 @@ class Model {
                                     constraint_ptr->violation_value();
             total_violation += violation_diff;
 
-            if (violation_diff < 0) {
+            if (violation_diff + constant::EPSILON < 0) {
                 is_constraint_improvable = true;
             }
 
