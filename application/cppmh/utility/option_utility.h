@@ -262,6 +262,12 @@ inline cppmh::solver::Option read_option(const std::string &a_FILE_NAME) {
             option_object_tabu_search);
 
         /**********************************************************************/
+        /// tabu_search.is_enabled_initial_modification
+        read_json(&option.tabu_search.is_enabled_initial_modification,  //
+                  "is_enabled_initial_modification",                    //
+                  option_object_tabu_search);
+
+        /**********************************************************************/
         /// tabu_search.bias_increase_count_threshold
         read_json(&option.tabu_search.bias_increase_count_threshold,  //
                   "bias_increase_count_threshold",                    //

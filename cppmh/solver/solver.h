@@ -333,7 +333,8 @@ Result<T_Variable, T_Expression> solve(
 
         option.tabu_search.time_offset = elapsed_time;
         option.tabu_search.seed += iteration;
-        if (!(last_total_update_status &
+        if (master_option.tabu_search.is_enabled_initial_modification &&
+            !(last_total_update_status &
               IncumbentHolderConstant::
                   STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE)) {
             option.tabu_search.number_of_initial_modification =
@@ -535,12 +536,14 @@ Result<T_Variable, T_Expression> solve(
             utility::print_message("Global incumbent objective was updated. ",
                                    master_option.verbose >= Verbose::Outer);
         } else {
-            utility::print_message(
-                "Incumbent objective was not updated. For the initial " +
-                    std::to_string(last_tabu_tenure) +
-                    " iterations in the next loop, the solution will be "
-                    "randomly updated to escape from the local minimum.",
-                master_option.verbose >= Verbose::Outer);
+            if (master_option.tabu_search.is_enabled_initial_modification) {
+                utility::print_message(
+                    "Incumbent objective was not updated. For the initial " +
+                        std::to_string(last_tabu_tenure) +
+                        " iterations in the next loop, the solution will be "
+                        "randomly updated to escape from the local minimum.",
+                    master_option.verbose >= Verbose::Outer);
+            }
         }
 
         if (master_option.tabu_search
