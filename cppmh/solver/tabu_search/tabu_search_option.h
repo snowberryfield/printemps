@@ -27,6 +27,7 @@ struct TabuSearchOptionConstant {
         true;
     static constexpr bool DEFAULT_IS_ENABLED_AUTOMATIC_ITERATION_ADJUSTMENT =
         true;
+    static constexpr bool   DEFAULT_IS_ENABLED_INITIAL_MODIFICATION    = true;
     static constexpr int    DEFAULT_BIAS_INCREASE_COUNT_THRESHOLD      = 5;
     static constexpr int    DEFAULT_BIAS_DECREASE_COUNT_THRESHOLD      = 10;
     static constexpr double DEFAULT_ITERATION_INCREASE_RATE            = 1.5;
@@ -59,6 +60,7 @@ struct TabuSearchOption {
     bool     is_enabled_automatic_break;
     bool     is_enabled_automatic_tabu_tenure_adjustment;
     bool     is_enabled_automatic_iteration_adjustment;
+    bool     is_enabled_initial_modification;
     int      bias_increase_count_threshold;
     int      bias_decrease_count_threshold;
     double   iteration_increase_rate;
@@ -105,6 +107,8 @@ struct TabuSearchOption {
         this->is_enabled_automatic_iteration_adjustment =
             TabuSearchOptionConstant::
                 DEFAULT_IS_ENABLED_AUTOMATIC_ITERATION_ADJUSTMENT;
+        this->is_enabled_initial_modification =
+            TabuSearchOptionConstant::DEFAULT_IS_ENABLED_INITIAL_MODIFICATION;
         this->bias_increase_count_threshold =
             TabuSearchOptionConstant::DEFAULT_BIAS_INCREASE_COUNT_THRESHOLD;
         this->bias_decrease_count_threshold =
