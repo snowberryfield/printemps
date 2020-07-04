@@ -1965,10 +1965,7 @@ class Model {
                 if (a_SOLUTION.find(variable.name()) != a_SOLUTION.end()) {
                     variable = a_SOLUTION.at(variable.name());
                 } else {
-                    throw std::logic_error(utility::format_error_location(
-                        __FILE__, __LINE__, __func__,
-                        "There is no value for decision variable " +
-                            variable.name() + "."));
+                    variable = 0;
                 }
             }
         }
