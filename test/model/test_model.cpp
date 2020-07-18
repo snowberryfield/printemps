@@ -778,8 +778,8 @@ TEST_F(TestModel, setup_variable_related_constraints) {
                               x(i).related_constraint_ptrs().end());
     }
 
-    for (auto i = 0; i < 10; i++) {
-        for (auto j = 0; j < 10; j++) {
+    for (auto i = 0; i < 20; i++) {
+        for (auto j = 0; j < 30; j++) {
             EXPECT_EQ(false, y(i, j).related_constraint_ptrs().find(&g(0)) !=
                                  y(i, j).related_constraint_ptrs().end());
             EXPECT_EQ(true, y(i, j).related_constraint_ptrs().find(&g(1)) !=
@@ -915,6 +915,44 @@ TEST_F(TestModel, setup_is_enabled_fast_evaluation) {
         model.setup_is_enabled_fast_evaluation();
 
         EXPECT_EQ(false, model.is_enabled_fast_evaluation());
+    }
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, setup_variable_sensitivity) {
+    cppmh::model::Model<int, double> model;
+
+    auto& x = model.create_variables("x", 10, 0, 1);
+    auto& y = model.create_variables("y", {20, 30}, 0, 1);
+    auto& g = model.create_constraints("g", 3);
+
+    auto& p = model.create_expressions("p", 3);
+    for (auto i = 0; i < 10; i++) {
+        p(0) += (i + 1) * x(i);
+    }
+
+    for (auto i = 0; i < 20; i++) {
+        for (auto j = 0; j < 30; j++) {
+            p(1) += (i + j + 1) * y(i, j);
+        }
+    }
+    g(0) = p(0) <= 10000;
+    g(1) = p(1) <= 10000;
+
+    model.minimize(2 * x.sum() + 5 * y.sum());
+
+    model.setup_variable_sensitivity();
+
+    for (auto i = 0; i < 10; i++) {
+        EXPECT_EQ(i + 1, x(i).constraint_sensitivities().at(&g(0)));
+        EXPECT_EQ(2, x(i).objective_sensitivity());
+    }
+
+    for (auto i = 0; i < 20; i++) {
+        for (auto j = 0; j < 30; j++) {
+            EXPECT_EQ(i + j + 1, y(i, j).constraint_sensitivities().at(&g(1)));
+            EXPECT_EQ(5, y(i, j).objective_sensitivity());
+        }
     }
 }
 
