@@ -637,6 +637,10 @@ class Model {
         this->setup_is_linear();
         this->setup_is_enabled_fast_evaluation();
 
+        if (this->is_linear()) {
+            this->setup_variable_sensitivity();
+        }
+
         /**
          * Presolve the problem by removing redundant constraints and fixing
          * decision variables implicitly fixed.
@@ -804,6 +808,27 @@ class Model {
 
         if (m_neighborhood.is_enabled_user_defined_move()) {
             m_is_enabled_fast_evaluation = false;
+        }
+    }
+
+    /*************************************************************************/
+    inline constexpr void setup_variable_sensitivity(void) {
+        for (auto &&proxy : m_variable_proxies) {
+            for (auto &&variable : proxy.flat_indexed_variables()) {
+                variable.reset_constraint_sensitivities();
+            }
+        }
+        for (auto &&proxy : m_constraint_proxies) {
+            for (auto &&constraint : proxy.flat_indexed_constraints()) {
+                for (auto &&sensitivity :
+                     constraint.expression().sensitivities()) {
+                    sensitivity.first->register_constraint_sensitivity(
+                        &constraint, sensitivity.second);
+                }
+            }
+        }
+        for (auto &&sensitivity : m_objective.expression().sensitivities()) {
+            sensitivity.first->set_objective_sensitivity(sensitivity.second);
         }
     }
 
