@@ -3,16 +3,15 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef CPPMH_MODEL_FIXED_SIZE_HASH_MAP__
-#define CPPMH_MODEL_FIXED_SIZE_HASH_MAP__
+#ifndef CPPMH_UTILITY_FIXED_SIZE_HASH_MAP__
+#define CPPMH_UTILITY_FIXED_SIZE_HASH_MAP__
 
 #include <vector>
 #include <unordered_map>
 #include <cmath>
-#include <iostream>
 
 namespace cppmh {
-namespace model {
+namespace utility {
 /*****************************************************************************/
 struct FixedSizeHashMapConstant {
     static constexpr std::uint_fast32_t DEFAULT_BUCKET_SIZE = 1;
@@ -152,7 +151,7 @@ class FixedSizeHashMap {
         return m_bucket_size;
     }
 };
-}  // namespace model
+}  // namespace utility
 }  // namespace cppmh
 #endif
 /*****************************************************************************/
