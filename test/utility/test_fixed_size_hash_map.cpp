@@ -32,12 +32,13 @@ class TestFixedSizeHashMap : public ::testing::Test {
 
 /*****************************************************************************/
 TEST_F(TestFixedSizeHashMap, initialize) {
-    cppmh::model::FixedSizeHashMap<cppmh::model::Variable<int, double>*, double>
+    cppmh::utility::FixedSizeHashMap<cppmh::model::Variable<int, double>*,
+                                     double>
         fixed_size_hash_map;
 
     /// static const variable seems not to be allowed in EXPECT_EQ().
     std::size_t default_bucket_size =
-        cppmh::model::FixedSizeHashMapConstant::DEFAULT_BUCKET_SIZE;
+        cppmh::utility::FixedSizeHashMapConstant::DEFAULT_BUCKET_SIZE;
 
     EXPECT_EQ(static_cast<unsigned int>(0), fixed_size_hash_map.shift_size());
     EXPECT_EQ(default_bucket_size, fixed_size_hash_map.bucket_size());
@@ -45,7 +46,8 @@ TEST_F(TestFixedSizeHashMap, initialize) {
 
 /*****************************************************************************/
 TEST_F(TestFixedSizeHashMap, setup) {
-    cppmh::model::FixedSizeHashMap<cppmh::model::Variable<int, double>*, double>
+    cppmh::utility::FixedSizeHashMap<cppmh::model::Variable<int, double>*,
+                                     double>
         fixed_size_hash_map;
 
     cppmh::model::Model<int, double> model;
