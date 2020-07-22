@@ -6,8 +6,9 @@
 #ifndef CPPMH_SOLVER_OPTION_H__
 #define CPPMH_SOLVER_OPTION_H__
 
-#include "tabu_search/tabu_search_option.h"
+#include "lagrange_dual/lagrange_dual_option.h"
 #include "local_search/local_search_option.h"
+#include "tabu_search/tabu_search_option.h"
 
 namespace cppmh {
 namespace solver {
@@ -23,6 +24,7 @@ struct OptionConstant {
     static constexpr double DEFAULT_PENALTY_COEFFICIENT_RELAXING_RATE   = 0.5;
     static constexpr double DEFAULT_PENALTY_COEFFICIENT_TIGHTENING_RATE = 1.0;
     static constexpr double DEFAULT_INITIAL_PENALTY_COEFFICIENT         = 1E6;
+    static constexpr bool   DEFAULT_IS_ENABLED_LAGRANGE_DUAL            = true;
     static constexpr bool   DEFAULT_IS_ENABLED_LOCAL_SEARCH             = true;
     static constexpr bool   DEFAULT_IS_ENABLED_GROUPING_PENALTY_COEFFICIENT =
         false;
@@ -45,6 +47,7 @@ struct Option {
     double               penalty_coefficient_relaxing_rate;
     double               penalty_coefficient_tightening_rate;
     double               initial_penalty_coefficient;
+    bool                 is_enabled_lagrange_dual;
     bool                 is_enabled_local_search;
     bool                 is_enabled_grouping_penalty_coefficient;
     bool                 is_enabled_presolve;
@@ -55,8 +58,9 @@ struct Option {
     double               target_objective_value;
     int                  verbose;
 
-    tabu_search::TabuSearchOption   tabu_search;
-    local_search::LocalSearchOption local_search;
+    tabu_search::TabuSearchOption     tabu_search;
+    local_search::LocalSearchOption   local_search;
+    lagrange_dual::LagrangeDualOption lagrange_dual;
 
     /*************************************************************************/
     Option(void) {
@@ -79,6 +83,8 @@ struct Option {
             OptionConstant::DEFAULT_PENALTY_COEFFICIENT_TIGHTENING_RATE;
         this->initial_penalty_coefficient =
             OptionConstant::DEFAULT_INITIAL_PENALTY_COEFFICIENT;
+        this->is_enabled_lagrange_dual =
+            OptionConstant::DEFAULT_IS_ENABLED_LAGRANGE_DUAL;
         this->is_enabled_local_search =
             OptionConstant::DEFAULT_IS_ENABLED_LOCAL_SEARCH;
         this->is_enabled_grouping_penalty_coefficient =
@@ -94,8 +100,9 @@ struct Option {
         this->target_objective_value = OptionConstant::DEFAULT_TARGET_OBJECTIVE;
         this->verbose                = OptionConstant::DEFAULT_VERBOSE;
 
-        this->tabu_search.initialize();
+        this->lagrange_dual.initialize();
         this->local_search.initialize();
+        this->tabu_search.initialize();
     }
 
     /*************************************************************************/
@@ -133,6 +140,10 @@ struct Option {
             " - is_enabled_presolve: " +  //
             utility::to_string(this->is_enabled_presolve, "%d"));
 
+        utility::print(                        //
+            " - is_enabled_lagrange_dual: " +  //
+            utility::to_string(this->is_enabled_lagrange_dual, "%d"));
+
         utility::print(                       //
             " - is_enabled_local_search: " +  //
             utility::to_string(this->is_enabled_local_search, "%d"));
@@ -167,6 +178,40 @@ struct Option {
         utility::print(       //
             " - verbose: " +  //
             utility::to_string(this->verbose, "%d"));
+
+        utility::print(                           //
+            " - lagrange_dual.iteration_max: " +  //
+            utility::to_string(this->lagrange_dual.iteration_max, "%d"));
+
+        utility::print(  //
+            " - lagrange_dual.time_max: " +
+            utility::to_string(this->lagrange_dual.time_max, "%f"));
+
+        utility::print(                         //
+            " - lagrange_dual.time_offset: " +  //
+            utility::to_string(this->lagrange_dual.time_offset, "%f"));
+
+        utility::print(                                   //
+            " - lagrange_dual.step_size_extend_rate: " +  //
+            utility::to_string(this->lagrange_dual.step_size_extend_rate,
+                               "%f"));
+
+        utility::print(                                   //
+            " - lagrange_dual.step_size_reduce_rate: " +  //
+            utility::to_string(this->lagrange_dual.step_size_reduce_rate,
+                               "%f"));
+
+        utility::print(                       //
+            " - lagrange_dual.tolerance: " +  //
+            utility::to_string(this->lagrange_dual.tolerance, "%f"));
+
+        utility::print(                        //
+            " - lagrange_dual.queue_size: " +  //
+            utility::to_string(this->lagrange_dual.queue_size, "%d"));
+
+        utility::print(                          //
+            " - lagrange_dual.log_interval: " +  //
+            utility::to_string(this->lagrange_dual.log_interval, "%d"));
 
         utility::print(                          //
             " - local_search.iteration_max: " +  //
