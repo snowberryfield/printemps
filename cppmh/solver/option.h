@@ -18,13 +18,13 @@ enum Verbose : int { None, Warning, Outer, Full, Debug };
 
 /*****************************************************************************/
 struct OptionConstant {
-    static constexpr int    DEFAULT_ITERATION_MAX                       = 20;
+    static constexpr int    DEFAULT_ITERATION_MAX                       = 100;
     static constexpr double DEFAULT_TIME_MAX                            = 120.0;
     static constexpr double DEFAULT_TIME_OFFSET                         = 0.0;
     static constexpr double DEFAULT_PENALTY_COEFFICIENT_RELAXING_RATE   = 0.5;
     static constexpr double DEFAULT_PENALTY_COEFFICIENT_TIGHTENING_RATE = 1.0;
     static constexpr double DEFAULT_INITIAL_PENALTY_COEFFICIENT         = 1E6;
-    static constexpr bool   DEFAULT_IS_ENABLED_LAGRANGE_DUAL            = true;
+    static constexpr bool   DEFAULT_IS_ENABLED_LAGRANGE_DUAL            = false;
     static constexpr bool   DEFAULT_IS_ENABLED_LOCAL_SEARCH             = true;
     static constexpr bool   DEFAULT_IS_ENABLED_GROUPING_PENALTY_COEFFICIENT =
         false;
