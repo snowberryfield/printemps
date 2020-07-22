@@ -452,10 +452,11 @@ class MPSReader {
             auto &variable = mps.variables[name];
 
             if (variable.sense == MPSVariableSense::Continuous) {
-                throw std::logic_error(utility::format_error_location(
-                    __FILE__, __LINE__, __func__,
-                    "The problem defined in the MPS file must not include "
-                    "continuous variables."));
+                utility::print_warning(  //
+                    "The problem defined in the MPS file includes "
+                    "continuous variables. In the following optimization, they "
+                    "are considered as integer variables.",
+                    true);
             }
 
             variable_proxy(count).set_bound(variable.integer_lower_bound,
