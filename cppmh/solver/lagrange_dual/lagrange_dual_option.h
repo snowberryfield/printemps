@@ -25,7 +25,7 @@ struct LagrangeDualOptionConstant {
 struct LagrangeDualOption {
     int    iteration_max;
     double time_max;
-    double time_offset;
+    double time_offset;  // hidden
     double step_size_extend_rate;
     double step_size_reduce_rate;
     double tolerance;
