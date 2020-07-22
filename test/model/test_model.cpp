@@ -661,52 +661,78 @@ TEST_F(TestModel, sign) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModel, number_of_variables) {
+TEST_F(TestModel, setup_number_of_variables_and_constraints) {
     cppmh::model::Model<int, double> model;
 
-    model.create_variable("x");
-    model.create_variables("y", 10);
-    model.create_variables("z", {20, 30});
-    EXPECT_EQ(1 + 10 + 20 * 30, model.number_of_variables());
-}
-
-/*****************************************************************************/
-TEST_F(TestModel, number_of_fixed_variables) {
-    cppmh::model::Model<int, double> model;
-
-    auto& x = model.create_variable("x");
-    auto& y = model.create_variables("y", 10);
-    auto& z = model.create_variables("z", {20, 30});
-    x.fix_by(0);
-    y(0).fix_by(0);
-    z(0, 0).fix_by(0);
-
-    EXPECT_EQ(3, model.number_of_fixed_variables());
-}
-
-/*****************************************************************************/
-TEST_F(TestModel, number_of_constraints) {
-    cppmh::model::Model<int, double> model;
-
-    model.create_constraint("g");
-    model.create_constraints("h", 10);
-    model.create_constraints("v", {20, 30});
-
-    EXPECT_EQ(1 + 10 + 20 * 30, model.number_of_constraints());
-}
-
-/*****************************************************************************/
-TEST_F(TestModel, number_of_disabled_constraints) {
-    cppmh::model::Model<int, double> model;
+    auto& x = model.create_variable("x", 0, 1);
+    auto& y = model.create_variables("y", 10, 0, 1);
+    auto& z = model.create_variables("z", {20, 30}, -10, 10);
 
     auto& g = model.create_constraint("g");
     auto& h = model.create_constraints("h", 10);
     auto& v = model.create_constraints("v", {20, 30});
-    g.disable();
+
+    x.fix_by(0);
+    y(0).fix_by(0);
+    z(0, 0).fix_by(0);
+
+    g = y.selection();
     h(0).disable();
     v(0, 0).disable();
 
+    model.setup_default_neighborhood(true, false,
+                                     cppmh::model::SelectionMode::Defined);
+    model.setup_number_of_variables_and_constraints();
+
+    EXPECT_EQ(1 + 10 + 20 * 30, model.number_of_variables());
+    EXPECT_EQ(3, model.number_of_fixed_variables());
+    EXPECT_EQ(10, model.number_of_selection_variables());
+    EXPECT_EQ(1, model.number_of_binary_variables());
+    EXPECT_EQ(600, model.number_of_integer_variables());
+
+    EXPECT_EQ(1 + 10 + 20 * 30, model.number_of_constraints());
+    EXPECT_EQ(1, model.number_of_selection_constraints());
     EXPECT_EQ(3, model.number_of_disabled_constraints());
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, number_of_variables) {
+    /// This method is tested in setup_number_of_variables_and_constraints().
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, number_of_fixed_variables) {
+    /// This method is tested in setup_number_of_variables_and_constraints().
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, number_of_selection_variables) {
+    /// This method is tested in setup_number_of_variables_and_constraints().
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, number_of_binary_variables) {
+    /// This method is tested in setup_number_of_variables_and_constraints().
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, number_of_integer_variables) {
+    /// This method is tested in setup_number_of_variables_and_constraints().
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, number_of_constraints) {
+    /// This method is tested in setup_number_of_variables_and_constraints().
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, number_of_selection_constraints) {
+    /// This method is tested in setup_number_of_variables_and_constraints().
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, number_of_disabled_constraints) {
+    /// This method is tested in setup_number_of_variables_and_constraints().
 }
 
 /*****************************************************************************/
@@ -1495,6 +1521,8 @@ TEST_F(TestModel, presolve) {
 
     model.presolve(false);
 
+    model.setup_number_of_variables_and_constraints();
+
     EXPECT_EQ(10, model.number_of_fixed_variables());
     EXPECT_EQ(4, model.number_of_disabled_constraints());
     EXPECT_EQ(true, x(0).is_fixed());
@@ -1524,6 +1552,7 @@ TEST_F(TestModel, remove_independent_variables) {
             EXPECT_EQ(true, x(i).is_fixed());
             EXPECT_EQ(0, x(i).value());
         }
+        model.setup_number_of_variables_and_constraints();
         EXPECT_EQ(10, model.number_of_fixed_variables());
     }
     {
@@ -1538,6 +1567,7 @@ TEST_F(TestModel, remove_independent_variables) {
             EXPECT_EQ(true, x(i).is_fixed());
             EXPECT_EQ(1, x(i).value());
         }
+        model.setup_number_of_variables_and_constraints();
         EXPECT_EQ(10, model.number_of_fixed_variables());
     }
     {
@@ -1552,6 +1582,7 @@ TEST_F(TestModel, remove_independent_variables) {
             EXPECT_EQ(true, x(i).is_fixed());
             EXPECT_EQ(1, x(i).value());
         }
+        model.setup_number_of_variables_and_constraints();
         EXPECT_EQ(10, model.number_of_fixed_variables());
     }
     {
@@ -1566,6 +1597,7 @@ TEST_F(TestModel, remove_independent_variables) {
             EXPECT_EQ(true, x(i).is_fixed());
             EXPECT_EQ(0, x(i).value());
         }
+        model.setup_number_of_variables_and_constraints();
         EXPECT_EQ(10, model.number_of_fixed_variables());
     }
 }
@@ -1879,6 +1911,7 @@ TEST_F(TestModel, fix_implicit_fixed_variables) {
 
     auto& x = model.create_variables("x", 10, -10, 10);
     x(0).set_bound(5, 5);
+    model.setup_number_of_variables_and_constraints();
     model.fix_implicit_fixed_variables(false);
     EXPECT_EQ(5, x(0).value());
     EXPECT_EQ(true, x(0).is_fixed());
@@ -1886,6 +1919,7 @@ TEST_F(TestModel, fix_implicit_fixed_variables) {
     for (auto i = 1; i < 10; i++) {
         EXPECT_EQ(false, x(i).is_fixed());
     }
+    model.setup_number_of_variables_and_constraints();
     EXPECT_EQ(1, model.number_of_fixed_variables());
 }
 
