@@ -55,10 +55,20 @@ class Model {
     std::vector<std::string> m_expression_names;
     std::vector<std::string> m_constraint_names;
 
-    bool                                   m_is_defined_objective;
-    bool                                   m_is_enabled_fast_evaluation;
-    bool                                   m_is_linear;
-    bool                                   m_is_minimization;
+    bool m_is_defined_objective;
+    bool m_is_enabled_fast_evaluation;
+    bool m_is_linear;
+    bool m_is_minimization;
+
+    int m_number_of_variables;
+    int m_number_of_fixed_variables;
+    int m_number_of_selection_variables;
+    int m_number_of_binary_variables;
+    int m_number_of_integer_variables;
+    int m_number_of_constraints;
+    int m_number_of_selection_constraints;
+    int m_number_of_disabled_constraints;
+
     Neighborhood<T_Variable, T_Expression> m_neighborhood;
     std::function<void(void)>              m_callback;
 
@@ -91,6 +101,16 @@ class Model {
         m_is_enabled_fast_evaluation = true;
         m_is_linear                  = true;
         m_is_minimization            = true;
+
+        m_number_of_variables             = 0;
+        m_number_of_fixed_variables       = 0;
+        m_number_of_selection_variables   = 0;
+        m_number_of_binary_variables      = 0;
+        m_number_of_integer_variables     = 0;
+        m_number_of_constraints           = 0;
+        m_number_of_selection_constraints = 0;
+        m_number_of_disabled_constraints  = 0;
+
         m_neighborhood.initialize();
         m_callback = [](void) {};
     }
@@ -574,46 +594,42 @@ class Model {
 
     /*************************************************************************/
     inline constexpr int number_of_variables(void) const {
-        int result = 0;
-        for (const auto &proxy : m_variable_proxies) {
-            result += proxy.number_of_elements();
-        }
-        return result;
+        return m_number_of_variables;
     }
 
     /*************************************************************************/
     inline constexpr int number_of_fixed_variables(void) const {
-        int result = 0;
-        for (const auto &proxy : m_variable_proxies) {
-            for (const auto &variable : proxy.flat_indexed_variables()) {
-                if (variable.is_fixed()) {
-                    result++;
-                }
-            }
-        }
-        return result;
+        return m_number_of_fixed_variables;
+    }
+
+    /*************************************************************************/
+    inline constexpr int number_of_selection_variables(void) const {
+        return m_number_of_selection_variables;
+    }
+
+    /*************************************************************************/
+    inline constexpr int number_of_binary_variables(void) const {
+        return m_number_of_binary_variables;
+    }
+
+    /*************************************************************************/
+    inline constexpr int number_of_integer_variables(void) const {
+        return m_number_of_integer_variables;
     }
 
     /*************************************************************************/
     inline constexpr int number_of_constraints(void) const {
-        int result = 0;
-        for (auto &&proxy : m_constraint_proxies) {
-            result += proxy.number_of_elements();
-        }
-        return result;
+        return m_number_of_constraints;
+    }
+
+    /*************************************************************************/
+    inline constexpr int number_of_selection_constraints(void) const {
+        return m_number_of_selection_constraints;
     }
 
     /*************************************************************************/
     inline constexpr int number_of_disabled_constraints(void) const {
-        int result = 0;
-        for (const auto &proxy : m_constraint_proxies) {
-            for (const auto &constraints : proxy.flat_indexed_constraints()) {
-                if (!constraints.is_enabled()) {
-                    result++;
-                }
-            }
-        }
-        return result;
+        return m_number_of_disabled_constraints;
     }
 
     /*************************************************************************/
@@ -636,6 +652,10 @@ class Model {
 
         this->setup_is_linear();
         this->setup_is_enabled_fast_evaluation();
+
+        if (this->is_linear()) {
+            this->setup_variable_sensitivity();
+        }
 
         /**
          * Presolve the problem by removing redundant constraints and fixing
@@ -667,6 +687,8 @@ class Model {
             a_IS_ENABLED_INITIAL_VALUE_CORRECTION, a_IS_ENABLED_PRINT);
 
         this->setup_fixed_sensitivities(a_IS_ENABLED_PRINT);
+
+        this->setup_number_of_variables_and_constraints();
     }
 
     /*************************************************************************/
@@ -804,6 +826,27 @@ class Model {
 
         if (m_neighborhood.is_enabled_user_defined_move()) {
             m_is_enabled_fast_evaluation = false;
+        }
+    }
+
+    /*************************************************************************/
+    inline constexpr void setup_variable_sensitivity(void) {
+        for (auto &&proxy : m_variable_proxies) {
+            for (auto &&variable : proxy.flat_indexed_variables()) {
+                variable.reset_constraint_sensitivities();
+            }
+        }
+        for (auto &&proxy : m_constraint_proxies) {
+            for (auto &&constraint : proxy.flat_indexed_constraints()) {
+                for (auto &&sensitivity :
+                     constraint.expression().sensitivities()) {
+                    sensitivity.first->register_constraint_sensitivity(
+                        &constraint, sensitivity.second);
+                }
+            }
+        }
+        for (auto &&sensitivity : m_objective.expression().sensitivities()) {
+            sensitivity.first->set_objective_sensitivity(sensitivity.second);
         }
     }
 
@@ -1105,6 +1148,123 @@ class Model {
          */
 
         utility::print_message("Done.", a_IS_ENABLED_PRINT);
+    }
+
+    /*************************************************************************/
+    inline constexpr void setup_number_of_variables_and_constraints(void) {
+        int number_of_variables             = 0;
+        int number_of_fixed_variables       = 0;
+        int number_of_selection_variables   = 0;
+        int number_of_binary_variables      = 0;
+        int number_of_integer_variables     = 0;
+        int number_of_constraints           = 0;
+        int number_of_selection_constraints = 0;
+        int number_of_disabled_constraints  = 0;
+
+        for (const auto &proxy : m_variable_proxies) {
+            number_of_variables += proxy.number_of_elements();
+            for (const auto &variable : proxy.flat_indexed_variables()) {
+                if (variable.is_fixed()) {
+                    number_of_fixed_variables++;
+                }
+                if (variable.sense() == VariableSense::Selection) {
+                    number_of_selection_variables++;
+                }
+                if (variable.sense() == VariableSense::Binary) {
+                    number_of_binary_variables++;
+                }
+                if (variable.sense() == VariableSense::Integer) {
+                    number_of_integer_variables++;
+                }
+            }
+        }
+
+        for (auto &&proxy : m_constraint_proxies) {
+            number_of_constraints += proxy.number_of_elements();
+            for (const auto &constraints : proxy.flat_indexed_constraints()) {
+                if (!constraints.is_enabled()) {
+                    number_of_disabled_constraints++;
+                }
+            }
+        }
+
+        number_of_selection_constraints = m_neighborhood.selections().size();
+
+        m_number_of_variables             = number_of_variables;
+        m_number_of_fixed_variables       = number_of_fixed_variables;
+        m_number_of_selection_variables   = number_of_selection_variables;
+        m_number_of_binary_variables      = number_of_binary_variables;
+        m_number_of_integer_variables     = number_of_integer_variables;
+        m_number_of_constraints           = number_of_constraints;
+        m_number_of_selection_constraints = number_of_selection_constraints;
+        m_number_of_disabled_constraints  = number_of_disabled_constraints;
+    }
+
+    /*************************************************************************/
+    inline constexpr void print_number_of_variables_and_constraints(
+        void) const {
+        utility::print_single_line(true);
+        if (m_number_of_fixed_variables == 0) {
+            utility::print_info(
+                "The number of decision variables: " +
+                    utility::to_string(m_number_of_variables, "%d"),
+                true);
+        } else {
+            utility::print_info(
+                "The number of decision variables: " +
+                    utility::to_string(m_number_of_variables, "%d") +
+                    "(reduced to " +
+                    utility::to_string(
+                        m_number_of_variables - m_number_of_fixed_variables,
+                        "%d") +
+                    ")",
+                true);
+        }
+
+        utility::print_info(
+            " - Selection: " +
+                utility::to_string(m_number_of_selection_variables, "%d"),
+            true);
+        utility::print_info(
+            " - Binary: " +
+                utility::to_string(m_number_of_binary_variables, "%d"),
+            true);
+        utility::print_info(
+            " - Integer: " +
+                utility::to_string(m_number_of_integer_variables, "%d"),
+            true);
+
+        utility::print_info(
+            "The number of fixed decision variables: " +
+                utility::to_string(m_number_of_fixed_variables, "%d"),
+            true);
+
+        if (m_number_of_disabled_constraints == 0) {
+            utility::print_info(
+                "The number of constraints: " +
+                    utility::to_string(m_number_of_constraints, "%d"),
+                true);
+        } else {
+            utility::print_info(
+                "The number of constraints: " +
+                    utility::to_string(m_number_of_constraints, "%d") +
+                    "(reduced to " +
+                    utility::to_string(m_number_of_constraints -
+                                           m_number_of_disabled_constraints,
+                                       "%d") +
+                    ")",
+                true);
+        }
+
+        utility::print_info(
+            "The number of selection constraints: " +
+                utility::to_string(m_number_of_selection_constraints, "%d"),
+            true);
+
+        utility::print_info(
+            "The number of reduced constraints: " +
+                utility::to_string(m_number_of_disabled_constraints, "%d"),
+            true);
     }
 
     /*************************************************************************/
@@ -1822,6 +1982,24 @@ class Model {
     }
 
     /*************************************************************************/
+    double compute_lagrangian(const std::vector<model::ValueProxy<double>>
+                                  &a_LAGRANGE_MULTIPLIER_PROXIES) {
+        double lagrangian = m_objective.value();
+        for (auto &&proxy : m_constraint_proxies) {
+            for (auto &&constraint : proxy.flat_indexed_constraints()) {
+                int id         = constraint.id();
+                int flat_index = constraint.flat_index();
+
+                lagrangian +=
+                    a_LAGRANGE_MULTIPLIER_PROXIES[id].flat_indexed_values(
+                        flat_index) *
+                    constraint.constraint_value();
+            }
+        }
+        return lagrangian;
+    }
+
+    /*************************************************************************/
     template <class T_Value>
     inline constexpr std::vector<ValueProxy<T_Value>>
     generate_variable_parameter_proxies(const T_Value a_VALUE) const {
@@ -1972,9 +2150,21 @@ class Model {
     }
 
     /*************************************************************************/
+    inline constexpr std::vector<VariableProxy<T_Variable, T_Expression>>
+        &variable_proxies(void) {
+        return m_variable_proxies;
+    }
+
+    /*************************************************************************/
     inline constexpr const std::vector<VariableProxy<T_Variable, T_Expression>>
         &variable_proxies(void) const {
         return m_variable_proxies;
+    }
+
+    /*************************************************************************/
+    inline constexpr std::vector<ExpressionProxy<T_Variable, T_Expression>>
+        &expression_proxies(void) {
+        return m_expression_proxies;
     }
 
     /*************************************************************************/
@@ -1985,10 +2175,21 @@ class Model {
     }
 
     /*************************************************************************/
+    inline constexpr std::vector<ConstraintProxy<T_Variable, T_Expression>>
+        &constraint_proxies(void) {
+        return m_constraint_proxies;
+    }
+
+    /*************************************************************************/
     inline constexpr const std::vector<
         ConstraintProxy<T_Variable, T_Expression>>
         &constraint_proxies(void) const {
         return m_constraint_proxies;
+    }
+
+    /*************************************************************************/
+    inline constexpr Objective<T_Variable, T_Expression> &objective(void) {
+        return m_objective;
     }
 
     /*************************************************************************/

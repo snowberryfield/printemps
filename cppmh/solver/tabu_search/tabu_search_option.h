@@ -20,7 +20,7 @@ struct TabuSearchOptionConstant {
     static constexpr double DEFAULT_FREQUENCY_PENALTY_COEFFICIENT = 1E-5;
 
     static constexpr bool   DEFAULT_IS_ENABLED_IMPROVABILITY_SCREENING = true;
-    static constexpr double DEFAULT_IS_ENABLED_SHUFFLE                 = false;
+    static constexpr double DEFAULT_IS_ENABLED_SHUFFLE                 = true;
     static constexpr double DEFAULT_IS_ENABLED_MOVE_CURTAIL            = false;
     static constexpr bool   DEFAULT_IS_ENABLED_AUTOMATIC_BREAK         = true;
     static constexpr bool DEFAULT_IS_ENABLED_AUTOMATIC_TABU_TENURE_ADJUSTMENT =
@@ -48,7 +48,7 @@ enum TabuMode : int {
 struct TabuSearchOption {
     int      iteration_max;
     double   time_max;
-    double   time_offset;
+    double   time_offset;  // hidden
     int      log_interval;
     int      initial_tabu_tenure;
     TabuMode tabu_mode;
@@ -63,11 +63,11 @@ struct TabuSearchOption {
     bool     is_enabled_initial_modification;
     int      bias_increase_count_threshold;
     int      bias_decrease_count_threshold;
-    double   iteration_increase_rate;
-    double   iteration_decrease_rate;
+    double   iteration_increase_rate;  // hidden
+    double   iteration_decrease_rate;  // hidden
     bool     ignore_tabu_if_augmented_incumbent;
     bool     ignore_tabu_if_feasible_incumbent;
-    int      number_of_initial_modification;
+    int      number_of_initial_modification;  // hidden
     int      seed;
 
     /*************************************************************************/

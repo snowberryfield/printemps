@@ -71,6 +71,12 @@ inline cppmh::solver::Option read_option(const std::string &a_FILE_NAME) {
               option_object);
 
     /**************************************************************************/
+    /// is_enabled_lagrange_dual
+    read_json(&option.is_enabled_lagrange_dual,  //
+              "is_enabled_lagrange_dual",        //
+              option_object);
+
+    /**************************************************************************/
     /// is_enabled_local_search
     read_json(&option.is_enabled_local_search,  //
               "is_enabled_local_search",        //
@@ -123,6 +129,65 @@ inline cppmh::solver::Option read_option(const std::string &a_FILE_NAME) {
     read_json(&option.verbose,  //
               "verbose",        //
               option_object);
+
+    /**************************************************************************/
+    /// lagrange dual
+    /**************************************************************************/
+    nlohmann::json option_object_lagrange_dual;
+
+    bool has_lagrange_dual_option = read_json(&option_object_lagrange_dual,  //
+                                              "lagrange_dual",               //
+                                              option_object);
+
+    if (has_lagrange_dual_option) {
+        /**********************************************************************/
+        /// lagrange_dual.iteration_max
+        read_json(&option.lagrange_dual.iteration_max,  //
+                  "iteration_max",                      //
+                  option_object_lagrange_dual);
+
+        /**********************************************************************/
+        /// lagrange_dual.time_max
+        read_json(&option.lagrange_dual.time_max,  //
+                  "time_max",                      //
+                  option_object_lagrange_dual);
+
+        /**********************************************************************/
+        /// lagrange_dual.time_offset
+        read_json(&option.lagrange_dual.time_offset,  //
+                  "time_offset",                      //
+                  option_object_lagrange_dual);
+
+        /**********************************************************************/
+        /// lagrange_dual.step_size_extend_rate
+        read_json(&option.lagrange_dual.step_size_extend_rate,  //
+                  "step_size_extend_rate",                      //
+                  option_object_lagrange_dual);
+
+        /**********************************************************************/
+        /// lagrange_dual.step_size_reduce_rate
+        read_json(&option.lagrange_dual.step_size_reduce_rate,  //
+                  "step_size_reduce_rate",                      //
+                  option_object_lagrange_dual);
+
+        /**********************************************************************/
+        /// lagrange_dual.tolerance
+        read_json(&option.lagrange_dual.tolerance,  //
+                  "tolerance",                      //
+                  option_object_lagrange_dual);
+
+        /**********************************************************************/
+        /// lagrange_dual.queue_size
+        read_json(&option.lagrange_dual.queue_size,  //
+                  "queue_size",                      //
+                  option_object_lagrange_dual);
+
+        /**********************************************************************/
+        /// lagrange_dual.log_interval
+        read_json(&option.lagrange_dual.log_interval,  //
+                  "log_interval",                      //
+                  option_object_lagrange_dual);
+    }
 
     /**************************************************************************/
     /// local search
