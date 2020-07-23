@@ -434,7 +434,21 @@ Result<T_Variable, T_Expression> solve(
         auto result_global_solution =
             result.incumbent_holder.global_augmented_incumbent_solution();
 
-        current_solution = result_global_solution;
+        switch (master_option.tabu_search.restart_mode) {
+            case tabu_search::RestartMode::Global: {
+                current_solution = result_global_solution;
+                break;
+            }
+            case tabu_search::RestartMode::Local: {
+                current_solution = result_local_solution;
+                break;
+            }
+            default: {
+                throw std::logic_error(utility::format_error_location(
+                    __FILE__, __LINE__, __func__,
+                    "The specified restart mode is invalid."));
+            }
+        }
 
         /**
          * Update the global augmented incumbent solution if it was improved

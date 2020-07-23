@@ -22,29 +22,11 @@ inline constexpr bool compute_permissibility(
     const Memory &                               a_MEMORY,     //
     const int                                    a_ITERATION,  //
     const Option &                               a_OPTION,     //
-    const int                                    a_TABU_TENURE) noexcept {
+    const int                                    a_TABU_TENURE) {
     bool        is_permissible         = true;
     const auto &last_update_iterations = a_MEMORY.last_update_iterations();
 
     switch (a_OPTION.tabu_search.tabu_mode) {
-        case TabuMode::Any: {
-            /**
-             * "Any" tabu mode
-             * The move is regarded as "tabu" if it includes any alteration
-             * about a variable in the tabu list.
-             */
-            is_permissible = true;
-            for (const auto &alteration : a_MOVE.alterations) {
-                if (a_ITERATION -
-                        last_update_iterations[alteration.first->id()]
-                                              [alteration.first->flat_index()] <
-                    a_TABU_TENURE) {
-                    is_permissible = false;
-                    break;
-                }
-            }
-            break;
-        }
         case TabuMode::All: {
             /**
              * "All" tabu mode
@@ -63,8 +45,29 @@ inline constexpr bool compute_permissibility(
             }
             break;
         }
+        case TabuMode::Any: {
+            /**
+             * "Any" tabu mode
+             * The move is regarded as "tabu" if it includes any alteration
+             * about a variable in the tabu list.
+             */
+            is_permissible = true;
+            for (const auto &alteration : a_MOVE.alterations) {
+                if (a_ITERATION -
+                        last_update_iterations[alteration.first->id()]
+                                              [alteration.first->flat_index()] <
+                    a_TABU_TENURE) {
+                    is_permissible = false;
+                    break;
+                }
+            }
+            break;
+        }
+
         default: {
-            /* error catch */
+            throw std::logic_error(utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "The specified tabu mode is invalid."));
         }
     }
     return is_permissible;
