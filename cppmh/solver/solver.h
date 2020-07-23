@@ -434,7 +434,13 @@ Result<T_Variable, T_Expression> solve(
         auto result_global_solution =
             result.incumbent_holder.global_augmented_incumbent_solution();
 
-        current_solution = result_global_solution;
+        if (master_option.tabu_search.restart_mode ==
+            tabu_search::RestartMode::Global) {
+            current_solution = result_global_solution;
+        } else if (master_option.tabu_search.restart_mode ==
+                   tabu_search::RestartMode::Local) {
+            current_solution = result_local_solution;
+        }
 
         /**
          * Update the global augmented incumbent solution if it was improved

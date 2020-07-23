@@ -265,15 +265,27 @@ inline cppmh::solver::Option read_option(const std::string &a_FILE_NAME) {
                   option_object_tabu_search);
 
         /**********************************************************************/
-        /// tabu_search.tabu_tenure
+        /// tabu_search.initial_tabu_tenure
         read_json(&option.tabu_search.initial_tabu_tenure,  //
                   "initial_tabu_tenure",                    //
                   option_object_tabu_search);
 
         /**********************************************************************/
+        /// tabu_search.tabu_tenure_randomize_rate
+        read_json(&option.tabu_search.tabu_tenure_randomize_rate,  //
+                  "tabu_tenure_randomize_rate",                    //
+                  option_object_tabu_search);
+
+        /**********************************************************************/
         /// tabu_search.tabu_mode
         read_json(&option.tabu_search.tabu_mode,  //
-                  "tabu_tenure",                  //
+                  "tabu_mode",                    //
+                  option_object_tabu_search);
+
+        /**********************************************************************/
+        /// tabu_search.restart_mode
+        read_json(&option.tabu_search.restart_mode,  //
+                  "restart_mode",                    //
                   option_object_tabu_search);
 
         /**********************************************************************/
