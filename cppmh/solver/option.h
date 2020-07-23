@@ -253,9 +253,18 @@ struct Option {
             " - tabu_search.initial_tabu_tenure: " +
             utility::to_string(this->tabu_search.initial_tabu_tenure, "%d"));
 
+        utility::print(  //
+            " - tabu_search.tabu_tenure_randomize_rate: " +
+            utility::to_string(this->tabu_search.tabu_tenure_randomize_rate,
+                               "%f"));
+
         utility::print(                     //
             " - tabu_search.tabu_mode: " +  //
             utility::to_string(this->tabu_search.tabu_mode, "%d"));
+
+        utility::print(                        //
+            " - tabu_search.restart_mode: " +  //
+            utility::to_string(this->tabu_search.restart_mode, "%d"));
 
         utility::print(                              //
             " - tabu_search.move_preserve_rate: " +  //
