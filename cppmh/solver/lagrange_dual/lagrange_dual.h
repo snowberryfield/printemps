@@ -155,6 +155,9 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
      */
     int iteration = 0;
 
+    auto variable_ptrs   = model->variable_reference().variable_ptrs;
+    auto constraint_ptrs = model->constraint_reference().constraint_ptrs;
+
     while (true) {
         /**
          *  Check the terminating condition.
@@ -173,15 +176,17 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
         /**
          * Update the dual solution.
          */
-        for (auto&& proxy : a_model->constraint_proxies()) {
-            for (auto&& constraint : proxy.flat_indexed_constraints()) {
-                double constraint_value = constraint.constraint_value();
-                int    id               = constraint.id();
-                int    flat_index       = constraint.flat_index();
+#ifdef _OPENMP
+#pragma omp parallel for if (option.is_enabled_parallel_evaluation) \
+    schedule(static)
+#endif
+        for (auto&& constraint_ptr : constraint_ptrs) {
+            double constraint_value = constraint_ptr->constraint_value();
+            int    id               = constraint_ptr->id();
+            int    flat_index       = constraint_ptr->flat_index();
 
-                dual_value_proxies[id].flat_indexed_values(flat_index) +=
-                    step_size * constraint_value;
-            }
+            dual_value_proxies[id].flat_indexed_values(flat_index) +=
+                step_size * constraint_value;
         }
 
         /**
@@ -193,35 +198,41 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
          * Update the primal optimal solution so that it minimizes lagrangian
          * for the updated dual solution.
          */
-        for (auto&& proxy : model->variable_proxies()) {
-            for (auto&& variable : proxy.flat_indexed_variables()) {
-                double coefficient = variable.objective_sensitivity();
+#ifdef _OPENMP
+#pragma omp parallel for if (option.is_enabled_parallel_evaluation) \
+    schedule(static)
+#endif
+        for (auto&& variable_ptr : variable_ptrs) {
+            double coefficient = variable_ptr->objective_sensitivity();
 
-                for (auto&& item : variable.constraint_sensitivities()) {
-                    auto&  constraint  = item.first;
-                    double sensitivity = item.second;
+            for (auto&& item : variable_ptr->constraint_sensitivities()) {
+                auto&  constraint  = item.first;
+                double sensitivity = item.second;
 
-                    int id         = constraint->id();
-                    int flat_index = constraint->flat_index();
+                int id         = constraint->id();
+                int flat_index = constraint->flat_index();
 
-                    coefficient +=
-                        dual_value_proxies[id].flat_indexed_values(flat_index) *
-                        sensitivity * model->sign();
+                coefficient +=
+                    dual_value_proxies[id].flat_indexed_values(flat_index) *
+                    sensitivity * model->sign();
+            }
+
+            if (coefficient > 0) {
+                if (model->is_minimization()) {
+                    variable_ptr->set_value_if_not_fixed(
+                        variable_ptr->lower_bound());
+                } else {
+                    variable_ptr->set_value_if_not_fixed(
+                        variable_ptr->upper_bound());
                 }
 
-                if (coefficient > 0) {
-                    if (model->is_minimization()) {
-                        variable.set_value_if_not_fixed(variable.lower_bound());
-                    } else {
-                        variable.set_value_if_not_fixed(variable.upper_bound());
-                    }
-
+            } else {
+                if (model->is_minimization()) {
+                    variable_ptr->set_value_if_not_fixed(
+                        variable_ptr->upper_bound());
                 } else {
-                    if (model->is_minimization()) {
-                        variable.set_value_if_not_fixed(variable.upper_bound());
-                    } else {
-                        variable.set_value_if_not_fixed(variable.lower_bound());
-                    }
+                    variable_ptr->set_value_if_not_fixed(
+                        variable_ptr->lower_bound());
                 }
             }
         }
