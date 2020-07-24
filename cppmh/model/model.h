@@ -2319,16 +2319,14 @@ class Model {
     double compute_lagrangian(const std::vector<model::ValueProxy<double>>
                                   &a_LAGRANGE_MULTIPLIER_PROXIES) {
         double lagrangian = m_objective.value();
-        for (auto &&proxy : m_constraint_proxies) {
-            for (auto &&constraint : proxy.flat_indexed_constraints()) {
-                int id         = constraint.id();
-                int flat_index = constraint.flat_index();
 
-                lagrangian +=
-                    a_LAGRANGE_MULTIPLIER_PROXIES[id].flat_indexed_values(
-                        flat_index) *
-                    constraint.constraint_value();
-            }
+        for (auto &&constraint_ptr : m_constraint_reference.constraint_ptrs) {
+            int id         = constraint_ptr->id();
+            int flat_index = constraint_ptr->flat_index();
+
+            lagrangian += a_LAGRANGE_MULTIPLIER_PROXIES[id].flat_indexed_values(
+                              flat_index) *
+                          constraint_ptr->constraint_value();
         }
         return lagrangian;
     }

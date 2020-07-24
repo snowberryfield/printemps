@@ -206,11 +206,11 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
             double coefficient = variable_ptr->objective_sensitivity();
 
             for (auto&& item : variable_ptr->constraint_sensitivities()) {
-                auto&  constraint  = item.first;
-                double sensitivity = item.second;
+                auto&  constraint_ptr = item.first;
+                double sensitivity    = item.second;
 
-                int id         = constraint->id();
-                int flat_index = constraint->flat_index();
+                int id         = constraint_ptr->id();
+                int flat_index = constraint_ptr->flat_index();
 
                 coefficient +=
                     dual_value_proxies[id].flat_indexed_values(flat_index) *
