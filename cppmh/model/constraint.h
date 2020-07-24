@@ -83,14 +83,12 @@ class Constraint : public AbstractMultiArrayElement {
     Constraint(const std::function<T_Expression(
                    const Move<T_Variable, T_Expression> &)> &a_FUNCTION,
                const ConstraintSense                         a_SENSE) {
-        this->initialize();
         this->setup(a_FUNCTION, a_SENSE);
     }
 
     /*************************************************************************/
     Constraint(const Expression<T_Variable, T_Expression> &a_EXPRESSION,
                const ConstraintSense                       a_SENSE) {
-        this->initialize();
         this->setup(a_EXPRESSION, a_SENSE);
         this->setup_constraint_type();
     }
@@ -100,8 +98,6 @@ class Constraint : public AbstractMultiArrayElement {
     /// Copy assignment
     Constraint<T_Variable, T_Expression> &operator=(
         const Constraint<T_Variable, T_Expression> &a_CONSTRAINT) {
-        this->initialize();
-
         if (a_CONSTRAINT.m_is_linear) {
             this->setup(a_CONSTRAINT.m_expression, a_CONSTRAINT.m_sense);
             this->copy_constraint_type(a_CONSTRAINT);
@@ -125,7 +121,6 @@ class Constraint : public AbstractMultiArrayElement {
         if (this == &a_constraint) {
             return *this;
         }
-        this->initialize();
 
         if (a_constraint.is_linear()) {
             this->setup(a_constraint.m_expression, a_constraint.m_sense);
@@ -196,6 +191,11 @@ class Constraint : public AbstractMultiArrayElement {
         m_is_linear        = true;
         m_is_enabled       = true;
 
+        this->clear_constraint_type();
+    }
+
+    /*************************************************************************/
+    inline constexpr void clear_constraint_type(void) {
         m_is_singleton          = false;
         m_is_aggregation        = false;
         m_is_precedence         = false;
@@ -217,8 +217,6 @@ class Constraint : public AbstractMultiArrayElement {
         const std::function<
             T_Expression(const Move<T_Variable, T_Expression> &)> &a_FUNCTION,
         const ConstraintSense                                      a_SENSE) {
-        AbstractMultiArrayElement::initialize();
-
         m_function = a_FUNCTION;
         m_expression.initialize();
         m_sense            = a_SENSE;
@@ -226,6 +224,8 @@ class Constraint : public AbstractMultiArrayElement {
         m_violation_value  = 0;
         m_is_linear        = false;
         m_is_enabled       = true;
+
+        this->clear_constraint_type();
 
         m_constraint_function =
             [this](const Move<T_Variable, T_Expression> &a_MOVE) {
@@ -276,6 +276,8 @@ class Constraint : public AbstractMultiArrayElement {
         m_violation_value  = 0;
         m_is_linear        = true;
         m_is_enabled       = true;
+
+        this->clear_constraint_type();
 
         m_expression.setup_fixed_sensitivities();
 
