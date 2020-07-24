@@ -87,7 +87,8 @@ Result<T_Variable, T_Expression> solve(
                  master_option.selection_mode);
 
     if (master_option.verbose >= Verbose::Outer) {
-        model->print_number_of_variables_and_constraints();
+        model->print_number_of_variables();
+        model->print_number_of_constraints();
     }
 
     utility::print_single_line(  //
