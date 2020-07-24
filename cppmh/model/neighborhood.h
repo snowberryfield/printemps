@@ -7,7 +7,6 @@
 #define CPPMH_MODEL_NEIGHBORHOOD_H__
 
 #include <vector>
-#include "selection.h"
 #include <typeinfo>
 
 namespace cppmh {
@@ -23,12 +22,6 @@ enum SelectionMode : int { None, Defined, Smaller, Larger, Independent };
 template <class T_Variable, class T_Expression>
 class Neighborhood {
    private:
-    std::vector<Selection<T_Variable, T_Expression>> m_selections;
-
-    std::vector<Variable<T_Variable, T_Expression> *> m_selection_variable_ptrs;
-    std::vector<Variable<T_Variable, T_Expression> *> m_binary_variable_ptrs;
-    std::vector<Variable<T_Variable, T_Expression> *> m_integer_variable_ptrs;
-
     std::function<void(std::vector<Move<T_Variable, T_Expression>> *)>
         m_selection_move_updater;
     std::function<void(std::vector<Move<T_Variable, T_Expression>> *)>
@@ -64,11 +57,6 @@ class Neighborhood {
 
     /*************************************************************************/
     inline void initialize(void) {
-        m_selections.clear();
-        m_selection_variable_ptrs.clear();
-        m_binary_variable_ptrs.clear();
-        m_integer_variable_ptrs.clear();
-
         m_selection_move_updater =
             [](std::vector<Move<T_Variable, T_Expression>> *) {};
         m_binary_move_updater =
@@ -93,276 +81,14 @@ class Neighborhood {
     }
 
     /*************************************************************************/
-    inline constexpr void setup_default_neighborhood(
-        std::vector<VariableProxy<T_Variable, T_Expression>>
-            *a_variable_proxies,
-        std::vector<ConstraintProxy<T_Variable, T_Expression>>
-            *                a_constraint_proxies,
-        const bool           a_IS_ENABLED_PARALLEL,
-        const SelectionMode &a_SELECTION_MODE) {
-        this->categorize_variables_and_constraints(
-            a_variable_proxies, a_constraint_proxies, a_SELECTION_MODE);
-        this->setup_selection_move_updater(a_IS_ENABLED_PARALLEL);
-        this->setup_binary_move_updater(a_IS_ENABLED_PARALLEL);
-        this->setup_integer_move_updater(a_IS_ENABLED_PARALLEL);
-    }
-
-    /*************************************************************************/
-    inline constexpr void setup_has_fixed_variables(
-        const std::vector<VariableProxy<T_Variable, T_Expression>>
-            &a_VARIABLE_PROXY) {
-        bool has_fixed_variables = false;
-
-        for (const auto &variable_proxy : a_VARIABLE_PROXY) {
-            for (const auto &variable :
-                 variable_proxy.flat_indexed_variables()) {
-                if (variable.is_fixed()) {
-                    has_fixed_variables = true;
-                    break;
-                }
-            }
-            if (has_fixed_variables) {
-                break;
-            }
-        }
-        m_has_fixed_variables = has_fixed_variables;
-    }
-    /*************************************************************************/
-    inline constexpr void categorize_variables_and_constraints(
-        std::vector<VariableProxy<T_Variable, T_Expression>>
-            *a_variable_proxies,
-        std::vector<ConstraintProxy<T_Variable, T_Expression>>
-            *                a_constraint_proxies,  //
-        const SelectionMode &a_SELECTION_MODE) {
-        /**
-         * pointers to binary variables which are includes in selection
-         * constraints.
-         */
-        std::vector<Variable<T_Variable, T_Expression> *>
-            selection_variable_ptrs;
-
-        /**
-         * pointers to binary variables which are not includes in any selection
-         * constraint.
-         */
-        std::vector<Variable<T_Variable, T_Expression> *> binary_variable_ptrs;
-
-        /**
-         * pointers to integer variables which are not includes in any selection
-         * constraint.
-         */
-        std::vector<Variable<T_Variable, T_Expression> *> integer_variable_ptrs;
-
-        std::vector<Selection<T_Variable, T_Expression>> raw_selections;
-        std::vector<Selection<T_Variable, T_Expression>> selections;
-
-        /**
-         * STEP 1:
-         * Filter Special Ordered Set Type I (selection) constraint without
-         * considering conflict.
-         */
-        for (auto &&proxy : *a_constraint_proxies) {
-            for (auto &&constraint : proxy.flat_indexed_constraints()) {
-                /**
-                 * Selection constraint must be linear.
-                 */
-                if (!constraint.is_linear()) {
-                    continue;
-                }
-
-                /**
-                 * Selection constraint must be equality.
-                 */
-                if (constraint.sense() != ConstraintSense::Equal) {
-                    continue;
-                }
-
-                /**
-                 * The constant term value of selection constraint must be -1.
-                 */
-                if (constraint.expression().constant_value() != -1) {
-                    continue;
-                }
-
-                /**
-                 * The number of variables in selection constraint must be more
-                 * than or equal to 2.
-                 */
-                if (constraint.expression().sensitivities().size() < 2) {
-                    continue;
-                }
-
-                bool is_selection_constraint = true;
-
-                /**
-                 * All included variables in selection constraint must be binary
-                 * variable with coefficient 1.
-                 */
-                for (const auto &sensitivity :
-                     constraint.expression().sensitivities()) {
-                    if (sensitivity.first->sense() != VariableSense::Binary) {
-                        is_selection_constraint = false;
-                        break;
-                    }
-
-                    if (sensitivity.second != 1) {
-                        is_selection_constraint = false;
-                        break;
-                    }
-                }
-
-                /**
-                 * Store variables pointers to raw_selections.
-                 */
-                if (is_selection_constraint) {
-                    Selection<T_Variable, T_Expression> selection;
-                    selection.constraint_ptr = &constraint;
-
-                    for (const auto &sensitivity :
-                         constraint.expression().sensitivities()) {
-                        selection.variable_ptrs.push_back(sensitivity.first);
-                    }
-                    raw_selections.push_back(selection);
-                }
-            }
-        }
-
-        /**
-         * STEP 2:
-         * Add selection constraints extracted in STEP 1.
-         */
-        switch (a_SELECTION_MODE) {
-            case SelectionMode::None: {
-                break;
-            }
-            case SelectionMode::Defined: {
-                break;
-            }
-            case SelectionMode::Smaller: {
-                std::sort(raw_selections.begin(), raw_selections.end(),
-                          [](auto const &a_LHS, auto const &a_RHS) {
-                              return a_LHS.variable_ptrs.size() <
-                                     a_RHS.variable_ptrs.size();
-                          });
-                break;
-            }
-            case SelectionMode::Larger: {
-                std::sort(raw_selections.begin(), raw_selections.end(),
-                          [](auto const &a_LHS, auto const &a_RHS) {
-                              return a_LHS.variable_ptrs.size() >
-                                     a_RHS.variable_ptrs.size();
-                          });
-                break;
-            }
-            case SelectionMode::Independent: {
-                break;
-            }
-            default: {
-            }
-        }
-
-        if (a_SELECTION_MODE == SelectionMode::Defined ||
-            a_SELECTION_MODE == SelectionMode::Smaller ||
-            a_SELECTION_MODE == SelectionMode::Larger) {
-            for (auto &&selection : raw_selections) {
-                bool has_eliminated_variable_ptr = false;
-                for (auto &&variable_ptr : selection.variable_ptrs) {
-                    if (std::find(selection_variable_ptrs.begin(),
-                                  selection_variable_ptrs.end(),
-                                  variable_ptr) !=
-                        selection_variable_ptrs.end()) {
-                        has_eliminated_variable_ptr = true;
-                        break;
-                    }
-                }
-                if (has_eliminated_variable_ptr) {
-                    continue;
-                } else {
-                    selections.push_back(selection);
-                    selection_variable_ptrs.insert(
-                        selection_variable_ptrs.end(),
-                        selection.variable_ptrs.begin(),
-                        selection.variable_ptrs.end());
-                    selection.constraint_ptr->disable();
-                }
-            }
-        } else if (a_SELECTION_MODE == SelectionMode::Independent) {
-            int raw_selections_size = raw_selections.size();
-            for (auto i = 0; i < raw_selections_size; i++) {
-                bool has_overlap = false;
-                for (auto &&variable_ptr : raw_selections[i].variable_ptrs) {
-                    for (auto j = 0; j < raw_selections_size; j++) {
-                        if (j != i &&
-                            std::find(raw_selections[j].variable_ptrs.begin(),
-                                      raw_selections[j].variable_ptrs.end(),
-                                      variable_ptr) !=
-                                raw_selections[j].variable_ptrs.end()) {
-                            has_overlap = true;
-                            break;
-                        }
-                    }
-                    if (has_overlap) {
-                        break;
-                    }
-                }
-                if (has_overlap) {
-                    continue;
-                } else {
-                    selections.push_back(raw_selections[i]);
-                    selection_variable_ptrs.insert(
-                        selection_variable_ptrs.end(),
-                        raw_selections[i].variable_ptrs.begin(),
-                        raw_selections[i].variable_ptrs.end());
-                    raw_selections[i].constraint_ptr->disable();
-                }
-            }
-        }
-
-        /*
-         * STEP 3:
-         * Categorize integer variables into "Selection", "Binary" and
-         * "Integer".
-         */
-        for (auto &&proxy : *a_variable_proxies) {
-            for (auto &&variable : proxy.flat_indexed_variables()) {
-                if (std::find(selection_variable_ptrs.begin(),
-                              selection_variable_ptrs.end(),
-                              &variable) == selection_variable_ptrs.end()) {
-                    if (variable.lower_bound() == 0 &&
-                        variable.upper_bound() == 1) {
-                        /// Binary variables
-                        binary_variable_ptrs.push_back(&variable);
-                    } else {
-                        /// Integer variables
-                        integer_variable_ptrs.push_back(&variable);
-                    }
-                }
-            }
-        }
-
-        m_selections              = selections;
-        m_selection_variable_ptrs = selection_variable_ptrs;
-        m_binary_variable_ptrs    = binary_variable_ptrs;
-        m_integer_variable_ptrs   = integer_variable_ptrs;
-
-        /**
-         * The following block must be after setting m_selections because
-         * variables have pointers to a element of m_selections.
-         */
-        for (auto &&selection : m_selections) {
-            for (auto &&variable_ptr : selection.variable_ptrs) {
-                /**
-                 * Register the selection object to the variables which is
-                 * covered by the corresponding selection constraint, and
-                 * categorize the variable into "Selection".
-                 */
-                variable_ptr->set_selection_ptr(&selection);
-            }
-        }
+    inline constexpr void set_has_fixed_variables(
+        const bool a_HAS_FIXED_VARIABLES) {
+        m_has_fixed_variables = a_HAS_FIXED_VARIABLES;
     }
 
     /*************************************************************************/
     inline constexpr void setup_selection_move_updater(
+        std::vector<Variable<T_Variable, T_Expression> *> &a_VARIABLE_PTRS,
         const bool a_IS_ENABLED_PARALLEL) {
         /**
          *  "Swap" move for binary variables in selection
@@ -371,42 +97,27 @@ class Neighborhood {
          * (if x = 1, y = 0, z = 0)
          */
 
-        int selections_size              = m_selections.size();
-        int selection_variable_ptrs_size = m_selection_variable_ptrs.size();
-        m_selection_moves.resize(selection_variable_ptrs_size);
+        int variables_size = a_VARIABLE_PTRS.size();
+        m_selection_moves.resize(variables_size);
 
-        for (auto i = 0; i < selections_size; i++) {
-            for (auto &variable_ptr : m_selections[i].variable_ptrs) {
-                auto &ptrs = variable_ptr->related_constraint_ptrs();
-                m_selections[i].related_constraint_ptrs.insert(ptrs.begin(),
-                                                               ptrs.end());
-            }
-        }
-
-        for (auto i = 0; i < selection_variable_ptrs_size; i++) {
+        for (auto i = 0; i < variables_size; i++) {
             m_selection_moves[i].sense = MoveSense::Selection;
             m_selection_moves[i].related_constraint_ptrs =
-                m_selection_variable_ptrs[i]
-                    ->selection_ptr()
-                    ->related_constraint_ptrs;
+                a_VARIABLE_PTRS[i]->selection_ptr()->related_constraint_ptrs;
         }
 
-        auto selection_move_updater = [this,
+        auto selection_move_updater = [this, a_VARIABLE_PTRS, variables_size,
                                        a_IS_ENABLED_PARALLEL](auto *a_moves) {
-            int selection_variable_ptrs_size = m_selection_variable_ptrs.size();
 #ifdef _OPENMP
 #pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
 #endif
-            for (auto i = 0; i < selection_variable_ptrs_size; i++) {
+            for (auto i = 0; i < variables_size; i++) {
                 (*a_moves)[i].alterations.clear();
                 (*a_moves)[i].alterations.emplace_back(
-                    m_selection_variable_ptrs[i]
-                        ->selection_ptr()
-                        ->selected_variable_ptr,
+                    a_VARIABLE_PTRS[i]->selection_ptr()->selected_variable_ptr,
                     0);
 
-                (*a_moves)[i].alterations.emplace_back(
-                    m_selection_variable_ptrs[i], 1);
+                (*a_moves)[i].alterations.emplace_back(a_VARIABLE_PTRS[i], 1);
             }
         };
         m_selection_move_updater = selection_move_updater;
@@ -414,6 +125,7 @@ class Neighborhood {
 
     /*************************************************************************/
     inline constexpr void setup_binary_move_updater(
+        std::vector<Variable<T_Variable, T_Expression> *> &a_VARIABLE_PTRS,
         const bool a_IS_ENABLED_PARALLEL) {
         /**
          * "Flip" move for binary variables:
@@ -421,26 +133,24 @@ class Neighborhood {
          *  move: {(x = 1)} (if x = 0)
          *        {(x = 0)} (if x = 1)
          */
-        int binary_variable_ptrs_size = m_binary_variable_ptrs.size();
-        m_binary_moves.resize(binary_variable_ptrs_size);
+        int variables_size = a_VARIABLE_PTRS.size();
+        m_binary_moves.resize(variables_size);
 
-        for (auto i = 0; i < binary_variable_ptrs_size; i++) {
+        for (auto i = 0; i < variables_size; i++) {
             m_binary_moves[i].sense = MoveSense::Binary;
             m_binary_moves[i].related_constraint_ptrs =
-                m_binary_variable_ptrs[i]->related_constraint_ptrs();
+                a_VARIABLE_PTRS[i]->related_constraint_ptrs();
         }
 
-        auto binary_move_updater = [this,
+        auto binary_move_updater = [this, a_VARIABLE_PTRS, variables_size,
                                     a_IS_ENABLED_PARALLEL](auto *a_moves) {
-            int binary_variable_ptrs_size = m_binary_variable_ptrs.size();
 #ifdef _OPENMP
 #pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
 #endif
-            for (auto i = 0; i < binary_variable_ptrs_size; i++) {
+            for (auto i = 0; i < variables_size; i++) {
                 (*a_moves)[i].alterations.clear();
                 (*a_moves)[i].alterations.emplace_back(
-                    m_binary_variable_ptrs[i],
-                    1 - m_binary_variable_ptrs[i]->value());
+                    a_VARIABLE_PTRS[i], 1 - a_VARIABLE_PTRS[i]->value());
             }
         };
         m_binary_move_updater = binary_move_updater;
@@ -448,6 +158,7 @@ class Neighborhood {
 
     /*************************************************************************/
     inline constexpr void setup_integer_move_updater(
+        std::vector<Variable<T_Variable, T_Expression> *> &a_VARIABLE_PTRS,
         const bool a_IS_ENABLED_PARALLEL) {
         /**
          *  "Shift" move for integer variables:
@@ -456,35 +167,32 @@ class Neighborhood {
          *        {(x = 1)} (if x = 0)
          *        {(x = 9)} (if x = 10)
          */
-        int integer_variable_ptrs_size = m_integer_variable_ptrs.size();
-        m_integer_moves.resize(2 * m_integer_variable_ptrs.size());
+        int variables_size = a_VARIABLE_PTRS.size();
+        m_integer_moves.resize(2 * variables_size);
 
-        for (auto i = 0; i < integer_variable_ptrs_size; i++) {
+        for (auto i = 0; i < variables_size; i++) {
             m_integer_moves[2 * i].sense = MoveSense::Integer;
             m_integer_moves[2 * i].related_constraint_ptrs =
-                m_integer_variable_ptrs[i]->related_constraint_ptrs();
+                a_VARIABLE_PTRS[i]->related_constraint_ptrs();
 
             m_integer_moves[2 * i + 1].sense = MoveSense::Integer;
             m_integer_moves[2 * i + 1].related_constraint_ptrs =
-                m_integer_variable_ptrs[i]->related_constraint_ptrs();
+                a_VARIABLE_PTRS[i]->related_constraint_ptrs();
         }
 
-        auto integer_move_updater = [this,
+        auto integer_move_updater = [this, a_VARIABLE_PTRS, variables_size,
                                      a_IS_ENABLED_PARALLEL](auto *a_moves) {
-            int integer_variable_ptrs_size = m_integer_variable_ptrs.size();
 #ifdef _OPENMP
 #pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
 #endif
-            for (auto i = 0; i < integer_variable_ptrs_size; i++) {
+            for (auto i = 0; i < variables_size; i++) {
                 (*a_moves)[2 * i].alterations.clear();
                 (*a_moves)[2 * i].alterations.emplace_back(
-                    m_integer_variable_ptrs[i],
-                    m_integer_variable_ptrs[i]->value() + 1);
+                    a_VARIABLE_PTRS[i], a_VARIABLE_PTRS[i]->value() + 1);
 
                 (*a_moves)[2 * i + 1].alterations.clear();
                 (*a_moves)[2 * i + 1].alterations.emplace_back(
-                    m_integer_variable_ptrs[i],
-                    m_integer_variable_ptrs[i]->value() - 1);
+                    a_VARIABLE_PTRS[i], a_VARIABLE_PTRS[i]->value() - 1);
             }
         };
         m_integer_move_updater = integer_move_updater;
@@ -595,24 +303,6 @@ class Neighborhood {
     }
 
     /*************************************************************************/
-    inline constexpr const std::vector<Variable<T_Variable, T_Expression> *>
-        &selection_variable_ptrs(void) {
-        return m_selection_variable_ptrs;
-    }
-
-    /*************************************************************************/
-    inline constexpr const std::vector<Variable<T_Variable, T_Expression> *>
-        &binary_variable_ptrs(void) {
-        return m_binary_variable_ptrs;
-    }
-
-    /*************************************************************************/
-    inline constexpr const std::vector<Variable<T_Variable, T_Expression> *>
-        &integer_variable_ptrs(void) {
-        return m_integer_variable_ptrs;
-    }
-
-    /*************************************************************************/
     inline constexpr const std::vector<Move<T_Variable, T_Expression>>
         &selection_moves(void) {
         return m_selection_moves;
@@ -634,18 +324,6 @@ class Neighborhood {
     inline constexpr const std::vector<Move<T_Variable, T_Expression>>
         &user_defined_moves(void) {
         return m_user_defined_moves;
-    }
-
-    /*************************************************************************/
-    inline constexpr std::vector<Selection<T_Variable, T_Expression>>
-        &selections(void) {
-        return m_selections;
-    }
-
-    /*************************************************************************/
-    inline constexpr const std::vector<Selection<T_Variable, T_Expression>>
-        &selections(void) const {
-        return m_selections;
     }
 
     /*************************************************************************/
