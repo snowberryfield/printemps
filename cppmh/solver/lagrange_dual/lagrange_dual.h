@@ -290,8 +290,8 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
         /**
          * Terminate the loop if lagrangian converges.
          */
-        if (queue.size() > option.lagrange_dual.queue_size &&
-            (lagrangian_incumbent - queue_average) <
+        if (queue.size() == option.lagrange_dual.queue_size &&
+            fabs(lagrangian - queue_average) <
                 std::max(1.0, fabs(queue_average)) *
                     option.lagrange_dual.tolerance) {
             break;
