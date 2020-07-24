@@ -133,7 +133,7 @@ TEST_F(TestBinpacking, bin_packing) {
         /// solve
         cppmh::solver::Option option;
 
-        option.iteration_max                           = 20;
+        option.iteration_max                           = 50;
         option.is_enabled_grouping_penalty_coefficient = true;
         option.is_enabled_initial_value_correction     = true;
         option.is_enabled_lagrange_dual                = true;
@@ -181,7 +181,7 @@ TEST_F(TestBinpacking, bin_packing) {
         /// solve
         cppmh::solver::Option option;
 
-        option.iteration_max                           = 20;
+        option.iteration_max                           = 50;
         option.is_enabled_grouping_penalty_coefficient = false;
         option.is_enabled_initial_value_correction     = false;
         option.is_enabled_lagrange_dual                = false;
