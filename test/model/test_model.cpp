@@ -2725,8 +2725,38 @@ TEST_F(TestModel, evaluate) {
             score_before = score_after_1;
         }
     }
+}
 
-}  // namespace
+/*****************************************************************************/
+TEST_F(TestModel, compute_lagrangian) {
+    cppmh::model::Model<int, double> model;
+
+    auto sequence = cppmh::utility::sequence(10);
+
+    auto& x = model.create_variables("x", 10, 0, 1);
+    auto& p = model.create_expression("p", x.dot(sequence) + 1);
+    [[maybe_unused]] auto& g = model.create_constraint("g", x.sum() <= 5);
+    [[maybe_unused]] auto& h = model.create_constraint("h", x(0) + x(1) <= 1);
+
+    model.minimize(p);
+    model.categorize_variables();
+    model.categorize_constraints();
+
+    cppmh::model::ValueProxy<double> dual_value_proxy(1);
+    dual_value_proxy.value() = 100;
+
+    std::vector<cppmh::model::ValueProxy<double>> dual_value_proxies = {
+        dual_value_proxy, dual_value_proxy};
+
+    for (auto&& element : x.flat_indexed_variables()) {
+        element = 1;
+    }
+
+    model.update();
+    auto lagrangian = model.compute_lagrangian(dual_value_proxies);
+
+    EXPECT_EQ(46 + 100 * (10 - 5) + 100 * (2 - 1), lagrangian);
+}
 
 /*****************************************************************************/
 TEST_F(TestModel, generate_variable_parameter_proxies) {
