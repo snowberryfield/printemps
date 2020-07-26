@@ -1395,6 +1395,12 @@ class Model {
 
         for (auto &&proxy : m_constraint_proxies) {
             for (auto &&constraint : proxy.flat_indexed_constraints()) {
+                constraint.setup_constraint_type();
+            }
+        }
+
+        for (auto &&proxy : m_constraint_proxies) {
+            for (auto &&constraint : proxy.flat_indexed_constraints()) {
                 constraint_reference.constraint_ptrs.push_back(&constraint);
                 if (!constraint.is_enabled()) {
                     constraint_reference.disabled_constraint_ptrs.push_back(

@@ -90,7 +90,6 @@ class Constraint : public AbstractMultiArrayElement {
     Constraint(const Expression<T_Variable, T_Expression> &a_EXPRESSION,
                const ConstraintSense                       a_SENSE) {
         this->setup(a_EXPRESSION, a_SENSE);
-        this->setup_constraint_type();
     }
 
    public:
@@ -100,7 +99,6 @@ class Constraint : public AbstractMultiArrayElement {
         const Constraint<T_Variable, T_Expression> &a_CONSTRAINT) {
         if (a_CONSTRAINT.m_is_linear) {
             this->setup(a_CONSTRAINT.m_expression, a_CONSTRAINT.m_sense);
-            this->copy_constraint_type(a_CONSTRAINT);
         } else {
             this->setup(a_CONSTRAINT.m_function, a_CONSTRAINT.m_sense);
         }
@@ -124,7 +122,6 @@ class Constraint : public AbstractMultiArrayElement {
 
         if (a_constraint.is_linear()) {
             this->setup(a_constraint.m_expression, a_constraint.m_sense);
-            this->copy_constraint_type(a_constraint);
         } else {
             this->setup(a_constraint.m_function, a_constraint.m_sense);
         }
@@ -351,11 +348,14 @@ class Constraint : public AbstractMultiArrayElement {
             }
 
             /// Variable Bound
-            if ((variable_ptrs[0]->sense() == VariableSense::Binary) &&
-                (variable_ptrs[1]->sense() == VariableSense::Binary)) {
-                m_is_variable_bound = true;
-                return;
-            }
+            /**
+             * At least one decision variables of the two must be binary
+             * according to the definition of Variable Bound proposed by MIPLIB
+             * 2017. But for convenience of the neighborhood definition, both of
+             * them can be integer(non-binary) variable.
+             */
+            m_is_variable_bound = true;
+            return;
         }
 
         /// Set Partitioning or Set Packing, Set Covering, Cardinality,
@@ -465,25 +465,6 @@ class Constraint : public AbstractMultiArrayElement {
 
         /// Otherwise, the constraint type is set to general linear.
         m_is_general_linear = true;
-    }
-
-    /*************************************************************************/
-    inline constexpr void copy_constraint_type(
-        const Constraint<T_Variable, T_Expression> &a_CONSTRAINT) {
-        m_is_singleton          = a_CONSTRAINT.is_singleton();
-        m_is_aggregation        = a_CONSTRAINT.is_aggregation();
-        m_is_precedence         = a_CONSTRAINT.is_precedence();
-        m_is_variable_bound     = a_CONSTRAINT.is_variable_bound();
-        m_is_set_partitioning   = a_CONSTRAINT.is_set_partitioning();
-        m_is_set_packing        = a_CONSTRAINT.is_set_packing();
-        m_is_set_covering       = a_CONSTRAINT.is_set_covering();
-        m_is_cardinality        = a_CONSTRAINT.is_cardinality();
-        m_is_invariant_knapsack = a_CONSTRAINT.is_invariant_knapsack();
-        m_is_equation_knapsack  = a_CONSTRAINT.is_equation_knapsack();
-        m_is_bin_packing        = a_CONSTRAINT.is_bin_packing();
-        m_is_knapsack           = a_CONSTRAINT.is_knapsack();
-        m_is_integer_knapsack   = a_CONSTRAINT.is_integer_knapsack();
-        m_is_general_linear     = a_CONSTRAINT.is_general_linear();
     }
 
     /*************************************************************************/

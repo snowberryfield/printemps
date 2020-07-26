@@ -325,11 +325,6 @@ TEST_F(TestConstraint, setup_constraint_type) {
         constraint.setup(2 * x - 10, cppmh::model::ConstraintSense::Lower);
         constraint.setup_constraint_type();
         EXPECT_EQ(true, constraint.is_singleton());
-
-        auto constraint_copy =
-            cppmh::model::Constraint<int, double>::create_instance();
-        constraint_copy.copy_constraint_type(constraint);
-        EXPECT_EQ(true, constraint_copy.is_singleton());
     }
 
     /// Aggregation
@@ -340,11 +335,6 @@ TEST_F(TestConstraint, setup_constraint_type) {
                          cppmh::model::ConstraintSense::Equal);
         constraint.setup_constraint_type();
         EXPECT_EQ(true, constraint.is_aggregation());
-
-        auto constraint_copy =
-            cppmh::model::Constraint<int, double>::create_instance();
-        constraint_copy.copy_constraint_type(constraint);
-        EXPECT_EQ(true, constraint_copy.is_aggregation());
     }
 
     /// Precedence
@@ -355,11 +345,6 @@ TEST_F(TestConstraint, setup_constraint_type) {
                          cppmh::model::ConstraintSense::Lower);
         constraint.setup_constraint_type();
         EXPECT_EQ(true, constraint.is_precedence());
-
-        auto constraint_copy =
-            cppmh::model::Constraint<int, double>::create_instance();
-        constraint_copy.copy_constraint_type(constraint);
-        EXPECT_EQ(true, constraint_copy.is_precedence());
     }
     {
         auto constraint =
@@ -368,11 +353,6 @@ TEST_F(TestConstraint, setup_constraint_type) {
                          cppmh::model::ConstraintSense::Lower);
         constraint.setup_constraint_type();
         EXPECT_EQ(true, constraint.is_precedence());
-
-        auto constraint_copy =
-            cppmh::model::Constraint<int, double>::create_instance();
-        constraint_copy.copy_constraint_type(constraint);
-        EXPECT_EQ(true, constraint_copy.is_precedence());
     }
     {
         auto constraint =
@@ -381,11 +361,6 @@ TEST_F(TestConstraint, setup_constraint_type) {
                          cppmh::model::ConstraintSense::Upper);
         constraint.setup_constraint_type();
         EXPECT_EQ(true, constraint.is_precedence());
-
-        auto constraint_copy =
-            cppmh::model::Constraint<int, double>::create_instance();
-        constraint_copy.copy_constraint_type(constraint);
-        EXPECT_EQ(true, constraint_copy.is_precedence());
     }
     {
         auto constraint =
@@ -394,11 +369,6 @@ TEST_F(TestConstraint, setup_constraint_type) {
                          cppmh::model::ConstraintSense::Upper);
         constraint.setup_constraint_type();
         EXPECT_EQ(true, constraint.is_precedence());
-
-        auto constraint_copy =
-            cppmh::model::Constraint<int, double>::create_instance();
-        constraint_copy.copy_constraint_type(constraint);
-        EXPECT_EQ(true, constraint_copy.is_precedence());
     }
 
     /// Variable Bound
@@ -409,11 +379,6 @@ TEST_F(TestConstraint, setup_constraint_type) {
                          cppmh::model::ConstraintSense::Lower);
         constraint.setup_constraint_type();
         EXPECT_EQ(true, constraint.is_variable_bound());
-
-        auto constraint_copy =
-            cppmh::model::Constraint<int, double>::create_instance();
-        constraint_copy.copy_constraint_type(constraint);
-        EXPECT_EQ(true, constraint_copy.is_variable_bound());
     }
     {
         auto constraint =
@@ -422,11 +387,6 @@ TEST_F(TestConstraint, setup_constraint_type) {
                          cppmh::model::ConstraintSense::Upper);
         constraint.setup_constraint_type();
         EXPECT_EQ(true, constraint.is_variable_bound());
-
-        auto constraint_copy =
-            cppmh::model::Constraint<int, double>::create_instance();
-        constraint_copy.copy_constraint_type(constraint);
-        EXPECT_EQ(true, constraint_copy.is_variable_bound());
     }
 
     /// Set Partitioning
@@ -436,11 +396,6 @@ TEST_F(TestConstraint, setup_constraint_type) {
         constraint.setup(z.sum() - 1, cppmh::model::ConstraintSense::Equal);
         constraint.setup_constraint_type();
         EXPECT_EQ(true, constraint.is_set_partitioning());
-
-        auto constraint_copy =
-            cppmh::model::Constraint<int, double>::create_instance();
-        constraint_copy.copy_constraint_type(constraint);
-        EXPECT_EQ(true, constraint_copy.is_set_partitioning());
     }
 
     /// Set Packing
@@ -450,11 +405,6 @@ TEST_F(TestConstraint, setup_constraint_type) {
         constraint.setup(z.sum() - 1, cppmh::model::ConstraintSense::Lower);
         constraint.setup_constraint_type();
         EXPECT_EQ(true, constraint.is_set_packing());
-
-        auto constraint_copy =
-            cppmh::model::Constraint<int, double>::create_instance();
-        constraint_copy.copy_constraint_type(constraint);
-        EXPECT_EQ(true, constraint_copy.is_set_packing());
     }
 
     /// Set Covering
@@ -464,11 +414,6 @@ TEST_F(TestConstraint, setup_constraint_type) {
         constraint.setup(z.sum() - 1, cppmh::model::ConstraintSense::Upper);
         constraint.setup_constraint_type();
         EXPECT_EQ(true, constraint.is_set_covering());
-
-        auto constraint_copy =
-            cppmh::model::Constraint<int, double>::create_instance();
-        constraint_copy.copy_constraint_type(constraint);
-        EXPECT_EQ(true, constraint_copy.is_set_covering());
     }
 
     /// Cardinality
@@ -478,11 +423,6 @@ TEST_F(TestConstraint, setup_constraint_type) {
         constraint.setup(z.sum() - 5, cppmh::model::ConstraintSense::Equal);
         constraint.setup_constraint_type();
         EXPECT_EQ(true, constraint.is_cardinality());
-
-        auto constraint_copy =
-            cppmh::model::Constraint<int, double>::create_instance();
-        constraint_copy.copy_constraint_type(constraint);
-        EXPECT_EQ(true, constraint_copy.is_cardinality());
     }
 
     /// Invariant Knapsack
@@ -492,11 +432,6 @@ TEST_F(TestConstraint, setup_constraint_type) {
         constraint.setup(z.sum() - 5, cppmh::model::ConstraintSense::Lower);
         constraint.setup_constraint_type();
         EXPECT_EQ(true, constraint.is_invariant_knapsack());
-
-        auto constraint_copy =
-            cppmh::model::Constraint<int, double>::create_instance();
-        constraint_copy.copy_constraint_type(constraint);
-        EXPECT_EQ(true, constraint_copy.is_invariant_knapsack());
     }
 
     /// Equation Knapsack
@@ -507,11 +442,6 @@ TEST_F(TestConstraint, setup_constraint_type) {
                          cppmh::model::ConstraintSense::Equal);
         constraint.setup_constraint_type();
         EXPECT_EQ(true, constraint.is_equation_knapsack());
-
-        auto constraint_copy =
-            cppmh::model::Constraint<int, double>::create_instance();
-        constraint_copy.copy_constraint_type(constraint);
-        EXPECT_EQ(true, constraint_copy.is_equation_knapsack());
     }
 
     /// Bin Packing
@@ -522,11 +452,6 @@ TEST_F(TestConstraint, setup_constraint_type) {
                          cppmh::model::ConstraintSense::Lower);
         constraint.setup_constraint_type();
         EXPECT_EQ(true, constraint.is_bin_packing());
-
-        auto constraint_copy =
-            cppmh::model::Constraint<int, double>::create_instance();
-        constraint_copy.copy_constraint_type(constraint);
-        EXPECT_EQ(true, constraint_copy.is_bin_packing());
     }
 
     {
@@ -536,11 +461,6 @@ TEST_F(TestConstraint, setup_constraint_type) {
                          cppmh::model::ConstraintSense::Upper);
         constraint.setup_constraint_type();
         EXPECT_EQ(true, constraint.is_bin_packing());
-
-        auto constraint_copy =
-            cppmh::model::Constraint<int, double>::create_instance();
-        constraint_copy.copy_constraint_type(constraint);
-        EXPECT_EQ(true, constraint_copy.is_bin_packing());
     }
 
     /// Knapsack
@@ -551,11 +471,6 @@ TEST_F(TestConstraint, setup_constraint_type) {
                          cppmh::model::ConstraintSense::Lower);
         constraint.setup_constraint_type();
         EXPECT_EQ(true, constraint.is_knapsack());
-
-        auto constraint_copy =
-            cppmh::model::Constraint<int, double>::create_instance();
-        constraint_copy.copy_constraint_type(constraint);
-        EXPECT_EQ(true, constraint_copy.is_knapsack());
     }
 
     {
@@ -565,11 +480,6 @@ TEST_F(TestConstraint, setup_constraint_type) {
                          cppmh::model::ConstraintSense::Upper);
         constraint.setup_constraint_type();
         EXPECT_EQ(true, constraint.is_knapsack());
-
-        auto constraint_copy =
-            cppmh::model::Constraint<int, double>::create_instance();
-        constraint_copy.copy_constraint_type(constraint);
-        EXPECT_EQ(true, constraint_copy.is_knapsack());
     }
 
     /// Integer Knapsack
@@ -580,11 +490,6 @@ TEST_F(TestConstraint, setup_constraint_type) {
                          cppmh::model::ConstraintSense::Lower);
         constraint.setup_constraint_type();
         EXPECT_EQ(true, constraint.is_integer_knapsack());
-
-        auto constraint_copy =
-            cppmh::model::Constraint<int, double>::create_instance();
-        constraint_copy.copy_constraint_type(constraint);
-        EXPECT_EQ(true, constraint_copy.is_integer_knapsack());
     }
 
     {
@@ -594,11 +499,6 @@ TEST_F(TestConstraint, setup_constraint_type) {
                          cppmh::model::ConstraintSense::Upper);
         constraint.setup_constraint_type();
         EXPECT_EQ(true, constraint.is_integer_knapsack());
-
-        auto constraint_copy =
-            cppmh::model::Constraint<int, double>::create_instance();
-        constraint_copy.copy_constraint_type(constraint);
-        EXPECT_EQ(true, constraint_copy.is_integer_knapsack());
     }
 
     /// General Linear
@@ -609,11 +509,6 @@ TEST_F(TestConstraint, setup_constraint_type) {
                          cppmh::model::ConstraintSense::Equal);
         constraint.setup_constraint_type();
         EXPECT_EQ(true, constraint.is_general_linear());
-
-        auto constraint_copy =
-            cppmh::model::Constraint<int, double>::create_instance();
-        constraint_copy.copy_constraint_type(constraint);
-        EXPECT_EQ(true, constraint_copy.is_general_linear());
     }
 }
 
