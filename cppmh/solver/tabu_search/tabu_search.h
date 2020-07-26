@@ -67,6 +67,11 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     IncumbentHolder_T incumbent_holder = a_INCUMBENT_HOLDER;
 
     /**
+     * Determine whether fast evaluation is available or not.
+     */
+    model->setup_is_enabled_fast_evaluation();
+
+    /**
      * Prepare a random generator, which is used for shuffling moves.
      */
     std::mt19937 get_rand_mt(option.tabu_search.seed);
@@ -361,7 +366,6 @@ TabuSearchResult<T_Variable, T_Expression> solve(
 
         update_status =
             incumbent_holder.try_update_incumbent(model, solution_score);
-
         total_update_status = update_status | total_update_status;
 
         /**

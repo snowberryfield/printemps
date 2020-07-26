@@ -48,8 +48,8 @@ TEST_F(TestVariable, initialize) {
     EXPECT_EQ(false, variable.has_bounds());
     EXPECT_EQ(cppmh::model::VariableSense::Integer, variable.sense());
     EXPECT_EQ(nullptr, variable.selection_ptr());
-    EXPECT_EQ(0, static_cast<int>(variable.related_constraint_ptrs().size()));
-    EXPECT_EQ(0, static_cast<int>(variable.constraint_sensitivities().size()));
+    EXPECT_EQ(true, variable.related_constraint_ptrs().empty());
+    EXPECT_EQ(true, variable.constraint_sensitivities().empty());
     EXPECT_EQ(0.0, variable.objective_sensitivity());
 }
 
@@ -263,7 +263,7 @@ TEST_F(TestVariable, register_related_constraint_ptr) {
     auto constraint_1 =
         cppmh::model::Constraint<int, double>::create_instance();
 
-    EXPECT_EQ(0, static_cast<int>(variable.related_constraint_ptrs().size()));
+    EXPECT_EQ(true, variable.related_constraint_ptrs().empty());
     EXPECT_EQ(false, variable.related_constraint_ptrs().find(&constraint_0) !=
                          variable.related_constraint_ptrs().end());
     EXPECT_EQ(false, variable.related_constraint_ptrs().find(&constraint_1) !=
@@ -291,7 +291,7 @@ TEST_F(TestVariable, register_related_constraint_ptr) {
                         variable.related_constraint_ptrs().end());
 
     variable.reset_related_constraint_ptrs();
-    EXPECT_EQ(0, static_cast<int>(variable.related_constraint_ptrs().size()));
+    EXPECT_EQ(true, variable.related_constraint_ptrs().empty());
     EXPECT_EQ(false, variable.related_constraint_ptrs().find(&constraint_0) !=
                          variable.related_constraint_ptrs().end());
     EXPECT_EQ(false, variable.related_constraint_ptrs().find(&constraint_1) !=
@@ -316,7 +316,7 @@ TEST_F(TestVariable, register_constraint_sensitivity) {
     auto constraint_1 =
         cppmh::model::Constraint<int, double>::create_instance();
 
-    EXPECT_EQ(0, static_cast<int>(variable.constraint_sensitivities().size()));
+    EXPECT_EQ(true, variable.constraint_sensitivities().empty());
 
     variable.register_constraint_sensitivity(&constraint_0, 10);
     EXPECT_EQ(1, static_cast<int>(variable.constraint_sensitivities().size()));
@@ -327,7 +327,7 @@ TEST_F(TestVariable, register_constraint_sensitivity) {
     EXPECT_EQ(20, variable.constraint_sensitivities().at(&constraint_1));
 
     variable.reset_constraint_sensitivities();
-    EXPECT_EQ(0, static_cast<int>(variable.constraint_sensitivities().size()));
+    EXPECT_EQ(true, variable.constraint_sensitivities().empty());
 }
 
 /*****************************************************************************/

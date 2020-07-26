@@ -61,84 +61,63 @@ TEST_F(TestModel, initialize) {
     EXPECT_EQ(1.0, model.sign());
 
     /// Variable Reference
-    EXPECT_EQ(                //
-        0, static_cast<int>(  //
-               model.variable_reference().variable_ptrs.size()));
     EXPECT_EQ(  //
-        0, static_cast<int>(
-               model.variable_reference().fixed_variable_ptrs.size()));
+        true, model.variable_reference().variable_ptrs.empty());
     EXPECT_EQ(  //
-        0, static_cast<int>(
-               model.variable_reference().selection_variable_ptrs.size()));
+        true, model.variable_reference().fixed_variable_ptrs.empty());
     EXPECT_EQ(  //
-        0, static_cast<int>(
-               model.variable_reference().binary_variable_ptrs.size()));
+        true, model.variable_reference().selection_variable_ptrs.empty());
     EXPECT_EQ(  //
-        0, static_cast<int>(
-               model.variable_reference().integer_variable_ptrs.size()));
-    EXPECT_EQ(                //
-        0, static_cast<int>(  //
-               model.variable_reference().variable_ptrs.size()));
+        true, model.variable_reference().binary_variable_ptrs.empty());
+    EXPECT_EQ(  //
+        true, model.variable_reference().integer_variable_ptrs.empty());
+    EXPECT_EQ(  //
+        true,   //
+        model.variable_reference().variable_ptrs.empty());
 
     /// Constraint Reference
-    EXPECT_EQ(                //
-        0, static_cast<int>(  //
-               model.constraint_reference().constraint_ptrs.size()));
     EXPECT_EQ(  //
-        0, static_cast<int>(
-               model.constraint_reference().selection_constraint_ptrs.size()));
+        true,   //
+        model.constraint_reference().constraint_ptrs.empty());
     EXPECT_EQ(  //
-        0, static_cast<int>(
-               model.constraint_reference().disabled_constraint_ptrs.size()));
+        true, model.constraint_reference().selection_constraint_ptrs.empty());
+    EXPECT_EQ(  //
+        true, model.constraint_reference().disabled_constraint_ptrs.empty());
 
     /// Constraint Type Reference
     EXPECT_EQ(  //
-        0, static_cast<int>(
-               model.constraint_type_reference().singleton_ptrs.size()));
+        true, model.constraint_type_reference().singleton_ptrs.empty());
     EXPECT_EQ(  //
-        0, static_cast<int>(
-               model.constraint_type_reference().aggregation_ptrs.size()));
+        true, model.constraint_type_reference().aggregation_ptrs.empty());
     EXPECT_EQ(  //
-        0, static_cast<int>(
-               model.constraint_type_reference().precedence_ptrs.size()));
+        true, model.constraint_type_reference().precedence_ptrs.empty());
     EXPECT_EQ(  //
-        0, static_cast<int>(
-               model.constraint_type_reference().variable_bound_ptrs.size()));
+        true, model.constraint_type_reference().variable_bound_ptrs.empty());
     EXPECT_EQ(  //
-        0, static_cast<int>(
-               model.constraint_type_reference().set_partitioning_ptrs.size()));
+        true,
+
+        model.constraint_type_reference().set_partitioning_ptrs.empty());
     EXPECT_EQ(  //
-        0, static_cast<int>(
-               model.constraint_type_reference().set_packing_ptrs.size()));
+        true, model.constraint_type_reference().set_packing_ptrs.empty());
     EXPECT_EQ(  //
-        0, static_cast<int>(
-               model.constraint_type_reference().set_covering_ptrs.size()));
+        true, model.constraint_type_reference().set_covering_ptrs.empty());
     EXPECT_EQ(  //
-        0, static_cast<int>(
-               model.constraint_type_reference().cardinality_ptrs.size()));
+        true, model.constraint_type_reference().cardinality_ptrs.empty());
     EXPECT_EQ(  //
-        0,
-        static_cast<int>(
-            model.constraint_type_reference().invariant_knapsack_ptrs.size()));
+        true,
+        model.constraint_type_reference().invariant_knapsack_ptrs.empty());
     EXPECT_EQ(  //
-        0,
-        static_cast<int>(
-            model.constraint_type_reference().equation_knapsack_ptrs.size()));
+        true, model.constraint_type_reference().equation_knapsack_ptrs.empty());
     EXPECT_EQ(  //
-        0, static_cast<int>(
-               model.constraint_type_reference().bin_packing_ptrs.size()));
+        true, model.constraint_type_reference().bin_packing_ptrs.empty());
     EXPECT_EQ(  //
-        0, static_cast<int>(
-               model.constraint_type_reference().knapsack_ptrs.size()));
+        true, model.constraint_type_reference().knapsack_ptrs.empty());
     EXPECT_EQ(  //
-        0, static_cast<int>(
-               model.constraint_type_reference().integer_knapsack_ptrs.size()));
+        true, model.constraint_type_reference().integer_knapsack_ptrs.empty());
     EXPECT_EQ(  //
-        0, static_cast<int>(
-               model.constraint_type_reference().general_linear_ptrs.size()));
+        true, model.constraint_type_reference().general_linear_ptrs.empty());
     EXPECT_EQ(  //
-        0, static_cast<int>(
-               model.constraint_type_reference().nonlinear_ptrs.size()));
+        true, model.constraint_type_reference().nonlinear_ptrs.empty());
 }
 
 /*****************************************************************************/
@@ -997,6 +976,7 @@ TEST_F(TestModel, setup_is_enabled_fast_evaluation) {
                      a_moves) { ; };
 
         model.neighborhood().set_user_defined_move_updater(move_updater);
+        model.neighborhood().enable_user_defined_move();
         model.setup_is_enabled_fast_evaluation();
 
         EXPECT_EQ(false, model.is_enabled_fast_evaluation());
@@ -1828,7 +1808,7 @@ TEST_F(TestModel, extract_selections_independent) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModel, setup_default_neighborhood) {
+TEST_F(TestModel, setup_neighborhood) {
     /// This method is tested in test_neighborhood.h
 }
 
