@@ -16,7 +16,7 @@ struct LagrangeDualOptionConstant {
     static constexpr double DEFAULT_TIME_OFFSET           = 0.0;
     static constexpr double DEFAULT_STEP_SIZE_EXTEND_RATE = 1.05;
     static constexpr double DEFAULT_STEP_SIZE_REDUCE_RATE = 0.95;
-    static constexpr double DEFAULT_TOLERANCE             = 0.001;
+    static constexpr double DEFAULT_TOLERANCE             = 1E-5;
     static constexpr int    DEFAULT_QUEUE_SIZE            = 100;
     static constexpr int    DEFAULT_LOG_INTERVAL          = 10;
 };

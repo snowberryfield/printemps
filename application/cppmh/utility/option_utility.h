@@ -112,6 +112,42 @@ inline cppmh::solver::Option read_option(const std::string &a_FILE_NAME) {
               "is_enabled_parallel_neighborhood_update",        //
               option_object);
 
+    /**********************************************************************/
+    /// is_enabled_binary_move
+    read_json(&option.is_enabled_binary_move,  //
+              "is_enabled_binary_move",        //
+              option_object);
+
+    /**********************************************************************/
+    /// is_enabled_integer_move
+    read_json(&option.is_enabled_integer_move,  //
+              "is_enabled_integer_move",        //
+              option_object);
+
+    /**********************************************************************/
+    /// is_enabled_aggregation_move
+    read_json(&option.is_enabled_aggregation_move,  //
+              "is_enabled_aggregation_move",        //
+              option_object);
+
+    /**********************************************************************/
+    /// is_enabled_precedence_move
+    read_json(&option.is_enabled_precedence_move,  //
+              "is_enabled_precedence_move",        //
+              option_object);
+
+    /**********************************************************************/
+    /// is_enabled_variable_bound_move
+    read_json(&option.is_enabled_variable_bound_move,  //
+              "is_enabled_variable_bound_move",        //
+              option_object);
+
+    /**********************************************************************/
+    /// is_enabled_user_defined_move
+    read_json(&option.is_enabled_user_defined_move,  //
+              "is_enabled_user_defined_move",        //
+              option_object);
+
     /**************************************************************************/
     /// selection_mode
     read_json(&option.selection_mode,  //

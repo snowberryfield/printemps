@@ -232,7 +232,9 @@ class Variable : public AbstractMultiArrayElement {
 
     /*************************************************************************/
     inline constexpr void setup_sense(void) {
-        if (m_lower_bound == 0 && m_upper_bound == 1) {
+        if ((m_lower_bound == 0 && m_upper_bound == 1) ||
+            (m_lower_bound == 0 && m_upper_bound == 0) ||
+            (m_lower_bound == 1 && m_upper_bound == 1)) {
             m_sense = VariableSense::Binary;
         } else {
             m_sense = VariableSense::Integer;

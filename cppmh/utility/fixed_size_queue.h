@@ -80,7 +80,7 @@ class FixedSizeQueue {
 
     /*************************************************************************/
     inline constexpr double average(void) const {
-        return std::accumulate(m_queue.begin(), m_queue.end(), 0) /
+        return std::accumulate(m_queue.begin(), m_queue.end(), 0.0) /
                static_cast<double>(m_queue.size());
     }
 };

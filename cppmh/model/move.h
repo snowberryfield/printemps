@@ -21,9 +21,12 @@ class Constraint;
 
 /*****************************************************************************/
 enum class MoveSense {
-    Selection,  //
-    Binary,     //
-    Integer,    //
+    Binary,         //
+    Integer,        //
+    Selection,      //
+    Precedence,     //
+    Aggregation,    //
+    VariableBound,  //
     UserDefined
 };
 

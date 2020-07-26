@@ -33,30 +33,48 @@ struct OptionConstant {
     static constexpr bool DEFAULT_IS_ENABLED_PARALLEL_EVALUATION      = true;
     static constexpr bool DEFAULT_IS_ENABLED_PARALLEL_NEIGHBORHOOD_UPDATE =
         true;
+
+    static constexpr bool DEFAULT_IS_ENABLED_BINARY_MOVE         = true;
+    static constexpr bool DEFAULT_IS_ENABLED_INTEGER_MOVE        = true;
+    static constexpr bool DEFAULT_IS_ENABLED_AGGREGATION_MOVE    = false;
+    static constexpr bool DEFAULT_IS_ENABLED_PRECEDENCE_MOVE     = false;
+    static constexpr bool DEFAULT_IS_ENABLED_VARIABLE_BOUND_MOVE = false;
+    static constexpr bool DEFAULT_IS_ENABLED_USER_DEFINED_MOVE   = false;
+
     static constexpr model::SelectionMode DEFAULT_SELECTION_MODE =
         model::SelectionMode::None;
+
     static constexpr double DEFAULT_TARGET_OBJECTIVE = -1E100;
     static constexpr bool   DEFAULT_VERBOSE          = Verbose::None;
 };
 
 /*****************************************************************************/
 struct Option {
-    int                  iteration_max;
-    double               time_offset;
-    double               time_max;
-    double               penalty_coefficient_relaxing_rate;
-    double               penalty_coefficient_tightening_rate;
-    double               initial_penalty_coefficient;
-    bool                 is_enabled_lagrange_dual;
-    bool                 is_enabled_local_search;
-    bool                 is_enabled_grouping_penalty_coefficient;
-    bool                 is_enabled_presolve;
-    bool                 is_enabled_initial_value_correction;
-    bool                 is_enabled_parallel_evaluation;
-    bool                 is_enabled_parallel_neighborhood_update;
+    int    iteration_max;
+    double time_offset;
+    double time_max;
+    double penalty_coefficient_relaxing_rate;
+    double penalty_coefficient_tightening_rate;
+    double initial_penalty_coefficient;
+    bool   is_enabled_lagrange_dual;
+    bool   is_enabled_local_search;
+    bool   is_enabled_grouping_penalty_coefficient;
+    bool   is_enabled_presolve;
+    bool   is_enabled_initial_value_correction;
+    bool   is_enabled_parallel_evaluation;
+    bool   is_enabled_parallel_neighborhood_update;
+
+    bool is_enabled_binary_move;
+    bool is_enabled_integer_move;
+    bool is_enabled_aggregation_move;
+    bool is_enabled_precedence_move;
+    bool is_enabled_variable_bound_move;
+    bool is_enabled_user_defined_move;
+
     model::SelectionMode selection_mode;
-    double               target_objective_value;
-    int                  verbose;
+
+    double target_objective_value;
+    int    verbose;
 
     tabu_search::TabuSearchOption     tabu_search;
     local_search::LocalSearchOption   local_search;
@@ -96,7 +114,22 @@ struct Option {
             OptionConstant::DEFAULT_IS_ENABLED_PARALLEL_EVALUATION;
         this->is_enabled_parallel_neighborhood_update =
             OptionConstant::DEFAULT_IS_ENABLED_PARALLEL_NEIGHBORHOOD_UPDATE;
-        this->selection_mode         = OptionConstant::DEFAULT_SELECTION_MODE;
+
+        this->is_enabled_binary_move =
+            OptionConstant::DEFAULT_IS_ENABLED_BINARY_MOVE;
+        this->is_enabled_integer_move =
+            OptionConstant::DEFAULT_IS_ENABLED_INTEGER_MOVE;
+        this->is_enabled_aggregation_move =
+            OptionConstant::DEFAULT_IS_ENABLED_AGGREGATION_MOVE;
+        this->is_enabled_precedence_move =
+            OptionConstant::DEFAULT_IS_ENABLED_PRECEDENCE_MOVE;
+        this->is_enabled_variable_bound_move =
+            OptionConstant::DEFAULT_IS_ENABLED_VARIABLE_BOUND_MOVE;
+        this->is_enabled_user_defined_move =
+            OptionConstant::DEFAULT_IS_ENABLED_USER_DEFINED_MOVE;
+
+        this->selection_mode = OptionConstant::DEFAULT_SELECTION_MODE;
+
         this->target_objective_value = OptionConstant::DEFAULT_TARGET_OBJECTIVE;
         this->verbose                = OptionConstant::DEFAULT_VERBOSE;
 
@@ -166,6 +199,30 @@ struct Option {
             " - is_enabled_parallel_neighborhood_update: " +  //
             utility::to_string(this->is_enabled_parallel_neighborhood_update,
                                "%d"));
+
+        utility::print(                      //
+            " - is_enabled_binary_move: " +  //
+            utility::to_string(this->is_enabled_binary_move, "%d"));
+
+        utility::print(                       //
+            " - is_enabled_integer_move: " +  //
+            utility::to_string(this->is_enabled_integer_move, "%d"));
+
+        utility::print(                           //
+            " - is_enabled_aggregation_move: " +  //
+            utility::to_string(this->is_enabled_aggregation_move, "%d"));
+
+        utility::print(                          //
+            " - is_enabled_precedence_move: " +  //
+            utility::to_string(this->is_enabled_precedence_move, "%d"));
+
+        utility::print(                              //
+            " - is_enabled_variable_bound_move: " +  //
+            utility::to_string(this->is_enabled_variable_bound_move, "%d"));
+
+        utility::print(                            //
+            " - is_enabled_user_defined_move: " +  //
+            utility::to_string(this->is_enabled_user_defined_move, "%d"));
 
         utility::print(              //
             " - selection_mode: " +  //
