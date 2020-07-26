@@ -311,7 +311,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
              * For diversification, the move for next solution is randomly
              * selected for initial several iteration.
              */
-            selected_index = rand() % number_of_moves;
+            selected_index = get_rand_mt() % number_of_moves;
         } else {
             /**
              * The move for next solution is determined by evaluations of
