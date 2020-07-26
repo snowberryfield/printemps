@@ -36,13 +36,12 @@ TEST_F(TestNeighborhood, initialize) {
 
     EXPECT_EQ(true, neighborhood.binary_moves().empty());
     EXPECT_EQ(true, neighborhood.integer_moves().empty());
-    EXPECT_EQ(true, neighborhood.selection_moves().empty());
-
     EXPECT_EQ(true, neighborhood.aggregation_moves().empty());
     EXPECT_EQ(true, neighborhood.precedence_moves().empty());
     EXPECT_EQ(true, neighborhood.variable_bound_same_moves().empty());
     EXPECT_EQ(true, neighborhood.variable_bound_opposite_moves().empty());
     EXPECT_EQ(true, neighborhood.user_defined_moves().empty());
+    EXPECT_EQ(true, neighborhood.selection_moves().empty());
 
     EXPECT_EQ(true, neighborhood.move_ptrs().empty());
 
@@ -51,12 +50,11 @@ TEST_F(TestNeighborhood, initialize) {
 
     EXPECT_EQ(false, neighborhood.is_enabled_binary_move());
     EXPECT_EQ(false, neighborhood.is_enabled_integer_move());
-    EXPECT_EQ(false, neighborhood.is_enabled_selection_move());
     EXPECT_EQ(false, neighborhood.is_enabled_aggregation_move());
     EXPECT_EQ(false, neighborhood.is_enabled_precedence_move());
     EXPECT_EQ(false, neighborhood.is_enabled_variable_bound_move());
-
     EXPECT_EQ(false, neighborhood.is_enabled_user_defined_move());
+    EXPECT_EQ(false, neighborhood.is_enabled_selection_move());
 
     /// Tests for updater functions are omitted.
 }
@@ -159,11 +157,10 @@ TEST_F(TestNeighborhood, setup_move_updater) {
 
     model.neighborhood().enable_binary_move();
     model.neighborhood().enable_integer_move();
-    model.neighborhood().enable_selection_move();
-
     model.neighborhood().enable_aggregation_move();
     model.neighborhood().enable_precedence_move();
     model.neighborhood().enable_variable_bound_move();
+    model.neighborhood().enable_selection_move();
 
     /**
      * Set initial values for selection variables.
@@ -178,39 +175,6 @@ TEST_F(TestNeighborhood, setup_move_updater) {
     /**
      * Check the variable pointers and values in raw moves.
      */
-    /// Selection
-    {
-        auto variable_ptrs = model.variable_reference().selection_variable_ptrs;
-        auto moves         = model.neighborhood().selection_moves();
-        EXPECT_EQ(variable_ptrs.size(), moves.size());
-
-        for (auto& move : moves) {
-            EXPECT_EQ(cppmh::model::MoveSense::Selection, move.sense);
-            EXPECT_EQ(2, static_cast<int>(move.alterations.size()));
-            EXPECT_EQ(1, move.alterations[0].first->value());
-            EXPECT_EQ(0, move.alterations[0].second);
-
-            if (move.alterations[0].first != move.alterations[1].first) {
-                EXPECT_EQ(0, move.alterations[1].first->value());
-                EXPECT_EQ(1, move.alterations[1].second);
-            }
-
-            for (auto& constraint_ptr :
-                 move.alterations[0].first->related_constraint_ptrs()) {
-                EXPECT_EQ(true,
-                          move.related_constraint_ptrs.find(constraint_ptr) !=
-                              move.related_constraint_ptrs.end());
-            }
-
-            for (auto& constraint_ptr :
-                 move.alterations[1].first->related_constraint_ptrs()) {
-                EXPECT_EQ(true,
-                          move.related_constraint_ptrs.find(constraint_ptr) !=
-                              move.related_constraint_ptrs.end());
-            }
-        }
-    }
-
     /// Binary
     {
         auto variable_ptrs = model.variable_reference().binary_variable_ptrs;
@@ -304,6 +268,39 @@ TEST_F(TestNeighborhood, setup_move_updater) {
         EXPECT_EQ(2, static_cast<int>(opposite_moves.size()));
     }
 
+    /// Selection
+    {
+        auto variable_ptrs = model.variable_reference().selection_variable_ptrs;
+        auto moves         = model.neighborhood().selection_moves();
+        EXPECT_EQ(variable_ptrs.size(), moves.size());
+
+        for (auto& move : moves) {
+            EXPECT_EQ(cppmh::model::MoveSense::Selection, move.sense);
+            EXPECT_EQ(2, static_cast<int>(move.alterations.size()));
+            EXPECT_EQ(1, move.alterations[0].first->value());
+            EXPECT_EQ(0, move.alterations[0].second);
+
+            if (move.alterations[0].first != move.alterations[1].first) {
+                EXPECT_EQ(0, move.alterations[1].first->value());
+                EXPECT_EQ(1, move.alterations[1].second);
+            }
+
+            for (auto& constraint_ptr :
+                 move.alterations[0].first->related_constraint_ptrs()) {
+                EXPECT_EQ(true,
+                          move.related_constraint_ptrs.find(constraint_ptr) !=
+                              move.related_constraint_ptrs.end());
+            }
+
+            for (auto& constraint_ptr :
+                 move.alterations[1].first->related_constraint_ptrs()) {
+                EXPECT_EQ(true,
+                          move.related_constraint_ptrs.find(constraint_ptr) !=
+                              move.related_constraint_ptrs.end());
+            }
+        }
+    }
+
     /**
      * Check the numbers of filtered moves. *
      */
@@ -316,9 +313,6 @@ TEST_F(TestNeighborhood, setup_move_updater) {
         int integer_variables_size =
             model.variable_reference().integer_variable_ptrs.size();
 
-        int selection_variables_size =
-            model.variable_reference().selection_variable_ptrs.size();
-
         int aggregations_size =
             model.constraint_type_reference().aggregation_ptrs.size();
 
@@ -328,13 +322,16 @@ TEST_F(TestNeighborhood, setup_move_updater) {
         int variable_bounds_size =
             model.constraint_type_reference().variable_bound_ptrs.size();
 
-        EXPECT_EQ(                                              //
-            (binary_variables_size)                             // Binary
-                + (2 * integer_variables_size - 2 - 1 - 1)      // Integer
-                + (selection_variables_size - selections_size)  // Selection
-                + (4 * aggregations_size - 5)                   // Aggregation
-                + (2 * precedences_size - 4)                    // Precedence
-                + (variable_bounds_size - 2),  // Variable Bound
+        int selection_variables_size =
+            model.variable_reference().selection_variable_ptrs.size();
+
+        EXPECT_EQ(                                          //
+            (binary_variables_size)                         // Binary
+                + (2 * integer_variables_size - 2 - 1 - 1)  // Integer
+                + (4 * aggregations_size - 5)               // Aggregation
+                + (2 * precedences_size - 4)                // Precedence
+                + (variable_bounds_size - 2)                // Variable Bound
+                + (selection_variables_size - selections_size),  // Selection
             static_cast<int>(model.neighborhood().move_ptrs().size()));
     }
 }
@@ -422,11 +419,6 @@ TEST_F(TestNeighborhood, integer_moves) {
 }
 
 /*****************************************************************************/
-TEST_F(TestNeighborhood, selection_moves) {
-    /// This method is tested in move_updater().
-}
-
-/*****************************************************************************/
 TEST_F(TestNeighborhood, aggregation_moves) {
     /// This method is tested in move_updater().
 }
@@ -443,6 +435,11 @@ TEST_F(TestNeighborhood, variable_bound_same_moves) {
 
 /*****************************************************************************/
 TEST_F(TestNeighborhood, variable_bound_opposite_moves) {
+    /// This method is tested in move_updater().
+}
+
+/*****************************************************************************/
+TEST_F(TestNeighborhood, selection_moves) {
     /// This method is tested in move_updater().
 }
 
@@ -497,30 +494,6 @@ TEST_F(TestNeighborhood, enable_integer_move) {
 /*****************************************************************************/
 TEST_F(TestNeighborhood, disable_integer_move) {
     /// This method is tested in is_enabled_integer_move().
-}
-
-/*****************************************************************************/
-TEST_F(TestNeighborhood, is_enabled_selection_move) {
-    cppmh::model::Neighborhood<int, double> neighborhood;
-
-    /// initial status
-    EXPECT_EQ(false, neighborhood.is_enabled_selection_move());
-
-    neighborhood.enable_selection_move();
-    EXPECT_EQ(true, neighborhood.is_enabled_selection_move());
-
-    neighborhood.disable_selection_move();
-    EXPECT_EQ(false, neighborhood.is_enabled_selection_move());
-}
-
-/*****************************************************************************/
-TEST_F(TestNeighborhood, enable_selection_move) {
-    /// This method is tested in is_enabled_selection_move().
-}
-
-/*****************************************************************************/
-TEST_F(TestNeighborhood, disable_selection_move) {
-    /// This method is tested in is_enabled_selection_move().
 }
 
 /*****************************************************************************/
@@ -619,6 +592,29 @@ TEST_F(TestNeighborhood, disable_variable_bound_move) {
     /// This method is tested in is_enabled_variable_bound_move().
 }
 
+/*****************************************************************************/
+TEST_F(TestNeighborhood, is_enabled_selection_move) {
+    cppmh::model::Neighborhood<int, double> neighborhood;
+
+    /// initial status
+    EXPECT_EQ(false, neighborhood.is_enabled_selection_move());
+
+    neighborhood.enable_selection_move();
+    EXPECT_EQ(true, neighborhood.is_enabled_selection_move());
+
+    neighborhood.disable_selection_move();
+    EXPECT_EQ(false, neighborhood.is_enabled_selection_move());
+}
+
+/*****************************************************************************/
+TEST_F(TestNeighborhood, enable_selection_move) {
+    /// This method is tested in is_enabled_selection_move().
+}
+
+/*****************************************************************************/
+TEST_F(TestNeighborhood, disable_selection_move) {
+    /// This method is tested in is_enabled_selection_move().
+}
 /*****************************************************************************/
 }  // namespace
 /*****************************************************************************/

@@ -13,7 +13,6 @@
     "is_enabled_parallel_neighborhood_update": true,
     "is_enabled_binary_move": true,
     "is_enabled_integer_move": true,
-    "is_enabled_selection_move": false,
     "is_enabled_aggregation_move": false,
     "is_enabled_precedence_move": false,
     "is_enabled_variable_bound_move": false,

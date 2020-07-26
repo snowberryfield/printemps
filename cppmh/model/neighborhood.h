@@ -24,9 +24,6 @@ class Neighborhood {
     std::function<void(std::vector<Move<T_Variable, T_Expression>> *)>
         m_integer_move_updater;
     std::function<void(std::vector<Move<T_Variable, T_Expression>> *)>
-        m_selection_move_updater;
-
-    std::function<void(std::vector<Move<T_Variable, T_Expression>> *)>
         m_precedence_move_updater;
     std::function<void(std::vector<Move<T_Variable, T_Expression>> *)>
         m_aggregation_move_updater;
@@ -34,19 +31,19 @@ class Neighborhood {
         m_variable_bound_same_move_updater;
     std::function<void(std::vector<Move<T_Variable, T_Expression>> *)>
         m_variable_bound_opposite_move_updater;
-
     std::function<void(std::vector<Move<T_Variable, T_Expression>> *)>
         m_user_defined_move_updater;
+    std::function<void(std::vector<Move<T_Variable, T_Expression>> *)>
+        m_selection_move_updater;
 
     std::vector<Move<T_Variable, T_Expression>> m_binary_moves;
     std::vector<Move<T_Variable, T_Expression>> m_integer_moves;
-    std::vector<Move<T_Variable, T_Expression>> m_selection_moves;
-
     std::vector<Move<T_Variable, T_Expression>> m_precedence_moves;
     std::vector<Move<T_Variable, T_Expression>> m_aggregation_moves;
     std::vector<Move<T_Variable, T_Expression>> m_variable_bound_same_moves;
     std::vector<Move<T_Variable, T_Expression>> m_variable_bound_opposite_moves;
     std::vector<Move<T_Variable, T_Expression>> m_user_defined_moves;
+    std::vector<Move<T_Variable, T_Expression>> m_selection_moves;
 
     std::vector<Move<T_Variable, T_Expression> *> m_move_ptrs;
 
@@ -55,12 +52,11 @@ class Neighborhood {
 
     bool m_is_enabled_binary_move;
     bool m_is_enabled_integer_move;
-    bool m_is_enabled_selection_move;
-
     bool m_is_enabled_precedence_move;
     bool m_is_enabled_aggregation_move;
     bool m_is_enabled_variable_bound_move;
     bool m_is_enabled_user_defined_move;
+    bool m_is_enabled_selection_move;
 
    public:
     /*************************************************************************/
@@ -79,9 +75,6 @@ class Neighborhood {
             [](std::vector<Move<T_Variable, T_Expression>> *) {};
         m_integer_move_updater =
             [](std::vector<Move<T_Variable, T_Expression>> *) {};
-        m_selection_move_updater =
-            [](std::vector<Move<T_Variable, T_Expression>> *) {};
-
         m_precedence_move_updater =
             [](std::vector<Move<T_Variable, T_Expression>> *) {};
         m_aggregation_move_updater =
@@ -92,30 +85,30 @@ class Neighborhood {
             [](std::vector<Move<T_Variable, T_Expression>> *) {};
         m_user_defined_move_updater =
             [](std::vector<Move<T_Variable, T_Expression>> *) {};
+        m_selection_move_updater =
+            [](std::vector<Move<T_Variable, T_Expression>> *) {};
 
         m_binary_moves.clear();
         m_integer_moves.clear();
-        m_selection_moves.clear();
-
         m_precedence_moves.clear();
         m_aggregation_moves.clear();
         m_variable_bound_same_moves.clear();
         m_variable_bound_opposite_moves.clear();
         m_user_defined_moves.clear();
+        m_selection_moves.clear();
 
         m_move_ptrs.clear();
 
         m_has_fixed_variables     = false;
         m_has_selection_variables = false;
 
-        m_is_enabled_binary_move    = false;
-        m_is_enabled_integer_move   = false;
-        m_is_enabled_selection_move = false;
-
+        m_is_enabled_binary_move         = false;
+        m_is_enabled_integer_move        = false;
         m_is_enabled_precedence_move     = false;
         m_is_enabled_aggregation_move    = false;
         m_is_enabled_variable_bound_move = false;
         m_is_enabled_user_defined_move   = false;
+        m_is_enabled_selection_move      = false;
     }
 
     /*************************************************************************/
@@ -203,43 +196,6 @@ class Neighborhood {
             }
         };
         m_integer_move_updater = integer_move_updater;
-    }
-
-    /*************************************************************************/
-    inline constexpr void setup_selection_move_updater(
-        std::vector<Variable<T_Variable, T_Expression> *> &a_VARIABLE_PTRS,
-        const bool a_IS_ENABLED_PARALLEL) {
-        /**
-         *  "Swap" move for binary variables in selection
-         * constraints: e.g.) selection constraint x + y + z = 1 (x,
-         * y, z \in {0, 1}) move: {(x = 0, y = 1), (x = 0, z = 1)}
-         * (if x = 1, y = 0, z = 0)
-         */
-
-        int variables_size = a_VARIABLE_PTRS.size();
-        m_selection_moves.resize(variables_size);
-
-        for (auto i = 0; i < variables_size; i++) {
-            m_selection_moves[i].sense = MoveSense::Selection;
-            m_selection_moves[i].related_constraint_ptrs =
-                a_VARIABLE_PTRS[i]->selection_ptr()->related_constraint_ptrs;
-        }
-
-        auto selection_move_updater = [this, a_VARIABLE_PTRS, variables_size,
-                                       a_IS_ENABLED_PARALLEL](auto *a_moves) {
-#ifdef _OPENMP
-#pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
-#endif
-            for (auto i = 0; i < variables_size; i++) {
-                (*a_moves)[i].alterations.clear();
-                (*a_moves)[i].alterations.emplace_back(
-                    a_VARIABLE_PTRS[i]->selection_ptr()->selected_variable_ptr,
-                    0);
-
-                (*a_moves)[i].alterations.emplace_back(a_VARIABLE_PTRS[i], 1);
-            }
-        };
-        m_selection_move_updater = selection_move_updater;
     }
 
     /*************************************************************************/
@@ -524,6 +480,43 @@ class Neighborhood {
     }
 
     /*************************************************************************/
+    inline constexpr void setup_selection_move_updater(
+        std::vector<Variable<T_Variable, T_Expression> *> &a_VARIABLE_PTRS,
+        const bool a_IS_ENABLED_PARALLEL) {
+        /**
+         *  "Swap" move for binary variables in selection
+         * constraints: e.g.) selection constraint x + y + z = 1 (x,
+         * y, z \in {0, 1}) move: {(x = 0, y = 1), (x = 0, z = 1)}
+         * (if x = 1, y = 0, z = 0)
+         */
+
+        int variables_size = a_VARIABLE_PTRS.size();
+        m_selection_moves.resize(variables_size);
+
+        for (auto i = 0; i < variables_size; i++) {
+            m_selection_moves[i].sense = MoveSense::Selection;
+            m_selection_moves[i].related_constraint_ptrs =
+                a_VARIABLE_PTRS[i]->selection_ptr()->related_constraint_ptrs;
+        }
+
+        auto selection_move_updater = [this, a_VARIABLE_PTRS, variables_size,
+                                       a_IS_ENABLED_PARALLEL](auto *a_moves) {
+#ifdef _OPENMP
+#pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
+#endif
+            for (auto i = 0; i < variables_size; i++) {
+                (*a_moves)[i].alterations.clear();
+                (*a_moves)[i].alterations.emplace_back(
+                    a_VARIABLE_PTRS[i]->selection_ptr()->selected_variable_ptr,
+                    0);
+
+                (*a_moves)[i].alterations.emplace_back(a_VARIABLE_PTRS[i], 1);
+            }
+        };
+        m_selection_move_updater = selection_move_updater;
+    }
+
+    /*************************************************************************/
     inline constexpr void update_moves(void) noexcept {
         if (m_binary_moves.size() > 0 &&  //
             m_is_enabled_binary_move) {
@@ -533,11 +526,6 @@ class Neighborhood {
         if (m_integer_moves.size() > 0 &&  //
             m_is_enabled_integer_move) {
             m_integer_move_updater(&m_integer_moves);
-        }
-
-        if (m_selection_moves.size() > 0 &&  //
-            m_is_enabled_selection_move) {
-            m_selection_move_updater(&m_selection_moves);
         }
 
         if (m_aggregation_moves.size() > 0 &&  //
@@ -565,15 +553,20 @@ class Neighborhood {
             m_user_defined_move_updater(&m_user_defined_moves);
         }
 
+        if (m_selection_moves.size() > 0 &&  //
+            m_is_enabled_selection_move) {
+            m_selection_move_updater(&m_selection_moves);
+        }
+
         auto number_of_candidate_moves =
             m_binary_moves.size()                     //
             + m_integer_moves.size()                  //
-            + m_selection_moves.size()                //
             + m_precedence_moves.size()               //
             + m_aggregation_moves.size()              //
             + m_variable_bound_same_moves.size()      //
             + m_variable_bound_opposite_moves.size()  //
-            + m_user_defined_moves.size();
+            + m_user_defined_moves.size()             //
+            + m_selection_moves.size();
 
         m_move_ptrs.resize(number_of_candidate_moves);
 
@@ -637,20 +630,6 @@ class Neighborhood {
                     continue;
                 }
                 if (has_bound_violation(move)) {
-                    continue;
-                }
-
-                m_move_ptrs[index++] = &move;
-            }
-        }
-
-        if (m_is_enabled_selection_move) {
-            for (auto &&move : m_selection_moves) {
-                if (has_fixed_variables(move)) {
-                    continue;
-                }
-
-                if (move.alterations[0].first == move.alterations[1].first) {
                     continue;
                 }
 
@@ -734,6 +713,20 @@ class Neighborhood {
             }
         }
 
+        if (m_is_enabled_selection_move) {
+            for (auto &&move : m_selection_moves) {
+                if (has_fixed_variables(move)) {
+                    continue;
+                }
+
+                if (move.alterations[0].first == move.alterations[1].first) {
+                    continue;
+                }
+
+                m_move_ptrs[index++] = &move;
+            }
+        }
+
         m_move_ptrs.erase(m_move_ptrs.begin() + index, m_move_ptrs.end());
     }
 
@@ -752,12 +745,6 @@ class Neighborhood {
     inline constexpr const std::vector<Move<T_Variable, T_Expression>>
         &integer_moves(void) {
         return m_integer_moves;
-    }
-
-    /*************************************************************************/
-    inline constexpr const std::vector<Move<T_Variable, T_Expression>>
-        &selection_moves(void) {
-        return m_selection_moves;
     }
 
     /*************************************************************************/
@@ -788,6 +775,12 @@ class Neighborhood {
     inline constexpr const std::vector<Move<T_Variable, T_Expression>>
         &user_defined_moves(void) {
         return m_user_defined_moves;
+    }
+
+    /*************************************************************************/
+    inline constexpr const std::vector<Move<T_Variable, T_Expression>>
+        &selection_moves(void) {
+        return m_selection_moves;
     }
 
     /*************************************************************************/
@@ -834,21 +827,6 @@ class Neighborhood {
     /*************************************************************************/
     inline constexpr void disable_integer_move(void) {
         m_is_enabled_integer_move = false;
-    }
-
-    /*************************************************************************/
-    inline constexpr bool is_enabled_selection_move(void) const {
-        return m_is_enabled_selection_move;
-    }
-
-    /*************************************************************************/
-    inline constexpr void enable_selection_move(void) {
-        m_is_enabled_selection_move = true;
-    }
-
-    /*************************************************************************/
-    inline constexpr void disable_selection_move(void) {
-        m_is_enabled_selection_move = false;
     }
 
     /*************************************************************************/
@@ -909,6 +887,21 @@ class Neighborhood {
     /*************************************************************************/
     inline constexpr void disable_user_defined_move(void) {
         m_is_enabled_user_defined_move = false;
+    }
+
+    /*************************************************************************/
+    inline constexpr bool is_enabled_selection_move(void) const {
+        return m_is_enabled_selection_move;
+    }
+
+    /*************************************************************************/
+    inline constexpr void enable_selection_move(void) {
+        m_is_enabled_selection_move = true;
+    }
+
+    /*************************************************************************/
+    inline constexpr void disable_selection_move(void) {
+        m_is_enabled_selection_move = false;
     }
 };
 }  // namespace model
