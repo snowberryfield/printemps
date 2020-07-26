@@ -177,11 +177,6 @@ Result<T_Variable, T_Expression> solve(
                 "Solving lagrange dual was skipped because it does not "
                 "applicable to selection variables.",
                 master_option.verbose >= Verbose::Warning);
-        } else if (model->number_of_integer_variables() > 0) {
-            utility::print_warning(
-                "Solving lagrange dual was skipped because it does not "
-                "applicable to integer (not binary) variables.",
-                master_option.verbose >= Verbose::Warning);
         } else {
             double elapsed_time = time_keeper.clock();
 
