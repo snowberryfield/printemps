@@ -40,7 +40,7 @@ TEST_F(TestFixedSizeHashMap, initialize) {
     std::size_t default_bucket_size =
         cppmh::utility::FixedSizeHashMapConstant::DEFAULT_BUCKET_SIZE;
 
-    EXPECT_EQ(static_cast<unsigned int>(0), fixed_size_hash_map.shift_size());
+    EXPECT_EQ(0, static_cast<int>(fixed_size_hash_map.shift_size()));
     EXPECT_EQ(default_bucket_size, fixed_size_hash_map.bucket_size());
 }
 

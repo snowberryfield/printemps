@@ -385,6 +385,14 @@ inline MPS read_mps(const std::string &a_FILE_NAME) {
                             integer_value;
                         mps.variables[v_name].continuous_fixed_value =
                             continuous_value;
+                        mps.variables[v_name].integer_lower_bound =
+                            integer_value;
+                        mps.variables[v_name].integer_upper_bound =
+                            integer_value;
+                        mps.variables[v_name].continuous_lower_bound =
+                            continuous_value;
+                        mps.variables[v_name].continuous_upper_bound =
+                            continuous_value;
                     }
                 }
                 break;
@@ -453,8 +461,8 @@ class MPSReader {
 
             if (variable.sense == MPSVariableSense::Continuous) {
                 utility::print_warning(  //
-                    "The problem defined in the MPS file includes "
-                    "continuous variables. In the following optimization, they "
+                    "The problem defined in the MPS file includes continuous "
+                    "variables. In the following optimization, they "
                     "are considered as integer variables.",
                     true);
             }

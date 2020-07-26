@@ -86,8 +86,37 @@ Result<T_Variable, T_Expression> solve(
                  master_option.verbose >= Verbose::Warning,
                  master_option.selection_mode);
 
+    if (master_option.is_enabled_binary_move) {
+        model->neighborhood().enable_binary_move();
+    }
+
+    if (master_option.is_enabled_integer_move) {
+        model->neighborhood().enable_integer_move();
+    }
+
+    if (master_option.is_enabled_aggregation_move) {
+        model->neighborhood().enable_aggregation_move();
+    }
+
+    if (master_option.is_enabled_precedence_move) {
+        model->neighborhood().enable_precedence_move();
+    }
+
+    if (master_option.is_enabled_variable_bound_move) {
+        model->neighborhood().enable_variable_bound_move();
+    }
+
+    if (master_option.is_enabled_user_defined_move) {
+        model->neighborhood().enable_user_defined_move();
+    }
+
+    if (master_option.selection_mode != model::SelectionMode::None) {
+        model->neighborhood().enable_selection_move();
+    }
+
     if (master_option.verbose >= Verbose::Outer) {
-        model->print_number_of_variables_and_constraints();
+        model->print_number_of_variables();
+        model->print_number_of_constraints();
     }
 
     utility::print_single_line(  //
