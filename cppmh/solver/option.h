@@ -36,7 +36,6 @@ struct OptionConstant {
 
     static constexpr bool DEFAULT_IS_ENABLED_BINARY_MOVE         = true;
     static constexpr bool DEFAULT_IS_ENABLED_INTEGER_MOVE        = true;
-    static constexpr bool DEFAULT_IS_ENABLED_SELECTION_MOVE      = false;
     static constexpr bool DEFAULT_IS_ENABLED_AGGREGATION_MOVE    = false;
     static constexpr bool DEFAULT_IS_ENABLED_PRECEDENCE_MOVE     = false;
     static constexpr bool DEFAULT_IS_ENABLED_VARIABLE_BOUND_MOVE = false;
@@ -67,7 +66,6 @@ struct Option {
 
     bool is_enabled_binary_move;
     bool is_enabled_integer_move;
-    bool is_enabled_selection_move;
     bool is_enabled_aggregation_move;
     bool is_enabled_precedence_move;
     bool is_enabled_variable_bound_move;
@@ -121,8 +119,6 @@ struct Option {
             OptionConstant::DEFAULT_IS_ENABLED_BINARY_MOVE;
         this->is_enabled_integer_move =
             OptionConstant::DEFAULT_IS_ENABLED_INTEGER_MOVE;
-        this->is_enabled_selection_move =
-            OptionConstant::DEFAULT_IS_ENABLED_SELECTION_MOVE;
         this->is_enabled_aggregation_move =
             OptionConstant::DEFAULT_IS_ENABLED_AGGREGATION_MOVE;
         this->is_enabled_precedence_move =
@@ -211,10 +207,6 @@ struct Option {
         utility::print(                       //
             " - is_enabled_integer_move: " +  //
             utility::to_string(this->is_enabled_integer_move, "%d"));
-
-        utility::print(                         //
-            " - is_enabled_selection_move: " +  //
-            utility::to_string(this->is_enabled_selection_move, "%d"));
 
         utility::print(                           //
             " - is_enabled_aggregation_move: " +  //
