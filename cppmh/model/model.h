@@ -147,6 +147,9 @@ struct ConstraintTypeReference {
 };
 
 /*****************************************************************************/
+enum SelectionMode : int { None, Defined, Smaller, Larger, Independent };
+
+/*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class Model {
    private:
@@ -662,18 +665,17 @@ class Model {
 
     /*************************************************************************/
     inline constexpr void setup(
-        const bool a_IS_ENABLED_PARALLEL_NEIGHBORHOOD_UPDATE,
-        const bool a_IS_ENABLED_PRESOLVE,
-        const bool a_IS_ENABLED_INITIAL_VALUE_CORRECTION,
-        const bool a_IS_ENABLED_PRINT, const SelectionMode &a_SELECTION_MODE) {
+        const bool           a_IS_ENABLED_PARALLEL_NEIGHBORHOOD_UPDATE,  //
+        const bool           a_IS_ENABLED_PRESOLVE,                      //
+        const bool           a_IS_ENABLED_INITIAL_VALUE_CORRECTION,      //
+        const bool           a_IS_ENABLED_PRINT,                         //
+        const SelectionMode &a_SELECTION_MODE) {
         this->verify_problem(a_IS_ENABLED_PRINT);
 
         this->setup_variable_related_constraints();
         this->setup_variable_sense();
         this->setup_unique_name();
-
         this->setup_is_linear();
-        this->setup_is_enabled_fast_evaluation();
 
         if (this->is_linear()) {
             this->setup_variable_sensitivity();
@@ -689,18 +691,13 @@ class Model {
 
         this->categorize_variables();
         this->categorize_constraints();
-        this->extract_selections(a_SELECTION_MODE);
 
-        this->setup_default_neighborhood(
-            a_IS_ENABLED_PARALLEL_NEIGHBORHOOD_UPDATE, a_IS_ENABLED_PRINT);
-
-        /**
-         * If the user-defined_neighborhood is set, default neighborhood
-         * should be disabled to avoid possible inconsistencies.
-         */
-        if (m_neighborhood.is_enabled_user_defined_move()) {
-            m_neighborhood.disable_default_move();
+        if (a_SELECTION_MODE != SelectionMode::None) {
+            this->extract_selections(a_SELECTION_MODE);
         }
+
+        this->setup_neighborhood(a_IS_ENABLED_PARALLEL_NEIGHBORHOOD_UPDATE,  //
+                                 a_IS_ENABLED_PRINT);
 
         this->verify_and_correct_selection_variables_initial_values(
             a_IS_ENABLED_INITIAL_VALUE_CORRECTION, a_IS_ENABLED_PRINT);
@@ -1635,22 +1632,41 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void setup_default_neighborhood(
-        const bool a_IS_ENABLED_PARALLEL, const bool a_IS_ENABLED_PRINT) {
+    inline constexpr void setup_neighborhood(
+        const bool a_IS_ENABLED_PARALLEL,  //
+        const bool a_IS_ENABLED_PRINT) {
         utility::print_single_line(a_IS_ENABLED_PRINT);
         utility::print_message("Detecting the neighborhood structure...",
                                a_IS_ENABLED_PRINT);
         bool has_fixed_variables = this->number_of_fixed_variables() > 0;
+        bool has_selection_variables =
+            this->number_of_selection_variables() > 0;
 
         m_neighborhood.set_has_fixed_variables(has_fixed_variables);
-        m_neighborhood.setup_selection_move_updater(
-            m_variable_reference.selection_variable_ptrs,  //
-            a_IS_ENABLED_PARALLEL);
+        m_neighborhood.set_has_selection_variables(has_selection_variables);
+
         m_neighborhood.setup_binary_move_updater(
             m_variable_reference.binary_variable_ptrs,  //
             a_IS_ENABLED_PARALLEL);
+
         m_neighborhood.setup_integer_move_updater(
             m_variable_reference.integer_variable_ptrs,  //
+            a_IS_ENABLED_PARALLEL);
+
+        m_neighborhood.setup_selection_move_updater(
+            m_variable_reference.selection_variable_ptrs,  //
+            a_IS_ENABLED_PARALLEL);
+
+        m_neighborhood.setup_aggregation_move_updater(
+            m_constraint_type_reference.aggregation_ptrs,  //
+            a_IS_ENABLED_PARALLEL);
+
+        m_neighborhood.setup_precedence_move_updater(
+            m_constraint_type_reference.precedence_ptrs,  //
+            a_IS_ENABLED_PARALLEL);
+
+        m_neighborhood.setup_variable_bound_move_updater(
+            m_constraint_type_reference.variable_bound_ptrs,  //
             a_IS_ENABLED_PARALLEL);
 
         utility::print_message("Done.", a_IS_ENABLED_PRINT);
