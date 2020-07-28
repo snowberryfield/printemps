@@ -161,6 +161,12 @@ inline cppmh::solver::Option read_option(const std::string &a_FILE_NAME) {
               option_object);
 
     /**************************************************************************/
+    /// seed
+    read_json(&option.seed,  //
+              "seed",        //
+              option_object);
+
+    /**************************************************************************/
     /// verbose
     read_json(&option.verbose,  //
               "verbose",        //
