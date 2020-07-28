@@ -38,7 +38,7 @@ cppmh can compute approximate solutions for __linear and nonlinear integer optim
                 x \in Z^{N},
 ```
 where `x` denotes N-dimensional integer vector with the lower bound vector `l` and the upper bound vector `u`. 
-The function `f:R^{N} -> R` denotes the scalar objective function to be minimized, and `g:R^{N} -> R^{I}`, `h:R^{N} -> R^{J}` respectively denote I-dimensional inequality and J-dimensional equality constraint functions.
+The function `f:R^{N} -> R` denotes the scalar objective function to be minimized, and `g:R^{N} -> R^{I}`, `h:R^{N} -> R^{J}` respectively denote `I`-dimensional inequality and `J`-dimensional equality constraint functions.
 
 cppmh employs __Tabu Search__ [1], a metaheuristics technique, to solve problems. 
 In solving, cppmh replaces constraints with penalty functions which return violations to the corresponding constraints, and the penalty functions multiplied by positive penalty coefficients are added to the objective function. 

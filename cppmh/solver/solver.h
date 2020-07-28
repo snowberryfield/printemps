@@ -83,8 +83,11 @@ Result<T_Variable, T_Expression> solve(
     model->setup(master_option.is_enabled_parallel_neighborhood_update,
                  master_option.is_enabled_presolve,
                  master_option.is_enabled_initial_value_correction,
-                 master_option.verbose >= Verbose::Warning,
-                 master_option.selection_mode);
+                 master_option.is_enabled_aggregation_move,
+                 master_option.is_enabled_precedence_move,
+                 master_option.is_enabled_variable_bound_move,
+                 master_option.selection_mode,
+                 master_option.verbose >= Verbose::Warning);
 
     if (master_option.is_enabled_binary_move) {
         model->neighborhood().enable_binary_move();
@@ -94,21 +97,14 @@ Result<T_Variable, T_Expression> solve(
         model->neighborhood().enable_integer_move();
     }
 
-    if (master_option.is_enabled_aggregation_move) {
-        model->neighborhood().enable_aggregation_move();
-    }
-
-    if (master_option.is_enabled_precedence_move) {
-        model->neighborhood().enable_precedence_move();
-    }
-
-    if (master_option.is_enabled_variable_bound_move) {
-        model->neighborhood().enable_variable_bound_move();
-    }
-
     if (master_option.is_enabled_user_defined_move) {
         model->neighborhood().enable_user_defined_move();
     }
+
+    /**
+     * Special neighborhood moves for Aggregation, Precedence, and Variable
+     * bound constraint types will be enabled when optimization stagnates.
+     */
 
     if (master_option.selection_mode != model::SelectionMode::None) {
         model->neighborhood().enable_selection_move();
@@ -118,6 +114,11 @@ Result<T_Variable, T_Expression> solve(
         model->print_number_of_variables();
         model->print_number_of_constraints();
     }
+
+    /**
+     * Prepare a random generator, which is used for shuffling moves.
+     */
+    std::mt19937 get_rand_mt(master_option.seed);
 
     utility::print_single_line(  //
         master_option.verbose >= Verbose::Outer);
@@ -370,15 +371,14 @@ Result<T_Variable, T_Expression> solve(
     /**
      * Run tabu searches to find better solutions.
      */
-    int iteration                = 0;
-    int last_total_update_status = IncumbentHolderConstant::STATUS_NO_UPDATED;
-    int last_tabu_tenure         = 0;
+    int iteration                           = 0;
+    int next_number_of_initial_modification = 0;
 
     /**
-     * The integer variable adjusted_iteration_max is used if the option
+     * The integer variable next_iteration_max is used if the option
      * tabu_search.is_enabled_automatic_iteration_adjustment is set true.
      */
-    int adjusted_iteration_max = master_option.tabu_search.iteration_max;
+    int next_iteration_max = master_option.tabu_search.iteration_max;
 
     while (true) {
         /**
@@ -417,18 +417,13 @@ Result<T_Variable, T_Expression> solve(
         Option option = master_option;
 
         if (option.tabu_search.is_enabled_automatic_iteration_adjustment) {
-            option.tabu_search.iteration_max = adjusted_iteration_max;
+            option.tabu_search.iteration_max = next_iteration_max;
         }
 
         option.tabu_search.time_offset = elapsed_time;
         option.tabu_search.seed += iteration;
-        if (master_option.tabu_search.is_enabled_initial_modification &&
-            !(last_total_update_status &
-              IncumbentHolderConstant::
-                  STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE)) {
-            option.tabu_search.number_of_initial_modification =
-                last_tabu_tenure;
-        }
+        option.tabu_search.number_of_initial_modification =
+            next_number_of_initial_modification;
 
         /**
          * Prepare the initial variable values.
@@ -446,9 +441,6 @@ Result<T_Variable, T_Expression> solve(
                                          global_penalty_coefficient_proxies,  //
                                          initial_variable_value_proxies,      //
                                          incumbent_holder);
-
-        last_tabu_tenure         = result.tabu_tenure;
-        last_total_update_status = result.total_update_status;
 
         /**
          * Update the current solution.
@@ -576,33 +568,6 @@ Result<T_Variable, T_Expression> solve(
              */
         }
 
-        /**
-         * Update the maximum number of iterations for the next loop.
-         */
-        if (master_option.tabu_search
-                .is_enabled_automatic_iteration_adjustment &&
-            !result.is_early_stopped) {
-            int adjusted_iteration_temp = 0;
-            if (last_total_update_status &
-                IncumbentHolderConstant::
-                    STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
-                adjusted_iteration_temp  //
-                    = static_cast<int>(ceil(
-                        result.last_local_augmented_incumbent_update_iteration *
-                        master_option.tabu_search.iteration_increase_rate));
-
-            } else {
-                adjusted_iteration_temp  //
-                    = static_cast<int>(ceil(
-                        option.tabu_search.iteration_max *
-                        master_option.tabu_search.iteration_increase_rate));
-            }
-            adjusted_iteration_max =
-                std::max(master_option.tabu_search.initial_tabu_tenure,
-                         std::min(master_option.tabu_search.iteration_max,
-                                  adjusted_iteration_temp));
-        }
-
         number_of_tabu_search_iterations += result.number_of_iterations;
         number_of_tabu_search_loops++;
 
@@ -629,38 +594,155 @@ Result<T_Variable, T_Expression> solve(
                     "%.3f"),
             master_option.verbose >= Verbose::Outer);
 
-        if (last_total_update_status &
+        if (result.total_update_status &
             IncumbentHolderConstant::STATUS_FEASIBLE_INCUMBENT_UPDATE) {
+            next_number_of_initial_modification = 0;
+
             utility::print_message("Feasible incumbent objective was updated. ",
                                    master_option.verbose >= Verbose::Outer);
-        } else if (last_total_update_status &
+
+        } else if (result.total_update_status &
                    IncumbentHolderConstant::
                        STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
+            next_number_of_initial_modification = 0;
+
             utility::print_message("Global incumbent objective was updated. ",
                                    master_option.verbose >= Verbose::Outer);
+
         } else {
             if (master_option.tabu_search.is_enabled_initial_modification) {
+                int nominal_number_of_initial_modification  //
+                    = static_cast<int>(
+                        std::floor(master_option.tabu_search
+                                       .initial_modification_fixed_rate *
+                                   result.tabu_tenure));
+
+                int initial_modification_random_width = static_cast<int>(
+                    option.tabu_search.initial_modification_randomize_rate *
+                    nominal_number_of_initial_modification);
+
+                int number_of_initial_modification =
+                    nominal_number_of_initial_modification +
+                    get_rand_mt() % (2 * initial_modification_random_width) -
+                    initial_modification_random_width;
+
+                next_number_of_initial_modification =
+                    std::max(1, number_of_initial_modification);
+
                 utility::print_message(
                     "Incumbent objective was not updated. For the "
                     "initial " +
-                        std::to_string(last_tabu_tenure) +
+                        std::to_string(next_number_of_initial_modification) +
                         " iterations in the next loop, the solution will "
-                        "be "
-                        "randomly updated to escape from the local "
-                        "minimum.",
+                        "be randomly updated to escape from the local minimum.",
                     master_option.verbose >= Verbose::Outer);
             }
         }
 
+        /**
+         * Update the maximum number of iterations for the next loop.
+         */
+        if (master_option.tabu_search
+                .is_enabled_automatic_iteration_adjustment &&
+            !result.is_early_stopped) {
+            int next_iteration_max_temp = 0;
+            if (result.total_update_status &
+                IncumbentHolderConstant::
+                    STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
+                next_iteration_max_temp  //
+                    = static_cast<int>(ceil(
+                        result.last_local_augmented_incumbent_update_iteration *
+                        master_option.tabu_search.iteration_increase_rate));
+
+            } else {
+                next_iteration_max_temp  //
+                    = static_cast<int>(ceil(
+                        option.tabu_search.iteration_max *
+                        master_option.tabu_search.iteration_increase_rate));
+            }
+            next_iteration_max =
+                std::max(master_option.tabu_search.initial_tabu_tenure,
+                         std::min(master_option.tabu_search.iteration_max,
+                                  next_iteration_max_temp));
+        }
         if (master_option.tabu_search
                 .is_enabled_automatic_iteration_adjustment) {
             utility::print_message(
                 "The maximum number of iterations for the next loop was "
                 "set to " +
-                    std::to_string(adjusted_iteration_max) + ".",
+                    std::to_string(next_iteration_max) + ".",
                 master_option.verbose >= Verbose::Outer);
         }
 
+        /**
+         * Enable the special neighborhood moves if the incumbent was not
+         * updated.
+         */
+        if (result.total_update_status &
+            IncumbentHolderConstant::STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
+            bool is_disabled_special_neighborhood_move = false;
+
+            if (master_option.is_enabled_aggregation_move) {
+                if (model->neighborhood().is_enabled_aggregation_move()) {
+                    model->neighborhood().disable_aggregation_move();
+                    is_disabled_special_neighborhood_move = true;
+                }
+            }
+
+            if (master_option.is_enabled_precedence_move) {
+                if (model->neighborhood().is_enabled_precedence_move()) {
+                    model->neighborhood().disable_precedence_move();
+                    is_disabled_special_neighborhood_move = true;
+                }
+            }
+
+            if (master_option.is_enabled_variable_bound_move) {
+                if (model->neighborhood().is_enabled_variable_bound_move()) {
+                    model->neighborhood().disable_variable_bound_move();
+                    is_disabled_special_neighborhood_move = true;
+                }
+            }
+
+            if (is_disabled_special_neighborhood_move) {
+                utility::print_message(
+                    "Special neighborhood moves were disabled.",
+                    master_option.verbose >= Verbose::Outer);
+            }
+        } else {
+            if (!result.is_early_stopped &&
+                (option.tabu_search.iteration_max ==
+                 master_option.tabu_search.iteration_max)) {
+                bool is_enabled_special_neighborhood_move = false;
+
+                if (master_option.is_enabled_aggregation_move) {
+                    if (!model->neighborhood().is_enabled_aggregation_move()) {
+                        model->neighborhood().enable_aggregation_move();
+                        is_enabled_special_neighborhood_move = true;
+                    }
+                }
+
+                if (master_option.is_enabled_precedence_move) {
+                    if (!model->neighborhood().is_enabled_precedence_move()) {
+                        model->neighborhood().enable_precedence_move();
+                        is_enabled_special_neighborhood_move = true;
+                    }
+                }
+
+                if (master_option.is_enabled_variable_bound_move) {
+                    if (!model->neighborhood()
+                             .is_enabled_variable_bound_move()) {
+                        model->neighborhood().enable_variable_bound_move();
+                        is_enabled_special_neighborhood_move = true;
+                    }
+                }
+
+                if (is_enabled_special_neighborhood_move) {
+                    utility::print_message(
+                        "Special neighborhood moves were enabled.",
+                        master_option.verbose >= Verbose::Outer);
+                }
+            }
+        }
         model->callback();
         iteration++;
     }

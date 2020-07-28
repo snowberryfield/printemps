@@ -161,6 +161,12 @@ inline cppmh::solver::Option read_option(const std::string &a_FILE_NAME) {
               option_object);
 
     /**************************************************************************/
+    /// seed
+    read_json(&option.seed,  //
+              "seed",        //
+              option_object);
+
+    /**************************************************************************/
     /// verbose
     read_json(&option.verbose,  //
               "verbose",        //
@@ -310,6 +316,18 @@ inline cppmh::solver::Option read_option(const std::string &a_FILE_NAME) {
         /// tabu_search.tabu_tenure_randomize_rate
         read_json(&option.tabu_search.tabu_tenure_randomize_rate,  //
                   "tabu_tenure_randomize_rate",                    //
+                  option_object_tabu_search);
+
+        /**********************************************************************/
+        /// tabu_search.initial_modification_fixed_rate
+        read_json(&option.tabu_search.initial_modification_fixed_rate,  //
+                  "initial_modification_fixed_rate",                    //
+                  option_object_tabu_search);
+
+        /**********************************************************************/
+        /// tabu_search.initial_modification_randomize_rate
+        read_json(&option.tabu_search.initial_modification_randomize_rate,  //
+                  "initial_modification_randomize_rate",                    //
                   option_object_tabu_search);
 
         /**********************************************************************/

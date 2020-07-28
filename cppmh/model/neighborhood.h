@@ -28,9 +28,7 @@ class Neighborhood {
     std::function<void(std::vector<Move<T_Variable, T_Expression>> *)>
         m_aggregation_move_updater;
     std::function<void(std::vector<Move<T_Variable, T_Expression>> *)>
-        m_variable_bound_same_move_updater;
-    std::function<void(std::vector<Move<T_Variable, T_Expression>> *)>
-        m_variable_bound_opposite_move_updater;
+        m_variable_bound_move_updater;
     std::function<void(std::vector<Move<T_Variable, T_Expression>> *)>
         m_user_defined_move_updater;
     std::function<void(std::vector<Move<T_Variable, T_Expression>> *)>
@@ -40,8 +38,7 @@ class Neighborhood {
     std::vector<Move<T_Variable, T_Expression>> m_integer_moves;
     std::vector<Move<T_Variable, T_Expression>> m_precedence_moves;
     std::vector<Move<T_Variable, T_Expression>> m_aggregation_moves;
-    std::vector<Move<T_Variable, T_Expression>> m_variable_bound_same_moves;
-    std::vector<Move<T_Variable, T_Expression>> m_variable_bound_opposite_moves;
+    std::vector<Move<T_Variable, T_Expression>> m_variable_bound_moves;
     std::vector<Move<T_Variable, T_Expression>> m_user_defined_moves;
     std::vector<Move<T_Variable, T_Expression>> m_selection_moves;
 
@@ -79,9 +76,7 @@ class Neighborhood {
             [](std::vector<Move<T_Variable, T_Expression>> *) {};
         m_aggregation_move_updater =
             [](std::vector<Move<T_Variable, T_Expression>> *) {};
-        m_variable_bound_same_move_updater =
-            [](std::vector<Move<T_Variable, T_Expression>> *) {};
-        m_variable_bound_opposite_move_updater =
+        m_variable_bound_move_updater =
             [](std::vector<Move<T_Variable, T_Expression>> *) {};
         m_user_defined_move_updater =
             [](std::vector<Move<T_Variable, T_Expression>> *) {};
@@ -92,8 +87,7 @@ class Neighborhood {
         m_integer_moves.clear();
         m_precedence_moves.clear();
         m_aggregation_moves.clear();
-        m_variable_bound_same_moves.clear();
-        m_variable_bound_opposite_moves.clear();
+        m_variable_bound_moves.clear();
         m_user_defined_moves.clear();
         m_selection_moves.clear();
 
@@ -231,7 +225,6 @@ class Neighborhood {
 
         for (auto i = 0; i < constraints_size; i++) {
             m_aggregation_moves[4 * i].sense = MoveSense::Aggregation;
-
             m_aggregation_moves[4 * i].related_constraint_ptrs.insert(
                 variable_ptr_pairs[i][0]->related_constraint_ptrs().begin(),
                 variable_ptr_pairs[i][0]->related_constraint_ptrs().end());
@@ -244,58 +237,44 @@ class Neighborhood {
             m_aggregation_moves[4 * i + 3] = m_aggregation_moves[4 * i];
         }
 
-        auto aggregation_move_updater =
-            [this, variable_ptr_pairs, sensitivity_pairs, constants,
-             constraints_size, a_IS_ENABLED_PARALLEL](auto *a_moves) {
+        auto aggregation_move_updater = [this, variable_ptr_pairs,
+                                         sensitivity_pairs, constants,
+                                         constraints_size,
+                                         a_IS_ENABLED_PARALLEL](auto *a_moves) {
 
 #ifdef _OPENMP
 #pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
 #endif
-                for (auto i = 0; i < constraints_size; i++) {
-                    auto value_0 = variable_ptr_pairs[i][0]->value();
-                    auto value_1 = variable_ptr_pairs[i][1]->value();
+            for (auto i = 0; i < constraints_size; i++) {
+                T_Variable value_pair[2] = {variable_ptr_pairs[i][0]->value(),
+                                            variable_ptr_pairs[i][1]->value()};
 
-                    (*a_moves)[4 * i].alterations.clear();
-                    (*a_moves)[4 * i].alterations.emplace_back(
-                        variable_ptr_pairs[i][0], value_0 + 1);
-                    (*a_moves)[4 * i].alterations.emplace_back(
-                        variable_ptr_pairs[i][1],
+                for (auto j = 0; j < 2; j++) {
+                    auto index = 4 * i + 2 * j;
+
+                    (*a_moves)[index].alterations.clear();
+                    (*a_moves)[index].alterations.emplace_back(
+                        variable_ptr_pairs[i][j], value_pair[j] + 1);
+                    (*a_moves)[index].alterations.emplace_back(
+                        variable_ptr_pairs[i][1 - j],
                         static_cast<T_Variable>(
                             (-constants[i] -
-                             sensitivity_pairs[i][0] * (value_0 + 1)) /
-                            sensitivity_pairs[i][1]));
+                             sensitivity_pairs[i][j] * (value_pair[j] + 1)) /
+                            sensitivity_pairs[i][1 - j]));
 
-                    (*a_moves)[4 * i + 1].alterations.clear();
-                    (*a_moves)[4 * i + 1].alterations.emplace_back(
-                        variable_ptr_pairs[i][0], value_0 - 1);
-                    (*a_moves)[4 * i + 1].alterations.emplace_back(
-                        variable_ptr_pairs[i][1],
+                    index = 4 * i + 2 * j + 1;
+                    (*a_moves)[index].alterations.clear();
+                    (*a_moves)[index].alterations.emplace_back(
+                        variable_ptr_pairs[i][j], value_pair[1 - j] - 1);
+                    (*a_moves)[index].alterations.emplace_back(
+                        variable_ptr_pairs[i][1 - j],
                         static_cast<T_Variable>(
                             (-constants[i] -
-                             sensitivity_pairs[i][0] * (value_0 - 1)) /
-                            sensitivity_pairs[i][1]));
-
-                    (*a_moves)[4 * i + 2].alterations.clear();
-                    (*a_moves)[4 * i + 2].alterations.emplace_back(
-                        variable_ptr_pairs[i][1], value_1 + 1);
-                    (*a_moves)[4 * i + 2].alterations.emplace_back(
-                        variable_ptr_pairs[i][0],
-                        static_cast<T_Variable>(
-                            (-constants[i] -
-                             sensitivity_pairs[i][1] * (value_1 + 1)) /
-                            sensitivity_pairs[i][0]));
-
-                    (*a_moves)[4 * i + 3].alterations.clear();
-                    (*a_moves)[4 * i + 3].alterations.emplace_back(
-                        variable_ptr_pairs[i][1], value_1 - 1);
-                    (*a_moves)[4 * i + 3].alterations.emplace_back(
-                        variable_ptr_pairs[i][0],
-                        static_cast<T_Variable>(
-                            (-constants[i] -
-                             sensitivity_pairs[i][1] * (value_1 - 1)) /
-                            sensitivity_pairs[i][0]));
+                             sensitivity_pairs[i][j] * (value_pair[j] - 1)) /
+                            sensitivity_pairs[i][1 - j]));
                 }
-            };
+            }
+        };
         m_aggregation_move_updater = aggregation_move_updater;
     }
 
@@ -364,15 +343,20 @@ class Neighborhood {
     }
 
     /*************************************************************************/
-    inline constexpr void setup_variable_bound_move_updater(
+    inline void setup_variable_bound_move_updater(
         std::vector<Constraint<T_Variable, T_Expression> *> &a_CONSTRAINT_PTRS,
         const bool a_IS_ENABLED_PARALLEL) {
-        std::vector<std::vector<Variable<T_Variable, T_Expression> *>>
-            variable_ptr_same_pairs;
-        std::vector<std::vector<Variable<T_Variable, T_Expression> *>>
-            variable_ptr_opposite_pairs;
-
+        /**
+         * NOTE: This method cannot be constexpr by clang for
+         * std::vector<ConstraintSense>.
+         */
         int raw_constraints_size = a_CONSTRAINT_PTRS.size();
+
+        std::vector<std::vector<Variable<T_Variable, T_Expression> *>>
+                                               variable_ptr_pairs;
+        std::vector<std::vector<T_Expression>> sensitivity_pairs;
+        std::vector<T_Expression>              constants;
+        std::vector<ConstraintSense>           senses;
 
         for (auto i = 0; i < raw_constraints_size; i++) {
             if (a_CONSTRAINT_PTRS[i]->is_enabled()) {
@@ -381,95 +365,109 @@ class Neighborhood {
                 std::vector<Variable<T_Variable, T_Expression> *>
                                           variable_ptr_pair;
                 std::vector<T_Expression> sensitivity_pair;
+
                 for (auto &&sensitivity : sensitivities) {
                     variable_ptr_pair.push_back(sensitivity.first);
                     sensitivity_pair.push_back(sensitivity.second);
                 }
-                if (sensitivity_pair[0] * sensitivity_pair[1] > 0) {
-                    variable_ptr_opposite_pairs.push_back(variable_ptr_pair);
-                } else {
-                    variable_ptr_same_pairs.push_back(variable_ptr_pair);
-                }
+
+                variable_ptr_pairs.push_back(variable_ptr_pair);
+                sensitivity_pairs.push_back(sensitivity_pair);
+                constants.push_back(expression.constant_value());
+                senses.push_back(a_CONSTRAINT_PTRS[i]->sense());
             }
         }
 
-        int constraints_same_size     = variable_ptr_same_pairs.size();
-        int constraints_opposite_size = variable_ptr_opposite_pairs.size();
-        m_variable_bound_same_moves.resize(constraints_same_size);
-        m_variable_bound_opposite_moves.resize(constraints_opposite_size);
+        int constraints_size = variable_ptr_pairs.size();
+        m_variable_bound_moves.resize(4 * constraints_size);
 
-        for (auto i = 0; i < constraints_same_size; i++) {
-            m_variable_bound_same_moves[i].sense = MoveSense::VariableBound;
-            m_variable_bound_same_moves[i].related_constraint_ptrs.insert(
-                variable_ptr_same_pairs[i][0]
-                    ->related_constraint_ptrs()
-                    .begin(),
-                variable_ptr_same_pairs[i][0]->related_constraint_ptrs().end());
-            m_variable_bound_same_moves[i].related_constraint_ptrs.insert(
-                variable_ptr_same_pairs[i][1]
-                    ->related_constraint_ptrs()
-                    .begin(),
-                variable_ptr_same_pairs[i][1]->related_constraint_ptrs().end());
+        for (auto i = 0; i < constraints_size; i++) {
+            m_variable_bound_moves[4 * i].sense = MoveSense::VariableBound;
+            m_variable_bound_moves[4 * i].related_constraint_ptrs.insert(
+                variable_ptr_pairs[i][0]->related_constraint_ptrs().begin(),
+                variable_ptr_pairs[i][0]->related_constraint_ptrs().end());
+            m_variable_bound_moves[4 * i].related_constraint_ptrs.insert(
+                variable_ptr_pairs[i][1]->related_constraint_ptrs().begin(),
+                variable_ptr_pairs[i][1]->related_constraint_ptrs().end());
+
+            m_variable_bound_moves[4 * i + 1] = m_variable_bound_moves[4 * i];
+            m_variable_bound_moves[4 * i + 2] = m_variable_bound_moves[4 * i];
+            m_variable_bound_moves[4 * i + 3] = m_variable_bound_moves[4 * i];
         }
 
-        for (auto i = 0; i < constraints_opposite_size; i++) {
-            m_variable_bound_opposite_moves[i].sense = MoveSense::VariableBound;
-            m_variable_bound_opposite_moves[i].related_constraint_ptrs.insert(
-                variable_ptr_opposite_pairs[i][0]
-                    ->related_constraint_ptrs()
-                    .begin(),
-                variable_ptr_opposite_pairs[i][0]
-                    ->related_constraint_ptrs()
-                    .end());
-            m_variable_bound_opposite_moves[i].related_constraint_ptrs.insert(
-                variable_ptr_opposite_pairs[i][1]
-                    ->related_constraint_ptrs()
-                    .begin(),
-                variable_ptr_opposite_pairs[i][1]
-                    ->related_constraint_ptrs()
-                    .end());
-        }
-
-        auto variable_bound_same_move_updater =
-            [this, variable_ptr_same_pairs, constraints_same_size,
-             a_IS_ENABLED_PARALLEL](auto *a_moves) {
-
+        auto variable_bound_move_updater =
+            [this, variable_ptr_pairs, sensitivity_pairs, constants, senses,
+             constraints_size, a_IS_ENABLED_PARALLEL](auto *a_moves) {
 #ifdef _OPENMP
 #pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
 #endif
-                for (auto i = 0; i < constraints_same_size; i++) {
-                    /// (0,1) -> (1,0), (1,0) -> (0.1)
-                    (*a_moves)[i].alterations.clear();
-                    (*a_moves)[i].alterations.emplace_back(
-                        variable_ptr_same_pairs[i][0],
-                        1 - variable_ptr_same_pairs[i][0]->value());
-                    (*a_moves)[i].alterations.emplace_back(
-                        variable_ptr_same_pairs[i][1],
-                        1 - variable_ptr_same_pairs[i][1]->value());
+                for (auto i = 0; i < constraints_size; i++) {
+                    T_Variable value_pair[2] = {
+                        variable_ptr_pairs[i][0]->value(),
+                        variable_ptr_pairs[i][1]->value()};
+
+                    for (auto j = 0; j < 2; j++) {
+                        auto index = 4 * i + 2 * j;
+                        (*a_moves)[index].alterations.clear();
+                        (*a_moves)[index].alterations.emplace_back(
+                            variable_ptr_pairs[i][j], value_pair[j] + 1);
+
+                        {
+                            double target_temp =
+                                (-constants[i] - sensitivity_pairs[i][j] *
+                                                     (value_pair[j] + 1)) /
+                                sensitivity_pairs[i][1 - j];
+                            T_Variable target = 0;
+
+                            if ((sensitivity_pairs[i][1 - j] > 0 &&
+                                 senses[i] == ConstraintSense::Lower) ||
+                                (sensitivity_pairs[i][1 - j] < 0 &&
+                                 senses[i] == ConstraintSense::Upper)) {
+                                target = std::min(value_pair[1 - j],
+                                                  static_cast<T_Variable>(
+                                                      std::floor(target_temp)));
+
+                            } else {
+                                target = std::max(value_pair[1 - j],
+                                                  static_cast<T_Variable>(
+                                                      std::ceil(target_temp)));
+                            }
+                            (*a_moves)[index].alterations.emplace_back(
+                                variable_ptr_pairs[i][1 - j], target);
+                        }
+
+                        index = 4 * i + 2 * j + 1;
+                        (*a_moves)[index].alterations.clear();
+                        (*a_moves)[index].alterations.emplace_back(
+                            variable_ptr_pairs[i][j], value_pair[j] - 1);
+
+                        {
+                            double target_temp =
+                                (-constants[i] - sensitivity_pairs[i][j] *
+                                                     (value_pair[j] - 1)) /
+                                sensitivity_pairs[i][1 - j];
+                            T_Variable target = 0;
+
+                            if ((sensitivity_pairs[i][1 - j] > 0 &&
+                                 senses[i] == ConstraintSense::Lower) ||
+                                (sensitivity_pairs[i][1 - j] < 0 &&
+                                 senses[i] == ConstraintSense::Upper)) {
+                                target = std::min(value_pair[1 - j],
+                                                  static_cast<T_Variable>(
+                                                      std::floor(target_temp)));
+
+                            } else {
+                                target = std::max(value_pair[1 - j],
+                                                  static_cast<T_Variable>(
+                                                      std::ceil(target_temp)));
+                            }
+                            (*a_moves)[index].alterations.emplace_back(
+                                variable_ptr_pairs[i][1 - j], target);
+                        }
+                    }
                 }
             };
-
-        auto variable_bound_opposite_move_updater =
-            [this, variable_ptr_opposite_pairs, constraints_opposite_size,
-             a_IS_ENABLED_PARALLEL](auto *a_moves) {
-#ifdef _OPENMP
-#pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
-#endif
-                for (auto i = 0; i < constraints_opposite_size; i++) {
-                    /// (0,0) -> (1,1), (1,1) -> (0.0)
-                    (*a_moves)[i].alterations.clear();
-                    (*a_moves)[i].alterations.emplace_back(
-                        variable_ptr_opposite_pairs[i][0],
-                        1 - variable_ptr_opposite_pairs[i][0]->value());
-                    (*a_moves)[i].alterations.emplace_back(
-                        variable_ptr_opposite_pairs[i][1],
-                        1 - variable_ptr_opposite_pairs[i][1]->value());
-                }
-            };
-
-        m_variable_bound_same_move_updater = variable_bound_same_move_updater;
-        m_variable_bound_opposite_move_updater =
-            variable_bound_opposite_move_updater;
+        m_variable_bound_move_updater = variable_bound_move_updater;
     }
 
     /*************************************************************************/
@@ -538,15 +536,9 @@ class Neighborhood {
             m_precedence_move_updater(&m_precedence_moves);
         }
 
-        if (m_variable_bound_same_moves.size() > 0 &&  //
+        if (m_variable_bound_moves.size() > 0 &&  //
             m_is_enabled_variable_bound_move) {
-            m_variable_bound_same_move_updater(&m_variable_bound_same_moves);
-        }
-
-        if (m_variable_bound_opposite_moves.size() > 0 &&  //
-            m_is_enabled_variable_bound_move) {
-            m_variable_bound_opposite_move_updater(
-                &m_variable_bound_opposite_moves);
+            m_variable_bound_move_updater(&m_variable_bound_moves);
         }
 
         if (m_is_enabled_user_defined_move) {
@@ -558,15 +550,13 @@ class Neighborhood {
             m_selection_move_updater(&m_selection_moves);
         }
 
-        auto number_of_candidate_moves =
-            m_binary_moves.size()                     //
-            + m_integer_moves.size()                  //
-            + m_precedence_moves.size()               //
-            + m_aggregation_moves.size()              //
-            + m_variable_bound_same_moves.size()      //
-            + m_variable_bound_opposite_moves.size()  //
-            + m_user_defined_moves.size()             //
-            + m_selection_moves.size();
+        auto number_of_candidate_moves = m_binary_moves.size()            //
+                                         + m_integer_moves.size()         //
+                                         + m_precedence_moves.size()      //
+                                         + m_aggregation_moves.size()     //
+                                         + m_variable_bound_moves.size()  //
+                                         + m_user_defined_moves.size()    //
+                                         + m_selection_moves.size();
 
         m_move_ptrs.resize(number_of_candidate_moves);
 
@@ -668,29 +658,14 @@ class Neighborhood {
         }
 
         if (m_is_enabled_variable_bound_move) {
-            for (auto &&move : m_variable_bound_same_moves) {
+            for (auto &&move : m_variable_bound_moves) {
                 if (has_fixed_variables(move)) {
                     continue;
                 }
                 if (has_selection_variables(move)) {
                     continue;
                 }
-
-                if (move.alterations[0].second != move.alterations[1].second) {
-                    continue;
-                }
-                m_move_ptrs[index++] = &move;
-            }
-
-            for (auto &&move : m_variable_bound_opposite_moves) {
-                if (has_fixed_variables(move)) {
-                    continue;
-                }
-                if (has_selection_variables(move)) {
-                    continue;
-                }
-
-                if (move.alterations[0].second == move.alterations[1].second) {
+                if (has_bound_violation(move)) {
                     continue;
                 }
                 m_move_ptrs[index++] = &move;
@@ -708,7 +683,6 @@ class Neighborhood {
                 if (has_bound_violation(move)) {
                     continue;
                 }
-
                 m_move_ptrs[index++] = &move;
             }
         }
@@ -761,14 +735,8 @@ class Neighborhood {
 
     /*************************************************************************/
     inline constexpr const std::vector<Move<T_Variable, T_Expression>>
-        &variable_bound_same_moves(void) {
-        return m_variable_bound_same_moves;
-    }
-
-    /*************************************************************************/
-    inline constexpr const std::vector<Move<T_Variable, T_Expression>>
-        &variable_bound_opposite_moves(void) {
-        return m_variable_bound_opposite_moves;
+        &variable_bound_moves(void) {
+        return m_variable_bound_moves;
     }
 
     /*************************************************************************/
@@ -903,7 +871,7 @@ class Neighborhood {
     inline constexpr void disable_selection_move(void) {
         m_is_enabled_selection_move = false;
     }
-};
+};  // namespace model
 }  // namespace model
 }  // namespace cppmh
 #endif
