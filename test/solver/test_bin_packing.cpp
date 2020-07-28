@@ -140,6 +140,12 @@ TEST_F(TestBinpacking, bin_packing) {
         option.is_enabled_local_search                 = true;
         option.is_enabled_parallel_evaluation          = true;
         option.is_enabled_parallel_neighborhood_update = true;
+        option.is_enabled_binary_move                  = true;
+        option.is_enabled_integer_move                 = true;
+        option.is_enabled_aggregation_move             = true;
+        option.is_enabled_precedence_move              = true;
+        option.is_enabled_variable_bound_move          = true;
+        option.is_enabled_user_defined_move            = true;
         option.target_objective_value                  = -1E100;
         option.verbose                                 = cppmh::solver::None;
         option.tabu_search.iteration_max               = 200;
@@ -188,6 +194,12 @@ TEST_F(TestBinpacking, bin_packing) {
         option.is_enabled_local_search                 = false;
         option.is_enabled_parallel_evaluation          = false;
         option.is_enabled_parallel_neighborhood_update = false;
+        option.is_enabled_binary_move                  = true;
+        option.is_enabled_integer_move                 = false;
+        option.is_enabled_aggregation_move             = false;
+        option.is_enabled_precedence_move              = false;
+        option.is_enabled_variable_bound_move          = false;
+        option.is_enabled_user_defined_move            = false;
         option.target_objective_value                  = -1E100;
         option.verbose                                 = cppmh::solver::None;
         option.tabu_search.iteration_max               = 200;

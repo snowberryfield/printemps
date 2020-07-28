@@ -45,6 +45,7 @@ struct OptionConstant {
         model::SelectionMode::None;
 
     static constexpr double DEFAULT_TARGET_OBJECTIVE = -1E100;
+    static constexpr bool   DEFAULT_SEED             = 1;
     static constexpr bool   DEFAULT_VERBOSE          = Verbose::None;
 };
 
@@ -74,6 +75,7 @@ struct Option {
     model::SelectionMode selection_mode;
 
     double target_objective_value;
+    int    seed;
     int    verbose;
 
     tabu_search::TabuSearchOption     tabu_search;
@@ -131,6 +133,7 @@ struct Option {
         this->selection_mode = OptionConstant::DEFAULT_SELECTION_MODE;
 
         this->target_objective_value = OptionConstant::DEFAULT_TARGET_OBJECTIVE;
+        this->seed                   = OptionConstant::DEFAULT_SEED;
         this->verbose                = OptionConstant::DEFAULT_VERBOSE;
 
         this->lagrange_dual.initialize();
@@ -232,6 +235,10 @@ struct Option {
             " - target_objective_value: " +  //
             utility::to_string(this->target_objective_value, "%.3e"));
 
+        utility::print(    //
+            " - seed: " +  //
+            utility::to_string(this->seed, "%d"));
+
         utility::print(       //
             " - verbose: " +  //
             utility::to_string(this->verbose, "%d"));
@@ -314,6 +321,16 @@ struct Option {
             " - tabu_search.tabu_tenure_randomize_rate: " +
             utility::to_string(this->tabu_search.tabu_tenure_randomize_rate,
                                "%f"));
+
+        utility::print(  //
+            " - tabu_search.initial_modification_fixed_rate: " +
+            utility::to_string(
+                this->tabu_search.initial_modification_fixed_rate, "%f"));
+
+        utility::print(  //
+            " - tabu_search.initial_modification_randomize_rate: " +
+            utility::to_string(
+                this->tabu_search.initial_modification_randomize_rate, "%f"));
 
         utility::print(                     //
             " - tabu_search.tabu_mode: " +  //

@@ -38,8 +38,7 @@ TEST_F(TestNeighborhood, initialize) {
     EXPECT_EQ(true, neighborhood.integer_moves().empty());
     EXPECT_EQ(true, neighborhood.aggregation_moves().empty());
     EXPECT_EQ(true, neighborhood.precedence_moves().empty());
-    EXPECT_EQ(true, neighborhood.variable_bound_same_moves().empty());
-    EXPECT_EQ(true, neighborhood.variable_bound_opposite_moves().empty());
+    EXPECT_EQ(true, neighborhood.variable_bound_moves().empty());
     EXPECT_EQ(true, neighborhood.user_defined_moves().empty());
     EXPECT_EQ(true, neighborhood.selection_moves().empty());
 
@@ -138,10 +137,10 @@ TEST_F(TestNeighborhood, setup_move_updater) {
     model.create_constraint("c13", -z(0) + z(1) >= 10);  // eff. : 2
 
     /// Variable bound constraints.
-    model.create_constraint("c14", 2 * x2(0) + 3 * x2(1) <= 5);  // eff. : 0
-    model.create_constraint("c14", 2 * x2(0) - 3 * x2(1) <= 5);  // eff. : 1
-    model.create_constraint("c14", 2 * x2(0) + 3 * x2(1) >= 5);  // eff. : 0
-    model.create_constraint("c14", 2 * x2(0) - 3 * x2(1) >= 5);  // eff. : 1
+    model.create_constraint("c14", 3 * z(0) + 10 * z(1) <= 20);  // eff. : 4
+    model.create_constraint("c14", 3 * z(0) - 10 * z(1) <= 20);  // eff. : 4
+    model.create_constraint("c14", 3 * z(0) + 10 * z(1) >= 20);  // eff. : 4
+    model.create_constraint("c14", 3 * z(0) - 10 * z(1) >= 20);  // eff. : 4
 
     y(0, 0).fix_by(0);
     y(0, 1) = -10;
@@ -150,7 +149,7 @@ TEST_F(TestNeighborhood, setup_move_updater) {
     model.categorize_variables();
     model.categorize_constraints();
     model.extract_selections(cppmh::model::SelectionMode::Larger);
-    model.setup_neighborhood(false, false);
+    model.setup_neighborhood(true, true, true, false, false);
 
     model.neighborhood().set_has_fixed_variables(true);
     model.neighborhood().set_has_selection_variables(true);
@@ -261,11 +260,8 @@ TEST_F(TestNeighborhood, setup_move_updater) {
     {
         auto constraint_ptrs =
             model.constraint_type_reference().variable_bound_ptrs;
-        auto same_moves = model.neighborhood().variable_bound_same_moves();
-        EXPECT_EQ(2, static_cast<int>(same_moves.size()));
-        auto opposite_moves =
-            model.neighborhood().variable_bound_opposite_moves();
-        EXPECT_EQ(2, static_cast<int>(opposite_moves.size()));
+        auto moves = model.neighborhood().variable_bound_moves();
+        EXPECT_EQ(16, static_cast<int>(moves.size()));
     }
 
     /// Selection
@@ -330,7 +326,7 @@ TEST_F(TestNeighborhood, setup_move_updater) {
                 + (2 * integer_variables_size - 2 - 1 - 1)  // Integer
                 + (4 * aggregations_size - 5)               // Aggregation
                 + (2 * precedences_size - 4)                // Precedence
-                + (variable_bounds_size - 2)                // Variable Bound
+                + (4 * variable_bounds_size)                // Variable Bound
                 + (selection_variables_size - selections_size),  // Selection
             static_cast<int>(model.neighborhood().move_ptrs().size()));
     }
@@ -391,7 +387,7 @@ TEST_F(TestNeighborhood, shuffle_moves) {
     auto&                  x = model.create_variables("x", n, 0, 1);
     [[maybe_unused]] auto& c = model.create_constraint("c", x.selection());
 
-    model.setup_neighborhood(false, false);
+    model.setup_neighborhood(true, true, true, false, false);
     model.neighborhood().update_moves();
 
     auto         before_move_ptrs = model.neighborhood().move_ptrs();
@@ -429,12 +425,7 @@ TEST_F(TestNeighborhood, precedence_moves) {
 }
 
 /*****************************************************************************/
-TEST_F(TestNeighborhood, variable_bound_same_moves) {
-    /// This method is tested in move_updater().
-}
-
-/*****************************************************************************/
-TEST_F(TestNeighborhood, variable_bound_opposite_moves) {
+TEST_F(TestNeighborhood, variable_bound_moves) {
     /// This method is tested in move_updater().
 }
 
