@@ -11,14 +11,16 @@ namespace solver {
 namespace tabu_search {
 /*****************************************************************************/
 struct TabuSearchOptionConstant {
-    static constexpr int    DEFAULT_ITERATION_MAX                 = 200;
-    static constexpr double DEFAULT_TIME_MAX                      = 120.0;
-    static constexpr double DEFAULT_TIME_OFFSET                   = 0.0;
-    static constexpr int    DEFAULT_LOG_INTERVAL                  = 10;
-    static constexpr int    DEFAULT_INITIAL_TABU_TENURE           = 10;
-    static constexpr double DEFAULT_TABU_TENURE_RANDOMIZE_RATE    = 0.5;
-    static constexpr double DEFAULT_MOVE_PRESERVE_RATE            = 1.0;
-    static constexpr double DEFAULT_FREQUENCY_PENALTY_COEFFICIENT = 1E-5;
+    static constexpr int    DEFAULT_ITERATION_MAX                       = 200;
+    static constexpr double DEFAULT_TIME_MAX                            = 120.0;
+    static constexpr double DEFAULT_TIME_OFFSET                         = 0.0;
+    static constexpr int    DEFAULT_LOG_INTERVAL                        = 10;
+    static constexpr int    DEFAULT_INITIAL_TABU_TENURE                 = 10;
+    static constexpr double DEFAULT_TABU_TENURE_RANDOMIZE_RATE          = 0.5;
+    static constexpr double DEFAULT_INITIAL_MODIFICATION_FIXED_RATE     = 1.0;
+    static constexpr double DEFAULT_INITIAL_MODIFICATION_RANDOMIZE_RATE = 0.5;
+    static constexpr double DEFAULT_MOVE_PRESERVE_RATE                  = 1.0;
+    static constexpr double DEFAULT_FREQUENCY_PENALTY_COEFFICIENT       = 1E-5;
 
     static constexpr bool   DEFAULT_IS_ENABLED_IMPROVABILITY_SCREENING = true;
     static constexpr double DEFAULT_IS_ENABLED_SHUFFLE                 = true;
@@ -59,6 +61,8 @@ struct TabuSearchOption {
     int         log_interval;
     int         initial_tabu_tenure;
     double      tabu_tenure_randomize_rate;
+    double      initial_modification_fixed_rate;      // hidden
+    double      initial_modification_randomize_rate;  // hidden
     TabuMode    tabu_mode;
     RestartMode restart_mode;
     double      move_preserve_rate;
@@ -99,6 +103,10 @@ struct TabuSearchOption {
             TabuSearchOptionConstant::DEFAULT_INITIAL_TABU_TENURE;
         this->tabu_tenure_randomize_rate =
             TabuSearchOptionConstant::DEFAULT_TABU_TENURE_RANDOMIZE_RATE;
+        this->initial_modification_fixed_rate =
+            TabuSearchOptionConstant::DEFAULT_INITIAL_MODIFICATION_FIXED_RATE;
+        this->initial_modification_randomize_rate = TabuSearchOptionConstant::
+            DEFAULT_INITIAL_MODIFICATION_RANDOMIZE_RATE;
         this->tabu_mode    = TabuMode::All;
         this->restart_mode = RestartMode::Global;
         this->move_preserve_rate =
