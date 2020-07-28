@@ -694,7 +694,9 @@ Result<T_Variable, T_Expression> solve(
                     master_option.verbose >= Verbose::Outer);
             }
         } else {
-            if (!result.is_early_stopped) {
+            if (!result.is_early_stopped &&
+                (option.tabu_search.iteration_max ==
+                 master_option.tabu_search.iteration_max)) {
                 bool is_enabled_special_neighborhood_move = false;
 
                 if (master_option.is_enabled_aggregation_move) {
