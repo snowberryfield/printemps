@@ -322,6 +322,16 @@ struct Option {
             utility::to_string(this->tabu_search.tabu_tenure_randomize_rate,
                                "%f"));
 
+        utility::print(  //
+            " - tabu_search.initial_modification_fixed_rate: " +
+            utility::to_string(
+                this->tabu_search.initial_modification_fixed_rate, "%f"));
+
+        utility::print(  //
+            " - tabu_search.initial_modification_randomize_rate: " +
+            utility::to_string(
+                this->tabu_search.initial_modification_randomize_rate, "%f"));
+
         utility::print(                     //
             " - tabu_search.tabu_mode: " +  //
             utility::to_string(this->tabu_search.tabu_mode, "%d"));

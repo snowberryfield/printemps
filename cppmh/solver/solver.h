@@ -611,8 +611,23 @@ Result<T_Variable, T_Expression> solve(
 
         } else {
             if (master_option.tabu_search.is_enabled_initial_modification) {
+                int nominal_number_of_initial_modification  //
+                    = static_cast<int>(
+                        std::floor(master_option.tabu_search
+                                       .initial_modification_fixed_rate *
+                                   result.tabu_tenure));
+
+                int initial_modification_random_width = static_cast<int>(
+                    option.tabu_search.initial_modification_randomize_rate *
+                    nominal_number_of_initial_modification);
+
+                int number_of_initial_modification =
+                    nominal_number_of_initial_modification +
+                    get_rand_mt() % (2 * initial_modification_random_width) -
+                    initial_modification_random_width;
+
                 next_number_of_initial_modification =
-                    (get_rand_mt() % result.tabu_tenure) + 1;
+                    std::max(1, number_of_initial_modification);
 
                 utility::print_message(
                     "Incumbent objective was not updated. For the "
