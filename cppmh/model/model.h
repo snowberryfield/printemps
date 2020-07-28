@@ -668,8 +668,11 @@ class Model {
         const bool           a_IS_ENABLED_PARALLEL_NEIGHBORHOOD_UPDATE,  //
         const bool           a_IS_ENABLED_PRESOLVE,                      //
         const bool           a_IS_ENABLED_INITIAL_VALUE_CORRECTION,      //
-        const bool           a_IS_ENABLED_PRINT,                         //
-        const SelectionMode &a_SELECTION_MODE) {
+        const bool           a_IS_ENABLED_AGGREGATION_MOVE,
+        const bool           a_IS_ENABLED_PRECEDENCE_MOVE,
+        const bool           a_IS_ENABLED_VARIABLE_BOUND_MOVE,
+        const SelectionMode &a_SELECTION_MODE,  //
+        const bool           a_IS_ENABLED_PRINT) {
         this->verify_problem(a_IS_ENABLED_PRINT);
 
         this->setup_variable_related_constraints();
@@ -696,7 +699,10 @@ class Model {
             this->extract_selections(a_SELECTION_MODE);
         }
 
-        this->setup_neighborhood(a_IS_ENABLED_PARALLEL_NEIGHBORHOOD_UPDATE,  //
+        this->setup_neighborhood(a_IS_ENABLED_AGGREGATION_MOVE,              //
+                                 a_IS_ENABLED_PRECEDENCE_MOVE,               //
+                                 a_IS_ENABLED_VARIABLE_BOUND_MOVE,           //
+                                 a_IS_ENABLED_PARALLEL_NEIGHBORHOOD_UPDATE,  //
                                  a_IS_ENABLED_PRINT);
 
         this->verify_and_correct_selection_variables_initial_values(
@@ -1639,6 +1645,9 @@ class Model {
 
     /*************************************************************************/
     inline constexpr void setup_neighborhood(
+        const bool a_IS_ENABLED_AGGREGATION_MOVE,
+        const bool a_IS_ENABLED_PRECEDENCE_MOVE,
+        const bool a_IS_ENABLED_VARIABLE_BOUND_MOVE,
         const bool a_IS_ENABLED_PARALLEL,  //
         const bool a_IS_ENABLED_PRINT) {
         utility::print_single_line(a_IS_ENABLED_PRINT);
@@ -1663,17 +1672,23 @@ class Model {
             m_variable_reference.selection_variable_ptrs,  //
             a_IS_ENABLED_PARALLEL);
 
-        m_neighborhood.setup_aggregation_move_updater(
-            m_constraint_type_reference.aggregation_ptrs,  //
-            a_IS_ENABLED_PARALLEL);
+        if (a_IS_ENABLED_AGGREGATION_MOVE) {
+            m_neighborhood.setup_aggregation_move_updater(
+                m_constraint_type_reference.aggregation_ptrs,  //
+                a_IS_ENABLED_PARALLEL);
+        }
 
-        m_neighborhood.setup_precedence_move_updater(
-            m_constraint_type_reference.precedence_ptrs,  //
-            a_IS_ENABLED_PARALLEL);
+        if (a_IS_ENABLED_PRECEDENCE_MOVE) {
+            m_neighborhood.setup_precedence_move_updater(
+                m_constraint_type_reference.precedence_ptrs,  //
+                a_IS_ENABLED_PARALLEL);
+        }
 
-        m_neighborhood.setup_variable_bound_move_updater(
-            m_constraint_type_reference.variable_bound_ptrs,  //
-            a_IS_ENABLED_PARALLEL);
+        if (a_IS_ENABLED_VARIABLE_BOUND_MOVE) {
+            m_neighborhood.setup_variable_bound_move_updater(
+                m_constraint_type_reference.variable_bound_ptrs,  //
+                a_IS_ENABLED_PARALLEL);
+        }
 
         utility::print_message("Done.", a_IS_ENABLED_PRINT);
     }

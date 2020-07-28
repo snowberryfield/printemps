@@ -149,7 +149,7 @@ TEST_F(TestNeighborhood, setup_move_updater) {
     model.categorize_variables();
     model.categorize_constraints();
     model.extract_selections(cppmh::model::SelectionMode::Larger);
-    model.setup_neighborhood(false, false);
+    model.setup_neighborhood(true, true, true, false, false);
 
     model.neighborhood().set_has_fixed_variables(true);
     model.neighborhood().set_has_selection_variables(true);
@@ -387,7 +387,7 @@ TEST_F(TestNeighborhood, shuffle_moves) {
     auto&                  x = model.create_variables("x", n, 0, 1);
     [[maybe_unused]] auto& c = model.create_constraint("c", x.selection());
 
-    model.setup_neighborhood(false, false);
+    model.setup_neighborhood(true, true, true, false, false);
     model.neighborhood().update_moves();
 
     auto         before_move_ptrs = model.neighborhood().move_ptrs();

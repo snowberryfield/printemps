@@ -135,17 +135,6 @@ TEST_F(TestQuadracitAssignment, quadratic_assignment) {
         };
     model.neighborhood().set_user_defined_move_updater(move_updater);
 
-    /// Option default
-    {
-        /// initial solution
-        for (auto n = 0; n < qap.N; n++) {
-            p(n) = n;
-        }
-
-        auto result = cppmh::solver::solve(&model);
-        EXPECT_EQ(true, result.solution.is_feasible());
-    }
-
     /// Option case 1
     {
         /// initial solution
@@ -162,6 +151,12 @@ TEST_F(TestQuadracitAssignment, quadratic_assignment) {
         option.is_enabled_local_search                 = true;
         option.is_enabled_parallel_evaluation          = true;
         option.is_enabled_parallel_neighborhood_update = true;
+        option.is_enabled_binary_move                  = false;
+        option.is_enabled_integer_move                 = false;
+        option.is_enabled_aggregation_move             = false;
+        option.is_enabled_precedence_move              = false;
+        option.is_enabled_variable_bound_move          = false;
+        option.is_enabled_user_defined_move            = true;
         option.target_objective_value                  = -1E100;
         option.verbose                                 = cppmh::solver::None;
         option.tabu_search.iteration_max               = 100;
@@ -200,6 +195,12 @@ TEST_F(TestQuadracitAssignment, quadratic_assignment) {
         option.is_enabled_local_search                 = false;
         option.is_enabled_parallel_evaluation          = false;
         option.is_enabled_parallel_neighborhood_update = false;
+        option.is_enabled_binary_move                  = false;
+        option.is_enabled_integer_move                 = false;
+        option.is_enabled_aggregation_move             = false;
+        option.is_enabled_precedence_move              = false;
+        option.is_enabled_variable_bound_move          = false;
+        option.is_enabled_user_defined_move            = true;
         option.target_objective_value                  = -1E100;
         option.verbose                                 = cppmh::solver::None;
         option.tabu_search.iteration_max               = 100;
