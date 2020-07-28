@@ -343,9 +343,13 @@ class Neighborhood {
     }
 
     /*************************************************************************/
-    inline constexpr void setup_variable_bound_move_updater(
+    inline void setup_variable_bound_move_updater(
         std::vector<Constraint<T_Variable, T_Expression> *> &a_CONSTRAINT_PTRS,
         const bool a_IS_ENABLED_PARALLEL) {
+        /**
+         * NOTE: This method cannot be constexpr by clang for
+         * std::vector<ConstraintSense>.
+         */
         int raw_constraints_size = a_CONSTRAINT_PTRS.size();
 
         std::vector<std::vector<Variable<T_Variable, T_Expression> *>>
