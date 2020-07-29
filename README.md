@@ -91,6 +91,17 @@ Following combinations of operating systems and compilers are confirmed compilat
 - [Starter Guide](document/starter_guide.md) describes the basic usage of cppmh including modeling of optimization problems, running the solver, and accessing the optimization results.
 - [Solver Option Guide](document/solver_option_guide.md) gives a detailed description of the all options and their default values.
 
+## Testing
+The test suites for `cppmh` are powered by [googletest](https://github.com/google/googletest). The command
+```
+$make -f makefile/Makefile.external [CC=gcc CXX=g++]
+```
+installs `googletest` into `external/` directory. The options `CC` and `CXX` respectively designate the paths of C and C++ compilers, which should be specified according to the user's development environment. After the installation og `googletest`, execute the command
+```
+$make -f makefile/Makefile.test
+```
+to build and run the test suites.
+
 ## License
 __cpp_metaheuristics__ is licensed under [MIT license](https://opensource.org/licenses/MIT).
 
