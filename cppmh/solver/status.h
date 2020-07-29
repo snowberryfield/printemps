@@ -10,7 +10,6 @@
 
 namespace cppmh {
 namespace solver {
-
 /*****************************************************************************/
 struct Status {
     std::unordered_map<std::string, model::ValueProxy<double>>
@@ -20,6 +19,7 @@ struct Status {
 
     bool   is_found_feasible_solution;
     double elapsed_time;
+    int    number_of_lagrange_dual_iterations;
     int    number_of_local_search_iterations;
     int    number_of_tabu_search_iterations;
     int    number_of_tabu_search_loops;
@@ -38,11 +38,12 @@ struct Status {
     inline void initialize(void) {
         this->penalty_coefficients.clear();
         this->update_counts.clear();
-        this->is_found_feasible_solution        = false;
-        this->elapsed_time                      = 0.0;
-        this->number_of_local_search_iterations = 0.0;
-        this->number_of_tabu_search_iterations  = 0.0;
-        this->number_of_tabu_search_loops       = 0.0;
+        this->is_found_feasible_solution         = false;
+        this->elapsed_time                       = 0.0;
+        this->number_of_local_search_iterations  = 0;
+        this->number_of_lagrange_dual_iterations = 0;
+        this->number_of_tabu_search_iterations   = 0;
+        this->number_of_tabu_search_loops        = 0;
     }
 
     /*************************************************************************/
@@ -78,6 +79,11 @@ struct Status {
 
         ofs << utility::indent_spaces(indent_level)
             << "\"elapsed_time\" : " + std::to_string(elapsed_time) + ","
+            << std::endl;
+
+        ofs << utility::indent_spaces(indent_level)
+            << "\"number_of_lagrange_dual_iterations\" : " +
+                   std::to_string(number_of_lagrange_dual_iterations) + ","
             << std::endl;
 
         ofs << utility::indent_spaces(indent_level)
@@ -123,6 +129,11 @@ struct Status {
 
         ofs << utility::indent_spaces(indent_level)
             << "\"elapsed_time\" : " + std::to_string(elapsed_time) + ","
+            << std::endl;
+
+        ofs << utility::indent_spaces(indent_level)
+            << "\"number_of_lagrange_dual_iterations\" : " +
+                   std::to_string(number_of_lagrange_dual_iterations) + ","
             << std::endl;
 
         ofs << utility::indent_spaces(indent_level)

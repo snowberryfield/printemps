@@ -403,8 +403,8 @@ class ExpressionProxy : public AbstractMultiArray {
 
         auto result = Expression<T_Variable, T_Expression>::create_instance();
 
-        int expression_ptrs_size = expression_ptrs.size();
-        for (auto i = 0; i < expression_ptrs_size; i++) {
+        int expression_size = expression_ptrs.size();
+        for (auto i = 0; i < expression_size; i++) {
             result += (*expression_ptrs[i]) * a_COEFFICIENTS[i];
         }
 

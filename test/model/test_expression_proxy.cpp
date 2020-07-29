@@ -5,10 +5,11 @@
 /*****************************************************************************/
 #include <gtest/gtest.h>
 #include <random>
+
 #include <cppmh.h>
 
-/*****************************************************************************/
 namespace {
+/*****************************************************************************/
 class TestExpressionProxy : public ::testing::Test {
    protected:
     cppmh::utility::IntegerUniformRandom m_random_integer;

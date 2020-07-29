@@ -3,8 +3,8 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef CPPMH_SOLVER_LOCAL_SEARCH_LOCAL_SEARCH_PRINT_H__
-#define CPPMH_SOLVER_LOCAL_SEARCH_LOCAL_SEARCH_PRINT_H__
+#ifndef CPPMH_SOLVER_LAGRANGE_DUAL_LAGRANGE_DUAL_PRINT_H__
+#define CPPMH_SOLVER_LAGRANGE_DUAL_LAGRANGE_DUAL_PRINT_H__
 
 namespace cppmh {
 namespace solver {
@@ -12,10 +12,7 @@ namespace solver {
 template <class T_Variable, class T_Expression>
 class IncumbentHolder;
 
-/*****************************************************************************/
-struct TabuSearchMoveScore;
-
-namespace local_search {
+namespace lagrange_dual {
 /*****************************************************************************/
 inline void print_table_header(const bool a_IS_ENABLED_PRINT) {
     if (!a_IS_ENABLED_PRINT) {
@@ -23,27 +20,27 @@ inline void print_table_header(const bool a_IS_ENABLED_PRINT) {
     }
 
     utility::print(
-        "---------+------------------------+----------------------+-----------"
+        "---------+------------+-----------+----------------------+-----------"
         "-----------",
         true);
     utility::print(
-        "Iteration| Number of Neighborhoods|   Current Solution   |"
+        "Iteration| Lagrangian | Step Size |   Current Solution   |"
         "  Incumbent Solution ",
         true);
     utility::print(
-        "         |      All       checked |   Aug.Obj.(Penalty)  | "
+        "         |            |           |   Aug.Obj.(Penalty)  | "
         "  Aug.Obj.  Feas.Obj ",
         true);
     utility::print(
-        "---------+------------------------+----------------------+-----------"
+        "---------+------------+-----------+----------------------+-----------"
         "-----------",
         true);
 }
-
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 inline void print_table_initial(
-    const model::Model<T_Variable, T_Expression> *   a_MODEL,
+    const model::Model<T_Variable, T_Expression> *a_MODEL,
+    const double a_LAGRANGIAN, const double a_STEP_SIZE,
     const model::SolutionScore &                     a_SOLUTION_SCORE,
     const IncumbentHolder<T_Variable, T_Expression> &a_INCUMBENT_HOLDER,
     const bool                                       a_IS_ENABLED_PRINT) {
@@ -52,7 +49,8 @@ inline void print_table_initial(
     }
 
     std::printf(
-        " INITIAL |          -           - | %9.2e(%9.2e) | %9.2e  %9.2e\n",
+        " INITIAL |  %9.2e | %9.2e | %9.2e(%9.2e) | %9.2e  %9.2e\n",
+        a_LAGRANGIAN * a_MODEL->sign(), a_STEP_SIZE,
         a_SOLUTION_SCORE.local_augmented_objective * a_MODEL->sign(),
         a_SOLUTION_SCORE.local_penalty,
         a_INCUMBENT_HOLDER.global_augmented_incumbent_objective() *
@@ -63,12 +61,12 @@ inline void print_table_initial(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 inline void print_table_body(
-    const model::Model<T_Variable, T_Expression> *a_MODEL,                    //
-    const int                                     a_ITERATION,                //
-    const int                                     a_NUMBER_OF_MOVES,          //
-    const int                                     a_NUMBER_OF_CHECKED_MOVES,  //
-    const model::SolutionScore &                  a_CURRENT_SOLUTION_SCORE,   //
-    const int                                     a_STATUS,                   //
+    const model::Model<T_Variable, T_Expression> *a_MODEL,                   //
+    const int                                     a_ITERATION,               //
+    const double                                  a_LAGRANGIAN,              //
+    const double                                  a_STEP_SIZE,               //
+    const model::SolutionScore &                  a_CURRENT_SOLUTION_SCORE,  //
+    const int                                     a_STATUS,                  //
     const IncumbentHolder<T_Variable, T_Expression> &a_INCUMBENT_HOLDER,
     const bool                                       a_IS_ENABLED_PRINT) {
     if (!a_IS_ENABLED_PRINT) {
@@ -97,11 +95,11 @@ inline void print_table_body(
     }
 
     std::printf(
-        "%8d |      %5d       %5d |%c%9.2e(%9.2e) |%c%9.2e %c%9.2e\n",
-        a_ITERATION,                //
-        a_NUMBER_OF_MOVES,          //
-        a_NUMBER_OF_CHECKED_MOVES,  //
-        mark_current,               //
+        "%8d |  %9.2e | %9.2e |%c%9.2e(%9.2e) |%c%9.2e %c%9.2e\n",
+        a_ITERATION,                     //
+        a_LAGRANGIAN * a_MODEL->sign(),  //
+        a_STEP_SIZE,                     //
+        mark_current,                    //
         a_CURRENT_SOLUTION_SCORE.local_augmented_objective *
             a_MODEL->sign(),                     //
         a_CURRENT_SOLUTION_SCORE.local_penalty,  //
@@ -117,11 +115,11 @@ inline void print_table_footer(const bool a_IS_ENABLED_PRINT) {
         return;
     }
     utility::print(
-        "---------+------------------------+----------------------+-----------"
+        "---------+------------+-----------+----------------------+-----------"
         "-----------",
         true);
 }
-}  // namespace local_search
+}  // namespace lagrange_dual
 }  // namespace solver
 }  // namespace cppmh
 

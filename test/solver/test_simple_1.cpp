@@ -7,8 +7,8 @@
 #include <random>
 #include <cppmh.h>
 
-/*****************************************************************************/
 namespace {
+/*****************************************************************************/
 class TestSimple1 : public ::testing::Test {
    protected:
     virtual void SetUp(void) {
@@ -65,12 +65,19 @@ TEST_F(TestSimple1, simple_1) {
         /// solve
         cppmh::solver::Option option;
 
-        option.iteration_max                           = 10;
+        option.iteration_max                           = 50;
         option.is_enabled_grouping_penalty_coefficient = true;
         option.is_enabled_initial_value_correction     = true;
+        option.is_enabled_lagrange_dual                = true;
         option.is_enabled_local_search                 = true;
         option.is_enabled_parallel_evaluation          = true;
         option.is_enabled_parallel_neighborhood_update = true;
+        option.is_enabled_binary_move                  = true;
+        option.is_enabled_integer_move                 = true;
+        option.is_enabled_aggregation_move             = true;
+        option.is_enabled_precedence_move              = true;
+        option.is_enabled_variable_bound_move          = true;
+        option.is_enabled_user_defined_move            = true;
         option.target_objective_value                  = -1E100;
         option.verbose                                 = cppmh::solver::None;
         option.tabu_search.iteration_max               = 100;
@@ -84,6 +91,7 @@ TEST_F(TestSimple1, simple_1) {
         option.tabu_search.is_enabled_automatic_break                  = true;
         option.tabu_search.is_enabled_automatic_tabu_tenure_adjustment = true;
         option.tabu_search.move_preserve_rate                          = 0.5;
+        option.tabu_search.is_enabled_initial_modification             = true;
         option.tabu_search.ignore_tabu_if_augmented_incumbent          = true;
         option.tabu_search.ignore_tabu_if_feasible_incumbent           = true;
 
@@ -102,12 +110,19 @@ TEST_F(TestSimple1, simple_1) {
         /// solve
         cppmh::solver::Option option;
 
-        option.iteration_max                           = 10;
-        option.is_enabled_local_search                 = false;
+        option.iteration_max                           = 50;
         option.is_enabled_grouping_penalty_coefficient = false;
         option.is_enabled_initial_value_correction     = false;
+        option.is_enabled_lagrange_dual                = false;
+        option.is_enabled_local_search                 = false;
         option.is_enabled_parallel_evaluation          = false;
         option.is_enabled_parallel_neighborhood_update = false;
+        option.is_enabled_binary_move                  = false;
+        option.is_enabled_integer_move                 = true;
+        option.is_enabled_aggregation_move             = false;
+        option.is_enabled_precedence_move              = false;
+        option.is_enabled_variable_bound_move          = false;
+        option.is_enabled_user_defined_move            = false;
         option.target_objective_value                  = -1E100;
         option.verbose                                 = cppmh::solver::None;
         option.tabu_search.iteration_max               = 100;
@@ -120,6 +135,7 @@ TEST_F(TestSimple1, simple_1) {
         option.tabu_search.is_enabled_automatic_break                  = false;
         option.tabu_search.is_enabled_automatic_tabu_tenure_adjustment = false;
         option.tabu_search.move_preserve_rate                          = 0.5;
+        option.tabu_search.is_enabled_initial_modification             = false;
         option.tabu_search.ignore_tabu_if_augmented_incumbent          = false;
         option.tabu_search.ignore_tabu_if_feasible_incumbent           = false;
 

@@ -54,6 +54,9 @@ class Variable : public AbstractMultiArrayElement {
     Selection<T_Variable, T_Expression> *m_selection_ptr;
     std::unordered_set<Constraint<T_Variable, T_Expression> *>
         m_related_constraint_ptrs;
+    std::unordered_map<Constraint<T_Variable, T_Expression> *, T_Expression>
+                 m_constraint_sensitivities;
+    T_Expression m_objective_sensitivity;
 
     /*************************************************************************/
     /// Default constructor
@@ -108,6 +111,8 @@ class Variable : public AbstractMultiArrayElement {
         m_sense         = VariableSense::Integer;
         m_selection_ptr = nullptr;
         m_related_constraint_ptrs.clear();
+        m_constraint_sensitivities.clear();
+        m_objective_sensitivity = 0.0;
     }
 
     /*************************************************************************/
@@ -227,7 +232,9 @@ class Variable : public AbstractMultiArrayElement {
 
     /*************************************************************************/
     inline constexpr void setup_sense(void) {
-        if (m_lower_bound == 0 && m_upper_bound == 1) {
+        if ((m_lower_bound == 0 && m_upper_bound == 1) ||
+            (m_lower_bound == 0 && m_upper_bound == 0) ||
+            (m_lower_bound == 1 && m_upper_bound == 1)) {
             m_sense = VariableSense::Binary;
         } else {
             m_sense = VariableSense::Integer;
@@ -267,6 +274,36 @@ class Variable : public AbstractMultiArrayElement {
     inline constexpr std::unordered_set<Constraint<T_Variable, T_Expression> *>
         &related_constraint_ptrs(void) {
         return m_related_constraint_ptrs;
+    }
+
+    /*************************************************************************/
+    inline constexpr void register_constraint_sensitivity(
+        Constraint<T_Variable, T_Expression> *a_constraint_ptr,
+        const T_Expression                    a_SENSITIVITY) {
+        m_constraint_sensitivities[a_constraint_ptr] = a_SENSITIVITY;
+    }
+
+    /*************************************************************************/
+    inline constexpr void reset_constraint_sensitivities(void) {
+        m_constraint_sensitivities.clear();
+    }
+
+    /*************************************************************************/
+    inline constexpr const std::unordered_map<
+        Constraint<T_Variable, T_Expression> *, T_Expression>
+        &constraint_sensitivities(void) const {
+        return m_constraint_sensitivities;
+    }
+
+    /*************************************************************************/
+    inline constexpr void set_objective_sensitivity(
+        const T_Expression a_SENSITIVITY) {
+        m_objective_sensitivity = a_SENSITIVITY;
+    }
+
+    /*************************************************************************/
+    inline constexpr T_Expression objective_sensitivity(void) const {
+        return m_objective_sensitivity;
     }
 
     /*************************************************************************/

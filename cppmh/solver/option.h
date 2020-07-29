@@ -6,23 +6,24 @@
 #ifndef CPPMH_SOLVER_OPTION_H__
 #define CPPMH_SOLVER_OPTION_H__
 
-#include "tabu_search/tabu_search_option.h"
+#include "lagrange_dual/lagrange_dual_option.h"
 #include "local_search/local_search_option.h"
+#include "tabu_search/tabu_search_option.h"
 
 namespace cppmh {
 namespace solver {
-
 /*****************************************************************************/
 enum Verbose : int { None, Warning, Outer, Full, Debug };
 
 /*****************************************************************************/
 struct OptionConstant {
-    static constexpr int    DEFAULT_ITERATION_MAX                       = 20;
+    static constexpr int    DEFAULT_ITERATION_MAX                       = 100;
     static constexpr double DEFAULT_TIME_MAX                            = 120.0;
     static constexpr double DEFAULT_TIME_OFFSET                         = 0.0;
     static constexpr double DEFAULT_PENALTY_COEFFICIENT_RELAXING_RATE   = 0.5;
     static constexpr double DEFAULT_PENALTY_COEFFICIENT_TIGHTENING_RATE = 1.0;
     static constexpr double DEFAULT_INITIAL_PENALTY_COEFFICIENT         = 1E6;
+    static constexpr bool   DEFAULT_IS_ENABLED_LAGRANGE_DUAL            = false;
     static constexpr bool   DEFAULT_IS_ENABLED_LOCAL_SEARCH             = true;
     static constexpr bool   DEFAULT_IS_ENABLED_GROUPING_PENALTY_COEFFICIENT =
         false;
@@ -31,32 +32,54 @@ struct OptionConstant {
     static constexpr bool DEFAULT_IS_ENABLED_PARALLEL_EVALUATION      = true;
     static constexpr bool DEFAULT_IS_ENABLED_PARALLEL_NEIGHBORHOOD_UPDATE =
         true;
+
+    static constexpr bool DEFAULT_IS_ENABLED_BINARY_MOVE         = true;
+    static constexpr bool DEFAULT_IS_ENABLED_INTEGER_MOVE        = true;
+    static constexpr bool DEFAULT_IS_ENABLED_AGGREGATION_MOVE    = false;
+    static constexpr bool DEFAULT_IS_ENABLED_PRECEDENCE_MOVE     = false;
+    static constexpr bool DEFAULT_IS_ENABLED_VARIABLE_BOUND_MOVE = false;
+    static constexpr bool DEFAULT_IS_ENABLED_USER_DEFINED_MOVE   = false;
+
     static constexpr model::SelectionMode DEFAULT_SELECTION_MODE =
         model::SelectionMode::None;
+
     static constexpr double DEFAULT_TARGET_OBJECTIVE = -1E100;
+    static constexpr bool   DEFAULT_SEED             = 1;
     static constexpr bool   DEFAULT_VERBOSE          = Verbose::None;
 };
 
 /*****************************************************************************/
 struct Option {
-    int                  iteration_max;
-    double               time_offset;
-    double               time_max;
-    double               penalty_coefficient_relaxing_rate;
-    double               penalty_coefficient_tightening_rate;
-    double               initial_penalty_coefficient;
-    bool                 is_enabled_local_search;
-    bool                 is_enabled_grouping_penalty_coefficient;
-    bool                 is_enabled_presolve;
-    bool                 is_enabled_initial_value_correction;
-    bool                 is_enabled_parallel_evaluation;
-    bool                 is_enabled_parallel_neighborhood_update;
-    model::SelectionMode selection_mode;
-    double               target_objective_value;
-    int                  verbose;
+    int    iteration_max;
+    double time_offset;
+    double time_max;
+    double penalty_coefficient_relaxing_rate;
+    double penalty_coefficient_tightening_rate;
+    double initial_penalty_coefficient;
+    bool   is_enabled_lagrange_dual;
+    bool   is_enabled_local_search;
+    bool   is_enabled_grouping_penalty_coefficient;
+    bool   is_enabled_presolve;
+    bool   is_enabled_initial_value_correction;
+    bool   is_enabled_parallel_evaluation;
+    bool   is_enabled_parallel_neighborhood_update;
 
-    tabu_search::TabuSearchOption   tabu_search;
-    local_search::LocalSearchOption local_search;
+    bool is_enabled_binary_move;
+    bool is_enabled_integer_move;
+    bool is_enabled_aggregation_move;
+    bool is_enabled_precedence_move;
+    bool is_enabled_variable_bound_move;
+    bool is_enabled_user_defined_move;
+
+    model::SelectionMode selection_mode;
+
+    double target_objective_value;
+    int    seed;
+    int    verbose;
+
+    tabu_search::TabuSearchOption     tabu_search;
+    local_search::LocalSearchOption   local_search;
+    lagrange_dual::LagrangeDualOption lagrange_dual;
 
     /*************************************************************************/
     Option(void) {
@@ -79,6 +102,8 @@ struct Option {
             OptionConstant::DEFAULT_PENALTY_COEFFICIENT_TIGHTENING_RATE;
         this->initial_penalty_coefficient =
             OptionConstant::DEFAULT_INITIAL_PENALTY_COEFFICIENT;
+        this->is_enabled_lagrange_dual =
+            OptionConstant::DEFAULT_IS_ENABLED_LAGRANGE_DUAL;
         this->is_enabled_local_search =
             OptionConstant::DEFAULT_IS_ENABLED_LOCAL_SEARCH;
         this->is_enabled_grouping_penalty_coefficient =
@@ -90,12 +115,29 @@ struct Option {
             OptionConstant::DEFAULT_IS_ENABLED_PARALLEL_EVALUATION;
         this->is_enabled_parallel_neighborhood_update =
             OptionConstant::DEFAULT_IS_ENABLED_PARALLEL_NEIGHBORHOOD_UPDATE;
-        this->selection_mode         = OptionConstant::DEFAULT_SELECTION_MODE;
+
+        this->is_enabled_binary_move =
+            OptionConstant::DEFAULT_IS_ENABLED_BINARY_MOVE;
+        this->is_enabled_integer_move =
+            OptionConstant::DEFAULT_IS_ENABLED_INTEGER_MOVE;
+        this->is_enabled_aggregation_move =
+            OptionConstant::DEFAULT_IS_ENABLED_AGGREGATION_MOVE;
+        this->is_enabled_precedence_move =
+            OptionConstant::DEFAULT_IS_ENABLED_PRECEDENCE_MOVE;
+        this->is_enabled_variable_bound_move =
+            OptionConstant::DEFAULT_IS_ENABLED_VARIABLE_BOUND_MOVE;
+        this->is_enabled_user_defined_move =
+            OptionConstant::DEFAULT_IS_ENABLED_USER_DEFINED_MOVE;
+
+        this->selection_mode = OptionConstant::DEFAULT_SELECTION_MODE;
+
         this->target_objective_value = OptionConstant::DEFAULT_TARGET_OBJECTIVE;
+        this->seed                   = OptionConstant::DEFAULT_SEED;
         this->verbose                = OptionConstant::DEFAULT_VERBOSE;
 
-        this->tabu_search.initialize();
+        this->lagrange_dual.initialize();
         this->local_search.initialize();
+        this->tabu_search.initialize();
     }
 
     /*************************************************************************/
@@ -133,6 +175,10 @@ struct Option {
             " - is_enabled_presolve: " +  //
             utility::to_string(this->is_enabled_presolve, "%d"));
 
+        utility::print(                        //
+            " - is_enabled_lagrange_dual: " +  //
+            utility::to_string(this->is_enabled_lagrange_dual, "%d"));
+
         utility::print(                       //
             " - is_enabled_local_search: " +  //
             utility::to_string(this->is_enabled_local_search, "%d"));
@@ -156,6 +202,30 @@ struct Option {
             utility::to_string(this->is_enabled_parallel_neighborhood_update,
                                "%d"));
 
+        utility::print(                      //
+            " - is_enabled_binary_move: " +  //
+            utility::to_string(this->is_enabled_binary_move, "%d"));
+
+        utility::print(                       //
+            " - is_enabled_integer_move: " +  //
+            utility::to_string(this->is_enabled_integer_move, "%d"));
+
+        utility::print(                           //
+            " - is_enabled_aggregation_move: " +  //
+            utility::to_string(this->is_enabled_aggregation_move, "%d"));
+
+        utility::print(                          //
+            " - is_enabled_precedence_move: " +  //
+            utility::to_string(this->is_enabled_precedence_move, "%d"));
+
+        utility::print(                              //
+            " - is_enabled_variable_bound_move: " +  //
+            utility::to_string(this->is_enabled_variable_bound_move, "%d"));
+
+        utility::print(                            //
+            " - is_enabled_user_defined_move: " +  //
+            utility::to_string(this->is_enabled_user_defined_move, "%d"));
+
         utility::print(              //
             " - selection_mode: " +  //
             utility::to_string(this->selection_mode, "%d"));
@@ -164,9 +234,47 @@ struct Option {
             " - target_objective_value: " +  //
             utility::to_string(this->target_objective_value, "%.3e"));
 
+        utility::print(    //
+            " - seed: " +  //
+            utility::to_string(this->seed, "%d"));
+
         utility::print(       //
             " - verbose: " +  //
             utility::to_string(this->verbose, "%d"));
+
+        utility::print(                           //
+            " - lagrange_dual.iteration_max: " +  //
+            utility::to_string(this->lagrange_dual.iteration_max, "%d"));
+
+        utility::print(  //
+            " - lagrange_dual.time_max: " +
+            utility::to_string(this->lagrange_dual.time_max, "%f"));
+
+        utility::print(                         //
+            " - lagrange_dual.time_offset: " +  //
+            utility::to_string(this->lagrange_dual.time_offset, "%f"));
+
+        utility::print(                                   //
+            " - lagrange_dual.step_size_extend_rate: " +  //
+            utility::to_string(this->lagrange_dual.step_size_extend_rate,
+                               "%f"));
+
+        utility::print(                                   //
+            " - lagrange_dual.step_size_reduce_rate: " +  //
+            utility::to_string(this->lagrange_dual.step_size_reduce_rate,
+                               "%f"));
+
+        utility::print(                       //
+            " - lagrange_dual.tolerance: " +  //
+            utility::to_string(this->lagrange_dual.tolerance, "%f"));
+
+        utility::print(                        //
+            " - lagrange_dual.queue_size: " +  //
+            utility::to_string(this->lagrange_dual.queue_size, "%d"));
+
+        utility::print(                          //
+            " - lagrange_dual.log_interval: " +  //
+            utility::to_string(this->lagrange_dual.log_interval, "%d"));
 
         utility::print(                          //
             " - local_search.iteration_max: " +  //
@@ -208,9 +316,28 @@ struct Option {
             " - tabu_search.initial_tabu_tenure: " +
             utility::to_string(this->tabu_search.initial_tabu_tenure, "%d"));
 
+        utility::print(  //
+            " - tabu_search.tabu_tenure_randomize_rate: " +
+            utility::to_string(this->tabu_search.tabu_tenure_randomize_rate,
+                               "%f"));
+
+        utility::print(  //
+            " - tabu_search.initial_modification_fixed_rate: " +
+            utility::to_string(
+                this->tabu_search.initial_modification_fixed_rate, "%f"));
+
+        utility::print(  //
+            " - tabu_search.initial_modification_randomize_rate: " +
+            utility::to_string(
+                this->tabu_search.initial_modification_randomize_rate, "%f"));
+
         utility::print(                     //
             " - tabu_search.tabu_mode: " +  //
             utility::to_string(this->tabu_search.tabu_mode, "%d"));
+
+        utility::print(                        //
+            " - tabu_search.restart_mode: " +  //
+            utility::to_string(this->tabu_search.restart_mode, "%d"));
 
         utility::print(                              //
             " - tabu_search.move_preserve_rate: " +  //

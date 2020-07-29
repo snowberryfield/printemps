@@ -71,6 +71,12 @@ inline cppmh::solver::Option read_option(const std::string &a_FILE_NAME) {
               option_object);
 
     /**************************************************************************/
+    /// is_enabled_lagrange_dual
+    read_json(&option.is_enabled_lagrange_dual,  //
+              "is_enabled_lagrange_dual",        //
+              option_object);
+
+    /**************************************************************************/
     /// is_enabled_local_search
     read_json(&option.is_enabled_local_search,  //
               "is_enabled_local_search",        //
@@ -106,6 +112,42 @@ inline cppmh::solver::Option read_option(const std::string &a_FILE_NAME) {
               "is_enabled_parallel_neighborhood_update",        //
               option_object);
 
+    /**********************************************************************/
+    /// is_enabled_binary_move
+    read_json(&option.is_enabled_binary_move,  //
+              "is_enabled_binary_move",        //
+              option_object);
+
+    /**********************************************************************/
+    /// is_enabled_integer_move
+    read_json(&option.is_enabled_integer_move,  //
+              "is_enabled_integer_move",        //
+              option_object);
+
+    /**********************************************************************/
+    /// is_enabled_aggregation_move
+    read_json(&option.is_enabled_aggregation_move,  //
+              "is_enabled_aggregation_move",        //
+              option_object);
+
+    /**********************************************************************/
+    /// is_enabled_precedence_move
+    read_json(&option.is_enabled_precedence_move,  //
+              "is_enabled_precedence_move",        //
+              option_object);
+
+    /**********************************************************************/
+    /// is_enabled_variable_bound_move
+    read_json(&option.is_enabled_variable_bound_move,  //
+              "is_enabled_variable_bound_move",        //
+              option_object);
+
+    /**********************************************************************/
+    /// is_enabled_user_defined_move
+    read_json(&option.is_enabled_user_defined_move,  //
+              "is_enabled_user_defined_move",        //
+              option_object);
+
     /**************************************************************************/
     /// selection_mode
     read_json(&option.selection_mode,  //
@@ -119,10 +161,75 @@ inline cppmh::solver::Option read_option(const std::string &a_FILE_NAME) {
               option_object);
 
     /**************************************************************************/
+    /// seed
+    read_json(&option.seed,  //
+              "seed",        //
+              option_object);
+
+    /**************************************************************************/
     /// verbose
     read_json(&option.verbose,  //
               "verbose",        //
               option_object);
+
+    /**************************************************************************/
+    /// lagrange dual
+    /**************************************************************************/
+    nlohmann::json option_object_lagrange_dual;
+
+    bool has_lagrange_dual_option = read_json(&option_object_lagrange_dual,  //
+                                              "lagrange_dual",               //
+                                              option_object);
+
+    if (has_lagrange_dual_option) {
+        /**********************************************************************/
+        /// lagrange_dual.iteration_max
+        read_json(&option.lagrange_dual.iteration_max,  //
+                  "iteration_max",                      //
+                  option_object_lagrange_dual);
+
+        /**********************************************************************/
+        /// lagrange_dual.time_max
+        read_json(&option.lagrange_dual.time_max,  //
+                  "time_max",                      //
+                  option_object_lagrange_dual);
+
+        /**********************************************************************/
+        /// lagrange_dual.time_offset
+        read_json(&option.lagrange_dual.time_offset,  //
+                  "time_offset",                      //
+                  option_object_lagrange_dual);
+
+        /**********************************************************************/
+        /// lagrange_dual.step_size_extend_rate
+        read_json(&option.lagrange_dual.step_size_extend_rate,  //
+                  "step_size_extend_rate",                      //
+                  option_object_lagrange_dual);
+
+        /**********************************************************************/
+        /// lagrange_dual.step_size_reduce_rate
+        read_json(&option.lagrange_dual.step_size_reduce_rate,  //
+                  "step_size_reduce_rate",                      //
+                  option_object_lagrange_dual);
+
+        /**********************************************************************/
+        /// lagrange_dual.tolerance
+        read_json(&option.lagrange_dual.tolerance,  //
+                  "tolerance",                      //
+                  option_object_lagrange_dual);
+
+        /**********************************************************************/
+        /// lagrange_dual.queue_size
+        read_json(&option.lagrange_dual.queue_size,  //
+                  "queue_size",                      //
+                  option_object_lagrange_dual);
+
+        /**********************************************************************/
+        /// lagrange_dual.log_interval
+        read_json(&option.lagrange_dual.log_interval,  //
+                  "log_interval",                      //
+                  option_object_lagrange_dual);
+    }
 
     /**************************************************************************/
     /// local search
@@ -200,15 +307,39 @@ inline cppmh::solver::Option read_option(const std::string &a_FILE_NAME) {
                   option_object_tabu_search);
 
         /**********************************************************************/
-        /// tabu_search.tabu_tenure
+        /// tabu_search.initial_tabu_tenure
         read_json(&option.tabu_search.initial_tabu_tenure,  //
                   "initial_tabu_tenure",                    //
                   option_object_tabu_search);
 
         /**********************************************************************/
+        /// tabu_search.tabu_tenure_randomize_rate
+        read_json(&option.tabu_search.tabu_tenure_randomize_rate,  //
+                  "tabu_tenure_randomize_rate",                    //
+                  option_object_tabu_search);
+
+        /**********************************************************************/
+        /// tabu_search.initial_modification_fixed_rate
+        read_json(&option.tabu_search.initial_modification_fixed_rate,  //
+                  "initial_modification_fixed_rate",                    //
+                  option_object_tabu_search);
+
+        /**********************************************************************/
+        /// tabu_search.initial_modification_randomize_rate
+        read_json(&option.tabu_search.initial_modification_randomize_rate,  //
+                  "initial_modification_randomize_rate",                    //
+                  option_object_tabu_search);
+
+        /**********************************************************************/
         /// tabu_search.tabu_mode
         read_json(&option.tabu_search.tabu_mode,  //
-                  "tabu_tenure",                  //
+                  "tabu_mode",                    //
+                  option_object_tabu_search);
+
+        /**********************************************************************/
+        /// tabu_search.restart_mode
+        read_json(&option.tabu_search.restart_mode,  //
+                  "restart_mode",                    //
                   option_object_tabu_search);
 
         /**********************************************************************/
@@ -260,6 +391,12 @@ inline cppmh::solver::Option read_option(const std::string &a_FILE_NAME) {
             &option.tabu_search.is_enabled_automatic_iteration_adjustment,  //
             "is_enabled_automatic_iteration_adjustment",                    //
             option_object_tabu_search);
+
+        /**********************************************************************/
+        /// tabu_search.is_enabled_initial_modification
+        read_json(&option.tabu_search.is_enabled_initial_modification,  //
+                  "is_enabled_initial_modification",                    //
+                  option_object_tabu_search);
 
         /**********************************************************************/
         /// tabu_search.bias_increase_count_threshold

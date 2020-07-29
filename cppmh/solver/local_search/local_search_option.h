@@ -22,7 +22,7 @@ struct LocalSearchOptionConstant {
 struct LocalSearchOption {
     int    iteration_max;
     double time_max;
-    double time_offset;
+    double time_offset;  // hidden
     int    log_interval;
     int    seed;
 

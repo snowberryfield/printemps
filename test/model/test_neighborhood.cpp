@@ -5,10 +5,11 @@
 /*****************************************************************************/
 #include <gtest/gtest.h>
 #include <random>
+
 #include <cppmh.h>
 
-/*****************************************************************************/
 namespace {
+/*****************************************************************************/
 class TestNeighborhood : public ::testing::Test {
    protected:
     cppmh::utility::IntegerUniformRandom m_random_integer;
@@ -33,452 +34,53 @@ class TestNeighborhood : public ::testing::Test {
 /*****************************************************************************/
 TEST_F(TestNeighborhood, initialize) {
     cppmh::model::Neighborhood<int, double> neighborhood;
-    EXPECT_EQ(true, neighborhood.selections().empty());
-    EXPECT_EQ(true, neighborhood.selection_variable_ptrs().empty());
-    EXPECT_EQ(true, neighborhood.binary_variable_ptrs().empty());
-    EXPECT_EQ(true, neighborhood.integer_variable_ptrs().empty());
-    EXPECT_EQ(true, neighborhood.selection_moves().empty());
+
     EXPECT_EQ(true, neighborhood.binary_moves().empty());
     EXPECT_EQ(true, neighborhood.integer_moves().empty());
+    EXPECT_EQ(true, neighborhood.aggregation_moves().empty());
+    EXPECT_EQ(true, neighborhood.precedence_moves().empty());
+    EXPECT_EQ(true, neighborhood.variable_bound_moves().empty());
     EXPECT_EQ(true, neighborhood.user_defined_moves().empty());
+    EXPECT_EQ(true, neighborhood.selection_moves().empty());
+
     EXPECT_EQ(true, neighborhood.move_ptrs().empty());
+
+    EXPECT_EQ(false, neighborhood.has_selection_variables());
     EXPECT_EQ(false, neighborhood.has_fixed_variables());
-    EXPECT_EQ(true, neighborhood.is_enabled_selection_move());
-    EXPECT_EQ(true, neighborhood.is_enabled_binary_move());
-    EXPECT_EQ(true, neighborhood.is_enabled_integer_move());
+
+    EXPECT_EQ(false, neighborhood.is_enabled_binary_move());
+    EXPECT_EQ(false, neighborhood.is_enabled_integer_move());
+    EXPECT_EQ(false, neighborhood.is_enabled_aggregation_move());
+    EXPECT_EQ(false, neighborhood.is_enabled_precedence_move());
+    EXPECT_EQ(false, neighborhood.is_enabled_variable_bound_move());
     EXPECT_EQ(false, neighborhood.is_enabled_user_defined_move());
+    EXPECT_EQ(false, neighborhood.is_enabled_selection_move());
 
     /// Tests for updater functions are omitted.
 }
 
 /*****************************************************************************/
-TEST_F(TestNeighborhood, setup_has_fixed_variables) {
-    /// Scaler
-    {
-        cppmh::model::Model<int, double> model;
+TEST_F(TestNeighborhood, set_has_fixed_variables) {
+    cppmh::model::Neighborhood<int, double> neighborhood;
+    EXPECT_EQ(false, neighborhood.has_fixed_variables());
 
-        [[maybe_unused]] auto& x = model.create_variable("x", 0, 1);
-        [[maybe_unused]] auto& y = model.create_variable("y", 0, 1);
+    neighborhood.set_has_fixed_variables(true);
+    EXPECT_EQ(true, neighborhood.has_fixed_variables());
 
-        model.setup_default_neighborhood(false, false,
-                                         cppmh::model::SelectionMode::Larger);
-        EXPECT_EQ(false, model.neighborhood().has_fixed_variables());
-    }
-
-    {
-        cppmh::model::Model<int, double> model;
-
-        auto&                  x = model.create_variable("x", 0, 1);
-        [[maybe_unused]] auto& y = model.create_variable("y", 0, 1);
-        x.fix_by(1);
-
-        model.setup_default_neighborhood(false, false,
-                                         cppmh::model::SelectionMode::Larger);
-        EXPECT_EQ(true, model.neighborhood().has_fixed_variables());
-    }
-
-    {
-        cppmh::model::Model<int, double> model;
-
-        [[maybe_unused]] auto& x = model.create_variable("x", 0, 1);
-        auto&                  y = model.create_variable("y", 0, 1);
-        y.fix_by(1);
-
-        model.setup_default_neighborhood(false, false,
-                                         cppmh::model::SelectionMode::Larger);
-        EXPECT_EQ(true, model.neighborhood().has_fixed_variables());
-    }
-
-    {
-        cppmh::model::Model<int, double> model;
-
-        auto& x = model.create_variable("x", 0, 1);
-        auto& y = model.create_variable("y", 0, 1);
-        x.fix_by(1);
-        y.fix_by(1);
-        x.unfix();
-        y.unfix();
-
-        model.setup_default_neighborhood(false, false,
-                                         cppmh::model::SelectionMode::Larger);
-        EXPECT_EQ(false, model.neighborhood().has_fixed_variables());
-    }
-
-    /// One-dimensional
-    {
-        cppmh::model::Model<int, double> model;
-
-        [[maybe_unused]] auto& x = model.create_variables("x", 10, 0, 1);
-        [[maybe_unused]] auto& y = model.create_variables("y", 10, 0, 1);
-
-        model.setup_default_neighborhood(false, false,
-                                         cppmh::model::SelectionMode::Larger);
-        EXPECT_EQ(false, model.neighborhood().has_fixed_variables());
-    }
-
-    {
-        cppmh::model::Model<int, double> model;
-
-        auto&                  x = model.create_variables("x", 10, 0, 1);
-        [[maybe_unused]] auto& y = model.create_variables("y", 10, 0, 1);
-        x(0).fix_by(1);
-
-        model.setup_default_neighborhood(false, false,
-                                         cppmh::model::SelectionMode::Larger);
-        EXPECT_EQ(true, model.neighborhood().has_fixed_variables());
-    }
-
-    {
-        cppmh::model::Model<int, double> model;
-
-        [[maybe_unused]] auto& x = model.create_variables("x", 10, 0, 1);
-        auto&                  y = model.create_variables("y", 10, 0, 1);
-        y(0).fix_by(1);
-
-        model.setup_default_neighborhood(false, false,
-                                         cppmh::model::SelectionMode::Larger);
-        EXPECT_EQ(true, model.neighborhood().has_fixed_variables());
-    }
-
-    {
-        cppmh::model::Model<int, double> model;
-
-        auto& x = model.create_variables("x", 10, 0, 1);
-        auto& y = model.create_variables("y", 10, 0, 1);
-        x(0).fix_by(1);
-        y(0).fix_by(1);
-        x(0).unfix();
-        y(0).unfix();
-
-        model.setup_default_neighborhood(false, false,
-                                         cppmh::model::SelectionMode::Larger);
-        EXPECT_EQ(false, model.neighborhood().has_fixed_variables());
-    }
-
-    /// Two-dimensional
-    {
-        cppmh::model::Model<int, double> model;
-
-        [[maybe_unused]] auto& x = model.create_variables("x", {10, 10}, 0, 1);
-        [[maybe_unused]] auto& y = model.create_variables("y", {10, 10}, 0, 1);
-
-        model.setup_default_neighborhood(false, false,
-                                         cppmh::model::SelectionMode::Larger);
-        EXPECT_EQ(false, model.neighborhood().has_fixed_variables());
-    }
-
-    {
-        cppmh::model::Model<int, double> model;
-
-        auto&                  x = model.create_variables("x", {10, 10}, 0, 1);
-        [[maybe_unused]] auto& y = model.create_variables("y", {10, 10}, 0, 1);
-        x(0, 0).fix_by(1);
-
-        model.setup_default_neighborhood(false, false,
-                                         cppmh::model::SelectionMode::Larger);
-        EXPECT_EQ(true, model.neighborhood().has_fixed_variables());
-    }
-
-    {
-        cppmh::model::Model<int, double> model;
-
-        [[maybe_unused]] auto& x = model.create_variables("x", {10, 10}, 0, 1);
-        auto&                  y = model.create_variables("y", {10, 10}, 0, 1);
-        y(0, 0).fix_by(1);
-
-        model.setup_default_neighborhood(false, false,
-                                         cppmh::model::SelectionMode::Larger);
-        EXPECT_EQ(true, model.neighborhood().has_fixed_variables());
-    }
-
-    {
-        cppmh::model::Model<int, double> model;
-
-        auto& x = model.create_variables("x", {10, 10}, 0, 1);
-        auto& y = model.create_variables("y", {10, 10}, 0, 1);
-        x(0, 0).fix_by(1);
-        y(0, 0).fix_by(1);
-        x(0, 0).unfix();
-        y(0, 0).unfix();
-
-        model.setup_default_neighborhood(false, false,
-                                         cppmh::model::SelectionMode::Larger);
-        EXPECT_EQ(false, model.neighborhood().has_fixed_variables());
-    }
+    neighborhood.set_has_fixed_variables(false);
+    EXPECT_EQ(false, neighborhood.has_fixed_variables());
 }
 
 /*****************************************************************************/
-TEST_F(TestNeighborhood, categorize_variables_and_constraints_larger) {
-    cppmh::model::Model<int, double> model;
+TEST_F(TestNeighborhood, set_has_selection_variables) {
+    cppmh::model::Neighborhood<int, double> neighborhood;
+    EXPECT_EQ(false, neighborhood.has_selection_variables());
 
-    auto& x0 = model.create_variables("x0", {10, 10}, 0, 1);
-    auto& x1 = model.create_variables("x1", {20, 20}, 0, 1);
-    auto& x2 = model.create_variables("x2", 2, 0, 1);
+    neighborhood.set_has_selection_variables(true);
+    EXPECT_EQ(true, neighborhood.has_selection_variables());
 
-    auto& y = model.create_variables("y", {30, 30}, -10, 10);
-
-    /**
-     * Selection constraint with 10 decision variables. The priority of this
-     * constraint is the third, and it will be employed for a swap
-     * neighborhood.
-     */
-    model.create_constraint("c0", x0.selection({0, cppmh::model::Range::All}));
-
-    /**
-     * Selection constraint with 32 decision variables. The priority of this
-     * constraint is the second, and it will NOT be employed for a swap
-     * neighborhood because higher-priority constraint c1 covers x1.
-     */
-    model.create_constraint(
-        "c1", (x0.sum({1, cppmh::model::Range::All}) +
-               x1.sum({1, cppmh::model::Range::All}) + x2(0)) == 1);
-
-    /**
-     * Selection constraint with 400 decision variables. The priority of this
-     * constraint is the first, and it will be employed for a swap
-     * neighborhood.
-     */
-    model.create_constraint("c2", x1.selection());
-
-    /**
-     * Selection constraint with 2 decision variables. The priority of this
-     * constraint is the fourth, and it will be employed for a swap
-     * neighborhood.
-     */
-    model.create_constraint("c3", x2.selection());
-
-    model.setup_default_neighborhood(false, false,
-                                     cppmh::model::SelectionMode::Larger);
-
-    EXPECT_EQ(3, static_cast<int>(model.neighborhood().selections().size()));
-
-    /**
-     * Check the numbers of covered variables and variable pointers.
-     */
-    {
-        /// Constraint c2
-        auto variable_ptrs = model.neighborhood().selections()[0].variable_ptrs;
-        EXPECT_EQ(400, static_cast<int>(variable_ptrs.size()));
-
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x1(0, 0)) != variable_ptrs.end()));
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x1(19, 19)) != variable_ptrs.end()));
-    }
-
-    {
-        /// Constraint c0
-        auto variable_ptrs = model.neighborhood().selections()[1].variable_ptrs;
-        EXPECT_EQ(10, static_cast<int>(variable_ptrs.size()));
-
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x0(0, 0)) != variable_ptrs.end()));
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x0(0, 9)) != variable_ptrs.end()));
-        EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x0(1, 0)) != variable_ptrs.end()));
-    }
-
-    {
-        /// Constraint c3
-        auto variable_ptrs = model.neighborhood().selections()[2].variable_ptrs;
-        EXPECT_EQ(2, static_cast<int>(variable_ptrs.size()));
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x2(0)) != variable_ptrs.end()));
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x2(1)) != variable_ptrs.end()));
-    }
-
-    /**
-     * Check whether the corresponding constraint is enabled or not.
-     */
-    /// Constraint c2
-    EXPECT_EQ(
-        false,
-        model.neighborhood().selections()[0].constraint_ptr->is_enabled());
-
-    /// Constraint c0
-    EXPECT_EQ(
-        false,
-        model.neighborhood().selections()[1].constraint_ptr->is_enabled());
-
-    /// Constraint c3
-    EXPECT_EQ(
-        false,
-        model.neighborhood().selections()[2].constraint_ptr->is_enabled());
-
-    /**
-     * Check the number of covered variables and variable pointers for each
-     * category. */
-
-    /// Selection
-    {
-        auto variable_ptrs = model.neighborhood().selection_variable_ptrs();
-        EXPECT_EQ(20 * 20 + 1 * 10 + 2, static_cast<int>(variable_ptrs.size()));
-
-        /// Constraint c2
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x1(0, 0)) != variable_ptrs.end()));
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x1(19, 19)) != variable_ptrs.end()));
-
-        /// Constraint c0
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x0(0, 0)) != variable_ptrs.end()));
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x0(0, 9)) != variable_ptrs.end()));
-        EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x0(1, 0)) != variable_ptrs.end()));
-
-        /// Constraint c3
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x2(0)) != variable_ptrs.end()));
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x2(1)) != variable_ptrs.end()));
-    }
-
-    /// Binary
-    {
-        auto variable_ptrs = model.neighborhood().binary_variable_ptrs();
-        EXPECT_EQ(10 * 10 + 20 * 20 + 2 - (20 * 20 + 1 * 10 + 2),
-                  static_cast<int>(variable_ptrs.size()));
-
-        /// Constraint c2
-        EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x1(0, 0)) != variable_ptrs.end()));
-        EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x1(19, 19)) != variable_ptrs.end()));
-
-        /// Constraint c0
-        EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x0(0, 0)) != variable_ptrs.end()));
-        EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x0(0, 9)) != variable_ptrs.end()));
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x0(1, 0)) != variable_ptrs.end()));
-
-        /// Constraint c3
-        EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x2(0)) != variable_ptrs.end()));
-        EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x2(1)) != variable_ptrs.end()));
-    }
-
-    /// Integer
-    {
-        auto variable_ptrs = model.neighborhood().integer_variable_ptrs();
-        EXPECT_EQ(30 * 30, static_cast<int>(variable_ptrs.size()));
-
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &y(0, 0)) != variable_ptrs.end()));
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &y(29, 29)) != variable_ptrs.end()));
-    }
-}
-
-/*****************************************************************************/
-TEST_F(TestNeighborhood, categorize_variables_and_constraints_independent) {
-    cppmh::model::Model<int, double> model;
-
-    auto& x0 = model.create_variables("x0", {10, 10}, 0, 1);
-    auto& x1 = model.create_variables("x1", {20, 20}, 0, 1);
-    auto& x2 = model.create_variables("x2", 2, 0, 1);
-
-    auto& y = model.create_variables("y", {30, 30}, -10, 10);
-
-    /**
-     * Selection constraint with 10 decision variables (no overlap).
-     */
-    model.create_constraint("c0", x0.selection({0, cppmh::model::Range::All}));
-
-    /**
-     * Selection constraint with 32 decision variables (overlap).
-     */
-    model.create_constraint(
-        "c1", (x0.sum({1, cppmh::model::Range::All}) +
-               x1.sum({1, cppmh::model::Range::All}) + x2(0)) == 1);
-
-    /**
-     * Selection constraint with 400 decision variables (overlap).
-     */
-    model.create_constraint("c2", x1.selection());
-
-    /**
-     * Selection constraint with 2 decision variables (overlap).
-     */
-    model.create_constraint("c3", x2.selection());
-
-    model.setup_default_neighborhood(false, false,
-                                     cppmh::model::SelectionMode::Independent);
-
-    EXPECT_EQ(1, static_cast<int>(model.neighborhood().selections().size()));
-
-    /**
-     * Check the numbers of covered variables and variable pointers.
-     */
-    {
-        /// Constraint c0
-        auto variable_ptrs = model.neighborhood().selections()[0].variable_ptrs;
-        EXPECT_EQ(10, static_cast<int>(variable_ptrs.size()));
-
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x0(0, 0)) != variable_ptrs.end()));
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x0(0, 9)) != variable_ptrs.end()));
-        EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x0(1, 0)) != variable_ptrs.end()));
-    }
-
-    /**
-     * Check whether the corresponding constraint is enabled or not.
-     */
-    /// Constraint c0
-    EXPECT_EQ(
-        false,
-        model.neighborhood().selections()[0].constraint_ptr->is_enabled());
-
-    /**
-     * Check the number of covered variables and variable pointers for each
-     * category. */
-    /// Selection
-    {
-        auto variable_ptrs = model.neighborhood().selection_variable_ptrs();
-        EXPECT_EQ(10, static_cast<int>(variable_ptrs.size()));
-
-        /// Constraint c0
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x0(0, 0)) != variable_ptrs.end()));
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x0(0, 9)) != variable_ptrs.end()));
-        EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x0(1, 0)) != variable_ptrs.end()));
-    }
-
-    /// Binary
-    {
-        auto variable_ptrs = model.neighborhood().binary_variable_ptrs();
-        EXPECT_EQ(10 * 10 + 20 * 20 + 2 - 10,
-                  static_cast<int>(variable_ptrs.size()));
-
-        /// Constraint c0
-        EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x0(0, 0)) != variable_ptrs.end()));
-        EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x0(0, 9)) != variable_ptrs.end()));
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x0(1, 0)) != variable_ptrs.end()));
-    }
-
-    /// Integer
-    {
-        auto variable_ptrs = model.neighborhood().integer_variable_ptrs();
-        EXPECT_EQ(30 * 30, static_cast<int>(variable_ptrs.size()));
-
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &y(0, 0)) != variable_ptrs.end()));
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &y(29, 29)) != variable_ptrs.end()));
-    }
+    neighborhood.set_has_selection_variables(false);
+    EXPECT_EQ(false, neighborhood.has_selection_variables());
 }
 
 /*****************************************************************************/
@@ -490,6 +92,7 @@ TEST_F(TestNeighborhood, setup_move_updater) {
     auto& x2 = model.create_variables("x2", 2, 0, 1);
 
     auto& y = model.create_variables("y", {30, 30}, -10, 10);
+    auto& z = model.create_variables("z", 2, -10, 10);
 
     /**
      * Selection constraint with 10 decision variables. The priority of this
@@ -515,24 +118,54 @@ TEST_F(TestNeighborhood, setup_move_updater) {
     model.create_constraint("c2", x1.selection());
 
     /**
-     * Selection constraint with 2 decision variables. The priority of this
-     * constraint is the fourth, and it will be employed for a swap
-     * neighborhood.
+     * Selection constraint with 2 decision variables. The priority NOT be
+     * employed for a swap neighborhood.
      */
     model.create_constraint("c3", x2.selection());
+
+    /// Aggregation constraints.
+    model.create_constraint("c4", x2(0) + x2(1) == 1);    // eff. : 0
+    model.create_constraint("c5", z(0) + 4 * z(1) == 8);  // eff. : 3
+
+    /// Precedence constraints.
+    model.create_constraint("c6", x2(0) - x2(1) <= 1);   // eff. : 1
+    model.create_constraint("c7", -x2(0) + x2(1) <= 1);  // eff. : 1
+    model.create_constraint("c8", x2(0) - x2(1) >= 1);   // eff. : 1
+    model.create_constraint("c9", -x2(0) + x2(1) >= 1);  // eff. : 1
+    model.create_constraint("c10", z(0) - z(1) <= 10);   // eff. : 2
+    model.create_constraint("c11", -z(0) + z(1) <= 10);  // eff. : 2
+    model.create_constraint("c12", z(0) - z(1) >= 10);   // eff. : 2
+    model.create_constraint("c13", -z(0) + z(1) >= 10);  // eff. : 2
+
+    /// Variable bound constraints.
+    model.create_constraint("c14", 3 * z(0) + 10 * z(1) <= 20);  // eff. : 4
+    model.create_constraint("c14", 3 * z(0) - 10 * z(1) <= 20);  // eff. : 4
+    model.create_constraint("c14", 3 * z(0) + 10 * z(1) >= 20);  // eff. : 4
+    model.create_constraint("c14", 3 * z(0) - 10 * z(1) >= 20);  // eff. : 4
 
     y(0, 0).fix_by(0);
     y(0, 1) = -10;
     y(0, 2) = 10;
 
-    model.setup_default_neighborhood(false, false,
-                                     cppmh::model::SelectionMode::Larger);
-    EXPECT_EQ(false, model.neighborhood().is_enabled_user_defined_move());
+    model.categorize_variables();
+    model.categorize_constraints();
+    model.extract_selections(cppmh::model::SelectionMode::Larger);
+    model.setup_neighborhood(true, true, true, false, false);
+
+    model.neighborhood().set_has_fixed_variables(true);
+    model.neighborhood().set_has_selection_variables(true);
+
+    model.neighborhood().enable_binary_move();
+    model.neighborhood().enable_integer_move();
+    model.neighborhood().enable_aggregation_move();
+    model.neighborhood().enable_precedence_move();
+    model.neighborhood().enable_variable_bound_move();
+    model.neighborhood().enable_selection_move();
 
     /**
      * Set initial values for selection variables.
      */
-    for (auto&& selection : model.neighborhood().selections()) {
+    for (auto&& selection : model.selections()) {
         selection.variable_ptrs.front()->set_value_if_not_fixed(1);
         selection.variable_ptrs.front()->select();
     }
@@ -542,42 +175,9 @@ TEST_F(TestNeighborhood, setup_move_updater) {
     /**
      * Check the variable pointers and values in raw moves.
      */
-    /// Selection
-    {
-        auto variable_ptrs = model.neighborhood().selection_variable_ptrs();
-        auto moves         = model.neighborhood().selection_moves();
-        EXPECT_EQ(variable_ptrs.size(), moves.size());
-
-        for (auto& move : moves) {
-            EXPECT_EQ(cppmh::model::MoveSense::Selection, move.sense);
-            EXPECT_EQ(2, static_cast<int>(move.alterations.size()));
-            EXPECT_EQ(1, move.alterations[0].first->value());
-            EXPECT_EQ(0, move.alterations[0].second);
-
-            if (move.alterations[0].first != move.alterations[1].first) {
-                EXPECT_EQ(0, move.alterations[1].first->value());
-                EXPECT_EQ(1, move.alterations[1].second);
-            }
-
-            for (auto& constraint_ptr :
-                 move.alterations[0].first->related_constraint_ptrs()) {
-                EXPECT_EQ(true,
-                          move.related_constraint_ptrs.find(constraint_ptr) !=
-                              move.related_constraint_ptrs.end());
-            }
-
-            for (auto& constraint_ptr :
-                 move.alterations[1].first->related_constraint_ptrs()) {
-                EXPECT_EQ(true,
-                          move.related_constraint_ptrs.find(constraint_ptr) !=
-                              move.related_constraint_ptrs.end());
-            }
-        }
-    }
-
     /// Binary
     {
-        auto variable_ptrs = model.neighborhood().binary_variable_ptrs();
+        auto variable_ptrs = model.variable_reference().binary_variable_ptrs;
         auto moves         = model.neighborhood().binary_moves();
         EXPECT_EQ(variable_ptrs.size(), moves.size());
 
@@ -602,13 +202,13 @@ TEST_F(TestNeighborhood, setup_move_updater) {
 
     /// Integer
     {
-        auto variable_ptrs = model.neighborhood().integer_variable_ptrs();
+        auto variable_ptrs = model.variable_reference().integer_variable_ptrs;
         auto moves         = model.neighborhood().integer_moves();
         EXPECT_EQ(2 * static_cast<int>(variable_ptrs.size()),
                   static_cast<int>(moves.size()));
 
-        int variable_ptrs_size = variable_ptrs.size();
-        for (auto i = 0; i < variable_ptrs_size; i++) {
+        int variable_size = variable_ptrs.size();
+        for (auto i = 0; i < variable_size; i++) {
             EXPECT_EQ(1, static_cast<int>(moves[2 * i].alterations.size()));
             EXPECT_EQ(cppmh::model::MoveSense::Integer, moves[2 * i].sense);
 
@@ -639,25 +239,97 @@ TEST_F(TestNeighborhood, setup_move_updater) {
         }
     }
 
+    /// Aggregation
+    {
+        auto constraint_ptrs =
+            model.constraint_type_reference().aggregation_ptrs;
+        auto moves = model.neighborhood().aggregation_moves();
+        EXPECT_EQ(4 * static_cast<int>(constraint_ptrs.size()),
+                  static_cast<int>(moves.size()));
+    }
+
+    /// Precedence
+    {
+        auto constraint_ptrs =
+            model.constraint_type_reference().precedence_ptrs;
+        auto moves = model.neighborhood().precedence_moves();
+        EXPECT_EQ(2 * static_cast<int>(constraint_ptrs.size()),
+                  static_cast<int>(moves.size()));
+    }
+
+    /// Variable Bound
+    {
+        auto constraint_ptrs =
+            model.constraint_type_reference().variable_bound_ptrs;
+        auto moves = model.neighborhood().variable_bound_moves();
+        EXPECT_EQ(16, static_cast<int>(moves.size()));
+    }
+
+    /// Selection
+    {
+        auto variable_ptrs = model.variable_reference().selection_variable_ptrs;
+        auto moves         = model.neighborhood().selection_moves();
+        EXPECT_EQ(variable_ptrs.size(), moves.size());
+
+        for (auto& move : moves) {
+            EXPECT_EQ(cppmh::model::MoveSense::Selection, move.sense);
+            EXPECT_EQ(2, static_cast<int>(move.alterations.size()));
+            EXPECT_EQ(1, move.alterations[0].first->value());
+            EXPECT_EQ(0, move.alterations[0].second);
+
+            if (move.alterations[0].first != move.alterations[1].first) {
+                EXPECT_EQ(0, move.alterations[1].first->value());
+                EXPECT_EQ(1, move.alterations[1].second);
+            }
+
+            for (auto& constraint_ptr :
+                 move.alterations[0].first->related_constraint_ptrs()) {
+                EXPECT_EQ(true,
+                          move.related_constraint_ptrs.find(constraint_ptr) !=
+                              move.related_constraint_ptrs.end());
+            }
+
+            for (auto& constraint_ptr :
+                 move.alterations[1].first->related_constraint_ptrs()) {
+                EXPECT_EQ(true,
+                          move.related_constraint_ptrs.find(constraint_ptr) !=
+                              move.related_constraint_ptrs.end());
+            }
+        }
+    }
+
     /**
      * Check the numbers of filtered moves. *
      */
     {
-        int selections_size = model.neighborhood().selections().size();
-
-        int selection_variables_size =
-            model.neighborhood().selection_variable_ptrs().size();
+        int selections_size = model.selections().size();
 
         int binary_variables_size =
-            model.neighborhood().binary_variable_ptrs().size();
+            model.variable_reference().binary_variable_ptrs.size();
 
         int integer_variables_size =
-            model.neighborhood().integer_variable_ptrs().size();
+            model.variable_reference().integer_variable_ptrs.size();
 
-        EXPECT_EQ((selection_variables_size - selections_size)     // Selection
-                      + (binary_variables_size)                    // Binary
-                      + (2 * integer_variables_size - 2 - 1 - 1),  // Integer
-                  static_cast<int>(model.neighborhood().move_ptrs().size()));
+        int aggregations_size =
+            model.constraint_type_reference().aggregation_ptrs.size();
+
+        int precedences_size =
+            model.constraint_type_reference().precedence_ptrs.size();
+
+        int variable_bounds_size =
+            model.constraint_type_reference().variable_bound_ptrs.size();
+
+        int selection_variables_size =
+            model.variable_reference().selection_variable_ptrs.size();
+
+        EXPECT_EQ(                                          //
+            (binary_variables_size)                         // Binary
+                + (2 * integer_variables_size - 2 - 1 - 1)  // Integer
+                + (4 * aggregations_size - 5)               // Aggregation
+                + (2 * precedences_size - 4)                // Precedence
+                + (4 * variable_bounds_size)                // Variable Bound
+                + (selection_variables_size - selections_size),  // Selection
+            static_cast<int>(model.neighborhood().move_ptrs().size()));
     }
 }
 
@@ -665,10 +337,8 @@ TEST_F(TestNeighborhood, setup_move_updater) {
 TEST_F(TestNeighborhood, set_user_defined_move_updater) {
     cppmh::model::Model<int, double> model;
 
-    int                    n = 100;
-    auto&                  x = model.create_variables("x", n, 0, 1);
-    [[maybe_unused]] auto& y = model.create_variables("y", n, 0, 100);
-    [[maybe_unused]] auto& c = model.create_constraint("c", x.selection());
+    int   n = 100;
+    auto& x = model.create_variables("x", n, 0, 1);
 
     x(0).fix_by(0);
     x(1).fix_by(1);
@@ -684,18 +354,15 @@ TEST_F(TestNeighborhood, set_user_defined_move_updater) {
         };
 
     model.neighborhood().set_user_defined_move_updater(move_updater);
-    model.neighborhood().disable_selection_move();
-    model.neighborhood().disable_binary_move();
-    model.neighborhood().disable_integer_move();
+    model.categorize_variables();
+    model.categorize_constraints();
+    model.extract_selections(cppmh::model::SelectionMode::Larger);
 
-    model.setup_default_neighborhood(false, false,
-                                     cppmh::model::SelectionMode::Larger);
+    model.neighborhood().set_has_fixed_variables(true);
+    model.neighborhood().set_has_selection_variables(false);
+
+    model.neighborhood().enable_user_defined_move();
     model.neighborhood().update_moves();
-
-    EXPECT_EQ(false, model.neighborhood().is_enabled_selection_move());
-    EXPECT_EQ(false, model.neighborhood().is_enabled_binary_move());
-    EXPECT_EQ(false, model.neighborhood().is_enabled_integer_move());
-    EXPECT_EQ(true, model.neighborhood().is_enabled_user_defined_move());
 
     /// Check the variable pointers and values in raw moves, and the numbers of
     /// filtered moves.
@@ -721,8 +388,7 @@ TEST_F(TestNeighborhood, shuffle_moves) {
     auto&                  x = model.create_variables("x", n, 0, 1);
     [[maybe_unused]] auto& c = model.create_constraint("c", x.selection());
 
-    model.setup_default_neighborhood(false, false,
-                                     cppmh::model::SelectionMode::Larger);
+    model.setup_neighborhood(true, true, true, false, false);
     model.neighborhood().update_moves();
 
     auto         before_move_ptrs = model.neighborhood().move_ptrs();
@@ -740,21 +406,28 @@ TEST_F(TestNeighborhood, shuffle_moves) {
 }
 
 /*****************************************************************************/
-TEST_F(TestNeighborhood, selection_variable_ptrs) {
-    /// This method is tested in
-    /// categorize_variables_and_constraints().
+TEST_F(TestNeighborhood, binary_moves) {
+    /// This method is tested in move_updater().
 }
 
 /*****************************************************************************/
-TEST_F(TestNeighborhood, binary_variable_ptrs) {
-    /// This method is tested in
-    /// categorize_variables_and_constraints().
+TEST_F(TestNeighborhood, integer_moves) {
+    /// This method is tested in move_updater().
 }
 
 /*****************************************************************************/
-TEST_F(TestNeighborhood, integer_variable_ptrs) {
-    /// This method is tested in
-    /// categorize_variables_and_constraints().
+TEST_F(TestNeighborhood, aggregation_moves) {
+    /// This method is tested in move_updater().
+}
+
+/*****************************************************************************/
+TEST_F(TestNeighborhood, precedence_moves) {
+    /// This method is tested in move_updater().
+}
+
+/*****************************************************************************/
+TEST_F(TestNeighborhood, variable_bound_moves) {
+    /// This method is tested in move_updater().
 }
 
 /*****************************************************************************/
@@ -763,42 +436,8 @@ TEST_F(TestNeighborhood, selection_moves) {
 }
 
 /*****************************************************************************/
-TEST_F(TestNeighborhood, binary_moves) {
-    /// This method is tested in move_updater().
-}
-
-/*****************************************************************************/
-TEST_F(TestNeighborhood, integer_moves) {
-    /// This method is tested in move_updater.
-}
-
-/*****************************************************************************/
 TEST_F(TestNeighborhood, user_defined_moves) {
     /// This method is tested in set_user_defined_move_updater().
-}
-
-/*****************************************************************************/
-TEST_F(TestNeighborhood, is_enabled_selection_move) {
-    cppmh::model::Neighborhood<int, double> neighborhood;
-
-    /// initial status
-    EXPECT_EQ(true, neighborhood.is_enabled_selection_move());
-
-    neighborhood.disable_selection_move();
-    EXPECT_EQ(false, neighborhood.is_enabled_selection_move());
-
-    neighborhood.enable_selection_move();
-    EXPECT_EQ(true, neighborhood.is_enabled_selection_move());
-}
-
-/*****************************************************************************/
-TEST_F(TestNeighborhood, enable_selection_move) {
-    /// This method is tested in is_enabled_selection_move().
-}
-
-/*****************************************************************************/
-TEST_F(TestNeighborhood, disable_selection_move) {
-    /// This method is tested in is_enabled_selection_move().
 }
 
 /*****************************************************************************/
@@ -806,13 +445,13 @@ TEST_F(TestNeighborhood, is_enabled_binary_move) {
     cppmh::model::Neighborhood<int, double> neighborhood;
 
     /// initial status
-    EXPECT_EQ(true, neighborhood.is_enabled_binary_move());
-
-    neighborhood.disable_binary_move();
     EXPECT_EQ(false, neighborhood.is_enabled_binary_move());
 
     neighborhood.enable_binary_move();
     EXPECT_EQ(true, neighborhood.is_enabled_binary_move());
+
+    neighborhood.disable_binary_move();
+    EXPECT_EQ(false, neighborhood.is_enabled_binary_move());
 }
 
 /*****************************************************************************/
@@ -830,13 +469,13 @@ TEST_F(TestNeighborhood, is_enabled_integer_move) {
     cppmh::model::Neighborhood<int, double> neighborhood;
 
     /// initial status
-    EXPECT_EQ(true, neighborhood.is_enabled_integer_move());
-
-    neighborhood.disable_integer_move();
     EXPECT_EQ(false, neighborhood.is_enabled_integer_move());
 
     neighborhood.enable_integer_move();
     EXPECT_EQ(true, neighborhood.is_enabled_integer_move());
+
+    neighborhood.disable_integer_move();
+    EXPECT_EQ(false, neighborhood.is_enabled_integer_move());
 }
 
 /*****************************************************************************/
@@ -856,11 +495,11 @@ TEST_F(TestNeighborhood, is_enabled_user_defined_move) {
     /// initial status
     EXPECT_EQ(false, neighborhood.is_enabled_user_defined_move());
 
-    neighborhood.enable_user_defined_move();
-    EXPECT_EQ(true, neighborhood.is_enabled_user_defined_move());
-
     neighborhood.disable_user_defined_move();
     EXPECT_EQ(false, neighborhood.is_enabled_user_defined_move());
+
+    neighborhood.enable_user_defined_move();
+    EXPECT_EQ(true, neighborhood.is_enabled_user_defined_move());
 }
 
 /*****************************************************************************/
@@ -873,6 +512,101 @@ TEST_F(TestNeighborhood, disable_user_defined_move) {
     /// This method is tested in is_enabled_user_defined_move().
 }
 
+/*****************************************************************************/
+TEST_F(TestNeighborhood, is_enabled_aggregation_move) {
+    cppmh::model::Neighborhood<int, double> neighborhood;
+
+    /// initial status
+    EXPECT_EQ(false, neighborhood.is_enabled_aggregation_move());
+
+    neighborhood.disable_aggregation_move();
+    EXPECT_EQ(false, neighborhood.is_enabled_aggregation_move());
+
+    neighborhood.enable_aggregation_move();
+    EXPECT_EQ(true, neighborhood.is_enabled_aggregation_move());
+}
+
+/*****************************************************************************/
+TEST_F(TestNeighborhood, enable_aggregation_move) {
+    /// This method is tested in is_enabled_aggregation_move().
+}
+
+/*****************************************************************************/
+TEST_F(TestNeighborhood, disable_aggregation_move) {
+    /// This method is tested in is_enabled_aggregation_move().
+}
+
+/*****************************************************************************/
+TEST_F(TestNeighborhood, is_enabled_precedence_move) {
+    cppmh::model::Neighborhood<int, double> neighborhood;
+
+    /// initial status
+    EXPECT_EQ(false, neighborhood.is_enabled_precedence_move());
+
+    neighborhood.disable_precedence_move();
+    EXPECT_EQ(false, neighborhood.is_enabled_precedence_move());
+
+    neighborhood.enable_precedence_move();
+    EXPECT_EQ(true, neighborhood.is_enabled_precedence_move());
+}
+
+/*****************************************************************************/
+TEST_F(TestNeighborhood, enable_precedence_move) {
+    /// This method is tested in is_enabled_precedence_move().
+}
+
+/*****************************************************************************/
+TEST_F(TestNeighborhood, disable_precedence_move) {
+    /// This method is tested in is_enabled_precedence_move().
+}
+
+/*****************************************************************************/
+TEST_F(TestNeighborhood, is_enabled_variable_bound_move) {
+    cppmh::model::Neighborhood<int, double> neighborhood;
+
+    /// initial status
+    EXPECT_EQ(false, neighborhood.is_enabled_variable_bound_move());
+
+    neighborhood.disable_variable_bound_move();
+    EXPECT_EQ(false, neighborhood.is_enabled_variable_bound_move());
+
+    neighborhood.enable_variable_bound_move();
+    EXPECT_EQ(true, neighborhood.is_enabled_variable_bound_move());
+}
+
+/*****************************************************************************/
+TEST_F(TestNeighborhood, enable_variable_bound_move) {
+    /// This method is tested in is_enabled_variable_bound_move().
+}
+
+/*****************************************************************************/
+TEST_F(TestNeighborhood, disable_variable_bound_move) {
+    /// This method is tested in is_enabled_variable_bound_move().
+}
+
+/*****************************************************************************/
+TEST_F(TestNeighborhood, is_enabled_selection_move) {
+    cppmh::model::Neighborhood<int, double> neighborhood;
+
+    /// initial status
+    EXPECT_EQ(false, neighborhood.is_enabled_selection_move());
+
+    neighborhood.enable_selection_move();
+    EXPECT_EQ(true, neighborhood.is_enabled_selection_move());
+
+    neighborhood.disable_selection_move();
+    EXPECT_EQ(false, neighborhood.is_enabled_selection_move());
+}
+
+/*****************************************************************************/
+TEST_F(TestNeighborhood, enable_selection_move) {
+    /// This method is tested in is_enabled_selection_move().
+}
+
+/*****************************************************************************/
+TEST_F(TestNeighborhood, disable_selection_move) {
+    /// This method is tested in is_enabled_selection_move().
+}
 /*****************************************************************************/
 }  // namespace
 /*****************************************************************************/
