@@ -10,6 +10,18 @@ namespace cppmh {
 namespace solver {
 namespace tabu_search {
 /*****************************************************************************/
+enum TabuMode : int {
+    All,
+    Any,
+};
+
+/*****************************************************************************/
+enum RestartMode : int {
+    Global,
+    Local,
+};
+
+/*****************************************************************************/
 struct TabuSearchOptionConstant {
     static constexpr int    DEFAULT_ITERATION_MAX                       = 200;
     static constexpr double DEFAULT_TIME_MAX                            = 120.0;
@@ -39,18 +51,6 @@ struct TabuSearchOptionConstant {
     static constexpr double DEFAULT_IGNORE_TABU_IF_FEASIBLE_INCUMBENT  = true;
     static constexpr bool   DEFAULT_NUMBER_OF_INITIAL_MODIFICATION     = 0;
     static constexpr int    DEFAULT_SEED                               = 1;
-};
-
-/*****************************************************************************/
-enum TabuMode : int {
-    All,
-    Any,
-};
-
-/*****************************************************************************/
-enum RestartMode : int {
-    Global,
-    Local,
 };
 
 /*****************************************************************************/

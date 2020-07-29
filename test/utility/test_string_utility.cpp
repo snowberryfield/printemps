@@ -6,8 +6,8 @@
 #include <gtest/gtest.h>
 #include <cppmh.h>
 
-/*****************************************************************************/
 namespace {
+/*****************************************************************************/
 class TestStringUtility : public ::testing::Test {
    protected:
     virtual void SetUp(void) {

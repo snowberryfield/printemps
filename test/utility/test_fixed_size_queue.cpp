@@ -8,8 +8,8 @@
 
 #include <cppmh.h>
 
-/*****************************************************************************/
 namespace {
+/*****************************************************************************/
 class TestFixedSizeQueue : public ::testing::Test {
    protected:
     virtual void SetUp(void) {

@@ -11,6 +11,7 @@
 
 namespace cppmh {
 namespace utility {
+/*****************************************************************************/
 template <class T>
 class FixedSizeQueue {
    private:
