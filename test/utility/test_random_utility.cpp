@@ -5,10 +5,11 @@
 /*****************************************************************************/
 #include <gtest/gtest.h>
 #include <vector>
+
 #include <cppmh.h>
 
-/*****************************************************************************/
 namespace {
+/*****************************************************************************/
 class TestRandomUtility : public ::testing::Test {
    protected:
     virtual void SetUp(void) {

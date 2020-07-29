@@ -12,7 +12,6 @@ namespace solver {
 template <class T_Variable, class T_Expression>
 class IncumbentHolder;
 
-/*****************************************************************************/
 namespace local_search {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>

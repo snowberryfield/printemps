@@ -7,8 +7,8 @@
 #include <random>
 #include <cppmh.h>
 
-/*****************************************************************************/
 namespace {
+/*****************************************************************************/
 class TestSimple1 : public ::testing::Test {
    protected:
     virtual void SetUp(void) {
