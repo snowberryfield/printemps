@@ -8,8 +8,8 @@
 
 #include <cppmh.h>
 
-/*****************************************************************************/
 namespace {
+/*****************************************************************************/
 class TestVectorUtility : public ::testing::Test {
    protected:
     virtual void SetUp(void) {

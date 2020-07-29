@@ -39,6 +39,7 @@ inline void print_table_header(const bool a_IS_ENABLED_PRINT) {
         "-----------",
         true);
 }
+
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 inline void print_table_initial(

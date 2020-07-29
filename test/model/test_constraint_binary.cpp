@@ -7,8 +7,8 @@
 #include <random>
 #include <cppmh.h>
 
-/*****************************************************************************/
 namespace {
+/*****************************************************************************/
 class TestConstraintBinary : public ::testing::Test {
    protected:
     cppmh::utility::IntegerUniformRandom m_random_integer;

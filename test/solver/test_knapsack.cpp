@@ -7,8 +7,8 @@
 #include <random>
 #include <cppmh.h>
 
-/*****************************************************************************/
 namespace {
+/*****************************************************************************/
 class TestKnapsack : public ::testing::Test {
    protected:
     virtual void SetUp(void) {
@@ -90,7 +90,7 @@ TEST_F(TestKnapsack, knapsack) {
         /// solve
         cppmh::solver::Option option;
 
-        option.iteration_max                           = 10;
+        option.iteration_max                           = 50;
         option.is_enabled_grouping_penalty_coefficient = true;
         option.is_enabled_initial_value_correction     = true;
         option.is_enabled_lagrange_dual                = true;
@@ -134,7 +134,7 @@ TEST_F(TestKnapsack, knapsack) {
         /// solve
         cppmh::solver::Option option;
 
-        option.iteration_max                           = 10;
+        option.iteration_max                           = 50;
         option.is_enabled_grouping_penalty_coefficient = false;
         option.is_enabled_initial_value_correction     = false;
         option.is_enabled_lagrange_dual                = false;
