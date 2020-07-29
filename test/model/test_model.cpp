@@ -5,10 +5,11 @@
 /*****************************************************************************/
 #include <gtest/gtest.h>
 #include <random>
+
 #include <cppmh.h>
 
-/*****************************************************************************/
 namespace {
+/*****************************************************************************/
 class TestModel : public ::testing::Test {
    protected:
     cppmh::utility::IntegerUniformRandom m_random_integer;
@@ -59,6 +60,65 @@ TEST_F(TestModel, initialize) {
     EXPECT_EQ(true, model.is_linear());
     EXPECT_EQ(true, model.is_minimization());
     EXPECT_EQ(1.0, model.sign());
+
+    /// Variable Reference
+    EXPECT_EQ(  //
+        true, model.variable_reference().variable_ptrs.empty());
+    EXPECT_EQ(  //
+        true, model.variable_reference().fixed_variable_ptrs.empty());
+    EXPECT_EQ(  //
+        true, model.variable_reference().selection_variable_ptrs.empty());
+    EXPECT_EQ(  //
+        true, model.variable_reference().binary_variable_ptrs.empty());
+    EXPECT_EQ(  //
+        true, model.variable_reference().integer_variable_ptrs.empty());
+    EXPECT_EQ(  //
+        true,   //
+        model.variable_reference().variable_ptrs.empty());
+
+    /// Constraint Reference
+    EXPECT_EQ(  //
+        true,   //
+        model.constraint_reference().constraint_ptrs.empty());
+    EXPECT_EQ(  //
+        true, model.constraint_reference().selection_constraint_ptrs.empty());
+    EXPECT_EQ(  //
+        true, model.constraint_reference().disabled_constraint_ptrs.empty());
+
+    /// Constraint Type Reference
+    EXPECT_EQ(  //
+        true, model.constraint_type_reference().singleton_ptrs.empty());
+    EXPECT_EQ(  //
+        true, model.constraint_type_reference().aggregation_ptrs.empty());
+    EXPECT_EQ(  //
+        true, model.constraint_type_reference().precedence_ptrs.empty());
+    EXPECT_EQ(  //
+        true, model.constraint_type_reference().variable_bound_ptrs.empty());
+    EXPECT_EQ(  //
+        true,
+
+        model.constraint_type_reference().set_partitioning_ptrs.empty());
+    EXPECT_EQ(  //
+        true, model.constraint_type_reference().set_packing_ptrs.empty());
+    EXPECT_EQ(  //
+        true, model.constraint_type_reference().set_covering_ptrs.empty());
+    EXPECT_EQ(  //
+        true, model.constraint_type_reference().cardinality_ptrs.empty());
+    EXPECT_EQ(  //
+        true,
+        model.constraint_type_reference().invariant_knapsack_ptrs.empty());
+    EXPECT_EQ(  //
+        true, model.constraint_type_reference().equation_knapsack_ptrs.empty());
+    EXPECT_EQ(  //
+        true, model.constraint_type_reference().bin_packing_ptrs.empty());
+    EXPECT_EQ(  //
+        true, model.constraint_type_reference().knapsack_ptrs.empty());
+    EXPECT_EQ(  //
+        true, model.constraint_type_reference().integer_knapsack_ptrs.empty());
+    EXPECT_EQ(  //
+        true, model.constraint_type_reference().general_linear_ptrs.empty());
+    EXPECT_EQ(  //
+        true, model.constraint_type_reference().nonlinear_ptrs.empty());
 }
 
 /*****************************************************************************/
@@ -636,85 +696,6 @@ TEST_F(TestModel, maximize_arg_expression) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModel, is_defined_objective) {
-    /// This method is tested in minimize_arg_function() and so on.
-}
-
-/*****************************************************************************/
-TEST_F(TestModel, is_enabled_fast_evaluation) {
-    /// This method is tested in setup_is_enabled_fast_evaluation().
-}
-
-/*****************************************************************************/
-TEST_F(TestModel, is_linear) {
-    /// This method is tested in setup_is_linear().
-}
-
-/*****************************************************************************/
-TEST_F(TestModel, is_minimization) {
-    /// This method is tested in minimize_arg_function() and so on.
-}
-
-/*****************************************************************************/
-TEST_F(TestModel, sign) {
-    /// This method is tested in minimize_arg_function() and so on.
-}
-
-/*****************************************************************************/
-TEST_F(TestModel, number_of_variables) {
-    cppmh::model::Model<int, double> model;
-
-    model.create_variable("x");
-    model.create_variables("y", 10);
-    model.create_variables("z", {20, 30});
-    EXPECT_EQ(1 + 10 + 20 * 30, model.number_of_variables());
-}
-
-/*****************************************************************************/
-TEST_F(TestModel, number_of_fixed_variables) {
-    cppmh::model::Model<int, double> model;
-
-    auto& x = model.create_variable("x");
-    auto& y = model.create_variables("y", 10);
-    auto& z = model.create_variables("z", {20, 30});
-    x.fix_by(0);
-    y(0).fix_by(0);
-    z(0, 0).fix_by(0);
-
-    EXPECT_EQ(3, model.number_of_fixed_variables());
-}
-
-/*****************************************************************************/
-TEST_F(TestModel, number_of_constraints) {
-    cppmh::model::Model<int, double> model;
-
-    model.create_constraint("g");
-    model.create_constraints("h", 10);
-    model.create_constraints("v", {20, 30});
-
-    EXPECT_EQ(1 + 10 + 20 * 30, model.number_of_constraints());
-}
-
-/*****************************************************************************/
-TEST_F(TestModel, number_of_disabled_constraints) {
-    cppmh::model::Model<int, double> model;
-
-    auto& g = model.create_constraint("g");
-    auto& h = model.create_constraints("h", 10);
-    auto& v = model.create_constraints("v", {20, 30});
-    g.disable();
-    h(0).disable();
-    v(0, 0).disable();
-
-    EXPECT_EQ(3, model.number_of_disabled_constraints());
-}
-
-/*****************************************************************************/
-TEST_F(TestModel, neighborhood) {
-    /// This method is tested in test_neighborhood.h
-}
-
-/*****************************************************************************/
 TEST_F(TestModel, setup) {
     /// This method is tested in the following submethods.
 }
@@ -778,8 +759,8 @@ TEST_F(TestModel, setup_variable_related_constraints) {
                               x(i).related_constraint_ptrs().end());
     }
 
-    for (auto i = 0; i < 10; i++) {
-        for (auto j = 0; j < 10; j++) {
+    for (auto i = 0; i < 20; i++) {
+        for (auto j = 0; j < 30; j++) {
             EXPECT_EQ(false, y(i, j).related_constraint_ptrs().find(&g(0)) !=
                                  y(i, j).related_constraint_ptrs().end());
             EXPECT_EQ(true, y(i, j).related_constraint_ptrs().find(&g(1)) !=
@@ -798,8 +779,9 @@ TEST_F(TestModel, setup_variable_sense) {
     auto& x = model.create_variables("x", 10, 0, 1);
     model.create_constraint("g", x.selection());
 
-    model.setup_default_neighborhood(false, false,
-                                     cppmh::model::SelectionMode::Larger);
+    model.categorize_variables();
+    model.categorize_constraints();
+    model.extract_selections(cppmh::model::SelectionMode::Defined);
     for (const auto& element : x.flat_indexed_variables()) {
         EXPECT_EQ(cppmh::model::VariableSense::Selection, element.sense());
     }
@@ -834,88 +816,6 @@ TEST_F(TestModel, setup_unique_name) {
     EXPECT_EQ("g[ 0,  1]", g(0, 1).name());
     EXPECT_EQ("g[19, 28]", g(19, 28).name());
     EXPECT_EQ("_g_19_29", g(19, 29).name());
-}
-
-/*****************************************************************************/
-TEST_F(TestModel, setup_is_enabled_fast_evaluation) {
-    /// Constraint: linear
-    /// Objective: linear
-    /// User-defined neighborhood: None
-    {
-        cppmh::model::Model<int, double> model;
-
-        auto& x = model.create_variable("x");
-
-        model.create_constraint("g", x <= 0);
-        model.minimize(x);
-
-        model.setup_is_enabled_fast_evaluation();
-
-        EXPECT_EQ(true, model.is_enabled_fast_evaluation());
-    }
-
-    /// Constraint: nonlinear (user-defined lambda)
-    /// Objective: linear
-    /// User-defined neighborhood: None
-    {
-        cppmh::model::Model<int, double> model;
-
-        auto& x = model.create_variable("x");
-
-        std::function<double(const cppmh::model::Move<int, double>&)> g =
-            [&x](const cppmh::model::Move<int, double>& a_MOVE) {
-                return x.evaluate(a_MOVE);
-            };
-
-        model.create_constraint("g", g <= 0);
-        model.minimize(x);
-
-        model.setup_is_enabled_fast_evaluation();
-
-        EXPECT_EQ(false, model.is_enabled_fast_evaluation());
-    }
-
-    /// Constraint: linear
-    /// Objective: nonlinear (user-defined lambda)
-    /// User-defined neighborhood: None
-    {
-        cppmh::model::Model<int, double> model;
-
-        auto& x = model.create_variable("x");
-
-        std::function<double(const cppmh::model::Move<int, double>&)> f =
-            [&x](const cppmh::model::Move<int, double>& a_MOVE) {
-                return x.evaluate(a_MOVE);
-            };
-
-        model.create_constraint("g", x <= 0);
-        model.minimize(f);
-
-        model.setup_is_enabled_fast_evaluation();
-
-        EXPECT_EQ(true, model.is_enabled_fast_evaluation());
-    }
-
-    /// Constraint: linear
-    /// Objective: linear
-    /// User-defined neighborhood: Yes
-    {
-        cppmh::model::Model<int, double> model;
-
-        auto& x = model.create_variable("x");
-
-        model.create_constraint("g", x <= 0);
-        model.minimize(x);
-
-        auto move_updater =
-            [&x]([[maybe_unused]] std::vector<cppmh::model::Move<int, double>>*
-                     a_moves) { ; };
-
-        model.neighborhood().set_user_defined_move_updater(move_updater);
-        model.setup_is_enabled_fast_evaluation();
-
-        EXPECT_EQ(false, model.is_enabled_fast_evaluation());
-    }
 }
 
 /*****************************************************************************/
@@ -1002,444 +902,124 @@ TEST_F(TestModel, setup_is_linear) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModel, setup_default_neighborhood) {
-    /// This method is tested in test_neighborhood.h
-}
-
-/*****************************************************************************/
-TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
-    /// There is a fixed variable with an invalid initial value.
-    /// correction: true
+TEST_F(TestModel, setup_is_enabled_fast_evaluation) {
+    /// Constraint: linear
+    /// Objective: linear
+    /// User-defined neighborhood: None
     {
         cppmh::model::Model<int, double> model;
 
-        auto& x = model.create_variables("x", 10, 0, 1);
-        model.create_constraint("g", x.selection());
-        x(0).fix_by(2);
+        auto& x = model.create_variable("x");
 
-        model.setup_default_neighborhood(false, false,
-                                         cppmh::model::SelectionMode::Larger);
+        model.create_constraint("g", x <= 0);
+        model.minimize(x);
 
-        ASSERT_THROW(
-            model.verify_and_correct_selection_variables_initial_values(true,
-                                                                        false),
-            std::logic_error);
+        model.setup_is_enabled_fast_evaluation();
+
+        EXPECT_EQ(true, model.is_enabled_fast_evaluation());
     }
 
-    /// There is a fixed variable with an invalid initial value.
-    /// correction: false
+    /// Constraint: nonlinear (user-defined lambda)
+    /// Objective: linear
+    /// User-defined neighborhood: None
     {
         cppmh::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
-        model.create_constraint("g", x.selection());
-        x(0).fix_by(2);
 
-        model.setup_default_neighborhood(false, false,
-                                         cppmh::model::SelectionMode::Larger);
+        auto& x = model.create_variable("x");
 
-        ASSERT_THROW(
-            model.verify_and_correct_selection_variables_initial_values(false,
-                                                                        false),
-            std::logic_error);
+        std::function<double(const cppmh::model::Move<int, double>&)> g =
+            [&x](const cppmh::model::Move<int, double>& a_MOVE) {
+                return x.evaluate(a_MOVE);
+            };
+
+        model.create_constraint("g", g <= 0);
+        model.minimize(x);
+
+        model.setup_is_enabled_fast_evaluation();
+
+        EXPECT_EQ(false, model.is_enabled_fast_evaluation());
     }
 
-    /// There is one fixed selected variable.
-    /// correction: true
+    /// Constraint: linear
+    /// Objective: nonlinear (user-defined lambda)
+    /// User-defined neighborhood: None
     {
         cppmh::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
-        model.create_constraint("g", x.selection());
-        x(0).fix_by(1);
 
-        model.setup_default_neighborhood(false, false,
-                                         cppmh::model::SelectionMode::Larger);
+        auto& x = model.create_variable("x");
 
-        model.verify_and_correct_selection_variables_initial_values(true,
-                                                                    false);
-        EXPECT_EQ(1, x(0).value());
+        std::function<double(const cppmh::model::Move<int, double>&)> f =
+            [&x](const cppmh::model::Move<int, double>& a_MOVE) {
+                return x.evaluate(a_MOVE);
+            };
+
+        model.create_constraint("g", x <= 0);
+        model.minimize(f);
+
+        model.setup_is_enabled_fast_evaluation();
+
+        EXPECT_EQ(true, model.is_enabled_fast_evaluation());
     }
 
-    /// There is one fixed selected variable.
-    /// correction: false
+    /// Constraint: linear
+    /// Objective: linear
+    /// User-defined neighborhood: Yes
     {
         cppmh::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
-        model.create_constraint("g", x.selection());
-        x(0).fix_by(1);
 
-        model.setup_default_neighborhood(false, false,
-                                         cppmh::model::SelectionMode::Larger);
+        auto& x = model.create_variable("x");
 
-        model.verify_and_correct_selection_variables_initial_values(false,
-                                                                    false);
-        EXPECT_EQ(1, x(0).value());
-    }
+        model.create_constraint("g", x <= 0);
+        model.minimize(x);
 
-    /// There are two fixed selected variables.
-    /// correction: true
-    {
-        cppmh::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
-        model.create_constraint("g", x.selection());
-        x(0).fix_by(1);
-        x(1).fix_by(1);
+        auto move_updater =
+            [&x]([[maybe_unused]] std::vector<cppmh::model::Move<int, double>>*
+                     a_moves) { ; };
 
-        model.setup_default_neighborhood(false, false,
-                                         cppmh::model::SelectionMode::Larger);
+        model.neighborhood().set_user_defined_move_updater(move_updater);
+        model.neighborhood().enable_user_defined_move();
+        model.setup_is_enabled_fast_evaluation();
 
-        ASSERT_THROW(
-            model.verify_and_correct_selection_variables_initial_values(true,
-                                                                        false),
-            std::logic_error);
-    }
-
-    /// There are two fixed selected variables.
-    /// correction: true
-    {
-        cppmh::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
-        model.create_constraint("g", x.selection());
-        x(0).fix_by(1);
-        x(1).fix_by(1);
-
-        model.setup_default_neighborhood(false, false,
-                                         cppmh::model::SelectionMode::Larger);
-
-        ASSERT_THROW(
-            model.verify_and_correct_selection_variables_initial_values(false,
-                                                                        false),
-            std::logic_error);
-    }
-
-    /// There are two variables with invalid initial values.
-    /// correction: true
-    {
-        cppmh::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
-        model.create_constraint("g", x.selection());
-        x(0) = 2;
-        x(1) = 3;
-
-        model.setup_default_neighborhood(false, false,
-                                         cppmh::model::SelectionMode::Larger);
-
-        model.verify_and_correct_selection_variables_initial_values(true,
-                                                                    false);
-
-        EXPECT_EQ(0, x(0).value());
-        EXPECT_EQ(0, x(1).value());
-    }
-
-    /// There are two variables with invalid initial values.
-    /// correction: false
-    {
-        cppmh::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
-        model.create_constraint("g", x.selection());
-        x(0) = 2;
-        x(1) = 3;
-
-        model.setup_default_neighborhood(false, false,
-                                         cppmh::model::SelectionMode::Larger);
-
-        ASSERT_THROW(
-            model.verify_and_correct_selection_variables_initial_values(false,
-                                                                        false),
-            std::logic_error);
-    }
-
-    /// There is no selected variable.
-    /// correction: true
-    {
-        cppmh::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
-        model.create_constraint("g", x.selection());
-
-        model.setup_default_neighborhood(false, false,
-                                         cppmh::model::SelectionMode::Larger);
-
-        model.verify_and_correct_selection_variables_initial_values(true,
-                                                                    false);
-
-        /// selected_variable_ptr is not always &x(0).
-        auto selected_variable_ptr =
-            model.neighborhood().selections().front().variable_ptrs.front();
-        EXPECT_EQ(1, selected_variable_ptr->value());
-    }
-
-    /// There is no selected variable.
-    /// correction: false
-    {
-        cppmh::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
-        model.create_constraint("g", x.selection());
-
-        model.setup_default_neighborhood(false, false,
-                                         cppmh::model::SelectionMode::Larger);
-
-        ASSERT_THROW(
-            model.verify_and_correct_selection_variables_initial_values(false,
-                                                                        false),
-            std::logic_error);
-    }
-
-    /// There is one selected variable.
-    /// correction: true
-    {
-        cppmh::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
-        model.create_constraint("g", x.selection());
-        x(0) = 1;
-
-        model.setup_default_neighborhood(false, false,
-                                         cppmh::model::SelectionMode::Larger);
-
-        model.verify_and_correct_selection_variables_initial_values(true,
-                                                                    false);
-
-        EXPECT_EQ(1, x(0).value());
-    }
-
-    /// There is one selected variable.
-    /// correction: false
-    {
-        cppmh::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
-        model.create_constraint("g", x.selection());
-        x(0) = 1;
-
-        model.setup_default_neighborhood(false, false,
-                                         cppmh::model::SelectionMode::Larger);
-
-        model.verify_and_correct_selection_variables_initial_values(false,
-                                                                    false);
-
-        EXPECT_EQ(1, x(0).value());
-    }
-
-    /// There are two unfixed selected variable.
-    /// correction: true
-    {
-        cppmh::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
-        model.create_constraint("g", x.selection());
-        x(0) = 1;
-        x(1) = 1;
-
-        model.setup_default_neighborhood(false, false,
-                                         cppmh::model::SelectionMode::Larger);
-
-        model.verify_and_correct_selection_variables_initial_values(true,
-                                                                    false);
-
-        /// selected_variable is not always x(0).
-        EXPECT_EQ(1, x(0).value() + x(1).value());
-    }
-
-    /// There are two unfixed selected variable.
-    /// correction: false
-    {
-        cppmh::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
-        model.create_constraint("g", x.selection());
-        x(0) = 1;
-        x(1) = 1;
-
-        model.setup_default_neighborhood(false, false,
-                                         cppmh::model::SelectionMode::Larger);
-
-        ASSERT_THROW(
-            model.verify_and_correct_selection_variables_initial_values(false,
-                                                                        false),
-            std::logic_error);
-    }
-
-    /// There are 1 fixed and 1 unfixed selected variable.
-    /// correction: true
-    {
-        cppmh::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
-        model.create_constraint("g", x.selection());
-        x(0) = 1;
-        x(1).fix_by(1);
-
-        model.setup_default_neighborhood(false, false,
-                                         cppmh::model::SelectionMode::Larger);
-
-        model.verify_and_correct_selection_variables_initial_values(true,
-                                                                    false);
-        EXPECT_EQ(0, x(0).value());
-        EXPECT_EQ(1, x(1).value());
-    }
-
-    /// There are 1 fixed and 1 unfixed selected variable.
-    /// correction: false
-    {
-        cppmh::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
-        model.create_constraint("g", x.selection());
-        x(0) = 1;
-        x(1).fix_by(1);
-
-        model.setup_default_neighborhood(false, false,
-                                         cppmh::model::SelectionMode::Larger);
-
-        ASSERT_THROW(
-            model.verify_and_correct_selection_variables_initial_values(false,
-                                                                        false),
-            std::logic_error);
+        EXPECT_EQ(false, model.is_enabled_fast_evaluation());
     }
 }
 
 /*****************************************************************************/
-TEST_F(TestModel, verify_and_correct_binary_variables_initial_values) {
-    /// There is a fixed variable with an invalid initial value.
-    /// correction: true
-    {
-        cppmh::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
-        x(0).fix_by(2);
-
-        model.setup_default_neighborhood(false, false,
-                                         cppmh::model::SelectionMode::Larger);
-
-        ASSERT_THROW(model.verify_and_correct_binary_variables_initial_values(
-                         true, false),
-                     std::logic_error);
-    }
-
-    /// There is a fixed variable with an invalid initial value.
-    /// correction: false
-    {
-        cppmh::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
-        x(0).fix_by(-1);
-
-        model.setup_default_neighborhood(false, false,
-                                         cppmh::model::SelectionMode::Larger);
-
-        ASSERT_THROW(model.verify_and_correct_binary_variables_initial_values(
-                         false, false),
-                     std::logic_error);
-    }
-
-    /// There is a variable with an invalid initial value.
-    /// correction: true
-    {
-        cppmh::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
-        x(0)    = 2;
-        x(1)    = -1;
-
-        model.setup_default_neighborhood(false, false,
-                                         cppmh::model::SelectionMode::Larger);
-
-        model.verify_and_correct_binary_variables_initial_values(true, false);
-        EXPECT_EQ(1, x(0).value());
-        EXPECT_EQ(0, x(1).value());
-    }
-
-    /// There is a variable with an invalid initial value.
-    /// correction: false
-    {
-        cppmh::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
-        x(0)    = 2;
-        x(1)    = -1;
-
-        model.setup_default_neighborhood(false, false,
-                                         cppmh::model::SelectionMode::Larger);
-
-        ASSERT_THROW(model.verify_and_correct_binary_variables_initial_values(
-                         false, false),
-                     std::logic_error);
-    }
-}
-
-/*****************************************************************************/
-TEST_F(TestModel, verify_and_correct_integer_variables_initial_values) {
-    /// There is a fixed variable with an invalid initial value.
-    /// correction: true
-    {
-        cppmh::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, -10, 10);
-        x(0).fix_by(11);
-
-        model.setup_default_neighborhood(false, false,
-                                         cppmh::model::SelectionMode::Larger);
-
-        ASSERT_THROW(model.verify_and_correct_integer_variables_initial_values(
-                         true, false),
-                     std::logic_error);
-    }
-
-    /// There is a fixed variable with an invalid initial value.
-    /// correction: false
-    {
-        cppmh::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, -10, 10);
-        x(0).fix_by(-11);
-
-        model.setup_default_neighborhood(false, false,
-                                         cppmh::model::SelectionMode::Larger);
-
-        ASSERT_THROW(model.verify_and_correct_integer_variables_initial_values(
-                         false, false),
-                     std::logic_error);
-    }
-
-    /// There is a variable with an invalid initial value.
-    /// correction: true
-    {
-        cppmh::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, -10, 10);
-        x(0)    = 11;
-        x(1)    = -11;
-
-        model.setup_default_neighborhood(false, false,
-                                         cppmh::model::SelectionMode::Larger);
-
-        model.verify_and_correct_integer_variables_initial_values(true, false);
-        EXPECT_EQ(10, x(0).value());
-        EXPECT_EQ(-10, x(1).value());
-    }
-
-    /// There is a variable with an invalid initial value.
-    /// correction: false
-    {
-        cppmh::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, -10, 10);
-        x(0)    = 11;
-        x(1)    = -11;
-
-        model.setup_default_neighborhood(false, false,
-                                         cppmh::model::SelectionMode::Larger);
-
-        ASSERT_THROW(model.verify_and_correct_integer_variables_initial_values(
-                         false, false),
-                     std::logic_error);
-    }
-}
-
-/*****************************************************************************/
-TEST_F(TestModel, setup_fixed_sensitivities) {
-    /// This method is tested in test_expression.h
-}
-
-/*****************************************************************************/
-TEST_F(TestModel, set_callback) {
+TEST_F(TestModel, setup_variable_sensitivity) {
     cppmh::model::Model<int, double> model;
 
-    int  v = 1;
-    auto f = [&v](void) { v++; };
-    model.set_callback(f);
-    model.callback();
-    EXPECT_EQ(2, v);
-}
+    auto& x = model.create_variables("x", 10, 0, 1);
+    auto& y = model.create_variables("y", {20, 30}, 0, 1);
+    auto& g = model.create_constraints("g", 3);
 
-/*****************************************************************************/
-TEST_F(TestModel, callback) {
-    /// This method is tested in set_callback.
+    auto& p = model.create_expressions("p", 3);
+    for (auto i = 0; i < 10; i++) {
+        p(0) += (i + 1) * x(i);
+    }
+
+    for (auto i = 0; i < 20; i++) {
+        for (auto j = 0; j < 30; j++) {
+            p(1) += (i + j + 1) * y(i, j);
+        }
+    }
+    g(0) = p(0) <= 10000;
+    g(1) = p(1) <= 10000;
+
+    model.minimize(2 * x.sum() + 5 * y.sum());
+
+    model.setup_variable_sensitivity();
+
+    for (auto i = 0; i < 10; i++) {
+        EXPECT_EQ(i + 1, x(i).constraint_sensitivities().at(&g(0)));
+        EXPECT_EQ(2, x(i).objective_sensitivity());
+    }
+
+    for (auto i = 0; i < 20; i++) {
+        for (auto j = 0; j < 30; j++) {
+            EXPECT_EQ(i + j + 1, y(i, j).constraint_sensitivities().at(&g(1)));
+            EXPECT_EQ(5, y(i, j).objective_sensitivity());
+        }
+    }
 }
 
 /*****************************************************************************/
@@ -1456,6 +1036,9 @@ TEST_F(TestModel, presolve) {
     model.setup_is_linear();
 
     model.presolve(false);
+
+    model.categorize_variables();
+    model.categorize_constraints();
 
     EXPECT_EQ(10, model.number_of_fixed_variables());
     EXPECT_EQ(4, model.number_of_disabled_constraints());
@@ -1486,6 +1069,9 @@ TEST_F(TestModel, remove_independent_variables) {
             EXPECT_EQ(true, x(i).is_fixed());
             EXPECT_EQ(0, x(i).value());
         }
+        model.categorize_variables();
+        model.categorize_constraints();
+
         EXPECT_EQ(10, model.number_of_fixed_variables());
     }
     {
@@ -1500,6 +1086,9 @@ TEST_F(TestModel, remove_independent_variables) {
             EXPECT_EQ(true, x(i).is_fixed());
             EXPECT_EQ(1, x(i).value());
         }
+        model.categorize_variables();
+        model.categorize_constraints();
+
         EXPECT_EQ(10, model.number_of_fixed_variables());
     }
     {
@@ -1514,6 +1103,9 @@ TEST_F(TestModel, remove_independent_variables) {
             EXPECT_EQ(true, x(i).is_fixed());
             EXPECT_EQ(1, x(i).value());
         }
+        model.categorize_variables();
+        model.categorize_constraints();
+
         EXPECT_EQ(10, model.number_of_fixed_variables());
     }
     {
@@ -1528,6 +1120,9 @@ TEST_F(TestModel, remove_independent_variables) {
             EXPECT_EQ(true, x(i).is_fixed());
             EXPECT_EQ(0, x(i).value());
         }
+        model.categorize_variables();
+        model.categorize_constraints();
+
         EXPECT_EQ(10, model.number_of_fixed_variables());
     }
 }
@@ -1848,7 +1443,825 @@ TEST_F(TestModel, fix_implicit_fixed_variables) {
     for (auto i = 1; i < 10; i++) {
         EXPECT_EQ(false, x(i).is_fixed());
     }
+    model.categorize_variables();
+    model.categorize_constraints();
+
     EXPECT_EQ(1, model.number_of_fixed_variables());
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, categorize_variables) {
+    cppmh::model::Model<int, double> model;
+
+    auto& x = model.create_variable("x", 0, 1);
+    auto& y = model.create_variables("y", 10, 0, 1);
+    auto& z = model.create_variables("z", {20, 30}, -10, 10);
+
+    x.fix_by(0);
+    y(0).fix_by(0);
+    z(0, 0).fix_by(0);
+
+    model.categorize_variables();
+
+    EXPECT_EQ(1 + 10 + 20 * 30, model.number_of_variables());
+    EXPECT_EQ(3, model.number_of_fixed_variables());
+    EXPECT_EQ(11, model.number_of_binary_variables());
+    EXPECT_EQ(600, model.number_of_integer_variables());
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, categorize_constraints) {
+    cppmh::model::Model<int, double> model;
+    auto coefficients = cppmh::utility::sequence(10);
+
+    auto& x = model.create_variable("x", -10, 10);
+    auto& y = model.create_variable("y", -10, 10);
+    auto& z = model.create_variables("z", 10, 0, 1);
+    auto& w = model.create_variable("w", 0, 1);
+    auto& r = model.create_variables("r", 10, -10, 10);
+
+    auto& singleton = model.create_constraint("singleton");
+    singleton       = 2 * x <= 10;
+
+    auto& aggregation = model.create_constraint("aggregation");
+    aggregation       = 2 * x + 3 * y == 10;
+
+    auto& precedence = model.create_constraints("precedence", 4);
+    precedence(0)    = 2 * x - 2 * y <= 5;
+    precedence(1)    = -2 * x + 2 * y <= 5;
+    precedence(2)    = 2 * x - 2 * y >= 5;
+    precedence(3)    = -2 * x + 2 * y >= 5;
+
+    auto& variable_bound = model.create_constraints("variable_bound", 2);
+    variable_bound(0)    = 2 * z(0) + 3 * z(1) >= 5;
+    variable_bound(1)    = 2 * z(0) + 3 * z(1) <= 5;
+
+    auto& set_partitioning = model.create_constraint("set_partitioning");
+    set_partitioning       = z.selection();
+
+    auto& set_packing = model.create_constraint("set_packing");
+    set_packing       = z.sum() <= 1;
+
+    auto& set_covering = model.create_constraint("set_covering");
+    set_covering       = z.sum() >= 1;
+
+    auto& cardinality = model.create_constraint("cardinality");
+    cardinality       = z.sum() == 5;
+
+    auto& invariant_knapsack = model.create_constraint("invariant_knapsack");
+    invariant_knapsack       = z.sum() <= 5;
+
+    auto& equation_knapsack = model.create_constraint("equation_knapsack");
+    equation_knapsack       = z.dot(coefficients) == 30;
+
+    auto& bin_packing = model.create_constraints("bin_packing", 2);
+    bin_packing(0)    = z.dot(coefficients) + 5 * w <= 5;
+    bin_packing(1)    = z.dot(coefficients) - 5 * w >= -5;
+
+    auto& knapsack = model.create_constraints("knapsack", 2);
+    knapsack(0)    = z.dot(coefficients) <= 50;
+    knapsack(1)    = z.dot(coefficients) >= -50;
+
+    auto& integer_knapsack = model.create_constraints("integer_knapsack", 2);
+    integer_knapsack(0)    = r.dot(coefficients) <= 50;
+    integer_knapsack(1)    = r.dot(coefficients) >= -50;
+
+    auto& general_liner = model.create_constraint("general_liner");
+    general_liner       = x + r.sum() == 50;
+
+    auto& nonlinear = model.create_constraint("nonlinear");
+    std::function<double(const cppmh::model::Move<int, double>&)> f =
+        [&x](const cppmh::model::Move<int, double>& a_MOVE) {
+            return x.evaluate(a_MOVE) - 1;
+        };
+    nonlinear = f <= 5;
+
+    singleton.disable();
+
+    model.categorize_variables();
+    model.categorize_constraints();
+    model.extract_selections(cppmh::model::SelectionMode::Defined);
+
+    EXPECT_EQ(22, model.number_of_constraints());
+    EXPECT_EQ(1, model.number_of_selection_constraints());
+    EXPECT_EQ(2, model.number_of_disabled_constraints());
+
+    auto reference = model.constraint_type_reference();
+    EXPECT_EQ(1, static_cast<int>(reference.singleton_ptrs.size()));
+    EXPECT_EQ(1, static_cast<int>(reference.aggregation_ptrs.size()));
+    EXPECT_EQ(4, static_cast<int>(reference.precedence_ptrs.size()));
+    EXPECT_EQ(2, static_cast<int>(reference.variable_bound_ptrs.size()));
+    EXPECT_EQ(1, static_cast<int>(reference.set_partitioning_ptrs.size()));
+    EXPECT_EQ(1, static_cast<int>(reference.set_packing_ptrs.size()));
+    EXPECT_EQ(1, static_cast<int>(reference.set_covering_ptrs.size()));
+    EXPECT_EQ(1, static_cast<int>(reference.invariant_knapsack_ptrs.size()));
+    EXPECT_EQ(1, static_cast<int>(reference.equation_knapsack_ptrs.size()));
+    EXPECT_EQ(2, static_cast<int>(reference.bin_packing_ptrs.size()));
+    EXPECT_EQ(2, static_cast<int>(reference.knapsack_ptrs.size()));
+    EXPECT_EQ(2, static_cast<int>(reference.integer_knapsack_ptrs.size()));
+    EXPECT_EQ(1, static_cast<int>(reference.general_linear_ptrs.size()));
+    EXPECT_EQ(1, static_cast<int>(reference.nonlinear_ptrs.size()));
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, extract_selections_larger) {
+    cppmh::model::Model<int, double> model;
+
+    auto& x0 = model.create_variables("x0", {10, 10}, 0, 1);
+    auto& x1 = model.create_variables("x1", {20, 20}, 0, 1);
+    auto& x2 = model.create_variables("x2", 2, 0, 1);
+
+    auto& y = model.create_variables("y", {30, 30}, -10, 10);
+
+    /**
+     * Selection constraint with 10 decision variables. The priority of this
+     * constraint is the third, and it will be employed for a swap
+     * neighborhood.
+     */
+    model.create_constraint("c0", x0.selection({0, cppmh::model::Range::All}));
+
+    /**
+     * Selection constraint with 32 decision variables. The priority of this
+     * constraint is the second, and it will NOT be employed for a swap
+     * neighborhood because higher-priority constraint c1 covers x1.
+     */
+    model.create_constraint(
+        "c1", (x0.sum({1, cppmh::model::Range::All}) +
+               x1.sum({1, cppmh::model::Range::All}) + x2(0)) == 1);
+
+    /**
+     * Selection constraint with 400 decision variables. The priority of this
+     * constraint is the first, and it will be employed for a swap
+     * neighborhood.
+     */
+    model.create_constraint("c2", x1.selection());
+
+    /**
+     * Selection constraint with 2 decision variables. The priority of this
+     * constraint is the fourth, and it will NOT be employed for a swap
+     * neighborhood.
+     */
+    model.create_constraint("c3", x2.selection());
+
+    model.categorize_variables();
+    model.categorize_constraints();
+    model.extract_selections(cppmh::model::SelectionMode::Larger);
+
+    EXPECT_EQ(2, model.number_of_selection_constraints());
+    EXPECT_EQ(2, static_cast<int>(model.selections().size()));
+
+    /**
+     * Check the numbers of covered variables and variable pointers.
+     */
+    {
+        /// Constraint c2
+        auto variable_ptrs = model.selections()[0].variable_ptrs;
+        EXPECT_EQ(400, static_cast<int>(variable_ptrs.size()));
+
+        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                                   &x1(0, 0)) != variable_ptrs.end()));
+        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                                   &x1(19, 19)) != variable_ptrs.end()));
+    }
+
+    {
+        /// Constraint c0
+        auto variable_ptrs = model.selections()[1].variable_ptrs;
+        EXPECT_EQ(10, static_cast<int>(variable_ptrs.size()));
+
+        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                                   &x0(0, 0)) != variable_ptrs.end()));
+        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                                   &x0(0, 9)) != variable_ptrs.end()));
+        EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                                    &x0(1, 0)) != variable_ptrs.end()));
+    }
+
+    /**
+     * Check whether the corresponding constraint is enabled or not.
+     */
+    /// Constraint c2
+    EXPECT_EQ(false, model.selections()[0].constraint_ptr->is_enabled());
+
+    /// Constraint c0
+    EXPECT_EQ(false, model.selections()[1].constraint_ptr->is_enabled());
+
+    /**
+     * Check the number of covered variables and variable pointers for each
+     * category. */
+
+    /// Selection
+    {
+        auto variable_ptrs = model.variable_reference().selection_variable_ptrs;
+        EXPECT_EQ(20 * 20 + 1 * 10, model.number_of_selection_variables());
+
+        /// Constraint c2
+        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                                   &x1(0, 0)) != variable_ptrs.end()));
+        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                                   &x1(19, 19)) != variable_ptrs.end()));
+
+        /// Constraint c0
+        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                                   &x0(0, 0)) != variable_ptrs.end()));
+        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                                   &x0(0, 9)) != variable_ptrs.end()));
+        EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                                    &x0(1, 0)) != variable_ptrs.end()));
+    }
+
+    /// Binary
+    {
+        auto variable_ptrs = model.variable_reference().binary_variable_ptrs;
+        EXPECT_EQ(10 * 10 + 20 * 20 + 2 - (20 * 20 + 1 * 10),
+                  model.number_of_binary_variables());
+
+        /// Constraint c2
+        EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                                    &x1(0, 0)) != variable_ptrs.end()));
+        EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                                    &x1(19, 19)) != variable_ptrs.end()));
+
+        /// Constraint c0
+        EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                                    &x0(0, 0)) != variable_ptrs.end()));
+        EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                                    &x0(0, 9)) != variable_ptrs.end()));
+        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                                   &x0(1, 0)) != variable_ptrs.end()));
+    }
+
+    /// Integer
+    {
+        auto variable_ptrs = model.variable_reference().integer_variable_ptrs;
+        EXPECT_EQ(30 * 30, model.number_of_integer_variables());
+
+        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                                   &y(0, 0)) != variable_ptrs.end()));
+        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                                   &y(29, 29)) != variable_ptrs.end()));
+    }
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, extract_selections_independent) {
+    cppmh::model::Model<int, double> model;
+
+    auto& x0 = model.create_variables("x0", {10, 10}, 0, 1);
+    auto& x1 = model.create_variables("x1", {20, 20}, 0, 1);
+    auto& x2 = model.create_variables("x2", 2, 0, 1);
+
+    auto& y = model.create_variables("y", {30, 30}, -10, 10);
+
+    /**
+     * Selection constraint with 10 decision variables (no overlap).
+     */
+    model.create_constraint("c0", x0.selection({0, cppmh::model::Range::All}));
+
+    /**
+     * Selection constraint with 32 decision variables (overlap).
+     */
+    model.create_constraint(
+        "c1", (x0.sum({1, cppmh::model::Range::All}) +
+               x1.sum({1, cppmh::model::Range::All}) + x2(0)) == 1);
+
+    /**
+     * Selection constraint with 400 decision variables (overlap).
+     */
+    model.create_constraint("c2", x1.selection());
+
+    /**
+     * Selection constraint with 2 decision variables (overlap).
+     */
+    model.create_constraint("c3", x2.selection());
+
+    model.categorize_variables();
+    model.categorize_constraints();
+    model.extract_selections(cppmh::model::SelectionMode::Independent);
+
+    EXPECT_EQ(1, model.number_of_selection_constraints());
+    EXPECT_EQ(1, static_cast<int>(model.selections().size()));
+
+    /**
+     * Check the numbers of covered variables and variable pointers.
+     */
+    {
+        /// Constraint c0
+        auto variable_ptrs = model.selections()[0].variable_ptrs;
+        EXPECT_EQ(10, static_cast<int>(variable_ptrs.size()));
+
+        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                                   &x0(0, 0)) != variable_ptrs.end()));
+        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                                   &x0(0, 9)) != variable_ptrs.end()));
+        EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                                    &x0(1, 0)) != variable_ptrs.end()));
+    }
+
+    /**
+     * Check whether the corresponding constraint is enabled or not.
+     */
+    /// Constraint c0
+    EXPECT_EQ(false, model.selections()[0].constraint_ptr->is_enabled());
+
+    /**
+     * Check the number of covered variables and variable pointers for each
+     * category. */
+    /// Selection
+    {
+        auto variable_ptrs = model.variable_reference().selection_variable_ptrs;
+        EXPECT_EQ(10, model.number_of_selection_variables());
+
+        /// Constraint c0
+        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                                   &x0(0, 0)) != variable_ptrs.end()));
+        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                                   &x0(0, 9)) != variable_ptrs.end()));
+        EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                                    &x0(1, 0)) != variable_ptrs.end()));
+    }
+
+    /// Binary
+    {
+        auto variable_ptrs = model.variable_reference().binary_variable_ptrs;
+        EXPECT_EQ(10 * 10 + 20 * 20 + 2 - 10,
+                  model.number_of_binary_variables());
+
+        /// Constraint c0
+        EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                                    &x0(0, 0)) != variable_ptrs.end()));
+        EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                                    &x0(0, 9)) != variable_ptrs.end()));
+        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                                   &x0(1, 0)) != variable_ptrs.end()));
+    }
+
+    /// Integer
+    {
+        auto variable_ptrs = model.variable_reference().integer_variable_ptrs;
+        EXPECT_EQ(30 * 30, model.number_of_integer_variables());
+
+        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                                   &y(0, 0)) != variable_ptrs.end()));
+        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                                   &y(29, 29)) != variable_ptrs.end()));
+    }
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, setup_neighborhood) {
+    /// This method is tested in test_neighborhood.h
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
+    /// There is a fixed variable with an invalid initial value.
+    /// correction: true
+    {
+        cppmh::model::Model<int, double> model;
+
+        auto& x = model.create_variables("x", 10, 0, 1);
+        model.create_constraint("g", x.selection());
+        x(0).fix_by(2);
+
+        model.categorize_variables();
+        model.categorize_constraints();
+        model.extract_selections(cppmh::model::SelectionMode::Defined);
+
+        ASSERT_THROW(
+            model.verify_and_correct_selection_variables_initial_values(true,
+                                                                        false),
+            std::logic_error);
+    }
+
+    /// There is a fixed variable with an invalid initial value.
+    /// correction: false
+    {
+        cppmh::model::Model<int, double> model;
+        auto& x = model.create_variables("x", 10, 0, 1);
+        model.create_constraint("g", x.selection());
+        x(0).fix_by(2);
+
+        model.categorize_variables();
+        model.categorize_constraints();
+        model.extract_selections(cppmh::model::SelectionMode::Defined);
+
+        ASSERT_THROW(
+            model.verify_and_correct_selection_variables_initial_values(false,
+                                                                        false),
+            std::logic_error);
+    }
+
+    /// There is one fixed selected variable.
+    /// correction: true
+    {
+        cppmh::model::Model<int, double> model;
+        auto& x = model.create_variables("x", 10, 0, 1);
+        model.create_constraint("g", x.selection());
+        x(0).fix_by(1);
+
+        model.categorize_variables();
+        model.categorize_constraints();
+        model.extract_selections(cppmh::model::SelectionMode::Defined);
+
+        model.verify_and_correct_selection_variables_initial_values(true,
+                                                                    false);
+        EXPECT_EQ(1, x(0).value());
+    }
+
+    /// There is one fixed selected variable.
+    /// correction: false
+    {
+        cppmh::model::Model<int, double> model;
+        auto& x = model.create_variables("x", 10, 0, 1);
+        model.create_constraint("g", x.selection());
+        x(0).fix_by(1);
+
+        model.categorize_variables();
+        model.categorize_constraints();
+        model.extract_selections(cppmh::model::SelectionMode::Defined);
+
+        model.verify_and_correct_selection_variables_initial_values(false,
+                                                                    false);
+        EXPECT_EQ(1, x(0).value());
+    }
+
+    /// There are two fixed selected variables.
+    /// correction: true
+    {
+        cppmh::model::Model<int, double> model;
+        auto& x = model.create_variables("x", 10, 0, 1);
+        model.create_constraint("g", x.selection());
+        x(0).fix_by(1);
+        x(1).fix_by(1);
+
+        model.categorize_variables();
+        model.categorize_constraints();
+        model.extract_selections(cppmh::model::SelectionMode::Defined);
+
+        ASSERT_THROW(
+            model.verify_and_correct_selection_variables_initial_values(true,
+                                                                        false),
+            std::logic_error);
+    }
+
+    /// There are two fixed selected variables.
+    /// correction: true
+    {
+        cppmh::model::Model<int, double> model;
+        auto& x = model.create_variables("x", 10, 0, 1);
+        model.create_constraint("g", x.selection());
+        x(0).fix_by(1);
+        x(1).fix_by(1);
+
+        model.categorize_variables();
+        model.categorize_constraints();
+        model.extract_selections(cppmh::model::SelectionMode::Defined);
+
+        ASSERT_THROW(
+            model.verify_and_correct_selection_variables_initial_values(false,
+                                                                        false),
+            std::logic_error);
+    }
+
+    /// There are two variables with invalid initial values.
+    /// correction: true
+    {
+        cppmh::model::Model<int, double> model;
+        auto& x = model.create_variables("x", 10, 0, 1);
+        model.create_constraint("g", x.selection());
+        x(0) = 2;
+        x(1) = 3;
+        model.categorize_variables();
+        model.categorize_constraints();
+        model.extract_selections(cppmh::model::SelectionMode::Defined);
+
+        model.verify_and_correct_selection_variables_initial_values(true,
+                                                                    false);
+
+        EXPECT_EQ(0, x(0).value());
+        EXPECT_EQ(0, x(1).value());
+    }
+
+    /// There are two variables with invalid initial values.
+    /// correction: false
+    {
+        cppmh::model::Model<int, double> model;
+        auto& x = model.create_variables("x", 10, 0, 1);
+        model.create_constraint("g", x.selection());
+        x(0) = 2;
+        x(1) = 3;
+
+        model.categorize_variables();
+        model.categorize_constraints();
+        model.extract_selections(cppmh::model::SelectionMode::Defined);
+
+        ASSERT_THROW(
+            model.verify_and_correct_selection_variables_initial_values(false,
+                                                                        false),
+            std::logic_error);
+    }
+
+    /// There is no selected variable.
+    /// correction: true
+    {
+        cppmh::model::Model<int, double> model;
+        auto& x = model.create_variables("x", 10, 0, 1);
+        model.create_constraint("g", x.selection());
+
+        model.categorize_variables();
+        model.categorize_constraints();
+        model.extract_selections(cppmh::model::SelectionMode::Defined);
+
+        model.verify_and_correct_selection_variables_initial_values(true,
+                                                                    false);
+
+        /// selected_variable_ptr is not always &x(0).
+        auto selected_variable_ptr =
+            model.selections().front().variable_ptrs.front();
+        EXPECT_EQ(1, selected_variable_ptr->value());
+    }
+
+    /// There is no selected variable.
+    /// correction: false
+    {
+        cppmh::model::Model<int, double> model;
+        auto& x = model.create_variables("x", 10, 0, 1);
+        model.create_constraint("g", x.selection());
+
+        model.categorize_variables();
+        model.categorize_constraints();
+        model.extract_selections(cppmh::model::SelectionMode::Defined);
+
+        ASSERT_THROW(
+            model.verify_and_correct_selection_variables_initial_values(false,
+                                                                        false),
+            std::logic_error);
+    }
+
+    /// There is one selected variable.
+    /// correction: true
+    {
+        cppmh::model::Model<int, double> model;
+        auto& x = model.create_variables("x", 10, 0, 1);
+        model.create_constraint("g", x.selection());
+        x(0) = 1;
+
+        model.categorize_variables();
+        model.categorize_constraints();
+        model.extract_selections(cppmh::model::SelectionMode::Defined);
+
+        model.verify_and_correct_selection_variables_initial_values(true,
+                                                                    false);
+
+        EXPECT_EQ(1, x(0).value());
+    }
+
+    /// There is one selected variable.
+    /// correction: false
+    {
+        cppmh::model::Model<int, double> model;
+        auto& x = model.create_variables("x", 10, 0, 1);
+        model.create_constraint("g", x.selection());
+        x(0) = 1;
+
+        model.categorize_variables();
+        model.categorize_constraints();
+        model.extract_selections(cppmh::model::SelectionMode::Defined);
+
+        model.verify_and_correct_selection_variables_initial_values(false,
+                                                                    false);
+
+        EXPECT_EQ(1, x(0).value());
+    }
+
+    /// There are two unfixed selected variable.
+    /// correction: true
+    {
+        cppmh::model::Model<int, double> model;
+        auto& x = model.create_variables("x", 10, 0, 1);
+        model.create_constraint("g", x.selection());
+        x(0) = 1;
+        x(1) = 1;
+
+        model.categorize_variables();
+        model.categorize_constraints();
+        model.extract_selections(cppmh::model::SelectionMode::Defined);
+
+        model.verify_and_correct_selection_variables_initial_values(true,
+                                                                    false);
+
+        /// selected_variable is not always x(0).
+        EXPECT_EQ(1, x(0).value() + x(1).value());
+    }
+
+    /// There are two unfixed selected variable.
+    /// correction: false
+    {
+        cppmh::model::Model<int, double> model;
+        auto& x = model.create_variables("x", 10, 0, 1);
+        model.create_constraint("g", x.selection());
+        x(0) = 1;
+        x(1) = 1;
+
+        model.categorize_variables();
+        model.categorize_constraints();
+        model.extract_selections(cppmh::model::SelectionMode::Defined);
+
+        ASSERT_THROW(
+            model.verify_and_correct_selection_variables_initial_values(false,
+                                                                        false),
+            std::logic_error);
+    }
+
+    /// There are 1 fixed and 1 unfixed selected variable.
+    /// correction: true
+    {
+        cppmh::model::Model<int, double> model;
+        auto& x = model.create_variables("x", 10, 0, 1);
+        model.create_constraint("g", x.selection());
+        x(0) = 1;
+        x(1).fix_by(1);
+
+        model.categorize_variables();
+        model.categorize_constraints();
+        model.extract_selections(cppmh::model::SelectionMode::Defined);
+
+        model.verify_and_correct_selection_variables_initial_values(true,
+                                                                    false);
+        EXPECT_EQ(0, x(0).value());
+        EXPECT_EQ(1, x(1).value());
+    }
+
+    /// There are 1 fixed and 1 unfixed selected variable.
+    /// correction: false
+    {
+        cppmh::model::Model<int, double> model;
+        auto& x = model.create_variables("x", 10, 0, 1);
+        model.create_constraint("g", x.selection());
+        x(0) = 1;
+        x(1).fix_by(1);
+
+        model.categorize_variables();
+        model.categorize_constraints();
+        model.extract_selections(cppmh::model::SelectionMode::Defined);
+
+        ASSERT_THROW(
+            model.verify_and_correct_selection_variables_initial_values(false,
+                                                                        false),
+            std::logic_error);
+    }
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, verify_and_correct_binary_variables_initial_values) {
+    /// There is a fixed variable with an invalid initial value.
+    /// correction: true
+    {
+        cppmh::model::Model<int, double> model;
+        auto& x = model.create_variables("x", 10, 0, 1);
+        x(0).fix_by(2);
+
+        model.categorize_variables();
+        model.categorize_constraints();
+
+        ASSERT_THROW(model.verify_and_correct_binary_variables_initial_values(
+                         true, false),
+                     std::logic_error);
+    }
+
+    /// There is a fixed variable with an invalid initial value.
+    /// correction: false
+    {
+        cppmh::model::Model<int, double> model;
+        auto& x = model.create_variables("x", 10, 0, 1);
+        x(0).fix_by(-1);
+
+        model.categorize_variables();
+        model.categorize_constraints();
+
+        ASSERT_THROW(model.verify_and_correct_binary_variables_initial_values(
+                         false, false),
+                     std::logic_error);
+    }
+
+    /// There is a variable with an invalid initial value.
+    /// correction: true
+    {
+        cppmh::model::Model<int, double> model;
+        auto& x = model.create_variables("x", 10, 0, 1);
+        x(0)    = 2;
+        x(1)    = -1;
+
+        model.categorize_variables();
+        model.categorize_constraints();
+
+        model.verify_and_correct_binary_variables_initial_values(true, false);
+        EXPECT_EQ(1, x(0).value());
+        EXPECT_EQ(0, x(1).value());
+    }
+
+    /// There is a variable with an invalid initial value.
+    /// correction: false
+    {
+        cppmh::model::Model<int, double> model;
+        auto& x = model.create_variables("x", 10, 0, 1);
+        x(0)    = 2;
+        x(1)    = -1;
+
+        model.categorize_variables();
+        model.categorize_constraints();
+
+        ASSERT_THROW(model.verify_and_correct_binary_variables_initial_values(
+                         false, false),
+                     std::logic_error);
+    }
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, verify_and_correct_integer_variables_initial_values) {
+    /// There is a fixed variable with an invalid initial value.
+    /// correction: true
+    {
+        cppmh::model::Model<int, double> model;
+        auto& x = model.create_variables("x", 10, -10, 10);
+        x(0).fix_by(11);
+
+        model.categorize_variables();
+        model.categorize_constraints();
+
+        ASSERT_THROW(model.verify_and_correct_integer_variables_initial_values(
+                         true, false),
+                     std::logic_error);
+    }
+
+    /// There is a fixed variable with an invalid initial value.
+    /// correction: false
+    {
+        cppmh::model::Model<int, double> model;
+        auto& x = model.create_variables("x", 10, -10, 10);
+        x(0).fix_by(-11);
+
+        model.categorize_variables();
+        model.categorize_constraints();
+
+        ASSERT_THROW(model.verify_and_correct_integer_variables_initial_values(
+                         false, false),
+                     std::logic_error);
+    }
+
+    /// There is a variable with an invalid initial value.
+    /// correction: true
+    {
+        cppmh::model::Model<int, double> model;
+        auto& x = model.create_variables("x", 10, -10, 10);
+        x(0)    = 11;
+        x(1)    = -11;
+
+        model.categorize_variables();
+        model.categorize_constraints();
+
+        model.verify_and_correct_integer_variables_initial_values(true, false);
+        EXPECT_EQ(10, x(0).value());
+        EXPECT_EQ(-10, x(1).value());
+    }
+
+    /// There is a variable with an invalid initial value.
+    /// correction: false
+    {
+        cppmh::model::Model<int, double> model;
+        auto& x = model.create_variables("x", 10, -10, 10);
+        x(0)    = 11;
+        x(1)    = -11;
+
+        model.categorize_variables();
+        model.categorize_constraints();
+
+        ASSERT_THROW(model.verify_and_correct_integer_variables_initial_values(
+                         false, false),
+                     std::logic_error);
+    }
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, setup_fixed_sensitivities) {
+    /// This method is tested in test_expression.h
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, set_callback) {
+    cppmh::model::Model<int, double> model;
+
+    int  v = 1;
+    auto f = [&v](void) { v++; };
+    model.set_callback(f);
+    model.callback();
+    EXPECT_EQ(2, v);
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, callback) {
+    /// This method is tested in set_callback.
 }
 
 /*****************************************************************************/
@@ -1925,8 +2338,9 @@ TEST_F(TestModel, update_arg_move) {
     x(0) = 1;
 
     model.minimize(p);
-    model.setup_default_neighborhood(false, false,
-                                     cppmh::model::SelectionMode::Larger);
+    model.categorize_variables();
+    model.categorize_constraints();
+    model.extract_selections(cppmh::model::SelectionMode::Defined);
     model.setup_fixed_sensitivities(false);
 
     model.update();
@@ -1941,8 +2355,7 @@ TEST_F(TestModel, update_arg_move) {
     EXPECT_EQ(10, p.value());
     EXPECT_EQ(10, p(0).value());
     EXPECT_EQ(10, model.objective().value());
-    EXPECT_EQ(&x(9),
-              model.neighborhood().selections().front().selected_variable_ptr);
+    EXPECT_EQ(&x(9), model.selections().front().selected_variable_ptr);
 }
 
 /*****************************************************************************/
@@ -1978,8 +2391,9 @@ TEST_F(TestModel, evaluate) {
 
         model.setup_variable_related_constraints();
         model.setup_variable_sense();
-        model.setup_default_neighborhood(false, false,
-                                         cppmh::model::SelectionMode::Larger);
+        model.categorize_variables();
+        model.categorize_constraints();
+        model.extract_selections(cppmh::model::SelectionMode::Defined);
         model.setup_fixed_sensitivities(false);
 
         for (auto&& element : x.flat_indexed_variables()) {
@@ -2152,8 +2566,9 @@ TEST_F(TestModel, evaluate) {
 
         model.setup_variable_related_constraints();
         model.setup_variable_sense();
-        model.setup_default_neighborhood(false, false,
-                                         cppmh::model::SelectionMode::Larger);
+        model.categorize_variables();
+        model.categorize_constraints();
+        model.extract_selections(cppmh::model::SelectionMode::Defined);
         model.setup_fixed_sensitivities(false);
 
         for (auto&& element : x.flat_indexed_variables()) {
@@ -2291,8 +2706,38 @@ TEST_F(TestModel, evaluate) {
             score_before = score_after_1;
         }
     }
+}
 
-}  // namespace
+/*****************************************************************************/
+TEST_F(TestModel, compute_lagrangian) {
+    cppmh::model::Model<int, double> model;
+
+    auto sequence = cppmh::utility::sequence(10);
+
+    auto& x = model.create_variables("x", 10, 0, 1);
+    auto& p = model.create_expression("p", x.dot(sequence) + 1);
+    [[maybe_unused]] auto& g = model.create_constraint("g", x.sum() <= 5);
+    [[maybe_unused]] auto& h = model.create_constraint("h", x(0) + x(1) <= 1);
+
+    model.minimize(p);
+    model.categorize_variables();
+    model.categorize_constraints();
+
+    cppmh::model::ValueProxy<double> dual_value_proxy(1);
+    dual_value_proxy.value() = 100;
+
+    std::vector<cppmh::model::ValueProxy<double>> dual_value_proxies = {
+        dual_value_proxy, dual_value_proxy};
+
+    for (auto&& element : x.flat_indexed_variables()) {
+        element = 1;
+    }
+
+    model.update();
+    auto lagrangian = model.compute_lagrangian(dual_value_proxies);
+
+    EXPECT_EQ(46 + 100 * (10 - 5) + 100 * (2 - 1), lagrangian);
+}
 
 /*****************************************************************************/
 TEST_F(TestModel, generate_variable_parameter_proxies) {
@@ -2673,6 +3118,96 @@ TEST_F(TestModel, expression_names) {
 /*****************************************************************************/
 TEST_F(TestModel, constraint_names) {
     /// This method is tested in create_constraint_scaler and so on.
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, selections) {
+    /// This method is tested in extract_selections_larger() and so on.
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, variable_reference) {
+    /// This method is tested in initialize() and so on.
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, constraint_reference) {
+    /// This method is tested in initialize() and so on.
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, constraint_type_reference) {
+    /// This method is tested in initialize() and so on.
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, is_defined_objective) {
+    /// This method is tested in minimize_arg_function() and so on.
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, is_enabled_fast_evaluation) {
+    /// This method is tested in setup_is_enabled_fast_evaluation().
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, is_linear) {
+    /// This method is tested in setup_is_linear().
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, is_minimization) {
+    /// This method is tested in minimize_arg_function() and so on.
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, sign) {
+    /// This method is tested in minimize_arg_function() and so on.
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, number_of_variables) {
+    /// This method is tested in categorize_variables().
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, number_of_fixed_variables) {
+    /// This method is tested in categorize_variables().
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, number_of_selection_variables) {
+    /// This method is tested in extract_selections_larger() and so on.
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, number_of_binary_variables) {
+    /// This method is tested in categorize_variables().
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, number_of_integer_variables) {
+    /// This method is tested in categorize_variables().
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, number_of_constraints) {
+    /// This method is tested in categorize_constraints().
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, number_of_selection_constraints) {
+    /// This method is tested in extract_selections_larger() and so on.
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, number_of_disabled_constraints) {
+    /// This method is tested in categorize_constraints().
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, neighborhood) {
+    /// This method is tested in test_neighborhood.h
 }
 
 /*****************************************************************************/

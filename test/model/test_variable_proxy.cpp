@@ -5,10 +5,11 @@
 /*****************************************************************************/
 #include <gtest/gtest.h>
 #include <random>
+
 #include <cppmh.h>
 
-/*****************************************************************************/
 namespace {
+/*****************************************************************************/
 class TestVariableProxy : public ::testing::Test {
    protected:
     cppmh::utility::IntegerUniformRandom m_random_integer;
@@ -76,8 +77,8 @@ TEST_F(TestVariableProxy, scalar_evaluate_arg_void) {
 /*****************************************************************************/
 TEST_F(TestVariableProxy, scalar_evaluate_arg_move) {
     cppmh::model::Model<int, double> model;
-    auto& variable_proxy_0 = model.create_variable("x_0");
-    auto& variable_proxy_1 = model.create_variable("x_1");
+    auto& variable_proxy_0 = model.create_variable("x0");
+    auto& variable_proxy_1 = model.create_variable("x1");
 
     auto value_0_before = random_integer();
     auto value_1_before = random_integer();
@@ -496,27 +497,8 @@ TEST_F(TestVariableProxy, one_dimensional_sense) {
     {
         cppmh::model::Model<int, double> model;
 
-        auto& variable_proxy = model.create_variables("x", 2, 0, 1);
-        ASSERT_THROW(variable_proxy.sense(), std::logic_error);
-    }
-
-    {
-        cppmh::model::Model<int, double> model;
-
         auto& variable_proxy = model.create_variables("x", 2, 0, 10);
         ASSERT_THROW(variable_proxy.sense(), std::logic_error);
-    }
-
-    {
-        cppmh::model::Model<int, double> model;
-
-        auto& variable_proxy = model.create_variables("x", 2, 0, 1);
-        model.create_constraint("c", variable_proxy.selection());
-        model.setup_default_neighborhood(false, false,
-                                         cppmh::model::SelectionMode::Larger);
-        for (const auto& variable : variable_proxy.flat_indexed_variables()) {
-            EXPECT_EQ(cppmh::model::VariableSense::Selection, variable.sense());
-        }
     }
 }
 
@@ -912,27 +894,8 @@ TEST_F(TestVariableProxy, two_dimensional_sense) {
     {
         cppmh::model::Model<int, double> model;
 
-        auto& variable_proxy = model.create_variables("x", {2, 3}, 0, 1);
-        ASSERT_THROW(variable_proxy.sense(), std::logic_error);
-    }
-
-    {
-        cppmh::model::Model<int, double> model;
-
         auto& variable_proxy = model.create_variables("x", {2, 3}, 0, 10);
         ASSERT_THROW(variable_proxy.sense(), std::logic_error);
-    }
-
-    {
-        cppmh::model::Model<int, double> model;
-
-        auto& variable_proxy = model.create_variables("x", {2, 3}, 0, 1);
-        model.create_constraint("c", variable_proxy.selection());
-        model.setup_default_neighborhood(false, false,
-                                         cppmh::model::SelectionMode::Larger);
-        for (const auto& variable : variable_proxy.flat_indexed_variables()) {
-            EXPECT_EQ(cppmh::model::VariableSense::Selection, variable.sense());
-        }
     }
 }
 

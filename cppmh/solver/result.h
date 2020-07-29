@@ -8,7 +8,6 @@
 
 namespace cppmh {
 namespace solver {
-
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 struct Result {

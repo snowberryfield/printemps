@@ -21,9 +21,12 @@ class Constraint;
 
 /*****************************************************************************/
 enum class MoveSense {
-    Selection,  //
-    Binary,     //
-    Integer,    //
+    Binary,         //
+    Integer,        //
+    Selection,      //
+    Precedence,     //
+    Aggregation,    //
+    VariableBound,  //
     UserDefined
 };
 
@@ -38,9 +41,6 @@ struct Move {
     MoveSense                                         sense;
     std::unordered_set<Constraint<T_Variable, T_Expression> *>
         related_constraint_ptrs;
-    Move(void) : sense(MoveSense::UserDefined) {
-        ;
-    }
 };
 using IPMove = Move<int, double>;
 }  // namespace model

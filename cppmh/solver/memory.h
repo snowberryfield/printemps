@@ -10,7 +10,6 @@
 
 namespace cppmh {
 namespace solver {
-
 /*****************************************************************************/
 struct MemoryConstant {
     static constexpr int INITIAL_LAST_UPDATE_ITERATION = -1000;

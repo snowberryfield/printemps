@@ -9,8 +9,9 @@
 #include <vector>
 #include <unordered_map>
 
+#include "../utility/utility.h"
+
 #include "abstract_multi_array_element.h"
-#include "fixed_size_hash_map.h"
 #include "move.h"
 
 namespace cppmh {
@@ -63,7 +64,8 @@ class Expression : public AbstractMultiArrayElement {
     std::unordered_map<Variable<T_Variable, T_Expression> *, T_Expression>
         m_sensitivities;
 
-    FixedSizeHashMap<Variable<T_Variable, T_Expression> *, T_Expression>
+    utility::FixedSizeHashMap<Variable<T_Variable, T_Expression> *,
+                              T_Expression>
         m_fixed_sensitivities;
 
     /*************************************************************************/

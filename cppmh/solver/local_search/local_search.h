@@ -60,21 +60,21 @@ LocalSearchResult<T_Variable, T_Expression> solve(
     IncumbentHolder_T incumbent_holder = a_INCUMBENT_HOLDER;
 
     /**
-     * Reset the local augmented incumbent.
+     * Determine whether fast evaluation is available or not.
      */
-    incumbent_holder.reset_local_augmented_incumbent();
+    model->setup_is_enabled_fast_evaluation();
 
     /**
      * Prepare a random generator, which is used for shuffling moves.
      */
     std::mt19937 get_rand_mt(option.local_search.seed);
 
-    model->import_variable_values(a_INITIAL_VARIABLE_VALUE_PROXIES);
-    model->update();
-
     /**
      * Initialize the solution and update the model.
      */
+    model->import_variable_values(a_INITIAL_VARIABLE_VALUE_PROXIES);
+    model->update();
+
     model::SolutionScore solution_score =
         model->evaluate({},                                 //
                         local_penalty_coefficient_proxies,  //
@@ -82,7 +82,12 @@ LocalSearchResult<T_Variable, T_Expression> solve(
 
     int update_status =
         incumbent_holder.try_update_incumbent(model, solution_score);
-    int total_update_status = 0;
+
+    /**
+     * Reset the local augmented incumbent.
+     */
+    incumbent_holder.reset_local_augmented_incumbent();
+    int total_update_status = IncumbentHolderConstant::STATUS_NO_UPDATED;
 
     /**
      * Create memory which records final updated iteration and updated count for

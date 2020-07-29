@@ -5,10 +5,11 @@
 /*****************************************************************************/
 #include <gtest/gtest.h>
 #include <random>
+
 #include <cppmh.h>
 
-/*****************************************************************************/
 namespace {
+/*****************************************************************************/
 class TestConstraint : public ::testing::Test {
    protected:
     cppmh::utility::IntegerUniformRandom m_random_integer;
@@ -52,6 +53,21 @@ TEST_F(TestConstraint, initialize) {
     EXPECT_EQ(0, constraint.violation_value());
     EXPECT_EQ(true, constraint.is_linear());
     EXPECT_EQ(true, constraint.is_enabled());
+
+    EXPECT_EQ(false, constraint.is_singleton());
+    EXPECT_EQ(false, constraint.is_aggregation());
+    EXPECT_EQ(false, constraint.is_precedence());
+    EXPECT_EQ(false, constraint.is_variable_bound());
+    EXPECT_EQ(false, constraint.is_set_partitioning());
+    EXPECT_EQ(false, constraint.is_set_packing());
+    EXPECT_EQ(false, constraint.is_set_covering());
+    EXPECT_EQ(false, constraint.is_cardinality());
+    EXPECT_EQ(false, constraint.is_invariant_knapsack());
+    EXPECT_EQ(false, constraint.is_equation_knapsack());
+    EXPECT_EQ(false, constraint.is_bin_packing());
+    EXPECT_EQ(false, constraint.is_knapsack());
+    EXPECT_EQ(false, constraint.is_integer_knapsack());
+    EXPECT_EQ(false, constraint.is_general_linear());
 }
 
 /*****************************************************************************/
@@ -64,8 +80,8 @@ TEST_F(TestConstraint, constructor_arg_function) {
     auto target      = random_integer();
 
     expression = sensitivity * variable + constant;
-    std::function<double(const cppmh::model::Move<int, double> &)> f =
-        [&expression](const cppmh::model::Move<int, double> &a_MOVE) {
+    std::function<double(const cppmh::model::Move<int, double>&)> f =
+        [&expression](const cppmh::model::Move<int, double>& a_MOVE) {
             return expression.evaluate(a_MOVE);
         };
 
@@ -175,8 +191,8 @@ TEST_F(TestConstraint, setup_arg_function) {
 
     expression = sensitivity * variable + constant;
 
-    std::function<double(const cppmh::model::Move<int, double> &)> f =
-        [&expression, target](const cppmh::model::Move<int, double> &a_MOVE) {
+    std::function<double(const cppmh::model::Move<int, double>&)> f =
+        [&expression, target](const cppmh::model::Move<int, double>& a_MOVE) {
             return expression.evaluate(a_MOVE) - target;
         };
 
@@ -293,6 +309,211 @@ TEST_F(TestConstraint, setup_arg_expression) {
 }
 
 /*****************************************************************************/
+TEST_F(TestConstraint, setup_constraint_type) {
+    cppmh::model::Model<int, double> model;
+    auto coefficients = cppmh::utility::sequence(10);
+
+    auto& x = model.create_variable("x", -10, 10);
+    auto& y = model.create_variable("y", -10, 10);
+    auto& z = model.create_variables("z", 10, 0, 1);
+    auto& w = model.create_variable("w", 0, 1);
+    auto& r = model.create_variables("r", 10, -10, 10);
+
+    /// Singleton
+    {
+        auto constraint =
+            cppmh::model::Constraint<int, double>::create_instance();
+        constraint.setup(2 * x - 10, cppmh::model::ConstraintSense::Lower);
+        constraint.setup_constraint_type();
+        EXPECT_EQ(true, constraint.is_singleton());
+    }
+
+    /// Aggregation
+    {
+        auto constraint =
+            cppmh::model::Constraint<int, double>::create_instance();
+        constraint.setup(2 * x + 3 * y - 10,
+                         cppmh::model::ConstraintSense::Equal);
+        constraint.setup_constraint_type();
+        EXPECT_EQ(true, constraint.is_aggregation());
+    }
+
+    /// Precedence
+    {
+        auto constraint =
+            cppmh::model::Constraint<int, double>::create_instance();
+        constraint.setup(2 * x - 2 * y - 5,
+                         cppmh::model::ConstraintSense::Lower);
+        constraint.setup_constraint_type();
+        EXPECT_EQ(true, constraint.is_precedence());
+    }
+    {
+        auto constraint =
+            cppmh::model::Constraint<int, double>::create_instance();
+        constraint.setup(-2 * x + 2 * y - 5,
+                         cppmh::model::ConstraintSense::Lower);
+        constraint.setup_constraint_type();
+        EXPECT_EQ(true, constraint.is_precedence());
+    }
+    {
+        auto constraint =
+            cppmh::model::Constraint<int, double>::create_instance();
+        constraint.setup(2 * x - 2 * y - 5,
+                         cppmh::model::ConstraintSense::Upper);
+        constraint.setup_constraint_type();
+        EXPECT_EQ(true, constraint.is_precedence());
+    }
+    {
+        auto constraint =
+            cppmh::model::Constraint<int, double>::create_instance();
+        constraint.setup(-2 * x + 2 * y - 5,
+                         cppmh::model::ConstraintSense::Upper);
+        constraint.setup_constraint_type();
+        EXPECT_EQ(true, constraint.is_precedence());
+    }
+
+    /// Variable Bound
+    {
+        auto constraint =
+            cppmh::model::Constraint<int, double>::create_instance();
+        constraint.setup(2 * z(0) + 3 * z(1) - 5,
+                         cppmh::model::ConstraintSense::Lower);
+        constraint.setup_constraint_type();
+        EXPECT_EQ(true, constraint.is_variable_bound());
+    }
+    {
+        auto constraint =
+            cppmh::model::Constraint<int, double>::create_instance();
+        constraint.setup(2 * z(0) + 3 * z(1) - 5,
+                         cppmh::model::ConstraintSense::Upper);
+        constraint.setup_constraint_type();
+        EXPECT_EQ(true, constraint.is_variable_bound());
+    }
+
+    /// Set Partitioning
+    {
+        auto constraint =
+            cppmh::model::Constraint<int, double>::create_instance();
+        constraint.setup(z.sum() - 1, cppmh::model::ConstraintSense::Equal);
+        constraint.setup_constraint_type();
+        EXPECT_EQ(true, constraint.is_set_partitioning());
+    }
+
+    /// Set Packing
+    {
+        auto constraint =
+            cppmh::model::Constraint<int, double>::create_instance();
+        constraint.setup(z.sum() - 1, cppmh::model::ConstraintSense::Lower);
+        constraint.setup_constraint_type();
+        EXPECT_EQ(true, constraint.is_set_packing());
+    }
+
+    /// Set Covering
+    {
+        auto constraint =
+            cppmh::model::Constraint<int, double>::create_instance();
+        constraint.setup(z.sum() - 1, cppmh::model::ConstraintSense::Upper);
+        constraint.setup_constraint_type();
+        EXPECT_EQ(true, constraint.is_set_covering());
+    }
+
+    /// Cardinality
+    {
+        auto constraint =
+            cppmh::model::Constraint<int, double>::create_instance();
+        constraint.setup(z.sum() - 5, cppmh::model::ConstraintSense::Equal);
+        constraint.setup_constraint_type();
+        EXPECT_EQ(true, constraint.is_cardinality());
+    }
+
+    /// Invariant Knapsack
+    {
+        auto constraint =
+            cppmh::model::Constraint<int, double>::create_instance();
+        constraint.setup(z.sum() - 5, cppmh::model::ConstraintSense::Lower);
+        constraint.setup_constraint_type();
+        EXPECT_EQ(true, constraint.is_invariant_knapsack());
+    }
+
+    /// Equation Knapsack
+    {
+        auto constraint =
+            cppmh::model::Constraint<int, double>::create_instance();
+        constraint.setup(z.dot(coefficients) - 30,
+                         cppmh::model::ConstraintSense::Equal);
+        constraint.setup_constraint_type();
+        EXPECT_EQ(true, constraint.is_equation_knapsack());
+    }
+
+    /// Bin Packing
+    {
+        auto constraint =
+            cppmh::model::Constraint<int, double>::create_instance();
+        constraint.setup(z.dot(coefficients) + 5 * w - 5,
+                         cppmh::model::ConstraintSense::Lower);
+        constraint.setup_constraint_type();
+        EXPECT_EQ(true, constraint.is_bin_packing());
+    }
+
+    {
+        auto constraint =
+            cppmh::model::Constraint<int, double>::create_instance();
+        constraint.setup(z.dot(coefficients) - 5 * w + 5,
+                         cppmh::model::ConstraintSense::Upper);
+        constraint.setup_constraint_type();
+        EXPECT_EQ(true, constraint.is_bin_packing());
+    }
+
+    /// Knapsack
+    {
+        auto constraint =
+            cppmh::model::Constraint<int, double>::create_instance();
+        constraint.setup(z.dot(coefficients) - 50,
+                         cppmh::model::ConstraintSense::Lower);
+        constraint.setup_constraint_type();
+        EXPECT_EQ(true, constraint.is_knapsack());
+    }
+
+    {
+        auto constraint =
+            cppmh::model::Constraint<int, double>::create_instance();
+        constraint.setup(z.dot(coefficients) + 50,
+                         cppmh::model::ConstraintSense::Upper);
+        constraint.setup_constraint_type();
+        EXPECT_EQ(true, constraint.is_knapsack());
+    }
+
+    /// Integer Knapsack
+    {
+        auto constraint =
+            cppmh::model::Constraint<int, double>::create_instance();
+        constraint.setup(r.dot(coefficients) - 50,
+                         cppmh::model::ConstraintSense::Lower);
+        constraint.setup_constraint_type();
+        EXPECT_EQ(true, constraint.is_integer_knapsack());
+    }
+
+    {
+        auto constraint =
+            cppmh::model::Constraint<int, double>::create_instance();
+        constraint.setup(r.dot(coefficients) + 50,
+                         cppmh::model::ConstraintSense::Upper);
+        constraint.setup_constraint_type();
+        EXPECT_EQ(true, constraint.is_integer_knapsack());
+    }
+
+    /// General Linear
+    {
+        auto constraint =
+            cppmh::model::Constraint<int, double>::create_instance();
+        constraint.setup(x + r.sum() - 50,
+                         cppmh::model::ConstraintSense::Equal);
+        constraint.setup_constraint_type();
+        EXPECT_EQ(true, constraint.is_general_linear());
+    }
+}
+
+/*****************************************************************************/
 TEST_F(TestConstraint, evaluate_function_arg_void) {
     auto expression = cppmh::model::Expression<int, double>::create_instance();
     auto variable   = cppmh::model::Variable<int, double>::create_instance();
@@ -303,8 +524,8 @@ TEST_F(TestConstraint, evaluate_function_arg_void) {
 
     expression = sensitivity * variable + constant;
 
-    std::function<double(const cppmh::model::Move<int, double> &)> f =
-        [&expression, target](const cppmh::model::Move<int, double> &a_MOVE) {
+    std::function<double(const cppmh::model::Move<int, double>&)> f =
+        [&expression, target](const cppmh::model::Move<int, double>& a_MOVE) {
             return expression.evaluate(a_MOVE) - target;
         };
 
@@ -356,8 +577,8 @@ TEST_F(TestConstraint, evaluate_function_arg_move) {
     expression = sensitivity * variable + constant;
     expression.setup_fixed_sensitivities();
 
-    std::function<double(const cppmh::model::Move<int, double> &)> f =
-        [&expression, target](const cppmh::model::Move<int, double> &a_MOVE) {
+    std::function<double(const cppmh::model::Move<int, double>&)> f =
+        [&expression, target](const cppmh::model::Move<int, double>& a_MOVE) {
             return expression.evaluate(a_MOVE) - target;
         };
 
@@ -442,8 +663,8 @@ TEST_F(TestConstraint, evaluate_violation_function_arg_void) {
 
     expression = sensitivity * variable + constant;
 
-    std::function<double(const cppmh::model::Move<int, double> &)> f =
-        [&expression, target](const cppmh::model::Move<int, double> &a_MOVE) {
+    std::function<double(const cppmh::model::Move<int, double>&)> f =
+        [&expression, target](const cppmh::model::Move<int, double>& a_MOVE) {
             return expression.evaluate(a_MOVE) - target;
         };
 
@@ -569,8 +790,8 @@ TEST_F(TestConstraint, evaluate_violation_function_arg_move) {
     expression = sensitivity * variable + constant;
     expression.setup_fixed_sensitivities();
 
-    std::function<double(const cppmh::model::Move<int, double> &)> f =
-        [&expression, target](const cppmh::model::Move<int, double> &a_MOVE) {
+    std::function<double(const cppmh::model::Move<int, double>&)> f =
+        [&expression, target](const cppmh::model::Move<int, double>& a_MOVE) {
             return expression.evaluate(a_MOVE) - target;
         };
 
@@ -824,14 +1045,84 @@ TEST_F(TestConstraint, expression) {
 
 /*****************************************************************************/
 TEST_F(TestConstraint, value) {
-    /// This method is tested in tested in other cases
+    /// This method is tested in tested in other cases.
 }
 
 /*****************************************************************************/
 TEST_F(TestConstraint, is_linear) {
     /// This method is tested in following tests:
-    /// - constructor_arg_function
-    /// - constructor_arg_expression
+    /// - constructor_arg_function()
+    /// - constructor_arg_expression()
+}
+
+/*****************************************************************************/
+TEST_F(TestConstraint, is_singleton) {
+    /// This method is tested in setup_constraint_type().
+}
+
+/*****************************************************************************/
+TEST_F(TestConstraint, is_aggregation) {
+    /// This method is tested in setup_constraint_type().
+}
+
+/*****************************************************************************/
+TEST_F(TestConstraint, is_precedence) {
+    /// This method is tested in setup_constraint_type().
+}
+
+/*****************************************************************************/
+TEST_F(TestConstraint, is_variable_bound) {
+    /// This method is tested in setup_constraint_type().
+}
+
+/*****************************************************************************/
+TEST_F(TestConstraint, is_set_partitioning) {
+    /// This method is tested in setup_constraint_type().
+}
+
+/*****************************************************************************/
+TEST_F(TestConstraint, is_set_packing) {
+    /// This method is tested in setup_constraint_type().
+}
+
+/*****************************************************************************/
+TEST_F(TestConstraint, is_set_covering) {
+    /// This method is tested in setup_constraint_type().
+}
+
+/*****************************************************************************/
+TEST_F(TestConstraint, is_cardinality) {
+    /// This method is tested in setup_constraint_type().
+}
+
+/*****************************************************************************/
+TEST_F(TestConstraint, is_invariant_knapsack) {
+    /// This method is tested in setup_constraint_type().
+}
+
+/*****************************************************************************/
+TEST_F(TestConstraint, is_equation_knapsack) {
+    /// This method is tested in setup_constraint_type().
+}
+
+/*****************************************************************************/
+TEST_F(TestConstraint, is_bin_packing) {
+    /// This method is tested in setup_constraint_type().
+}
+
+/*****************************************************************************/
+TEST_F(TestConstraint, is_knapsack) {
+    /// This method is tested in setup_constraint_type().
+}
+
+/*****************************************************************************/
+TEST_F(TestConstraint, is_integer_knapsack) {
+    /// This method is tested in setup_constraint_type().
+}
+
+/*****************************************************************************/
+TEST_F(TestConstraint, is_general_linear) {
+    /// This method is tested in setup_constraint_type().
 }
 
 /*****************************************************************************/
@@ -868,8 +1159,8 @@ TEST_F(TestConstraint, operator_equal_function) {
 
     expression = sensitivity * variable + constant;
 
-    std::function<double(const cppmh::model::Move<int, double> &)> f =
-        [&expression, target](const cppmh::model::Move<int, double> &a_MOVE) {
+    std::function<double(const cppmh::model::Move<int, double>&)> f =
+        [&expression, target](const cppmh::model::Move<int, double>& a_MOVE) {
             return expression.evaluate(a_MOVE) - target;
         };
 
