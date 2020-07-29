@@ -18,7 +18,6 @@
 
 namespace cppmh {
 namespace utility {
-
 /*****************************************************************************/
 enum class MPSVariableSense { Integer, Continuous };
 

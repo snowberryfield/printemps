@@ -12,7 +12,6 @@
 
 namespace cppmh {
 namespace solver {
-
 /*****************************************************************************/
 enum Verbose : int { None, Warning, Outer, Full, Debug };
 

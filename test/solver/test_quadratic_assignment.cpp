@@ -7,8 +7,8 @@
 #include <random>
 #include <cppmh.h>
 
-/*****************************************************************************/
 namespace {
+/*****************************************************************************/
 class TestQuadracitAssignment : public ::testing::Test {
    protected:
     virtual void SetUp(void) {
@@ -144,7 +144,7 @@ TEST_F(TestQuadracitAssignment, quadratic_assignment) {
         /// solve
         cppmh::solver::Option option;
 
-        option.iteration_max                           = 10;
+        option.iteration_max                           = 50;
         option.is_enabled_grouping_penalty_coefficient = true;
         option.is_enabled_initial_value_correction     = true;
         option.is_enabled_lagrange_dual                = true;
@@ -188,7 +188,7 @@ TEST_F(TestQuadracitAssignment, quadratic_assignment) {
         /// solve
         cppmh::solver::Option option;
 
-        option.iteration_max                           = 10;
+        option.iteration_max                           = 50;
         option.is_enabled_grouping_penalty_coefficient = false;
         option.is_enabled_initial_value_correction     = false;
         option.is_enabled_lagrange_dual                = false;

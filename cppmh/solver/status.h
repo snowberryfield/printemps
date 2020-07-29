@@ -10,7 +10,6 @@
 
 namespace cppmh {
 namespace solver {
-
 /*****************************************************************************/
 struct Status {
     std::unordered_map<std::string, model::ValueProxy<double>>
