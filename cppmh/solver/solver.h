@@ -622,9 +622,13 @@ Result<T_Variable, T_Expression> solve(
                     nominal_number_of_initial_modification);
 
                 int number_of_initial_modification =
-                    nominal_number_of_initial_modification +
-                    get_rand_mt() % (2 * initial_modification_random_width) -
-                    initial_modification_random_width;
+                    nominal_number_of_initial_modification;
+                if (initial_modification_random_width > 0) {
+                    number_of_initial_modification +=
+                        get_rand_mt() %
+                            (2 * initial_modification_random_width) -
+                        initial_modification_random_width;
+                }
 
                 next_number_of_initial_modification =
                     std::max(1, number_of_initial_modification);
