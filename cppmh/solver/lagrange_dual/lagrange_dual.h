@@ -203,6 +203,9 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
     schedule(static)
 #endif
         for (auto&& variable_ptr : variable_ptrs) {
+            if (variable_ptr->is_fixed()) {
+                continue;
+            }
             double coefficient = variable_ptr->objective_sensitivity();
 
             for (auto&& item : variable_ptr->constraint_sensitivities()) {
