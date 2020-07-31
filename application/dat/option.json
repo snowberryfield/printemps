@@ -16,6 +16,7 @@
     "is_enabled_aggregation_move": false,
     "is_enabled_precedence_move": false,
     "is_enabled_variable_bound_move": false,
+    "is_enabled_exclusive_move": false,
     "is_enabled_user_defined_move": false,
     "selection_mode": 0,
     "seed": 1,
