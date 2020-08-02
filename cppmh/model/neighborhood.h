@@ -30,6 +30,8 @@ class Neighborhood {
     std::function<void(std::vector<Move<T_Variable, T_Expression>> *)>
         m_variable_bound_move_updater;
     std::function<void(std::vector<Move<T_Variable, T_Expression>> *)>
+        m_exclusive_move_updater;
+    std::function<void(std::vector<Move<T_Variable, T_Expression>> *)>
         m_user_defined_move_updater;
     std::function<void(std::vector<Move<T_Variable, T_Expression>> *)>
         m_selection_move_updater;
@@ -39,6 +41,7 @@ class Neighborhood {
     std::vector<Move<T_Variable, T_Expression>> m_precedence_moves;
     std::vector<Move<T_Variable, T_Expression>> m_aggregation_moves;
     std::vector<Move<T_Variable, T_Expression>> m_variable_bound_moves;
+    std::vector<Move<T_Variable, T_Expression>> m_exclusive_moves;
     std::vector<Move<T_Variable, T_Expression>> m_user_defined_moves;
     std::vector<Move<T_Variable, T_Expression>> m_selection_moves;
 
@@ -52,6 +55,7 @@ class Neighborhood {
     bool m_is_enabled_precedence_move;
     bool m_is_enabled_aggregation_move;
     bool m_is_enabled_variable_bound_move;
+    bool m_is_enabled_exclusive_move;
     bool m_is_enabled_user_defined_move;
     bool m_is_enabled_selection_move;
 
@@ -78,6 +82,8 @@ class Neighborhood {
             [](std::vector<Move<T_Variable, T_Expression>> *) {};
         m_variable_bound_move_updater =
             [](std::vector<Move<T_Variable, T_Expression>> *) {};
+        m_exclusive_move_updater =
+            [](std::vector<Move<T_Variable, T_Expression>> *) {};
         m_user_defined_move_updater =
             [](std::vector<Move<T_Variable, T_Expression>> *) {};
         m_selection_move_updater =
@@ -88,6 +94,7 @@ class Neighborhood {
         m_precedence_moves.clear();
         m_aggregation_moves.clear();
         m_variable_bound_moves.clear();
+        m_exclusive_moves.clear();
         m_user_defined_moves.clear();
         m_selection_moves.clear();
 
@@ -101,6 +108,7 @@ class Neighborhood {
         m_is_enabled_precedence_move     = false;
         m_is_enabled_aggregation_move    = false;
         m_is_enabled_variable_bound_move = false;
+        m_is_enabled_exclusive_move      = false;
         m_is_enabled_user_defined_move   = false;
         m_is_enabled_selection_move      = false;
     }
@@ -119,7 +127,8 @@ class Neighborhood {
 
     /*************************************************************************/
     inline constexpr void setup_binary_move_updater(
-        std::vector<Variable<T_Variable, T_Expression> *> &a_VARIABLE_PTRS,
+        const std::vector<Variable<T_Variable, T_Expression> *>
+            &      a_VARIABLE_PTRS,
         const bool a_IS_ENABLED_PARALLEL) {
         /**
          * "Flip" move for binary variables:
@@ -152,7 +161,8 @@ class Neighborhood {
 
     /*************************************************************************/
     inline constexpr void setup_integer_move_updater(
-        std::vector<Variable<T_Variable, T_Expression> *> &a_VARIABLE_PTRS,
+        const std::vector<Variable<T_Variable, T_Expression> *>
+            &      a_VARIABLE_PTRS,
         const bool a_IS_ENABLED_PARALLEL) {
         /**
          *  "Shift" move for integer variables:
@@ -194,7 +204,8 @@ class Neighborhood {
 
     /*************************************************************************/
     inline constexpr void setup_aggregation_move_updater(
-        std::vector<Constraint<T_Variable, T_Expression> *> &a_CONSTRAINT_PTRS,
+        const std::vector<Constraint<T_Variable, T_Expression> *>
+            &      a_CONSTRAINT_PTRS,
         const bool a_IS_ENABLED_PARALLEL) {
         int raw_constraints_size = a_CONSTRAINT_PTRS.size();
 
@@ -280,7 +291,8 @@ class Neighborhood {
 
     /*************************************************************************/
     inline constexpr void setup_precedence_move_updater(
-        std::vector<Constraint<T_Variable, T_Expression> *> &a_CONSTRAINT_PTRS,
+        const std::vector<Constraint<T_Variable, T_Expression> *>
+            &      a_CONSTRAINT_PTRS,
         const bool a_IS_ENABLED_PARALLEL) {
         int raw_constraints_size = a_CONSTRAINT_PTRS.size();
 
@@ -344,7 +356,8 @@ class Neighborhood {
 
     /*************************************************************************/
     inline void setup_variable_bound_move_updater(
-        std::vector<Constraint<T_Variable, T_Expression> *> &a_CONSTRAINT_PTRS,
+        const std::vector<Constraint<T_Variable, T_Expression> *>
+            &      a_CONSTRAINT_PTRS,
         const bool a_IS_ENABLED_PARALLEL) {
         /**
          * NOTE: This method cannot be constexpr by clang for
@@ -471,6 +484,104 @@ class Neighborhood {
     }
 
     /*************************************************************************/
+    inline constexpr void setup_exclusive_move_updater(
+        const std::vector<Constraint<T_Variable, T_Expression> *>
+            &a_SET_PARTITIONING_PTRS,
+        const std::vector<Constraint<T_Variable, T_Expression> *>
+            &      a_SET_PACKING_PTRS,
+        const bool a_IS_ENABLED_PARALLEL) {
+        int set_partitionings_size = a_SET_PARTITIONING_PTRS.size();
+        int set_packings_size      = a_SET_PACKING_PTRS.size();
+
+        std::unordered_map<
+            Variable<T_Variable, T_Expression> *,
+            std::unordered_set<Variable<T_Variable, T_Expression> *>>
+            associations;
+
+        for (auto i = 0; i < set_partitionings_size; i++) {
+            if (a_SET_PARTITIONING_PTRS[i]->is_enabled()) {
+                auto &sensitivities =
+                    a_SET_PARTITIONING_PTRS[i]->expression().sensitivities();
+                for (auto &&sensitivity_first : sensitivities) {
+                    for (auto &&sensitivity_second : sensitivities) {
+                        if (sensitivity_first == sensitivity_second) {
+                            continue;
+                        }
+                        auto variable_ptr_first  = sensitivity_first.first;
+                        auto variable_ptr_second = sensitivity_second.first;
+                        associations[variable_ptr_first].insert(
+                            variable_ptr_second);
+                    }
+                }
+            }
+        }
+
+        for (auto i = 0; i < set_packings_size; i++) {
+            if (a_SET_PACKING_PTRS[i]->is_enabled()) {
+                auto &sensitivities =
+                    a_SET_PACKING_PTRS[i]->expression().sensitivities();
+                for (auto &&sensitivity_first : sensitivities) {
+                    for (auto &&sensitivity_second : sensitivities) {
+                        if (sensitivity_first == sensitivity_second) {
+                            continue;
+                        }
+                        auto variable_ptr_first  = sensitivity_first.first;
+                        auto variable_ptr_second = sensitivity_second.first;
+                        associations[variable_ptr_first].insert(
+                            variable_ptr_second);
+                    }
+                }
+            }
+        }
+
+        int variables_size = associations.size();
+        m_exclusive_moves.resize(variables_size);
+
+        std::vector<Variable<T_Variable, T_Expression> *> variable_ptrs(
+            variables_size);
+        std::vector<std::unordered_set<Variable<T_Variable, T_Expression> *>>
+            associated_variables_ptrs(variables_size);
+
+        int move_index = 0;
+        for (auto &&association : associations) {
+            auto  variable_ptr             = association.first;
+            auto &associated_variable_ptrs = association.second;
+
+            variable_ptrs[move_index]             = variable_ptr;
+            associated_variables_ptrs[move_index] = associated_variable_ptrs;
+
+            m_exclusive_moves[move_index].sense = MoveSense::Exclusive;
+            m_exclusive_moves[move_index].related_constraint_ptrs.insert(
+                variable_ptr->related_constraint_ptrs().begin(),
+                variable_ptr->related_constraint_ptrs().end());
+            for (auto &&associated_variable_ptr : associated_variable_ptrs) {
+                m_exclusive_moves[move_index].related_constraint_ptrs.insert(
+                    associated_variable_ptr->related_constraint_ptrs().begin(),
+                    associated_variable_ptr->related_constraint_ptrs().end());
+            }
+            move_index++;
+        }
+
+        auto exclusive_move_updater =
+            [this, variable_ptrs, associated_variables_ptrs, variables_size,
+             a_IS_ENABLED_PARALLEL](auto *a_moves) {
+
+#ifdef _OPENMP
+#pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
+#endif
+                for (auto i = 0; i < variables_size; i++) {
+                    (*a_moves)[i].alterations.clear();
+                    (*a_moves)[i].alterations.emplace_back(variable_ptrs[i], 1);
+                    for (auto &&variable_ptr : associated_variables_ptrs[i]) {
+                        (*a_moves)[i].alterations.emplace_back(variable_ptr, 0);
+                    }
+                }
+            };
+        m_exclusive_move_updater = exclusive_move_updater;
+        exclusive_move_updater(&m_exclusive_moves);
+    }
+
+    /*************************************************************************/
     inline constexpr void set_user_defined_move_updater(
         const std::function<void(std::vector<Move<T_Variable, T_Expression>> *)>
             &a_FUNCTION) {
@@ -541,6 +652,10 @@ class Neighborhood {
             m_variable_bound_move_updater(&m_variable_bound_moves);
         }
 
+        /**
+         * NOTE: Exclusive moves do not require updates.
+         */
+
         if (m_is_enabled_user_defined_move) {
             m_user_defined_move_updater(&m_user_defined_moves);
         }
@@ -555,6 +670,7 @@ class Neighborhood {
                                          + m_precedence_moves.size()      //
                                          + m_aggregation_moves.size()     //
                                          + m_variable_bound_moves.size()  //
+                                         + m_exclusive_moves.size()       //
                                          + m_user_defined_moves.size()    //
                                          + m_selection_moves.size();
 
@@ -672,6 +788,22 @@ class Neighborhood {
             }
         }
 
+        if (m_is_enabled_exclusive_move) {
+            for (auto &&move : m_exclusive_moves) {
+                if (has_fixed_variables(move)) {
+                    continue;
+                }
+                if (has_selection_variables(move)) {
+                    continue;
+                }
+                if (move.alterations[0].first->value() == 1) {
+                    continue;
+                }
+
+                m_move_ptrs[index++] = &move;
+            }
+        }
+
         if (m_is_enabled_user_defined_move) {
             for (auto &&move : m_user_defined_moves) {
                 if (has_fixed_variables(move)) {
@@ -737,6 +869,12 @@ class Neighborhood {
     inline constexpr const std::vector<Move<T_Variable, T_Expression>>
         &variable_bound_moves(void) {
         return m_variable_bound_moves;
+    }
+
+    /*************************************************************************/
+    inline constexpr const std::vector<Move<T_Variable, T_Expression>>
+        &exclusive_moves(void) {
+        return m_exclusive_moves;
     }
 
     /*************************************************************************/
@@ -840,6 +978,21 @@ class Neighborhood {
     /*************************************************************************/
     inline constexpr void disable_variable_bound_move(void) {
         m_is_enabled_variable_bound_move = false;
+    }
+
+    /*************************************************************************/
+    inline constexpr bool is_enabled_exclusive_move(void) const {
+        return m_is_enabled_exclusive_move;
+    }
+
+    /*************************************************************************/
+    inline constexpr void enable_exclusive_move(void) {
+        m_is_enabled_exclusive_move = true;
+    }
+
+    /*************************************************************************/
+    inline constexpr void disable_exclusive_move(void) {
+        m_is_enabled_exclusive_move = false;
     }
 
     /*************************************************************************/

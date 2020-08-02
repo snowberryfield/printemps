@@ -671,6 +671,7 @@ class Model {
         const bool           a_IS_ENABLED_AGGREGATION_MOVE,
         const bool           a_IS_ENABLED_PRECEDENCE_MOVE,
         const bool           a_IS_ENABLED_VARIABLE_BOUND_MOVE,
+        const bool           a_IS_ENABLED_EXCLUSIVE_MOVE,
         const SelectionMode &a_SELECTION_MODE,  //
         const bool           a_IS_ENABLED_PRINT) {
         this->verify_problem(a_IS_ENABLED_PRINT);
@@ -702,6 +703,7 @@ class Model {
         this->setup_neighborhood(a_IS_ENABLED_AGGREGATION_MOVE,              //
                                  a_IS_ENABLED_PRECEDENCE_MOVE,               //
                                  a_IS_ENABLED_VARIABLE_BOUND_MOVE,           //
+                                 a_IS_ENABLED_EXCLUSIVE_MOVE, //
                                  a_IS_ENABLED_PARALLEL_NEIGHBORHOOD_UPDATE,  //
                                  a_IS_ENABLED_PRINT);
 
@@ -1648,7 +1650,8 @@ class Model {
         const bool a_IS_ENABLED_AGGREGATION_MOVE,
         const bool a_IS_ENABLED_PRECEDENCE_MOVE,
         const bool a_IS_ENABLED_VARIABLE_BOUND_MOVE,
-        const bool a_IS_ENABLED_PARALLEL,  //
+        const bool a_IS_ENABLED_EXCLUSIVE_MOVE,  //
+        const bool a_IS_ENABLED_PARALLEL,        //
         const bool a_IS_ENABLED_PRINT) {
         utility::print_single_line(a_IS_ENABLED_PRINT);
         utility::print_message("Detecting the neighborhood structure...",
@@ -1681,6 +1684,13 @@ class Model {
         if (a_IS_ENABLED_PRECEDENCE_MOVE) {
             m_neighborhood.setup_precedence_move_updater(
                 m_constraint_type_reference.precedence_ptrs,  //
+                a_IS_ENABLED_PARALLEL);
+        }
+
+        if (a_IS_ENABLED_EXCLUSIVE_MOVE) {
+            m_neighborhood.setup_exclusive_move_updater(
+                m_constraint_type_reference.set_partitioning_ptrs,  //
+                m_constraint_type_reference.set_packing_ptrs,       //
                 a_IS_ENABLED_PARALLEL);
         }
 
