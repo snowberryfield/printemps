@@ -86,6 +86,7 @@ Result<T_Variable, T_Expression> solve(
                  master_option.is_enabled_aggregation_move,
                  master_option.is_enabled_precedence_move,
                  master_option.is_enabled_variable_bound_move,
+                 master_option.is_enabled_exclusive_move,
                  master_option.selection_mode,
                  master_option.verbose >= Verbose::Warning);
 
@@ -707,6 +708,13 @@ Result<T_Variable, T_Expression> solve(
                 }
             }
 
+            if (master_option.is_enabled_exclusive_move) {
+                if (model->neighborhood().is_enabled_exclusive_move()) {
+                    model->neighborhood().disable_exclusive_move();
+                    is_disabled_special_neighborhood_move = true;
+                }
+            }
+
             if (is_disabled_special_neighborhood_move) {
                 utility::print_message(
                     "Special neighborhood moves were disabled.",
@@ -736,6 +744,13 @@ Result<T_Variable, T_Expression> solve(
                     if (!model->neighborhood()
                              .is_enabled_variable_bound_move()) {
                         model->neighborhood().enable_variable_bound_move();
+                        is_enabled_special_neighborhood_move = true;
+                    }
+                }
+
+                if (master_option.is_enabled_exclusive_move) {
+                    if (!model->neighborhood().is_enabled_exclusive_move()) {
+                        model->neighborhood().enable_exclusive_move();
                         is_enabled_special_neighborhood_move = true;
                     }
                 }
