@@ -3,6 +3,7 @@
     "time_max": 120.0,
     "penalty_coefficient_relaxing_rate": 0.5,
     "penalty_coefficient_tightening_rate": 1.0,
+    "penalty_coefficient_updating_balance": 0.0,
     "initial_penalty_coefficient": 1E6,
     "is_enabled_lagrange_dual": false,
     "is_enabled_local_search": true,
