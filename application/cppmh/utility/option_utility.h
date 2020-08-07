@@ -65,6 +65,12 @@ inline cppmh::solver::Option read_option(const std::string &a_FILE_NAME) {
               option_object);
 
     /**************************************************************************/
+    /// penalty_coefficient_updating_balance
+    read_json(&option.penalty_coefficient_updating_balance,  //
+              "penalty_coefficient_updating_balance",        //
+              option_object);
+
+    /**************************************************************************/
     /// initial_penalty_coefficient
     read_json(&option.initial_penalty_coefficient,  //
               "initial_penalty_coefficient",        //

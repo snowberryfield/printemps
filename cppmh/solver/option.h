@@ -22,9 +22,10 @@ struct OptionConstant {
     static constexpr double DEFAULT_TIME_OFFSET                         = 0.0;
     static constexpr double DEFAULT_PENALTY_COEFFICIENT_RELAXING_RATE   = 0.5;
     static constexpr double DEFAULT_PENALTY_COEFFICIENT_TIGHTENING_RATE = 1.0;
-    static constexpr double DEFAULT_INITIAL_PENALTY_COEFFICIENT         = 1E6;
-    static constexpr bool   DEFAULT_IS_ENABLED_LAGRANGE_DUAL            = false;
-    static constexpr bool   DEFAULT_IS_ENABLED_LOCAL_SEARCH             = true;
+    static constexpr double DEFAULT_PENALTY_COEFFICIENT_UPDATING_BALANCE = 0.0;
+    static constexpr double DEFAULT_INITIAL_PENALTY_COEFFICIENT          = 1E6;
+    static constexpr bool   DEFAULT_IS_ENABLED_LAGRANGE_DUAL = false;
+    static constexpr bool   DEFAULT_IS_ENABLED_LOCAL_SEARCH  = true;
     static constexpr bool   DEFAULT_IS_ENABLED_GROUPING_PENALTY_COEFFICIENT =
         false;
     static constexpr bool DEFAULT_IS_ENABLED_PRESOLVE                 = true;
@@ -56,6 +57,7 @@ struct Option {
     double time_max;
     double penalty_coefficient_relaxing_rate;
     double penalty_coefficient_tightening_rate;
+    double penalty_coefficient_updating_balance;  // hidden
     double initial_penalty_coefficient;
     bool   is_enabled_lagrange_dual;
     bool   is_enabled_local_search;
@@ -102,6 +104,8 @@ struct Option {
             OptionConstant::DEFAULT_PENALTY_COEFFICIENT_RELAXING_RATE;
         this->penalty_coefficient_tightening_rate =
             OptionConstant::DEFAULT_PENALTY_COEFFICIENT_TIGHTENING_RATE;
+        this->penalty_coefficient_updating_balance =
+            OptionConstant::DEFAULT_PENALTY_COEFFICIENT_UPDATING_BALANCE;
         this->initial_penalty_coefficient =
             OptionConstant::DEFAULT_INITIAL_PENALTY_COEFFICIENT;
         this->is_enabled_lagrange_dual =
@@ -169,6 +173,11 @@ struct Option {
         utility::print(                                   //
             " - penalty_coefficient_tightening_rate: " +  //
             utility::to_string(this->penalty_coefficient_tightening_rate,
+                               "%f"));
+
+        utility::print(                                    //
+            " - penalty_coefficient_updating_balance: " +  //
+            utility::to_string(this->penalty_coefficient_updating_balance,
                                "%f"));
 
         utility::print(                           //
