@@ -58,6 +58,7 @@
         "is_enabled_automatic_break": true,
         "is_enabled_automatic_tabu_tenure_adjustment": true,
         "is_enabled_automatic_iteration_adjustment": true,
+        "is_enabled_tabu_tenure_taking_over": false,
         "is_enabled_initial_modification": true,
         "ignore_tabu_if_augmented_incumbent": false,
         "ignore_tabu_if_feasible_incumbent": true,

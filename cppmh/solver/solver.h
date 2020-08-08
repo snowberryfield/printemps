@@ -372,8 +372,10 @@ Result<T_Variable, T_Expression> solve(
     /**
      * Run tabu searches to find better solutions.
      */
+
     int iteration                           = 0;
     int next_number_of_initial_modification = 0;
+    int next_inital_tabu_tenure = master_option.tabu_search.initial_tabu_tenure;
 
     /**
      * The integer variable next_iteration_max is used if the option
@@ -425,6 +427,7 @@ Result<T_Variable, T_Expression> solve(
         option.tabu_search.seed += iteration;
         option.tabu_search.number_of_initial_modification =
             next_number_of_initial_modification;
+        option.tabu_search.initial_tabu_tenure = next_inital_tabu_tenure;
 
         /**
          * Prepare the initial variable values.
@@ -486,7 +489,7 @@ Result<T_Variable, T_Expression> solve(
         }
 
         /**
-         * Update the updating count for each decision variables
+         * Update the updating count for each decision variables.
          */
         const auto& update_counts = result.memory.update_counts();
         for (const auto& proxy : update_counts) {
@@ -775,6 +778,17 @@ Result<T_Variable, T_Expression> solve(
                 }
             }
         }
+
+        /**
+         * Update the initial tabu tenure;
+         */
+        if (master_option.tabu_search.is_enabled_tabu_tenure_taking_over) {
+            next_inital_tabu_tenure = result.tabu_tenure;
+        } else {
+            next_inital_tabu_tenure =
+                master_option.tabu_search.initial_tabu_tenure;
+        }
+
         model->callback();
         iteration++;
     }
