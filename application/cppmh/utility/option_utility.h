@@ -65,6 +65,12 @@ inline cppmh::solver::Option read_option(const std::string &a_FILE_NAME) {
               option_object);
 
     /**************************************************************************/
+    /// penalty_coefficient_updating_balance
+    read_json(&option.penalty_coefficient_updating_balance,  //
+              "penalty_coefficient_updating_balance",        //
+              option_object);
+
+    /**************************************************************************/
     /// initial_penalty_coefficient
     read_json(&option.initial_penalty_coefficient,  //
               "initial_penalty_coefficient",        //
@@ -397,6 +403,12 @@ inline cppmh::solver::Option read_option(const std::string &a_FILE_NAME) {
             &option.tabu_search.is_enabled_automatic_iteration_adjustment,  //
             "is_enabled_automatic_iteration_adjustment",                    //
             option_object_tabu_search);
+
+        /**********************************************************************/
+        /// tabu_search.is_enabled_tabu_tenure_taking_over
+        read_json(&option.tabu_search.is_enabled_tabu_tenure_taking_over,  //
+                  "is_enabled_tabu_tenure_taking_over",                    //
+                  option_object_tabu_search);
 
         /**********************************************************************/
         /// tabu_search.is_enabled_initial_modification
