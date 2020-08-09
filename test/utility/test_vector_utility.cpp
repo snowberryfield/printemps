@@ -22,29 +22,29 @@ class TestVectorUtility : public ::testing::Test {
 
 /*****************************************************************************/
 TEST_F(TestVectorUtility, count_duplicate) {
-    std::vector<int>         v_int_0    = {1, 2, 3, 4, 5};
-    std::vector<int>         v_int_1    = {1, 1, 3, 4, 5};
-    std::vector<double>      v_double_1 = {1.0, 1.0, 3.0, 4.0, 1.0};
-    std::vector<std::string> v_string_2 = {"a", "a", "a", "b", "a"};
+    std::vector<int>         v_int_0  = {1, 2, 3, 4, 5};
+    std::vector<int>         v_int_1  = {1, 1, 3, 4, 5};
+    std::vector<double>      v_double = {1.0, 1.0, 3.0, 4.0, 1.0};
+    std::vector<std::string> v_string = {"a", "a", "a", "b", "a"};
 
     EXPECT_EQ(0, cppmh::utility::count_duplicate(v_int_0));
     EXPECT_EQ(1, cppmh::utility::count_duplicate(v_int_1));
-    EXPECT_EQ(2, cppmh::utility::count_duplicate(v_double_1));
-    EXPECT_EQ(3, cppmh::utility::count_duplicate(v_string_2));
+    EXPECT_EQ(2, cppmh::utility::count_duplicate(v_double));
+    EXPECT_EQ(3, cppmh::utility::count_duplicate(v_string));
 }
 
 /*****************************************************************************/
 TEST_F(TestVectorUtility, count) {
-    std::vector<int>         v_int_0    = {1, 2, 3, 4, 5};
-    std::vector<int>         v_int_1    = {1, 1, 3, 4, 5};
-    std::vector<double>      v_double_1 = {1.0, 1.0, 3.0, 4.0, 1.0};
-    std::vector<std::string> v_string_2 = {"a", "a", "a", "b", "a"};
+    std::vector<int>         v_int_0  = {1, 2, 3, 4, 5};
+    std::vector<int>         v_int_1  = {1, 1, 3, 4, 5};
+    std::vector<double>      v_double = {1.0, 1.0, 3.0, 4.0, 1.0};
+    std::vector<std::string> v_string = {"a", "a", "a", "b", "a"};
 
     EXPECT_EQ(1, cppmh::utility::count(v_int_0, 1));
     EXPECT_EQ(2, cppmh::utility::count(v_int_1, 1));
-    EXPECT_EQ(3, cppmh::utility::count(v_double_1, 1.0));
+    EXPECT_EQ(3, cppmh::utility::count(v_double, 1.0));
     std::string key = "a";
-    EXPECT_EQ(4, cppmh::utility::count(v_string_2, key));
+    EXPECT_EQ(4, cppmh::utility::count(v_string, key));
 }
 
 /*****************************************************************************/
