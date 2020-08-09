@@ -372,8 +372,10 @@ Result<T_Variable, T_Expression> solve(
     /**
      * Run tabu searches to find better solutions.
      */
+
     int iteration                           = 0;
     int next_number_of_initial_modification = 0;
+    int next_inital_tabu_tenure = master_option.tabu_search.initial_tabu_tenure;
 
     /**
      * The integer variable next_iteration_max is used if the option
@@ -425,6 +427,7 @@ Result<T_Variable, T_Expression> solve(
         option.tabu_search.seed += iteration;
         option.tabu_search.number_of_initial_modification =
             next_number_of_initial_modification;
+        option.tabu_search.initial_tabu_tenure = next_inital_tabu_tenure;
 
         /**
          * Prepare the initial variable values.
@@ -486,7 +489,7 @@ Result<T_Variable, T_Expression> solve(
         }
 
         /**
-         * Update the updating count for each decision variables
+         * Update the updating count for each decision variables.
          */
         const auto& update_counts = result.memory.update_counts();
         for (const auto& proxy : update_counts) {
@@ -524,13 +527,18 @@ Result<T_Variable, T_Expression> solve(
              * local augmented incumbent objective obtained in the last tabu
              * search) is positive, tighten the local penalty coefficients.
              */
-            double total_squared_penalty = 0.0;
+            double total_penalty           = 0.0;
+            double total_squared_violation = 0.0;
             for (const auto& proxy :
                  result_local_solution.violation_value_proxies) {
                 for (const auto& element : proxy.flat_indexed_values()) {
-                    total_squared_penalty += element * element;
+                    total_penalty += element;
+                    total_squared_violation += element * element;
                 }
             }
+
+            const double balance =
+                master_option.penalty_coefficient_updating_balance;
 
             for (auto&& proxy : local_penalty_coefficient_proxies) {
                 int  id = proxy.id();
@@ -540,10 +548,18 @@ Result<T_Variable, T_Expression> solve(
 
                 int flat_index = 0;
                 for (auto&& element : proxy.flat_indexed_values()) {
+                    double delta_penalty_constant =
+                        std::max(0.0, gap) / total_penalty;
+                    double delta_penalty_proportional =
+                        std::max(0.0, gap) / total_squared_violation *
+                        violation_values[flat_index];
+
                     element +=
                         master_option.penalty_coefficient_tightening_rate *
-                        std::max(0.0, gap) / total_squared_penalty *
-                        violation_values[flat_index++];
+                        (balance * delta_penalty_constant +
+                         (1.0 - balance) * delta_penalty_proportional);
+
+                    flat_index++;
                 }
 
                 if (master_option.is_enabled_grouping_penalty_coefficient) {
@@ -762,6 +778,17 @@ Result<T_Variable, T_Expression> solve(
                 }
             }
         }
+
+        /**
+         * Update the initial tabu tenure;
+         */
+        if (master_option.tabu_search.is_enabled_tabu_tenure_taking_over) {
+            next_inital_tabu_tenure = result.tabu_tenure;
+        } else {
+            next_inital_tabu_tenure =
+                master_option.tabu_search.initial_tabu_tenure;
+        }
+
         model->callback();
         iteration++;
     }

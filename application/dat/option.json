@@ -1,8 +1,10 @@
 {
     "iteration_max": 100,
     "time_max": 120.0,
+    "time_offset": 0.0,
     "penalty_coefficient_relaxing_rate": 0.5,
     "penalty_coefficient_tightening_rate": 1.0,
+    "penalty_coefficient_updating_balance": 0.0,
     "initial_penalty_coefficient": 1E6,
     "is_enabled_lagrange_dual": false,
     "is_enabled_local_search": true,
@@ -25,6 +27,7 @@
     "lagrange_dual": {
         "iteration_max": 10000,
         "time_max": 120.0,
+        "time_offset": 0.0,
         "step_size_extend_rate": 1.05,
         "step_size_reduce_rate": 0.95,
         "tolerance": 0.001,
@@ -42,6 +45,7 @@
     "tabu_search": {
         "iteration_max": 200,
         "time_max": 120,
+        "time_offset": 0.0,
         "log_interval": 10,
         "initial_tabu_tenure": 10,
         "tabu_tenure_randomize_rate": 0.5,
@@ -57,9 +61,15 @@
         "is_enabled_automatic_break": true,
         "is_enabled_automatic_tabu_tenure_adjustment": true,
         "is_enabled_automatic_iteration_adjustment": true,
+        "is_enabled_tabu_tenure_taking_over": false,
         "is_enabled_initial_modification": true,
+        "bias_increase_count_threshold": 5,
+        "bias_decrease_count_threshold": 10,
+        "iteration_increase_rate": 1.5,
+        "iteration_decrease_rate": 0.5,
         "ignore_tabu_if_augmented_incumbent": false,
         "ignore_tabu_if_feasible_incumbent": true,
+        "number_of_initial_modification": 0,
         "seed": 1
     }
 }
