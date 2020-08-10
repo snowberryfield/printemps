@@ -13,6 +13,45 @@ namespace cppmh {
 namespace model {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
+inline constexpr bool has_fixed_variables(
+    const Move<T_Variable, T_Expression> &a_MOVE) {
+    for (const auto &alteration : a_MOVE.alterations) {
+        if (alteration.first->is_fixed()) {
+            return true;
+        }
+    }
+    return false;
+};
+
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+inline constexpr bool has_selection_variables(
+    const Move<T_Variable, T_Expression> &a_MOVE) {
+    for (const auto &alteration : a_MOVE.alterations) {
+        if (alteration.first->sense() == VariableSense::Selection) {
+            return true;
+        }
+    }
+    return false;
+};
+
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+inline constexpr bool has_bound_violation(
+    const Move<T_Variable, T_Expression> &a_MOVE) {
+    for (const auto &alteration : a_MOVE.alterations) {
+        if (alteration.second < alteration.first->lower_bound()) {
+            return true;
+        }
+        if (alteration.second > alteration.first->upper_bound()) {
+            return true;
+        }
+    }
+    return false;
+};
+
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
 class Variable;
 
 /*****************************************************************************/
@@ -627,39 +666,47 @@ class Neighborhood {
 
     /*************************************************************************/
     inline constexpr void update_moves(void) noexcept {
+        /// Binary
         if (m_binary_moves.size() > 0 &&  //
             m_is_enabled_binary_move) {
             m_binary_move_updater(&m_binary_moves);
         }
 
+        /// Integer
         if (m_integer_moves.size() > 0 &&  //
             m_is_enabled_integer_move) {
             m_integer_move_updater(&m_integer_moves);
         }
 
+        /// Aggregation
         if (m_aggregation_moves.size() > 0 &&  //
             m_is_enabled_aggregation_move) {
             m_aggregation_move_updater(&m_aggregation_moves);
         }
 
+        /// Precedence
         if (m_precedence_moves.size() > 0 &&  //
             m_is_enabled_precedence_move) {
             m_precedence_move_updater(&m_precedence_moves);
         }
 
+        /// Variable Bound
         if (m_variable_bound_moves.size() > 0 &&  //
             m_is_enabled_variable_bound_move) {
             m_variable_bound_move_updater(&m_variable_bound_moves);
         }
 
+        /// Exclusive
         /**
          * NOTE: Exclusive moves do not require updates.
          */
 
+        /// User Defined
         if (m_is_enabled_user_defined_move) {
             m_user_defined_move_updater(&m_user_defined_moves);
         }
 
+        /// Selection
         if (m_selection_moves.size() > 0 &&  //
             m_is_enabled_selection_move) {
             m_selection_move_updater(&m_selection_moves);
@@ -676,50 +723,16 @@ class Neighborhood {
 
         m_move_ptrs.resize(number_of_candidate_moves);
 
-        auto has_fixed_variables = [this](const auto &a_MOVE) {
-            if (!m_has_fixed_variables) {
-                return false;
-            }
-            for (const auto &alteration : a_MOVE.alterations) {
-                if (alteration.first->is_fixed()) {
-                    return true;
-                }
-            }
-            return false;
-        };
-
-        auto has_selection_variables = [this](const auto &a_MOVE) {
-            if (!m_has_selection_variables) {
-                return false;
-            }
-            for (const auto &alteration : a_MOVE.alterations) {
-                if (alteration.first->sense() == VariableSense::Selection) {
-                    return true;
-                }
-            }
-            return false;
-        };
-
-        auto has_bound_violation = [this](const auto &a_MOVE) {
-            for (const auto &alteration : a_MOVE.alterations) {
-                if (alteration.second < alteration.first->lower_bound()) {
-                    return true;
-                }
-                if (alteration.second > alteration.first->upper_bound()) {
-                    return true;
-                }
-            }
-            return false;
-        };
-
         auto index = 0;
 
+        /// Binary
         if (m_is_enabled_binary_move) {
             for (auto &&move : m_binary_moves) {
-                if (has_fixed_variables(move)) {
+                if (m_has_fixed_variables && model::has_fixed_variables(move)) {
                     continue;
                 }
-                if (has_selection_variables(move)) {
+                if (m_has_selection_variables &&
+                    model::has_selection_variables(move)) {
                     continue;
                 }
 
@@ -727,12 +740,14 @@ class Neighborhood {
             }
         }
 
+        /// Integer
         if (m_is_enabled_integer_move) {
             for (auto &&move : m_integer_moves) {
-                if (has_fixed_variables(move)) {
+                if (m_has_fixed_variables && model::has_fixed_variables(move)) {
                     continue;
                 }
-                if (has_selection_variables(move)) {
+                if (m_has_selection_variables &&
+                    model::has_selection_variables(move)) {
                     continue;
                 }
                 if (has_bound_violation(move)) {
@@ -743,59 +758,71 @@ class Neighborhood {
             }
         }
 
+        /// Aggregation
         if (m_is_enabled_aggregation_move) {
             for (auto &&move : m_aggregation_moves) {
-                if (has_fixed_variables(move)) {
+                if (m_has_fixed_variables && model::has_fixed_variables(move)) {
                     continue;
                 }
-                if (has_selection_variables(move)) {
+                if (m_has_selection_variables &&
+                    model::has_selection_variables(move)) {
                     continue;
                 }
-                if (has_bound_violation(move)) {
+
+                if (model::has_bound_violation(move)) {
                     continue;
                 }
                 m_move_ptrs[index++] = &move;
             }
         }
 
+        /// Precedence
         if (m_is_enabled_precedence_move) {
             for (auto &&move : m_precedence_moves) {
-                if (has_fixed_variables(move)) {
+                if (m_has_fixed_variables && model::has_fixed_variables(move)) {
                     continue;
                 }
-                if (has_selection_variables(move)) {
+                if (m_has_selection_variables &&
+                    model::has_selection_variables(move)) {
                     continue;
                 }
-                if (has_bound_violation(move)) {
+
+                if (model::has_bound_violation(move)) {
                     continue;
                 }
                 m_move_ptrs[index++] = &move;
             }
         }
 
+        /// Variable Bound
         if (m_is_enabled_variable_bound_move) {
             for (auto &&move : m_variable_bound_moves) {
-                if (has_fixed_variables(move)) {
+                if (m_has_fixed_variables && model::has_fixed_variables(move)) {
                     continue;
                 }
-                if (has_selection_variables(move)) {
+                if (m_has_selection_variables &&
+                    model::has_selection_variables(move)) {
                     continue;
                 }
-                if (has_bound_violation(move)) {
+
+                if (model::has_bound_violation(move)) {
                     continue;
                 }
                 m_move_ptrs[index++] = &move;
             }
         }
 
+        /// Exclusive
         if (m_is_enabled_exclusive_move) {
             for (auto &&move : m_exclusive_moves) {
-                if (has_fixed_variables(move)) {
+                if (m_has_fixed_variables && model::has_fixed_variables(move)) {
                     continue;
                 }
-                if (has_selection_variables(move)) {
+                if (m_has_selection_variables &&
+                    model::has_selection_variables(move)) {
                     continue;
                 }
+
                 if (move.alterations[0].first->value() == 1) {
                     continue;
                 }
@@ -804,24 +831,28 @@ class Neighborhood {
             }
         }
 
+        /// User Defined
         if (m_is_enabled_user_defined_move) {
             for (auto &&move : m_user_defined_moves) {
-                if (has_fixed_variables(move)) {
+                if (m_has_fixed_variables && model::has_fixed_variables(move)) {
                     continue;
                 }
-                if (has_selection_variables(move)) {
+                if (m_has_selection_variables &&
+                    model::has_selection_variables(move)) {
                     continue;
                 }
-                if (has_bound_violation(move)) {
+
+                if (model::has_bound_violation(move)) {
                     continue;
                 }
                 m_move_ptrs[index++] = &move;
             }
         }
 
+        /// Selection
         if (m_is_enabled_selection_move) {
             for (auto &&move : m_selection_moves) {
-                if (has_fixed_variables(move)) {
+                if (m_has_fixed_variables && model::has_fixed_variables(move)) {
                     continue;
                 }
 
