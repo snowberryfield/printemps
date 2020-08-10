@@ -117,7 +117,7 @@ Result<T_Variable, T_Expression> solve(
     }
 
     /**
-     * Prepare a random generator, which is used for shuffling moves.
+     * Prepare a random generator.
      */
     std::mt19937 get_rand_mt(master_option.seed);
 
@@ -144,8 +144,8 @@ Result<T_Variable, T_Expression> solve(
         model->generate_variable_parameter_proxies(0);
 
     /**
-     * Compute expressions, constraints, and objective according to initial
-     * values.
+     * Compute the valus of expressions, constraints, and the objective function
+     * according to the initial solution.
      */
     model->update();
 
@@ -166,7 +166,7 @@ Result<T_Variable, T_Expression> solve(
     int number_of_tabu_search_loops        = 0;
 
     /**
-     * Solve Lagrange dual
+     * Solve Lagrange dual to obtain a better initial solution ß(Optional).
      */
     if (master_option.is_enabled_lagrange_dual) {
         if (!model->is_linear()) {
@@ -241,9 +241,20 @@ Result<T_Variable, T_Expression> solve(
                     result.incumbent_holder.feasible_incumbent_score());
             }
 
+            /**
+             * Preserve the number of iteraions for solving the Lagrange dual
+             * problem.
+             */
             number_of_lagrange_dual_iterations = result.number_of_iterations;
 
+            /**
+             * Measure the elapsed time to solve the Lagrange dual problem.
+             */
             elapsed_time = time_keeper.clock();
+
+            /**
+             * Print the search summary.
+             */
             utility::print_message(
                 "Solving Lagrange dual was finished. Total elapsed time: " +
                     utility::to_string(elapsed_time, "%.3f") + "sec",
@@ -324,7 +335,7 @@ Result<T_Variable, T_Expression> solve(
 
         /**
          * Update the feasible incumbent solution if it was improved by the
-         * local search
+         * local search.
          */
         if (result.incumbent_holder.is_found_feasible_solution()) {
             update_status = incumbent_holder.try_update_incumbent(
@@ -333,7 +344,7 @@ Result<T_Variable, T_Expression> solve(
         }
 
         /**
-         * Update the updating count for each decision variables
+         * Update the updating count for each decision variables.
          */
         const auto& update_counts = result.memory.update_counts();
         for (const auto& proxy : update_counts) {
@@ -344,9 +355,19 @@ Result<T_Variable, T_Expression> solve(
             }
         }
 
+        /**
+         * Preserve the number of iteraions for the local search.
+         */
         number_of_local_search_iterations = result.number_of_iterations;
 
+        /**
+         * Measure the elapsed time for the local search.
+         */
         elapsed_time = time_keeper.clock();
+
+        /**
+         * Print the search summary.
+         */
         utility::print_message(
             "Local search was finished. Total elapsed time: " +
                 utility::to_string(elapsed_time, "%.3f") + "sec",
@@ -585,11 +606,20 @@ Result<T_Variable, T_Expression> solve(
              */
         }
 
+        /**
+         * Preserve the number of iteraions for the final tabu search loop.
+         */
         number_of_tabu_search_iterations += result.number_of_iterations;
         number_of_tabu_search_loops++;
 
+        /**
+         * Measure the elapsed time for the final tabu search loop.
+         */
         elapsed_time = time_keeper.clock();
 
+        /**
+         * Print the summary.
+         */
         utility::print_message(
             "Tabu search loop (" + std::to_string(iteration + 1) + "/" +
                 std::to_string(master_option.iteration_max) +
@@ -611,6 +641,9 @@ Result<T_Variable, T_Expression> solve(
                     "%.3f"),
             master_option.verbose >= Verbose::Outer);
 
+        /**
+         * Update the number of initial modification for the next loop.
+         */
         if (result.total_update_status &
             IncumbentHolderConstant::STATUS_FEASIBLE_INCUMBENT_UPDATE) {
             next_number_of_initial_modification = 0;
@@ -703,6 +736,7 @@ Result<T_Variable, T_Expression> solve(
             IncumbentHolderConstant::STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
             bool is_disabled_special_neighborhood_move = false;
 
+            /// Aggregation
             if (master_option.is_enabled_aggregation_move) {
                 if (model->neighborhood().is_enabled_aggregation_move()) {
                     model->neighborhood().disable_aggregation_move();
@@ -710,6 +744,7 @@ Result<T_Variable, T_Expression> solve(
                 }
             }
 
+            /// Precedence
             if (master_option.is_enabled_precedence_move) {
                 if (model->neighborhood().is_enabled_precedence_move()) {
                     model->neighborhood().disable_precedence_move();
@@ -717,6 +752,7 @@ Result<T_Variable, T_Expression> solve(
                 }
             }
 
+            /// Variable Bound
             if (master_option.is_enabled_variable_bound_move) {
                 if (model->neighborhood().is_enabled_variable_bound_move()) {
                     model->neighborhood().disable_variable_bound_move();
@@ -724,6 +760,7 @@ Result<T_Variable, T_Expression> solve(
                 }
             }
 
+            /// Exclusive
             if (master_option.is_enabled_exclusive_move) {
                 if (model->neighborhood().is_enabled_exclusive_move()) {
                     model->neighborhood().disable_exclusive_move();
@@ -742,6 +779,7 @@ Result<T_Variable, T_Expression> solve(
                  master_option.tabu_search.iteration_max)) {
                 bool is_enabled_special_neighborhood_move = false;
 
+                /// Aggregation
                 if (master_option.is_enabled_aggregation_move) {
                     if (!model->neighborhood().is_enabled_aggregation_move()) {
                         model->neighborhood().enable_aggregation_move();
@@ -749,6 +787,7 @@ Result<T_Variable, T_Expression> solve(
                     }
                 }
 
+                /// Precedence
                 if (master_option.is_enabled_precedence_move) {
                     if (!model->neighborhood().is_enabled_precedence_move()) {
                         model->neighborhood().enable_precedence_move();
@@ -756,6 +795,7 @@ Result<T_Variable, T_Expression> solve(
                     }
                 }
 
+                /// Variable Bound
                 if (master_option.is_enabled_variable_bound_move) {
                     if (!model->neighborhood()
                              .is_enabled_variable_bound_move()) {
@@ -764,6 +804,7 @@ Result<T_Variable, T_Expression> solve(
                     }
                 }
 
+                /// Exclusive
                 if (master_option.is_enabled_exclusive_move) {
                     if (!model->neighborhood().is_enabled_exclusive_move()) {
                         model->neighborhood().enable_exclusive_move();
@@ -780,7 +821,7 @@ Result<T_Variable, T_Expression> solve(
         }
 
         /**
-         * Update the initial tabu tenure;
+         * Update the initial tabu tenure.
          */
         if (master_option.tabu_search.is_enabled_tabu_tenure_taking_over) {
             next_inital_tabu_tenure = result.tabu_tenure;
@@ -816,9 +857,10 @@ Result<T_Variable, T_Expression> solve(
     incumbent = model->export_solution();
 
     auto named_solution = model->convert_to_named_solution(incumbent);
-    Result<T_Variable, T_Expression> result;
-    result.solution = named_solution;
 
+    /**
+     * Export the final penalty coefficient values.
+     */
     std::unordered_map<std::string, model::ValueProxy<double>>
         named_penalty_coefficients;
 
@@ -829,6 +871,9 @@ Result<T_Variable, T_Expression> solve(
             local_penalty_coefficient_proxies[i];
     }
 
+    /**
+     * Export the final variable update counts.
+     */
     std::unordered_map<std::string, model::ValueProxy<int>> named_update_counts;
     int         variable_proxies_size = model->variable_proxies().size();
     const auto& variable_names        = model->variable_names();
@@ -836,6 +881,11 @@ Result<T_Variable, T_Expression> solve(
         named_update_counts[variable_names[i]] = global_update_counts[i];
     }
 
+    /**
+     * Prepare the result object to return.
+     */
+    Result<T_Variable, T_Expression> result;
+    result.solution                          = named_solution;
     result.status.penalty_coefficients       = named_penalty_coefficients;
     result.status.update_counts              = named_update_counts;
     result.status.is_found_feasible_solution = named_solution.is_feasible();

@@ -703,7 +703,7 @@ class Model {
         this->setup_neighborhood(a_IS_ENABLED_AGGREGATION_MOVE,              //
                                  a_IS_ENABLED_PRECEDENCE_MOVE,               //
                                  a_IS_ENABLED_VARIABLE_BOUND_MOVE,           //
-                                 a_IS_ENABLED_EXCLUSIVE_MOVE, //
+                                 a_IS_ENABLED_EXCLUSIVE_MOVE,                //
                                  a_IS_ENABLED_PARALLEL_NEIGHBORHOOD_UPDATE,  //
                                  a_IS_ENABLED_PRINT);
 
@@ -2001,7 +2001,7 @@ class Model {
             utility::print_info(
                 "The number of decision variables: " +
                     utility::to_string(this->number_of_variables(), "%d") +
-                    "(reduced to " +
+                    " (reduced to " +
                     utility::to_string((this->number_of_variables() -
                                         this->number_of_fixed_variables()),
                                        "%d") +
@@ -2040,7 +2040,7 @@ class Model {
             utility::print_info(
                 "The number of constraints: " +
                     utility::to_string(this->number_of_constraints(), "%d") +
-                    "(reduced to " +
+                    " (reduced to " +
                     utility::to_string((this->number_of_constraints() -
                                         this->number_of_disabled_constraints()),
                                        "%d") +
