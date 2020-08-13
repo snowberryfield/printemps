@@ -143,8 +143,8 @@ Result<T_Variable, T_Expression> solve(
     Memory memory(model);
 
     /**
-     * Compute the valus of expressions, constraints, and the objective function
-     * according to the initial solution.
+     * Compute the values of expressions, constraints, and the objective
+     * function according to the initial solution.
      */
     model->update();
 
@@ -240,7 +240,7 @@ Result<T_Variable, T_Expression> solve(
             }
 
             /**
-             * Preserve the number of iteraions for solving the Lagrange dual
+             * Preserve the number of iterations for solving the Lagrange dual
              * problem.
              */
             number_of_lagrange_dual_iterations = result.number_of_iterations;
