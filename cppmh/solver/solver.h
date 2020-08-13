@@ -138,14 +138,13 @@ Result<T_Variable, T_Expression> solve(
     auto local_penalty_coefficient_proxies  = penalty_coefficient_proxies;
 
     /**
-     * Create an array which stores updating count for each decision variable.
+     * Create memory which stores updating count for each decision variable.
      */
-    std::vector<model::ValueProxy<int>> global_update_counts =
-        model->generate_variable_parameter_proxies(0);
+    Memory memory(model);
 
     /**
-     * Compute the valus of expressions, constraints, and the objective function
-     * according to the initial solution.
+     * Compute the values of expressions, constraints, and the objective
+     * function according to the initial solution.
      */
     model->update();
 
@@ -221,7 +220,6 @@ Result<T_Variable, T_Expression> solve(
              */
             current_solution =
                 result.incumbent_holder.global_augmented_incumbent_solution();
-            // current_solution = result.primal_solution;
 
             /**
              * Update the global augmented incumbent solution if it was
@@ -242,7 +240,7 @@ Result<T_Variable, T_Expression> solve(
             }
 
             /**
-             * Preserve the number of iteraions for solving the Lagrange dual
+             * Preserve the number of iterations for solving the Lagrange dual
              * problem.
              */
             number_of_lagrange_dual_iterations = result.number_of_iterations;
@@ -317,7 +315,8 @@ Result<T_Variable, T_Expression> solve(
                                 local_penalty_coefficient_proxies,   //
                                 global_penalty_coefficient_proxies,  //
                                 initial_variable_value_proxies,      //
-                                incumbent_holder);                   //
+                                incumbent_holder,                    //
+                                memory);                             //
 
         /**
          * Update the current solution.
@@ -344,19 +343,12 @@ Result<T_Variable, T_Expression> solve(
         }
 
         /**
-         * Update the updating count for each decision variables.
+         * Update the memory.
          */
-        const auto& update_counts = result.memory.update_counts();
-        for (const auto& proxy : update_counts) {
-            int id         = proxy.id();
-            int flat_index = 0;
-            for (auto&& element : proxy.flat_indexed_values()) {
-                global_update_counts[id][flat_index++] += element;
-            }
-        }
+        memory = result.memory;
 
         /**
-         * Preserve the number of iteraions for the local search.
+         * Preserve the number of iterations for the local search.
          */
         number_of_local_search_iterations = result.number_of_iterations;
 
@@ -465,7 +457,8 @@ Result<T_Variable, T_Expression> solve(
                                          local_penalty_coefficient_proxies,   //
                                          global_penalty_coefficient_proxies,  //
                                          initial_variable_value_proxies,      //
-                                         incumbent_holder);
+                                         incumbent_holder,                    //
+                                         memory);
 
         /**
          * Update the current solution.
@@ -510,16 +503,9 @@ Result<T_Variable, T_Expression> solve(
         }
 
         /**
-         * Update the updating count for each decision variables.
+         * Update the memory.
          */
-        const auto& update_counts = result.memory.update_counts();
-        for (const auto& proxy : update_counts) {
-            int id         = proxy.id();
-            int flat_index = 0;
-            for (auto&& element : proxy.flat_indexed_values()) {
-                global_update_counts[id][flat_index++] += element;
-            }
-        }
+        memory = result.memory;
 
         /**
          * Update the local penalty coefficients.
@@ -607,7 +593,7 @@ Result<T_Variable, T_Expression> solve(
         }
 
         /**
-         * Preserve the number of iteraions for the final tabu search loop.
+         * Preserve the number of iterations for the final tabu search loop.
          */
         number_of_tabu_search_iterations += result.number_of_iterations;
         number_of_tabu_search_loops++;
@@ -877,8 +863,10 @@ Result<T_Variable, T_Expression> solve(
     std::unordered_map<std::string, model::ValueProxy<int>> named_update_counts;
     int         variable_proxies_size = model->variable_proxies().size();
     const auto& variable_names        = model->variable_names();
+
+    const auto& update_counts = memory.update_counts();
     for (auto i = 0; i < variable_proxies_size; i++) {
-        named_update_counts[variable_names[i]] = global_update_counts[i];
+        named_update_counts[variable_names[i]] = update_counts[i];
     }
 
     /**
