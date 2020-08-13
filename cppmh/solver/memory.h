@@ -163,6 +163,16 @@ class Memory {
     }
 
     /*************************************************************************/
+    inline void reset_last_update_iterations(void) {
+        /// This method cannot be constexpr.
+        for (auto &&proxy : m_last_update_iterations) {
+            for (auto &&value : proxy.flat_indexed_values()) {
+                value = MemoryConstant::INITIAL_LAST_UPDATE_ITERATION;
+            }
+        }
+    }
+
+    /*************************************************************************/
     inline constexpr const std::vector<model::ValueProxy<int>>
         &last_update_iterations(void) const {
         return m_last_update_iterations;

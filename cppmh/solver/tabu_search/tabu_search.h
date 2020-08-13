@@ -38,7 +38,8 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     const std::vector<model::ValueProxy<T_Variable>>&  //
         a_INITIAL_VARIABLE_VALUE_PROXIES,              //
     const IncumbentHolder<T_Variable, T_Expression>&   //
-        a_INCUMBENT_HOLDER) {
+                 a_INCUMBENT_HOLDER,                   //
+    const Memory a_MEMORY) {
     /**
      * Define type aliases.
      */
@@ -58,6 +59,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
      */
     Model_T* model  = a_model;
     Option   option = a_OPTION;
+    Memory   memory = a_MEMORY;
 
     std::vector<model::ValueProxy<double>> local_penalty_coefficient_proxies =
         a_LOCAL_PENALTY_COEFFICIENT_PROXIES;
@@ -97,10 +99,9 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     int total_update_status = IncumbentHolderConstant::STATUS_NO_UPDATED;
 
     /**
-     * Create memory which records final updated iteration and updated count for
-     * each decision variable.
+     * Reset the last update iterations.
      */
-    Memory memory(model);
+    memory.reset_last_update_iterations();
 
     /**
      * The boolean variable has_constraint is used to determine the behavior of
