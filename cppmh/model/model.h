@@ -2534,7 +2534,7 @@ class Model {
         /// Decision variables
         for (const auto &proxy : m_variable_proxies) {
             for (const auto &variable : proxy.flat_indexed_variables()) {
-                plain_solution.variable_values.push_back(variable.value());
+                plain_solution.variables.push_back(variable.value());
             }
         }
 
@@ -2553,7 +2553,7 @@ class Model {
         /// Decision variables
         for (const auto &proxy : a_SOLUTION.variable_value_proxies) {
             for (const auto &value : proxy.flat_indexed_values()) {
-                plain_solution.variable_values.push_back(value);
+                plain_solution.variables.push_back(value);
             }
         }
 

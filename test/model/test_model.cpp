@@ -3182,15 +3182,15 @@ TEST_F(TestModel, export_plain_solution) {
     EXPECT_EQ(model.is_feasible(), plain_solution.is_feasible);
 
     int index = 0;
-    EXPECT_EQ(x.value(), plain_solution.variable_values[index++]);
+    EXPECT_EQ(x.value(), plain_solution.variables[index++]);
 
     for (auto i = 0; i < 10; i++) {
-        EXPECT_EQ(y(i).value(), plain_solution.variable_values[index++]);
+        EXPECT_EQ(y(i).value(), plain_solution.variables[index++]);
     }
 
     for (auto i = 0; i < 20; i++) {
         for (auto j = 0; j < 30; j++) {
-            EXPECT_EQ(z(i, j).value(), plain_solution.variable_values[index++]);
+            EXPECT_EQ(z(i, j).value(), plain_solution.variables[index++]);
         }
     }
 }
@@ -3225,15 +3225,15 @@ TEST_F(TestModel, convert_to_plain_solution) {
     EXPECT_EQ(model.is_feasible(), plain_solution.is_feasible);
 
     int index = 0;
-    EXPECT_EQ(x.value(), plain_solution.variable_values[index++]);
+    EXPECT_EQ(x.value(), plain_solution.variables[index++]);
 
     for (auto i = 0; i < 10; i++) {
-        EXPECT_EQ(y(i).value(), plain_solution.variable_values[index++]);
+        EXPECT_EQ(y(i).value(), plain_solution.variables[index++]);
     }
 
     for (auto i = 0; i < 20; i++) {
         for (auto j = 0; j < 30; j++) {
-            EXPECT_EQ(z(i, j).value(), plain_solution.variable_values[index++]);
+            EXPECT_EQ(z(i, j).value(), plain_solution.variables[index++]);
         }
     }
 }

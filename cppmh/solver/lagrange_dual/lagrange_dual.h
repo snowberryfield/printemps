@@ -140,6 +140,12 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
     double step_size = 1.0 / model->number_of_variables();
 
     /**
+     * Prepare historical solutions holder.
+     */
+    std::vector<model::PlainSolution<T_Variable, T_Expression>>
+        historical_feasible_solutions;
+
+    /**
      * Print the header of optimization progress table and print the
      * initial solution status.
      */
@@ -253,6 +259,14 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
         total_update_status = update_status || total_update_status;
 
         /**
+         * Push the current solution to historical data.
+         */
+        if (solution_score.is_feasible) {
+            historical_feasible_solutions.push_back(
+                model->export_plain_solution());
+        }
+
+        /**
          * Compute the lagrangian value.
          */
         double lagrangian =
@@ -323,12 +337,13 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
      * Prepare the result.
      */
     Result_T result;
-    result.lagrangian           = lagrangian_incumbent;
-    result.primal_solution      = primal_incumbent;
-    result.dual_value_proxies   = dual_value_proxies_incumbent;
-    result.incumbent_holder     = incumbent_holder;
-    result.total_update_status  = total_update_status;
-    result.number_of_iterations = iteration;
+    result.lagrangian                    = lagrangian_incumbent;
+    result.primal_solution               = primal_incumbent;
+    result.dual_value_proxies            = dual_value_proxies_incumbent;
+    result.incumbent_holder              = incumbent_holder;
+    result.total_update_status           = total_update_status;
+    result.number_of_iterations          = iteration;
+    result.historical_feasible_solutions = historical_feasible_solutions;
 
     return result;
 }
