@@ -125,6 +125,12 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     int last_tabu_tenure_updated_iteration = 0;
 
     /**
+     * Prepare historical solutions holder.
+     */
+    std::vector<model::PlainSolution<T_Variable, T_Expression>>
+        historical_feasible_solutions;
+
+    /**
      * Prepare other local variables.
      */
     std::vector<model::SolutionScore> trial_solution_scores;
@@ -370,6 +376,14 @@ TabuSearchResult<T_Variable, T_Expression> solve(
         total_update_status = update_status | total_update_status;
 
         /**
+         * Push the current solution to historical data.
+         */
+        if (solution_score.is_feasible) {
+            historical_feasible_solutions.push_back(
+                model->export_plain_solution());
+        }
+
+        /**
          * Update the memory.
          */
         int tabu_tenure_random_width = static_cast<int>(
@@ -562,6 +576,8 @@ TabuSearchResult<T_Variable, T_Expression> solve(
         last_feasible_incumbent_update_iteration;
 
     result.is_early_stopped = is_early_stopped;
+
+    result.historical_feasible_solutions = historical_feasible_solutions;
 
     return result;
 }

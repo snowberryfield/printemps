@@ -185,6 +185,12 @@ inline cppmh::solver::Option read_option(const std::string &a_FILE_NAME) {
               option_object);
 
     /**************************************************************************/
+    /// is_enabled_collect_historical_data
+    read_json(&option.is_enabled_collect_historical_data,  //
+              "is_enabled_collect_historical_data",        //
+              option_object);
+
+    /**************************************************************************/
     /// lagrange dual
     /**************************************************************************/
     nlohmann::json option_object_lagrange_dual;

@@ -21,7 +21,7 @@ struct PlainSolution {
 
     T_Expression            objective;
     bool                    is_feasible;
-    std::vector<T_Variable> variable_values;
+    std::vector<T_Variable> variables;
 
     /*************************************************************************/
     PlainSolution(void) : objective(0), is_feasible(false) {
@@ -35,10 +35,34 @@ struct PlainSolution {
 
     /*************************************************************************/
     inline void initialize(void) {
-        this->variable_values.clear();
+        this->variables.clear();
 
         this->objective   = 0;
         this->is_feasible = false;
+    }
+
+    /*************************************************************************/
+    inline void write(std::ofstream* a_ofs, const int a_INDENT_LEVEL) const {
+        int indent_level = a_INDENT_LEVEL;
+        *a_ofs << utility::indent_spaces(indent_level) << "{" << std::endl;
+        indent_level++;
+        *a_ofs << utility::indent_spaces(indent_level) << "\"is_feasible\" : "
+               << (this->is_feasible ? "true," : "false,") << std::endl;
+        *a_ofs << utility::indent_spaces(indent_level)
+               << "\"objective\" : " << this->objective << "," << std::endl;
+        *a_ofs << utility::indent_spaces(indent_level) << "\"variables\" : ";
+        *a_ofs << "[";
+        auto& variables      = this->variables;
+        int   variables_size = variables.size();
+        for (auto i = 0; i < variables_size; i++) {
+            if (i != variables_size - 1) {
+                *a_ofs << variables[i] << ", ";
+            } else {
+                *a_ofs << variables[i] << "]" << std::endl;
+            }
+        }
+        indent_level--;
+        *a_ofs << utility::indent_spaces(indent_level) << "}";
     }
 };
 using IPPlainSolution = PlainSolution<int, double>;

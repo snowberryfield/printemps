@@ -97,6 +97,12 @@ LocalSearchResult<T_Variable, T_Expression> solve(
     memory.reset_last_update_iterations();
 
     /**
+     * Prepare historical solutions holder.
+     */
+    std::vector<model::PlainSolution<T_Variable, T_Expression>>
+        historical_feasible_solutions;
+
+    /**
      * Print the header of optimization progress table and print the initial
      * solution status.
      */
@@ -202,6 +208,14 @@ LocalSearchResult<T_Variable, T_Expression> solve(
         total_update_status = update_status || total_update_status;
 
         /**
+         * Push the current solution to historical data.
+         */
+        if (solution_score.is_feasible) {
+            historical_feasible_solutions.push_back(
+                model->export_plain_solution());
+        }
+
+        /**
          * Update the memory.
          */
         memory.update(*move_ptr, iteration);
@@ -232,10 +246,11 @@ LocalSearchResult<T_Variable, T_Expression> solve(
      * Prepare the result.
      */
     Result_T result;
-    result.incumbent_holder     = incumbent_holder;
-    result.memory               = memory;
-    result.total_update_status  = total_update_status;
-    result.number_of_iterations = iteration;
+    result.incumbent_holder              = incumbent_holder;
+    result.memory                        = memory;
+    result.total_update_status           = total_update_status;
+    result.number_of_iterations          = iteration;
+    result.historical_feasible_solutions = historical_feasible_solutions;
 
     return result;
 }
