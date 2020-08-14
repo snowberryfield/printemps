@@ -21,6 +21,7 @@
 #include "value_proxy.h"
 #include "solution.h"
 #include "named_solution.h"
+#include "plain_solution.h"
 #include "solution_score.h"
 #include "selection.h"
 #include "neighborhood.h"
@@ -2224,6 +2225,18 @@ class Model {
     }
 
     /*************************************************************************/
+    inline constexpr bool is_feasible(void) const {
+        for (const auto &proxy : m_constraint_proxies) {
+            for (const auto &constraint : proxy.flat_indexed_constraints()) {
+                if (constraint.violation_value() > constant::EPSILON) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    /*************************************************************************/
     inline SolutionScore evaluate(
         const Move<T_Variable, T_Expression> &a_MOVE,
         const std::vector<ValueProxy<double>>
@@ -2461,17 +2474,16 @@ class Model {
                 proxy.export_violations_and_names());
         }
 
-        solution.objective = m_objective.value();
-        bool is_feasible   = true;
-        for (const auto &proxy : solution.violation_value_proxies) {
-            if (utility::max(proxy.flat_indexed_values()) > constant::EPSILON) {
-                is_feasible = false;
-                break;
-            }
-        }
-        solution.is_feasible = is_feasible;
+        solution.objective   = m_objective.value();
+        solution.is_feasible = this->is_feasible();
 
         return solution;
+    }
+
+    /*************************************************************************/
+    inline constexpr NamedSolution<T_Variable, T_Expression>
+    export_named_solution(void) const {
+        return this->convert_to_named_solution(this->export_solution());
     }
 
     /*************************************************************************/
@@ -2512,6 +2524,43 @@ class Model {
         named_solution.m_is_feasible = a_SOLUTION.is_feasible;
 
         return named_solution;
+    }
+
+    /*************************************************************************/
+    inline constexpr PlainSolution<T_Variable, T_Expression>
+    export_plain_solution(void) const {
+        PlainSolution<T_Variable, T_Expression> plain_solution;
+
+        /// Decision variables
+        for (const auto &proxy : m_variable_proxies) {
+            for (const auto &variable : proxy.flat_indexed_variables()) {
+                plain_solution.variables.push_back(variable.value());
+            }
+        }
+
+        plain_solution.objective   = m_objective.value();
+        plain_solution.is_feasible = this->is_feasible();
+
+        return plain_solution;
+    }
+
+    /*************************************************************************/
+    inline constexpr PlainSolution<T_Variable, T_Expression>
+    convert_to_plain_solution(
+        const Solution<T_Variable, T_Expression> &a_SOLUTION) const {
+        PlainSolution<T_Variable, T_Expression> plain_solution;
+
+        /// Decision variables
+        for (const auto &proxy : a_SOLUTION.variable_value_proxies) {
+            for (const auto &value : proxy.flat_indexed_values()) {
+                plain_solution.variables.push_back(value);
+            }
+        }
+
+        plain_solution.objective   = a_SOLUTION.objective;
+        plain_solution.is_feasible = a_SOLUTION.is_feasible;
+
+        return plain_solution;
     }
 
     /*************************************************************************/
