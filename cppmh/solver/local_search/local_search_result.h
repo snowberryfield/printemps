@@ -21,6 +21,9 @@ struct LocalSearchResult {
     int                                       total_update_status;
     int                                       number_of_iterations;
 
+    std::vector<model::PlainSolution<T_Variable, T_Expression>>
+        historical_feasible_solutions;
+
     /*************************************************************************/
     LocalSearchResult(void) {
         this->initialize();
@@ -37,6 +40,8 @@ struct LocalSearchResult {
         this->memory.initialize();
         this->total_update_status  = 0;
         this->number_of_iterations = 0;
+
+        this->historical_feasible_solutions.clear();
     }
 };
 }  // namespace local_search

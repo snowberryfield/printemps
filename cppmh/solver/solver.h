@@ -16,6 +16,7 @@
 #include "incumbent_holder.h"
 #include "option.h"
 #include "status.h"
+#include "history.h"
 #include "result.h"
 #include "tabu_search/tabu_search.h"
 #include "local_search/local_search.h"
@@ -143,6 +144,12 @@ Result<T_Variable, T_Expression> solve(
     Memory memory(model);
 
     /**
+     * Prepare historical solutions holder.
+     */
+    std::vector<model::PlainSolution<T_Variable, T_Expression>>
+        historical_feasible_solutions;
+
+    /**
      * Compute the values of expressions, constraints, and the objective
      * function according to the initial solution.
      */
@@ -222,8 +229,18 @@ Result<T_Variable, T_Expression> solve(
                 result.incumbent_holder.global_augmented_incumbent_solution();
 
             /**
+             * Update the historical data.
+             */
+            if (master_option.is_enabled_collect_historical_data) {
+                historical_feasible_solutions.insert(
+                    historical_feasible_solutions.end(),
+                    result.historical_feasible_solutions.begin(),
+                    result.historical_feasible_solutions.end());
+            }
+
+            /**
              * Update the global augmented incumbent solution if it was
-             * improved by the local search.
+             * improved by the Lagrange dual search.
              */
             update_status = incumbent_holder.try_update_incumbent(
                 result.incumbent_holder.global_augmented_incumbent_solution(),
@@ -231,7 +248,7 @@ Result<T_Variable, T_Expression> solve(
 
             /**
              * Update the feasible incumbent solution if it was improved by
-             * the local search
+             * the Lagrange dual search
              */
             if (result.incumbent_holder.is_found_feasible_solution()) {
                 update_status = incumbent_holder.try_update_incumbent(
@@ -323,6 +340,16 @@ Result<T_Variable, T_Expression> solve(
          */
         current_solution =
             result.incumbent_holder.global_augmented_incumbent_solution();
+
+        /**
+         * Update the historical data.
+         */
+        if (master_option.is_enabled_collect_historical_data) {
+            historical_feasible_solutions.insert(
+                historical_feasible_solutions.end(),
+                result.historical_feasible_solutions.begin(),
+                result.historical_feasible_solutions.end());
+        }
 
         /**
          * Update the global augmented incumbent solution if it was improved
@@ -482,6 +509,16 @@ Result<T_Variable, T_Expression> solve(
                     __FILE__, __LINE__, __func__,
                     "The specified restart mode is invalid."));
             }
+        }
+
+        /**
+         * Update the historical data.
+         */
+        if (master_option.is_enabled_collect_historical_data) {
+            historical_feasible_solutions.insert(
+                historical_feasible_solutions.end(),
+                result.historical_feasible_solutions.begin(),
+                result.historical_feasible_solutions.end());
         }
 
         /**
@@ -885,6 +922,7 @@ Result<T_Variable, T_Expression> solve(
     result.status.number_of_tabu_search_iterations =
         number_of_tabu_search_iterations;
     result.status.number_of_tabu_search_loops = number_of_tabu_search_loops;
+    result.history.feasible_solutions         = historical_feasible_solutions;
 
     return result;
 }

@@ -72,6 +72,11 @@ int main([[maybe_unused]] int argc, char *argv[]) {
 
     result.status.write_json_by_name("status.json");
 
+    if (option.is_enabled_collect_historical_data) {
+        result.history.write_feasible_solutions_json(
+            "historical_feasible_solutions.json");
+    }
+
     return 0;
 }
 /*****************************************************************************/
