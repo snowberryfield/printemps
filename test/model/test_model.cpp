@@ -2359,6 +2359,26 @@ TEST_F(TestModel, update_arg_move) {
 }
 
 /*****************************************************************************/
+TEST_F(TestModel, is_feasible) {
+    cppmh::model::Model<int, double> model;
+
+    auto&                  x = model.create_variable("x", 0, 10);
+    [[maybe_unused]] auto& g = model.create_constraint("g", x <= 5);
+
+    x = 4;
+    model.update();
+    EXPECT_EQ(true, model.is_feasible());
+
+    x = 5;
+    model.update();
+    EXPECT_EQ(true, model.is_feasible());
+
+    x = 6;
+    model.update();
+    EXPECT_EQ(false, model.is_feasible());
+}
+
+/*****************************************************************************/
 TEST_F(TestModel, evaluate) {
     /// minimize
     {
@@ -2905,12 +2925,14 @@ TEST_F(TestModel, export_solution) {
 
     model.update();
 
-    /// Test Solution
     auto solution = model.export_solution();
     EXPECT_EQ(3, static_cast<int>(solution.variable_value_proxies.size()));
     EXPECT_EQ(3, static_cast<int>(solution.expression_value_proxies.size()));
     EXPECT_EQ(3, static_cast<int>(solution.constraint_value_proxies.size()));
     EXPECT_EQ(3, static_cast<int>(solution.violation_value_proxies.size()));
+
+    EXPECT_EQ(model.objective().value(), solution.objective);
+    EXPECT_EQ(model.is_feasible(), solution.is_feasible);
 
     EXPECT_EQ(x.id(), solution.variable_value_proxies[0].id());
     EXPECT_EQ(x.value(), solution.variable_value_proxies[0].value());
@@ -2978,13 +3000,59 @@ TEST_F(TestModel, export_solution) {
                       solution.violation_value_proxies[2](i, j));
         }
     }
+}
 
-    /// Test NamedSolution
-    auto named_solution = model.convert_to_named_solution(solution);
+/*****************************************************************************/
+TEST_F(TestModel, export_named_solution) {
+    cppmh::model::Model<int, double> model;
+
+    auto& x = model.create_variable("x");
+    auto& y = model.create_variables("y", 10);
+    auto& z = model.create_variables("z", {20, 30});
+
+    auto& p = model.create_expression("p");
+    auto& q = model.create_expressions("q", 10);
+    auto& r = model.create_expressions("r", {20, 30});
+
+    auto& g = model.create_constraint("g");
+    auto& h = model.create_constraints("h", 10);
+    auto& v = model.create_constraints("v", {20, 30});
+
+    p = random_integer() * x;
+    for (auto i = 0; i < 10; i++) {
+        q(i) = random_integer() * y(i);
+    }
+
+    for (auto i = 0; i < 20; i++) {
+        for (auto j = 0; j < 30; j++) {
+            r(i, j) = random_integer() * z(i, j) + random_integer();
+            v(i, j) = r(i, j) == random_integer();
+        }
+    }
+    model.minimize(random_integer() * p + random_integer() * q.sum() +
+                   random_integer() * r.sum());
+
+    x = random_integer();
+    for (auto i = 0; i < 10; i++) {
+        y(i) = random_integer();
+    }
+
+    for (auto i = 0; i < 20; i++) {
+        for (auto j = 0; j < 30; j++) {
+            z(i, j) = random_integer();
+        }
+    }
+
+    model.update();
+
+    auto named_solution = model.export_named_solution();
     EXPECT_EQ(3, static_cast<int>(named_solution.variables().size()));
     EXPECT_EQ(3, static_cast<int>(named_solution.expressions().size()));
     EXPECT_EQ(3, static_cast<int>(named_solution.constraints().size()));
     EXPECT_EQ(3, static_cast<int>(named_solution.violations().size()));
+
+    EXPECT_EQ(model.objective().value(), named_solution.objective());
+    EXPECT_EQ(model.is_feasible(), named_solution.is_feasible());
 
     EXPECT_EQ(x.id(), named_solution.variables("x").id());
     EXPECT_EQ(x.id(), named_solution.variables().at("x").id());
@@ -3082,7 +3150,92 @@ TEST_F(TestModel, export_solution) {
 
 /*****************************************************************************/
 TEST_F(TestModel, convert_to_named_solution) {
-    /// This method is tested in export_solution.
+    /// This method is tested in export_named_solution.
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, export_plain_solution) {
+    cppmh::model::Model<int, double> model;
+
+    auto& x = model.create_variable("x");
+    auto& y = model.create_variables("y", 10);
+    auto& z = model.create_variables("z", {20, 30});
+
+    model.minimize(random_integer() * x.sum() + random_integer() * y.sum() +
+                   random_integer() * z.sum());
+
+    x = random_integer();
+    for (auto i = 0; i < 10; i++) {
+        y(i) = random_integer();
+    }
+
+    for (auto i = 0; i < 20; i++) {
+        for (auto j = 0; j < 30; j++) {
+            z(i, j) = random_integer();
+        }
+    }
+
+    model.update();
+
+    auto plain_solution = model.export_plain_solution();
+    EXPECT_EQ(model.objective().value(), plain_solution.objective);
+    EXPECT_EQ(model.is_feasible(), plain_solution.is_feasible);
+
+    int index = 0;
+    EXPECT_EQ(x.value(), plain_solution.variable_values[index++]);
+
+    for (auto i = 0; i < 10; i++) {
+        EXPECT_EQ(y(i).value(), plain_solution.variable_values[index++]);
+    }
+
+    for (auto i = 0; i < 20; i++) {
+        for (auto j = 0; j < 30; j++) {
+            EXPECT_EQ(z(i, j).value(), plain_solution.variable_values[index++]);
+        }
+    }
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, convert_to_plain_solution) {
+    cppmh::model::Model<int, double> model;
+
+    auto& x = model.create_variable("x");
+    auto& y = model.create_variables("y", 10);
+    auto& z = model.create_variables("z", {20, 30});
+
+    model.minimize(random_integer() * x.sum() + random_integer() * y.sum() +
+                   random_integer() * z.sum());
+
+    x = random_integer();
+    for (auto i = 0; i < 10; i++) {
+        y(i) = random_integer();
+    }
+
+    for (auto i = 0; i < 20; i++) {
+        for (auto j = 0; j < 30; j++) {
+            z(i, j) = random_integer();
+        }
+    }
+
+    model.update();
+
+    auto solution       = model.export_solution();
+    auto plain_solution = model.convert_to_plain_solution(solution);
+    EXPECT_EQ(model.objective().value(), plain_solution.objective);
+    EXPECT_EQ(model.is_feasible(), plain_solution.is_feasible);
+
+    int index = 0;
+    EXPECT_EQ(x.value(), plain_solution.variable_values[index++]);
+
+    for (auto i = 0; i < 10; i++) {
+        EXPECT_EQ(y(i).value(), plain_solution.variable_values[index++]);
+    }
+
+    for (auto i = 0; i < 20; i++) {
+        for (auto j = 0; j < 30; j++) {
+            EXPECT_EQ(z(i, j).value(), plain_solution.variable_values[index++]);
+        }
+    }
 }
 
 /*****************************************************************************/
