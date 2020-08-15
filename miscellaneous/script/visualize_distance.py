@@ -14,9 +14,14 @@ def compute_distance(x, y):
 ###############################################################################
 
 
-def visualize(a_raw_solutions):
+def visualize_distance(solution_object, max_number_of_solutions=5000):
+    # Summary
+    name = solution_object['name']
+    number_of_variables = solution_object['number_of_variables']
+    number_of_constraints = solution_object['number_of_constraints']
+
     # Copy and sort raw solutions.
-    raw_solutions = copy.deepcopy(a_raw_solutions)
+    raw_solutions = copy.deepcopy(solution_object['solutions'])
     raw_solutions.sort(key=lambda x: x['objective'])
     for solution in raw_solutions:
         solution['variables'] = np.array(solution['variables'])
@@ -26,7 +31,6 @@ def visualize(a_raw_solutions):
     # Dedplication of solutions.
     unique_solutions = []
     EPSILON = 1E-5
-    MAX_NUMBER_OF_SOLUTIONS = 5000
 
     for i in range(number_of_raw_solutions):
         is_unique = True
@@ -40,7 +44,7 @@ def visualize(a_raw_solutions):
 
         if is_unique:
             unique_solutions.append(raw_solutions[i])
-            if len(unique_solutions) == MAX_NUMBER_OF_SOLUTIONS:
+            if len(unique_solutions) == max_number_of_solutions:
                 break
 
     number_of_unique_solutions = len(unique_solutions)
@@ -57,12 +61,12 @@ def visualize(a_raw_solutions):
             distances[i, j] = distance
             distances[j, i] = distance
 
-    number_of_variables = len(unique_solutions[0]['variables'])
-
     # Plot the Manhattan distances as a heatmap.
+    title = 'Manhattan distance between 2 solutions \n %s (#Var.:%d, #Cons.:%d)' \
+        % (name, number_of_variables, number_of_constraints)
+
+    plt.title(title)
     plt.imshow(distances, interpolation='gaussian')
-    plt.title('Manhattan distance between 2 solutions (#Variable = %d)' %
-              number_of_variables)
     plt.xlabel('Solution No.')
     plt.ylabel('Solution No.')
     plt.grid(False)
@@ -75,9 +79,9 @@ def visualize(a_raw_solutions):
 def main():
     solution_file_name = sys.argv[1]
     with open(solution_file_name, 'r') as f:
-        solution = json.load(f)
+        solution_object = json.load(f)
 
-    visualize(solution)
+    visualize_distance(solution_object)
 
 ###############################################################################
 
