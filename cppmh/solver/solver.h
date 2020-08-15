@@ -494,13 +494,20 @@ Result<T_Variable, T_Expression> solve(
             result.incumbent_holder.local_augmented_incumbent_solution();
         auto result_global_solution =
             result.incumbent_holder.global_augmented_incumbent_solution();
+        bool is_changed = false;
 
         switch (master_option.tabu_search.restart_mode) {
             case tabu_search::RestartMode::Global: {
+                is_changed = (result_global_solution.variable_value_proxies !=
+                              current_solution.variable_value_proxies);
                 current_solution = result_global_solution;
+
                 break;
             }
             case tabu_search::RestartMode::Local: {
+                is_changed = (result_local_solution.variable_value_proxies !=
+                              current_solution.variable_value_proxies);
+                current_solution = result_global_solution;
                 current_solution = result_local_solution;
                 break;
             }
@@ -683,7 +690,8 @@ Result<T_Variable, T_Expression> solve(
                                    master_option.verbose >= Verbose::Outer);
 
         } else {
-            if (master_option.tabu_search.is_enabled_initial_modification) {
+            if (master_option.tabu_search.is_enabled_initial_modification &&
+                !is_changed) {
                 int nominal_number_of_initial_modification  //
                     = static_cast<int>(
                         std::floor(master_option.tabu_search
