@@ -29,6 +29,10 @@
 #include "expression_binary_operator.h"
 #include "constraint_binary_operator.h"
 
+#include "variable_reference.h"
+#include "constraint_reference.h"
+#include "constraint_type_reference.h"
+
 namespace cppmh {
 namespace model {
 /*****************************************************************************/
@@ -41,110 +45,6 @@ struct ModelConstant {
     static constexpr int MAX_NUMBER_OF_VARIABLE_PROXIES   = 100;
     static constexpr int MAX_NUMBER_OF_EXPRESSION_PROXIES = 100;
     static constexpr int MAX_NUMBER_OF_CONSTRAINT_PROXIES = 100;
-};
-
-/*****************************************************************************/
-template <class T_Variable, class T_Expression>
-struct VariableReference {
-    std::vector<Variable<T_Variable, T_Expression> *> variable_ptrs;
-    std::vector<Variable<T_Variable, T_Expression> *> fixed_variable_ptrs;
-    std::vector<Variable<T_Variable, T_Expression> *> selection_variable_ptrs;
-    std::vector<Variable<T_Variable, T_Expression> *> binary_variable_ptrs;
-    std::vector<Variable<T_Variable, T_Expression> *> integer_variable_ptrs;
-
-    /*************************************************************************/
-    VariableReference(void) {
-        this->initialize();
-    }
-
-    /*************************************************************************/
-    virtual ~VariableReference(void) {
-        /// nothing to do
-    }
-
-    /*************************************************************************/
-    inline void initialize(void) {
-        this->variable_ptrs.clear();
-        this->fixed_variable_ptrs.clear();
-        this->selection_variable_ptrs.clear();
-        this->binary_variable_ptrs.clear();
-        this->integer_variable_ptrs.clear();
-    }
-};
-
-/*****************************************************************************/
-template <class T_Variable, class T_Expression>
-struct ConstraintReference {
-    std::vector<Constraint<T_Variable, T_Expression> *> constraint_ptrs;
-    std::vector<Constraint<T_Variable, T_Expression> *>
-        selection_constraint_ptrs;
-    std::vector<Constraint<T_Variable, T_Expression> *>
-        disabled_constraint_ptrs;
-
-    /*************************************************************************/
-    ConstraintReference(void) {
-        this->initialize();
-    }
-
-    /*************************************************************************/
-    virtual ~ConstraintReference(void) {
-        /// nothing to do
-    }
-
-    /*************************************************************************/
-    inline void initialize(void) {
-        this->constraint_ptrs.clear();
-        this->selection_constraint_ptrs.clear();
-        this->disabled_constraint_ptrs.clear();
-    }
-};
-
-/*****************************************************************************/
-template <class T_Variable, class T_Expression>
-struct ConstraintTypeReference {
-    std::vector<Constraint<T_Variable, T_Expression> *> singleton_ptrs;
-    std::vector<Constraint<T_Variable, T_Expression> *> aggregation_ptrs;
-    std::vector<Constraint<T_Variable, T_Expression> *> precedence_ptrs;
-    std::vector<Constraint<T_Variable, T_Expression> *> variable_bound_ptrs;
-    std::vector<Constraint<T_Variable, T_Expression> *> set_partitioning_ptrs;
-    std::vector<Constraint<T_Variable, T_Expression> *> set_packing_ptrs;
-    std::vector<Constraint<T_Variable, T_Expression> *> set_covering_ptrs;
-    std::vector<Constraint<T_Variable, T_Expression> *> cardinality_ptrs;
-    std::vector<Constraint<T_Variable, T_Expression> *> invariant_knapsack_ptrs;
-    std::vector<Constraint<T_Variable, T_Expression> *> equation_knapsack_ptrs;
-    std::vector<Constraint<T_Variable, T_Expression> *> bin_packing_ptrs;
-    std::vector<Constraint<T_Variable, T_Expression> *> knapsack_ptrs;
-    std::vector<Constraint<T_Variable, T_Expression> *> integer_knapsack_ptrs;
-    std::vector<Constraint<T_Variable, T_Expression> *> general_linear_ptrs;
-    std::vector<Constraint<T_Variable, T_Expression> *> nonlinear_ptrs;
-
-    /*************************************************************************/
-    ConstraintTypeReference(void) {
-        this->initialize();
-    }
-
-    /*************************************************************************/
-    virtual ~ConstraintTypeReference(void) {
-        /// nothing to do
-    }
-
-    /*************************************************************************/
-    inline void initialize(void) {
-        this->singleton_ptrs.clear();
-        this->aggregation_ptrs.clear();
-        this->precedence_ptrs.clear();
-        this->variable_bound_ptrs.clear();
-        this->set_partitioning_ptrs.clear();
-        this->set_packing_ptrs.clear();
-        this->cardinality_ptrs.clear();
-        this->invariant_knapsack_ptrs.clear();
-        this->equation_knapsack_ptrs.clear();
-        this->bin_packing_ptrs.clear();
-        this->knapsack_ptrs.clear();
-        this->integer_knapsack_ptrs.clear();
-        this->general_linear_ptrs.clear();
-        this->nonlinear_ptrs.clear();
-    }
 };
 
 /*****************************************************************************/
