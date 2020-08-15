@@ -20,6 +20,7 @@
 #include "objective.h"
 #include "value_proxy.h"
 #include "solution.h"
+#include "model_summary.h"
 #include "named_solution.h"
 #include "plain_solution.h"
 #include "solution_score.h"
@@ -2416,6 +2417,9 @@ class Model {
         int expression_proxies_size = m_expression_proxies.size();
         int constraint_proxies_size = m_constraint_proxies.size();
 
+        /// Summary
+        named_solution.m_model_summary = this->export_summary();
+
         /// Decision variables
         for (auto i = 0; i < variable_proxies_size; i++) {
             named_solution.m_variable_value_proxies[m_variable_names[i]] =
@@ -2495,6 +2499,15 @@ class Model {
                 }
             }
         }
+    }
+
+    /*************************************************************************/
+    inline constexpr ModelSummary export_summary(void) const {
+        ModelSummary summary;
+        summary.name                  = m_name;
+        summary.number_of_variables   = this->number_of_variables();
+        summary.number_of_constraints = this->number_of_constraints();
+        return summary;
     }
 
     /*************************************************************************/

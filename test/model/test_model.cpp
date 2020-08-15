@@ -3064,9 +3064,19 @@ TEST_F(TestModel, export_named_solution) {
         }
     }
 
+    model.set_name("name");
+    model.categorize_variables();
+    model.categorize_constraints();
     model.update();
 
     auto named_solution = model.export_named_solution();
+
+    EXPECT_EQ("name", named_solution.model_summary().name);
+    EXPECT_EQ(1 + 10 + 20 * 30,
+              named_solution.model_summary().number_of_variables);
+    EXPECT_EQ(1 + 10 + 20 * 30,
+              named_solution.model_summary().number_of_constraints);
+
     EXPECT_EQ(3, static_cast<int>(named_solution.variables().size()));
     EXPECT_EQ(3, static_cast<int>(named_solution.expressions().size()));
     EXPECT_EQ(3, static_cast<int>(named_solution.constraints().size()));
@@ -3257,6 +3267,27 @@ TEST_F(TestModel, convert_to_plain_solution) {
             EXPECT_EQ(z(i, j).value(), plain_solution.variables[index++]);
         }
     }
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, export_summary) {
+    cppmh::model::Model<int, double> model("name");
+
+    [[maybe_unused]] auto& x = model.create_variable("x");
+    [[maybe_unused]] auto& y = model.create_variables("y", 10);
+    [[maybe_unused]] auto& z = model.create_variables("z", {20, 30});
+
+    [[maybe_unused]] auto& g = model.create_constraint("g");
+    [[maybe_unused]] auto& h = model.create_constraints("h", 10);
+    [[maybe_unused]] auto& v = model.create_constraints("v", {20, 30});
+
+    model.categorize_variables();
+    model.categorize_constraints();
+
+    auto summary = model.export_summary();
+    EXPECT_EQ("name", summary.name);
+    EXPECT_EQ(1 + 10 + 20 * 30, summary.number_of_variables);
+    EXPECT_EQ(1 + 10 + 20 * 30, summary.number_of_constraints);
 }
 
 /*****************************************************************************/
