@@ -11,6 +11,7 @@ namespace solver {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 struct History {
+    model::ModelSummary model_summary;
     std::vector<model::PlainSolution<T_Variable, T_Expression>>  //
         feasible_solutions;
 
@@ -26,6 +27,7 @@ struct History {
 
     /*************************************************************************/
     inline void constexpr initialize(void) {
+        this->model_summary.initialize();
         this->feasible_solutions.clear();
     }
 
@@ -35,7 +37,25 @@ struct History {
         int indent_level = 0;
 
         std::ofstream ofs(a_FILE_NAME.c_str());
-        ofs << utility::indent_spaces(indent_level) << "[" << std::endl;
+        ofs << utility::indent_spaces(indent_level) << "{" << std::endl;
+        indent_level++;
+
+        /// Summary
+        ofs << utility::indent_spaces(indent_level) << "\"name\" : "
+            << "\"" << model_summary.name << "\"," << std::endl;
+
+        ofs << utility::indent_spaces(indent_level)
+            << "\"number_of_variables\" : " << model_summary.number_of_variables
+            << "," << std::endl;
+
+        ofs << utility::indent_spaces(indent_level)
+            << "\"number_of_constraints\" : "
+            << model_summary.number_of_constraints << "," << std::endl;
+
+        /// Solutions
+        ofs << utility::indent_spaces(indent_level) << "\"solutions\": ["
+            << std::endl;
+
         indent_level++;
         auto& feasible_solutions      = this->feasible_solutions;
         int   feasible_solutions_size = feasible_solutions.size();
@@ -49,6 +69,8 @@ struct History {
         }
         indent_level--;
         ofs << utility::indent_spaces(indent_level) << "]" << std::endl;
+        indent_level--;
+        ofs << utility::indent_spaces(indent_level) << "}" << std::endl;
         ofs.close();
     }
 };

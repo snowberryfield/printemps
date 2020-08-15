@@ -910,7 +910,9 @@ Result<T_Variable, T_Expression> solve(
      * Prepare the result object to return.
      */
     Result<T_Variable, T_Expression> result;
-    result.solution                          = named_solution;
+    result.solution = named_solution;
+
+    result.status.model_summary              = model->export_summary();
     result.status.penalty_coefficients       = named_penalty_coefficients;
     result.status.update_counts              = named_update_counts;
     result.status.is_found_feasible_solution = named_solution.is_feasible();
@@ -922,7 +924,9 @@ Result<T_Variable, T_Expression> solve(
     result.status.number_of_tabu_search_iterations =
         number_of_tabu_search_iterations;
     result.status.number_of_tabu_search_loops = number_of_tabu_search_loops;
-    result.history.feasible_solutions         = historical_feasible_solutions;
+
+    result.history.model_summary      = model->export_summary();
+    result.history.feasible_solutions = historical_feasible_solutions;
 
     return result;
 }
