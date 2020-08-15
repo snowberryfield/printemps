@@ -23,7 +23,8 @@ def compute_distance(x, y):
 ###############################################################################
 
 
-def visualize_distance(solution_object, output_file_name, max_number_of_solutions):
+def visualize_distance(solution_object, output_file_name,
+                       max_number_of_solutions, is_descending):
     '''
     Visualize Manhattan distance for each solutions pair as a heatmap.
     '''
@@ -34,7 +35,11 @@ def visualize_distance(solution_object, output_file_name, max_number_of_solution
 
     # Copy and sort raw solutions.
     raw_solutions = copy.deepcopy(solution_object['solutions'])
-    raw_solutions.sort(key=lambda x: x['objective'])
+    if is_descending:
+        raw_solutions.sort(key=lambda x: -x['objective'])
+    else:
+        raw_solutions.sort(key=lambda x: x['objective'])
+
     for solution in raw_solutions:
         solution['variables'] = np.array(solution['variables'])
 
@@ -76,13 +81,22 @@ def visualize_distance(solution_object, output_file_name, max_number_of_solution
     # Plot the Manhattan distances as a heatmap.
     title = 'Manhattan distance between 2 solutions \n %s (#Var.: %d, #Cons.: %d)' \
         % (name, number_of_variables, number_of_constraints)
+    if is_descending:
+        footnote_text = '* The solutions are sorted in descending order of objective function value.'
+    else:
+        footnote_text = '* The solutions are sorted in ascending order of objective function value.'
 
     plt.title(title)
     plt.imshow(distances)
     plt.xlabel('Solution No.')
     plt.ylabel('Solution No.')
+    plt.text(-0.1 * number_of_unique_solutions,
+             1.19 * number_of_unique_solutions,
+             footnote_text)
+
     plt.grid(False)
     plt.colorbar()
+    plt.subplots_adjust(bottom=0.15)
     plt.savefig(output_file_name)
 
 ###############################################################################
@@ -98,10 +112,13 @@ def main():
                         help='output file name.',
                         type=str,
                         default='distance.png')
-    parser.add_argument('--max',
+    parser.add_argument('-s', '--size',
                         help='maximum number of solutions for plot.',
                         type=int,
                         default=5000)
+    parser.add_argument('--descending',
+                        help='Sort solution in descending order',
+                        action='store_true')
     args = parser.parse_args()
 
     solution_file_name = args.input_file_name
@@ -110,7 +127,8 @@ def main():
 
     visualize_distance(solution_object,
                        output_file_name=args.output,
-                       max_number_of_solutions=args.max)
+                       max_number_of_solutions=args.size,
+                       is_descending=args.descending)
 
 ###############################################################################
 
