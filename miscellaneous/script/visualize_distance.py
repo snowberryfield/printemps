@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
+###############################################################################
+# Copyright (c) 2020 Yuji KOGUMA
+# Released under the MIT license
+# https://opensource.org/licenses/mit-license.php
+###############################################################################
+
 import json
-import sys
+import argparse
 import numpy as np
 import copy
 import matplotlib.pyplot as plt
@@ -9,24 +15,34 @@ import matplotlib.pyplot as plt
 
 
 def compute_distance(x, y):
+    '''
+    Compute the Manhattan distance between solutions x and y.
+    '''
     return np.abs(x - y).sum()
 
 ###############################################################################
 
 
-def visualize(a_raw_solutions):
+def visualize_distance(solution_object, output_file_name, max_number_of_solutions):
+    '''
+    Visualize Manhattan distance for each solutions pair as a heatmap.
+    '''
+    # Summary
+    name = solution_object['name']
+    number_of_variables = solution_object['number_of_variables']
+    number_of_constraints = solution_object['number_of_constraints']
+
     # Copy and sort raw solutions.
-    raw_solutions = copy.deepcopy(a_raw_solutions)
+    raw_solutions = copy.deepcopy(solution_object['solutions'])
     raw_solutions.sort(key=lambda x: x['objective'])
     for solution in raw_solutions:
         solution['variables'] = np.array(solution['variables'])
 
     number_of_raw_solutions = len(raw_solutions)
 
-    # Dedplication of solutions.
+    # Dedeplication of solutions.
     unique_solutions = []
     EPSILON = 1E-5
-    MAX_NUMBER_OF_SOLUTIONS = 5000
 
     for i in range(number_of_raw_solutions):
         is_unique = True
@@ -40,12 +56,12 @@ def visualize(a_raw_solutions):
 
         if is_unique:
             unique_solutions.append(raw_solutions[i])
-            if len(unique_solutions) == MAX_NUMBER_OF_SOLUTIONS:
+            if len(unique_solutions) == max_number_of_solutions:
                 break
 
     number_of_unique_solutions = len(unique_solutions)
 
-    # Compute Manhattan distances for each solutions pairs.
+    # Compute Manhattan distance for each solutions pair.
     distances = np.zeros(
         (number_of_unique_solutions, number_of_unique_solutions))
 
@@ -57,27 +73,44 @@ def visualize(a_raw_solutions):
             distances[i, j] = distance
             distances[j, i] = distance
 
-    number_of_variables = len(unique_solutions[0]['variables'])
-
     # Plot the Manhattan distances as a heatmap.
-    plt.imshow(distances, interpolation='gaussian')
-    plt.title('Manhattan distance between 2 solutions (#Variable = %d)' %
-              number_of_variables)
+    title = 'Manhattan distance between 2 solutions \n %s (#Var.: %d, #Cons.: %d)' \
+        % (name, number_of_variables, number_of_constraints)
+
+    plt.title(title)
+    plt.imshow(distances)
     plt.xlabel('Solution No.')
     plt.ylabel('Solution No.')
     plt.grid(False)
     plt.colorbar()
-    plt.show()
+    plt.savefig(output_file_name)
 
 ###############################################################################
 
 
 def main():
-    solution_file_name = sys.argv[1]
-    with open(solution_file_name, 'r') as f:
-        solution = json.load(f)
+    parser = argparse.ArgumentParser(
+        description='A script for visualizing distance for each solutions pair.')
+    parser.add_argument('input_file_name',
+                        help='input file name.',
+                        type=str)
+    parser.add_argument('-o', '--output',
+                        help='output file name.',
+                        type=str,
+                        default='distance.png')
+    parser.add_argument('--max',
+                        help='maximum number of solutions for plot.',
+                        type=int,
+                        default=5000)
+    args = parser.parse_args()
 
-    visualize(solution)
+    solution_file_name = args.input_file_name
+    with open(solution_file_name, 'r') as f:
+        solution_object = json.load(f)
+
+    visualize_distance(solution_object,
+                       output_file_name=args.output,
+                       max_number_of_solutions=args.max)
 
 ###############################################################################
 
