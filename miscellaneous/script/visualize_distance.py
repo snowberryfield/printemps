@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
+###############################################################################
+# Copyright (c) 2020 Yuji KOGUMA
+# Released under the MIT license
+# https://opensource.org/licenses/mit-license.php
+###############################################################################
+
 import json
-import sys
+import argparse
 import numpy as np
 import copy
 import matplotlib.pyplot as plt
@@ -9,12 +15,18 @@ import matplotlib.pyplot as plt
 
 
 def compute_distance(x, y):
+    '''
+    Compute the Manhattan distance between solutions x and y.
+    '''
     return np.abs(x - y).sum()
 
 ###############################################################################
 
 
-def visualize_distance(solution_object, max_number_of_solutions=5000):
+def visualize_distance(solution_object, output_file_name, max_number_of_solutions):
+    '''
+    Visualize Manhattan distance for each solutions pair as a heatmap.
+    '''
     # Summary
     name = solution_object['name']
     number_of_variables = solution_object['number_of_variables']
@@ -28,7 +40,7 @@ def visualize_distance(solution_object, max_number_of_solutions=5000):
 
     number_of_raw_solutions = len(raw_solutions)
 
-    # Dedplication of solutions.
+    # Dedeplication of solutions.
     unique_solutions = []
     EPSILON = 1E-5
 
@@ -49,7 +61,7 @@ def visualize_distance(solution_object, max_number_of_solutions=5000):
 
     number_of_unique_solutions = len(unique_solutions)
 
-    # Compute Manhattan distances for each solutions pairs.
+    # Compute Manhattan distance for each solutions pair.
     distances = np.zeros(
         (number_of_unique_solutions, number_of_unique_solutions))
 
@@ -62,26 +74,43 @@ def visualize_distance(solution_object, max_number_of_solutions=5000):
             distances[j, i] = distance
 
     # Plot the Manhattan distances as a heatmap.
-    title = 'Manhattan distance between 2 solutions \n %s (#Var.:%d, #Cons.:%d)' \
+    title = 'Manhattan distance between 2 solutions \n %s (#Var.: %d, #Cons.: %d)' \
         % (name, number_of_variables, number_of_constraints)
 
     plt.title(title)
-    plt.imshow(distances, interpolation='gaussian')
+    plt.imshow(distances)
     plt.xlabel('Solution No.')
     plt.ylabel('Solution No.')
     plt.grid(False)
     plt.colorbar()
-    plt.show()
+    plt.savefig(output_file_name)
 
 ###############################################################################
 
 
 def main():
-    solution_file_name = sys.argv[1]
+    parser = argparse.ArgumentParser(
+        description='A script for visualizing distance for each solutions pair.')
+    parser.add_argument('input_file_name',
+                        help='input file name.',
+                        type=str)
+    parser.add_argument('-o', '--output',
+                        help='output file name.',
+                        type=str,
+                        default='distance.png')
+    parser.add_argument('--max',
+                        help='maximum number of solutions for plot.',
+                        type=int,
+                        default=5000)
+    args = parser.parse_args()
+
+    solution_file_name = args.input_file_name
     with open(solution_file_name, 'r') as f:
         solution_object = json.load(f)
 
-    visualize_distance(solution_object)
+    visualize_distance(solution_object,
+                       output_file_name=args.output,
+                       max_number_of_solutions=args.max)
 
 ###############################################################################
 
