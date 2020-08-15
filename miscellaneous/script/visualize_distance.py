@@ -10,6 +10,8 @@ import argparse
 import numpy as np
 import copy
 import matplotlib.pyplot as plt
+import matplotlib.cm as cm
+import networkx as nx
 
 ###############################################################################
 
@@ -24,7 +26,7 @@ def compute_distance(x, y):
 
 
 def visualize_distance(solution_object, output_file_name,
-                       max_number_of_solutions, is_descending):
+                       max_number_of_solutions, is_descending, is_enabled_create_mst):
     '''
     Visualize Manhattan distance for each solutions pair as a heatmap.
     '''
@@ -99,6 +101,43 @@ def visualize_distance(solution_object, output_file_name,
     plt.subplots_adjust(bottom=0.15)
     plt.savefig(output_file_name)
 
+    # Create the minimum spanning tree (Optional)
+    if is_enabled_create_mst:
+        graph = nx.Graph()
+        edges = []
+        for i in range(number_of_unique_solutions):
+            for j in range(i+1, number_of_unique_solutions):
+                edges.append((i, j, distances[i, j]))
+
+        graph.add_weighted_edges_from(edges)
+        mst = nx.minimum_spanning_tree(graph)
+
+        objectives = [solution['objective'] for solution in unique_solutions]
+        min_objective = np.min(objectives)
+        max_objective = np.max(objectives)
+
+        for i in range(number_of_unique_solutions):
+            color = cm.summer(
+                np.sqrt(objectives[i] - min_objective) / np.sqrt(max_objective - min_objective))
+            red = int(np.floor(color[0] * 255))
+            green = int(np.floor(color[1] * 255))
+            blue = int(np.floor(color[2] * 255))
+            alpha = 127
+            fillcolor = '#' + format(red, '02x') + format(green, '02x') + \
+                format(blue, '02x') + format(alpha, '02x')
+
+            mst.nodes[i]['label'] = objectives[i]
+            mst.nodes[i]['penwidth'] = 0.1
+            mst.nodes[i]['fillcolor'] = fillcolor
+            mst.nodes[i]['style'] = 'filled, rounded'
+
+        for (i, j) in mst.edges:
+            mst.edges[i, j]['penwidth'] = 0.3
+
+        nx.drawing.nx_agraph.write_dot(mst, 'distance.dot')
+        # nx.nx_agraph.view_pygraphviz(mst, prog='sfdp')
+
+
 ###############################################################################
 
 
@@ -119,6 +158,9 @@ def main():
     parser.add_argument('--descending',
                         help='Sort solution in descending order',
                         action='store_true')
+    parser.add_argument('--dot',
+                        help='Enable generate minimum spanning tree dot file',
+                        action='store_true')
     args = parser.parse_args()
 
     solution_file_name = args.input_file_name
@@ -128,7 +170,8 @@ def main():
     visualize_distance(solution_object,
                        output_file_name=args.output,
                        max_number_of_solutions=args.size,
-                       is_descending=args.descending)
+                       is_descending=args.descending,
+                       is_enabled_create_mst=args.dot)
 
 ###############################################################################
 
