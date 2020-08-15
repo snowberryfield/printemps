@@ -134,7 +134,8 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr std::string name(void) const {
+    inline std::string name(void) const {
+        /// This method cannot be constexpr by clang.
         return m_name;
     }
 
