@@ -2375,7 +2375,7 @@ class Model {
 
     /*************************************************************************/
     inline Solution<T_Variable, T_Expression> export_solution(void) const {
-        // cannot be constexpr by clang
+        // This method cannot be constexpr by clang.
         Solution<T_Variable, T_Expression> solution;
 
         for (const auto &proxy : m_variable_proxies) {
@@ -2410,7 +2410,7 @@ class Model {
     /*************************************************************************/
     inline NamedSolution<T_Variable, T_Expression> convert_to_named_solution(
         const Solution<T_Variable, T_Expression> &a_SOLUTION) const {
-        /// cannot be constexpr by clang
+        /// This method cannot be constexpr by clang.
         NamedSolution<T_Variable, T_Expression> named_solution;
 
         int variable_proxies_size   = m_variable_proxies.size();
@@ -2502,7 +2502,8 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr ModelSummary export_summary(void) const {
+    inline ModelSummary export_summary(void) const {
+        /// This method cannot be constexpr by clang.
         ModelSummary summary;
         summary.name                  = m_name;
         summary.number_of_variables   = this->number_of_variables();
