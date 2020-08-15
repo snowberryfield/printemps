@@ -308,7 +308,7 @@ inline void write_values_by_name(
         count++;
     }
     indent_level--;
-    *a_ofs << utility::indent_spaces(indent_level) << "}," << std::endl;
+    *a_ofs << utility::indent_spaces(indent_level) << "}" << std::endl;
 }
 
 /*****************************************************************************/
@@ -388,7 +388,7 @@ inline void write_values_by_array(
     }
 
     indent_level--;
-    *a_ofs << utility::indent_spaces(indent_level) << "}," << std::endl;
+    *a_ofs << utility::indent_spaces(indent_level) << "}" << std::endl;
 }
 }  // namespace model
 }  // namespace cppmh

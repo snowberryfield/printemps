@@ -107,6 +107,24 @@ inline std::string indent_spaces(const int a_INDENT_LEVEL) {
     }
     return indent_spaces;
 }
+
+/*****************************************************************************/
+inline std::string remove_extension(const std::string &a_ORIGINAL) {
+    auto position = a_ORIGINAL.find_last_of(".");
+    return a_ORIGINAL.substr(0, position);
+}
+
+/*****************************************************************************/
+inline std::string remove_path(const std::string &a_ORIGINAL) {
+    auto position = a_ORIGINAL.find_last_of("/\\");
+    return a_ORIGINAL.substr(position + 1);
+}
+
+/*****************************************************************************/
+inline std::string base_name(const std::string &a_ORIGINAL) {
+    return remove_path(remove_extension(a_ORIGINAL));
+}
+
 }  // namespace utility
 }  // namespace cppmh
 

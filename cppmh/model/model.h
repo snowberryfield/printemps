@@ -20,6 +20,7 @@
 #include "objective.h"
 #include "value_proxy.h"
 #include "solution.h"
+#include "model_summary.h"
 #include "named_solution.h"
 #include "plain_solution.h"
 #include "solution_score.h"
@@ -28,6 +29,10 @@
 
 #include "expression_binary_operator.h"
 #include "constraint_binary_operator.h"
+
+#include "variable_reference.h"
+#include "constraint_reference.h"
+#include "constraint_type_reference.h"
 
 namespace cppmh {
 namespace model {
@@ -44,116 +49,14 @@ struct ModelConstant {
 };
 
 /*****************************************************************************/
-template <class T_Variable, class T_Expression>
-struct VariableReference {
-    std::vector<Variable<T_Variable, T_Expression> *> variable_ptrs;
-    std::vector<Variable<T_Variable, T_Expression> *> fixed_variable_ptrs;
-    std::vector<Variable<T_Variable, T_Expression> *> selection_variable_ptrs;
-    std::vector<Variable<T_Variable, T_Expression> *> binary_variable_ptrs;
-    std::vector<Variable<T_Variable, T_Expression> *> integer_variable_ptrs;
-
-    /*************************************************************************/
-    VariableReference(void) {
-        this->initialize();
-    }
-
-    /*************************************************************************/
-    virtual ~VariableReference(void) {
-        /// nothing to do
-    }
-
-    /*************************************************************************/
-    inline void initialize(void) {
-        this->variable_ptrs.clear();
-        this->fixed_variable_ptrs.clear();
-        this->selection_variable_ptrs.clear();
-        this->binary_variable_ptrs.clear();
-        this->integer_variable_ptrs.clear();
-    }
-};
-
-/*****************************************************************************/
-template <class T_Variable, class T_Expression>
-struct ConstraintReference {
-    std::vector<Constraint<T_Variable, T_Expression> *> constraint_ptrs;
-    std::vector<Constraint<T_Variable, T_Expression> *>
-        selection_constraint_ptrs;
-    std::vector<Constraint<T_Variable, T_Expression> *>
-        disabled_constraint_ptrs;
-
-    /*************************************************************************/
-    ConstraintReference(void) {
-        this->initialize();
-    }
-
-    /*************************************************************************/
-    virtual ~ConstraintReference(void) {
-        /// nothing to do
-    }
-
-    /*************************************************************************/
-    inline void initialize(void) {
-        this->constraint_ptrs.clear();
-        this->selection_constraint_ptrs.clear();
-        this->disabled_constraint_ptrs.clear();
-    }
-};
-
-/*****************************************************************************/
-template <class T_Variable, class T_Expression>
-struct ConstraintTypeReference {
-    std::vector<Constraint<T_Variable, T_Expression> *> singleton_ptrs;
-    std::vector<Constraint<T_Variable, T_Expression> *> aggregation_ptrs;
-    std::vector<Constraint<T_Variable, T_Expression> *> precedence_ptrs;
-    std::vector<Constraint<T_Variable, T_Expression> *> variable_bound_ptrs;
-    std::vector<Constraint<T_Variable, T_Expression> *> set_partitioning_ptrs;
-    std::vector<Constraint<T_Variable, T_Expression> *> set_packing_ptrs;
-    std::vector<Constraint<T_Variable, T_Expression> *> set_covering_ptrs;
-    std::vector<Constraint<T_Variable, T_Expression> *> cardinality_ptrs;
-    std::vector<Constraint<T_Variable, T_Expression> *> invariant_knapsack_ptrs;
-    std::vector<Constraint<T_Variable, T_Expression> *> equation_knapsack_ptrs;
-    std::vector<Constraint<T_Variable, T_Expression> *> bin_packing_ptrs;
-    std::vector<Constraint<T_Variable, T_Expression> *> knapsack_ptrs;
-    std::vector<Constraint<T_Variable, T_Expression> *> integer_knapsack_ptrs;
-    std::vector<Constraint<T_Variable, T_Expression> *> general_linear_ptrs;
-    std::vector<Constraint<T_Variable, T_Expression> *> nonlinear_ptrs;
-
-    /*************************************************************************/
-    ConstraintTypeReference(void) {
-        this->initialize();
-    }
-
-    /*************************************************************************/
-    virtual ~ConstraintTypeReference(void) {
-        /// nothing to do
-    }
-
-    /*************************************************************************/
-    inline void initialize(void) {
-        this->singleton_ptrs.clear();
-        this->aggregation_ptrs.clear();
-        this->precedence_ptrs.clear();
-        this->variable_bound_ptrs.clear();
-        this->set_partitioning_ptrs.clear();
-        this->set_packing_ptrs.clear();
-        this->cardinality_ptrs.clear();
-        this->invariant_knapsack_ptrs.clear();
-        this->equation_knapsack_ptrs.clear();
-        this->bin_packing_ptrs.clear();
-        this->knapsack_ptrs.clear();
-        this->integer_knapsack_ptrs.clear();
-        this->general_linear_ptrs.clear();
-        this->nonlinear_ptrs.clear();
-    }
-};
-
-/*****************************************************************************/
 enum SelectionMode : int { None, Defined, Smaller, Larger, Independent };
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class Model {
    private:
+    std::string m_name;
+
     std::vector<VariableProxy<T_Variable, T_Expression>>   m_variable_proxies;
     std::vector<ExpressionProxy<T_Variable, T_Expression>> m_expression_proxies;
     std::vector<ConstraintProxy<T_Variable, T_Expression>> m_constraint_proxies;
@@ -185,12 +88,20 @@ class Model {
     }
 
     /*************************************************************************/
+    Model(const std::string &a_NAME) {
+        this->initialize();
+        this->set_name(a_NAME);
+    }
+
+    /*************************************************************************/
     virtual ~Model(void) {
         /// nothing to do
     }
 
     /*************************************************************************/
     inline void initialize(void) {
+        m_name = "";
+
         m_variable_proxies.reserve(
             ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES);
         m_expression_proxies.reserve(
@@ -215,6 +126,17 @@ class Model {
 
         m_neighborhood.initialize();
         m_callback = [](void) {};
+    }
+
+    /*************************************************************************/
+    inline constexpr void set_name(const std::string &a_NAME) {
+        m_name = a_NAME;
+    }
+
+    /*************************************************************************/
+    inline std::string name(void) const {
+        /// This method cannot be constexpr by clang.
+        return m_name;
     }
 
     /*************************************************************************/
@@ -2454,7 +2376,7 @@ class Model {
 
     /*************************************************************************/
     inline Solution<T_Variable, T_Expression> export_solution(void) const {
-        // cannot be constexpr by clang
+        // This method cannot be constexpr by clang.
         Solution<T_Variable, T_Expression> solution;
 
         for (const auto &proxy : m_variable_proxies) {
@@ -2489,12 +2411,15 @@ class Model {
     /*************************************************************************/
     inline NamedSolution<T_Variable, T_Expression> convert_to_named_solution(
         const Solution<T_Variable, T_Expression> &a_SOLUTION) const {
-        /// cannot be constexpr by clang
+        /// This method cannot be constexpr by clang.
         NamedSolution<T_Variable, T_Expression> named_solution;
 
         int variable_proxies_size   = m_variable_proxies.size();
         int expression_proxies_size = m_expression_proxies.size();
         int constraint_proxies_size = m_constraint_proxies.size();
+
+        /// Summary
+        named_solution.m_model_summary = this->export_summary();
 
         /// Decision variables
         for (auto i = 0; i < variable_proxies_size; i++) {
@@ -2575,6 +2500,16 @@ class Model {
                 }
             }
         }
+    }
+
+    /*************************************************************************/
+    inline ModelSummary export_summary(void) const {
+        /// This method cannot be constexpr by clang.
+        ModelSummary summary;
+        summary.name                  = m_name;
+        summary.number_of_variables   = this->number_of_variables();
+        summary.number_of_constraints = this->number_of_constraints();
+        return summary;
     }
 
     /*************************************************************************/
