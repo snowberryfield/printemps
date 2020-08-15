@@ -44,6 +44,8 @@ TEST_F(TestModel, initialize) {
     auto max_number_of_constraint_proxies =
         cppmh::model::ModelConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES;
 
+    EXPECT_EQ("", model.name());
+
     EXPECT_EQ(max_number_of_variable_proxies,
               static_cast<int>(model.variable_proxies().capacity()));
     EXPECT_EQ(max_number_of_expression_proxies,
@@ -119,6 +121,25 @@ TEST_F(TestModel, initialize) {
         true, model.constraint_type_reference().general_linear_ptrs.empty());
     EXPECT_EQ(  //
         true, model.constraint_type_reference().nonlinear_ptrs.empty());
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, constructor_arg_name) {
+    cppmh::model::Model<int, double> model("name");
+    EXPECT_EQ("name", model.name());
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, set_name) {
+    cppmh::model::Model<int, double> model;
+    EXPECT_EQ("", model.name());
+    model.set_name("name");
+    EXPECT_EQ("name", model.name());
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, name) {
+    /// This method is tested in set_name().
 }
 
 /*****************************************************************************/

@@ -54,6 +54,8 @@ enum SelectionMode : int { None, Defined, Smaller, Larger, Independent };
 template <class T_Variable, class T_Expression>
 class Model {
    private:
+    std::string m_name;
+
     std::vector<VariableProxy<T_Variable, T_Expression>>   m_variable_proxies;
     std::vector<ExpressionProxy<T_Variable, T_Expression>> m_expression_proxies;
     std::vector<ConstraintProxy<T_Variable, T_Expression>> m_constraint_proxies;
@@ -85,12 +87,20 @@ class Model {
     }
 
     /*************************************************************************/
+    Model(const std::string &a_NAME) {
+        this->initialize();
+        this->set_name(a_NAME);
+    }
+
+    /*************************************************************************/
     virtual ~Model(void) {
         /// nothing to do
     }
 
     /*************************************************************************/
     inline void initialize(void) {
+        m_name = "";
+
         m_variable_proxies.reserve(
             ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES);
         m_expression_proxies.reserve(
@@ -115,6 +125,16 @@ class Model {
 
         m_neighborhood.initialize();
         m_callback = [](void) {};
+    }
+
+    /*************************************************************************/
+    inline constexpr void set_name(const std::string &a_NAME) {
+        m_name = a_NAME;
+    }
+
+    /*************************************************************************/
+    inline constexpr std::string name(void) const {
+        return m_name;
     }
 
     /*************************************************************************/
