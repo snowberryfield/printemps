@@ -260,6 +260,20 @@ class ValueProxy : public AbstractMultiArray {
 
 /*****************************************************************************/
 template <class T_Value>
+inline constexpr bool operator==(const ValueProxy<T_Value> &a_LEFT,
+                                 const ValueProxy<T_Value> &a_RIGHT) {
+    return a_LEFT.flat_indexed_values() == a_RIGHT.flat_indexed_values();
+}
+
+/*****************************************************************************/
+template <class T_Value>
+inline constexpr bool operator!=(const ValueProxy<T_Value> &a_LEFT,
+                                 const ValueProxy<T_Value> &a_RIGHT) {
+    return !(a_LEFT == a_RIGHT);
+}
+
+/*****************************************************************************/
+template <class T_Value>
 inline void print_values(
     const std::unordered_map<std::string, ValueProxy<T_Value>> a_VALUE_PROXIES,
     const std::string &                                        a_CATEGORY) {

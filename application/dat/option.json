@@ -23,6 +23,8 @@
     "selection_mode": 0,
     "seed": 1,
     "target_objective_value": -1E100,
+    "is_enabled_collect_historical_data": false,
+    "historical_data_capacity": 5000,
     "verbose": 0,
     "lagrange_dual": {
         "iteration_max": 10000,
