@@ -47,7 +47,7 @@ def visualize_distance(solution_object, output_file_name,
 
     number_of_raw_solutions = len(raw_solutions)
 
-    # Dedeplication of solutions.
+    # Deduplication of solutions.
     unique_solutions = []
     EPSILON = 1E-5
 
@@ -81,7 +81,7 @@ def visualize_distance(solution_object, output_file_name,
             distances[j, i] = distance
 
     # Plot the Manhattan distances as a heatmap.
-    title = 'Manhattan distance between 2 solutions \n %s (#Var.: %d, #Cons.: %d)' \
+    title = 'Manhattan distance between 2 solutions \n (Instance: %s, #Var.: %d, #Cons.: %d)' \
         % (name, number_of_variables, number_of_constraints)
     if is_descending:
         footnote_text = '* The solutions are sorted in descending order of objective function value.'
@@ -104,6 +104,13 @@ def visualize_distance(solution_object, output_file_name,
     # Create the minimum spanning tree (Optional)
     if is_enabled_create_mst:
         graph = nx.Graph()
+        label = 'Solution network: The minimum spanning tree of a complete graph where nodes denote solutions. \\n' \
+            + 'An edge connecting 2 nodes is weighted by Manhattan distance between the solutions. \\n' \
+            + '(Instance: %s, #Var.: %d, #Cons.: %d)' \
+            % (name, number_of_variables, number_of_constraints)
+        graph.graph['graph'] = {
+            'label': label,
+            'labelloc': 't'}
         edges = []
         for i in range(number_of_unique_solutions):
             for j in range(i+1, number_of_unique_solutions):
