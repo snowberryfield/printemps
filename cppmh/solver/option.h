@@ -49,6 +49,7 @@ struct OptionConstant {
     static constexpr bool   DEFAULT_SEED             = 1;
     static constexpr bool   DEFAULT_VERBOSE          = Verbose::None;
     static constexpr bool   DEFAULT_IS_ENABLED_COLLECT_HISTORICAL_DATA = false;
+    static constexpr int    DEFAULT_HISTORICAL_DATA_CAPACITY           = 5000;
 };
 
 /*****************************************************************************/
@@ -82,6 +83,7 @@ struct Option {
     int    seed;
     int    verbose;
     bool   is_enabled_collect_historical_data;  // hidden
+    int    historical_data_capacity;            // hidden
 
     tabu_search::TabuSearchOption     tabu_search;
     local_search::LocalSearchOption   local_search;
@@ -146,6 +148,8 @@ struct Option {
         this->verbose                = OptionConstant::DEFAULT_VERBOSE;
         this->is_enabled_collect_historical_data =
             OptionConstant::DEFAULT_IS_ENABLED_COLLECT_HISTORICAL_DATA;
+        this->historical_data_capacity =
+            OptionConstant::DEFAULT_HISTORICAL_DATA_CAPACITY;
 
         this->lagrange_dual.initialize();
         this->local_search.initialize();
@@ -266,6 +270,10 @@ struct Option {
         utility::print(                                  //
             " - is_enabled_collect_historical_data: " +  //
             utility::to_string(this->is_enabled_collect_historical_data, "%d"));
+
+        utility::print(                        //
+            " - historical_data_capacity: " +  //
+            utility::to_string(this->historical_data_capacity, "%d"));
 
         utility::print(                           //
             " - lagrange_dual.iteration_max: " +  //

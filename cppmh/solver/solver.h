@@ -144,10 +144,11 @@ Result<T_Variable, T_Expression> solve(
     Memory memory(model);
 
     /**
-     * Prepare historical solutions holder.
+     * Prepare historical solutions pool.
      */
-    std::vector<model::PlainSolution<T_Variable, T_Expression>>
-        historical_feasible_solutions;
+    model::PlainSolutionPool<T_Variable, T_Expression>  //
+        solution_pool(master_option.historical_data_capacity,
+                      model->is_minimization());
 
     /**
      * Compute the values of expressions, constraints, and the objective
@@ -232,10 +233,7 @@ Result<T_Variable, T_Expression> solve(
              * Update the historical data.
              */
             if (master_option.is_enabled_collect_historical_data) {
-                historical_feasible_solutions.insert(
-                    historical_feasible_solutions.end(),
-                    result.historical_feasible_solutions.begin(),
-                    result.historical_feasible_solutions.end());
+                solution_pool.push(result.historical_feasible_solutions);
             }
 
             /**
@@ -345,10 +343,7 @@ Result<T_Variable, T_Expression> solve(
          * Update the historical data.
          */
         if (master_option.is_enabled_collect_historical_data) {
-            historical_feasible_solutions.insert(
-                historical_feasible_solutions.end(),
-                result.historical_feasible_solutions.begin(),
-                result.historical_feasible_solutions.end());
+            solution_pool.push(result.historical_feasible_solutions);
         }
 
         /**
@@ -412,7 +407,6 @@ Result<T_Variable, T_Expression> solve(
     /**
      * Run tabu searches to find better solutions.
      */
-
     int iteration                           = 0;
     int next_number_of_initial_modification = 0;
     int next_inital_tabu_tenure = master_option.tabu_search.initial_tabu_tenure;
@@ -522,10 +516,7 @@ Result<T_Variable, T_Expression> solve(
          * Update the historical data.
          */
         if (master_option.is_enabled_collect_historical_data) {
-            historical_feasible_solutions.insert(
-                historical_feasible_solutions.end(),
-                result.historical_feasible_solutions.begin(),
-                result.historical_feasible_solutions.end());
+            solution_pool.push(result.historical_feasible_solutions);
         }
 
         /**
@@ -558,21 +549,7 @@ Result<T_Variable, T_Expression> solve(
             incumbent_holder.global_augmented_incumbent_objective() -
             result.incumbent_holder.local_augmented_incumbent_objective();
 
-        if (result_local_solution.is_feasible || gap < -constant::EPSILON) {
-            /**
-             * Relax the local penalty coefficients if
-             * (1) The local augmented incumbent solution obtained in the
-             * last tabu search is feasible, or (2) The gap the (global
-             * augmented incumbent objective) - (the local augmented
-             * incumbent objective obtained in the last tabu search) is
-             * negative.
-             */
-            for (auto&& proxy : local_penalty_coefficient_proxies) {
-                for (auto&& element : proxy.flat_indexed_values()) {
-                    element *= master_option.penalty_coefficient_relaxing_rate;
-                }
-            }
-        } else if (gap > constant::EPSILON) {
+        if (gap > constant::EPSILON) {
             /**
              * If The gap the (global augmented incumbent objective) - (the
              * local augmented incumbent objective obtained in the last tabu
@@ -632,8 +609,25 @@ Result<T_Variable, T_Expression> solve(
             }
         } else {
             /**
-             * Otherwise, the penalty coefficients will not change.
+             * Otherwise relax the local penalty coefficients of which
+             * corresponding constraints are satisfied.
              */
+            for (auto&& proxy : local_penalty_coefficient_proxies) {
+                int  id = proxy.id();
+                auto violation_values =
+                    result_local_solution.violation_value_proxies[id]
+                        .flat_indexed_values();
+
+                int flat_index = 0;
+                for (auto&& element : proxy.flat_indexed_values()) {
+                    if (violation_values[flat_index] < constant::EPSILON) {
+                        element *=
+                            master_option.penalty_coefficient_relaxing_rate;
+                    }
+
+                    flat_index++;
+                }
+            }
         }
 
         /**
@@ -934,7 +928,7 @@ Result<T_Variable, T_Expression> solve(
     result.status.number_of_tabu_search_loops = number_of_tabu_search_loops;
 
     result.history.model_summary      = model->export_summary();
-    result.history.feasible_solutions = historical_feasible_solutions;
+    result.history.feasible_solutions = solution_pool.solutions();
 
     return result;
 }

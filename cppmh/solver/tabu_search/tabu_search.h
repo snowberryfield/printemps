@@ -69,6 +69,11 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     IncumbentHolder_T incumbent_holder = a_INCUMBENT_HOLDER;
 
     /**
+     * Reset the local augmented incumbent.
+     */
+    incumbent_holder.reset_local_augmented_incumbent();
+
+    /**
      * Determine whether fast evaluation is available or not.
      */
     model->setup_is_enabled_fast_evaluation();
@@ -91,11 +96,6 @@ TabuSearchResult<T_Variable, T_Expression> solve(
 
     int update_status =
         incumbent_holder.try_update_incumbent(model, solution_score);
-
-    /**
-     * Reset the local augmented incumbent.
-     */
-    incumbent_holder.reset_local_augmented_incumbent();
     int total_update_status = IncumbentHolderConstant::STATUS_NO_UPDATED;
 
     /**
