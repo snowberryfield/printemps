@@ -26,6 +26,7 @@
 #include "solution_score.h"
 #include "selection.h"
 #include "neighborhood.h"
+#include "plain_solution_pool.h"
 
 #include "expression_binary_operator.h"
 #include "constraint_binary_operator.h"
@@ -134,8 +135,7 @@ class Model {
     }
 
     /*************************************************************************/
-    inline std::string name(void) const {
-        /// This method cannot be constexpr by clang.
+    inline constexpr const std::string &name(void) const {
         return m_name;
     }
 
