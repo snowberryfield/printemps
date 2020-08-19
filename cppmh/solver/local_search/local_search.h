@@ -140,7 +140,12 @@ LocalSearchResult<T_Variable, T_Expression> solve(
         /**
          * Update the moves.
          */
-        model->neighborhood().update_moves();
+        if (model->is_linear()) {
+            model->update_variable_improvability();
+            model->neighborhood().update_moves(true);
+        } else {
+            model->neighborhood().update_moves(false);
+        }
         model->neighborhood().shuffle_moves(&get_rand_mt);
 
         bool found_improving_solution = false;

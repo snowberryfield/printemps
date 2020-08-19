@@ -2147,6 +2147,93 @@ class Model {
     }
 
     /*************************************************************************/
+    inline constexpr void update_variable_improvability(void) {
+        for (auto &&variable_ptr : m_variable_reference.variable_ptrs) {
+            variable_ptr->set_is_improvable(false);
+        }
+        if (this->is_feasible()) {
+            auto &sensitivities = m_objective.expression().sensitivities();
+            for (auto &&sensitivity : sensitivities) {
+                auto &variable_ptr = sensitivity.first;
+                auto  coefficient  = sensitivity.second;
+
+                if (this->is_minimization()) {
+                    if (coefficient > 0 &&  //
+                        (variable_ptr->value() !=
+                         variable_ptr->lower_bound())) {
+                        variable_ptr->set_is_improvable(true);
+                    } else if (coefficient < 0 &&
+                               (variable_ptr->value() !=
+                                variable_ptr->upper_bound())) {
+                        variable_ptr->set_is_improvable(true);
+                    }
+                } else {
+                    if (coefficient > 0 &&  //
+                        (variable_ptr->value() !=
+                         variable_ptr->upper_bound())) {
+                        variable_ptr->set_is_improvable(true);
+                    } else if (coefficient < 0 &&
+                               (variable_ptr->value() !=
+                                variable_ptr->lower_bound())) {
+                        variable_ptr->set_is_improvable(true);
+                    }
+                }
+            }
+        } else {
+            for (auto &&constraint_ptr :
+                 m_constraint_reference.constraint_ptrs) {
+                if (!constraint_ptr->is_enabled()) {
+                    continue;
+                }
+
+                auto &sensitivities =
+                    constraint_ptr->expression().sensitivities();
+                auto constraint_value = constraint_ptr->constraint_value();
+
+                if ((constraint_ptr->sense() == ConstraintSense::Lower) ||
+                    (constraint_ptr->sense() == ConstraintSense::Equal)) {
+                    if (constraint_value > 0) {
+                        for (auto &&sensitivity : sensitivities) {
+                            auto &variable_ptr = sensitivity.first;
+                            auto  coefficient  = sensitivity.second;
+
+                            if (coefficient > 0 &&
+                                (variable_ptr->value() !=
+                                 variable_ptr->lower_bound())) {
+                                variable_ptr->set_is_improvable(true);
+
+                            } else if (coefficient < 0 &&
+                                       (variable_ptr->value() !=
+                                        variable_ptr->upper_bound())) {
+                                variable_ptr->set_is_improvable(true);
+                            }
+                        }
+                    }
+                }
+                if ((constraint_ptr->sense() == ConstraintSense::Upper) ||
+                    (constraint_ptr->sense() == ConstraintSense::Equal)) {
+                    if (constraint_value < 0) {
+                        for (auto &&sensitivity : sensitivities) {
+                            auto &variable_ptr = sensitivity.first;
+                            auto  coefficient  = sensitivity.second;
+
+                            if (coefficient > 0 &&
+                                (variable_ptr->value() !=
+                                 variable_ptr->upper_bound())) {
+                                variable_ptr->set_is_improvable(true);
+                            } else if (coefficient < 0 &&
+                                       (variable_ptr->value() !=
+                                        variable_ptr->lower_bound())) {
+                                variable_ptr->set_is_improvable(true);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /*************************************************************************/
     inline constexpr bool is_feasible(void) const {
         for (const auto &proxy : m_constraint_proxies) {
             for (const auto &constraint : proxy.flat_indexed_constraints()) {
