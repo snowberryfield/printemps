@@ -52,6 +52,18 @@ inline constexpr bool has_bound_violation(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
+inline constexpr bool has_improvable_variable(
+    const Move<T_Variable, T_Expression> &a_MOVE) {
+    for (const auto &alteration : a_MOVE.alterations) {
+        if (alteration.first->is_improvable()) {
+            return true;
+        }
+    }
+    return false;
+};
+
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
 class Variable;
 
 /*****************************************************************************/
@@ -665,7 +677,8 @@ class Neighborhood {
     }
 
     /*************************************************************************/
-    inline constexpr void update_moves(void) noexcept {
+    inline constexpr void update_moves(
+        const bool a_IS_ENABLED_IMPROBABILITY_SCREENING) noexcept {
         /// Binary
         if (m_binary_moves.size() > 0 &&  //
             m_is_enabled_binary_move) {
@@ -735,6 +748,10 @@ class Neighborhood {
                     model::has_selection_variables(move)) {
                     continue;
                 }
+                if (a_IS_ENABLED_IMPROBABILITY_SCREENING &&
+                    !has_improvable_variable(move)) {
+                    continue;
+                }
 
                 m_move_ptrs[index++] = &move;
             }
@@ -751,6 +768,10 @@ class Neighborhood {
                     continue;
                 }
                 if (has_bound_violation(move)) {
+                    continue;
+                }
+                if (a_IS_ENABLED_IMPROBABILITY_SCREENING &&
+                    !has_improvable_variable(move)) {
                     continue;
                 }
 
@@ -772,6 +793,10 @@ class Neighborhood {
                 if (model::has_bound_violation(move)) {
                     continue;
                 }
+                if (a_IS_ENABLED_IMPROBABILITY_SCREENING &&
+                    !has_improvable_variable(move)) {
+                    continue;
+                }
                 m_move_ptrs[index++] = &move;
             }
         }
@@ -790,6 +815,10 @@ class Neighborhood {
                 if (model::has_bound_violation(move)) {
                     continue;
                 }
+                if (a_IS_ENABLED_IMPROBABILITY_SCREENING &&
+                    !has_improvable_variable(move)) {
+                    continue;
+                }
                 m_move_ptrs[index++] = &move;
             }
         }
@@ -804,8 +833,11 @@ class Neighborhood {
                     model::has_selection_variables(move)) {
                     continue;
                 }
-
                 if (model::has_bound_violation(move)) {
+                    continue;
+                }
+                if (a_IS_ENABLED_IMPROBABILITY_SCREENING &&
+                    !has_improvable_variable(move)) {
                     continue;
                 }
                 m_move_ptrs[index++] = &move;
@@ -822,8 +854,11 @@ class Neighborhood {
                     model::has_selection_variables(move)) {
                     continue;
                 }
-
                 if (move.alterations[0].first->value() == 1) {
+                    continue;
+                }
+                if (a_IS_ENABLED_IMPROBABILITY_SCREENING &&
+                    !has_improvable_variable(move)) {
                     continue;
                 }
 
@@ -841,8 +876,11 @@ class Neighborhood {
                     model::has_selection_variables(move)) {
                     continue;
                 }
-
                 if (model::has_bound_violation(move)) {
+                    continue;
+                }
+                if (a_IS_ENABLED_IMPROBABILITY_SCREENING &&
+                    !has_improvable_variable(move)) {
                     continue;
                 }
                 m_move_ptrs[index++] = &move;
@@ -855,8 +893,11 @@ class Neighborhood {
                 if (m_has_fixed_variables && model::has_fixed_variables(move)) {
                     continue;
                 }
-
                 if (move.alterations[0].first == move.alterations[1].first) {
+                    continue;
+                }
+                if (a_IS_ENABLED_IMPROBABILITY_SCREENING &&
+                    !has_improvable_variable(move)) {
                     continue;
                 }
 
