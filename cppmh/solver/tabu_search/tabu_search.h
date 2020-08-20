@@ -203,9 +203,11 @@ TabuSearchResult<T_Variable, T_Expression> solve(
              * only improvable moves will be generated.
              */
             model->update_variable_improvability();
-            model->neighborhood().update_moves(true);
+            model->neighborhood().update_moves(
+                true, option.is_enabled_parallel_neighborhood_update);
         } else {
-            model->neighborhood().update_moves(false);
+            model->neighborhood().update_moves(
+                false, option.is_enabled_parallel_neighborhood_update);
         }
 
         if (option.tabu_search.is_enabled_shuffle) {

@@ -142,9 +142,11 @@ LocalSearchResult<T_Variable, T_Expression> solve(
          */
         if (model->is_linear()) {
             model->update_variable_improvability();
-            model->neighborhood().update_moves(true);
+            model->neighborhood().update_moves(
+                true, option.is_enabled_parallel_neighborhood_update);
         } else {
-            model->neighborhood().update_moves(false);
+            model->neighborhood().update_moves(
+                false, option.is_enabled_parallel_neighborhood_update);
         }
         model->neighborhood().shuffle_moves(&get_rand_mt);
 
