@@ -232,7 +232,8 @@ Result<T_Variable, T_Expression> solve(
             /**
              * Update the historical data.
              */
-            if (master_option.is_enabled_collect_historical_data) {
+            if (master_option.is_enabled_collect_historical_data &&
+                result.historical_feasible_solutions.size() > 0) {
                 solution_pool.push(result.historical_feasible_solutions);
             }
 
@@ -342,7 +343,8 @@ Result<T_Variable, T_Expression> solve(
         /**
          * Update the historical data.
          */
-        if (master_option.is_enabled_collect_historical_data) {
+        if (master_option.is_enabled_collect_historical_data &&
+            result.historical_feasible_solutions.size() > 0) {
             solution_pool.push(result.historical_feasible_solutions);
         }
 
@@ -515,7 +517,8 @@ Result<T_Variable, T_Expression> solve(
         /**
          * Update the historical data.
          */
-        if (master_option.is_enabled_collect_historical_data) {
+        if (master_option.is_enabled_collect_historical_data &&
+            result.historical_feasible_solutions.size() > 0) {
             solution_pool.push(result.historical_feasible_solutions);
         }
 
