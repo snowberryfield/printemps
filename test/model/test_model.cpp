@@ -2347,6 +2347,220 @@ TEST_F(TestModel, update_arg_void) {
 }
 
 /*****************************************************************************/
+TEST_F(TestModel, update_variable_improvability) {
+    {
+        cppmh::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x", -10, 10);
+        auto& y = model.create_variable("y", -10, 10);
+
+        [[maybe_unused]] auto& g = model.create_constraint("g", x - y <= 0);
+
+        model.minimize(-x + y);
+        model.categorize_variables();
+        model.categorize_constraints();
+        model.setup_fixed_sensitivities(false);
+
+        x = -10;
+        y = -10;
+
+        model.update();
+        model.update_variable_improvability();
+        EXPECT_EQ(true, x(0).is_improvable());
+        EXPECT_EQ(false, y(0).is_improvable());
+
+        x = 10;
+        y = 10;
+        model.update();
+        model.update_variable_improvability();
+        EXPECT_EQ(false, x(0).is_improvable());
+        EXPECT_EQ(true, y(0).is_improvable());
+
+        x = 10;
+        y = -10;
+        model.update();
+        model.update_variable_improvability();
+        EXPECT_EQ(true, x(0).is_improvable());
+        EXPECT_EQ(true, y(0).is_improvable());
+    }
+    {
+        cppmh::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x", -10, 10);
+        auto& y = model.create_variable("y", -10, 10);
+
+        [[maybe_unused]] auto& g = model.create_constraint("g", x - y == 0);
+
+        model.minimize(-x + y);
+        model.categorize_variables();
+        model.categorize_constraints();
+        model.setup_fixed_sensitivities(false);
+
+        x = -10;
+        y = -10;
+
+        model.update();
+        model.update_variable_improvability();
+        EXPECT_EQ(true, x(0).is_improvable());
+        EXPECT_EQ(false, y(0).is_improvable());
+
+        x = 10;
+        y = 10;
+        model.update();
+        model.update_variable_improvability();
+        EXPECT_EQ(false, x(0).is_improvable());
+        EXPECT_EQ(true, y(0).is_improvable());
+
+        x = 10;
+        y = -10;
+        model.update();
+        model.update_variable_improvability();
+        EXPECT_EQ(true, x(0).is_improvable());
+        EXPECT_EQ(true, y(0).is_improvable());
+    }
+    {
+        cppmh::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x", -10, 10);
+        auto& y = model.create_variable("y", -10, 10);
+
+        [[maybe_unused]] auto& g = model.create_constraint("g", x - y >= 0);
+
+        model.minimize(-x + y);
+        model.categorize_variables();
+        model.categorize_constraints();
+        model.setup_fixed_sensitivities(false);
+
+        x = -10;
+        y = -10;
+
+        model.update();
+        model.update_variable_improvability();
+        EXPECT_EQ(true, x(0).is_improvable());
+        EXPECT_EQ(false, y(0).is_improvable());
+
+        x = 10;
+        y = 10;
+        model.update();
+        model.update_variable_improvability();
+        EXPECT_EQ(false, x(0).is_improvable());
+        EXPECT_EQ(true, y(0).is_improvable());
+
+        x = -10;
+        y = 10;
+        model.update();
+        model.update_variable_improvability();
+        EXPECT_EQ(true, x(0).is_improvable());
+        EXPECT_EQ(true, y(0).is_improvable());
+    }
+    {
+        cppmh::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x", -10, 10);
+        auto& y = model.create_variable("y", -10, 10);
+
+        [[maybe_unused]] auto& g = model.create_constraint("g", x - y <= 0);
+
+        model.maximize(-x + y);
+        model.categorize_variables();
+        model.categorize_constraints();
+        model.setup_fixed_sensitivities(false);
+
+        x = -10;
+        y = -10;
+
+        model.update();
+        model.update_variable_improvability();
+        EXPECT_EQ(false, x(0).is_improvable());
+        EXPECT_EQ(true, y(0).is_improvable());
+
+        x = 10;
+        y = 10;
+        model.update();
+        model.update_variable_improvability();
+        EXPECT_EQ(true, x(0).is_improvable());
+        EXPECT_EQ(false, y(0).is_improvable());
+
+        x = 10;
+        y = -10;
+        model.update();
+        model.update_variable_improvability();
+        EXPECT_EQ(true, x(0).is_improvable());
+        EXPECT_EQ(true, y(0).is_improvable());
+    }
+    {
+        cppmh::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x", -10, 10);
+        auto& y = model.create_variable("y", -10, 10);
+
+        [[maybe_unused]] auto& g = model.create_constraint("g", x - y == 0);
+
+        model.maximize(-x + y);
+        model.categorize_variables();
+        model.categorize_constraints();
+        model.setup_fixed_sensitivities(false);
+
+        x = -10;
+        y = -10;
+
+        model.update();
+        model.update_variable_improvability();
+        EXPECT_EQ(false, x(0).is_improvable());
+        EXPECT_EQ(true, y(0).is_improvable());
+
+        x = 10;
+        y = 10;
+        model.update();
+        model.update_variable_improvability();
+        EXPECT_EQ(true, x(0).is_improvable());
+        EXPECT_EQ(false, y(0).is_improvable());
+
+        x = 10;
+        y = -10;
+        model.update();
+        model.update_variable_improvability();
+        EXPECT_EQ(true, x(0).is_improvable());
+        EXPECT_EQ(true, y(0).is_improvable());
+    }
+    {
+        cppmh::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x", -10, 10);
+        auto& y = model.create_variable("y", -10, 10);
+
+        [[maybe_unused]] auto& g = model.create_constraint("g", x - y >= 0);
+
+        model.maximize(-x + y);
+        model.categorize_variables();
+        model.categorize_constraints();
+        model.setup_fixed_sensitivities(false);
+
+        x = -10;
+        y = -10;
+
+        model.update();
+        model.update_variable_improvability();
+        EXPECT_EQ(false, x(0).is_improvable());
+        EXPECT_EQ(true, y(0).is_improvable());
+
+        x = 10;
+        y = 10;
+        model.update();
+        model.update_variable_improvability();
+        EXPECT_EQ(true, x(0).is_improvable());
+        EXPECT_EQ(false, y(0).is_improvable());
+
+        x = -10;
+        y = 10;
+        model.update();
+        model.update_variable_improvability();
+        EXPECT_EQ(true, x(0).is_improvable());
+        EXPECT_EQ(true, y(0).is_improvable());
+    }
+}
+
+/*****************************************************************************/
 TEST_F(TestModel, update_arg_move) {
     cppmh::model::Model<int, double> model;
 

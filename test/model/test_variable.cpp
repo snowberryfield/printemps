@@ -47,6 +47,7 @@ TEST_F(TestVariable, initialize) {
     EXPECT_EQ(std::numeric_limits<int>::min() + 1, variable.lower_bound());
     EXPECT_EQ(std::numeric_limits<int>::max() - 1, variable.upper_bound());
     EXPECT_EQ(false, variable.has_bounds());
+    EXPECT_EQ(false, variable.is_improvable());
     EXPECT_EQ(cppmh::model::VariableSense::Integer, variable.sense());
     EXPECT_EQ(nullptr, variable.selection_ptr());
     EXPECT_EQ(true, variable.related_constraint_ptrs().empty());
@@ -225,6 +226,16 @@ TEST_F(TestVariable, upper_bound) {
 /*****************************************************************************/
 TEST_F(TestVariable, has_bounds) {
     /// This method is tested in set_bound().
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, set_is_improvable) {
+    auto variable = cppmh::model::Variable<int, double>::create_instance();
+    EXPECT_EQ(false, variable.is_improvable());
+    variable.set_is_improvable(true);
+    EXPECT_EQ(true, variable.is_improvable());
+    variable.set_is_improvable(false);
+    EXPECT_EQ(false, variable.is_improvable());
 }
 
 /*****************************************************************************/
