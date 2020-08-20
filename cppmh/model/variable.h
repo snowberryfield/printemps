@@ -49,6 +49,7 @@ class Variable : public AbstractMultiArrayElement {
     T_Variable    m_lower_bound;
     T_Variable    m_upper_bound;
     bool          m_has_bounds;
+    bool          m_is_improvable;
     VariableSense m_sense;
 
     Selection<T_Variable, T_Expression> *m_selection_ptr;
@@ -108,6 +109,7 @@ class Variable : public AbstractMultiArrayElement {
         m_lower_bound   = std::numeric_limits<int>::min() + 1;
         m_upper_bound   = std::numeric_limits<int>::max() - 1;
         m_has_bounds    = false;
+        m_is_improvable = false;
         m_sense         = VariableSense::Integer;
         m_selection_ptr = nullptr;
         m_related_constraint_ptrs.clear();
@@ -223,6 +225,16 @@ class Variable : public AbstractMultiArrayElement {
     /*************************************************************************/
     inline constexpr bool has_bounds(void) const {
         return m_has_bounds;
+    }
+
+    /*************************************************************************/
+    inline constexpr void set_is_improvable(const bool a_IS_IMPROVABLE) {
+        m_is_improvable = a_IS_IMPROVABLE;
+    }
+
+    /*************************************************************************/
+    inline constexpr bool is_improvable(void) const {
+        return m_is_improvable;
     }
 
     /*************************************************************************/

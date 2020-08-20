@@ -177,7 +177,7 @@ TEST_F(TestNeighborhood, setup_move_updater) {
         selection.variable_ptrs.front()->select();
     }
 
-    model.neighborhood().update_moves();
+    model.neighborhood().update_moves(false, false);
 
     /**
      * Check the variable pointers and values in raw moves.
@@ -379,7 +379,7 @@ TEST_F(TestNeighborhood, set_user_defined_move_updater) {
     model.neighborhood().set_has_selection_variables(false);
 
     model.neighborhood().enable_user_defined_move();
-    model.neighborhood().update_moves();
+    model.neighborhood().update_moves(false, false);
 
     /// Check the variable pointers and values in raw moves, and the numbers of
     /// filtered moves.
@@ -406,7 +406,7 @@ TEST_F(TestNeighborhood, shuffle_moves) {
     [[maybe_unused]] auto& c = model.create_constraint("c", x.selection());
 
     model.setup_neighborhood(true, true, true, true, false, false);
-    model.neighborhood().update_moves();
+    model.neighborhood().update_moves(false, false);
 
     auto         before_move_ptrs = model.neighborhood().move_ptrs();
     std::mt19937 rand;

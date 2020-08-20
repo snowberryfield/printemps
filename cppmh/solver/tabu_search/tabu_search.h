@@ -108,7 +108,8 @@ TabuSearchResult<T_Variable, T_Expression> solve(
      * improvability screening. If the model is unconstrained, improvability
      * screening will be skipped.
      */
-    bool has_constraint(local_penalty_coefficient_proxies.size() > 0);
+    bool has_constraint = (model->number_of_constraints() -
+                           model->number_of_disabled_constraints()) > 0;
 
     /**
      * Set up the tabu tenure and related parameters.
@@ -194,7 +195,21 @@ TabuSearchResult<T_Variable, T_Expression> solve(
         /**
          * Update the moves.
          */
-        model->neighborhood().update_moves();
+        if (model->is_linear() && has_constraint &&
+            option.tabu_search.is_enabled_improvability_screening &&
+            iteration >= option.tabu_search.number_of_initial_modification) {
+            /**
+             * If the option is_enabled_improvability_screening is set true,
+             * only improvable moves will be generated.
+             */
+            model->update_variable_improvability();
+            model->neighborhood().update_moves(
+                true, option.is_enabled_parallel_neighborhood_update);
+        } else {
+            model->neighborhood().update_moves(
+                false, option.is_enabled_parallel_neighborhood_update);
+        }
+
         if (option.tabu_search.is_enabled_shuffle) {
             model->neighborhood().shuffle_moves(&get_rand_mt);
         }
@@ -276,24 +291,6 @@ TabuSearchResult<T_Variable, T_Expression> solve(
             total_scores[i_move] =
                 trial_solution_scores[i_move].local_augmented_objective +
                 trial_move_scores[i_move].frequency_penalty;
-
-            /**
-             * If the option is_enabled_improvability_screening is set true,
-             * moves with no improvement in the objective function or constraint
-             * violation will be set lower priorities in selecting a move for
-             * the next solution.
-             */
-            if (option.tabu_search.is_enabled_improvability_screening &&
-                has_constraint) {
-                if (solution_score.is_feasible &&
-                    !trial_solution_scores[i_move].is_objective_improvable) {
-                    total_scores[i_move] = HUGE_VALF;
-                }
-                if (!solution_score.is_feasible &&
-                    !trial_solution_scores[i_move].is_constraint_improvable) {
-                    total_scores[i_move] = HUGE_VALF;
-                }
-            }
 
             /**
              * If the move is "tabu", it will be set lower priorities in
@@ -427,10 +424,13 @@ TabuSearchResult<T_Variable, T_Expression> solve(
         for (const auto& score : trial_solution_scores) {
             if (score.is_feasible) {
                 number_of_feasible_neighborhoods++;
-            }
-            if (score.is_objective_improvable ||
-                score.is_constraint_improvable) {
-                number_of_improvable_neighborhoods++;
+                if (score.is_objective_improvable) {
+                    number_of_improvable_neighborhoods++;
+                }
+            } else {
+                if (score.is_constraint_improvable) {
+                    number_of_improvable_neighborhoods++;
+                }
             }
         }
 
