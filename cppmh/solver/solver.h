@@ -37,6 +37,13 @@ template <class T_Variable, class T_Expression>
 Result<T_Variable, T_Expression> solve(
     model::Model<T_Variable, T_Expression>* a_model,  //
     const Option&                           a_OPTION) {
+    if (a_model->is_solved()) {
+        throw std::logic_error(utility::format_error_location(
+            __FILE__, __LINE__, __func__,
+            "This model has already been solved."));
+    } else {
+        a_model->set_is_solved(true);
+    }
     /**
      * Define type aliases.
      */
@@ -81,13 +88,15 @@ Result<T_Variable, T_Expression> solve(
         master_option.print();
     }
 
-    model->setup(master_option.is_enabled_parallel_neighborhood_update,
+    model->setup(master_option.is_enabled_improvability_screening,
+                 master_option.is_enabled_parallel_neighborhood_update,
                  master_option.is_enabled_presolve,
                  master_option.is_enabled_initial_value_correction,
                  master_option.is_enabled_aggregation_move,
                  master_option.is_enabled_precedence_move,
                  master_option.is_enabled_variable_bound_move,
                  master_option.is_enabled_exclusive_move,
+                 master_option.is_enabled_user_defined_move,
                  master_option.selection_mode,
                  master_option.verbose >= Verbose::Warning);
 
