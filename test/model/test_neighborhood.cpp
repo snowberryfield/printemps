@@ -218,6 +218,7 @@ TEST_F(TestNeighborhood, setup_move_updater) {
             }
         }
     }
+
     /// Integer
     {
         auto variable_ptrs = model.variable_reference().integer_variable_ptrs;
@@ -281,7 +282,7 @@ TEST_F(TestNeighborhood, setup_move_updater) {
             }
         }
     }
-    std::cout << __FILE__ << " " << __LINE__ << std::endl;
+
     /// Aggregation
     {
         auto constraint_ptrs =
@@ -290,7 +291,6 @@ TEST_F(TestNeighborhood, setup_move_updater) {
         EXPECT_EQ(4 * constraint_ptrs.size(), moves.size());
     }
 
-    std::cout << __FILE__ << " " << __LINE__ << std::endl;
     /// Precedence
     {
         auto constraint_ptrs =
@@ -299,7 +299,6 @@ TEST_F(TestNeighborhood, setup_move_updater) {
         EXPECT_EQ(2 * constraint_ptrs.size(), moves.size());
     }
 
-    std::cout << __FILE__ << " " << __LINE__ << std::endl;
     /// Variable Bound
     {
         auto constraint_ptrs =
@@ -308,19 +307,16 @@ TEST_F(TestNeighborhood, setup_move_updater) {
         EXPECT_EQ(4 * constraint_ptrs.size(), moves.size());
     }
 
-    std::cout << __FILE__ << " " << __LINE__ << std::endl;
     /// Exclusive
     {
         auto moves = model.neighborhood().exclusive_moves();
 
         /// x0(1,0), ..., x(1,9),
         /// x0(2,0), ..., x(1,9),
-        /// x1(1,0), ..., x1(1,19),
         /// x2(0)
-        EXPECT_EQ(41, static_cast<int>(moves.size()));
+        EXPECT_EQ(21, static_cast<int>(moves.size()));
     }
 
-    std::cout << __FILE__ << " " << __LINE__ << std::endl;
     /// Selection
     {
         auto variable_ptrs = model.variable_reference().selection_variable_ptrs;
@@ -384,7 +380,7 @@ TEST_F(TestNeighborhood, setup_move_updater) {
                 + (4 * aggregations_size - 5)               // Aggregation
                 + (2 * precedences_size - 4)                // Precedence
                 + (4 * variable_bounds_size)                // Variable Bound
-                + (10)  // Exclusive (from c18)
+                + (21)                                      // Exclusive
                 + (selection_variables_size - selections_size),  // Selection
             static_cast<int>(model.neighborhood().move_ptrs().size()));
     }
