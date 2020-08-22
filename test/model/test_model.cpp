@@ -62,6 +62,7 @@ TEST_F(TestModel, initialize) {
     EXPECT_EQ(true, model.is_linear());
     EXPECT_EQ(true, model.is_minimization());
     EXPECT_EQ(1.0, model.sign());
+    EXPECT_EQ(false, model.is_solved());
 
     /// Variable Reference
     EXPECT_EQ(  //
@@ -790,26 +791,6 @@ TEST_F(TestModel, setup_variable_related_constraints) {
             EXPECT_EQ(i == 0, y(i, j).related_constraint_ptrs().find(&g(2)) !=
                                   y(i, j).related_constraint_ptrs().end());
         }
-    }
-}
-
-/*****************************************************************************/
-TEST_F(TestModel, setup_variable_sense) {
-    cppmh::model::Model<int, double> model;
-
-    auto& x = model.create_variables("x", 10, 0, 1);
-    model.create_constraint("g", x.selection());
-
-    model.categorize_variables();
-    model.categorize_constraints();
-    model.extract_selections(cppmh::model::SelectionMode::Defined);
-    for (const auto& element : x.flat_indexed_variables()) {
-        EXPECT_EQ(cppmh::model::VariableSense::Selection, element.sense());
-    }
-
-    model.setup_variable_sense();
-    for (const auto& element : x.flat_indexed_variables()) {
-        EXPECT_EQ(cppmh::model::VariableSense::Binary, element.sense());
     }
 }
 
@@ -2645,7 +2626,6 @@ TEST_F(TestModel, evaluate) {
         model.minimize(p);
 
         model.setup_variable_related_constraints();
-        model.setup_variable_sense();
         model.categorize_variables();
         model.categorize_constraints();
         model.extract_selections(cppmh::model::SelectionMode::Defined);
@@ -2820,7 +2800,6 @@ TEST_F(TestModel, evaluate) {
         model.maximize(p);
 
         model.setup_variable_related_constraints();
-        model.setup_variable_sense();
         model.categorize_variables();
         model.categorize_constraints();
         model.extract_selections(cppmh::model::SelectionMode::Defined);
@@ -3582,6 +3561,21 @@ TEST_F(TestModel, is_minimization) {
 /*****************************************************************************/
 TEST_F(TestModel, sign) {
     /// This method is tested in minimize_arg_function() and so on.
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, set_is_solved) {
+    cppmh::model::Model<int, double> model;
+    EXPECT_EQ(false, model.is_solved());
+    model.set_is_solved(true);
+    EXPECT_EQ(true, model.is_solved());
+    model.set_is_solved(false);
+    EXPECT_EQ(false, model.is_solved());
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, is_solved) {
+    /// This method is tested in set_is_solved().
 }
 
 /*****************************************************************************/

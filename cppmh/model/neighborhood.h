@@ -70,22 +70,33 @@ class Variable;
 template <class T_Variable, class T_Expression>
 class Neighborhood {
    private:
-    std::function<void(std::vector<Move<T_Variable, T_Expression>> *)>
+    std::function<void(std::vector<Move<T_Variable, T_Expression>> *,
+                       std::vector<int> *)>
         m_binary_move_updater;
-    std::function<void(std::vector<Move<T_Variable, T_Expression>> *)>
+    std::function<void(std::vector<Move<T_Variable, T_Expression>> *,
+                       std::vector<int> *)>
         m_integer_move_updater;
-    std::function<void(std::vector<Move<T_Variable, T_Expression>> *)>
+    std::function<void(std::vector<Move<T_Variable, T_Expression>> *,
+                       std::vector<int> *)>
         m_precedence_move_updater;
-    std::function<void(std::vector<Move<T_Variable, T_Expression>> *)>
+    std::function<void(std::vector<Move<T_Variable, T_Expression>> *,
+                       std::vector<int> *)>
         m_aggregation_move_updater;
-    std::function<void(std::vector<Move<T_Variable, T_Expression>> *)>
+    std::function<void(std::vector<Move<T_Variable, T_Expression>> *,
+                       std::vector<int> *)>
         m_variable_bound_move_updater;
-    std::function<void(std::vector<Move<T_Variable, T_Expression>> *)>
+    std::function<void(std::vector<Move<T_Variable, T_Expression>> *,
+                       std::vector<int> *)>
         m_exclusive_move_updater;
+    std::function<void(std::vector<Move<T_Variable, T_Expression>> *,
+                       std::vector<int> *)>
+        m_selection_move_updater;
+
     std::function<void(std::vector<Move<T_Variable, T_Expression>> *)>
         m_user_defined_move_updater;
-    std::function<void(std::vector<Move<T_Variable, T_Expression>> *)>
-        m_selection_move_updater;
+    std::function<void(std::vector<Move<T_Variable, T_Expression>> *,
+                       std::vector<int> *)>
+        m_user_defined_move_updater_wrapper;
 
     std::vector<Move<T_Variable, T_Expression>> m_binary_moves;
     std::vector<Move<T_Variable, T_Expression>> m_integer_moves;
@@ -93,8 +104,8 @@ class Neighborhood {
     std::vector<Move<T_Variable, T_Expression>> m_aggregation_moves;
     std::vector<Move<T_Variable, T_Expression>> m_variable_bound_moves;
     std::vector<Move<T_Variable, T_Expression>> m_exclusive_moves;
-    std::vector<Move<T_Variable, T_Expression>> m_user_defined_moves;
     std::vector<Move<T_Variable, T_Expression>> m_selection_moves;
+    std::vector<Move<T_Variable, T_Expression>> m_user_defined_moves;
 
     std::vector<int> m_binary_move_flags;
     std::vector<int> m_integer_move_flags;
@@ -102,8 +113,8 @@ class Neighborhood {
     std::vector<int> m_aggregation_move_flags;
     std::vector<int> m_variable_bound_move_flags;
     std::vector<int> m_exclusive_move_flags;
-    std::vector<int> m_user_defined_move_flags;
     std::vector<int> m_selection_move_flags;
+    std::vector<int> m_user_defined_move_flags;
 
     std::vector<Move<T_Variable, T_Expression> *> m_move_ptrs;
 
@@ -116,8 +127,8 @@ class Neighborhood {
     bool m_is_enabled_aggregation_move;
     bool m_is_enabled_variable_bound_move;
     bool m_is_enabled_exclusive_move;
-    bool m_is_enabled_user_defined_move;
     bool m_is_enabled_selection_move;
+    bool m_is_enabled_user_defined_move;
 
    public:
     /*************************************************************************/
@@ -133,21 +144,31 @@ class Neighborhood {
     /*************************************************************************/
     inline void initialize(void) {
         m_binary_move_updater =
-            [](std::vector<Move<T_Variable, T_Expression>> *) {};
+            [](std::vector<Move<T_Variable, T_Expression>> *,
+               std::vector<int> *) {};
         m_integer_move_updater =
-            [](std::vector<Move<T_Variable, T_Expression>> *) {};
+            [](std::vector<Move<T_Variable, T_Expression>> *,
+               std::vector<int> *) {};
         m_precedence_move_updater =
-            [](std::vector<Move<T_Variable, T_Expression>> *) {};
+            [](std::vector<Move<T_Variable, T_Expression>> *,
+               std::vector<int> *) {};
         m_aggregation_move_updater =
-            [](std::vector<Move<T_Variable, T_Expression>> *) {};
+            [](std::vector<Move<T_Variable, T_Expression>> *,
+               std::vector<int> *) {};
         m_variable_bound_move_updater =
-            [](std::vector<Move<T_Variable, T_Expression>> *) {};
+            [](std::vector<Move<T_Variable, T_Expression>> *,
+               std::vector<int> *) {};
         m_exclusive_move_updater =
-            [](std::vector<Move<T_Variable, T_Expression>> *) {};
+            [](std::vector<Move<T_Variable, T_Expression>> *,
+               std::vector<int> *) {};
+        m_selection_move_updater =
+            [](std::vector<Move<T_Variable, T_Expression>> *,
+               std::vector<int> *) {};
         m_user_defined_move_updater =
             [](std::vector<Move<T_Variable, T_Expression>> *) {};
-        m_selection_move_updater =
-            [](std::vector<Move<T_Variable, T_Expression>> *) {};
+        m_user_defined_move_updater_wrapper =
+            [](std::vector<Move<T_Variable, T_Expression>> *,
+               std::vector<int> *) {};
 
         m_binary_moves.clear();
         m_integer_moves.clear();
@@ -155,8 +176,8 @@ class Neighborhood {
         m_aggregation_moves.clear();
         m_variable_bound_moves.clear();
         m_exclusive_moves.clear();
-        m_user_defined_moves.clear();
         m_selection_moves.clear();
+        m_user_defined_moves.clear();
 
         m_binary_move_flags.clear();
         m_integer_move_flags.clear();
@@ -164,8 +185,8 @@ class Neighborhood {
         m_aggregation_move_flags.clear();
         m_variable_bound_move_flags.clear();
         m_exclusive_move_flags.clear();
-        m_user_defined_move_flags.clear();
         m_selection_move_flags.clear();
+        m_user_defined_move_flags.clear();
 
         m_move_ptrs.clear();
 
@@ -178,8 +199,8 @@ class Neighborhood {
         m_is_enabled_aggregation_move    = false;
         m_is_enabled_variable_bound_move = false;
         m_is_enabled_exclusive_move      = false;
-        m_is_enabled_user_defined_move   = false;
         m_is_enabled_selection_move      = false;
+        m_is_enabled_user_defined_move   = false;
     }
 
     /*************************************************************************/
@@ -198,6 +219,7 @@ class Neighborhood {
     inline constexpr void setup_binary_move_updater(
         const std::vector<Variable<T_Variable, T_Expression> *>
             &      a_VARIABLE_PTRS,
+        const bool a_IS_ENABLED_IMPROVABILITY_SCREENING,
         const bool a_IS_ENABLED_PARALLEL) {
         /**
          * "Flip" move for binary variables:
@@ -205,27 +227,45 @@ class Neighborhood {
          *  move: {(x = 1)} (if x = 0)
          *        {(x = 0)} (if x = 1)
          */
-        int variables_size = a_VARIABLE_PTRS.size();
+
+        std::vector<Variable<T_Variable, T_Expression> *>
+            not_fixed_variable_ptrs;
+        for (auto &&variable_ptr : a_VARIABLE_PTRS) {
+            if (!variable_ptr->is_fixed()) {
+                not_fixed_variable_ptrs.push_back(variable_ptr);
+            }
+        }
+
+        int variables_size = not_fixed_variable_ptrs.size();
         m_binary_moves.resize(variables_size);
         m_binary_move_flags.resize(variables_size);
 
         for (auto i = 0; i < variables_size; i++) {
             m_binary_moves[i].sense = MoveSense::Binary;
             m_binary_moves[i].related_constraint_ptrs =
-                a_VARIABLE_PTRS[i]->related_constraint_ptrs();
+                not_fixed_variable_ptrs[i]->related_constraint_ptrs();
+            m_binary_moves[i].alterations.emplace_back(
+                not_fixed_variable_ptrs[i], 0);
         }
 
-        auto binary_move_updater = [this, a_VARIABLE_PTRS, variables_size,
-                                    a_IS_ENABLED_PARALLEL](auto *a_moves) {
+        auto binary_move_updater =
+            [this, not_fixed_variable_ptrs, variables_size,
+             a_IS_ENABLED_IMPROVABILITY_SCREENING,
+             a_IS_ENABLED_PARALLEL](auto *a_moves, auto *a_flags) {
 #ifdef _OPENMP
 #pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
 #endif
-            for (auto i = 0; i < variables_size; i++) {
-                (*a_moves)[i].alterations.clear();
-                (*a_moves)[i].alterations.emplace_back(
-                    a_VARIABLE_PTRS[i], 1 - a_VARIABLE_PTRS[i]->value());
-            }
-        };
+                for (auto i = 0; i < variables_size; i++) {
+                    if (a_IS_ENABLED_IMPROVABILITY_SCREENING &&
+                        !not_fixed_variable_ptrs[i]->is_improvable()) {
+                        (*a_flags)[i] = 0;
+                    } else {
+                        (*a_moves)[i].alterations.front().second =
+                            1 - not_fixed_variable_ptrs[i]->value();
+                        (*a_flags)[i] = 1;
+                    }
+                }
+            };
         m_binary_move_updater = binary_move_updater;
     }
 
@@ -233,6 +273,7 @@ class Neighborhood {
     inline constexpr void setup_integer_move_updater(
         const std::vector<Variable<T_Variable, T_Expression> *>
             &      a_VARIABLE_PTRS,
+        const bool a_IS_ENABLED_IMPROVABILITY_SCREENING,
         const bool a_IS_ENABLED_PARALLEL) {
         /**
          *  "Shift" move for integer variables:
@@ -241,35 +282,66 @@ class Neighborhood {
          *        {(x = 1)} (if x = 0)
          *        {(x = 9)} (if x = 10)
          */
-        int variables_size = a_VARIABLE_PTRS.size();
+
+        std::vector<Variable<T_Variable, T_Expression> *>
+            not_fixed_variable_ptrs;
+        for (auto &&variable_ptr : a_VARIABLE_PTRS) {
+            if (!variable_ptr->is_fixed()) {
+                not_fixed_variable_ptrs.push_back(variable_ptr);
+            }
+        }
+
+        int variables_size = not_fixed_variable_ptrs.size();
         m_integer_moves.resize(2 * variables_size);
         m_integer_move_flags.resize(2 * variables_size);
 
         for (auto i = 0; i < variables_size; i++) {
             m_integer_moves[2 * i].sense = MoveSense::Integer;
             m_integer_moves[2 * i].related_constraint_ptrs =
-                a_VARIABLE_PTRS[i]->related_constraint_ptrs();
+                not_fixed_variable_ptrs[i]->related_constraint_ptrs();
+            m_integer_moves[2 * i].alterations.emplace_back(
+                not_fixed_variable_ptrs[i], 0);
 
             m_integer_moves[2 * i + 1].sense = MoveSense::Integer;
             m_integer_moves[2 * i + 1].related_constraint_ptrs =
-                a_VARIABLE_PTRS[i]->related_constraint_ptrs();
+                not_fixed_variable_ptrs[i]->related_constraint_ptrs();
+            m_integer_moves[2 * i + 1].alterations.emplace_back(
+                not_fixed_variable_ptrs[i], 0);
         }
 
-        auto integer_move_updater = [this, a_VARIABLE_PTRS, variables_size,
-                                     a_IS_ENABLED_PARALLEL](auto *a_moves) {
+        auto integer_move_updater =
+            [this, not_fixed_variable_ptrs, variables_size,
+             a_IS_ENABLED_IMPROVABILITY_SCREENING,
+             a_IS_ENABLED_PARALLEL](auto *a_moves, auto *a_flags) {
 #ifdef _OPENMP
 #pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
 #endif
-            for (auto i = 0; i < variables_size; i++) {
-                (*a_moves)[2 * i].alterations.clear();
-                (*a_moves)[2 * i].alterations.emplace_back(
-                    a_VARIABLE_PTRS[i], a_VARIABLE_PTRS[i]->value() + 1);
+                for (auto i = 0; i < variables_size; i++) {
+                    if (a_IS_ENABLED_IMPROVABILITY_SCREENING &&
+                        !not_fixed_variable_ptrs[i]->is_improvable()) {
+                        (*a_flags)[2 * i]     = 0;
+                        (*a_flags)[2 * i + 1] = 0;
+                    } else {
+                        if (not_fixed_variable_ptrs[i]->value() ==
+                            not_fixed_variable_ptrs[i]->upper_bound()) {
+                            (*a_flags)[2 * i] = 0;
+                        } else {
+                            (*a_moves)[2 * i].alterations.front().second =
+                                not_fixed_variable_ptrs[i]->value() + 1;
+                            (*a_flags)[2 * i] = 1;
+                        }
 
-                (*a_moves)[2 * i + 1].alterations.clear();
-                (*a_moves)[2 * i + 1].alterations.emplace_back(
-                    a_VARIABLE_PTRS[i], a_VARIABLE_PTRS[i]->value() - 1);
-            }
-        };
+                        if (not_fixed_variable_ptrs[i]->value() ==
+                            not_fixed_variable_ptrs[i]->lower_bound()) {
+                            (*a_flags)[2 * i + 1] = 0;
+                        } else {
+                            (*a_moves)[2 * i + 1].alterations.front().second =
+                                not_fixed_variable_ptrs[i]->value() - 1;
+                            (*a_flags)[2 * i + 1] = 1;
+                        }
+                    }
+                }
+            };
         m_integer_move_updater = integer_move_updater;
     }
 
@@ -277,6 +349,7 @@ class Neighborhood {
     inline constexpr void setup_aggregation_move_updater(
         const std::vector<Constraint<T_Variable, T_Expression> *>
             &      a_CONSTRAINT_PTRS,
+        const bool a_IS_ENABLED_IMPROVABILITY_SCREENING,
         const bool a_IS_ENABLED_PARALLEL) {
         int raw_constraints_size = a_CONSTRAINT_PTRS.size();
 
@@ -320,44 +393,70 @@ class Neighborhood {
             m_aggregation_moves[4 * i + 3] = m_aggregation_moves[4 * i];
         }
 
-        auto aggregation_move_updater = [this, variable_ptr_pairs,
-                                         sensitivity_pairs, constants,
-                                         constraints_size,
-                                         a_IS_ENABLED_PARALLEL](auto *a_moves) {
+        auto aggregation_move_updater =
+            [this, variable_ptr_pairs, sensitivity_pairs, constants,
+             constraints_size, a_IS_ENABLED_IMPROVABILITY_SCREENING,
+             a_IS_ENABLED_PARALLEL](auto *a_moves, auto *a_flags) {
+#ifdef _OPENMP
+#pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
+#endif
+                for (auto i = 0; i < constraints_size; i++) {
+                    T_Variable value_pair[2] = {
+                        variable_ptr_pairs[i][0]->value(),
+                        variable_ptr_pairs[i][1]->value()};
+                    for (auto j = 0; j < 2; j++) {
+                        auto index = 4 * i + 2 * j;
+
+                        (*a_moves)[index].alterations.clear();
+                        (*a_moves)[index].alterations.emplace_back(
+                            variable_ptr_pairs[i][j], value_pair[j] + 1);
+                        (*a_moves)[index].alterations.emplace_back(
+                            variable_ptr_pairs[i][1 - j],
+                            static_cast<T_Variable>(
+                                (-constants[i] - sensitivity_pairs[i][j] *
+                                                     (value_pair[j] + 1)) /
+                                sensitivity_pairs[i][1 - j]));
+
+                        index = 4 * i + 2 * j + 1;
+                        (*a_moves)[index].alterations.clear();
+                        (*a_moves)[index].alterations.emplace_back(
+                            variable_ptr_pairs[i][j], value_pair[1 - j] - 1);
+                        (*a_moves)[index].alterations.emplace_back(
+                            variable_ptr_pairs[i][1 - j],
+                            static_cast<T_Variable>(
+                                (-constants[i] - sensitivity_pairs[i][j] *
+                                                     (value_pair[j] - 1)) /
+                                sensitivity_pairs[i][1 - j]));
+                    }
+                }
+                int moves_size = a_moves->size();
 
 #ifdef _OPENMP
 #pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
 #endif
-            for (auto i = 0; i < constraints_size; i++) {
-                T_Variable value_pair[2] = {variable_ptr_pairs[i][0]->value(),
-                                            variable_ptr_pairs[i][1]->value()};
-
-                for (auto j = 0; j < 2; j++) {
-                    auto index = 4 * i + 2 * j;
-
-                    (*a_moves)[index].alterations.clear();
-                    (*a_moves)[index].alterations.emplace_back(
-                        variable_ptr_pairs[i][j], value_pair[j] + 1);
-                    (*a_moves)[index].alterations.emplace_back(
-                        variable_ptr_pairs[i][1 - j],
-                        static_cast<T_Variable>(
-                            (-constants[i] -
-                             sensitivity_pairs[i][j] * (value_pair[j] + 1)) /
-                            sensitivity_pairs[i][1 - j]));
-
-                    index = 4 * i + 2 * j + 1;
-                    (*a_moves)[index].alterations.clear();
-                    (*a_moves)[index].alterations.emplace_back(
-                        variable_ptr_pairs[i][j], value_pair[1 - j] - 1);
-                    (*a_moves)[index].alterations.emplace_back(
-                        variable_ptr_pairs[i][1 - j],
-                        static_cast<T_Variable>(
-                            (-constants[i] -
-                             sensitivity_pairs[i][j] * (value_pair[j] - 1)) /
-                            sensitivity_pairs[i][1 - j]));
+                for (auto i = 0; i < moves_size; i++) {
+                    (*a_flags)[i] = 1;
+                    if (m_has_fixed_variables &&
+                        model::has_fixed_variables((*a_moves)[i])) {
+                        (*a_flags)[i] = 0;
+                        continue;
+                    }
+                    if (m_has_selection_variables &&
+                        model::has_selection_variables((*a_moves)[i])) {
+                        (*a_flags)[i] = 0;
+                        continue;
+                    }
+                    if (model::has_bound_violation((*a_moves)[i])) {
+                        (*a_flags)[i] = 0;
+                        continue;
+                    }
+                    if (a_IS_ENABLED_IMPROVABILITY_SCREENING &&
+                        !model::has_improvable_variable((*a_moves)[i])) {
+                        (*a_flags)[i] = 0;
+                        continue;
+                    }
                 }
-            }
-        };
+            };
         m_aggregation_move_updater = aggregation_move_updater;
     }
 
@@ -365,6 +464,7 @@ class Neighborhood {
     inline constexpr void setup_precedence_move_updater(
         const std::vector<Constraint<T_Variable, T_Expression> *>
             &      a_CONSTRAINT_PTRS,
+        const bool a_IS_ENABLED_IMPROVABILITY_SCREENING,
         const bool a_IS_ENABLED_PARALLEL) {
         int raw_constraints_size = a_CONSTRAINT_PTRS.size();
 
@@ -397,33 +497,67 @@ class Neighborhood {
                 variable_ptr_pairs[i][1]->related_constraint_ptrs().begin(),
                 variable_ptr_pairs[i][1]->related_constraint_ptrs().end());
 
+            m_precedence_moves[2 * i].alterations.emplace_back(
+                variable_ptr_pairs[i][0], 0);
+            m_precedence_moves[2 * i].alterations.emplace_back(
+                variable_ptr_pairs[i][1], 0);
+
             m_precedence_moves[2 * i + 1] = m_precedence_moves[2 * i];
         }
 
-        auto precedence_move_updater = [this, variable_ptr_pairs,
-                                        constraints_size,
-                                        a_IS_ENABLED_PARALLEL](auto *a_moves) {
+        auto precedence_move_updater =
+            [this, variable_ptr_pairs, constraints_size,
+             a_IS_ENABLED_IMPROVABILITY_SCREENING,
+             a_IS_ENABLED_PARALLEL](auto *a_moves, auto *a_flags) {
 
 #ifdef _OPENMP
 #pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
 #endif
-            for (auto i = 0; i < constraints_size; i++) {
-                (*a_moves)[2 * i].alterations.clear();
-                (*a_moves)[2 * i].alterations.emplace_back(
-                    variable_ptr_pairs[i][0],
-                    variable_ptr_pairs[i][0]->value() + 1);
-                (*a_moves)[2 * i].alterations.emplace_back(
-                    variable_ptr_pairs[i][1],
-                    variable_ptr_pairs[i][1]->value() + 1);
-                (*a_moves)[2 * i + 1].alterations.clear();
-                (*a_moves)[2 * i + 1].alterations.emplace_back(
-                    variable_ptr_pairs[i][0],
-                    variable_ptr_pairs[i][0]->value() - 1);
-                (*a_moves)[2 * i + 1].alterations.emplace_back(
-                    variable_ptr_pairs[i][1],
-                    variable_ptr_pairs[i][1]->value() - 1);
-            }
-        };
+                for (auto i = 0; i < constraints_size; i++) {
+                    (*a_moves)[2 * i].alterations.clear();
+                    (*a_moves)[2 * i].alterations.emplace_back(
+                        variable_ptr_pairs[i][0],
+                        variable_ptr_pairs[i][0]->value() + 1);
+                    (*a_moves)[2 * i].alterations.emplace_back(
+                        variable_ptr_pairs[i][1],
+                        variable_ptr_pairs[i][1]->value() + 1);
+                    (*a_moves)[2 * i + 1].alterations.clear();
+                    (*a_moves)[2 * i + 1].alterations.emplace_back(
+                        variable_ptr_pairs[i][0],
+                        variable_ptr_pairs[i][0]->value() - 1);
+                    (*a_moves)[2 * i + 1].alterations.emplace_back(
+                        variable_ptr_pairs[i][1],
+                        variable_ptr_pairs[i][1]->value() - 1);
+                }
+
+                int moves_size = a_moves->size();
+
+#ifdef _OPENMP
+#pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
+#endif
+                for (auto i = 0; i < moves_size; i++) {
+                    (*a_flags)[i] = 1;
+                    if (m_has_fixed_variables &&
+                        model::has_fixed_variables((*a_moves)[i])) {
+                        (*a_flags)[i] = 0;
+                        continue;
+                    }
+                    if (m_has_selection_variables &&
+                        model::has_selection_variables((*a_moves)[i])) {
+                        (*a_flags)[i] = 0;
+                        continue;
+                    }
+                    if (model::has_bound_violation((*a_moves)[i])) {
+                        (*a_flags)[i] = 0;
+                        continue;
+                    }
+                    if (a_IS_ENABLED_IMPROVABILITY_SCREENING &&
+                        !model::has_improvable_variable((*a_moves)[i])) {
+                        (*a_flags)[i] = 0;
+                        continue;
+                    }
+                }
+            };
         m_precedence_move_updater = precedence_move_updater;
     }
 
@@ -431,6 +565,7 @@ class Neighborhood {
     inline void setup_variable_bound_move_updater(
         const std::vector<Constraint<T_Variable, T_Expression> *>
             &      a_CONSTRAINT_PTRS,
+        const bool a_IS_ENABLED_IMPROVABILITY_SCREENING,
         const bool a_IS_ENABLED_PARALLEL) {
         /**
          * NOTE: This method cannot be constexpr by clang for
@@ -484,7 +619,8 @@ class Neighborhood {
 
         auto variable_bound_move_updater =
             [this, variable_ptr_pairs, sensitivity_pairs, constants, senses,
-             constraints_size, a_IS_ENABLED_PARALLEL](auto *a_moves) {
+             constraints_size, a_IS_ENABLED_IMPROVABILITY_SCREENING,
+             a_IS_ENABLED_PARALLEL](auto *a_moves, auto *a_flags) {
 #ifdef _OPENMP
 #pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
 #endif
@@ -553,6 +689,33 @@ class Neighborhood {
                         }
                     }
                 }
+
+                int moves_size = a_moves->size();
+#ifdef _OPENMP
+#pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
+#endif
+                for (auto i = 0; i < moves_size; i++) {
+                    (*a_flags)[i] = 1;
+                    if (m_has_fixed_variables &&
+                        model::has_fixed_variables((*a_moves)[i])) {
+                        (*a_flags)[i] = 0;
+                        continue;
+                    }
+                    if (m_has_selection_variables &&
+                        model::has_selection_variables((*a_moves)[i])) {
+                        (*a_flags)[i] = 0;
+                        continue;
+                    }
+                    if (model::has_bound_violation((*a_moves)[i])) {
+                        (*a_flags)[i] = 0;
+                        continue;
+                    }
+                    if (a_IS_ENABLED_IMPROVABILITY_SCREENING &&
+                        !model::has_improvable_variable((*a_moves)[i])) {
+                        (*a_flags)[i] = 0;
+                        continue;
+                    }
+                }
             };
         m_variable_bound_move_updater = variable_bound_move_updater;
     }
@@ -563,6 +726,7 @@ class Neighborhood {
             &a_SET_PARTITIONING_PTRS,
         const std::vector<Constraint<T_Variable, T_Expression> *>
             &      a_SET_PACKING_PTRS,
+        const bool a_IS_ENABLED_IMPROVABILITY_SCREENING,
         const bool a_IS_ENABLED_PARALLEL) {
         int set_partitionings_size = a_SET_PARTITIONING_PTRS.size();
         int set_packings_size      = a_SET_PACKING_PTRS.size();
@@ -626,46 +790,61 @@ class Neighborhood {
             associated_variables_ptrs[move_index] = associated_variable_ptrs;
 
             m_exclusive_moves[move_index].sense = MoveSense::Exclusive;
+            m_exclusive_moves[move_index].alterations.emplace_back(variable_ptr,
+                                                                   1);
             m_exclusive_moves[move_index].related_constraint_ptrs.insert(
                 variable_ptr->related_constraint_ptrs().begin(),
                 variable_ptr->related_constraint_ptrs().end());
+
             for (auto &&associated_variable_ptr : associated_variable_ptrs) {
+                m_exclusive_moves[move_index].alterations.emplace_back(
+                    associated_variable_ptr, 0);
                 m_exclusive_moves[move_index].related_constraint_ptrs.insert(
                     associated_variable_ptr->related_constraint_ptrs().begin(),
                     associated_variable_ptr->related_constraint_ptrs().end());
             }
+
             move_index++;
         }
 
         auto exclusive_move_updater =
             [this, variable_ptrs, associated_variables_ptrs, variables_size,
-             a_IS_ENABLED_PARALLEL](auto *a_moves) {
-
+             a_IS_ENABLED_IMPROVABILITY_SCREENING,
+             a_IS_ENABLED_PARALLEL](auto *a_moves, auto *a_flags) {
+                int moves_size = a_moves->size();
 #ifdef _OPENMP
 #pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
 #endif
-                for (auto i = 0; i < variables_size; i++) {
-                    (*a_moves)[i].alterations.clear();
-                    (*a_moves)[i].alterations.emplace_back(variable_ptrs[i], 1);
-                    for (auto &&variable_ptr : associated_variables_ptrs[i]) {
-                        (*a_moves)[i].alterations.emplace_back(variable_ptr, 0);
+                for (auto i = 0; i < moves_size; i++) {
+                    (*a_flags)[i] = 1;
+                    if (m_has_fixed_variables &&
+                        model::has_fixed_variables((*a_moves)[i])) {
+                        (*a_flags)[i] = 0;
+                        continue;
+                    }
+                    if (m_has_selection_variables &&
+                        model::has_selection_variables((*a_moves)[i])) {
+                        (*a_flags)[i] = 0;
+                        continue;
+                    }
+                    if ((*a_moves)[i].alterations[0].first->value() == 1) {
+                        (*a_flags)[i] = 0;
+                        continue;
+                    }
+                    if (a_IS_ENABLED_IMPROVABILITY_SCREENING &&
+                        !model::has_improvable_variable((*a_moves)[i])) {
+                        (*a_flags)[i] = 0;
+                        continue;
                     }
                 }
             };
         m_exclusive_move_updater = exclusive_move_updater;
-        exclusive_move_updater(&m_exclusive_moves);
-    }
-
-    /*************************************************************************/
-    inline constexpr void set_user_defined_move_updater(
-        const std::function<void(std::vector<Move<T_Variable, T_Expression>> *)>
-            &a_FUNCTION) {
-        m_user_defined_move_updater = a_FUNCTION;
     }
 
     /*************************************************************************/
     inline constexpr void setup_selection_move_updater(
         std::vector<Variable<T_Variable, T_Expression> *> &a_VARIABLE_PTRS,
+        const bool a_IS_ENABLED_IMPROVABILITY_SCREENING,
         const bool a_IS_ENABLED_PARALLEL) {
         /**
          *  "Swap" move for binary variables in selection
@@ -685,7 +864,9 @@ class Neighborhood {
         }
 
         auto selection_move_updater = [this, a_VARIABLE_PTRS, variables_size,
-                                       a_IS_ENABLED_PARALLEL](auto *a_moves) {
+                                       a_IS_ENABLED_IMPROVABILITY_SCREENING,
+                                       a_IS_ENABLED_PARALLEL](auto *a_moves,
+                                                              auto *a_flags) {
 #ifdef _OPENMP
 #pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
 #endif
@@ -697,23 +878,90 @@ class Neighborhood {
 
                 (*a_moves)[i].alterations.emplace_back(a_VARIABLE_PTRS[i], 1);
             }
+
+            int moves_size = a_moves->size();
+
+#ifdef _OPENMP
+#pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
+#endif
+            for (auto i = 0; i < moves_size; i++) {
+                (*a_flags)[i] = 1;
+                if (m_has_fixed_variables &&
+                    model::has_fixed_variables((*a_moves)[i])) {
+                    (*a_flags)[i] = 0;
+                }
+                if (((*a_moves)[i].alterations[0].first ==
+                     (*a_moves)[i].alterations[1].first)) {
+                    (*a_flags)[i] = 0;
+                }
+                if (a_IS_ENABLED_IMPROVABILITY_SCREENING &&
+                    !model::has_improvable_variable((*a_moves)[i])) {
+                    (*a_flags)[i] = 0;
+                }
+            }
         };
         m_selection_move_updater = selection_move_updater;
     }
 
     /*************************************************************************/
-    inline constexpr void update_moves(
-        const bool                  a_IS_ENABLED_IMPROBABILITY_SCREENING,
-        [[maybe_unused]] const bool a_IS_ENABLED_PARALLEL) {
+    inline constexpr void set_user_defined_move_updater(
+        const std::function<void(std::vector<Move<T_Variable, T_Expression>> *)>
+            &a_FUNCTION) {
+        m_user_defined_move_updater = a_FUNCTION;
+    }
+
+    /*************************************************************************/
+    inline constexpr void setup_user_defined_move_updater(
+        const bool a_IS_ENABLED_IMPROVABILITY_SCREENING,
+        const bool a_IS_ENABLED_PARALLEL) {
+         auto user_defined_move_updater_wrapper =
+            [this, a_IS_ENABLED_IMPROVABILITY_SCREENING, a_IS_ENABLED_PARALLEL](
+                auto *a_moves, auto *a_flags) {
+                m_user_defined_move_updater(a_moves);
+                int moves_size = a_moves->size();
+                a_flags->resize(moves_size);
+
+#ifdef _OPENMP
+#pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
+#endif
+                for (auto i = 0; i < moves_size; i++) {
+                    (*a_flags)[i] = 1;
+                    if (m_has_fixed_variables &&
+                        model::has_fixed_variables((*a_moves)[i])) {
+                        (*a_flags)[i] = 0;
+                        continue;
+                    }
+                    if (m_has_selection_variables &&
+                        model::has_selection_variables((*a_moves)[i])) {
+                        (*a_flags)[i] = 0;
+                        continue;
+                    }
+                    if (model::has_bound_violation((*a_moves)[i])) {
+                        (*a_flags)[i] = 0;
+                        continue;
+                    }
+                    if (a_IS_ENABLED_IMPROVABILITY_SCREENING &&
+                        !model::has_improvable_variable((*a_moves)[i])) {
+                        (*a_flags)[i] = 0;
+                        continue;
+                    }
+                }
+            };
+        m_user_defined_move_updater_wrapper = user_defined_move_updater_wrapper;
+    }
+
+    /*************************************************************************/
+    inline constexpr void update_moves(void) {
         auto &binary_moves         = m_binary_moves;
         auto &integer_moves        = m_integer_moves;
         auto &precedence_moves     = m_precedence_moves;
         auto &aggregation_moves    = m_aggregation_moves;
         auto &variable_bound_moves = m_variable_bound_moves;
         auto &exclusive_moves      = m_exclusive_moves;
-        auto &user_defined_moves   = m_user_defined_moves;
         auto &selection_moves      = m_selection_moves;
-        auto &move_ptrs            = m_move_ptrs;
+        auto &user_defined_moves   = m_user_defined_moves;
+
+        auto &move_ptrs = m_move_ptrs;
 
         auto &binary_move_flags         = m_binary_move_flags;
         auto &integer_move_flags        = m_integer_move_flags;
@@ -721,8 +969,8 @@ class Neighborhood {
         auto &aggregation_move_flags    = m_aggregation_move_flags;
         auto &variable_bound_move_flags = m_variable_bound_move_flags;
         auto &exclusive_move_flags      = m_exclusive_move_flags;
-        auto &user_defined_move_flags   = m_user_defined_move_flags;
         auto &selection_move_flags      = m_selection_move_flags;
+        auto &user_defined_move_flags   = m_user_defined_move_flags;
 
         int binary_moves_size         = binary_moves.size();
         int integer_moves_size        = integer_moves.size();
@@ -730,276 +978,63 @@ class Neighborhood {
         int aggregation_moves_size    = aggregation_moves.size();
         int variable_bound_moves_size = variable_bound_moves.size();
         int exclusive_moves_size      = exclusive_moves.size();
-        int user_defined_moves_size   = 0;
         int selection_moves_size      = selection_moves.size();
+        int user_defined_moves_size   = 0;  /// computed later
 
         /// Binary
         if (binary_moves_size > 0 &&  //
             m_is_enabled_binary_move) {
-            m_binary_move_updater(&binary_moves);
+            m_binary_move_updater(&binary_moves,  //
+                                  &binary_move_flags);
         }
 
         /// Integer
         if (integer_moves_size > 0 &&  //
             m_is_enabled_integer_move) {
-            m_integer_move_updater(&integer_moves);
+            m_integer_move_updater(&integer_moves,  //
+                                   &integer_move_flags);
         }
 
         /// Aggregation
         if (aggregation_moves_size > 0 &&  //
             m_is_enabled_aggregation_move) {
-            m_aggregation_move_updater(&aggregation_moves);
+            m_aggregation_move_updater(&aggregation_moves,
+                                       &aggregation_move_flags);
         }
 
         /// Precedence
         if (precedence_moves_size > 0 &&  //
             m_is_enabled_precedence_move) {
-            m_precedence_move_updater(&precedence_moves);
+            m_precedence_move_updater(&precedence_moves,  //
+                                      &precedence_move_flags);
         }
 
         /// Variable Bound
         if (variable_bound_moves_size > 0 &&  //
             m_is_enabled_variable_bound_move) {
-            m_variable_bound_move_updater(&variable_bound_moves);
+            m_variable_bound_move_updater(&variable_bound_moves,  //
+                                          &variable_bound_move_flags);
         }
 
         /// Exclusive
-        /**
-         * NOTE: Exclusive moves do not require updates.
-         */
-
-        /// User Defined
-        if (m_is_enabled_user_defined_move) {
-            m_user_defined_move_updater(&user_defined_moves);
-            user_defined_moves_size = user_defined_moves.size();
-            user_defined_move_flags.resize(user_defined_moves_size);
+        if (exclusive_moves_size > 0 &&  //
+            m_is_enabled_exclusive_move) {
+            m_exclusive_move_updater(&exclusive_moves,  //
+                                     &exclusive_move_flags);
         }
 
         /// Selection
         if (selection_moves_size > 0 &&  //
             m_is_enabled_selection_move) {
-            m_selection_move_updater(&m_selection_moves);
-        }
-
-        /// Binary
-        if (m_is_enabled_binary_move) {
-#ifdef _OPENMP
-#pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
-#endif
-            for (auto i = 0; i < binary_moves_size; i++) {
-                binary_move_flags[i] = 1;
-                if (m_has_fixed_variables &&
-                    model::has_fixed_variables(binary_moves[i])) {
-                    binary_move_flags[i] = 0;
-                    continue;
-                }
-                if (m_has_selection_variables &&
-                    model::has_selection_variables(binary_moves[i])) {
-                    binary_move_flags[i] = 0;
-                    continue;
-                }
-                if (a_IS_ENABLED_IMPROBABILITY_SCREENING &&
-                    !model::has_improvable_variable(binary_moves[i])) {
-                    binary_move_flags[i] = 0;
-                    continue;
-                }
-            }
-        }
-
-        /// Integer
-        if (m_is_enabled_integer_move) {
-#ifdef _OPENMP
-#pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
-#endif
-            for (auto i = 0; i < integer_moves_size; i++) {
-                integer_move_flags[i] = 1;
-                if (m_has_fixed_variables &&
-                    model::has_fixed_variables(integer_moves[i])) {
-                    integer_move_flags[i] = 0;
-                    continue;
-                }
-                if (m_has_selection_variables &&
-                    model::has_selection_variables(integer_moves[i])) {
-                    integer_move_flags[i] = 0;
-                    continue;
-                }
-                if (model::has_bound_violation(integer_moves[i])) {
-                    integer_move_flags[i] = 0;
-                    continue;
-                }
-                if (a_IS_ENABLED_IMPROBABILITY_SCREENING &&
-                    !model::has_improvable_variable(integer_moves[i])) {
-                    integer_move_flags[i] = 0;
-                    continue;
-                }
-            }
-        }
-
-        /// Aggregation
-        if (m_is_enabled_aggregation_move) {
-#ifdef _OPENMP
-#pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
-#endif
-            for (auto i = 0; i < aggregation_moves_size; i++) {
-                aggregation_move_flags[i] = 1;
-                if (m_has_fixed_variables &&
-                    model::has_fixed_variables(aggregation_moves[i])) {
-                    aggregation_move_flags[i] = 0;
-                    continue;
-                }
-                if (m_has_selection_variables &&
-                    model::has_selection_variables(aggregation_moves[i])) {
-                    aggregation_move_flags[i] = 0;
-                    continue;
-                }
-                if (model::has_bound_violation(aggregation_moves[i])) {
-                    aggregation_move_flags[i] = 0;
-                    continue;
-                }
-                if (a_IS_ENABLED_IMPROBABILITY_SCREENING &&
-                    !model::has_improvable_variable(aggregation_moves[i])) {
-                    aggregation_move_flags[i] = 0;
-                    continue;
-                }
-            }
-        }
-
-        /// Precedence
-        if (m_is_enabled_precedence_move) {
-#ifdef _OPENMP
-#pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
-#endif
-            for (auto i = 0; i < precedence_moves_size; i++) {
-                precedence_move_flags[i] = 1;
-                if (m_has_fixed_variables &&
-                    model::has_fixed_variables(precedence_moves[i])) {
-                    precedence_move_flags[i] = 0;
-                    continue;
-                }
-                if (m_has_selection_variables &&
-                    model::has_selection_variables(precedence_moves[i])) {
-                    precedence_move_flags[i] = 0;
-                    continue;
-                }
-                if (model::has_bound_violation(precedence_moves[i])) {
-                    precedence_move_flags[i] = 0;
-                    continue;
-                }
-                if (a_IS_ENABLED_IMPROBABILITY_SCREENING &&
-                    !model::has_improvable_variable(precedence_moves[i])) {
-                    precedence_move_flags[i] = 0;
-                    continue;
-                }
-            }
-        }
-
-        /// Variable Bound
-        if (m_is_enabled_variable_bound_move) {
-#ifdef _OPENMP
-#pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
-#endif
-            for (auto i = 0; i < variable_bound_moves_size; i++) {
-                variable_bound_move_flags[i] = 1;
-                if (m_has_fixed_variables &&
-                    model::has_fixed_variables(variable_bound_moves[i])) {
-                    variable_bound_move_flags[i] = 0;
-                    continue;
-                }
-                if (m_has_selection_variables &&
-                    model::has_selection_variables(variable_bound_moves[i])) {
-                    variable_bound_move_flags[i] = 0;
-                    continue;
-                }
-                if (model::has_bound_violation(variable_bound_moves[i])) {
-                    variable_bound_move_flags[i] = 0;
-                    continue;
-                }
-                if (a_IS_ENABLED_IMPROBABILITY_SCREENING &&
-                    !model::has_improvable_variable(variable_bound_moves[i])) {
-                    variable_bound_move_flags[i] = 0;
-                    continue;
-                }
-            }
-        }
-
-        /// Exclusive
-        if (m_is_enabled_exclusive_move) {
-#ifdef _OPENMP
-#pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
-#endif
-            for (auto i = 0; i < exclusive_moves_size; i++) {
-                exclusive_move_flags[i] = 1;
-                if (m_has_fixed_variables &&
-                    model::has_fixed_variables(exclusive_moves[i])) {
-                    exclusive_move_flags[i] = 0;
-                    continue;
-                }
-                if (m_has_selection_variables &&
-                    model::has_selection_variables(exclusive_moves[i])) {
-                    exclusive_move_flags[i] = 0;
-                    continue;
-                }
-                if (exclusive_moves[i].alterations[0].first->value() == 1) {
-                    exclusive_move_flags[i] = 0;
-                    continue;
-                }
-                if (a_IS_ENABLED_IMPROBABILITY_SCREENING &&
-                    !model::has_improvable_variable(exclusive_moves[i])) {
-                    exclusive_move_flags[i] = 0;
-                    continue;
-                }
-            }
+            m_selection_move_updater(&selection_moves,  //
+                                     &selection_move_flags);
         }
 
         /// User Defined
         if (m_is_enabled_user_defined_move) {
-#ifdef _OPENMP
-#pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
-#endif
-            for (auto i = 0; i < user_defined_moves_size; i++) {
-                user_defined_move_flags[i] = 1;
-                if (m_has_fixed_variables &&
-                    model::has_fixed_variables(user_defined_moves[i])) {
-                    user_defined_move_flags[i] = 0;
-                    continue;
-                }
-                if (m_has_selection_variables &&
-                    model::has_selection_variables(user_defined_moves[i])) {
-                    user_defined_move_flags[i] = 0;
-                    continue;
-                }
-                if (model::has_bound_violation(user_defined_moves[i])) {
-                    user_defined_move_flags[i] = 0;
-                    continue;
-                }
-                if (a_IS_ENABLED_IMPROBABILITY_SCREENING &&
-                    !model::has_improvable_variable(user_defined_moves[i])) {
-                    user_defined_move_flags[i] = 0;
-                    continue;
-                }
-            }
-        }
-
-        /// Selection
-        if (m_is_enabled_selection_move) {
-#ifdef _OPENMP
-#pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
-#endif
-            for (auto i = 0; i < selection_moves_size; i++) {
-                selection_move_flags[i] = 1;
-                if (m_has_fixed_variables &&
-                    model::has_fixed_variables(selection_moves[i])) {
-                    selection_move_flags[i] = 0;
-                }
-                if ((selection_moves[i].alterations[0].first ==
-                     selection_moves[i].alterations[1].first)) {
-                    selection_move_flags[i] = 0;
-                }
-                if (a_IS_ENABLED_IMPROBABILITY_SCREENING &&
-                    !model::has_improvable_variable(selection_moves[i])) {
-                    selection_move_flags[i] = 0;
-                }
-            }
+            m_user_defined_move_updater_wrapper(&user_defined_moves,  //
+                                                &user_defined_move_flags);
+            user_defined_moves_size = user_defined_moves.size();
         }
 
         auto number_of_candidate_moves =           //
@@ -1079,50 +1114,93 @@ class Neighborhood {
 
     /*************************************************************************/
     inline constexpr const std::vector<Move<T_Variable, T_Expression>>
-        &binary_moves(void) {
+        &binary_moves(void) const {
         return m_binary_moves;
     }
 
     /*************************************************************************/
+    inline constexpr const std::vector<int> &binary_move_flags(void) const {
+        return m_binary_move_flags;
+    }
+
+    /*************************************************************************/
     inline constexpr const std::vector<Move<T_Variable, T_Expression>>
-        &integer_moves(void) {
+        &integer_moves(void) const {
         return m_integer_moves;
     }
 
     /*************************************************************************/
+    inline constexpr const std::vector<int> &integer_move_flags(void) const {
+        return m_integer_move_flags;
+    }
+
+    /*************************************************************************/
     inline constexpr const std::vector<Move<T_Variable, T_Expression>>
-        &aggregation_moves(void) {
+        &aggregation_moves(void) const {
         return m_aggregation_moves;
     }
 
     /*************************************************************************/
+    inline constexpr const std::vector<int> &aggregation_move_flags(
+        void) const {
+        return m_aggregation_move_flags;
+    }
+
+    /*************************************************************************/
     inline constexpr const std::vector<Move<T_Variable, T_Expression>>
-        &precedence_moves(void) {
+        &precedence_moves(void) const {
         return m_precedence_moves;
     }
 
     /*************************************************************************/
+    inline constexpr const std::vector<int> &precedence_move_flags(void) const {
+        return m_precedence_move_flags;
+    }
+
+    /*************************************************************************/
     inline constexpr const std::vector<Move<T_Variable, T_Expression>>
-        &variable_bound_moves(void) {
+        &variable_bound_moves(void) const {
         return m_variable_bound_moves;
     }
 
     /*************************************************************************/
+    inline constexpr const std::vector<int> &variable_bound_move_flags(
+        void) const {
+        return m_variable_bound_move_flags;
+    }
+
+    /*************************************************************************/
     inline constexpr const std::vector<Move<T_Variable, T_Expression>>
-        &exclusive_moves(void) {
+        &exclusive_moves(void) const {
         return m_exclusive_moves;
     }
 
     /*************************************************************************/
-    inline constexpr const std::vector<Move<T_Variable, T_Expression>>
-        &user_defined_moves(void) {
-        return m_user_defined_moves;
+    inline constexpr const std::vector<int> &exclusive_move_flags(void) const {
+        return m_exclusive_move_flags;
     }
 
     /*************************************************************************/
     inline constexpr const std::vector<Move<T_Variable, T_Expression>>
-        &selection_moves(void) {
+        &selection_moves(void) const {
         return m_selection_moves;
+    }
+
+    /*************************************************************************/
+    inline constexpr const std::vector<int> &selection_move_flags(void) const {
+        return m_selection_move_flags;
+    }
+
+    /*************************************************************************/
+    inline constexpr const std::vector<Move<T_Variable, T_Expression>>
+        &user_defined_moves(void) const {
+        return m_user_defined_moves;
+    }
+
+    /*************************************************************************/
+    inline constexpr const std::vector<int> &user_defined_move_flags(
+        void) const {
+        return m_user_defined_move_flags;
     }
 
     /*************************************************************************/
@@ -1232,21 +1310,6 @@ class Neighborhood {
     }
 
     /*************************************************************************/
-    inline constexpr bool is_enabled_user_defined_move(void) const {
-        return m_is_enabled_user_defined_move;
-    }
-
-    /*************************************************************************/
-    inline constexpr void enable_user_defined_move(void) {
-        m_is_enabled_user_defined_move = true;
-    }
-
-    /*************************************************************************/
-    inline constexpr void disable_user_defined_move(void) {
-        m_is_enabled_user_defined_move = false;
-    }
-
-    /*************************************************************************/
     inline constexpr bool is_enabled_selection_move(void) const {
         return m_is_enabled_selection_move;
     }
@@ -1259,6 +1322,21 @@ class Neighborhood {
     /*************************************************************************/
     inline constexpr void disable_selection_move(void) {
         m_is_enabled_selection_move = false;
+    }
+
+    /*************************************************************************/
+    inline constexpr bool is_enabled_user_defined_move(void) const {
+        return m_is_enabled_user_defined_move;
+    }
+
+    /*************************************************************************/
+    inline constexpr void enable_user_defined_move(void) {
+        m_is_enabled_user_defined_move = true;
+    }
+
+    /*************************************************************************/
+    inline constexpr void disable_user_defined_move(void) {
+        m_is_enabled_user_defined_move = false;
     }
 };  // namespace model
 }  // namespace model
