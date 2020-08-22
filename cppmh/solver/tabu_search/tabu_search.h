@@ -196,19 +196,16 @@ TabuSearchResult<T_Variable, T_Expression> solve(
          * Update the moves.
          */
         if (model->is_linear() && has_constraint &&
-            option.tabu_search.is_enabled_improvability_screening &&
+            option.is_enabled_improvability_screening &&
             iteration >= option.tabu_search.number_of_initial_modification) {
             /**
              * If the option is_enabled_improvability_screening is set true,
              * only improvable moves will be generated.
              */
             model->update_variable_improvability();
-            model->neighborhood().update_moves(
-                true, option.is_enabled_parallel_neighborhood_update);
-        } else {
-            model->neighborhood().update_moves(
-                false, option.is_enabled_parallel_neighborhood_update);
         }
+
+        model->neighborhood().update_moves();
 
         if (option.tabu_search.is_enabled_shuffle) {
             model->neighborhood().shuffle_moves(&get_rand_mt);

@@ -34,10 +34,9 @@ struct TabuSearchOptionConstant {
     static constexpr double DEFAULT_MOVE_PRESERVE_RATE                  = 1.0;
     static constexpr double DEFAULT_FREQUENCY_PENALTY_COEFFICIENT       = 1E-5;
 
-    static constexpr bool   DEFAULT_IS_ENABLED_IMPROVABILITY_SCREENING = true;
-    static constexpr double DEFAULT_IS_ENABLED_SHUFFLE                 = true;
-    static constexpr double DEFAULT_IS_ENABLED_MOVE_CURTAIL            = false;
-    static constexpr bool   DEFAULT_IS_ENABLED_AUTOMATIC_BREAK         = true;
+    static constexpr double DEFAULT_IS_ENABLED_SHUFFLE         = true;
+    static constexpr double DEFAULT_IS_ENABLED_MOVE_CURTAIL    = false;
+    static constexpr bool   DEFAULT_IS_ENABLED_AUTOMATIC_BREAK = true;
     static constexpr bool DEFAULT_IS_ENABLED_AUTOMATIC_TABU_TENURE_ADJUSTMENT =
         true;
     static constexpr bool DEFAULT_IS_ENABLED_AUTOMATIC_ITERATION_ADJUSTMENT =
@@ -68,7 +67,6 @@ struct TabuSearchOption {
     RestartMode restart_mode;
     double      move_preserve_rate;
     double      frequency_penalty_coefficient;
-    bool        is_enabled_improvability_screening;
     bool        is_enabled_shuffle;
     bool        is_enabled_move_curtail;
     bool        is_enabled_automatic_break;
@@ -115,8 +113,6 @@ struct TabuSearchOption {
             TabuSearchOptionConstant::DEFAULT_MOVE_PRESERVE_RATE;
         this->frequency_penalty_coefficient =
             TabuSearchOptionConstant::DEFAULT_FREQUENCY_PENALTY_COEFFICIENT;
-        this->is_enabled_improvability_screening = TabuSearchOptionConstant::
-            DEFAULT_IS_ENABLED_IMPROVABILITY_SCREENING;
         this->is_enabled_shuffle =
             TabuSearchOptionConstant::DEFAULT_IS_ENABLED_SHUFFLE;
         this->is_enabled_move_curtail =

@@ -119,6 +119,12 @@ inline cppmh::solver::Option read_option(const std::string &a_FILE_NAME) {
               option_object);
 
     /**********************************************************************/
+    /// is_enabled_improvability_screening
+    read_json(&option.is_enabled_improvability_screening,  //
+              "is_enabled_improvability_screening",        //
+              option_object);
+
+    /**********************************************************************/
     /// is_enabled_binary_move
     read_json(&option.is_enabled_binary_move,  //
               "is_enabled_binary_move",        //
@@ -376,12 +382,6 @@ inline cppmh::solver::Option read_option(const std::string &a_FILE_NAME) {
         /// tabu_search.frequency_penalty_coefficient
         read_json(&option.tabu_search.frequency_penalty_coefficient,  //
                   "frequency_penalty_coefficient",                    //
-                  option_object_tabu_search);
-
-        /**********************************************************************/
-        /// tabu_search.is_enabled_improvability_screening
-        read_json(&option.tabu_search.is_enabled_improvability_screening,  //
-                  "is_enabled_improvability_screening",                    //
                   option_object_tabu_search);
 
         /**********************************************************************/
