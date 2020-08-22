@@ -72,6 +72,7 @@ class Model {
     bool m_is_enabled_fast_evaluation;
     bool m_is_linear;
     bool m_is_minimization;
+    bool m_is_solved;
 
     std::vector<Selection<T_Variable, T_Expression>> m_selections;
     VariableReference<T_Variable, T_Expression>      m_variable_reference;
@@ -81,6 +82,12 @@ class Model {
 
     Neighborhood<T_Variable, T_Expression> m_neighborhood;
     std::function<void(void)>              m_callback;
+
+    /*************************************************************************/
+    Model(const Model &) = default;
+
+    /*************************************************************************/
+    Model &operator=(const Model &) = default;
 
    public:
     /*************************************************************************/
@@ -119,6 +126,7 @@ class Model {
         m_is_enabled_fast_evaluation = true;
         m_is_linear                  = true;
         m_is_minimization            = true;
+        m_is_solved                  = false;
 
         m_selections.clear();
         m_variable_reference.initialize();
@@ -588,6 +596,7 @@ class Model {
 
     /*************************************************************************/
     inline constexpr void setup(
+        const bool           a_IS_ENABLED_IMPROVABILITY_SCREENING,       //
         const bool           a_IS_ENABLED_PARALLEL_NEIGHBORHOOD_UPDATE,  //
         const bool           a_IS_ENABLED_PRESOLVE,                      //
         const bool           a_IS_ENABLED_INITIAL_VALUE_CORRECTION,      //
@@ -595,12 +604,12 @@ class Model {
         const bool           a_IS_ENABLED_PRECEDENCE_MOVE,
         const bool           a_IS_ENABLED_VARIABLE_BOUND_MOVE,
         const bool           a_IS_ENABLED_EXCLUSIVE_MOVE,
+        const bool           a_IS_ENABLED_USER_DEFINED_MOVE,
         const SelectionMode &a_SELECTION_MODE,  //
         const bool           a_IS_ENABLED_PRINT) {
         this->verify_problem(a_IS_ENABLED_PRINT);
 
         this->setup_variable_related_constraints();
-        this->setup_variable_sense();
         this->setup_unique_name();
         this->setup_is_linear();
 
@@ -627,6 +636,8 @@ class Model {
                                  a_IS_ENABLED_PRECEDENCE_MOVE,               //
                                  a_IS_ENABLED_VARIABLE_BOUND_MOVE,           //
                                  a_IS_ENABLED_EXCLUSIVE_MOVE,                //
+                                 a_IS_ENABLED_USER_DEFINED_MOVE,             //
+                                 a_IS_ENABLED_IMPROVABILITY_SCREENING,       //
                                  a_IS_ENABLED_PARALLEL_NEIGHBORHOOD_UPDATE,  //
                                  a_IS_ENABLED_PRINT);
 
@@ -675,23 +686,6 @@ class Model {
                     sensitivity.first->register_related_constraint_ptr(
                         &constraint);
                 }
-            }
-        }
-    }
-
-    /*************************************************************************/
-    inline constexpr void setup_variable_sense(void) {
-        /**
-         * This method is for re-optimizations. After an optimization,
-         * the senses of the "Binary" decision variables can be changed
-         * to "Selection" by automatic detection of the neighborhood.
-         * This method recovers the "Selection" decision variables into
-         * "Binary".
-         */
-
-        for (auto &&proxy : m_variable_proxies) {
-            for (auto &&variable : proxy.flat_indexed_variables()) {
-                variable.setup_sense();
             }
         }
     }
@@ -1573,8 +1567,10 @@ class Model {
         const bool a_IS_ENABLED_AGGREGATION_MOVE,
         const bool a_IS_ENABLED_PRECEDENCE_MOVE,
         const bool a_IS_ENABLED_VARIABLE_BOUND_MOVE,
-        const bool a_IS_ENABLED_EXCLUSIVE_MOVE,  //
-        const bool a_IS_ENABLED_PARALLEL,        //
+        const bool a_IS_ENABLED_EXCLUSIVE_MOVE,           //
+        const bool a_IS_ENABLED_USER_DEFINED_MOVE,        //
+        const bool a_IS_ENABLED_IMPROVABILITY_SCREENING,  //
+        const bool a_IS_ENABLED_PARALLEL,                 //
         const bool a_IS_ENABLED_PRINT) {
         utility::print_single_line(a_IS_ENABLED_PRINT);
         utility::print_message("Detecting the neighborhood structure...",
@@ -1588,25 +1584,30 @@ class Model {
 
         m_neighborhood.setup_binary_move_updater(
             m_variable_reference.binary_variable_ptrs,  //
+            a_IS_ENABLED_IMPROVABILITY_SCREENING,       //
             a_IS_ENABLED_PARALLEL);
 
         m_neighborhood.setup_integer_move_updater(
             m_variable_reference.integer_variable_ptrs,  //
+            a_IS_ENABLED_IMPROVABILITY_SCREENING,        //
             a_IS_ENABLED_PARALLEL);
 
         m_neighborhood.setup_selection_move_updater(
             m_variable_reference.selection_variable_ptrs,  //
+            a_IS_ENABLED_IMPROVABILITY_SCREENING,          //
             a_IS_ENABLED_PARALLEL);
 
         if (a_IS_ENABLED_AGGREGATION_MOVE) {
             m_neighborhood.setup_aggregation_move_updater(
                 m_constraint_type_reference.aggregation_ptrs,  //
+                a_IS_ENABLED_IMPROVABILITY_SCREENING,          //
                 a_IS_ENABLED_PARALLEL);
         }
 
         if (a_IS_ENABLED_PRECEDENCE_MOVE) {
             m_neighborhood.setup_precedence_move_updater(
                 m_constraint_type_reference.precedence_ptrs,  //
+                a_IS_ENABLED_IMPROVABILITY_SCREENING,         //
                 a_IS_ENABLED_PARALLEL);
         }
 
@@ -1614,12 +1615,20 @@ class Model {
             m_neighborhood.setup_exclusive_move_updater(
                 m_constraint_type_reference.set_partitioning_ptrs,  //
                 m_constraint_type_reference.set_packing_ptrs,       //
+                a_IS_ENABLED_IMPROVABILITY_SCREENING,               //
                 a_IS_ENABLED_PARALLEL);
         }
 
         if (a_IS_ENABLED_VARIABLE_BOUND_MOVE) {
             m_neighborhood.setup_variable_bound_move_updater(
                 m_constraint_type_reference.variable_bound_ptrs,  //
+                a_IS_ENABLED_IMPROVABILITY_SCREENING,             //
+                a_IS_ENABLED_PARALLEL);
+        }
+
+        if (a_IS_ENABLED_USER_DEFINED_MOVE) {
+            m_neighborhood.setup_user_defined_move_updater(
+                a_IS_ENABLED_IMPROVABILITY_SCREENING,  //
                 a_IS_ENABLED_PARALLEL);
         }
 
@@ -2718,6 +2727,16 @@ class Model {
          * used to show objective function values for output.
          */
         return m_is_minimization ? 1.0 : -1.0;
+    }
+
+    /*************************************************************************/
+    inline constexpr void set_is_solved(const bool a_IS_SOLVED) {
+        m_is_solved = a_IS_SOLVED;
+    }
+
+    /*************************************************************************/
+    inline constexpr bool is_solved(void) const {
+        return m_is_solved;
     }
 
     /*************************************************************************/
