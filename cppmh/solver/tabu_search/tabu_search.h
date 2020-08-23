@@ -245,7 +245,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
 
         /**
          * The boolean is_aspirated will be set true in the following steps if a
-         * tabu-solution which improves the incumbents.
+         * tabu-solution improves the incumbents.
          */
         bool is_aspirated = false;
 
@@ -323,7 +323,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
 
             /**
              * A move which improves the augmented incumbent solution can be
-             * accepted. (optional)
+             * accepted (optional).
              */
             if (option.tabu_search.ignore_tabu_if_augmented_incumbent) {
                 if (!trial_move_scores[argmin_global_augmented_objective]
@@ -340,7 +340,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
 
             /**
              * A move which improves the feasible incumbent solution can be
-             * accepted. (optional)
+             * accepted (optional).
              */
             if (option.tabu_search.ignore_tabu_if_feasible_incumbent) {
                 if (trial_solution_scores[argmin_global_augmented_objective]
@@ -421,13 +421,10 @@ TabuSearchResult<T_Variable, T_Expression> solve(
         for (const auto& score : trial_solution_scores) {
             if (score.is_feasible) {
                 number_of_feasible_neighborhoods++;
-                if (score.is_objective_improvable) {
-                    number_of_improvable_neighborhoods++;
-                }
-            } else {
-                if (score.is_constraint_improvable) {
-                    number_of_improvable_neighborhoods++;
-                }
+            }
+            if (score.is_objective_improvable ||
+                score.is_constraint_improvable) {
+                number_of_improvable_neighborhoods++;
             }
         }
 
