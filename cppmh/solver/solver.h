@@ -112,14 +112,18 @@ Result<T_Variable, T_Expression> solve(
         model->neighborhood().enable_user_defined_move();
     }
 
+    if (master_option.selection_mode != model::SelectionMode::None) {
+        model->neighborhood().enable_selection_move();
+    }
+
     /**
      * Special neighborhood moves for Aggregation, Precedence, and Variable
      * bound constraint types will be enabled when optimization stagnates.
      */
-
-    if (master_option.selection_mode != model::SelectionMode::None) {
-        model->neighborhood().enable_selection_move();
-    }
+    bool has_special_constraints =
+        (model->constraint_type_reference().aggregation_ptrs.size() +
+         model->constraint_type_reference().precedence_ptrs.size() +
+         model->constraint_type_reference().variable_bound_ptrs.size()) > 0;
 
     if (master_option.verbose >= Verbose::Outer) {
         model->print_number_of_variables();
@@ -805,7 +809,8 @@ Result<T_Variable, T_Expression> solve(
                 }
             }
 
-            if (is_disabled_special_neighborhood_move) {
+            if (is_disabled_special_neighborhood_move &&
+                has_special_constraints) {
                 utility::print_message(
                     "Special neighborhood moves were disabled.",
                     master_option.verbose >= Verbose::Outer);
@@ -849,7 +854,8 @@ Result<T_Variable, T_Expression> solve(
                     }
                 }
 
-                if (is_enabled_special_neighborhood_move) {
+                if (is_enabled_special_neighborhood_move &&
+                    has_special_constraints) {
                     utility::print_message(
                         "Special neighborhood moves were enabled.",
                         master_option.verbose >= Verbose::Outer);
@@ -866,6 +872,10 @@ Result<T_Variable, T_Expression> solve(
             next_inital_tabu_tenure =
                 master_option.tabu_search.initial_tabu_tenure;
         }
+        utility::print_message("The tabu tenure for the next loop was set to " +
+                                   std::to_string(next_inital_tabu_tenure) +
+                                   ".",
+                               master_option.verbose >= Verbose::Outer);
 
         model->callback();
         iteration++;

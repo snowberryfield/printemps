@@ -2302,7 +2302,7 @@ class Model {
         if (m_is_defined_objective) {
             objective = m_objective.evaluate(a_MOVE) * this->sign();
             objective_improvement =
-                (m_objective.value() - objective) * this->sign();
+                m_objective.value() * this->sign() - objective;
         }
 
         double local_augmented_objective  = objective + local_penalty;
@@ -2372,7 +2372,7 @@ class Model {
         if (m_is_defined_objective) {
             objective = m_objective.evaluate(a_MOVE) * this->sign();
             objective_improvement =
-                (m_objective.value() - objective) * this->sign();
+                m_objective.value() * this->sign() - objective;
         }
 
         double local_augmented_objective  = objective + local_penalty;
