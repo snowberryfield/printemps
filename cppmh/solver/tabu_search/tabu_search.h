@@ -104,14 +104,6 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     memory.reset_last_update_iterations();
 
     /**
-     * The boolean variable has_constraint is used to determine the behavior of
-     * improvability screening. If the model is unconstrained, improvability
-     * screening will be skipped.
-     */
-    bool has_constraint = (model->number_of_constraints() -
-                           model->number_of_disabled_constraints()) > 0;
-
-    /**
      * Set up the tabu tenure and related parameters.
      */
     int original_tabu_tenure = std::min(option.tabu_search.initial_tabu_tenure,
@@ -195,9 +187,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
         /**
          * Update the moves.
          */
-        if (model->is_linear() && has_constraint &&
-            option.is_enabled_improvability_screening &&
-            iteration >= option.tabu_search.number_of_initial_modification) {
+        if (model->is_linear() && option.is_enabled_improvability_screening) {
             /**
              * If the option is_enabled_improvability_screening is set true,
              * only improvable moves will be generated.
