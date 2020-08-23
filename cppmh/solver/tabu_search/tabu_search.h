@@ -476,7 +476,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
         }
 
         if (option.tabu_search.is_enabled_automatic_tabu_tenure_adjustment) {
-            if (is_aspirated || number_of_permissible_neighborhoods == 0) {
+            if (is_aspirated) {
                 /**
                  * The tabu tenure is decreased if
                  * - The incumbent solution is found in the tabu solutions,
@@ -491,8 +491,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                                         std::to_string(tabu_tenure) + ".",
                                     option.verbose >= Verbose::Debug);
             } else if ((iteration - last_tabu_tenure_updated_iteration) %
-                           (tabu_tenure + 1) ==
-                       0) {
+                       ((tabu_tenure + 1) == 0)) {
                 /**
                  * The bias of searching is computed with the interval of
                  * tabu_tenure+1. The tabu tenure is increased if the bias has
