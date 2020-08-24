@@ -16,18 +16,54 @@ int main([[maybe_unused]] int argc, char *argv[]) {
      * exits.
      */
     if (argv[1] == nullptr) {
-        std::cout << "Usage: ./mps_solver.exe mps_file [option_file] "
-                     "[initial_solution_file]"
+        std::cout << "Usage: ./mps_solver.exe [OPTIONS] [MPS_FILE]"
                   << std::endl;
+        std::cout << std::endl;
+        std::cout  //
+            << "  -p [OPTION_FILE]: Specifies option file." << std::endl;
+        std::cout
+            << "  -i [INITIAL_SOLUTION_FILE]: Specifies initial solution file."
+            << std::endl;
+        std::cout  //
+            << "  --separate: Separate equality constraints into lower "
+               "and upper constraints."
+            << std::endl;
         exit(1);
+    }
+
+    /**
+     * Parse the arguments.
+     */
+    std::string mps_file_name;
+    std::string option_file_name;
+    std::string initial_solution_file_name;
+    bool        is_enabled_separate_equality = false;
+
+    std::vector<std::string> args(argv, argv + argc);
+    int                      i = 1;
+    while (i < static_cast<int>(args.size())) {
+        if (args[i] == "-p") {
+            option_file_name = args[i + 1];
+            i += 2;
+        } else if (args[i] == "-i") {
+            initial_solution_file_name = args[i + 1];
+            i += 2;
+        } else if (args[i] == "--separate") {
+            is_enabled_separate_equality = true;
+            i++;
+        } else {
+            mps_file_name = args[i];
+            i++;
+        }
     }
 
     /**
      * Read the specified MPS file and convert to the model.
      */
-    std::string               mps_file_name = argv[1];
     cppmh::utility::MPSReader mps_reader;
-    auto &model = mps_reader.create_model_from_mps(mps_file_name);
+
+    auto &model = mps_reader.create_model_from_mps(
+        mps_file_name, is_enabled_separate_equality);
     model.set_name(cppmh::utility::base_name(mps_file_name));
 
     /**
@@ -35,20 +71,20 @@ int main([[maybe_unused]] int argc, char *argv[]) {
      * be used for the calculation. Otherwise, the default values will be used.
      */
     cppmh::solver::Option option;
+
     option.verbose = cppmh::solver::Full;
-    if (argc > 2) {
-        std::string option_file_name = argv[2];
+    if (!option_file_name.empty()) {
         option = cppmh::utility::read_option(option_file_name);
     }
 
     /**
-     * If the solution file is given, the values of the decision variables in
-     * the file will be used as the initial values. Otherwise, the default
-     * values will be used.
+     * If the initial solution file is given, the values of the decision
+     * variables in the file will be used as the initial values. Otherwise, the
+     * default values will be used.
      */
-    if (argc > 3) {
-        std::string solution_file_name = argv[3];
-        auto solution = cppmh::utility::read_solution(solution_file_name);
+    if (!initial_solution_file_name.empty()) {
+        auto solution =
+            cppmh::utility::read_solution(initial_solution_file_name);
         model.import_solution(solution);
     }
 
