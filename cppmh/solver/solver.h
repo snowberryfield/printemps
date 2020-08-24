@@ -423,8 +423,10 @@ Result<T_Variable, T_Expression> solve(
      * Run tabu searches to find better solutions.
      */
     int iteration                           = 0;
+    int not_update_count                    = 0;
     int next_number_of_initial_modification = 0;
     int next_inital_tabu_tenure = master_option.tabu_search.initial_tabu_tenure;
+    bool penalty_coefficient_reset_flag = false;
 
     /**
      * The integer variable next_iteration_max is used if the option
@@ -543,6 +545,21 @@ Result<T_Variable, T_Expression> solve(
             result.incumbent_holder.global_augmented_incumbent_solution(),
             result.incumbent_holder.global_augmented_incumbent_score());
 
+        if ((update_status && (IncumbentHolderConstant::
+                                   STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE))) {
+            not_update_count               = 0;
+            penalty_coefficient_reset_flag = false;
+        } else {
+            not_update_count++;
+            if (not_update_count ==
+                master_option.penalty_coefficient_reset_count_threshold) {
+                penalty_coefficient_reset_flag = true;
+                not_update_count               = 0;
+            } else {
+                penalty_coefficient_reset_flag = false;
+            }
+        }
+
         /**
          * Update the feasible incumbent solution if it was improved by the
          * tabu search.
@@ -565,9 +582,16 @@ Result<T_Variable, T_Expression> solve(
             incumbent_holder.global_augmented_incumbent_objective() -
             result.incumbent_holder.local_augmented_incumbent_objective();
 
-        if (gap > constant::EPSILON) {
+        if (penalty_coefficient_reset_flag) {
             /**
-             * If The gap the (global augmented incumbent objective) - (the
+             * If penalty_coefficient_reset_flag is true, the penalty
+             * coefficients will be reset;
+             */
+            local_penalty_coefficient_proxies =
+                global_penalty_coefficient_proxies;
+        } else if (gap > constant::EPSILON) {
+            /**
+             * If the gap the (global augmented incumbent objective) - (the
              * local augmented incumbent objective obtained in the last tabu
              * search) is positive, tighten the local penalty coefficients.
              */
@@ -876,6 +900,15 @@ Result<T_Variable, T_Expression> solve(
                                    std::to_string(next_inital_tabu_tenure) +
                                    ".",
                                master_option.verbose >= Verbose::Outer);
+
+        /**
+         * Print message if the penalty coefficients were reset.
+         */
+        if (penalty_coefficient_reset_flag) {
+            utility::print_message(
+                "The penalty coefficients were reset due to search stagnation.",
+                master_option.verbose >= Verbose::Outer);
+        }
 
         model->callback();
         iteration++;
