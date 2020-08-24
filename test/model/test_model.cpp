@@ -44,6 +44,8 @@ TEST_F(TestModel, initialize) {
     auto max_number_of_constraint_proxies =
         cppmh::model::ModelConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES;
 
+    EXPECT_EQ("", model.name());
+
     EXPECT_EQ(max_number_of_variable_proxies,
               static_cast<int>(model.variable_proxies().capacity()));
     EXPECT_EQ(max_number_of_expression_proxies,
@@ -60,6 +62,7 @@ TEST_F(TestModel, initialize) {
     EXPECT_EQ(true, model.is_linear());
     EXPECT_EQ(true, model.is_minimization());
     EXPECT_EQ(1.0, model.sign());
+    EXPECT_EQ(false, model.is_solved());
 
     /// Variable Reference
     EXPECT_EQ(  //
@@ -119,6 +122,25 @@ TEST_F(TestModel, initialize) {
         true, model.constraint_type_reference().general_linear_ptrs.empty());
     EXPECT_EQ(  //
         true, model.constraint_type_reference().nonlinear_ptrs.empty());
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, constructor_arg_name) {
+    cppmh::model::Model<int, double> model("name");
+    EXPECT_EQ("name", model.name());
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, set_name) {
+    cppmh::model::Model<int, double> model;
+    EXPECT_EQ("", model.name());
+    model.set_name("name");
+    EXPECT_EQ("name", model.name());
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, name) {
+    /// This method is tested in set_name().
 }
 
 /*****************************************************************************/
@@ -769,26 +791,6 @@ TEST_F(TestModel, setup_variable_related_constraints) {
             EXPECT_EQ(i == 0, y(i, j).related_constraint_ptrs().find(&g(2)) !=
                                   y(i, j).related_constraint_ptrs().end());
         }
-    }
-}
-
-/*****************************************************************************/
-TEST_F(TestModel, setup_variable_sense) {
-    cppmh::model::Model<int, double> model;
-
-    auto& x = model.create_variables("x", 10, 0, 1);
-    model.create_constraint("g", x.selection());
-
-    model.categorize_variables();
-    model.categorize_constraints();
-    model.extract_selections(cppmh::model::SelectionMode::Defined);
-    for (const auto& element : x.flat_indexed_variables()) {
-        EXPECT_EQ(cppmh::model::VariableSense::Selection, element.sense());
-    }
-
-    model.setup_variable_sense();
-    for (const auto& element : x.flat_indexed_variables()) {
-        EXPECT_EQ(cppmh::model::VariableSense::Binary, element.sense());
     }
 }
 
@@ -2326,6 +2328,220 @@ TEST_F(TestModel, update_arg_void) {
 }
 
 /*****************************************************************************/
+TEST_F(TestModel, update_variable_improvability) {
+    {
+        cppmh::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x", -10, 10);
+        auto& y = model.create_variable("y", -10, 10);
+
+        [[maybe_unused]] auto& g = model.create_constraint("g", x - y <= 0);
+
+        model.minimize(-x + y);
+        model.categorize_variables();
+        model.categorize_constraints();
+        model.setup_fixed_sensitivities(false);
+
+        x = -10;
+        y = -10;
+
+        model.update();
+        model.update_variable_improvability();
+        EXPECT_EQ(true, x(0).is_improvable());
+        EXPECT_EQ(false, y(0).is_improvable());
+
+        x = 10;
+        y = 10;
+        model.update();
+        model.update_variable_improvability();
+        EXPECT_EQ(false, x(0).is_improvable());
+        EXPECT_EQ(true, y(0).is_improvable());
+
+        x = 10;
+        y = -10;
+        model.update();
+        model.update_variable_improvability();
+        EXPECT_EQ(true, x(0).is_improvable());
+        EXPECT_EQ(true, y(0).is_improvable());
+    }
+    {
+        cppmh::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x", -10, 10);
+        auto& y = model.create_variable("y", -10, 10);
+
+        [[maybe_unused]] auto& g = model.create_constraint("g", x - y == 0);
+
+        model.minimize(-x + y);
+        model.categorize_variables();
+        model.categorize_constraints();
+        model.setup_fixed_sensitivities(false);
+
+        x = -10;
+        y = -10;
+
+        model.update();
+        model.update_variable_improvability();
+        EXPECT_EQ(true, x(0).is_improvable());
+        EXPECT_EQ(false, y(0).is_improvable());
+
+        x = 10;
+        y = 10;
+        model.update();
+        model.update_variable_improvability();
+        EXPECT_EQ(false, x(0).is_improvable());
+        EXPECT_EQ(true, y(0).is_improvable());
+
+        x = 10;
+        y = -10;
+        model.update();
+        model.update_variable_improvability();
+        EXPECT_EQ(true, x(0).is_improvable());
+        EXPECT_EQ(true, y(0).is_improvable());
+    }
+    {
+        cppmh::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x", -10, 10);
+        auto& y = model.create_variable("y", -10, 10);
+
+        [[maybe_unused]] auto& g = model.create_constraint("g", x - y >= 0);
+
+        model.minimize(-x + y);
+        model.categorize_variables();
+        model.categorize_constraints();
+        model.setup_fixed_sensitivities(false);
+
+        x = -10;
+        y = -10;
+
+        model.update();
+        model.update_variable_improvability();
+        EXPECT_EQ(true, x(0).is_improvable());
+        EXPECT_EQ(false, y(0).is_improvable());
+
+        x = 10;
+        y = 10;
+        model.update();
+        model.update_variable_improvability();
+        EXPECT_EQ(false, x(0).is_improvable());
+        EXPECT_EQ(true, y(0).is_improvable());
+
+        x = -10;
+        y = 10;
+        model.update();
+        model.update_variable_improvability();
+        EXPECT_EQ(true, x(0).is_improvable());
+        EXPECT_EQ(true, y(0).is_improvable());
+    }
+    {
+        cppmh::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x", -10, 10);
+        auto& y = model.create_variable("y", -10, 10);
+
+        [[maybe_unused]] auto& g = model.create_constraint("g", x - y <= 0);
+
+        model.maximize(-x + y);
+        model.categorize_variables();
+        model.categorize_constraints();
+        model.setup_fixed_sensitivities(false);
+
+        x = -10;
+        y = -10;
+
+        model.update();
+        model.update_variable_improvability();
+        EXPECT_EQ(false, x(0).is_improvable());
+        EXPECT_EQ(true, y(0).is_improvable());
+
+        x = 10;
+        y = 10;
+        model.update();
+        model.update_variable_improvability();
+        EXPECT_EQ(true, x(0).is_improvable());
+        EXPECT_EQ(false, y(0).is_improvable());
+
+        x = 10;
+        y = -10;
+        model.update();
+        model.update_variable_improvability();
+        EXPECT_EQ(true, x(0).is_improvable());
+        EXPECT_EQ(true, y(0).is_improvable());
+    }
+    {
+        cppmh::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x", -10, 10);
+        auto& y = model.create_variable("y", -10, 10);
+
+        [[maybe_unused]] auto& g = model.create_constraint("g", x - y == 0);
+
+        model.maximize(-x + y);
+        model.categorize_variables();
+        model.categorize_constraints();
+        model.setup_fixed_sensitivities(false);
+
+        x = -10;
+        y = -10;
+
+        model.update();
+        model.update_variable_improvability();
+        EXPECT_EQ(false, x(0).is_improvable());
+        EXPECT_EQ(true, y(0).is_improvable());
+
+        x = 10;
+        y = 10;
+        model.update();
+        model.update_variable_improvability();
+        EXPECT_EQ(true, x(0).is_improvable());
+        EXPECT_EQ(false, y(0).is_improvable());
+
+        x = 10;
+        y = -10;
+        model.update();
+        model.update_variable_improvability();
+        EXPECT_EQ(true, x(0).is_improvable());
+        EXPECT_EQ(true, y(0).is_improvable());
+    }
+    {
+        cppmh::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x", -10, 10);
+        auto& y = model.create_variable("y", -10, 10);
+
+        [[maybe_unused]] auto& g = model.create_constraint("g", x - y >= 0);
+
+        model.maximize(-x + y);
+        model.categorize_variables();
+        model.categorize_constraints();
+        model.setup_fixed_sensitivities(false);
+
+        x = -10;
+        y = -10;
+
+        model.update();
+        model.update_variable_improvability();
+        EXPECT_EQ(false, x(0).is_improvable());
+        EXPECT_EQ(true, y(0).is_improvable());
+
+        x = 10;
+        y = 10;
+        model.update();
+        model.update_variable_improvability();
+        EXPECT_EQ(true, x(0).is_improvable());
+        EXPECT_EQ(false, y(0).is_improvable());
+
+        x = -10;
+        y = 10;
+        model.update();
+        model.update_variable_improvability();
+        EXPECT_EQ(true, x(0).is_improvable());
+        EXPECT_EQ(true, y(0).is_improvable());
+    }
+}
+
+/*****************************************************************************/
 TEST_F(TestModel, update_arg_move) {
     cppmh::model::Model<int, double> model;
 
@@ -2356,6 +2572,26 @@ TEST_F(TestModel, update_arg_move) {
     EXPECT_EQ(10, p(0).value());
     EXPECT_EQ(10, model.objective().value());
     EXPECT_EQ(&x(9), model.selections().front().selected_variable_ptr);
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, is_feasible) {
+    cppmh::model::Model<int, double> model;
+
+    auto&                  x = model.create_variable("x", 0, 10);
+    [[maybe_unused]] auto& g = model.create_constraint("g", x <= 5);
+
+    x = 4;
+    model.update();
+    EXPECT_EQ(true, model.is_feasible());
+
+    x = 5;
+    model.update();
+    EXPECT_EQ(true, model.is_feasible());
+
+    x = 6;
+    model.update();
+    EXPECT_EQ(false, model.is_feasible());
 }
 
 /*****************************************************************************/
@@ -2390,7 +2626,6 @@ TEST_F(TestModel, evaluate) {
         model.minimize(p);
 
         model.setup_variable_related_constraints();
-        model.setup_variable_sense();
         model.categorize_variables();
         model.categorize_constraints();
         model.extract_selections(cppmh::model::SelectionMode::Defined);
@@ -2565,7 +2800,6 @@ TEST_F(TestModel, evaluate) {
         model.maximize(p);
 
         model.setup_variable_related_constraints();
-        model.setup_variable_sense();
         model.categorize_variables();
         model.categorize_constraints();
         model.extract_selections(cppmh::model::SelectionMode::Defined);
@@ -2905,12 +3139,14 @@ TEST_F(TestModel, export_solution) {
 
     model.update();
 
-    /// Test Solution
     auto solution = model.export_solution();
     EXPECT_EQ(3, static_cast<int>(solution.variable_value_proxies.size()));
     EXPECT_EQ(3, static_cast<int>(solution.expression_value_proxies.size()));
     EXPECT_EQ(3, static_cast<int>(solution.constraint_value_proxies.size()));
     EXPECT_EQ(3, static_cast<int>(solution.violation_value_proxies.size()));
+
+    EXPECT_EQ(model.objective().value(), solution.objective);
+    EXPECT_EQ(model.is_feasible(), solution.is_feasible);
 
     EXPECT_EQ(x.id(), solution.variable_value_proxies[0].id());
     EXPECT_EQ(x.value(), solution.variable_value_proxies[0].value());
@@ -2978,13 +3214,69 @@ TEST_F(TestModel, export_solution) {
                       solution.violation_value_proxies[2](i, j));
         }
     }
+}
 
-    /// Test NamedSolution
-    auto named_solution = model.convert_to_named_solution(solution);
+/*****************************************************************************/
+TEST_F(TestModel, export_named_solution) {
+    cppmh::model::Model<int, double> model;
+
+    auto& x = model.create_variable("x");
+    auto& y = model.create_variables("y", 10);
+    auto& z = model.create_variables("z", {20, 30});
+
+    auto& p = model.create_expression("p");
+    auto& q = model.create_expressions("q", 10);
+    auto& r = model.create_expressions("r", {20, 30});
+
+    auto& g = model.create_constraint("g");
+    auto& h = model.create_constraints("h", 10);
+    auto& v = model.create_constraints("v", {20, 30});
+
+    p = random_integer() * x;
+    for (auto i = 0; i < 10; i++) {
+        q(i) = random_integer() * y(i);
+    }
+
+    for (auto i = 0; i < 20; i++) {
+        for (auto j = 0; j < 30; j++) {
+            r(i, j) = random_integer() * z(i, j) + random_integer();
+            v(i, j) = r(i, j) == random_integer();
+        }
+    }
+    model.minimize(random_integer() * p + random_integer() * q.sum() +
+                   random_integer() * r.sum());
+
+    x = random_integer();
+    for (auto i = 0; i < 10; i++) {
+        y(i) = random_integer();
+    }
+
+    for (auto i = 0; i < 20; i++) {
+        for (auto j = 0; j < 30; j++) {
+            z(i, j) = random_integer();
+        }
+    }
+
+    model.set_name("name");
+    model.categorize_variables();
+    model.categorize_constraints();
+    model.update();
+
+    auto named_solution = model.export_named_solution();
+
+    EXPECT_EQ("name", named_solution.model_summary().name);
+    EXPECT_EQ(1 + 10 + 20 * 30,
+              named_solution.model_summary().number_of_variables);
+    EXPECT_EQ(1 + 10 + 20 * 30,
+              named_solution.model_summary().number_of_constraints);
+
     EXPECT_EQ(3, static_cast<int>(named_solution.variables().size()));
     EXPECT_EQ(3, static_cast<int>(named_solution.expressions().size()));
     EXPECT_EQ(3, static_cast<int>(named_solution.constraints().size()));
     EXPECT_EQ(3, static_cast<int>(named_solution.violations().size()));
+
+    EXPECT_EQ(model.objective().value(), named_solution.objective());
+    EXPECT_EQ(model.is_feasible(), named_solution.is_feasible());
 
     EXPECT_EQ(x.id(), named_solution.variables("x").id());
     EXPECT_EQ(x.id(), named_solution.variables().at("x").id());
@@ -3082,7 +3374,113 @@ TEST_F(TestModel, export_solution) {
 
 /*****************************************************************************/
 TEST_F(TestModel, convert_to_named_solution) {
-    /// This method is tested in export_solution.
+    /// This method is tested in export_named_solution.
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, export_plain_solution) {
+    cppmh::model::Model<int, double> model;
+
+    auto& x = model.create_variable("x");
+    auto& y = model.create_variables("y", 10);
+    auto& z = model.create_variables("z", {20, 30});
+
+    model.minimize(random_integer() * x.sum() + random_integer() * y.sum() +
+                   random_integer() * z.sum());
+
+    x = random_integer();
+    for (auto i = 0; i < 10; i++) {
+        y(i) = random_integer();
+    }
+
+    for (auto i = 0; i < 20; i++) {
+        for (auto j = 0; j < 30; j++) {
+            z(i, j) = random_integer();
+        }
+    }
+
+    model.update();
+
+    auto plain_solution = model.export_plain_solution();
+    EXPECT_EQ(model.objective().value(), plain_solution.objective);
+    EXPECT_EQ(model.is_feasible(), plain_solution.is_feasible);
+
+    int index = 0;
+    EXPECT_EQ(x.value(), plain_solution.variables[index++]);
+
+    for (auto i = 0; i < 10; i++) {
+        EXPECT_EQ(y(i).value(), plain_solution.variables[index++]);
+    }
+
+    for (auto i = 0; i < 20; i++) {
+        for (auto j = 0; j < 30; j++) {
+            EXPECT_EQ(z(i, j).value(), plain_solution.variables[index++]);
+        }
+    }
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, convert_to_plain_solution) {
+    cppmh::model::Model<int, double> model;
+
+    auto& x = model.create_variable("x");
+    auto& y = model.create_variables("y", 10);
+    auto& z = model.create_variables("z", {20, 30});
+
+    model.minimize(random_integer() * x.sum() + random_integer() * y.sum() +
+                   random_integer() * z.sum());
+
+    x = random_integer();
+    for (auto i = 0; i < 10; i++) {
+        y(i) = random_integer();
+    }
+
+    for (auto i = 0; i < 20; i++) {
+        for (auto j = 0; j < 30; j++) {
+            z(i, j) = random_integer();
+        }
+    }
+
+    model.update();
+
+    auto solution       = model.export_solution();
+    auto plain_solution = model.convert_to_plain_solution(solution);
+    EXPECT_EQ(model.objective().value(), plain_solution.objective);
+    EXPECT_EQ(model.is_feasible(), plain_solution.is_feasible);
+
+    int index = 0;
+    EXPECT_EQ(x.value(), plain_solution.variables[index++]);
+
+    for (auto i = 0; i < 10; i++) {
+        EXPECT_EQ(y(i).value(), plain_solution.variables[index++]);
+    }
+
+    for (auto i = 0; i < 20; i++) {
+        for (auto j = 0; j < 30; j++) {
+            EXPECT_EQ(z(i, j).value(), plain_solution.variables[index++]);
+        }
+    }
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, export_summary) {
+    cppmh::model::Model<int, double> model("name");
+
+    [[maybe_unused]] auto& x = model.create_variable("x");
+    [[maybe_unused]] auto& y = model.create_variables("y", 10);
+    [[maybe_unused]] auto& z = model.create_variables("z", {20, 30});
+
+    [[maybe_unused]] auto& g = model.create_constraint("g");
+    [[maybe_unused]] auto& h = model.create_constraints("h", 10);
+    [[maybe_unused]] auto& v = model.create_constraints("v", {20, 30});
+
+    model.categorize_variables();
+    model.categorize_constraints();
+
+    auto summary = model.export_summary();
+    EXPECT_EQ("name", summary.name);
+    EXPECT_EQ(1 + 10 + 20 * 30, summary.number_of_variables);
+    EXPECT_EQ(1 + 10 + 20 * 30, summary.number_of_constraints);
 }
 
 /*****************************************************************************/
@@ -3163,6 +3561,21 @@ TEST_F(TestModel, is_minimization) {
 /*****************************************************************************/
 TEST_F(TestModel, sign) {
     /// This method is tested in minimize_arg_function() and so on.
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, set_is_solved) {
+    cppmh::model::Model<int, double> model;
+    EXPECT_EQ(false, model.is_solved());
+    model.set_is_solved(true);
+    EXPECT_EQ(true, model.is_solved());
+    model.set_is_solved(false);
+    EXPECT_EQ(false, model.is_solved());
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, is_solved) {
+    /// This method is tested in set_is_solved().
 }
 
 /*****************************************************************************/

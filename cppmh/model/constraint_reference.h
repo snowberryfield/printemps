@@ -3,51 +3,45 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef CPPMH_SOLVER_LOCAL_SEARCH_LOCAL_SEARCH_RESULT_H__
-#define CPPMH_SOLVER_LOCAL_SEARCH_LOCAL_SEARCH_RESULT_H__
+#ifndef CPPMH_MODEL_CONSTRAINT_REFERENCE_H__
+#define CPPMH_MODEL_CONSTRAINT_REFERENCE_H__
+
+#include <vector>
 
 namespace cppmh {
-namespace solver {
+namespace model {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-class IncumbentHolder;
+class Constraint;
 
-namespace local_search {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-struct LocalSearchResult {
-    IncumbentHolder<T_Variable, T_Expression> incumbent_holder;
-    Memory                                    memory;
-    int                                       total_update_status;
-    int                                       number_of_iterations;
-
-    std::vector<model::PlainSolution<T_Variable, T_Expression>>
-        historical_feasible_solutions;
+struct ConstraintReference {
+    std::vector<Constraint<T_Variable, T_Expression> *> constraint_ptrs;
+    std::vector<Constraint<T_Variable, T_Expression> *>
+        selection_constraint_ptrs;
+    std::vector<Constraint<T_Variable, T_Expression> *>
+        disabled_constraint_ptrs;
 
     /*************************************************************************/
-    LocalSearchResult(void) {
+    ConstraintReference(void) {
         this->initialize();
     }
 
     /*************************************************************************/
-    virtual ~LocalSearchResult(void) {
+    virtual ~ConstraintReference(void) {
         /// nothing to do
     }
 
     /*************************************************************************/
-    inline void constexpr initialize(void) {
-        this->incumbent_holder.initialize();
-        this->memory.initialize();
-        this->total_update_status  = 0;
-        this->number_of_iterations = 0;
-
-        this->historical_feasible_solutions.clear();
+    inline void initialize(void) {
+        this->constraint_ptrs.clear();
+        this->selection_constraint_ptrs.clear();
+        this->disabled_constraint_ptrs.clear();
     }
 };
-}  // namespace local_search
-}  // namespace solver
+}  // namespace model
 }  // namespace cppmh
-
 #endif
 /*****************************************************************************/
 // END

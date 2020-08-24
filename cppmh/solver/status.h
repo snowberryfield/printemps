@@ -12,6 +12,8 @@ namespace cppmh {
 namespace solver {
 /*****************************************************************************/
 struct Status {
+    model::ModelSummary model_summary;
+
     std::unordered_map<std::string, model::ValueProxy<double>>
         penalty_coefficients;
 
@@ -36,6 +38,8 @@ struct Status {
 
     /*************************************************************************/
     inline void initialize(void) {
+        this->model_summary.initialize();
+
         this->penalty_coefficients.clear();
         this->update_counts.clear();
         this->is_found_feasible_solution         = false;
@@ -64,42 +68,54 @@ struct Status {
         ofs << utility::indent_spaces(indent_level) << "{" << std::endl;
         indent_level++;
 
-        /// Penalty coefficients
-        model::write_values_by_name(&ofs, this->penalty_coefficients,  //
-                                    "penalty_coefficients", indent_level);
+        /// Summary
+        ofs << utility::indent_spaces(indent_level) << "\"name\" : "
+            << "\"" << model_summary.name << "\"," << std::endl;
 
-        /// Update counts
-        model::write_values_by_name(&ofs, this->update_counts,  //
-                                    "update_counts", indent_level);
+        ofs << utility::indent_spaces(indent_level)
+            << "\"number_of_variables\" : " << model_summary.number_of_variables
+            << "," << std::endl;
 
-        /// Others
+        ofs << utility::indent_spaces(indent_level)
+            << "\"number_of_constraints\" : "
+            << model_summary.number_of_constraints << "," << std::endl;
+
         ofs << utility::indent_spaces(indent_level)
             << "\"is_found_feasible_solution\" : "
             << (is_found_feasible_solution ? "true," : "false,") << std::endl;
 
         ofs << utility::indent_spaces(indent_level)
-            << "\"elapsed_time\" : " + std::to_string(elapsed_time) + ","
+            << "\"elapsed_time\" : " + std::to_string(elapsed_time) << ","
             << std::endl;
 
         ofs << utility::indent_spaces(indent_level)
             << "\"number_of_lagrange_dual_iterations\" : " +
-                   std::to_string(number_of_lagrange_dual_iterations) + ","
-            << std::endl;
+                   std::to_string(number_of_lagrange_dual_iterations)
+            << "," << std::endl;
 
         ofs << utility::indent_spaces(indent_level)
             << "\"number_of_local_search_iterations\" : " +
-                   std::to_string(number_of_local_search_iterations) + ","
-            << std::endl;
+                   std::to_string(number_of_local_search_iterations)
+            << "," << std::endl;
 
         ofs << utility::indent_spaces(indent_level)
             << "\"number_of_tabu_search_iterations\" : " +
-                   std::to_string(number_of_tabu_search_iterations) + ","
-            << std::endl;
+                   std::to_string(number_of_tabu_search_iterations)
+            << "," << std::endl;
 
         ofs << utility::indent_spaces(indent_level)
             << "\"number_of_tabu_search_loops\" : " +
                    std::to_string(number_of_tabu_search_loops)
-            << std::endl;
+            << "," << std::endl;
+
+        /// Penalty coefficients
+        model::write_values_by_name(&ofs, this->penalty_coefficients,  //
+                                    "penalty_coefficients", indent_level);
+        ofs << "," << std::endl;
+
+        /// Update counts
+        model::write_values_by_name(&ofs, this->update_counts,  //
+                                    "update_counts", indent_level);
 
         indent_level--;
         ofs << utility::indent_spaces(indent_level) << "}" << std::endl;

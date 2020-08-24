@@ -38,7 +38,8 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     const std::vector<model::ValueProxy<T_Variable>>&  //
         a_INITIAL_VARIABLE_VALUE_PROXIES,              //
     const IncumbentHolder<T_Variable, T_Expression>&   //
-        a_INCUMBENT_HOLDER) {
+                 a_INCUMBENT_HOLDER,                   //
+    const Memory a_MEMORY) {
     /**
      * Define type aliases.
      */
@@ -58,6 +59,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
      */
     Model_T* model  = a_model;
     Option   option = a_OPTION;
+    Memory   memory = a_MEMORY;
 
     std::vector<model::ValueProxy<double>> local_penalty_coefficient_proxies =
         a_LOCAL_PENALTY_COEFFICIENT_PROXIES;
@@ -65,6 +67,11 @@ TabuSearchResult<T_Variable, T_Expression> solve(
         a_GLOBAL_PENALTY_COEFFICIENT_PROXIES;
 
     IncumbentHolder_T incumbent_holder = a_INCUMBENT_HOLDER;
+
+    /**
+     * Reset the local augmented incumbent.
+     */
+    incumbent_holder.reset_local_augmented_incumbent();
 
     /**
      * Determine whether fast evaluation is available or not.
@@ -89,25 +96,12 @@ TabuSearchResult<T_Variable, T_Expression> solve(
 
     int update_status =
         incumbent_holder.try_update_incumbent(model, solution_score);
-
-    /**
-     * Reset the local augmented incumbent.
-     */
-    incumbent_holder.reset_local_augmented_incumbent();
     int total_update_status = IncumbentHolderConstant::STATUS_NO_UPDATED;
 
     /**
-     * Create memory which records final updated iteration and updated count for
-     * each decision variable.
+     * Reset the last update iterations.
      */
-    Memory memory(model);
-
-    /**
-     * The boolean variable has_constraint is used to determine the behavior of
-     * improvability screening. If the model is unconstrained, improvability
-     * screening will be skipped.
-     */
-    bool has_constraint(local_penalty_coefficient_proxies.size() > 0);
+    memory.reset_last_update_iterations();
 
     /**
      * Set up the tabu tenure and related parameters.
@@ -122,6 +116,12 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     int    bias_decrease_count = 0;
 
     int last_tabu_tenure_updated_iteration = 0;
+
+    /**
+     * Prepare historical solutions holder.
+     */
+    std::vector<model::PlainSolution<T_Variable, T_Expression>>
+        historical_feasible_solutions;
 
     /**
      * Prepare other local variables.
@@ -187,7 +187,16 @@ TabuSearchResult<T_Variable, T_Expression> solve(
         /**
          * Update the moves.
          */
+        if (model->is_linear() && option.is_enabled_improvability_screening) {
+            /**
+             * If the option is_enabled_improvability_screening is set true,
+             * only improvable moves will be generated.
+             */
+            model->update_variable_improvability();
+        }
+
         model->neighborhood().update_moves();
+
         if (option.tabu_search.is_enabled_shuffle) {
             model->neighborhood().shuffle_moves(&get_rand_mt);
         }
@@ -226,7 +235,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
 
         /**
          * The boolean is_aspirated will be set true in the following steps if a
-         * tabu-solution which improves the incumbents.
+         * tabu-solution improves the incumbents.
          */
         bool is_aspirated = false;
 
@@ -271,24 +280,6 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                 trial_move_scores[i_move].frequency_penalty;
 
             /**
-             * If the option is_enabled_improvability_screening is set true,
-             * moves with no improvement in the objective function or constraint
-             * violation will be set lower priorities in selecting a move for
-             * the next solution.
-             */
-            if (option.tabu_search.is_enabled_improvability_screening &&
-                has_constraint) {
-                if (solution_score.is_feasible &&
-                    !trial_solution_scores[i_move].is_objective_improvable) {
-                    total_scores[i_move] = HUGE_VALF;
-                }
-                if (!solution_score.is_feasible &&
-                    !trial_solution_scores[i_move].is_constraint_improvable) {
-                    total_scores[i_move] = HUGE_VALF;
-                }
-            }
-
-            /**
              * If the move is "tabu", it will be set lower priorities in
              * selecting a move for the next solution.
              */
@@ -322,7 +313,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
 
             /**
              * A move which improves the augmented incumbent solution can be
-             * accepted. (optional)
+             * accepted (optional).
              */
             if (option.tabu_search.ignore_tabu_if_augmented_incumbent) {
                 if (!trial_move_scores[argmin_global_augmented_objective]
@@ -339,7 +330,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
 
             /**
              * A move which improves the feasible incumbent solution can be
-             * accepted. (optional)
+             * accepted (optional).
              */
             if (option.tabu_search.ignore_tabu_if_feasible_incumbent) {
                 if (trial_solution_scores[argmin_global_augmented_objective]
@@ -367,6 +358,14 @@ TabuSearchResult<T_Variable, T_Expression> solve(
         update_status =
             incumbent_holder.try_update_incumbent(model, solution_score);
         total_update_status = update_status | total_update_status;
+
+        /**
+         * Push the current solution to historical data.
+         */
+        if (solution_score.is_feasible) {
+            historical_feasible_solutions.push_back(
+                model->export_plain_solution());
+        }
 
         /**
          * Update the memory.
@@ -477,7 +476,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
         }
 
         if (option.tabu_search.is_enabled_automatic_tabu_tenure_adjustment) {
-            if (is_aspirated || number_of_permissible_neighborhoods == 0) {
+            if (is_aspirated) {
                 /**
                  * The tabu tenure is decreased if
                  * - The incumbent solution is found in the tabu solutions,
@@ -492,8 +491,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                                         std::to_string(tabu_tenure) + ".",
                                     option.verbose >= Verbose::Debug);
             } else if ((iteration - last_tabu_tenure_updated_iteration) %
-                           (tabu_tenure + 1) ==
-                       0) {
+                       ((tabu_tenure + 1) == 0)) {
                 /**
                  * The bias of searching is computed with the interval of
                  * tabu_tenure+1. The tabu tenure is increased if the bias has
@@ -561,6 +559,8 @@ TabuSearchResult<T_Variable, T_Expression> solve(
         last_feasible_incumbent_update_iteration;
 
     result.is_early_stopped = is_early_stopped;
+
+    result.historical_feasible_solutions = historical_feasible_solutions;
 
     return result;
 }

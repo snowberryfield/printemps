@@ -567,7 +567,8 @@ std::unordered_map<std::string, int> read_solution(
         if (items_size != 2) {
             continue;
         }
-        solution[items[0]] = atoi(items[1].c_str());
+        solution[items[0]] =
+            static_cast<int>(floor(0.5 + atof(items[1].c_str())));
     }
 
     return solution;

@@ -27,6 +27,7 @@ enum class MoveSense {
     Precedence,     //
     Aggregation,    //
     VariableBound,  //
+    Exclusive,      //
     UserDefined
 };
 

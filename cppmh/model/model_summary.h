@@ -3,38 +3,38 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef CPPMH_SOLVER_RESULT_H__
-#define CPPMH_SOLVER_RESULT_H__
+#ifndef CPPMH_MODEL_SUMMARY_H__
+#define CPPMH_MODEL_SUMMARY_H__
+
+#include <string>
 
 namespace cppmh {
-namespace solver {
+namespace model {
 /*****************************************************************************/
-template <class T_Variable, class T_Expression>
-struct Result {
-    model::NamedSolution<T_Variable, T_Expression> solution;
-    Status                                         status;
-    History<T_Variable, T_Expression>              history;
+struct ModelSummary {
+    std::string name;
+    int         number_of_variables;
+    int         number_of_constraints;
 
     /*************************************************************************/
-    Result(void) {
+    ModelSummary(void) {
         this->initialize();
     }
 
     /*************************************************************************/
-    virtual ~Result(void) {
+    virtual ~ModelSummary(void) {
         /// nothing to do
     }
 
     /*************************************************************************/
-    inline void constexpr initialize(void) {
-        this->solution.initialize();
-        this->status.initialize();
-        this->history.initialize();
+    inline void initialize(void) {
+        this->name                  = "";
+        this->number_of_variables   = 0;
+        this->number_of_constraints = 0;
     }
 };
-}  // namespace solver
+}  // namespace model
 }  // namespace cppmh
-
 #endif
 /*****************************************************************************/
 // END

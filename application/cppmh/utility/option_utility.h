@@ -65,6 +65,18 @@ inline cppmh::solver::Option read_option(const std::string &a_FILE_NAME) {
               option_object);
 
     /**************************************************************************/
+    /// penalty_coefficient_updating_balance
+    read_json(&option.penalty_coefficient_updating_balance,  //
+              "penalty_coefficient_updating_balance",        //
+              option_object);
+
+    /**************************************************************************/
+    /// penalty_coefficient_reset_count_threshold
+    read_json(&option.penalty_coefficient_reset_count_threshold,  //
+              "penalty_coefficient_reset_count_threshold",        //
+              option_object);
+
+    /**************************************************************************/
     /// initial_penalty_coefficient
     read_json(&option.initial_penalty_coefficient,  //
               "initial_penalty_coefficient",        //
@@ -113,6 +125,12 @@ inline cppmh::solver::Option read_option(const std::string &a_FILE_NAME) {
               option_object);
 
     /**********************************************************************/
+    /// is_enabled_improvability_screening
+    read_json(&option.is_enabled_improvability_screening,  //
+              "is_enabled_improvability_screening",        //
+              option_object);
+
+    /**********************************************************************/
     /// is_enabled_binary_move
     read_json(&option.is_enabled_binary_move,  //
               "is_enabled_binary_move",        //
@@ -143,6 +161,12 @@ inline cppmh::solver::Option read_option(const std::string &a_FILE_NAME) {
               option_object);
 
     /**********************************************************************/
+    /// is_enabled_exclusive_move
+    read_json(&option.is_enabled_exclusive_move,  //
+              "is_enabled_exclusive_move",        //
+              option_object);
+
+    /**********************************************************************/
     /// is_enabled_user_defined_move
     read_json(&option.is_enabled_user_defined_move,  //
               "is_enabled_user_defined_move",        //
@@ -170,6 +194,18 @@ inline cppmh::solver::Option read_option(const std::string &a_FILE_NAME) {
     /// verbose
     read_json(&option.verbose,  //
               "verbose",        //
+              option_object);
+
+    /**************************************************************************/
+    /// is_enabled_collect_historical_data
+    read_json(&option.is_enabled_collect_historical_data,  //
+              "is_enabled_collect_historical_data",        //
+              option_object);
+
+    /**************************************************************************/
+    /// historical_data_capacity
+    read_json(&option.historical_data_capacity,  //
+              "historical_data_capacity",        //
               option_object);
 
     /**************************************************************************/
@@ -355,12 +391,6 @@ inline cppmh::solver::Option read_option(const std::string &a_FILE_NAME) {
                   option_object_tabu_search);
 
         /**********************************************************************/
-        /// tabu_search.is_enabled_improvability_screening
-        read_json(&option.tabu_search.is_enabled_improvability_screening,  //
-                  "is_enabled_improvability_screening",                    //
-                  option_object_tabu_search);
-
-        /**********************************************************************/
         /// tabu_search.is_enabled_shuffle
         read_json(&option.tabu_search.is_enabled_shuffle,  //
                   "is_enabled_shuffle",                    //
@@ -391,6 +421,12 @@ inline cppmh::solver::Option read_option(const std::string &a_FILE_NAME) {
             &option.tabu_search.is_enabled_automatic_iteration_adjustment,  //
             "is_enabled_automatic_iteration_adjustment",                    //
             option_object_tabu_search);
+
+        /**********************************************************************/
+        /// tabu_search.is_enabled_tabu_tenure_taking_over
+        read_json(&option.tabu_search.is_enabled_tabu_tenure_taking_over,  //
+                  "is_enabled_tabu_tenure_taking_over",                    //
+                  option_object_tabu_search);
 
         /**********************************************************************/
         /// tabu_search.is_enabled_initial_modification
