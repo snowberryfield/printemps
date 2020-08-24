@@ -20,12 +20,13 @@ struct OptionConstant {
     static constexpr int    DEFAULT_ITERATION_MAX                       = 100;
     static constexpr double DEFAULT_TIME_MAX                            = 120.0;
     static constexpr double DEFAULT_TIME_OFFSET                         = 0.0;
-    static constexpr double DEFAULT_PENALTY_COEFFICIENT_RELAXING_RATE   = 0.5;
+    static constexpr double DEFAULT_PENALTY_COEFFICIENT_RELAXING_RATE   = 0.9;
     static constexpr double DEFAULT_PENALTY_COEFFICIENT_TIGHTENING_RATE = 1.0;
     static constexpr double DEFAULT_PENALTY_COEFFICIENT_UPDATING_BALANCE = 0.0;
-    static constexpr double DEFAULT_INITIAL_PENALTY_COEFFICIENT          = 1E6;
-    static constexpr bool   DEFAULT_IS_ENABLED_LAGRANGE_DUAL = false;
-    static constexpr bool   DEFAULT_IS_ENABLED_LOCAL_SEARCH  = true;
+    static constexpr int DEFAULT_PENALTY_COEFFICIENT_RESET_COUNT_THRESHOLD = 10;
+    static constexpr double DEFAULT_INITIAL_PENALTY_COEFFICIENT = 1E6;
+    static constexpr bool   DEFAULT_IS_ENABLED_LAGRANGE_DUAL    = false;
+    static constexpr bool   DEFAULT_IS_ENABLED_LOCAL_SEARCH     = true;
     static constexpr bool   DEFAULT_IS_ENABLED_GROUPING_PENALTY_COEFFICIENT =
         false;
     static constexpr bool DEFAULT_IS_ENABLED_PRESOLVE                 = true;
@@ -49,7 +50,7 @@ struct OptionConstant {
     static constexpr bool   DEFAULT_SEED             = 1;
     static constexpr bool   DEFAULT_VERBOSE          = Verbose::None;
     static constexpr bool   DEFAULT_IS_ENABLED_COLLECT_HISTORICAL_DATA = false;
-    static constexpr int    DEFAULT_HISTORICAL_DATA_CAPACITY           = 5000;
+    static constexpr int    DEFAULT_HISTORICAL_DATA_CAPACITY           = 1000;
 };
 
 /*****************************************************************************/
@@ -59,7 +60,8 @@ struct Option {
     double time_max;
     double penalty_coefficient_relaxing_rate;
     double penalty_coefficient_tightening_rate;
-    double penalty_coefficient_updating_balance;  // hidden
+    double penalty_coefficient_updating_balance;       // hidden
+    int    penalty_coefficient_reset_count_threshold;  // hidden
     double initial_penalty_coefficient;
     bool   is_enabled_lagrange_dual;
     bool   is_enabled_local_search;
@@ -111,6 +113,8 @@ struct Option {
             OptionConstant::DEFAULT_PENALTY_COEFFICIENT_TIGHTENING_RATE;
         this->penalty_coefficient_updating_balance =
             OptionConstant::DEFAULT_PENALTY_COEFFICIENT_UPDATING_BALANCE;
+        this->penalty_coefficient_reset_count_threshold =
+            OptionConstant::DEFAULT_PENALTY_COEFFICIENT_RESET_COUNT_THRESHOLD;
         this->initial_penalty_coefficient =
             OptionConstant::DEFAULT_INITIAL_PENALTY_COEFFICIENT;
         this->is_enabled_lagrange_dual =
@@ -190,6 +194,11 @@ struct Option {
             " - penalty_coefficient_updating_balance: " +  //
             utility::to_string(this->penalty_coefficient_updating_balance,
                                "%f"));
+
+        utility::print(                                         //
+            " - penalty_coefficient_reset_count_threshold: " +  //
+            utility::to_string(this->penalty_coefficient_reset_count_threshold,
+                               "%d"));
 
         utility::print(                           //
             " - initial_penalty_coefficient: " +  //
