@@ -16,15 +16,35 @@ int main([[maybe_unused]] int argc, char *argv[]) {
      * exits.
      */
     if (argv[1] == nullptr) {
-        std::cout << "Usage: ./qap_solver.exe mps_file [option_file]"
+        std::cout << "Usage: ./aqp_solver.exe [OPTIONS] [MPS_FILE]"
                   << std::endl;
+        std::cout << std::endl;
+        std::cout  //
+            << "  -p [OPTION_FILE]: Specifies option file." << std::endl;
         exit(1);
+    }
+
+    /**
+     * Parse the arguments.
+     */
+    std::string qap_file_name;
+    std::string option_file_name;
+
+    std::vector<std::string> args(argv, argv + argc);
+    int                      i = 1;
+    while (i < static_cast<int>(args.size())) {
+        if (args[i] == "-p") {
+            option_file_name = args[i + 1];
+            i += 2;
+        } else {
+            qap_file_name = args[i];
+            i++;
+        }
     }
 
     /**
      * Read the specified QAPLIB file and convert to the model.
      */
-    std::string                  qap_file_name = argv[1];
     cppmh::utility::QAPLIBReader qaplib_reader;
     auto &model = qaplib_reader.create_model_from_qaplib(qap_file_name);
     model.set_name(cppmh::utility::base_name(qap_file_name));
@@ -35,7 +55,7 @@ int main([[maybe_unused]] int argc, char *argv[]) {
      */
     cppmh::solver::Option option;
     option.verbose = cppmh::solver::Full;
-    if (argc > 2) {
+    if (!option_file_name.empty()) {
         std::string option_file_name = argv[2];
         option = cppmh::utility::read_option(option_file_name);
     }
