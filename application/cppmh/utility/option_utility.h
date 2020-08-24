@@ -71,6 +71,12 @@ inline cppmh::solver::Option read_option(const std::string &a_FILE_NAME) {
               option_object);
 
     /**************************************************************************/
+    /// penalty_coefficient_reset_count_threshold
+    read_json(&option.penalty_coefficient_reset_count_threshold,  //
+              "penalty_coefficient_reset_count_threshold",        //
+              option_object);
+
+    /**************************************************************************/
     /// initial_penalty_coefficient
     read_json(&option.initial_penalty_coefficient,  //
               "initial_penalty_coefficient",        //
