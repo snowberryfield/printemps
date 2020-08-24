@@ -2922,7 +2922,7 @@ TEST_F(TestModel, evaluate) {
             EXPECT_EQ(10000, score_after_0.global_penalty);
             EXPECT_EQ(-11 + 100, score_after_0.local_augmented_objective);
             EXPECT_EQ(-11 + 10000, score_after_0.global_augmented_objective);
-            EXPECT_EQ(false, score_after_0.is_objective_improvable);
+            EXPECT_EQ(true, score_after_0.is_objective_improvable);
             EXPECT_EQ(false, score_after_0.is_constraint_improvable);
             EXPECT_EQ(false, score_after_0.is_feasible);
 
@@ -2932,7 +2932,7 @@ TEST_F(TestModel, evaluate) {
             EXPECT_EQ(10000, score_after_1.global_penalty);
             EXPECT_EQ(-11 + 100, score_after_1.local_augmented_objective);
             EXPECT_EQ(-11 + 10000, score_after_1.global_augmented_objective);
-            EXPECT_EQ(false, score_after_1.is_objective_improvable);
+            EXPECT_EQ(true, score_after_1.is_objective_improvable);
             EXPECT_EQ(false, score_after_1.is_constraint_improvable);
             EXPECT_EQ(false, score_after_1.is_feasible);
 
