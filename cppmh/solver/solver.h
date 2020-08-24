@@ -16,6 +16,7 @@
 #include "incumbent_holder.h"
 #include "option.h"
 #include "status.h"
+#include "history.h"
 #include "result.h"
 #include "tabu_search/tabu_search.h"
 #include "local_search/local_search.h"
@@ -36,6 +37,13 @@ template <class T_Variable, class T_Expression>
 Result<T_Variable, T_Expression> solve(
     model::Model<T_Variable, T_Expression>* a_model,  //
     const Option&                           a_OPTION) {
+    if (a_model->is_solved()) {
+        throw std::logic_error(utility::format_error_location(
+            __FILE__, __LINE__, __func__,
+            "This model has already been solved."));
+    } else {
+        a_model->set_is_solved(true);
+    }
     /**
      * Define type aliases.
      */
@@ -80,12 +88,15 @@ Result<T_Variable, T_Expression> solve(
         master_option.print();
     }
 
-    model->setup(master_option.is_enabled_parallel_neighborhood_update,
+    model->setup(master_option.is_enabled_improvability_screening,
+                 master_option.is_enabled_parallel_neighborhood_update,
                  master_option.is_enabled_presolve,
                  master_option.is_enabled_initial_value_correction,
                  master_option.is_enabled_aggregation_move,
                  master_option.is_enabled_precedence_move,
                  master_option.is_enabled_variable_bound_move,
+                 master_option.is_enabled_exclusive_move,
+                 master_option.is_enabled_user_defined_move,
                  master_option.selection_mode,
                  master_option.verbose >= Verbose::Warning);
 
@@ -101,14 +112,18 @@ Result<T_Variable, T_Expression> solve(
         model->neighborhood().enable_user_defined_move();
     }
 
+    if (master_option.selection_mode != model::SelectionMode::None) {
+        model->neighborhood().enable_selection_move();
+    }
+
     /**
      * Special neighborhood moves for Aggregation, Precedence, and Variable
      * bound constraint types will be enabled when optimization stagnates.
      */
-
-    if (master_option.selection_mode != model::SelectionMode::None) {
-        model->neighborhood().enable_selection_move();
-    }
+    bool has_special_constraints =
+        (model->constraint_type_reference().aggregation_ptrs.size() +
+         model->constraint_type_reference().precedence_ptrs.size() +
+         model->constraint_type_reference().variable_bound_ptrs.size()) > 0;
 
     if (master_option.verbose >= Verbose::Outer) {
         model->print_number_of_variables();
@@ -116,7 +131,7 @@ Result<T_Variable, T_Expression> solve(
     }
 
     /**
-     * Prepare a random generator, which is used for shuffling moves.
+     * Prepare a random generator.
      */
     std::mt19937 get_rand_mt(master_option.seed);
 
@@ -137,14 +152,20 @@ Result<T_Variable, T_Expression> solve(
     auto local_penalty_coefficient_proxies  = penalty_coefficient_proxies;
 
     /**
-     * Create an array which stores updating count for each decision variable.
+     * Create memory which stores updating count for each decision variable.
      */
-    std::vector<model::ValueProxy<int>> global_update_counts =
-        model->generate_variable_parameter_proxies(0);
+    Memory memory(model);
 
     /**
-     * Compute expressions, constraints, and objective according to initial
-     * values.
+     * Prepare historical solutions pool.
+     */
+    model::PlainSolutionPool<T_Variable, T_Expression>  //
+        solution_pool(master_option.historical_data_capacity,
+                      model->is_minimization());
+
+    /**
+     * Compute the values of expressions, constraints, and the objective
+     * function according to the initial solution.
      */
     model->update();
 
@@ -165,7 +186,7 @@ Result<T_Variable, T_Expression> solve(
     int number_of_tabu_search_loops        = 0;
 
     /**
-     * Solve Lagrange dual
+     * Solve Lagrange dual to obtain a better initial solution ß(Optional).
      */
     if (master_option.is_enabled_lagrange_dual) {
         if (!model->is_linear()) {
@@ -220,11 +241,18 @@ Result<T_Variable, T_Expression> solve(
              */
             current_solution =
                 result.incumbent_holder.global_augmented_incumbent_solution();
-            // current_solution = result.primal_solution;
+
+            /**
+             * Update the historical data.
+             */
+            if (master_option.is_enabled_collect_historical_data &&
+                result.historical_feasible_solutions.size() > 0) {
+                solution_pool.push(result.historical_feasible_solutions);
+            }
 
             /**
              * Update the global augmented incumbent solution if it was
-             * improved by the local search.
+             * improved by the Lagrange dual search.
              */
             update_status = incumbent_holder.try_update_incumbent(
                 result.incumbent_holder.global_augmented_incumbent_solution(),
@@ -232,7 +260,7 @@ Result<T_Variable, T_Expression> solve(
 
             /**
              * Update the feasible incumbent solution if it was improved by
-             * the local search
+             * the Lagrange dual search
              */
             if (result.incumbent_holder.is_found_feasible_solution()) {
                 update_status = incumbent_holder.try_update_incumbent(
@@ -240,9 +268,20 @@ Result<T_Variable, T_Expression> solve(
                     result.incumbent_holder.feasible_incumbent_score());
             }
 
+            /**
+             * Preserve the number of iterations for solving the Lagrange dual
+             * problem.
+             */
             number_of_lagrange_dual_iterations = result.number_of_iterations;
 
+            /**
+             * Measure the elapsed time to solve the Lagrange dual problem.
+             */
             elapsed_time = time_keeper.clock();
+
+            /**
+             * Print the search summary.
+             */
             utility::print_message(
                 "Solving Lagrange dual was finished. Total elapsed time: " +
                     utility::to_string(elapsed_time, "%.3f") + "sec",
@@ -305,13 +344,22 @@ Result<T_Variable, T_Expression> solve(
                                 local_penalty_coefficient_proxies,   //
                                 global_penalty_coefficient_proxies,  //
                                 initial_variable_value_proxies,      //
-                                incumbent_holder);                   //
+                                incumbent_holder,                    //
+                                memory);                             //
 
         /**
          * Update the current solution.
          */
         current_solution =
             result.incumbent_holder.global_augmented_incumbent_solution();
+
+        /**
+         * Update the historical data.
+         */
+        if (master_option.is_enabled_collect_historical_data &&
+            result.historical_feasible_solutions.size() > 0) {
+            solution_pool.push(result.historical_feasible_solutions);
+        }
 
         /**
          * Update the global augmented incumbent solution if it was improved
@@ -323,7 +371,7 @@ Result<T_Variable, T_Expression> solve(
 
         /**
          * Update the feasible incumbent solution if it was improved by the
-         * local search
+         * local search.
          */
         if (result.incumbent_holder.is_found_feasible_solution()) {
             update_status = incumbent_holder.try_update_incumbent(
@@ -332,20 +380,23 @@ Result<T_Variable, T_Expression> solve(
         }
 
         /**
-         * Update the updating count for each decision variables
+         * Update the memory.
          */
-        const auto& update_counts = result.memory.update_counts();
-        for (const auto& proxy : update_counts) {
-            int id         = proxy.id();
-            int flat_index = 0;
-            for (auto&& element : proxy.flat_indexed_values()) {
-                global_update_counts[id][flat_index++] += element;
-            }
-        }
+        memory = result.memory;
 
+        /**
+         * Preserve the number of iterations for the local search.
+         */
         number_of_local_search_iterations = result.number_of_iterations;
 
+        /**
+         * Measure the elapsed time for the local search.
+         */
         elapsed_time = time_keeper.clock();
+
+        /**
+         * Print the search summary.
+         */
         utility::print_message(
             "Local search was finished. Total elapsed time: " +
                 utility::to_string(elapsed_time, "%.3f") + "sec",
@@ -372,7 +423,10 @@ Result<T_Variable, T_Expression> solve(
      * Run tabu searches to find better solutions.
      */
     int iteration                           = 0;
+    int not_update_count                    = 0;
     int next_number_of_initial_modification = 0;
+    int next_inital_tabu_tenure = master_option.tabu_search.initial_tabu_tenure;
+    bool penalty_coefficient_reset_flag = false;
 
     /**
      * The integer variable next_iteration_max is used if the option
@@ -424,6 +478,7 @@ Result<T_Variable, T_Expression> solve(
         option.tabu_search.seed += iteration;
         option.tabu_search.number_of_initial_modification =
             next_number_of_initial_modification;
+        option.tabu_search.initial_tabu_tenure = next_inital_tabu_tenure;
 
         /**
          * Prepare the initial variable values.
@@ -440,7 +495,8 @@ Result<T_Variable, T_Expression> solve(
                                          local_penalty_coefficient_proxies,   //
                                          global_penalty_coefficient_proxies,  //
                                          initial_variable_value_proxies,      //
-                                         incumbent_holder);
+                                         incumbent_holder,                    //
+                                         memory);
 
         /**
          * Update the current solution.
@@ -449,13 +505,20 @@ Result<T_Variable, T_Expression> solve(
             result.incumbent_holder.local_augmented_incumbent_solution();
         auto result_global_solution =
             result.incumbent_holder.global_augmented_incumbent_solution();
+        bool is_changed = false;
 
         switch (master_option.tabu_search.restart_mode) {
             case tabu_search::RestartMode::Global: {
+                is_changed = (result_global_solution.variable_value_proxies !=
+                              current_solution.variable_value_proxies);
                 current_solution = result_global_solution;
+
                 break;
             }
             case tabu_search::RestartMode::Local: {
+                is_changed = (result_local_solution.variable_value_proxies !=
+                              current_solution.variable_value_proxies);
+                current_solution = result_global_solution;
                 current_solution = result_local_solution;
                 break;
             }
@@ -467,12 +530,35 @@ Result<T_Variable, T_Expression> solve(
         }
 
         /**
+         * Update the historical data.
+         */
+        if (master_option.is_enabled_collect_historical_data &&
+            result.historical_feasible_solutions.size() > 0) {
+            solution_pool.push(result.historical_feasible_solutions);
+        }
+
+        /**
          * Update the global augmented incumbent solution if it was improved
          * by the tabu search.
          */
         update_status = incumbent_holder.try_update_incumbent(
             result.incumbent_holder.global_augmented_incumbent_solution(),
             result.incumbent_holder.global_augmented_incumbent_score());
+
+        if ((update_status && (IncumbentHolderConstant::
+                                   STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE))) {
+            not_update_count               = 0;
+            penalty_coefficient_reset_flag = false;
+        } else {
+            not_update_count++;
+            if (not_update_count ==
+                master_option.penalty_coefficient_reset_count_threshold) {
+                penalty_coefficient_reset_flag = true;
+                not_update_count               = 0;
+            } else {
+                penalty_coefficient_reset_flag = false;
+            }
+        }
 
         /**
          * Update the feasible incumbent solution if it was improved by the
@@ -485,16 +571,9 @@ Result<T_Variable, T_Expression> solve(
         }
 
         /**
-         * Update the updating count for each decision variables
+         * Update the memory.
          */
-        const auto& update_counts = result.memory.update_counts();
-        for (const auto& proxy : update_counts) {
-            int id         = proxy.id();
-            int flat_index = 0;
-            for (auto&& element : proxy.flat_indexed_values()) {
-                global_update_counts[id][flat_index++] += element;
-            }
-        }
+        memory = result.memory;
 
         /**
          * Update the local penalty coefficients.
@@ -503,33 +582,31 @@ Result<T_Variable, T_Expression> solve(
             incumbent_holder.global_augmented_incumbent_objective() -
             result.incumbent_holder.local_augmented_incumbent_objective();
 
-        if (result_local_solution.is_feasible || gap < -constant::EPSILON) {
+        if (penalty_coefficient_reset_flag) {
             /**
-             * Relax the local penalty coefficients if
-             * (1) The local augmented incumbent solution obtained in the
-             * last tabu search is feasible, or (2) The gap the (global
-             * augmented incumbent objective) - (the local augmented
-             * incumbent objective obtained in the last tabu search) is
-             * negative.
+             * If penalty_coefficient_reset_flag is true, the penalty
+             * coefficients will be reset;
              */
-            for (auto&& proxy : local_penalty_coefficient_proxies) {
-                for (auto&& element : proxy.flat_indexed_values()) {
-                    element *= master_option.penalty_coefficient_relaxing_rate;
-                }
-            }
+            local_penalty_coefficient_proxies =
+                global_penalty_coefficient_proxies;
         } else if (gap > constant::EPSILON) {
             /**
-             * If The gap the (global augmented incumbent objective) - (the
+             * If the gap the (global augmented incumbent objective) - (the
              * local augmented incumbent objective obtained in the last tabu
              * search) is positive, tighten the local penalty coefficients.
              */
-            double total_squared_penalty = 0.0;
+            double total_penalty           = 0.0;
+            double total_squared_violation = 0.0;
             for (const auto& proxy :
                  result_local_solution.violation_value_proxies) {
                 for (const auto& element : proxy.flat_indexed_values()) {
-                    total_squared_penalty += element * element;
+                    total_penalty += element;
+                    total_squared_violation += element * element;
                 }
             }
+
+            const double balance =
+                master_option.penalty_coefficient_updating_balance;
 
             for (auto&& proxy : local_penalty_coefficient_proxies) {
                 int  id = proxy.id();
@@ -539,10 +616,18 @@ Result<T_Variable, T_Expression> solve(
 
                 int flat_index = 0;
                 for (auto&& element : proxy.flat_indexed_values()) {
+                    double delta_penalty_constant =
+                        std::max(0.0, gap) / total_penalty;
+                    double delta_penalty_proportional =
+                        std::max(0.0, gap) / total_squared_violation *
+                        violation_values[flat_index];
+
                     element +=
                         master_option.penalty_coefficient_tightening_rate *
-                        std::max(0.0, gap) / total_squared_penalty *
-                        violation_values[flat_index++];
+                        (balance * delta_penalty_constant +
+                         (1.0 - balance) * delta_penalty_proportional);
+
+                    flat_index++;
                 }
 
                 if (master_option.is_enabled_grouping_penalty_coefficient) {
@@ -564,15 +649,41 @@ Result<T_Variable, T_Expression> solve(
             }
         } else {
             /**
-             * Otherwise, the penalty coefficients will not change.
+             * Otherwise relax the local penalty coefficients of which
+             * corresponding constraints are satisfied.
              */
+            for (auto&& proxy : local_penalty_coefficient_proxies) {
+                int  id = proxy.id();
+                auto violation_values =
+                    result_local_solution.violation_value_proxies[id]
+                        .flat_indexed_values();
+
+                int flat_index = 0;
+                for (auto&& element : proxy.flat_indexed_values()) {
+                    if (violation_values[flat_index] < constant::EPSILON) {
+                        element *=
+                            master_option.penalty_coefficient_relaxing_rate;
+                    }
+
+                    flat_index++;
+                }
+            }
         }
 
+        /**
+         * Preserve the number of iterations for the final tabu search loop.
+         */
         number_of_tabu_search_iterations += result.number_of_iterations;
         number_of_tabu_search_loops++;
 
+        /**
+         * Measure the elapsed time for the final tabu search loop.
+         */
         elapsed_time = time_keeper.clock();
 
+        /**
+         * Print the summary.
+         */
         utility::print_message(
             "Tabu search loop (" + std::to_string(iteration + 1) + "/" +
                 std::to_string(master_option.iteration_max) +
@@ -594,6 +705,9 @@ Result<T_Variable, T_Expression> solve(
                     "%.3f"),
             master_option.verbose >= Verbose::Outer);
 
+        /**
+         * Update the number of initial modification for the next loop.
+         */
         if (result.total_update_status &
             IncumbentHolderConstant::STATUS_FEASIBLE_INCUMBENT_UPDATE) {
             next_number_of_initial_modification = 0;
@@ -610,7 +724,8 @@ Result<T_Variable, T_Expression> solve(
                                    master_option.verbose >= Verbose::Outer);
 
         } else {
-            if (master_option.tabu_search.is_enabled_initial_modification) {
+            if (master_option.tabu_search.is_enabled_initial_modification &&
+                !is_changed) {
                 int nominal_number_of_initial_modification  //
                     = static_cast<int>(
                         std::floor(master_option.tabu_search
@@ -686,6 +801,7 @@ Result<T_Variable, T_Expression> solve(
             IncumbentHolderConstant::STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
             bool is_disabled_special_neighborhood_move = false;
 
+            /// Aggregation
             if (master_option.is_enabled_aggregation_move) {
                 if (model->neighborhood().is_enabled_aggregation_move()) {
                     model->neighborhood().disable_aggregation_move();
@@ -693,6 +809,7 @@ Result<T_Variable, T_Expression> solve(
                 }
             }
 
+            /// Precedence
             if (master_option.is_enabled_precedence_move) {
                 if (model->neighborhood().is_enabled_precedence_move()) {
                     model->neighborhood().disable_precedence_move();
@@ -700,6 +817,7 @@ Result<T_Variable, T_Expression> solve(
                 }
             }
 
+            /// Variable Bound
             if (master_option.is_enabled_variable_bound_move) {
                 if (model->neighborhood().is_enabled_variable_bound_move()) {
                     model->neighborhood().disable_variable_bound_move();
@@ -707,7 +825,16 @@ Result<T_Variable, T_Expression> solve(
                 }
             }
 
-            if (is_disabled_special_neighborhood_move) {
+            /// Exclusive
+            if (master_option.is_enabled_exclusive_move) {
+                if (model->neighborhood().is_enabled_exclusive_move()) {
+                    model->neighborhood().disable_exclusive_move();
+                    is_disabled_special_neighborhood_move = true;
+                }
+            }
+
+            if (is_disabled_special_neighborhood_move &&
+                has_special_constraints) {
                 utility::print_message(
                     "Special neighborhood moves were disabled.",
                     master_option.verbose >= Verbose::Outer);
@@ -718,6 +845,7 @@ Result<T_Variable, T_Expression> solve(
                  master_option.tabu_search.iteration_max)) {
                 bool is_enabled_special_neighborhood_move = false;
 
+                /// Aggregation
                 if (master_option.is_enabled_aggregation_move) {
                     if (!model->neighborhood().is_enabled_aggregation_move()) {
                         model->neighborhood().enable_aggregation_move();
@@ -725,6 +853,7 @@ Result<T_Variable, T_Expression> solve(
                     }
                 }
 
+                /// Precedence
                 if (master_option.is_enabled_precedence_move) {
                     if (!model->neighborhood().is_enabled_precedence_move()) {
                         model->neighborhood().enable_precedence_move();
@@ -732,6 +861,7 @@ Result<T_Variable, T_Expression> solve(
                     }
                 }
 
+                /// Variable Bound
                 if (master_option.is_enabled_variable_bound_move) {
                     if (!model->neighborhood()
                              .is_enabled_variable_bound_move()) {
@@ -740,13 +870,46 @@ Result<T_Variable, T_Expression> solve(
                     }
                 }
 
-                if (is_enabled_special_neighborhood_move) {
+                /// Exclusive
+                if (master_option.is_enabled_exclusive_move) {
+                    if (!model->neighborhood().is_enabled_exclusive_move()) {
+                        model->neighborhood().enable_exclusive_move();
+                        is_enabled_special_neighborhood_move = true;
+                    }
+                }
+
+                if (is_enabled_special_neighborhood_move &&
+                    has_special_constraints) {
                     utility::print_message(
                         "Special neighborhood moves were enabled.",
                         master_option.verbose >= Verbose::Outer);
                 }
             }
         }
+
+        /**
+         * Update the initial tabu tenure.
+         */
+        if (master_option.tabu_search.is_enabled_tabu_tenure_taking_over) {
+            next_inital_tabu_tenure = result.tabu_tenure;
+        } else {
+            next_inital_tabu_tenure =
+                master_option.tabu_search.initial_tabu_tenure;
+        }
+        utility::print_message("The tabu tenure for the next loop was set to " +
+                                   std::to_string(next_inital_tabu_tenure) +
+                                   ".",
+                               master_option.verbose >= Verbose::Outer);
+
+        /**
+         * Print message if the penalty coefficients were reset.
+         */
+        if (penalty_coefficient_reset_flag) {
+            utility::print_message(
+                "The penalty coefficients were reset due to search stagnation.",
+                master_option.verbose >= Verbose::Outer);
+        }
+
         model->callback();
         iteration++;
     }
@@ -774,9 +937,10 @@ Result<T_Variable, T_Expression> solve(
     incumbent = model->export_solution();
 
     auto named_solution = model->convert_to_named_solution(incumbent);
-    Result<T_Variable, T_Expression> result;
-    result.solution = named_solution;
 
+    /**
+     * Export the final penalty coefficient values.
+     */
     std::unordered_map<std::string, model::ValueProxy<double>>
         named_penalty_coefficients;
 
@@ -787,13 +951,25 @@ Result<T_Variable, T_Expression> solve(
             local_penalty_coefficient_proxies[i];
     }
 
+    /**
+     * Export the final variable update counts.
+     */
     std::unordered_map<std::string, model::ValueProxy<int>> named_update_counts;
     int         variable_proxies_size = model->variable_proxies().size();
     const auto& variable_names        = model->variable_names();
+
+    const auto& update_counts = memory.update_counts();
     for (auto i = 0; i < variable_proxies_size; i++) {
-        named_update_counts[variable_names[i]] = global_update_counts[i];
+        named_update_counts[variable_names[i]] = update_counts[i];
     }
 
+    /**
+     * Prepare the result object to return.
+     */
+    Result<T_Variable, T_Expression> result;
+    result.solution = named_solution;
+
+    result.status.model_summary              = model->export_summary();
     result.status.penalty_coefficients       = named_penalty_coefficients;
     result.status.update_counts              = named_update_counts;
     result.status.is_found_feasible_solution = named_solution.is_feasible();
@@ -805,6 +981,9 @@ Result<T_Variable, T_Expression> solve(
     result.status.number_of_tabu_search_iterations =
         number_of_tabu_search_iterations;
     result.status.number_of_tabu_search_loops = number_of_tabu_search_loops;
+
+    result.history.model_summary      = model->export_summary();
+    result.history.feasible_solutions = solution_pool.solutions();
 
     return result;
 }

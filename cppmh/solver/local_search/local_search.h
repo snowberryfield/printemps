@@ -32,7 +32,8 @@ LocalSearchResult<T_Variable, T_Expression> solve(
     const std::vector<model::ValueProxy<T_Variable>>&  //
         a_INITIAL_VARIABLE_VALUE_PROXIES,              //
     const IncumbentHolder<T_Variable, T_Expression>&   //
-        a_INCUMBENT_HOLDER) {
+                  a_INCUMBENT_HOLDER,                  //
+    const Memory& a_MEMORY) {
     /**
      * Define type aliases.
      */
@@ -51,6 +52,7 @@ LocalSearchResult<T_Variable, T_Expression> solve(
      */
     Model_T* model  = a_model;
     Option   option = a_OPTION;
+    Memory   memory = a_MEMORY;
 
     std::vector<model::ValueProxy<double>> local_penalty_coefficient_proxies =
         a_LOCAL_PENALTY_COEFFICIENT_PROXIES;
@@ -58,6 +60,11 @@ LocalSearchResult<T_Variable, T_Expression> solve(
         a_GLOBAL_PENALTY_COEFFICIENT_PROXIES;
 
     IncumbentHolder_T incumbent_holder = a_INCUMBENT_HOLDER;
+
+    /**
+     * Reset the local augmented incumbent.
+     */
+    incumbent_holder.reset_local_augmented_incumbent();
 
     /**
      * Determine whether fast evaluation is available or not.
@@ -82,18 +89,18 @@ LocalSearchResult<T_Variable, T_Expression> solve(
 
     int update_status =
         incumbent_holder.try_update_incumbent(model, solution_score);
-
-    /**
-     * Reset the local augmented incumbent.
-     */
-    incumbent_holder.reset_local_augmented_incumbent();
     int total_update_status = IncumbentHolderConstant::STATUS_NO_UPDATED;
 
     /**
-     * Create memory which records final updated iteration and updated count for
-     * each decision variable.
+     * Reset the last update iterations.
      */
-    Memory memory(model);
+    memory.reset_last_update_iterations();
+
+    /**
+     * Prepare historical solutions holder.
+     */
+    std::vector<model::PlainSolution<T_Variable, T_Expression>>
+        historical_feasible_solutions;
 
     /**
      * Print the header of optimization progress table and print the initial
@@ -133,6 +140,9 @@ LocalSearchResult<T_Variable, T_Expression> solve(
         /**
          * Update the moves.
          */
+        if (model->is_linear()) {
+            model->update_variable_improvability();
+        }
         model->neighborhood().update_moves();
         model->neighborhood().shuffle_moves(&get_rand_mt);
 
@@ -201,6 +211,14 @@ LocalSearchResult<T_Variable, T_Expression> solve(
         total_update_status = update_status || total_update_status;
 
         /**
+         * Push the current solution to historical data.
+         */
+        if (solution_score.is_feasible) {
+            historical_feasible_solutions.push_back(
+                model->export_plain_solution());
+        }
+
+        /**
          * Update the memory.
          */
         memory.update(*move_ptr, iteration);
@@ -231,10 +249,11 @@ LocalSearchResult<T_Variable, T_Expression> solve(
      * Prepare the result.
      */
     Result_T result;
-    result.incumbent_holder     = incumbent_holder;
-    result.memory               = memory;
-    result.total_update_status  = total_update_status;
-    result.number_of_iterations = iteration;
+    result.incumbent_holder              = incumbent_holder;
+    result.memory                        = memory;
+    result.total_update_status           = total_update_status;
+    result.number_of_iterations          = iteration;
+    result.historical_feasible_solutions = historical_feasible_solutions;
 
     return result;
 }

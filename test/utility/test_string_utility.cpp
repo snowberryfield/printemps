@@ -61,6 +61,31 @@ TEST_F(TestStringUtility, delete_crlf) {
     EXPECT_EQ("hogehoge", cppmh::utility::delete_crlf("hogehoge\n\r\r\n"));
 }
 
+/*****************************************************************************/
+TEST_F(TestStringUtility, remove_extension) {
+    EXPECT_EQ("hogehoge", cppmh::utility::remove_extension("hogehoge"));
+    EXPECT_EQ("hogehoge", cppmh::utility::remove_extension("hogehoge.txt"));
+    EXPECT_EQ("hogehoge.txt",
+              cppmh::utility::remove_extension("hogehoge.txt.txt"));
+}
+
+/*****************************************************************************/
+TEST_F(TestStringUtility, remove_path) {
+    EXPECT_EQ("hogehoge", cppmh::utility::remove_path("hogehoge"));
+    EXPECT_EQ("hogehoge", cppmh::utility::remove_path("path/to/hogehoge"));
+    EXPECT_EQ("hogehoge", cppmh::utility::remove_path("path\\to\\hogehoge"));
+}
+
+/*****************************************************************************/
+TEST_F(TestStringUtility, base_name) {
+    EXPECT_EQ("hogehoge", cppmh::utility::base_name("hogehoge"));
+    EXPECT_EQ("hogehoge", cppmh::utility::base_name("hogehoge.txt"));
+    EXPECT_EQ("hogehoge", cppmh::utility::base_name("path/to/hogehoge"));
+    EXPECT_EQ("hogehoge", cppmh::utility::base_name("path/to/hogehoge.txt"));
+    EXPECT_EQ("hogehoge", cppmh::utility::base_name("path\\to\\hogehoge"));
+    EXPECT_EQ("hogehoge", cppmh::utility::base_name("path\\to\\hogehoge.txt"));
+}
+
 }  // namespace
 /*****************************************************************************/
 // END

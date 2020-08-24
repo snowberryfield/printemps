@@ -27,6 +27,8 @@ class NamedSolution {
     friend class Model<T_Variable, T_Expression>;
 
    private:
+    ModelSummary m_model_summary;
+
     std::unordered_map<std::string, ValueProxy<T_Variable>>
         m_variable_value_proxies;
     std::unordered_map<std::string, ValueProxy<T_Expression>>
@@ -52,6 +54,13 @@ class NamedSolution {
 
     /*************************************************************************/
     inline void initialize(void) {
+        m_model_summary.initialize();
+
+        m_variable_value_proxies.clear();
+        m_expression_value_proxies.clear();
+        m_constraint_value_proxies.clear();
+        m_violation_value_proxies.clear();
+
         m_objective   = 0;
         m_is_feasible = false;
     }
@@ -84,28 +93,44 @@ class NamedSolution {
         ofs << utility::indent_spaces(indent_level) << "{" << std::endl;
         indent_level++;
 
+        /// Summary
+        ofs << utility::indent_spaces(indent_level) << "\"name\" : "
+            << "\"" << m_model_summary.name << "\"," << std::endl;
+
+        ofs << utility::indent_spaces(indent_level)
+            << "\"number_of_variables\" : "
+            << m_model_summary.number_of_variables << "," << std::endl;
+
+        ofs << utility::indent_spaces(indent_level)
+            << "\"number_of_constraints\" : "
+            << m_model_summary.number_of_constraints << "," << std::endl;
+
+        ofs << utility::indent_spaces(indent_level)
+            << "\"is_feasible\" : " << (m_is_feasible ? "true," : "false,")
+            << std::endl;
+
+        ofs << utility::indent_spaces(indent_level)
+            << "\"objective\" : " + std::to_string(m_objective) << ","
+            << std::endl;
+
         /// Decision variables
         write_values_by_name(&ofs, m_variable_value_proxies, "variables",
                              indent_level);
+        ofs << "," << std::endl;
 
         /// Expressions
         write_values_by_name(&ofs, m_expression_value_proxies, "expressions",
                              indent_level);
+        ofs << "," << std::endl;
 
         /// Constraints
         write_values_by_name(&ofs, m_constraint_value_proxies, "constraints",
                              indent_level);
+        ofs << "," << std::endl;
 
         /// Violations
         write_values_by_name(&ofs, m_violation_value_proxies, "violations",
                              indent_level);
-
-        /// Others
-        ofs << utility::indent_spaces(indent_level)
-            << "\"is_feasible\" : " << (m_is_feasible ? "true," : "false,")
-            << std::endl;
-        ofs << utility::indent_spaces(indent_level)
-            << "\"objective\" : " + std::to_string(m_objective) << std::endl;
 
         indent_level--;
         ofs << utility::indent_spaces(indent_level) << "}" << std::endl;
@@ -120,28 +145,44 @@ class NamedSolution {
         ofs << utility::indent_spaces(indent_level) << "{" << std::endl;
         indent_level++;
 
+        /// Summary
+        ofs << utility::indent_spaces(indent_level) << "\"name\" : "
+            << "\"" << m_model_summary.name << "\"," << std::endl;
+
+        ofs << utility::indent_spaces(indent_level)
+            << "\"number_of_variables\" : "
+            << m_model_summary.number_of_variables << "," << std::endl;
+
+        ofs << utility::indent_spaces(indent_level)
+            << "\"number_of_constraints\" : "
+            << m_model_summary.number_of_constraints << "," << std::endl;
+
+        ofs << utility::indent_spaces(indent_level)
+            << "\"is_feasible\" : " << (m_is_feasible ? "true," : "false,")
+            << std::endl;
+
+        ofs << utility::indent_spaces(indent_level)
+            << "\"objective\" : " + std::to_string(m_objective) << ","
+            << std::endl;
+
         /// Decision variables
         write_values_by_array(&ofs, m_variable_value_proxies, "variables",
                               indent_level);
+        ofs << "," << std::endl;
 
         /// Expressions
         write_values_by_array(&ofs, m_expression_value_proxies, "expressions",
                               indent_level);
+        ofs << "," << std::endl;
 
         /// Constraints
         write_values_by_array(&ofs, m_constraint_value_proxies, "constraints",
                               indent_level);
+        ofs << "," << std::endl;
 
         /// Violations
         write_values_by_array(&ofs, m_violation_value_proxies, "violations",
                               indent_level);
-
-        /// Others
-        ofs << utility::indent_spaces(indent_level)
-            << "\"is_feasible\" : " << (m_is_feasible ? "true," : "false,")
-            << std::endl;
-        ofs << utility::indent_spaces(indent_level)
-            << "\"objective\" : " + std::to_string(m_objective) << std::endl;
 
         indent_level--;
         ofs << utility::indent_spaces(indent_level) << "}" << std::endl;
@@ -168,60 +209,69 @@ class NamedSolution {
     }
 
     /*************************************************************************/
-    inline const std::unordered_map<std::string, ValueProxy<T_Variable>>&
+    inline constexpr const ModelSummary& model_summary(void) const {
+        return m_model_summary;
+    }
+
+    /*************************************************************************/
+    inline constexpr const std::unordered_map<std::string,
+                                              ValueProxy<T_Variable>>&
     variables(void) const {
         return m_variable_value_proxies;
     }
 
     /*************************************************************************/
-    inline const ValueProxy<T_Variable>& variables(
+    inline constexpr const ValueProxy<T_Variable>& variables(
         const std::string& a_NAME) const {
         return m_variable_value_proxies.at(a_NAME);
     }
 
     /*************************************************************************/
-    inline const std::unordered_map<std::string, ValueProxy<T_Expression>>&
+    inline constexpr const std::unordered_map<std::string,
+                                              ValueProxy<T_Expression>>&
     expressions(void) const {
         return m_expression_value_proxies;
     }
 
     /*************************************************************************/
-    inline const ValueProxy<T_Expression>& expressions(
+    inline constexpr const ValueProxy<T_Expression>& expressions(
         const std::string& a_NAME) const {
         return m_expression_value_proxies.at(a_NAME);
     }
 
     /*************************************************************************/
-    inline const std::unordered_map<std::string, ValueProxy<T_Expression>>&
+    inline constexpr const std::unordered_map<std::string,
+                                              ValueProxy<T_Expression>>&
     constraints(void) const {
         return m_constraint_value_proxies;
     }
 
     /*************************************************************************/
-    inline const ValueProxy<T_Expression>& constraints(
+    inline constexpr const ValueProxy<T_Expression>& constraints(
         const std::string& a_NAME) const {
         return m_constraint_value_proxies.at(a_NAME);
     }
 
     /*************************************************************************/
-    inline const std::unordered_map<std::string, ValueProxy<T_Expression>>&
+    inline constexpr const std::unordered_map<std::string,
+                                              ValueProxy<T_Expression>>&
     violations(void) const {
         return m_violation_value_proxies;
     }
 
     /*************************************************************************/
-    inline const ValueProxy<T_Expression>& violations(
+    inline constexpr const ValueProxy<T_Expression>& violations(
         const std::string& a_NAME) const {
         return m_violation_value_proxies.at(a_NAME);
     }
 
     /*************************************************************************/
-    inline T_Expression objective(void) const {
+    inline constexpr T_Expression objective(void) const {
         return m_objective;
     }
 
     /*************************************************************************/
-    inline bool is_feasible(void) const {
+    inline constexpr bool is_feasible(void) const {
         return m_is_feasible;
     }
 };

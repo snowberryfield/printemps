@@ -28,6 +28,9 @@ struct TabuSearchResult {
 
     bool is_early_stopped;
 
+    std::vector<model::PlainSolution<T_Variable, T_Expression>>
+        historical_feasible_solutions;
+
     /*************************************************************************/
     TabuSearchResult(void) {
         this->initialize();
@@ -51,6 +54,8 @@ struct TabuSearchResult {
         this->last_feasible_incumbent_update_iteration         = -1;
 
         this->is_early_stopped = false;
+
+        this->historical_feasible_solutions.clear();
     }
 };
 }  // namespace tabu_search

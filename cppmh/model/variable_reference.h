@@ -3,51 +3,47 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef CPPMH_SOLVER_LOCAL_SEARCH_LOCAL_SEARCH_RESULT_H__
-#define CPPMH_SOLVER_LOCAL_SEARCH_LOCAL_SEARCH_RESULT_H__
+#ifndef CPPMH_MODEL_VARIABLE_REFERENCE_H__
+#define CPPMH_MODEL_VARIABLE_REFERENCE_H__
+
+#include <vector>
 
 namespace cppmh {
-namespace solver {
+namespace model {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-class IncumbentHolder;
+class Variable;
 
-namespace local_search {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-struct LocalSearchResult {
-    IncumbentHolder<T_Variable, T_Expression> incumbent_holder;
-    Memory                                    memory;
-    int                                       total_update_status;
-    int                                       number_of_iterations;
-
-    std::vector<model::PlainSolution<T_Variable, T_Expression>>
-        historical_feasible_solutions;
+struct VariableReference {
+    std::vector<Variable<T_Variable, T_Expression> *> variable_ptrs;
+    std::vector<Variable<T_Variable, T_Expression> *> fixed_variable_ptrs;
+    std::vector<Variable<T_Variable, T_Expression> *> selection_variable_ptrs;
+    std::vector<Variable<T_Variable, T_Expression> *> binary_variable_ptrs;
+    std::vector<Variable<T_Variable, T_Expression> *> integer_variable_ptrs;
 
     /*************************************************************************/
-    LocalSearchResult(void) {
+    VariableReference(void) {
         this->initialize();
     }
 
     /*************************************************************************/
-    virtual ~LocalSearchResult(void) {
+    virtual ~VariableReference(void) {
         /// nothing to do
     }
 
     /*************************************************************************/
-    inline void constexpr initialize(void) {
-        this->incumbent_holder.initialize();
-        this->memory.initialize();
-        this->total_update_status  = 0;
-        this->number_of_iterations = 0;
-
-        this->historical_feasible_solutions.clear();
+    inline void initialize(void) {
+        this->variable_ptrs.clear();
+        this->fixed_variable_ptrs.clear();
+        this->selection_variable_ptrs.clear();
+        this->binary_variable_ptrs.clear();
+        this->integer_variable_ptrs.clear();
     }
 };
-}  // namespace local_search
-}  // namespace solver
+}  // namespace model
 }  // namespace cppmh
-
 #endif
 /*****************************************************************************/
 // END
