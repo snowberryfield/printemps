@@ -56,9 +56,12 @@ int main([[maybe_unused]] int argc, char *argv[]) {
     cppmh::solver::Option option;
     option.verbose = cppmh::solver::Full;
     if (!option_file_name.empty()) {
-        std::string option_file_name = argv[2];
         option = cppmh::utility::read_option(option_file_name);
     }
+    option.is_enabled_binary_move             = false;
+    option.is_enabled_integer_move            = false;
+    option.is_enabled_improvability_screening = false;
+    option.is_enabled_user_defined_move       = true;
 
     /**
      * Run the solver.
