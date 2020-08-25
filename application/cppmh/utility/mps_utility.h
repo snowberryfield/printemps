@@ -129,6 +129,11 @@ struct MPS {
     std::vector<std::string> variable_names;
     std::vector<std::string> constraint_names;
 
+    int number_of_variables;
+    int number_of_lower_constraints;
+    int number_of_equal_constraints;
+    int number_of_upper_constraints;
+
     /*************************************************************************/
     MPS(void) {
         this->initialize();
@@ -143,6 +148,11 @@ struct MPS {
 
         variable_names.clear();
         constraint_names.clear();
+
+        number_of_variables         = 0;
+        number_of_lower_constraints = 0;
+        number_of_equal_constraints = 0;
+        number_of_upper_constraints = 0;
     }
 };
 
@@ -236,16 +246,19 @@ inline MPS read_mps(const std::string &a_FILE_NAME) {
                     mps.constraints[c_name].sense = MPSConstraintSense::Lower;
                     mps.constraints[c_name].name  = c_name;
                     mps.constraint_names.push_back(c_name);
+                    mps.number_of_lower_constraints++;
                 } else if (items.front() == "E") {
                     std::string c_name            = items[1];
                     mps.constraints[c_name].sense = MPSConstraintSense::Equal;
                     mps.constraints[c_name].name  = c_name;
                     mps.constraint_names.push_back(c_name);
+                    mps.number_of_equal_constraints++;
                 } else if (items.front() == "G") {
                     std::string c_name            = items[1];
                     mps.constraints[c_name].sense = MPSConstraintSense::Upper;
                     mps.constraints[c_name].name  = c_name;
                     mps.constraint_names.push_back(c_name);
+                    mps.number_of_upper_constraints++;
                 } else {
                     throw std::logic_error(utility::format_error_location(
                         __FILE__, __LINE__, __func__,
@@ -291,6 +304,7 @@ inline MPS read_mps(const std::string &a_FILE_NAME) {
                     mps.variables[v_name].sense = variable_sense;
                     mps.variables[v_name].name  = v_name;
                     mps.variable_names.push_back(v_name);
+                    mps.number_of_variables++;
                 }
 
                 break;
@@ -447,7 +461,8 @@ class MPSReader {
 
     /*************************************************************************/
     inline model::IPModel &create_model_from_mps(
-        const std::string &a_FILE_NAME) {
+        const std::string &a_FILE_NAME,
+        const bool         a_IS_ENABLED_SEPARATE_EQUALITY) {
         MPS mps = read_mps(a_FILE_NAME);
 
         std::unordered_map<std::string, model::IPVariable *> variable_ptrs;
@@ -479,8 +494,19 @@ class MPSReader {
             count++;
         }
 
+        int number_of_constraints = 0;
+        if (a_IS_ENABLED_SEPARATE_EQUALITY) {
+            number_of_constraints = mps.number_of_lower_constraints +
+                                    2 * mps.number_of_equal_constraints +
+                                    mps.number_of_upper_constraints;
+        } else {
+            number_of_constraints = mps.number_of_lower_constraints +
+                                    mps.number_of_equal_constraints +
+                                    mps.number_of_upper_constraints;
+        }
+
         auto &constraint_proxy =
-            m_model.create_constraints("constraints", mps.constraints.size());
+            m_model.create_constraints("constraints", number_of_constraints);
 
         count = 0;
         for (const auto &name : mps.constraint_names) {
@@ -496,22 +522,37 @@ class MPSReader {
             switch (constraint.sense) {
                 case MPSConstraintSense::Lower: {
                     constraint_proxy(count) = expression_temp <= constraint.rhs;
+                    constraint_proxy(count).set_name(name);
+                    count++;
                     break;
                 }
 
                 case MPSConstraintSense::Equal: {
-                    constraint_proxy(count) = expression_temp == constraint.rhs;
+                    if (a_IS_ENABLED_SEPARATE_EQUALITY) {
+                        constraint_proxy(count) =
+                            expression_temp <= constraint.rhs;
+                        constraint_proxy(count).set_name(name + "_lower");
+                        count++;
+                        constraint_proxy(count) =
+                            expression_temp >= constraint.rhs;
+                        constraint_proxy(count).set_name(name + "_upper");
+                        count++;
+                    } else {
+                        constraint_proxy(count) =
+                            expression_temp == constraint.rhs;
+                        constraint_proxy(count).set_name(name);
+                        count++;
+                    }
                     break;
                 }
 
                 case MPSConstraintSense::Upper: {
                     constraint_proxy(count) = expression_temp >= constraint.rhs;
+                    constraint_proxy(count).set_name(name);
+                    count++;
                     break;
                 }
             }
-
-            constraint_proxy(count).set_name(name);
-            count++;
         }
 
         auto objective_temp = model::IPExpression::create_instance();
