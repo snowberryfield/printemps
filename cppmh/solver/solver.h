@@ -589,11 +589,14 @@ Result<T_Variable, T_Expression> solve(
              */
             local_penalty_coefficient_proxies =
                 global_penalty_coefficient_proxies;
-        } else if (gap > constant::EPSILON) {
+        } else if (gap > constant::EPSILON &&
+                   !result_local_solution.is_feasible) {
             /**
              * If the gap the (global augmented incumbent objective) - (the
              * local augmented incumbent objective obtained in the last tabu
              * search) is positive, tighten the local penalty coefficients.
+             * The latter condition considers cancellation of significant
+             * digits.
              */
             double total_penalty           = 0.0;
             double total_squared_violation = 0.0;
