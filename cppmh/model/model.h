@@ -2162,9 +2162,9 @@ class Model {
         }
         if (this->is_feasible()) {
             auto &sensitivities = m_objective.expression().sensitivities();
-            for (auto &&sensitivity : sensitivities) {
-                auto &variable_ptr = sensitivity.first;
-                auto  coefficient  = sensitivity.second;
+            for (const auto &sensitivity : sensitivities) {
+                auto variable_ptr = sensitivity.first;
+                auto coefficient  = sensitivity.second;
 
                 if (this->is_minimization()) {
                     if (coefficient > 0 &&  //
@@ -2202,9 +2202,9 @@ class Model {
                 if ((constraint_ptr->sense() == ConstraintSense::Lower) ||
                     (constraint_ptr->sense() == ConstraintSense::Equal)) {
                     if (constraint_value > 0) {
-                        for (auto &&sensitivity : sensitivities) {
-                            auto &variable_ptr = sensitivity.first;
-                            auto  coefficient  = sensitivity.second;
+                        for (const auto &sensitivity : sensitivities) {
+                            auto variable_ptr = sensitivity.first;
+                            auto coefficient  = sensitivity.second;
 
                             if (coefficient > 0 &&
                                 (variable_ptr->value() !=
@@ -2222,9 +2222,9 @@ class Model {
                 if ((constraint_ptr->sense() == ConstraintSense::Upper) ||
                     (constraint_ptr->sense() == ConstraintSense::Equal)) {
                     if (constraint_value < 0) {
-                        for (auto &&sensitivity : sensitivities) {
-                            auto &variable_ptr = sensitivity.first;
-                            auto  coefficient  = sensitivity.second;
+                        for (const auto &sensitivity : sensitivities) {
+                            auto variable_ptr = sensitivity.first;
+                            auto coefficient  = sensitivity.second;
 
                             if (coefficient > 0 &&
                                 (variable_ptr->value() !=
