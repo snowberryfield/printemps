@@ -65,6 +65,8 @@ TEST_F(TestSimple1, simple_1) {
     option.is_enabled_aggregation_move             = true;
     option.is_enabled_precedence_move              = true;
     option.is_enabled_variable_bound_move          = true;
+    option.is_enabled_exclusive_move               = true;
+    option.is_enabled_chain_move                   = true;
     option.is_enabled_user_defined_move            = true;
     option.target_objective_value                  = -1E100;
     option.verbose                                 = cppmh::solver::None;
