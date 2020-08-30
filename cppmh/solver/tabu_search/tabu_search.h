@@ -142,6 +142,13 @@ TabuSearchResult<T_Variable, T_Expression> solve(
 
     bool is_early_stopped = false;
 
+    model::Move<T_Variable, T_Expression> previous_move;
+    model::Move<T_Variable, T_Expression> current_move;
+    double                                previous_improvement = 0;
+    double                                current_improvement  = 0;
+    double previous_global_augmented_objective                 = HUGE_VALF;
+    double current_global_augmented_objective                  = HUGE_VALF;
+
     /**
      * Print the header of optimization progress table and print the initial
      * solution status.
@@ -286,6 +293,13 @@ TabuSearchResult<T_Variable, T_Expression> solve(
             if (!trial_move_scores[i_move].is_permissible) {
                 total_scores[i_move] = HUGE_VALF;
             }
+
+            if (trial_move_ptrs[i_move]->sense == model::MoveSense::Chain &&
+                fabs(current_global_augmented_objective -
+                     trial_solution_scores[i_move].global_augmented_objective) <
+                    constant::EPSILON) {
+                total_scores[i_move] = HUGE_VALF;
+            }
         }
 
         /**
@@ -308,7 +322,6 @@ TabuSearchResult<T_Variable, T_Expression> solve(
              * The move for next solution is determined by evaluations of
              * solutions and moves after the inital modification has finished.
              */
-
             selected_index = argmin_total_score;
 
             /**
@@ -347,6 +360,13 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                 }
             }
         }
+        /**
+         * Backup the previous move, improvement and global incumbent objective.
+         */
+        previous_move        = current_move;
+        previous_improvement = current_improvement;
+        previous_global_augmented_objective =
+            current_global_augmented_objective;
 
         /**
          * Update the model by the selected move.
@@ -358,6 +378,15 @@ TabuSearchResult<T_Variable, T_Expression> solve(
         update_status =
             incumbent_holder.try_update_incumbent(model, solution_score);
         total_update_status = update_status | total_update_status;
+
+        /**
+         * Update the current move, improvement and global incumbent objective.
+         */
+        current_move = *move_ptr;
+        current_global_augmented_objective =
+            solution_score.global_augmented_objective;
+        current_improvement = previous_global_augmented_objective -
+                              current_global_augmented_objective;
 
         /**
          * Push the current solution to historical data.
@@ -402,6 +431,9 @@ TabuSearchResult<T_Variable, T_Expression> solve(
             last_feasible_incumbent_update_iteration         = iteration;
         }
 
+        /**
+         * Calculate the number of moves for each type.
+         */
         int number_of_all_neighborhoods         = number_of_moves;
         int number_of_feasible_neighborhoods    = 0;
         int number_of_infeasible_neighborhood   = 0;
@@ -441,6 +473,19 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                              update_status,                        //
                              incumbent_holder,                     //
                              option.verbose >= Verbose::Full);
+        }
+
+        /**
+         * Register a chain move.
+         */
+        if (iteration > 2 && option.is_enabled_chain_move) {
+            if (current_improvement > 0 && previous_improvement < 0 &&
+                current_improvement + previous_improvement > 0) {
+                auto chain_move = previous_move + current_move;
+                if (!Move_T::has_duplicate_variable(chain_move)) {
+                    model->neighborhood().register_chain_move(chain_move);
+                }
+            }
         }
 
         if (option.tabu_search.is_enabled_automatic_break) {

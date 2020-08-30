@@ -91,6 +91,9 @@ class Neighborhood {
     std::function<void(std::vector<Move<T_Variable, T_Expression>> *,
                        std::vector<int> *)>
         m_selection_move_updater;
+    std::function<void(std::vector<Move<T_Variable, T_Expression>> *,
+                       std::vector<int> *)>
+        m_chain_move_updater;
 
     std::function<void(std::vector<Move<T_Variable, T_Expression>> *)>
         m_user_defined_move_updater;
@@ -105,6 +108,7 @@ class Neighborhood {
     std::vector<Move<T_Variable, T_Expression>> m_variable_bound_moves;
     std::vector<Move<T_Variable, T_Expression>> m_exclusive_moves;
     std::vector<Move<T_Variable, T_Expression>> m_selection_moves;
+    std::vector<Move<T_Variable, T_Expression>> m_chain_moves;
     std::vector<Move<T_Variable, T_Expression>> m_user_defined_moves;
 
     std::vector<int> m_binary_move_flags;
@@ -114,6 +118,7 @@ class Neighborhood {
     std::vector<int> m_variable_bound_move_flags;
     std::vector<int> m_exclusive_move_flags;
     std::vector<int> m_selection_move_flags;
+    std::vector<int> m_chain_move_flags;
     std::vector<int> m_user_defined_move_flags;
 
     std::vector<Move<T_Variable, T_Expression> *> m_move_ptrs;
@@ -128,6 +133,7 @@ class Neighborhood {
     bool m_is_enabled_variable_bound_move;
     bool m_is_enabled_exclusive_move;
     bool m_is_enabled_selection_move;
+    bool m_is_enabled_chain_move;
     bool m_is_enabled_user_defined_move;
 
    public:
@@ -164,6 +170,9 @@ class Neighborhood {
         m_selection_move_updater =
             [](std::vector<Move<T_Variable, T_Expression>> *,
                std::vector<int> *) {};
+        m_chain_move_updater =  //
+            [](std::vector<Move<T_Variable, T_Expression>> *,
+               std::vector<int> *) {};
         m_user_defined_move_updater =
             [](std::vector<Move<T_Variable, T_Expression>> *) {};
         m_user_defined_move_updater_wrapper =
@@ -177,6 +186,7 @@ class Neighborhood {
         m_variable_bound_moves.clear();
         m_exclusive_moves.clear();
         m_selection_moves.clear();
+        m_chain_moves.clear();
         m_user_defined_moves.clear();
 
         m_binary_move_flags.clear();
@@ -186,6 +196,7 @@ class Neighborhood {
         m_variable_bound_move_flags.clear();
         m_exclusive_move_flags.clear();
         m_selection_move_flags.clear();
+        m_chain_move_flags.clear();
         m_user_defined_move_flags.clear();
 
         m_move_ptrs.clear();
@@ -200,6 +211,7 @@ class Neighborhood {
         m_is_enabled_variable_bound_move = false;
         m_is_enabled_exclusive_move      = false;
         m_is_enabled_selection_move      = false;
+        m_is_enabled_chain_move          = false;
         m_is_enabled_user_defined_move   = false;
     }
 
@@ -912,6 +924,46 @@ class Neighborhood {
     }
 
     /*************************************************************************/
+    inline constexpr void setup_chain_move_updater(
+        const bool a_IS_ENABLED_IMPROVABILITY_SCREENING,
+        const bool a_IS_ENABLED_PARALLEL) {
+        auto chain_move_updater = [this, a_IS_ENABLED_IMPROVABILITY_SCREENING,
+                                   a_IS_ENABLED_PARALLEL](auto *a_moves,
+                                                          auto *a_flags) {
+            int moves_size = a_moves->size();
+#ifdef _OPENMP
+#pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
+#endif
+            for (auto i = 0; i < moves_size; i++) {
+                (*a_flags)[i] = 1;
+                if (m_has_fixed_variables &&
+                    model::has_fixed_variables((*a_moves)[i])) {
+                    (*a_flags)[i] = 0;
+                }
+                if (a_IS_ENABLED_IMPROVABILITY_SCREENING &&
+                    !model::has_improvable_variable((*a_moves)[i])) {
+                    (*a_flags)[i] = 0;
+                }
+
+                for (const auto &alteration : (*a_moves)[i].alterations) {
+                    if (alteration.first->value() == alteration.second) {
+                        (*a_flags)[i] = 0;
+                        break;
+                    }
+                }
+            }
+        };
+        m_chain_move_updater = chain_move_updater;
+    }
+
+    /*************************************************************************/
+    inline constexpr void register_chain_move(
+        const Move<T_Variable, T_Expression> &a_MOVE) {
+        m_chain_moves.push_back(a_MOVE);
+        m_chain_move_flags.resize(m_chain_moves.size());
+    }
+
+    /*************************************************************************/
     inline constexpr void set_user_defined_move_updater(
         const std::function<void(std::vector<Move<T_Variable, T_Expression>> *)>
             &a_FUNCTION) {
@@ -967,6 +1019,7 @@ class Neighborhood {
         auto &variable_bound_moves = m_variable_bound_moves;
         auto &exclusive_moves      = m_exclusive_moves;
         auto &selection_moves      = m_selection_moves;
+        auto &chain_moves          = m_chain_moves;
         auto &user_defined_moves   = m_user_defined_moves;
 
         auto &move_ptrs = m_move_ptrs;
@@ -978,6 +1031,7 @@ class Neighborhood {
         auto &variable_bound_move_flags = m_variable_bound_move_flags;
         auto &exclusive_move_flags      = m_exclusive_move_flags;
         auto &selection_move_flags      = m_selection_move_flags;
+        auto &chain_move_flags          = m_chain_move_flags;
         auto &user_defined_move_flags   = m_user_defined_move_flags;
 
         int binary_moves_size         = binary_moves.size();
@@ -987,6 +1041,7 @@ class Neighborhood {
         int variable_bound_moves_size = variable_bound_moves.size();
         int exclusive_moves_size      = exclusive_moves.size();
         int selection_moves_size      = selection_moves.size();
+        int chain_moves_size          = chain_moves.size();
         int user_defined_moves_size   = 0;  /// computed later
 
         /// Binary
@@ -1038,6 +1093,12 @@ class Neighborhood {
                                      &selection_move_flags);
         }
 
+        /// Chain
+        if (m_is_enabled_chain_move) {
+            m_chain_move_updater(&chain_moves,  //
+                                 &chain_move_flags);
+        }
+
         /// User Defined
         if (m_is_enabled_user_defined_move) {
             m_user_defined_move_updater_wrapper(&user_defined_moves,  //
@@ -1058,6 +1119,8 @@ class Neighborhood {
                        variable_bound_move_flags.end(), 1) +
             std::count(exclusive_move_flags.begin(),  //
                        exclusive_move_flags.end(), 1) +
+            std::count(chain_move_flags.begin(),  //
+                       chain_move_flags.end(), 1) +
             std::count(user_defined_move_flags.begin(),  //
                        user_defined_move_flags.end(), 1) +
             std::count(selection_move_flags.begin(),  //
@@ -1102,15 +1165,21 @@ class Neighborhood {
             }
         }
 
-        for (auto i = 0; i < user_defined_moves_size; i++) {
-            if (user_defined_move_flags[i]) {
-                move_ptrs[index++] = &user_defined_moves[i];
-            }
-        }
-
         for (auto i = 0; i < selection_moves_size; i++) {
             if (selection_move_flags[i]) {
                 move_ptrs[index++] = &selection_moves[i];
+            }
+        }
+
+        for (auto i = 0; i < chain_moves_size; i++) {
+            if (chain_move_flags[i]) {
+                move_ptrs[index++] = &chain_moves[i];
+            }
+        }
+
+        for (auto i = 0; i < user_defined_moves_size; i++) {
+            if (user_defined_move_flags[i]) {
+                move_ptrs[index++] = &user_defined_moves[i];
             }
         }
     }
@@ -1330,6 +1399,21 @@ class Neighborhood {
     /*************************************************************************/
     inline constexpr void disable_selection_move(void) {
         m_is_enabled_selection_move = false;
+    }
+
+    /*************************************************************************/
+    inline constexpr bool is_enabled_chain_move(void) const {
+        return m_is_enabled_chain_move;
+    }
+
+    /*************************************************************************/
+    inline constexpr void enable_chain_move(void) {
+        m_is_enabled_chain_move = true;
+    }
+
+    /*************************************************************************/
+    inline constexpr void disable_chain_move(void) {
+        m_is_enabled_chain_move = false;
     }
 
     /*************************************************************************/

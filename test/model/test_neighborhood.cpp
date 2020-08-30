@@ -156,7 +156,7 @@ TEST_F(TestNeighborhood, setup_move_updater) {
     model.categorize_constraints();
     model.extract_selections(cppmh::model::SelectionMode::Larger);
 
-    model.setup_neighborhood(true, true, true, true, false, false, false,
+    model.setup_neighborhood(true, true, true, true, false, false, false, false,
                              false);
 
     model.neighborhood().set_has_fixed_variables(true);
@@ -410,8 +410,8 @@ TEST_F(TestNeighborhood, set_user_defined_move_updater) {
     model.categorize_variables();
     model.categorize_constraints();
 
-    model.setup_neighborhood(false, false, false, false, true, false, false,
-                             false);
+    model.setup_neighborhood(false, false, false, false, false, true, false,
+                             false, false);
 
     model.neighborhood().set_has_fixed_variables(true);
     model.neighborhood().set_has_selection_variables(false);
@@ -443,7 +443,7 @@ TEST_F(TestNeighborhood, shuffle_moves) {
     auto&                  x = model.create_variables("x", n, 0, 1);
     [[maybe_unused]] auto& c = model.create_constraint("c", x.selection());
 
-    model.setup_neighborhood(true, true, true, true, false, false, false,
+    model.setup_neighborhood(true, true, true, true, false, false, false, false,
                              false);
     model.neighborhood().update_moves();
 
