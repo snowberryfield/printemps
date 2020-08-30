@@ -84,10 +84,29 @@ Result<T_Variable, T_Expression> solve(
         }
     }
 
+    /**
+     * Print the option value.
+     */
     if (master_option.verbose >= Verbose::Outer) {
         master_option.print();
     }
 
+    /**
+     * Setup the model. This includes the following processes.
+     * - setup_variable_related_constraints()
+     * - setup_unique_name()
+     * - setup_is_linear()
+     * - setup_variable_sensitivity()
+     * - presolve()
+     * - categorize_variables()
+     * - categorize_constraints()
+     * - extract_selections()
+     * - setup_neighborhood()
+     * - verify_and_correct_selection_variables_initial_values()
+     * - verify_and_correct_binary_variables_initial_values()
+     * - verify_and_correct_integer_variables_initial_values()
+     * - setup_fixed_sensitivities()
+     */
     model->setup(master_option.is_enabled_improvability_screening,
                  master_option.is_enabled_parallel_neighborhood_update,
                  master_option.is_enabled_presolve,
@@ -97,9 +116,21 @@ Result<T_Variable, T_Expression> solve(
                  master_option.is_enabled_variable_bound_move,
                  master_option.is_enabled_exclusive_move,
                  master_option.is_enabled_user_defined_move,
+                 master_option.is_enabled_chain_move,
                  master_option.selection_mode,
                  master_option.verbose >= Verbose::Warning);
 
+    /**
+     * Print the problem size.
+     */
+    if (master_option.verbose >= Verbose::Outer) {
+        model->print_number_of_variables();
+        model->print_number_of_constraints();
+    }
+
+    /**
+     * Enables the default neighborhood moves.
+     */
     if (master_option.is_enabled_binary_move) {
         model->neighborhood().enable_binary_move();
     }
@@ -117,17 +148,21 @@ Result<T_Variable, T_Expression> solve(
     }
 
     /**
-     * Special neighborhood moves for Aggregation, Precedence, and Variable
-     * bound constraint types will be enabled when optimization stagnates.
+     * NOTE: Special neighborhood moves will be enabled when optimization
+     * stagnates.
      */
-    bool has_special_constraints =
-        (model->constraint_type_reference().aggregation_ptrs.size() +
-         model->constraint_type_reference().precedence_ptrs.size() +
-         model->constraint_type_reference().variable_bound_ptrs.size()) > 0;
 
-    if (master_option.verbose >= Verbose::Outer) {
-        model->print_number_of_variables();
-        model->print_number_of_constraints();
+    /**
+     * Check whether there exist special neighborhood moves or not.
+     */
+    bool has_special_neighborhood_moves =
+        (model->neighborhood().aggregation_moves().size() +
+         model->neighborhood().precedence_moves().size() +
+         model->neighborhood().variable_bound_moves().size() +
+         model->neighborhood().exclusive_moves().size()) > 0;
+
+    if (master_option.is_enabled_chain_move) {
+        has_special_neighborhood_moves = true;
     }
 
     /**
@@ -674,39 +709,14 @@ Result<T_Variable, T_Expression> solve(
         }
 
         /**
-         * Preserve the number of iterations for the final tabu search loop.
+         * Update the initial tabu tenure for the next loop.
          */
-        number_of_tabu_search_iterations += result.number_of_iterations;
-        number_of_tabu_search_loops++;
-
-        /**
-         * Measure the elapsed time for the final tabu search loop.
-         */
-        elapsed_time = time_keeper.clock();
-
-        /**
-         * Print the summary.
-         */
-        utility::print_message(
-            "Tabu search loop (" + std::to_string(iteration + 1) + "/" +
-                std::to_string(master_option.iteration_max) +
-                ") was finished. Total elapsed time: " +
-                utility::to_string(elapsed_time, "%.3f") + "sec",
-            master_option.verbose >= Verbose::Outer);
-        utility::print_info(
-            " - Global augmented incumbent objective: " +
-                utility::to_string(
-                    incumbent_holder.global_augmented_incumbent_objective() *
-                        model->sign(),
-                    "%.3f"),
-            master_option.verbose >= Verbose::Outer);
-        utility::print_info(
-            " - Feasible incumbent objective: " +
-                utility::to_string(
-                    incumbent_holder.feasible_incumbent_objective() *
-                        model->sign(),
-                    "%.3f"),
-            master_option.verbose >= Verbose::Outer);
+        if (master_option.tabu_search.is_enabled_tabu_tenure_taking_over) {
+            next_inital_tabu_tenure = result.tabu_tenure;
+        } else {
+            next_inital_tabu_tenure =
+                master_option.tabu_search.initial_tabu_tenure;
+        }
 
         /**
          * Update the number of initial modification for the next loop.
@@ -714,18 +724,10 @@ Result<T_Variable, T_Expression> solve(
         if (result.total_update_status &
             IncumbentHolderConstant::STATUS_FEASIBLE_INCUMBENT_UPDATE) {
             next_number_of_initial_modification = 0;
-
-            utility::print_message("Feasible incumbent objective was updated. ",
-                                   master_option.verbose >= Verbose::Outer);
-
         } else if (result.total_update_status &
                    IncumbentHolderConstant::
                        STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
             next_number_of_initial_modification = 0;
-
-            utility::print_message("Global incumbent objective was updated. ",
-                                   master_option.verbose >= Verbose::Outer);
-
         } else {
             if (master_option.tabu_search.is_enabled_initial_modification &&
                 !is_changed) {
@@ -733,7 +735,7 @@ Result<T_Variable, T_Expression> solve(
                     = static_cast<int>(
                         std::floor(master_option.tabu_search
                                        .initial_modification_fixed_rate *
-                                   result.tabu_tenure));
+                                   next_inital_tabu_tenure));
 
                 int initial_modification_random_width = static_cast<int>(
                     option.tabu_search.initial_modification_randomize_rate *
@@ -750,14 +752,6 @@ Result<T_Variable, T_Expression> solve(
 
                 next_number_of_initial_modification =
                     std::max(1, number_of_initial_modification);
-
-                utility::print_message(
-                    "Incumbent objective was not updated. For the "
-                    "initial " +
-                        std::to_string(next_number_of_initial_modification) +
-                        " iterations in the next loop, the solution will "
-                        "be randomly updated to escape from the local minimum.",
-                    master_option.verbose >= Verbose::Outer);
             }
         }
 
@@ -787,23 +781,16 @@ Result<T_Variable, T_Expression> solve(
                          std::min(master_option.tabu_search.iteration_max,
                                   next_iteration_max_temp));
         }
-        if (master_option.tabu_search
-                .is_enabled_automatic_iteration_adjustment) {
-            utility::print_message(
-                "The maximum number of iterations for the next loop was "
-                "set to " +
-                    std::to_string(next_iteration_max) + ".",
-                master_option.verbose >= Verbose::Outer);
-        }
 
-        /**
-         * Enable the special neighborhood moves if the incumbent was not
-         * updated.
-         */
+        bool is_enabled_special_neighborhood_move  = false;
+        bool is_disabled_special_neighborhood_move = false;
+
         if (result.total_update_status &
             IncumbentHolderConstant::STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
-            bool is_disabled_special_neighborhood_move = false;
-
+            /**
+             * Disable the special neighborhood moves if the incumbent was
+             * updated.
+             */
             /// Aggregation
             if (master_option.is_enabled_aggregation_move) {
                 if (model->neighborhood().is_enabled_aggregation_move()) {
@@ -836,18 +823,22 @@ Result<T_Variable, T_Expression> solve(
                 }
             }
 
-            if (is_disabled_special_neighborhood_move &&
-                has_special_constraints) {
-                utility::print_message(
-                    "Special neighborhood moves were disabled.",
-                    master_option.verbose >= Verbose::Outer);
+            /// Chain
+            if (master_option.is_enabled_chain_move) {
+                if (model->neighborhood().is_enabled_chain_move()) {
+                    model->neighborhood().disable_chain_move();
+                    is_disabled_special_neighborhood_move = true;
+                }
             }
+
         } else {
+            /**
+             * Enable the special neighborhood moves if the incumbent was not
+             * updated.
+             */
             if (!result.is_early_stopped &&
                 (option.tabu_search.iteration_max ==
                  master_option.tabu_search.iteration_max)) {
-                bool is_enabled_special_neighborhood_move = false;
-
                 /// Aggregation
                 if (master_option.is_enabled_aggregation_move) {
                     if (!model->neighborhood().is_enabled_aggregation_move()) {
@@ -881,28 +872,71 @@ Result<T_Variable, T_Expression> solve(
                     }
                 }
 
-                if (is_enabled_special_neighborhood_move &&
-                    has_special_constraints) {
-                    utility::print_message(
-                        "Special neighborhood moves were enabled.",
-                        master_option.verbose >= Verbose::Outer);
+                /// Chain
+                if (master_option.is_enabled_chain_move) {
+                    if (!model->neighborhood().is_enabled_chain_move()) {
+                        model->neighborhood().enable_chain_move();
+                        is_enabled_special_neighborhood_move = true;
+                    }
                 }
             }
         }
 
         /**
-         * Update the initial tabu tenure.
+         * Preserve the number of iterations of the previous loop.
          */
-        if (master_option.tabu_search.is_enabled_tabu_tenure_taking_over) {
-            next_inital_tabu_tenure = result.tabu_tenure;
+        number_of_tabu_search_iterations += result.number_of_iterations;
+        number_of_tabu_search_loops++;
+
+        /**
+         * Measure the elapsed time of the previous loop.
+         */
+        elapsed_time = time_keeper.clock();
+
+        /**
+         * Print the summary.
+         */
+        utility::print_message(
+            "Tabu search loop (" + std::to_string(iteration + 1) + "/" +
+                std::to_string(master_option.iteration_max) +
+                ") was finished. Total elapsed time: " +
+                utility::to_string(elapsed_time, "%.3f") + "sec",
+            master_option.verbose >= Verbose::Outer);
+        utility::print_info(
+            " - Global augmented incumbent objective: " +
+                utility::to_string(
+                    incumbent_holder.global_augmented_incumbent_objective() *
+                        model->sign(),
+                    "%.3f"),
+            master_option.verbose >= Verbose::Outer);
+        utility::print_info(
+            " - Feasible incumbent objective: " +
+                utility::to_string(
+                    incumbent_holder.feasible_incumbent_objective() *
+                        model->sign(),
+                    "%.3f"),
+            master_option.verbose >= Verbose::Outer);
+
+        /**
+         * Print the optimization status of the previous tabu search loop.
+         */
+        if (result.total_update_status &
+            IncumbentHolderConstant::STATUS_FEASIBLE_INCUMBENT_UPDATE) {
+            utility::print_message("Feasible incumbent objective was updated. ",
+                                   master_option.verbose >= Verbose::Outer);
+
+        } else if (result.total_update_status &
+                   IncumbentHolderConstant::
+                       STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
+            utility::print_message("Global incumbent objective was updated. ",
+                                   master_option.verbose >= Verbose::Outer);
         } else {
-            next_inital_tabu_tenure =
-                master_option.tabu_search.initial_tabu_tenure;
+            if (master_option.tabu_search.is_enabled_initial_modification &&
+                !is_changed) {
+                utility::print_message("Incumbent objective was not updated.",
+                                       master_option.verbose >= Verbose::Outer);
+            }
         }
-        utility::print_message("The tabu tenure for the next loop was set to " +
-                                   std::to_string(next_inital_tabu_tenure) +
-                                   ".",
-                               master_option.verbose >= Verbose::Outer);
 
         /**
          * Print message if the penalty coefficients were reset.
@@ -911,6 +945,54 @@ Result<T_Variable, T_Expression> solve(
             utility::print_message(
                 "The penalty coefficients were reset due to search stagnation.",
                 master_option.verbose >= Verbose::Outer);
+        }
+
+        /**
+         * Print the initial tabu tenure for the next loop.
+         */
+        utility::print_message("The tabu tenure for the next loop was set to " +
+                                   std::to_string(next_inital_tabu_tenure) +
+                                   ".",
+                               master_option.verbose >= Verbose::Outer);
+
+        /**
+         * Print the number of initial modification for the next loop.
+         */
+        if (next_number_of_initial_modification > 0) {
+            utility::print_message(
+                "For the initial " +
+                    std::to_string(next_number_of_initial_modification) +
+                    " iterations in the next loop, the solution will "
+                    "be randomly updated to escape from the local minimum.",
+                master_option.verbose >= Verbose::Outer);
+        }
+
+        /**
+         * Print the number of iterations for the next loop.
+         */
+        if (master_option.tabu_search
+                .is_enabled_automatic_iteration_adjustment) {
+            utility::print_message(
+                "The maximum number of iterations for the next loop was "
+                "set to " +
+                    std::to_string(next_iteration_max) + ".",
+                master_option.verbose >= Verbose::Outer);
+        }
+
+        /**
+         * Print a message of the special neighborhood moves
+         * activation/deactivation.
+         */
+        if (is_disabled_special_neighborhood_move &&
+            has_special_neighborhood_moves) {
+            utility::print_message("Special neighborhood moves were disabled.",
+                                   master_option.verbose >= Verbose::Outer);
+        }
+
+        if (is_enabled_special_neighborhood_move &&
+            has_special_neighborhood_moves) {
+            utility::print_message("Special neighborhood moves were enabled.",
+                                   master_option.verbose >= Verbose::Outer);
         }
 
         model->callback();

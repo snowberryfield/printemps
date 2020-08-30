@@ -604,6 +604,7 @@ class Model {
         const bool           a_IS_ENABLED_PRECEDENCE_MOVE,
         const bool           a_IS_ENABLED_VARIABLE_BOUND_MOVE,
         const bool           a_IS_ENABLED_EXCLUSIVE_MOVE,
+        const bool           a_IS_ENABLED_CHAIN_MOVE,
         const bool           a_IS_ENABLED_USER_DEFINED_MOVE,
         const SelectionMode &a_SELECTION_MODE,  //
         const bool           a_IS_ENABLED_PRINT) {
@@ -637,6 +638,7 @@ class Model {
                                  a_IS_ENABLED_VARIABLE_BOUND_MOVE,           //
                                  a_IS_ENABLED_EXCLUSIVE_MOVE,                //
                                  a_IS_ENABLED_USER_DEFINED_MOVE,             //
+                                 a_IS_ENABLED_CHAIN_MOVE,                    //
                                  a_IS_ENABLED_IMPROVABILITY_SCREENING,       //
                                  a_IS_ENABLED_PARALLEL_NEIGHBORHOOD_UPDATE,  //
                                  a_IS_ENABLED_PRINT);
@@ -1568,6 +1570,7 @@ class Model {
         const bool a_IS_ENABLED_PRECEDENCE_MOVE,
         const bool a_IS_ENABLED_VARIABLE_BOUND_MOVE,
         const bool a_IS_ENABLED_EXCLUSIVE_MOVE,           //
+        const bool a_IS_ENABLED_CHAIN_MOVE,               //
         const bool a_IS_ENABLED_USER_DEFINED_MOVE,        //
         const bool a_IS_ENABLED_IMPROVABILITY_SCREENING,  //
         const bool a_IS_ENABLED_PARALLEL,                 //
@@ -1623,6 +1626,12 @@ class Model {
             m_neighborhood.setup_variable_bound_move_updater(
                 m_constraint_type_reference.variable_bound_ptrs,  //
                 a_IS_ENABLED_IMPROVABILITY_SCREENING,             //
+                a_IS_ENABLED_PARALLEL);
+        }
+
+        if (a_IS_ENABLED_CHAIN_MOVE) {
+            m_neighborhood.setup_chain_move_updater(
+                a_IS_ENABLED_IMPROVABILITY_SCREENING,  //
                 a_IS_ENABLED_PARALLEL);
         }
 
