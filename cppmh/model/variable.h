@@ -136,7 +136,7 @@ class Variable : public AbstractMultiArrayElement {
 
     /*************************************************************************/
     inline constexpr void set_value(T_Variable a_VALUE) {
-        if (m_is_fixed) {
+        if (m_value != a_VALUE && m_is_fixed) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "A fixed variable was attempted to be changed."));
@@ -349,7 +349,7 @@ class Variable : public AbstractMultiArrayElement {
     /*************************************************************************/
     inline constexpr Variable<T_Variable, T_Expression> &operator=(
         const T_Variable a_VALUE) {
-        if (m_is_fixed) {
+        if (m_value != a_VALUE && m_is_fixed) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "A fixed variable was attempted to be changed."));

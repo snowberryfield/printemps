@@ -102,7 +102,8 @@ TEST_F(TestVariable, set_value) {
     EXPECT_EQ(value, variable.value());
 
     variable.fix();
-    ASSERT_THROW(variable = value, std::logic_error);
+    EXPECT_EQ(value, (variable = value).value());
+    ASSERT_THROW(variable = value + 1, std::logic_error);
 }
 
 /*****************************************************************************/
@@ -402,7 +403,8 @@ TEST_F(TestVariable, operator_equal_arg_t_variable) {
     EXPECT_EQ(value, variable.value());
 
     variable.fix();
-    ASSERT_THROW(variable = value, std::logic_error);
+    EXPECT_EQ(value, (variable = value).value());
+    ASSERT_THROW(variable = value + 1, std::logic_error);
 }
 
 /*****************************************************************************/
