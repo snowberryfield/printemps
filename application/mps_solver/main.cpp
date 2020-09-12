@@ -16,13 +16,15 @@ int main([[maybe_unused]] int argc, char *argv[]) {
      * exits.
      */
     if (argv[1] == nullptr) {
-        std::cout << "Usage: ./mps_solver.exe [OPTIONS] [MPS_FILE]"
+        std::cout << "Usage: ./mps_solver.exe [-p OPTION_FILE_NAME] [-i "
+                     "INITIAL_SOLUTION_FILE_NAME] [--separate] mps_file"
                   << std::endl;
         std::cout << std::endl;
         std::cout  //
-            << "  -p [OPTION_FILE]: Specifies option file." << std::endl;
-        std::cout
-            << "  -i [INITIAL_SOLUTION_FILE]: Specifies initial solution file."
+            << "  -p OPTION_FILE_NAME: Specify option file name." << std::endl;
+        std::cout  //
+            << "  -i INITIAL_SOLUTION_FILE_NAME: Specify initial solution "
+               "file name."
             << std::endl;
         std::cout  //
             << "  --separate: Separate equality constraints into lower "

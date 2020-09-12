@@ -16,11 +16,11 @@ int main([[maybe_unused]] int argc, char *argv[]) {
      * exits.
      */
     if (argv[1] == nullptr) {
-        std::cout << "Usage: ./aqp_solver.exe [OPTIONS] [MPS_FILE]"
+        std::cout << "Usage: ./qap_solver.exe [-p OPTION_FILE_NAME] qap_file"
                   << std::endl;
         std::cout << std::endl;
         std::cout  //
-            << "  -p [OPTION_FILE]: Specifies option file." << std::endl;
+            << "  -p OPTION_FILE_NAME: Specify option file name." << std::endl;
         exit(1);
     }
 

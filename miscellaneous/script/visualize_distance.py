@@ -152,21 +152,21 @@ def main():
     parser = argparse.ArgumentParser(
         description='A script for visualizing distance for each solutions pair.')
     parser.add_argument('input_file_name',
-                        help='input file name.',
+                        help='specify the input file name.',
                         type=str)
     parser.add_argument('-o', '--output',
-                        help='output file name.',
+                        help='specify the output file name.',
                         type=str,
                         default='distance.png')
     parser.add_argument('-s', '--size',
-                        help='maximum number of solutions for plot.',
+                        help='specify the maximum number of solutions for plot.',
                         type=int,
                         default=5000)
     parser.add_argument('--descending',
-                        help='Sort solution in descending order',
+                        help='sort solutions in descending order',
                         action='store_true')
     parser.add_argument('--dot',
-                        help='Enable generate minimum spanning tree dot file',
+                        help='enable generating the minimum spanning tree dot file',
                         action='store_true')
     args = parser.parse_args()
 
