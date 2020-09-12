@@ -54,7 +54,6 @@ int main([[maybe_unused]] int argc, char *argv[]) {
      * be used for the calculation. Otherwise, the default values will be used.
      */
     cppmh::solver::Option option;
-    option.verbose = cppmh::solver::Full;
     if (!option_file_name.empty()) {
         option = cppmh::utility::read_option(option_file_name);
     }
@@ -72,10 +71,12 @@ int main([[maybe_unused]] int argc, char *argv[]) {
      * Print the result summary.
      */
     cppmh::utility::print_info(
-        "status: " + std::to_string(result.solution.is_feasible()), true);
+        "status: " + std::to_string(result.solution.is_feasible()),
+        option.verbose != cppmh::solver::Verbose::None);
 
     cppmh::utility::print_info(
-        "objective: " + std::to_string(result.solution.objective()), true);
+        "objective: " + std::to_string(result.solution.objective()),
+        option.verbose != cppmh::solver::Verbose::None);
 
     result.solution.write_json_by_name("incumbent.json");
     result.solution.write_solution("incumbent.sol");
