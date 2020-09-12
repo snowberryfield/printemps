@@ -557,6 +557,25 @@ Result<T_Variable, T_Expression> solve(
                 current_solution = result_local_solution;
                 break;
             }
+            case tabu_search::RestartMode::Automatic: {
+                if ((result.tabu_tenure >
+                     option.tabu_search.initial_tabu_tenure) &&
+                    (result.incumbent_holder.local_augmented_incumbent_score()
+                         .objective <
+                     incumbent_holder.global_augmented_incumbent_score()
+                         .objective)) {
+                    is_changed =
+                        (result_local_solution.variable_value_proxies !=
+                         current_solution.variable_value_proxies);
+                    current_solution = result_local_solution;
+                } else {
+                    is_changed =
+                        (result_global_solution.variable_value_proxies !=
+                         current_solution.variable_value_proxies);
+                    current_solution = result_global_solution;
+                }
+                break;
+            }
             default: {
                 throw std::logic_error(utility::format_error_location(
                     __FILE__, __LINE__, __func__,

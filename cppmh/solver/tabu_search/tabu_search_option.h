@@ -16,10 +16,7 @@ enum TabuMode : int {
 };
 
 /*****************************************************************************/
-enum RestartMode : int {
-    Global,
-    Local,
-};
+enum RestartMode : int { Global, Local, Automatic };
 
 /*****************************************************************************/
 struct TabuSearchOptionConstant {
