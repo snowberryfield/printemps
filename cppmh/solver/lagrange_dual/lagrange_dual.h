@@ -182,14 +182,15 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
         /**
          * Update the dual solution.
          */
+        int constraint_size = constraint_ptrs.size();
 #ifdef _OPENMP
 #pragma omp parallel for if (option.is_enabled_parallel_evaluation) \
     schedule(static)
 #endif
-        for (auto&& constraint_ptr : constraint_ptrs) {
-            double constraint_value = constraint_ptr->constraint_value();
-            int    id               = constraint_ptr->id();
-            int    flat_index       = constraint_ptr->flat_index();
+        for (auto i = 0; i < constraint_size; i++) {
+            double constraint_value = constraint_ptrs[i]->constraint_value();
+            int    id               = constraint_ptrs[i]->id();
+            int    flat_index       = constraint_ptrs[i]->flat_index();
 
             dual_value_proxies[id].flat_indexed_values(flat_index) +=
                 step_size * constraint_value;
@@ -204,17 +205,18 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
          * Update the primal optimal solution so that it minimizes lagrangian
          * for the updated dual solution.
          */
+        int variable_size = variable_ptrs.size();
 #ifdef _OPENMP
 #pragma omp parallel for if (option.is_enabled_parallel_evaluation) \
     schedule(static)
 #endif
-        for (auto&& variable_ptr : variable_ptrs) {
-            if (variable_ptr->is_fixed()) {
+        for (auto i = 0; i < variable_size; i++) {
+            if (variable_ptrs[i]->is_fixed()) {
                 continue;
             }
-            double coefficient = variable_ptr->objective_sensitivity();
+            double coefficient = variable_ptrs[i]->objective_sensitivity();
 
-            for (auto&& item : variable_ptr->constraint_sensitivities()) {
+            for (auto&& item : variable_ptrs[i]->constraint_sensitivities()) {
                 auto&  constraint_ptr = item.first;
                 double sensitivity    = item.second;
 
@@ -228,20 +230,20 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
 
             if (coefficient > 0) {
                 if (model->is_minimization()) {
-                    variable_ptr->set_value_if_not_fixed(
-                        variable_ptr->lower_bound());
+                    variable_ptrs[i]->set_value_if_not_fixed(
+                        variable_ptrs[i]->lower_bound());
                 } else {
-                    variable_ptr->set_value_if_not_fixed(
-                        variable_ptr->upper_bound());
+                    variable_ptrs[i]->set_value_if_not_fixed(
+                        variable_ptrs[i]->upper_bound());
                 }
 
             } else {
                 if (model->is_minimization()) {
-                    variable_ptr->set_value_if_not_fixed(
-                        variable_ptr->upper_bound());
+                    variable_ptrs[i]->set_value_if_not_fixed(
+                        variable_ptrs[i]->upper_bound());
                 } else {
-                    variable_ptr->set_value_if_not_fixed(
-                        variable_ptr->lower_bound());
+                    variable_ptrs[i]->set_value_if_not_fixed(
+                        variable_ptrs[i]->lower_bound());
                 }
             }
         }
