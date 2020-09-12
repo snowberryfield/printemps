@@ -67,11 +67,6 @@ LocalSearchResult<T_Variable, T_Expression> solve(
     incumbent_holder.reset_local_augmented_incumbent();
 
     /**
-     * Determine whether fast evaluation is available or not.
-     */
-    model->setup_is_enabled_fast_evaluation();
-
-    /**
      * Prepare a random generator, which is used for shuffling moves.
      */
     std::mt19937 get_rand_mt(option.local_search.seed);

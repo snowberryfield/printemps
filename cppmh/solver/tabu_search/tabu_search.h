@@ -74,11 +74,6 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     incumbent_holder.reset_local_augmented_incumbent();
 
     /**
-     * Determine whether fast evaluation is available or not.
-     */
-    model->setup_is_enabled_fast_evaluation();
-
-    /**
      * Prepare a random generator, which is used for shuffling moves.
      */
     std::mt19937 get_rand_mt(option.tabu_search.seed);
@@ -107,7 +102,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
      * Set up the tabu tenure and related parameters.
      */
     int original_tabu_tenure = std::min(option.tabu_search.initial_tabu_tenure,
-                                        model->number_of_variables());
+                                        model->number_of_not_fixed_variables());
     int tabu_tenure          = original_tabu_tenure;
 
     double bias_previous       = 0.0;
@@ -240,20 +235,14 @@ TabuSearchResult<T_Variable, T_Expression> solve(
         global_augmented_objectives.resize(number_of_moves);
         total_scores.resize(number_of_moves);
 
-        /**
-         * The boolean is_aspirated will be set true in the following steps if a
-         * tabu-solution improves the incumbents.
-         */
-        bool is_aspirated = false;
-
 #ifdef _OPENMP
 #pragma omp parallel for if (option.is_enabled_parallel_evaluation) \
     schedule(static)
 #endif
         for (auto i_move = 0; i_move < number_of_moves; i_move++) {
             /**
-             * The neighborhood solutions are evaluated in parallel by fast or
-             * ordinary(slow) evaluation methods.
+             * The neighborhood solutions will be evaluated in parallel by fast
+             * or ordinary(slow) evaluation methods.
              */
             if (model->is_enabled_fast_evaluation()) {
                 trial_solution_scores[i_move] =
@@ -313,14 +302,14 @@ TabuSearchResult<T_Variable, T_Expression> solve(
 
         if (iteration < option.tabu_search.number_of_initial_modification) {
             /**
-             * For diversification, the move for next solution is randomly
+             * For diversification, the move for next solution will be randomly
              * selected for initial several iteration.
              */
             selected_index = get_rand_mt() % number_of_moves;
         } else {
             /**
-             * The move for next solution is determined by evaluations of
-             * solutions and moves after the inital modification has finished.
+             * The move for next solution will be determined by evaluations of
+             * solutions and moves after the inital modifications.
              */
             selected_index = argmin_total_score;
 
@@ -337,7 +326,6 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                         incumbent_holder
                             .global_augmented_incumbent_objective()) {
                     selected_index = argmin_global_augmented_objective;
-                    is_aspirated   = true;
                 }
             }
 
@@ -355,7 +343,6 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                                 constant::EPSILON <
                             incumbent_holder.feasible_incumbent_objective()) {
                         selected_index = argmin_global_augmented_objective;
-                        is_aspirated   = true;
                     }
                 }
             }
@@ -491,7 +478,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
         if (option.tabu_search.is_enabled_automatic_break) {
             /**
              * If the local penalty us sufficiently larger than objective
-             * sensitivity, the current loop is terminated and the
+             * sensitivity, the current loop will be terminated and the
              * local penalty coefficients will be adjusted.
              */
             constexpr int    ITERATION_MIN = 10;
@@ -521,27 +508,28 @@ TabuSearchResult<T_Variable, T_Expression> solve(
         }
 
         if (option.tabu_search.is_enabled_automatic_tabu_tenure_adjustment) {
-            if (is_aspirated) {
+            if ((update_status &
+                 IncumbentHolderConstant::
+                     STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) &&
+                tabu_tenure > original_tabu_tenure) {
                 /**
-                 * The tabu tenure is decreased if
-                 * - The incumbent solution is found in the tabu solutions,
-                 * or
-                 * - There is no permissible solutions.
+                 * The tabu tenure will be reverted to the original value if it
+                 * has been increased and the global incumbent is updated.
                  */
-                tabu_tenure = std::max(tabu_tenure - 1, 1);
+                tabu_tenure                        = original_tabu_tenure;
                 last_tabu_tenure_updated_iteration = iteration;
                 bias_decrease_count                = 0;
                 bias_increase_count                = 0;
-                utility::print_info("Tabu tenure decreased: " +
+                utility::print_info("Tabu tenure reverted: " +
                                         std::to_string(tabu_tenure) + ".",
                                     option.verbose >= Verbose::Debug);
             } else if ((iteration - last_tabu_tenure_updated_iteration) %
                            (tabu_tenure + 1) ==
                        0) {
                 /**
-                 * The bias of searching is computed with the interval of
-                 * tabu_tenure+1. The tabu tenure is increased if the bias has
-                 * grown up, and decreased if the bias is reduced.
+                 * The bias of searching will be computed with the interval of
+                 * tabu_tenure+1. The tabu tenure will be increased if the bias
+                 * has grown up, and decreased if the bias has been reduced.
                  */
                 bias_previous = bias_current;
                 bias_current  = memory.bias();
@@ -553,8 +541,9 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                     if (bias_increase_count >
                         option.tabu_search.bias_increase_count_threshold) {
                         bias_increase_count = 0;
-                        tabu_tenure         = std::min(tabu_tenure + 1,
-                                               model->number_of_variables());
+                        tabu_tenure =
+                            std::min(tabu_tenure + 1,
+                                     model->number_of_not_fixed_variables());
                         last_tabu_tenure_updated_iteration = iteration;
                         utility::print_info("Tabu tenure increased: " +
                                                 std::to_string(tabu_tenure) +
