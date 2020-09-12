@@ -429,12 +429,6 @@ inline cppmh::solver::Option read_option(const std::string &a_FILE_NAME) {
             option_object_tabu_search);
 
         /**********************************************************************/
-        /// tabu_search.is_enabled_tabu_tenure_taking_over
-        read_json(&option.tabu_search.is_enabled_tabu_tenure_taking_over,  //
-                  "is_enabled_tabu_tenure_taking_over",                    //
-                  option_object_tabu_search);
-
-        /**********************************************************************/
         /// tabu_search.is_enabled_initial_modification
         read_json(&option.tabu_search.is_enabled_initial_modification,  //
                   "is_enabled_initial_modification",                    //
