@@ -431,11 +431,6 @@ struct Option {
                 this->tabu_search.is_enabled_automatic_iteration_adjustment,
                 "%d"));
 
-        utility::print(                                              //
-            " - tabu_search.is_enabled_tabu_tenure_taking_over: " +  //
-            utility::to_string(
-                this->tabu_search.is_enabled_tabu_tenure_taking_over, "%d"));
-
         utility::print(                                           //
             " - tabu_search.is_enabled_initial_modification: " +  //
             utility::to_string(

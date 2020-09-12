@@ -1467,6 +1467,7 @@ TEST_F(TestModel, categorize_variables) {
 
     EXPECT_EQ(1 + 10 + 20 * 30, model.number_of_variables());
     EXPECT_EQ(3, model.number_of_fixed_variables());
+    EXPECT_EQ(1 + 10 + 20 * 30 - 3, model.number_of_not_fixed_variables());
     EXPECT_EQ(11, model.number_of_binary_variables());
     EXPECT_EQ(600, model.number_of_integer_variables());
 }
@@ -3585,6 +3586,11 @@ TEST_F(TestModel, number_of_variables) {
 
 /*****************************************************************************/
 TEST_F(TestModel, number_of_fixed_variables) {
+    /// This method is tested in categorize_variables().
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, number_of_not_fixed_variables) {
     /// This method is tested in categorize_variables().
 }
 

@@ -653,6 +653,8 @@ class Model {
             a_IS_ENABLED_INITIAL_VALUE_CORRECTION, a_IS_ENABLED_PRINT);
 
         this->setup_fixed_sensitivities(a_IS_ENABLED_PRINT);
+
+        this->setup_is_enabled_fast_evaluation();
     }
 
     /*************************************************************************/
@@ -2756,6 +2758,11 @@ class Model {
     /*************************************************************************/
     inline constexpr int number_of_fixed_variables(void) const {
         return m_variable_reference.fixed_variable_ptrs.size();
+    }
+
+    /*************************************************************************/
+    inline constexpr int number_of_not_fixed_variables(void) const {
+        return this->number_of_variables() - this->number_of_fixed_variables();
     }
 
     /*************************************************************************/

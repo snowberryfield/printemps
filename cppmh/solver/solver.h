@@ -461,7 +461,8 @@ Result<T_Variable, T_Expression> solve(
     int not_update_count                    = 0;
     int next_number_of_initial_modification = 0;
     int next_inital_tabu_tenure = master_option.tabu_search.initial_tabu_tenure;
-    bool penalty_coefficient_reset_flag = false;
+    bool   penalty_coefficient_reset_flag = false;
+    double bias                           = memory.bias();
 
     /**
      * The integer variable next_iteration_max is used if the option
@@ -553,8 +554,26 @@ Result<T_Variable, T_Expression> solve(
             case tabu_search::RestartMode::Local: {
                 is_changed = (result_local_solution.variable_value_proxies !=
                               current_solution.variable_value_proxies);
-                current_solution = result_global_solution;
                 current_solution = result_local_solution;
+                break;
+            }
+            case tabu_search::RestartMode::Automatic: {
+                if ((result.tabu_tenure >
+                     option.tabu_search.initial_tabu_tenure) &&
+                    (result.incumbent_holder.local_augmented_incumbent_score()
+                         .objective <
+                     incumbent_holder.global_augmented_incumbent_score()
+                         .objective)) {
+                    is_changed =
+                        (result_local_solution.variable_value_proxies !=
+                         current_solution.variable_value_proxies);
+                    current_solution = result_local_solution;
+                } else {
+                    is_changed =
+                        (result_global_solution.variable_value_proxies !=
+                         current_solution.variable_value_proxies);
+                    current_solution = result_global_solution;
+                }
                 break;
             }
             default: {
@@ -711,8 +730,25 @@ Result<T_Variable, T_Expression> solve(
         /**
          * Update the initial tabu tenure for the next loop.
          */
-        if (master_option.tabu_search.is_enabled_tabu_tenure_taking_over) {
-            next_inital_tabu_tenure = result.tabu_tenure;
+        auto previous_bias = bias;
+        bias               = memory.bias();
+        if (master_option.tabu_search
+                .is_enabled_automatic_tabu_tenure_adjustment) {
+            if (result.total_update_status &
+                IncumbentHolderConstant::
+                    STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
+                next_inital_tabu_tenure =
+                    std::min(master_option.tabu_search.initial_tabu_tenure,
+                             model->number_of_not_fixed_variables());
+            } else if (bias > previous_bias) {
+                next_inital_tabu_tenure =
+                    std::min(option.tabu_search.initial_tabu_tenure + 1,
+                             model->number_of_not_fixed_variables());
+
+            } else if (bias < previous_bias) {
+                next_inital_tabu_tenure =
+                    std::max(option.tabu_search.initial_tabu_tenure - 1, 1);
+            }
         } else {
             next_inital_tabu_tenure =
                 master_option.tabu_search.initial_tabu_tenure;
