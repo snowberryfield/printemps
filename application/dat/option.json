@@ -15,6 +15,7 @@
     "is_enabled_parallel_evaluation": true,
     "is_enabled_parallel_neighborhood_update": true,
     "is_enabled_improvability_screening": true,
+    "is_enabled_feasibility_screening": false,
     "is_enabled_binary_move": true,
     "is_enabled_integer_move": true,
     "is_enabled_aggregation_move": false,

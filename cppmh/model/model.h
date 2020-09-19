@@ -2167,11 +2167,12 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void update_variable_improvability(void) {
+    inline constexpr void update_variable_improvability(
+        const bool a_IS_ENABLED_FEASIBILITY_SCREENING) {
         for (auto &&variable_ptr : m_variable_reference.variable_ptrs) {
             variable_ptr->set_is_improvable(false);
         }
-        if (this->is_feasible()) {
+        if (this->is_feasible() || !a_IS_ENABLED_FEASIBILITY_SCREENING) {
             auto &sensitivities = m_objective.expression().sensitivities();
             for (const auto &sensitivity : sensitivities) {
                 auto variable_ptr = sensitivity.first;
@@ -2199,7 +2200,9 @@ class Model {
                     }
                 }
             }
-        } else {
+        }
+
+        if (!this->is_feasible()) {
             for (auto &&constraint_ptr :
                  m_constraint_reference.constraint_ptrs) {
                 if (!constraint_ptr->is_enabled()) {

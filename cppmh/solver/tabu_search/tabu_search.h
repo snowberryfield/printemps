@@ -194,7 +194,8 @@ TabuSearchResult<T_Variable, T_Expression> solve(
              * If the option is_enabled_improvability_screening is set true,
              * only improvable moves will be generated.
              */
-            model->update_variable_improvability();
+            model->update_variable_improvability(
+                option.is_enabled_feasibility_screening);
         }
 
         model->neighborhood().update_moves();
