@@ -35,6 +35,7 @@ struct OptionConstant {
     static constexpr bool DEFAULT_IS_ENABLED_PARALLEL_NEIGHBORHOOD_UPDATE =
         true;
     static constexpr bool DEFAULT_IS_ENABLED_IMPROVABILITY_SCREENING = true;
+    static constexpr bool DEFAULT_IS_ENABLED_FEASIBILITY_SCREENING   = false;
     static constexpr bool DEFAULT_IS_ENABLED_BINARY_MOVE             = true;
     static constexpr bool DEFAULT_IS_ENABLED_INTEGER_MOVE            = true;
     static constexpr bool DEFAULT_IS_ENABLED_AGGREGATION_MOVE        = false;
@@ -72,6 +73,7 @@ struct Option {
     bool   is_enabled_parallel_evaluation;
     bool   is_enabled_parallel_neighborhood_update;
     bool   is_enabled_improvability_screening;
+    bool   is_enabled_feasibility_screening;
 
     bool is_enabled_binary_move;
     bool is_enabled_integer_move;
@@ -132,9 +134,10 @@ struct Option {
             OptionConstant::DEFAULT_IS_ENABLED_PARALLEL_EVALUATION;
         this->is_enabled_parallel_neighborhood_update =
             OptionConstant::DEFAULT_IS_ENABLED_PARALLEL_NEIGHBORHOOD_UPDATE;
-
         this->is_enabled_improvability_screening =
             OptionConstant::DEFAULT_IS_ENABLED_IMPROVABILITY_SCREENING;
+        this->is_enabled_feasibility_screening =
+            OptionConstant::DEFAULT_IS_ENABLED_FEASIBILITY_SCREENING;
         this->is_enabled_binary_move =
             OptionConstant::DEFAULT_IS_ENABLED_BINARY_MOVE;
         this->is_enabled_integer_move =
@@ -242,6 +245,10 @@ struct Option {
         utility::print(                                  //
             " - is_enabled_improvability_screening: " +  //
             utility::to_string(this->is_enabled_improvability_screening, "%d"));
+
+        utility::print(                                //
+            " - is_enabled_feasibility_screening: " +  //
+            utility::to_string(this->is_enabled_feasibility_screening, "%d"));
 
         utility::print(                      //
             " - is_enabled_binary_move: " +  //
