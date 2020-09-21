@@ -17,7 +17,7 @@ enum Verbose : int { None, Warning, Outer, Full, Debug };
 
 /*****************************************************************************/
 struct OptionConstant {
-    static constexpr int    DEFAULT_ITERATION_MAX                       = 100;
+    static constexpr int    DEFAULT_ITERATION_MAX                       = 10000;
     static constexpr double DEFAULT_TIME_MAX                            = 120.0;
     static constexpr double DEFAULT_TIME_OFFSET                         = 0.0;
     static constexpr double DEFAULT_PENALTY_COEFFICIENT_RELAXING_RATE   = 0.9;
