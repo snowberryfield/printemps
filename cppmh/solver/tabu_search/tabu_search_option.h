@@ -20,7 +20,7 @@ enum RestartMode : int { Global, Local, Automatic };
 
 /*****************************************************************************/
 struct TabuSearchOptionConstant {
-    static constexpr int    DEFAULT_ITERATION_MAX                       = 200;
+    static constexpr int    DEFAULT_ITERATION_MAX                       = 500;
     static constexpr double DEFAULT_TIME_MAX                            = 120.0;
     static constexpr double DEFAULT_TIME_OFFSET                         = 0.0;
     static constexpr int    DEFAULT_LOG_INTERVAL                        = 10;
@@ -103,7 +103,7 @@ struct TabuSearchOption {
         this->initial_modification_randomize_rate = TabuSearchOptionConstant::
             DEFAULT_INITIAL_MODIFICATION_RANDOMIZE_RATE;
         this->tabu_mode    = TabuMode::All;
-        this->restart_mode = RestartMode::Global;
+        this->restart_mode = RestartMode::Automatic;
         this->move_preserve_rate =
             TabuSearchOptionConstant::DEFAULT_MOVE_PRESERVE_RATE;
         this->frequency_penalty_coefficient =

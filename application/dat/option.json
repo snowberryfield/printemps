@@ -1,5 +1,5 @@
 {
-    "iteration_max": 100,
+    "iteration_max": 10000,
     "time_max": 120.0,
     "time_offset": 0.0,
     "penalty_coefficient_relaxing_rate": 0.9,
@@ -13,9 +13,9 @@
     "is_enabled_presolve": true,
     "is_enabled_initial_value_correction": true,
     "is_enabled_parallel_evaluation": true,
-    "is_enabled_parallel_neighborhood_update": true,
+    "is_enabled_parallel_neighborhood_update": false,
     "is_enabled_improvability_screening": true,
-    "is_enabled_feasibility_screening": false,
+    "is_enabled_feasibility_screening": true,
     "is_enabled_binary_move": true,
     "is_enabled_integer_move": true,
     "is_enabled_aggregation_move": false,
@@ -48,7 +48,7 @@
         "seed": 1
     },
     "tabu_search": {
-        "iteration_max": 200,
+        "iteration_max": 500,
         "time_max": 120,
         "time_offset": 0.0,
         "log_interval": 10,
@@ -57,7 +57,7 @@
         "initial_modification_fixed_rate": 1.0,
         "initial_modification_randomize_rate": 0.5,
         "tabu_mode": 0,
-        "restart_mode": 0,
+        "restart_mode": 2,
         "move_preserve_rate": 1.0,
         "frequency_penalty_coefficient": 1E-5,
         "is_enabled_shuffle": true,
