@@ -131,6 +131,12 @@ inline cppmh::solver::Option read_option(const std::string &a_FILE_NAME) {
               option_object);
 
     /**********************************************************************/
+    /// is_enabled_feasibility_screening
+    read_json(&option.is_enabled_feasibility_screening,  //
+              "is_enabled_feasibility_screening",        //
+              option_object);
+
+    /**********************************************************************/
     /// is_enabled_binary_move
     read_json(&option.is_enabled_binary_move,  //
               "is_enabled_binary_move",        //
@@ -164,6 +170,12 @@ inline cppmh::solver::Option read_option(const std::string &a_FILE_NAME) {
     /// is_enabled_exclusive_move
     read_json(&option.is_enabled_exclusive_move,  //
               "is_enabled_exclusive_move",        //
+              option_object);
+
+    /**********************************************************************/
+    /// is_enabled_chain_move
+    read_json(&option.is_enabled_chain_move,  //
+              "is_enabled_chain_move",        //
               option_object);
 
     /**********************************************************************/
@@ -421,12 +433,6 @@ inline cppmh::solver::Option read_option(const std::string &a_FILE_NAME) {
             &option.tabu_search.is_enabled_automatic_iteration_adjustment,  //
             "is_enabled_automatic_iteration_adjustment",                    //
             option_object_tabu_search);
-
-        /**********************************************************************/
-        /// tabu_search.is_enabled_tabu_tenure_taking_over
-        read_json(&option.tabu_search.is_enabled_tabu_tenure_taking_over,  //
-                  "is_enabled_tabu_tenure_taking_over",                    //
-                  option_object_tabu_search);
 
         /**********************************************************************/
         /// tabu_search.is_enabled_initial_modification

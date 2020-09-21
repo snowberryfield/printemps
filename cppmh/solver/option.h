@@ -17,7 +17,7 @@ enum Verbose : int { None, Warning, Outer, Full, Debug };
 
 /*****************************************************************************/
 struct OptionConstant {
-    static constexpr int    DEFAULT_ITERATION_MAX                       = 100;
+    static constexpr int    DEFAULT_ITERATION_MAX                       = 10000;
     static constexpr double DEFAULT_TIME_MAX                            = 120.0;
     static constexpr double DEFAULT_TIME_OFFSET                         = 0.0;
     static constexpr double DEFAULT_PENALTY_COEFFICIENT_RELAXING_RATE   = 0.9;
@@ -35,12 +35,14 @@ struct OptionConstant {
     static constexpr bool DEFAULT_IS_ENABLED_PARALLEL_NEIGHBORHOOD_UPDATE =
         true;
     static constexpr bool DEFAULT_IS_ENABLED_IMPROVABILITY_SCREENING = true;
+    static constexpr bool DEFAULT_IS_ENABLED_FEASIBILITY_SCREENING   = false;
     static constexpr bool DEFAULT_IS_ENABLED_BINARY_MOVE             = true;
     static constexpr bool DEFAULT_IS_ENABLED_INTEGER_MOVE            = true;
     static constexpr bool DEFAULT_IS_ENABLED_AGGREGATION_MOVE        = false;
     static constexpr bool DEFAULT_IS_ENABLED_PRECEDENCE_MOVE         = false;
     static constexpr bool DEFAULT_IS_ENABLED_VARIABLE_BOUND_MOVE     = false;
     static constexpr bool DEFAULT_IS_ENABLED_EXCLUSIVE_MOVE          = false;
+    static constexpr bool DEFAULT_IS_ENABLED_CHAIN_MOVE              = false;
     static constexpr bool DEFAULT_IS_ENABLED_USER_DEFINED_MOVE       = false;
 
     static constexpr model::SelectionMode DEFAULT_SELECTION_MODE =
@@ -71,13 +73,15 @@ struct Option {
     bool   is_enabled_parallel_evaluation;
     bool   is_enabled_parallel_neighborhood_update;
     bool   is_enabled_improvability_screening;
+    bool   is_enabled_feasibility_screening;
 
     bool is_enabled_binary_move;
     bool is_enabled_integer_move;
     bool is_enabled_aggregation_move;
     bool is_enabled_precedence_move;
     bool is_enabled_variable_bound_move;
-    bool is_enabled_exclusive_move;  // hidden
+    bool is_enabled_exclusive_move;
+    bool is_enabled_chain_move;
     bool is_enabled_user_defined_move;
 
     model::SelectionMode selection_mode;
@@ -130,9 +134,10 @@ struct Option {
             OptionConstant::DEFAULT_IS_ENABLED_PARALLEL_EVALUATION;
         this->is_enabled_parallel_neighborhood_update =
             OptionConstant::DEFAULT_IS_ENABLED_PARALLEL_NEIGHBORHOOD_UPDATE;
-
         this->is_enabled_improvability_screening =
             OptionConstant::DEFAULT_IS_ENABLED_IMPROVABILITY_SCREENING;
+        this->is_enabled_feasibility_screening =
+            OptionConstant::DEFAULT_IS_ENABLED_FEASIBILITY_SCREENING;
         this->is_enabled_binary_move =
             OptionConstant::DEFAULT_IS_ENABLED_BINARY_MOVE;
         this->is_enabled_integer_move =
@@ -145,6 +150,8 @@ struct Option {
             OptionConstant::DEFAULT_IS_ENABLED_VARIABLE_BOUND_MOVE;
         this->is_enabled_exclusive_move =
             OptionConstant::DEFAULT_IS_ENABLED_EXCLUSIVE_MOVE;
+        this->is_enabled_chain_move =
+            OptionConstant::DEFAULT_IS_ENABLED_CHAIN_MOVE;
         this->is_enabled_user_defined_move =
             OptionConstant::DEFAULT_IS_ENABLED_USER_DEFINED_MOVE;
 
@@ -239,6 +246,10 @@ struct Option {
             " - is_enabled_improvability_screening: " +  //
             utility::to_string(this->is_enabled_improvability_screening, "%d"));
 
+        utility::print(                                //
+            " - is_enabled_feasibility_screening: " +  //
+            utility::to_string(this->is_enabled_feasibility_screening, "%d"));
+
         utility::print(                      //
             " - is_enabled_binary_move: " +  //
             utility::to_string(this->is_enabled_binary_move, "%d"));
@@ -261,6 +272,10 @@ struct Option {
 
         utility::print(                         //
             " - is_enabled_exclusive_move: " +  //
+            utility::to_string(this->is_enabled_exclusive_move, "%d"));
+
+        utility::print(                     //
+            " - is_enabled_chain_move: " +  //
             utility::to_string(this->is_enabled_exclusive_move, "%d"));
 
         utility::print(                            //
@@ -422,11 +437,6 @@ struct Option {
             utility::to_string(
                 this->tabu_search.is_enabled_automatic_iteration_adjustment,
                 "%d"));
-
-        utility::print(                                              //
-            " - tabu_search.is_enabled_tabu_tenure_taking_over: " +  //
-            utility::to_string(
-                this->tabu_search.is_enabled_tabu_tenure_taking_over, "%d"));
 
         utility::print(                                           //
             " - tabu_search.is_enabled_initial_modification: " +  //

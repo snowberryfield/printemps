@@ -604,6 +604,7 @@ class Model {
         const bool           a_IS_ENABLED_PRECEDENCE_MOVE,
         const bool           a_IS_ENABLED_VARIABLE_BOUND_MOVE,
         const bool           a_IS_ENABLED_EXCLUSIVE_MOVE,
+        const bool           a_IS_ENABLED_CHAIN_MOVE,
         const bool           a_IS_ENABLED_USER_DEFINED_MOVE,
         const SelectionMode &a_SELECTION_MODE,  //
         const bool           a_IS_ENABLED_PRINT) {
@@ -637,6 +638,7 @@ class Model {
                                  a_IS_ENABLED_VARIABLE_BOUND_MOVE,           //
                                  a_IS_ENABLED_EXCLUSIVE_MOVE,                //
                                  a_IS_ENABLED_USER_DEFINED_MOVE,             //
+                                 a_IS_ENABLED_CHAIN_MOVE,                    //
                                  a_IS_ENABLED_IMPROVABILITY_SCREENING,       //
                                  a_IS_ENABLED_PARALLEL_NEIGHBORHOOD_UPDATE,  //
                                  a_IS_ENABLED_PRINT);
@@ -651,6 +653,8 @@ class Model {
             a_IS_ENABLED_INITIAL_VALUE_CORRECTION, a_IS_ENABLED_PRINT);
 
         this->setup_fixed_sensitivities(a_IS_ENABLED_PRINT);
+
+        this->setup_is_enabled_fast_evaluation();
     }
 
     /*************************************************************************/
@@ -1568,6 +1572,7 @@ class Model {
         const bool a_IS_ENABLED_PRECEDENCE_MOVE,
         const bool a_IS_ENABLED_VARIABLE_BOUND_MOVE,
         const bool a_IS_ENABLED_EXCLUSIVE_MOVE,           //
+        const bool a_IS_ENABLED_CHAIN_MOVE,               //
         const bool a_IS_ENABLED_USER_DEFINED_MOVE,        //
         const bool a_IS_ENABLED_IMPROVABILITY_SCREENING,  //
         const bool a_IS_ENABLED_PARALLEL,                 //
@@ -1623,6 +1628,12 @@ class Model {
             m_neighborhood.setup_variable_bound_move_updater(
                 m_constraint_type_reference.variable_bound_ptrs,  //
                 a_IS_ENABLED_IMPROVABILITY_SCREENING,             //
+                a_IS_ENABLED_PARALLEL);
+        }
+
+        if (a_IS_ENABLED_CHAIN_MOVE) {
+            m_neighborhood.setup_chain_move_updater(
+                a_IS_ENABLED_IMPROVABILITY_SCREENING,  //
                 a_IS_ENABLED_PARALLEL);
         }
 
@@ -2156,11 +2167,12 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void update_variable_improvability(void) {
+    inline constexpr void update_variable_improvability(
+        const bool a_IS_ENABLED_FEASIBILITY_SCREENING) {
         for (auto &&variable_ptr : m_variable_reference.variable_ptrs) {
             variable_ptr->set_is_improvable(false);
         }
-        if (this->is_feasible()) {
+        if (this->is_feasible() || !a_IS_ENABLED_FEASIBILITY_SCREENING) {
             auto &sensitivities = m_objective.expression().sensitivities();
             for (const auto &sensitivity : sensitivities) {
                 auto variable_ptr = sensitivity.first;
@@ -2188,7 +2200,9 @@ class Model {
                     }
                 }
             }
-        } else {
+        }
+
+        if (!this->is_feasible()) {
             for (auto &&constraint_ptr :
                  m_constraint_reference.constraint_ptrs) {
                 if (!constraint_ptr->is_enabled()) {
@@ -2747,6 +2761,11 @@ class Model {
     /*************************************************************************/
     inline constexpr int number_of_fixed_variables(void) const {
         return m_variable_reference.fixed_variable_ptrs.size();
+    }
+
+    /*************************************************************************/
+    inline constexpr int number_of_not_fixed_variables(void) const {
+        return this->number_of_variables() - this->number_of_fixed_variables();
     }
 
     /*************************************************************************/
