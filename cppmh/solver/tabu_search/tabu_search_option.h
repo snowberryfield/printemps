@@ -16,14 +16,11 @@ enum TabuMode : int {
 };
 
 /*****************************************************************************/
-enum RestartMode : int {
-    Global,
-    Local,
-};
+enum RestartMode : int { Global, Local, Automatic };
 
 /*****************************************************************************/
 struct TabuSearchOptionConstant {
-    static constexpr int    DEFAULT_ITERATION_MAX                       = 200;
+    static constexpr int    DEFAULT_ITERATION_MAX                       = 500;
     static constexpr double DEFAULT_TIME_MAX                            = 120.0;
     static constexpr double DEFAULT_TIME_OFFSET                         = 0.0;
     static constexpr int    DEFAULT_LOG_INTERVAL                        = 10;
@@ -41,7 +38,6 @@ struct TabuSearchOptionConstant {
         true;
     static constexpr bool DEFAULT_IS_ENABLED_AUTOMATIC_ITERATION_ADJUSTMENT =
         true;
-    static constexpr bool   DEFAULT_IS_ENABLED_TABU_TENURE_TAKING_OVER = false;
     static constexpr bool   DEFAULT_IS_ENABLED_INITIAL_MODIFICATION    = true;
     static constexpr int    DEFAULT_BIAS_INCREASE_COUNT_THRESHOLD      = 5;
     static constexpr int    DEFAULT_BIAS_DECREASE_COUNT_THRESHOLD      = 10;
@@ -72,7 +68,6 @@ struct TabuSearchOption {
     bool        is_enabled_automatic_break;
     bool        is_enabled_automatic_tabu_tenure_adjustment;
     bool        is_enabled_automatic_iteration_adjustment;
-    bool        is_enabled_tabu_tenure_taking_over;
     bool        is_enabled_initial_modification;
     int         bias_increase_count_threshold;
     int         bias_decrease_count_threshold;
@@ -108,7 +103,7 @@ struct TabuSearchOption {
         this->initial_modification_randomize_rate = TabuSearchOptionConstant::
             DEFAULT_INITIAL_MODIFICATION_RANDOMIZE_RATE;
         this->tabu_mode    = TabuMode::All;
-        this->restart_mode = RestartMode::Global;
+        this->restart_mode = RestartMode::Automatic;
         this->move_preserve_rate =
             TabuSearchOptionConstant::DEFAULT_MOVE_PRESERVE_RATE;
         this->frequency_penalty_coefficient =
@@ -125,8 +120,6 @@ struct TabuSearchOption {
         this->is_enabled_automatic_iteration_adjustment =
             TabuSearchOptionConstant::
                 DEFAULT_IS_ENABLED_AUTOMATIC_ITERATION_ADJUSTMENT;
-        this->is_enabled_tabu_tenure_taking_over = TabuSearchOptionConstant::
-            DEFAULT_IS_ENABLED_TABU_TENURE_TAKING_OVER;
         this->is_enabled_initial_modification =
             TabuSearchOptionConstant::DEFAULT_IS_ENABLED_INITIAL_MODIFICATION;
         this->bias_increase_count_threshold =
