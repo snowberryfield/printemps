@@ -521,9 +521,9 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                 last_tabu_tenure_updated_iteration = iteration;
                 bias_decrease_count                = 0;
                 bias_increase_count                = 0;
-                utility::print_info("Tabu tenure reverted: " +
-                                        std::to_string(tabu_tenure) + ".",
-                                    option.verbose >= Verbose::Debug);
+                utility::print_debug("Tabu tenure reverted: " +
+                                         std::to_string(tabu_tenure) + ".",
+                                     option.verbose >= Verbose::Debug);
             } else if ((iteration - last_tabu_tenure_updated_iteration) %
                            (tabu_tenure + 1) ==
                        0) {
