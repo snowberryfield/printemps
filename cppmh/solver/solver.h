@@ -993,6 +993,36 @@ Result<T_Variable, T_Expression> solve(
         }
 
         /**
+         * Print the number of violative constraints.
+         */
+        if (!current_solution_score.is_feasible) {
+            int number_of_violative_constraints = 0;
+
+            for (const auto& proxy : current_solution.violation_value_proxies) {
+                auto& values      = proxy.flat_indexed_values();
+                auto& names       = proxy.flat_indexed_names();
+                int   values_size = values.size();
+
+                utility::print_debug("Violative constraints:",
+                                     master_option.verbose >= Verbose::Debug);
+                for (auto i = 0; i < values_size; i++) {
+                    if (values[i] > 0) {
+                        number_of_violative_constraints++;
+                        utility::print_debug(
+                            " - " + names[i] + " (violation: " +
+                                std::to_string(values[i]) + ")",
+                            master_option.verbose >= Verbose::Debug);
+                    }
+                }
+            }
+            utility::print_message(
+                "The current does not satisfy " +
+                    std::to_string(number_of_violative_constraints) +
+                    " constraints.",
+                master_option.verbose >= Verbose::Debug);
+        }
+
+        /**
          * Print message if the penalty coefficients were reset.
          */
         if (penalty_coefficient_reset_flag) {

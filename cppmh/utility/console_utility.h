@@ -135,6 +135,11 @@ inline void print_warning(const std::string &a_MESSAGE,
 inline void print_info(const std::string &a_MESSAGE, const bool a_IS_ENABLED) {
     print_with_label("INFO    : ", a_MESSAGE, a_IS_ENABLED);
 }
+
+/******************************************************************************/
+inline void print_debug(const std::string &a_MESSAGE, const bool a_IS_ENABLED) {
+    print_with_label("DEBUG   : ", a_MESSAGE, a_IS_ENABLED);
+}
 }  // namespace utility
 }  // namespace cppmh
 
