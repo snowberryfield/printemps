@@ -943,7 +943,7 @@ Result<T_Variable, T_Expression> solve(
         number_of_tabu_search_loops++;
 
         /**
-         * Measure the elapsed time of the previous loop.
+         * Update the elapsed time.
          */
         elapsed_time = time_keeper.clock();
 
@@ -995,7 +995,7 @@ Result<T_Variable, T_Expression> solve(
         /**
          * Print the number of violative constraints.
          */
-        if (!current_solution_score.is_feasible) {
+        if (!current_solution.is_feasible) {
             int number_of_violative_constraints = 0;
 
             for (const auto& proxy : current_solution.violation_value_proxies) {
