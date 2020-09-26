@@ -25,9 +25,12 @@ struct OptionConstant {
     static constexpr double DEFAULT_PENALTY_COEFFICIENT_UPDATING_BALANCE = 0.0;
     static constexpr int DEFAULT_PENALTY_COEFFICIENT_RESET_COUNT_THRESHOLD = -1;
     static constexpr double DEFAULT_INITIAL_PENALTY_COEFFICIENT = 1E6;
-    static constexpr bool   DEFAULT_IS_ENABLED_LAGRANGE_DUAL    = false;
-    static constexpr bool   DEFAULT_IS_ENABLED_LOCAL_SEARCH     = true;
-    static constexpr bool   DEFAULT_IS_ENABLED_GROUPING_PENALTY_COEFFICIENT =
+    static constexpr bool
+        DEFAULT_IS_ENABLED_PENALTY_COEFFICIENT_PARTIAL_RELAXATION  //
+        = true;
+    static constexpr bool DEFAULT_IS_ENABLED_LAGRANGE_DUAL = false;
+    static constexpr bool DEFAULT_IS_ENABLED_LOCAL_SEARCH  = true;
+    static constexpr bool DEFAULT_IS_ENABLED_GROUPING_PENALTY_COEFFICIENT =
         false;
     static constexpr bool DEFAULT_IS_ENABLED_PRESOLVE                 = true;
     static constexpr bool DEFAULT_IS_ENABLED_INITIAL_VALUE_CORRECTION = true;
@@ -65,6 +68,7 @@ struct Option {
     double penalty_coefficient_updating_balance;       // hidden
     int    penalty_coefficient_reset_count_threshold;  // hidden
     double initial_penalty_coefficient;
+    bool   is_enabled_penalty_coefficient_partial_relaxation;
     bool   is_enabled_lagrange_dual;
     bool   is_enabled_local_search;
     bool   is_enabled_grouping_penalty_coefficient;
@@ -121,6 +125,9 @@ struct Option {
             OptionConstant::DEFAULT_PENALTY_COEFFICIENT_RESET_COUNT_THRESHOLD;
         this->initial_penalty_coefficient =
             OptionConstant::DEFAULT_INITIAL_PENALTY_COEFFICIENT;
+        this->is_enabled_penalty_coefficient_partial_relaxation =
+            OptionConstant::
+                DEFAULT_IS_ENABLED_PENALTY_COEFFICIENT_PARTIAL_RELAXATION;
         this->is_enabled_lagrange_dual =
             OptionConstant::DEFAULT_IS_ENABLED_LAGRANGE_DUAL;
         this->is_enabled_local_search =
@@ -210,6 +217,11 @@ struct Option {
         utility::print(                           //
             " - initial_penalty_coefficient: " +  //
             utility::to_string(this->initial_penalty_coefficient, "%f"));
+
+        utility::print(                                                 //
+            " - is_enabled_penalty_coefficient_partial_relaxation: " +  //
+            utility::to_string(
+                this->is_enabled_penalty_coefficient_partial_relaxation, "%d"));
 
         utility::print(                   //
             " - is_enabled_presolve: " +  //
