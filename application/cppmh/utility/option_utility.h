@@ -83,6 +83,12 @@ inline cppmh::solver::Option read_option(const std::string &a_FILE_NAME) {
               option_object);
 
     /**************************************************************************/
+    /// is_enabled_penalty_coefficient_partial_relaxation
+    read_json(&option.is_enabled_penalty_coefficient_partial_relaxation,  //
+              "is_enabled_penalty_coefficient_partial_relaxation",        //
+              option_object);
+
+    /**************************************************************************/
     /// is_enabled_lagrange_dual
     read_json(&option.is_enabled_lagrange_dual,  //
               "is_enabled_lagrange_dual",        //

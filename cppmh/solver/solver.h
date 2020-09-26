@@ -716,24 +716,44 @@ Result<T_Variable, T_Expression> solve(
                 }
             }
         } else {
-            /**
-             * Otherwise relax the local penalty coefficients of which
-             * corresponding constraints are satisfied.
-             */
             for (auto&& proxy : local_penalty_coefficient_proxies) {
                 int  id = proxy.id();
                 auto violation_values =
                     result_local_solution.violation_value_proxies[id]
                         .flat_indexed_values();
 
-                int flat_index = 0;
-                for (auto&& element : proxy.flat_indexed_values()) {
-                    if (violation_values[flat_index] < constant::EPSILON) {
+                if (master_option
+                        .is_enabled_penalty_coefficient_partial_relaxation) {
+                    /**
+                     * Relax the local penalty coefficients of which
+                     * corresponding constraints are satisfied.
+                     */
+                    int flat_index = 0;
+                    for (auto&& element : proxy.flat_indexed_values()) {
+                        if (violation_values[flat_index] < constant::EPSILON) {
+                            element *=
+                                master_option.penalty_coefficient_relaxing_rate;
+                        }
+                        flat_index++;
+                    }
+                } else {
+                    /**
+                     * Relax all the local penalty coefficients for the
+                     * following cases:
+                     * (1) The resulted local solution is feasible, or
+                     * (2) There is no update is the previous loop.
+                     */
+                    int flat_index = 0;
+                    if (result_local_solution.is_feasible ||
+                        update_status ==
+                            IncumbentHolderConstant::STATUS_NO_UPDATED) {
+                    }
+                    for (auto&& element : proxy.flat_indexed_values()) {
                         element *=
                             master_option.penalty_coefficient_relaxing_rate;
-                    }
 
-                    flat_index++;
+                        flat_index++;
+                    }
                 }
             }
         }
@@ -887,8 +907,8 @@ Result<T_Variable, T_Expression> solve(
 
         } else {
             /**
-             * Enable the special neighborhood moves if the incumbent was not
-             * updated.
+             * Enable the special neighborhood moves if the incumbent was
+             * not updated.
              */
             if (!result.is_early_stopped &&
                 (option.tabu_search.iteration_max ==
@@ -1003,15 +1023,15 @@ Result<T_Variable, T_Expression> solve(
                 auto& names       = proxy.flat_indexed_names();
                 int   values_size = values.size();
 
-                utility::print_debug("Violative constraints:",
-                                     master_option.verbose >= Verbose::Debug);
+                utility::print_info("Violative constraints:",
+                                    master_option.verbose >= Verbose::Outer);
                 for (auto i = 0; i < values_size; i++) {
                     if (values[i] > 0) {
                         number_of_violative_constraints++;
-                        utility::print_debug(
+                        utility::print_info(
                             " - " + names[i] + " (violation: " +
                                 std::to_string(values[i]) + ")",
-                            master_option.verbose >= Verbose::Debug);
+                            master_option.verbose >= Verbose::Outer);
                     }
                 }
             }
@@ -1027,7 +1047,8 @@ Result<T_Variable, T_Expression> solve(
          */
         if (penalty_coefficient_reset_flag) {
             utility::print_message(
-                "The penalty coefficients were reset due to search stagnation.",
+                "The penalty coefficients were reset due to search "
+                "stagnation.",
                 master_option.verbose >= Verbose::Outer);
         }
 
