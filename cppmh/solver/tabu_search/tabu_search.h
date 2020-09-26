@@ -546,10 +546,10 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                             std::min(tabu_tenure + 1,
                                      model->number_of_not_fixed_variables());
                         last_tabu_tenure_updated_iteration = iteration;
-                        utility::print_info("Tabu tenure increased: " +
-                                                std::to_string(tabu_tenure) +
-                                                ".",
-                                            option.verbose >= Verbose::Debug);
+                        utility::print_debug("Tabu tenure increased: " +
+                                                 std::to_string(tabu_tenure) +
+                                                 ".",
+                                             option.verbose >= Verbose::Debug);
                     }
                 } else {
                     bias_decrease_count++;
@@ -561,10 +561,10 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                         tabu_tenure         = std::max(tabu_tenure - 1, 1);
                         last_tabu_tenure_updated_iteration = iteration;
 
-                        utility::print_info("Tabu tenure decreased: " +
-                                                std::to_string(tabu_tenure) +
-                                                ".",
-                                            option.verbose >= Verbose::Debug);
+                        utility::print_debug("Tabu tenure decreased: " +
+                                                 std::to_string(tabu_tenure) +
+                                                 ".",
+                                             option.verbose >= Verbose::Debug);
                     }
                 }
             }

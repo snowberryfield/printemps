@@ -7,6 +7,7 @@
     "penalty_coefficient_updating_balance": 0.0,
     "penalty_coefficient_reset_count_threshold": -1,
     "initial_penalty_coefficient": 1E6,
+    "is_enabled_penalty_coefficient_partial_relaxation": true,
     "is_enabled_lagrange_dual": false,
     "is_enabled_local_search": true,
     "is_enabled_grouping_penalty_coefficient": false,

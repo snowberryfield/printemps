@@ -297,7 +297,7 @@ cppmh::model::IPModel model;
 auto& x = model.create_variables("x", 10);
 
 // The value of x(0) is fixed by 1.
-x.fix_by(0) = 1;
+x(0).fix_by(1);
 ```
 
 There are some other method related to the fixing. 
