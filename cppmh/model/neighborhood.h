@@ -1044,11 +1044,15 @@ class Neighborhood {
         int chain_moves_size          = chain_moves.size();
         int user_defined_moves_size   = 0;  /// computed later
 
+        auto number_of_candidate_moves = 0;
         /// Binary
         if (binary_moves_size > 0 &&  //
             m_is_enabled_binary_move) {
             m_binary_move_updater(&binary_moves,  //
                                   &binary_move_flags);
+            number_of_candidate_moves +=
+                std::count(binary_move_flags.begin(),  //
+                           binary_move_flags.end(), 1);
         }
 
         /// Integer
@@ -1056,6 +1060,9 @@ class Neighborhood {
             m_is_enabled_integer_move) {
             m_integer_move_updater(&integer_moves,  //
                                    &integer_move_flags);
+            number_of_candidate_moves +=
+                std::count(integer_move_flags.begin(),  //
+                           integer_move_flags.end(), 1);
         }
 
         /// Aggregation
@@ -1063,6 +1070,9 @@ class Neighborhood {
             m_is_enabled_aggregation_move) {
             m_aggregation_move_updater(&aggregation_moves,
                                        &aggregation_move_flags);
+            number_of_candidate_moves +=
+                std::count(aggregation_move_flags.begin(),  //
+                           aggregation_move_flags.end(), 1);
         }
 
         /// Precedence
@@ -1070,6 +1080,9 @@ class Neighborhood {
             m_is_enabled_precedence_move) {
             m_precedence_move_updater(&precedence_moves,  //
                                       &precedence_move_flags);
+            number_of_candidate_moves +=
+                std::count(precedence_move_flags.begin(),  //
+                           precedence_move_flags.end(), 1);
         }
 
         /// Variable Bound
@@ -1077,6 +1090,9 @@ class Neighborhood {
             m_is_enabled_variable_bound_move) {
             m_variable_bound_move_updater(&variable_bound_moves,  //
                                           &variable_bound_move_flags);
+            number_of_candidate_moves +=
+                std::count(variable_bound_move_flags.begin(),  //
+                           variable_bound_move_flags.end(), 1);
         }
 
         /// Exclusive
@@ -1084,6 +1100,9 @@ class Neighborhood {
             m_is_enabled_exclusive_move) {
             m_exclusive_move_updater(&exclusive_moves,  //
                                      &exclusive_move_flags);
+            number_of_candidate_moves +=
+                std::count(exclusive_move_flags.begin(),  //
+                           exclusive_move_flags.end(), 1);
         }
 
         /// Selection
@@ -1091,12 +1110,18 @@ class Neighborhood {
             m_is_enabled_selection_move) {
             m_selection_move_updater(&selection_moves,  //
                                      &selection_move_flags);
+            number_of_candidate_moves +=
+                std::count(selection_move_flags.begin(),  //
+                           selection_move_flags.end(), 1);
         }
 
         /// Chain
         if (m_is_enabled_chain_move) {
             m_chain_move_updater(&chain_moves,  //
                                  &chain_move_flags);
+            number_of_candidate_moves +=
+                std::count(chain_move_flags.begin(),  //
+                           chain_move_flags.end(), 1);
         }
 
         /// User Defined
@@ -1104,82 +1129,83 @@ class Neighborhood {
             m_user_defined_move_updater_wrapper(&user_defined_moves,  //
                                                 &user_defined_move_flags);
             user_defined_moves_size = user_defined_moves.size();
+            number_of_candidate_moves +=
+                std::count(user_defined_move_flags.begin(),  //
+                           user_defined_move_flags.end(), 1);
         }
-
-        auto number_of_candidate_moves =           //
-            std::count(binary_move_flags.begin(),  //
-                       binary_move_flags.end(), 1) +
-            std::count(integer_move_flags.begin(),  //
-                       integer_move_flags.end(), 1) +
-            std::count(precedence_move_flags.begin(),
-                       precedence_move_flags.end(), 1) +
-            std::count(aggregation_move_flags.begin(),  //
-                       aggregation_move_flags.end(), 1) +
-            std::count(variable_bound_move_flags.begin(),  //
-                       variable_bound_move_flags.end(), 1) +
-            std::count(exclusive_move_flags.begin(),  //
-                       exclusive_move_flags.end(), 1) +
-            std::count(chain_move_flags.begin(),  //
-                       chain_move_flags.end(), 1) +
-            std::count(user_defined_move_flags.begin(),  //
-                       user_defined_move_flags.end(), 1) +
-            std::count(selection_move_flags.begin(),  //
-                       selection_move_flags.end(), 1);
 
         move_ptrs.resize(number_of_candidate_moves);
         auto index = 0;
 
-        for (auto i = 0; i < binary_moves_size; i++) {
-            if (binary_move_flags[i] > 0) {
-                move_ptrs[index++] = &binary_moves[i];
+        if (m_is_enabled_binary_move) {
+            for (auto i = 0; i < binary_moves_size; i++) {
+                if (binary_move_flags[i] > 0) {
+                    move_ptrs[index++] = &binary_moves[i];
+                }
             }
         }
 
-        for (auto i = 0; i < integer_moves_size; i++) {
-            if (integer_move_flags[i]) {
-                move_ptrs[index++] = &integer_moves[i];
+        if (m_is_enabled_integer_move) {
+            for (auto i = 0; i < integer_moves_size; i++) {
+                if (integer_move_flags[i]) {
+                    move_ptrs[index++] = &integer_moves[i];
+                }
             }
         }
 
-        for (auto i = 0; i < precedence_moves_size; i++) {
-            if (precedence_move_flags[i]) {
-                move_ptrs[index++] = &precedence_moves[i];
+        if (m_is_enabled_precedence_move) {
+            for (auto i = 0; i < precedence_moves_size; i++) {
+                if (precedence_move_flags[i]) {
+                    move_ptrs[index++] = &precedence_moves[i];
+                }
             }
         }
 
-        for (auto i = 0; i < aggregation_moves_size; i++) {
-            if (aggregation_move_flags[i]) {
-                move_ptrs[index++] = &aggregation_moves[i];
+        if (m_is_enabled_aggregation_move) {
+            for (auto i = 0; i < aggregation_moves_size; i++) {
+                if (aggregation_move_flags[i]) {
+                    move_ptrs[index++] = &aggregation_moves[i];
+                }
             }
         }
 
-        for (auto i = 0; i < variable_bound_moves_size; i++) {
-            if (variable_bound_move_flags[i]) {
-                move_ptrs[index++] = &variable_bound_moves[i];
+        if (m_is_enabled_variable_bound_move) {
+            for (auto i = 0; i < variable_bound_moves_size; i++) {
+                if (variable_bound_move_flags[i]) {
+                    move_ptrs[index++] = &variable_bound_moves[i];
+                }
             }
         }
 
-        for (auto i = 0; i < exclusive_moves_size; i++) {
-            if (exclusive_move_flags[i]) {
-                move_ptrs[index++] = &exclusive_moves[i];
+        if (m_is_enabled_exclusive_move) {
+            for (auto i = 0; i < exclusive_moves_size; i++) {
+                if (exclusive_move_flags[i]) {
+                    move_ptrs[index++] = &exclusive_moves[i];
+                }
             }
         }
 
-        for (auto i = 0; i < selection_moves_size; i++) {
-            if (selection_move_flags[i]) {
-                move_ptrs[index++] = &selection_moves[i];
+        if (m_is_enabled_selection_move) {
+            for (auto i = 0; i < selection_moves_size; i++) {
+                if (selection_move_flags[i]) {
+                    move_ptrs[index++] = &selection_moves[i];
+                }
             }
         }
 
-        for (auto i = 0; i < chain_moves_size; i++) {
-            if (chain_move_flags[i]) {
-                move_ptrs[index++] = &chain_moves[i];
+        if (m_is_enabled_chain_move) {
+            for (auto i = 0; i < chain_moves_size; i++) {
+                if (chain_move_flags[i]) {
+                    move_ptrs[index++] = &chain_moves[i];
+                }
             }
         }
 
-        for (auto i = 0; i < user_defined_moves_size; i++) {
-            if (user_defined_move_flags[i]) {
-                move_ptrs[index++] = &user_defined_moves[i];
+        if (m_is_enabled_user_defined_move) {
+            for (auto i = 0; i < user_defined_moves_size; i++) {
+                if (user_defined_move_flags[i]) {
+                    move_ptrs[index++] = &user_defined_moves[i];
+                }
             }
         }
     }
