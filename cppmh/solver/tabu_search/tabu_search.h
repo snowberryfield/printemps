@@ -470,7 +470,9 @@ TabuSearchResult<T_Variable, T_Expression> solve(
             if (current_improvement > 0 && previous_improvement < 0 &&
                 current_improvement + previous_improvement > 0) {
                 auto chain_move = previous_move + current_move;
-                if (!Move_T::has_duplicate_variable(chain_move)) {
+                if (!Move_T::has_duplicate_variable(chain_move) &&
+                    previous_move.sense != model::MoveSense::Selection &&
+                    current_move.sense != model::MoveSense::Selection) {
                     model->neighborhood().register_chain_move(chain_move);
                 }
             }

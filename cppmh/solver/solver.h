@@ -1036,7 +1036,7 @@ Result<T_Variable, T_Expression> solve(
                 }
             }
             utility::print_message(
-                "The current does not satisfy " +
+                "The current solution does not satisfy " +
                     std::to_string(number_of_violative_constraints) +
                     " constraints.",
                 master_option.verbose >= Verbose::Debug);
