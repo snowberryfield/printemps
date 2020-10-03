@@ -462,9 +462,7 @@ Result<T_Variable, T_Expression> solve(
     int next_number_of_initial_modification = 0;
     int next_inital_tabu_tenure = master_option.tabu_search.initial_tabu_tenure;
 
-    bool   penalty_coefficient_reset_flag   = false;
-    bool   restart_from_local_solution_flag = false;
-    double bias                             = memory.bias();
+    bool penalty_coefficient_reset_flag = false;
 
     /**
      * The integer variable next_iteration_max is used if the option
@@ -528,8 +526,8 @@ Result<T_Variable, T_Expression> solve(
         /**
          * Run the tabu search.
          */
-        auto result = tabu_search::solve(model,  //
-                                         option,
+        auto result = tabu_search::solve(model,                               //
+                                         option,                              //
                                          local_penalty_coefficient_proxies,   //
                                          global_penalty_coefficient_proxies,  //
                                          initial_variable_value_proxies,      //
@@ -537,62 +535,66 @@ Result<T_Variable, T_Expression> solve(
                                          memory);
 
         /**
-         * Update the bias.
+         * Update the current solution which is employed as the initial solution
+         * of the next loop. Whether the local penalty coefficients should be
+         * relaxed or tightened, is also determined.
          */
-        auto previous_bias = bias;
-        bias               = memory.bias();
-
-        /**
-         * Update the current solution.
-         */
-        auto result_local_solution =
+        auto result_local_incumbent_solution =
             result.incumbent_holder.local_augmented_incumbent_solution();
-        auto result_global_solution =
+        auto result_global_incumbent_solution =
             result.incumbent_holder.global_augmented_incumbent_solution();
-        bool is_changed = false;
 
-        switch (master_option.tabu_search.restart_mode) {
-            case tabu_search::RestartMode::Global: {
-                is_changed = (result_global_solution.variable_value_proxies !=
-                              current_solution.variable_value_proxies);
-                current_solution                 = result_global_solution;
-                restart_from_local_solution_flag = false;
-                break;
-            }
-            case tabu_search::RestartMode::Local: {
-                is_changed = (result_local_solution.variable_value_proxies !=
-                              current_solution.variable_value_proxies);
-                current_solution                 = result_local_solution;
-                restart_from_local_solution_flag = true;
-                break;
-            }
-            case tabu_search::RestartMode::Automatic: {
-                if (!restart_from_local_solution_flag &&
-                    (bias > previous_bias) &&
-                    (result.incumbent_holder.local_augmented_incumbent_score()
-                         .objective <
-                     incumbent_holder.global_augmented_incumbent_score()
-                         .objective)) {
-                    is_changed =
-                        (result_local_solution.variable_value_proxies !=
-                         current_solution.variable_value_proxies);
-                    current_solution                 = result_local_solution;
-                    restart_from_local_solution_flag = true;
+        auto result_local_augmented_incumbent_objective =
+            result.incumbent_holder.local_augmented_incumbent_objective();
+        auto result_global_augmented_incumbent_objective =
+            result.incumbent_holder.global_augmented_incumbent_objective();
+
+        bool   penalty_coefficient_tightening_flag = false;
+        bool   penalty_coefficient_relaxing_flag   = false;
+        double current_augmented_objective         = 0.0;
+        auto   previous_solution                   = current_solution;
+
+        if (result.total_update_status &
+            IncumbentHolderConstant::STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
+            current_solution = result_global_incumbent_solution;
+            current_augmented_objective =
+                result_global_augmented_incumbent_objective;
+            penalty_coefficient_tightening_flag = false;
+            penalty_coefficient_relaxing_flag   = true;
+        } else {
+            if (result.total_update_status ==
+                IncumbentHolderConstant::
+                    STATUS_LOCAL_AUGMENTED_INCUMBENT_UPDATE) {
+                current_solution = result_local_incumbent_solution;
+                current_augmented_objective =
+                    result_local_augmented_incumbent_objective;
+                if (current_solution.is_feasible) {
+                    penalty_coefficient_tightening_flag = false;
+                    penalty_coefficient_relaxing_flag   = true;
                 } else {
-                    is_changed =
-                        (result_global_solution.variable_value_proxies !=
-                         current_solution.variable_value_proxies);
-                    current_solution                 = result_global_solution;
-                    restart_from_local_solution_flag = false;
+                    penalty_coefficient_tightening_flag = true;
+                    penalty_coefficient_relaxing_flag   = false;
                 }
-                break;
-            }
-            default: {
-                throw std::logic_error(utility::format_error_location(
-                    __FILE__, __LINE__, __func__,
-                    "The specified restart mode is invalid."));
+            } else {
+                current_solution = result_global_incumbent_solution;
+                current_augmented_objective =
+                    result_global_augmented_incumbent_objective;
+                if (current_solution.is_feasible) {
+                    penalty_coefficient_tightening_flag = false;
+                    penalty_coefficient_relaxing_flag   = true;
+                } else {
+                    // Do not modify penalty coefficients.
+                    penalty_coefficient_tightening_flag = false;
+                    penalty_coefficient_relaxing_flag   = false;
+                }
             }
         }
+
+        /**
+         * This flag will be used to control the initial modification.
+         */
+        bool is_changed = current_solution.variable_value_proxies !=
+                          previous_solution.variable_value_proxies;
 
         /**
          * Update the historical data.
@@ -643,10 +645,6 @@ Result<T_Variable, T_Expression> solve(
         /**
          * Update the local penalty coefficients.
          */
-        double gap =
-            incumbent_holder.global_augmented_incumbent_objective() -
-            result.incumbent_holder.local_augmented_incumbent_objective();
-
         if (penalty_coefficient_reset_flag) {
             /**
              * If penalty_coefficient_reset_flag is true, the penalty
@@ -654,19 +652,13 @@ Result<T_Variable, T_Expression> solve(
              */
             local_penalty_coefficient_proxies =
                 global_penalty_coefficient_proxies;
-        } else if (gap > constant::EPSILON &&
-                   !result_local_solution.is_feasible) {
+        } else if (penalty_coefficient_tightening_flag) {
             /**
-             * If the gap the (global augmented incumbent objective) - (the
-             * local augmented incumbent objective obtained in the last tabu
-             * search) is positive, tighten the local penalty coefficients.
-             * The latter condition considers cancellation of significant
-             * digits.
+             * Tighten the local penalty coefficients.
              */
             double total_penalty           = 0.0;
             double total_squared_violation = 0.0;
-            for (const auto& proxy :
-                 result_local_solution.violation_value_proxies) {
+            for (const auto& proxy : current_solution.violation_value_proxies) {
                 for (const auto& element : proxy.flat_indexed_values()) {
                     total_penalty += element;
                     total_squared_violation += element * element;
@@ -676,10 +668,13 @@ Result<T_Variable, T_Expression> solve(
             const double balance =
                 master_option.penalty_coefficient_updating_balance;
 
+            double gap = result_global_augmented_incumbent_objective -
+                         current_augmented_objective;
+
             for (auto&& proxy : local_penalty_coefficient_proxies) {
                 int  id = proxy.id();
                 auto violation_values =
-                    result_local_solution.violation_value_proxies[id]
+                    current_solution.violation_value_proxies[id]
                         .flat_indexed_values();
 
                 int flat_index = 0;
@@ -715,45 +710,24 @@ Result<T_Variable, T_Expression> solve(
                         element, master_option.initial_penalty_coefficient);
                 }
             }
-        } else {
+        } else if (penalty_coefficient_relaxing_flag) {
+            /**
+             * Relax the local penalty coefficients of which
+             * corresponding constraints are satisfied.
+             */
             for (auto&& proxy : local_penalty_coefficient_proxies) {
                 int  id = proxy.id();
                 auto violation_values =
-                    result_local_solution.violation_value_proxies[id]
+                    current_solution.violation_value_proxies[id]
                         .flat_indexed_values();
 
-                if (master_option
-                        .is_enabled_penalty_coefficient_partial_relaxation) {
-                    /**
-                     * Relax the local penalty coefficients of which
-                     * corresponding constraints are satisfied.
-                     */
-                    int flat_index = 0;
-                    for (auto&& element : proxy.flat_indexed_values()) {
-                        if (violation_values[flat_index] < constant::EPSILON) {
-                            element *=
-                                master_option.penalty_coefficient_relaxing_rate;
-                        }
-                        flat_index++;
-                    }
-                } else {
-                    /**
-                     * Relax all the local penalty coefficients for the
-                     * following cases:
-                     * (1) The resulted local solution is feasible, or
-                     * (2) There is no update is the previous loop.
-                     */
-                    int flat_index = 0;
-                    if (result_local_solution.is_feasible ||
-                        update_status ==
-                            IncumbentHolderConstant::STATUS_NO_UPDATED) {
-                    }
-                    for (auto&& element : proxy.flat_indexed_values()) {
+                int flat_index = 0;
+                for (auto&& element : proxy.flat_indexed_values()) {
+                    if (violation_values[flat_index] < constant::EPSILON) {
                         element *=
                             master_option.penalty_coefficient_relaxing_rate;
-
-                        flat_index++;
                     }
+                    flat_index++;
                 }
             }
         }
@@ -826,6 +800,8 @@ Result<T_Variable, T_Expression> solve(
 
                 next_number_of_initial_modification =
                     std::max(1, number_of_initial_modification);
+            } else {
+                next_number_of_initial_modification = 0;
             }
         }
 
@@ -1005,11 +981,8 @@ Result<T_Variable, T_Expression> solve(
             utility::print_message("Global incumbent objective was updated. ",
                                    master_option.verbose >= Verbose::Outer);
         } else {
-            if (master_option.tabu_search.is_enabled_initial_modification &&
-                !is_changed) {
-                utility::print_message("Incumbent objective was not updated.",
-                                       master_option.verbose >= Verbose::Outer);
-            }
+            utility::print_message("Incumbent objective was not updated.",
+                                   master_option.verbose >= Verbose::Outer);
         }
 
         /**
@@ -1023,8 +996,9 @@ Result<T_Variable, T_Expression> solve(
                 auto& names       = proxy.flat_indexed_names();
                 int   values_size = values.size();
 
-                utility::print_info("Violative constraints:",
-                                    master_option.verbose >= Verbose::Outer);
+                utility::print_info(
+                    "Violative constraints in the current solution:",
+                    master_option.verbose >= Verbose::Outer);
                 for (auto i = 0; i < values_size; i++) {
                     if (values[i] > 0) {
                         number_of_violative_constraints++;
@@ -1068,7 +1042,7 @@ Result<T_Variable, T_Expression> solve(
                 "For the initial " +
                     std::to_string(next_number_of_initial_modification) +
                     " iterations in the next loop, the solution will "
-                    "be randomly updated to escape from the local minimum.",
+                    "be randomly updated to escape from the local optimum.",
                 master_option.verbose >= Verbose::Outer);
         }
 
