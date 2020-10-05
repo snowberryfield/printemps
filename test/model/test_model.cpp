@@ -63,6 +63,7 @@ TEST_F(TestModel, initialize) {
     EXPECT_EQ(true, model.is_minimization());
     EXPECT_EQ(1.0, model.sign());
     EXPECT_EQ(false, model.is_solved());
+    EXPECT_EQ(false, model.is_feasible());
 
     /// Variable Reference
     EXPECT_EQ(  //
@@ -2341,6 +2342,7 @@ TEST_F(TestModel, update_variable_improvability) {
         model.minimize(-x + y);
         model.categorize_variables();
         model.categorize_constraints();
+        model.setup_variable_sensitivity();
         model.setup_fixed_sensitivities(false);
 
         x = -10;
@@ -2376,6 +2378,7 @@ TEST_F(TestModel, update_variable_improvability) {
         model.minimize(-x + y);
         model.categorize_variables();
         model.categorize_constraints();
+        model.setup_variable_sensitivity();
         model.setup_fixed_sensitivities(false);
 
         x = -10;
@@ -2411,6 +2414,7 @@ TEST_F(TestModel, update_variable_improvability) {
         model.minimize(-x + y);
         model.categorize_variables();
         model.categorize_constraints();
+        model.setup_variable_sensitivity();
         model.setup_fixed_sensitivities(false);
 
         x = -10;
@@ -2446,6 +2450,7 @@ TEST_F(TestModel, update_variable_improvability) {
         model.maximize(-x + y);
         model.categorize_variables();
         model.categorize_constraints();
+        model.setup_variable_sensitivity();
         model.setup_fixed_sensitivities(false);
 
         x = -10;
@@ -2481,6 +2486,7 @@ TEST_F(TestModel, update_variable_improvability) {
         model.maximize(-x + y);
         model.categorize_variables();
         model.categorize_constraints();
+        model.setup_variable_sensitivity();
         model.setup_fixed_sensitivities(false);
 
         x = -10;
@@ -2516,6 +2522,7 @@ TEST_F(TestModel, update_variable_improvability) {
         model.maximize(-x + y);
         model.categorize_variables();
         model.categorize_constraints();
+        model.setup_variable_sensitivity();
         model.setup_fixed_sensitivities(false);
 
         x = -10;
@@ -2553,6 +2560,7 @@ TEST_F(TestModel, update_variable_improvability) {
         model.minimize(-x + y + z);
         model.categorize_variables();
         model.categorize_constraints();
+        model.setup_variable_sensitivity();
         model.setup_fixed_sensitivities(false);
 
         x = -10;
@@ -2615,14 +2623,14 @@ TEST_F(TestModel, update_arg_move) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModel, is_feasible) {
+TEST_F(TestModel, update_feasibility) {
     cppmh::model::Model<int, double> model;
 
     auto&                  x = model.create_variable("x", 0, 10);
     [[maybe_unused]] auto& g = model.create_constraint("g", x <= 5);
 
     x = 4;
-    model.update();
+    model.update();  // include update_feasibility()
     EXPECT_EQ(true, model.is_feasible());
 
     x = 5;
@@ -3616,6 +3624,11 @@ TEST_F(TestModel, set_is_solved) {
 /*****************************************************************************/
 TEST_F(TestModel, is_solved) {
     /// This method is tested in set_is_solved().
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, is_feasible) {
+    /// This method is tested in update_feasibility().
 }
 
 /*****************************************************************************/

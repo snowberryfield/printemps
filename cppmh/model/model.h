@@ -73,6 +73,7 @@ class Model {
     bool m_is_linear;
     bool m_is_minimization;
     bool m_is_solved;
+    bool m_is_feasible;
 
     std::vector<Selection<T_Variable, T_Expression>> m_selections;
     VariableReference<T_Variable, T_Expression>      m_variable_reference;
@@ -127,6 +128,7 @@ class Model {
         m_is_linear                  = true;
         m_is_minimization            = true;
         m_is_solved                  = false;
+        m_is_feasible                = false;
 
         m_selections.clear();
         m_variable_reference.initialize();
@@ -2129,6 +2131,8 @@ class Model {
         if (m_is_defined_objective) {
             m_objective.update();
         }
+
+        this->update_feasibility();
     }
 
     /*************************************************************************/
@@ -2164,21 +2168,24 @@ class Model {
         if (a_MOVE.sense == MoveSense::Selection) {
             a_MOVE.alterations[1].first->select();
         }
+
+        this->update_feasibility();
     }
 
     /*************************************************************************/
     inline constexpr void update_variable_improvability(
         const bool a_IS_ENABLED_FEASIBILITY_SCREENING) {
-        for (auto &&variable_ptr : m_variable_reference.variable_ptrs) {
+        const auto &variable_ptrs   = m_variable_reference.variable_ptrs;
+        const auto &constraint_ptrs = m_constraint_reference.constraint_ptrs;
+
+        for (auto &&variable_ptr : variable_ptrs) {
             variable_ptr->set_is_improvable(false);
         }
-        if (this->is_feasible() || !a_IS_ENABLED_FEASIBILITY_SCREENING) {
-            auto &sensitivities = m_objective.expression().sensitivities();
-            for (const auto &sensitivity : sensitivities) {
-                auto variable_ptr = sensitivity.first;
-                auto coefficient  = sensitivity.second;
 
-                if (this->is_minimization()) {
+        if (this->is_feasible() || !a_IS_ENABLED_FEASIBILITY_SCREENING) {
+            if (this->is_minimization()) {
+                for (auto &&variable_ptr : variable_ptrs) {
+                    auto coefficient = variable_ptr->objective_sensitivity();
                     if (coefficient > 0 &&  //
                         (variable_ptr->value() !=
                          variable_ptr->lower_bound())) {
@@ -2188,7 +2195,10 @@ class Model {
                                 variable_ptr->upper_bound())) {
                         variable_ptr->set_is_improvable(true);
                     }
-                } else {
+                }
+            } else {
+                for (auto &&variable_ptr : variable_ptrs) {
+                    auto coefficient = variable_ptr->objective_sensitivity();
                     if (coefficient > 0 &&  //
                         (variable_ptr->value() !=
                          variable_ptr->upper_bound())) {
@@ -2203,9 +2213,11 @@ class Model {
         }
 
         if (!this->is_feasible()) {
-            for (auto &&constraint_ptr :
-                 m_constraint_reference.constraint_ptrs) {
+            for (const auto &constraint_ptr : constraint_ptrs) {
                 if (!constraint_ptr->is_enabled()) {
+                    continue;
+                }
+                if (constraint_ptr->violation_value() < constant::EPSILON) {
                     continue;
                 }
 
@@ -2219,6 +2231,10 @@ class Model {
                         for (const auto &sensitivity : sensitivities) {
                             auto variable_ptr = sensitivity.first;
                             auto coefficient  = sensitivity.second;
+
+                            if (variable_ptr->is_improvable()) {
+                                continue;
+                            }
 
                             if (coefficient > 0 &&
                                 (variable_ptr->value() !=
@@ -2240,6 +2256,10 @@ class Model {
                             auto variable_ptr = sensitivity.first;
                             auto coefficient  = sensitivity.second;
 
+                            if (variable_ptr->is_improvable()) {
+                                continue;
+                            }
+
                             if (coefficient > 0 &&
                                 (variable_ptr->value() !=
                                  variable_ptr->upper_bound())) {
@@ -2257,15 +2277,16 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr bool is_feasible(void) const {
+    inline constexpr void update_feasibility(void) {
         for (const auto &proxy : m_constraint_proxies) {
             for (const auto &constraint : proxy.flat_indexed_constraints()) {
                 if (constraint.violation_value() > constant::EPSILON) {
-                    return false;
+                    m_is_feasible = false;
+                    return;
                 }
             }
         }
-        return true;
+        m_is_feasible = true;
     }
 
     /*************************************************************************/
@@ -2754,6 +2775,11 @@ class Model {
     }
 
     /*************************************************************************/
+    inline constexpr bool is_feasible(void) const {
+        return m_is_feasible;
+    }
+
+    /*************************************************************************/
     inline constexpr int number_of_variables(void) const {
         return m_variable_reference.variable_ptrs.size();
     }
@@ -2803,7 +2829,7 @@ class Model {
         void) {
         return m_neighborhood;
     }
-};
+};  // namespace model
 using IPModel = Model<int, double>;
 }  // namespace model
 }  // namespace cppmh

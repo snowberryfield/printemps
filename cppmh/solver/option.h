@@ -16,6 +16,9 @@ namespace solver {
 enum Verbose : int { None, Warning, Outer, Full, Debug };
 
 /*****************************************************************************/
+enum ImprovabilityScreeningMode : int { Off, Soft, Aggressive, Automatic };
+
+/*****************************************************************************/
 struct OptionConstant {
     static constexpr int    DEFAULT_ITERATION_MAX                       = 10000;
     static constexpr double DEFAULT_TIME_MAX                            = 120.0;
@@ -34,19 +37,20 @@ struct OptionConstant {
     static constexpr bool DEFAULT_IS_ENABLED_PARALLEL_EVALUATION      = true;
     static constexpr bool DEFAULT_IS_ENABLED_PARALLEL_NEIGHBORHOOD_UPDATE =
         true;
-    static constexpr bool DEFAULT_IS_ENABLED_IMPROVABILITY_SCREENING = true;
-    static constexpr bool DEFAULT_IS_ENABLED_FEASIBILITY_SCREENING   = false;
-    static constexpr bool DEFAULT_IS_ENABLED_BINARY_MOVE             = true;
-    static constexpr bool DEFAULT_IS_ENABLED_INTEGER_MOVE            = true;
-    static constexpr bool DEFAULT_IS_ENABLED_AGGREGATION_MOVE        = false;
-    static constexpr bool DEFAULT_IS_ENABLED_PRECEDENCE_MOVE         = false;
-    static constexpr bool DEFAULT_IS_ENABLED_VARIABLE_BOUND_MOVE     = false;
-    static constexpr bool DEFAULT_IS_ENABLED_EXCLUSIVE_MOVE          = false;
-    static constexpr bool DEFAULT_IS_ENABLED_CHAIN_MOVE              = false;
-    static constexpr bool DEFAULT_IS_ENABLED_USER_DEFINED_MOVE       = false;
+    static constexpr bool DEFAULT_IS_ENABLED_BINARY_MOVE         = true;
+    static constexpr bool DEFAULT_IS_ENABLED_INTEGER_MOVE        = true;
+    static constexpr bool DEFAULT_IS_ENABLED_AGGREGATION_MOVE    = false;
+    static constexpr bool DEFAULT_IS_ENABLED_PRECEDENCE_MOVE     = false;
+    static constexpr bool DEFAULT_IS_ENABLED_VARIABLE_BOUND_MOVE = false;
+    static constexpr bool DEFAULT_IS_ENABLED_EXCLUSIVE_MOVE      = false;
+    static constexpr bool DEFAULT_IS_ENABLED_CHAIN_MOVE          = false;
+    static constexpr bool DEFAULT_IS_ENABLED_USER_DEFINED_MOVE   = false;
 
     static constexpr model::SelectionMode DEFAULT_SELECTION_MODE =
         model::SelectionMode::None;
+    static constexpr ImprovabilityScreeningMode
+        DEFAULT_IMPROVABILITY_SCREENING_MODE =
+            ImprovabilityScreeningMode::Automatic;
 
     static constexpr double DEFAULT_TARGET_OBJECTIVE = -1E100;
     static constexpr bool   DEFAULT_SEED             = 1;
@@ -72,8 +76,6 @@ struct Option {
     bool   is_enabled_initial_value_correction;
     bool   is_enabled_parallel_evaluation;
     bool   is_enabled_parallel_neighborhood_update;
-    bool   is_enabled_improvability_screening;
-    bool   is_enabled_feasibility_screening;
 
     bool is_enabled_binary_move;
     bool is_enabled_integer_move;
@@ -84,7 +86,8 @@ struct Option {
     bool is_enabled_chain_move;
     bool is_enabled_user_defined_move;
 
-    model::SelectionMode selection_mode;
+    model::SelectionMode       selection_mode;
+    ImprovabilityScreeningMode improvability_screening_mode;
 
     double target_objective_value;
     int    seed;
@@ -134,10 +137,6 @@ struct Option {
             OptionConstant::DEFAULT_IS_ENABLED_PARALLEL_EVALUATION;
         this->is_enabled_parallel_neighborhood_update =
             OptionConstant::DEFAULT_IS_ENABLED_PARALLEL_NEIGHBORHOOD_UPDATE;
-        this->is_enabled_improvability_screening =
-            OptionConstant::DEFAULT_IS_ENABLED_IMPROVABILITY_SCREENING;
-        this->is_enabled_feasibility_screening =
-            OptionConstant::DEFAULT_IS_ENABLED_FEASIBILITY_SCREENING;
         this->is_enabled_binary_move =
             OptionConstant::DEFAULT_IS_ENABLED_BINARY_MOVE;
         this->is_enabled_integer_move =
@@ -156,6 +155,8 @@ struct Option {
             OptionConstant::DEFAULT_IS_ENABLED_USER_DEFINED_MOVE;
 
         this->selection_mode = OptionConstant::DEFAULT_SELECTION_MODE;
+        this->improvability_screening_mode =
+            OptionConstant::DEFAULT_IMPROVABILITY_SCREENING_MODE;
 
         this->target_objective_value = OptionConstant::DEFAULT_TARGET_OBJECTIVE;
         this->seed                   = OptionConstant::DEFAULT_SEED;
@@ -242,14 +243,6 @@ struct Option {
             utility::to_string(this->is_enabled_parallel_neighborhood_update,
                                "%d"));
 
-        utility::print(                                  //
-            " - is_enabled_improvability_screening: " +  //
-            utility::to_string(this->is_enabled_improvability_screening, "%d"));
-
-        utility::print(                                //
-            " - is_enabled_feasibility_screening: " +  //
-            utility::to_string(this->is_enabled_feasibility_screening, "%d"));
-
         utility::print(                      //
             " - is_enabled_binary_move: " +  //
             utility::to_string(this->is_enabled_binary_move, "%d"));
@@ -285,6 +278,10 @@ struct Option {
         utility::print(              //
             " - selection_mode: " +  //
             utility::to_string(this->selection_mode, "%d"));
+
+        utility::print(                            //
+            " - improvability_screening_mode: " +  //
+            utility::to_string(this->improvability_screening_mode, "%d"));
 
         utility::print(                      //
             " - target_objective_value: " +  //
