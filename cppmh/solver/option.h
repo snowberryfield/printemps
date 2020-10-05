@@ -174,8 +174,8 @@ struct Option {
     /*************************************************************************/
     inline void print(void) const {
         utility::print_single_line(true);
-        utility::print_info(
-            "The values for each option are specified as follows:", true);
+        utility::print_info("The values for options are specified as follows:",
+                            true);
 
         utility::print(             //
             " - iteration_max: " +  //
