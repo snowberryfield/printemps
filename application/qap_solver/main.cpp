@@ -60,6 +60,7 @@ int main([[maybe_unused]] int argc, char *argv[]) {
     option.is_enabled_binary_move       = false;
     option.is_enabled_integer_move      = false;
     option.is_enabled_user_defined_move = true;
+    option.is_enabled_chain_move        = false;
     option.improvability_screening_mode = cppmh::solver::Off;
 
     /**

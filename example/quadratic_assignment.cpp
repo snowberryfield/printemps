@@ -176,12 +176,12 @@ int main(void) {
     /// Run solver
     /*************************************************************************/
     cppmh::solver::Option option;
-    option.is_enabled_binary_move             = false;
-    option.is_enabled_integer_move            = false;
-    option.is_enabled_improvability_screening = false;
-    option.is_enabled_user_defined_move       = true;
-    option.verbose                            = cppmh::solver::Full;
-    auto result = cppmh::solver::solve(&model, option);
+    option.is_enabled_binary_move       = false;
+    option.is_enabled_integer_move      = false;
+    option.is_enabled_user_defined_move = true;
+    option.verbose                      = cppmh::solver::Full;
+    option.improvability_screening_mode = cppmh::solver::Off;
+    auto result                         = cppmh::solver::solve(&model, option);
 
     /*************************************************************************/
     /// Print result
