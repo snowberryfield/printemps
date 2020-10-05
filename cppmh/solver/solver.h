@@ -107,7 +107,12 @@ Result<T_Variable, T_Expression> solve(
      * - verify_and_correct_integer_variables_initial_values()
      * - setup_fixed_sensitivities()
      */
-    model->setup(master_option.is_enabled_improvability_screening,
+
+    bool is_enabled_improvability_screening =
+        (master_option.improvability_screening_mode !=
+         ImprovabilityScreeningMode::Off);
+
+    model->setup(is_enabled_improvability_screening,
                  master_option.is_enabled_parallel_neighborhood_update,
                  master_option.is_enabled_presolve,
                  master_option.is_enabled_initial_value_correction,
