@@ -125,18 +125,6 @@ inline cppmh::solver::Option read_option(const std::string &a_FILE_NAME) {
               option_object);
 
     /**********************************************************************/
-    /// is_enabled_improvability_screening
-    read_json(&option.is_enabled_improvability_screening,  //
-              "is_enabled_improvability_screening",        //
-              option_object);
-
-    /**********************************************************************/
-    /// is_enabled_feasibility_screening
-    read_json(&option.is_enabled_feasibility_screening,  //
-              "is_enabled_feasibility_screening",        //
-              option_object);
-
-    /**********************************************************************/
     /// is_enabled_binary_move
     read_json(&option.is_enabled_binary_move,  //
               "is_enabled_binary_move",        //
@@ -188,6 +176,12 @@ inline cppmh::solver::Option read_option(const std::string &a_FILE_NAME) {
     /// selection_mode
     read_json(&option.selection_mode,  //
               "selection_mode",        //
+              option_object);
+
+    /**************************************************************************/
+    /// improvability_screening_mode
+    read_json(&option.improvability_screening_mode,  //
+              "improvability_screening_mode",        //
               option_object);
 
     /**************************************************************************/
