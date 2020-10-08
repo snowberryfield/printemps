@@ -2173,102 +2173,99 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void update_variable_improvability(
-        const bool a_IS_ENABLED_FEASIBILITY_SCREENING) {
-        const auto &variable_ptrs   = m_variable_reference.variable_ptrs;
-        const auto &constraint_ptrs = m_constraint_reference.constraint_ptrs;
-
+    inline constexpr void reset_variable_improvability(void) {
+        const auto &variable_ptrs = m_variable_reference.variable_ptrs;
         for (auto &&variable_ptr : variable_ptrs) {
             variable_ptr->set_is_improvable(false);
         }
+    }
 
-        if (this->is_feasible() || !a_IS_ENABLED_FEASIBILITY_SCREENING) {
-            if (this->is_minimization()) {
-                for (auto &&variable_ptr : variable_ptrs) {
-                    auto coefficient = variable_ptr->objective_sensitivity();
-                    if (coefficient > 0 &&  //
-                        (variable_ptr->value() !=
-                         variable_ptr->lower_bound())) {
-                        variable_ptr->set_is_improvable(true);
-                    } else if (coefficient < 0 &&
-                               (variable_ptr->value() !=
-                                variable_ptr->upper_bound())) {
-                        variable_ptr->set_is_improvable(true);
-                    }
+    /*************************************************************************/
+    inline constexpr void update_variable_objective_improvability(
+        const std::vector<Variable<T_Variable, T_Expression> *>
+            &a_VARIABLE_PTRS) {
+        if (this->is_minimization()) {
+            for (const auto &variable_ptr : a_VARIABLE_PTRS) {
+                auto coefficient = variable_ptr->objective_sensitivity();
+
+                if (coefficient > 0 &&  //
+                    (variable_ptr->value() != variable_ptr->lower_bound())) {
+                    variable_ptr->set_is_improvable(true);
+                } else if (coefficient < 0 && (variable_ptr->value() !=
+                                               variable_ptr->upper_bound())) {
+                    variable_ptr->set_is_improvable(true);
                 }
-            } else {
-                for (auto &&variable_ptr : variable_ptrs) {
-                    auto coefficient = variable_ptr->objective_sensitivity();
-                    if (coefficient > 0 &&  //
-                        (variable_ptr->value() !=
-                         variable_ptr->upper_bound())) {
-                        variable_ptr->set_is_improvable(true);
-                    } else if (coefficient < 0 &&
-                               (variable_ptr->value() !=
-                                variable_ptr->lower_bound())) {
-                        variable_ptr->set_is_improvable(true);
-                    }
+            }
+        } else {
+            for (const auto &variable_ptr : a_VARIABLE_PTRS) {
+                auto coefficient = variable_ptr->objective_sensitivity();
+                if (coefficient > 0 &&  //
+                    (variable_ptr->value() != variable_ptr->upper_bound())) {
+                    variable_ptr->set_is_improvable(true);
+                } else if (coefficient < 0 && (variable_ptr->value() !=
+                                               variable_ptr->lower_bound())) {
+                    variable_ptr->set_is_improvable(true);
                 }
             }
         }
+    }
 
-        if (!this->is_feasible()) {
-            for (const auto &constraint_ptr : constraint_ptrs) {
-                if (!constraint_ptr->is_enabled()) {
-                    continue;
-                }
-                if (constraint_ptr->violation_value() < constant::EPSILON) {
-                    continue;
-                }
+    /*************************************************************************/
+    inline constexpr void update_variable_feasibility_improvability(
+        const std::vector<Constraint<T_Variable, T_Expression> *>
+            &a_CONSTRAINT_PTRS) {
+        for (const auto &constraint_ptr : a_CONSTRAINT_PTRS) {
+            if (!constraint_ptr->is_enabled()) {
+                continue;
+            }
+            if (constraint_ptr->violation_value() < constant::EPSILON) {
+                continue;
+            }
+            auto &sensitivities = constraint_ptr->expression().sensitivities();
+            auto  constraint_value = constraint_ptr->constraint_value();
 
-                auto &sensitivities =
-                    constraint_ptr->expression().sensitivities();
-                auto constraint_value = constraint_ptr->constraint_value();
+            if ((constraint_ptr->sense() == ConstraintSense::Lower) ||
+                (constraint_ptr->sense() == ConstraintSense::Equal)) {
+                if (constraint_value > 0) {
+                    for (const auto &sensitivity : sensitivities) {
+                        auto variable_ptr = sensitivity.first;
+                        auto coefficient  = sensitivity.second;
 
-                if ((constraint_ptr->sense() == ConstraintSense::Lower) ||
-                    (constraint_ptr->sense() == ConstraintSense::Equal)) {
-                    if (constraint_value > 0) {
-                        for (const auto &sensitivity : sensitivities) {
-                            auto variable_ptr = sensitivity.first;
-                            auto coefficient  = sensitivity.second;
+                        if (variable_ptr->is_improvable()) {
+                            continue;
+                        }
 
-                            if (variable_ptr->is_improvable()) {
-                                continue;
-                            }
+                        if (coefficient > 0 && (variable_ptr->value() !=
+                                                variable_ptr->lower_bound())) {
+                            variable_ptr->set_is_improvable(true);
 
-                            if (coefficient > 0 &&
-                                (variable_ptr->value() !=
-                                 variable_ptr->lower_bound())) {
-                                variable_ptr->set_is_improvable(true);
-
-                            } else if (coefficient < 0 &&
-                                       (variable_ptr->value() !=
-                                        variable_ptr->upper_bound())) {
-                                variable_ptr->set_is_improvable(true);
-                            }
+                        } else if (coefficient < 0 &&
+                                   (variable_ptr->value() !=
+                                    variable_ptr->upper_bound())) {
+                            variable_ptr->set_is_improvable(true);
                         }
                     }
                 }
-                if ((constraint_ptr->sense() == ConstraintSense::Upper) ||
-                    (constraint_ptr->sense() == ConstraintSense::Equal)) {
-                    if (constraint_value < 0) {
-                        for (const auto &sensitivity : sensitivities) {
-                            auto variable_ptr = sensitivity.first;
-                            auto coefficient  = sensitivity.second;
+            }
+            if ((constraint_ptr->sense() == ConstraintSense::Upper) ||
+                (constraint_ptr->sense() == ConstraintSense::Equal)) {
+                if (constraint_value < 0) {
+                    for (const auto &sensitivity : sensitivities) {
+                        auto variable_ptr = sensitivity.first;
+                        auto coefficient  = sensitivity.second;
 
-                            if (variable_ptr->is_improvable()) {
-                                continue;
-                            }
+                        if (variable_ptr->is_improvable()) {
+                            continue;
+                        }
 
-                            if (coefficient > 0 &&
-                                (variable_ptr->value() !=
-                                 variable_ptr->upper_bound())) {
-                                variable_ptr->set_is_improvable(true);
-                            } else if (coefficient < 0 &&
-                                       (variable_ptr->value() !=
-                                        variable_ptr->lower_bound())) {
-                                variable_ptr->set_is_improvable(true);
-                            }
+                        if (coefficient > 0 && (variable_ptr->value() !=
+                                                variable_ptr->upper_bound())) {
+                            variable_ptr->set_is_improvable(true);
+
+                        } else if (coefficient < 0 &&
+                                   (variable_ptr->value() !=
+                                    variable_ptr->lower_bound())) {
+                            variable_ptr->set_is_improvable(true);
                         }
                     }
                 }
@@ -2276,6 +2273,22 @@ class Model {
         }
     }
 
+    /*************************************************************************/
+    inline constexpr void update_variable_improvability(
+        const bool a_IS_ENABLED_FEASIBILITY_SCREENING) {
+        const auto &variable_ptrs   = m_variable_reference.variable_ptrs;
+        const auto &constraint_ptrs = m_constraint_reference.constraint_ptrs;
+
+        this->reset_variable_improvability();
+
+        if (this->is_feasible() || !a_IS_ENABLED_FEASIBILITY_SCREENING) {
+            this->update_variable_objective_improvability(variable_ptrs);
+        }
+
+        if (!this->is_feasible()) {
+            this->update_variable_feasibility_improvability(constraint_ptrs);
+        }
+    }
     /*************************************************************************/
     inline constexpr void update_feasibility(void) {
         for (const auto &proxy : m_constraint_proxies) {
@@ -2829,7 +2842,7 @@ class Model {
         void) {
         return m_neighborhood;
     }
-};  // namespace model
+};
 using IPModel = Model<int, double>;
 }  // namespace model
 }  // namespace cppmh
