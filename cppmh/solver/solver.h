@@ -210,12 +210,14 @@ Result<T_Variable, T_Expression> solve(
     model->update();
 
     Solution_T        current_solution = model->export_solution();
+    Solution_T        previous_solution;
     IncumbentHolder_T incumbent_holder;
 
     model::SolutionScore current_solution_score =
         model->evaluate({},                                 //
                         local_penalty_coefficient_proxies,  //
                         global_penalty_coefficient_proxies);
+    model::SolutionScore previous_solution_score;
 
     [[maybe_unused]] int update_status = incumbent_holder.try_update_incumbent(
         current_solution, current_solution_score);
@@ -279,8 +281,12 @@ Result<T_Variable, T_Expression> solve(
             /**
              * Update the current solution.
              */
+            previous_solution       = current_solution;
+            previous_solution_score = current_solution_score;
             current_solution =
                 result.incumbent_holder.global_augmented_incumbent_solution();
+            current_solution_score =
+                result.incumbent_holder.global_augmented_incumbent_score();
 
             /**
              * Update the historical data.
@@ -390,8 +396,12 @@ Result<T_Variable, T_Expression> solve(
         /**
          * Update the current solution.
          */
+        previous_solution       = current_solution;
+        previous_solution_score = current_solution_score;
         current_solution =
             result.incumbent_holder.global_augmented_incumbent_solution();
+        current_solution_score =
+            result.incumbent_holder.global_augmented_incumbent_score();
 
         /**
          * Update the historical data.
@@ -462,18 +472,14 @@ Result<T_Variable, T_Expression> solve(
     /**
      * Run tabu searches to find better solutions.
      */
-    int iteration                           = 0;
-    int not_update_count                    = 0;
-    int next_number_of_initial_modification = 0;
+    int iteration        = 0;
+    int not_update_count = 0;
+
     int next_inital_tabu_tenure = master_option.tabu_search.initial_tabu_tenure;
+    int next_number_of_initial_modification = 0;
+    int next_iteration_max = master_option.tabu_search.iteration_max;
 
     bool penalty_coefficient_reset_flag = false;
-
-    /**
-     * The integer variable next_iteration_max is used if the option
-     * tabu_search.is_enabled_automatic_iteration_adjustment is set true.
-     */
-    int next_iteration_max = master_option.tabu_search.iteration_max;
 
     while (true) {
         /**
@@ -554,23 +560,32 @@ Result<T_Variable, T_Expression> solve(
         auto result_global_augmented_incumbent_objective =
             result.incumbent_holder.global_augmented_incumbent_objective();
 
+        auto result_local_augmented_incumbent_score =
+            result.incumbent_holder.local_augmented_incumbent_score();
+        auto result_global_augmented_incumbent_score =
+            result.incumbent_holder.global_augmented_incumbent_score();
+
         bool   penalty_coefficient_tightening_flag = false;
         bool   penalty_coefficient_relaxing_flag   = false;
         double current_augmented_objective         = 0.0;
-        auto   previous_solution                   = current_solution;
+
+        previous_solution       = current_solution;
+        previous_solution_score = current_solution_score;
 
         if (result.total_update_status &
             IncumbentHolderConstant::STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
-            current_solution = result_global_incumbent_solution;
+            current_solution       = result_global_incumbent_solution;
+            current_solution_score = result_global_augmented_incumbent_score;
             current_augmented_objective =
                 result_global_augmented_incumbent_objective;
             penalty_coefficient_tightening_flag = false;
             penalty_coefficient_relaxing_flag   = true;
         } else {
-            if (result.total_update_status ==
-                IncumbentHolderConstant::
-                    STATUS_LOCAL_AUGMENTED_INCUMBENT_UPDATE) {
-                current_solution = result_local_incumbent_solution;
+            if ((result.total_update_status ==
+                 IncumbentHolderConstant::
+                     STATUS_LOCAL_AUGMENTED_INCUMBENT_UPDATE)) {
+                current_solution       = result_local_incumbent_solution;
+                current_solution_score = result_local_augmented_incumbent_score;
                 current_augmented_objective =
                     result_local_augmented_incumbent_objective;
                 if (current_solution.is_feasible) {
@@ -582,6 +597,8 @@ Result<T_Variable, T_Expression> solve(
                 }
             } else {
                 current_solution = result_global_incumbent_solution;
+                current_solution_score =
+                    result_global_augmented_incumbent_score;
                 current_augmented_objective =
                     result_global_augmented_incumbent_objective;
                 if (current_solution.is_feasible) {
@@ -837,6 +854,9 @@ Result<T_Variable, T_Expression> solve(
                                   next_iteration_max_temp));
         }
 
+        /**
+         * Update the neighborhood moves to be employed for the next loop.
+         */
         bool is_enabled_special_neighborhood_move  = false;
         bool is_disabled_special_neighborhood_move = false;
 
