@@ -83,12 +83,6 @@ inline cppmh::solver::Option read_option(const std::string &a_FILE_NAME) {
               option_object);
 
     /**************************************************************************/
-    /// is_enabled_penalty_coefficient_partial_relaxation
-    read_json(&option.is_enabled_penalty_coefficient_partial_relaxation,  //
-              "is_enabled_penalty_coefficient_partial_relaxation",        //
-              option_object);
-
-    /**************************************************************************/
     /// is_enabled_lagrange_dual
     read_json(&option.is_enabled_lagrange_dual,  //
               "is_enabled_lagrange_dual",        //
@@ -128,18 +122,6 @@ inline cppmh::solver::Option read_option(const std::string &a_FILE_NAME) {
     /// is_enabled_parallel_neighborhood_update
     read_json(&option.is_enabled_parallel_neighborhood_update,  //
               "is_enabled_parallel_neighborhood_update",        //
-              option_object);
-
-    /**********************************************************************/
-    /// is_enabled_improvability_screening
-    read_json(&option.is_enabled_improvability_screening,  //
-              "is_enabled_improvability_screening",        //
-              option_object);
-
-    /**********************************************************************/
-    /// is_enabled_feasibility_screening
-    read_json(&option.is_enabled_feasibility_screening,  //
-              "is_enabled_feasibility_screening",        //
               option_object);
 
     /**********************************************************************/
@@ -194,6 +176,12 @@ inline cppmh::solver::Option read_option(const std::string &a_FILE_NAME) {
     /// selection_mode
     read_json(&option.selection_mode,  //
               "selection_mode",        //
+              option_object);
+
+    /**************************************************************************/
+    /// improvability_screening_mode
+    read_json(&option.improvability_screening_mode,  //
+              "improvability_screening_mode",        //
               option_object);
 
     /**************************************************************************/
@@ -388,12 +376,6 @@ inline cppmh::solver::Option read_option(const std::string &a_FILE_NAME) {
         /// tabu_search.tabu_mode
         read_json(&option.tabu_search.tabu_mode,  //
                   "tabu_mode",                    //
-                  option_object_tabu_search);
-
-        /**********************************************************************/
-        /// tabu_search.restart_mode
-        read_json(&option.tabu_search.restart_mode,  //
-                  "restart_mode",                    //
                   option_object_tabu_search);
 
         /**********************************************************************/
