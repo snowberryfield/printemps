@@ -139,10 +139,12 @@ TabuSearchResult<T_Variable, T_Expression> solve(
 
     model::Move<T_Variable, T_Expression> previous_move;
     model::Move<T_Variable, T_Expression> current_move;
-    double                                previous_improvement = 0;
-    double                                current_improvement  = 0;
-    double previous_global_augmented_objective                 = HUGE_VALF;
-    double current_global_augmented_objective                  = HUGE_VALF;
+
+    double previous_improvement = 0;
+    double current_improvement  = 0;
+
+    double previous_global_augmented_objective = HUGE_VALF;
+    double current_global_augmented_objective  = HUGE_VALF;
 
     /**
      * Print the header of optimization progress table and print the initial
@@ -189,13 +191,39 @@ TabuSearchResult<T_Variable, T_Expression> solve(
         /**
          * Update the moves.
          */
-        if (model->is_linear() && option.is_enabled_improvability_screening) {
+        bool is_enabled_improvability_screening =
+            (option.improvability_screening_mode !=
+             ImprovabilityScreeningMode::Off);
+
+        if (model->is_linear() && is_enabled_improvability_screening) {
             /**
-             * If the option is_enabled_improvability_screening is set true,
+             * If the option improvability_screening_mode is not None,
              * only improvable moves will be generated.
              */
-            model->update_variable_improvability(
-                option.is_enabled_feasibility_screening);
+            switch (option.improvability_screening_mode) {
+                case ImprovabilityScreeningMode::Soft: {
+                    model->update_variable_improvability(false);
+                    break;
+                }
+                case ImprovabilityScreeningMode::Aggressive: {
+                    model->update_variable_improvability(true);
+                    break;
+                }
+                case ImprovabilityScreeningMode::Automatic: {
+                    if (incumbent_holder.is_found_feasible_solution()) {
+                        model->update_variable_improvability(false);
+                    } else {
+                        model->update_variable_improvability(true);
+                    }
+                    break;
+                }
+                default: {
+                    throw std::logic_error(utility::format_error_location(
+                        __FILE__, __LINE__, __func__,
+                        "The specified improvability screening mode is "
+                        "invalid."));
+                }
+            }
         }
 
         model->neighborhood().update_moves();
@@ -470,7 +498,9 @@ TabuSearchResult<T_Variable, T_Expression> solve(
             if (current_improvement > 0 && previous_improvement < 0 &&
                 current_improvement + previous_improvement > 0) {
                 auto chain_move = previous_move + current_move;
-                if (!Move_T::has_duplicate_variable(chain_move)) {
+                if (!Move_T::has_duplicate_variable(chain_move) &&
+                    previous_move.sense != model::MoveSense::Selection &&
+                    current_move.sense != model::MoveSense::Selection) {
                     model->neighborhood().register_chain_move(chain_move);
                 }
             }

@@ -16,6 +16,9 @@ namespace solver {
 enum Verbose : int { None, Warning, Outer, Full, Debug };
 
 /*****************************************************************************/
+enum ImprovabilityScreeningMode : int { Off, Soft, Aggressive, Automatic };
+
+/*****************************************************************************/
 struct OptionConstant {
     static constexpr int    DEFAULT_ITERATION_MAX                       = 10000;
     static constexpr double DEFAULT_TIME_MAX                            = 120.0;
@@ -25,31 +28,29 @@ struct OptionConstant {
     static constexpr double DEFAULT_PENALTY_COEFFICIENT_UPDATING_BALANCE = 0.0;
     static constexpr int DEFAULT_PENALTY_COEFFICIENT_RESET_COUNT_THRESHOLD = -1;
     static constexpr double DEFAULT_INITIAL_PENALTY_COEFFICIENT = 1E6;
-    static constexpr bool
-        DEFAULT_IS_ENABLED_PENALTY_COEFFICIENT_PARTIAL_RELAXATION  //
-        = true;
-    static constexpr bool DEFAULT_IS_ENABLED_LAGRANGE_DUAL = false;
-    static constexpr bool DEFAULT_IS_ENABLED_LOCAL_SEARCH  = true;
-    static constexpr bool DEFAULT_IS_ENABLED_GROUPING_PENALTY_COEFFICIENT =
+    static constexpr bool   DEFAULT_IS_ENABLED_LAGRANGE_DUAL    = false;
+    static constexpr bool   DEFAULT_IS_ENABLED_LOCAL_SEARCH     = true;
+    static constexpr bool   DEFAULT_IS_ENABLED_GROUPING_PENALTY_COEFFICIENT =
         false;
     static constexpr bool DEFAULT_IS_ENABLED_PRESOLVE                 = true;
     static constexpr bool DEFAULT_IS_ENABLED_INITIAL_VALUE_CORRECTION = true;
     static constexpr bool DEFAULT_IS_ENABLED_PARALLEL_EVALUATION      = true;
     static constexpr bool DEFAULT_IS_ENABLED_PARALLEL_NEIGHBORHOOD_UPDATE =
         true;
-    static constexpr bool DEFAULT_IS_ENABLED_IMPROVABILITY_SCREENING = true;
-    static constexpr bool DEFAULT_IS_ENABLED_FEASIBILITY_SCREENING   = false;
-    static constexpr bool DEFAULT_IS_ENABLED_BINARY_MOVE             = true;
-    static constexpr bool DEFAULT_IS_ENABLED_INTEGER_MOVE            = true;
-    static constexpr bool DEFAULT_IS_ENABLED_AGGREGATION_MOVE        = false;
-    static constexpr bool DEFAULT_IS_ENABLED_PRECEDENCE_MOVE         = false;
-    static constexpr bool DEFAULT_IS_ENABLED_VARIABLE_BOUND_MOVE     = false;
-    static constexpr bool DEFAULT_IS_ENABLED_EXCLUSIVE_MOVE          = false;
-    static constexpr bool DEFAULT_IS_ENABLED_CHAIN_MOVE              = false;
-    static constexpr bool DEFAULT_IS_ENABLED_USER_DEFINED_MOVE       = false;
+    static constexpr bool DEFAULT_IS_ENABLED_BINARY_MOVE         = true;
+    static constexpr bool DEFAULT_IS_ENABLED_INTEGER_MOVE        = true;
+    static constexpr bool DEFAULT_IS_ENABLED_AGGREGATION_MOVE    = false;
+    static constexpr bool DEFAULT_IS_ENABLED_PRECEDENCE_MOVE     = false;
+    static constexpr bool DEFAULT_IS_ENABLED_VARIABLE_BOUND_MOVE = false;
+    static constexpr bool DEFAULT_IS_ENABLED_EXCLUSIVE_MOVE      = false;
+    static constexpr bool DEFAULT_IS_ENABLED_CHAIN_MOVE          = false;
+    static constexpr bool DEFAULT_IS_ENABLED_USER_DEFINED_MOVE   = false;
 
     static constexpr model::SelectionMode DEFAULT_SELECTION_MODE =
         model::SelectionMode::None;
+    static constexpr ImprovabilityScreeningMode
+        DEFAULT_IMPROVABILITY_SCREENING_MODE =
+            ImprovabilityScreeningMode::Automatic;
 
     static constexpr double DEFAULT_TARGET_OBJECTIVE = -1E100;
     static constexpr bool   DEFAULT_SEED             = 1;
@@ -68,7 +69,6 @@ struct Option {
     double penalty_coefficient_updating_balance;       // hidden
     int    penalty_coefficient_reset_count_threshold;  // hidden
     double initial_penalty_coefficient;
-    bool   is_enabled_penalty_coefficient_partial_relaxation;
     bool   is_enabled_lagrange_dual;
     bool   is_enabled_local_search;
     bool   is_enabled_grouping_penalty_coefficient;
@@ -76,8 +76,6 @@ struct Option {
     bool   is_enabled_initial_value_correction;
     bool   is_enabled_parallel_evaluation;
     bool   is_enabled_parallel_neighborhood_update;
-    bool   is_enabled_improvability_screening;
-    bool   is_enabled_feasibility_screening;
 
     bool is_enabled_binary_move;
     bool is_enabled_integer_move;
@@ -88,7 +86,8 @@ struct Option {
     bool is_enabled_chain_move;
     bool is_enabled_user_defined_move;
 
-    model::SelectionMode selection_mode;
+    model::SelectionMode       selection_mode;
+    ImprovabilityScreeningMode improvability_screening_mode;
 
     double target_objective_value;
     int    seed;
@@ -125,9 +124,6 @@ struct Option {
             OptionConstant::DEFAULT_PENALTY_COEFFICIENT_RESET_COUNT_THRESHOLD;
         this->initial_penalty_coefficient =
             OptionConstant::DEFAULT_INITIAL_PENALTY_COEFFICIENT;
-        this->is_enabled_penalty_coefficient_partial_relaxation =
-            OptionConstant::
-                DEFAULT_IS_ENABLED_PENALTY_COEFFICIENT_PARTIAL_RELAXATION;
         this->is_enabled_lagrange_dual =
             OptionConstant::DEFAULT_IS_ENABLED_LAGRANGE_DUAL;
         this->is_enabled_local_search =
@@ -141,10 +137,6 @@ struct Option {
             OptionConstant::DEFAULT_IS_ENABLED_PARALLEL_EVALUATION;
         this->is_enabled_parallel_neighborhood_update =
             OptionConstant::DEFAULT_IS_ENABLED_PARALLEL_NEIGHBORHOOD_UPDATE;
-        this->is_enabled_improvability_screening =
-            OptionConstant::DEFAULT_IS_ENABLED_IMPROVABILITY_SCREENING;
-        this->is_enabled_feasibility_screening =
-            OptionConstant::DEFAULT_IS_ENABLED_FEASIBILITY_SCREENING;
         this->is_enabled_binary_move =
             OptionConstant::DEFAULT_IS_ENABLED_BINARY_MOVE;
         this->is_enabled_integer_move =
@@ -163,6 +155,8 @@ struct Option {
             OptionConstant::DEFAULT_IS_ENABLED_USER_DEFINED_MOVE;
 
         this->selection_mode = OptionConstant::DEFAULT_SELECTION_MODE;
+        this->improvability_screening_mode =
+            OptionConstant::DEFAULT_IMPROVABILITY_SCREENING_MODE;
 
         this->target_objective_value = OptionConstant::DEFAULT_TARGET_OBJECTIVE;
         this->seed                   = OptionConstant::DEFAULT_SEED;
@@ -180,8 +174,8 @@ struct Option {
     /*************************************************************************/
     inline void print(void) const {
         utility::print_single_line(true);
-        utility::print_info(
-            "The values for each option are specified as follows:", true);
+        utility::print_info("The values for options are specified as follows:",
+                            true);
 
         utility::print(             //
             " - iteration_max: " +  //
@@ -218,11 +212,6 @@ struct Option {
             " - initial_penalty_coefficient: " +  //
             utility::to_string(this->initial_penalty_coefficient, "%f"));
 
-        utility::print(                                                 //
-            " - is_enabled_penalty_coefficient_partial_relaxation: " +  //
-            utility::to_string(
-                this->is_enabled_penalty_coefficient_partial_relaxation, "%d"));
-
         utility::print(                   //
             " - is_enabled_presolve: " +  //
             utility::to_string(this->is_enabled_presolve, "%d"));
@@ -253,14 +242,6 @@ struct Option {
             " - is_enabled_parallel_neighborhood_update: " +  //
             utility::to_string(this->is_enabled_parallel_neighborhood_update,
                                "%d"));
-
-        utility::print(                                  //
-            " - is_enabled_improvability_screening: " +  //
-            utility::to_string(this->is_enabled_improvability_screening, "%d"));
-
-        utility::print(                                //
-            " - is_enabled_feasibility_screening: " +  //
-            utility::to_string(this->is_enabled_feasibility_screening, "%d"));
 
         utility::print(                      //
             " - is_enabled_binary_move: " +  //
@@ -297,6 +278,10 @@ struct Option {
         utility::print(              //
             " - selection_mode: " +  //
             utility::to_string(this->selection_mode, "%d"));
+
+        utility::print(                            //
+            " - improvability_screening_mode: " +  //
+            utility::to_string(this->improvability_screening_mode, "%d"));
 
         utility::print(                      //
             " - target_objective_value: " +  //
@@ -410,10 +395,6 @@ struct Option {
         utility::print(                     //
             " - tabu_search.tabu_mode: " +  //
             utility::to_string(this->tabu_search.tabu_mode, "%d"));
-
-        utility::print(                        //
-            " - tabu_search.restart_mode: " +  //
-            utility::to_string(this->tabu_search.restart_mode, "%d"));
 
         utility::print(                              //
             " - tabu_search.move_preserve_rate: " +  //

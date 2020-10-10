@@ -111,11 +111,10 @@ TEST_F(TestBinpacking, bin_packing) {
     option.iteration_max                           = 50;
     option.is_enabled_grouping_penalty_coefficient = true;
     option.is_enabled_initial_value_correction     = true;
-    option.is_enabled_lagrange_dual                = true;
+    option.is_enabled_lagrange_dual                = false;
     option.is_enabled_local_search                 = true;
     option.is_enabled_parallel_evaluation          = true;
     option.is_enabled_parallel_neighborhood_update = true;
-    option.is_enabled_improvability_screening      = true;
     option.is_enabled_binary_move                  = true;
     option.is_enabled_integer_move                 = true;
     option.is_enabled_aggregation_move             = true;

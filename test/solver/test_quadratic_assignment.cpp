@@ -149,7 +149,6 @@ TEST_F(TestQuadracitAssignment, quadratic_assignment) {
     option.is_enabled_local_search                 = true;
     option.is_enabled_parallel_evaluation          = true;
     option.is_enabled_parallel_neighborhood_update = true;
-    option.is_enabled_improvability_screening      = true;
     option.is_enabled_binary_move                  = false;
     option.is_enabled_integer_move                 = false;
     option.is_enabled_aggregation_move             = false;

@@ -84,7 +84,6 @@ TEST_F(TestKnapsack, knapsack) {
     option.is_enabled_local_search                 = true;
     option.is_enabled_parallel_evaluation          = true;
     option.is_enabled_parallel_neighborhood_update = true;
-    option.is_enabled_improvability_screening      = true;
     option.is_enabled_binary_move                  = true;
     option.is_enabled_integer_move                 = true;
     option.is_enabled_aggregation_move             = true;

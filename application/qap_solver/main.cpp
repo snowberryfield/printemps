@@ -57,10 +57,11 @@ int main([[maybe_unused]] int argc, char *argv[]) {
     if (!option_file_name.empty()) {
         option = cppmh::utility::read_option(option_file_name);
     }
-    option.is_enabled_binary_move             = false;
-    option.is_enabled_integer_move            = false;
-    option.is_enabled_improvability_screening = false;
-    option.is_enabled_user_defined_move       = true;
+    option.is_enabled_binary_move       = false;
+    option.is_enabled_integer_move      = false;
+    option.is_enabled_user_defined_move = true;
+    option.is_enabled_chain_move        = false;
+    option.improvability_screening_mode = cppmh::solver::Off;
 
     /**
      * Run the solver.
