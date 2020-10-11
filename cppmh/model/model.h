@@ -635,15 +635,16 @@ class Model {
             this->extract_selections(a_SELECTION_MODE);
         }
 
-        this->setup_neighborhood(a_IS_ENABLED_AGGREGATION_MOVE,              //
-                                 a_IS_ENABLED_PRECEDENCE_MOVE,               //
-                                 a_IS_ENABLED_VARIABLE_BOUND_MOVE,           //
-                                 a_IS_ENABLED_EXCLUSIVE_MOVE,                //
-                                 a_IS_ENABLED_USER_DEFINED_MOVE,             //
-                                 a_IS_ENABLED_CHAIN_MOVE,                    //
-                                 a_IS_ENABLED_IMPROVABILITY_SCREENING,       //
-                                 a_IS_ENABLED_PARALLEL_NEIGHBORHOOD_UPDATE,  //
-                                 a_IS_ENABLED_PRINT);
+        this->setup_neighborhood(
+            a_IS_ENABLED_AGGREGATION_MOVE,                              //
+            a_IS_ENABLED_PRECEDENCE_MOVE,                               //
+            a_IS_ENABLED_VARIABLE_BOUND_MOVE,                           //
+            a_IS_ENABLED_EXCLUSIVE_MOVE,                                //
+            a_IS_ENABLED_USER_DEFINED_MOVE,                             //
+            a_IS_ENABLED_CHAIN_MOVE,                                    //
+            a_IS_ENABLED_IMPROVABILITY_SCREENING && this->is_linear(),  //
+            a_IS_ENABLED_PARALLEL_NEIGHBORHOOD_UPDATE,                  //
+            a_IS_ENABLED_PRINT);
 
         this->verify_and_correct_selection_variables_initial_values(
             a_IS_ENABLED_INITIAL_VALUE_CORRECTION, a_IS_ENABLED_PRINT);
