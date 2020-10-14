@@ -605,9 +605,13 @@ Result<T_Variable, T_Expression> solve(
                     penalty_coefficient_tightening_flag = false;
                     penalty_coefficient_relaxing_flag   = true;
                 } else {
-                    // Do not modify penalty coefficients.
-                    penalty_coefficient_tightening_flag = false;
-                    penalty_coefficient_relaxing_flag   = false;
+                    if (incumbent_holder.is_found_feasible_solution()) {
+                        penalty_coefficient_tightening_flag = false;
+                        penalty_coefficient_relaxing_flag   = false;
+                    } else {
+                        penalty_coefficient_tightening_flag = false;
+                        penalty_coefficient_relaxing_flag   = true;
+                    }
                 }
             }
         }
