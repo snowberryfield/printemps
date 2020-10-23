@@ -891,7 +891,7 @@ Result<T_Variable, T_Expression> solve(
          */
         if (master_option.tabu_search
                 .is_enabled_automatic_iteration_adjustment &&
-            !result.is_early_stopped) {
+            result.number_of_iterations == option.tabu_search.iteration_max) {
             int iteration_max_temp = 0;
             if (result.total_update_status &
                 IncumbentHolderConstant::
@@ -970,9 +970,8 @@ Result<T_Variable, T_Expression> solve(
              * Enable the special neighborhood moves if the incumbent was
              * not updated.
              */
-            if (!result.is_early_stopped &&
-                (option.tabu_search.iteration_max ==
-                 master_option.tabu_search.iteration_max)) {
+            if (result.number_of_iterations ==
+                master_option.tabu_search.iteration_max) {
                 /// Aggregation
                 if (master_option.is_enabled_aggregation_move) {
                     if (!model->neighborhood().is_enabled_aggregation_move()) {

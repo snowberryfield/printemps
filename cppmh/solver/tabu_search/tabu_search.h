@@ -136,7 +136,8 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     int last_global_augmented_incumbent_update_iteration = -1;
     int last_feasible_incumbent_update_iteration         = -1;
 
-    bool is_early_stopped = false;
+    TabuSearchTerminationStatus termination_status =
+        TabuSearchTerminationStatus::ITERATION_OVER;
 
     model::Move<T_Variable, T_Expression> previous_move;
     model::Move<T_Variable, T_Expression> current_move;
@@ -171,23 +172,23 @@ TabuSearchResult<T_Variable, T_Expression> solve(
          */
         double elapsed_time = time_keeper.clock();
         if (elapsed_time > option.tabu_search.time_max) {
-            is_early_stopped = true;
+            termination_status = TabuSearchTerminationStatus::TIME_OVER;
             break;
         }
 
         if (elapsed_time + option.tabu_search.time_offset > option.time_max) {
-            is_early_stopped = true;
+            termination_status = TabuSearchTerminationStatus::TIME_OVER;
             break;
         }
 
         if (iteration >= option.tabu_search.iteration_max) {
-            /// This is not early stopping.
+            termination_status = TabuSearchTerminationStatus::ITERATION_OVER;
             break;
         }
 
         if (incumbent_holder.feasible_incumbent_objective() <=
             option.target_objective_value) {
-            is_early_stopped = true;
+            termination_status = TabuSearchTerminationStatus::REACH_TARGET;
             break;
         }
 
@@ -240,7 +241,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
          * be terminated.
          */
         if (number_of_moves == 0) {
-            is_early_stopped = true;
+            termination_status = TabuSearchTerminationStatus::NO_MOVE;
             break;
         }
 
@@ -533,7 +534,8 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                     utility::max_abs(objective_improvements);
                 double min_penalty = utility::min(infeasible_local_penalties);
                 if (max_objective_sensitivity * MARGIN < min_penalty) {
-                    is_early_stopped = true;
+                    termination_status =
+                        TabuSearchTerminationStatus::EARLY_STOP;
                     break;
                 }
             }
@@ -625,7 +627,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     result.last_feasible_incumbent_update_iteration =
         last_feasible_incumbent_update_iteration;
 
-    result.is_early_stopped = is_early_stopped;
+    result.termination_status = termination_status;
 
     result.historical_feasible_solutions = historical_feasible_solutions;
 
