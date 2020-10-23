@@ -84,13 +84,14 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     model->import_variable_values(a_INITIAL_VARIABLE_VALUE_PROXIES);
     model->update();
 
-    model::SolutionScore solution_score =
+    model::SolutionScore current_solution_score =
         model->evaluate({},                                 //
                         local_penalty_coefficient_proxies,  //
                         global_penalty_coefficient_proxies);
+    model::SolutionScore previous_solution_score;
 
     int update_status =
-        incumbent_holder.try_update_incumbent(model, solution_score);
+        incumbent_holder.try_update_incumbent(model, current_solution_score);
     int total_update_status = IncumbentHolderConstant::STATUS_NO_UPDATED;
 
     /**
@@ -155,7 +156,9 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                            option.verbose >= Verbose::Full);
 
     print_table_header(option.verbose >= Verbose::Full);
-    print_table_initial(model, solution_score, incumbent_holder,
+    print_table_initial(model,                   //
+                        current_solution_score,  //
+                        incumbent_holder,        //
                         option.verbose >= Verbose::Full);
 
     /**
@@ -207,14 +210,6 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                 }
                 case ImprovabilityScreeningMode::Aggressive: {
                     model->update_variable_improvability(true);
-                    break;
-                }
-                case ImprovabilityScreeningMode::Automatic: {
-                    if (incumbent_holder.is_found_feasible_solution()) {
-                        model->update_variable_improvability(false);
-                    } else {
-                        model->update_variable_improvability(true);
-                    }
                     break;
                 }
                 default: {
@@ -274,10 +269,10 @@ TabuSearchResult<T_Variable, T_Expression> solve(
              * or ordinary(slow) evaluation methods.
              */
             if (model->is_enabled_fast_evaluation()) {
-                trial_solution_scores[i_move] =
-                    model->evaluate(*trial_move_ptrs[i_move], solution_score,
-                                    local_penalty_coefficient_proxies,
-                                    global_penalty_coefficient_proxies);
+                trial_solution_scores[i_move] = model->evaluate(
+                    *trial_move_ptrs[i_move], current_solution_score,
+                    local_penalty_coefficient_proxies,
+                    global_penalty_coefficient_proxies);
 
             } else {
                 trial_solution_scores[i_move] = model->evaluate(
@@ -377,10 +372,12 @@ TabuSearchResult<T_Variable, T_Expression> solve(
             }
         }
         /**
-         * Backup the previous move, improvement and global incumbent objective.
+         * Backup the previous solution score, move, improvement and global
+         * incumbent objective.
          */
-        previous_move        = current_move;
-        previous_improvement = current_improvement;
+        previous_solution_score = current_solution_score;
+        previous_move           = current_move;
+        previous_improvement    = current_improvement;
         previous_global_augmented_objective =
             current_global_augmented_objective;
 
@@ -389,25 +386,29 @@ TabuSearchResult<T_Variable, T_Expression> solve(
          */
         Move_T* move_ptr = trial_move_ptrs[selected_index];
         model->update(*move_ptr);
-        solution_score = trial_solution_scores[selected_index];
-
-        update_status =
-            incumbent_holder.try_update_incumbent(model, solution_score);
-        total_update_status = update_status | total_update_status;
 
         /**
-         * Update the current move, improvement and global incumbent objective.
+         * Update the current solution score, move, improvement and global
+         * incumbent objective.
          */
-        current_move = *move_ptr;
+        current_solution_score = trial_solution_scores[selected_index];
+        current_move           = *move_ptr;
         current_global_augmented_objective =
-            solution_score.global_augmented_objective;
+            current_solution_score.global_augmented_objective;
         current_improvement = previous_global_augmented_objective -
                               current_global_augmented_objective;
 
         /**
+         * Update the status.
+         */
+        update_status = incumbent_holder.try_update_incumbent(
+            model, current_solution_score);
+        total_update_status = update_status | total_update_status;
+
+        /**
          * Push the current solution to historical data.
          */
-        if (solution_score.is_feasible) {
+        if (current_solution_score.is_feasible) {
             historical_feasible_solutions.push_back(
                 model->export_plain_solution());
         }
@@ -485,7 +486,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                              number_of_feasible_neighborhoods,     //
                              number_of_permissible_neighborhoods,  //
                              number_of_improvable_neighborhoods,   //
-                             solution_score,                       //
+                             current_solution_score,               //
                              update_status,                        //
                              incumbent_holder,                     //
                              option.verbose >= Verbose::Full);
@@ -515,8 +516,8 @@ TabuSearchResult<T_Variable, T_Expression> solve(
             constexpr int    ITERATION_MIN = 10;
             constexpr double MARGIN        = 100.0;
 
-            if (iteration > ITERATION_MIN      //
-                && solution_score.is_feasible  //
+            if (iteration > ITERATION_MIN              //
+                && current_solution_score.is_feasible  //
                 && number_of_infeasible_neighborhood > 0) {
                 std::vector<double> infeasible_local_penalties(
                     number_of_infeasible_neighborhood);
