@@ -23,7 +23,7 @@
     "is_enabled_chain_move": false,
     "is_enabled_user_defined_move": false,
     "selection_mode": 0,
-    "improvability_screening": 3,
+    "improvability_screening_mode": 3,
     "seed": 1,
     "target_objective_value": -1E100,
     "is_enabled_collect_historical_data": false,
