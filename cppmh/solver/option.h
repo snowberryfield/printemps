@@ -177,302 +177,302 @@ struct Option {
         utility::print_info("The values for options are specified as follows:",
                             true);
 
-        utility::print(             //
-            " - iteration_max: " +  //
+        utility::print(              //
+            " -- iteration_max: " +  //
             utility::to_string(this->iteration_max, "%d"));
 
-        utility::print(           //
-            " - time_offset: " +  //
+        utility::print(            //
+            " -- time_offset: " +  //
             utility::to_string(this->time_offset, "%f"));
 
-        utility::print(        //
-            " - time_max: " +  //
+        utility::print(         //
+            " -- time_max: " +  //
             utility::to_string(this->time_max, "%f"));
 
-        utility::print(                                 //
-            " - penalty_coefficient_relaxing_rate: " +  //
+        utility::print(                                  //
+            " -- penalty_coefficient_relaxing_rate: " +  //
             utility::to_string(this->penalty_coefficient_relaxing_rate, "%f"));
 
-        utility::print(                                   //
-            " - penalty_coefficient_tightening_rate: " +  //
+        utility::print(                                    //
+            " -- penalty_coefficient_tightening_rate: " +  //
             utility::to_string(this->penalty_coefficient_tightening_rate,
                                "%f"));
 
-        utility::print(                                    //
-            " - penalty_coefficient_updating_balance: " +  //
+        utility::print(                                     //
+            " -- penalty_coefficient_updating_balance: " +  //
             utility::to_string(this->penalty_coefficient_updating_balance,
                                "%f"));
 
-        utility::print(                                         //
-            " - penalty_coefficient_reset_count_threshold: " +  //
+        utility::print(                                          //
+            " -- penalty_coefficient_reset_count_threshold: " +  //
             utility::to_string(this->penalty_coefficient_reset_count_threshold,
                                "%d"));
 
-        utility::print(                           //
-            " - initial_penalty_coefficient: " +  //
+        utility::print(                            //
+            " -- initial_penalty_coefficient: " +  //
             utility::to_string(this->initial_penalty_coefficient, "%f"));
 
-        utility::print(                   //
-            " - is_enabled_presolve: " +  //
+        utility::print(                    //
+            " -- is_enabled_presolve: " +  //
             utility::to_string(this->is_enabled_presolve, "%d"));
 
-        utility::print(                        //
-            " - is_enabled_lagrange_dual: " +  //
+        utility::print(                         //
+            " -- is_enabled_lagrange_dual: " +  //
             utility::to_string(this->is_enabled_lagrange_dual, "%d"));
 
-        utility::print(                       //
-            " - is_enabled_local_search: " +  //
+        utility::print(                        //
+            " -- is_enabled_local_search: " +  //
             utility::to_string(this->is_enabled_local_search, "%d"));
 
-        utility::print(                                       //
-            " - is_enabled_grouping_penalty_coefficient: " +  //
+        utility::print(                                        //
+            " -- is_enabled_grouping_penalty_coefficient: " +  //
             utility::to_string(this->is_enabled_grouping_penalty_coefficient,
                                "%d"));
 
-        utility::print(                                   //
-            " - is_enabled_initial_value_correction: " +  //
+        utility::print(                                    //
+            " -- is_enabled_initial_value_correction: " +  //
             utility::to_string(this->is_enabled_initial_value_correction,
                                "%d"));
 
-        utility::print(                              //
-            " - is_enabled_parallel_evaluation: " +  //
+        utility::print(                               //
+            " -- is_enabled_parallel_evaluation: " +  //
             utility::to_string(this->is_enabled_parallel_evaluation, "%d"));
 
-        utility::print(                                       //
-            " - is_enabled_parallel_neighborhood_update: " +  //
+        utility::print(                                        //
+            " -- is_enabled_parallel_neighborhood_update: " +  //
             utility::to_string(this->is_enabled_parallel_neighborhood_update,
                                "%d"));
 
-        utility::print(                      //
-            " - is_enabled_binary_move: " +  //
+        utility::print(                       //
+            " -- is_enabled_binary_move: " +  //
             utility::to_string(this->is_enabled_binary_move, "%d"));
 
-        utility::print(                       //
-            " - is_enabled_integer_move: " +  //
+        utility::print(                        //
+            " -- is_enabled_integer_move: " +  //
             utility::to_string(this->is_enabled_integer_move, "%d"));
 
-        utility::print(                           //
-            " - is_enabled_aggregation_move: " +  //
+        utility::print(                            //
+            " -- is_enabled_aggregation_move: " +  //
             utility::to_string(this->is_enabled_aggregation_move, "%d"));
 
-        utility::print(                          //
-            " - is_enabled_precedence_move: " +  //
+        utility::print(                           //
+            " -- is_enabled_precedence_move: " +  //
             utility::to_string(this->is_enabled_precedence_move, "%d"));
 
-        utility::print(                              //
-            " - is_enabled_variable_bound_move: " +  //
+        utility::print(                               //
+            " -- is_enabled_variable_bound_move: " +  //
             utility::to_string(this->is_enabled_variable_bound_move, "%d"));
 
-        utility::print(                         //
-            " - is_enabled_exclusive_move: " +  //
+        utility::print(                          //
+            " -- is_enabled_exclusive_move: " +  //
             utility::to_string(this->is_enabled_exclusive_move, "%d"));
-
-        utility::print(                     //
-            " - is_enabled_chain_move: " +  //
-            utility::to_string(this->is_enabled_exclusive_move, "%d"));
-
-        utility::print(                            //
-            " - is_enabled_user_defined_move: " +  //
-            utility::to_string(this->is_enabled_user_defined_move, "%d"));
-
-        utility::print(              //
-            " - selection_mode: " +  //
-            utility::to_string(this->selection_mode, "%d"));
-
-        utility::print(                            //
-            " - improvability_screening_mode: " +  //
-            utility::to_string(this->improvability_screening_mode, "%d"));
 
         utility::print(                      //
-            " - target_objective_value: " +  //
+            " -- is_enabled_chain_move: " +  //
+            utility::to_string(this->is_enabled_chain_move, "%d"));
+
+        utility::print(                             //
+            " -- is_enabled_user_defined_move: " +  //
+            utility::to_string(this->is_enabled_user_defined_move, "%d"));
+
+        utility::print(               //
+            " -- selection_mode: " +  //
+            utility::to_string(this->selection_mode, "%d"));
+
+        utility::print(                             //
+            " -- improvability_screening_mode: " +  //
+            utility::to_string(this->improvability_screening_mode, "%d"));
+
+        utility::print(                       //
+            " -- target_objective_value: " +  //
             utility::to_string(this->target_objective_value, "%.3e"));
 
-        utility::print(    //
-            " - seed: " +  //
+        utility::print(     //
+            " -- seed: " +  //
             utility::to_string(this->seed, "%d"));
 
-        utility::print(       //
-            " - verbose: " +  //
+        utility::print(        //
+            " -- verbose: " +  //
             utility::to_string(this->verbose, "%d"));
 
-        utility::print(                                  //
-            " - is_enabled_collect_historical_data: " +  //
+        utility::print(                                   //
+            " -- is_enabled_collect_historical_data: " +  //
             utility::to_string(this->is_enabled_collect_historical_data, "%d"));
 
-        utility::print(                        //
-            " - historical_data_capacity: " +  //
+        utility::print(                         //
+            " -- historical_data_capacity: " +  //
             utility::to_string(this->historical_data_capacity, "%d"));
 
-        utility::print(                           //
-            " - lagrange_dual.iteration_max: " +  //
+        utility::print(                            //
+            " -- lagrange_dual.iteration_max: " +  //
             utility::to_string(this->lagrange_dual.iteration_max, "%d"));
 
         utility::print(  //
-            " - lagrange_dual.time_max: " +
+            " -- lagrange_dual.time_max: " +
             utility::to_string(this->lagrange_dual.time_max, "%f"));
 
-        utility::print(                         //
-            " - lagrange_dual.time_offset: " +  //
+        utility::print(                          //
+            " -- lagrange_dual.time_offset: " +  //
             utility::to_string(this->lagrange_dual.time_offset, "%f"));
 
-        utility::print(                                   //
-            " - lagrange_dual.step_size_extend_rate: " +  //
+        utility::print(                                    //
+            " -- lagrange_dual.step_size_extend_rate: " +  //
             utility::to_string(this->lagrange_dual.step_size_extend_rate,
                                "%f"));
 
-        utility::print(                                   //
-            " - lagrange_dual.step_size_reduce_rate: " +  //
+        utility::print(                                    //
+            " -- lagrange_dual.step_size_reduce_rate: " +  //
             utility::to_string(this->lagrange_dual.step_size_reduce_rate,
                                "%f"));
 
-        utility::print(                       //
-            " - lagrange_dual.tolerance: " +  //
+        utility::print(                        //
+            " -- lagrange_dual.tolerance: " +  //
             utility::to_string(this->lagrange_dual.tolerance, "%f"));
 
-        utility::print(                        //
-            " - lagrange_dual.queue_size: " +  //
+        utility::print(                         //
+            " -- lagrange_dual.queue_size: " +  //
             utility::to_string(this->lagrange_dual.queue_size, "%d"));
 
-        utility::print(                          //
-            " - lagrange_dual.log_interval: " +  //
+        utility::print(                           //
+            " -- lagrange_dual.log_interval: " +  //
             utility::to_string(this->lagrange_dual.log_interval, "%d"));
 
-        utility::print(                          //
-            " - local_search.iteration_max: " +  //
+        utility::print(                           //
+            " -- local_search.iteration_max: " +  //
             utility::to_string(this->local_search.iteration_max, "%d"));
 
         utility::print(  //
-            " - local_search.time_max: " +
+            " -- local_search.time_max: " +
             utility::to_string(this->local_search.time_max, "%f"));
 
-        utility::print(                        //
-            " - local_search.time_offset: " +  //
+        utility::print(                         //
+            " -- local_search.time_offset: " +  //
             utility::to_string(this->local_search.time_offset, "%f"));
 
-        utility::print(                         //
-            " - local_search.log_interval: " +  //
+        utility::print(                          //
+            " -- local_search.log_interval: " +  //
             utility::to_string(this->local_search.log_interval, "%d"));
 
-        utility::print(                 //
-            " - local_search.seed: " +  //
+        utility::print(                  //
+            " -- local_search.seed: " +  //
             utility::to_string(this->local_search.seed, "%d"));
 
-        utility::print(                         //
-            " - tabu_search.iteration_max: " +  //
+        utility::print(                          //
+            " -- tabu_search.iteration_max: " +  //
             utility::to_string(this->tabu_search.iteration_max, "%d"));
 
-        utility::print(                    //
-            " - tabu_search.time_max: " +  //
+        utility::print(                     //
+            " -- tabu_search.time_max: " +  //
             utility::to_string(this->tabu_search.time_max, "%f"));
 
-        utility::print(                       //
-            " - tabu_search.time_offset: " +  //
+        utility::print(                        //
+            " -- tabu_search.time_offset: " +  //
             utility::to_string(this->tabu_search.time_offset, "%f"));
 
-        utility::print(                        //
-            " - tabu_search.log_interval: " +  //
+        utility::print(                         //
+            " -- tabu_search.log_interval: " +  //
             utility::to_string(this->tabu_search.log_interval, "%d"));
 
         utility::print(  //
-            " - tabu_search.initial_tabu_tenure: " +
+            " -- tabu_search.initial_tabu_tenure: " +
             utility::to_string(this->tabu_search.initial_tabu_tenure, "%d"));
 
         utility::print(  //
-            " - tabu_search.tabu_tenure_randomize_rate: " +
+            " -- tabu_search.tabu_tenure_randomize_rate: " +
             utility::to_string(this->tabu_search.tabu_tenure_randomize_rate,
                                "%f"));
 
         utility::print(  //
-            " - tabu_search.initial_modification_fixed_rate: " +
+            " -- tabu_search.initial_modification_fixed_rate: " +
             utility::to_string(
                 this->tabu_search.initial_modification_fixed_rate, "%f"));
 
         utility::print(  //
-            " - tabu_search.initial_modification_randomize_rate: " +
+            " -- tabu_search.initial_modification_randomize_rate: " +
             utility::to_string(
                 this->tabu_search.initial_modification_randomize_rate, "%f"));
 
-        utility::print(                     //
-            " - tabu_search.tabu_mode: " +  //
+        utility::print(                      //
+            " -- tabu_search.tabu_mode: " +  //
             utility::to_string(this->tabu_search.tabu_mode, "%d"));
 
-        utility::print(                              //
-            " - tabu_search.move_preserve_rate: " +  //
+        utility::print(                               //
+            " -- tabu_search.move_preserve_rate: " +  //
             utility::to_string(this->tabu_search.move_preserve_rate, "%f"));
 
-        utility::print(                                         //
-            " - tabu_search.frequency_penalty_coefficient: " +  //
+        utility::print(                                          //
+            " -- tabu_search.frequency_penalty_coefficient: " +  //
             utility::to_string(this->tabu_search.frequency_penalty_coefficient,
                                "%f"));
 
-        utility::print(                              //
-            " - tabu_search.is_enabled_shuffle: " +  //
+        utility::print(                               //
+            " -- tabu_search.is_enabled_shuffle: " +  //
             utility::to_string(this->tabu_search.is_enabled_shuffle, "%d"));
 
-        utility::print(                                   //
-            " - tabu_search.is_enabled_move_curtail: " +  //
+        utility::print(                                    //
+            " -- tabu_search.is_enabled_move_curtail: " +  //
             utility::to_string(this->tabu_search.is_enabled_move_curtail,
                                "%d"));
 
-        utility::print(                                      //
-            " - tabu_search.is_enabled_automatic_break: " +  //
+        utility::print(                                       //
+            " -- tabu_search.is_enabled_automatic_break: " +  //
             utility::to_string(this->tabu_search.is_enabled_automatic_break,
                                "%d"));
 
-        utility::print(                                                       //
-            " - tabu_search.is_enabled_automatic_tabu_tenure_adjustment: " +  //
+        utility::print(  //
+            " -- tabu_search.is_enabled_automatic_tabu_tenure_adjustment: " +  //
             utility::to_string(
                 this->tabu_search.is_enabled_automatic_tabu_tenure_adjustment,
                 "%d"));
 
-        utility::print(                                                     //
-            " - tabu_search.is_enabled_automatic_iteration_adjustment: " +  //
+        utility::print(                                                      //
+            " -- tabu_search.is_enabled_automatic_iteration_adjustment: " +  //
             utility::to_string(
                 this->tabu_search.is_enabled_automatic_iteration_adjustment,
                 "%d"));
 
-        utility::print(                                           //
-            " - tabu_search.is_enabled_initial_modification: " +  //
+        utility::print(                                            //
+            " -- tabu_search.is_enabled_initial_modification: " +  //
             utility::to_string(
                 this->tabu_search.is_enabled_initial_modification, "%d"));
 
-        utility::print(                                         //
-            " - tabu_search.bias_increase_count_threshold: " +  //
+        utility::print(                                          //
+            " -- tabu_search.bias_increase_count_threshold: " +  //
             utility::to_string(this->tabu_search.bias_increase_count_threshold,
                                "%d"));
 
-        utility::print(                                         //
-            " - tabu_search.bias_decrease_count_threshold: " +  //
+        utility::print(                                          //
+            " -- tabu_search.bias_decrease_count_threshold: " +  //
             utility::to_string(this->tabu_search.bias_decrease_count_threshold,
                                "%d"));
 
-        utility::print(                                   //
-            " - tabu_search.iteration_increase_rate: " +  //
+        utility::print(                                    //
+            " -- tabu_search.iteration_increase_rate: " +  //
             utility::to_string(this->tabu_search.iteration_increase_rate,
                                "%f"));
 
-        utility::print(                                   //
-            " - tabu_search.iteration_decrease_rate: " +  //
+        utility::print(                                    //
+            " -- tabu_search.iteration_decrease_rate: " +  //
             utility::to_string(this->tabu_search.iteration_decrease_rate,
                                "%f"));
 
-        utility::print(                                              //
-            " - tabu_search.ignore_tabu_if_augmented_incumbent: " +  //
+        utility::print(                                               //
+            " -- tabu_search.ignore_tabu_if_augmented_incumbent: " +  //
             utility::to_string(
                 this->tabu_search.ignore_tabu_if_augmented_incumbent, "%d"));
 
-        utility::print(                                             //
-            " - tabu_search.ignore_tabu_if_feasible_incumbent: " +  //
+        utility::print(                                              //
+            " -- tabu_search.ignore_tabu_if_feasible_incumbent: " +  //
             utility::to_string(
                 this->tabu_search.ignore_tabu_if_feasible_incumbent, "%d"));
 
-        utility::print(                                          //
-            " - tabu_search.number_of_initial_modification: " +  //
+        utility::print(                                           //
+            " -- tabu_search.number_of_initial_modification: " +  //
             utility::to_string(this->tabu_search.number_of_initial_modification,
                                "%d"));
 
-        utility::print(              //
-            " - tabu_search.seed: "  //
+        utility::print(               //
+            " -- tabu_search.seed: "  //
             + utility::to_string(this->tabu_search.seed, "%d"));
     }
 };
