@@ -227,10 +227,12 @@ Result<T_Variable, T_Expression> solve(
     int number_of_tabu_search_iterations   = 0;
     int number_of_tabu_search_loops        = 0;
 
+    bool is_terminated = false;
+
     /**
      * Solve Lagrange dual to obtain a better initial solution ß(Optional).
      */
-    if (master_option.is_enabled_lagrange_dual) {
+    if (master_option.is_enabled_lagrange_dual && !is_terminated) {
         if (!model->is_linear()) {
             utility::print_warning(
                 "Solving lagrange dual was skipped because the problem is "
@@ -248,17 +250,156 @@ Result<T_Variable, T_Expression> solve(
              *  Check the terminating condition.
              */
             if (elapsed_time > master_option.time_max) {
+                is_terminated = true;
                 utility::print_message(
                     "Outer loop was terminated because of time-over (" +
                         utility::to_string(elapsed_time, "%.3f") + "sec).",
                     master_option.verbose >= Verbose::Outer);
+            } else if (incumbent_holder.feasible_incumbent_objective() <=
+                       master_option.target_objective_value) {
+                is_terminated = true;
+                utility::print_message(
+                    "Outer loop was terminated because of feasible objective "
+                    "reaches the target limit.",
+                    master_option.verbose >= Verbose::Outer);
             }
 
+            if (!is_terminated) {
+                /**
+                 *  Prepare an option object for local search.
+                 */
+                Option option                    = master_option;
+                option.lagrange_dual.time_offset = elapsed_time;
+
+                /**
+                 * Prepare the initial variable values.
+                 */
+                std::vector<model::ValueProxy<T_Variable>>
+                    initial_variable_value_proxies =
+                        current_solution.variable_value_proxies;
+
+                /**
+                 * Run the lagrange dual search.
+                 */
+                auto result =
+                    lagrange_dual::solve(model,                               //
+                                         option,                              //
+                                         local_penalty_coefficient_proxies,   //
+                                         global_penalty_coefficient_proxies,  //
+                                         initial_variable_value_proxies,      //
+                                         incumbent_holder);                   //
+
+                /**
+                 * Update the current solution.
+                 */
+                previous_solution       = current_solution;
+                previous_solution_score = current_solution_score;
+
+                current_solution = result.incumbent_holder
+                                       .global_augmented_incumbent_solution();
+                current_solution_score =
+                    result.incumbent_holder.global_augmented_incumbent_score();
+
+                /**
+                 * Update the historical data.
+                 */
+                if (master_option.is_enabled_collect_historical_data &&
+                    result.historical_feasible_solutions.size() > 0) {
+                    solution_pool.push(result.historical_feasible_solutions);
+                }
+
+                /**
+                 * Update the global augmented incumbent solution if it was
+                 * improved by the Lagrange dual search.
+                 */
+                update_status = incumbent_holder.try_update_incumbent(
+                    result.incumbent_holder
+                        .global_augmented_incumbent_solution(),
+                    result.incumbent_holder.global_augmented_incumbent_score());
+
+                /**
+                 * Update the feasible incumbent solution if it was improved by
+                 * the Lagrange dual search
+                 */
+                if (result.incumbent_holder.is_found_feasible_solution()) {
+                    update_status = incumbent_holder.try_update_incumbent(
+                        result.incumbent_holder.feasible_incumbent_solution(),
+                        result.incumbent_holder.feasible_incumbent_score());
+                }
+
+                /**
+                 * Preserve the number of iterations for solving the Lagrange
+                 * dual problem.
+                 */
+                number_of_lagrange_dual_iterations =
+                    result.number_of_iterations;
+
+                /**
+                 * Measure the elapsed time to solve the Lagrange dual problem.
+                 */
+                elapsed_time = time_keeper.clock();
+
+                /**
+                 * Print the search summary.
+                 */
+                utility::print_message("Solving Lagrange dual was finished. ",
+                                       master_option.verbose >= Verbose::Outer);
+
+                utility::print_info(  //
+                    " -- Total elapsed time: " +
+                        utility::to_string(elapsed_time, "%.3f") + "sec",
+                    master_option.verbose >= Verbose::Outer);
+
+                utility::print_info(
+                    " -- Global augmented incumbent objective: " +
+                        utility::to_string(
+                            incumbent_holder
+                                    .global_augmented_incumbent_objective() *
+                                model->sign(),
+                            "%.3f"),
+                    master_option.verbose >= Verbose::Outer);
+
+                utility::print_info(
+                    " -- Feasible incumbent objective: " +
+                        utility::to_string(
+                            incumbent_holder.feasible_incumbent_objective() *
+                                model->sign(),
+                            "%.3f"),
+                    master_option.verbose >= Verbose::Outer);
+            }
+        }
+    }
+
+    /**
+     * Run a local search to improve the initial solution (optional).
+     */
+    if (master_option.is_enabled_local_search && !is_terminated) {
+        double elapsed_time = time_keeper.clock();
+
+        /**
+         *  Check the terminating condition.
+         */
+        if (elapsed_time > master_option.time_max) {
+            is_terminated = true;
+            utility::print_message(
+                "Outer loop was terminated because of time-over (" +
+                    utility::to_string(elapsed_time, "%.3f") + "sec).",
+                master_option.verbose >= Verbose::Outer);
+        } else if (incumbent_holder.feasible_incumbent_objective() <=
+                   master_option.target_objective_value) {
+            is_terminated = true;
+            utility::print_message(
+                "Outer loop was terminated because of feasible objective "
+                "reaches the target limit.",
+                master_option.verbose >= Verbose::Outer);
+        }
+
+        if (!is_terminated) {
             /**
              *  Prepare an option object for local search.
              */
-            Option option                    = master_option;
-            option.lagrange_dual.time_offset = elapsed_time;
+            Option option                   = master_option;
+            option.local_search.time_offset = elapsed_time;
 
             /**
              * Prepare the initial variable values.
@@ -268,15 +409,16 @@ Result<T_Variable, T_Expression> solve(
                     current_solution.variable_value_proxies;
 
             /**
-             * Run the lagrange dual search.
+             * Run the local search.
              */
             auto result =
-                lagrange_dual::solve(model,                               //
-                                     option,                              //
-                                     local_penalty_coefficient_proxies,   //
-                                     global_penalty_coefficient_proxies,  //
-                                     initial_variable_value_proxies,      //
-                                     incumbent_holder);                   //
+                local_search::solve(model,                               //
+                                    option,                              //
+                                    local_penalty_coefficient_proxies,   //
+                                    global_penalty_coefficient_proxies,  //
+                                    initial_variable_value_proxies,      //
+                                    incumbent_holder,                    //
+                                    memory);                             //
 
             /**
              * Update the current solution.
@@ -298,16 +440,16 @@ Result<T_Variable, T_Expression> solve(
             }
 
             /**
-             * Update the global augmented incumbent solution if it was
-             * improved by the Lagrange dual search.
+             * Update the global augmented incumbent solution if it was improved
+             * by the local search.
              */
             update_status = incumbent_holder.try_update_incumbent(
                 result.incumbent_holder.global_augmented_incumbent_solution(),
                 result.incumbent_holder.global_augmented_incumbent_score());
 
             /**
-             * Update the feasible incumbent solution if it was improved by
-             * the Lagrange dual search
+             * Update the feasible incumbent solution if it was improved by the
+             * local search.
              */
             if (result.incumbent_holder.is_found_feasible_solution()) {
                 update_status = incumbent_holder.try_update_incumbent(
@@ -316,20 +458,24 @@ Result<T_Variable, T_Expression> solve(
             }
 
             /**
-             * Preserve the number of iterations for solving the Lagrange dual
-             * problem.
+             * Update the memory.
              */
-            number_of_lagrange_dual_iterations = result.number_of_iterations;
+            memory = result.memory;
 
             /**
-             * Measure the elapsed time to solve the Lagrange dual problem.
+             * Preserve the number of iterations for the local search.
+             */
+            number_of_local_search_iterations = result.number_of_iterations;
+
+            /**
+             * Measure the elapsed time for the local search.
              */
             elapsed_time = time_keeper.clock();
 
             /**
              * Print the search summary.
              */
-            utility::print_message("Solving Lagrange dual was finished. ",
+            utility::print_message("Local search was finished.",
                                    master_option.verbose >= Verbose::Outer);
 
             utility::print_info(  //
@@ -357,127 +503,6 @@ Result<T_Variable, T_Expression> solve(
     }
 
     /**
-     * Run a local search to improve the initial solution (optional).
-     */
-    if (master_option.is_enabled_local_search) {
-        double elapsed_time = time_keeper.clock();
-
-        /**
-         *  Check the terminating condition.
-         */
-        if (elapsed_time > master_option.time_max) {
-            utility::print_message(
-                "Outer loop was terminated because of time-over (" +
-                    utility::to_string(elapsed_time, "%.3f") + "sec).",
-                master_option.verbose >= Verbose::Outer);
-        }
-
-        /**
-         *  Prepare an option object for local search.
-         */
-        Option option                   = master_option;
-        option.local_search.time_offset = elapsed_time;
-
-        /**
-         * Prepare the initial variable values.
-         */
-        std::vector<model::ValueProxy<T_Variable>>
-            initial_variable_value_proxies =
-                current_solution.variable_value_proxies;
-
-        /**
-         * Run the local search.
-         */
-        auto result =
-            local_search::solve(model,                               //
-                                option,                              //
-                                local_penalty_coefficient_proxies,   //
-                                global_penalty_coefficient_proxies,  //
-                                initial_variable_value_proxies,      //
-                                incumbent_holder,                    //
-                                memory);                             //
-
-        /**
-         * Update the current solution.
-         */
-        previous_solution       = current_solution;
-        previous_solution_score = current_solution_score;
-
-        current_solution =
-            result.incumbent_holder.global_augmented_incumbent_solution();
-        current_solution_score =
-            result.incumbent_holder.global_augmented_incumbent_score();
-
-        /**
-         * Update the historical data.
-         */
-        if (master_option.is_enabled_collect_historical_data &&
-            result.historical_feasible_solutions.size() > 0) {
-            solution_pool.push(result.historical_feasible_solutions);
-        }
-
-        /**
-         * Update the global augmented incumbent solution if it was improved
-         * by the local search.
-         */
-        update_status = incumbent_holder.try_update_incumbent(
-            result.incumbent_holder.global_augmented_incumbent_solution(),
-            result.incumbent_holder.global_augmented_incumbent_score());
-
-        /**
-         * Update the feasible incumbent solution if it was improved by the
-         * local search.
-         */
-        if (result.incumbent_holder.is_found_feasible_solution()) {
-            update_status = incumbent_holder.try_update_incumbent(
-                result.incumbent_holder.feasible_incumbent_solution(),
-                result.incumbent_holder.feasible_incumbent_score());
-        }
-
-        /**
-         * Update the memory.
-         */
-        memory = result.memory;
-
-        /**
-         * Preserve the number of iterations for the local search.
-         */
-        number_of_local_search_iterations = result.number_of_iterations;
-
-        /**
-         * Measure the elapsed time for the local search.
-         */
-        elapsed_time = time_keeper.clock();
-
-        /**
-         * Print the search summary.
-         */
-        utility::print_message("Local search was finished.",
-                               master_option.verbose >= Verbose::Outer);
-
-        utility::print_info(  //
-            " -- Total elapsed time: " +
-                utility::to_string(elapsed_time, "%.3f") + "sec",
-            master_option.verbose >= Verbose::Outer);
-
-        utility::print_info(
-            " -- Global augmented incumbent objective: " +
-                utility::to_string(
-                    incumbent_holder.global_augmented_incumbent_objective() *
-                        model->sign(),
-                    "%.3f"),
-            master_option.verbose >= Verbose::Outer);
-
-        utility::print_info(
-            " -- Feasible incumbent objective: " +
-                utility::to_string(
-                    incumbent_holder.feasible_incumbent_objective() *
-                        model->sign(),
-                    "%.3f"),
-            master_option.verbose >= Verbose::Outer);
-    }
-
-    /**
      * Run tabu searches to find better solutions.
      */
     int iteration        = 0;
@@ -492,13 +517,14 @@ Result<T_Variable, T_Expression> solve(
     int inital_tabu_tenure = master_option.tabu_search.initial_tabu_tenure;
     int number_of_initial_modification = 0;
     int iteration_max = master_option.tabu_search.iteration_max;
+
     ImprovabilityScreeningMode improvability_screening_mode =
         master_option.improvability_screening_mode;
     if (improvability_screening_mode == ImprovabilityScreeningMode::Automatic) {
         improvability_screening_mode = ImprovabilityScreeningMode::Aggressive;
     }
 
-    while (true) {
+    while (!is_terminated) {
         /**
          *  Check the terminating condition.
          */
@@ -508,24 +534,24 @@ Result<T_Variable, T_Expression> solve(
                 "Outer loop was terminated because of time-over (" +
                     utility::to_string(elapsed_time, "%.3f") + "sec).",
                 master_option.verbose >= Verbose::Outer);
-            break;
-        }
-
-        if (iteration >= master_option.iteration_max) {
+            is_terminated = true;
+        } else if (iteration >= master_option.iteration_max) {
             utility::print_message(
                 "Outer loop was terminated because of iteration limit (" +
                     utility::to_string(iteration, "%d") + " iterations).",
                 master_option.verbose >= Verbose::Outer);
-            break;
-        }
-
-        if (incumbent_holder.feasible_incumbent_objective() <=
-            master_option.target_objective_value) {
+            is_terminated = true;
+        } else if (incumbent_holder.feasible_incumbent_objective() <=
+                   master_option.target_objective_value) {
             utility::print_message(
                 "Outer loop was terminated because of feasible objective "
                 "reaches the target limit (" +
                     utility::to_string(iteration, "%d") + " iterations).",
                 master_option.verbose >= Verbose::Outer);
+            is_terminated = true;
+        }
+
+        if (is_terminated) {
             break;
         }
 
@@ -569,6 +595,9 @@ Result<T_Variable, T_Expression> solve(
          * of the next loop. Whether the local penalty coefficients should be
          * relaxed or tightened, is also determined.
          */
+        previous_solution       = current_solution;
+        previous_solution_score = current_solution_score;
+
         auto result_local_augmented_incumbent_solution =
             result.incumbent_holder.local_augmented_incumbent_solution();
         auto result_global_augmented_incumbent_solution =
@@ -583,6 +612,10 @@ Result<T_Variable, T_Expression> solve(
             result.incumbent_holder.local_augmented_incumbent_score();
         auto result_global_augmented_incumbent_score =
             result.incumbent_holder.global_augmented_incumbent_score();
+
+        bool employing_local_augmented_solution_flag  = false;
+        bool employing_global_augmented_solution_flag = false;
+        bool employing_previous_solution_flag         = false;
 
         bool penalty_coefficient_tightening_flag = false;
         bool penalty_coefficient_relaxing_flag   = false;
@@ -602,22 +635,16 @@ Result<T_Variable, T_Expression> solve(
             }
         }
 
-        previous_solution       = current_solution;
-        previous_solution_score = current_solution_score;
-
         if (result.total_update_status &
             IncumbentHolderConstant::STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
-            current_solution       = result_global_augmented_incumbent_solution;
-            current_solution_score = result_global_augmented_incumbent_score;
+            employing_global_augmented_solution_flag = true;
 
             penalty_coefficient_tightening_flag = false;
             penalty_coefficient_relaxing_flag   = true;
         } else {
             if (result.total_update_status ==
                 IncumbentHolderConstant::STATUS_NO_UPDATED) {
-                current_solution = result_global_augmented_incumbent_solution;
-                current_solution_score =
-                    result_global_augmented_incumbent_score;
+                employing_global_augmented_solution_flag = true;
 
                 penalty_coefficient_tightening_flag = false;
                 penalty_coefficient_relaxing_flag   = true;
@@ -633,19 +660,13 @@ Result<T_Variable, T_Expression> solve(
                              result_local_augmented_incumbent_objective;
 
                 if (gap < constant::EPSILON) {
-                    current_solution =
-                        result_global_augmented_incumbent_solution;
-                    current_solution_score =
-                        result_global_augmented_incumbent_score;
+                    employing_global_augmented_solution_flag = true;
 
                     penalty_coefficient_tightening_flag = false;
                     penalty_coefficient_relaxing_flag   = true;
                 } else {
                     if (result_local_augmented_incumbent_score.is_feasible) {
-                        current_solution =
-                            result_local_augmented_incumbent_solution;
-                        current_solution_score =
-                            result_local_augmented_incumbent_score;
+                        employing_local_augmented_solution_flag = true;
 
                         penalty_coefficient_tightening_flag = false;
                         penalty_coefficient_relaxing_flag   = true;
@@ -656,20 +677,31 @@ Result<T_Variable, T_Expression> solve(
                             (result_local_augmented_incumbent_score
                                  .global_penalty <
                              previous_solution_score.global_penalty)) {
-                            current_solution =
-                                result_local_augmented_incumbent_solution;
-                            current_solution_score =
-                                result_local_augmented_incumbent_score;
+                            employing_local_augmented_solution_flag = true;
 
                         } else {
-                            current_solution       = previous_solution;
-                            current_solution_score = previous_solution_score;
+                            employing_previous_solution_flag = true;
                         }
                         penalty_coefficient_tightening_flag = true;
                         penalty_coefficient_relaxing_flag   = false;
                     }
                 }
             }
+        }
+
+        if (employing_global_augmented_solution_flag) {
+            current_solution       = result_global_augmented_incumbent_solution;
+            current_solution_score = result_global_augmented_incumbent_score;
+        } else if (employing_local_augmented_solution_flag) {
+            current_solution       = result_local_augmented_incumbent_solution;
+            current_solution_score = result_local_augmented_incumbent_score;
+        } else if (employing_previous_solution_flag) {
+            current_solution       = previous_solution;
+            current_solution_score = previous_solution_score;
+        } else {
+            throw std::logic_error(utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "An error ocurred in determining the next initial solution."));
         }
 
         /**
@@ -1099,18 +1131,26 @@ Result<T_Variable, T_Expression> solve(
                 utility::print_message(
                     "There are " +
                         std::to_string(number_of_violative_constraints) +
-                        "violative constraints.",
+                        " violative constraints.",
                     master_option.verbose >= Verbose::Outer);
             }
         }
 
         /**
-         * Print message if the penalty coefficients were reset.
+         * Print message if the penalty coefficients were changed.
          */
         if (penalty_coefficient_reset_flag) {
             utility::print_message(
                 "The penalty coefficients were reset due to search "
                 "stagnation.",
+                master_option.verbose >= Verbose::Outer);
+        } else if (penalty_coefficient_relaxing_flag) {
+            utility::print_message(  //
+                "The penalty coefficients were relaxed.",
+                master_option.verbose >= Verbose::Outer);
+        } else if (penalty_coefficient_tightening_flag) {
+            utility::print_message(  //
+                "The penalty coefficients were tightened.",
                 master_option.verbose >= Verbose::Outer);
         }
 
@@ -1120,6 +1160,26 @@ Result<T_Variable, T_Expression> solve(
         utility::print_message("The tabu tenure for the next loop was set to " +
                                    std::to_string(inital_tabu_tenure) + ".",
                                master_option.verbose >= Verbose::Outer);
+
+        /**
+         * Print the initial solution for the next loop.
+         */
+        if (employing_global_augmented_solution_flag) {
+            utility::print_message(
+                "The next loop will be start from the global incumbent "
+                "solution.",
+                master_option.verbose >= Verbose::Outer);
+        } else if (employing_local_augmented_solution_flag) {
+            utility::print_message(
+                "The next loop will be start from the local incumbent "
+                "solution founded in the previous loop.",
+                master_option.verbose >= Verbose::Outer);
+        } else if (employing_previous_solution_flag) {
+            utility::print_message(
+                "The next loop will be start from the same initial solution "
+                "of the previous loop.",
+                master_option.verbose >= Verbose::Outer);
+        }
 
         /**
          * Print the number of initial modification for the next loop.
