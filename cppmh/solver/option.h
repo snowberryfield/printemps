@@ -27,9 +27,9 @@ struct OptionConstant {
     static constexpr double DEFAULT_PENALTY_COEFFICIENT_TIGHTENING_RATE = 1.0;
     static constexpr double DEFAULT_PENALTY_COEFFICIENT_UPDATING_BALANCE = 0.0;
     static constexpr int DEFAULT_PENALTY_COEFFICIENT_RESET_COUNT_THRESHOLD = -1;
-    static constexpr double DEFAULT_INITIAL_PENALTY_COEFFICIENT = 1E6;
+    static constexpr double DEFAULT_INITIAL_PENALTY_COEFFICIENT = 1E7;
     static constexpr bool   DEFAULT_IS_ENABLED_LAGRANGE_DUAL    = false;
-    static constexpr bool   DEFAULT_IS_ENABLED_LOCAL_SEARCH     = true;
+    static constexpr bool   DEFAULT_IS_ENABLED_LOCAL_SEARCH     = false;
     static constexpr bool   DEFAULT_IS_ENABLED_GROUPING_PENALTY_COEFFICIENT =
         false;
     static constexpr bool DEFAULT_IS_ENABLED_PRESOLVE                 = true;
