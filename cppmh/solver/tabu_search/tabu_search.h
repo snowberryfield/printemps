@@ -477,23 +477,6 @@ TabuSearchResult<T_Variable, T_Expression> solve(
             number_of_all_neighborhoods - number_of_feasible_neighborhoods;
 
         /**
-         * Print the optimization progress.
-         */
-        if (iteration % std::max(option.tabu_search.log_interval, 1) == 0 ||
-            update_status > 0) {
-            print_table_body(model,                                //
-                             iteration,                            //
-                             number_of_all_neighborhoods,          //
-                             number_of_feasible_neighborhoods,     //
-                             number_of_permissible_neighborhoods,  //
-                             number_of_improvable_neighborhoods,   //
-                             current_solution_score,               //
-                             update_status,                        //
-                             incumbent_holder,                     //
-                             option.verbose >= Verbose::Full);
-        }
-
-        /**
          * Register a chain move.
          */
         if (iteration > 2 && option.is_enabled_chain_move) {
@@ -602,6 +585,24 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                 }
             }
         }
+
+        /**
+         * Print the optimization progress.
+         */
+        if (iteration % std::max(option.tabu_search.log_interval, 1) == 0 ||
+            update_status > 0) {
+            print_table_body(model,                                //
+                             iteration,                            //
+                             number_of_all_neighborhoods,          //
+                             number_of_feasible_neighborhoods,     //
+                             number_of_permissible_neighborhoods,  //
+                             number_of_improvable_neighborhoods,   //
+                             current_solution_score,               //
+                             update_status,                        //
+                             incumbent_holder,                     //
+                             option.verbose >= Verbose::Full);
+        }
+
         iteration++;
     }
 
