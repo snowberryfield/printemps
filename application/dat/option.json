@@ -65,7 +65,7 @@
         "is_enabled_automatic_tabu_tenure_adjustment": true,
         "is_enabled_automatic_iteration_adjustment": true,
         "is_enabled_initial_modification": true,
-        "bias_increase_count_threshold": 5,
+        "bias_increase_count_threshold": 10,
         "bias_decrease_count_threshold": 10,
         "iteration_increase_rate": 1.5,
         "iteration_decrease_rate": 0.5,
