@@ -97,14 +97,22 @@ inline void print_table_body(
         mark_feasible_incumbent         = '*';
     }
 
+    auto int_format = [](const int a_VALUE, const int a_THRESHOLD) {
+        if (a_VALUE >= a_THRESHOLD) {
+            return utility::to_string(static_cast<double>(a_VALUE), "%5.0e");
+        } else {
+            return utility::to_string(a_VALUE, "%5d");
+        }
+    };
+
     std::printf(
-        "%8d |%5d %5d %5d %5d |%c%9.2e(%9.2e) |%c%9.2e %c%9.2e\n",
-        a_ITERATION,                           //
-        a_NUMBER_OF_ALL_NEIGHBORHOODS,         //
-        a_NUMBER_OF_FEASIBLE_NEIGHBORHOODS,    //
-        a_NUMBER_OF_PERMISSIBLE_NEIGHBORHOOD,  //
-        a_NUMBER_OF_IMPROVABLE_NEIGHBORHOOD,   //
-        mark_current,                          //
+        "%8d |%s %s %s %s |%c%9.2e(%9.2e) |%c%9.2e %c%9.2e\n",
+        a_ITERATION,                                                       //
+        int_format(a_NUMBER_OF_ALL_NEIGHBORHOODS, 100000).c_str(),         //
+        int_format(a_NUMBER_OF_FEASIBLE_NEIGHBORHOODS, 100000).c_str(),    //
+        int_format(a_NUMBER_OF_PERMISSIBLE_NEIGHBORHOOD, 100000).c_str(),  //
+        int_format(a_NUMBER_OF_IMPROVABLE_NEIGHBORHOOD, 100000).c_str(),   //
+        mark_current,                                                      //
         a_CURRENT_SOLUTION_SCORE.local_augmented_objective *
             a_MODEL->sign(),                     //
         a_CURRENT_SOLUTION_SCORE.local_penalty,  //
