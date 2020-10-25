@@ -635,15 +635,16 @@ class Model {
             this->extract_selections(a_SELECTION_MODE);
         }
 
-        this->setup_neighborhood(a_IS_ENABLED_AGGREGATION_MOVE,              //
-                                 a_IS_ENABLED_PRECEDENCE_MOVE,               //
-                                 a_IS_ENABLED_VARIABLE_BOUND_MOVE,           //
-                                 a_IS_ENABLED_EXCLUSIVE_MOVE,                //
-                                 a_IS_ENABLED_USER_DEFINED_MOVE,             //
-                                 a_IS_ENABLED_CHAIN_MOVE,                    //
-                                 a_IS_ENABLED_IMPROVABILITY_SCREENING,       //
-                                 a_IS_ENABLED_PARALLEL_NEIGHBORHOOD_UPDATE,  //
-                                 a_IS_ENABLED_PRINT);
+        this->setup_neighborhood(
+            a_IS_ENABLED_AGGREGATION_MOVE,                              //
+            a_IS_ENABLED_PRECEDENCE_MOVE,                               //
+            a_IS_ENABLED_VARIABLE_BOUND_MOVE,                           //
+            a_IS_ENABLED_EXCLUSIVE_MOVE,                                //
+            a_IS_ENABLED_USER_DEFINED_MOVE,                             //
+            a_IS_ENABLED_CHAIN_MOVE,                                    //
+            a_IS_ENABLED_IMPROVABILITY_SCREENING && this->is_linear(),  //
+            a_IS_ENABLED_PARALLEL_NEIGHBORHOOD_UPDATE,                  //
+            a_IS_ENABLED_PRINT);
 
         this->verify_and_correct_selection_variables_initial_values(
             a_IS_ENABLED_INITIAL_VALUE_CORRECTION, a_IS_ENABLED_PRINT);
@@ -1955,15 +1956,15 @@ class Model {
         }
 
         utility::print_info(
-            " - Selection: " +
+            " -- Selection: " +
                 utility::to_string(this->number_of_selection_variables(), "%d"),
             true);
         utility::print_info(
-            " - Binary: " +
+            " -- Binary: " +
                 utility::to_string(this->number_of_binary_variables(), "%d"),
             true);
         utility::print_info(
-            " - Integer: " +
+            " -- Integer: " +
                 utility::to_string(this->number_of_integer_variables(), "%d"),
             true);
 
@@ -1994,83 +1995,83 @@ class Model {
         }
 
         utility::print_info(
-            " - Singleton: " +
+            " -- Singleton: " +
                 utility::to_string(
                     m_constraint_type_reference.singleton_ptrs.size(), "%d"),
             true);
         utility::print_info(
-            " - Aggregation: " +
+            " -- Aggregation: " +
                 utility::to_string(
                     m_constraint_type_reference.aggregation_ptrs.size(), "%d"),
             true);
         utility::print_info(
-            " - Precedence: " +
+            " -- Precedence: " +
                 utility::to_string(
                     m_constraint_type_reference.precedence_ptrs.size(), "%d"),
             true);
         utility::print_info(
-            " - Variable Bound: " +
+            " -- Variable Bound: " +
                 utility::to_string(
                     m_constraint_type_reference.variable_bound_ptrs.size(),
                     "%d"),
             true);
         utility::print_info(
-            " - Set Partitioning: " +
+            " -- Set Partitioning: " +
                 utility::to_string(
                     m_constraint_type_reference.set_partitioning_ptrs.size(),
                     "%d"),
             true);
         utility::print_info(
-            " - Set Packing: " +
+            " -- Set Packing: " +
                 utility::to_string(
                     m_constraint_type_reference.set_packing_ptrs.size(), "%d"),
             true);
         utility::print_info(
-            " - Set Covering: " +
+            " -- Set Covering: " +
                 utility::to_string(
                     m_constraint_type_reference.set_covering_ptrs.size(), "%d"),
             true);
         utility::print_info(
-            " - Cardinality: " +
+            " -- Cardinality: " +
                 utility::to_string(
                     m_constraint_type_reference.cardinality_ptrs.size(), "%d"),
             true);
         utility::print_info(
-            " - Invariant Knapsack: " +
+            " -- Invariant Knapsack: " +
                 utility::to_string(
                     m_constraint_type_reference.invariant_knapsack_ptrs.size(),
                     "%d"),
             true);
         utility::print_info(
-            " - Equation Knapsack: " +
+            " -- Equation Knapsack: " +
                 utility::to_string(
                     m_constraint_type_reference.equation_knapsack_ptrs.size(),
                     "%d"),
             true);
         utility::print_info(
-            " - Bin Packing: " +
+            " -- Bin Packing: " +
                 utility::to_string(
                     m_constraint_type_reference.bin_packing_ptrs.size(), "%d"),
             true);
         utility::print_info(
-            " - Knapsack: " +
+            " -- Knapsack: " +
                 utility::to_string(
                     m_constraint_type_reference.knapsack_ptrs.size(), "%d"),
             true);
         utility::print_info(
-            " - Integer Knapsack: " +
+            " -- Integer Knapsack: " +
                 utility::to_string(
                     m_constraint_type_reference.integer_knapsack_ptrs.size(),
                     "%d"),
             true);
         utility::print_info(
-            " - General Linear: " +
+            " -- General Linear: " +
                 utility::to_string(
                     m_constraint_type_reference.general_linear_ptrs.size(),
                     "%d"),
             true);
         utility::print_info(
-            " - Nonlinear: " +
+            " -- Nonlinear: " +
                 utility::to_string(
                     m_constraint_type_reference.nonlinear_ptrs.size(), "%d"),
             true);

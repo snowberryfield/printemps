@@ -146,6 +146,12 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
         historical_feasible_solutions;
 
     /**
+     * Prepare other local variables.
+     */
+    LagrangeDualTerminationStatus termination_status =
+        LagrangeDualTerminationStatus::ITERATION_OVER;
+
+    /**
      * Print the header of optimization progress table and print the
      * initial solution status.
      */
@@ -170,12 +176,20 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
          */
         double elapsed_time = time_keeper.clock();
         if (elapsed_time > option.lagrange_dual.time_max) {
+            termination_status = LagrangeDualTerminationStatus::TIME_OVER;
             break;
         }
         if (elapsed_time + option.lagrange_dual.time_offset > option.time_max) {
+            termination_status = LagrangeDualTerminationStatus::TIME_OVER;
             break;
         }
         if (iteration >= option.lagrange_dual.iteration_max) {
+            termination_status = LagrangeDualTerminationStatus::ITERATION_OVER;
+            break;
+        }
+        if (incumbent_holder.feasible_incumbent_objective() <=
+            option.target_objective_value) {
+            termination_status = LagrangeDualTerminationStatus::REACH_TARGET;
             break;
         }
 
@@ -324,6 +338,7 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
             fabs(lagrangian - queue_average) <
                 std::max(1.0, fabs(queue_average)) *
                     option.lagrange_dual.tolerance) {
+            termination_status = LagrangeDualTerminationStatus::CONVERGE;
             break;
         }
 
@@ -345,6 +360,7 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
     result.incumbent_holder              = incumbent_holder;
     result.total_update_status           = total_update_status;
     result.number_of_iterations          = iteration;
+    result.termination_status            = termination_status;
     result.historical_feasible_solutions = historical_feasible_solutions;
 
     return result;
