@@ -98,6 +98,12 @@ LocalSearchResult<T_Variable, T_Expression> solve(
         historical_feasible_solutions;
 
     /**
+     * Prepare other local variables.
+     */
+    LocalSearchTerminationStatus termination_status =
+        LocalSearchTerminationStatus::ITERATION_OVER;
+
+    /**
      * Print the header of optimization progress table and print the initial
      * solution status.
      */
@@ -119,16 +125,20 @@ LocalSearchResult<T_Variable, T_Expression> solve(
          */
         double elapsed_time = time_keeper.clock();
         if (elapsed_time > option.local_search.time_max) {
+            termination_status = LocalSearchTerminationStatus::TIME_OVER;
             break;
         }
         if (elapsed_time + option.local_search.time_offset > option.time_max) {
+            termination_status = LocalSearchTerminationStatus::TIME_OVER;
             break;
         }
         if (iteration >= option.local_search.iteration_max) {
+            termination_status = LocalSearchTerminationStatus::ITERATION_OVER;
             break;
         }
         if (incumbent_holder.feasible_incumbent_objective() <=
             option.target_objective_value) {
+            termination_status = LocalSearchTerminationStatus::REACH_TARGET;
             break;
         }
 
@@ -153,6 +163,7 @@ LocalSearchResult<T_Variable, T_Expression> solve(
          * be terminated.
          */
         if (number_of_moves == 0) {
+            termination_status = LocalSearchTerminationStatus::NO_MOVE;
             break;
         }
 
@@ -192,6 +203,7 @@ LocalSearchResult<T_Variable, T_Expression> solve(
          * in the checked neighborhood.
          */
         if (!found_improving_solution) {
+            termination_status = LocalSearchTerminationStatus::LOCAL_OPTIMAL;
             break;
         }
 
@@ -248,6 +260,7 @@ LocalSearchResult<T_Variable, T_Expression> solve(
     result.memory                        = memory;
     result.total_update_status           = total_update_status;
     result.number_of_iterations          = iteration;
+    result.termination_status            = termination_status;
     result.historical_feasible_solutions = historical_feasible_solutions;
 
     return result;
