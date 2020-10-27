@@ -35,7 +35,7 @@
         "time_offset": 0.0,
         "step_size_extend_rate": 1.05,
         "step_size_reduce_rate": 0.95,
-        "tolerance": 0.001,
+        "tolerance": 1E-5,
         "queue_size": 100,
         "log_interval": 10,
         "seed": 1

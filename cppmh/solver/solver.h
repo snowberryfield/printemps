@@ -672,15 +672,20 @@ Result<T_Variable, T_Expression> solve(
                         penalty_coefficient_relaxing_flag   = true;
 
                     } else {
-                        if ((result_local_augmented_incumbent_score.objective <
-                             previous_solution_score.objective) ||
-                            (result_local_augmented_incumbent_score
-                                 .global_penalty <
-                             previous_solution_score.global_penalty)) {
-                            employing_local_augmented_solution_flag = true;
+                        if (incumbent_holder.is_found_feasible_solution()) {
+                            if ((result_local_augmented_incumbent_score
+                                     .objective <
+                                 previous_solution_score.objective) ||
+                                (result_local_augmented_incumbent_score
+                                     .global_penalty <
+                                 previous_solution_score.global_penalty)) {
+                                employing_local_augmented_solution_flag = true;
 
+                            } else {
+                                employing_previous_solution_flag = true;
+                            }
                         } else {
-                            employing_previous_solution_flag = true;
+                            employing_local_augmented_solution_flag = true;
                         }
                         penalty_coefficient_tightening_flag = true;
                         penalty_coefficient_relaxing_flag   = false;
