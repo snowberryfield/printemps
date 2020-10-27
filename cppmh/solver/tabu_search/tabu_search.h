@@ -491,39 +491,6 @@ TabuSearchResult<T_Variable, T_Expression> solve(
             }
         }
 
-        if (option.tabu_search.is_enabled_automatic_break) {
-            /**
-             * If the local penalty us sufficiently larger than objective
-             * sensitivity, the current loop will be terminated and the
-             * local penalty coefficients will be adjusted.
-             */
-            constexpr int    ITERATION_MIN = 10;
-            constexpr double MARGIN        = 100.0;
-
-            if (iteration > ITERATION_MIN              //
-                && current_solution_score.is_feasible  //
-                && number_of_infeasible_neighborhood > 0) {
-                std::vector<double> infeasible_local_penalties(
-                    number_of_infeasible_neighborhood);
-                int count = 0;
-                for (auto i = 0; i < number_of_all_neighborhoods; i++) {
-                    if (!trial_solution_scores[i].is_feasible) {
-                        infeasible_local_penalties[count++] =
-                            local_penalties[i];
-                    }
-                }
-
-                double max_objective_sensitivity =
-                    utility::max_abs(objective_improvements);
-                double min_penalty = utility::min(infeasible_local_penalties);
-                if (max_objective_sensitivity * MARGIN < min_penalty) {
-                    termination_status =
-                        TabuSearchTerminationStatus::EARLY_STOP;
-                    break;
-                }
-            }
-        }
-
         if (option.tabu_search.is_enabled_automatic_tabu_tenure_adjustment) {
             if ((update_status &
                  IncumbentHolderConstant::
@@ -601,6 +568,39 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                              update_status,                        //
                              incumbent_holder,                     //
                              option.verbose >= Verbose::Full);
+        }
+
+        if (option.tabu_search.is_enabled_automatic_break) {
+            /**
+             * If the local penalty us sufficiently larger than objective
+             * sensitivity, the current loop will be terminated and the
+             * local penalty coefficients will be adjusted.
+             */
+            constexpr int    ITERATION_MIN = 10;
+            constexpr double MARGIN        = 100.0;
+
+            if (iteration > ITERATION_MIN              //
+                && current_solution_score.is_feasible  //
+                && number_of_infeasible_neighborhood > 0) {
+                std::vector<double> infeasible_local_penalties(
+                    number_of_infeasible_neighborhood);
+                int count = 0;
+                for (auto i = 0; i < number_of_all_neighborhoods; i++) {
+                    if (!trial_solution_scores[i].is_feasible) {
+                        infeasible_local_penalties[count++] =
+                            local_penalties[i];
+                    }
+                }
+
+                double max_objective_sensitivity =
+                    utility::max_abs(objective_improvements);
+                double min_penalty = utility::min(infeasible_local_penalties);
+                if (max_objective_sensitivity * MARGIN < min_penalty) {
+                    termination_status =
+                        TabuSearchTerminationStatus::EARLY_STOP;
+                    break;
+                }
+            }
         }
 
         iteration++;
