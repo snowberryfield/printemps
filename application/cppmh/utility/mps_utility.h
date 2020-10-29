@@ -28,7 +28,16 @@ enum class MPSConstraintSense { Lower, Equal, Upper };
 enum class MPSObjectiveSense { Minimize, Maximize };
 
 /*****************************************************************************/
-enum class MPSReadMode { Initial, Name, Rows, Columns, Rhs, Bounds, Endata };
+enum class MPSReadMode {
+    Initial,
+    Name,
+    Rows,
+    Columns,
+    Rhs,
+    Ranges,
+    Bounds,
+    Endata
+};
 
 /*****************************************************************************/
 struct MPSVariable {
@@ -213,17 +222,15 @@ inline MPS read_mps(const std::string &a_FILE_NAME) {
         } else if (items.front() == "RHS" && items.size() == 1) {
             read_mode = MPSReadMode::Rhs;
             continue;
+        } else if (items.front() == "RANGES" && items.size() == 1) {
+            read_mode = MPSReadMode::Ranges;
+            continue;
         } else if (items.front() == "BOUNDS" && items.size() == 1) {
             read_mode = MPSReadMode::Bounds;
             continue;
         } else if (items.front() == "ENDATA" && items.size() == 1) {
             read_mode = MPSReadMode::Endata;
             is_valid  = true;
-            break;
-        } else if (items.front() == "RANGES" && items.size() == 1) {
-            throw std::logic_error(utility::format_error_location(
-                __FILE__, __LINE__, __func__,
-                "This program does not compatible to RANGES section."));
             break;
         }
         switch (read_mode) {
@@ -321,6 +328,12 @@ inline MPS read_mps(const std::string &a_FILE_NAME) {
                     double      rhs    = atof(items[2 * i + 2].c_str());
                     mps.constraints[c_name].rhs = rhs;
                 }
+                break;
+            }
+            case MPSReadMode::Ranges: {
+                throw std::logic_error(utility::format_error_location(
+                    __FILE__, __LINE__, __func__,
+                    "This program does not compatible to RANGES section."));
                 break;
             }
             case MPSReadMode::Bounds: {
