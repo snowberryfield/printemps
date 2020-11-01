@@ -1,5 +1,5 @@
 {
-    "iteration_max": 10000,
+    "iteration_max": 100,
     "time_max": 120.0,
     "time_offset": 0.0,
     "penalty_coefficient_relaxing_rate": 0.9,
@@ -71,7 +71,6 @@
         "iteration_decrease_rate": 0.5,
         "ignore_tabu_if_augmented_incumbent": false,
         "ignore_tabu_if_feasible_incumbent": true,
-        "number_of_initial_modification": 0,
         "seed": 1
     }
 }
