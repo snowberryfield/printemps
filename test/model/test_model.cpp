@@ -3186,6 +3186,12 @@ TEST_F(TestModel, export_solution) {
     }
 
     model.update();
+    double total_violation = 0.0;
+    for (auto i = 0; i < 20; i++) {
+        for (auto j = 0; j < 30; j++) {
+            total_violation += v(i, j).violation_value();
+        }
+    }
 
     auto solution = model.export_solution();
     EXPECT_EQ(3, static_cast<int>(solution.variable_value_proxies.size()));
@@ -3194,6 +3200,7 @@ TEST_F(TestModel, export_solution) {
     EXPECT_EQ(3, static_cast<int>(solution.violation_value_proxies.size()));
 
     EXPECT_EQ(model.objective().value(), solution.objective);
+    EXPECT_EQ(total_violation, solution.total_violation);
     EXPECT_EQ(model.is_feasible(), solution.is_feasible);
 
     EXPECT_EQ(x.id(), solution.variable_value_proxies[0].id());
@@ -3309,6 +3316,12 @@ TEST_F(TestModel, export_named_solution) {
     model.categorize_variables();
     model.categorize_constraints();
     model.update();
+    double total_violation = 0.0;
+    for (auto i = 0; i < 20; i++) {
+        for (auto j = 0; j < 30; j++) {
+            total_violation += v(i, j).violation_value();
+        }
+    }
 
     auto named_solution = model.export_named_solution();
 
@@ -3324,6 +3337,7 @@ TEST_F(TestModel, export_named_solution) {
     EXPECT_EQ(3, static_cast<int>(named_solution.violations().size()));
 
     EXPECT_EQ(model.objective().value(), named_solution.objective());
+    EXPECT_EQ(total_violation, named_solution.total_violation());
     EXPECT_EQ(model.is_feasible(), named_solution.is_feasible());
 
     EXPECT_EQ(x.id(), named_solution.variables("x").id());
@@ -3475,8 +3489,25 @@ TEST_F(TestModel, convert_to_plain_solution) {
     auto& y = model.create_variables("y", 10);
     auto& z = model.create_variables("z", {20, 30});
 
-    model.minimize(random_integer() * x.sum() + random_integer() * y.sum() +
-                   random_integer() * z.sum());
+    auto& p = model.create_expression("p");
+    auto& q = model.create_expressions("q", 10);
+    auto& r = model.create_expressions("r", {20, 30});
+
+    auto& v = model.create_constraints("v", {20, 30});
+
+    p = random_integer() * x;
+    for (auto i = 0; i < 10; i++) {
+        q(i) = random_integer() * y(i);
+    }
+
+    for (auto i = 0; i < 20; i++) {
+        for (auto j = 0; j < 30; j++) {
+            r(i, j) = random_integer() * z(i, j) + random_integer();
+            v(i, j) = r(i, j) == random_integer();
+        }
+    }
+    model.minimize(random_integer() * p + random_integer() * q.sum() +
+                   random_integer() * r.sum());
 
     x = random_integer();
     for (auto i = 0; i < 10; i++) {
@@ -3490,10 +3521,17 @@ TEST_F(TestModel, convert_to_plain_solution) {
     }
 
     model.update();
+    double total_violation = 0.0;
+    for (auto i = 0; i < 20; i++) {
+        for (auto j = 0; j < 30; j++) {
+            total_violation += v(i, j).violation_value();
+        }
+    }
 
     auto solution       = model.export_solution();
     auto plain_solution = model.convert_to_plain_solution(solution);
     EXPECT_EQ(model.objective().value(), plain_solution.objective);
+    EXPECT_EQ(total_violation, plain_solution.total_violation);
     EXPECT_EQ(model.is_feasible(), plain_solution.is_feasible);
 
     int index = 0;

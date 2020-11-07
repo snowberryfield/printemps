@@ -20,11 +20,12 @@ struct PlainSolution {
     friend class Model<T_Variable, T_Expression>;
 
     T_Expression            objective;
+    T_Expression            total_violation;
     bool                    is_feasible;
     std::vector<T_Variable> variables;
 
     /*************************************************************************/
-    PlainSolution(void) : objective(0), is_feasible(false) {
+    PlainSolution(void) : objective(0), total_violation(0), is_feasible(false) {
         this->initialize();
     }
 
@@ -37,8 +38,9 @@ struct PlainSolution {
     inline void initialize(void) {
         this->variables.clear();
 
-        this->objective   = 0;
-        this->is_feasible = false;
+        this->objective       = 0;
+        this->total_violation = 0;
+        this->is_feasible     = false;
     }
 
     /*************************************************************************/
@@ -50,6 +52,9 @@ struct PlainSolution {
                << (this->is_feasible ? "true," : "false,") << std::endl;
         *a_ofs << utility::indent_spaces(indent_level)
                << "\"objective\" : " << this->objective << "," << std::endl;
+        *a_ofs << utility::indent_spaces(indent_level)
+               << "\"total_violation\" : " << this->total_violation << ","
+               << std::endl;
         *a_ofs << utility::indent_spaces(indent_level) << "\"variables\" : ";
         *a_ofs << "[";
         auto& variables      = this->variables;

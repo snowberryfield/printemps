@@ -39,6 +39,7 @@ class NamedSolution {
         m_violation_value_proxies;
 
     T_Expression m_objective;
+    T_Expression m_total_violation;
     bool         m_is_feasible;
 
    public:
@@ -61,8 +62,9 @@ class NamedSolution {
         m_constraint_value_proxies.clear();
         m_violation_value_proxies.clear();
 
-        m_objective   = 0;
-        m_is_feasible = false;
+        m_objective       = 0;
+        m_total_violation = 0;
+        m_is_feasible     = false;
     }
 
     /*************************************************************************/
@@ -112,6 +114,10 @@ class NamedSolution {
         ofs << utility::indent_spaces(indent_level)
             << "\"objective\" : " + std::to_string(m_objective) << ","
             << std::endl;
+
+        ofs << utility::indent_spaces(indent_level)
+            << "\"total_violation\" : " + std::to_string(m_total_violation)
+            << "," << std::endl;
 
         /// Decision variables
         write_values_by_name(&ofs, m_variable_value_proxies, "variables",
@@ -164,6 +170,10 @@ class NamedSolution {
         ofs << utility::indent_spaces(indent_level)
             << "\"objective\" : " + std::to_string(m_objective) << ","
             << std::endl;
+
+        ofs << utility::indent_spaces(indent_level)
+            << "\"total_violation\" : " + std::to_string(m_total_violation)
+            << "," << std::endl;
 
         /// Decision variables
         write_values_by_array(&ofs, m_variable_value_proxies, "variables",
@@ -268,6 +278,11 @@ class NamedSolution {
     /*************************************************************************/
     inline constexpr T_Expression objective(void) const {
         return m_objective;
+    }
+
+    /*************************************************************************/
+    inline constexpr T_Expression total_violation(void) const {
+        return m_total_violation;
     }
 
     /*************************************************************************/

@@ -104,6 +104,10 @@ int main([[maybe_unused]] int argc, char *argv[]) {
         "objective: " + std::to_string(result.solution.objective()),
         option.verbose != cppmh::solver::Verbose::None);
 
+    cppmh::utility::print_info(
+        "total violation: " + std::to_string(result.solution.total_violation()),
+        option.verbose != cppmh::solver::Verbose::None);
+
     result.solution.write_json_by_name("incumbent.json");
     result.solution.write_solution("incumbent.sol");
 
