@@ -1177,7 +1177,7 @@ Result<T_Variable, T_Expression> solve(
         } else if (employing_local_augmented_solution_flag) {
             utility::print_message(
                 "The next loop will be start from the local incumbent "
-                "solution founded in the previous loop.",
+                "solution found in the previous loop.",
                 master_option.verbose >= Verbose::Outer);
         } else if (employing_previous_solution_flag) {
             utility::print_message(
