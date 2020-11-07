@@ -27,10 +27,11 @@ struct Solution {
     std::vector<ValueProxy<T_Expression>> violation_value_proxies;
 
     T_Expression objective;
+    T_Expression total_violation;
     bool         is_feasible;
 
     /*************************************************************************/
-    Solution(void) : objective(0), is_feasible(false) {
+    Solution(void) : objective(0), total_violation(0), is_feasible(false) {
         this->initialize();
     }
 
@@ -46,8 +47,9 @@ struct Solution {
         this->constraint_value_proxies.clear();
         this->violation_value_proxies.clear();
 
-        this->objective   = 0;
-        this->is_feasible = false;
+        this->objective       = 0;
+        this->total_violation = 0;
+        this->is_feasible     = false;
     }
 };
 using IPSolution = Solution<int, double>;
