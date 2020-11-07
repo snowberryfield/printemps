@@ -79,13 +79,13 @@ int main([[maybe_unused]] int argc, char *argv[]) {
         "objective: " + std::to_string(result.solution.objective()),
         option.verbose != cppmh::solver::Verbose::None);
 
-    result.solution.write_json_by_name("incumbent.json");
+    auto summary = model.export_summary();
+    result.solution.write_json_by_name("incumbent.json", summary);
     result.solution.write_solution("incumbent.sol");
-
-    result.status.write_json_by_name("status.json");
+    result.status.write_json_by_name("status.json", summary);
 
     if (option.is_enabled_collect_historical_data) {
-        result.history.write_feasible_solutions_json("feasible.json");
+        result.solution_archive.write_solutions_json("feasible.json", summary);
     }
 
     return 0;

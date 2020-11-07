@@ -3325,12 +3325,6 @@ TEST_F(TestModel, export_named_solution) {
 
     auto named_solution = model.export_named_solution();
 
-    EXPECT_EQ("name", named_solution.model_summary().name);
-    EXPECT_EQ(1 + 10 + 20 * 30,
-              named_solution.model_summary().number_of_variables);
-    EXPECT_EQ(1 + 10 + 20 * 30,
-              named_solution.model_summary().number_of_constraints);
-
     EXPECT_EQ(3, static_cast<int>(named_solution.variables().size()));
     EXPECT_EQ(3, static_cast<int>(named_solution.expressions().size()));
     EXPECT_EQ(3, static_cast<int>(named_solution.constraints().size()));

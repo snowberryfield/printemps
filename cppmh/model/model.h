@@ -26,7 +26,6 @@
 #include "solution_score.h"
 #include "selection.h"
 #include "neighborhood.h"
-#include "plain_solution_pool.h"
 
 #include "expression_binary_operator.h"
 #include "constraint_binary_operator.h"
@@ -2574,9 +2573,6 @@ class Model {
         int variable_proxies_size   = m_variable_proxies.size();
         int expression_proxies_size = m_expression_proxies.size();
         int constraint_proxies_size = m_constraint_proxies.size();
-
-        /// Summary
-        named_solution.m_model_summary = this->export_summary();
 
         /// Decision variables
         for (auto i = 0; i < variable_proxies_size; i++) {

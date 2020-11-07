@@ -16,7 +16,7 @@
 #include "incumbent_holder.h"
 #include "option.h"
 #include "status.h"
-#include "history.h"
+#include "solution_archive.h"
 #include "result.h"
 #include "tabu_search/tabu_search.h"
 #include "local_search/local_search.h"
@@ -197,11 +197,11 @@ Result<T_Variable, T_Expression> solve(
     Memory memory(model);
 
     /**
-     * Prepare historical solutions pool.
+     * Prepare feasible solutions archive.
      */
-    model::PlainSolutionPool<T_Variable, T_Expression>  //
-        solution_pool(master_option.historical_data_capacity,
-                      model->is_minimization());
+    SolutionArchive<T_Variable, T_Expression>  //
+        solution_archive(master_option.historical_data_capacity,
+                         model->is_minimization());
 
     /**
      * Compute the values of expressions, constraints, and the objective
@@ -305,7 +305,7 @@ Result<T_Variable, T_Expression> solve(
                  */
                 if (master_option.is_enabled_collect_historical_data &&
                     result.historical_feasible_solutions.size() > 0) {
-                    solution_pool.push(result.historical_feasible_solutions);
+                    solution_archive.push(result.historical_feasible_solutions);
                 }
 
                 /**
@@ -436,7 +436,7 @@ Result<T_Variable, T_Expression> solve(
              */
             if (master_option.is_enabled_collect_historical_data &&
                 result.historical_feasible_solutions.size() > 0) {
-                solution_pool.push(result.historical_feasible_solutions);
+                solution_archive.push(result.historical_feasible_solutions);
             }
 
             /**
@@ -720,7 +720,7 @@ Result<T_Variable, T_Expression> solve(
          */
         if (master_option.is_enabled_collect_historical_data &&
             result.historical_feasible_solutions.size() > 0) {
-            solution_pool.push(result.historical_feasible_solutions);
+            solution_archive.push(result.historical_feasible_solutions);
         }
 
         /**
@@ -1284,7 +1284,6 @@ Result<T_Variable, T_Expression> solve(
     Result<T_Variable, T_Expression> result;
     result.solution = named_solution;
 
-    result.status.model_summary              = model->export_summary();
     result.status.penalty_coefficients       = named_penalty_coefficients;
     result.status.update_counts              = named_update_counts;
     result.status.is_found_feasible_solution = named_solution.is_feasible();
@@ -1296,9 +1295,7 @@ Result<T_Variable, T_Expression> solve(
     result.status.number_of_tabu_search_iterations =
         number_of_tabu_search_iterations;
     result.status.number_of_tabu_search_loops = number_of_tabu_search_loops;
-
-    result.history.model_summary      = model->export_summary();
-    result.history.feasible_solutions = solution_pool.solutions();
+    result.solution_archive                   = solution_archive;
 
     return result;
 }

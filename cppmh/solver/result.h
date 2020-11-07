@@ -13,7 +13,7 @@ template <class T_Variable, class T_Expression>
 struct Result {
     model::NamedSolution<T_Variable, T_Expression> solution;
     Status                                         status;
-    History<T_Variable, T_Expression>              history;
+    SolutionArchive<T_Variable, T_Expression>      solution_archive;
 
     /*************************************************************************/
     Result(void) {
@@ -29,7 +29,7 @@ struct Result {
     inline void constexpr initialize(void) {
         this->solution.initialize();
         this->status.initialize();
-        this->history.initialize();
+        this->solution_archive.initialize();
     }
 };
 }  // namespace solver
