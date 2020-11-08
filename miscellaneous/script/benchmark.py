@@ -14,43 +14,51 @@ import argparse
 
 def run_benchmark(executable, mps_list, option_file_name,
                   is_enabled_separate_equality):
-
-    if(is_enabled_separate_equality):
-        separate_switch = '--separate'
-    else:
-        separate_switch = ''
-
     results = []
-
+    index = 0
     for mps in mps_list:
-        print('Solving' + mps + '...')
-        subprocess.run([executable, mps, '-p',
-                        option_file_name, separate_switch])
+        commands = [executable, mps]
+        if (is_enabled_separate_equality):
+            commands.append('--separate')
+        if (option_file_name):
+            commands.append('-p')
+            commands.append(option_file_name)
+
+        print('#{} Solving'.format(index) + mps + '...')
+        subprocess.run(commands)
+
         with open('status.json', 'r') as f:
             status = json.load(f)
         with open('incumbent.json', 'r') as f:
             incumbent = json.load(f)
 
         result = {
-            'name': status['name'],
-            'number_of_variables': status['number_of_variables'],
-            'number_of_constraints': status['number_of_constraints'],
-            'is_found_feasible_solution': status['is_found_feasible_solution'],
-            'elapsed_time': status['elapsed_time'],
-            'number_of_lagrange_dual_iterations': status['number_of_lagrange_dual_iterations'],
-            'number_of_local_search_iterations': status['number_of_local_search_iterations'],
-            'number_of_tabu_search_iterations': status['number_of_tabu_search_iterations'],
-            'number_of_tabu_search_loops': status['number_of_tabu_search_loops'],
-            'objective': incumbent['objective']
+            'instance': {
+                'name': status['name'],
+                'number_of_variables': status['number_of_variables'],
+                'number_of_constraints': status['number_of_constraints']
+            },
+            'computed': {
+                'is_found_feasible_solution': status['is_found_feasible_solution'],
+                'objective': incumbent['objective'],
+                'total_violation': incumbent['total_violation'],
+                'elapsed_time': status['elapsed_time'],
+                'number_of_lagrange_dual_iterations': status['number_of_lagrange_dual_iterations'],
+                'number_of_local_search_iterations': status['number_of_local_search_iterations'],
+                'number_of_tabu_search_iterations': status['number_of_tabu_search_iterations'],
+                'number_of_tabu_search_loops': status['number_of_tabu_search_loops']
+            }
         }
         results.append(result)
-        print('n.variables:%d, n.constraints:%d, is_feasible:%d, objective:%f, elapsed time[sec]:%f' % (
-            result['number_of_variables'],
-            result['number_of_constraints'],
-            result['is_found_feasible_solution'],
-            result['objective'],
-            result['elapsed_time']
+        print('  n.variables:{0}, n.constraints:{1}, is_feasible:{2}, objective:{3}, total violation:{4}, elapsed time[sec]:{5}'.format(
+            status['number_of_variables'],
+            status['number_of_constraints'],
+            status['is_found_feasible_solution'],
+            incumbent['objective'],
+            incumbent['total_violation'],
+            status['elapsed_time']
         ))
+        print()
 
     return results
 
@@ -72,17 +80,18 @@ def write_csv(results):
             + 'number_of_tabu_search_loops\n')
 
         for result in results:
-            f.write('%s,%d,%d,%d,%f,%f,%d,%d,%d,%d\n' % (
-                result['name'],
-                result['number_of_variables'],
-                result['number_of_constraints'],
-                result['is_found_feasible_solution'],
-                result['objective'],
-                result['elapsed_time'],
-                result['number_of_lagrange_dual_iterations'],
-                result['number_of_local_search_iterations'],
-                result['number_of_tabu_search_iterations'],
-                result['number_of_tabu_search_loops']
+            f.write('{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10}\n'.format(
+                result['instance']['name'],
+                result['instance']['number_of_variables'],
+                result['instance']['number_of_constraints'],
+                result['computed']['is_found_feasible_solution'],
+                result['computed']['objective'],
+                result['computed']['total_violation'],
+                result['computed']['elapsed_time'],
+                result['computed']['number_of_lagrange_dual_iterations'],
+                result['computed']['number_of_local_search_iterations'],
+                result['computed']['number_of_tabu_search_iterations'],
+                result['computed']['number_of_tabu_search_loops']
             ))
 
 
