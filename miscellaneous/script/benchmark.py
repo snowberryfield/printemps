@@ -59,6 +59,7 @@ def run_benchmark(executable, mps_list, option_file_name,
             status['elapsed_time']
         ))
         print()
+        index += 1
 
     return results
 
