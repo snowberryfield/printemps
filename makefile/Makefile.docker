@@ -8,4 +8,4 @@ down:
 
 .PHONY: shell
 shell:
-	docker-compose exec --user `id -u`:`id -g` development_environment bash
+	docker-compose exec develop bash
