@@ -3,39 +3,33 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef CPPMH_UTILITY_PLAIN_SOLUTION_POOL_H__
-#define CPPMH_UTILITY_PLAIN_SOLUTION_POOL_H__
-
-#include <algorithm>
-#include <vector>
+#ifndef CPPMH_SOLVER_SOLUTION_ARCHIVE_H__
+#define CPPMH_SOLVER_SOLUTION_ARCHIVE_H__
 
 namespace cppmh {
-namespace model {
+namespace solver {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-class PlainSolution;
-
-/*****************************************************************************/
-template <class T_Variable, class T_Expression>
-class PlainSolutionPool {
+class SolutionArchive {
    private:
-    int                                                  m_max_size;
-    bool                                                 m_is_ascending;
-    std::vector<PlainSolution<T_Variable, T_Expression>> m_solutions;
+    int  m_max_size;
+    bool m_is_ascending;
+    std::vector<model::PlainSolution<T_Variable, T_Expression>>  //
+        m_solutions;
 
    public:
     /*************************************************************************/
-    PlainSolutionPool(void) {
+    SolutionArchive(void) {
         this->initialize();
     }
 
     /*************************************************************************/
-    virtual ~PlainSolutionPool(void) {
+    virtual ~SolutionArchive(void) {
         /// nothing to do
     }
 
     /*************************************************************************/
-    PlainSolutionPool(const int a_MAX_SIZE, const bool a_is_ASCENDING) {
+    SolutionArchive(const int a_MAX_SIZE, const bool a_is_ASCENDING) {
         this->setup(a_MAX_SIZE, a_is_ASCENDING);
     }
 
@@ -56,15 +50,15 @@ class PlainSolutionPool {
 
     /*************************************************************************/
     inline constexpr void push(
-        const PlainSolution<T_Variable, T_Expression>& a_SOLUTION) {
-        std::vector<PlainSolution<T_Variable, T_Expression>> solutions = {
-            a_SOLUTION};
+        const model::PlainSolution<T_Variable, T_Expression>& a_SOLUTION) {
+        std::vector<model::PlainSolution<T_Variable, T_Expression>> solutions =
+            {a_SOLUTION};
         this->push(solutions);
     }
 
     /*************************************************************************/
     inline constexpr void push(
-        const std::vector<PlainSolution<T_Variable, T_Expression>>&
+        const std::vector<model::PlainSolution<T_Variable, T_Expression>>&
             a_SOLUTIONS) {
         auto& solutions = m_solutions;
         solutions.insert(solutions.end(), a_SOLUTIONS.begin(),
@@ -110,12 +104,57 @@ class PlainSolutionPool {
     }
 
     /*************************************************************************/
-    inline constexpr const std::vector<PlainSolution<T_Variable, T_Expression>>&
+    inline constexpr const std::vector<
+        model::PlainSolution<T_Variable, T_Expression>>&
     solutions(void) const {
         return m_solutions;
     }
+
+    /*************************************************************************/
+    inline void write_solutions_json(
+        const std::string&         a_FILE_NAME,
+        const model::ModelSummary& a_MODEL_SUMMARY) const {
+        int indent_level = 0;
+
+        std::ofstream ofs(a_FILE_NAME.c_str());
+        ofs << utility::indent_spaces(indent_level) << "{" << std::endl;
+        indent_level++;
+
+        /// Summary
+        ofs << utility::indent_spaces(indent_level) << "\"name\" : "
+            << "\"" << a_MODEL_SUMMARY.name << "\"," << std::endl;
+
+        ofs << utility::indent_spaces(indent_level)
+            << "\"number_of_variables\" : "
+            << a_MODEL_SUMMARY.number_of_variables << "," << std::endl;
+
+        ofs << utility::indent_spaces(indent_level)
+            << "\"number_of_constraints\" : "
+            << a_MODEL_SUMMARY.number_of_constraints << "," << std::endl;
+
+        /// Solutions
+        ofs << utility::indent_spaces(indent_level) << "\"solutions\": ["
+            << std::endl;
+
+        indent_level++;
+        auto& solutions      = this->m_solutions;
+        int   solutions_size = solutions.size();
+        for (auto i = 0; i < solutions_size; i++) {
+            solutions[i].write(&ofs, indent_level);
+            if (i != solutions_size - 1) {
+                ofs << "," << std::endl;
+            } else {
+                ofs << std::endl;
+            }
+        }
+        indent_level--;
+        ofs << utility::indent_spaces(indent_level) << "]" << std::endl;
+        indent_level--;
+        ofs << utility::indent_spaces(indent_level) << "}" << std::endl;
+        ofs.close();
+    }
 };
-}  // namespace model
+}  // namespace solver
 }  // namespace cppmh
 
 #endif

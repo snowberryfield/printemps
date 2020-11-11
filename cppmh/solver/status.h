@@ -12,8 +12,6 @@ namespace cppmh {
 namespace solver {
 /*****************************************************************************/
 struct Status {
-    model::ModelSummary model_summary;
-
     std::unordered_map<std::string, model::ValueProxy<double>>
         penalty_coefficients;
 
@@ -38,8 +36,6 @@ struct Status {
 
     /*************************************************************************/
     inline void initialize(void) {
-        this->model_summary.initialize();
-
         this->penalty_coefficients.clear();
         this->update_counts.clear();
         this->is_found_feasible_solution         = false;
@@ -61,7 +57,9 @@ struct Status {
     }
 
     /*************************************************************************/
-    inline void write_json_by_name(const std::string& a_FILE_NAME) const {
+    inline void write_json_by_name(
+        const std::string&         a_FILE_NAME,
+        const model::ModelSummary& a_MODEL_SUMMARY) const {
         int indent_level = 0;
 
         std::ofstream ofs(a_FILE_NAME.c_str());
@@ -70,15 +68,15 @@ struct Status {
 
         /// Summary
         ofs << utility::indent_spaces(indent_level) << "\"name\" : "
-            << "\"" << model_summary.name << "\"," << std::endl;
+            << "\"" << a_MODEL_SUMMARY.name << "\"," << std::endl;
 
         ofs << utility::indent_spaces(indent_level)
-            << "\"number_of_variables\" : " << model_summary.number_of_variables
-            << "," << std::endl;
+            << "\"number_of_variables\" : "
+            << a_MODEL_SUMMARY.number_of_variables << "," << std::endl;
 
         ofs << utility::indent_spaces(indent_level)
             << "\"number_of_constraints\" : "
-            << model_summary.number_of_constraints << "," << std::endl;
+            << a_MODEL_SUMMARY.number_of_constraints << "," << std::endl;
 
         ofs << utility::indent_spaces(indent_level)
             << "\"is_found_feasible_solution\" : "
@@ -123,12 +121,54 @@ struct Status {
     }
 
     /*************************************************************************/
-    inline void write_json_by_array(const std::string& a_FILE_NAME) const {
+    inline void write_json_by_array(
+        const std::string&         a_FILE_NAME,
+        const model::ModelSummary& a_MODEL_SUMMARY) const {
         int indent_level = 0;
 
         std::ofstream ofs(a_FILE_NAME.c_str());
         ofs << utility::indent_spaces(indent_level) << "{" << std::endl;
         indent_level++;
+
+        /// Summary
+        ofs << utility::indent_spaces(indent_level) << "\"name\" : "
+            << "\"" << a_MODEL_SUMMARY.name << "\"," << std::endl;
+
+        ofs << utility::indent_spaces(indent_level)
+            << "\"number_of_variables\" : "
+            << a_MODEL_SUMMARY.number_of_variables << "," << std::endl;
+
+        ofs << utility::indent_spaces(indent_level)
+            << "\"number_of_constraints\" : "
+            << a_MODEL_SUMMARY.number_of_constraints << "," << std::endl;
+
+        ofs << utility::indent_spaces(indent_level)
+            << "\"is_found_feasible_solution\" : "
+            << (is_found_feasible_solution ? "true," : "false,") << std::endl;
+
+        ofs << utility::indent_spaces(indent_level)
+            << "\"elapsed_time\" : " + std::to_string(elapsed_time) << ","
+            << std::endl;
+
+        ofs << utility::indent_spaces(indent_level)
+            << "\"number_of_lagrange_dual_iterations\" : " +
+                   std::to_string(number_of_lagrange_dual_iterations)
+            << "," << std::endl;
+
+        ofs << utility::indent_spaces(indent_level)
+            << "\"number_of_local_search_iterations\" : " +
+                   std::to_string(number_of_local_search_iterations)
+            << "," << std::endl;
+
+        ofs << utility::indent_spaces(indent_level)
+            << "\"number_of_tabu_search_iterations\" : " +
+                   std::to_string(number_of_tabu_search_iterations)
+            << "," << std::endl;
+
+        ofs << utility::indent_spaces(indent_level)
+            << "\"number_of_tabu_search_loops\" : " +
+                   std::to_string(number_of_tabu_search_loops)
+            << "," << std::endl;
 
         /// Penalty coefficients
         model::write_values_by_array(&ofs, this->penalty_coefficients,  //
