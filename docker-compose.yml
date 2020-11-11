@@ -1,9 +1,9 @@
 version: "3"
 services:
-  development_environment:
+  develop:
     build:
       context: ./docker
       dockerfile: Dockerfile
-    working_dir: /tmp/develop
+    working_dir: /home/work
     volumes:
-      - ${PWD}:/tmp/develop
+      - ${PWD}:/home/work

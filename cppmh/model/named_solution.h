@@ -27,8 +27,6 @@ class NamedSolution {
     friend class Model<T_Variable, T_Expression>;
 
    private:
-    ModelSummary m_model_summary;
-
     std::unordered_map<std::string, ValueProxy<T_Variable>>
         m_variable_value_proxies;
     std::unordered_map<std::string, ValueProxy<T_Expression>>
@@ -39,6 +37,7 @@ class NamedSolution {
         m_violation_value_proxies;
 
     T_Expression m_objective;
+    T_Expression m_total_violation;
     bool         m_is_feasible;
 
    public:
@@ -54,15 +53,14 @@ class NamedSolution {
 
     /*************************************************************************/
     inline void initialize(void) {
-        m_model_summary.initialize();
-
         m_variable_value_proxies.clear();
         m_expression_value_proxies.clear();
         m_constraint_value_proxies.clear();
         m_violation_value_proxies.clear();
 
-        m_objective   = 0;
-        m_is_feasible = false;
+        m_objective       = 0;
+        m_total_violation = 0;
+        m_is_feasible     = false;
     }
 
     /*************************************************************************/
@@ -86,7 +84,8 @@ class NamedSolution {
     }
 
     /*************************************************************************/
-    inline void write_json_by_name(const std::string& a_FILE_NAME) const {
+    inline void write_json_by_name(const std::string&  a_FILE_NAME,
+                                   const ModelSummary& a_MODEL_SUMMARY) const {
         int indent_level = 0;
 
         std::ofstream ofs(a_FILE_NAME.c_str());
@@ -95,15 +94,15 @@ class NamedSolution {
 
         /// Summary
         ofs << utility::indent_spaces(indent_level) << "\"name\" : "
-            << "\"" << m_model_summary.name << "\"," << std::endl;
+            << "\"" << a_MODEL_SUMMARY.name << "\"," << std::endl;
 
         ofs << utility::indent_spaces(indent_level)
             << "\"number_of_variables\" : "
-            << m_model_summary.number_of_variables << "," << std::endl;
+            << a_MODEL_SUMMARY.number_of_variables << "," << std::endl;
 
         ofs << utility::indent_spaces(indent_level)
             << "\"number_of_constraints\" : "
-            << m_model_summary.number_of_constraints << "," << std::endl;
+            << a_MODEL_SUMMARY.number_of_constraints << "," << std::endl;
 
         ofs << utility::indent_spaces(indent_level)
             << "\"is_feasible\" : " << (m_is_feasible ? "true," : "false,")
@@ -112,6 +111,10 @@ class NamedSolution {
         ofs << utility::indent_spaces(indent_level)
             << "\"objective\" : " + std::to_string(m_objective) << ","
             << std::endl;
+
+        ofs << utility::indent_spaces(indent_level)
+            << "\"total_violation\" : " + std::to_string(m_total_violation)
+            << "," << std::endl;
 
         /// Decision variables
         write_values_by_name(&ofs, m_variable_value_proxies, "variables",
@@ -138,7 +141,8 @@ class NamedSolution {
     }
 
     /*************************************************************************/
-    inline void write_json_by_array(const std::string& a_FILE_NAME) const {
+    inline void write_json_by_array(const std::string&  a_FILE_NAME,
+                                    const ModelSummary& a_MODEL_SUMMARY) const {
         int indent_level = 0;
 
         std::ofstream ofs(a_FILE_NAME.c_str());
@@ -147,15 +151,15 @@ class NamedSolution {
 
         /// Summary
         ofs << utility::indent_spaces(indent_level) << "\"name\" : "
-            << "\"" << m_model_summary.name << "\"," << std::endl;
+            << "\"" << a_MODEL_SUMMARY.name << "\"," << std::endl;
 
         ofs << utility::indent_spaces(indent_level)
             << "\"number_of_variables\" : "
-            << m_model_summary.number_of_variables << "," << std::endl;
+            << a_MODEL_SUMMARY.number_of_variables << "," << std::endl;
 
         ofs << utility::indent_spaces(indent_level)
             << "\"number_of_constraints\" : "
-            << m_model_summary.number_of_constraints << "," << std::endl;
+            << a_MODEL_SUMMARY.number_of_constraints << "," << std::endl;
 
         ofs << utility::indent_spaces(indent_level)
             << "\"is_feasible\" : " << (m_is_feasible ? "true," : "false,")
@@ -164,6 +168,10 @@ class NamedSolution {
         ofs << utility::indent_spaces(indent_level)
             << "\"objective\" : " + std::to_string(m_objective) << ","
             << std::endl;
+
+        ofs << utility::indent_spaces(indent_level)
+            << "\"total_violation\" : " + std::to_string(m_total_violation)
+            << "," << std::endl;
 
         /// Decision variables
         write_values_by_array(&ofs, m_variable_value_proxies, "variables",
@@ -206,11 +214,6 @@ class NamedSolution {
             ofs << "=infeas=" << std::endl;
         }
         ofs.close();
-    }
-
-    /*************************************************************************/
-    inline constexpr const ModelSummary& model_summary(void) const {
-        return m_model_summary;
     }
 
     /*************************************************************************/
@@ -268,6 +271,11 @@ class NamedSolution {
     /*************************************************************************/
     inline constexpr T_Expression objective(void) const {
         return m_objective;
+    }
+
+    /*************************************************************************/
+    inline constexpr T_Expression total_violation(void) const {
+        return m_total_violation;
     }
 
     /*************************************************************************/

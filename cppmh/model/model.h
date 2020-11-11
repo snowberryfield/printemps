@@ -26,7 +26,6 @@
 #include "solution_score.h"
 #include "selection.h"
 #include "neighborhood.h"
-#include "plain_solution_pool.h"
 
 #include "expression_binary_operator.h"
 #include "constraint_binary_operator.h"
@@ -2521,19 +2520,22 @@ class Model {
 
     /*************************************************************************/
     inline Solution<T_Variable, T_Expression> export_solution(void) const {
-        // This method cannot be constexpr by clang.
+        /// This method cannot be constexpr by clang.
         Solution<T_Variable, T_Expression> solution;
 
+        /// Decision variables
         for (const auto &proxy : m_variable_proxies) {
             solution.variable_value_proxies.push_back(
                 proxy.export_values_and_names());
         }
 
+        /// Expressions
         for (const auto &proxy : m_expression_proxies) {
             solution.expression_value_proxies.push_back(
                 proxy.export_values_and_names());
         }
 
+        /// Constraints
         for (const auto &proxy : m_constraint_proxies) {
             solution.constraint_value_proxies.push_back(
                 proxy.export_values_and_names());
@@ -2541,8 +2543,17 @@ class Model {
                 proxy.export_violations_and_names());
         }
 
-        solution.objective   = m_objective.value();
-        solution.is_feasible = this->is_feasible();
+        /// Total violation
+        T_Expression total_violation = 0;
+        for (const auto &proxy : m_constraint_proxies) {
+            for (const auto &constraint : proxy.flat_indexed_constraints()) {
+                total_violation += constraint.violation_value();
+            }
+        }
+
+        solution.objective       = m_objective.value();
+        solution.total_violation = total_violation;
+        solution.is_feasible     = this->is_feasible();
 
         return solution;
     }
@@ -2562,9 +2573,6 @@ class Model {
         int variable_proxies_size   = m_variable_proxies.size();
         int expression_proxies_size = m_expression_proxies.size();
         int constraint_proxies_size = m_constraint_proxies.size();
-
-        /// Summary
-        named_solution.m_model_summary = this->export_summary();
 
         /// Decision variables
         for (auto i = 0; i < variable_proxies_size; i++) {
@@ -2590,8 +2598,9 @@ class Model {
                 a_SOLUTION.violation_value_proxies[i];
         }
 
-        named_solution.m_objective   = a_SOLUTION.objective;
-        named_solution.m_is_feasible = a_SOLUTION.is_feasible;
+        named_solution.m_objective       = a_SOLUTION.objective;
+        named_solution.m_total_violation = a_SOLUTION.total_violation;
+        named_solution.m_is_feasible     = a_SOLUTION.is_feasible;
 
         return named_solution;
     }
@@ -2608,8 +2617,17 @@ class Model {
             }
         }
 
-        plain_solution.objective   = m_objective.value();
-        plain_solution.is_feasible = this->is_feasible();
+        /// Total violation
+        T_Expression total_violation = 0;
+        for (const auto &proxy : m_constraint_proxies) {
+            for (const auto &constraint : proxy.flat_indexed_constraints()) {
+                total_violation += constraint.violation_value();
+            }
+        }
+
+        plain_solution.objective       = m_objective.value();
+        plain_solution.total_violation = total_violation;
+        plain_solution.is_feasible     = this->is_feasible();
 
         return plain_solution;
     }
@@ -2627,8 +2645,9 @@ class Model {
             }
         }
 
-        plain_solution.objective   = a_SOLUTION.objective;
-        plain_solution.is_feasible = a_SOLUTION.is_feasible;
+        plain_solution.objective       = a_SOLUTION.objective;
+        plain_solution.total_violation = a_SOLUTION.total_violation;
+        plain_solution.is_feasible     = a_SOLUTION.is_feasible;
 
         return plain_solution;
     }
