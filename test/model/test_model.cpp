@@ -155,8 +155,8 @@ TEST_F(TestModel, create_variable_scalar_without_bound) {
             auto& x    = model.create_variable(name);
             EXPECT_EQ(i + 1, static_cast<int>(model.variable_proxies().size()));
             EXPECT_EQ(i, x.id());
-            EXPECT_EQ(std::numeric_limits<int>::min() + 1, x.lower_bound());
-            EXPECT_EQ(std::numeric_limits<int>::max() - 1, x.upper_bound());
+            EXPECT_EQ(cppmh::constant::INT_MIN, x.lower_bound());
+            EXPECT_EQ(cppmh::constant::INT_MAX, x.upper_bound());
             EXPECT_EQ(false, x.has_bounds());
             EXPECT_EQ(cppmh::model::VariableSense::Integer, x.sense());
             EXPECT_EQ(&x, &model.variable_proxies().back());
@@ -208,8 +208,8 @@ TEST_F(TestModel, create_variable_one_dimensional_without_bound) {
             auto& x    = model.create_variables(name, 2);
             EXPECT_EQ(i + 1, static_cast<int>(model.variable_proxies().size()));
             EXPECT_EQ(i, x.id());
-            EXPECT_EQ(std::numeric_limits<int>::min() + 1, x(0).lower_bound());
-            EXPECT_EQ(std::numeric_limits<int>::max() - 1, x(0).upper_bound());
+            EXPECT_EQ(cppmh::constant::INT_MIN, x(0).lower_bound());
+            EXPECT_EQ(cppmh::constant::INT_MAX, x(0).upper_bound());
             EXPECT_EQ(false, x(0).has_bounds());
             EXPECT_EQ(cppmh::model::VariableSense::Integer, x(0).sense());
             EXPECT_EQ(&x, &model.variable_proxies().back());
@@ -262,10 +262,8 @@ TEST_F(TestModel, create_variable_two_dimensional_without_bound) {
             auto& x    = model.create_variables(name, {2, 3});
             EXPECT_EQ(i + 1, static_cast<int>(model.variable_proxies().size()));
             EXPECT_EQ(i, x.id());
-            EXPECT_EQ(std::numeric_limits<int>::min() + 1,
-                      x(0, 0).lower_bound());
-            EXPECT_EQ(std::numeric_limits<int>::max() - 1,
-                      x(0, 0).upper_bound());
+            EXPECT_EQ(cppmh::constant::INT_MIN, x(0, 0).lower_bound());
+            EXPECT_EQ(cppmh::constant::INT_MAX, x(0, 0).upper_bound());
             EXPECT_EQ(false, x(0, 0).has_bounds());
             EXPECT_EQ(cppmh::model::VariableSense::Integer, x(0, 0).sense());
             EXPECT_EQ(&x, &model.variable_proxies().back());

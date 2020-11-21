@@ -290,9 +290,9 @@ class Neighborhood {
         /**
          *  "Shift" move for integer variables:
          *  e.g) integer variable 0 <= x <= 10 (x \in Z)
-         *  move: {(x = 4), (x = 6)} (if x = 5)
-         *        {(x = 1)} (if x = 0)
-         *        {(x = 9)} (if x = 10)
+         *  move: {(x = 5), (x = 7), (x = 3), (x = 8)} (if x = 6)
+         *        {(x = 1), (x = 5)} (if x = 0)
+         *        {(x = 9), (x = 5)} (if x = 10)
          */
 
         std::vector<Variable<T_Variable, T_Expression> *>
@@ -304,21 +304,17 @@ class Neighborhood {
         }
 
         int variables_size = not_fixed_variable_ptrs.size();
-        m_integer_moves.resize(2 * variables_size);
-        m_integer_move_flags.resize(2 * variables_size);
+        m_integer_moves.resize(4 * variables_size);
+        m_integer_move_flags.resize(4 * variables_size);
 
         for (auto i = 0; i < variables_size; i++) {
-            m_integer_moves[2 * i].sense = MoveSense::Integer;
-            m_integer_moves[2 * i].related_constraint_ptrs =
-                not_fixed_variable_ptrs[i]->related_constraint_ptrs();
-            m_integer_moves[2 * i].alterations.emplace_back(
-                not_fixed_variable_ptrs[i], 0);
-
-            m_integer_moves[2 * i + 1].sense = MoveSense::Integer;
-            m_integer_moves[2 * i + 1].related_constraint_ptrs =
-                not_fixed_variable_ptrs[i]->related_constraint_ptrs();
-            m_integer_moves[2 * i + 1].alterations.emplace_back(
-                not_fixed_variable_ptrs[i], 0);
+            for (auto j = 0; j < 4; j++) {
+                m_integer_moves[4 * i + j].sense = MoveSense::Integer;
+                m_integer_moves[4 * i + j].related_constraint_ptrs =
+                    not_fixed_variable_ptrs[i]->related_constraint_ptrs();
+                m_integer_moves[4 * i + j].alterations.emplace_back(
+                    not_fixed_variable_ptrs[i], 0);
+            }
         }
 
         auto integer_move_updater =
@@ -331,25 +327,49 @@ class Neighborhood {
                 for (auto i = 0; i < variables_size; i++) {
                     if (a_IS_ENABLED_IMPROVABILITY_SCREENING &&
                         !not_fixed_variable_ptrs[i]->is_improvable()) {
-                        (*a_flags)[2 * i]     = 0;
-                        (*a_flags)[2 * i + 1] = 0;
+                        for (auto j = 0; j < 4; j++) {
+                            (*a_flags)[4 * i]     = 0;
+                            (*a_flags)[4 * i + j] = 0;
+                        }
                     } else {
                         if (not_fixed_variable_ptrs[i]->value() ==
                             not_fixed_variable_ptrs[i]->upper_bound()) {
-                            (*a_flags)[2 * i] = 0;
+                            (*a_flags)[4 * i] = 0;
                         } else {
-                            (*a_moves)[2 * i].alterations.front().second =
+                            (*a_moves)[4 * i].alterations.front().second =
                                 not_fixed_variable_ptrs[i]->value() + 1;
-                            (*a_flags)[2 * i] = 1;
+                            (*a_flags)[4 * i] = 1;
                         }
 
                         if (not_fixed_variable_ptrs[i]->value() ==
                             not_fixed_variable_ptrs[i]->lower_bound()) {
-                            (*a_flags)[2 * i + 1] = 0;
+                            (*a_flags)[4 * i + 1] = 0;
                         } else {
-                            (*a_moves)[2 * i + 1].alterations.front().second =
+                            (*a_moves)[4 * i + 1].alterations.front().second =
                                 not_fixed_variable_ptrs[i]->value() - 1;
-                            (*a_flags)[2 * i + 1] = 1;
+                            (*a_flags)[4 * i + 1] = 1;
+                        }
+
+                        if (not_fixed_variable_ptrs[i]->value() ==
+                            not_fixed_variable_ptrs[i]->upper_bound()) {
+                            (*a_flags)[4 * i + 2] = 0;
+                        } else {
+                            (*a_moves)[4 * i + 2].alterations.front().second =
+                                (not_fixed_variable_ptrs[i]->value() +
+                                 not_fixed_variable_ptrs[i]->upper_bound()) /
+                                2;
+                            (*a_flags)[4 * i + 2] = 1;
+                        }
+
+                        if (not_fixed_variable_ptrs[i]->value() ==
+                            not_fixed_variable_ptrs[i]->lower_bound()) {
+                            (*a_flags)[4 * i + 3] = 0;
+                        } else {
+                            (*a_moves)[4 * i + 3].alterations.front().second =
+                                (not_fixed_variable_ptrs[i]->value() +
+                                 not_fixed_variable_ptrs[i]->lower_bound()) /
+                                2;
+                            (*a_flags)[4 * i + 3] = 1;
                         }
                     }
                 }
