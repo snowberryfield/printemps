@@ -6,10 +6,14 @@
 #ifndef CPPMH_CONSTANT_H__
 #define CPPMH_CONSTANT_H__
 
+#include <limits>
+
 namespace cppmh {
 namespace constant {
 static constexpr auto EPSILON = 1E-5;
-}
+static constexpr auto INT_MIN = std::numeric_limits<int>::min() / 2 + 1;
+static constexpr auto INT_MAX = (std::numeric_limits<int>::max() - 1) / 2;
+}  // namespace constant
 }  // namespace cppmh
 
 #endif
