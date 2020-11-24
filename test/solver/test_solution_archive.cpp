@@ -6,14 +6,14 @@
 #include <gtest/gtest.h>
 #include <random>
 
-#include <cppmh.h>
+#include <printemps.h>
 
 namespace {
 /*****************************************************************************/
 class TestSolutionArchive : public ::testing::Test {
    protected:
-    cppmh::utility::IntegerUniformRandom m_random_integer;
-    cppmh::utility::IntegerUniformRandom m_random_positive_integer;
+    printemps::utility::IntegerUniformRandom m_random_integer;
+    printemps::utility::IntegerUniformRandom m_random_positive_integer;
 
     virtual void SetUp(void) {
         m_random_integer.setup(-1000, 1000, 0);
@@ -33,7 +33,7 @@ class TestSolutionArchive : public ::testing::Test {
 
 /*****************************************************************************/
 TEST_F(TestSolutionArchive, initialize) {
-    cppmh::solver::SolutionArchive<int, double> archive;
+    printemps::solver::SolutionArchive<int, double> archive;
 
     EXPECT_EQ(0, archive.size());
     EXPECT_EQ(0, archive.max_size());
@@ -44,7 +44,7 @@ TEST_F(TestSolutionArchive, initialize) {
 /*****************************************************************************/
 TEST_F(TestSolutionArchive, setup) {
     {
-        cppmh::solver::SolutionArchive<int, double> archive(100, true);
+        printemps::solver::SolutionArchive<int, double> archive(100, true);
 
         EXPECT_EQ(0, archive.size());
         EXPECT_EQ(100, archive.max_size());
@@ -52,7 +52,7 @@ TEST_F(TestSolutionArchive, setup) {
         EXPECT_EQ(true, archive.solutions().empty());
     }
     {
-        cppmh::solver::SolutionArchive<int, double> archive(200, false);
+        printemps::solver::SolutionArchive<int, double> archive(200, false);
 
         EXPECT_EQ(0, archive.size());
         EXPECT_EQ(200, archive.max_size());
@@ -63,7 +63,7 @@ TEST_F(TestSolutionArchive, setup) {
 
 /*****************************************************************************/
 TEST_F(TestSolutionArchive, push) {
-    cppmh::model::PlainSolution<int, double> solution_0;
+    printemps::model::PlainSolution<int, double> solution_0;
     solution_0.objective = 10;
     solution_0.variables = {
         0,
@@ -71,7 +71,7 @@ TEST_F(TestSolutionArchive, push) {
         0,
         0,
     };
-    cppmh::model::PlainSolution<int, double> solution_1;
+    printemps::model::PlainSolution<int, double> solution_1;
     solution_1.objective = 10;
     solution_1.variables = {
         0,
@@ -79,7 +79,7 @@ TEST_F(TestSolutionArchive, push) {
         0,
         0,
     };
-    cppmh::model::PlainSolution<int, double> solution_2;
+    printemps::model::PlainSolution<int, double> solution_2;
     solution_2.objective = 5;
     solution_2.variables = {
         0,
@@ -88,7 +88,7 @@ TEST_F(TestSolutionArchive, push) {
         1,
     };
 
-    cppmh::model::PlainSolution<int, double> solution_3;
+    printemps::model::PlainSolution<int, double> solution_3;
     solution_3.objective = 1;
     solution_3.variables = {
         1,
@@ -97,11 +97,11 @@ TEST_F(TestSolutionArchive, push) {
         1,
     };
 
-    std::vector<cppmh::model::PlainSolution<int, double>> solutions = {
+    std::vector<printemps::model::PlainSolution<int, double>> solutions = {
         solution_0, solution_1, solution_2, solution_3};
 
     {
-        cppmh::solver::SolutionArchive<int, double> archive(2, true);
+        printemps::solver::SolutionArchive<int, double> archive(2, true);
 
         archive.push(solution_0);
         EXPECT_EQ(1, archive.size());
@@ -119,7 +119,7 @@ TEST_F(TestSolutionArchive, push) {
         EXPECT_EQ(5, archive.solutions()[1].objective);
     }
     {
-        cppmh::solver::SolutionArchive<int, double> archive(2, false);
+        printemps::solver::SolutionArchive<int, double> archive(2, false);
 
         archive.push(solutions);
         EXPECT_EQ(2, archive.size());

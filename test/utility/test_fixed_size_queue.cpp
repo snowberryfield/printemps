@@ -6,7 +6,7 @@
 #include <gtest/gtest.h>
 #include <string>
 
-#include <cppmh.h>
+#include <printemps.h>
 
 namespace {
 /*****************************************************************************/
@@ -22,7 +22,7 @@ class TestFixedSizeQueue : public ::testing::Test {
 
 /*****************************************************************************/
 TEST_F(TestFixedSizeQueue, initialize) {
-    cppmh::utility::FixedSizeQueue<int> queue;
+    printemps::utility::FixedSizeQueue<int> queue;
 
     EXPECT_EQ(0, queue.size());
     EXPECT_EQ(0, queue.max_size());
@@ -30,7 +30,7 @@ TEST_F(TestFixedSizeQueue, initialize) {
 
 /*****************************************************************************/
 TEST_F(TestFixedSizeQueue, size) {
-    cppmh::utility::FixedSizeQueue<int> queue(100);
+    printemps::utility::FixedSizeQueue<int> queue(100);
     EXPECT_EQ(100, queue.max_size());
     EXPECT_EQ(0, queue.size());
     for (auto i = 0; i < 100; i++) {
@@ -51,7 +51,7 @@ TEST_F(TestFixedSizeQueue, max_size) {
 /*****************************************************************************/
 TEST_F(TestFixedSizeQueue, min) {
     {
-        cppmh::utility::FixedSizeQueue<int> queue(10);
+        printemps::utility::FixedSizeQueue<int> queue(10);
 
         double sum = 0.0;
 
@@ -66,7 +66,7 @@ TEST_F(TestFixedSizeQueue, min) {
         }
     }
     {
-        cppmh::utility::FixedSizeQueue<double> queue(110);
+        printemps::utility::FixedSizeQueue<double> queue(110);
 
         double sum = 0.0;
 

@@ -6,14 +6,14 @@
 #include <gtest/gtest.h>
 #include <random>
 
-#include <cppmh.h>
+#include <printemps.h>
 
 namespace {
 /*****************************************************************************/
 class TestExpression : public ::testing::Test {
    protected:
-    cppmh::utility::IntegerUniformRandom m_random_integer;
-    cppmh::utility::IntegerUniformRandom m_random_positive_integer;
+    printemps::utility::IntegerUniformRandom m_random_integer;
+    printemps::utility::IntegerUniformRandom m_random_positive_integer;
 
     virtual void SetUp(void) {
         m_random_integer.setup(-1000, 1000, 0);
@@ -33,7 +33,8 @@ class TestExpression : public ::testing::Test {
 
 /*****************************************************************************/
 TEST_F(TestExpression, initialize) {
-    auto expression = cppmh::model::Expression<int, double>::create_instance();
+    auto expression =
+        printemps::model::Expression<int, double>::create_instance();
 
     /// Check the initial values of the base class members.
     EXPECT_EQ(0, expression.id());
@@ -50,11 +51,14 @@ TEST_F(TestExpression, initialize) {
 
 /*****************************************************************************/
 TEST_F(TestExpression, set_sensitivities) {
-    auto expression = cppmh::model::Expression<int, double>::create_instance();
+    auto expression =
+        printemps::model::Expression<int, double>::create_instance();
 
-    auto variable_0 = cppmh::model::Variable<int, double>::create_instance();
-    auto variable_1 = cppmh::model::Variable<int, double>::create_instance();
-    std::unordered_map<cppmh::model::Variable<int, double>*, double>
+    auto variable_0 =
+        printemps::model::Variable<int, double>::create_instance();
+    auto variable_1 =
+        printemps::model::Variable<int, double>::create_instance();
+    std::unordered_map<printemps::model::Variable<int, double>*, double>
         sensitivities;
 
     auto sensitivity_0 = random_integer();
@@ -82,7 +86,8 @@ TEST_F(TestExpression, setup_fixed_sensitivities) {
 
 /*****************************************************************************/
 TEST_F(TestExpression, constant_value) {
-    auto expression = cppmh::model::Expression<int, double>::create_instance();
+    auto expression =
+        printemps::model::Expression<int, double>::create_instance();
 
     auto value = random_integer();
     expression = value;
@@ -91,11 +96,14 @@ TEST_F(TestExpression, constant_value) {
 
 /*****************************************************************************/
 TEST_F(TestExpression, evaluate_arg_void) {
-    auto expression = cppmh::model::Expression<int, double>::create_instance();
+    auto expression =
+        printemps::model::Expression<int, double>::create_instance();
 
-    auto variable_0 = cppmh::model::Variable<int, double>::create_instance();
-    auto variable_1 = cppmh::model::Variable<int, double>::create_instance();
-    std::unordered_map<cppmh::model::Variable<int, double>*, double>
+    auto variable_0 =
+        printemps::model::Variable<int, double>::create_instance();
+    auto variable_1 =
+        printemps::model::Variable<int, double>::create_instance();
+    std::unordered_map<printemps::model::Variable<int, double>*, double>
         sensitivities;
 
     auto sensitivity_0 = random_integer();
@@ -119,11 +127,14 @@ TEST_F(TestExpression, evaluate_arg_void) {
 
 /*****************************************************************************/
 TEST_F(TestExpression, evaluate_arg_move) {
-    auto expression = cppmh::model::Expression<int, double>::create_instance();
+    auto expression =
+        printemps::model::Expression<int, double>::create_instance();
 
-    auto variable_0 = cppmh::model::Variable<int, double>::create_instance();
-    auto variable_1 = cppmh::model::Variable<int, double>::create_instance();
-    std::unordered_map<cppmh::model::Variable<int, double>*, double>
+    auto variable_0 =
+        printemps::model::Variable<int, double>::create_instance();
+    auto variable_1 =
+        printemps::model::Variable<int, double>::create_instance();
+    std::unordered_map<printemps::model::Variable<int, double>*, double>
         sensitivities;
 
     auto sensitivity_0 = random_integer();
@@ -142,7 +153,7 @@ TEST_F(TestExpression, evaluate_arg_move) {
 
     expression.update();
 
-    cppmh::model::Move<int, double> move;
+    printemps::model::Move<int, double> move;
     v_value_0 = random_integer();
     v_value_1 = random_integer();
 
@@ -157,11 +168,14 @@ TEST_F(TestExpression, evaluate_arg_move) {
 
 /*****************************************************************************/
 TEST_F(TestExpression, update_arg_void) {
-    auto expression = cppmh::model::Expression<int, double>::create_instance();
+    auto expression =
+        printemps::model::Expression<int, double>::create_instance();
 
-    auto variable_0 = cppmh::model::Variable<int, double>::create_instance();
-    auto variable_1 = cppmh::model::Variable<int, double>::create_instance();
-    std::unordered_map<cppmh::model::Variable<int, double>*, double>
+    auto variable_0 =
+        printemps::model::Variable<int, double>::create_instance();
+    auto variable_1 =
+        printemps::model::Variable<int, double>::create_instance();
+    std::unordered_map<printemps::model::Variable<int, double>*, double>
         sensitivities;
 
     auto sensitivity_0 = random_integer();
@@ -186,11 +200,14 @@ TEST_F(TestExpression, update_arg_void) {
 
 /*****************************************************************************/
 TEST_F(TestExpression, update_arg_move) {
-    auto expression = cppmh::model::Expression<int, double>::create_instance();
+    auto expression =
+        printemps::model::Expression<int, double>::create_instance();
 
-    auto variable_0 = cppmh::model::Variable<int, double>::create_instance();
-    auto variable_1 = cppmh::model::Variable<int, double>::create_instance();
-    std::unordered_map<cppmh::model::Variable<int, double>*, double>
+    auto variable_0 =
+        printemps::model::Variable<int, double>::create_instance();
+    auto variable_1 =
+        printemps::model::Variable<int, double>::create_instance();
+    std::unordered_map<printemps::model::Variable<int, double>*, double>
         sensitivities;
 
     auto sensitivity_0 = random_integer();
@@ -208,7 +225,7 @@ TEST_F(TestExpression, update_arg_move) {
     variable_1 = v_value_1;
 
     expression.update();
-    cppmh::model::Move<int, double> move;
+    printemps::model::Move<int, double> move;
     v_value_0 = random_integer();
     v_value_1 = random_integer();
 
@@ -229,11 +246,14 @@ TEST_F(TestExpression, value) {
 
 /*****************************************************************************/
 TEST_F(TestExpression, self) {
-    auto expression = cppmh::model::Expression<int, double>::create_instance();
+    auto expression =
+        printemps::model::Expression<int, double>::create_instance();
 
-    auto variable_0 = cppmh::model::Variable<int, double>::create_instance();
-    auto variable_1 = cppmh::model::Variable<int, double>::create_instance();
-    std::unordered_map<cppmh::model::Variable<int, double>*, double>
+    auto variable_0 =
+        printemps::model::Variable<int, double>::create_instance();
+    auto variable_1 =
+        printemps::model::Variable<int, double>::create_instance();
+    std::unordered_map<printemps::model::Variable<int, double>*, double>
         sensitivities;
 
     auto sensitivity_0 = random_integer();
@@ -255,7 +275,8 @@ TEST_F(TestExpression, self) {
 
 /*****************************************************************************/
 TEST_F(TestExpression, is_enabled) {
-    auto expression = cppmh::model::Expression<int, double>::create_instance();
+    auto expression =
+        printemps::model::Expression<int, double>::create_instance();
     expression.disable();
     EXPECT_EQ(false, expression.is_enabled());
 
@@ -278,11 +299,14 @@ TEST_F(TestExpression, disable) {
 
 /*****************************************************************************/
 TEST_F(TestExpression, operator_plus) {
-    auto expression = cppmh::model::Expression<int, double>::create_instance();
+    auto expression =
+        printemps::model::Expression<int, double>::create_instance();
 
-    auto variable_0 = cppmh::model::Variable<int, double>::create_instance();
-    auto variable_1 = cppmh::model::Variable<int, double>::create_instance();
-    std::unordered_map<cppmh::model::Variable<int, double>*, double>
+    auto variable_0 =
+        printemps::model::Variable<int, double>::create_instance();
+    auto variable_1 =
+        printemps::model::Variable<int, double>::create_instance();
+    std::unordered_map<printemps::model::Variable<int, double>*, double>
         sensitivities;
 
     auto sensitivity_0 = random_integer();
@@ -305,11 +329,14 @@ TEST_F(TestExpression, operator_plus) {
 
 /*****************************************************************************/
 TEST_F(TestExpression, operator_minus) {
-    auto expression = cppmh::model::Expression<int, double>::create_instance();
+    auto expression =
+        printemps::model::Expression<int, double>::create_instance();
 
-    auto variable_0 = cppmh::model::Variable<int, double>::create_instance();
-    auto variable_1 = cppmh::model::Variable<int, double>::create_instance();
-    std::unordered_map<cppmh::model::Variable<int, double>*, double>
+    auto variable_0 =
+        printemps::model::Variable<int, double>::create_instance();
+    auto variable_1 =
+        printemps::model::Variable<int, double>::create_instance();
+    std::unordered_map<printemps::model::Variable<int, double>*, double>
         sensitivities;
 
     auto sensitivity_0 = random_integer();
@@ -331,7 +358,8 @@ TEST_F(TestExpression, operator_minus) {
 
 /*****************************************************************************/
 TEST_F(TestExpression, operator_equal_arg_t_value) {
-    auto expression = cppmh::model::Expression<int, double>::create_instance();
+    auto expression =
+        printemps::model::Expression<int, double>::create_instance();
 
     auto value = random_integer();
 
@@ -341,9 +369,10 @@ TEST_F(TestExpression, operator_equal_arg_t_value) {
 
 /*****************************************************************************/
 TEST_F(TestExpression, operator_equal_arg_t_expression_like) {
-    auto expression = cppmh::model::Expression<int, double>::create_instance();
+    auto expression =
+        printemps::model::Expression<int, double>::create_instance();
 
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("y");
@@ -370,7 +399,8 @@ TEST_F(TestExpression, operator_equal_arg_t_expression_like) {
 
 /*****************************************************************************/
 TEST_F(TestExpression, operator_plus_equal_arg_t_value) {
-    auto expression = cppmh::model::Expression<int, double>::create_instance();
+    auto expression =
+        printemps::model::Expression<int, double>::create_instance();
 
     auto value_0 = random_integer();
     auto value_1 = random_integer();
@@ -382,9 +412,10 @@ TEST_F(TestExpression, operator_plus_equal_arg_t_value) {
 
 /*****************************************************************************/
 TEST_F(TestExpression, operator_plus_equal_arg_t_expression_like) {
-    auto expression = cppmh::model::Expression<int, double>::create_instance();
+    auto expression =
+        printemps::model::Expression<int, double>::create_instance();
 
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("y");
@@ -412,12 +443,14 @@ TEST_F(TestExpression, operator_plus_equal_arg_t_expression_like) {
 /*****************************************************************************/
 TEST_F(TestExpression, operator_plus_equal_arg_expression) {
     auto expression_0 =
-        cppmh::model::Expression<int, double>::create_instance();
+        printemps::model::Expression<int, double>::create_instance();
     auto expression_1 =
-        cppmh::model::Expression<int, double>::create_instance();
+        printemps::model::Expression<int, double>::create_instance();
 
-    auto variable_0 = cppmh::model::Variable<int, double>::create_instance();
-    auto variable_1 = cppmh::model::Variable<int, double>::create_instance();
+    auto variable_0 =
+        printemps::model::Variable<int, double>::create_instance();
+    auto variable_1 =
+        printemps::model::Variable<int, double>::create_instance();
 
     auto sensitivity_0_0 = random_integer();
     auto sensitivity_0_1 = random_integer();
@@ -443,7 +476,8 @@ TEST_F(TestExpression, operator_plus_equal_arg_expression) {
 
 /*****************************************************************************/
 TEST_F(TestExpression, operator_minus_equal_arg_t_value) {
-    auto expression = cppmh::model::Expression<int, double>::create_instance();
+    auto expression =
+        printemps::model::Expression<int, double>::create_instance();
 
     auto value_0 = random_integer();
     auto value_1 = random_integer();
@@ -455,9 +489,10 @@ TEST_F(TestExpression, operator_minus_equal_arg_t_value) {
 
 /*****************************************************************************/
 TEST_F(TestExpression, operator_minus_equal_arg_t_expression_like) {
-    auto expression = cppmh::model::Expression<int, double>::create_instance();
+    auto expression =
+        printemps::model::Expression<int, double>::create_instance();
 
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("y");
@@ -485,14 +520,16 @@ TEST_F(TestExpression, operator_minus_equal_arg_t_expression_like) {
 /*****************************************************************************/
 TEST_F(TestExpression, operator_minus_equal_arg_expression) {
     auto expression_0 =
-        cppmh::model::Expression<int, double>::create_instance();
+        printemps::model::Expression<int, double>::create_instance();
     auto expression_1 =
-        cppmh::model::Expression<int, double>::create_instance();
+        printemps::model::Expression<int, double>::create_instance();
     auto expression_sum =
-        cppmh::model::Expression<int, double>::create_instance();
+        printemps::model::Expression<int, double>::create_instance();
 
-    auto variable_0 = cppmh::model::Variable<int, double>::create_instance();
-    auto variable_1 = cppmh::model::Variable<int, double>::create_instance();
+    auto variable_0 =
+        printemps::model::Variable<int, double>::create_instance();
+    auto variable_1 =
+        printemps::model::Variable<int, double>::create_instance();
 
     auto sensitivity_0_0 = random_integer();
     auto sensitivity_0_1 = random_integer();
@@ -520,8 +557,9 @@ TEST_F(TestExpression, operator_minus_equal_arg_expression) {
 
 /*****************************************************************************/
 TEST_F(TestExpression, operator_product_equal_arg_t_value) {
-    auto expression = cppmh::model::Expression<int, double>::create_instance();
-    auto variable   = cppmh::model::Variable<int, double>::create_instance();
+    auto expression =
+        printemps::model::Expression<int, double>::create_instance();
+    auto variable = printemps::model::Variable<int, double>::create_instance();
 
     auto sensitivity = random_integer();
     auto constant    = random_integer();
@@ -541,8 +579,9 @@ TEST_F(TestExpression, operator_product_equal_arg_t_value) {
 
 /*****************************************************************************/
 TEST_F(TestExpression, operator_divide_equal_arg_t_value) {
-    auto expression = cppmh::model::Expression<int, double>::create_instance();
-    auto variable   = cppmh::model::Variable<int, double>::create_instance();
+    auto expression =
+        printemps::model::Expression<int, double>::create_instance();
+    auto variable = printemps::model::Variable<int, double>::create_instance();
 
     expression = 100 * variable + 200;
 

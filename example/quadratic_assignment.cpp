@@ -4,7 +4,7 @@
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
 
-#include <cppmh.h>
+#include <printemps.h>
 
 /*****************************************************************************/
 struct QuadraticAssignmentProblem {
@@ -69,7 +69,7 @@ int main(void) {
     /*************************************************************************/
     /// Model object definition
     /*************************************************************************/
-    cppmh::model::IPModel model;
+    printemps::model::IPModel model;
 
     /*************************************************************************/
     /// Decision variable definitions
@@ -79,8 +79,8 @@ int main(void) {
     /*************************************************************************/
     /// Objective function definition
     /*************************************************************************/
-    std::function<double(const cppmh::model::IPMove&)> f =
-        [&qap, &p](const cppmh::model::IPMove& a_MOVE) {
+    std::function<double(const printemps::model::IPMove&)> f =
+        [&qap, &p](const printemps::model::IPMove& a_MOVE) {
             double f = 0.0;
 
             std::vector<int> p_values(qap.N);
@@ -116,15 +116,15 @@ int main(void) {
      * An user-defined neighborhood is defined by a lambda function which
      * updates candidate moves from the current solution to the next solution.
      * The candidate moves are expressed by std::vector of objects of
-     * "cppmh::model::IPMove". A "cppmh::model::IPMove" object contains a member
-     * "alterations" typed by std::vector of objects of
-     * "cppmh::model::Alteration". A "cppmh::model::Alteration" object is an
-     * alias of std::tuple of which the first element is a pointer to a decision
-     * variable and the second element is a new value after movement.
+     * "printemps::model::IPMove". A "printemps::model::IPMove" object contains
+     * a member "alterations" typed by std::vector of objects of
+     * "printemps::model::Alteration". A "printemps::model::Alteration" object
+     * is an alias of std::tuple of which the first element is a pointer to a
+     * decision variable and the second element is a new value after movement.
      */
 
-    std::function<void(std::vector<cppmh::model::IPMove>*)> move_updater =
-        [&qap, &p](std::vector<cppmh::model::IPMove>* a_moves) {
+    std::function<void(std::vector<printemps::model::IPMove>*)> move_updater =
+        [&qap, &p](std::vector<printemps::model::IPMove>* a_moves) {
             /**
              * This lambda function defines user-defined moves for "swap"
              * neighborhood which are obtained by swaps between two or three
@@ -175,13 +175,13 @@ int main(void) {
     /*************************************************************************/
     /// Run solver
     /*************************************************************************/
-    cppmh::solver::Option option;
+    printemps::solver::Option option;
     option.is_enabled_binary_move       = false;
     option.is_enabled_integer_move      = false;
     option.is_enabled_user_defined_move = true;
-    option.verbose                      = cppmh::solver::Full;
-    option.improvability_screening_mode = cppmh::solver::Off;
-    auto result                         = cppmh::solver::solve(&model, option);
+    option.verbose                      = printemps::solver::Full;
+    option.improvability_screening_mode = printemps::solver::Off;
+    auto result = printemps::solver::solve(&model, option);
 
     /*************************************************************************/
     /// Print result

@@ -1,6 +1,6 @@
-# Starter Guide of cpp_metaheuristics
+# Starter Guide of PRINTEMPS
 
-- [Starter Guide of cpp_metaheuristics](#starter-guide-of-cppmetaheuristics)
+- [Starter Guide of PRINTEMPS](#starter-guide-of-printemps)
   - [Introduction](#introduction)
   - [Modeling](#modeling)
     - [Basics](#basics)
@@ -26,7 +26,7 @@
   - [References](#references)
 
 ## Introduction
-cppmh can compute approximate solutions for __linear and nonlinear integer optimization problems__ formulated as follows:
+PRINTEMPS can compute approximate solutions for __linear and nonlinear integer optimization problems__ formulated as follows:
 
 
 ```
@@ -40,16 +40,16 @@ cppmh can compute approximate solutions for __linear and nonlinear integer optim
 where `x` denotes N-dimensional integer vector with the lower bound vector `l` and the upper bound vector `u`. 
 The function `f:R^{N} -> R` denotes the scalar objective function to be minimized, and `g:R^{N} -> R^{I}`, `h:R^{N} -> R^{J}` respectively denote `I`-dimensional inequality and `J`-dimensional equality constraint functions.
 
-cppmh employs __Tabu Search__ [1], a metaheuristics technique, to solve problems. 
-In solving, cppmh replaces constraints with penalty functions which return violations to the corresponding constraints, and the penalty functions multiplied by positive penalty coefficients are added to the objective function. 
+PRINTEMPS employs __Tabu Search__ [1], a metaheuristics technique, to solve problems. 
+In solving, it replaces constraints with penalty functions which return violations to the corresponding constraints, and the penalty functions multiplied by positive penalty coefficients are added to the objective function. 
 The penalty coefficients are updated iteratively and automatically in a method similar (not exact same) to the one proposed in paper [2]. 
-The figure below shows the flow-chart of the algorithm of cppmh. 
+The figure below shows the flow-chart of the algorithm of PRINTEMPS. 
 
 <div align="center">
 
 <img src="../asset/flowchart.png" width="600">
 
-__The Flow-Chart of the optimization algorithm of cppmh.__ 
+__The Flow-Chart of the optimization algorithm of PRINTEMPS.__ 
 
 </div>
 
@@ -62,13 +62,13 @@ Let us consider a simple linear integer optimization problem [3]:
                       x_1 and x_2 are integer.
 ```
 
-The following code shows an implementation to solve the problem (P) using cppmh.
+The following code shows an implementation to solve the problem (P) using PRINTEMPS.
 
 ```c++
-#include <cppmh.h>
+#include <printemps.h>
 int main(void) {
     // (1) Modeling
-    cppmh::model::IPModel model;
+    printemps::model::IPModel model;
 
     auto& x = model.create_variables("x", 2);
     auto& g = model.create_constraints("g", 2);
@@ -78,7 +78,7 @@ int main(void) {
     model.minimize(x(0) + 10 * x(1));
 
     // (2) Running Solver
-    auto result = cppmh::solver::solve(&model);
+    auto result = printemps::solver::solve(&model);
 
     // (3) Accessing the Result
     std::cout << "objective = " << result.solution.objective() << std::endl;
@@ -96,7 +96,7 @@ x(0) = 7
 x(1) = 70
 ```
 
-An optimization using cppmh consists of three steps; (1) modeling, (2) optimization, and (3) accessing the result. Each step is detailed in the following sections of this document. 
+An optimization using PRINTEMPS consists of three steps; (1) modeling, (2) optimization, and (3) accessing the result. Each step is detailed in the following sections of this document. 
 
 ## Modeling
 ### Basics
@@ -114,10 +114,10 @@ Let us consider the following optimization problem:
                  f_2 = 5 y_1 + 6 y_2.
 ```
 
-The following code shows an implementation of the mathematical model of the problem (P2) using cppmh.
+The following code shows an implementation of the mathematical model of the problem (P2) using PRINTEMPS.
 
 ```c++
-cppmh::model::IPModel model;
+printemps::model::IPModel model;
 
 // Create binary decision variables.
 auto& x_1 = model.create_variable("x_1", 0, 1);
@@ -154,11 +154,11 @@ An expression can express a first-order function on decision variables such as `
 Please note that instances of the decision variable, expression and constraint created by the methods `create_variable()`, `create_expression()`, and `create_constraint()` are managed in an `IPModel` object. 
 These methods return the references of their instances, so that the symbols describing the problem must be declared as aliases. 
 
-cppmh supports one or higher-dimensional indexed symbols such as `x(0), x(1), x(0,0), x(0,1), ...` for intuitive modeling.
+PRINTEMPS supports one or higher-dimensional indexed symbols such as `x(0), x(1), x(0,0), x(0,1), ...` for intuitive modeling.
 The problem (P2) can be equivalently modeled as follows:
 
 ```c++
-cppmh::model::IPModel model;
+printemps::model::IPModel model;
 
 // Create indexed binary decision variables x(0), x(1), x(2), y(0), y(1).
 auto& x = model.create_variables("x", 3, 0, 1);
@@ -191,7 +191,7 @@ In addition, following special methods are provided to define a problem simply:
 With these methods, the problem (P2) can be simplified as follows:
 
 ```c++
-cppmh::model::IPModel model;
+printemps::model::IPModel model;
 
 // Create indexed binary decision variables x(0), x(1), x(2), y(0), y(1).
 auto& x = model.create_variables("x", 3, 0, 1);
@@ -225,7 +225,7 @@ model.minimize(f.sum());
 Decision variables to describe the problem can be created as follows: 
 
 ```c++
-cppmh::model::IPModel model;
+printemps::model::IPModel model;
 
 // Create scalar (no-indexed) variable x.
 auto& x = model.create_variable("x");
@@ -257,7 +257,7 @@ The lower and upper bounds of a decision variable can be specified after creatio
 In the following code, the lower and upper bounds of `x(1)` to `x(9)` are commonly set as `-5` and `5`, respectively, while those of `x(0)` are set as `0` and `20`, respectively.
 
 ```c++
-cppmh::model::IPModel model;
+printemps::model::IPModel model;
 
 // Create decision variables x(0), ..., x(9) with the lower bound -5 and the
 // upper bound 5.
@@ -272,7 +272,7 @@ The default initial value of decision variable is `0`.
 Users can specify initial values by the operator `=`, and the current value of the decision variable can be accessed by the method `value()`. In the following code, the initial value for `x(0)` is set as `1`, while as those of `x(1)` to `x(9)` are still `0`.
 
 ```c++
-cppmh::model::IPModel model;
+printemps::model::IPModel model;
 
 // Create decision variables x(0), ..., x(9). 
 // The initial values of them are set by the default value 0.
@@ -291,7 +291,7 @@ The value of fixed variable will not be changed during optimization.
 In the following code, the value for `x(0)` is fixed by 1, while as those of `x(1)` to `x(9)` can vary.
 
 ```c++
-cppmh::model::IPModel model;
+printemps::model::IPModel model;
 
 // Create decision variables x(0), ..., x(9). 
 auto& x = model.create_variables("x", 10);
@@ -310,7 +310,7 @@ Users can check whether the decision variable is fixed or not by the method `is_
 Expressions to describe the problem can be created as follows: 
 
 ```c++
-cppmh::model::IPModel model;
+printemps::model::IPModel model;
 
 auto& x = model.create_variable("x");
 auto& y = model.create_variable("y");
@@ -340,7 +340,7 @@ An expression can be defined as a first-order functions on decision variables an
 The following code shows examples of expression definitions.
 
 ```c++
-cppmh::model::IPModel model;
+printemps::model::IPModel model;
 
 // Create decision variables.
 auto &x = model.create_variable("x");
@@ -389,7 +389,7 @@ auto &t = model.create_expression("u");
 #### Creating Constraint
 Constraints to describe the problem can be created as follows: 
 ```c++
-cppmh::model::IPModel model;
+printemps::model::IPModel model;
 
 // Create decision variables.
 auto& x = model.create_variable("x");
@@ -421,7 +421,7 @@ Note that a constraint whose sides are both constants is not acceptable, namely,
 The following code shows examples of constraint definitions.
 
 ```c++
-cppmh::model::IPModel model;
+printemps::model::IPModel model;
 
 // Create decision variables.
 auto& x = model.create_variable("x");
@@ -444,19 +444,19 @@ auto& u = model.create_expression("u");
 auto& v = model.create_expressions("v", 10);
 for (auto i = 0; i < 10; i++) {
     // OK. This code is identical to the following code:
-    // u(i) = z.sum({i, cppmh::model::All}) == 1;
-    v(i) = z.selection({i, cppmh::model::All});
+    // u(i) = z.sum({i, printemps::model::All}) == 1;
+    v(i) = z.selection({i, printemps::model::All});
 }
 ```
 
 ### Objective Function
 The objective function and the optimization sense (minimization or maximization) can be specified by the methods `minimize()` and `maximize()` of `IPModel` object. 
 An expression or a decision variable can be objective function by specifying them as the argument of the methods `minimize()` or `maximize()`. 
-If there is no objective function definition, cppmh solves the problem as a constraint satisfaction problem, which aims to find a feasible solution. 
+If there is no objective function definition, PRINTEMPS solves the problem as a constraint satisfaction problem, which aims to find a feasible solution. 
 If methods `minimize()` or `maximize()` are called more than once, the last definition will be effective.
 The following code shows an example of objective function definitions.
 ```c++
-cppmh::model::IPModel model;
+printemps::model::IPModel model;
 
 // Create decision variables.
 auto& x = model.create_variable("x");
@@ -484,7 +484,7 @@ The method `sum()` gives an expression defined by sum of components of indexed d
 The code
 
 ```c++
-cppmh::model::IPModel model;
+printemps::model::IPModel model;
 
 // Create decision variables.
 auto& x = model.create_variables("x", {10, 20});
@@ -496,7 +496,7 @@ auto& p = model.create_expression("p", x.sum());
 is identical to the following code:
 
 ```c++
-cppmh::model::IPModel model;
+printemps::model::IPModel model;
 
 // Create decision variables.
 auto& x = model.create_variables("x", {10, 20});
@@ -512,11 +512,11 @@ for (auto i = 0; i < 10; i++) {
 ```
 
 Partial sums of components of indexed decision variables or expressions can be obtained by specifying indices for fixed and for summation. 
-Summation is calculated for an index of which value is specified by the constant `cppmh::model::All`.
+Summation is calculated for an index of which value is specified by the constant `printemps::model::All`.
 The code
 
 ```c++
-cppmh::model::IPModel model;
+printemps::model::IPModel model;
 
 // Create decision variables.
 auto& x = model.create_variables("x", {10, 20});
@@ -524,14 +524,14 @@ auto& x = model.create_variables("x", {10, 20});
 // Create and define expressions.
 auto& p = model.create_expressions("p", 10);
 for (auto i = 0; i < 10; i++) {
-    p(i) += x.sum({i, cppmh::model::All});
+    p(i) += x.sum({i, printemps::model::All});
 }
 ```
 
 is identical to the following code:
 
 ```c++
-cppmh::model::IPModel model;
+printemps::model::IPModel model;
 
 // Create decision variables.
 auto& x = model.create_variables("x", {10, 20});
@@ -552,7 +552,7 @@ The code
 ```c++
 std::vector<int> a = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 
-cppmh::model::IPModel model;
+printemps::model::IPModel model;
 
 // Create decision variables.
 auto& x = model.create_variables("x", 10);
@@ -566,7 +566,7 @@ is identical to the following code:
 ```c++
 std::vector<int> a = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 
-cppmh::model::IPModel model;
+printemps::model::IPModel model;
 
 // Create decision variables.
 auto& x = model.create_variables("x", 10);
@@ -584,7 +584,7 @@ The following code shows example of allowable and non-allowable usages.
 ```c++
 std::vector<int> a = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 
-cppmh::model::IPModel model;
+printemps::model::IPModel model;
 
 // Create decision variables.
 auto& x = model.create_variables("x", {10, 10});
@@ -599,7 +599,7 @@ auto& p = model.create_expressions("p", 10);
 //    }
 // }
 for (auto i = 0; i < 10; i++) {
-    p[i] = x.dot(a, {i, cppmh::model::All});
+    p[i] = x.dot(a, {i, printemps::model::All});
 }
 
 auto& q = model.create_expressions("q", 10);
@@ -610,13 +610,13 @@ auto& q = model.create_expressions("q", 10);
 //    }
 // }
 for (auto i = 0; i < 10; i++) {
-    q[i] = x.dot(a, {cppmh::model::All, i});
+    q[i] = x.dot(a, {printemps::model::All, i});
 }
 
 auto& r = model.create_expressions("r", 10);
 // NG. The number of indices for summation must be one.
 // for(auto i=0; i<10; i++){
-//     r[i] = x.dot(a, {cppmh::model::All, cppmh::model::All});
+//     r[i] = x.dot(a, {printemps::model::All, printemps::model::All});
 // }
 ```
 
@@ -626,7 +626,7 @@ Such constraints are frequently used in practice.
 The code
 
 ```c++
-cppmh::model::IPModel model;
+printemps::model::IPModel model;
 
 // Create binary decision variables.
 auto& x = model.create_variables("x", {10, 20}, 0, 1);
@@ -638,7 +638,7 @@ auto& g = model.create_constraint("g", x.selection());
 is identical to the following code:
 
 ```c++
-cppmh::model::IPModel model;
+printemps::model::IPModel model;
 
 // Create binary decision variables.
 auto& x = model.create_variables("x", {10, 20}, 0, 1);
@@ -659,20 +659,20 @@ Of course, a selection constraint for partial sums of indexed binary decision va
 The code
 
 ```c++
-cppmh::model::IPModel model;
+printemps::model::IPModel model;
 
 auto& x = model.create_variables("x", {10, 20}, 0, 1);
 auto& g = model.create_constraints("g", 10);
 
 for (auto i = 0; i < 10; i++) {
-    g(i) += x.selection({i, cppmh::model::All});
+    g(i) += x.selection({i, printemps::model::All});
 }
 ```
 
 is identical to the following code:
 
 ```c++
-cppmh::model::IPModel model;
+printemps::model::IPModel model;
 
 // Create binary decision variables.
 auto& x = model.create_variables("x", {10, 20}, 0, 1);
@@ -694,14 +694,14 @@ for (auto i = 0; i < 10; i++) {
 ```
 
 ## Optimization
-The solver of cppmh can be run by the `cppmh::solver::solve()` function with the pointer to the `IPModel` object as the argument:
+The solver can be run by the `printemps::solver::solve()` function with the pointer to the `IPModel` object as the argument:
 
 ```c++
-cppmh::model::IPModel model;
+printemps::model::IPModel model;
 
 // The modeling part is omitted.
 
-auto result = cppmh::solver::solve(&model);
+auto result = printemps::solver::solve(&model);
 ```
 
 Users can configure the behavior of the solver by setting options. The options include those related to optimization parameters, log verbosity, multi-thread computation enabling, etc. [Solver Option Guide](doc/solver_option_guide.md) gives a detailed description of the options and their default values.
@@ -714,7 +714,7 @@ The augmented objective function is the sum of the original objective function v
 The following code shows an example of accessing the optimization result.
 
 ```c++
-cppmh::model::IPModel model;
+printemps::model::IPModel model;
 
 // Create decision variables.
 auto& x = model.create_variable("x");
@@ -730,7 +730,7 @@ auto& h = model.create_constraints("h", {10, 10, 10});
 
 // The formulation part is omitted.
 
-auto result = cppmh::solver::solve(&model);
+auto result = printemps::solver::solve(&model);
 
 // Print whether a feasible solution was obtained or not and the objective
 // function value of the final best solution.

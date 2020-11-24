@@ -5,7 +5,7 @@
 /*****************************************************************************/
 #include <gtest/gtest.h>
 #include <random>
-#include <cppmh.h>
+#include <printemps.h>
 
 namespace {
 /*****************************************************************************/
@@ -36,7 +36,7 @@ TEST_F(TestSimple1, simple_1) {
      * [1] R.Fletcher: Practical Methods of Optimization, Second Edition,
      * John Wiley & Sons (2000).
      */
-    cppmh::model::IPModel model;
+    printemps::model::IPModel model;
 
     auto& x = model.create_variables("x", 2, -100, 100);
     auto& g = model.create_constraints("g", 2);
@@ -50,7 +50,7 @@ TEST_F(TestSimple1, simple_1) {
     x(1) = 50;
 
     /// solve
-    cppmh::solver::Option option;
+    printemps::solver::Option option;
 
     option.iteration_max                           = 50;
     option.is_enabled_grouping_penalty_coefficient = true;
@@ -68,10 +68,11 @@ TEST_F(TestSimple1, simple_1) {
     option.is_enabled_chain_move                   = true;
     option.is_enabled_user_defined_move            = true;
     option.target_objective_value                  = -1E100;
-    option.verbose                                 = cppmh::solver::None;
+    option.verbose                                 = printemps::solver::None;
     option.tabu_search.iteration_max               = 100;
     option.tabu_search.initial_tabu_tenure         = 10;
-    option.tabu_search.tabu_mode = cppmh::solver::tabu_search::TabuMode::All;
+    option.tabu_search.tabu_mode =
+        printemps::solver::tabu_search::TabuMode::All;
 
     option.tabu_search.is_enabled_shuffle                          = true;
     option.tabu_search.is_enabled_move_curtail                     = true;
@@ -82,12 +83,12 @@ TEST_F(TestSimple1, simple_1) {
     option.tabu_search.ignore_tabu_if_augmented_incumbent          = true;
     option.tabu_search.ignore_tabu_if_feasible_incumbent           = true;
 
-    auto result = cppmh::solver::solve(&model, option);
+    auto result = printemps::solver::solve(&model, option);
     EXPECT_EQ(true, result.solution.is_feasible());
     EXPECT_EQ(7, result.solution.variables("x").values(0));
     EXPECT_EQ(70, result.solution.variables("x").values(1));
 
-    ASSERT_THROW(cppmh::solver::solve(&model, option), std::logic_error);
+    ASSERT_THROW(printemps::solver::solve(&model, option), std::logic_error);
 }
 /*****************************************************************************/
 }  // namespace

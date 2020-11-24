@@ -9,7 +9,7 @@
 /build/
 /sample/external/
 /external/
-/cppmh/external/
+/printemps/external/
 /doxygen/*
 !/doxygen/Doxyfile
 
