@@ -5,14 +5,14 @@
 /*****************************************************************************/
 #include <gtest/gtest.h>
 #include <random>
-#include <cppmh.h>
+#include <printemps.h>
 
 namespace {
 /*****************************************************************************/
 class TestConstraintBinary : public ::testing::Test {
    protected:
-    cppmh::utility::IntegerUniformRandom m_random_integer;
-    cppmh::utility::IntegerUniformRandom m_random_positive_integer;
+    printemps::utility::IntegerUniformRandom m_random_integer;
+    printemps::utility::IntegerUniformRandom m_random_positive_integer;
 
     virtual void SetUp(void) {
         m_random_integer.setup(-1000, 1000, 0);
@@ -32,15 +32,16 @@ class TestConstraintBinary : public ::testing::Test {
 
 /*****************************************************************************/
 TEST_F(TestConstraintBinary, function_lower) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
-    auto variable   = cppmh::model::Variable<int, double>::create_instance();
-    auto expression = cppmh::model::Expression<int, double>::create_instance();
-    auto target     = random_integer();
+    auto variable = printemps::model::Variable<int, double>::create_instance();
+    auto expression =
+        printemps::model::Expression<int, double>::create_instance();
+    auto target = random_integer();
 
     expression = variable;
-    std::function<double(const cppmh::model::Move<int, double>&)> f =
-        [&expression](const cppmh::model::Move<int, double>& a_MOVE) {
+    std::function<double(const printemps::model::Move<int, double>&)> f =
+        [&expression](const printemps::model::Move<int, double>& a_MOVE) {
             return expression.evaluate(a_MOVE);
         };
 
@@ -49,7 +50,7 @@ TEST_F(TestConstraintBinary, function_lower) {
         auto constraint_result = f <= target;
 
         EXPECT_EQ(false, constraint_result.is_linear());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Lower,
+        EXPECT_EQ(printemps::model::ConstraintSense::Lower,
                   constraint_result.sense());
 
         auto value = random_integer();
@@ -65,7 +66,7 @@ TEST_F(TestConstraintBinary, function_lower) {
         auto constraint_result = target <= f;
 
         EXPECT_EQ(false, constraint_result.is_linear());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Lower,
+        EXPECT_EQ(printemps::model::ConstraintSense::Lower,
                   constraint_result.sense());
 
         auto value = random_integer();
@@ -79,15 +80,16 @@ TEST_F(TestConstraintBinary, function_lower) {
 
 /*****************************************************************************/
 TEST_F(TestConstraintBinary, function_equal) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
-    auto variable   = cppmh::model::Variable<int, double>::create_instance();
-    auto expression = cppmh::model::Expression<int, double>::create_instance();
-    auto target     = random_integer();
+    auto variable = printemps::model::Variable<int, double>::create_instance();
+    auto expression =
+        printemps::model::Expression<int, double>::create_instance();
+    auto target = random_integer();
 
     expression = variable;
-    std::function<double(const cppmh::model::Move<int, double>&)> f =
-        [&expression](const cppmh::model::Move<int, double>& a_MOVE) {
+    std::function<double(const printemps::model::Move<int, double>&)> f =
+        [&expression](const printemps::model::Move<int, double>& a_MOVE) {
             return expression.evaluate(a_MOVE);
         };
 
@@ -96,7 +98,7 @@ TEST_F(TestConstraintBinary, function_equal) {
         auto constraint_result = f == target;
 
         EXPECT_EQ(false, constraint_result.is_linear());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Equal,
+        EXPECT_EQ(printemps::model::ConstraintSense::Equal,
                   constraint_result.sense());
 
         auto value = random_integer();
@@ -111,7 +113,7 @@ TEST_F(TestConstraintBinary, function_equal) {
         auto constraint_result = target == f;
 
         EXPECT_EQ(false, constraint_result.is_linear());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Equal,
+        EXPECT_EQ(printemps::model::ConstraintSense::Equal,
                   constraint_result.sense());
 
         auto value = random_integer();
@@ -124,15 +126,16 @@ TEST_F(TestConstraintBinary, function_equal) {
 
 /*****************************************************************************/
 TEST_F(TestConstraintBinary, function_upper) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
-    auto variable   = cppmh::model::Variable<int, double>::create_instance();
-    auto expression = cppmh::model::Expression<int, double>::create_instance();
-    auto target     = random_integer();
+    auto variable = printemps::model::Variable<int, double>::create_instance();
+    auto expression =
+        printemps::model::Expression<int, double>::create_instance();
+    auto target = random_integer();
 
     expression = variable;
-    std::function<double(const cppmh::model::Move<int, double>&)> f =
-        [&expression](const cppmh::model::Move<int, double>& a_MOVE) {
+    std::function<double(const printemps::model::Move<int, double>&)> f =
+        [&expression](const printemps::model::Move<int, double>& a_MOVE) {
             return expression.evaluate(a_MOVE);
         };
 
@@ -141,7 +144,7 @@ TEST_F(TestConstraintBinary, function_upper) {
         auto constraint_result = f >= target;
 
         EXPECT_EQ(false, constraint_result.is_linear());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Upper,
+        EXPECT_EQ(printemps::model::ConstraintSense::Upper,
                   constraint_result.sense());
 
         auto value = random_integer();
@@ -157,7 +160,7 @@ TEST_F(TestConstraintBinary, function_upper) {
         auto constraint_result = target >= f;
 
         EXPECT_EQ(false, constraint_result.is_linear());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Upper,
+        EXPECT_EQ(printemps::model::ConstraintSense::Upper,
                   constraint_result.sense());
 
         auto value = random_integer();
@@ -171,13 +174,14 @@ TEST_F(TestConstraintBinary, function_upper) {
 
 /*****************************************************************************/
 TEST_F(TestConstraintBinary, variable_lower) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable   = cppmh::model::Variable<int, double>::create_instance();
-    auto  expression = cppmh::model::Expression<int, double>::create_instance();
-    auto  constant   = random_integer();
+    auto  variable = printemps::model::Variable<int, double>::create_instance();
+    auto  expression =
+        printemps::model::Expression<int, double>::create_instance();
+    auto constant = random_integer();
 
     expression_proxy = variable_proxy;
     expression       = variable;
@@ -189,7 +193,7 @@ TEST_F(TestConstraintBinary, variable_lower) {
         EXPECT_EQ(0,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Lower,
+        EXPECT_EQ(printemps::model::ConstraintSense::Lower,
                   constraint_result.sense());
     }
 
@@ -200,7 +204,7 @@ TEST_F(TestConstraintBinary, variable_lower) {
         EXPECT_EQ(1,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(-constant, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Lower,
+        EXPECT_EQ(printemps::model::ConstraintSense::Lower,
                   constraint_result.sense());
     }
 
@@ -211,7 +215,7 @@ TEST_F(TestConstraintBinary, variable_lower) {
         EXPECT_EQ(-1,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(constant, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Lower,
+        EXPECT_EQ(printemps::model::ConstraintSense::Lower,
                   constraint_result.sense());
     }
 
@@ -224,7 +228,7 @@ TEST_F(TestConstraintBinary, variable_lower) {
         EXPECT_EQ(-1, constraint_result.expression().sensitivities().at(
                           &variable_proxy[0]));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Lower,
+        EXPECT_EQ(printemps::model::ConstraintSense::Lower,
                   constraint_result.sense());
     }
 
@@ -237,7 +241,7 @@ TEST_F(TestConstraintBinary, variable_lower) {
         EXPECT_EQ(-1,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Lower,
+        EXPECT_EQ(printemps::model::ConstraintSense::Lower,
                   constraint_result.sense());
     }
 
@@ -248,7 +252,7 @@ TEST_F(TestConstraintBinary, variable_lower) {
         EXPECT_EQ(0,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Lower,
+        EXPECT_EQ(printemps::model::ConstraintSense::Lower,
                   constraint_result.sense());
     }
 
@@ -259,7 +263,7 @@ TEST_F(TestConstraintBinary, variable_lower) {
         EXPECT_EQ(0,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Lower,
+        EXPECT_EQ(printemps::model::ConstraintSense::Lower,
                   constraint_result.sense());
     }
 
@@ -272,7 +276,7 @@ TEST_F(TestConstraintBinary, variable_lower) {
         EXPECT_EQ(-1, constraint_result.expression().sensitivities().at(
                           &variable_proxy[0]));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Lower,
+        EXPECT_EQ(printemps::model::ConstraintSense::Lower,
                   constraint_result.sense());
     }
 
@@ -285,20 +289,21 @@ TEST_F(TestConstraintBinary, variable_lower) {
         EXPECT_EQ(-1,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Lower,
+        EXPECT_EQ(printemps::model::ConstraintSense::Lower,
                   constraint_result.sense());
     }
 }
 
 /*****************************************************************************/
 TEST_F(TestConstraintBinary, variable_equal) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable   = cppmh::model::Variable<int, double>::create_instance();
-    auto  expression = cppmh::model::Expression<int, double>::create_instance();
-    auto  constant   = random_integer();
+    auto  variable = printemps::model::Variable<int, double>::create_instance();
+    auto  expression =
+        printemps::model::Expression<int, double>::create_instance();
+    auto constant = random_integer();
 
     expression_proxy = variable_proxy;
     expression       = variable;
@@ -310,7 +315,7 @@ TEST_F(TestConstraintBinary, variable_equal) {
         EXPECT_EQ(0,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Equal,
+        EXPECT_EQ(printemps::model::ConstraintSense::Equal,
                   constraint_result.sense());
     }
 
@@ -321,7 +326,7 @@ TEST_F(TestConstraintBinary, variable_equal) {
         EXPECT_EQ(1,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(-constant, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Equal,
+        EXPECT_EQ(printemps::model::ConstraintSense::Equal,
                   constraint_result.sense());
     }
 
@@ -332,7 +337,7 @@ TEST_F(TestConstraintBinary, variable_equal) {
         EXPECT_EQ(-1,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(constant, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Equal,
+        EXPECT_EQ(printemps::model::ConstraintSense::Equal,
                   constraint_result.sense());
     }
 
@@ -345,7 +350,7 @@ TEST_F(TestConstraintBinary, variable_equal) {
         EXPECT_EQ(-1, constraint_result.expression().sensitivities().at(
                           &variable_proxy[0]));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Equal,
+        EXPECT_EQ(printemps::model::ConstraintSense::Equal,
                   constraint_result.sense());
     }
 
@@ -358,7 +363,7 @@ TEST_F(TestConstraintBinary, variable_equal) {
         EXPECT_EQ(-1,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Equal,
+        EXPECT_EQ(printemps::model::ConstraintSense::Equal,
                   constraint_result.sense());
     }
 
@@ -369,7 +374,7 @@ TEST_F(TestConstraintBinary, variable_equal) {
         EXPECT_EQ(0,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Equal,
+        EXPECT_EQ(printemps::model::ConstraintSense::Equal,
                   constraint_result.sense());
     }
 
@@ -380,7 +385,7 @@ TEST_F(TestConstraintBinary, variable_equal) {
         EXPECT_EQ(0,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Equal,
+        EXPECT_EQ(printemps::model::ConstraintSense::Equal,
                   constraint_result.sense());
     }
 
@@ -393,7 +398,7 @@ TEST_F(TestConstraintBinary, variable_equal) {
         EXPECT_EQ(-1, constraint_result.expression().sensitivities().at(
                           &variable_proxy[0]));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Equal,
+        EXPECT_EQ(printemps::model::ConstraintSense::Equal,
                   constraint_result.sense());
     }
 
@@ -406,20 +411,21 @@ TEST_F(TestConstraintBinary, variable_equal) {
         EXPECT_EQ(-1,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Equal,
+        EXPECT_EQ(printemps::model::ConstraintSense::Equal,
                   constraint_result.sense());
     }
 }
 
 /*****************************************************************************/
 TEST_F(TestConstraintBinary, variable_upper) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable   = cppmh::model::Variable<int, double>::create_instance();
-    auto  expression = cppmh::model::Expression<int, double>::create_instance();
-    auto  constant   = random_integer();
+    auto  variable = printemps::model::Variable<int, double>::create_instance();
+    auto  expression =
+        printemps::model::Expression<int, double>::create_instance();
+    auto constant = random_integer();
 
     expression_proxy = variable_proxy;
     expression       = variable;
@@ -431,7 +437,7 @@ TEST_F(TestConstraintBinary, variable_upper) {
         EXPECT_EQ(0,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Upper,
+        EXPECT_EQ(printemps::model::ConstraintSense::Upper,
                   constraint_result.sense());
     }
 
@@ -442,7 +448,7 @@ TEST_F(TestConstraintBinary, variable_upper) {
         EXPECT_EQ(1,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(-constant, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Upper,
+        EXPECT_EQ(printemps::model::ConstraintSense::Upper,
                   constraint_result.sense());
     }
 
@@ -453,7 +459,7 @@ TEST_F(TestConstraintBinary, variable_upper) {
         EXPECT_EQ(-1,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(constant, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Upper,
+        EXPECT_EQ(printemps::model::ConstraintSense::Upper,
                   constraint_result.sense());
     }
 
@@ -466,7 +472,7 @@ TEST_F(TestConstraintBinary, variable_upper) {
         EXPECT_EQ(-1, constraint_result.expression().sensitivities().at(
                           &variable_proxy[0]));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Upper,
+        EXPECT_EQ(printemps::model::ConstraintSense::Upper,
                   constraint_result.sense());
     }
 
@@ -479,7 +485,7 @@ TEST_F(TestConstraintBinary, variable_upper) {
         EXPECT_EQ(-1,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Upper,
+        EXPECT_EQ(printemps::model::ConstraintSense::Upper,
                   constraint_result.sense());
     }
 
@@ -490,7 +496,7 @@ TEST_F(TestConstraintBinary, variable_upper) {
         EXPECT_EQ(0,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Upper,
+        EXPECT_EQ(printemps::model::ConstraintSense::Upper,
                   constraint_result.sense());
     }
 
@@ -501,7 +507,7 @@ TEST_F(TestConstraintBinary, variable_upper) {
         EXPECT_EQ(0,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Upper,
+        EXPECT_EQ(printemps::model::ConstraintSense::Upper,
                   constraint_result.sense());
     }
 
@@ -514,7 +520,7 @@ TEST_F(TestConstraintBinary, variable_upper) {
         EXPECT_EQ(-1, constraint_result.expression().sensitivities().at(
                           &variable_proxy[0]));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Upper,
+        EXPECT_EQ(printemps::model::ConstraintSense::Upper,
                   constraint_result.sense());
     }
 
@@ -527,20 +533,21 @@ TEST_F(TestConstraintBinary, variable_upper) {
         EXPECT_EQ(-1,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Upper,
+        EXPECT_EQ(printemps::model::ConstraintSense::Upper,
                   constraint_result.sense());
     }
 }
 
 /*****************************************************************************/
 TEST_F(TestConstraintBinary, variable_proxy_lower) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable   = cppmh::model::Variable<int, double>::create_instance();
-    auto  expression = cppmh::model::Expression<int, double>::create_instance();
-    auto  constant   = random_integer();
+    auto  variable = printemps::model::Variable<int, double>::create_instance();
+    auto  expression =
+        printemps::model::Expression<int, double>::create_instance();
+    auto constant = random_integer();
 
     expression_proxy = variable_proxy;
     expression       = variable;
@@ -552,7 +559,7 @@ TEST_F(TestConstraintBinary, variable_proxy_lower) {
         EXPECT_EQ(0, constraint_result.expression().sensitivities().at(
                          &variable_proxy[0]));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Lower,
+        EXPECT_EQ(printemps::model::ConstraintSense::Lower,
                   constraint_result.sense());
     }
 
@@ -563,7 +570,7 @@ TEST_F(TestConstraintBinary, variable_proxy_lower) {
         EXPECT_EQ(1, constraint_result.expression().sensitivities().at(
                          &variable_proxy[0]));
         EXPECT_EQ(-constant, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Lower,
+        EXPECT_EQ(printemps::model::ConstraintSense::Lower,
                   constraint_result.sense());
     }
 
@@ -574,7 +581,7 @@ TEST_F(TestConstraintBinary, variable_proxy_lower) {
         EXPECT_EQ(-1, constraint_result.expression().sensitivities().at(
                           &variable_proxy[0]));
         EXPECT_EQ(constant, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Lower,
+        EXPECT_EQ(printemps::model::ConstraintSense::Lower,
                   constraint_result.sense());
     }
 
@@ -587,7 +594,7 @@ TEST_F(TestConstraintBinary, variable_proxy_lower) {
         EXPECT_EQ(-1,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Lower,
+        EXPECT_EQ(printemps::model::ConstraintSense::Lower,
                   constraint_result.sense());
     }
 
@@ -600,7 +607,7 @@ TEST_F(TestConstraintBinary, variable_proxy_lower) {
         EXPECT_EQ(-1, constraint_result.expression().sensitivities().at(
                           &variable_proxy[0]));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Lower,
+        EXPECT_EQ(printemps::model::ConstraintSense::Lower,
                   constraint_result.sense());
     }
 
@@ -613,7 +620,7 @@ TEST_F(TestConstraintBinary, variable_proxy_lower) {
         EXPECT_EQ(-1,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Lower,
+        EXPECT_EQ(printemps::model::ConstraintSense::Lower,
                   constraint_result.sense());
     }
 
@@ -626,7 +633,7 @@ TEST_F(TestConstraintBinary, variable_proxy_lower) {
         EXPECT_EQ(-1, constraint_result.expression().sensitivities().at(
                           &variable_proxy[0]));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Lower,
+        EXPECT_EQ(printemps::model::ConstraintSense::Lower,
                   constraint_result.sense());
     }
 
@@ -637,7 +644,7 @@ TEST_F(TestConstraintBinary, variable_proxy_lower) {
         EXPECT_EQ(0, constraint_result.expression().sensitivities().at(
                          &variable_proxy[0]));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Lower,
+        EXPECT_EQ(printemps::model::ConstraintSense::Lower,
                   constraint_result.sense());
     }
 
@@ -648,20 +655,21 @@ TEST_F(TestConstraintBinary, variable_proxy_lower) {
         EXPECT_EQ(0, constraint_result.expression().sensitivities().at(
                          &variable_proxy[0]));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Lower,
+        EXPECT_EQ(printemps::model::ConstraintSense::Lower,
                   constraint_result.sense());
     }
 }
 
 /*****************************************************************************/
 TEST_F(TestConstraintBinary, variable_proxy_equal) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable   = cppmh::model::Variable<int, double>::create_instance();
-    auto  expression = cppmh::model::Expression<int, double>::create_instance();
-    auto  constant   = random_integer();
+    auto  variable = printemps::model::Variable<int, double>::create_instance();
+    auto  expression =
+        printemps::model::Expression<int, double>::create_instance();
+    auto constant = random_integer();
 
     expression_proxy = variable_proxy;
     expression       = variable;
@@ -673,7 +681,7 @@ TEST_F(TestConstraintBinary, variable_proxy_equal) {
         EXPECT_EQ(0, constraint_result.expression().sensitivities().at(
                          &variable_proxy[0]));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Equal,
+        EXPECT_EQ(printemps::model::ConstraintSense::Equal,
                   constraint_result.sense());
     }
 
@@ -684,7 +692,7 @@ TEST_F(TestConstraintBinary, variable_proxy_equal) {
         EXPECT_EQ(1, constraint_result.expression().sensitivities().at(
                          &variable_proxy[0]));
         EXPECT_EQ(-constant, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Equal,
+        EXPECT_EQ(printemps::model::ConstraintSense::Equal,
                   constraint_result.sense());
     }
 
@@ -695,7 +703,7 @@ TEST_F(TestConstraintBinary, variable_proxy_equal) {
         EXPECT_EQ(-1, constraint_result.expression().sensitivities().at(
                           &variable_proxy[0]));
         EXPECT_EQ(constant, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Equal,
+        EXPECT_EQ(printemps::model::ConstraintSense::Equal,
                   constraint_result.sense());
     }
 
@@ -708,7 +716,7 @@ TEST_F(TestConstraintBinary, variable_proxy_equal) {
         EXPECT_EQ(-1,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Equal,
+        EXPECT_EQ(printemps::model::ConstraintSense::Equal,
                   constraint_result.sense());
     }
 
@@ -721,7 +729,7 @@ TEST_F(TestConstraintBinary, variable_proxy_equal) {
         EXPECT_EQ(-1, constraint_result.expression().sensitivities().at(
                           &variable_proxy[0]));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Equal,
+        EXPECT_EQ(printemps::model::ConstraintSense::Equal,
                   constraint_result.sense());
     }
 
@@ -734,7 +742,7 @@ TEST_F(TestConstraintBinary, variable_proxy_equal) {
         EXPECT_EQ(-1,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Equal,
+        EXPECT_EQ(printemps::model::ConstraintSense::Equal,
                   constraint_result.sense());
     }
 
@@ -747,7 +755,7 @@ TEST_F(TestConstraintBinary, variable_proxy_equal) {
         EXPECT_EQ(-1, constraint_result.expression().sensitivities().at(
                           &variable_proxy[0]));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Equal,
+        EXPECT_EQ(printemps::model::ConstraintSense::Equal,
                   constraint_result.sense());
     }
 
@@ -758,7 +766,7 @@ TEST_F(TestConstraintBinary, variable_proxy_equal) {
         EXPECT_EQ(0, constraint_result.expression().sensitivities().at(
                          &variable_proxy[0]));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Equal,
+        EXPECT_EQ(printemps::model::ConstraintSense::Equal,
                   constraint_result.sense());
     }
 
@@ -769,20 +777,21 @@ TEST_F(TestConstraintBinary, variable_proxy_equal) {
         EXPECT_EQ(0, constraint_result.expression().sensitivities().at(
                          &variable_proxy[0]));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Equal,
+        EXPECT_EQ(printemps::model::ConstraintSense::Equal,
                   constraint_result.sense());
     }
 }
 
 /*****************************************************************************/
 TEST_F(TestConstraintBinary, variable_proxy_upper) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable   = cppmh::model::Variable<int, double>::create_instance();
-    auto  expression = cppmh::model::Expression<int, double>::create_instance();
-    auto  constant   = random_integer();
+    auto  variable = printemps::model::Variable<int, double>::create_instance();
+    auto  expression =
+        printemps::model::Expression<int, double>::create_instance();
+    auto constant = random_integer();
 
     expression_proxy = variable_proxy;
     expression       = variable;
@@ -794,7 +803,7 @@ TEST_F(TestConstraintBinary, variable_proxy_upper) {
         EXPECT_EQ(0, constraint_result.expression().sensitivities().at(
                          &variable_proxy[0]));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Upper,
+        EXPECT_EQ(printemps::model::ConstraintSense::Upper,
                   constraint_result.sense());
     }
 
@@ -805,7 +814,7 @@ TEST_F(TestConstraintBinary, variable_proxy_upper) {
         EXPECT_EQ(1, constraint_result.expression().sensitivities().at(
                          &variable_proxy[0]));
         EXPECT_EQ(-constant, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Upper,
+        EXPECT_EQ(printemps::model::ConstraintSense::Upper,
                   constraint_result.sense());
     }
 
@@ -816,7 +825,7 @@ TEST_F(TestConstraintBinary, variable_proxy_upper) {
         EXPECT_EQ(-1, constraint_result.expression().sensitivities().at(
                           &variable_proxy[0]));
         EXPECT_EQ(constant, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Upper,
+        EXPECT_EQ(printemps::model::ConstraintSense::Upper,
                   constraint_result.sense());
     }
 
@@ -829,7 +838,7 @@ TEST_F(TestConstraintBinary, variable_proxy_upper) {
         EXPECT_EQ(-1,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Upper,
+        EXPECT_EQ(printemps::model::ConstraintSense::Upper,
                   constraint_result.sense());
     }
 
@@ -842,7 +851,7 @@ TEST_F(TestConstraintBinary, variable_proxy_upper) {
         EXPECT_EQ(-1, constraint_result.expression().sensitivities().at(
                           &variable_proxy[0]));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Upper,
+        EXPECT_EQ(printemps::model::ConstraintSense::Upper,
                   constraint_result.sense());
     }
 
@@ -855,7 +864,7 @@ TEST_F(TestConstraintBinary, variable_proxy_upper) {
         EXPECT_EQ(-1,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Upper,
+        EXPECT_EQ(printemps::model::ConstraintSense::Upper,
                   constraint_result.sense());
     }
 
@@ -868,7 +877,7 @@ TEST_F(TestConstraintBinary, variable_proxy_upper) {
         EXPECT_EQ(-1, constraint_result.expression().sensitivities().at(
                           &variable_proxy[0]));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Upper,
+        EXPECT_EQ(printemps::model::ConstraintSense::Upper,
                   constraint_result.sense());
     }
 
@@ -879,7 +888,7 @@ TEST_F(TestConstraintBinary, variable_proxy_upper) {
         EXPECT_EQ(0, constraint_result.expression().sensitivities().at(
                          &variable_proxy[0]));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Upper,
+        EXPECT_EQ(printemps::model::ConstraintSense::Upper,
                   constraint_result.sense());
     }
 
@@ -890,20 +899,21 @@ TEST_F(TestConstraintBinary, variable_proxy_upper) {
         EXPECT_EQ(0, constraint_result.expression().sensitivities().at(
                          &variable_proxy[0]));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Upper,
+        EXPECT_EQ(printemps::model::ConstraintSense::Upper,
                   constraint_result.sense());
     }
 }
 
 /*****************************************************************************/
 TEST_F(TestConstraintBinary, expression_lower) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable   = cppmh::model::Variable<int, double>::create_instance();
-    auto  expression = cppmh::model::Expression<int, double>::create_instance();
-    auto  constant   = random_integer();
+    auto  variable = printemps::model::Variable<int, double>::create_instance();
+    auto  expression =
+        printemps::model::Expression<int, double>::create_instance();
+    auto constant = random_integer();
 
     expression_proxy = variable_proxy;
     expression       = variable;
@@ -915,7 +925,7 @@ TEST_F(TestConstraintBinary, expression_lower) {
         EXPECT_EQ(0,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Lower,
+        EXPECT_EQ(printemps::model::ConstraintSense::Lower,
                   constraint_result.sense());
     }
 
@@ -926,7 +936,7 @@ TEST_F(TestConstraintBinary, expression_lower) {
         EXPECT_EQ(1,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(-constant, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Lower,
+        EXPECT_EQ(printemps::model::ConstraintSense::Lower,
                   constraint_result.sense());
     }
 
@@ -937,7 +947,7 @@ TEST_F(TestConstraintBinary, expression_lower) {
         EXPECT_EQ(-1,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(constant, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Lower,
+        EXPECT_EQ(printemps::model::ConstraintSense::Lower,
                   constraint_result.sense());
     }
 
@@ -948,7 +958,7 @@ TEST_F(TestConstraintBinary, expression_lower) {
         EXPECT_EQ(0,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Lower,
+        EXPECT_EQ(printemps::model::ConstraintSense::Lower,
                   constraint_result.sense());
     }
 
@@ -959,7 +969,7 @@ TEST_F(TestConstraintBinary, expression_lower) {
         EXPECT_EQ(0,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Lower,
+        EXPECT_EQ(printemps::model::ConstraintSense::Lower,
                   constraint_result.sense());
     }
 
@@ -972,7 +982,7 @@ TEST_F(TestConstraintBinary, expression_lower) {
         EXPECT_EQ(-1, constraint_result.expression().sensitivities().at(
                           &variable_proxy[0]));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Lower,
+        EXPECT_EQ(printemps::model::ConstraintSense::Lower,
                   constraint_result.sense());
     }
 
@@ -985,7 +995,7 @@ TEST_F(TestConstraintBinary, expression_lower) {
         EXPECT_EQ(-1,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Lower,
+        EXPECT_EQ(printemps::model::ConstraintSense::Lower,
                   constraint_result.sense());
     }
 
@@ -998,7 +1008,7 @@ TEST_F(TestConstraintBinary, expression_lower) {
         EXPECT_EQ(-1, constraint_result.expression().sensitivities().at(
                           &variable_proxy[0]));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Lower,
+        EXPECT_EQ(printemps::model::ConstraintSense::Lower,
                   constraint_result.sense());
     }
 
@@ -1011,20 +1021,21 @@ TEST_F(TestConstraintBinary, expression_lower) {
         EXPECT_EQ(-1,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Lower,
+        EXPECT_EQ(printemps::model::ConstraintSense::Lower,
                   constraint_result.sense());
     }
 }
 
 /*****************************************************************************/
 TEST_F(TestConstraintBinary, expression_equal) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable   = cppmh::model::Variable<int, double>::create_instance();
-    auto  expression = cppmh::model::Expression<int, double>::create_instance();
-    auto  constant   = random_integer();
+    auto  variable = printemps::model::Variable<int, double>::create_instance();
+    auto  expression =
+        printemps::model::Expression<int, double>::create_instance();
+    auto constant = random_integer();
 
     expression_proxy = variable_proxy;
     expression       = variable;
@@ -1036,7 +1047,7 @@ TEST_F(TestConstraintBinary, expression_equal) {
         EXPECT_EQ(0,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Equal,
+        EXPECT_EQ(printemps::model::ConstraintSense::Equal,
                   constraint_result.sense());
     }
 
@@ -1047,7 +1058,7 @@ TEST_F(TestConstraintBinary, expression_equal) {
         EXPECT_EQ(1,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(-constant, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Equal,
+        EXPECT_EQ(printemps::model::ConstraintSense::Equal,
                   constraint_result.sense());
     }
 
@@ -1058,7 +1069,7 @@ TEST_F(TestConstraintBinary, expression_equal) {
         EXPECT_EQ(-1,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(constant, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Equal,
+        EXPECT_EQ(printemps::model::ConstraintSense::Equal,
                   constraint_result.sense());
     }
 
@@ -1069,7 +1080,7 @@ TEST_F(TestConstraintBinary, expression_equal) {
         EXPECT_EQ(0,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Equal,
+        EXPECT_EQ(printemps::model::ConstraintSense::Equal,
                   constraint_result.sense());
     }
 
@@ -1080,7 +1091,7 @@ TEST_F(TestConstraintBinary, expression_equal) {
         EXPECT_EQ(0,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Equal,
+        EXPECT_EQ(printemps::model::ConstraintSense::Equal,
                   constraint_result.sense());
     }
 
@@ -1093,7 +1104,7 @@ TEST_F(TestConstraintBinary, expression_equal) {
         EXPECT_EQ(-1, constraint_result.expression().sensitivities().at(
                           &variable_proxy[0]));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Equal,
+        EXPECT_EQ(printemps::model::ConstraintSense::Equal,
                   constraint_result.sense());
     }
 
@@ -1106,7 +1117,7 @@ TEST_F(TestConstraintBinary, expression_equal) {
         EXPECT_EQ(-1,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Equal,
+        EXPECT_EQ(printemps::model::ConstraintSense::Equal,
                   constraint_result.sense());
     }
 
@@ -1119,7 +1130,7 @@ TEST_F(TestConstraintBinary, expression_equal) {
         EXPECT_EQ(-1, constraint_result.expression().sensitivities().at(
                           &variable_proxy[0]));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Equal,
+        EXPECT_EQ(printemps::model::ConstraintSense::Equal,
                   constraint_result.sense());
     }
 
@@ -1132,20 +1143,21 @@ TEST_F(TestConstraintBinary, expression_equal) {
         EXPECT_EQ(-1,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Equal,
+        EXPECT_EQ(printemps::model::ConstraintSense::Equal,
                   constraint_result.sense());
     }
 }
 
 /*****************************************************************************/
 TEST_F(TestConstraintBinary, expression_upper) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable   = cppmh::model::Variable<int, double>::create_instance();
-    auto  expression = cppmh::model::Expression<int, double>::create_instance();
-    auto  constant   = random_integer();
+    auto  variable = printemps::model::Variable<int, double>::create_instance();
+    auto  expression =
+        printemps::model::Expression<int, double>::create_instance();
+    auto constant = random_integer();
 
     expression_proxy = variable_proxy;
     expression       = variable;
@@ -1157,7 +1169,7 @@ TEST_F(TestConstraintBinary, expression_upper) {
         EXPECT_EQ(0,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Upper,
+        EXPECT_EQ(printemps::model::ConstraintSense::Upper,
                   constraint_result.sense());
     }
 
@@ -1168,7 +1180,7 @@ TEST_F(TestConstraintBinary, expression_upper) {
         EXPECT_EQ(1,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(-constant, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Upper,
+        EXPECT_EQ(printemps::model::ConstraintSense::Upper,
                   constraint_result.sense());
     }
 
@@ -1179,7 +1191,7 @@ TEST_F(TestConstraintBinary, expression_upper) {
         EXPECT_EQ(-1,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(constant, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Upper,
+        EXPECT_EQ(printemps::model::ConstraintSense::Upper,
                   constraint_result.sense());
     }
 
@@ -1190,7 +1202,7 @@ TEST_F(TestConstraintBinary, expression_upper) {
         EXPECT_EQ(0,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Upper,
+        EXPECT_EQ(printemps::model::ConstraintSense::Upper,
                   constraint_result.sense());
     }
 
@@ -1201,7 +1213,7 @@ TEST_F(TestConstraintBinary, expression_upper) {
         EXPECT_EQ(0,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Upper,
+        EXPECT_EQ(printemps::model::ConstraintSense::Upper,
                   constraint_result.sense());
     }
 
@@ -1214,7 +1226,7 @@ TEST_F(TestConstraintBinary, expression_upper) {
         EXPECT_EQ(-1, constraint_result.expression().sensitivities().at(
                           &variable_proxy[0]));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Upper,
+        EXPECT_EQ(printemps::model::ConstraintSense::Upper,
                   constraint_result.sense());
     }
 
@@ -1227,7 +1239,7 @@ TEST_F(TestConstraintBinary, expression_upper) {
         EXPECT_EQ(-1,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Upper,
+        EXPECT_EQ(printemps::model::ConstraintSense::Upper,
                   constraint_result.sense());
     }
 
@@ -1240,7 +1252,7 @@ TEST_F(TestConstraintBinary, expression_upper) {
         EXPECT_EQ(-1, constraint_result.expression().sensitivities().at(
                           &variable_proxy[0]));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Upper,
+        EXPECT_EQ(printemps::model::ConstraintSense::Upper,
                   constraint_result.sense());
     }
 
@@ -1253,20 +1265,21 @@ TEST_F(TestConstraintBinary, expression_upper) {
         EXPECT_EQ(-1,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Upper,
+        EXPECT_EQ(printemps::model::ConstraintSense::Upper,
                   constraint_result.sense());
     }
 }
 
 /*****************************************************************************/
 TEST_F(TestConstraintBinary, expression_proxy_lower) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable   = cppmh::model::Variable<int, double>::create_instance();
-    auto  expression = cppmh::model::Expression<int, double>::create_instance();
-    auto  constant   = random_integer();
+    auto  variable = printemps::model::Variable<int, double>::create_instance();
+    auto  expression =
+        printemps::model::Expression<int, double>::create_instance();
+    auto constant = random_integer();
 
     expression_proxy = variable_proxy;
     expression       = variable;
@@ -1278,7 +1291,7 @@ TEST_F(TestConstraintBinary, expression_proxy_lower) {
         EXPECT_EQ(0, constraint_result.expression().sensitivities().at(
                          &variable_proxy[0]));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Lower,
+        EXPECT_EQ(printemps::model::ConstraintSense::Lower,
                   constraint_result.sense());
     }
 
@@ -1289,7 +1302,7 @@ TEST_F(TestConstraintBinary, expression_proxy_lower) {
         EXPECT_EQ(1, constraint_result.expression().sensitivities().at(
                          &variable_proxy[0]));
         EXPECT_EQ(-constant, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Lower,
+        EXPECT_EQ(printemps::model::ConstraintSense::Lower,
                   constraint_result.sense());
     }
 
@@ -1300,7 +1313,7 @@ TEST_F(TestConstraintBinary, expression_proxy_lower) {
         EXPECT_EQ(-1, constraint_result.expression().sensitivities().at(
                           &variable_proxy[0]));
         EXPECT_EQ(constant, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Lower,
+        EXPECT_EQ(printemps::model::ConstraintSense::Lower,
                   constraint_result.sense());
     }
 
@@ -1313,7 +1326,7 @@ TEST_F(TestConstraintBinary, expression_proxy_lower) {
         EXPECT_EQ(-1,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Lower,
+        EXPECT_EQ(printemps::model::ConstraintSense::Lower,
                   constraint_result.sense());
     }
 
@@ -1326,7 +1339,7 @@ TEST_F(TestConstraintBinary, expression_proxy_lower) {
         EXPECT_EQ(-1, constraint_result.expression().sensitivities().at(
                           &variable_proxy[0]));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Lower,
+        EXPECT_EQ(printemps::model::ConstraintSense::Lower,
                   constraint_result.sense());
     }
 
@@ -1339,7 +1352,7 @@ TEST_F(TestConstraintBinary, expression_proxy_lower) {
         EXPECT_EQ(-1,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Lower,
+        EXPECT_EQ(printemps::model::ConstraintSense::Lower,
                   constraint_result.sense());
     }
 
@@ -1352,20 +1365,21 @@ TEST_F(TestConstraintBinary, expression_proxy_lower) {
         EXPECT_EQ(-1, constraint_result.expression().sensitivities().at(
                           &variable_proxy[0]));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Lower,
+        EXPECT_EQ(printemps::model::ConstraintSense::Lower,
                   constraint_result.sense());
     }
 }
 
 /*****************************************************************************/
 TEST_F(TestConstraintBinary, expression_proxy_equal) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable   = cppmh::model::Variable<int, double>::create_instance();
-    auto  expression = cppmh::model::Expression<int, double>::create_instance();
-    auto  constant   = random_integer();
+    auto  variable = printemps::model::Variable<int, double>::create_instance();
+    auto  expression =
+        printemps::model::Expression<int, double>::create_instance();
+    auto constant = random_integer();
 
     expression_proxy = variable_proxy;
     expression       = variable;
@@ -1377,7 +1391,7 @@ TEST_F(TestConstraintBinary, expression_proxy_equal) {
         EXPECT_EQ(0, constraint_result.expression().sensitivities().at(
                          &variable_proxy[0]));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Equal,
+        EXPECT_EQ(printemps::model::ConstraintSense::Equal,
                   constraint_result.sense());
     }
 
@@ -1388,7 +1402,7 @@ TEST_F(TestConstraintBinary, expression_proxy_equal) {
         EXPECT_EQ(1, constraint_result.expression().sensitivities().at(
                          &variable_proxy[0]));
         EXPECT_EQ(-constant, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Equal,
+        EXPECT_EQ(printemps::model::ConstraintSense::Equal,
                   constraint_result.sense());
     }
 
@@ -1399,7 +1413,7 @@ TEST_F(TestConstraintBinary, expression_proxy_equal) {
         EXPECT_EQ(-1, constraint_result.expression().sensitivities().at(
                           &variable_proxy[0]));
         EXPECT_EQ(constant, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Equal,
+        EXPECT_EQ(printemps::model::ConstraintSense::Equal,
                   constraint_result.sense());
     }
 
@@ -1412,7 +1426,7 @@ TEST_F(TestConstraintBinary, expression_proxy_equal) {
         EXPECT_EQ(-1,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Equal,
+        EXPECT_EQ(printemps::model::ConstraintSense::Equal,
                   constraint_result.sense());
     }
 
@@ -1425,7 +1439,7 @@ TEST_F(TestConstraintBinary, expression_proxy_equal) {
         EXPECT_EQ(-1, constraint_result.expression().sensitivities().at(
                           &variable_proxy[0]));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Equal,
+        EXPECT_EQ(printemps::model::ConstraintSense::Equal,
                   constraint_result.sense());
     }
 
@@ -1438,7 +1452,7 @@ TEST_F(TestConstraintBinary, expression_proxy_equal) {
         EXPECT_EQ(-1,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Equal,
+        EXPECT_EQ(printemps::model::ConstraintSense::Equal,
                   constraint_result.sense());
     }
 
@@ -1451,20 +1465,21 @@ TEST_F(TestConstraintBinary, expression_proxy_equal) {
         EXPECT_EQ(-1, constraint_result.expression().sensitivities().at(
                           &variable_proxy[0]));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Equal,
+        EXPECT_EQ(printemps::model::ConstraintSense::Equal,
                   constraint_result.sense());
     }
 }
 
 /*****************************************************************************/
 TEST_F(TestConstraintBinary, expression_proxy_upper) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable   = cppmh::model::Variable<int, double>::create_instance();
-    auto  expression = cppmh::model::Expression<int, double>::create_instance();
-    auto  constant   = random_integer();
+    auto  variable = printemps::model::Variable<int, double>::create_instance();
+    auto  expression =
+        printemps::model::Expression<int, double>::create_instance();
+    auto constant = random_integer();
 
     expression_proxy = variable_proxy;
     expression       = variable;
@@ -1476,7 +1491,7 @@ TEST_F(TestConstraintBinary, expression_proxy_upper) {
         EXPECT_EQ(0, constraint_result.expression().sensitivities().at(
                          &variable_proxy[0]));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Upper,
+        EXPECT_EQ(printemps::model::ConstraintSense::Upper,
                   constraint_result.sense());
     }
 
@@ -1487,7 +1502,7 @@ TEST_F(TestConstraintBinary, expression_proxy_upper) {
         EXPECT_EQ(1, constraint_result.expression().sensitivities().at(
                          &variable_proxy[0]));
         EXPECT_EQ(-constant, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Upper,
+        EXPECT_EQ(printemps::model::ConstraintSense::Upper,
                   constraint_result.sense());
     }
 
@@ -1498,7 +1513,7 @@ TEST_F(TestConstraintBinary, expression_proxy_upper) {
         EXPECT_EQ(-1, constraint_result.expression().sensitivities().at(
                           &variable_proxy[0]));
         EXPECT_EQ(constant, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Upper,
+        EXPECT_EQ(printemps::model::ConstraintSense::Upper,
                   constraint_result.sense());
     }
 
@@ -1511,7 +1526,7 @@ TEST_F(TestConstraintBinary, expression_proxy_upper) {
         EXPECT_EQ(-1,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Upper,
+        EXPECT_EQ(printemps::model::ConstraintSense::Upper,
                   constraint_result.sense());
     }
 
@@ -1524,7 +1539,7 @@ TEST_F(TestConstraintBinary, expression_proxy_upper) {
         EXPECT_EQ(-1, constraint_result.expression().sensitivities().at(
                           &variable_proxy[0]));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Upper,
+        EXPECT_EQ(printemps::model::ConstraintSense::Upper,
                   constraint_result.sense());
     }
 
@@ -1537,7 +1552,7 @@ TEST_F(TestConstraintBinary, expression_proxy_upper) {
         EXPECT_EQ(-1,
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Upper,
+        EXPECT_EQ(printemps::model::ConstraintSense::Upper,
                   constraint_result.sense());
     }
 
@@ -1550,7 +1565,7 @@ TEST_F(TestConstraintBinary, expression_proxy_upper) {
         EXPECT_EQ(-1, constraint_result.expression().sensitivities().at(
                           &variable_proxy[0]));
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Upper,
+        EXPECT_EQ(printemps::model::ConstraintSense::Upper,
                   constraint_result.sense());
     }
 }

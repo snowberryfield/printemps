@@ -1,4 +1,4 @@
-#include <cppmh.h>
+#include <printemps.h>
 
 int main(void) {
     /**
@@ -16,7 +16,7 @@ int main(void) {
      * [1] R.Fletcher: Practical Methods of Optimization, Second Edition,
      * John Wiley & Sons (2000).
      */
-    cppmh::model::IPModel model;
+    printemps::model::IPModel model;
 
     auto& x = model.create_variables("x", 2, -100, 100);
     auto& g = model.create_constraints("g", 2);
@@ -25,7 +25,7 @@ int main(void) {
     g(1) = -82 * x(0) + 28 * x(1) >= 1306;
     model.minimize(x(0) + 10 * x(1));
 
-    auto result = cppmh::solver::solve(&model);
+    auto result = printemps::solver::solve(&model);
 
     std::cout << "objective = " << result.solution.objective() << std::endl;
     std::cout << "x(0) = " << result.solution.variables("x").values(0)

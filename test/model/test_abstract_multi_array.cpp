@@ -6,14 +6,14 @@
 #include <gtest/gtest.h>
 #include <random>
 
-#include <cppmh.h>
+#include <printemps.h>
 
 namespace {
 /*****************************************************************************/
 class TestAbstractMultiArray : public ::testing::Test {
    protected:
-    cppmh::utility::IntegerUniformRandom m_random_integer;
-    cppmh::utility::IntegerUniformRandom m_random_positive_integer;
+    printemps::utility::IntegerUniformRandom m_random_integer;
+    printemps::utility::IntegerUniformRandom m_random_positive_integer;
 
     virtual void SetUp(void) {
         m_random_integer.setup(-1000, 1000, 0);
@@ -36,7 +36,7 @@ TEST_F(TestAbstractMultiArray, scalar_create_instance) {
     /**
      * The VariableProxy class inherits the TestAbstractMultiArray class.
      */
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
     auto& variable_proxy = model.create_variable("x");
     EXPECT_EQ(0, variable_proxy.id());
     EXPECT_EQ(1, variable_proxy.shape()[0]);
@@ -47,7 +47,7 @@ TEST_F(TestAbstractMultiArray, scalar_create_instance) {
 
 /*****************************************************************************/
 TEST_F(TestAbstractMultiArray, one_dimensional_create_instance) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", 2);
     EXPECT_EQ(0, variable_proxy.id());
@@ -59,7 +59,7 @@ TEST_F(TestAbstractMultiArray, one_dimensional_create_instance) {
 
 /*****************************************************************************/
 TEST_F(TestAbstractMultiArray, two_dimensional_create_instance) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
     auto& variable_proxy = model.create_variables("x", {2, 3});
     EXPECT_EQ(0, variable_proxy.id());
     EXPECT_EQ(2, variable_proxy.shape()[0]);
@@ -72,7 +72,7 @@ TEST_F(TestAbstractMultiArray, two_dimensional_create_instance) {
 
 /*****************************************************************************/
 TEST_F(TestAbstractMultiArray, three_dimensional_create_instance) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
     auto& variable_proxy = model.create_variables("x", {2, 3, 4});
     EXPECT_EQ(0, variable_proxy.id());
     EXPECT_EQ(2, variable_proxy.shape()[0]);
@@ -87,7 +87,7 @@ TEST_F(TestAbstractMultiArray, three_dimensional_create_instance) {
 
 /*****************************************************************************/
 TEST_F(TestAbstractMultiArray, four_dimensional_create_instance) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
     auto& variable_proxy = model.create_variables("x", {2, 3, 4, 5});
     EXPECT_EQ(0, variable_proxy.id());
     EXPECT_EQ(2, variable_proxy.shape()[0]);
