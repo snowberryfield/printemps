@@ -148,6 +148,16 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     double previous_global_augmented_objective = HUGE_VALF;
     double current_global_augmented_objective  = HUGE_VALF;
 
+    bool is_few_permissible_neighborhood = false;
+    bool is_found_new_feasible_solution  = false;
+
+    double min_objective     = current_solution_score.objective;
+    double max_objective     = current_solution_score.objective;
+    double min_local_penalty = HUGE_VALF;
+    if (!current_solution_score.is_feasible) {
+        min_local_penalty = current_solution_score.local_penalty;
+    }
+
     /**
      * Print the header of optimization progress table and print the initial
      * solution status.
@@ -399,12 +409,24 @@ TabuSearchResult<T_Variable, T_Expression> solve(
         current_improvement = previous_global_augmented_objective -
                               current_global_augmented_objective;
 
+        min_objective =
+            std::min(min_objective, current_solution_score.objective);
+        max_objective =
+            std::min(max_objective, current_solution_score.objective);
+        if (!current_solution_score.is_feasible) {
+            min_local_penalty = std::min(min_local_penalty,
+                                         current_solution_score.local_penalty);
+        }
         /**
          * Update the status.
          */
         update_status = incumbent_holder.try_update_incumbent(
             model, current_solution_score);
         total_update_status = update_status | total_update_status;
+
+        if (current_solution_score.is_feasible) {
+            is_found_new_feasible_solution = true;
+        }
 
         /**
          * Push the current solution to historical data.
@@ -475,6 +497,10 @@ TabuSearchResult<T_Variable, T_Expression> solve(
         }
         number_of_infeasible_neighborhood =
             number_of_all_neighborhoods - number_of_feasible_neighborhoods;
+
+        if (number_of_permissible_neighborhoods == 0) {
+            is_few_permissible_neighborhood = true;
+        }
 
         /**
          * Register a chain move.
@@ -594,8 +620,8 @@ TabuSearchResult<T_Variable, T_Expression> solve(
 
                 double max_objective_sensitivity =
                     utility::max_abs(objective_improvements);
-                double min_penalty = utility::min(infeasible_local_penalties);
-                if (max_objective_sensitivity * MARGIN < min_penalty) {
+                if (max_objective_sensitivity * MARGIN <
+                    utility::min(infeasible_local_penalties)) {
                     termination_status =
                         TabuSearchTerminationStatus::EARLY_STOP;
                     break;
@@ -628,8 +654,17 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     result.last_feasible_incumbent_update_iteration =
         last_feasible_incumbent_update_iteration;
 
-    result.termination_status = termination_status;
+    result.is_few_permissible_neighborhood = is_few_permissible_neighborhood;
+    result.is_found_new_feasible_solution  = is_found_new_feasible_solution;
 
+    auto abs_max_objective = std::max(fabs(max_objective), fabs(min_objective));
+
+    result.objective_constraint_ration =
+        std::max(1.0,
+                 std::max(abs_max_objective, max_objective - min_objective)) /
+        std::max(1.0, min_local_penalty);
+
+    result.termination_status            = termination_status;
     result.historical_feasible_solutions = historical_feasible_solutions;
 
     return result;
