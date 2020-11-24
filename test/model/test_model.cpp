@@ -6,14 +6,14 @@
 #include <gtest/gtest.h>
 #include <random>
 
-#include <cppmh.h>
+#include <printemps.h>
 
 namespace {
 /*****************************************************************************/
 class TestModel : public ::testing::Test {
    protected:
-    cppmh::utility::IntegerUniformRandom m_random_integer;
-    cppmh::utility::IntegerUniformRandom m_random_positive_integer;
+    printemps::utility::IntegerUniformRandom m_random_integer;
+    printemps::utility::IntegerUniformRandom m_random_positive_integer;
 
     virtual void SetUp(void) {
         m_random_integer.setup(-1000, 1000, 0);
@@ -33,16 +33,16 @@ class TestModel : public ::testing::Test {
 
 /*****************************************************************************/
 TEST_F(TestModel, initialize) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     /// These declarations are for googletest constraint.
     /// http://opencv.jp/googletestdocs/FAQ.html#faq-the-compiler-complains-about-undefined-reference
     auto max_number_of_variable_proxies =
-        cppmh::model::ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES;
+        printemps::model::ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES;
     auto max_number_of_expression_proxies =
-        cppmh::model::ModelConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES;
+        printemps::model::ModelConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES;
     auto max_number_of_constraint_proxies =
-        cppmh::model::ModelConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES;
+        printemps::model::ModelConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES;
 
     EXPECT_EQ("", model.name());
 
@@ -127,13 +127,13 @@ TEST_F(TestModel, initialize) {
 
 /*****************************************************************************/
 TEST_F(TestModel, constructor_arg_name) {
-    cppmh::model::Model<int, double> model("name");
+    printemps::model::Model<int, double> model("name");
     EXPECT_EQ("name", model.name());
 }
 
 /*****************************************************************************/
 TEST_F(TestModel, set_name) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
     EXPECT_EQ("", model.name());
     model.set_name("name");
     EXPECT_EQ("name", model.name());
@@ -147,25 +147,26 @@ TEST_F(TestModel, name) {
 /*****************************************************************************/
 TEST_F(TestModel, create_variable_scalar_without_bound) {
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
         for (auto i = 0;
-             i < cppmh::model::ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES;
+             i <
+             printemps::model::ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES;
              i++) {
             auto  name = "x" + std::to_string(i);
             auto& x    = model.create_variable(name);
             EXPECT_EQ(i + 1, static_cast<int>(model.variable_proxies().size()));
             EXPECT_EQ(i, x.id());
-            EXPECT_EQ(cppmh::constant::INT_MIN, x.lower_bound());
-            EXPECT_EQ(cppmh::constant::INT_MAX, x.upper_bound());
+            EXPECT_EQ(printemps::constant::INT_MIN, x.lower_bound());
+            EXPECT_EQ(printemps::constant::INT_MAX, x.upper_bound());
             EXPECT_EQ(false, x.has_bounds());
-            EXPECT_EQ(cppmh::model::VariableSense::Integer, x.sense());
+            EXPECT_EQ(printemps::model::VariableSense::Integer, x.sense());
             EXPECT_EQ(&x, &model.variable_proxies().back());
             EXPECT_EQ(name, model.variable_names().back());
         }
         ASSERT_THROW(model.create_variable("error"), std::logic_error);
     }
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
         ASSERT_THROW(model.create_variable("s p a c e"), std::logic_error);
     }
 }
@@ -173,9 +174,10 @@ TEST_F(TestModel, create_variable_scalar_without_bound) {
 /*****************************************************************************/
 TEST_F(TestModel, create_variable_scalar_with_bound) {
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
         for (auto i = 0;
-             i < cppmh::model::ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES;
+             i <
+             printemps::model::ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES;
              i++) {
             auto  name = "x" + std::to_string(i);
             auto& x    = model.create_variable(name, 0, 1);
@@ -184,14 +186,14 @@ TEST_F(TestModel, create_variable_scalar_with_bound) {
             EXPECT_EQ(0, x.lower_bound());
             EXPECT_EQ(1, x.upper_bound());
             EXPECT_EQ(true, x.has_bounds());
-            EXPECT_EQ(cppmh::model::VariableSense::Binary, x.sense());
+            EXPECT_EQ(printemps::model::VariableSense::Binary, x.sense());
             EXPECT_EQ(&x, &model.variable_proxies().back());
             EXPECT_EQ(name, model.variable_names().back());
         }
         ASSERT_THROW(model.create_variable("error", 0, 1), std::logic_error);
     }
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
         ASSERT_THROW(model.create_variable("s p a c e", 0, 1),
                      std::logic_error);
     }
@@ -200,25 +202,26 @@ TEST_F(TestModel, create_variable_scalar_with_bound) {
 /*****************************************************************************/
 TEST_F(TestModel, create_variable_one_dimensional_without_bound) {
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
         for (auto i = 0;
-             i < cppmh::model::ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES;
+             i <
+             printemps::model::ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES;
              i++) {
             auto  name = "x" + std::to_string(i);
             auto& x    = model.create_variables(name, 2);
             EXPECT_EQ(i + 1, static_cast<int>(model.variable_proxies().size()));
             EXPECT_EQ(i, x.id());
-            EXPECT_EQ(cppmh::constant::INT_MIN, x(0).lower_bound());
-            EXPECT_EQ(cppmh::constant::INT_MAX, x(0).upper_bound());
+            EXPECT_EQ(printemps::constant::INT_MIN, x(0).lower_bound());
+            EXPECT_EQ(printemps::constant::INT_MAX, x(0).upper_bound());
             EXPECT_EQ(false, x(0).has_bounds());
-            EXPECT_EQ(cppmh::model::VariableSense::Integer, x(0).sense());
+            EXPECT_EQ(printemps::model::VariableSense::Integer, x(0).sense());
             EXPECT_EQ(&x, &model.variable_proxies().back());
             EXPECT_EQ(name, model.variable_names().back());
         }
         ASSERT_THROW(model.create_variables("error", 2), std::logic_error);
     }
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
         ASSERT_THROW(model.create_variables("s p a c e", 2), std::logic_error);
     }
 }
@@ -226,9 +229,10 @@ TEST_F(TestModel, create_variable_one_dimensional_without_bound) {
 /*****************************************************************************/
 TEST_F(TestModel, create_variable_one_dimensional_with_bound) {
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
         for (auto i = 0;
-             i < cppmh::model::ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES;
+             i <
+             printemps::model::ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES;
              i++) {
             auto  name = "x" + std::to_string(i);
             auto& x    = model.create_variables(name, 2, 0, 1);
@@ -237,7 +241,7 @@ TEST_F(TestModel, create_variable_one_dimensional_with_bound) {
             EXPECT_EQ(0, x(0).lower_bound());
             EXPECT_EQ(1, x(0).upper_bound());
             EXPECT_EQ(true, x(0).has_bounds());
-            EXPECT_EQ(cppmh::model::VariableSense::Binary, x(0).sense());
+            EXPECT_EQ(printemps::model::VariableSense::Binary, x(0).sense());
             EXPECT_EQ(&x, &model.variable_proxies().back());
             EXPECT_EQ(name, model.variable_names().back());
         }
@@ -245,7 +249,7 @@ TEST_F(TestModel, create_variable_one_dimensional_with_bound) {
                      std::logic_error);
     }
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
         ASSERT_THROW(model.create_variables("s p a c e", 2, 0, 1),
                      std::logic_error);
     }
@@ -254,25 +258,27 @@ TEST_F(TestModel, create_variable_one_dimensional_with_bound) {
 /*****************************************************************************/
 TEST_F(TestModel, create_variable_two_dimensional_without_bound) {
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
         for (auto i = 0;
-             i < cppmh::model::ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES;
+             i <
+             printemps::model::ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES;
              i++) {
             auto  name = "x" + std::to_string(i);
             auto& x    = model.create_variables(name, {2, 3});
             EXPECT_EQ(i + 1, static_cast<int>(model.variable_proxies().size()));
             EXPECT_EQ(i, x.id());
-            EXPECT_EQ(cppmh::constant::INT_MIN, x(0, 0).lower_bound());
-            EXPECT_EQ(cppmh::constant::INT_MAX, x(0, 0).upper_bound());
+            EXPECT_EQ(printemps::constant::INT_MIN, x(0, 0).lower_bound());
+            EXPECT_EQ(printemps::constant::INT_MAX, x(0, 0).upper_bound());
             EXPECT_EQ(false, x(0, 0).has_bounds());
-            EXPECT_EQ(cppmh::model::VariableSense::Integer, x(0, 0).sense());
+            EXPECT_EQ(printemps::model::VariableSense::Integer,
+                      x(0, 0).sense());
             EXPECT_EQ(&x, &model.variable_proxies().back());
             EXPECT_EQ(name, model.variable_names().back());
         }
         ASSERT_THROW(model.create_variables("error", {2, 3}), std::logic_error);
     }
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
         ASSERT_THROW(model.create_variables("s p a c e", {2, 3}),
                      std::logic_error);
     }
@@ -281,9 +287,10 @@ TEST_F(TestModel, create_variable_two_dimensional_without_bound) {
 /*****************************************************************************/
 TEST_F(TestModel, create_variable_two_dimensional_with_bound) {
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
         for (auto i = 0;
-             i < cppmh::model::ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES;
+             i <
+             printemps::model::ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES;
              i++) {
             auto  name = "x" + std::to_string(i);
             auto& x    = model.create_variables(name, {2, 3}, 0, 1);
@@ -292,7 +299,7 @@ TEST_F(TestModel, create_variable_two_dimensional_with_bound) {
             EXPECT_EQ(0, x(0, 0).lower_bound());
             EXPECT_EQ(1, x(0, 0).upper_bound());
             EXPECT_EQ(true, x(0, 0).has_bounds());
-            EXPECT_EQ(cppmh::model::VariableSense::Binary, x(0, 0).sense());
+            EXPECT_EQ(printemps::model::VariableSense::Binary, x(0, 0).sense());
             EXPECT_EQ(&x, &model.variable_proxies().back());
             EXPECT_EQ(name, model.variable_names().back());
         }
@@ -300,7 +307,7 @@ TEST_F(TestModel, create_variable_two_dimensional_with_bound) {
                      std::logic_error);
     }
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
         ASSERT_THROW(model.create_variables("s p a c e", {2, 3}, 0, 1),
                      std::logic_error);
     }
@@ -309,9 +316,10 @@ TEST_F(TestModel, create_variable_two_dimensional_with_bound) {
 /*****************************************************************************/
 TEST_F(TestModel, create_expression_scalar) {
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
         for (auto i = 0;
-             i < cppmh::model::ModelConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES;
+             i <
+             printemps::model::ModelConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES;
              i++) {
             auto  name = "p" + std::to_string(i);
             auto& p    = model.create_expression(name);
@@ -324,7 +332,7 @@ TEST_F(TestModel, create_expression_scalar) {
         ASSERT_THROW(model.create_expression("error"), std::logic_error);
     }
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
         ASSERT_THROW(model.create_expression("s p a c e"), std::logic_error);
     }
 }
@@ -332,9 +340,10 @@ TEST_F(TestModel, create_expression_scalar) {
 /*****************************************************************************/
 TEST_F(TestModel, create_expression_one_dimensional) {
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
         for (auto i = 0;
-             i < cppmh::model::ModelConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES;
+             i <
+             printemps::model::ModelConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES;
              i++) {
             auto  name = "p" + std::to_string(i);
             auto& p    = model.create_expressions(name, 2);
@@ -347,7 +356,7 @@ TEST_F(TestModel, create_expression_one_dimensional) {
         ASSERT_THROW(model.create_expressions("error", 2), std::logic_error);
     }
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
         ASSERT_THROW(model.create_expressions("s p a c e", 2),
                      std::logic_error);
     }
@@ -356,9 +365,10 @@ TEST_F(TestModel, create_expression_one_dimensional) {
 /*****************************************************************************/
 TEST_F(TestModel, create_expression_two_dimensional) {
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
         for (auto i = 0;
-             i < cppmh::model::ModelConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES;
+             i <
+             printemps::model::ModelConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES;
              i++) {
             auto  name = "p" + std::to_string(i);
             auto& p    = model.create_expressions(name, {2, 3});
@@ -372,7 +382,7 @@ TEST_F(TestModel, create_expression_two_dimensional) {
                      std::logic_error);
     }
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
         ASSERT_THROW(model.create_expressions("s p a c e", {2, 3}),
                      std::logic_error);
     }
@@ -381,14 +391,15 @@ TEST_F(TestModel, create_expression_two_dimensional) {
 /*****************************************************************************/
 TEST_F(TestModel, create_expression_arg_expression_like) {
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
 
         for (auto i = 0;
-             i < cppmh::model::ModelConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES;
+             i <
+             printemps::model::ModelConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES;
              i++) {
             auto name = "p" + std::to_string(i);
             auto variable =
-                cppmh::model::Variable<int, double>::create_instance();
+                printemps::model::Variable<int, double>::create_instance();
 
             auto& p = model.create_expression(name, variable);
             EXPECT_EQ(i + 1,
@@ -398,13 +409,15 @@ TEST_F(TestModel, create_expression_arg_expression_like) {
             EXPECT_EQ(name, model.expression_names().back());
         }
 
-        auto variable = cppmh::model::Variable<int, double>::create_instance();
+        auto variable =
+            printemps::model::Variable<int, double>::create_instance();
         ASSERT_THROW(model.create_expression("error", variable),
                      std::logic_error);
     }
     {
-        cppmh::model::Model<int, double> model;
-        auto variable = cppmh::model::Variable<int, double>::create_instance();
+        printemps::model::Model<int, double> model;
+        auto                                 variable =
+            printemps::model::Variable<int, double>::create_instance();
         ASSERT_THROW(model.create_expression("s p a c e", variable),
                      std::logic_error);
     }
@@ -413,14 +426,15 @@ TEST_F(TestModel, create_expression_arg_expression_like) {
 /*****************************************************************************/
 TEST_F(TestModel, create_expression_arg_expression) {
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
 
         for (auto i = 0;
-             i < cppmh::model::ModelConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES;
+             i <
+             printemps::model::ModelConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES;
              i++) {
             auto name = "p" + std::to_string(i);
             auto expression =
-                cppmh::model::Expression<int, double>::create_instance();
+                printemps::model::Expression<int, double>::create_instance();
 
             auto& p = model.create_expression(name, expression);
             EXPECT_EQ(i + 1,
@@ -431,15 +445,15 @@ TEST_F(TestModel, create_expression_arg_expression) {
         }
 
         auto expression =
-            cppmh::model::Expression<int, double>::create_instance();
+            printemps::model::Expression<int, double>::create_instance();
         ASSERT_THROW(model.create_expression("error", expression),
                      std::logic_error);
     }
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
 
         auto expression =
-            cppmh::model::Expression<int, double>::create_instance();
+            printemps::model::Expression<int, double>::create_instance();
         ASSERT_THROW(model.create_expression("s p a c e", expression),
                      std::logic_error);
     }
@@ -448,9 +462,10 @@ TEST_F(TestModel, create_expression_arg_expression) {
 /*****************************************************************************/
 TEST_F(TestModel, create_constraint_scalar) {
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
         for (auto i = 0;
-             i < cppmh::model::ModelConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES;
+             i <
+             printemps::model::ModelConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES;
              i++) {
             auto  name = "g" + std::to_string(i);
             auto& g    = model.create_constraint(name);
@@ -463,7 +478,7 @@ TEST_F(TestModel, create_constraint_scalar) {
         ASSERT_THROW(model.create_constraint("error"), std::logic_error);
     }
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
         ASSERT_THROW(model.create_constraint("s p a c e"), std::logic_error);
     }
 }
@@ -471,9 +486,10 @@ TEST_F(TestModel, create_constraint_scalar) {
 /*****************************************************************************/
 TEST_F(TestModel, create_constraint_one_dimensional) {
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
         for (auto i = 0;
-             i < cppmh::model::ModelConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES;
+             i <
+             printemps::model::ModelConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES;
              i++) {
             auto  name = "g" + std::to_string(i);
             auto& g    = model.create_constraints(name, 2);
@@ -486,7 +502,7 @@ TEST_F(TestModel, create_constraint_one_dimensional) {
         ASSERT_THROW(model.create_constraints("error", 2), std::logic_error);
     }
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
         ASSERT_THROW(model.create_constraints("s p a c e", 2),
                      std::logic_error);
     }
@@ -495,9 +511,10 @@ TEST_F(TestModel, create_constraint_one_dimensional) {
 /*****************************************************************************/
 TEST_F(TestModel, create_constraint_two_dimensional) {
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
         for (auto i = 0;
-             i < cppmh::model::ModelConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES;
+             i <
+             printemps::model::ModelConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES;
              i++) {
             auto  name = "g" + std::to_string(i);
             auto& g    = model.create_constraints(name, {2, 3});
@@ -511,7 +528,7 @@ TEST_F(TestModel, create_constraint_two_dimensional) {
                      std::logic_error);
     }
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
         ASSERT_THROW(model.create_constraints("s p a c e", {2, 3}),
                      std::logic_error);
     }
@@ -520,14 +537,15 @@ TEST_F(TestModel, create_constraint_two_dimensional) {
 /*****************************************************************************/
 TEST_F(TestModel, create_constraint_arg_constraint) {
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
 
         for (auto i = 0;
-             i < cppmh::model::ModelConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES;
+             i <
+             printemps::model::ModelConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES;
              i++) {
             auto name = "g" + std::to_string(i);
             auto expression =
-                cppmh::model::Expression<int, double>::create_instance();
+                printemps::model::Expression<int, double>::create_instance();
             auto constraint = expression <= 1;
 
             auto& g = model.create_constraint(name, constraint);
@@ -539,15 +557,15 @@ TEST_F(TestModel, create_constraint_arg_constraint) {
         }
 
         auto expression =
-            cppmh::model::Expression<int, double>::create_instance();
+            printemps::model::Expression<int, double>::create_instance();
         auto constraint = expression <= 1;
         ASSERT_THROW(model.create_constraint("error", constraint),
                      std::logic_error);
     }
     {
-        cppmh::model::Model<int, double> model;
-        auto                             expression =
-            cppmh::model::Expression<int, double>::create_instance();
+        printemps::model::Model<int, double> model;
+        auto                                 expression =
+            printemps::model::Expression<int, double>::create_instance();
         auto constraint = expression <= 1;
         ASSERT_THROW(model.create_constraint("s p a c e", constraint),
                      std::logic_error);
@@ -556,12 +574,12 @@ TEST_F(TestModel, create_constraint_arg_constraint) {
 
 /*****************************************************************************/
 TEST_F(TestModel, minimize_arg_function) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& x = model.create_variables("x", 10, -1, 1);
     auto& p = model.create_expression("p", x.sum() + 1);
 
-    auto f = [&p](const cppmh::model::Move<int, double>& a_MOVE) {
+    auto f = [&p](const printemps::model::Move<int, double>& a_MOVE) {
         return p.evaluate(a_MOVE);
     };
     model.minimize(f);
@@ -582,13 +600,13 @@ TEST_F(TestModel, minimize_arg_function) {
 
 /*****************************************************************************/
 TEST_F(TestModel, minimize_arg_expression_like) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& x = model.create_variables("x", 10, -1, 1);
     auto& p = model.create_expression("p", x.sum() + 1);
 
     [[maybe_unused]] auto f =
-        [&p](const cppmh::model::Move<int, double>& a_MOVE) {
+        [&p](const printemps::model::Move<int, double>& a_MOVE) {
             return p.evaluate(a_MOVE);
         };
     model.minimize(p);
@@ -610,13 +628,13 @@ TEST_F(TestModel, minimize_arg_expression_like) {
 
 /*****************************************************************************/
 TEST_F(TestModel, minimize_arg_expression) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& x = model.create_variables("x", 10, -1, 1);
     auto& p = model.create_expression("p", x.sum() + 1);
 
     [[maybe_unused]] auto f =
-        [&p](const cppmh::model::Move<int, double>& a_MOVE) {
+        [&p](const printemps::model::Move<int, double>& a_MOVE) {
             return p.evaluate(a_MOVE);
         };
     model.minimize(p(0));
@@ -638,12 +656,12 @@ TEST_F(TestModel, minimize_arg_expression) {
 
 /*****************************************************************************/
 TEST_F(TestModel, maximize_arg_function) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& x = model.create_variables("x", 10, -1, 1);
     auto& p = model.create_expression("p", x.sum() + 1);
 
-    auto f = [&p](const cppmh::model::Move<int, double>& a_MOVE) {
+    auto f = [&p](const printemps::model::Move<int, double>& a_MOVE) {
         return p.evaluate(a_MOVE);
     };
     model.maximize(f);
@@ -664,13 +682,13 @@ TEST_F(TestModel, maximize_arg_function) {
 
 /*****************************************************************************/
 TEST_F(TestModel, maximize_arg_expression_like) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& x = model.create_variables("x", 10, -1, 1);
     auto& p = model.create_expression("p", x.sum() + 1);
 
     [[maybe_unused]] auto f =
-        [&p](const cppmh::model::Move<int, double>& a_MOVE) {
+        [&p](const printemps::model::Move<int, double>& a_MOVE) {
             return p.evaluate(a_MOVE);
         };
     model.maximize(p);
@@ -692,11 +710,11 @@ TEST_F(TestModel, maximize_arg_expression_like) {
 
 /*****************************************************************************/
 TEST_F(TestModel, maximize_arg_expression) {
-    cppmh::model::Model<int, double> model;
-    auto&                            x = model.create_variables("x", 10, -1, 1);
+    printemps::model::Model<int, double> model;
+    auto&                 x = model.create_variables("x", 10, -1, 1);
     auto&                 p = model.create_expression("p", x.sum() + 1);
     [[maybe_unused]] auto f =
-        [&p](const cppmh::model::Move<int, double>& a_MOVE) {
+        [&p](const printemps::model::Move<int, double>& a_MOVE) {
             return p.evaluate(a_MOVE);
         };
     model.maximize(p(0));
@@ -725,13 +743,13 @@ TEST_F(TestModel, setup) {
 TEST_F(TestModel, verify_problem) {
     /// No decision variables.
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
         ASSERT_THROW(model.verify_problem(false), std::logic_error);
     }
 
     /// No constraint functions.
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
 
         auto& x = model.create_variable("x");
         model.minimize(x);
@@ -740,7 +758,7 @@ TEST_F(TestModel, verify_problem) {
 
     /// No objective function.
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
 
         auto& x = model.create_variable("x");
         model.create_constraint("g", x == 1);
@@ -749,7 +767,7 @@ TEST_F(TestModel, verify_problem) {
 
     /// No constraint functions and no objective function
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
 
         [[maybe_unused]] auto& x = model.create_variable("x");
         ASSERT_THROW(model.verify_problem(false), std::logic_error);
@@ -758,7 +776,7 @@ TEST_F(TestModel, verify_problem) {
 
 /*****************************************************************************/
 TEST_F(TestModel, setup_variable_related_constraints) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& x = model.create_variables("x", 10, 0, 1);
     auto& y = model.create_variables("y", {20, 30}, 0, 1);
@@ -766,7 +784,7 @@ TEST_F(TestModel, setup_variable_related_constraints) {
     auto& g = model.create_constraints("g", 3);
     g(0)    = x.selection();
     g(1)    = y.selection();
-    g(2)    = x(0) + y.sum({0, cppmh::model::All}) >= 1;
+    g(2)    = x(0) + y.sum({0, printemps::model::All}) >= 1;
 
     model.setup_variable_related_constraints();
 
@@ -795,7 +813,7 @@ TEST_F(TestModel, setup_variable_related_constraints) {
 
 /*****************************************************************************/
 TEST_F(TestModel, setup_unique_name) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& x = model.create_variable("x");
     auto& p = model.create_variables("p", {10});
@@ -824,7 +842,7 @@ TEST_F(TestModel, setup_is_linear) {
     /// Constraint: linear
     /// Objective: linear
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
 
         auto& x = model.create_variable("x");
 
@@ -839,12 +857,12 @@ TEST_F(TestModel, setup_is_linear) {
     /// Constraint: nonlinear (user-defined lambda)
     /// Objective: linear
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
 
         auto& x = model.create_variable("x");
 
-        std::function<double(const cppmh::model::Move<int, double>&)> g =
-            [&x](const cppmh::model::Move<int, double>& a_MOVE) {
+        std::function<double(const printemps::model::Move<int, double>&)> g =
+            [&x](const printemps::model::Move<int, double>& a_MOVE) {
                 return x.evaluate(a_MOVE);
             };
 
@@ -859,12 +877,12 @@ TEST_F(TestModel, setup_is_linear) {
     /// Constraint: linear
     /// Objective: nonlinear (user-defined lambda)
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
 
         auto& x = model.create_variable("x");
 
-        std::function<double(const cppmh::model::Move<int, double>&)> f =
-            [&x](const cppmh::model::Move<int, double>& a_MOVE) {
+        std::function<double(const printemps::model::Move<int, double>&)> f =
+            [&x](const printemps::model::Move<int, double>& a_MOVE) {
                 return x.evaluate(a_MOVE);
             };
 
@@ -879,17 +897,17 @@ TEST_F(TestModel, setup_is_linear) {
     /// Constraint: nonlinear
     /// Objective: nonlinear
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
 
         auto& x = model.create_variable("x");
 
-        std::function<double(const cppmh::model::Move<int, double>&)> g =
-            [&x](const cppmh::model::Move<int, double>& a_MOVE) {
+        std::function<double(const printemps::model::Move<int, double>&)> g =
+            [&x](const printemps::model::Move<int, double>& a_MOVE) {
                 return x.evaluate(a_MOVE);
             };
 
-        std::function<double(const cppmh::model::Move<int, double>&)> f =
-            [&x](const cppmh::model::Move<int, double>& a_MOVE) {
+        std::function<double(const printemps::model::Move<int, double>&)> f =
+            [&x](const printemps::model::Move<int, double>& a_MOVE) {
                 return x.evaluate(a_MOVE);
             };
 
@@ -908,7 +926,7 @@ TEST_F(TestModel, setup_is_enabled_fast_evaluation) {
     /// Objective: linear
     /// User-defined neighborhood: None
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
 
         auto& x = model.create_variable("x");
 
@@ -924,12 +942,12 @@ TEST_F(TestModel, setup_is_enabled_fast_evaluation) {
     /// Objective: linear
     /// User-defined neighborhood: None
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
 
         auto& x = model.create_variable("x");
 
-        std::function<double(const cppmh::model::Move<int, double>&)> g =
-            [&x](const cppmh::model::Move<int, double>& a_MOVE) {
+        std::function<double(const printemps::model::Move<int, double>&)> g =
+            [&x](const printemps::model::Move<int, double>& a_MOVE) {
                 return x.evaluate(a_MOVE);
             };
 
@@ -945,12 +963,12 @@ TEST_F(TestModel, setup_is_enabled_fast_evaluation) {
     /// Objective: nonlinear (user-defined lambda)
     /// User-defined neighborhood: None
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
 
         auto& x = model.create_variable("x");
 
-        std::function<double(const cppmh::model::Move<int, double>&)> f =
-            [&x](const cppmh::model::Move<int, double>& a_MOVE) {
+        std::function<double(const printemps::model::Move<int, double>&)> f =
+            [&x](const printemps::model::Move<int, double>& a_MOVE) {
                 return x.evaluate(a_MOVE);
             };
 
@@ -966,7 +984,7 @@ TEST_F(TestModel, setup_is_enabled_fast_evaluation) {
     /// Objective: linear
     /// User-defined neighborhood: Yes
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
 
         auto& x = model.create_variable("x");
 
@@ -974,8 +992,8 @@ TEST_F(TestModel, setup_is_enabled_fast_evaluation) {
         model.minimize(x);
 
         auto move_updater =
-            [&x]([[maybe_unused]] std::vector<cppmh::model::Move<int, double>>*
-                     a_moves) { ; };
+            [&x]([[maybe_unused]] std::vector<
+                 printemps::model::Move<int, double>>* a_moves) { ; };
 
         model.neighborhood().set_user_defined_move_updater(move_updater);
         model.neighborhood().enable_user_defined_move();
@@ -987,7 +1005,7 @@ TEST_F(TestModel, setup_is_enabled_fast_evaluation) {
 
 /*****************************************************************************/
 TEST_F(TestModel, setup_variable_sensitivity) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& x = model.create_variables("x", 10, 0, 1);
     auto& y = model.create_variables("y", {20, 30}, 0, 1);
@@ -1025,7 +1043,7 @@ TEST_F(TestModel, setup_variable_sensitivity) {
 
 /*****************************************************************************/
 TEST_F(TestModel, presolve) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& x = model.create_variables("x", 10, -10, 10);
     model.minimize(x.sum());
@@ -1059,7 +1077,7 @@ TEST_F(TestModel, presolve) {
 /*****************************************************************************/
 TEST_F(TestModel, remove_independent_variables) {
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
 
         auto& x = model.create_variables("x", 10, 0, 1);
         model.minimize(x.sum());
@@ -1076,7 +1094,7 @@ TEST_F(TestModel, remove_independent_variables) {
         EXPECT_EQ(10, model.number_of_fixed_variables());
     }
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
 
         auto& x = model.create_variables("x", 10, 0, 1);
         model.maximize(x.sum());
@@ -1093,7 +1111,7 @@ TEST_F(TestModel, remove_independent_variables) {
         EXPECT_EQ(10, model.number_of_fixed_variables());
     }
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
 
         auto& x = model.create_variables("x", 10, 0, 1);
         model.minimize(-x.sum());
@@ -1110,7 +1128,7 @@ TEST_F(TestModel, remove_independent_variables) {
         EXPECT_EQ(10, model.number_of_fixed_variables());
     }
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
 
         auto& x = model.create_variables("x", 10, 0, 1);
         model.maximize(-x.sum());
@@ -1132,7 +1150,7 @@ TEST_F(TestModel, remove_independent_variables) {
 TEST_F(TestModel,
        remove_redundant_constraints_with_tightening_variable_bounds) {
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
 
         auto& x = model.create_variable("x", 0, 10);
         auto& g = model.create_constraint("g", 3 * x + 1 == 7);
@@ -1144,7 +1162,7 @@ TEST_F(TestModel,
         EXPECT_EQ(false, g.is_enabled());
     }
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
 
         auto& x = model.create_variable("x", 0, 10);
         auto& g = model.create_constraint("g", 3 * x + 1 <= 7);
@@ -1157,7 +1175,7 @@ TEST_F(TestModel,
         EXPECT_EQ(false, g.is_enabled());
     }
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
 
         auto& x = model.create_variable("x", 0, 10);
         auto& g = model.create_constraint("g", 3 * x + 1 >= 7);
@@ -1171,7 +1189,7 @@ TEST_F(TestModel,
     }
 
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
 
         auto& x = model.create_variable("x", -10, 10);
         auto& g = model.create_constraint("g", -3 * x + 1 == 7);
@@ -1183,7 +1201,7 @@ TEST_F(TestModel,
         EXPECT_EQ(false, g.is_enabled());
     }
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
 
         auto& x = model.create_variable("x", -10, 10);
         auto& g = model.create_constraint("g", -3 * x + 1 <= 7);
@@ -1196,7 +1214,7 @@ TEST_F(TestModel,
         EXPECT_EQ(false, g.is_enabled());
     }
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
 
         auto& x = model.create_variable("x", -10, 10);
         auto& g = model.create_constraint("g", -3 * x + 1 >= 7);
@@ -1210,7 +1228,7 @@ TEST_F(TestModel,
     }
 
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
 
         auto& x = model.create_variable("x", 0, 10);
         auto& y = model.create_variable("y", 0, 1);
@@ -1224,7 +1242,7 @@ TEST_F(TestModel,
         EXPECT_EQ(false, g.is_enabled());
     }
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
 
         auto& x = model.create_variable("x", 0, 10);
         auto& y = model.create_variable("y", 0, 1);
@@ -1239,7 +1257,7 @@ TEST_F(TestModel,
         EXPECT_EQ(false, g.is_enabled());
     }
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
 
         auto& x = model.create_variable("x", 0, 10);
         auto& y = model.create_variable("y", 0, 1);
@@ -1254,7 +1272,7 @@ TEST_F(TestModel,
         EXPECT_EQ(false, g.is_enabled());
     }
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
 
         auto& x = model.create_variable("x", -10, 10);
         auto& y = model.create_variable("y", 0, 1);
@@ -1268,7 +1286,7 @@ TEST_F(TestModel,
         EXPECT_EQ(false, g.is_enabled());
     }
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
 
         auto& x = model.create_variable("x", -10, 10);
         auto& y = model.create_variable("y", 0, 1);
@@ -1283,7 +1301,7 @@ TEST_F(TestModel,
         EXPECT_EQ(false, g.is_enabled());
     }
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
 
         auto& x = model.create_variable("x", -10, 10);
         auto& y = model.create_variable("y", 0, 1);
@@ -1299,7 +1317,7 @@ TEST_F(TestModel,
     }
 
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
 
         auto& x = model.create_variable("x", 0, 10);
         auto& g = model.create_constraint("g", 3 * x + 1 == 7);
@@ -1311,7 +1329,7 @@ TEST_F(TestModel,
         EXPECT_EQ(false, g.is_enabled());
     }
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
 
         auto& x = model.create_variable("x", 0, 10);
         auto& g = model.create_constraint("g", 3 * x + 1 <= 7);
@@ -1323,7 +1341,7 @@ TEST_F(TestModel,
         EXPECT_EQ(false, g.is_enabled());
     }
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
 
         auto& x = model.create_variable("x", 0, 10);
         auto& g = model.create_constraint("g", 3 * x + 1 >= 7);
@@ -1336,7 +1354,7 @@ TEST_F(TestModel,
     }
 
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
 
         auto& x = model.create_variable("x", -10, 10);
         auto& g = model.create_constraint("g", -3 * x + 1 == 7);
@@ -1348,7 +1366,7 @@ TEST_F(TestModel,
         EXPECT_EQ(false, g.is_enabled());
     }
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
 
         auto& x = model.create_variable("x", -10, 10);
         auto& g = model.create_constraint("g", -3 * x + 1 <= 7);
@@ -1360,7 +1378,7 @@ TEST_F(TestModel,
         EXPECT_EQ(false, g.is_enabled());
     }
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
 
         auto& x = model.create_variable("x", -10, 10);
         auto& g = model.create_constraint("g", -3 * x + 1 >= 7);
@@ -1373,7 +1391,7 @@ TEST_F(TestModel,
     }
 
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
 
         auto& x = model.create_variable("x", 0, 10);
         auto& y = model.create_variable("y", 0, 1);
@@ -1387,7 +1405,7 @@ TEST_F(TestModel,
         EXPECT_EQ(true, g.is_enabled());
     }
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
 
         auto& x = model.create_variable("x", 0, 10);
         auto& y = model.create_variable("y", 0, 1);
@@ -1402,7 +1420,7 @@ TEST_F(TestModel,
     }
 
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
 
         auto& x = model.create_variable("x", -10, 10);
         auto& y = model.create_variable("y", 0, 1);
@@ -1416,7 +1434,7 @@ TEST_F(TestModel,
         EXPECT_EQ(true, g.is_enabled());
     }
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
 
         auto& x = model.create_variable("x", -10, 10);
         auto& y = model.create_variable("y", 0, 1);
@@ -1433,7 +1451,7 @@ TEST_F(TestModel,
 
 /*****************************************************************************/
 TEST_F(TestModel, fix_implicit_fixed_variables) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& x = model.create_variables("x", 10, -10, 10);
     x(0).set_bound(5, 5);
@@ -1452,7 +1470,7 @@ TEST_F(TestModel, fix_implicit_fixed_variables) {
 
 /*****************************************************************************/
 TEST_F(TestModel, categorize_variables) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& x = model.create_variable("x", 0, 1);
     auto& y = model.create_variables("y", 10, 0, 1);
@@ -1473,8 +1491,8 @@ TEST_F(TestModel, categorize_variables) {
 
 /*****************************************************************************/
 TEST_F(TestModel, categorize_constraints) {
-    cppmh::model::Model<int, double> model;
-    auto coefficients = cppmh::utility::sequence(10);
+    printemps::model::Model<int, double> model;
+    auto coefficients = printemps::utility::sequence(10);
 
     auto& x = model.create_variable("x", -10, 10);
     auto& y = model.create_variable("y", -10, 10);
@@ -1532,8 +1550,8 @@ TEST_F(TestModel, categorize_constraints) {
     general_liner       = x + r.sum() == 50;
 
     auto& nonlinear = model.create_constraint("nonlinear");
-    std::function<double(const cppmh::model::Move<int, double>&)> f =
-        [&x](const cppmh::model::Move<int, double>& a_MOVE) {
+    std::function<double(const printemps::model::Move<int, double>&)> f =
+        [&x](const printemps::model::Move<int, double>& a_MOVE) {
             return x.evaluate(a_MOVE) - 1;
         };
     nonlinear = f <= 5;
@@ -1542,7 +1560,7 @@ TEST_F(TestModel, categorize_constraints) {
 
     model.categorize_variables();
     model.categorize_constraints();
-    model.extract_selections(cppmh::model::SelectionMode::Defined);
+    model.extract_selections(printemps::model::SelectionMode::Defined);
 
     EXPECT_EQ(22, model.number_of_constraints());
     EXPECT_EQ(1, model.number_of_selection_constraints());
@@ -1567,7 +1585,7 @@ TEST_F(TestModel, categorize_constraints) {
 
 /*****************************************************************************/
 TEST_F(TestModel, extract_selections_larger) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& x0 = model.create_variables("x0", {10, 10}, 0, 1);
     auto& x1 = model.create_variables("x1", {20, 20}, 0, 1);
@@ -1580,7 +1598,8 @@ TEST_F(TestModel, extract_selections_larger) {
      * constraint is the third, and it will be employed for a swap
      * neighborhood.
      */
-    model.create_constraint("c0", x0.selection({0, cppmh::model::Range::All}));
+    model.create_constraint("c0",
+                            x0.selection({0, printemps::model::Range::All}));
 
     /**
      * Selection constraint with 32 decision variables. The priority of this
@@ -1588,8 +1607,8 @@ TEST_F(TestModel, extract_selections_larger) {
      * neighborhood because higher-priority constraint c1 covers x1.
      */
     model.create_constraint(
-        "c1", (x0.sum({1, cppmh::model::Range::All}) +
-               x1.sum({1, cppmh::model::Range::All}) + x2(0)) == 1);
+        "c1", (x0.sum({1, printemps::model::Range::All}) +
+               x1.sum({1, printemps::model::Range::All}) + x2(0)) == 1);
 
     /**
      * Selection constraint with 400 decision variables. The priority of this
@@ -1607,7 +1626,7 @@ TEST_F(TestModel, extract_selections_larger) {
 
     model.categorize_variables();
     model.categorize_constraints();
-    model.extract_selections(cppmh::model::SelectionMode::Larger);
+    model.extract_selections(printemps::model::SelectionMode::Larger);
 
     EXPECT_EQ(2, model.number_of_selection_constraints());
     EXPECT_EQ(2, static_cast<int>(model.selections().size()));
@@ -1707,7 +1726,7 @@ TEST_F(TestModel, extract_selections_larger) {
 
 /*****************************************************************************/
 TEST_F(TestModel, extract_selections_independent) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& x0 = model.create_variables("x0", {10, 10}, 0, 1);
     auto& x1 = model.create_variables("x1", {20, 20}, 0, 1);
@@ -1718,14 +1737,15 @@ TEST_F(TestModel, extract_selections_independent) {
     /**
      * Selection constraint with 10 decision variables (no overlap).
      */
-    model.create_constraint("c0", x0.selection({0, cppmh::model::Range::All}));
+    model.create_constraint("c0",
+                            x0.selection({0, printemps::model::Range::All}));
 
     /**
      * Selection constraint with 32 decision variables (overlap).
      */
     model.create_constraint(
-        "c1", (x0.sum({1, cppmh::model::Range::All}) +
-               x1.sum({1, cppmh::model::Range::All}) + x2(0)) == 1);
+        "c1", (x0.sum({1, printemps::model::Range::All}) +
+               x1.sum({1, printemps::model::Range::All}) + x2(0)) == 1);
 
     /**
      * Selection constraint with 400 decision variables (overlap).
@@ -1739,7 +1759,7 @@ TEST_F(TestModel, extract_selections_independent) {
 
     model.categorize_variables();
     model.categorize_constraints();
-    model.extract_selections(cppmh::model::SelectionMode::Independent);
+    model.extract_selections(printemps::model::SelectionMode::Independent);
 
     EXPECT_EQ(1, model.number_of_selection_constraints());
     EXPECT_EQ(1, static_cast<int>(model.selections().size()));
@@ -1820,7 +1840,7 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
     /// There is a fixed variable with an invalid initial value.
     /// correction: true
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
 
         auto& x = model.create_variables("x", 10, 0, 1);
         model.create_constraint("g", x.selection());
@@ -1828,7 +1848,7 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
 
         model.categorize_variables();
         model.categorize_constraints();
-        model.extract_selections(cppmh::model::SelectionMode::Defined);
+        model.extract_selections(printemps::model::SelectionMode::Defined);
 
         ASSERT_THROW(
             model.verify_and_correct_selection_variables_initial_values(true,
@@ -1839,14 +1859,14 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
     /// There is a fixed variable with an invalid initial value.
     /// correction: false
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
         auto& x = model.create_variables("x", 10, 0, 1);
         model.create_constraint("g", x.selection());
         x(0).fix_by(2);
 
         model.categorize_variables();
         model.categorize_constraints();
-        model.extract_selections(cppmh::model::SelectionMode::Defined);
+        model.extract_selections(printemps::model::SelectionMode::Defined);
 
         ASSERT_THROW(
             model.verify_and_correct_selection_variables_initial_values(false,
@@ -1857,14 +1877,14 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
     /// There is one fixed selected variable.
     /// correction: true
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
         auto& x = model.create_variables("x", 10, 0, 1);
         model.create_constraint("g", x.selection());
         x(0).fix_by(1);
 
         model.categorize_variables();
         model.categorize_constraints();
-        model.extract_selections(cppmh::model::SelectionMode::Defined);
+        model.extract_selections(printemps::model::SelectionMode::Defined);
 
         model.verify_and_correct_selection_variables_initial_values(true,
                                                                     false);
@@ -1874,14 +1894,14 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
     /// There is one fixed selected variable.
     /// correction: false
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
         auto& x = model.create_variables("x", 10, 0, 1);
         model.create_constraint("g", x.selection());
         x(0).fix_by(1);
 
         model.categorize_variables();
         model.categorize_constraints();
-        model.extract_selections(cppmh::model::SelectionMode::Defined);
+        model.extract_selections(printemps::model::SelectionMode::Defined);
 
         model.verify_and_correct_selection_variables_initial_values(false,
                                                                     false);
@@ -1891,7 +1911,7 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
     /// There are two fixed selected variables.
     /// correction: true
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
         auto& x = model.create_variables("x", 10, 0, 1);
         model.create_constraint("g", x.selection());
         x(0).fix_by(1);
@@ -1899,7 +1919,7 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
 
         model.categorize_variables();
         model.categorize_constraints();
-        model.extract_selections(cppmh::model::SelectionMode::Defined);
+        model.extract_selections(printemps::model::SelectionMode::Defined);
 
         ASSERT_THROW(
             model.verify_and_correct_selection_variables_initial_values(true,
@@ -1910,7 +1930,7 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
     /// There are two fixed selected variables.
     /// correction: true
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
         auto& x = model.create_variables("x", 10, 0, 1);
         model.create_constraint("g", x.selection());
         x(0).fix_by(1);
@@ -1918,7 +1938,7 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
 
         model.categorize_variables();
         model.categorize_constraints();
-        model.extract_selections(cppmh::model::SelectionMode::Defined);
+        model.extract_selections(printemps::model::SelectionMode::Defined);
 
         ASSERT_THROW(
             model.verify_and_correct_selection_variables_initial_values(false,
@@ -1929,14 +1949,14 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
     /// There are two variables with invalid initial values.
     /// correction: true
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
         auto& x = model.create_variables("x", 10, 0, 1);
         model.create_constraint("g", x.selection());
         x(0) = 2;
         x(1) = 3;
         model.categorize_variables();
         model.categorize_constraints();
-        model.extract_selections(cppmh::model::SelectionMode::Defined);
+        model.extract_selections(printemps::model::SelectionMode::Defined);
 
         model.verify_and_correct_selection_variables_initial_values(true,
                                                                     false);
@@ -1948,7 +1968,7 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
     /// There are two variables with invalid initial values.
     /// correction: false
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
         auto& x = model.create_variables("x", 10, 0, 1);
         model.create_constraint("g", x.selection());
         x(0) = 2;
@@ -1956,7 +1976,7 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
 
         model.categorize_variables();
         model.categorize_constraints();
-        model.extract_selections(cppmh::model::SelectionMode::Defined);
+        model.extract_selections(printemps::model::SelectionMode::Defined);
 
         ASSERT_THROW(
             model.verify_and_correct_selection_variables_initial_values(false,
@@ -1967,13 +1987,13 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
     /// There is no selected variable.
     /// correction: true
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
         auto& x = model.create_variables("x", 10, 0, 1);
         model.create_constraint("g", x.selection());
 
         model.categorize_variables();
         model.categorize_constraints();
-        model.extract_selections(cppmh::model::SelectionMode::Defined);
+        model.extract_selections(printemps::model::SelectionMode::Defined);
 
         model.verify_and_correct_selection_variables_initial_values(true,
                                                                     false);
@@ -1987,13 +2007,13 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
     /// There is no selected variable.
     /// correction: false
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
         auto& x = model.create_variables("x", 10, 0, 1);
         model.create_constraint("g", x.selection());
 
         model.categorize_variables();
         model.categorize_constraints();
-        model.extract_selections(cppmh::model::SelectionMode::Defined);
+        model.extract_selections(printemps::model::SelectionMode::Defined);
 
         ASSERT_THROW(
             model.verify_and_correct_selection_variables_initial_values(false,
@@ -2004,14 +2024,14 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
     /// There is one selected variable.
     /// correction: true
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
         auto& x = model.create_variables("x", 10, 0, 1);
         model.create_constraint("g", x.selection());
         x(0) = 1;
 
         model.categorize_variables();
         model.categorize_constraints();
-        model.extract_selections(cppmh::model::SelectionMode::Defined);
+        model.extract_selections(printemps::model::SelectionMode::Defined);
 
         model.verify_and_correct_selection_variables_initial_values(true,
                                                                     false);
@@ -2022,14 +2042,14 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
     /// There is one selected variable.
     /// correction: false
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
         auto& x = model.create_variables("x", 10, 0, 1);
         model.create_constraint("g", x.selection());
         x(0) = 1;
 
         model.categorize_variables();
         model.categorize_constraints();
-        model.extract_selections(cppmh::model::SelectionMode::Defined);
+        model.extract_selections(printemps::model::SelectionMode::Defined);
 
         model.verify_and_correct_selection_variables_initial_values(false,
                                                                     false);
@@ -2040,7 +2060,7 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
     /// There are two unfixed selected variable.
     /// correction: true
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
         auto& x = model.create_variables("x", 10, 0, 1);
         model.create_constraint("g", x.selection());
         x(0) = 1;
@@ -2048,7 +2068,7 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
 
         model.categorize_variables();
         model.categorize_constraints();
-        model.extract_selections(cppmh::model::SelectionMode::Defined);
+        model.extract_selections(printemps::model::SelectionMode::Defined);
 
         model.verify_and_correct_selection_variables_initial_values(true,
                                                                     false);
@@ -2060,7 +2080,7 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
     /// There are two unfixed selected variable.
     /// correction: false
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
         auto& x = model.create_variables("x", 10, 0, 1);
         model.create_constraint("g", x.selection());
         x(0) = 1;
@@ -2068,7 +2088,7 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
 
         model.categorize_variables();
         model.categorize_constraints();
-        model.extract_selections(cppmh::model::SelectionMode::Defined);
+        model.extract_selections(printemps::model::SelectionMode::Defined);
 
         ASSERT_THROW(
             model.verify_and_correct_selection_variables_initial_values(false,
@@ -2079,7 +2099,7 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
     /// There are 1 fixed and 1 unfixed selected variable.
     /// correction: true
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
         auto& x = model.create_variables("x", 10, 0, 1);
         model.create_constraint("g", x.selection());
         x(0) = 1;
@@ -2087,7 +2107,7 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
 
         model.categorize_variables();
         model.categorize_constraints();
-        model.extract_selections(cppmh::model::SelectionMode::Defined);
+        model.extract_selections(printemps::model::SelectionMode::Defined);
 
         model.verify_and_correct_selection_variables_initial_values(true,
                                                                     false);
@@ -2098,7 +2118,7 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
     /// There are 1 fixed and 1 unfixed selected variable.
     /// correction: false
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
         auto& x = model.create_variables("x", 10, 0, 1);
         model.create_constraint("g", x.selection());
         x(0) = 1;
@@ -2106,7 +2126,7 @@ TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
 
         model.categorize_variables();
         model.categorize_constraints();
-        model.extract_selections(cppmh::model::SelectionMode::Defined);
+        model.extract_selections(printemps::model::SelectionMode::Defined);
 
         ASSERT_THROW(
             model.verify_and_correct_selection_variables_initial_values(false,
@@ -2120,7 +2140,7 @@ TEST_F(TestModel, verify_and_correct_binary_variables_initial_values) {
     /// There is a fixed variable with an invalid initial value.
     /// correction: true
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
         auto& x = model.create_variables("x", 10, 0, 1);
         x(0).fix_by(2);
 
@@ -2135,7 +2155,7 @@ TEST_F(TestModel, verify_and_correct_binary_variables_initial_values) {
     /// There is a fixed variable with an invalid initial value.
     /// correction: false
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
         auto& x = model.create_variables("x", 10, 0, 1);
         x(0).fix_by(-1);
 
@@ -2150,7 +2170,7 @@ TEST_F(TestModel, verify_and_correct_binary_variables_initial_values) {
     /// There is a variable with an invalid initial value.
     /// correction: true
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
         auto& x = model.create_variables("x", 10, 0, 1);
         x(0)    = 2;
         x(1)    = -1;
@@ -2166,7 +2186,7 @@ TEST_F(TestModel, verify_and_correct_binary_variables_initial_values) {
     /// There is a variable with an invalid initial value.
     /// correction: false
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
         auto& x = model.create_variables("x", 10, 0, 1);
         x(0)    = 2;
         x(1)    = -1;
@@ -2185,7 +2205,7 @@ TEST_F(TestModel, verify_and_correct_integer_variables_initial_values) {
     /// There is a fixed variable with an invalid initial value.
     /// correction: true
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
         auto& x = model.create_variables("x", 10, -10, 10);
         x(0).fix_by(11);
 
@@ -2200,7 +2220,7 @@ TEST_F(TestModel, verify_and_correct_integer_variables_initial_values) {
     /// There is a fixed variable with an invalid initial value.
     /// correction: false
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
         auto& x = model.create_variables("x", 10, -10, 10);
         x(0).fix_by(-11);
 
@@ -2215,7 +2235,7 @@ TEST_F(TestModel, verify_and_correct_integer_variables_initial_values) {
     /// There is a variable with an invalid initial value.
     /// correction: true
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
         auto& x = model.create_variables("x", 10, -10, 10);
         x(0)    = 11;
         x(1)    = -11;
@@ -2231,7 +2251,7 @@ TEST_F(TestModel, verify_and_correct_integer_variables_initial_values) {
     /// There is a variable with an invalid initial value.
     /// correction: false
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
         auto& x = model.create_variables("x", 10, -10, 10);
         x(0)    = 11;
         x(1)    = -11;
@@ -2252,7 +2272,7 @@ TEST_F(TestModel, setup_fixed_sensitivities) {
 
 /*****************************************************************************/
 TEST_F(TestModel, set_callback) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     int  v = 1;
     auto f = [&v](void) { v++; };
@@ -2268,15 +2288,15 @@ TEST_F(TestModel, callback) {
 
 /*****************************************************************************/
 TEST_F(TestModel, import_variable_values) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& x = model.create_variable("x");
     auto& y = model.create_variables("y", 10);
     auto& z = model.create_variables("z", {10, 10});
 
-    cppmh::model::ValueProxy<int> x_value(x.id());
-    cppmh::model::ValueProxy<int> y_value(y.id(), 10);
-    cppmh::model::ValueProxy<int> z_value(z.id(), {10, 10});
+    printemps::model::ValueProxy<int> x_value(x.id());
+    printemps::model::ValueProxy<int> y_value(y.id(), 10);
+    printemps::model::ValueProxy<int> z_value(z.id(), {10, 10});
 
     x_value.value() = 1;
 
@@ -2307,9 +2327,9 @@ TEST_F(TestModel, import_variable_values) {
 
 /*****************************************************************************/
 TEST_F(TestModel, update_arg_void) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
-    auto sequence = cppmh::utility::sequence(10);
+    auto sequence = printemps::utility::sequence(10);
 
     auto& x = model.create_variables("x", 10, 0, 1);
     auto& p = model.create_expression("p", x.dot(sequence) + 1);
@@ -2330,7 +2350,7 @@ TEST_F(TestModel, update_arg_void) {
 /*****************************************************************************/
 TEST_F(TestModel, update_variable_improvability) {
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
 
         auto& x = model.create_variable("x", -10, 10);
         auto& y = model.create_variable("y", -10, 10);
@@ -2366,7 +2386,7 @@ TEST_F(TestModel, update_variable_improvability) {
         EXPECT_EQ(true, y(0).is_improvable());
     }
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
 
         auto& x = model.create_variable("x", -10, 10);
         auto& y = model.create_variable("y", -10, 10);
@@ -2402,7 +2422,7 @@ TEST_F(TestModel, update_variable_improvability) {
         EXPECT_EQ(true, y(0).is_improvable());
     }
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
 
         auto& x = model.create_variable("x", -10, 10);
         auto& y = model.create_variable("y", -10, 10);
@@ -2438,7 +2458,7 @@ TEST_F(TestModel, update_variable_improvability) {
         EXPECT_EQ(true, y(0).is_improvable());
     }
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
 
         auto& x = model.create_variable("x", -10, 10);
         auto& y = model.create_variable("y", -10, 10);
@@ -2474,7 +2494,7 @@ TEST_F(TestModel, update_variable_improvability) {
         EXPECT_EQ(true, y(0).is_improvable());
     }
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
 
         auto& x = model.create_variable("x", -10, 10);
         auto& y = model.create_variable("y", -10, 10);
@@ -2510,7 +2530,7 @@ TEST_F(TestModel, update_variable_improvability) {
         EXPECT_EQ(true, y(0).is_improvable());
     }
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
 
         auto& x = model.create_variable("x", -10, 10);
         auto& y = model.create_variable("y", -10, 10);
@@ -2547,7 +2567,7 @@ TEST_F(TestModel, update_variable_improvability) {
     }
 
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
 
         auto& x = model.create_variable("x", -10, 10);
         auto& y = model.create_variable("y", -10, 10);
@@ -2589,9 +2609,9 @@ TEST_F(TestModel, update_variable_improvability) {
 
 /*****************************************************************************/
 TEST_F(TestModel, update_arg_move) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
-    auto sequence = cppmh::utility::sequence(10);
+    auto sequence = printemps::utility::sequence(10);
 
     auto& x = model.create_variables("x", 10, 0, 1);
     auto& p = model.create_expression("p", x.dot(sequence) + 1);
@@ -2602,13 +2622,13 @@ TEST_F(TestModel, update_arg_move) {
     model.minimize(p);
     model.categorize_variables();
     model.categorize_constraints();
-    model.extract_selections(cppmh::model::SelectionMode::Defined);
+    model.extract_selections(printemps::model::SelectionMode::Defined);
     model.setup_fixed_sensitivities(false);
 
     model.update();
 
-    cppmh::model::Move<int, double> move;
-    move.sense = cppmh::model::MoveSense::Selection;
+    printemps::model::Move<int, double> move;
+    move.sense = printemps::model::MoveSense::Selection;
     move.alterations.emplace_back(&x(0), 0);
     move.alterations.emplace_back(&x(9), 1);
 
@@ -2622,7 +2642,7 @@ TEST_F(TestModel, update_arg_move) {
 
 /*****************************************************************************/
 TEST_F(TestModel, update_feasibility) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto&                  x = model.create_variable("x", 0, 10);
     [[maybe_unused]] auto& g = model.create_constraint("g", x <= 5);
@@ -2644,9 +2664,9 @@ TEST_F(TestModel, update_feasibility) {
 TEST_F(TestModel, evaluate) {
     /// minimize
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
 
-        auto sequence = cppmh::utility::sequence(10);
+        auto sequence = printemps::utility::sequence(10);
 
         auto& x = model.create_variables("x", 10, 0, 1);
         auto& p = model.create_expression("p", x.dot(sequence) + 1);
@@ -2654,17 +2674,18 @@ TEST_F(TestModel, evaluate) {
         [[maybe_unused]] auto& h =
             model.create_constraint("h", x(0) + x(1) <= 1);
 
-        cppmh::model::ValueProxy<double> local_penalty_coefficient_proxy(1);
+        printemps::model::ValueProxy<double> local_penalty_coefficient_proxy(1);
         local_penalty_coefficient_proxy.value() = 100;
 
-        cppmh::model::ValueProxy<double> global_penalty_coefficient_proxy(1);
+        printemps::model::ValueProxy<double> global_penalty_coefficient_proxy(
+            1);
         global_penalty_coefficient_proxy.value() = 10000;
 
-        std::vector<cppmh::model::ValueProxy<double>>
+        std::vector<printemps::model::ValueProxy<double>>
             local_penalty_coefficient_proxies = {
                 local_penalty_coefficient_proxy,
                 local_penalty_coefficient_proxy};
-        std::vector<cppmh::model::ValueProxy<double>>
+        std::vector<printemps::model::ValueProxy<double>>
             global_penalty_coefficient_proxies = {
                 global_penalty_coefficient_proxy,
                 global_penalty_coefficient_proxy};
@@ -2674,7 +2695,7 @@ TEST_F(TestModel, evaluate) {
         model.setup_variable_related_constraints();
         model.categorize_variables();
         model.categorize_constraints();
-        model.extract_selections(cppmh::model::SelectionMode::Defined);
+        model.extract_selections(printemps::model::SelectionMode::Defined);
         model.setup_fixed_sensitivities(false);
 
         for (auto&& element : x.flat_indexed_variables()) {
@@ -2687,7 +2708,7 @@ TEST_F(TestModel, evaluate) {
                            global_penalty_coefficient_proxies);
 
         {
-            cppmh::model::Move<int, double> move;
+            printemps::model::Move<int, double> move;
             for (auto&& element : x.flat_indexed_variables()) {
                 move.alterations.emplace_back(&element, 1);
                 for (auto&& constraint_ptr :
@@ -2733,7 +2754,7 @@ TEST_F(TestModel, evaluate) {
         }
 
         {
-            cppmh::model::Move<int, double> move;
+            printemps::model::Move<int, double> move;
             for (auto&& element : x.flat_indexed_variables()) {
                 move.alterations.emplace_back(&element, 0);
                 for (auto&& constraint_ptr :
@@ -2775,7 +2796,7 @@ TEST_F(TestModel, evaluate) {
         }
 
         {
-            cppmh::model::Move<int, double> move;
+            printemps::model::Move<int, double> move;
             for (auto i = 0; i < 5; i++) {
                 move.alterations.emplace_back(&x(i), 1);
                 for (auto&& constraint_ptr : x(i).related_constraint_ptrs()) {
@@ -2818,9 +2839,9 @@ TEST_F(TestModel, evaluate) {
 
     /// maximize
     {
-        cppmh::model::Model<int, double> model;
+        printemps::model::Model<int, double> model;
 
-        auto sequence = cppmh::utility::sequence(10);
+        auto sequence = printemps::utility::sequence(10);
 
         auto& x = model.create_variables("x", 10, 0, 1);
         auto& p = model.create_expression("p", x.dot(sequence) + 1);
@@ -2828,17 +2849,18 @@ TEST_F(TestModel, evaluate) {
         [[maybe_unused]] auto& h =
             model.create_constraint("h", x(0) + x(1) <= 1);
 
-        cppmh::model::ValueProxy<double> local_penalty_coefficient_proxy(1);
+        printemps::model::ValueProxy<double> local_penalty_coefficient_proxy(1);
         local_penalty_coefficient_proxy.value() = 100;
 
-        cppmh::model::ValueProxy<double> global_penalty_coefficient_proxy(1);
+        printemps::model::ValueProxy<double> global_penalty_coefficient_proxy(
+            1);
         global_penalty_coefficient_proxy.value() = 10000;
 
-        std::vector<cppmh::model::ValueProxy<double>>
+        std::vector<printemps::model::ValueProxy<double>>
             local_penalty_coefficient_proxies = {
                 local_penalty_coefficient_proxy,
                 local_penalty_coefficient_proxy};
-        std::vector<cppmh::model::ValueProxy<double>>
+        std::vector<printemps::model::ValueProxy<double>>
             global_penalty_coefficient_proxies = {
                 global_penalty_coefficient_proxy,
                 global_penalty_coefficient_proxy};
@@ -2848,7 +2870,7 @@ TEST_F(TestModel, evaluate) {
         model.setup_variable_related_constraints();
         model.categorize_variables();
         model.categorize_constraints();
-        model.extract_selections(cppmh::model::SelectionMode::Defined);
+        model.extract_selections(printemps::model::SelectionMode::Defined);
         model.setup_fixed_sensitivities(false);
 
         for (auto&& element : x.flat_indexed_variables()) {
@@ -2860,7 +2882,7 @@ TEST_F(TestModel, evaluate) {
                            global_penalty_coefficient_proxies);
 
         {
-            cppmh::model::Move<int, double> move;
+            printemps::model::Move<int, double> move;
             for (auto&& element : x.flat_indexed_variables()) {
                 move.alterations.emplace_back(&element, 1);
                 for (auto&& constraint_ptr :
@@ -2904,7 +2926,7 @@ TEST_F(TestModel, evaluate) {
             score_before = score_after_1;
         }
         {
-            cppmh::model::Move<int, double> move;
+            printemps::model::Move<int, double> move;
             for (auto&& element : x.flat_indexed_variables()) {
                 move.alterations.emplace_back(&element, 0);
                 for (auto&& constraint_ptr :
@@ -2946,7 +2968,7 @@ TEST_F(TestModel, evaluate) {
         }
 
         {
-            cppmh::model::Move<int, double> move;
+            printemps::model::Move<int, double> move;
             for (auto i = 0; i < 5; i++) {
                 move.alterations.emplace_back(&x(i), 1);
                 for (auto&& constraint_ptr : x(i).related_constraint_ptrs()) {
@@ -2990,9 +3012,9 @@ TEST_F(TestModel, evaluate) {
 
 /*****************************************************************************/
 TEST_F(TestModel, compute_lagrangian) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
-    auto sequence = cppmh::utility::sequence(10);
+    auto sequence = printemps::utility::sequence(10);
 
     auto& x = model.create_variables("x", 10, 0, 1);
     auto& p = model.create_expression("p", x.dot(sequence) + 1);
@@ -3003,10 +3025,10 @@ TEST_F(TestModel, compute_lagrangian) {
     model.categorize_variables();
     model.categorize_constraints();
 
-    cppmh::model::ValueProxy<double> dual_value_proxy(1);
+    printemps::model::ValueProxy<double> dual_value_proxy(1);
     dual_value_proxy.value() = 100;
 
-    std::vector<cppmh::model::ValueProxy<double>> dual_value_proxies = {
+    std::vector<printemps::model::ValueProxy<double>> dual_value_proxies = {
         dual_value_proxy, dual_value_proxy};
 
     for (auto&& element : x.flat_indexed_variables()) {
@@ -3021,7 +3043,7 @@ TEST_F(TestModel, compute_lagrangian) {
 
 /*****************************************************************************/
 TEST_F(TestModel, generate_variable_parameter_proxies) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& x = model.create_variable("x");
     auto& y = model.create_variables("y", 10);
@@ -3062,7 +3084,7 @@ TEST_F(TestModel, generate_variable_parameter_proxies) {
 
 /*****************************************************************************/
 TEST_F(TestModel, generate_expression_parameter_proxies) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& p = model.create_expression("p");
     auto& q = model.create_expressions("q", 10);
@@ -3103,7 +3125,7 @@ TEST_F(TestModel, generate_expression_parameter_proxies) {
 
 /*****************************************************************************/
 TEST_F(TestModel, generate_constraint_parameter_proxies) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& g = model.create_constraint("g");
     auto& h = model.create_constraints("h", 10);
@@ -3144,7 +3166,7 @@ TEST_F(TestModel, generate_constraint_parameter_proxies) {
 
 /*****************************************************************************/
 TEST_F(TestModel, export_solution) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& x = model.create_variable("x");
     auto& y = model.create_variables("y", 10);
@@ -3271,7 +3293,7 @@ TEST_F(TestModel, export_solution) {
 
 /*****************************************************************************/
 TEST_F(TestModel, export_named_solution) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& x = model.create_variable("x");
     auto& y = model.create_variables("y", 10);
@@ -3433,7 +3455,7 @@ TEST_F(TestModel, convert_to_named_solution) {
 
 /*****************************************************************************/
 TEST_F(TestModel, export_plain_solution) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& x = model.create_variable("x");
     auto& y = model.create_variables("y", 10);
@@ -3475,7 +3497,7 @@ TEST_F(TestModel, export_plain_solution) {
 
 /*****************************************************************************/
 TEST_F(TestModel, convert_to_plain_solution) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& x = model.create_variable("x");
     auto& y = model.create_variables("y", 10);
@@ -3542,7 +3564,7 @@ TEST_F(TestModel, convert_to_plain_solution) {
 
 /*****************************************************************************/
 TEST_F(TestModel, export_summary) {
-    cppmh::model::Model<int, double> model("name");
+    printemps::model::Model<int, double> model("name");
 
     [[maybe_unused]] auto& x = model.create_variable("x");
     [[maybe_unused]] auto& y = model.create_variables("y", 10);
@@ -3643,7 +3665,7 @@ TEST_F(TestModel, sign) {
 
 /*****************************************************************************/
 TEST_F(TestModel, set_is_solved) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
     EXPECT_EQ(false, model.is_solved());
     model.set_is_solved(true);
     EXPECT_EQ(true, model.is_solved());

@@ -1,4 +1,4 @@
-#include <cppmh.h>
+#include <printemps.h>
 
 int main(void) {
     /**
@@ -14,7 +14,7 @@ int main(void) {
      *        where    f_1 = 2 x_1 + 7 x_2 + 9 x_3 + 1,
      *                 f_2 = 5 y_1 + 6 y_2.
      */
-    cppmh::model::IPModel model;
+    printemps::model::IPModel model;
 
     auto& x = model.create_variables("x", 3, 0, 1);
     auto& y = model.create_variables("y", 2, 0, 1);
@@ -32,7 +32,7 @@ int main(void) {
 
     model.minimize(f.sum());
 
-    auto result = cppmh::solver::solve(&model);
+    auto result = printemps::solver::solve(&model);
 
     result.solution.print_variable_values();
     result.solution.print_expression_values();

@@ -1,27 +1,27 @@
-# cpp_metaheuristics
-![GitHub Actions](https://github.com/snowberryfield/cpp_metaheuristics/workflows/GitHub%20Actions/badge.svg) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/b990a9488ea14ead982cfecfb5a1ba00)](https://www.codacy.com/manual/snowberryfield/cpp_metaheuristics?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=snowberryfield/cpp_metaheuristics&amp;utm_campaign=Badge_Grade) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+# PRINTEMPS
+![GitHub Actions](https://github.com/snowberryfield/printemps/workflows/GitHub%20Actions/badge.svg) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/b990a9488ea14ead982cfecfb5a1ba00)](https://www.codacy.com/manual/snowberryfield/printemps?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=snowberryfield/printemps&amp;utm_campaign=Badge_Grade) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-__cpp_metaheuristics__ (hereinafter referred to as __cppmh__) is a C++ metaheuristics modeler/solver library for general combinatorial optimization problems. cppmh emphasizes on the following aspects:
-- __Portability.__ cppmh is implemented as a header-only library which does not depend on any other proprietary or open-source libraries. Users can integrate cppmh in to their own codes by just copying necessary files. 
+__PRINTEMPS__ is a C++ metaheuristics modeler/solver library for general combinatorial optimization problems. `PRINTEMPS` emphasizes on the following aspects:
+- __Portability.__ It is implemented as a header-only library which does not depend on any other proprietary or open-source libraries. Users can integrate it in to their own codes by just copying necessary files. 
 
-- __Intuitiveness in modeling.__ cppmh provides an intuitive modeling environment to define a optimization model as a program code. Users can define constraint and objective functions using arithmetic operations on decision variables.
+- __Intuitiveness in modeling.__ It provides an intuitive modeling environment to define a optimization model as a program code. Users can define constraint and objective functions using arithmetic operations on decision variables.
 
-- __Flexibility to define neighborhood.__ cppmh automatically detects the neighborhood structure of the problem. In addition to this, cppmh also accepts user-defined neighborhood.
+- __Flexibility to define neighborhood.__ It automatically detects the neighborhood structure of the problem. In addition to this, PRINTEMPS also accepts user-defined neighborhood.
 
-## Optimization in cpp_metaheuristics
-cppmh can compute approximate solutions for __linear and nonlinear integer optimization problems__. cppmh employs __Tabu Search__ [1], a metaheuristics technique, to solve problems. In solving, cppmh replaces constraints with penalty functions which return violations to the corresponding constraints, and the penalty functions multiplied by positive penalty coefficients are added to the objective function. The penalty coefficients are updated iteratively and automatically in a method similar (not exact same) to the one proposed in paper [2].
-The figure below shows the flow-chart of the algorithm of cppmh. 
+## Optimization in PRINTEMPS
+PRINTEMPS can compute approximate solutions for __linear and nonlinear integer optimization problems__. It employs __Tabu Search__ [1], a metaheuristics technique, to solve problems. In solving, it replaces constraints with penalty functions which return violations to the corresponding constraints, and the penalty functions multiplied by positive penalty coefficients are added to the objective function. The penalty coefficients are updated iteratively and automatically in a method similar (not exact same) to the one proposed in paper [2].
+The figure below shows the flow-chart of the algorithm of PRINTEMPS. 
 
 <div align="center">
 
 <img src="./asset/flowchart.png" width="600">
 
-__The Flow-Chart of the optimization algorithm of cppmh.__ 
+__The Flow-Chart of the optimization algorithm of PRINTEMPS.__ 
 
 </div>
 
 ## Installation
-Installation of cppmh is just completed by copying the [`cppmh/`](cppmh/) directory to an appropriate location. 
+Installation of PRINTEMPS is just completed by copying the [`printemps/`](printemps/) directory to an appropriate location. 
 
 ## Example
 Let us consider a simple linear integer optimization problem [3]:
@@ -33,12 +33,12 @@ Let us consider a simple linear integer optimization problem [3]:
                      x_1 and x_2 are integer.
 ```
 
-The following code shows an implementation code to solve the problem (P) using cppmh.
+The following code shows an implementation code to solve the problem (P) using PRINTEMPS.
 ```c++
-#include <cppmh.h>
+#include <printemps.h>
 int main(void) {
     // (1) Modeling
-    cppmh::model::IPModel model;
+    printemps::model::IPModel model;
 
     auto& x = model.create_variables("x", 2);
     auto& g = model.create_constraints("g", 2);
@@ -48,7 +48,7 @@ int main(void) {
     model.minimize(x(0) + 10 * x(1));
 
     // (2) Running Solver
-    auto result = cppmh::solver::solve(&model);
+    auto result = printemps::solver::solve(&model);
 
     // (3) Accessing the Result
     std::cout << "objective = " << result.solution.objective() << std::endl;
@@ -71,9 +71,9 @@ Following additional examples are provided in [`example/`](example/) directory.
 - [`example/quadratic_assignment.cpp`](example/quadratic_assignment.cpp) solves a quadratic assignment problem as an example of optimization that incorporates nonlinear functions and user-defined neighborhoods. 
 
 ## Compilation
-A source code of program integrating cppmh can be compiled by C++14 standards compatible compilers with specifying include search path where cppmh is installed. For instance, the example code [`example/knapsack.cpp`](example/knapsack.cpp) can be built by following command using g++:
+A source code of program integrating PRINTEMPS can be compiled by C++14 standards compatible compilers with specifying include search path where it is installed. For instance, the example code [`example/knapsack.cpp`](example/knapsack.cpp) can be built by following command using g++:
 ```
-$g++ -std=c++14 -O2 -I path/to/cppmh [-fopenmp] sample/knapsack.cpp -o knapsack.exe
+$g++ -std=c++14 -O2 -I path/to/printemps [-fopenmp] sample/knapsack.cpp -o knapsack.exe
 ```
 
 The option `-fopenmp` is required to activate parallel computation. See [Solver Options](document/solver_option_guide.md) for details.
@@ -88,11 +88,11 @@ Following combinations of operating systems and compilers are confirmed compilat
 |     Ubuntu 18.04     | gcc (7.5.0, 8.4.0, 9.2.1) <br /> clang (6.0.0, 8.0.0, 9.0.0) |
 
 ## Documents
-- [Starter Guide](document/starter_guide.md) describes the basic usage of cppmh including modeling of optimization problems, running the solver, and accessing the optimization results.
+- [Starter Guide](document/starter_guide.md) describes the basic usage of PRINTEMPS including modeling of optimization problems, running the solver, and accessing the optimization results.
 - [Solver Option Guide](document/solver_option_guide.md) gives a detailed description of the all options and their default values.
 
 ## Testing
-The test suites for `cppmh` are powered by [googletest](https://github.com/google/googletest). The command
+The test suites for `printemps` are powered by [googletest](https://github.com/google/googletest). The command
 ```
 $make -f makefile/Makefile.external [CC=gcc CXX=g++]
 ```
@@ -103,7 +103,7 @@ $make -f makefile/Makefile.test
 to build and run the test suites.
 
 ## License
-__cpp_metaheuristics__ is licensed under [MIT license](https://opensource.org/licenses/MIT).
+__PRINTEMPS__ is licensed under [MIT license](https://opensource.org/licenses/MIT).
 
 ## References
 
