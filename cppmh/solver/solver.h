@@ -505,14 +505,11 @@ Result<T_Variable, T_Expression> solve(
     /**
      * Run tabu searches to find better solutions.
      */
-    int iteration        = 0;
-    int not_update_count = 0;
+    int iteration                                   = 0;
+    int not_global_augmented_incumbent_update_count = 0;
+    int not_update_count                            = 0;
 
-    bool   penalty_coefficient_reset_flag = false;
-    double penalty_coefficient_tightening_rate =
-        master_option.penalty_coefficient_tightening_rate;
-    double penalty_coefficient_relaxing_rate =
-        master_option.penalty_coefficient_relaxing_rate;
+    bool penalty_coefficient_reset_flag = false;
 
     int inital_tabu_tenure = master_option.tabu_search.initial_tabu_tenure;
     int number_of_initial_modification = 0;
@@ -591,6 +588,29 @@ Result<T_Variable, T_Expression> solve(
                                          memory);
 
         /**
+         * Update the global augmented incumbent solution if it was improved
+         * by the tabu search.
+         */
+        update_status = incumbent_holder.try_update_incumbent(
+            result.incumbent_holder.global_augmented_incumbent_solution(),
+            result.incumbent_holder.global_augmented_incumbent_score());
+
+        if ((update_status && (IncumbentHolderConstant::
+                                   STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE))) {
+            not_global_augmented_incumbent_update_count = 0;
+            penalty_coefficient_reset_flag              = false;
+        } else {
+            not_global_augmented_incumbent_update_count++;
+            if (not_global_augmented_incumbent_update_count ==
+                master_option.penalty_coefficient_reset_count_threshold) {
+                penalty_coefficient_reset_flag              = true;
+                not_global_augmented_incumbent_update_count = 0;
+            } else {
+                penalty_coefficient_reset_flag = false;
+            }
+        }
+
+        /**
          * Update the current solution which is employed as the initial solution
          * of the next loop. Whether the local penalty coefficients should be
          * relaxed or tightened, is also determined.
@@ -617,59 +637,76 @@ Result<T_Variable, T_Expression> solve(
         bool employing_global_augmented_solution_flag = false;
         bool employing_previous_solution_flag         = false;
 
-        bool penalty_coefficient_tightening_flag = false;
-        bool penalty_coefficient_relaxing_flag   = false;
-
-        penalty_coefficient_tightening_rate =
-            master_option.penalty_coefficient_tightening_rate;
-        penalty_coefficient_relaxing_rate =
-            master_option.penalty_coefficient_relaxing_rate;
+        bool penalty_coefficient_tightening_flag      = false;
+        bool penalty_coefficient_relaxing_flag        = false;
+        bool is_enabled_forcibly_initial_modification = false;
 
         if (master_option.improvability_screening_mode ==
             ImprovabilityScreeningMode::Automatic) {
-            if (incumbent_holder.is_found_feasible_solution()) {
-                improvability_screening_mode = ImprovabilityScreeningMode::Soft;
-            } else {
+            if (result.total_update_status ==
+                IncumbentHolderConstant::STATUS_NO_UPDATED) {
                 improvability_screening_mode =
                     ImprovabilityScreeningMode::Aggressive;
+            } else if (result.is_few_permissible_neighborhood) {
+                improvability_screening_mode = ImprovabilityScreeningMode::Soft;
+            } else {
+                if (incumbent_holder.is_found_feasible_solution()) {
+                    improvability_screening_mode =
+                        ImprovabilityScreeningMode::Soft;
+                } else {
+                    improvability_screening_mode =
+                        ImprovabilityScreeningMode::Aggressive;
+                }
             }
         }
 
         if (result.total_update_status &
             IncumbentHolderConstant::STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
             employing_global_augmented_solution_flag = true;
-
-            penalty_coefficient_tightening_flag = false;
-            penalty_coefficient_relaxing_flag   = true;
+            penalty_coefficient_tightening_flag      = false;
+            penalty_coefficient_relaxing_flag        = true;
+            not_update_count                         = 0;
         } else {
             if (result.total_update_status ==
                 IncumbentHolderConstant::STATUS_NO_UPDATED) {
                 employing_global_augmented_solution_flag = true;
-
-                penalty_coefficient_tightening_flag = false;
-                penalty_coefficient_relaxing_flag   = true;
-
-                if (master_option.improvability_screening_mode ==
-                    ImprovabilityScreeningMode::Automatic) {
-                    improvability_screening_mode =
-                        ImprovabilityScreeningMode::Aggressive;
+                is_enabled_forcibly_initial_modification = true;
+                if (result_local_augmented_incumbent_score.is_feasible) {
+                    penalty_coefficient_tightening_flag = false;
+                    penalty_coefficient_relaxing_flag   = true;
+                    not_update_count                    = 0;
+                } else {
+                    if (not_update_count < 1) {
+                        penalty_coefficient_tightening_flag = false;
+                        penalty_coefficient_relaxing_flag   = false;
+                        not_update_count++;
+                    } else {
+                        penalty_coefficient_tightening_flag = false;
+                        penalty_coefficient_relaxing_flag   = true;
+                        not_update_count                    = 0;
+                    }
                 }
-
             } else {
                 double gap = result_global_augmented_incumbent_objective -
                              result_local_augmented_incumbent_objective;
 
+                not_update_count = 0;
+
                 if (gap < constant::EPSILON) {
                     employing_global_augmented_solution_flag = true;
-
-                    penalty_coefficient_tightening_flag = false;
-                    penalty_coefficient_relaxing_flag   = true;
+                    is_enabled_forcibly_initial_modification = true;
+                    if (result_local_augmented_incumbent_score.is_feasible) {
+                        penalty_coefficient_tightening_flag = false;
+                        penalty_coefficient_relaxing_flag   = true;
+                    } else {
+                        penalty_coefficient_tightening_flag = true;
+                        penalty_coefficient_relaxing_flag   = false;
+                    }
                 } else {
                     if (result_local_augmented_incumbent_score.is_feasible) {
                         employing_local_augmented_solution_flag = true;
-
-                        penalty_coefficient_tightening_flag = false;
-                        penalty_coefficient_relaxing_flag   = true;
+                        penalty_coefficient_tightening_flag     = false;
+                        penalty_coefficient_relaxing_flag       = true;
 
                     } else {
                         if (incumbent_holder.is_found_feasible_solution()) {
@@ -724,29 +761,6 @@ Result<T_Variable, T_Expression> solve(
         }
 
         /**
-         * Update the global augmented incumbent solution if it was improved
-         * by the tabu search.
-         */
-        update_status = incumbent_holder.try_update_incumbent(
-            result.incumbent_holder.global_augmented_incumbent_solution(),
-            result.incumbent_holder.global_augmented_incumbent_score());
-
-        if ((update_status && (IncumbentHolderConstant::
-                                   STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE))) {
-            not_update_count               = 0;
-            penalty_coefficient_reset_flag = false;
-        } else {
-            not_update_count++;
-            if (not_update_count ==
-                master_option.penalty_coefficient_reset_count_threshold) {
-                penalty_coefficient_reset_flag = true;
-                not_update_count               = 0;
-            } else {
-                penalty_coefficient_reset_flag = false;
-            }
-        }
-
-        /**
          * Update the feasible incumbent solution if it was improved by the
          * tabu search.
          */
@@ -785,10 +799,8 @@ Result<T_Variable, T_Expression> solve(
                 }
             }
 
-            const double balance =
-                master_option.penalty_coefficient_updating_balance;
-
-            double gap = result_global_augmented_incumbent_objective -
+            double balance = master_option.penalty_coefficient_updating_balance;
+            double gap     = result_global_augmented_incumbent_objective -
                          result_local_augmented_incumbent_objective;
 
             for (auto&& proxy : local_penalty_coefficient_proxies) {
@@ -806,9 +818,10 @@ Result<T_Variable, T_Expression> solve(
                         std::max(0.0, gap) / total_squared_violation *
                         violation_values[flat_index];
 
-                    element += penalty_coefficient_tightening_rate *
-                               (balance * delta_penalty_constant +
-                                (1.0 - balance) * delta_penalty_proportional);
+                    element +=
+                        master_option.penalty_coefficient_tightening_rate *
+                        (balance * delta_penalty_constant +
+                         (1.0 - balance) * delta_penalty_proportional);
 
                     flat_index++;
                 }
@@ -835,6 +848,16 @@ Result<T_Variable, T_Expression> solve(
              * Relax the local penalty coefficients of which
              * corresponding constraints are satisfied.
              */
+            auto penalty_coefficient_relaxing_rate =
+                master_option.penalty_coefficient_relaxing_rate;
+            if (result.objective_constraint_ration > constant::EPSILON &&
+                result.is_found_new_feasible_solution) {
+                constexpr double MARGIN = 100.0;
+                penalty_coefficient_relaxing_rate =
+                    std::min(penalty_coefficient_relaxing_rate,
+                             result.objective_constraint_ration * MARGIN);
+            }
+
             for (auto&& proxy : local_penalty_coefficient_proxies) {
                 int  id = proxy.id();
                 auto violation_values =
@@ -896,7 +919,7 @@ Result<T_Variable, T_Expression> solve(
             number_of_initial_modification = 0;
         } else {
             if (master_option.tabu_search.is_enabled_initial_modification &&
-                !is_changed) {
+                (!is_changed || is_enabled_forcibly_initial_modification)) {
                 int nominal_number_of_initial_modification  //
                     = static_cast<int>(
                         std::floor(master_option.tabu_search
@@ -1165,6 +1188,38 @@ Result<T_Variable, T_Expression> solve(
         utility::print_message("The tabu tenure for the next loop was set to " +
                                    std::to_string(inital_tabu_tenure) + ".",
                                master_option.verbose >= Verbose::Outer);
+
+        /**
+         * Print the improvability screening_mode
+         */
+        switch (improvability_screening_mode) {
+            case ImprovabilityScreeningMode::Off: {
+                utility::print_message(
+                    "No improvability screening will be applied for the next "
+                    "loop.",
+                    master_option.verbose >= Verbose::Outer);
+                break;
+            }
+            case ImprovabilityScreeningMode::Soft: {
+                utility::print_message(
+                    "The soft improvability screening will be applied in the "
+                    "next loop.",
+                    master_option.verbose >= Verbose::Outer);
+                break;
+            }
+            case ImprovabilityScreeningMode::Aggressive: {
+                utility::print_message(
+                    "The aggressive improvability screening will be applied "
+                    "in the next loop.",
+                    master_option.verbose >= Verbose::Outer);
+                break;
+            }
+            default: {
+                throw std::logic_error(utility::format_error_location(
+                    __FILE__, __LINE__, __func__,
+                    "The specified improvability screening mode is invalid."));
+            }
+        }
 
         /**
          * Print the initial solution for the next loop.

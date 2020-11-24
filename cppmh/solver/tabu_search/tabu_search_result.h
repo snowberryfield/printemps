@@ -36,6 +36,11 @@ struct TabuSearchResult {
     int last_global_augmented_incumbent_update_iteration;
     int last_feasible_incumbent_update_iteration;
 
+    bool is_few_permissible_neighborhood;
+    bool is_found_new_feasible_solution;
+
+    double objective_constraint_ration;
+
     TabuSearchTerminationStatus termination_status;
 
     std::vector<model::PlainSolution<T_Variable, T_Expression>>
@@ -63,6 +68,11 @@ struct TabuSearchResult {
         this->last_local_augmented_incumbent_update_iteration  = -1;
         this->last_global_augmented_incumbent_update_iteration = -1;
         this->last_feasible_incumbent_update_iteration         = -1;
+
+        this->is_few_permissible_neighborhood = false;
+        this->is_found_new_feasible_solution  = false;
+
+        this->objective_constraint_ration = 1.0;
 
         this->termination_status = TabuSearchTerminationStatus::ITERATION_OVER;
 
