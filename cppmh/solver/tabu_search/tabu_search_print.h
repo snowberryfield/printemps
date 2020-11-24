@@ -43,7 +43,7 @@ inline void print_table_header(const bool a_IS_ENABLED_PRINT) {
 template <class T_Variable, class T_Expression>
 inline void print_table_initial(
     const model::Model<T_Variable, T_Expression> *   a_MODEL,
-    const model::SolutionScore &                     a_SOLUTION_SCORE,
+    const model::SolutionScore &                     a_CURRENT_SOLUTION_SCORE,
     const IncumbentHolder<T_Variable, T_Expression> &a_INCUMBENT_HOLDER,
     const bool                                       a_IS_ENABLED_PRINT) {
     if (!a_IS_ENABLED_PRINT) {
@@ -52,8 +52,10 @@ inline void print_table_initial(
 
     std::printf(
         " INITIAL |    -     -     -     - | %9.2e(%9.2e) | %9.2e  %9.2e\n",
-        a_SOLUTION_SCORE.local_augmented_objective * a_MODEL->sign(),
-        a_SOLUTION_SCORE.local_penalty,
+        a_CURRENT_SOLUTION_SCORE.local_augmented_objective * a_MODEL->sign(),
+        a_CURRENT_SOLUTION_SCORE.is_feasible
+            ? 0.0
+            : a_CURRENT_SOLUTION_SCORE.local_penalty,  //
         a_INCUMBENT_HOLDER.global_augmented_incumbent_objective() *
             a_MODEL->sign(),
         a_INCUMBENT_HOLDER.feasible_incumbent_objective() * a_MODEL->sign());
@@ -97,9 +99,9 @@ inline void print_table_body(
         mark_feasible_incumbent         = '*';
     }
 
-    auto int_format = [](const int a_VALUE, const int a_THRESHOLD) {
-        if (a_VALUE >= a_THRESHOLD) {
-            return utility::to_string(static_cast<double>(a_VALUE), "%5.0e");
+    auto int_format = [](const int a_VALUE) {
+        if (a_VALUE >= 100000) {
+            return utility::to_string(a_VALUE / 1000, "%4dk");
         } else {
             return utility::to_string(a_VALUE, "%5d");
         }
@@ -107,16 +109,18 @@ inline void print_table_body(
 
     std::printf(
         "%8d |%s %s %s %s |%c%9.2e(%9.2e) |%c%9.2e %c%9.2e\n",
-        a_ITERATION,                                                       //
-        int_format(a_NUMBER_OF_ALL_NEIGHBORHOODS, 100000).c_str(),         //
-        int_format(a_NUMBER_OF_FEASIBLE_NEIGHBORHOODS, 100000).c_str(),    //
-        int_format(a_NUMBER_OF_PERMISSIBLE_NEIGHBORHOOD, 100000).c_str(),  //
-        int_format(a_NUMBER_OF_IMPROVABLE_NEIGHBORHOOD, 100000).c_str(),   //
-        mark_current,                                                      //
+        a_ITERATION,                                               //
+        int_format(a_NUMBER_OF_ALL_NEIGHBORHOODS).c_str(),         //
+        int_format(a_NUMBER_OF_FEASIBLE_NEIGHBORHOODS).c_str(),    //
+        int_format(a_NUMBER_OF_PERMISSIBLE_NEIGHBORHOOD).c_str(),  //
+        int_format(a_NUMBER_OF_IMPROVABLE_NEIGHBORHOOD).c_str(),   //
+        mark_current,                                              //
         a_CURRENT_SOLUTION_SCORE.local_augmented_objective *
-            a_MODEL->sign(),                     //
-        a_CURRENT_SOLUTION_SCORE.local_penalty,  //
-        mark_global_augmented_incumbent,         //
+            a_MODEL->sign(),  //
+        a_CURRENT_SOLUTION_SCORE.is_feasible
+            ? 0.0
+            : a_CURRENT_SOLUTION_SCORE.local_penalty,  //
+        mark_global_augmented_incumbent,               //
         a_INCUMBENT_HOLDER.global_augmented_incumbent_objective() *
             a_MODEL->sign(),      //
         mark_feasible_incumbent,  //
