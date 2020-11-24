@@ -233,52 +233,71 @@ TEST_F(TestNeighborhood, setup_move_updater) {
 
         auto moves = model.neighborhood().integer_moves();
         auto flags = model.neighborhood().integer_move_flags();
-        EXPECT_EQ(2 * static_cast<int>(not_fixed_variable_ptrs.size()),
+        EXPECT_EQ(4 * static_cast<int>(not_fixed_variable_ptrs.size()),
                   static_cast<int>(moves.size()));
 
         int variable_size = not_fixed_variable_ptrs.size();
         for (auto i = 0; i < variable_size; i++) {
-            EXPECT_EQ(1, static_cast<int>(moves[2 * i].alterations.size()));
-            EXPECT_EQ(1, static_cast<int>(moves[2 * i + 1].alterations.size()));
+            for (auto j = 0; j < 4; j++) {
+                EXPECT_EQ(
+                    1, static_cast<int>(moves[4 * i + j].alterations.size()));
+                EXPECT_EQ(cppmh::model::MoveSense::Integer,
+                          moves[4 * i + j].sense);
+                EXPECT_EQ(false,
+                          moves[4 * i + j].alterations[0].first->is_fixed());
 
-            EXPECT_EQ(cppmh::model::MoveSense::Integer, moves[2 * i].sense);
-            EXPECT_EQ(cppmh::model::MoveSense::Integer, moves[2 * i + 1].sense);
-
-            EXPECT_EQ(false, moves[2 * i].alterations[0].first->is_fixed());
-            EXPECT_EQ(false, moves[2 * i + 1].alterations[0].first->is_fixed());
-
-            for (auto& constraint_ptr :
-                 moves[2 * i].alterations[0].first->related_constraint_ptrs()) {
-                EXPECT_EQ(true, moves[2 * i].related_constraint_ptrs.find(
-                                    constraint_ptr) !=
-                                    moves[2 * i].related_constraint_ptrs.end());
+                for (auto& constraint_ptr :
+                     moves[4 * i + j]
+                         .alterations[0]
+                         .first->related_constraint_ptrs()) {
+                    EXPECT_EQ(
+                        true,
+                        moves[4 * i + j].related_constraint_ptrs.find(
+                            constraint_ptr) !=
+                            moves[4 * i + j].related_constraint_ptrs.end());
+                }
             }
 
-            for (auto& constraint_ptr : moves[2 * i + 1]
-                                            .alterations[0]
-                                            .first->related_constraint_ptrs()) {
-                EXPECT_EQ(true,
-                          moves[2 * i + 1].related_constraint_ptrs.find(
-                              constraint_ptr) !=
-                              moves[2 * i + 1].related_constraint_ptrs.end());
-            }
-
-            if (moves[2 * i].alterations.front().first->value() ==
-                moves[2 * i].alterations.front().first->upper_bound()) {
-                EXPECT_EQ(0, flags[2 * i]);
+            if (moves[4 * i].alterations.front().first->value() ==
+                moves[4 * i].alterations.front().first->upper_bound()) {
+                EXPECT_EQ(0, flags[4 * i]);
             } else {
-                EXPECT_EQ(1, flags[2 * i]);
-                EXPECT_EQ(moves[2 * i].alterations[0].second,
-                          moves[2 * i].alterations[0].first->value() + 1);
+                EXPECT_EQ(1, flags[4 * i]);
+                EXPECT_EQ(moves[4 * i].alterations[0].second,
+                          moves[4 * i].alterations[0].first->value() + 1);
             }
 
-            if (moves[2 * i].alterations.front().first->value() ==
-                moves[2 * i].alterations.front().first->lower_bound()) {
-                EXPECT_EQ(0, flags[2 * i + 1]);
+            if (moves[4 * i + 1].alterations.front().first->value() ==
+                moves[4 * i + 1].alterations.front().first->lower_bound()) {
+                EXPECT_EQ(0, flags[4 * i + 1]);
             } else {
-                EXPECT_EQ(1, flags[2 * i + 1]);
-                EXPECT_EQ(moves[2 * i + 1].alterations[0].second,
-                          moves[2 * i + 1].alterations[0].first->value() - 1);
+                EXPECT_EQ(1, flags[4 * i + 1]);
+                EXPECT_EQ(moves[4 * i + 1].alterations[0].second,
+                          moves[4 * i + 1].alterations[0].first->value() - 1);
+            }
+
+            if (moves[4 * i + 2].alterations.front().first->value() ==
+                moves[4 * i + 2].alterations.front().first->upper_bound()) {
+                EXPECT_EQ(0, flags[4 * i + 2]);
+            } else {
+                EXPECT_EQ(1, flags[4 * i + 2]);
+                EXPECT_EQ(
+                    moves[4 * i + 2].alterations[0].second,
+                    (moves[4 * i + 2].alterations[0].first->value() +
+                     moves[4 * i + 2].alterations[0].first->upper_bound()) /
+                        2);
+            }
+
+            if (moves[4 * i + 3].alterations.front().first->value() ==
+                moves[4 * i + 3].alterations.front().first->lower_bound()) {
+                EXPECT_EQ(0, flags[4 * i + 3]);
+            } else {
+                EXPECT_EQ(1, flags[4 * i + 3]);
+                EXPECT_EQ(
+                    moves[4 * i + 3].alterations[0].second,
+                    (moves[4 * i + 3].alterations[0].first->value() +
+                     moves[4 * i + 3].alterations[0].first->lower_bound()) /
+                        2);
             }
         }
     }
@@ -376,7 +395,7 @@ TEST_F(TestNeighborhood, setup_move_updater) {
 
         EXPECT_EQ(                                          //
             (binary_variables_size)                         // Binary
-                + (2 * integer_variables_size - 2 - 1 - 1)  // Integer
+                + (4 * integer_variables_size - 4 - 2 - 2)  // Integer
                 + (4 * aggregations_size - 5)               // Aggregation
                 + (2 * precedences_size - 4)                // Precedence
                 + (4 * variable_bounds_size)                // Variable Bound

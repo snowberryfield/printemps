@@ -44,8 +44,8 @@ TEST_F(TestVariable, initialize) {
     /// Check the initial values of the derived class members.
     EXPECT_EQ(false, variable.is_fixed());
     EXPECT_EQ(0, variable.value());
-    EXPECT_EQ(std::numeric_limits<int>::min() + 1, variable.lower_bound());
-    EXPECT_EQ(std::numeric_limits<int>::max() - 1, variable.upper_bound());
+    EXPECT_EQ(cppmh::constant::INT_MIN, variable.lower_bound());
+    EXPECT_EQ(cppmh::constant::INT_MAX, variable.upper_bound());
     EXPECT_EQ(false, variable.has_bounds());
     EXPECT_EQ(false, variable.is_improvable());
     EXPECT_EQ(cppmh::model::VariableSense::Integer, variable.sense());
@@ -204,8 +204,8 @@ TEST_F(TestVariable, set_bound) {
                  std::logic_error);
 
     variable.reset_bound();
-    EXPECT_EQ(std::numeric_limits<int>::min() + 1, variable.lower_bound());
-    EXPECT_EQ(std::numeric_limits<int>::max() - 1, variable.upper_bound());
+    EXPECT_EQ(cppmh::constant::INT_MIN, variable.lower_bound());
+    EXPECT_EQ(cppmh::constant::INT_MAX, variable.upper_bound());
     EXPECT_EQ(false, variable.has_bounds());
 }
 

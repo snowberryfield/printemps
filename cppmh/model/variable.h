@@ -106,8 +106,8 @@ class Variable : public AbstractMultiArrayElement {
          * sufficiently large negative and positive integer, respectively. The
          * default bounds have margin to avoid overflows in calculating moves.
          */
-        m_lower_bound   = std::numeric_limits<int>::min() + 1;
-        m_upper_bound   = std::numeric_limits<int>::max() - 1;
+        m_lower_bound   = constant::INT_MIN;
+        m_upper_bound   = constant::INT_MAX;
         m_has_bounds    = false;
         m_is_improvable = false;
         m_sense         = VariableSense::Integer;
@@ -205,8 +205,8 @@ class Variable : public AbstractMultiArrayElement {
 
     /*************************************************************************/
     inline constexpr void reset_bound(void) {
-        m_lower_bound   = std::numeric_limits<int>::min() + 1;
-        m_upper_bound   = std::numeric_limits<int>::max() - 1;
+        m_lower_bound   = constant::INT_MIN;
+        m_upper_bound   = constant::INT_MAX;
         m_has_bounds    = false;
         m_sense         = VariableSense::Integer;
         m_selection_ptr = nullptr;
