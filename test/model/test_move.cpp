@@ -6,14 +6,14 @@
 #include <gtest/gtest.h>
 #include <random>
 
-#include <cppmh.h>
+#include <printemps.h>
 
 namespace {
 /*****************************************************************************/
 class TestMove : public ::testing::Test {
    protected:
-    cppmh::utility::IntegerUniformRandom m_random_integer;
-    cppmh::utility::IntegerUniformRandom m_random_positive_integer;
+    printemps::utility::IntegerUniformRandom m_random_integer;
+    printemps::utility::IntegerUniformRandom m_random_positive_integer;
 
     virtual void SetUp(void) {
         m_random_integer.setup(-1000, 1000, 0);
@@ -33,19 +33,21 @@ class TestMove : public ::testing::Test {
 
 /*****************************************************************************/
 TEST_F(TestMove, has_duplicate_variable) {
-    auto variable_0 = cppmh::model::Variable<int, double>::create_instance();
-    auto variable_1 = cppmh::model::Variable<int, double>::create_instance();
+    auto variable_0 =
+        printemps::model::Variable<int, double>::create_instance();
+    auto variable_1 =
+        printemps::model::Variable<int, double>::create_instance();
 
-    using Move_T = cppmh::model::Move<int, double>;
+    using Move_T = printemps::model::Move<int, double>;
     {
-        cppmh::model::Move<int, double> move;
+        printemps::model::Move<int, double> move;
         move.alterations.emplace_back(&variable_0, 1);
         move.alterations.emplace_back(&variable_0, 1);
         EXPECT_EQ(true, Move_T::has_duplicate_variable(move));
     }
 
     {
-        cppmh::model::Move<int, double> move;
+        printemps::model::Move<int, double> move;
         move.alterations.emplace_back(&variable_0, 1);
         move.alterations.emplace_back(&variable_1, 1);
         EXPECT_EQ(false, Move_T::has_duplicate_variable(move));
@@ -54,8 +56,8 @@ TEST_F(TestMove, has_duplicate_variable) {
 
 /*****************************************************************************/
 TEST_F(TestMove, operator_plus) {
-    using Move_T = cppmh::model::Move<int, double>;
-    cppmh::model::Model<int, double> model;
+    using Move_T = printemps::model::Move<int, double>;
+    printemps::model::Model<int, double> model;
 
     auto& x = model.create_variable("x", 0, 10);
     auto& y = model.create_variable("y", 0, 10);
@@ -71,17 +73,17 @@ TEST_F(TestMove, operator_plus) {
 
     auto variable_ptrs = model.variable_reference().variable_ptrs;
 
-    cppmh::model::Move<int, double> move_x;
+    printemps::model::Move<int, double> move_x;
     move_x.alterations.emplace_back(variable_ptrs[0], 1);
     move_x.related_constraint_ptrs =
         variable_ptrs[0]->related_constraint_ptrs();
 
-    cppmh::model::Move<int, double> move_y;
+    printemps::model::Move<int, double> move_y;
     move_y.alterations.emplace_back(variable_ptrs[1], 2);
     move_y.related_constraint_ptrs =
         variable_ptrs[1]->related_constraint_ptrs();
 
-    cppmh::model::Move<int, double> move_z;
+    printemps::model::Move<int, double> move_z;
     move_z.alterations.emplace_back(variable_ptrs[2], 3);
     move_z.related_constraint_ptrs =
         variable_ptrs[2]->related_constraint_ptrs();
@@ -90,7 +92,7 @@ TEST_F(TestMove, operator_plus) {
     EXPECT_EQ(false, Move_T::has_duplicate_variable(move_x_y));
     EXPECT_EQ(2, static_cast<int>(move_x_y.alterations.size()));
     EXPECT_EQ(3, static_cast<int>(move_x_y.related_constraint_ptrs.size()));
-    EXPECT_EQ(cppmh::model::MoveSense::Chain, move_x_y.sense);
+    EXPECT_EQ(printemps::model::MoveSense::Chain, move_x_y.sense);
 
     EXPECT_EQ(variable_ptrs[0], move_x_y.alterations[0].first);
     EXPECT_EQ(1, move_x_y.alterations[0].second);
@@ -102,7 +104,7 @@ TEST_F(TestMove, operator_plus) {
     EXPECT_EQ(false, Move_T::has_duplicate_variable(move_x_y_z));
     EXPECT_EQ(3, static_cast<int>(move_x_y_z.alterations.size()));
     EXPECT_EQ(3, static_cast<int>(move_x_y_z.related_constraint_ptrs.size()));
-    EXPECT_EQ(cppmh::model::MoveSense::Chain, move_x_y_z.sense);
+    EXPECT_EQ(printemps::model::MoveSense::Chain, move_x_y_z.sense);
 
     EXPECT_EQ(variable_ptrs[0], move_x_y_z.alterations[0].first);
     EXPECT_EQ(1, move_x_y_z.alterations[0].second);
@@ -117,7 +119,7 @@ TEST_F(TestMove, operator_plus) {
     EXPECT_EQ(true, Move_T::has_duplicate_variable(move_x_y_z_z));
     EXPECT_EQ(4, static_cast<int>(move_x_y_z_z.alterations.size()));
     EXPECT_EQ(3, static_cast<int>(move_x_y_z_z.related_constraint_ptrs.size()));
-    EXPECT_EQ(cppmh::model::MoveSense::Chain, move_x_y_z_z.sense);
+    EXPECT_EQ(printemps::model::MoveSense::Chain, move_x_y_z_z.sense);
 
     EXPECT_EQ(variable_ptrs[0], move_x_y_z_z.alterations[0].first);
     EXPECT_EQ(1, move_x_y_z_z.alterations[0].second);

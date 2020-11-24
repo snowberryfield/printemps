@@ -4,7 +4,7 @@
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
 #include <gtest/gtest.h>
-#include <cppmh.h>
+#include <printemps.h>
 
 namespace {
 /*****************************************************************************/
@@ -20,29 +20,29 @@ class TestStringUtility : public ::testing::Test {
 
 /*****************************************************************************/
 TEST_F(TestStringUtility, trim) {
-    EXPECT_EQ("hoge hoge", cppmh::utility::trim(" hoge hoge "));
+    EXPECT_EQ("hoge hoge", printemps::utility::trim(" hoge hoge "));
 }
 
 /*****************************************************************************/
 TEST_F(TestStringUtility, delete_space) {
-    EXPECT_EQ("hogehoge", cppmh::utility::delete_space(" hoge hoge "));
+    EXPECT_EQ("hogehoge", printemps::utility::delete_space(" hoge hoge "));
 }
 
 /*****************************************************************************/
 TEST_F(TestStringUtility, has_space) {
-    EXPECT_EQ(true, cppmh::utility::has_space(" hoge hoge "));
-    EXPECT_EQ(true, cppmh::utility::has_space("hoge hoge "));
-    EXPECT_EQ(true, cppmh::utility::has_space(" hoge hoge"));
-    EXPECT_EQ(true, cppmh::utility::has_space("hoge hoge"));
-    EXPECT_EQ(false, cppmh::utility::has_space("hogehoge"));
+    EXPECT_EQ(true, printemps::utility::has_space(" hoge hoge "));
+    EXPECT_EQ(true, printemps::utility::has_space("hoge hoge "));
+    EXPECT_EQ(true, printemps::utility::has_space(" hoge hoge"));
+    EXPECT_EQ(true, printemps::utility::has_space("hoge hoge"));
+    EXPECT_EQ(false, printemps::utility::has_space("hogehoge"));
 }
 
 /*****************************************************************************/
 TEST_F(TestStringUtility, to_string) {
-    EXPECT_EQ(" 100", cppmh::utility::to_string(100, "%4d"));
-    EXPECT_EQ("0100", cppmh::utility::to_string(100, "%04d"));
-    EXPECT_EQ("100.00000", cppmh::utility::to_string(100.0, "%.5f"));
-    EXPECT_EQ("1.000e+02", cppmh::utility::to_string(100.0, "%.3e"));
+    EXPECT_EQ(" 100", printemps::utility::to_string(100, "%4d"));
+    EXPECT_EQ("0100", printemps::utility::to_string(100, "%04d"));
+    EXPECT_EQ("100.00000", printemps::utility::to_string(100.0, "%.5f"));
+    EXPECT_EQ("1.000e+02", printemps::utility::to_string(100.0, "%.3e"));
 }
 
 /*****************************************************************************/
@@ -52,38 +52,41 @@ TEST_F(TestStringUtility, format_error_location) {
 
 /*****************************************************************************/
 TEST_F(TestStringUtility, delete_crlf) {
-    EXPECT_EQ("hogehoge", cppmh::utility::delete_crlf("hogehoge"));
-    EXPECT_EQ("hogehoge", cppmh::utility::delete_crlf("hogehoge\r"));
-    EXPECT_EQ("hogehoge", cppmh::utility::delete_crlf("hogehoge\n"));
-    EXPECT_EQ("hogehoge", cppmh::utility::delete_crlf("hogehoge\r\n"));
-    EXPECT_EQ("hogehoge", cppmh::utility::delete_crlf("hogehoge\n\r"));
-    EXPECT_EQ("hogehoge", cppmh::utility::delete_crlf("\r\nhogehoge"));
-    EXPECT_EQ("hogehoge", cppmh::utility::delete_crlf("hogehoge\n\r\r\n"));
+    EXPECT_EQ("hogehoge", printemps::utility::delete_crlf("hogehoge"));
+    EXPECT_EQ("hogehoge", printemps::utility::delete_crlf("hogehoge\r"));
+    EXPECT_EQ("hogehoge", printemps::utility::delete_crlf("hogehoge\n"));
+    EXPECT_EQ("hogehoge", printemps::utility::delete_crlf("hogehoge\r\n"));
+    EXPECT_EQ("hogehoge", printemps::utility::delete_crlf("hogehoge\n\r"));
+    EXPECT_EQ("hogehoge", printemps::utility::delete_crlf("\r\nhogehoge"));
+    EXPECT_EQ("hogehoge", printemps::utility::delete_crlf("hogehoge\n\r\r\n"));
 }
 
 /*****************************************************************************/
 TEST_F(TestStringUtility, remove_extension) {
-    EXPECT_EQ("hogehoge", cppmh::utility::remove_extension("hogehoge"));
-    EXPECT_EQ("hogehoge", cppmh::utility::remove_extension("hogehoge.txt"));
+    EXPECT_EQ("hogehoge", printemps::utility::remove_extension("hogehoge"));
+    EXPECT_EQ("hogehoge", printemps::utility::remove_extension("hogehoge.txt"));
     EXPECT_EQ("hogehoge.txt",
-              cppmh::utility::remove_extension("hogehoge.txt.txt"));
+              printemps::utility::remove_extension("hogehoge.txt.txt"));
 }
 
 /*****************************************************************************/
 TEST_F(TestStringUtility, remove_path) {
-    EXPECT_EQ("hogehoge", cppmh::utility::remove_path("hogehoge"));
-    EXPECT_EQ("hogehoge", cppmh::utility::remove_path("path/to/hogehoge"));
-    EXPECT_EQ("hogehoge", cppmh::utility::remove_path("path\\to\\hogehoge"));
+    EXPECT_EQ("hogehoge", printemps::utility::remove_path("hogehoge"));
+    EXPECT_EQ("hogehoge", printemps::utility::remove_path("path/to/hogehoge"));
+    EXPECT_EQ("hogehoge",
+              printemps::utility::remove_path("path\\to\\hogehoge"));
 }
 
 /*****************************************************************************/
 TEST_F(TestStringUtility, base_name) {
-    EXPECT_EQ("hogehoge", cppmh::utility::base_name("hogehoge"));
-    EXPECT_EQ("hogehoge", cppmh::utility::base_name("hogehoge.txt"));
-    EXPECT_EQ("hogehoge", cppmh::utility::base_name("path/to/hogehoge"));
-    EXPECT_EQ("hogehoge", cppmh::utility::base_name("path/to/hogehoge.txt"));
-    EXPECT_EQ("hogehoge", cppmh::utility::base_name("path\\to\\hogehoge"));
-    EXPECT_EQ("hogehoge", cppmh::utility::base_name("path\\to\\hogehoge.txt"));
+    EXPECT_EQ("hogehoge", printemps::utility::base_name("hogehoge"));
+    EXPECT_EQ("hogehoge", printemps::utility::base_name("hogehoge.txt"));
+    EXPECT_EQ("hogehoge", printemps::utility::base_name("path/to/hogehoge"));
+    EXPECT_EQ("hogehoge",
+              printemps::utility::base_name("path/to/hogehoge.txt"));
+    EXPECT_EQ("hogehoge", printemps::utility::base_name("path\\to\\hogehoge"));
+    EXPECT_EQ("hogehoge",
+              printemps::utility::base_name("path\\to\\hogehoge.txt"));
 }
 
 }  // namespace

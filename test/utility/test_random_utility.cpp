@@ -6,7 +6,7 @@
 #include <gtest/gtest.h>
 #include <vector>
 
-#include <cppmh.h>
+#include <printemps.h>
 
 namespace {
 /*****************************************************************************/
@@ -22,8 +22,8 @@ class TestRandomUtility : public ::testing::Test {
 
 /*****************************************************************************/
 TEST_F(TestRandomUtility, generate_random) {
-    cppmh::utility::IntegerUniformRandom random_integer_generator;
-    cppmh::utility::IntegerUniformRandom random_positive_integer_generator;
+    printemps::utility::IntegerUniformRandom random_integer_generator;
+    printemps::utility::IntegerUniformRandom random_positive_integer_generator;
 
     random_integer_generator.setup(-100, 100, 0);
     random_positive_integer_generator.setup(1, 100, 0);
@@ -37,17 +37,17 @@ TEST_F(TestRandomUtility, generate_random) {
             random_positive_integer_generator.generate_random());
     }
 
-    EXPECT_EQ(-100, cppmh::utility::min(random_integers));
-    EXPECT_EQ(100, cppmh::utility::max(random_integers));
+    EXPECT_EQ(-100, printemps::utility::min(random_integers));
+    EXPECT_EQ(100, printemps::utility::max(random_integers));
 
-    EXPECT_EQ(1, cppmh::utility::min(random_positive_integers));
-    EXPECT_EQ(100, cppmh::utility::max(random_positive_integers));
+    EXPECT_EQ(1, printemps::utility::min(random_positive_integers));
+    EXPECT_EQ(100, printemps::utility::max(random_positive_integers));
 }
 
 /*****************************************************************************/
 TEST_F(TestRandomUtility, seed) {
-    cppmh::utility::IntegerUniformRandom random_integer_generator_1;
-    cppmh::utility::IntegerUniformRandom random_integer_generator_2;
+    printemps::utility::IntegerUniformRandom random_integer_generator_1;
+    printemps::utility::IntegerUniformRandom random_integer_generator_2;
 
     random_integer_generator_1.setup(-100, 100, 0);
     random_integer_generator_2.setup(-100, 100, 0);

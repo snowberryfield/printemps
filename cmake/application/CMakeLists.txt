@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(cppmh)
+project(printemps)
 
 find_package(OpenMP REQUIRED)
 if(OpenMP_FOUND)
@@ -44,7 +44,7 @@ add_executable(
 
 target_include_directories(
     mps_solver.exe
-    PRIVATE ${TOP_DIR}/cppmh/
+    PRIVATE ${TOP_DIR}/printemps/
     PRIVATE ${TOP_DIR}/external/include/
 )
 
@@ -55,7 +55,7 @@ add_executable(
 
 target_include_directories(
     qap_solver.exe
-    PRIVATE ${TOP_DIR}/cppmh/
+    PRIVATE ${TOP_DIR}/printemps/
     PRIVATE ${TOP_DIR}/external/include/
 )
 

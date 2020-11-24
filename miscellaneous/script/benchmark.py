@@ -101,9 +101,9 @@ def write_csv(results):
 
 def main():
     parser = argparse.ArgumentParser(
-        description='A script for benchmarking of cpp_metaheuristics')
+        description='A script for benchmarking of printemps')
     parser.add_argument('executable',
-                        help='specify the executable of cpp_metaheuristics.',
+                        help='specify the executable of printemps.',
                         type=str)
     parser.add_argument('mps_list',
                         help='specify the mps list file name.',

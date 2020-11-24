@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(cppmh)
+project(printemps)
 
 find_package(OpenMP REQUIRED)
 if(OpenMP_FOUND)
@@ -44,7 +44,7 @@ add_executable(
 
 target_include_directories(
     simple_1.exe
-    PRIVATE ${TOP_DIR}/cppmh/
+    PRIVATE ${TOP_DIR}/printemps/
 )
 
 #simple_2
@@ -54,7 +54,7 @@ add_executable(
 
 target_include_directories(
     simple_2.exe
-    PRIVATE ${TOP_DIR}/cppmh/
+    PRIVATE ${TOP_DIR}/printemps/
 )
 
 #knapsack
@@ -64,7 +64,7 @@ add_executable(
 
 target_include_directories(
     knapsack.exe 
-    PRIVATE ${TOP_DIR}/cppmh/
+    PRIVATE ${TOP_DIR}/printemps/
 )
 
 #bin_packing
@@ -74,7 +74,7 @@ add_executable(
 
 target_include_directories(
     bin_packing.exe
-    PRIVATE ${TOP_DIR}/cppmh/
+    PRIVATE ${TOP_DIR}/printemps/
 )
 
 #quadratic_assignment
@@ -84,7 +84,7 @@ add_executable(
 
 target_include_directories(
     quadratic_assignment.exe
-    PRIVATE ${TOP_DIR}/cppmh/
+    PRIVATE ${TOP_DIR}/printemps/
 )
 
 #sudoku
@@ -94,7 +94,7 @@ add_executable(
 
 target_include_directories(
     sudoku.exe
-    PRIVATE ${TOP_DIR}/cppmh/
+    PRIVATE ${TOP_DIR}/printemps/
 )
 
 ###############################################################################

@@ -7,8 +7,8 @@
 #include <string>
 #include <iostream>
 
-#include "../cppmh/utility/qap_utility.h"
-#include "../cppmh/utility/option_utility.h"
+#include "../printemps/utility/qap_utility.h"
+#include "../printemps/utility/option_utility.h"
 
 int main([[maybe_unused]] int argc, char *argv[]) {
     /**
@@ -45,39 +45,39 @@ int main([[maybe_unused]] int argc, char *argv[]) {
     /**
      * Read the specified QAPLIB file and convert to the model.
      */
-    cppmh::utility::QAPLIBReader qaplib_reader;
+    printemps::utility::QAPLIBReader qaplib_reader;
     auto &model = qaplib_reader.create_model_from_qaplib(qap_file_name);
-    model.set_name(cppmh::utility::base_name(qap_file_name));
+    model.set_name(printemps::utility::base_name(qap_file_name));
 
     /**
      * If the option file is given, the option values specified in the file will
      * be used for the calculation. Otherwise, the default values will be used.
      */
-    cppmh::solver::Option option;
+    printemps::solver::Option option;
     if (!option_file_name.empty()) {
-        option = cppmh::utility::read_option(option_file_name);
+        option = printemps::utility::read_option(option_file_name);
     }
     option.is_enabled_binary_move       = false;
     option.is_enabled_integer_move      = false;
     option.is_enabled_user_defined_move = true;
     option.is_enabled_chain_move        = false;
-    option.improvability_screening_mode = cppmh::solver::Off;
+    option.improvability_screening_mode = printemps::solver::Off;
 
     /**
      * Run the solver.
      */
-    auto result = cppmh::solver::solve(&model, option);
+    auto result = printemps::solver::solve(&model, option);
 
     /**
      * Print the result summary.
      */
-    cppmh::utility::print_info(
+    printemps::utility::print_info(
         "status: " + std::to_string(result.solution.is_feasible()),
-        option.verbose != cppmh::solver::Verbose::None);
+        option.verbose != printemps::solver::Verbose::None);
 
-    cppmh::utility::print_info(
+    printemps::utility::print_info(
         "objective: " + std::to_string(result.solution.objective()),
-        option.verbose != cppmh::solver::Verbose::None);
+        option.verbose != printemps::solver::Verbose::None);
 
     auto summary = model.export_summary();
     result.solution.write_json_by_name("incumbent.json", summary);
