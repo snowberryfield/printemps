@@ -3,7 +3,7 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#include <cppmh.h>
+#include <printemps.h>
 
 int main(void) {
     /*************************************************************************/
@@ -42,7 +42,7 @@ int main(void) {
     /*************************************************************************/
     /// Model object definition
     /*************************************************************************/
-    cppmh::model::IPModel model;
+    printemps::model::IPModel model;
 
     /*************************************************************************/
     /// Decision variable definitions
@@ -58,7 +58,7 @@ int main(void) {
         = model.create_expressions("total_volume", number_of_bins);
 
     for (auto m = 0; m < number_of_bins; m++) {
-        total_volume(m) = x.dot({cppmh::model::All, m}, item_volumes);
+        total_volume(m) = x.dot({printemps::model::All, m}, item_volumes);
     }
 
     auto& number_of_used_bins =
@@ -72,7 +72,7 @@ int main(void) {
     auto& constraint_selection =
         model.create_constraints("selection", number_of_items);
     for (auto n = 0; n < number_of_items; n++) {
-        constraint_selection(n) = x.selection({n, cppmh::model::All});
+        constraint_selection(n) = x.selection({n, printemps::model::All});
     }
 
     /// sum_{n=1}^{N} v_{n} x_{n, m} <= C (m=1,...,M)
@@ -131,12 +131,12 @@ int main(void) {
     /*************************************************************************/
     /// Run solver
     /*************************************************************************/
-    cppmh::solver::Option option;
-    option.selection_mode        = cppmh::model::SelectionMode::Defined;
-    option.tabu_search.tabu_mode = cppmh::solver::tabu_search::Any;
-    option.verbose               = cppmh::solver::Full;
+    printemps::solver::Option option;
+    option.selection_mode        = printemps::model::SelectionMode::Defined;
+    option.tabu_search.tabu_mode = printemps::solver::tabu_search::Any;
+    option.verbose               = printemps::solver::Full;
 
-    auto result = cppmh::solver::solve(&model, option);
+    auto result = printemps::solver::solve(&model, option);
 
     /*************************************************************************/
     /// Print result

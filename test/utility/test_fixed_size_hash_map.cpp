@@ -6,14 +6,14 @@
 #include <gtest/gtest.h>
 #include <random>
 
-#include <cppmh.h>
+#include <printemps.h>
 
 namespace {
 /*****************************************************************************/
 class TestFixedSizeHashMap : public ::testing::Test {
    protected:
-    cppmh::utility::IntegerUniformRandom m_random_integer;
-    cppmh::utility::IntegerUniformRandom m_random_positive_integer;
+    printemps::utility::IntegerUniformRandom m_random_integer;
+    printemps::utility::IntegerUniformRandom m_random_positive_integer;
 
     virtual void SetUp(void) {
         m_random_integer.setup(-1000, 1000, 0);
@@ -33,13 +33,13 @@ class TestFixedSizeHashMap : public ::testing::Test {
 
 /*****************************************************************************/
 TEST_F(TestFixedSizeHashMap, initialize) {
-    cppmh::utility::FixedSizeHashMap<cppmh::model::Variable<int, double>*,
-                                     double>
+    printemps::utility::FixedSizeHashMap<
+        printemps::model::Variable<int, double>*, double>
         fixed_size_hash_map;
 
     /// static const variable seems not to be allowed in EXPECT_EQ().
     std::size_t default_bucket_size =
-        cppmh::utility::FixedSizeHashMapConstant::DEFAULT_BUCKET_SIZE;
+        printemps::utility::FixedSizeHashMapConstant::DEFAULT_BUCKET_SIZE;
 
     EXPECT_EQ(0, static_cast<int>(fixed_size_hash_map.shift_size()));
     EXPECT_EQ(default_bucket_size, fixed_size_hash_map.bucket_size());
@@ -47,16 +47,16 @@ TEST_F(TestFixedSizeHashMap, initialize) {
 
 /*****************************************************************************/
 TEST_F(TestFixedSizeHashMap, setup) {
-    cppmh::utility::FixedSizeHashMap<cppmh::model::Variable<int, double>*,
-                                     double>
+    printemps::utility::FixedSizeHashMap<
+        printemps::model::Variable<int, double>*, double>
         fixed_size_hash_map;
 
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& x = model.create_variables("x", {10, 20});
     auto& y = model.create_variables("y", {20, 30, 40});
 
-    std::unordered_map<cppmh::model::Variable<int, double>*, double>
+    std::unordered_map<printemps::model::Variable<int, double>*, double>
         unordered_map;
 
     for (auto i = 0; i < 10; i++) {
@@ -73,10 +73,11 @@ TEST_F(TestFixedSizeHashMap, setup) {
         }
     }
     fixed_size_hash_map.setup(unordered_map,
-                              sizeof(cppmh::model::Variable<int, double>));
+                              sizeof(printemps::model::Variable<int, double>));
 
-    EXPECT_EQ((unsigned int)log2(sizeof(cppmh::model::Variable<int, double>)),
-              fixed_size_hash_map.shift_size());
+    EXPECT_EQ(
+        (unsigned int)log2(sizeof(printemps::model::Variable<int, double>)),
+        fixed_size_hash_map.shift_size());
 
     /// 10 * 20 + 20 * 30 * 40 = 200 + 24000
     /// 262144 < 24000 * 10(LOAD_MARGIN) < 262144

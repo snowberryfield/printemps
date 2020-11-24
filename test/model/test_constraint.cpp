@@ -6,14 +6,14 @@
 #include <gtest/gtest.h>
 #include <random>
 
-#include <cppmh.h>
+#include <printemps.h>
 
 namespace {
 /*****************************************************************************/
 class TestConstraint : public ::testing::Test {
    protected:
-    cppmh::utility::IntegerUniformRandom m_random_integer;
-    cppmh::utility::IntegerUniformRandom m_random_positive_integer;
+    printemps::utility::IntegerUniformRandom m_random_integer;
+    printemps::utility::IntegerUniformRandom m_random_positive_integer;
 
     virtual void SetUp(void) {
         m_random_integer.setup(-1000, 1000, 0);
@@ -33,7 +33,8 @@ class TestConstraint : public ::testing::Test {
 
 /*****************************************************************************/
 TEST_F(TestConstraint, initialize) {
-    auto constraint = cppmh::model::Constraint<int, double>::create_instance();
+    auto constraint =
+        printemps::model::Constraint<int, double>::create_instance();
 
     /// Check the initial values of the base class members.
     EXPECT_EQ(0, constraint.id());
@@ -48,7 +49,7 @@ TEST_F(TestConstraint, initialize) {
     EXPECT_EQ(0, constraint.evaluate_violation({}));
     EXPECT_EQ(true, constraint.expression().sensitivities().empty());
     EXPECT_EQ(0, constraint.expression().constant_value());
-    EXPECT_EQ(cppmh::model::ConstraintSense::Lower, constraint.sense());
+    EXPECT_EQ(printemps::model::ConstraintSense::Lower, constraint.sense());
     EXPECT_EQ(0, constraint.constraint_value());
     EXPECT_EQ(0, constraint.violation_value());
     EXPECT_EQ(true, constraint.is_linear());
@@ -72,26 +73,27 @@ TEST_F(TestConstraint, initialize) {
 
 /*****************************************************************************/
 TEST_F(TestConstraint, constructor_arg_function) {
-    auto expression = cppmh::model::Expression<int, double>::create_instance();
-    auto variable   = cppmh::model::Variable<int, double>::create_instance();
+    auto expression =
+        printemps::model::Expression<int, double>::create_instance();
+    auto variable = printemps::model::Variable<int, double>::create_instance();
 
     auto sensitivity = random_integer();
     auto constant    = random_integer();
     auto target      = random_integer();
 
     expression = sensitivity * variable + constant;
-    std::function<double(const cppmh::model::Move<int, double>&)> f =
-        [&expression](const cppmh::model::Move<int, double>& a_MOVE) {
+    std::function<double(const printemps::model::Move<int, double>&)> f =
+        [&expression](const printemps::model::Move<int, double>& a_MOVE) {
             return expression.evaluate(a_MOVE);
         };
 
     /// Lower
     {
-        cppmh::model::Constraint<int, double> constraint(f <= target);
+        printemps::model::Constraint<int, double> constraint(f <= target);
 
         EXPECT_EQ(true, constraint.expression().sensitivities().empty());
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Lower, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Lower, constraint.sense());
         EXPECT_EQ(0, constraint.constraint_value());
         EXPECT_EQ(0, constraint.violation_value());
         EXPECT_EQ(false, constraint.is_linear());
@@ -100,11 +102,11 @@ TEST_F(TestConstraint, constructor_arg_function) {
 
     /// Equal
     {
-        cppmh::model::Constraint<int, double> constraint(f == target);
+        printemps::model::Constraint<int, double> constraint(f == target);
 
         EXPECT_EQ(true, constraint.expression().sensitivities().empty());
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Equal, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Equal, constraint.sense());
         EXPECT_EQ(0, constraint.constraint_value());
         EXPECT_EQ(0, constraint.violation_value());
         EXPECT_EQ(false, constraint.is_linear());
@@ -113,11 +115,11 @@ TEST_F(TestConstraint, constructor_arg_function) {
 
     /// Upper
     {
-        cppmh::model::Constraint<int, double> constraint(f >= target);
+        printemps::model::Constraint<int, double> constraint(f >= target);
 
         EXPECT_EQ(true, constraint.expression().sensitivities().empty());
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Upper, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Upper, constraint.sense());
         EXPECT_EQ(0, constraint.constraint_value());
         EXPECT_EQ(0, constraint.violation_value());
         EXPECT_EQ(false, constraint.is_linear());
@@ -127,8 +129,9 @@ TEST_F(TestConstraint, constructor_arg_function) {
 
 /*****************************************************************************/
 TEST_F(TestConstraint, constructor_arg_expression) {
-    auto expression = cppmh::model::Expression<int, double>::create_instance();
-    auto variable   = cppmh::model::Variable<int, double>::create_instance();
+    auto expression =
+        printemps::model::Expression<int, double>::create_instance();
+    auto variable = printemps::model::Variable<int, double>::create_instance();
 
     auto sensitivity = random_integer();
     auto constant    = random_integer();
@@ -138,13 +141,14 @@ TEST_F(TestConstraint, constructor_arg_expression) {
 
     /// Lower
     {
-        cppmh::model::Constraint<int, double> constraint(expression <= target);
+        printemps::model::Constraint<int, double> constraint(expression <=
+                                                             target);
 
         EXPECT_EQ(sensitivity,
                   constraint.expression().sensitivities().at(&variable));
 
         EXPECT_EQ(constant - target, constraint.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Lower, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Lower, constraint.sense());
         EXPECT_EQ(0, constraint.constraint_value());
         EXPECT_EQ(0, constraint.violation_value());
         EXPECT_EQ(true, constraint.is_linear());
@@ -153,12 +157,13 @@ TEST_F(TestConstraint, constructor_arg_expression) {
 
     /// Equal
     {
-        cppmh::model::Constraint<int, double> constraint(expression == target);
+        printemps::model::Constraint<int, double> constraint(expression ==
+                                                             target);
 
         EXPECT_EQ(sensitivity,
                   constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(constant - target, constraint.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Equal, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Equal, constraint.sense());
         EXPECT_EQ(0, constraint.constraint_value());
         EXPECT_EQ(0, constraint.violation_value());
         EXPECT_EQ(true, constraint.is_linear());
@@ -167,12 +172,13 @@ TEST_F(TestConstraint, constructor_arg_expression) {
 
     /// Upper
     {
-        cppmh::model::Constraint<int, double> constraint(expression >= target);
+        printemps::model::Constraint<int, double> constraint(expression >=
+                                                             target);
 
         EXPECT_EQ(sensitivity,
                   constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(constant - target, constraint.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Upper, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Upper, constraint.sense());
         EXPECT_EQ(0, constraint.constraint_value());
         EXPECT_EQ(0, constraint.violation_value());
         EXPECT_EQ(true, constraint.is_linear());
@@ -182,8 +188,9 @@ TEST_F(TestConstraint, constructor_arg_expression) {
 
 /*****************************************************************************/
 TEST_F(TestConstraint, setup_arg_function) {
-    auto expression = cppmh::model::Expression<int, double>::create_instance();
-    auto variable   = cppmh::model::Variable<int, double>::create_instance();
+    auto expression =
+        printemps::model::Expression<int, double>::create_instance();
+    auto variable = printemps::model::Variable<int, double>::create_instance();
 
     auto sensitivity = random_integer();
     auto constant    = random_integer();
@@ -191,21 +198,22 @@ TEST_F(TestConstraint, setup_arg_function) {
 
     expression = sensitivity * variable + constant;
 
-    std::function<double(const cppmh::model::Move<int, double>&)> f =
-        [&expression, target](const cppmh::model::Move<int, double>& a_MOVE) {
+    std::function<double(const printemps::model::Move<int, double>&)> f =
+        [&expression,
+         target](const printemps::model::Move<int, double>& a_MOVE) {
             return expression.evaluate(a_MOVE) - target;
         };
 
     /// Lower
     {
         auto constraint =
-            cppmh::model::Constraint<int, double>::create_instance();
+            printemps::model::Constraint<int, double>::create_instance();
 
-        constraint.setup(f, cppmh::model::ConstraintSense::Lower);
+        constraint.setup(f, printemps::model::ConstraintSense::Lower);
 
         EXPECT_EQ(true, constraint.expression().sensitivities().empty());
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Lower, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Lower, constraint.sense());
         EXPECT_EQ(0, constraint.constraint_value());
         EXPECT_EQ(0, constraint.violation_value());
         EXPECT_EQ(false, constraint.is_linear());
@@ -215,12 +223,12 @@ TEST_F(TestConstraint, setup_arg_function) {
     /// Equal
     {
         auto constraint =
-            cppmh::model::Constraint<int, double>::create_instance();
-        constraint.setup(f, cppmh::model::ConstraintSense::Equal);
+            printemps::model::Constraint<int, double>::create_instance();
+        constraint.setup(f, printemps::model::ConstraintSense::Equal);
 
         EXPECT_EQ(true, constraint.expression().sensitivities().empty());
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Equal, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Equal, constraint.sense());
         EXPECT_EQ(0, constraint.constraint_value());
         EXPECT_EQ(0, constraint.violation_value());
         EXPECT_EQ(false, constraint.is_linear());
@@ -230,13 +238,13 @@ TEST_F(TestConstraint, setup_arg_function) {
     /// Upper
     {
         auto constraint =
-            cppmh::model::Constraint<int, double>::create_instance();
+            printemps::model::Constraint<int, double>::create_instance();
         ;
-        constraint.setup(f, cppmh::model::ConstraintSense::Upper);
+        constraint.setup(f, printemps::model::ConstraintSense::Upper);
 
         EXPECT_EQ(true, constraint.expression().sensitivities().empty());
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Upper, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Upper, constraint.sense());
         EXPECT_EQ(0, constraint.constraint_value());
         EXPECT_EQ(0, constraint.violation_value());
         EXPECT_EQ(false, constraint.is_linear());
@@ -246,8 +254,9 @@ TEST_F(TestConstraint, setup_arg_function) {
 
 /*****************************************************************************/
 TEST_F(TestConstraint, setup_arg_expression) {
-    auto expression = cppmh::model::Expression<int, double>::create_instance();
-    auto variable   = cppmh::model::Variable<int, double>::create_instance();
+    auto expression =
+        printemps::model::Expression<int, double>::create_instance();
+    auto variable = printemps::model::Variable<int, double>::create_instance();
 
     auto sensitivity = random_integer();
     auto constant    = random_integer();
@@ -258,14 +267,14 @@ TEST_F(TestConstraint, setup_arg_expression) {
     /// Lower
     {
         auto constraint =
-            cppmh::model::Constraint<int, double>::create_instance();
+            printemps::model::Constraint<int, double>::create_instance();
         constraint.setup(expression - target,
-                         cppmh::model::ConstraintSense::Lower);
+                         printemps::model::ConstraintSense::Lower);
 
         EXPECT_EQ(sensitivity,
                   constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(constant - target, constraint.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Lower, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Lower, constraint.sense());
         EXPECT_EQ(0, constraint.constraint_value());
         EXPECT_EQ(0, constraint.violation_value());
         EXPECT_EQ(true, constraint.is_linear());
@@ -275,15 +284,15 @@ TEST_F(TestConstraint, setup_arg_expression) {
     /// Equal
     {
         auto constraint =
-            cppmh::model::Constraint<int, double>::create_instance();
+            printemps::model::Constraint<int, double>::create_instance();
         ;
         constraint.setup(expression - target,
-                         cppmh::model::ConstraintSense::Equal);
+                         printemps::model::ConstraintSense::Equal);
 
         EXPECT_EQ(sensitivity,
                   constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(constant - target, constraint.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Equal, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Equal, constraint.sense());
         EXPECT_EQ(0, constraint.constraint_value());
         EXPECT_EQ(0, constraint.violation_value());
         EXPECT_EQ(true, constraint.is_linear());
@@ -293,14 +302,14 @@ TEST_F(TestConstraint, setup_arg_expression) {
     /// Upper
     {
         auto constraint =
-            cppmh::model::Constraint<int, double>::create_instance();
+            printemps::model::Constraint<int, double>::create_instance();
         constraint.setup(expression - target,
-                         cppmh::model::ConstraintSense::Upper);
+                         printemps::model::ConstraintSense::Upper);
 
         EXPECT_EQ(sensitivity,
                   constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(constant - target, constraint.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Upper, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Upper, constraint.sense());
         EXPECT_EQ(0, constraint.constraint_value());
         EXPECT_EQ(0, constraint.violation_value());
         EXPECT_EQ(true, constraint.is_linear());
@@ -310,8 +319,8 @@ TEST_F(TestConstraint, setup_arg_expression) {
 
 /*****************************************************************************/
 TEST_F(TestConstraint, setup_constraint_type) {
-    cppmh::model::Model<int, double> model;
-    auto coefficients = cppmh::utility::sequence(10);
+    printemps::model::Model<int, double> model;
+    auto coefficients = printemps::utility::sequence(10);
 
     auto& x = model.create_variable("x", -10, 10);
     auto& y = model.create_variable("y", -10, 10);
@@ -322,8 +331,8 @@ TEST_F(TestConstraint, setup_constraint_type) {
     /// Singleton
     {
         auto constraint =
-            cppmh::model::Constraint<int, double>::create_instance();
-        constraint.setup(2 * x - 10, cppmh::model::ConstraintSense::Lower);
+            printemps::model::Constraint<int, double>::create_instance();
+        constraint.setup(2 * x - 10, printemps::model::ConstraintSense::Lower);
         constraint.setup_constraint_type();
         EXPECT_EQ(true, constraint.is_singleton());
     }
@@ -331,9 +340,9 @@ TEST_F(TestConstraint, setup_constraint_type) {
     /// Aggregation
     {
         auto constraint =
-            cppmh::model::Constraint<int, double>::create_instance();
+            printemps::model::Constraint<int, double>::create_instance();
         constraint.setup(2 * x + 3 * y - 10,
-                         cppmh::model::ConstraintSense::Equal);
+                         printemps::model::ConstraintSense::Equal);
         constraint.setup_constraint_type();
         EXPECT_EQ(true, constraint.is_aggregation());
     }
@@ -341,33 +350,33 @@ TEST_F(TestConstraint, setup_constraint_type) {
     /// Precedence
     {
         auto constraint =
-            cppmh::model::Constraint<int, double>::create_instance();
+            printemps::model::Constraint<int, double>::create_instance();
         constraint.setup(2 * x - 2 * y - 5,
-                         cppmh::model::ConstraintSense::Lower);
+                         printemps::model::ConstraintSense::Lower);
         constraint.setup_constraint_type();
         EXPECT_EQ(true, constraint.is_precedence());
     }
     {
         auto constraint =
-            cppmh::model::Constraint<int, double>::create_instance();
+            printemps::model::Constraint<int, double>::create_instance();
         constraint.setup(-2 * x + 2 * y - 5,
-                         cppmh::model::ConstraintSense::Lower);
+                         printemps::model::ConstraintSense::Lower);
         constraint.setup_constraint_type();
         EXPECT_EQ(true, constraint.is_precedence());
     }
     {
         auto constraint =
-            cppmh::model::Constraint<int, double>::create_instance();
+            printemps::model::Constraint<int, double>::create_instance();
         constraint.setup(2 * x - 2 * y - 5,
-                         cppmh::model::ConstraintSense::Upper);
+                         printemps::model::ConstraintSense::Upper);
         constraint.setup_constraint_type();
         EXPECT_EQ(true, constraint.is_precedence());
     }
     {
         auto constraint =
-            cppmh::model::Constraint<int, double>::create_instance();
+            printemps::model::Constraint<int, double>::create_instance();
         constraint.setup(-2 * x + 2 * y - 5,
-                         cppmh::model::ConstraintSense::Upper);
+                         printemps::model::ConstraintSense::Upper);
         constraint.setup_constraint_type();
         EXPECT_EQ(true, constraint.is_precedence());
     }
@@ -375,17 +384,17 @@ TEST_F(TestConstraint, setup_constraint_type) {
     /// Variable Bound
     {
         auto constraint =
-            cppmh::model::Constraint<int, double>::create_instance();
+            printemps::model::Constraint<int, double>::create_instance();
         constraint.setup(2 * z(0) + 3 * z(1) - 5,
-                         cppmh::model::ConstraintSense::Lower);
+                         printemps::model::ConstraintSense::Lower);
         constraint.setup_constraint_type();
         EXPECT_EQ(true, constraint.is_variable_bound());
     }
     {
         auto constraint =
-            cppmh::model::Constraint<int, double>::create_instance();
+            printemps::model::Constraint<int, double>::create_instance();
         constraint.setup(2 * z(0) + 3 * z(1) - 5,
-                         cppmh::model::ConstraintSense::Upper);
+                         printemps::model::ConstraintSense::Upper);
         constraint.setup_constraint_type();
         EXPECT_EQ(true, constraint.is_variable_bound());
     }
@@ -393,8 +402,8 @@ TEST_F(TestConstraint, setup_constraint_type) {
     /// Set Partitioning
     {
         auto constraint =
-            cppmh::model::Constraint<int, double>::create_instance();
-        constraint.setup(z.sum() - 1, cppmh::model::ConstraintSense::Equal);
+            printemps::model::Constraint<int, double>::create_instance();
+        constraint.setup(z.sum() - 1, printemps::model::ConstraintSense::Equal);
         constraint.setup_constraint_type();
         EXPECT_EQ(true, constraint.is_set_partitioning());
     }
@@ -402,8 +411,8 @@ TEST_F(TestConstraint, setup_constraint_type) {
     /// Set Packing
     {
         auto constraint =
-            cppmh::model::Constraint<int, double>::create_instance();
-        constraint.setup(z.sum() - 1, cppmh::model::ConstraintSense::Lower);
+            printemps::model::Constraint<int, double>::create_instance();
+        constraint.setup(z.sum() - 1, printemps::model::ConstraintSense::Lower);
         constraint.setup_constraint_type();
         EXPECT_EQ(true, constraint.is_set_packing());
     }
@@ -411,8 +420,8 @@ TEST_F(TestConstraint, setup_constraint_type) {
     /// Set Covering
     {
         auto constraint =
-            cppmh::model::Constraint<int, double>::create_instance();
-        constraint.setup(z.sum() - 1, cppmh::model::ConstraintSense::Upper);
+            printemps::model::Constraint<int, double>::create_instance();
+        constraint.setup(z.sum() - 1, printemps::model::ConstraintSense::Upper);
         constraint.setup_constraint_type();
         EXPECT_EQ(true, constraint.is_set_covering());
     }
@@ -420,8 +429,8 @@ TEST_F(TestConstraint, setup_constraint_type) {
     /// Cardinality
     {
         auto constraint =
-            cppmh::model::Constraint<int, double>::create_instance();
-        constraint.setup(z.sum() - 5, cppmh::model::ConstraintSense::Equal);
+            printemps::model::Constraint<int, double>::create_instance();
+        constraint.setup(z.sum() - 5, printemps::model::ConstraintSense::Equal);
         constraint.setup_constraint_type();
         EXPECT_EQ(true, constraint.is_cardinality());
     }
@@ -429,8 +438,8 @@ TEST_F(TestConstraint, setup_constraint_type) {
     /// Invariant Knapsack
     {
         auto constraint =
-            cppmh::model::Constraint<int, double>::create_instance();
-        constraint.setup(z.sum() - 5, cppmh::model::ConstraintSense::Lower);
+            printemps::model::Constraint<int, double>::create_instance();
+        constraint.setup(z.sum() - 5, printemps::model::ConstraintSense::Lower);
         constraint.setup_constraint_type();
         EXPECT_EQ(true, constraint.is_invariant_knapsack());
     }
@@ -438,9 +447,9 @@ TEST_F(TestConstraint, setup_constraint_type) {
     /// Equation Knapsack
     {
         auto constraint =
-            cppmh::model::Constraint<int, double>::create_instance();
+            printemps::model::Constraint<int, double>::create_instance();
         constraint.setup(z.dot(coefficients) - 30,
-                         cppmh::model::ConstraintSense::Equal);
+                         printemps::model::ConstraintSense::Equal);
         constraint.setup_constraint_type();
         EXPECT_EQ(true, constraint.is_equation_knapsack());
     }
@@ -448,18 +457,18 @@ TEST_F(TestConstraint, setup_constraint_type) {
     /// Bin Packing
     {
         auto constraint =
-            cppmh::model::Constraint<int, double>::create_instance();
+            printemps::model::Constraint<int, double>::create_instance();
         constraint.setup(z.dot(coefficients) + 5 * w - 5,
-                         cppmh::model::ConstraintSense::Lower);
+                         printemps::model::ConstraintSense::Lower);
         constraint.setup_constraint_type();
         EXPECT_EQ(true, constraint.is_bin_packing());
     }
 
     {
         auto constraint =
-            cppmh::model::Constraint<int, double>::create_instance();
+            printemps::model::Constraint<int, double>::create_instance();
         constraint.setup(z.dot(coefficients) - 5 * w + 5,
-                         cppmh::model::ConstraintSense::Upper);
+                         printemps::model::ConstraintSense::Upper);
         constraint.setup_constraint_type();
         EXPECT_EQ(true, constraint.is_bin_packing());
     }
@@ -467,18 +476,18 @@ TEST_F(TestConstraint, setup_constraint_type) {
     /// Knapsack
     {
         auto constraint =
-            cppmh::model::Constraint<int, double>::create_instance();
+            printemps::model::Constraint<int, double>::create_instance();
         constraint.setup(z.dot(coefficients) - 50,
-                         cppmh::model::ConstraintSense::Lower);
+                         printemps::model::ConstraintSense::Lower);
         constraint.setup_constraint_type();
         EXPECT_EQ(true, constraint.is_knapsack());
     }
 
     {
         auto constraint =
-            cppmh::model::Constraint<int, double>::create_instance();
+            printemps::model::Constraint<int, double>::create_instance();
         constraint.setup(z.dot(coefficients) + 50,
-                         cppmh::model::ConstraintSense::Upper);
+                         printemps::model::ConstraintSense::Upper);
         constraint.setup_constraint_type();
         EXPECT_EQ(true, constraint.is_knapsack());
     }
@@ -486,18 +495,18 @@ TEST_F(TestConstraint, setup_constraint_type) {
     /// Integer Knapsack
     {
         auto constraint =
-            cppmh::model::Constraint<int, double>::create_instance();
+            printemps::model::Constraint<int, double>::create_instance();
         constraint.setup(r.dot(coefficients) - 50,
-                         cppmh::model::ConstraintSense::Lower);
+                         printemps::model::ConstraintSense::Lower);
         constraint.setup_constraint_type();
         EXPECT_EQ(true, constraint.is_integer_knapsack());
     }
 
     {
         auto constraint =
-            cppmh::model::Constraint<int, double>::create_instance();
+            printemps::model::Constraint<int, double>::create_instance();
         constraint.setup(r.dot(coefficients) + 50,
-                         cppmh::model::ConstraintSense::Upper);
+                         printemps::model::ConstraintSense::Upper);
         constraint.setup_constraint_type();
         EXPECT_EQ(true, constraint.is_integer_knapsack());
     }
@@ -505,9 +514,9 @@ TEST_F(TestConstraint, setup_constraint_type) {
     /// General Linear
     {
         auto constraint =
-            cppmh::model::Constraint<int, double>::create_instance();
+            printemps::model::Constraint<int, double>::create_instance();
         constraint.setup(x + r.sum() - 50,
-                         cppmh::model::ConstraintSense::Equal);
+                         printemps::model::ConstraintSense::Equal);
         constraint.setup_constraint_type();
         EXPECT_EQ(true, constraint.is_general_linear());
     }
@@ -515,8 +524,9 @@ TEST_F(TestConstraint, setup_constraint_type) {
 
 /*****************************************************************************/
 TEST_F(TestConstraint, evaluate_function_arg_void) {
-    auto expression = cppmh::model::Expression<int, double>::create_instance();
-    auto variable   = cppmh::model::Variable<int, double>::create_instance();
+    auto expression =
+        printemps::model::Expression<int, double>::create_instance();
+    auto variable = printemps::model::Variable<int, double>::create_instance();
 
     auto sensitivity = random_integer();
     auto constant    = random_integer();
@@ -524,14 +534,16 @@ TEST_F(TestConstraint, evaluate_function_arg_void) {
 
     expression = sensitivity * variable + constant;
 
-    std::function<double(const cppmh::model::Move<int, double>&)> f =
-        [&expression, target](const cppmh::model::Move<int, double>& a_MOVE) {
+    std::function<double(const printemps::model::Move<int, double>&)> f =
+        [&expression,
+         target](const printemps::model::Move<int, double>& a_MOVE) {
             return expression.evaluate(a_MOVE) - target;
         };
 
-    auto constraint = cppmh::model::Constraint<int, double>::create_instance();
+    auto constraint =
+        printemps::model::Constraint<int, double>::create_instance();
 
-    constraint.setup(f, cppmh::model::ConstraintSense::Lower);
+    constraint.setup(f, printemps::model::ConstraintSense::Lower);
 
     auto value = random_integer();
     variable   = value;
@@ -544,8 +556,9 @@ TEST_F(TestConstraint, evaluate_function_arg_void) {
 
 /*****************************************************************************/
 TEST_F(TestConstraint, evaluate_expression_arg_void) {
-    auto expression = cppmh::model::Expression<int, double>::create_instance();
-    auto variable   = cppmh::model::Variable<int, double>::create_instance();
+    auto expression =
+        printemps::model::Expression<int, double>::create_instance();
+    auto variable = printemps::model::Variable<int, double>::create_instance();
 
     auto sensitivity = random_integer();
     auto constant    = random_integer();
@@ -553,8 +566,10 @@ TEST_F(TestConstraint, evaluate_expression_arg_void) {
 
     expression = sensitivity * variable + constant;
 
-    auto constraint = cppmh::model::Constraint<int, double>::create_instance();
-    constraint.setup(expression - target, cppmh::model::ConstraintSense::Lower);
+    auto constraint =
+        printemps::model::Constraint<int, double>::create_instance();
+    constraint.setup(expression - target,
+                     printemps::model::ConstraintSense::Lower);
 
     auto value = random_integer();
     variable   = value;
@@ -567,8 +582,9 @@ TEST_F(TestConstraint, evaluate_expression_arg_void) {
 
 /*****************************************************************************/
 TEST_F(TestConstraint, evaluate_function_arg_move) {
-    auto expression = cppmh::model::Expression<int, double>::create_instance();
-    auto variable   = cppmh::model::Variable<int, double>::create_instance();
+    auto expression =
+        printemps::model::Expression<int, double>::create_instance();
+    auto variable = printemps::model::Variable<int, double>::create_instance();
 
     auto sensitivity = random_integer();
     auto constant    = random_integer();
@@ -577,13 +593,15 @@ TEST_F(TestConstraint, evaluate_function_arg_move) {
     expression = sensitivity * variable + constant;
     expression.setup_fixed_sensitivities();
 
-    std::function<double(const cppmh::model::Move<int, double>&)> f =
-        [&expression, target](const cppmh::model::Move<int, double>& a_MOVE) {
+    std::function<double(const printemps::model::Move<int, double>&)> f =
+        [&expression,
+         target](const printemps::model::Move<int, double>& a_MOVE) {
             return expression.evaluate(a_MOVE) - target;
         };
 
-    auto constraint = cppmh::model::Constraint<int, double>::create_instance();
-    constraint.setup(f, cppmh::model::ConstraintSense::Lower);
+    auto constraint =
+        printemps::model::Constraint<int, double>::create_instance();
+    constraint.setup(f, printemps::model::ConstraintSense::Lower);
 
     /// initial
     {
@@ -602,7 +620,7 @@ TEST_F(TestConstraint, evaluate_function_arg_move) {
     {
         auto value = random_integer();
 
-        cppmh::model::Move<int, double> move;
+        printemps::model::Move<int, double> move;
         move.alterations.emplace_back(&variable, value);
 
         auto expected_value = sensitivity * value + constant - target;
@@ -614,8 +632,9 @@ TEST_F(TestConstraint, evaluate_function_arg_move) {
 
 /*****************************************************************************/
 TEST_F(TestConstraint, evaluate_expression_arg_move) {
-    auto expression = cppmh::model::Expression<int, double>::create_instance();
-    auto variable   = cppmh::model::Variable<int, double>::create_instance();
+    auto expression =
+        printemps::model::Expression<int, double>::create_instance();
+    auto variable = printemps::model::Variable<int, double>::create_instance();
 
     auto sensitivity = random_integer();
     auto constant    = random_integer();
@@ -623,8 +642,10 @@ TEST_F(TestConstraint, evaluate_expression_arg_move) {
 
     expression = sensitivity * variable + constant;
 
-    auto constraint = cppmh::model::Constraint<int, double>::create_instance();
-    constraint.setup(expression - target, cppmh::model::ConstraintSense::Lower);
+    auto constraint =
+        printemps::model::Constraint<int, double>::create_instance();
+    constraint.setup(expression - target,
+                     printemps::model::ConstraintSense::Lower);
 
     /// initial
     {
@@ -642,7 +663,7 @@ TEST_F(TestConstraint, evaluate_expression_arg_move) {
     {
         auto value = random_integer();
 
-        cppmh::model::Move<int, double> move;
+        printemps::model::Move<int, double> move;
         move.alterations.emplace_back(&variable, value);
 
         auto expected_value = sensitivity * value + constant - target;
@@ -654,8 +675,9 @@ TEST_F(TestConstraint, evaluate_expression_arg_move) {
 
 /*****************************************************************************/
 TEST_F(TestConstraint, evaluate_violation_function_arg_void) {
-    auto expression = cppmh::model::Expression<int, double>::create_instance();
-    auto variable   = cppmh::model::Variable<int, double>::create_instance();
+    auto expression =
+        printemps::model::Expression<int, double>::create_instance();
+    auto variable = printemps::model::Variable<int, double>::create_instance();
 
     auto sensitivity = random_integer();
     auto constant    = random_integer();
@@ -663,16 +685,17 @@ TEST_F(TestConstraint, evaluate_violation_function_arg_void) {
 
     expression = sensitivity * variable + constant;
 
-    std::function<double(const cppmh::model::Move<int, double>&)> f =
-        [&expression, target](const cppmh::model::Move<int, double>& a_MOVE) {
+    std::function<double(const printemps::model::Move<int, double>&)> f =
+        [&expression,
+         target](const printemps::model::Move<int, double>& a_MOVE) {
             return expression.evaluate(a_MOVE) - target;
         };
 
     /// Lower
     {
         auto constraint =
-            cppmh::model::Constraint<int, double>::create_instance();
-        constraint.setup(f, cppmh::model::ConstraintSense::Lower);
+            printemps::model::Constraint<int, double>::create_instance();
+        constraint.setup(f, printemps::model::ConstraintSense::Lower);
 
         auto value = random_integer();
         variable   = value;
@@ -687,8 +710,8 @@ TEST_F(TestConstraint, evaluate_violation_function_arg_void) {
     /// Equal
     {
         auto constraint =
-            cppmh::model::Constraint<int, double>::create_instance();
-        constraint.setup(f, cppmh::model::ConstraintSense::Equal);
+            printemps::model::Constraint<int, double>::create_instance();
+        constraint.setup(f, printemps::model::ConstraintSense::Equal);
 
         auto value = random_integer();
         variable   = value;
@@ -702,8 +725,8 @@ TEST_F(TestConstraint, evaluate_violation_function_arg_void) {
     /// Upper
     {
         auto constraint =
-            cppmh::model::Constraint<int, double>::create_instance();
-        constraint.setup(f, cppmh::model::ConstraintSense::Upper);
+            printemps::model::Constraint<int, double>::create_instance();
+        constraint.setup(f, printemps::model::ConstraintSense::Upper);
 
         auto value = random_integer();
         variable   = value;
@@ -718,8 +741,9 @@ TEST_F(TestConstraint, evaluate_violation_function_arg_void) {
 
 /*****************************************************************************/
 TEST_F(TestConstraint, evaluate_violation_expression_arg_void) {
-    auto expression = cppmh::model::Expression<int, double>::create_instance();
-    auto variable   = cppmh::model::Variable<int, double>::create_instance();
+    auto expression =
+        printemps::model::Expression<int, double>::create_instance();
+    auto variable = printemps::model::Variable<int, double>::create_instance();
 
     auto sensitivity = random_integer();
     auto constant    = random_integer();
@@ -730,9 +754,9 @@ TEST_F(TestConstraint, evaluate_violation_expression_arg_void) {
     /// Lower
     {
         auto constraint =
-            cppmh::model::Constraint<int, double>::create_instance();
+            printemps::model::Constraint<int, double>::create_instance();
         constraint.setup(expression - target,
-                         cppmh::model::ConstraintSense::Lower);
+                         printemps::model::ConstraintSense::Lower);
 
         auto value = random_integer();
         variable   = value;
@@ -747,9 +771,9 @@ TEST_F(TestConstraint, evaluate_violation_expression_arg_void) {
     /// Equal
     {
         auto constraint =
-            cppmh::model::Constraint<int, double>::create_instance();
+            printemps::model::Constraint<int, double>::create_instance();
         constraint.setup(expression - target,
-                         cppmh::model::ConstraintSense::Equal);
+                         printemps::model::ConstraintSense::Equal);
 
         auto value = random_integer();
         variable   = value;
@@ -763,9 +787,9 @@ TEST_F(TestConstraint, evaluate_violation_expression_arg_void) {
     /// Upper
     {
         auto constraint =
-            cppmh::model::Constraint<int, double>::create_instance();
+            printemps::model::Constraint<int, double>::create_instance();
         constraint.setup(expression - target,
-                         cppmh::model::ConstraintSense::Upper);
+                         printemps::model::ConstraintSense::Upper);
 
         auto value = random_integer();
         variable   = value;
@@ -780,8 +804,9 @@ TEST_F(TestConstraint, evaluate_violation_expression_arg_void) {
 
 /*****************************************************************************/
 TEST_F(TestConstraint, evaluate_violation_function_arg_move) {
-    auto expression = cppmh::model::Expression<int, double>::create_instance();
-    auto variable   = cppmh::model::Variable<int, double>::create_instance();
+    auto expression =
+        printemps::model::Expression<int, double>::create_instance();
+    auto variable = printemps::model::Variable<int, double>::create_instance();
 
     auto sensitivity = random_integer();
     auto constant    = random_integer();
@@ -790,16 +815,17 @@ TEST_F(TestConstraint, evaluate_violation_function_arg_move) {
     expression = sensitivity * variable + constant;
     expression.setup_fixed_sensitivities();
 
-    std::function<double(const cppmh::model::Move<int, double>&)> f =
-        [&expression, target](const cppmh::model::Move<int, double>& a_MOVE) {
+    std::function<double(const printemps::model::Move<int, double>&)> f =
+        [&expression,
+         target](const printemps::model::Move<int, double>& a_MOVE) {
             return expression.evaluate(a_MOVE) - target;
         };
 
     /// Lower
     {
         auto constraint =
-            cppmh::model::Constraint<int, double>::create_instance();
-        constraint.setup(f, cppmh::model::ConstraintSense::Lower);
+            printemps::model::Constraint<int, double>::create_instance();
+        constraint.setup(f, printemps::model::ConstraintSense::Lower);
 
         /// initial
         {
@@ -820,7 +846,7 @@ TEST_F(TestConstraint, evaluate_violation_function_arg_move) {
         {
             auto value = random_integer();
 
-            cppmh::model::Move<int, double> move;
+            printemps::model::Move<int, double> move;
             move.alterations.emplace_back(&variable, value);
 
             auto expected_value =
@@ -834,8 +860,8 @@ TEST_F(TestConstraint, evaluate_violation_function_arg_move) {
     /// Equal
     {
         auto constraint =
-            cppmh::model::Constraint<int, double>::create_instance();
-        constraint.setup(f, cppmh::model::ConstraintSense::Equal);
+            printemps::model::Constraint<int, double>::create_instance();
+        constraint.setup(f, printemps::model::ConstraintSense::Equal);
 
         /// initial
         {
@@ -856,7 +882,7 @@ TEST_F(TestConstraint, evaluate_violation_function_arg_move) {
         {
             auto value = random_integer();
 
-            cppmh::model::Move<int, double> move;
+            printemps::model::Move<int, double> move;
             move.alterations.emplace_back(&variable, value);
 
             auto expected_value =
@@ -870,8 +896,8 @@ TEST_F(TestConstraint, evaluate_violation_function_arg_move) {
     /// Upper
     {
         auto constraint =
-            cppmh::model::Constraint<int, double>::create_instance();
-        constraint.setup(f, cppmh::model::ConstraintSense::Upper);
+            printemps::model::Constraint<int, double>::create_instance();
+        constraint.setup(f, printemps::model::ConstraintSense::Upper);
 
         /// initial
         {
@@ -892,7 +918,7 @@ TEST_F(TestConstraint, evaluate_violation_function_arg_move) {
         {
             auto value = random_integer();
 
-            cppmh::model::Move<int, double> move;
+            printemps::model::Move<int, double> move;
             move.alterations.emplace_back(&variable, value);
 
             auto expected_value =
@@ -906,8 +932,9 @@ TEST_F(TestConstraint, evaluate_violation_function_arg_move) {
 
 /*****************************************************************************/
 TEST_F(TestConstraint, evaluate_violation_expression_arg_move) {
-    auto expression = cppmh::model::Expression<int, double>::create_instance();
-    auto variable   = cppmh::model::Variable<int, double>::create_instance();
+    auto expression =
+        printemps::model::Expression<int, double>::create_instance();
+    auto variable = printemps::model::Variable<int, double>::create_instance();
 
     auto sensitivity = random_integer();
     auto constant    = random_integer();
@@ -918,9 +945,9 @@ TEST_F(TestConstraint, evaluate_violation_expression_arg_move) {
     /// Lower
     {
         auto constraint =
-            cppmh::model::Constraint<int, double>::create_instance();
+            printemps::model::Constraint<int, double>::create_instance();
         constraint.setup(expression - target,
-                         cppmh::model::ConstraintSense::Lower);
+                         printemps::model::ConstraintSense::Lower);
 
         /// initial
         {
@@ -939,7 +966,7 @@ TEST_F(TestConstraint, evaluate_violation_expression_arg_move) {
         {
             auto value = random_integer();
 
-            cppmh::model::Move<int, double> move;
+            printemps::model::Move<int, double> move;
             move.alterations.emplace_back(&variable, value);
 
             auto expected_value =
@@ -953,9 +980,9 @@ TEST_F(TestConstraint, evaluate_violation_expression_arg_move) {
     /// Equal
     {
         auto constraint =
-            cppmh::model::Constraint<int, double>::create_instance();
+            printemps::model::Constraint<int, double>::create_instance();
         constraint.setup(expression - target,
-                         cppmh::model::ConstraintSense::Equal);
+                         printemps::model::ConstraintSense::Equal);
 
         /// initial
         {
@@ -974,7 +1001,7 @@ TEST_F(TestConstraint, evaluate_violation_expression_arg_move) {
         {
             auto value = random_integer();
 
-            cppmh::model::Move<int, double> move;
+            printemps::model::Move<int, double> move;
             move.alterations.emplace_back(&variable, value);
 
             auto expected_value =
@@ -988,9 +1015,9 @@ TEST_F(TestConstraint, evaluate_violation_expression_arg_move) {
     /// Upper
     {
         auto constraint =
-            cppmh::model::Constraint<int, double>::create_instance();
+            printemps::model::Constraint<int, double>::create_instance();
         constraint.setup(expression - target,
-                         cppmh::model::ConstraintSense::Upper);
+                         printemps::model::ConstraintSense::Upper);
 
         /// initial
         {
@@ -1007,8 +1034,8 @@ TEST_F(TestConstraint, evaluate_violation_expression_arg_move) {
 
         /// after move
         {
-            auto                            value = random_integer();
-            cppmh::model::Move<int, double> move;
+            auto                                value = random_integer();
+            printemps::model::Move<int, double> move;
             move.alterations.emplace_back(&variable, value);
 
             auto expected_value =
@@ -1127,7 +1154,8 @@ TEST_F(TestConstraint, is_general_linear) {
 
 /*****************************************************************************/
 TEST_F(TestConstraint, is_enabled) {
-    auto constraint = cppmh::model::Constraint<int, double>::create_instance();
+    auto constraint =
+        printemps::model::Constraint<int, double>::create_instance();
     constraint.disable();
     EXPECT_EQ(false, constraint.is_enabled());
 
@@ -1150,8 +1178,9 @@ TEST_F(TestConstraint, disable) {
 
 /*****************************************************************************/
 TEST_F(TestConstraint, operator_equal_function) {
-    auto expression = cppmh::model::Expression<int, double>::create_instance();
-    auto variable   = cppmh::model::Variable<int, double>::create_instance();
+    auto expression =
+        printemps::model::Expression<int, double>::create_instance();
+    auto variable = printemps::model::Variable<int, double>::create_instance();
 
     auto sensitivity = random_integer();
     auto constant    = random_integer();
@@ -1159,25 +1188,26 @@ TEST_F(TestConstraint, operator_equal_function) {
 
     expression = sensitivity * variable + constant;
 
-    std::function<double(const cppmh::model::Move<int, double>&)> f =
-        [&expression, target](const cppmh::model::Move<int, double>& a_MOVE) {
+    std::function<double(const printemps::model::Move<int, double>&)> f =
+        [&expression,
+         target](const printemps::model::Move<int, double>& a_MOVE) {
             return expression.evaluate(a_MOVE) - target;
         };
 
     /// Lower
     {
         auto constraint_source =
-            cppmh::model::Constraint<int, double>::create_instance();
-        constraint_source.setup(f, cppmh::model::ConstraintSense::Lower);
+            printemps::model::Constraint<int, double>::create_instance();
+        constraint_source.setup(f, printemps::model::ConstraintSense::Lower);
 
         auto constraint_result =
-            cppmh::model::Constraint<int, double>::create_instance();
+            printemps::model::Constraint<int, double>::create_instance();
 
         EXPECT_EQ(false, (constraint_result = constraint_source).is_linear());
 
         EXPECT_EQ(true, constraint_result.expression().sensitivities().empty());
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Lower,
+        EXPECT_EQ(printemps::model::ConstraintSense::Lower,
                   constraint_result.sense());
         EXPECT_EQ(0, constraint_result.constraint_value());
         EXPECT_EQ(0, constraint_result.violation_value());
@@ -1195,16 +1225,16 @@ TEST_F(TestConstraint, operator_equal_function) {
     /// Equal
     {
         auto constraint_source =
-            cppmh::model::Constraint<int, double>::create_instance();
-        constraint_source.setup(f, cppmh::model::ConstraintSense::Equal);
+            printemps::model::Constraint<int, double>::create_instance();
+        constraint_source.setup(f, printemps::model::ConstraintSense::Equal);
         auto constraint_result =
-            cppmh::model::Constraint<int, double>::create_instance();
+            printemps::model::Constraint<int, double>::create_instance();
 
         EXPECT_EQ(false, (constraint_result = constraint_source).is_linear());
 
         EXPECT_EQ(true, constraint_result.expression().sensitivities().empty());
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Equal,
+        EXPECT_EQ(printemps::model::ConstraintSense::Equal,
                   constraint_result.sense());
         EXPECT_EQ(0, constraint_result.constraint_value());
         EXPECT_EQ(0, constraint_result.violation_value());
@@ -1222,16 +1252,16 @@ TEST_F(TestConstraint, operator_equal_function) {
     /// Upper
     {
         auto constraint_source =
-            cppmh::model::Constraint<int, double>::create_instance();
-        constraint_source.setup(f, cppmh::model::ConstraintSense::Upper);
+            printemps::model::Constraint<int, double>::create_instance();
+        constraint_source.setup(f, printemps::model::ConstraintSense::Upper);
         auto constraint_result =
-            cppmh::model::Constraint<int, double>::create_instance();
+            printemps::model::Constraint<int, double>::create_instance();
 
         EXPECT_EQ(false, (constraint_result = constraint_source).is_linear());
 
         EXPECT_EQ(true, constraint_result.expression().sensitivities().empty());
         EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Upper,
+        EXPECT_EQ(printemps::model::ConstraintSense::Upper,
                   constraint_result.sense());
         EXPECT_EQ(0, constraint_result.constraint_value());
         EXPECT_EQ(0, constraint_result.violation_value());
@@ -1249,8 +1279,9 @@ TEST_F(TestConstraint, operator_equal_function) {
 
 /*****************************************************************************/
 TEST_F(TestConstraint, operator_equal_expression) {
-    auto expression = cppmh::model::Expression<int, double>::create_instance();
-    auto variable   = cppmh::model::Variable<int, double>::create_instance();
+    auto expression =
+        printemps::model::Expression<int, double>::create_instance();
+    auto variable = printemps::model::Variable<int, double>::create_instance();
 
     auto sensitivity = random_integer();
     auto constant    = random_integer();
@@ -1261,11 +1292,11 @@ TEST_F(TestConstraint, operator_equal_expression) {
     /// Lower
     {
         auto constraint_source =
-            cppmh::model::Constraint<int, double>::create_instance();
+            printemps::model::Constraint<int, double>::create_instance();
         constraint_source.setup(expression - target,
-                                cppmh::model::ConstraintSense::Lower);
+                                printemps::model::ConstraintSense::Lower);
         auto constraint_result =
-            cppmh::model::Constraint<int, double>::create_instance();
+            printemps::model::Constraint<int, double>::create_instance();
 
         EXPECT_EQ(true, (constraint_result = constraint_source).is_linear());
 
@@ -1273,7 +1304,7 @@ TEST_F(TestConstraint, operator_equal_expression) {
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(constant - target,
                   constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Lower,
+        EXPECT_EQ(printemps::model::ConstraintSense::Lower,
                   constraint_result.sense());
         EXPECT_EQ(0, constraint_result.constraint_value());
         EXPECT_EQ(0, constraint_result.violation_value());
@@ -1291,11 +1322,11 @@ TEST_F(TestConstraint, operator_equal_expression) {
     /// Equal
     {
         auto constraint_source =
-            cppmh::model::Constraint<int, double>::create_instance();
+            printemps::model::Constraint<int, double>::create_instance();
         constraint_source.setup(expression - target,
-                                cppmh::model::ConstraintSense::Equal);
+                                printemps::model::ConstraintSense::Equal);
         auto constraint_result =
-            cppmh::model::Constraint<int, double>::create_instance();
+            printemps::model::Constraint<int, double>::create_instance();
 
         EXPECT_EQ(true, (constraint_result = constraint_source).is_linear());
 
@@ -1303,7 +1334,7 @@ TEST_F(TestConstraint, operator_equal_expression) {
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(constant - target,
                   constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Equal,
+        EXPECT_EQ(printemps::model::ConstraintSense::Equal,
                   constraint_result.sense());
         EXPECT_EQ(0, constraint_result.constraint_value());
         EXPECT_EQ(0, constraint_result.violation_value());
@@ -1321,11 +1352,11 @@ TEST_F(TestConstraint, operator_equal_expression) {
     /// Upper
     {
         auto constraint_source =
-            cppmh::model::Constraint<int, double>::create_instance();
+            printemps::model::Constraint<int, double>::create_instance();
         constraint_source.setup(expression - target,
-                                cppmh::model::ConstraintSense::Upper);
+                                printemps::model::ConstraintSense::Upper);
         auto constraint_result =
-            cppmh::model::Constraint<int, double>::create_instance();
+            printemps::model::Constraint<int, double>::create_instance();
 
         EXPECT_EQ(true, (constraint_result = constraint_source).is_linear());
 
@@ -1333,7 +1364,7 @@ TEST_F(TestConstraint, operator_equal_expression) {
                   constraint_result.expression().sensitivities().at(&variable));
         EXPECT_EQ(constant - target,
                   constraint_result.expression().constant_value());
-        EXPECT_EQ(cppmh::model::ConstraintSense::Upper,
+        EXPECT_EQ(printemps::model::ConstraintSense::Upper,
                   constraint_result.sense());
         EXPECT_EQ(0, constraint_result.constraint_value());
         EXPECT_EQ(0, constraint_result.violation_value());

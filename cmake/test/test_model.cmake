@@ -8,7 +8,7 @@ add_executable(
 
 target_include_directories(
     test_model
-    PUBLIC ${TOP_DIR}/cppmh/
+    PUBLIC ${TOP_DIR}/printemps/
     PUBLIC ${TOP_DIR}/external/include/
 )
 

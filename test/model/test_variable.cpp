@@ -6,14 +6,14 @@
 #include <gtest/gtest.h>
 #include <random>
 
-#include <cppmh.h>
+#include <printemps.h>
 
 namespace {
 /*****************************************************************************/
 class TestVariable : public ::testing::Test {
    protected:
-    cppmh::utility::IntegerUniformRandom m_random_integer;
-    cppmh::utility::IntegerUniformRandom m_random_positive_integer;
+    printemps::utility::IntegerUniformRandom m_random_integer;
+    printemps::utility::IntegerUniformRandom m_random_positive_integer;
 
     virtual void SetUp(void) {
         m_random_integer.setup(-1000, 1000, 0);
@@ -33,7 +33,7 @@ class TestVariable : public ::testing::Test {
 
 /*****************************************************************************/
 TEST_F(TestVariable, initialize) {
-    auto variable = cppmh::model::Variable<int, double>::create_instance();
+    auto variable = printemps::model::Variable<int, double>::create_instance();
 
     /// Check the initial values of the base class members.
     EXPECT_EQ(0, variable.id());
@@ -44,11 +44,11 @@ TEST_F(TestVariable, initialize) {
     /// Check the initial values of the derived class members.
     EXPECT_EQ(false, variable.is_fixed());
     EXPECT_EQ(0, variable.value());
-    EXPECT_EQ(std::numeric_limits<int>::min() + 1, variable.lower_bound());
-    EXPECT_EQ(std::numeric_limits<int>::max() - 1, variable.upper_bound());
+    EXPECT_EQ(printemps::constant::INT_MIN, variable.lower_bound());
+    EXPECT_EQ(printemps::constant::INT_MAX, variable.upper_bound());
     EXPECT_EQ(false, variable.has_bounds());
     EXPECT_EQ(false, variable.is_improvable());
-    EXPECT_EQ(cppmh::model::VariableSense::Integer, variable.sense());
+    EXPECT_EQ(printemps::model::VariableSense::Integer, variable.sense());
     EXPECT_EQ(nullptr, variable.selection_ptr());
     EXPECT_EQ(true, variable.related_constraint_ptrs().empty());
     EXPECT_EQ(true, variable.constraint_sensitivities().empty());
@@ -57,7 +57,7 @@ TEST_F(TestVariable, initialize) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, set_value_force) {
-    auto variable = cppmh::model::Variable<int, double>::create_instance();
+    auto variable = printemps::model::Variable<int, double>::create_instance();
 
     auto value_0 = random_integer();
     variable     = value_0;
@@ -71,7 +71,7 @@ TEST_F(TestVariable, set_value_force) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, set_value_if_not_fixed) {
-    auto variable = cppmh::model::Variable<int, double>::create_instance();
+    auto variable = printemps::model::Variable<int, double>::create_instance();
 
     auto value_0 = random_integer();
     variable     = value_0;
@@ -86,7 +86,7 @@ TEST_F(TestVariable, set_value_if_not_fixed) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, value) {
-    auto variable = cppmh::model::Variable<int, double>::create_instance();
+    auto variable = printemps::model::Variable<int, double>::create_instance();
 
     auto value = random_integer();
     variable   = value;
@@ -95,7 +95,7 @@ TEST_F(TestVariable, value) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, set_value) {
-    auto variable = cppmh::model::Variable<int, double>::create_instance();
+    auto variable = printemps::model::Variable<int, double>::create_instance();
 
     auto value = random_integer();
     variable.set_value(value);
@@ -108,7 +108,7 @@ TEST_F(TestVariable, set_value) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, evaluate_arg_void) {
-    auto variable = cppmh::model::Variable<int, double>::create_instance();
+    auto variable = printemps::model::Variable<int, double>::create_instance();
 
     auto value = random_integer();
     variable   = value;
@@ -117,8 +117,10 @@ TEST_F(TestVariable, evaluate_arg_void) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, evaluate_arg_move) {
-    auto variable_0 = cppmh::model::Variable<int, double>::create_instance();
-    auto variable_1 = cppmh::model::Variable<int, double>::create_instance();
+    auto variable_0 =
+        printemps::model::Variable<int, double>::create_instance();
+    auto variable_1 =
+        printemps::model::Variable<int, double>::create_instance();
     auto value_0_before = random_integer();
     auto value_1_before = random_integer();
     auto value_0_after  = random_integer();
@@ -127,8 +129,8 @@ TEST_F(TestVariable, evaluate_arg_move) {
     variable_0 = value_0_before;
     variable_1 = value_1_before;
 
-    cppmh::model::Move<int, double> move_0;
-    cppmh::model::Move<int, double> move_1;
+    printemps::model::Move<int, double> move_0;
+    printemps::model::Move<int, double> move_1;
     move_0.alterations.emplace_back(&variable_0, value_0_after);
     move_1.alterations.emplace_back(&variable_1, value_1_after);
 
@@ -140,7 +142,7 @@ TEST_F(TestVariable, evaluate_arg_move) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, fix) {
-    auto variable = cppmh::model::Variable<int, double>::create_instance();
+    auto variable = printemps::model::Variable<int, double>::create_instance();
     variable.fix();
     EXPECT_EQ(true, variable.is_fixed());
     variable.unfix();
@@ -159,7 +161,7 @@ TEST_F(TestVariable, unfix) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, fix_by) {
-    auto variable = cppmh::model::Variable<int, double>::create_instance();
+    auto variable = printemps::model::Variable<int, double>::create_instance();
 
     auto value = random_integer();
     variable.fix_by(value);
@@ -169,28 +171,28 @@ TEST_F(TestVariable, fix_by) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, sense) {
-    auto variable = cppmh::model::Variable<int, double>::create_instance();
-    EXPECT_EQ(cppmh::model::VariableSense::Integer, variable.sense());
+    auto variable = printemps::model::Variable<int, double>::create_instance();
+    EXPECT_EQ(printemps::model::VariableSense::Integer, variable.sense());
     variable.set_bound(0, 1);
-    EXPECT_EQ(cppmh::model::VariableSense::Binary, variable.sense());
+    EXPECT_EQ(printemps::model::VariableSense::Binary, variable.sense());
     variable.set_bound(0, 10);
-    EXPECT_EQ(cppmh::model::VariableSense::Integer, variable.sense());
+    EXPECT_EQ(printemps::model::VariableSense::Integer, variable.sense());
 }
 
 /*****************************************************************************/
 TEST_F(TestVariable, setup_sense) {
-    auto variable = cppmh::model::Variable<int, double>::create_instance();
+    auto variable = printemps::model::Variable<int, double>::create_instance();
     variable.set_bound(0, 1);
-    cppmh::model::Selection<int, double> selection;
+    printemps::model::Selection<int, double> selection;
     variable.set_selection_ptr(&selection);
-    EXPECT_EQ(cppmh::model::VariableSense::Selection, variable.sense());
+    EXPECT_EQ(printemps::model::VariableSense::Selection, variable.sense());
     variable.setup_sense();
-    EXPECT_EQ(cppmh::model::VariableSense::Binary, variable.sense());
+    EXPECT_EQ(printemps::model::VariableSense::Binary, variable.sense());
 }
 
 /*****************************************************************************/
 TEST_F(TestVariable, set_bound) {
-    auto variable = cppmh::model::Variable<int, double>::create_instance();
+    auto variable = printemps::model::Variable<int, double>::create_instance();
 
     auto lower_bound = random_integer();
     auto upper_bound = lower_bound + random_positive_integer();
@@ -204,8 +206,8 @@ TEST_F(TestVariable, set_bound) {
                  std::logic_error);
 
     variable.reset_bound();
-    EXPECT_EQ(std::numeric_limits<int>::min() + 1, variable.lower_bound());
-    EXPECT_EQ(std::numeric_limits<int>::max() - 1, variable.upper_bound());
+    EXPECT_EQ(printemps::constant::INT_MIN, variable.lower_bound());
+    EXPECT_EQ(printemps::constant::INT_MAX, variable.upper_bound());
     EXPECT_EQ(false, variable.has_bounds());
 }
 
@@ -231,7 +233,7 @@ TEST_F(TestVariable, has_bounds) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, set_is_improvable) {
-    auto variable = cppmh::model::Variable<int, double>::create_instance();
+    auto variable = printemps::model::Variable<int, double>::create_instance();
     EXPECT_EQ(false, variable.is_improvable());
     variable.set_is_improvable(true);
     EXPECT_EQ(true, variable.is_improvable());
@@ -241,11 +243,13 @@ TEST_F(TestVariable, set_is_improvable) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, set_selection_ptr) {
-    auto variable_0 = cppmh::model::Variable<int, double>::create_instance();
-    auto variable_1 = cppmh::model::Variable<int, double>::create_instance();
+    auto variable_0 =
+        printemps::model::Variable<int, double>::create_instance();
+    auto variable_1 =
+        printemps::model::Variable<int, double>::create_instance();
     variable_0.set_bound(0, 1);
     variable_1.set_bound(0, 1);
-    cppmh::model::Selection<int, double> selection;
+    printemps::model::Selection<int, double> selection;
     variable_0.set_selection_ptr(&selection);
     variable_1.set_selection_ptr(&selection);
 
@@ -270,11 +274,11 @@ TEST_F(TestVariable, select) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, register_related_constraint_ptr) {
-    auto variable = cppmh::model::Variable<int, double>::create_instance();
+    auto variable = printemps::model::Variable<int, double>::create_instance();
     auto constraint_0 =
-        cppmh::model::Constraint<int, double>::create_instance();
+        printemps::model::Constraint<int, double>::create_instance();
     auto constraint_1 =
-        cppmh::model::Constraint<int, double>::create_instance();
+        printemps::model::Constraint<int, double>::create_instance();
 
     EXPECT_EQ(true, variable.related_constraint_ptrs().empty());
     EXPECT_EQ(false, variable.related_constraint_ptrs().find(&constraint_0) !=
@@ -323,11 +327,11 @@ TEST_F(TestVariable, related_constraint_ptrs) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, register_constraint_sensitivity) {
-    auto variable = cppmh::model::Variable<int, double>::create_instance();
+    auto variable = printemps::model::Variable<int, double>::create_instance();
     auto constraint_0 =
-        cppmh::model::Constraint<int, double>::create_instance();
+        printemps::model::Constraint<int, double>::create_instance();
     auto constraint_1 =
-        cppmh::model::Constraint<int, double>::create_instance();
+        printemps::model::Constraint<int, double>::create_instance();
 
     EXPECT_EQ(true, variable.constraint_sensitivities().empty());
 
@@ -355,7 +359,7 @@ TEST_F(TestVariable, constraint_sensitivities) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, set_objective_sensitivity) {
-    auto variable = cppmh::model::Variable<int, double>::create_instance();
+    auto variable = printemps::model::Variable<int, double>::create_instance();
     EXPECT_EQ(0.0, variable.objective_sensitivity());
     variable.set_objective_sensitivity(100.0);
     EXPECT_EQ(100.0, variable.objective_sensitivity());
@@ -368,35 +372,35 @@ TEST_F(TestVariable, objective_sensitivity) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, to_expression) {
-    auto variable = cppmh::model::Variable<int, double>::create_instance();
+    auto variable = printemps::model::Variable<int, double>::create_instance();
 
     EXPECT_EQ(1, variable.to_expression().sensitivities().at(&variable));
 }
 
 /*****************************************************************************/
 TEST_F(TestVariable, reference) {
-    auto variable = cppmh::model::Variable<int, double>::create_instance();
+    auto variable = printemps::model::Variable<int, double>::create_instance();
 
     EXPECT_EQ(&variable, variable.reference());
 }
 
 /*****************************************************************************/
 TEST_F(TestVariable, operator_plus) {
-    auto variable = cppmh::model::Variable<int, double>::create_instance();
+    auto variable = printemps::model::Variable<int, double>::create_instance();
 
     EXPECT_EQ(1, (+variable).sensitivities().at(&variable));
 }
 
 /*****************************************************************************/
 TEST_F(TestVariable, operator_minus) {
-    auto variable = cppmh::model::Variable<int, double>::create_instance();
+    auto variable = printemps::model::Variable<int, double>::create_instance();
 
     EXPECT_EQ(-1, (-variable).sensitivities().at(&variable));
 }
 
 /*****************************************************************************/
 TEST_F(TestVariable, operator_equal_arg_t_variable) {
-    auto variable = cppmh::model::Variable<int, double>::create_instance();
+    auto variable = printemps::model::Variable<int, double>::create_instance();
 
     auto value = random_integer();
     variable   = value;

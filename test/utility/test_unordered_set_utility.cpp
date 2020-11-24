@@ -6,7 +6,7 @@
 #include <gtest/gtest.h>
 #include <string>
 
-#include <cppmh.h>
+#include <printemps.h>
 
 namespace {
 /*****************************************************************************/
@@ -28,10 +28,10 @@ TEST_F(TestUnorderedSetUtility, intersection_set) {
     std::unordered_set<std::string> set_string_1 = {"c", "d", "e", "f", "g"};
 
     auto intersection_int =
-        cppmh::utility::intersection_set(set_int_0, set_int_1);
+        printemps::utility::intersection_set(set_int_0, set_int_1);
 
     auto intersection_str =
-        cppmh::utility::intersection_set(set_string_0, set_string_1);
+        printemps::utility::intersection_set(set_string_0, set_string_1);
 
     EXPECT_EQ(false, intersection_int.find(1) != intersection_int.end());
     EXPECT_EQ(false, intersection_int.find(2) != intersection_int.end());
@@ -57,8 +57,8 @@ TEST_F(TestUnorderedSetUtility, union_set) {
     std::unordered_set<std::string> set_string_0 = {"a", "b", "c", "d", "e"};
     std::unordered_set<std::string> set_string_1 = {"c", "d", "e", "f", "g"};
 
-    auto union_int = cppmh::utility::union_set(set_int_0, set_int_1);
-    auto union_str = cppmh::utility::union_set(set_string_0, set_string_1);
+    auto union_int = printemps::utility::union_set(set_int_0, set_int_1);
+    auto union_str = printemps::utility::union_set(set_string_0, set_string_1);
 
     EXPECT_EQ(true, union_int.find(1) != union_int.end());
     EXPECT_EQ(true, union_int.find(2) != union_int.end());
