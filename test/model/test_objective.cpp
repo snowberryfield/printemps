@@ -6,14 +6,14 @@
 #include <gtest/gtest.h>
 #include <random>
 
-#include <cppmh.h>
+#include <printemps.h>
 
 namespace {
 /*****************************************************************************/
 class TestObjective : public ::testing::Test {
    protected:
-    cppmh::utility::IntegerUniformRandom m_random_integer;
-    cppmh::utility::IntegerUniformRandom m_random_positive_integer;
+    printemps::utility::IntegerUniformRandom m_random_integer;
+    printemps::utility::IntegerUniformRandom m_random_positive_integer;
 
     virtual void SetUp(void) {
         m_random_integer.setup(-1000, 1000, 0);
@@ -33,7 +33,8 @@ class TestObjective : public ::testing::Test {
 
 /*****************************************************************************/
 TEST_F(TestObjective, initialize) {
-    auto objective = cppmh::model::Objective<int, double>::create_instance();
+    auto objective =
+        printemps::model::Objective<int, double>::create_instance();
 
     EXPECT_EQ(0, objective.evaluate());
     EXPECT_EQ(0, objective.evaluate({}));
@@ -45,19 +46,21 @@ TEST_F(TestObjective, initialize) {
 
 /*****************************************************************************/
 TEST_F(TestObjective, create_instance_arg_function) {
-    auto expression = cppmh::model::Expression<int, double>::create_instance();
-    auto variable   = cppmh::model::Variable<int, double>::create_instance();
+    auto expression =
+        printemps::model::Expression<int, double>::create_instance();
+    auto variable = printemps::model::Variable<int, double>::create_instance();
 
     auto sensitivity = random_integer();
     auto constant    = random_integer();
 
     expression = sensitivity * variable + constant;
 
-    auto f = [&expression](const cppmh::model::Move<int, double> &a_MOVE) {
+    auto f = [&expression](const printemps::model::Move<int, double> &a_MOVE) {
         return expression.evaluate(a_MOVE);
     };
 
-    auto objective = cppmh::model::Objective<int, double>::create_instance(f);
+    auto objective =
+        printemps::model::Objective<int, double>::create_instance(f);
 
     EXPECT_EQ(true, objective.expression().sensitivities().empty());
     EXPECT_EQ(0, objective.expression().constant_value());
@@ -67,15 +70,16 @@ TEST_F(TestObjective, create_instance_arg_function) {
 
 /*****************************************************************************/
 TEST_F(TestObjective, create_instance_arg_expression) {
-    auto expression = cppmh::model::Expression<int, double>::create_instance();
-    auto variable   = cppmh::model::Variable<int, double>::create_instance();
+    auto expression =
+        printemps::model::Expression<int, double>::create_instance();
+    auto variable = printemps::model::Variable<int, double>::create_instance();
 
     auto sensitivity = random_integer();
     auto constant    = random_integer();
 
     expression = sensitivity * variable + constant;
     auto objective =
-        cppmh::model::Objective<int, double>::create_instance(expression);
+        printemps::model::Objective<int, double>::create_instance(expression);
 
     auto value = random_integer();
     variable   = value;
@@ -90,11 +94,12 @@ TEST_F(TestObjective, create_instance_arg_expression) {
 /*****************************************************************************/
 TEST_F(TestObjective, setup_arg_function) {
     auto f =
-        []([[maybe_unused]] const cppmh::model::Move<int, double> &a_MOVE) {
+        []([[maybe_unused]] const printemps::model::Move<int, double> &a_MOVE) {
             return 0;
         };
 
-    auto objective = cppmh::model::Objective<int, double>::create_instance();
+    auto objective =
+        printemps::model::Objective<int, double>::create_instance();
     objective.setup(f);
 
     EXPECT_EQ(true, objective.expression().sensitivities().empty());
@@ -105,15 +110,17 @@ TEST_F(TestObjective, setup_arg_function) {
 
 /*****************************************************************************/
 TEST_F(TestObjective, setup_arg_expression) {
-    auto expression = cppmh::model::Expression<int, double>::create_instance();
-    auto variable   = cppmh::model::Variable<int, double>::create_instance();
+    auto expression =
+        printemps::model::Expression<int, double>::create_instance();
+    auto variable = printemps::model::Variable<int, double>::create_instance();
 
     auto sensitivity = random_integer();
     auto constant    = random_integer();
 
     expression = sensitivity * variable + constant;
 
-    auto objective = cppmh::model::Objective<int, double>::create_instance();
+    auto objective =
+        printemps::model::Objective<int, double>::create_instance();
     objective.setup(expression);
 
     EXPECT_EQ(sensitivity,
@@ -125,8 +132,9 @@ TEST_F(TestObjective, setup_arg_expression) {
 
 /*****************************************************************************/
 TEST_F(TestObjective, evaluate_function_arg_void) {
-    auto expression = cppmh::model::Expression<int, double>::create_instance();
-    auto variable   = cppmh::model::Variable<int, double>::create_instance();
+    auto expression =
+        printemps::model::Expression<int, double>::create_instance();
+    auto variable = printemps::model::Variable<int, double>::create_instance();
 
     auto sensitivity = random_integer();
     auto constant    = random_integer();
@@ -134,11 +142,12 @@ TEST_F(TestObjective, evaluate_function_arg_void) {
     expression = sensitivity * variable + constant;
     expression.setup_fixed_sensitivities();
 
-    auto f = [&expression](const cppmh::model::Move<int, double> &a_MOVE) {
+    auto f = [&expression](const printemps::model::Move<int, double> &a_MOVE) {
         return expression.evaluate(a_MOVE);
     };
 
-    auto objective = cppmh::model::Objective<int, double>::create_instance(f);
+    auto objective =
+        printemps::model::Objective<int, double>::create_instance(f);
 
     auto value = random_integer();
     variable   = value;
@@ -151,8 +160,9 @@ TEST_F(TestObjective, evaluate_function_arg_void) {
 
 /*****************************************************************************/
 TEST_F(TestObjective, evaluate_expression_arg_void) {
-    auto expression = cppmh::model::Expression<int, double>::create_instance();
-    auto variable   = cppmh::model::Variable<int, double>::create_instance();
+    auto expression =
+        printemps::model::Expression<int, double>::create_instance();
+    auto variable = printemps::model::Variable<int, double>::create_instance();
 
     auto sensitivity = random_integer();
     auto constant    = random_integer();
@@ -160,7 +170,7 @@ TEST_F(TestObjective, evaluate_expression_arg_void) {
     expression = sensitivity * variable + constant;
 
     auto objective =
-        cppmh::model::Objective<int, double>::create_instance(expression);
+        printemps::model::Objective<int, double>::create_instance(expression);
 
     auto value = random_integer();
     variable   = value;
@@ -173,8 +183,9 @@ TEST_F(TestObjective, evaluate_expression_arg_void) {
 
 /*****************************************************************************/
 TEST_F(TestObjective, evaluate_function_arg_move) {
-    auto expression = cppmh::model::Expression<int, double>::create_instance();
-    auto variable   = cppmh::model::Variable<int, double>::create_instance();
+    auto expression =
+        printemps::model::Expression<int, double>::create_instance();
+    auto variable = printemps::model::Variable<int, double>::create_instance();
 
     auto sensitivity = random_integer();
     auto constant    = random_integer();
@@ -183,11 +194,12 @@ TEST_F(TestObjective, evaluate_function_arg_move) {
     expression.setup_fixed_sensitivities();
 
     auto f = [&expression,
-              &variable](const cppmh::model::Move<int, double> &a_MOVE) {
+              &variable](const printemps::model::Move<int, double> &a_MOVE) {
         return expression.evaluate(a_MOVE);
     };
 
-    auto objective = cppmh::model::Objective<int, double>::create_instance(f);
+    auto objective =
+        printemps::model::Objective<int, double>::create_instance(f);
 
     {
         auto value = random_integer();
@@ -202,8 +214,8 @@ TEST_F(TestObjective, evaluate_function_arg_move) {
         expression.update();
     }
     {
-        auto                            value = random_integer();
-        cppmh::model::Move<int, double> move;
+        auto                                value = random_integer();
+        printemps::model::Move<int, double> move;
         move.alterations.emplace_back(&variable, value);
 
         auto expected_value = sensitivity * value + constant;
@@ -215,8 +227,9 @@ TEST_F(TestObjective, evaluate_function_arg_move) {
 
 /*****************************************************************************/
 TEST_F(TestObjective, evaluate_expression_arg_move) {
-    auto expression = cppmh::model::Expression<int, double>::create_instance();
-    auto variable   = cppmh::model::Variable<int, double>::create_instance();
+    auto expression =
+        printemps::model::Expression<int, double>::create_instance();
+    auto variable = printemps::model::Variable<int, double>::create_instance();
 
     auto sensitivity = random_integer();
     auto constant    = random_integer();
@@ -224,7 +237,7 @@ TEST_F(TestObjective, evaluate_expression_arg_move) {
     expression = sensitivity * variable + constant;
 
     auto objective =
-        cppmh::model::Objective<int, double>::create_instance(expression);
+        printemps::model::Objective<int, double>::create_instance(expression);
 
     {
         auto value = random_integer();
@@ -237,8 +250,8 @@ TEST_F(TestObjective, evaluate_expression_arg_move) {
         EXPECT_EQ(expected_value, objective.value());
     }
     {
-        auto                            value = random_integer();
-        cppmh::model::Move<int, double> move;
+        auto                                value = random_integer();
+        printemps::model::Move<int, double> move;
         move.alterations.emplace_back(&variable, value);
 
         auto expected_value = sensitivity * value + constant;

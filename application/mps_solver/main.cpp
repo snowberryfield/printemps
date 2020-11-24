@@ -7,8 +7,8 @@
 #include <string>
 #include <iostream>
 
-#include "../cppmh/utility/mps_utility.h"
-#include "../cppmh/utility/option_utility.h"
+#include "../printemps/utility/mps_utility.h"
+#include "../printemps/utility/option_utility.h"
 
 int main([[maybe_unused]] int argc, char *argv[]) {
     /**
@@ -62,19 +62,19 @@ int main([[maybe_unused]] int argc, char *argv[]) {
     /**
      * Read the specified MPS file and convert to the model.
      */
-    cppmh::utility::MPSReader mps_reader;
+    printemps::utility::MPSReader mps_reader;
 
     auto &model = mps_reader.create_model_from_mps(
         mps_file_name, is_enabled_separate_equality);
-    model.set_name(cppmh::utility::base_name(mps_file_name));
+    model.set_name(printemps::utility::base_name(mps_file_name));
 
     /**
      * If the option file is given, the option values specified in the file will
      * be used for the calculation. Otherwise, the default values will be used.
      */
-    cppmh::solver::Option option;
+    printemps::solver::Option option;
     if (!option_file_name.empty()) {
-        option = cppmh::utility::read_option(option_file_name);
+        option = printemps::utility::read_option(option_file_name);
     }
 
     /**
@@ -84,29 +84,29 @@ int main([[maybe_unused]] int argc, char *argv[]) {
      */
     if (!initial_solution_file_name.empty()) {
         auto solution =
-            cppmh::utility::read_solution(initial_solution_file_name);
+            printemps::utility::read_solution(initial_solution_file_name);
         model.import_solution(solution);
     }
 
     /**
      * Run the solver.
      */
-    auto result = cppmh::solver::solve(&model, option);
+    auto result = printemps::solver::solve(&model, option);
 
     /**
      * Print the result summary.
      */
-    cppmh::utility::print_info(
+    printemps::utility::print_info(
         "status: " + std::to_string(result.solution.is_feasible()),
-        option.verbose != cppmh::solver::Verbose::None);
+        option.verbose != printemps::solver::Verbose::None);
 
-    cppmh::utility::print_info(
+    printemps::utility::print_info(
         "objective: " + std::to_string(result.solution.objective()),
-        option.verbose != cppmh::solver::Verbose::None);
+        option.verbose != printemps::solver::Verbose::None);
 
-    cppmh::utility::print_info(
+    printemps::utility::print_info(
         "total violation: " + std::to_string(result.solution.total_violation()),
-        option.verbose != cppmh::solver::Verbose::None);
+        option.verbose != printemps::solver::Verbose::None);
 
     auto summary = model.export_summary();
     result.solution.write_json_by_name("incumbent.json", summary);

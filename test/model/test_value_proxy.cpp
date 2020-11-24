@@ -5,14 +5,14 @@
 /*****************************************************************************/
 #include <gtest/gtest.h>
 #include <random>
-#include <cppmh.h>
+#include <printemps.h>
 
 namespace {
 /*****************************************************************************/
 class TestValueProxy : public ::testing::Test {
    protected:
-    cppmh::utility::IntegerUniformRandom m_random_integer;
-    cppmh::utility::IntegerUniformRandom m_random_positive_integer;
+    printemps::utility::IntegerUniformRandom m_random_integer;
+    printemps::utility::IntegerUniformRandom m_random_positive_integer;
 
     virtual void SetUp(void) {
         m_random_integer.setup(-1000, 1000, 0);
@@ -32,8 +32,8 @@ class TestValueProxy : public ::testing::Test {
 
 /*****************************************************************************/
 TEST_F(TestValueProxy, scalar_constructor) {
-    const int                     ID = -1;
-    cppmh::model::ValueProxy<int> value_proxy(ID);
+    const int                         ID = -1;
+    printemps::model::ValueProxy<int> value_proxy(ID);
 
     EXPECT_EQ(ID, value_proxy.id());
     EXPECT_EQ(1, value_proxy.shape()[0]);
@@ -45,8 +45,8 @@ TEST_F(TestValueProxy, scalar_constructor) {
 
 /*****************************************************************************/
 TEST_F(TestValueProxy, scalar_flat_indexed_values_arg_void) {
-    const int                     ID = -1;
-    cppmh::model::ValueProxy<int> value_proxy(ID);
+    const int                         ID = -1;
+    printemps::model::ValueProxy<int> value_proxy(ID);
 
     auto value  = random_integer();
     value_proxy = value;
@@ -55,8 +55,8 @@ TEST_F(TestValueProxy, scalar_flat_indexed_values_arg_void) {
 
 /*****************************************************************************/
 TEST_F(TestValueProxy, scalar_flat_indexed_values_arg_int) {
-    const int                     ID = -1;
-    cppmh::model::ValueProxy<int> value_proxy(ID);
+    const int                         ID = -1;
+    printemps::model::ValueProxy<int> value_proxy(ID);
 
     auto value  = random_integer();
     value_proxy = value;
@@ -65,8 +65,8 @@ TEST_F(TestValueProxy, scalar_flat_indexed_values_arg_int) {
 
 /*****************************************************************************/
 TEST_F(TestValueProxy, scalar_value) {
-    const int                     ID = -1;
-    cppmh::model::ValueProxy<int> value_proxy(ID);
+    const int                         ID = -1;
+    printemps::model::ValueProxy<int> value_proxy(ID);
 
     auto value          = random_integer();
     value_proxy.value() = value;
@@ -75,8 +75,8 @@ TEST_F(TestValueProxy, scalar_value) {
 
 /*****************************************************************************/
 TEST_F(TestValueProxy, scalar_values) {
-    const int                     ID = -1;
-    cppmh::model::ValueProxy<int> value_proxy(ID);
+    const int                         ID = -1;
+    printemps::model::ValueProxy<int> value_proxy(ID);
 
     auto value            = random_integer();
     value_proxy.values(0) = value;
@@ -89,8 +89,8 @@ TEST_F(TestValueProxy, scalar_values) {
 
 /*****************************************************************************/
 TEST_F(TestValueProxy, scalar_values_with_indices) {
-    const int                     ID = -1;
-    cppmh::model::ValueProxy<int> value_proxy(ID);
+    const int                         ID = -1;
+    printemps::model::ValueProxy<int> value_proxy(ID);
 
     auto value              = random_integer();
     value_proxy.values({0}) = value;
@@ -99,8 +99,8 @@ TEST_F(TestValueProxy, scalar_values_with_indices) {
 
 /*****************************************************************************/
 TEST_F(TestValueProxy, scalar_fill) {
-    const int                     ID = -1;
-    cppmh::model::ValueProxy<int> value_proxy(ID);
+    const int                         ID = -1;
+    printemps::model::ValueProxy<int> value_proxy(ID);
 
     auto value = random_integer();
     value_proxy.fill(value);
@@ -109,8 +109,8 @@ TEST_F(TestValueProxy, scalar_fill) {
 
 /*****************************************************************************/
 TEST_F(TestValueProxy, scalar_operator_square_bracket) {
-    const int                     ID = -1;
-    cppmh::model::ValueProxy<int> value_proxy(ID);
+    const int                         ID = -1;
+    printemps::model::ValueProxy<int> value_proxy(ID);
 
     auto value     = random_integer();
     value_proxy[0] = value;
@@ -119,8 +119,8 @@ TEST_F(TestValueProxy, scalar_operator_square_bracket) {
 
 /*****************************************************************************/
 TEST_F(TestValueProxy, scalar_operator_round_bracket) {
-    const int                     ID = -1;
-    cppmh::model::ValueProxy<int> value_proxy(ID);
+    const int                         ID = -1;
+    printemps::model::ValueProxy<int> value_proxy(ID);
 
     auto value     = random_integer();
     value_proxy(0) = value;
@@ -133,8 +133,8 @@ TEST_F(TestValueProxy, scalar_operator_round_bracket) {
 
 /*****************************************************************************/
 TEST_F(TestValueProxy, scalar_operator_equal) {
-    const int                     ID = -1;
-    cppmh::model::ValueProxy<int> value_proxy(ID);
+    const int                         ID = -1;
+    printemps::model::ValueProxy<int> value_proxy(ID);
 
     auto value = random_integer();
     EXPECT_EQ(value, (value_proxy = value)[0]);
@@ -144,8 +144,8 @@ TEST_F(TestValueProxy, scalar_operator_equal) {
 
 /*****************************************************************************/
 TEST_F(TestValueProxy, one_dimensional_constructor) {
-    const int                     ID = -1;
-    cppmh::model::ValueProxy<int> value_proxy(ID, 2);
+    const int                         ID = -1;
+    printemps::model::ValueProxy<int> value_proxy(ID, 2);
 
     EXPECT_EQ(ID, value_proxy.id());
     EXPECT_EQ(2, value_proxy.shape()[0]);
@@ -157,8 +157,8 @@ TEST_F(TestValueProxy, one_dimensional_constructor) {
 
 /*****************************************************************************/
 TEST_F(TestValueProxy, one_dimensional_value) {
-    const int                     ID = -1;
-    cppmh::model::ValueProxy<int> value_proxy(ID, 2);
+    const int                         ID = -1;
+    printemps::model::ValueProxy<int> value_proxy(ID, 2);
 
     auto value = random_integer();
     ASSERT_THROW(value_proxy.value() = value, std::logic_error);
@@ -166,8 +166,8 @@ TEST_F(TestValueProxy, one_dimensional_value) {
 
 /*****************************************************************************/
 TEST_F(TestValueProxy, one_dimensional_values) {
-    const int                     ID = -1;
-    cppmh::model::ValueProxy<int> value_proxy(ID, 2);
+    const int                         ID = -1;
+    printemps::model::ValueProxy<int> value_proxy(ID, 2);
 
     auto value_0          = random_integer();
     auto value_1          = random_integer();
@@ -183,8 +183,8 @@ TEST_F(TestValueProxy, one_dimensional_values) {
 
 /*****************************************************************************/
 TEST_F(TestValueProxy, one_dimensional_values_with_indices) {
-    const int                     ID = -1;
-    cppmh::model::ValueProxy<int> value_proxy(ID, 2);
+    const int                         ID = -1;
+    printemps::model::ValueProxy<int> value_proxy(ID, 2);
 
     auto value_0            = random_integer();
     auto value_1            = random_integer();
@@ -196,8 +196,8 @@ TEST_F(TestValueProxy, one_dimensional_values_with_indices) {
 
 /*****************************************************************************/
 TEST_F(TestValueProxy, one_dimensional_fill) {
-    const int                     ID = -1;
-    cppmh::model::ValueProxy<int> value_proxy(ID, 2);
+    const int                         ID = -1;
+    printemps::model::ValueProxy<int> value_proxy(ID, 2);
 
     auto value = random_integer();
     value_proxy.fill(value);
@@ -207,8 +207,8 @@ TEST_F(TestValueProxy, one_dimensional_fill) {
 
 /*****************************************************************************/
 TEST_F(TestValueProxy, one_dimensional_operator_square_bracket) {
-    const int                     ID = -1;
-    cppmh::model::ValueProxy<int> value_proxy(ID, 2);
+    const int                         ID = -1;
+    printemps::model::ValueProxy<int> value_proxy(ID, 2);
 
     auto value_0   = random_integer();
     auto value_1   = random_integer();
@@ -220,8 +220,8 @@ TEST_F(TestValueProxy, one_dimensional_operator_square_bracket) {
 
 /*****************************************************************************/
 TEST_F(TestValueProxy, one_dimensional_operator_round_bracket) {
-    const int                     ID = -1;
-    cppmh::model::ValueProxy<int> value_proxy(ID, 2);
+    const int                         ID = -1;
+    printemps::model::ValueProxy<int> value_proxy(ID, 2);
 
     auto value_0   = random_integer();
     auto value_1   = random_integer();
@@ -237,8 +237,8 @@ TEST_F(TestValueProxy, one_dimensional_operator_round_bracket) {
 
 /*****************************************************************************/
 TEST_F(TestValueProxy, one_dimensional_operator_equal) {
-    const int                     ID = -1;
-    cppmh::model::ValueProxy<int> value_proxy(ID, 2);
+    const int                         ID = -1;
+    printemps::model::ValueProxy<int> value_proxy(ID, 2);
 
     auto value = random_integer();
     ASSERT_THROW(value_proxy = value, std::logic_error);
@@ -246,8 +246,8 @@ TEST_F(TestValueProxy, one_dimensional_operator_equal) {
 
 /*****************************************************************************/
 TEST_F(TestValueProxy, two_dimensional_constructor) {
-    const int                     ID = -1;
-    cppmh::model::ValueProxy<int> value_proxy(ID, {2, 3});
+    const int                         ID = -1;
+    printemps::model::ValueProxy<int> value_proxy(ID, {2, 3});
 
     EXPECT_EQ(ID, value_proxy.id());
     EXPECT_EQ(2, value_proxy.shape()[0]);
@@ -262,8 +262,8 @@ TEST_F(TestValueProxy, two_dimensional_constructor) {
 
 /*****************************************************************************/
 TEST_F(TestValueProxy, two_dimensional_value) {
-    const int                     ID = -1;
-    cppmh::model::ValueProxy<int> value_proxy(ID, {2, 3});
+    const int                         ID = -1;
+    printemps::model::ValueProxy<int> value_proxy(ID, {2, 3});
 
     auto value = random_integer();
     ASSERT_THROW(value_proxy.value() = value, std::logic_error);
@@ -271,8 +271,8 @@ TEST_F(TestValueProxy, two_dimensional_value) {
 
 /*****************************************************************************/
 TEST_F(TestValueProxy, two_dimensional_values) {
-    const int                     ID = -1;
-    cppmh::model::ValueProxy<int> value_proxy(ID, {2, 3});
+    const int                         ID = -1;
+    printemps::model::ValueProxy<int> value_proxy(ID, {2, 3});
 
     auto value_0             = random_integer();
     auto value_1             = random_integer();
@@ -288,8 +288,8 @@ TEST_F(TestValueProxy, two_dimensional_values) {
 
 /*****************************************************************************/
 TEST_F(TestValueProxy, two_dimensional_values_with_indices) {
-    const int                     ID = -1;
-    cppmh::model::ValueProxy<int> value_proxy(ID, {2, 3});
+    const int                         ID = -1;
+    printemps::model::ValueProxy<int> value_proxy(ID, {2, 3});
 
     auto value_0               = random_integer();
     auto value_1               = random_integer();
@@ -301,8 +301,8 @@ TEST_F(TestValueProxy, two_dimensional_values_with_indices) {
 
 /*****************************************************************************/
 TEST_F(TestValueProxy, two_dimensional_fill) {
-    const int                     ID = -1;
-    cppmh::model::ValueProxy<int> value_proxy(ID, {2, 3});
+    const int                         ID = -1;
+    printemps::model::ValueProxy<int> value_proxy(ID, {2, 3});
 
     auto value = random_integer();
     value_proxy.fill(value);
@@ -312,8 +312,8 @@ TEST_F(TestValueProxy, two_dimensional_fill) {
 
 /*****************************************************************************/
 TEST_F(TestValueProxy, two_dimensional_operator_square_bracket) {
-    const int                     ID = -1;
-    cppmh::model::ValueProxy<int> value_proxy(ID, {2, 3});
+    const int                         ID = -1;
+    printemps::model::ValueProxy<int> value_proxy(ID, {2, 3});
 
     auto value_0           = random_integer();
     auto value_1           = random_integer();
@@ -325,8 +325,8 @@ TEST_F(TestValueProxy, two_dimensional_operator_square_bracket) {
 
 /*****************************************************************************/
 TEST_F(TestValueProxy, two_dimensional_operator_round_bracket) {
-    const int                     ID = -1;
-    cppmh::model::ValueProxy<int> value_proxy(ID, {2, 3});
+    const int                         ID = -1;
+    printemps::model::ValueProxy<int> value_proxy(ID, {2, 3});
 
     auto value_0      = random_integer();
     auto value_1      = random_integer();
@@ -342,8 +342,8 @@ TEST_F(TestValueProxy, two_dimensional_operator_round_bracket) {
 
 /*****************************************************************************/
 TEST_F(TestValueProxy, two_dimensional_operator_equal) {
-    const int                     ID = -1;
-    cppmh::model::ValueProxy<int> value_proxy(ID, {2, 3});
+    const int                         ID = -1;
+    printemps::model::ValueProxy<int> value_proxy(ID, {2, 3});
 
     auto value = random_integer();
     ASSERT_THROW(value_proxy = value, std::logic_error);
@@ -351,8 +351,8 @@ TEST_F(TestValueProxy, two_dimensional_operator_equal) {
 
 /*****************************************************************************/
 TEST_F(TestValueProxy, three_dimensional_constructor) {
-    const int                     ID = -1;
-    cppmh::model::ValueProxy<int> value_proxy(ID, {2, 3, 4});
+    const int                         ID = -1;
+    printemps::model::ValueProxy<int> value_proxy(ID, {2, 3, 4});
 
     EXPECT_EQ(-1, value_proxy.id());
     EXPECT_EQ(2, value_proxy.shape()[0]);
@@ -369,8 +369,8 @@ TEST_F(TestValueProxy, three_dimensional_constructor) {
 
 /*****************************************************************************/
 TEST_F(TestValueProxy, three_dimensional_value) {
-    const int                     ID = -1;
-    cppmh::model::ValueProxy<int> value_proxy(ID, {2, 3, 4});
+    const int                         ID = -1;
+    printemps::model::ValueProxy<int> value_proxy(ID, {2, 3, 4});
 
     auto value = random_integer();
     ASSERT_THROW(value_proxy.value() = value, std::logic_error);
@@ -378,8 +378,8 @@ TEST_F(TestValueProxy, three_dimensional_value) {
 
 /*****************************************************************************/
 TEST_F(TestValueProxy, three_dimensional_values) {
-    const int                     ID = -1;
-    cppmh::model::ValueProxy<int> value_proxy(ID, {2, 3, 4});
+    const int                         ID = -1;
+    printemps::model::ValueProxy<int> value_proxy(ID, {2, 3, 4});
 
     auto value_0         = random_integer();
     auto value_1         = random_integer();
@@ -395,8 +395,8 @@ TEST_F(TestValueProxy, three_dimensional_values) {
 
 /*****************************************************************************/
 TEST_F(TestValueProxy, three_dimensional_operator_round_bracket) {
-    const int                     ID = -1;
-    cppmh::model::ValueProxy<int> value_proxy(ID, {2, 3, 4});
+    const int                         ID = -1;
+    printemps::model::ValueProxy<int> value_proxy(ID, {2, 3, 4});
 
     auto value_0         = random_integer();
     auto value_1         = random_integer();
@@ -412,8 +412,8 @@ TEST_F(TestValueProxy, three_dimensional_operator_round_bracket) {
 
 /*****************************************************************************/
 TEST_F(TestValueProxy, four_dimensional_constructor) {
-    const int                     ID = -1;
-    cppmh::model::ValueProxy<int> value_proxy(ID, {2, 3, 4, 5});
+    const int                         ID = -1;
+    printemps::model::ValueProxy<int> value_proxy(ID, {2, 3, 4, 5});
 
     EXPECT_EQ(-1, value_proxy.id());
     EXPECT_EQ(2, value_proxy.shape()[0]);
@@ -433,8 +433,8 @@ TEST_F(TestValueProxy, four_dimensional_constructor) {
 
 /*****************************************************************************/
 TEST_F(TestValueProxy, four_dimensional_value) {
-    const int                     ID = -1;
-    cppmh::model::ValueProxy<int> value_proxy(ID, {2, 3, 4, 5});
+    const int                         ID = -1;
+    printemps::model::ValueProxy<int> value_proxy(ID, {2, 3, 4, 5});
 
     auto value = random_integer();
     ASSERT_THROW(value_proxy.value() = value, std::logic_error);
@@ -442,8 +442,8 @@ TEST_F(TestValueProxy, four_dimensional_value) {
 
 /*****************************************************************************/
 TEST_F(TestValueProxy, four_dimensional_values) {
-    const int                     ID = -1;
-    cppmh::model::ValueProxy<int> value_proxy(ID, {2, 3, 4, 5});
+    const int                         ID = -1;
+    printemps::model::ValueProxy<int> value_proxy(ID, {2, 3, 4, 5});
 
     auto value_0                   = random_integer();
     auto value_1                   = random_integer();
@@ -459,8 +459,8 @@ TEST_F(TestValueProxy, four_dimensional_values) {
 
 /*****************************************************************************/
 TEST_F(TestValueProxy, four_dimensional_values_with_indices) {
-    const int                     ID = -1;
-    cppmh::model::ValueProxy<int> value_proxy(ID, {2, 3, 4});
+    const int                         ID = -1;
+    printemps::model::ValueProxy<int> value_proxy(ID, {2, 3, 4});
 
     auto value_0                  = random_integer();
     auto value_1                  = random_integer();
@@ -472,8 +472,8 @@ TEST_F(TestValueProxy, four_dimensional_values_with_indices) {
 
 /*****************************************************************************/
 TEST_F(TestValueProxy, four_dimensional_operator_round_bracket) {
-    const int                     ID = -1;
-    cppmh::model::ValueProxy<int> value_proxy(ID, {2, 3, 4, 5});
+    const int                         ID = -1;
+    printemps::model::ValueProxy<int> value_proxy(ID, {2, 3, 4, 5});
 
     auto value_0            = random_integer();
     auto value_1            = random_integer();

@@ -3,7 +3,7 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#include <cppmh.h>
+#include <printemps.h>
 
 int main(void) {
     /*************************************************************************/
@@ -42,7 +42,7 @@ int main(void) {
     /*************************************************************************/
     /// Model object definition
     /*************************************************************************/
-    cppmh::model::IPModel model;
+    printemps::model::IPModel model;
 
     /*************************************************************************/
     /// Decision variable definitions
@@ -85,7 +85,8 @@ int main(void) {
         model.create_constraints("constraint_number", {N, N});
     for (auto n = 0; n < N; n++) {
         for (auto m = 0; m < N; m++) {
-            constraint_number(n, m) = x.selection({n, m, cppmh::model::All});
+            constraint_number(n, m) =
+                x.selection({n, m, printemps::model::All});
         }
     }
 
@@ -93,7 +94,7 @@ int main(void) {
     auto& constraint_row = model.create_constraints("constraint_row", {N, N});
     for (auto m = 0; m < N; m++) {
         for (auto k = 0; k < N; k++) {
-            constraint_row(m, k) = x.selection({cppmh::model::All, m, k});
+            constraint_row(m, k) = x.selection({printemps::model::All, m, k});
         }
     }
 
@@ -102,7 +103,8 @@ int main(void) {
         model.create_constraints("constraint_column", {N, N});
     for (auto n = 0; n < N; n++) {
         for (auto k = 0; k < N; k++) {
-            constraint_column(n, k) = x.selection({n, cppmh::model::All, k});
+            constraint_column(n, k) =
+                x.selection({n, printemps::model::All, k});
         }
     }
 
@@ -136,12 +138,12 @@ int main(void) {
     /*************************************************************************/
     /// Run solver
     /*************************************************************************/
-    cppmh::solver::Option option;
+    printemps::solver::Option option;
     option.tabu_search.iteration_max = 100000;
-    option.selection_mode            = cppmh::model::SelectionMode::Defined;
-    option.verbose                   = cppmh::solver::Full;
+    option.selection_mode            = printemps::model::SelectionMode::Defined;
+    option.verbose                   = printemps::solver::Full;
 
-    auto result = cppmh::solver::solve(&model, option);
+    auto result = printemps::solver::solve(&model, option);
 
     /*************************************************************************/
     /// Print result

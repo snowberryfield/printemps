@@ -3,7 +3,7 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#include <cppmh.h>
+#include <printemps.h>
 
 int main(void) {
     /*************************************************************************/
@@ -45,7 +45,7 @@ int main(void) {
     /*************************************************************************/
     /// Model object definition
     /*************************************************************************/
-    cppmh::model::IPModel model;
+    printemps::model::IPModel model;
 
     /*************************************************************************/
     /// Decision variable definitions
@@ -88,10 +88,10 @@ int main(void) {
     /*************************************************************************/
     /// Run solver
     /*************************************************************************/
-    cppmh::solver::Option option;
-    option.verbose = cppmh::solver::Full;
+    printemps::solver::Option option;
+    option.verbose = printemps::solver::Full;
 
-    auto result = cppmh::solver::solve(&model, option);
+    auto result = printemps::solver::solve(&model, option);
 
     /*************************************************************************/
     /// Print result

@@ -6,14 +6,14 @@
 #include <gtest/gtest.h>
 #include <random>
 
-#include <cppmh.h>
+#include <printemps.h>
 
 namespace {
 /*****************************************************************************/
 class TestExpressionBinary : public ::testing::Test {
    protected:
-    cppmh::utility::IntegerUniformRandom m_random_integer;
-    cppmh::utility::IntegerUniformRandom m_random_positive_integer;
+    printemps::utility::IntegerUniformRandom m_random_integer;
+    printemps::utility::IntegerUniformRandom m_random_positive_integer;
 
     virtual void SetUp(void) {
         m_random_integer.setup(-1000, 1000, 0);
@@ -33,12 +33,13 @@ class TestExpressionBinary : public ::testing::Test {
 
 /*****************************************************************************/
 TEST_F(TestExpressionBinary, variable_operator_add) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable   = cppmh::model::Variable<int, double>::create_instance();
-    auto  expression = cppmh::model::Expression<int, double>::create_instance();
+    auto  variable = printemps::model::Variable<int, double>::create_instance();
+    auto  expression =
+        printemps::model::Expression<int, double>::create_instance();
 
     auto constant = random_integer();
 
@@ -124,13 +125,14 @@ TEST_F(TestExpressionBinary, variable_operator_add) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionBinary, variable_proxy_operator_add) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable   = cppmh::model::Variable<int, double>::create_instance();
-    auto  expression = cppmh::model::Expression<int, double>::create_instance();
-    auto  constant   = random_integer();
+    auto  variable = printemps::model::Variable<int, double>::create_instance();
+    auto  expression =
+        printemps::model::Expression<int, double>::create_instance();
+    auto constant = random_integer();
 
     expression_proxy = variable_proxy;
     expression       = variable;
@@ -214,13 +216,14 @@ TEST_F(TestExpressionBinary, variable_proxy_operator_add) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionBinary, expression_operator_add) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable   = cppmh::model::Variable<int, double>::create_instance();
-    auto  expression = cppmh::model::Expression<int, double>::create_instance();
-    auto  constant   = random_integer();
+    auto  variable = printemps::model::Variable<int, double>::create_instance();
+    auto  expression =
+        printemps::model::Expression<int, double>::create_instance();
+    auto constant = random_integer();
 
     expression_proxy = variable_proxy;
     expression       = variable;
@@ -304,13 +307,14 @@ TEST_F(TestExpressionBinary, expression_operator_add) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionBinary, expression_proxy_operator_add) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable   = cppmh::model::Variable<int, double>::create_instance();
-    auto  expression = cppmh::model::Expression<int, double>::create_instance();
-    auto  constant   = random_integer();
+    auto  variable = printemps::model::Variable<int, double>::create_instance();
+    auto  expression =
+        printemps::model::Expression<int, double>::create_instance();
+    auto constant = random_integer();
 
     expression_proxy = variable_proxy;
     expression       = variable;
@@ -394,12 +398,13 @@ TEST_F(TestExpressionBinary, expression_proxy_operator_add) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionBinary, variable_operator_subtract) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable   = cppmh::model::Variable<int, double>::create_instance();
-    auto  expression = cppmh::model::Expression<int, double>::create_instance();
+    auto  variable = printemps::model::Variable<int, double>::create_instance();
+    auto  expression =
+        printemps::model::Expression<int, double>::create_instance();
 
     auto constant = random_integer();
 
@@ -486,13 +491,14 @@ TEST_F(TestExpressionBinary, variable_operator_subtract) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionBinary, variable_proxy_operator_subtract) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable   = cppmh::model::Variable<int, double>::create_instance();
-    auto  expression = cppmh::model::Expression<int, double>::create_instance();
-    auto  constant   = random_integer();
+    auto  variable = printemps::model::Variable<int, double>::create_instance();
+    auto  expression =
+        printemps::model::Expression<int, double>::create_instance();
+    auto constant = random_integer();
 
     expression_proxy = variable_proxy;
     expression       = variable;
@@ -576,13 +582,14 @@ TEST_F(TestExpressionBinary, variable_proxy_operator_subtract) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionBinary, expression_operator_subtract) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable   = cppmh::model::Variable<int, double>::create_instance();
-    auto  expression = cppmh::model::Expression<int, double>::create_instance();
-    auto  constant   = random_integer();
+    auto  variable = printemps::model::Variable<int, double>::create_instance();
+    auto  expression =
+        printemps::model::Expression<int, double>::create_instance();
+    auto constant = random_integer();
 
     expression_proxy = variable_proxy;
     expression       = variable;
@@ -666,13 +673,14 @@ TEST_F(TestExpressionBinary, expression_operator_subtract) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionBinary, expression_proxy_operator_subtract) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable   = cppmh::model::Variable<int, double>::create_instance();
-    auto  expression = cppmh::model::Expression<int, double>::create_instance();
-    auto  constant   = random_integer();
+    auto  variable = printemps::model::Variable<int, double>::create_instance();
+    auto  expression =
+        printemps::model::Expression<int, double>::create_instance();
+    auto constant = random_integer();
 
     expression_proxy = variable_proxy;
     expression       = variable;
@@ -756,12 +764,13 @@ TEST_F(TestExpressionBinary, expression_proxy_operator_subtract) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionBinary, variable_combination_add_product) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable   = cppmh::model::Variable<int, double>::create_instance();
-    auto  expression = cppmh::model::Expression<int, double>::create_instance();
+    auto  variable = printemps::model::Variable<int, double>::create_instance();
+    auto  expression =
+        printemps::model::Expression<int, double>::create_instance();
 
     auto sensitivity_0 = random_integer();
     auto sensitivity_1 = random_integer();
@@ -869,12 +878,13 @@ TEST_F(TestExpressionBinary, variable_combination_add_product) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionBinary, variable_proxy_combination_add_product) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable   = cppmh::model::Variable<int, double>::create_instance();
-    auto  expression = cppmh::model::Expression<int, double>::create_instance();
+    auto  variable = printemps::model::Variable<int, double>::create_instance();
+    auto  expression =
+        printemps::model::Expression<int, double>::create_instance();
 
     auto sensitivity_0 = random_integer();
     auto sensitivity_1 = random_integer();
@@ -982,12 +992,13 @@ TEST_F(TestExpressionBinary, variable_proxy_combination_add_product) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionBinary, expression_combination_add_product) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable   = cppmh::model::Variable<int, double>::create_instance();
-    auto  expression = cppmh::model::Expression<int, double>::create_instance();
+    auto  variable = printemps::model::Variable<int, double>::create_instance();
+    auto  expression =
+        printemps::model::Expression<int, double>::create_instance();
 
     auto sensitivity_0 = random_integer();
     auto sensitivity_1 = random_integer();
@@ -1095,12 +1106,13 @@ TEST_F(TestExpressionBinary, expression_combination_add_product) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionBinary, expression_proxy_combination_add_product) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable   = cppmh::model::Variable<int, double>::create_instance();
-    auto  expression = cppmh::model::Expression<int, double>::create_instance();
+    auto  variable = printemps::model::Variable<int, double>::create_instance();
+    auto  expression =
+        printemps::model::Expression<int, double>::create_instance();
 
     auto sensitivity_0 = random_integer();
     auto sensitivity_1 = random_integer();
@@ -1208,12 +1220,13 @@ TEST_F(TestExpressionBinary, expression_proxy_combination_add_product) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionBinary, variable_combination_subtract_product) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable   = cppmh::model::Variable<int, double>::create_instance();
-    auto  expression = cppmh::model::Expression<int, double>::create_instance();
+    auto  variable = printemps::model::Variable<int, double>::create_instance();
+    auto  expression =
+        printemps::model::Expression<int, double>::create_instance();
 
     auto sensitivity_0 = random_integer();
     auto sensitivity_1 = random_integer();
@@ -1321,12 +1334,13 @@ TEST_F(TestExpressionBinary, variable_combination_subtract_product) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionBinary, variable_proxy_combination_subtract_product) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable   = cppmh::model::Variable<int, double>::create_instance();
-    auto  expression = cppmh::model::Expression<int, double>::create_instance();
+    auto  variable = printemps::model::Variable<int, double>::create_instance();
+    auto  expression =
+        printemps::model::Expression<int, double>::create_instance();
 
     auto sensitivity_0 = random_integer();
     auto sensitivity_1 = random_integer();
@@ -1434,12 +1448,13 @@ TEST_F(TestExpressionBinary, variable_proxy_combination_subtract_product) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionBinary, expression_combination_subtract_product) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable   = cppmh::model::Variable<int, double>::create_instance();
-    auto  expression = cppmh::model::Expression<int, double>::create_instance();
+    auto  variable = printemps::model::Variable<int, double>::create_instance();
+    auto  expression =
+        printemps::model::Expression<int, double>::create_instance();
 
     auto sensitivity_0 = random_integer();
     auto sensitivity_1 = random_integer();
@@ -1547,12 +1562,13 @@ TEST_F(TestExpressionBinary, expression_combination_subtract_product) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionBinary, expression_proxy_combination_subtract_product) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable   = cppmh::model::Variable<int, double>::create_instance();
-    auto  expression = cppmh::model::Expression<int, double>::create_instance();
+    auto  variable = printemps::model::Variable<int, double>::create_instance();
+    auto  expression =
+        printemps::model::Expression<int, double>::create_instance();
 
     auto sensitivity_0 = random_integer();
     auto sensitivity_1 = random_integer();
@@ -1660,12 +1676,13 @@ TEST_F(TestExpressionBinary, expression_proxy_combination_subtract_product) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionBinary, operator_divide) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable   = cppmh::model::Variable<int, double>::create_instance();
-    auto  expression = cppmh::model::Expression<int, double>::create_instance();
+    auto  variable = printemps::model::Variable<int, double>::create_instance();
+    auto  expression =
+        printemps::model::Expression<int, double>::create_instance();
 
     auto denominator = static_cast<double>(random_positive_integer());
 

@@ -6,14 +6,14 @@
 #include <gtest/gtest.h>
 #include <random>
 
-#include <cppmh.h>
+#include <printemps.h>
 
 namespace {
 /*****************************************************************************/
 class TestNeighborhood : public ::testing::Test {
    protected:
-    cppmh::utility::IntegerUniformRandom m_random_integer;
-    cppmh::utility::IntegerUniformRandom m_random_positive_integer;
+    printemps::utility::IntegerUniformRandom m_random_integer;
+    printemps::utility::IntegerUniformRandom m_random_positive_integer;
 
     virtual void SetUp(void) {
         m_random_integer.setup(-1000, 1000, 0);
@@ -33,7 +33,7 @@ class TestNeighborhood : public ::testing::Test {
 
 /*****************************************************************************/
 TEST_F(TestNeighborhood, initialize) {
-    cppmh::model::Neighborhood<int, double> neighborhood;
+    printemps::model::Neighborhood<int, double> neighborhood;
 
     EXPECT_EQ(true, neighborhood.binary_moves().empty());
     EXPECT_EQ(true, neighborhood.integer_moves().empty());
@@ -61,7 +61,7 @@ TEST_F(TestNeighborhood, initialize) {
 
 /*****************************************************************************/
 TEST_F(TestNeighborhood, set_has_fixed_variables) {
-    cppmh::model::Neighborhood<int, double> neighborhood;
+    printemps::model::Neighborhood<int, double> neighborhood;
     EXPECT_EQ(false, neighborhood.has_fixed_variables());
 
     neighborhood.set_has_fixed_variables(true);
@@ -73,7 +73,7 @@ TEST_F(TestNeighborhood, set_has_fixed_variables) {
 
 /*****************************************************************************/
 TEST_F(TestNeighborhood, set_has_selection_variables) {
-    cppmh::model::Neighborhood<int, double> neighborhood;
+    printemps::model::Neighborhood<int, double> neighborhood;
     EXPECT_EQ(false, neighborhood.has_selection_variables());
 
     neighborhood.set_has_selection_variables(true);
@@ -85,7 +85,7 @@ TEST_F(TestNeighborhood, set_has_selection_variables) {
 
 /*****************************************************************************/
 TEST_F(TestNeighborhood, setup_move_updater) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     auto& x0 = model.create_variables("x0", {10, 10}, 0, 1);
     auto& x1 = model.create_variables("x1", {20, 20}, 0, 1);
@@ -99,7 +99,8 @@ TEST_F(TestNeighborhood, setup_move_updater) {
      * this constraint is the third in determining selection neighborhoods,
      * and it will be employed.
      */
-    model.create_constraint("c0", x0.selection({0, cppmh::model::Range::All}));
+    model.create_constraint("c0",
+                            x0.selection({0, printemps::model::Range::All}));
 
     /**
      * Set partitioning  constraint with 31 decision variables. The priority of
@@ -108,8 +109,8 @@ TEST_F(TestNeighborhood, setup_move_updater) {
      * already covered x1.
      */
     model.create_constraint(
-        "c1", (x0.sum({1, cppmh::model::Range::All}) +
-               x1.sum({1, cppmh::model::Range::All}) + x2(0)) == 1);
+        "c1", (x0.sum({1, printemps::model::Range::All}) +
+               x1.sum({1, printemps::model::Range::All}) + x2(0)) == 1);
 
     /**
      * Set partitioning  constraint with 400 decision variables. The priority of
@@ -145,7 +146,8 @@ TEST_F(TestNeighborhood, setup_move_updater) {
     model.create_constraint("c17", 3 * z(0) - 10 * z(1) >= 20);  // eff. : 4
 
     /// Set packing constraints.
-    model.create_constraint("c18", x0.sum({2, cppmh::model::Range::All}) <= 1);
+    model.create_constraint("c18",
+                            x0.sum({2, printemps::model::Range::All}) <= 1);
 
     y(0, 0).fix_by(0);
     y(0, 1) = -10;
@@ -154,7 +156,7 @@ TEST_F(TestNeighborhood, setup_move_updater) {
     model.setup_unique_name();
     model.categorize_variables();
     model.categorize_constraints();
-    model.extract_selections(cppmh::model::SelectionMode::Larger);
+    model.extract_selections(printemps::model::SelectionMode::Larger);
 
     model.setup_neighborhood(true, true, true, true, false, false, false, false,
                              false);
@@ -187,7 +189,7 @@ TEST_F(TestNeighborhood, setup_move_updater) {
     {
         auto variable_ptrs = model.variable_reference().binary_variable_ptrs;
 
-        std::vector<cppmh::model::Variable<int, double>*>
+        std::vector<printemps::model::Variable<int, double>*>
             not_fixed_variable_ptrs;
         for (auto&& variable_ptr : variable_ptrs) {
             if (!variable_ptr->is_fixed()) {
@@ -200,7 +202,7 @@ TEST_F(TestNeighborhood, setup_move_updater) {
         EXPECT_EQ(not_fixed_variable_ptrs.size(), moves.size());
 
         for (auto& move : moves) {
-            EXPECT_EQ(cppmh::model::MoveSense::Binary, move.sense);
+            EXPECT_EQ(printemps::model::MoveSense::Binary, move.sense);
             EXPECT_EQ(false, move.alterations[0].first->is_fixed());
 
             EXPECT_EQ(move.alterations[0].second,
@@ -223,7 +225,7 @@ TEST_F(TestNeighborhood, setup_move_updater) {
     {
         auto variable_ptrs = model.variable_reference().integer_variable_ptrs;
 
-        std::vector<cppmh::model::Variable<int, double>*>
+        std::vector<printemps::model::Variable<int, double>*>
             not_fixed_variable_ptrs;
         for (auto&& variable_ptr : variable_ptrs) {
             if (!variable_ptr->is_fixed()) {
@@ -233,52 +235,71 @@ TEST_F(TestNeighborhood, setup_move_updater) {
 
         auto moves = model.neighborhood().integer_moves();
         auto flags = model.neighborhood().integer_move_flags();
-        EXPECT_EQ(2 * static_cast<int>(not_fixed_variable_ptrs.size()),
+        EXPECT_EQ(4 * static_cast<int>(not_fixed_variable_ptrs.size()),
                   static_cast<int>(moves.size()));
 
         int variable_size = not_fixed_variable_ptrs.size();
         for (auto i = 0; i < variable_size; i++) {
-            EXPECT_EQ(1, static_cast<int>(moves[2 * i].alterations.size()));
-            EXPECT_EQ(1, static_cast<int>(moves[2 * i + 1].alterations.size()));
+            for (auto j = 0; j < 4; j++) {
+                EXPECT_EQ(
+                    1, static_cast<int>(moves[4 * i + j].alterations.size()));
+                EXPECT_EQ(printemps::model::MoveSense::Integer,
+                          moves[4 * i + j].sense);
+                EXPECT_EQ(false,
+                          moves[4 * i + j].alterations[0].first->is_fixed());
 
-            EXPECT_EQ(cppmh::model::MoveSense::Integer, moves[2 * i].sense);
-            EXPECT_EQ(cppmh::model::MoveSense::Integer, moves[2 * i + 1].sense);
-
-            EXPECT_EQ(false, moves[2 * i].alterations[0].first->is_fixed());
-            EXPECT_EQ(false, moves[2 * i + 1].alterations[0].first->is_fixed());
-
-            for (auto& constraint_ptr :
-                 moves[2 * i].alterations[0].first->related_constraint_ptrs()) {
-                EXPECT_EQ(true, moves[2 * i].related_constraint_ptrs.find(
-                                    constraint_ptr) !=
-                                    moves[2 * i].related_constraint_ptrs.end());
+                for (auto& constraint_ptr :
+                     moves[4 * i + j]
+                         .alterations[0]
+                         .first->related_constraint_ptrs()) {
+                    EXPECT_EQ(
+                        true,
+                        moves[4 * i + j].related_constraint_ptrs.find(
+                            constraint_ptr) !=
+                            moves[4 * i + j].related_constraint_ptrs.end());
+                }
             }
 
-            for (auto& constraint_ptr : moves[2 * i + 1]
-                                            .alterations[0]
-                                            .first->related_constraint_ptrs()) {
-                EXPECT_EQ(true,
-                          moves[2 * i + 1].related_constraint_ptrs.find(
-                              constraint_ptr) !=
-                              moves[2 * i + 1].related_constraint_ptrs.end());
-            }
-
-            if (moves[2 * i].alterations.front().first->value() ==
-                moves[2 * i].alterations.front().first->upper_bound()) {
-                EXPECT_EQ(0, flags[2 * i]);
+            if (moves[4 * i].alterations.front().first->value() ==
+                moves[4 * i].alterations.front().first->upper_bound()) {
+                EXPECT_EQ(0, flags[4 * i]);
             } else {
-                EXPECT_EQ(1, flags[2 * i]);
-                EXPECT_EQ(moves[2 * i].alterations[0].second,
-                          moves[2 * i].alterations[0].first->value() + 1);
+                EXPECT_EQ(1, flags[4 * i]);
+                EXPECT_EQ(moves[4 * i].alterations[0].second,
+                          moves[4 * i].alterations[0].first->value() + 1);
             }
 
-            if (moves[2 * i].alterations.front().first->value() ==
-                moves[2 * i].alterations.front().first->lower_bound()) {
-                EXPECT_EQ(0, flags[2 * i + 1]);
+            if (moves[4 * i + 1].alterations.front().first->value() ==
+                moves[4 * i + 1].alterations.front().first->lower_bound()) {
+                EXPECT_EQ(0, flags[4 * i + 1]);
             } else {
-                EXPECT_EQ(1, flags[2 * i + 1]);
-                EXPECT_EQ(moves[2 * i + 1].alterations[0].second,
-                          moves[2 * i + 1].alterations[0].first->value() - 1);
+                EXPECT_EQ(1, flags[4 * i + 1]);
+                EXPECT_EQ(moves[4 * i + 1].alterations[0].second,
+                          moves[4 * i + 1].alterations[0].first->value() - 1);
+            }
+
+            if (moves[4 * i + 2].alterations.front().first->value() ==
+                moves[4 * i + 2].alterations.front().first->upper_bound()) {
+                EXPECT_EQ(0, flags[4 * i + 2]);
+            } else {
+                EXPECT_EQ(1, flags[4 * i + 2]);
+                EXPECT_EQ(
+                    moves[4 * i + 2].alterations[0].second,
+                    (moves[4 * i + 2].alterations[0].first->value() +
+                     moves[4 * i + 2].alterations[0].first->upper_bound()) /
+                        2);
+            }
+
+            if (moves[4 * i + 3].alterations.front().first->value() ==
+                moves[4 * i + 3].alterations.front().first->lower_bound()) {
+                EXPECT_EQ(0, flags[4 * i + 3]);
+            } else {
+                EXPECT_EQ(1, flags[4 * i + 3]);
+                EXPECT_EQ(
+                    moves[4 * i + 3].alterations[0].second,
+                    (moves[4 * i + 3].alterations[0].first->value() +
+                     moves[4 * i + 3].alterations[0].first->lower_bound()) /
+                        2);
             }
         }
     }
@@ -324,7 +345,7 @@ TEST_F(TestNeighborhood, setup_move_updater) {
         EXPECT_EQ(variable_ptrs.size(), moves.size());
 
         for (auto& move : moves) {
-            EXPECT_EQ(cppmh::model::MoveSense::Selection, move.sense);
+            EXPECT_EQ(printemps::model::MoveSense::Selection, move.sense);
             EXPECT_EQ(2, static_cast<int>(move.alterations.size()));
             EXPECT_EQ(1, move.alterations[0].first->value());
             EXPECT_EQ(0, move.alterations[0].second);
@@ -376,7 +397,7 @@ TEST_F(TestNeighborhood, setup_move_updater) {
 
         EXPECT_EQ(                                          //
             (binary_variables_size)                         // Binary
-                + (2 * integer_variables_size - 2 - 1 - 1)  // Integer
+                + (4 * integer_variables_size - 4 - 2 - 2)  // Integer
                 + (4 * aggregations_size - 5)               // Aggregation
                 + (2 * precedences_size - 4)                // Precedence
                 + (4 * variable_bounds_size)                // Variable Bound
@@ -388,7 +409,7 @@ TEST_F(TestNeighborhood, setup_move_updater) {
 
 /*****************************************************************************/
 TEST_F(TestNeighborhood, set_user_defined_move_updater) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     int   n = 100;
     auto& x = model.create_variables("x", n, 0, 1);
@@ -397,10 +418,10 @@ TEST_F(TestNeighborhood, set_user_defined_move_updater) {
     x(1).fix_by(1);
 
     auto move_updater =
-        [&x, n](std::vector<cppmh::model::Move<int, double>>* a_moves) {
+        [&x, n](std::vector<printemps::model::Move<int, double>>* a_moves) {
             a_moves->resize(n);
             for (auto i = 0; i < n; i++) {
-                (*a_moves)[i].sense = cppmh::model::MoveSense::UserDefined;
+                (*a_moves)[i].sense = printemps::model::MoveSense::UserDefined;
                 (*a_moves)[i].alterations.clear();
                 (*a_moves)[i].alterations.emplace_back(&x(i), 1 - x(i).value());
             }
@@ -424,7 +445,7 @@ TEST_F(TestNeighborhood, set_user_defined_move_updater) {
     auto moves = model.neighborhood().user_defined_moves();
     EXPECT_EQ(n, static_cast<int>(moves.size()));
     for (auto& move : moves) {
-        EXPECT_EQ(cppmh::model::MoveSense::UserDefined, move.sense);
+        EXPECT_EQ(printemps::model::MoveSense::UserDefined, move.sense);
         EXPECT_EQ(1, static_cast<int>(move.alterations.size()));
         EXPECT_EQ(true, (move.alterations[0].first->value() == 0 ||
                          move.alterations[0].first->value() == 1));
@@ -437,7 +458,7 @@ TEST_F(TestNeighborhood, set_user_defined_move_updater) {
 
 /*****************************************************************************/
 TEST_F(TestNeighborhood, shuffle_moves) {
-    cppmh::model::Model<int, double> model;
+    printemps::model::Model<int, double> model;
 
     int                    n = 100;
     auto&                  x = model.create_variables("x", n, 0, 1);
@@ -498,7 +519,7 @@ TEST_F(TestNeighborhood, user_defined_moves) {
 
 /*****************************************************************************/
 TEST_F(TestNeighborhood, is_enabled_binary_move) {
-    cppmh::model::Neighborhood<int, double> neighborhood;
+    printemps::model::Neighborhood<int, double> neighborhood;
 
     /// initial status
     EXPECT_EQ(false, neighborhood.is_enabled_binary_move());
@@ -522,7 +543,7 @@ TEST_F(TestNeighborhood, disable_binary_move) {
 
 /*****************************************************************************/
 TEST_F(TestNeighborhood, is_enabled_integer_move) {
-    cppmh::model::Neighborhood<int, double> neighborhood;
+    printemps::model::Neighborhood<int, double> neighborhood;
 
     /// initial status
     EXPECT_EQ(false, neighborhood.is_enabled_integer_move());
@@ -546,7 +567,7 @@ TEST_F(TestNeighborhood, disable_integer_move) {
 
 /*****************************************************************************/
 TEST_F(TestNeighborhood, is_enabled_user_defined_move) {
-    cppmh::model::Neighborhood<int, double> neighborhood;
+    printemps::model::Neighborhood<int, double> neighborhood;
 
     /// initial status
     EXPECT_EQ(false, neighborhood.is_enabled_user_defined_move());
@@ -570,7 +591,7 @@ TEST_F(TestNeighborhood, disable_user_defined_move) {
 
 /*****************************************************************************/
 TEST_F(TestNeighborhood, is_enabled_aggregation_move) {
-    cppmh::model::Neighborhood<int, double> neighborhood;
+    printemps::model::Neighborhood<int, double> neighborhood;
 
     /// initial status
     EXPECT_EQ(false, neighborhood.is_enabled_aggregation_move());
@@ -594,7 +615,7 @@ TEST_F(TestNeighborhood, disable_aggregation_move) {
 
 /*****************************************************************************/
 TEST_F(TestNeighborhood, is_enabled_precedence_move) {
-    cppmh::model::Neighborhood<int, double> neighborhood;
+    printemps::model::Neighborhood<int, double> neighborhood;
 
     /// initial status
     EXPECT_EQ(false, neighborhood.is_enabled_precedence_move());
@@ -618,7 +639,7 @@ TEST_F(TestNeighborhood, disable_precedence_move) {
 
 /*****************************************************************************/
 TEST_F(TestNeighborhood, is_enabled_variable_bound_move) {
-    cppmh::model::Neighborhood<int, double> neighborhood;
+    printemps::model::Neighborhood<int, double> neighborhood;
 
     /// initial status
     EXPECT_EQ(false, neighborhood.is_enabled_variable_bound_move());
@@ -642,7 +663,7 @@ TEST_F(TestNeighborhood, disable_variable_bound_move) {
 
 /*****************************************************************************/
 TEST_F(TestNeighborhood, is_enabled_selection_move) {
-    cppmh::model::Neighborhood<int, double> neighborhood;
+    printemps::model::Neighborhood<int, double> neighborhood;
 
     /// initial status
     EXPECT_EQ(false, neighborhood.is_enabled_selection_move());
@@ -666,7 +687,7 @@ TEST_F(TestNeighborhood, disable_selection_move) {
 
 /*****************************************************************************/
 TEST_F(TestNeighborhood, is_enabled_exclusive_move) {
-    cppmh::model::Neighborhood<int, double> neighborhood;
+    printemps::model::Neighborhood<int, double> neighborhood;
 
     /// initial status
     EXPECT_EQ(false, neighborhood.is_enabled_exclusive_move());
