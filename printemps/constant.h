@@ -10,9 +10,9 @@
 
 namespace printemps {
 namespace constant {
-static constexpr auto EPSILON = 1E-5;
-static constexpr auto INT_MIN = std::numeric_limits<int>::min() / 2 + 1;
-static constexpr auto INT_MAX = (std::numeric_limits<int>::max() - 1) / 2;
+static constexpr auto EPSILON      = 1E-5;
+static constexpr auto INT_HALF_MIN = std::numeric_limits<int>::min() / 2 + 1;
+static constexpr auto INT_HALF_MAX = (std::numeric_limits<int>::max() - 1) / 2;
 }  // namespace constant
 }  // namespace printemps
 

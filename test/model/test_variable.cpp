@@ -44,8 +44,8 @@ TEST_F(TestVariable, initialize) {
     /// Check the initial values of the derived class members.
     EXPECT_EQ(false, variable.is_fixed());
     EXPECT_EQ(0, variable.value());
-    EXPECT_EQ(printemps::constant::INT_MIN, variable.lower_bound());
-    EXPECT_EQ(printemps::constant::INT_MAX, variable.upper_bound());
+    EXPECT_EQ(printemps::constant::INT_HALF_MIN, variable.lower_bound());
+    EXPECT_EQ(printemps::constant::INT_HALF_MAX, variable.upper_bound());
     EXPECT_EQ(false, variable.has_bounds());
     EXPECT_EQ(false, variable.is_improvable());
     EXPECT_EQ(printemps::model::VariableSense::Integer, variable.sense());
@@ -206,8 +206,8 @@ TEST_F(TestVariable, set_bound) {
                  std::logic_error);
 
     variable.reset_bound();
-    EXPECT_EQ(printemps::constant::INT_MIN, variable.lower_bound());
-    EXPECT_EQ(printemps::constant::INT_MAX, variable.upper_bound());
+    EXPECT_EQ(printemps::constant::INT_HALF_MIN, variable.lower_bound());
+    EXPECT_EQ(printemps::constant::INT_HALF_MAX, variable.upper_bound());
     EXPECT_EQ(false, variable.has_bounds());
 }
 
