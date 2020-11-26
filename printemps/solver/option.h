@@ -3,8 +3,8 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef printemps_SOLVER_OPTION_H__
-#define printemps_SOLVER_OPTION_H__
+#ifndef PRINTEMPS_SOLVER_OPTION_H__
+#define PRINTEMPS_SOLVER_OPTION_H__
 
 #include "lagrange_dual/lagrange_dual_option.h"
 #include "local_search/local_search_option.h"

@@ -3,8 +3,8 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef printemps_SOLVER_TABU_SEARCH_TABU_SEARCH_MOVE_SCORE_H__
-#define printemps_SOLVER_TABU_SEARCH_TABU_SEARCH_MOVE_SCORE_H__
+#ifndef PRINTEMPS_SOLVER_TABU_SEARCH_TABU_SEARCH_MOVE_SCORE_H__
+#define PRINTEMPS_SOLVER_TABU_SEARCH_TABU_SEARCH_MOVE_SCORE_H__
 
 namespace printemps {
 namespace solver {
