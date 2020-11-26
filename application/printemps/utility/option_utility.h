@@ -4,8 +4,8 @@
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
 
-#ifndef printemps_UTILITY_OPTION_UTILITY_H__
-#define printemps_UTILITY_OPTION_UTILITY_H__
+#ifndef PRINTEMPS_UTILITY_OPTION_UTILITY_H__
+#define PRINTEMPS_UTILITY_OPTION_UTILITY_H__
 
 #include <printemps.h>
 #include <nlohmann/json.hpp>

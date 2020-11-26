@@ -3,8 +3,8 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef printemps_MODEL_VARIABLE_PROXY_H__
-#define printemps_MODEL_VARIABLE_PROXY_H__
+#ifndef PRINTEMPS_MODEL_VARIABLE_PROXY_H__
+#define PRINTEMPS_MODEL_VARIABLE_PROXY_H__
 
 #include "../utility/utility.h"
 

@@ -3,8 +3,8 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef printemps_SOLVER_LOCAL_SEARCH_LOCAL_SEARCH_H__
-#define printemps_SOLVER_LOCAL_SEARCH_LOCAL_SEARCH_H__
+#ifndef PRINTEMPS_SOLVER_LOCAL_SEARCH_LOCAL_SEARCH_H__
+#define PRINTEMPS_SOLVER_LOCAL_SEARCH_LOCAL_SEARCH_H__
 
 #include "local_search_option.h"
 #include "local_search_print.h"
