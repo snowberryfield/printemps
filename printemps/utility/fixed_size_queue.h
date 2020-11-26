@@ -3,8 +3,8 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef printemps_UTILITY_FIXED_SIZE_QUEUE_H__
-#define printemps_UTILITY_FIXED_SIZE_QUEUE_H__
+#ifndef PRINTEMPS_UTILITY_FIXED_SIZE_QUEUE_H__
+#define PRINTEMPS_UTILITY_FIXED_SIZE_QUEUE_H__
 
 #include <algorithm>
 #include <deque>

@@ -3,8 +3,8 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef printemps_UTILUTY_H__
-#define printemps_UTILUTY_H__
+#ifndef PRINTEMPS_UTILUTY_H__
+#define PRINTEMPS_UTILUTY_H__
 
 #include "console_utility.h"
 #include "vector_utility.h"

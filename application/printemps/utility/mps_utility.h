@@ -3,8 +3,8 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef printemps_UTILITY_MPS_UTILITY_H__
-#define printemps_UTILITY_MPS_UTILITY_H__
+#ifndef PRINTEMPS_UTILITY_MPS_UTILITY_H__
+#define PRINTEMPS_UTILITY_MPS_UTILITY_H__
 
 #include <iostream>
 #include <cmath>
@@ -68,7 +68,7 @@ struct MPSVariable {
         sense                  = MPSVariableSense::Continuous;
         name                   = "";
         integer_lower_bound    = 0;
-        integer_upper_bound    = constant::INT_MAX;
+        integer_upper_bound    = constant::INT_HALF_MAX;
         integer_fixed_value    = 0;
         continuous_lower_bound = 0;
         continuous_upper_bound = HUGE_VAL;
@@ -355,9 +355,9 @@ inline MPS read_mps(const std::string &a_FILE_NAME) {
                     if (category == "FR") {
                         mps.variables[v_name].is_bound_defined = true;
                         mps.variables[v_name].integer_lower_bound =
-                            constant::INT_MIN;
+                            constant::INT_HALF_MIN;
                         mps.variables[v_name].integer_upper_bound =
-                            constant::INT_MAX;
+                            constant::INT_HALF_MAX;
                         mps.variables[v_name].continuous_lower_bound =
                             -HUGE_VAL;
                         mps.variables[v_name].continuous_upper_bound = HUGE_VAL;
@@ -369,7 +369,7 @@ inline MPS read_mps(const std::string &a_FILE_NAME) {
                     } else if (category == "MI") {
                         mps.variables[v_name].is_bound_defined = true;
                         mps.variables[v_name].integer_lower_bound =
-                            constant::INT_MIN;
+                            constant::INT_HALF_MIN;
                         mps.variables[v_name].integer_upper_bound = 0;
                         mps.variables[v_name].continuous_lower_bound =
                             -HUGE_VAL;
@@ -378,7 +378,7 @@ inline MPS read_mps(const std::string &a_FILE_NAME) {
                         mps.variables[v_name].is_bound_defined    = true;
                         mps.variables[v_name].integer_lower_bound = 0;
                         mps.variables[v_name].integer_upper_bound =
-                            constant::INT_MAX;
+                            constant::INT_HALF_MAX;
                         mps.variables[v_name].continuous_lower_bound = 0;
                         mps.variables[v_name].continuous_upper_bound = HUGE_VAL;
                     }

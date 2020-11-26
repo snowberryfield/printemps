@@ -3,8 +3,8 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef printemps_UTILITY_FIXED_SIZE_HASH_MAP__
-#define printemps_UTILITY_FIXED_SIZE_HASH_MAP__
+#ifndef PRINTEMPS_UTILITY_FIXED_SIZE_HASH_MAP__
+#define PRINTEMPS_UTILITY_FIXED_SIZE_HASH_MAP__
 
 #include <vector>
 #include <unordered_map>
@@ -32,8 +32,8 @@ class FixedSizeHashMap {
     bool *   m_is_occupied;
 
     /*************************************************************************/
-    inline constexpr std::uint_fast32_t compute_hash(const T_Key a_KEY) const
-        noexcept {
+    inline constexpr std::uint_fast32_t compute_hash(
+        const T_Key a_KEY) const noexcept {
         return reinterpret_cast<std::uint_fast64_t>(a_KEY) >> m_shift_size;
     }
 

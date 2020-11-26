@@ -3,8 +3,8 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef printemps_SOLVER_INCUMBENT_HOLDER_H__
-#define printemps_SOLVER_INCUMBENT_HOLDER_H__
+#ifndef PRINTEMPS_SOLVER_INCUMBENT_HOLDER_H__
+#define PRINTEMPS_SOLVER_INCUMBENT_HOLDER_H__
 
 #include <unordered_map>
 #include <string>
