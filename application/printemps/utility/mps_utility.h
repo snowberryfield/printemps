@@ -383,8 +383,9 @@ inline MPS read_mps(const std::string &a_FILE_NAME) {
                         mps.variables[v_name].continuous_upper_bound = HUGE_VAL;
                     }
                 } else if (items_size == 4) {
-                    int    integer_value    = atoi(items[3].c_str());
                     double continuous_value = atof(items[3].c_str());
+                    int    integer_value = static_cast<int>(continuous_value);
+
                     if (category == "LO") {
                         mps.variables[v_name].is_bound_defined = true;
                         mps.variables[v_name].integer_lower_bound =
