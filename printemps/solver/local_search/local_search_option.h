@@ -24,7 +24,7 @@ struct LocalSearchOption {
     double time_max;
     double time_offset;  // hidden
     int    log_interval;
-    int    seed;
+    int    seed;  // hidden
 
     /*************************************************************************/
     LocalSearchOption(void) {

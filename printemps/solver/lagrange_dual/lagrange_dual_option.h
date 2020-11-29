@@ -29,7 +29,7 @@ struct LagrangeDualOption {
     double step_size_extend_rate;
     double step_size_reduce_rate;
     double tolerance;
-    double queue_size;
+    double queue_size;  // hidden
     int    log_interval;
 
     /*************************************************************************/
