@@ -62,7 +62,7 @@ struct OptionConstant {
 /*****************************************************************************/
 struct Option {
     int    iteration_max;
-    double time_offset;
+    double time_offset;  // hidden
     double time_max;
     double penalty_coefficient_relaxing_rate;
     double penalty_coefficient_tightening_rate;
@@ -90,7 +90,7 @@ struct Option {
     ImprovabilityScreeningMode improvability_screening_mode;
 
     double target_objective_value;
-    int    seed;
+    int    seed;  // hidden
     int    verbose;
     bool   is_enabled_collect_historical_data;  // hidden
     int    historical_data_capacity;            // hidden
