@@ -28,7 +28,7 @@
         "step_size_extend_rate": 1.05,
         "step_size_reduce_rate": 0.95,
         "tolerance": 1E-5,
-        "log_interval": 10,
+        "log_interval": 10
     },
     "local_search": {
         "iteration_max": 10000,
