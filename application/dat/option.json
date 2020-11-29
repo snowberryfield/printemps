@@ -1,15 +1,11 @@
 {
     "iteration_max": 100,
     "time_max": 120.0,
-    "time_offset": 0.0,
     "penalty_coefficient_relaxing_rate": 0.9,
     "penalty_coefficient_tightening_rate": 1.0,
-    "penalty_coefficient_updating_balance": 0.0,
-    "penalty_coefficient_reset_count_threshold": -1,
     "initial_penalty_coefficient": 1E7,
     "is_enabled_lagrange_dual": false,
     "is_enabled_local_search": false,
-    "is_enabled_grouping_penalty_coefficient": false,
     "is_enabled_presolve": true,
     "is_enabled_initial_value_correction": true,
     "is_enabled_parallel_evaluation": true,
@@ -24,28 +20,20 @@
     "is_enabled_user_defined_move": false,
     "selection_mode": 0,
     "improvability_screening_mode": 3,
-    "seed": 1,
     "target_objective_value": -1E100,
-    "is_enabled_collect_historical_data": false,
-    "historical_data_capacity": 1000,
     "verbose": 0,
     "lagrange_dual": {
         "iteration_max": 10000,
         "time_max": 120.0,
-        "time_offset": 0.0,
         "step_size_extend_rate": 1.05,
         "step_size_reduce_rate": 0.95,
         "tolerance": 1E-5,
-        "queue_size": 100,
         "log_interval": 10,
-        "seed": 1
     },
     "local_search": {
         "iteration_max": 10000,
         "time_max": 120.0,
-        "time_offset": 0.0,
-        "log_interval": 10,
-        "seed": 1
+        "log_interval": 10
     },
     "tabu_search": {
         "iteration_max": 200,
@@ -54,23 +42,6 @@
         "log_interval": 10,
         "initial_tabu_tenure": 10,
         "tabu_tenure_randomize_rate": 0.5,
-        "initial_modification_fixed_rate": 1.0,
-        "initial_modification_randomize_rate": 0.5,
-        "tabu_mode": 0,
-        "move_preserve_rate": 1.0,
-        "frequency_penalty_coefficient": 1E-5,
-        "is_enabled_shuffle": true,
-        "is_enabled_move_curtail": false,
-        "is_enabled_automatic_break": true,
-        "is_enabled_automatic_tabu_tenure_adjustment": true,
-        "is_enabled_automatic_iteration_adjustment": true,
-        "is_enabled_initial_modification": true,
-        "bias_increase_count_threshold": 10,
-        "bias_decrease_count_threshold": 10,
-        "iteration_increase_rate": 1.5,
-        "iteration_decrease_rate": 0.5,
-        "ignore_tabu_if_augmented_incumbent": false,
-        "ignore_tabu_if_feasible_incumbent": true,
-        "seed": 1
+        "tabu_mode": 0
     }
 }
