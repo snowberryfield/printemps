@@ -12,8 +12,8 @@ import argparse
 ###############################################################################
 
 
-def run_benchmark(executable, mps_list, option_file_name,
-                  is_enabled_separate_equality):
+def run_batch(executable, mps_list, option_file_name,
+              is_enabled_separate_equality):
     results = []
     index = 0
     for mps in mps_list:
@@ -67,7 +67,7 @@ def run_benchmark(executable, mps_list, option_file_name,
 
 
 def write_csv(results):
-    with open('benchmark_result.csv', 'w') as f:
+    with open('batch_result.csv', 'w') as f:
 
         f.write(
             'name,number_of_variables,'
@@ -101,7 +101,7 @@ def write_csv(results):
 
 def main():
     parser = argparse.ArgumentParser(
-        description='A script for benchmarking of printemps')
+        description='A script for batch execution of printemps')
     parser.add_argument('executable',
                         help='specify the executable of printemps.',
                         type=str)
@@ -121,12 +121,12 @@ def main():
     with open(mps_list_file_name, 'r') as f:
         mps_list = json.load(f)
 
-    results = run_benchmark(args.executable,
-                            mps_list,
-                            args.option,
-                            args.separate)
+    results = run_batch(args.executable,
+                        mps_list,
+                        args.option,
+                        args.separate)
 
-    with open('benchmark_result.json', 'w') as f:
+    with open('batch_result.json', 'w') as f:
         json.dump(results, f, indent=4)
 
     write_csv(results)

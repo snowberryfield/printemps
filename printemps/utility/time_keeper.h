@@ -4,8 +4,8 @@
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
 
-#ifndef printemps_UTILITY_TIME_KEEPER_H__
-#define printemps_UTILITY_TIME_KEEPER_H__
+#ifndef PRINTEMPS_UTILITY_TIME_KEEPER_H__
+#define PRINTEMPS_UTILITY_TIME_KEEPER_H__
 
 #include <iostream>
 #include <cstdlib>

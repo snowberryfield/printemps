@@ -3,8 +3,8 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef printemps_SOLVER_LOCAL_SEARCH_LOCAL_SEARCH_PRINT_H__
-#define printemps_SOLVER_LOCAL_SEARCH_LOCAL_SEARCH_PRINT_H__
+#ifndef PRINTEMPS_SOLVER_LOCAL_SEARCH_LOCAL_SEARCH_PRINT_H__
+#define PRINTEMPS_SOLVER_LOCAL_SEARCH_LOCAL_SEARCH_PRINT_H__
 
 namespace printemps {
 namespace solver {

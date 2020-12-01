@@ -4,8 +4,8 @@
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
 
-#ifndef printemps_MODEL_VALUE_PROXY_H__
-#define printemps_MODEL_VALUE_PROXY_H__
+#ifndef PRINTEMPS_MODEL_VALUE_PROXY_H__
+#define PRINTEMPS_MODEL_VALUE_PROXY_H__
 
 #include "abstract_multi_array.h"
 #include <vector>

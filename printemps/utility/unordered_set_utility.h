@@ -3,8 +3,8 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef printemps_UTILITY_UNORDERED_UTILITY_H__
-#define printemps_UTILITY_UNORDERED_UTILITY_H__
+#ifndef PRINTEMPS_UTILITY_UNORDERED_UTILITY_H__
+#define PRINTEMPS_UTILITY_UNORDERED_UTILITY_H__
 
 #include <unordered_set>
 

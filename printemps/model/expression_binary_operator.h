@@ -3,8 +3,8 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef printemps_MODEL_EXPRESSION_BINARY_OPERAOR__H__
-#define printemps_MODEL_EXPRESSION_BINARY_OPERAOR__H__
+#ifndef PRINTEMPS_MODEL_EXPRESSION_BINARY_OPERAOR__H__
+#define PRINTEMPS_MODEL_EXPRESSION_BINARY_OPERAOR__H__
 
 namespace printemps {
 namespace model {
