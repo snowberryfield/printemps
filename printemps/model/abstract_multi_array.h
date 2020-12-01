@@ -3,8 +3,8 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef printemps_MODEL_ABSTRACT_MULTI_ARRAY_H__
-#define printemps_MODEL_ABSTRACT_MULTI_ARRAY_H__
+#ifndef PRINTEMPS_MODEL_ABSTRACT_MULTI_ARRAY_H__
+#define PRINTEMPS_MODEL_ABSTRACT_MULTI_ARRAY_H__
 
 #include <vector>
 #include <numeric>

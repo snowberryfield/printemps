@@ -3,8 +3,8 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef printemps_SOLVER_LAGRANGE_DUAL_LAGRANGE_DUAL_OPTION_H__
-#define printemps_SOLVER_LAGRANGE_DUAL_LAGRANGE_DUAL_OPTION_H__
+#ifndef PRINTEMPS_SOLVER_LAGRANGE_DUAL_LAGRANGE_DUAL_OPTION_H__
+#define PRINTEMPS_SOLVER_LAGRANGE_DUAL_LAGRANGE_DUAL_OPTION_H__
 
 namespace printemps {
 namespace solver {
@@ -29,7 +29,7 @@ struct LagrangeDualOption {
     double step_size_extend_rate;
     double step_size_reduce_rate;
     double tolerance;
-    double queue_size;
+    double queue_size;  // hidden
     int    log_interval;
 
     /*************************************************************************/

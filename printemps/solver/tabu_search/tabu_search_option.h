@@ -3,8 +3,8 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef printemps_SOLVER_TABU_SEARCH_TABU_SEARCH_OPTION_H__
-#define printemps_SOLVER_TABU_SEARCH_TABU_SEARCH_OPTION_H__
+#ifndef PRINTEMPS_SOLVER_TABU_SEARCH_TABU_SEARCH_OPTION_H__
+#define PRINTEMPS_SOLVER_TABU_SEARCH_TABU_SEARCH_OPTION_H__
 
 namespace printemps {
 namespace solver {
@@ -57,22 +57,22 @@ struct TabuSearchOption {
     double   initial_modification_fixed_rate;      // hidden
     double   initial_modification_randomize_rate;  // hidden
     TabuMode tabu_mode;
-    double   move_preserve_rate;
-    double   frequency_penalty_coefficient;
-    bool     is_enabled_shuffle;
-    bool     is_enabled_move_curtail;
-    bool     is_enabled_automatic_break;
-    bool     is_enabled_automatic_tabu_tenure_adjustment;
-    bool     is_enabled_automatic_iteration_adjustment;
-    bool     is_enabled_initial_modification;
-    int      bias_increase_count_threshold;  // hidden
-    int      bias_decrease_count_threshold;  // hidden
-    double   iteration_increase_rate;        // hidden
-    double   iteration_decrease_rate;        // hidden
-    bool     ignore_tabu_if_augmented_incumbent;
-    bool     ignore_tabu_if_feasible_incumbent;
-    int      number_of_initial_modification;  // hidden
-    int      seed;
+    double   move_preserve_rate;                           // hidden
+    double   frequency_penalty_coefficient;                // hidden
+    bool     is_enabled_shuffle;                           // hidden
+    bool     is_enabled_move_curtail;                      // hidden
+    bool     is_enabled_automatic_break;                   // hidden
+    bool     is_enabled_automatic_tabu_tenure_adjustment;  // hidden
+    bool     is_enabled_automatic_iteration_adjustment;    // hidden
+    bool     is_enabled_initial_modification;              // hidden
+    int      bias_increase_count_threshold;                // hidden
+    int      bias_decrease_count_threshold;                // hidden
+    double   iteration_increase_rate;                      // hidden
+    double   iteration_decrease_rate;                      // hidden
+    bool     ignore_tabu_if_augmented_incumbent;           // hidden
+    bool     ignore_tabu_if_feasible_incumbent;            // hidden
+    int      number_of_initial_modification;               // hidden
+    int      seed;                                         // hidden
 
     /*************************************************************************/
     TabuSearchOption(void) {

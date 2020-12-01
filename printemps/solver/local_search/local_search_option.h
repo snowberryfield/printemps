@@ -3,8 +3,8 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef printemps_SOLVER_LOCAL_SEARCH_LOCAL_SEARCH_OPTION_H__
-#define printemps_SOLVER_LOCAL_SEARCH_LOCAL_SEARCH_OPTION_H__
+#ifndef PRINTEMPS_SOLVER_LOCAL_SEARCH_LOCAL_SEARCH_OPTION_H__
+#define PRINTEMPS_SOLVER_LOCAL_SEARCH_LOCAL_SEARCH_OPTION_H__
 
 namespace printemps {
 namespace solver {
@@ -24,7 +24,7 @@ struct LocalSearchOption {
     double time_max;
     double time_offset;  // hidden
     int    log_interval;
-    int    seed;
+    int    seed;  // hidden
 
     /*************************************************************************/
     LocalSearchOption(void) {
