@@ -121,7 +121,7 @@ where the argument `mps_file` is the path of the MPS file. The argument `-p opti
 
 
 ## Benchmark
-Optimization performance of PRINTEMPS has been evaluated using pure integer instances of [MIPLIB2017](https://miplib.zib.de). Please refer [Benchmark Results](./contents/benchmark/index.md) for detail.
+Optimization performance of PRINTEMPS has been evaluated using pure integer instances of [MIPLIB 2017](https://miplib.zib.de). Please refer [Benchmark Results](./contents/benchmark/index.md) for detail.
 
 
 ## Test

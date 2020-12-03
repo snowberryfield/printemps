@@ -6,19 +6,19 @@ layout: sub
 # Benchmark Result
 
 ## Condition
-| Item               | Value                                                                                                                                                         |
-|:-------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Last Updated       | Nov 30, 2020                                                                                                                                                  |
-| PRINTEMPS Version  | 1.5.1                                                                                                                                                         |
-| Computational Time | 600sec for each instance                                                                                                                                      |
-| Instance Set       | Pure integer instances of [MIPLIB2017 Benchmark Set](https://miplib.zib.de/tag_benchmark.html) (89 instances)                                                 |
-| Operating System   | Ubuntu 20.04                                                                                                                                                  |
-| Compiler           | g++ 7.5.0                                                                                                                                                     |
-| CPU                | Intel(R) Xeon(R) CPU E3-1270 v5 @ 3.60GHz                                                                                                                     |
-| RAM                | 16GB                                                                                                                                                          |
-| Solver             | The [standalone solver](https://snowberryfield.github.io/printemps/#standalone-solver) was run with`--separate` flag and the [option JSON file](option.json). |
+| Item               | Value                                                                                                                                                                   |
+|:-------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Last Updated       | Nov 30, 2020                                                                                                                                                            |
+| PRINTEMPS Version  | 1.5.1                                                                                                                                                                   |
+| Computational Time | 600sec for each instance                                                                                                                                                |
+| Instance Set       | Pure integer instances of [MIPLIB 2017 Benchmark Set](https://miplib.zib.de/tag_benchmark.html) (89 instances)                                                          |
+| Operating System   | Ubuntu 20.04                                                                                                                                                            |
+| Compiler           | g++ 7.5.0                                                                                                                                                               |
+| CPU                | Intel(R) Xeon(R) CPU E3-1270 v5 @ 3.60GHz                                                                                                                               |
+| RAM                | 16GB                                                                                                                                                                    |
+| Solver             | The [standalone solver](https://snowberryfield.github.io/printemps/#standalone-solver) was run with`--separate` flag and the [option JSON file](benchmark_option.json). |
 
-Back to [Benchmark top](../../).
+Back to [Benchmark top](../../../).
 
 ## Result
 
