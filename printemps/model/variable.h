@@ -25,13 +25,6 @@ template <class T_Variable, class T_Expression>
 struct Selection;
 
 /*****************************************************************************/
-enum class VariableSense {
-    Selection,  //
-    Binary,     //
-    Integer     //
-};
-
-/*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class Variable : public AbstractMultiArrayElement {
     /**

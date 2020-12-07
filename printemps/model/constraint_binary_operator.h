@@ -32,9 +32,6 @@ template <class T_Variable, class T_Expression>
 class Constraint;
 
 /*****************************************************************************/
-enum class ConstraintSense;
-
-/*****************************************************************************/
 // LOWER
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value>
