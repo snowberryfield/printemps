@@ -611,6 +611,16 @@ Result<T_Variable, T_Expression> solve(
         }
 
         /**
+         * Reset chain moves if the global augmented objective was updated.
+         */
+        if (update_status &
+            IncumbentHolderConstant::STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
+            if (option.is_enabled_chain_move) {
+                model->neighborhood().clear_chain_moves();
+            }
+        }
+
+        /**
          * Update the current solution which is employed as the initial solution
          * of the next loop. Whether the local penalty coefficients should be
          * relaxed or tightened, is also determined.

@@ -12,7 +12,12 @@
 #include <functional>
 #include <cmath>
 
+#include "variable_sense.h"
+#include "constraint_sense.h"
+#include "move_sense.h"
 #include "range.h"
+#include "selection_mode.h"
+
 #include "move.h"
 #include "variable_proxy.h"
 #include "expression_proxy.h"
@@ -47,9 +52,6 @@ struct ModelConstant {
     static constexpr int MAX_NUMBER_OF_EXPRESSION_PROXIES = 100;
     static constexpr int MAX_NUMBER_OF_CONSTRAINT_PROXIES = 100;
 };
-
-/*****************************************************************************/
-enum SelectionMode : int { None, Defined, Smaller, Larger, Independent };
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>

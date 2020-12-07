@@ -20,19 +20,6 @@ template <class T_Variable, class T_Expression>
 class Constraint;
 
 /*****************************************************************************/
-enum class MoveSense {
-    Binary,         //
-    Integer,        //
-    Selection,      //
-    Precedence,     //
-    Aggregation,    //
-    VariableBound,  //
-    Exclusive,      //
-    Chain,          //
-    UserDefined
-};
-
-/*****************************************************************************/
 template <class T_Variable, class T_Expression>
 using Alteration = std::pair<Variable<T_Variable, T_Expression> *, T_Variable>;
 
@@ -58,6 +45,18 @@ struct Move {
         }
         return false;
     };
+
+    /*************************************************************************/
+    inline static constexpr bool is_binary_swap(
+        const Move<T_Variable, T_Expression> &a_MOVE) {
+        for (const auto &alteration : a_MOVE.alterations) {
+            if (alteration.first->sense() != VariableSense::Binary) {
+                return false;
+            }
+        }
+
+        return true;
+    };
 };
 
 /*****************************************************************************/
@@ -74,6 +73,25 @@ inline constexpr Move<T_Variable, T_Expression> operator+(
         a_MOVE_2.related_constraint_ptrs.end());
     result.sense = MoveSense::Chain;
     return result;
+};
+
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+inline constexpr bool operator==(
+    const Move<T_Variable, T_Expression> &a_MOVE_1,
+    const Move<T_Variable, T_Expression> &a_MOVE_2) {
+    if (a_MOVE_1.alterations.size() != a_MOVE_2.alterations.size()) {
+        return false;
+    }
+
+    int alterations_size = a_MOVE_1.alterations.size();
+    for (auto i = 0; i < alterations_size; i++) {
+        if (a_MOVE_1.alterations[i] != a_MOVE_2.alterations[i]) {
+            return false;
+        }
+    }
+
+    return true;
 };
 
 using IPMove = Move<int, double>;

@@ -19,13 +19,6 @@ template <class T_Variable, class T_Expression>
 class Expression;
 
 /*****************************************************************************/
-enum class ConstraintSense {
-    Lower,  // <= target
-    Equal,  // = target
-    Upper   // >= target
-};
-
-/*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class Constraint : public AbstractMultiArrayElement {
     /**

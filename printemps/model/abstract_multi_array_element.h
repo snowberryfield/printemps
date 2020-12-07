@@ -11,6 +11,7 @@
 
 namespace printemps {
 namespace model {
+/*****************************************************************************/
 class AbstractMultiArrayElement {
    protected:
     int              m_id;

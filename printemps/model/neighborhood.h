@@ -984,6 +984,37 @@ class Neighborhood {
     }
 
     /*************************************************************************/
+    inline constexpr void clear_chain_moves() {
+        m_chain_moves.clear();
+        m_chain_move_flags.clear();
+    }
+
+    /*************************************************************************/
+    inline constexpr void deduplicate_chain_moves() {
+        std::vector<Move<T_Variable, T_Expression>> chain_moves;
+        int moves_size = m_chain_moves.size();
+        chain_moves.reserve(moves_size);
+
+        for (auto i = 0; i < moves_size; i++) {
+            bool has_duplicated_move = false;
+            for (auto j = i + 1; j < moves_size; j++) {
+                if (i != j) {
+                    if (m_chain_moves[i] == m_chain_moves[j]) {
+                        has_duplicated_move = true;
+                        break;
+                    }
+                }
+            }
+            if (!has_duplicated_move) {
+                chain_moves.push_back(m_chain_moves[i]);
+            }
+        }
+        m_chain_moves = chain_moves;
+        m_chain_move_flags.resize(chain_moves.size());
+        std::cout << moves_size << " -> " << chain_moves.size() << std::endl;
+    }
+
+    /*************************************************************************/
     inline constexpr void set_user_defined_move_updater(
         const std::function<void(std::vector<Move<T_Variable, T_Expression>> *)>
             &a_FUNCTION) {
