@@ -417,6 +417,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
             min_local_penalty = std::min(min_local_penalty,
                                          current_solution_score.local_penalty);
         }
+
         /**
          * Update the status.
          */
@@ -503,16 +504,25 @@ TabuSearchResult<T_Variable, T_Expression> solve(
         }
 
         /**
-         * Register a chain move.
+         * Register a chain move. To prevent the duplication of same chain move,
+         * moves of the initial tabu_tenure iterations will be ignored.
          */
-        if (iteration > 2 && option.is_enabled_chain_move) {
-            if (current_improvement > 0 && previous_improvement < 0 &&
-                current_improvement + previous_improvement > 0) {
+        if (iteration > tabu_tenure && option.is_enabled_chain_move) {
+            if (current_improvement * previous_improvement < 0) {
                 auto chain_move = previous_move + current_move;
                 if (!Move_T::has_duplicate_variable(chain_move) &&
                     previous_move.sense != model::MoveSense::Selection &&
                     current_move.sense != model::MoveSense::Selection) {
                     model->neighborhood().register_chain_move(chain_move);
+
+                    if (Move_T::is_binary_swap(chain_move)) {
+                        auto back_chain_move = chain_move;
+                        for (auto&& alteration : back_chain_move.alterations) {
+                            alteration.second = 1 - alteration.second;
+                        }
+                        model->neighborhood().register_chain_move(
+                            back_chain_move);
+                    }
                 }
             }
         }
