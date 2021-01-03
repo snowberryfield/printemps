@@ -599,10 +599,8 @@ class Model {
 
     /*************************************************************************/
     inline constexpr void setup(
-        const bool           a_IS_ENABLED_IMPROVABILITY_SCREENING,       //
-        const bool           a_IS_ENABLED_PARALLEL_NEIGHBORHOOD_UPDATE,  //
-        const bool           a_IS_ENABLED_PRESOLVE,                      //
-        const bool           a_IS_ENABLED_INITIAL_VALUE_CORRECTION,      //
+        const bool           a_IS_ENABLED_PRESOLVE,                  //
+        const bool           a_IS_ENABLED_INITIAL_VALUE_CORRECTION,  //
         const bool           a_IS_ENABLED_AGGREGATION_MOVE,
         const bool           a_IS_ENABLED_PRECEDENCE_MOVE,
         const bool           a_IS_ENABLED_VARIABLE_BOUND_MOVE,
@@ -636,16 +634,13 @@ class Model {
             this->extract_selections(a_SELECTION_MODE);
         }
 
-        this->setup_neighborhood(
-            a_IS_ENABLED_AGGREGATION_MOVE,                              //
-            a_IS_ENABLED_PRECEDENCE_MOVE,                               //
-            a_IS_ENABLED_VARIABLE_BOUND_MOVE,                           //
-            a_IS_ENABLED_EXCLUSIVE_MOVE,                                //
-            a_IS_ENABLED_USER_DEFINED_MOVE,                             //
-            a_IS_ENABLED_CHAIN_MOVE,                                    //
-            a_IS_ENABLED_IMPROVABILITY_SCREENING && this->is_linear(),  //
-            a_IS_ENABLED_PARALLEL_NEIGHBORHOOD_UPDATE,                  //
-            a_IS_ENABLED_PRINT);
+        this->setup_neighborhood(a_IS_ENABLED_AGGREGATION_MOVE,     //
+                                 a_IS_ENABLED_PRECEDENCE_MOVE,      //
+                                 a_IS_ENABLED_VARIABLE_BOUND_MOVE,  //
+                                 a_IS_ENABLED_EXCLUSIVE_MOVE,       //
+                                 a_IS_ENABLED_USER_DEFINED_MOVE,    //
+                                 a_IS_ENABLED_CHAIN_MOVE,           //
+                                 a_IS_ENABLED_PRINT);
 
         this->verify_and_correct_selection_variables_initial_values(
             a_IS_ENABLED_INITIAL_VALUE_CORRECTION, a_IS_ENABLED_PRINT);
@@ -1302,6 +1297,9 @@ class Model {
                 variable_reference.variable_ptrs.push_back(&variable);
                 if (variable.is_fixed()) {
                     variable_reference.fixed_variable_ptrs.push_back(&variable);
+                } else {
+                    variable_reference.not_fixed_variable_ptrs.push_back(
+                        &variable);
                 }
                 if (variable.sense() == VariableSense::Selection) {
                     variable_reference.selection_variable_ptrs.push_back(
@@ -1575,11 +1573,9 @@ class Model {
         const bool a_IS_ENABLED_AGGREGATION_MOVE,
         const bool a_IS_ENABLED_PRECEDENCE_MOVE,
         const bool a_IS_ENABLED_VARIABLE_BOUND_MOVE,
-        const bool a_IS_ENABLED_EXCLUSIVE_MOVE,           //
-        const bool a_IS_ENABLED_CHAIN_MOVE,               //
-        const bool a_IS_ENABLED_USER_DEFINED_MOVE,        //
-        const bool a_IS_ENABLED_IMPROVABILITY_SCREENING,  //
-        const bool a_IS_ENABLED_PARALLEL,                 //
+        const bool a_IS_ENABLED_EXCLUSIVE_MOVE,     //
+        const bool a_IS_ENABLED_CHAIN_MOVE,         //
+        const bool a_IS_ENABLED_USER_DEFINED_MOVE,  //
         const bool a_IS_ENABLED_PRINT) {
         utility::print_single_line(a_IS_ENABLED_PRINT);
         utility::print_message("Detecting the neighborhood structure...",
@@ -1592,59 +1588,41 @@ class Model {
         m_neighborhood.set_has_selection_variables(has_selection_variables);
 
         m_neighborhood.setup_binary_move_updater(
-            m_variable_reference.binary_variable_ptrs,  //
-            a_IS_ENABLED_IMPROVABILITY_SCREENING,       //
-            a_IS_ENABLED_PARALLEL);
+            m_variable_reference.binary_variable_ptrs);
 
         m_neighborhood.setup_integer_move_updater(
-            m_variable_reference.integer_variable_ptrs,  //
-            a_IS_ENABLED_IMPROVABILITY_SCREENING,        //
-            a_IS_ENABLED_PARALLEL);
+            m_variable_reference.integer_variable_ptrs);
 
         m_neighborhood.setup_selection_move_updater(
-            m_variable_reference.selection_variable_ptrs,  //
-            a_IS_ENABLED_IMPROVABILITY_SCREENING,          //
-            a_IS_ENABLED_PARALLEL);
+            m_variable_reference.selection_variable_ptrs);
 
         if (a_IS_ENABLED_AGGREGATION_MOVE) {
             m_neighborhood.setup_aggregation_move_updater(
-                m_constraint_type_reference.aggregation_ptrs,  //
-                a_IS_ENABLED_IMPROVABILITY_SCREENING,          //
-                a_IS_ENABLED_PARALLEL);
+                m_constraint_type_reference.aggregation_ptrs);
         }
 
         if (a_IS_ENABLED_PRECEDENCE_MOVE) {
             m_neighborhood.setup_precedence_move_updater(
-                m_constraint_type_reference.precedence_ptrs,  //
-                a_IS_ENABLED_IMPROVABILITY_SCREENING,         //
-                a_IS_ENABLED_PARALLEL);
+                m_constraint_type_reference.precedence_ptrs);
         }
 
         if (a_IS_ENABLED_EXCLUSIVE_MOVE) {
             m_neighborhood.setup_exclusive_move_updater(
                 m_constraint_type_reference.set_partitioning_ptrs,  //
-                m_constraint_type_reference.set_packing_ptrs,       //
-                a_IS_ENABLED_IMPROVABILITY_SCREENING,               //
-                a_IS_ENABLED_PARALLEL);
+                m_constraint_type_reference.set_packing_ptrs);
         }
 
         if (a_IS_ENABLED_VARIABLE_BOUND_MOVE) {
             m_neighborhood.setup_variable_bound_move_updater(
-                m_constraint_type_reference.variable_bound_ptrs,  //
-                a_IS_ENABLED_IMPROVABILITY_SCREENING,             //
-                a_IS_ENABLED_PARALLEL);
+                m_constraint_type_reference.variable_bound_ptrs);
         }
 
         if (a_IS_ENABLED_CHAIN_MOVE) {
-            m_neighborhood.setup_chain_move_updater(
-                a_IS_ENABLED_IMPROVABILITY_SCREENING,  //
-                a_IS_ENABLED_PARALLEL);
+            m_neighborhood.setup_chain_move_updater();
         }
 
         if (a_IS_ENABLED_USER_DEFINED_MOVE) {
-            m_neighborhood.setup_user_defined_move_updater(
-                a_IS_ENABLED_IMPROVABILITY_SCREENING,  //
-                a_IS_ENABLED_PARALLEL);
+            m_neighborhood.setup_user_defined_move_updater();
         }
 
         utility::print_message("Done.", a_IS_ENABLED_PRINT);
@@ -2147,11 +2125,17 @@ class Model {
             m_objective.update(a_MOVE);
         }
 
-        for (auto &&proxy : m_constraint_proxies) {
-            for (auto &&constraint : proxy.flat_indexed_constraints()) {
-                if (constraint.is_enabled()) {
-                    constraint.update(a_MOVE);
+        if (m_neighborhood.is_enabled_user_defined_move()) {
+            for (auto &&proxy : m_constraint_proxies) {
+                for (auto &&constraint : proxy.flat_indexed_constraints()) {
+                    if (constraint.is_enabled()) {
+                        constraint.update(a_MOVE);
+                    }
                 }
+            }
+        } else {
+            for (auto &&constraint_ptr : a_MOVE.related_constraint_ptrs) {
+                constraint_ptr->update(a_MOVE);
             }
         }
 
@@ -2175,47 +2159,85 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void reset_variable_improvability(void) {
-        const auto &variable_ptrs = m_variable_reference.variable_ptrs;
-        for (auto &&variable_ptr : variable_ptrs) {
-            variable_ptr->set_is_improvable(false);
+    inline constexpr void reset_variable_objective_improvability(
+        const std::vector<Variable<T_Variable, T_Expression> *>
+            &a_VARIABLE_PTRS) {
+        for (auto &&variable_ptr : a_VARIABLE_PTRS) {
+            variable_ptr->set_is_objective_improvable(false);
         }
+    }
+
+    /*************************************************************************/
+    inline constexpr void reset_variable_objective_improvability(void) {
+        this->reset_variable_objective_improvability(
+            this->variable_reference().variable_ptrs);
+    }
+
+    /*************************************************************************/
+    inline constexpr void reset_variable_feasibility_improvability(
+        const std::vector<Variable<T_Variable, T_Expression> *>
+            &a_VARIABLE_PTRS) const noexcept {
+        for (auto &&variable_ptr : a_VARIABLE_PTRS) {
+            variable_ptr->set_is_feasibility_improvable(false);
+        }
+    }
+
+    /*************************************************************************/
+    inline constexpr void reset_variable_feasibility_improvability(
+        const std::vector<Constraint<T_Variable, T_Expression> *>
+            &a_CONSTRAINT_PTRS) const noexcept {
+        for (const auto &constraint_ptr : a_CONSTRAINT_PTRS) {
+            if (!constraint_ptr->is_enabled()) {
+                continue;
+            }
+            auto &sensitivities = constraint_ptr->expression().sensitivities();
+            for (const auto &sensitivity : sensitivities) {
+                sensitivity.first->set_is_feasibility_improvable(false);
+            }
+        }
+    }
+
+    /*************************************************************************/
+    inline constexpr void reset_variable_feasibility_improvability(void) {
+        this->reset_variable_feasibility_improvability(
+            this->variable_reference().variable_ptrs);
+    }
+
+    /*************************************************************************/
+    inline constexpr void update_variable_objective_improvability(void) {
+        this->update_variable_objective_improvability(
+            this->variable_reference().variable_ptrs);
     }
 
     /*************************************************************************/
     inline constexpr void update_variable_objective_improvability(
         const std::vector<Variable<T_Variable, T_Expression> *>
-            &a_VARIABLE_PTRS) {
-        if (this->is_minimization()) {
-            for (const auto &variable_ptr : a_VARIABLE_PTRS) {
-                auto coefficient = variable_ptr->objective_sensitivity();
-
-                if (coefficient > 0 &&  //
-                    (variable_ptr->value() != variable_ptr->lower_bound())) {
-                    variable_ptr->set_is_improvable(true);
-                } else if (coefficient < 0 && (variable_ptr->value() !=
-                                               variable_ptr->upper_bound())) {
-                    variable_ptr->set_is_improvable(true);
-                }
-            }
-        } else {
-            for (const auto &variable_ptr : a_VARIABLE_PTRS) {
-                auto coefficient = variable_ptr->objective_sensitivity();
-                if (coefficient > 0 &&  //
-                    (variable_ptr->value() != variable_ptr->upper_bound())) {
-                    variable_ptr->set_is_improvable(true);
-                } else if (coefficient < 0 && (variable_ptr->value() !=
-                                               variable_ptr->lower_bound())) {
-                    variable_ptr->set_is_improvable(true);
-                }
+            &a_VARIABLE_PTRS) const noexcept {
+        for (const auto &variable_ptr : a_VARIABLE_PTRS) {
+            auto coefficient =
+                variable_ptr->objective_sensitivity() * this->sign();
+            if (coefficient > 0 &&  //
+                (variable_ptr->value() > variable_ptr->lower_bound())) {
+                variable_ptr->set_is_objective_improvable(true);
+            } else if (coefficient < 0 &&  //
+                       (variable_ptr->value() < variable_ptr->upper_bound())) {
+                variable_ptr->set_is_objective_improvable(true);
+            } else {
+                variable_ptr->set_is_objective_improvable(false);
             }
         }
     }
 
     /*************************************************************************/
+    inline constexpr void update_variable_feasibility_improvability(void) {
+        this->update_variable_feasibility_improvability(
+            this->constraint_reference().constraint_ptrs);
+    }
+
+    /*************************************************************************/
     inline constexpr void update_variable_feasibility_improvability(
         const std::vector<Constraint<T_Variable, T_Expression> *>
-            &a_CONSTRAINT_PTRS) {
+            &a_CONSTRAINT_PTRS) const noexcept {
         for (const auto &constraint_ptr : a_CONSTRAINT_PTRS) {
             if (!constraint_ptr->is_enabled()) {
                 continue;
@@ -2223,51 +2245,52 @@ class Model {
             if (constraint_ptr->violation_value() < constant::EPSILON) {
                 continue;
             }
-            auto &sensitivities = constraint_ptr->expression().sensitivities();
-            auto  constraint_value = constraint_ptr->constraint_value();
+            const auto &sensitivities =
+                constraint_ptr->expression().sensitivities();
+            const auto &constraint_value = constraint_ptr->constraint_value();
 
-            if ((constraint_ptr->sense() == ConstraintSense::Lower) ||
-                (constraint_ptr->sense() == ConstraintSense::Equal)) {
-                if (constraint_value > 0) {
+            const int MASK_LOWER_OR_EQUAL = 0b10;
+            const int MASK_UPPER_OR_EQUAL = 0b11;
+
+            if (constraint_value > 0) {
+                if ((constraint_ptr->sense() & MASK_LOWER_OR_EQUAL) == 0) {
                     for (const auto &sensitivity : sensitivities) {
-                        auto variable_ptr = sensitivity.first;
-                        auto coefficient  = sensitivity.second;
+                        const auto &variable_ptr = sensitivity.first;
+                        const auto &coefficient  = sensitivity.second;
 
-                        if (variable_ptr->is_improvable()) {
+                        if (variable_ptr->is_feasibility_improvable()) {
                             continue;
                         }
 
-                        if (coefficient > 0 && (variable_ptr->value() !=
+                        if (coefficient > 0 && (variable_ptr->value() >
                                                 variable_ptr->lower_bound())) {
-                            variable_ptr->set_is_improvable(true);
+                            variable_ptr->set_is_feasibility_improvable(true);
 
                         } else if (coefficient < 0 &&
-                                   (variable_ptr->value() !=
+                                   (variable_ptr->value() <
                                     variable_ptr->upper_bound())) {
-                            variable_ptr->set_is_improvable(true);
+                            variable_ptr->set_is_feasibility_improvable(true);
                         }
                     }
                 }
-            }
-            if ((constraint_ptr->sense() == ConstraintSense::Upper) ||
-                (constraint_ptr->sense() == ConstraintSense::Equal)) {
-                if (constraint_value < 0) {
+            } else if (constraint_value < 0) {
+                if ((constraint_ptr->sense() & MASK_UPPER_OR_EQUAL)) {
                     for (const auto &sensitivity : sensitivities) {
-                        auto variable_ptr = sensitivity.first;
-                        auto coefficient  = sensitivity.second;
+                        const auto &variable_ptr = sensitivity.first;
+                        const auto &coefficient  = sensitivity.second;
 
-                        if (variable_ptr->is_improvable()) {
+                        if (variable_ptr->is_feasibility_improvable()) {
                             continue;
                         }
 
-                        if (coefficient > 0 && (variable_ptr->value() !=
+                        if (coefficient > 0 && (variable_ptr->value() <
                                                 variable_ptr->upper_bound())) {
-                            variable_ptr->set_is_improvable(true);
+                            variable_ptr->set_is_feasibility_improvable(true);
 
                         } else if (coefficient < 0 &&
-                                   (variable_ptr->value() !=
+                                   (variable_ptr->value() >
                                     variable_ptr->lower_bound())) {
-                            variable_ptr->set_is_improvable(true);
+                            variable_ptr->set_is_feasibility_improvable(true);
                         }
                     }
                 }
@@ -2275,22 +2298,6 @@ class Model {
         }
     }
 
-    /*************************************************************************/
-    inline constexpr void update_variable_improvability(
-        const bool a_IS_ENABLED_FEASIBILITY_SCREENING) {
-        const auto &variable_ptrs   = m_variable_reference.variable_ptrs;
-        const auto &constraint_ptrs = m_constraint_reference.constraint_ptrs;
-
-        this->reset_variable_improvability();
-
-        if (this->is_feasible() || !a_IS_ENABLED_FEASIBILITY_SCREENING) {
-            this->update_variable_objective_improvability(variable_ptrs);
-        }
-
-        if (!this->is_feasible()) {
-            this->update_variable_feasibility_improvability(constraint_ptrs);
-        }
-    }
     /*************************************************************************/
     inline constexpr void update_feasibility(void) {
         for (const auto &proxy : m_constraint_proxies) {
@@ -2826,7 +2833,7 @@ class Model {
 
     /*************************************************************************/
     inline constexpr int number_of_not_fixed_variables(void) const {
-        return this->number_of_variables() - this->number_of_fixed_variables();
+        return m_variable_reference.not_fixed_variable_ptrs.size();
     }
 
     /*************************************************************************/

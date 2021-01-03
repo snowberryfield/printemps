@@ -98,10 +98,20 @@ LocalSearchResult<T_Variable, T_Expression> solve(
         historical_feasible_solutions;
 
     /**
+     * Reset the variable improvability.
+     */
+    model->reset_variable_objective_improvability();
+    model->reset_variable_feasibility_improvability();
+
+    /**
      * Prepare other local variables.
      */
+
     LocalSearchTerminationStatus termination_status =
         LocalSearchTerminationStatus::ITERATION_OVER;
+
+    model::Move<T_Variable, T_Expression> previous_move;
+    model::Move<T_Variable, T_Expression> current_move;
 
     /**
      * Print the header of optimization progress table and print the initial
@@ -145,13 +155,45 @@ LocalSearchResult<T_Variable, T_Expression> solve(
         /**
          * Update the moves.
          */
+        bool accept_all                    = true;
+        bool accept_objective_improvable   = true;
+        bool accept_feasibility_improvable = true;
+
         if (model->is_linear()) {
-            model->update_variable_improvability(true);
+            auto changed_variable_ptrs =
+                utility::to_vector(model::related_variable_ptrs(current_move));
+            auto changed_constraint_ptrs =
+                utility::to_vector(current_move.related_constraint_ptrs);
+
+            if (iteration == 0) {
+                model->update_variable_objective_improvability();
+            } else {
+                model->update_variable_objective_improvability(
+                    changed_variable_ptrs);
+            }
+
+            if (model->is_feasible()) {
+                accept_all                    = false;
+                accept_objective_improvable   = true;
+                accept_feasibility_improvable = false;
+            } else {
+                model->reset_variable_feasibility_improvability();
+                model->update_variable_feasibility_improvability();
+
+                accept_all                    = false;
+                accept_objective_improvable   = false;
+                accept_feasibility_improvable = true;
+            }
         }
-        model->neighborhood().update_moves();
+        model->neighborhood().update_moves(
+            accept_all,                     //
+            accept_objective_improvable,    //
+            accept_feasibility_improvable,  //
+            option.is_enabled_parallel_neighborhood_update);
+
         model->neighborhood().shuffle_moves(&get_rand_mt);
 
-        bool found_improving_solution = false;
+        bool is_found_improving_solution = false;
 
         const auto& move_ptrs = model->neighborhood().move_ptrs();
 
@@ -174,14 +216,16 @@ LocalSearchResult<T_Variable, T_Expression> solve(
              * ordinary(slow) evaluation methods.
              */
             if (model->is_enabled_fast_evaluation()) {
-                trial_solution_score =
-                    model->evaluate(*move_ptr, solution_score,
-                                    local_penalty_coefficient_proxies,
-                                    global_penalty_coefficient_proxies);
+                trial_solution_score                                      //
+                    = model->evaluate(*move_ptr,                          //
+                                      solution_score,                     //
+                                      local_penalty_coefficient_proxies,  //
+                                      global_penalty_coefficient_proxies);
             } else {
-                trial_solution_score = model->evaluate(
-                    *move_ptr, local_penalty_coefficient_proxies,
-                    global_penalty_coefficient_proxies);
+                trial_solution_score                                      //
+                    = model->evaluate(*move_ptr,                          //
+                                      local_penalty_coefficient_proxies,  //
+                                      global_penalty_coefficient_proxies);
             }
 
             /**
@@ -190,8 +234,11 @@ LocalSearchResult<T_Variable, T_Expression> solve(
             if (trial_solution_score.local_augmented_objective +
                     constant::EPSILON <
                 incumbent_holder.local_augmented_incumbent_objective()) {
-                solution_score           = trial_solution_score;
-                found_improving_solution = true;
+                solution_score              = trial_solution_score;
+                is_found_improving_solution = true;
+
+                previous_move = current_move;
+                current_move  = *move_ptr;
                 break;
             }
 
@@ -202,7 +249,7 @@ LocalSearchResult<T_Variable, T_Expression> solve(
          * The local search will be terminated if there is no improving solution
          * in the checked neighborhood.
          */
-        if (!found_improving_solution) {
+        if (!is_found_improving_solution) {
             termination_status = LocalSearchTerminationStatus::LOCAL_OPTIMAL;
             break;
         }

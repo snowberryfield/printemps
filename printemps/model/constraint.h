@@ -520,17 +520,17 @@ class Constraint : public AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr ConstraintSense sense(void) const {
+    inline constexpr ConstraintSense sense(void) const noexcept {
         return m_sense;
     }
 
     /*************************************************************************/
-    inline constexpr T_Expression constraint_value(void) const {
+    inline constexpr T_Expression constraint_value(void) const noexcept {
         return m_constraint_value;
     }
 
     /*************************************************************************/
-    inline constexpr T_Expression violation_value(void) const {
+    inline constexpr T_Expression violation_value(void) const noexcept {
         return m_violation_value;
     }
 
