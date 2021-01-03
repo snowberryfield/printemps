@@ -39,7 +39,7 @@ struct TabuSearchResult {
     bool is_few_permissible_neighborhood;
     bool is_found_new_feasible_solution;
 
-    double objective_constraint_ration;
+    double objective_constraint_ratio;
 
     TabuSearchTerminationStatus termination_status;
 
@@ -72,7 +72,7 @@ struct TabuSearchResult {
         this->is_few_permissible_neighborhood = false;
         this->is_found_new_feasible_solution  = false;
 
-        this->objective_constraint_ration = 1.0;
+        this->objective_constraint_ratio = 1.0;
 
         this->termination_status = TabuSearchTerminationStatus::ITERATION_OVER;
 

@@ -30,34 +30,48 @@ struct Move {
     MoveSense                                         sense;
     std::unordered_set<Constraint<T_Variable, T_Expression> *>
         related_constraint_ptrs;
-
-    /*************************************************************************/
-    inline static constexpr bool has_duplicate_variable(
-        const Move<T_Variable, T_Expression> &a_MOVE) {
-        auto &alterations      = a_MOVE.alterations;
-        int   alterations_size = alterations.size();
-        for (auto i = 0; i < alterations_size; i++) {
-            for (auto j = i + 1; j < alterations_size; j++) {
-                if (alterations[i].first == alterations[j].first) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    };
-
-    /*************************************************************************/
-    inline static constexpr bool is_binary_swap(
-        const Move<T_Variable, T_Expression> &a_MOVE) {
-        for (const auto &alteration : a_MOVE.alterations) {
-            if (alteration.first->sense() != VariableSense::Binary) {
-                return false;
-            }
-        }
-
-        return true;
-    };
 };
+
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+inline constexpr bool has_duplicate_variable(
+    const Move<T_Variable, T_Expression> &a_MOVE) {
+    auto &alterations      = a_MOVE.alterations;
+    int   alterations_size = alterations.size();
+    for (auto i = 0; i < alterations_size; i++) {
+        for (auto j = i + 1; j < alterations_size; j++) {
+            if (alterations[i].first == alterations[j].first) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+inline constexpr bool is_binary_swap(
+    const Move<T_Variable, T_Expression> &a_MOVE) {
+    for (const auto &alteration : a_MOVE.alterations) {
+        if (alteration.first->sense() != VariableSense::Binary) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+inline constexpr std::unordered_set<Variable<T_Variable, T_Expression> *>
+related_variable_ptrs(const Move<T_Variable, T_Expression> &a_MOVE) {
+    std::unordered_set<Variable<T_Variable, T_Expression> *> result;
+    for (const auto &alteration : a_MOVE.alterations) {
+        result.insert(alteration.first);
+    }
+
+    return result;
+}
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>

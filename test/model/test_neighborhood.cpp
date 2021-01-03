@@ -158,8 +158,7 @@ TEST_F(TestNeighborhood, setup_move_updater) {
     model.categorize_constraints();
     model.extract_selections(printemps::model::SelectionMode::Larger);
 
-    model.setup_neighborhood(true, true, true, true, false, false, false, false,
-                             false);
+    model.setup_neighborhood(true, true, true, true, false, false, false);
 
     model.neighborhood().set_has_fixed_variables(true);
     model.neighborhood().set_has_selection_variables(true);
@@ -180,7 +179,7 @@ TEST_F(TestNeighborhood, setup_move_updater) {
         selection.variable_ptrs.front()->select();
     }
 
-    model.neighborhood().update_moves();
+    model.neighborhood().update_moves(true, false, false, false);
 
     /**
      * Check the variable pointers and values in raw moves.
@@ -431,14 +430,13 @@ TEST_F(TestNeighborhood, set_user_defined_move_updater) {
     model.categorize_variables();
     model.categorize_constraints();
 
-    model.setup_neighborhood(false, false, false, false, false, true, false,
-                             false, false);
+    model.setup_neighborhood(false, false, false, false, false, true, false);
 
     model.neighborhood().set_has_fixed_variables(true);
     model.neighborhood().set_has_selection_variables(false);
 
     model.neighborhood().enable_user_defined_move();
-    model.neighborhood().update_moves();
+    model.neighborhood().update_moves(true, false, false, false);
 
     /// Check the variable pointers and values in raw moves, and the numbers of
     /// filtered moves.
@@ -464,9 +462,8 @@ TEST_F(TestNeighborhood, shuffle_moves) {
     auto&                  x = model.create_variables("x", n, 0, 1);
     [[maybe_unused]] auto& c = model.create_constraint("c", x.selection());
 
-    model.setup_neighborhood(true, true, true, true, false, false, false, false,
-                             false);
-    model.neighborhood().update_moves();
+    model.setup_neighborhood(true, true, true, true, false, false, false);
+    model.neighborhood().update_moves(true, false, false, false);
 
     auto         before_move_ptrs = model.neighborhood().move_ptrs();
     std::mt19937 rand;

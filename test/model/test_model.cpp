@@ -2365,25 +2365,33 @@ TEST_F(TestModel, update_variable_improvability) {
 
         x = -10;
         y = -10;
-
         model.update();
-        model.update_variable_improvability(true);
-        EXPECT_EQ(true, x(0).is_improvable());
-        EXPECT_EQ(false, y(0).is_improvable());
+        model.update_variable_objective_improvability();
+        model.update_variable_feasibility_improvability();
+        EXPECT_EQ(true, x(0).is_objective_improvable());
+        EXPECT_EQ(false, y(0).is_objective_improvable());
+        EXPECT_EQ(false, x(0).is_feasibility_improvable());
+        EXPECT_EQ(false, y(0).is_feasibility_improvable());
 
         x = 10;
         y = 10;
         model.update();
-        model.update_variable_improvability(true);
-        EXPECT_EQ(false, x(0).is_improvable());
-        EXPECT_EQ(true, y(0).is_improvable());
+        model.update_variable_objective_improvability();
+        model.update_variable_feasibility_improvability();
+        EXPECT_EQ(false, x(0).is_objective_improvable());
+        EXPECT_EQ(true, y(0).is_objective_improvable());
+        EXPECT_EQ(false, x(0).is_feasibility_improvable());
+        EXPECT_EQ(false, y(0).is_feasibility_improvable());
 
         x = 10;
         y = -10;
         model.update();
-        model.update_variable_improvability(true);
-        EXPECT_EQ(true, x(0).is_improvable());
-        EXPECT_EQ(true, y(0).is_improvable());
+        model.update_variable_objective_improvability();
+        model.update_variable_feasibility_improvability();
+        EXPECT_EQ(false, x(0).is_objective_improvable());
+        EXPECT_EQ(false, y(0).is_objective_improvable());
+        EXPECT_EQ(true, x(0).is_feasibility_improvable());
+        EXPECT_EQ(true, y(0).is_feasibility_improvable());
     }
     {
         printemps::model::Model<int, double> model;
@@ -2401,25 +2409,33 @@ TEST_F(TestModel, update_variable_improvability) {
 
         x = -10;
         y = -10;
-
         model.update();
-        model.update_variable_improvability(true);
-        EXPECT_EQ(true, x(0).is_improvable());
-        EXPECT_EQ(false, y(0).is_improvable());
+        model.update_variable_objective_improvability();
+        model.update_variable_feasibility_improvability();
+        EXPECT_EQ(true, x(0).is_objective_improvable());
+        EXPECT_EQ(false, y(0).is_objective_improvable());
+        EXPECT_EQ(false, x(0).is_feasibility_improvable());
+        EXPECT_EQ(false, y(0).is_feasibility_improvable());
 
         x = 10;
         y = 10;
         model.update();
-        model.update_variable_improvability(true);
-        EXPECT_EQ(false, x(0).is_improvable());
-        EXPECT_EQ(true, y(0).is_improvable());
+        model.update_variable_objective_improvability();
+        model.update_variable_feasibility_improvability();
+        EXPECT_EQ(false, x(0).is_objective_improvable());
+        EXPECT_EQ(true, y(0).is_objective_improvable());
+        EXPECT_EQ(false, x(0).is_feasibility_improvable());
+        EXPECT_EQ(false, y(0).is_feasibility_improvable());
 
         x = 10;
         y = -10;
         model.update();
-        model.update_variable_improvability(true);
-        EXPECT_EQ(true, x(0).is_improvable());
-        EXPECT_EQ(true, y(0).is_improvable());
+        model.update_variable_objective_improvability();
+        model.update_variable_feasibility_improvability();
+        EXPECT_EQ(false, x(0).is_objective_improvable());
+        EXPECT_EQ(false, y(0).is_objective_improvable());
+        EXPECT_EQ(true, x(0).is_feasibility_improvable());
+        EXPECT_EQ(true, y(0).is_feasibility_improvable());
     }
     {
         printemps::model::Model<int, double> model;
@@ -2437,25 +2453,33 @@ TEST_F(TestModel, update_variable_improvability) {
 
         x = -10;
         y = -10;
-
         model.update();
-        model.update_variable_improvability(true);
-        EXPECT_EQ(true, x(0).is_improvable());
-        EXPECT_EQ(false, y(0).is_improvable());
+        model.update_variable_objective_improvability();
+        model.update_variable_feasibility_improvability();
+        EXPECT_EQ(true, x(0).is_objective_improvable());
+        EXPECT_EQ(false, y(0).is_objective_improvable());
+        EXPECT_EQ(false, x(0).is_feasibility_improvable());
+        EXPECT_EQ(false, y(0).is_feasibility_improvable());
 
         x = 10;
         y = 10;
         model.update();
-        model.update_variable_improvability(true);
-        EXPECT_EQ(false, x(0).is_improvable());
-        EXPECT_EQ(true, y(0).is_improvable());
+        model.update_variable_objective_improvability();
+        model.update_variable_feasibility_improvability();
+        EXPECT_EQ(false, x(0).is_objective_improvable());
+        EXPECT_EQ(true, y(0).is_objective_improvable());
+        EXPECT_EQ(false, x(0).is_feasibility_improvable());
+        EXPECT_EQ(false, y(0).is_feasibility_improvable());
 
         x = -10;
         y = 10;
         model.update();
-        model.update_variable_improvability(true);
-        EXPECT_EQ(true, x(0).is_improvable());
-        EXPECT_EQ(true, y(0).is_improvable());
+        model.update_variable_objective_improvability();
+        model.update_variable_feasibility_improvability();
+        EXPECT_EQ(true, x(0).is_objective_improvable());
+        EXPECT_EQ(true, y(0).is_objective_improvable());
+        EXPECT_EQ(true, x(0).is_feasibility_improvable());
+        EXPECT_EQ(true, y(0).is_feasibility_improvable());
     }
     {
         printemps::model::Model<int, double> model;
@@ -2475,23 +2499,32 @@ TEST_F(TestModel, update_variable_improvability) {
         y = -10;
 
         model.update();
-        model.update_variable_improvability(true);
-        EXPECT_EQ(false, x(0).is_improvable());
-        EXPECT_EQ(true, y(0).is_improvable());
+        model.update_variable_objective_improvability();
+        model.update_variable_feasibility_improvability();
+        EXPECT_EQ(false, x(0).is_objective_improvable());
+        EXPECT_EQ(true, y(0).is_objective_improvable());
+        EXPECT_EQ(false, x(0).is_feasibility_improvable());
+        EXPECT_EQ(false, y(0).is_feasibility_improvable());
 
         x = 10;
         y = 10;
         model.update();
-        model.update_variable_improvability(true);
-        EXPECT_EQ(true, x(0).is_improvable());
-        EXPECT_EQ(false, y(0).is_improvable());
+        model.update_variable_objective_improvability();
+        model.update_variable_feasibility_improvability();
+        EXPECT_EQ(true, x(0).is_objective_improvable());
+        EXPECT_EQ(false, y(0).is_objective_improvable());
+        EXPECT_EQ(false, x(0).is_feasibility_improvable());
+        EXPECT_EQ(false, y(0).is_feasibility_improvable());
 
         x = 10;
         y = -10;
         model.update();
-        model.update_variable_improvability(true);
-        EXPECT_EQ(true, x(0).is_improvable());
-        EXPECT_EQ(true, y(0).is_improvable());
+        model.update_variable_objective_improvability();
+        model.update_variable_feasibility_improvability();
+        EXPECT_EQ(true, x(0).is_objective_improvable());
+        EXPECT_EQ(true, y(0).is_objective_improvable());
+        EXPECT_EQ(true, x(0).is_feasibility_improvable());
+        EXPECT_EQ(true, y(0).is_feasibility_improvable());
     }
     {
         printemps::model::Model<int, double> model;
@@ -2511,23 +2544,32 @@ TEST_F(TestModel, update_variable_improvability) {
         y = -10;
 
         model.update();
-        model.update_variable_improvability(true);
-        EXPECT_EQ(false, x(0).is_improvable());
-        EXPECT_EQ(true, y(0).is_improvable());
+        model.update_variable_objective_improvability();
+        model.update_variable_feasibility_improvability();
+        EXPECT_EQ(false, x(0).is_objective_improvable());
+        EXPECT_EQ(true, y(0).is_objective_improvable());
+        EXPECT_EQ(false, x(0).is_feasibility_improvable());
+        EXPECT_EQ(false, y(0).is_feasibility_improvable());
 
         x = 10;
         y = 10;
         model.update();
-        model.update_variable_improvability(true);
-        EXPECT_EQ(true, x(0).is_improvable());
-        EXPECT_EQ(false, y(0).is_improvable());
+        model.update_variable_objective_improvability();
+        model.update_variable_feasibility_improvability();
+        EXPECT_EQ(true, x(0).is_objective_improvable());
+        EXPECT_EQ(false, y(0).is_objective_improvable());
+        EXPECT_EQ(false, x(0).is_feasibility_improvable());
+        EXPECT_EQ(false, y(0).is_feasibility_improvable());
 
         x = 10;
         y = -10;
         model.update();
-        model.update_variable_improvability(true);
-        EXPECT_EQ(true, x(0).is_improvable());
-        EXPECT_EQ(true, y(0).is_improvable());
+        model.update_variable_objective_improvability();
+        model.update_variable_feasibility_improvability();
+        EXPECT_EQ(true, x(0).is_objective_improvable());
+        EXPECT_EQ(true, y(0).is_objective_improvable());
+        EXPECT_EQ(true, x(0).is_feasibility_improvable());
+        EXPECT_EQ(true, y(0).is_feasibility_improvable());
     }
     {
         printemps::model::Model<int, double> model;
@@ -2547,63 +2589,32 @@ TEST_F(TestModel, update_variable_improvability) {
         y = -10;
 
         model.update();
-        model.update_variable_improvability(true);
-        EXPECT_EQ(false, x(0).is_improvable());
-        EXPECT_EQ(true, y(0).is_improvable());
+        model.update_variable_objective_improvability();
+        model.update_variable_feasibility_improvability();
+        EXPECT_EQ(false, x(0).is_objective_improvable());
+        EXPECT_EQ(true, y(0).is_objective_improvable());
+        EXPECT_EQ(false, x(0).is_feasibility_improvable());
+        EXPECT_EQ(false, y(0).is_feasibility_improvable());
 
         x = 10;
         y = 10;
         model.update();
-        model.update_variable_improvability(true);
-        EXPECT_EQ(true, x(0).is_improvable());
-        EXPECT_EQ(false, y(0).is_improvable());
+        model.update_variable_objective_improvability();
+        model.update_variable_feasibility_improvability();
+        EXPECT_EQ(true, x(0).is_objective_improvable());
+        EXPECT_EQ(false, y(0).is_objective_improvable());
+        EXPECT_EQ(false, x(0).is_feasibility_improvable());
+        EXPECT_EQ(false, y(0).is_feasibility_improvable());
 
         x = -10;
         y = 10;
         model.update();
-        model.update_variable_improvability(true);
-        EXPECT_EQ(true, x(0).is_improvable());
-        EXPECT_EQ(true, y(0).is_improvable());
-    }
-
-    {
-        printemps::model::Model<int, double> model;
-
-        auto& x = model.create_variable("x", -10, 10);
-        auto& y = model.create_variable("y", -10, 10);
-        auto& z = model.create_variable("z", -10, 10);
-
-        [[maybe_unused]] auto& g = model.create_constraint("g", x - y >= 0);
-
-        model.minimize(-x + y + z);
-        model.categorize_variables();
-        model.categorize_constraints();
-        model.setup_variable_sensitivity();
-        model.setup_fixed_sensitivities(false);
-
-        x = -10;
-        y = 10;
-        z = 10;
-        model.update();
-        model.update_variable_improvability(true);
-        EXPECT_EQ(true, x(0).is_improvable());
-        EXPECT_EQ(true, y(0).is_improvable());
-        EXPECT_EQ(false, z(0).is_improvable());
-        model.update_variable_improvability(false);
-        EXPECT_EQ(true, x(0).is_improvable());
-        EXPECT_EQ(true, y(0).is_improvable());
-        EXPECT_EQ(true, z(0).is_improvable());
-
-        z = -10;
-        model.update();
-        model.update_variable_improvability(true);
-        EXPECT_EQ(true, x(0).is_improvable());
-        EXPECT_EQ(true, y(0).is_improvable());
-        EXPECT_EQ(false, z(0).is_improvable());
-        model.update_variable_improvability(false);
-        EXPECT_EQ(true, x(0).is_improvable());
-        EXPECT_EQ(true, y(0).is_improvable());
-        EXPECT_EQ(false, z(0).is_improvable());
+        model.update_variable_objective_improvability();
+        model.update_variable_feasibility_improvability();
+        EXPECT_EQ(false, x(0).is_objective_improvable());
+        EXPECT_EQ(false, y(0).is_objective_improvable());
+        EXPECT_EQ(true, x(0).is_feasibility_improvable());
+        EXPECT_EQ(true, y(0).is_feasibility_improvable());
     }
 }
 

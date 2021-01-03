@@ -16,7 +16,13 @@ namespace solver {
 enum Verbose : int { None, Warning, Outer, Full, Debug };
 
 /*****************************************************************************/
-enum ImprovabilityScreeningMode : int { Off, Soft, Aggressive, Automatic };
+enum ImprovabilityScreeningMode : int {
+    Off,
+    Soft,
+    Aggressive,
+    Automatic,
+    Intensive
+};
 
 /*****************************************************************************/
 struct OptionConstant {
