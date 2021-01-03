@@ -41,7 +41,7 @@
 
 namespace printemps {
 namespace model {
-/*************************************************************************/
+/*****************************************************************************/
 template <class T_Variable, class T_Expression>
 inline constexpr int remove_independent_variables(
     Model<T_Variable, T_Expression> *a_model, const bool a_IS_ENABLED_PRINT) {
@@ -140,7 +140,7 @@ inline constexpr int remove_independent_variables(
     return number_of_newly_fixed_variables;
 }
 
-/*************************************************************************/
+/*****************************************************************************/
 template <class T_Variable, class T_Expression>
 inline constexpr int
 remove_redundant_constraints_with_tightening_variable_bounds(
@@ -456,7 +456,7 @@ remove_redundant_constraints_with_tightening_variable_bounds(
     return number_of_newly_disabled_constraints;
 }
 
-/*************************************************************************/
+/*****************************************************************************/
 template <class T_Variable, class T_Expression>
 inline constexpr int fix_implicit_fixed_variables(
     Model<T_Variable, T_Expression> *a_model, const bool a_IS_ENABLED_PRINT) {
