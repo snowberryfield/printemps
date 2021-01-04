@@ -1456,6 +1456,165 @@ TEST_F(TestModel, update_arg_void) {
 }
 
 /*****************************************************************************/
+TEST_F(TestModel, update_arg_move) {
+    printemps::model::Model<int, double> model;
+
+    auto sequence = printemps::utility::sequence(10);
+
+    auto& x = model.create_variables("x", 10, 0, 1);
+    auto& p = model.create_expression("p", x.dot(sequence) + 1);
+    model.create_constraint("g", x.selection());
+
+    x(0) = 1;
+
+    model.minimize(p);
+    model.categorize_variables();
+    model.categorize_constraints();
+    model.extract_selections(printemps::model::SelectionMode::Defined);
+    model.setup_fixed_sensitivities(false);
+
+    model.update();
+
+    printemps::model::Move<int, double> move;
+    move.sense = printemps::model::MoveSense::Selection;
+    move.alterations.emplace_back(&x(0), 0);
+    move.alterations.emplace_back(&x(9), 1);
+
+    model.update(move);
+
+    EXPECT_EQ(10, p.value());
+    EXPECT_EQ(10, p(0).value());
+    EXPECT_EQ(10, model.objective().value());
+    EXPECT_EQ(&x(9), model.selections().front().selected_variable_ptr);
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, reset_variable_objective_improvability_arg_void) {
+    printemps::model::Model<int, double> model;
+
+    auto& x = model.create_variable("x", 0, 1);
+    auto& y = model.create_variables("y", 10, 0, 1);
+    model.categorize_variables();
+
+    x(0).set_is_objective_improvable(true);
+    EXPECT_EQ(true, x(0).is_objective_improvable());
+    for (auto i = 0; i < 10; i++) {
+        y(i).set_is_objective_improvable(true);
+        EXPECT_EQ(true, y(i).is_objective_improvable());
+    }
+    model.reset_variable_objective_improvability();
+
+    EXPECT_EQ(false, x(0).is_objective_improvable());
+    for (auto i = 0; i < 10; i++) {
+        EXPECT_EQ(false, y(i).is_objective_improvable());
+    }
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, reset_variable_objective_improvability_arg_variable_ptrs) {
+    printemps::model::Model<int, double> model;
+
+    auto& x = model.create_variable("x", 0, 1);
+    auto& y = model.create_variables("y", 10, 0, 1);
+    model.categorize_variables();
+
+    x(0).set_is_objective_improvable(true);
+    EXPECT_EQ(true, x(0).is_objective_improvable());
+    for (auto i = 0; i < 10; i++) {
+        y(i).set_is_objective_improvable(true);
+        EXPECT_EQ(true, y(i).is_objective_improvable());
+    }
+    model.reset_variable_objective_improvability({&x(0), &y(0), &y(9)});
+
+    EXPECT_EQ(false, x(0).is_objective_improvable());
+    EXPECT_EQ(false, y(0).is_objective_improvable());
+    EXPECT_EQ(false, y(9).is_objective_improvable());
+    for (auto i = 1; i < 9; i++) {
+        EXPECT_EQ(true, y(i).is_objective_improvable());
+    }
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, reset_variable_feasibility_improvability_arg_void) {
+    printemps::model::Model<int, double> model;
+
+    auto& x = model.create_variable("x", 0, 1);
+    auto& y = model.create_variables("y", 10, 0, 1);
+    model.categorize_variables();
+
+    x(0).set_is_feasibility_improvable(true);
+    EXPECT_EQ(true, x(0).is_feasibility_improvable());
+    for (auto i = 0; i < 10; i++) {
+        y(i).set_is_feasibility_improvable(true);
+        EXPECT_EQ(true, y(i).is_feasibility_improvable());
+    }
+    model.reset_variable_feasibility_improvability();
+
+    EXPECT_EQ(false, x(0).is_feasibility_improvable());
+    for (auto i = 0; i < 10; i++) {
+        EXPECT_EQ(false, y(i).is_feasibility_improvable());
+    }
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, reset_variable_feasibility_improvability_arg_variable_ptrs) {
+    printemps::model::Model<int, double> model;
+
+    auto& x = model.create_variable("x", 0, 1);
+    auto& y = model.create_variables("y", 10, 0, 1);
+    model.categorize_variables();
+
+    x(0).set_is_feasibility_improvable(true);
+    EXPECT_EQ(true, x(0).is_feasibility_improvable());
+    for (auto i = 0; i < 10; i++) {
+        y(i).set_is_feasibility_improvable(true);
+        EXPECT_EQ(true, y(i).is_feasibility_improvable());
+    }
+    model.reset_variable_feasibility_improvability({&x(0), &y(0), &y(9)});
+
+    EXPECT_EQ(false, x(0).is_feasibility_improvable());
+    EXPECT_EQ(false, y(0).is_feasibility_improvable());
+    EXPECT_EQ(false, y(9).is_feasibility_improvable());
+    for (auto i = 1; i < 9; i++) {
+        EXPECT_EQ(true, y(i).is_feasibility_improvable());
+    }
+}
+
+/*****************************************************************************/
+TEST_F(TestModel,
+       reset_variable_feasibility_improvability_arg_constraint_ptrs) {
+    printemps::model::Model<int, double> model;
+
+    auto& x = model.create_variable("x", 0, 1);
+    auto& y = model.create_variables("y", 10, 0, 1);
+    auto& g = model.create_constraints("g", 2);
+
+    g(0) = x <= y(0);
+    g(1) = y(1) == y(9);
+
+    model.categorize_variables();
+    model.categorize_constraints();
+
+    x(0).set_is_feasibility_improvable(true);
+    EXPECT_EQ(true, x(0).is_feasibility_improvable());
+    for (auto i = 0; i < 10; i++) {
+        y(i).set_is_feasibility_improvable(true);
+        EXPECT_EQ(true, y(i).is_feasibility_improvable());
+    }
+    std::vector<printemps::model::Constraint<int, double>*> constraint_ptrs = {
+        &g(0), &g(1)};
+    model.reset_variable_feasibility_improvability(constraint_ptrs);
+
+    EXPECT_EQ(false, x(0).is_feasibility_improvable());
+    EXPECT_EQ(false, y(0).is_feasibility_improvable());
+    EXPECT_EQ(false, y(1).is_feasibility_improvable());
+    EXPECT_EQ(false, y(9).is_feasibility_improvable());
+    for (auto i = 2; i < 9; i++) {
+        EXPECT_EQ(true, y(i).is_feasibility_improvable());
+    }
+}
+
+/*****************************************************************************/
 TEST_F(TestModel, update_variable_improvability) {
     {
         printemps::model::Model<int, double> model;
@@ -1724,39 +1883,6 @@ TEST_F(TestModel, update_variable_improvability) {
         EXPECT_EQ(true, x(0).is_feasibility_improvable());
         EXPECT_EQ(true, y(0).is_feasibility_improvable());
     }
-}
-
-/*****************************************************************************/
-TEST_F(TestModel, update_arg_move) {
-    printemps::model::Model<int, double> model;
-
-    auto sequence = printemps::utility::sequence(10);
-
-    auto& x = model.create_variables("x", 10, 0, 1);
-    auto& p = model.create_expression("p", x.dot(sequence) + 1);
-    model.create_constraint("g", x.selection());
-
-    x(0) = 1;
-
-    model.minimize(p);
-    model.categorize_variables();
-    model.categorize_constraints();
-    model.extract_selections(printemps::model::SelectionMode::Defined);
-    model.setup_fixed_sensitivities(false);
-
-    model.update();
-
-    printemps::model::Move<int, double> move;
-    move.sense = printemps::model::MoveSense::Selection;
-    move.alterations.emplace_back(&x(0), 0);
-    move.alterations.emplace_back(&x(9), 1);
-
-    model.update(move);
-
-    EXPECT_EQ(10, p.value());
-    EXPECT_EQ(10, p(0).value());
-    EXPECT_EQ(10, model.objective().value());
-    EXPECT_EQ(&x(9), model.selections().front().selected_variable_ptr);
 }
 
 /*****************************************************************************/
