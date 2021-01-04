@@ -51,6 +51,7 @@ struct OptionConstant {
     static constexpr bool DEFAULT_IS_ENABLED_EXCLUSIVE_MOVE      = false;
     static constexpr bool DEFAULT_IS_ENABLED_CHAIN_MOVE          = false;
     static constexpr bool DEFAULT_IS_ENABLED_USER_DEFINED_MOVE   = false;
+    static constexpr int  DEFAULT_CHAIN_MOVE_CAPACITY            = 10000;
 
     static constexpr model::SelectionMode DEFAULT_SELECTION_MODE =
         model::SelectionMode::None;
@@ -91,6 +92,8 @@ struct Option {
     bool is_enabled_exclusive_move;
     bool is_enabled_chain_move;
     bool is_enabled_user_defined_move;
+
+    int chain_move_capacity;
 
     model::SelectionMode       selection_mode;
     ImprovabilityScreeningMode improvability_screening_mode;
@@ -159,6 +162,7 @@ struct Option {
             OptionConstant::DEFAULT_IS_ENABLED_CHAIN_MOVE;
         this->is_enabled_user_defined_move =
             OptionConstant::DEFAULT_IS_ENABLED_USER_DEFINED_MOVE;
+        this->chain_move_capacity = OptionConstant::DEFAULT_CHAIN_MOVE_CAPACITY;
 
         this->selection_mode = OptionConstant::DEFAULT_SELECTION_MODE;
         this->improvability_screening_mode =
@@ -280,6 +284,10 @@ struct Option {
         utility::print(                             //
             " -- is_enabled_user_defined_move: " +  //
             utility::to_string(this->is_enabled_user_defined_move, "%d"));
+
+        utility::print(                    //
+            " -- chain_move_capacity: " +  //
+            utility::to_string(this->chain_move_capacity, "%d"));
 
         utility::print(               //
             " -- selection_mode: " +  //

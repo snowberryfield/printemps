@@ -172,6 +172,12 @@ inline printemps::solver::Option read_option(const std::string &a_FILE_NAME) {
               "is_enabled_user_defined_move",        //
               option_object);
 
+    /**********************************************************************/
+    /// chain_move_capacity
+    read_json(&option.chain_move_capacity,  //
+              "chain_move_capacity",        //
+              option_object);
+
     /**************************************************************************/
     /// selection_mode
     read_json(&option.selection_mode,  //
