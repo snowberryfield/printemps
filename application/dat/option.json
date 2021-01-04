@@ -18,6 +18,7 @@
     "is_enabled_exclusive_move": false,
     "is_enabled_chain_move": false,
     "is_enabled_user_defined_move": false,
+    "chain_move_capacity": 10000,
     "selection_mode": 0,
     "improvability_screening_mode": 3,
     "target_objective_value": -1E100,

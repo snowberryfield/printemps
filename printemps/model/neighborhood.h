@@ -1127,17 +1127,15 @@ class Neighborhood {
     /*************************************************************************/
     inline constexpr void deduplicate_chain_moves() {
         std::vector<Move<T_Variable, T_Expression>> chain_moves;
-        int moves_size = m_chain_moves.size();
-        chain_moves.reserve(moves_size);
+        int chain_moves_size = m_chain_moves.size();
+        chain_moves.reserve(chain_moves_size);
 
-        for (auto i = 0; i < moves_size; i++) {
+        for (auto i = 0; i < chain_moves_size; i++) {
             bool has_duplicated_move = false;
-            for (auto j = i + 1; j < moves_size; j++) {
-                if (i != j) {
-                    if (m_chain_moves[i] == m_chain_moves[j]) {
-                        has_duplicated_move = true;
-                        break;
-                    }
+            for (auto j = 0; j < chain_moves.size(); j++) {
+                if (m_chain_moves[i] == m_chain_moves[j]) {
+                    has_duplicated_move = true;
+                    break;
                 }
             }
             if (!has_duplicated_move) {
@@ -1146,6 +1144,19 @@ class Neighborhood {
         }
         m_chain_moves = chain_moves;
         m_chain_move_flags.resize(chain_moves.size());
+    }
+
+    /*************************************************************************/
+    inline constexpr void reduce_chain_moves(const int     a_NUMBER_OF_MOVES,
+                                             std::mt19937 *a_rand) noexcept {
+        int chain_moves_size = m_chain_moves.size();
+        if (chain_moves_size <= a_NUMBER_OF_MOVES) {
+            return;
+        }
+
+        std::shuffle(m_chain_moves.begin(), m_chain_moves.end(), *a_rand);
+        m_chain_moves.resize(a_NUMBER_OF_MOVES);
+        m_chain_move_flags.resize(a_NUMBER_OF_MOVES);
     }
 
     /*************************************************************************/
@@ -1531,6 +1542,17 @@ class Neighborhood {
     /*************************************************************************/
     inline constexpr const std::vector<int> &selection_move_flags(void) const {
         return m_selection_move_flags;
+    }
+
+    /*************************************************************************/
+    inline constexpr const std::vector<Move<T_Variable, T_Expression>>
+        &chain_moves(void) const {
+        return m_chain_moves;
+    }
+
+    /*************************************************************************/
+    inline constexpr const std::vector<int> &chain_move_flags(void) const {
+        return m_chain_move_flags;
     }
 
     /*************************************************************************/

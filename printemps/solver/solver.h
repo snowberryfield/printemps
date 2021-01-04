@@ -1085,6 +1085,15 @@ Result<T_Variable, T_Expression> solve(
         }
 
         /**
+         * Suppress the number of registered chain moves.
+         */
+        if (model->neighborhood().is_enabled_chain_move() &&
+            master_option.chain_move_capacity > 0) {
+            model->neighborhood().reduce_chain_moves(
+                master_option.chain_move_capacity, &get_rand_mt);
+        }
+
+        /**
          * Preserve the number of iterations of the previous loop.
          */
         number_of_tabu_search_iterations += result.number_of_iterations;
