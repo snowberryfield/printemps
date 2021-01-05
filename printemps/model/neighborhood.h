@@ -361,10 +361,17 @@ class Neighborhood {
                 const bool a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
                 const bool a_ACCEPT_FEASIBILITY_IMPROVABLE,  //
                 const bool a_IS_ENABLED_PARALLEL) {
+                const int DELTA_MAX = 10000;
 #ifdef _OPENMP
 #pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
 #endif
                 for (auto i = 0; i < variables_size; i++) {
+                    const auto value = not_fixed_variable_ptrs[i]->value();
+                    const auto lower_bound =
+                        not_fixed_variable_ptrs[i]->lower_bound();
+                    const auto upper_bound =
+                        not_fixed_variable_ptrs[i]->upper_bound();
+
                     if (a_ACCEPT_ALL ||
                         (a_ACCEPT_OBJECTIVE_IMPROVABLE &&
                          not_fixed_variable_ptrs[i]
@@ -372,43 +379,41 @@ class Neighborhood {
                         (a_ACCEPT_FEASIBILITY_IMPROVABLE &&
                          not_fixed_variable_ptrs[i]
                              ->is_feasibility_improvable())) {
-                        if (not_fixed_variable_ptrs[i]->value() ==
-                            not_fixed_variable_ptrs[i]->upper_bound()) {
+                        if (value == upper_bound) {
                             (*a_flags)[4 * i] = 0;
                         } else {
                             (*a_moves)[4 * i].alterations.front().second =
-                                not_fixed_variable_ptrs[i]->value() + 1;
+                                value + 1;
                             (*a_flags)[4 * i] = 1;
                         }
 
-                        if (not_fixed_variable_ptrs[i]->value() ==
-                            not_fixed_variable_ptrs[i]->lower_bound()) {
+                        if (value == lower_bound) {
                             (*a_flags)[4 * i + 1] = 0;
                         } else {
                             (*a_moves)[4 * i + 1].alterations.front().second =
-                                not_fixed_variable_ptrs[i]->value() - 1;
+                                value - 1;
                             (*a_flags)[4 * i + 1] = 1;
                         }
 
-                        if (not_fixed_variable_ptrs[i]->value() ==
-                            not_fixed_variable_ptrs[i]->upper_bound()) {
+                        if (value == upper_bound ||
+                            upper_bound == constant::INT_HALF_MAX) {
                             (*a_flags)[4 * i + 2] = 0;
                         } else {
+                            const auto delta =
+                                std::min(DELTA_MAX, (upper_bound - value) / 2);
                             (*a_moves)[4 * i + 2].alterations.front().second =
-                                (not_fixed_variable_ptrs[i]->value() +
-                                 not_fixed_variable_ptrs[i]->upper_bound()) /
-                                2;
+                                value + delta;
                             (*a_flags)[4 * i + 2] = 1;
                         }
 
-                        if (not_fixed_variable_ptrs[i]->value() ==
-                            not_fixed_variable_ptrs[i]->lower_bound()) {
+                        if (value == lower_bound ||
+                            lower_bound == constant::INT_HALF_MIN) {
                             (*a_flags)[4 * i + 3] = 0;
                         } else {
+                            const auto delta =
+                                std::max(-DELTA_MAX, (lower_bound - value) / 2);
                             (*a_moves)[4 * i + 3].alterations.front().second =
-                                (not_fixed_variable_ptrs[i]->value() +
-                                 not_fixed_variable_ptrs[i]->lower_bound()) /
-                                2;
+                                value + delta;
                             (*a_flags)[4 * i + 3] = 1;
                         }
                     } else {
