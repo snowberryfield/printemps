@@ -108,13 +108,7 @@ Result<T_Variable, T_Expression> solve(
      * - setup_fixed_sensitivities()
      */
 
-    bool is_enabled_improvability_screening =
-        (master_option.improvability_screening_mode !=
-         ImprovabilityScreeningMode::Off);
-
-    model->setup(is_enabled_improvability_screening,
-                 master_option.is_enabled_parallel_neighborhood_update,
-                 master_option.is_enabled_presolve,
+    model->setup(master_option.is_enabled_presolve,
                  master_option.is_enabled_initial_value_correction,
                  master_option.is_enabled_aggregation_move,
                  master_option.is_enabled_precedence_move,
@@ -518,7 +512,7 @@ Result<T_Variable, T_Expression> solve(
     ImprovabilityScreeningMode improvability_screening_mode =
         master_option.improvability_screening_mode;
     if (improvability_screening_mode == ImprovabilityScreeningMode::Automatic) {
-        improvability_screening_mode = ImprovabilityScreeningMode::Aggressive;
+        improvability_screening_mode = ImprovabilityScreeningMode::Intensive;
     }
 
     while (!is_terminated) {
@@ -611,6 +605,16 @@ Result<T_Variable, T_Expression> solve(
         }
 
         /**
+         * Reset chain moves if the global augmented objective was updated.
+         */
+        if (update_status &
+            IncumbentHolderConstant::STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
+            if (option.is_enabled_chain_move) {
+                model->neighborhood().clear_chain_moves();
+            }
+        }
+
+        /**
          * Update the current solution which is employed as the initial solution
          * of the next loop. Whether the local penalty coefficients should be
          * relaxed or tightened, is also determined.
@@ -643,8 +647,13 @@ Result<T_Variable, T_Expression> solve(
 
         if (master_option.improvability_screening_mode ==
             ImprovabilityScreeningMode::Automatic) {
-            if (result.total_update_status ==
-                IncumbentHolderConstant::STATUS_NO_UPDATED) {
+            if (result.total_update_status &
+                IncumbentHolderConstant::
+                    STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
+                improvability_screening_mode =
+                    ImprovabilityScreeningMode::Intensive;
+            } else if (result.total_update_status ==
+                       IncumbentHolderConstant::STATUS_NO_UPDATED) {
                 improvability_screening_mode =
                     ImprovabilityScreeningMode::Aggressive;
             } else if (result.is_few_permissible_neighborhood) {
@@ -850,12 +859,12 @@ Result<T_Variable, T_Expression> solve(
              */
             auto penalty_coefficient_relaxing_rate =
                 master_option.penalty_coefficient_relaxing_rate;
-            if (result.objective_constraint_ration > constant::EPSILON &&
+            if (result.objective_constraint_ratio > constant::EPSILON &&
                 result.is_found_new_feasible_solution) {
-                constexpr double MARGIN = 100.0;
+                const double MARGIN = 100.0;
                 penalty_coefficient_relaxing_rate =
                     std::min(penalty_coefficient_relaxing_rate,
-                             result.objective_constraint_ration * MARGIN);
+                             result.objective_constraint_ratio * MARGIN);
             }
 
             for (auto&& proxy : local_penalty_coefficient_proxies) {
@@ -1076,6 +1085,15 @@ Result<T_Variable, T_Expression> solve(
         }
 
         /**
+         * Suppress the number of registered chain moves.
+         */
+        if (model->neighborhood().is_enabled_chain_move() &&
+            master_option.chain_move_capacity > 0) {
+            model->neighborhood().reduce_chain_moves(
+                master_option.chain_move_capacity, &get_rand_mt);
+        }
+
+        /**
          * Preserve the number of iterations of the previous loop.
          */
         number_of_tabu_search_iterations += result.number_of_iterations;
@@ -1210,6 +1228,13 @@ Result<T_Variable, T_Expression> solve(
             case ImprovabilityScreeningMode::Aggressive: {
                 utility::print_message(
                     "The aggressive improvability screening will be applied "
+                    "in the next loop.",
+                    master_option.verbose >= Verbose::Outer);
+                break;
+            }
+            case ImprovabilityScreeningMode::Intensive: {
+                utility::print_message(
+                    "The intensive improvability screening will be applied "
                     "in the next loop.",
                     master_option.verbose >= Verbose::Outer);
                 break;

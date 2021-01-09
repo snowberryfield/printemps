@@ -19,13 +19,6 @@ template <class T_Variable, class T_Expression>
 class Expression;
 
 /*****************************************************************************/
-enum class ConstraintSense {
-    Lower,  // <= target
-    Equal,  // = target
-    Upper   // >= target
-};
-
-/*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class Constraint : public AbstractMultiArrayElement {
     /**
@@ -527,17 +520,17 @@ class Constraint : public AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr ConstraintSense sense(void) const {
+    inline constexpr ConstraintSense sense(void) const noexcept {
         return m_sense;
     }
 
     /*************************************************************************/
-    inline constexpr T_Expression constraint_value(void) const {
+    inline constexpr T_Expression constraint_value(void) const noexcept {
         return m_constraint_value;
     }
 
     /*************************************************************************/
-    inline constexpr T_Expression violation_value(void) const {
+    inline constexpr T_Expression violation_value(void) const noexcept {
         return m_violation_value;
     }
 

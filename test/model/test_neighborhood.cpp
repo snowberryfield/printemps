@@ -158,8 +158,7 @@ TEST_F(TestNeighborhood, setup_move_updater) {
     model.categorize_constraints();
     model.extract_selections(printemps::model::SelectionMode::Larger);
 
-    model.setup_neighborhood(true, true, true, true, false, false, false, false,
-                             false);
+    model.setup_neighborhood(true, true, true, true, false, false, false);
 
     model.neighborhood().set_has_fixed_variables(true);
     model.neighborhood().set_has_selection_variables(true);
@@ -180,7 +179,7 @@ TEST_F(TestNeighborhood, setup_move_updater) {
         selection.variable_ptrs.front()->select();
     }
 
-    model.neighborhood().update_moves();
+    model.neighborhood().update_moves(true, false, false, false);
 
     /**
      * Check the variable pointers and values in raw moves.
@@ -309,7 +308,9 @@ TEST_F(TestNeighborhood, setup_move_updater) {
         auto constraint_ptrs =
             model.constraint_type_reference().aggregation_ptrs;
         auto moves = model.neighborhood().aggregation_moves();
+        auto flags = model.neighborhood().aggregation_move_flags();
         EXPECT_EQ(4 * constraint_ptrs.size(), moves.size());
+        EXPECT_EQ(4 * constraint_ptrs.size(), flags.size());
     }
 
     /// Precedence
@@ -317,7 +318,9 @@ TEST_F(TestNeighborhood, setup_move_updater) {
         auto constraint_ptrs =
             model.constraint_type_reference().precedence_ptrs;
         auto moves = model.neighborhood().precedence_moves();
+        auto flags = model.neighborhood().precedence_move_flags();
         EXPECT_EQ(2 * constraint_ptrs.size(), moves.size());
+        EXPECT_EQ(2 * constraint_ptrs.size(), flags.size());
     }
 
     /// Variable Bound
@@ -331,19 +334,22 @@ TEST_F(TestNeighborhood, setup_move_updater) {
     /// Exclusive
     {
         auto moves = model.neighborhood().exclusive_moves();
+        auto flags = model.neighborhood().exclusive_move_flags();
 
         /// x0(1,0), ..., x(1,9),
         /// x0(2,0), ..., x(1,9),
         /// x2(0)
         EXPECT_EQ(21, static_cast<int>(moves.size()));
+        EXPECT_EQ(21, static_cast<int>(flags.size()));
     }
 
     /// Selection
     {
         auto variable_ptrs = model.variable_reference().selection_variable_ptrs;
         auto moves         = model.neighborhood().selection_moves();
+        auto flags         = model.neighborhood().selection_moves();
         EXPECT_EQ(variable_ptrs.size(), moves.size());
-
+        EXPECT_EQ(variable_ptrs.size(), flags.size());
         for (auto& move : moves) {
             EXPECT_EQ(printemps::model::MoveSense::Selection, move.sense);
             EXPECT_EQ(2, static_cast<int>(move.alterations.size()));
@@ -408,6 +414,148 @@ TEST_F(TestNeighborhood, setup_move_updater) {
 }
 
 /*****************************************************************************/
+TEST_F(TestNeighborhood, register_chain_move) {
+    printemps::model::Model<int, double> model;
+
+    auto& x = model.create_variables("x", 10, 0, 1);
+    model.categorize_variables();
+    model.categorize_constraints();
+    model.setup_neighborhood(true, true, true, true, false, false, false);
+
+    EXPECT_EQ(0, model.neighborhood().chain_moves().size());
+    EXPECT_EQ(0, model.neighborhood().chain_move_flags().size());
+
+    printemps::model::Move<int, double> move;
+    move.alterations.emplace_back(&x(0), 1);
+    move.alterations.emplace_back(&x(1), 1);
+    move.related_constraint_ptrs = {};
+    move.sense                   = printemps::model::MoveSense::Chain;
+
+    model.neighborhood().register_chain_move(move);
+
+    EXPECT_EQ(1, model.neighborhood().chain_moves().size());
+    EXPECT_EQ(1, model.neighborhood().chain_move_flags().size());
+
+    EXPECT_EQ(&x(0),
+              model.neighborhood().chain_moves()[0].alterations[0].first);
+    EXPECT_EQ(1, model.neighborhood().chain_moves()[0].alterations[0].second);
+
+    EXPECT_EQ(&x(1),
+              model.neighborhood().chain_moves()[0].alterations[1].first);
+    EXPECT_EQ(1, model.neighborhood().chain_moves()[0].alterations[1].second);
+
+    model.neighborhood().clear_chain_moves();
+    EXPECT_EQ(0, model.neighborhood().chain_moves().size());
+    EXPECT_EQ(0, model.neighborhood().chain_move_flags().size());
+}
+
+/*****************************************************************************/
+TEST_F(TestNeighborhood, clear_chain_moves) {
+    /// This method is tested in register_chain_move().
+}
+
+/*****************************************************************************/
+TEST_F(TestNeighborhood, deduplicate_chain_moves) {
+    printemps::model::Model<int, double> model;
+
+    auto& x = model.create_variables("x0", 10, 0, 1);
+    model.categorize_variables();
+    model.categorize_constraints();
+    model.setup_neighborhood(true, true, true, true, false, false, false);
+
+    EXPECT_EQ(0, model.neighborhood().chain_moves().size());
+    EXPECT_EQ(0, model.neighborhood().chain_move_flags().size());
+    printemps::model::Move<int, double> move1;
+    move1.alterations.emplace_back(&x(0), 1);
+    move1.alterations.emplace_back(&x(1), 1);
+    move1.related_constraint_ptrs = {};
+    move1.sense                   = printemps::model::MoveSense::Chain;
+
+    printemps::model::Move<int, double> move2;
+    move2.alterations.emplace_back(&x(0), 0);
+    move2.alterations.emplace_back(&x(1), 1);
+    move2.related_constraint_ptrs = {};
+    move2.sense                   = printemps::model::MoveSense::Chain;
+
+    printemps::model::Move<int, double> move3;
+    move3.alterations.emplace_back(&x(0), 1);
+    move3.alterations.emplace_back(&x(1), 0);
+    move3.related_constraint_ptrs = {};
+    move3.sense                   = printemps::model::MoveSense::Chain;
+
+    printemps::model::Move<int, double> move4;
+    move4.alterations.emplace_back(&x(0), 1);
+    move4.alterations.emplace_back(&x(2), 1);
+    move4.related_constraint_ptrs = {};
+    move4.sense                   = printemps::model::MoveSense::Chain;
+
+    printemps::model::Move<int, double> move5;
+    move5.alterations.emplace_back(&x(1), 1);
+    move5.alterations.emplace_back(&x(0), 1);
+    move5.related_constraint_ptrs = {};
+    move5.sense                   = printemps::model::MoveSense::Chain;
+
+    for (auto i = 0; i < 5; i++) {
+        model.neighborhood().register_chain_move(move1);
+        model.neighborhood().register_chain_move(move2);
+        model.neighborhood().register_chain_move(move3);
+        model.neighborhood().register_chain_move(move4);
+        model.neighborhood().register_chain_move(move5);
+    }
+    EXPECT_EQ(25, model.neighborhood().chain_moves().size());
+    EXPECT_EQ(25, model.neighborhood().chain_move_flags().size());
+
+    model.neighborhood().deduplicate_chain_moves();
+    EXPECT_EQ(5, model.neighborhood().chain_moves().size());
+    EXPECT_EQ(5, model.neighborhood().chain_move_flags().size());
+}
+
+/*****************************************************************************/
+TEST_F(TestNeighborhood, reduce_chain_moves) {
+    printemps::model::Model<int, double> model;
+
+    auto& x = model.create_variables("x0", 10, 0, 1);
+    model.categorize_variables();
+    model.categorize_constraints();
+    model.setup_neighborhood(true, true, true, true, false, false, false);
+
+    printemps::model::Move<int, double> move;
+    move.alterations.emplace_back(&x(0), 1);
+    move.alterations.emplace_back(&x(1), 1);
+    move.related_constraint_ptrs = {};
+    move.sense                   = printemps::model::MoveSense::Chain;
+
+    for (auto i = 0; i < 5000; i++) {
+        model.neighborhood().register_chain_move(move);
+    }
+
+    const int    CHAIN_MOVE_CAPACITY = 10000;
+    std::mt19937 rand;
+    rand.seed(1);
+    model.neighborhood().reduce_chain_moves(CHAIN_MOVE_CAPACITY, &rand);
+    EXPECT_EQ(5000, model.neighborhood().chain_moves().size());
+    EXPECT_EQ(5000, model.neighborhood().chain_move_flags().size());
+
+    for (auto i = 0; i < 5000; i++) {
+        model.neighborhood().register_chain_move(move);
+    }
+
+    model.neighborhood().reduce_chain_moves(CHAIN_MOVE_CAPACITY, &rand);
+    EXPECT_EQ(CHAIN_MOVE_CAPACITY, model.neighborhood().chain_moves().size());
+    EXPECT_EQ(CHAIN_MOVE_CAPACITY,
+              model.neighborhood().chain_move_flags().size());
+
+    for (auto i = 0; i < 5000; i++) {
+        model.neighborhood().register_chain_move(move);
+    }
+
+    model.neighborhood().reduce_chain_moves(CHAIN_MOVE_CAPACITY, &rand);
+    EXPECT_EQ(CHAIN_MOVE_CAPACITY, model.neighborhood().chain_moves().size());
+    EXPECT_EQ(CHAIN_MOVE_CAPACITY,
+              model.neighborhood().chain_move_flags().size());
+}
+
+/*****************************************************************************/
 TEST_F(TestNeighborhood, set_user_defined_move_updater) {
     printemps::model::Model<int, double> model;
 
@@ -431,14 +579,13 @@ TEST_F(TestNeighborhood, set_user_defined_move_updater) {
     model.categorize_variables();
     model.categorize_constraints();
 
-    model.setup_neighborhood(false, false, false, false, false, true, false,
-                             false, false);
+    model.setup_neighborhood(false, false, false, false, false, true, false);
 
     model.neighborhood().set_has_fixed_variables(true);
     model.neighborhood().set_has_selection_variables(false);
 
     model.neighborhood().enable_user_defined_move();
-    model.neighborhood().update_moves();
+    model.neighborhood().update_moves(true, false, false, false);
 
     /// Check the variable pointers and values in raw moves, and the numbers of
     /// filtered moves.
@@ -464,9 +611,8 @@ TEST_F(TestNeighborhood, shuffle_moves) {
     auto&                  x = model.create_variables("x", n, 0, 1);
     [[maybe_unused]] auto& c = model.create_constraint("c", x.selection());
 
-    model.setup_neighborhood(true, true, true, true, false, false, false, false,
-                             false);
-    model.neighborhood().update_moves();
+    model.setup_neighborhood(true, true, true, true, false, false, false);
+    model.neighborhood().update_moves(true, false, false, false);
 
     auto         before_move_ptrs = model.neighborhood().move_ptrs();
     std::mt19937 rand;
@@ -488,7 +634,17 @@ TEST_F(TestNeighborhood, binary_moves) {
 }
 
 /*****************************************************************************/
+TEST_F(TestNeighborhood, binary_move_flags) {
+    /// This method is tested in move_updater().
+}
+
+/*****************************************************************************/
 TEST_F(TestNeighborhood, integer_moves) {
+    /// This method is tested in move_updater().
+}
+
+/*****************************************************************************/
+TEST_F(TestNeighborhood, integer_move_flags) {
     /// This method is tested in move_updater().
 }
 
@@ -498,7 +654,17 @@ TEST_F(TestNeighborhood, aggregation_moves) {
 }
 
 /*****************************************************************************/
+TEST_F(TestNeighborhood, aggregation_move_flags) {
+    /// This method is tested in move_updater().
+}
+
+/*****************************************************************************/
 TEST_F(TestNeighborhood, precedence_moves) {
+    /// This method is tested in move_updater().
+}
+
+/*****************************************************************************/
+TEST_F(TestNeighborhood, precedence_move_flags) {
     /// This method is tested in move_updater().
 }
 
@@ -508,12 +674,37 @@ TEST_F(TestNeighborhood, variable_bound_moves) {
 }
 
 /*****************************************************************************/
+TEST_F(TestNeighborhood, variable_bound_move_flags) {
+    /// This method is tested in move_updater().
+}
+
+/*****************************************************************************/
 TEST_F(TestNeighborhood, selection_moves) {
     /// This method is tested in move_updater().
 }
 
 /*****************************************************************************/
+TEST_F(TestNeighborhood, selection_move_flags) {
+    /// This method is tested in move_updater().
+}
+
+/*****************************************************************************/
+TEST_F(TestNeighborhood, chain_moves) {
+    /// This method is tested in register_chain_move().
+}
+
+/*****************************************************************************/
+TEST_F(TestNeighborhood, chain_move_flags) {
+    /// This method is tested in register_chain_move().
+}
+
+/*****************************************************************************/
 TEST_F(TestNeighborhood, user_defined_moves) {
+    /// This method is tested in set_user_defined_move_updater().
+}
+
+/*****************************************************************************/
+TEST_F(TestNeighborhood, user_defined_move_flags) {
     /// This method is tested in set_user_defined_move_updater().
 }
 
