@@ -40,6 +40,14 @@ inline constexpr std::unordered_set<T> union_set(
     result.insert(a_SECOND.begin(), a_SECOND.end());
     return result;
 }
+/*****************************************************************************/
+template <class T>
+inline constexpr std::vector<T> to_vector(
+    const std::unordered_set<T> &a_UNORDERED_SET) {
+    std::vector<T> result(a_UNORDERED_SET.begin(), a_UNORDERED_SET.end());
+    return result;
+}
+
 }  // namespace utility
 }  // namespace printemps
 

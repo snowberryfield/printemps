@@ -11,6 +11,7 @@
 
 namespace printemps {
 namespace model {
+/*****************************************************************************/
 /**
  * This class was designed with reference to the following site.
  * https://stackoverflow.com/questions/47664127/create-a-multidimensional-array-dynamically-in-c/47664858

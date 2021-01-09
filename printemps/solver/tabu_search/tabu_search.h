@@ -120,8 +120,15 @@ TabuSearchResult<T_Variable, T_Expression> solve(
         historical_feasible_solutions;
 
     /**
+     * Reset the variable improvability.
+     */
+    model->reset_variable_objective_improvability();
+    model->reset_variable_feasibility_improvability();
+
+    /**
      * Prepare other local variables.
      */
+
     std::vector<model::SolutionScore> trial_solution_scores;
     std::vector<MoveScore>            trial_move_scores;
 
@@ -209,18 +216,83 @@ TabuSearchResult<T_Variable, T_Expression> solve(
             (option.improvability_screening_mode !=
              ImprovabilityScreeningMode::Off);
 
+        bool accept_all                    = true;
+        bool accept_objective_improvable   = true;
+        bool accept_feasibility_improvable = true;
+
         if (model->is_linear() && is_enabled_improvability_screening) {
             /**
              * If the option improvability_screening_mode is not None,
              * only improvable moves will be generated.
              */
+
+            auto changed_variable_ptrs =
+                utility::to_vector(model::related_variable_ptrs(current_move));
+            auto changed_constraint_ptrs =
+                utility::to_vector(current_move.related_constraint_ptrs);
+
+            if (iteration == 0) {
+                model->update_variable_objective_improvability();
+            } else {
+                model->update_variable_objective_improvability(
+                    changed_variable_ptrs);
+            }
+
             switch (option.improvability_screening_mode) {
                 case ImprovabilityScreeningMode::Soft: {
-                    model->update_variable_improvability(false);
+                    if (model->is_feasible()) {
+                        accept_all                    = false;
+                        accept_objective_improvable   = true;
+                        accept_feasibility_improvable = false;
+                    } else {
+                        model->reset_variable_feasibility_improvability();
+                        model->update_variable_feasibility_improvability();
+
+                        accept_all                    = false;
+                        accept_objective_improvable   = true;
+                        accept_feasibility_improvable = true;
+                    }
+
                     break;
                 }
                 case ImprovabilityScreeningMode::Aggressive: {
-                    model->update_variable_improvability(true);
+                    if (model->is_feasible()) {
+                        accept_all                    = false;
+                        accept_objective_improvable   = true;
+                        accept_feasibility_improvable = false;
+                    } else {
+                        model->reset_variable_feasibility_improvability();
+                        model->update_variable_feasibility_improvability();
+
+                        accept_all                    = false;
+                        accept_objective_improvable   = false;
+                        accept_feasibility_improvable = true;
+                    }
+                    break;
+                }
+                case ImprovabilityScreeningMode::Intensive: {
+                    if (model->is_feasible()) {
+                        accept_all                    = false;
+                        accept_objective_improvable   = true;
+                        accept_feasibility_improvable = false;
+                    } else {
+                        // model->reset_variable_feasibility_improvability();
+                        // model->update_variable_feasibility_improvability();
+
+                        if (iteration == 0) {
+                            model->reset_variable_feasibility_improvability();
+                            model->update_variable_feasibility_improvability();
+                        } else {
+                            model->reset_variable_feasibility_improvability(
+                                changed_constraint_ptrs);
+                            model->update_variable_feasibility_improvability(
+                                changed_constraint_ptrs);
+                        }
+
+                        accept_all                    = false;
+                        accept_objective_improvable   = false;
+                        accept_feasibility_improvable = true;
+                    }
                     break;
                 }
                 default: {
@@ -231,8 +303,11 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                 }
             }
         }
-
-        model->neighborhood().update_moves();
+        model->neighborhood().update_moves(
+            accept_all,                     //
+            accept_objective_improvable,    //
+            accept_feasibility_improvable,  //
+            option.is_enabled_parallel_neighborhood_update);
 
         if (option.tabu_search.is_enabled_shuffle) {
             model->neighborhood().shuffle_moves(&get_rand_mt);
@@ -280,20 +355,25 @@ TabuSearchResult<T_Variable, T_Expression> solve(
              * or ordinary(slow) evaluation methods.
              */
             if (model->is_enabled_fast_evaluation()) {
-                trial_solution_scores[i_move] = model->evaluate(
-                    *trial_move_ptrs[i_move], current_solution_score,
-                    local_penalty_coefficient_proxies,
-                    global_penalty_coefficient_proxies);
+                trial_solution_scores[i_move]                             //
+                    = model->evaluate(*trial_move_ptrs[i_move],           //
+                                      current_solution_score,             //
+                                      local_penalty_coefficient_proxies,  //
+                                      global_penalty_coefficient_proxies);
 
             } else {
-                trial_solution_scores[i_move] = model->evaluate(
-                    *trial_move_ptrs[i_move], local_penalty_coefficient_proxies,
-                    global_penalty_coefficient_proxies);
+                trial_solution_scores[i_move]                             //
+                    = model->evaluate(*trial_move_ptrs[i_move],           //
+                                      local_penalty_coefficient_proxies,  //
+                                      global_penalty_coefficient_proxies);
             }
 
-            trial_move_scores[i_move] =
-                evaluate_move(*trial_move_ptrs[i_move], iteration, memory,
-                              option, tabu_tenure);
+            trial_move_scores[i_move]                      //
+                = evaluate_move(*trial_move_ptrs[i_move],  //
+                                iteration,                 //
+                                memory,                    //
+                                option,                    //
+                                tabu_tenure);
 
             objective_improvements[i_move] =
                 trial_solution_scores[i_move].objective_improvement;
@@ -417,6 +497,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
             min_local_penalty = std::min(min_local_penalty,
                                          current_solution_score.local_penalty);
         }
+
         /**
          * Update the status.
          */
@@ -431,7 +512,8 @@ TabuSearchResult<T_Variable, T_Expression> solve(
         /**
          * Push the current solution to historical data.
          */
-        if (current_solution_score.is_feasible) {
+        if (option.is_enabled_collect_historical_data &&
+            current_solution_score.is_feasible) {
             historical_feasible_solutions.push_back(
                 model->export_plain_solution());
         }
@@ -503,16 +585,25 @@ TabuSearchResult<T_Variable, T_Expression> solve(
         }
 
         /**
-         * Register a chain move.
+         * Register a chain move. To prevent the duplication of same chain move,
+         * moves of the initial tabu_tenure iterations will be ignored.
          */
-        if (iteration > 2 && option.is_enabled_chain_move) {
-            if (current_improvement > 0 && previous_improvement < 0 &&
-                current_improvement + previous_improvement > 0) {
+        if (iteration > tabu_tenure && option.is_enabled_chain_move) {
+            if (current_improvement * previous_improvement < 0) {
                 auto chain_move = previous_move + current_move;
-                if (!Move_T::has_duplicate_variable(chain_move) &&
+                if (!model::has_duplicate_variable(chain_move) &&
                     previous_move.sense != model::MoveSense::Selection &&
                     current_move.sense != model::MoveSense::Selection) {
                     model->neighborhood().register_chain_move(chain_move);
+
+                    if (model::is_binary_swap(chain_move)) {
+                        auto back_chain_move = chain_move;
+                        for (auto&& alteration : back_chain_move.alterations) {
+                            alteration.second = 1 - alteration.second;
+                        }
+                        model->neighborhood().register_chain_move(
+                            back_chain_move);
+                    }
                 }
             }
         }
@@ -659,7 +750,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
 
     auto abs_max_objective = std::max(fabs(max_objective), fabs(min_objective));
 
-    result.objective_constraint_ration =
+    result.objective_constraint_ratio =
         std::max(1.0,
                  std::max(abs_max_objective, max_objective - min_objective)) /
         std::max(1.0, min_local_penalty);

@@ -77,6 +77,37 @@ TEST_F(TestUnorderedSetUtility, union_set) {
     EXPECT_EQ(true, union_str.find("g") != union_str.end());
 }
 
+/*****************************************************************************/
+TEST_F(TestUnorderedSetUtility, to_vector) {
+    std::unordered_set<int>         set_int    = {1, 2, 3, 4, 5};
+    std::unordered_set<std::string> set_string = {"a", "b", "c", "d", "e"};
+
+    auto vector_int    = printemps::utility::to_vector(set_int);
+    auto vector_string = printemps::utility::to_vector(set_string);
+
+    EXPECT_EQ(true, std::find(vector_int.begin(), vector_int.end(), 1) !=
+                        vector_int.end());
+    EXPECT_EQ(true, std::find(vector_int.begin(), vector_int.end(), 2) !=
+                        vector_int.end());
+    EXPECT_EQ(true, std::find(vector_int.begin(), vector_int.end(), 3) !=
+                        vector_int.end());
+    EXPECT_EQ(true, std::find(vector_int.begin(), vector_int.end(), 4) !=
+                        vector_int.end());
+    EXPECT_EQ(true, std::find(vector_int.begin(), vector_int.end(), 5) !=
+                        vector_int.end());
+
+    EXPECT_EQ(true, std::find(vector_string.begin(), vector_string.end(),
+                              "a") != vector_string.end());
+    EXPECT_EQ(true, std::find(vector_string.begin(), vector_string.end(),
+                              "b") != vector_string.end());
+    EXPECT_EQ(true, std::find(vector_string.begin(), vector_string.end(),
+                              "c") != vector_string.end());
+    EXPECT_EQ(true, std::find(vector_string.begin(), vector_string.end(),
+                              "d") != vector_string.end());
+    EXPECT_EQ(true, std::find(vector_string.begin(), vector_string.end(),
+                              "e") != vector_string.end());
+}
+
 }  // namespace
 /*****************************************************************************/
 // END
