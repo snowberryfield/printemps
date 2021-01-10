@@ -349,60 +349,59 @@ TabuSearchResult<T_Variable, T_Expression> solve(
 #pragma omp parallel for if (option.is_enabled_parallel_evaluation) \
     schedule(static)
 #endif
-        for (auto i_move = 0; i_move < number_of_moves; i_move++) {
+        for (auto i = 0; i < number_of_moves; i++) {
             /**
              * The neighborhood solutions will be evaluated in parallel by fast
              * or ordinary(slow) evaluation methods.
              */
             if (model->is_enabled_fast_evaluation()) {
-                trial_solution_scores[i_move]                             //
-                    = model->evaluate(*trial_move_ptrs[i_move],           //
+                trial_solution_scores[i]                                  //
+                    = model->evaluate(*trial_move_ptrs[i],                //
                                       current_solution_score,             //
                                       local_penalty_coefficient_proxies,  //
                                       global_penalty_coefficient_proxies);
 
             } else {
-                trial_solution_scores[i_move]                             //
-                    = model->evaluate(*trial_move_ptrs[i_move],           //
+                trial_solution_scores[i]                                  //
+                    = model->evaluate(*trial_move_ptrs[i],                //
                                       local_penalty_coefficient_proxies,  //
                                       global_penalty_coefficient_proxies);
             }
 
-            trial_move_scores[i_move]                      //
-                = evaluate_move(*trial_move_ptrs[i_move],  //
-                                iteration,                 //
-                                memory,                    //
-                                option,                    //
+            trial_move_scores[i]                      //
+                = evaluate_move(*trial_move_ptrs[i],  //
+                                iteration,            //
+                                memory,               //
+                                option,               //
                                 tabu_tenure);
 
-            objective_improvements[i_move] =
-                trial_solution_scores[i_move].objective_improvement;
+            objective_improvements[i] =
+                trial_solution_scores[i].objective_improvement;
 
-            local_penalties[i_move] =
-                trial_solution_scores[i_move].local_penalty;
+            local_penalties[i] = trial_solution_scores[i].local_penalty;
 
-            local_augmented_objectives[i_move] =
-                trial_solution_scores[i_move].local_augmented_objective;
-            global_augmented_objectives[i_move] =
-                trial_solution_scores[i_move].global_augmented_objective;
+            local_augmented_objectives[i] =
+                trial_solution_scores[i].local_augmented_objective;
+            global_augmented_objectives[i] =
+                trial_solution_scores[i].global_augmented_objective;
 
-            total_scores[i_move] =
-                trial_solution_scores[i_move].local_augmented_objective +
-                trial_move_scores[i_move].frequency_penalty;
+            total_scores[i] =
+                trial_solution_scores[i].local_augmented_objective +
+                trial_move_scores[i].frequency_penalty;
 
             /**
              * If the move is "tabu", it will be set lower priorities in
              * selecting a move for the next solution.
              */
-            if (!trial_move_scores[i_move].is_permissible) {
-                total_scores[i_move] = HUGE_VALF;
+            if (!trial_move_scores[i].is_permissible) {
+                total_scores[i] = HUGE_VALF;
             }
 
-            if (trial_move_ptrs[i_move]->sense == model::MoveSense::Chain &&
+            if (trial_move_ptrs[i]->sense == model::MoveSense::Chain &&
                 fabs(current_global_augmented_objective -
-                     trial_solution_scores[i_move].global_augmented_objective) <
+                     trial_solution_scores[i].global_augmented_objective) <
                     constant::EPSILON) {
-                total_scores[i_move] = HUGE_VALF;
+                total_scores[i] = HUGE_VALF;
             }
         }
 
@@ -693,8 +692,8 @@ TabuSearchResult<T_Variable, T_Expression> solve(
              * sensitivity, the current loop will be terminated and the
              * local penalty coefficients will be adjusted.
              */
-            constexpr int    ITERATION_MIN = 10;
-            constexpr double MARGIN        = 100.0;
+            const int    ITERATION_MIN = 10;
+            const double MARGIN        = 100.0;
 
             if (iteration > ITERATION_MIN              //
                 && current_solution_score.is_feasible  //

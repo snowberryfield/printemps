@@ -479,6 +479,82 @@ TEST_F(TestPresolver, fix_implicit_fixed_variables) {
 
     EXPECT_EQ(1, model.number_of_fixed_variables());
 }
+
+/*****************************************************************************/
+TEST_F(TestPresolver, fix_redundant_variables) {
+    {
+        printemps::model::Model<int, double> model;
+
+        auto& x = model.create_variables("x", 9, 0, 1);
+        auto& g = model.create_constraints("g", 9);
+
+        g(0) = x(0) + x(1) + x(2) <= 1;
+        g(1) = x(0) + x(1) + x(2) == 1;
+        g(2) = x(0) + x(1) + x(2) >= 1;
+        g(3) = x(3) + x(4) + x(5) <= 1;
+        g(4) = x(3) + x(4) + x(5) == 1;
+        g(5) = x(3) + x(4) + x(5) >= 1;
+        g(6) = x(6) + x(7) + x(8) <= 1;
+        g(7) = x(6) + x(7) + x(8) == 1;
+        g(8) = x(6) + x(7) + x(8) >= 1;
+
+        model.minimize(x(0) + x(1) + x(2)        //
+                       + x(3) - x(4) - 2 * x(5)  //
+                       + x(6) + x(7) + 2 * x(8));
+
+        model.setup_unique_name();
+        model.setup_variable_related_constraints();
+        model.setup_is_linear();
+        model.setup_variable_sensitivity();
+
+        model.categorize_variables();
+        model.categorize_constraints();
+        printemps::model::fix_redundant_variables(&model, false);
+        model.categorize_variables();
+        model.categorize_constraints();
+
+        EXPECT_EQ(true, x(3).is_fixed());
+        EXPECT_EQ(true, x(4).is_fixed());
+        EXPECT_EQ(true, x(8).is_fixed());
+    }
+
+    {
+        printemps::model::Model<int, double> model;
+
+        auto& x = model.create_variables("x", 9, 0, 1);
+        auto& g = model.create_constraints("g", 9);
+
+        g(0) = x(0) + x(1) + x(2) <= 1;
+        g(1) = x(0) + x(1) + x(2) == 1;
+        g(2) = x(0) + x(1) + x(2) >= 1;
+        g(3) = x(3) + x(4) + x(5) <= 1;
+        g(4) = x(3) + x(4) + x(5) == 1;
+        g(5) = x(3) + x(4) + x(5) >= 1;
+        g(6) = x(6) + x(7) + x(8) <= 1;
+        g(7) = x(6) + x(7) + x(8) == 1;
+        g(8) = x(6) + x(7) + x(8) >= 1;
+
+        model.maximize(x(0) + x(1) + x(2)        //
+                       + x(3) - x(4) - 2 * x(5)  //
+                       + x(6) + x(7) + 2 * x(8));
+
+        model.setup_unique_name();
+        model.setup_variable_related_constraints();
+        model.setup_is_linear();
+        model.setup_variable_sensitivity();
+
+        model.categorize_variables();
+        model.categorize_constraints();
+        printemps::model::fix_redundant_variables(&model, false);
+        model.categorize_variables();
+        model.categorize_constraints();
+
+        EXPECT_EQ(true, x(4).is_fixed());
+        EXPECT_EQ(true, x(5).is_fixed());
+        EXPECT_EQ(true, x(6).is_fixed());
+        EXPECT_EQ(true, x(7).is_fixed());
+    }
+}
 /*****************************************************************************/
 }  // namespace
 /*****************************************************************************/
