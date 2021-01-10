@@ -44,6 +44,8 @@ class Variable : public AbstractMultiArrayElement {
     bool          m_has_bounds;
     bool          m_is_objective_improvable;
     bool          m_is_feasibility_improvable;
+    bool          m_has_lower_bound_margin;
+    bool          m_has_upper_bound_margin;
     VariableSense m_sense;
 
     Selection<T_Variable, T_Expression> *m_selection_ptr;
@@ -107,6 +109,9 @@ class Variable : public AbstractMultiArrayElement {
         m_is_objective_improvable   = false;
         m_is_feasibility_improvable = false;
 
+        m_has_lower_bound_margin = true;
+        m_has_upper_bound_margin = true;
+
         m_sense         = VariableSense::Integer;
         m_selection_ptr = nullptr;
         m_related_constraint_ptrs.clear();
@@ -117,12 +122,14 @@ class Variable : public AbstractMultiArrayElement {
     /*************************************************************************/
     inline constexpr void set_value_force(const T_Variable a_VALUE) {
         m_value = a_VALUE;
+        this->update_margin();
     }
 
     /*************************************************************************/
     inline constexpr void set_value_if_not_fixed(const T_Variable a_VALUE) {
         if (!m_is_fixed) {
             m_value = a_VALUE;
+            this->update_margin();
         }
     }
 
@@ -139,6 +146,7 @@ class Variable : public AbstractMultiArrayElement {
                 "A fixed variable was attempted to be changed."));
         }
         m_value = a_VALUE;
+        this->update_margin();
     }
 
     /*************************************************************************/
@@ -180,6 +188,7 @@ class Variable : public AbstractMultiArrayElement {
     inline constexpr void fix_by(const T_Variable a_VALUE) {
         m_value    = a_VALUE;
         m_is_fixed = true;
+        this->update_margin();
     }
 
     /*************************************************************************/
@@ -198,6 +207,7 @@ class Variable : public AbstractMultiArrayElement {
         m_has_bounds  = true;
 
         this->setup_sense();
+        this->update_margin();
     }
 
     /*************************************************************************/
@@ -207,6 +217,7 @@ class Variable : public AbstractMultiArrayElement {
         m_has_bounds    = false;
         m_sense         = VariableSense::Integer;
         m_selection_ptr = nullptr;
+        this->update_margin();
     }
 
     /*************************************************************************/
@@ -323,8 +334,24 @@ class Variable : public AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr T_Expression objective_sensitivity(void) const {
+    inline constexpr T_Expression objective_sensitivity(void) const noexcept {
         return m_objective_sensitivity;
+    }
+
+    /*************************************************************************/
+    inline constexpr void update_margin(void) {
+        m_has_lower_bound_margin = m_value > m_lower_bound;
+        m_has_upper_bound_margin = m_value < m_upper_bound;
+    }
+
+    /*************************************************************************/
+    inline constexpr bool has_lower_bound_margin(void) const noexcept {
+        return m_has_lower_bound_margin;
+    }
+
+    /*************************************************************************/
+    inline constexpr bool has_upper_bound_margin(void) const noexcept {
+        return m_has_upper_bound_margin;
     }
 
     /*************************************************************************/
@@ -364,6 +391,7 @@ class Variable : public AbstractMultiArrayElement {
                 "A fixed variable was attempted to be changed."));
         }
         m_value = a_VALUE;
+        this->update_margin();
         return *this;
     }
 };
