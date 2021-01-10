@@ -336,7 +336,7 @@ Result<T_Variable, T_Expression> solve(
                 /**
                  * Print the search summary.
                  */
-                utility::print_message("Solving Lagrange dual was finished. ",
+                utility::print_message("Solving Lagrange dual finished. ",
                                        master_option.verbose >= Verbose::Outer);
 
                 utility::print_info(  //
@@ -469,7 +469,7 @@ Result<T_Variable, T_Expression> solve(
             /**
              * Print the search summary.
              */
-            utility::print_message("Local search was finished.",
+            utility::print_message("Local search finished.",
                                    master_option.verbose >= Verbose::Outer);
 
             utility::print_info(  //
@@ -1109,7 +1109,7 @@ Result<T_Variable, T_Expression> solve(
          */
         utility::print_message(
             "Tabu search loop (" + std::to_string(iteration + 1) + "/" +
-                std::to_string(master_option.iteration_max) + ") was finished.",
+                std::to_string(master_option.iteration_max) + ") finished.",
             master_option.verbose >= Verbose::Outer);
 
         utility::print_info(  //
