@@ -622,6 +622,9 @@ class Model {
             this->setup_variable_sensitivity();
         }
 
+        this->categorize_variables();
+        this->categorize_constraints();
+
         /**
          * Presolve the problem by removing redundant constraints and fixing
          * decision variables implicitly fixed.
@@ -630,6 +633,7 @@ class Model {
             presolve(this, a_IS_ENABLED_PRINT);
         }
 
+        /// Categorize again to reflect the presolving result.
         this->categorize_variables();
         this->categorize_constraints();
 
@@ -1453,11 +1457,10 @@ class Model {
         for (const auto &variable_ptr : a_VARIABLE_PTRS) {
             auto coefficient =
                 variable_ptr->objective_sensitivity() * this->sign();
-            if (coefficient > 0 &&  //
-                (variable_ptr->value() > variable_ptr->lower_bound())) {
+            if (coefficient > 0 && variable_ptr->has_lower_bound_margin()) {
                 variable_ptr->set_is_objective_improvable(true);
-            } else if (coefficient < 0 &&  //
-                       (variable_ptr->value() < variable_ptr->upper_bound())) {
+            } else if (coefficient < 0 &&
+                       variable_ptr->has_upper_bound_margin()) {
                 variable_ptr->set_is_objective_improvable(true);
             } else {
                 variable_ptr->set_is_objective_improvable(false);
@@ -1499,13 +1502,16 @@ class Model {
                             continue;
                         }
 
-                        if (coefficient > 0 && (variable_ptr->value() >
-                                                variable_ptr->lower_bound())) {
+                        if (variable_ptr->is_fixed()) {
+                            continue;
+                        }
+
+                        if (coefficient > 0 &&
+                            variable_ptr->has_lower_bound_margin()) {
                             variable_ptr->set_is_feasibility_improvable(true);
 
                         } else if (coefficient < 0 &&
-                                   (variable_ptr->value() <
-                                    variable_ptr->upper_bound())) {
+                                   variable_ptr->has_upper_bound_margin()) {
                             variable_ptr->set_is_feasibility_improvable(true);
                         }
                     }
@@ -1520,13 +1526,15 @@ class Model {
                             continue;
                         }
 
-                        if (coefficient > 0 && (variable_ptr->value() <
-                                                variable_ptr->upper_bound())) {
-                            variable_ptr->set_is_feasibility_improvable(true);
+                        if (variable_ptr->is_fixed()) {
+                            continue;
+                        }
 
+                        if (coefficient > 0 &&
+                            variable_ptr->has_upper_bound_margin()) {
+                            variable_ptr->set_is_feasibility_improvable(true);
                         } else if (coefficient < 0 &&
-                                   (variable_ptr->value() >
-                                    variable_ptr->lower_bound())) {
+                                   variable_ptr->has_lower_bound_margin()) {
                             variable_ptr->set_is_feasibility_improvable(true);
                         }
                     }
