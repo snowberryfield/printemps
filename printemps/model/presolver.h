@@ -543,18 +543,23 @@ inline constexpr int fix_redundant_variables(
                     variable_ptrs[j]->related_constraint_ptrs().size()) {
                     break;
                 }
-                if (variable_ptrs[i]->constraint_sensitivities() !=
-                    variable_ptrs[j]->constraint_sensitivities()) {
-                    continue;
-                }
 
                 if (variable_ptrs[j]->is_fixed() &&
                     variable_ptrs[j]->value() == 0) {
                     continue;
                 }
 
-                if (variable_ptrs[i]->objective_sensitivity() !=
-                    variable_ptrs[j]->objective_sensitivity()) {
+                if (variable_ptrs[i]->constraint_sensitivities() !=
+                    variable_ptrs[j]->constraint_sensitivities()) {
+                    continue;
+                }
+
+                if ((a_model->is_minimization() &&
+                     (variable_ptrs[i]->objective_sensitivity() >=
+                      variable_ptrs[j]->objective_sensitivity())) ||
+                    (!a_model->is_minimization() &&
+                     (variable_ptrs[i]->objective_sensitivity() <=
+                      variable_ptrs[j]->objective_sensitivity()))) {
                     variable_ptrs[i]->fix_by(0);
                     utility::print_message(
                         "The value of redundant decision variable " +
