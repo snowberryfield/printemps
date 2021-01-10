@@ -241,8 +241,8 @@ remove_redundant_constraints_with_tightening_variable_bounds(
                  not_fixed_term_lower_bound + fixed_term_value +
                          constant_value >=
                      0)) {
-                utility::print_message("The constraint " + constraint.name() +
-                                           " was removed for redundancy.",
+                utility::print_message("The redundant constraint " +
+                                           constraint.name() + " was removed.",
                                        a_IS_ENABLED_PRINT);
 
                 if (constraint.is_enabled()) {
@@ -313,10 +313,10 @@ remove_redundant_constraints_with_tightening_variable_bounds(
                             a_IS_ENABLED_PRINT);
                         variable_ptr->set_bound(lower_bound, bound_floor);
                     } else {
-                        utility::print_message(
-                            "The constraint " + constraint.name() +
-                                " was removed for redundancy.",
-                            a_IS_ENABLED_PRINT);
+                        utility::print_message("The redundant constraint " +
+                                                   constraint.name() +
+                                                   " was removed.",
+                                               a_IS_ENABLED_PRINT);
                     }
                     if (constraint.is_enabled()) {
                         constraint.disable();
@@ -347,10 +347,10 @@ remove_redundant_constraints_with_tightening_variable_bounds(
                             a_IS_ENABLED_PRINT);
                         variable_ptr->set_bound(bound_ceil, upper_bound);
                     } else {
-                        utility::print_message(
-                            "The constraint " + constraint.name() +
-                                " was removed for redundancy.",
-                            a_IS_ENABLED_PRINT);
+                        utility::print_message("The redundant constraint " +
+                                                   constraint.name() +
+                                                   " was removed.",
+                                               a_IS_ENABLED_PRINT);
                     }
                     if (constraint.is_enabled()) {
                         constraint.disable();
@@ -493,6 +493,86 @@ inline constexpr int fix_implicit_fixed_variables(
 }
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
+inline constexpr int fix_redundant_variables(
+    Model<T_Variable, T_Expression> *a_model, const bool a_IS_ENABLED_PRINT) {
+    int number_of_set_partitionings =
+        a_model->constraint_type_reference().set_partitioning_ptrs.size();
+    int number_of_set_coverings =
+        a_model->constraint_type_reference().set_covering_ptrs.size();
+    int number_of_set_packings =
+        a_model->constraint_type_reference().set_packing_ptrs.size();
+
+    int number_of_newly_fixed_variables = 0;
+    if (a_model->number_of_constraints() ==
+        (number_of_set_partitionings + number_of_set_coverings +
+         number_of_set_packings)) {
+        auto variable_ptrs = a_model->variable_reference().variable_ptrs;
+
+        if (a_model->is_minimization()) {
+            std::sort(variable_ptrs.begin(), variable_ptrs.end(),
+                      [](auto const &a_LHS, auto const &a_RHS) {
+                          if (a_LHS->related_constraint_ptrs() ==
+                              a_RHS->related_constraint_ptrs()) {
+                              return a_LHS->objective_sensitivity() >
+                                     a_RHS->objective_sensitivity();
+                          } else {
+                              return a_LHS->related_constraint_ptrs().size() <
+                                     a_RHS->related_constraint_ptrs().size();
+                          }
+                      });
+        } else {
+            std::sort(variable_ptrs.begin(), variable_ptrs.end(),
+                      [](auto const &a_LHS, auto const &a_RHS) {
+                          if (a_LHS->related_constraint_ptrs() ==
+                              a_RHS->related_constraint_ptrs()) {
+                              return a_LHS->objective_sensitivity() <
+                                     a_RHS->objective_sensitivity();
+                          } else {
+                              return a_LHS->related_constraint_ptrs().size() <
+                                     a_RHS->related_constraint_ptrs().size();
+                          }
+                      });
+        }
+
+        for (auto i = 0; i < a_model->number_of_variables(); i++) {
+            if (variable_ptrs[i]->is_fixed()) {
+                continue;
+            }
+            for (auto j = i + 1; j < a_model->number_of_variables(); j++) {
+                if (variable_ptrs[i]->related_constraint_ptrs().size() <
+                    variable_ptrs[j]->related_constraint_ptrs().size()) {
+                    break;
+                }
+                if (variable_ptrs[i]->constraint_sensitivities() !=
+                    variable_ptrs[j]->constraint_sensitivities()) {
+                    continue;
+                }
+
+                if (variable_ptrs[j]->is_fixed() &&
+                    variable_ptrs[j]->value() == 0) {
+                    continue;
+                }
+
+                if (variable_ptrs[i]->objective_sensitivity() !=
+                    variable_ptrs[j]->objective_sensitivity()) {
+                    variable_ptrs[i]->fix_by(0);
+                    utility::print_message(
+                        "The value of redundant decision variable " +
+                            variable_ptrs[i]->name() + " was fixed by " +
+                            std::to_string(0) + ".",
+                        a_IS_ENABLED_PRINT);
+
+                    number_of_newly_fixed_variables++;
+                    break;
+                }
+            }
+        }
+    }
+    return number_of_newly_fixed_variables;
+}
+
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
 inline constexpr void presolve(Model<T_Variable, T_Expression> *a_model,
                                const bool a_IS_ENABLED_PRINT) {
     utility::print_single_line(a_IS_ENABLED_PRINT);
@@ -517,6 +597,10 @@ inline constexpr void presolve(Model<T_Variable, T_Expression> *a_model,
             number_of_newly_fixed_variables == 0) {
             break;
         }
+    }
+    const int FIX_REDUNDANT_VARIABLES_THRESHOLD = 100000;
+    if (a_model->number_of_variables() <= FIX_REDUNDANT_VARIABLES_THRESHOLD) {
+        fix_redundant_variables(a_model, a_IS_ENABLED_PRINT);
     }
     utility::print_message("Done.", a_IS_ENABLED_PRINT);
 }

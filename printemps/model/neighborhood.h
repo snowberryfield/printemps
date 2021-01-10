@@ -291,12 +291,12 @@ class Neighborhood {
 
         auto binary_move_updater =  //
             [this, not_fixed_variable_ptrs, variables_size](
-                auto *     a_moves,                          //
-                auto *     a_flags,                          //
-                const bool a_ACCEPT_ALL,                     //
-                const bool a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
-                const bool a_ACCEPT_FEASIBILITY_IMPROVABLE,  //
-                const bool a_IS_ENABLED_PARALLEL) {
+                auto *                      a_moves,                          //
+                auto *                      a_flags,                          //
+                const bool                  a_ACCEPT_ALL,                     //
+                const bool                  a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
+                const bool                  a_ACCEPT_FEASIBILITY_IMPROVABLE,  //
+                [[maybe_unused]] const bool a_IS_ENABLED_PARALLEL) {
 #ifdef _OPENMP
 #pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
 #endif
@@ -355,12 +355,12 @@ class Neighborhood {
 
         auto integer_move_updater =  //
             [this, not_fixed_variable_ptrs, variables_size](
-                auto *     a_moves,                          //
-                auto *     a_flags,                          //
-                const bool a_ACCEPT_ALL,                     //
-                const bool a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
-                const bool a_ACCEPT_FEASIBILITY_IMPROVABLE,  //
-                const bool a_IS_ENABLED_PARALLEL) {
+                auto *                      a_moves,                          //
+                auto *                      a_flags,                          //
+                const bool                  a_ACCEPT_ALL,                     //
+                const bool                  a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
+                const bool                  a_ACCEPT_FEASIBILITY_IMPROVABLE,  //
+                [[maybe_unused]] const bool a_IS_ENABLED_PARALLEL) {
                 const int DELTA_MAX = 10000;
 #ifdef _OPENMP
 #pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
@@ -489,7 +489,7 @@ class Neighborhood {
                          const bool a_ACCEPT_ALL,                     //
                          const bool a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
                          const bool a_ACCEPT_FEASIBILITY_IMPROVABLE,  //
-                         const bool a_IS_ENABLED_PARALLEL) {
+                         [[maybe_unused]] const bool a_IS_ENABLED_PARALLEL) {
 #ifdef _OPENMP
 #pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
 #endif
@@ -608,12 +608,12 @@ class Neighborhood {
 
         auto precedence_move_updater =  //
             [this, variable_ptr_pairs, pairs_size](
-                auto *     a_moves,                          //
-                auto *     a_flags,                          //
-                const bool a_ACCEPT_ALL,                     //
-                const bool a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
-                const bool a_ACCEPT_FEASIBILITY_IMPROVABLE,  //
-                const bool a_IS_ENABLED_PARALLEL) {
+                auto *                      a_moves,                          //
+                auto *                      a_flags,                          //
+                const bool                  a_ACCEPT_ALL,                     //
+                const bool                  a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
+                const bool                  a_ACCEPT_FEASIBILITY_IMPROVABLE,  //
+                [[maybe_unused]] const bool a_IS_ENABLED_PARALLEL) {
 
 #ifdef _OPENMP
 #pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
@@ -737,7 +737,7 @@ class Neighborhood {
                          const bool a_ACCEPT_ALL,                     //
                          const bool a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
                          const bool a_ACCEPT_FEASIBILITY_IMPROVABLE,  //
-                         const bool a_IS_ENABLED_PARALLEL) {
+                         [[maybe_unused]] const bool a_IS_ENABLED_PARALLEL) {
 #ifdef _OPENMP
 #pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
 #endif
@@ -946,12 +946,12 @@ class Neighborhood {
 
         auto exclusive_move_updater =  //
             [this, variable_ptrs, associated_variables_ptrs, variables_size](
-                auto *     a_moves,                          //
-                auto *     a_flags,                          //
-                const bool a_ACCEPT_ALL,                     //
-                const bool a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
-                const bool a_ACCEPT_FEASIBILITY_IMPROVABLE,  //
-                const bool a_IS_ENABLED_PARALLEL) {
+                auto *                      a_moves,                          //
+                auto *                      a_flags,                          //
+                const bool                  a_ACCEPT_ALL,                     //
+                const bool                  a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
+                const bool                  a_ACCEPT_FEASIBILITY_IMPROVABLE,  //
+                [[maybe_unused]] const bool a_IS_ENABLED_PARALLEL) {
                 int moves_size = a_moves->size();
 #ifdef _OPENMP
 #pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
@@ -1005,12 +1005,12 @@ class Neighborhood {
 
         auto selection_move_updater =  //
             [this, a_VARIABLE_PTRS, variables_size](
-                auto *     a_moves,                          //
-                auto *     a_flags,                          //
-                const bool a_ACCEPT_ALL,                     //
-                const bool a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
-                const bool a_ACCEPT_FEASIBILITY_IMPROVABLE,  //
-                const bool a_IS_ENABLED_PARALLEL) {
+                auto *                      a_moves,                          //
+                auto *                      a_flags,                          //
+                const bool                  a_ACCEPT_ALL,                     //
+                const bool                  a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
+                const bool                  a_ACCEPT_FEASIBILITY_IMPROVABLE,  //
+                [[maybe_unused]] const bool a_IS_ENABLED_PARALLEL) {
 #ifdef _OPENMP
 #pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
 #endif
@@ -1073,7 +1073,7 @@ class Neighborhood {
                    const bool a_ACCEPT_ALL,                     //
                    const bool a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
                    const bool a_ACCEPT_FEASIBILITY_IMPROVABLE,  //
-                   const bool a_IS_ENABLED_PARALLEL) {
+                   [[maybe_unused]] const bool a_IS_ENABLED_PARALLEL) {
                 int moves_size = a_moves->size();
 #ifdef _OPENMP
 #pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
@@ -1137,7 +1137,7 @@ class Neighborhood {
 
         for (auto i = 0; i < chain_moves_size; i++) {
             bool has_duplicated_move = false;
-            for (auto j = 0; j < chain_moves.size(); j++) {
+            for (auto j = 0; j < static_cast<int>(chain_moves.size()); j++) {
                 if (m_chain_moves[i] == m_chain_moves[j]) {
                     has_duplicated_move = true;
                     break;
@@ -1179,7 +1179,7 @@ class Neighborhood {
                    const bool a_ACCEPT_ALL,                     //
                    const bool a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
                    const bool a_ACCEPT_FEASIBILITY_IMPROVABLE,  //
-                   const bool a_IS_ENABLED_PARALLEL) {
+                   [[maybe_unused]] const bool a_IS_ENABLED_PARALLEL) {
                 m_user_defined_move_updater(a_moves);
                 int moves_size = a_moves->size();
                 a_flags->resize(moves_size);
@@ -1226,10 +1226,10 @@ class Neighborhood {
 
     /*************************************************************************/
     inline constexpr void update_moves(
-        const bool a_ACCEPT_ALL,                     //
-        const bool a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
-        const bool a_ACCEPT_FEASIBILITY_IMPROVABLE,  //
-        const bool a_IS_ENABLED_PARALLEL) {
+        const bool                  a_ACCEPT_ALL,                     //
+        const bool                  a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
+        const bool                  a_ACCEPT_FEASIBILITY_IMPROVABLE,  //
+        [[maybe_unused]] const bool a_IS_ENABLED_PARALLEL) {
         auto &binary_moves         = m_binary_moves;
         auto &integer_moves        = m_integer_moves;
         auto &precedence_moves     = m_precedence_moves;

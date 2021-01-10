@@ -622,6 +622,9 @@ class Model {
             this->setup_variable_sensitivity();
         }
 
+        this->categorize_variables();
+        this->categorize_constraints();
+
         /**
          * Presolve the problem by removing redundant constraints and fixing
          * decision variables implicitly fixed.
@@ -630,6 +633,7 @@ class Model {
             presolve(this, a_IS_ENABLED_PRINT);
         }
 
+        /// Categorize again to reflect the presolving result.
         this->categorize_variables();
         this->categorize_constraints();
 
