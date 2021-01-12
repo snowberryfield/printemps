@@ -34,7 +34,7 @@ struct Move {
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-inline constexpr bool has_duplicate_variable(
+constexpr bool has_duplicate_variable(
     const Move<T_Variable, T_Expression> &a_MOVE) {
     auto &alterations      = a_MOVE.alterations;
     int   alterations_size = alterations.size();
@@ -50,8 +50,7 @@ inline constexpr bool has_duplicate_variable(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-inline constexpr bool is_binary_swap(
-    const Move<T_Variable, T_Expression> &a_MOVE) {
+constexpr bool is_binary_swap(const Move<T_Variable, T_Expression> &a_MOVE) {
     for (const auto &alteration : a_MOVE.alterations) {
         if (alteration.first->sense() != VariableSense::Binary) {
             return false;
@@ -63,7 +62,7 @@ inline constexpr bool is_binary_swap(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-inline constexpr std::unordered_set<Variable<T_Variable, T_Expression> *>
+constexpr std::unordered_set<Variable<T_Variable, T_Expression> *>
 related_variable_ptrs(const Move<T_Variable, T_Expression> &a_MOVE) {
     std::unordered_set<Variable<T_Variable, T_Expression> *> result;
     for (const auto &alteration : a_MOVE.alterations) {
@@ -75,7 +74,7 @@ related_variable_ptrs(const Move<T_Variable, T_Expression> &a_MOVE) {
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-inline constexpr Move<T_Variable, T_Expression> operator+(
+constexpr Move<T_Variable, T_Expression> operator+(
     const Move<T_Variable, T_Expression> &a_MOVE_1,
     const Move<T_Variable, T_Expression> &a_MOVE_2) {
     auto result = a_MOVE_1;
@@ -91,9 +90,8 @@ inline constexpr Move<T_Variable, T_Expression> operator+(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-inline constexpr bool operator==(
-    const Move<T_Variable, T_Expression> &a_MOVE_1,
-    const Move<T_Variable, T_Expression> &a_MOVE_2) {
+constexpr bool operator==(const Move<T_Variable, T_Expression> &a_MOVE_1,
+                          const Move<T_Variable, T_Expression> &a_MOVE_2) {
     if (a_MOVE_1.alterations.size() != a_MOVE_2.alterations.size()) {
         return false;
     }

@@ -85,7 +85,7 @@ struct TabuSearchOption {
     }
 
     /*************************************************************************/
-    inline constexpr void initialize(void) {
+    constexpr void initialize(void) {
         this->iteration_max = TabuSearchOptionConstant::DEFAULT_ITERATION_MAX;
         this->time_max      = TabuSearchOptionConstant::DEFAULT_TIME_MAX;
         this->time_offset   = TabuSearchOptionConstant::DEFAULT_TIME_OFFSET;

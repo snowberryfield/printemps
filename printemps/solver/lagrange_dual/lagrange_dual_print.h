@@ -14,7 +14,7 @@ class IncumbentHolder;
 
 namespace lagrange_dual {
 /*****************************************************************************/
-inline void print_table_header(const bool a_IS_ENABLED_PRINT) {
+void print_table_header(const bool a_IS_ENABLED_PRINT) {
     if (!a_IS_ENABLED_PRINT) {
         return;
     }
@@ -38,7 +38,7 @@ inline void print_table_header(const bool a_IS_ENABLED_PRINT) {
 }
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-inline void print_table_initial(
+void print_table_initial(
     const model::Model<T_Variable, T_Expression> *a_MODEL,
     const double a_LAGRANGIAN, const double a_STEP_SIZE,
     const model::SolutionScore &                     a_CURRENT_SOLUTION_SCORE,
@@ -62,7 +62,7 @@ inline void print_table_initial(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-inline void print_table_body(
+void print_table_body(
     const model::Model<T_Variable, T_Expression> *a_MODEL,                   //
     const int                                     a_ITERATION,               //
     const double                                  a_LAGRANGIAN,              //
@@ -114,7 +114,7 @@ inline void print_table_body(
         a_INCUMBENT_HOLDER.feasible_incumbent_objective() * a_MODEL->sign());
 }
 /*****************************************************************************/
-inline void print_table_footer(const bool a_IS_ENABLED_PRINT) {
+void print_table_footer(const bool a_IS_ENABLED_PRINT) {
     if (!a_IS_ENABLED_PRINT) {
         return;
     }

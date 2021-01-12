@@ -14,7 +14,7 @@ namespace model {
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-inline constexpr bool has_fixed_variables(
+constexpr bool has_fixed_variables(
     const Move<T_Variable, T_Expression> &a_MOVE) {
     for (const auto &alteration : a_MOVE.alterations) {
         if (alteration.first->is_fixed()) {
@@ -26,7 +26,7 @@ inline constexpr bool has_fixed_variables(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-inline constexpr bool has_selection_variables(
+constexpr bool has_selection_variables(
     const Move<T_Variable, T_Expression> &a_MOVE) {
     for (const auto &alteration : a_MOVE.alterations) {
         if (alteration.first->sense() == VariableSense::Selection) {
@@ -38,7 +38,7 @@ inline constexpr bool has_selection_variables(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-inline constexpr bool has_bound_violation(
+constexpr bool has_bound_violation(
     const Move<T_Variable, T_Expression> &a_MOVE) {
     for (const auto &alteration : a_MOVE.alterations) {
         if (alteration.second < alteration.first->lower_bound()) {
@@ -53,7 +53,7 @@ inline constexpr bool has_bound_violation(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-inline constexpr bool has_objective_improvable_variable(
+constexpr bool has_objective_improvable_variable(
     const Move<T_Variable, T_Expression> &a_MOVE) {
     for (const auto &alteration : a_MOVE.alterations) {
         if (alteration.first->is_objective_improvable()) {
@@ -65,7 +65,7 @@ inline constexpr bool has_objective_improvable_variable(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-inline constexpr bool has_feasibility_improvable_variable(
+constexpr bool has_feasibility_improvable_variable(
     const Move<T_Variable, T_Expression> &a_MOVE) {
     for (const auto &alteration : a_MOVE.alterations) {
         if (alteration.first->is_feasibility_improvable()) {
@@ -170,7 +170,7 @@ class Neighborhood {
     }
 
     /*************************************************************************/
-    inline void initialize(void) {
+    void initialize(void) {
         m_binary_move_updater =
             [](std::vector<Move<T_Variable, T_Expression>> *,
                std::vector<int> *, const bool, const bool, const bool,
@@ -259,7 +259,7 @@ class Neighborhood {
     }
 
     /*************************************************************************/
-    inline constexpr void setup_binary_move_updater(
+    constexpr void setup_binary_move_updater(
         const std::vector<Variable<T_Variable, T_Expression> *>
             &a_VARIABLE_PTRS) {
         /**
@@ -320,7 +320,7 @@ class Neighborhood {
     }
 
     /*************************************************************************/
-    inline constexpr void setup_integer_move_updater(
+    constexpr void setup_integer_move_updater(
         const std::vector<Variable<T_Variable, T_Expression> *>
             &a_VARIABLE_PTRS) {
         /**
@@ -428,7 +428,7 @@ class Neighborhood {
     }
 
     /*************************************************************************/
-    inline constexpr void setup_aggregation_move_updater(
+    constexpr void setup_aggregation_move_updater(
         const std::vector<Constraint<T_Variable, T_Expression> *>
             &a_CONSTRAINT_PTRS) {
         int raw_constraints_size = a_CONSTRAINT_PTRS.size();
@@ -555,7 +555,7 @@ class Neighborhood {
     }
 
     /*************************************************************************/
-    inline constexpr void setup_precedence_move_updater(
+    constexpr void setup_precedence_move_updater(
         const std::vector<Constraint<T_Variable, T_Expression> *>
             &a_CONSTRAINT_PTRS) {
         int raw_constraints_size = a_CONSTRAINT_PTRS.size();
@@ -668,7 +668,7 @@ class Neighborhood {
     }
 
     /*************************************************************************/
-    inline void setup_variable_bound_move_updater(
+    void setup_variable_bound_move_updater(
         const std::vector<Constraint<T_Variable, T_Expression> *>
             &a_CONSTRAINT_PTRS) {
         /**
@@ -839,7 +839,7 @@ class Neighborhood {
     }
 
     /*************************************************************************/
-    inline constexpr void setup_exclusive_move_updater(
+    constexpr void setup_exclusive_move_updater(
         const std::vector<Constraint<T_Variable, T_Expression> *>
             &a_SET_PARTITIONING_PTRS,
         const std::vector<Constraint<T_Variable, T_Expression> *>
@@ -984,7 +984,7 @@ class Neighborhood {
     }
 
     /*************************************************************************/
-    inline constexpr void setup_selection_move_updater(
+    constexpr void setup_selection_move_updater(
         std::vector<Variable<T_Variable, T_Expression> *> &a_VARIABLE_PTRS) {
         /**
          *  "Swap" move for binary variables in selection
@@ -1066,7 +1066,7 @@ class Neighborhood {
     }
 
     /*************************************************************************/
-    inline constexpr void setup_chain_move_updater(void) {
+    constexpr void setup_chain_move_updater(void) {
         auto chain_move_updater =                               //
             [this](auto *     a_moves,                          //
                    auto *     a_flags,                          //
@@ -1130,7 +1130,7 @@ class Neighborhood {
     }
 
     /*************************************************************************/
-    inline constexpr void deduplicate_chain_moves() {
+    constexpr void deduplicate_chain_moves() {
         std::vector<Move<T_Variable, T_Expression>> chain_moves;
         int chain_moves_size = m_chain_moves.size();
         chain_moves.reserve(chain_moves_size);
@@ -1172,7 +1172,7 @@ class Neighborhood {
     }
 
     /*************************************************************************/
-    inline constexpr void setup_user_defined_move_updater(void) {
+    constexpr void setup_user_defined_move_updater(void) {
         auto user_defined_move_updater_wrapper =                //
             [this](auto *     a_moves,                          //
                    auto *     a_flags,                          //
@@ -1225,7 +1225,7 @@ class Neighborhood {
     }
 
     /*************************************************************************/
-    inline constexpr void update_moves(
+    constexpr void update_moves(
         const bool                  a_ACCEPT_ALL,                     //
         const bool                  a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
         const bool                  a_ACCEPT_FEASIBILITY_IMPROVABLE,  //

@@ -46,7 +46,7 @@ struct LagrangeDualResult {
     }
 
     /*************************************************************************/
-    inline void constexpr initialize(void) {
+    void initialize(void) {
         this->lagrangian = -HUGE_VALF;
         this->primal_solution.initialize();
         this->dual_value_proxies.clear();

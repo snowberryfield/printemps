@@ -119,7 +119,7 @@ struct Option {
     }
 
     /*************************************************************************/
-    inline constexpr void initialize(void) {
+    void initialize(void) {
         this->iteration_max = OptionConstant::DEFAULT_ITERATION_MAX;
         this->time_max      = OptionConstant::DEFAULT_TIME_MAX;
         this->time_offset   = OptionConstant::DEFAULT_TIME_OFFSET;
@@ -182,7 +182,7 @@ struct Option {
     }
 
     /*************************************************************************/
-    inline void print(void) const {
+    void print(void) const {
         utility::print_single_line(true);
         utility::print_info("The values for options are specified as follows:",
                             true);

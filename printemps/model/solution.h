@@ -41,7 +41,7 @@ struct Solution {
     }
 
     /*************************************************************************/
-    inline void initialize(void) {
+    void initialize(void) {
         this->variable_value_proxies.clear();
         this->expression_value_proxies.clear();
         this->constraint_value_proxies.clear();

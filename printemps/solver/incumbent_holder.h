@@ -58,7 +58,7 @@ class IncumbentHolder {
     }
 
     /*************************************************************************/
-    inline constexpr void initialize(void) {
+    void initialize(void) {
         m_is_found_feasible_solution =
             IncumbentHolderConstant::DEFAULT_IS_FOUND_FEASIBLE_SOLUTION;
 
@@ -73,7 +73,7 @@ class IncumbentHolder {
     }
 
     /*************************************************************************/
-    inline constexpr int try_update_incumbent(
+    constexpr int try_update_incumbent(
         const model::Solution<T_Variable, T_Expression> &a_SOLUTION,
         const model::SolutionScore &                     a_SCORE) {
         int status = IncumbentHolderConstant::STATUS_NO_UPDATED;
@@ -120,7 +120,7 @@ class IncumbentHolder {
     }
 
     /*************************************************************************/
-    inline constexpr int try_update_incumbent(
+    constexpr int try_update_incumbent(
         model::Model<T_Variable, T_Expression> *a_model,
         const model::SolutionScore &            a_SCORE) {
         /// solution here defined is not substituted when no improvement

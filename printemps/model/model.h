@@ -112,7 +112,7 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void initialize(void) {
+    void initialize(void) {
         m_name = "";
 
         m_variable_proxies.reserve(

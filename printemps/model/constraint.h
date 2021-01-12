@@ -158,7 +158,7 @@ class Constraint : public AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr void initialize(void) {
+    void initialize(void) {
         AbstractMultiArrayElement::initialize();
 
         m_function =  //
@@ -203,7 +203,7 @@ class Constraint : public AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr void setup(
+    constexpr void setup(
         const std::function<
             T_Expression(const Move<T_Variable, T_Expression> &)> &a_FUNCTION,
         const ConstraintSense                                      a_SENSE) {
@@ -253,7 +253,7 @@ class Constraint : public AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr void setup(
+    constexpr void setup(
         const Expression<T_Variable, T_Expression> &a_EXPRESSION,
         const ConstraintSense                       a_SENSE) {
         m_function =  //
@@ -307,7 +307,7 @@ class Constraint : public AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr void setup_constraint_type(void) {
+    constexpr void setup_constraint_type(void) {
         /// Singleton
         if (m_expression.sensitivities().size() == 1) {
             m_is_singleton = true;

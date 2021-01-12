@@ -14,8 +14,8 @@ namespace printemps {
 namespace utility {
 /******************************************************************************/
 template <class T>
-inline bool read_json(T *a_parameter, const std::string &a_NAME,
-                      const nlohmann::json &a_JSON) {
+bool read_json(T *a_parameter, const std::string &a_NAME,
+               const nlohmann::json &a_JSON) {
     if (a_JSON.find(a_NAME) != a_JSON.end()) {
         *a_parameter = a_JSON.at(a_NAME).get<T>();
         return true;
@@ -24,7 +24,7 @@ inline bool read_json(T *a_parameter, const std::string &a_NAME,
 }
 
 /******************************************************************************/
-inline printemps::solver::Option read_option(const std::string &a_FILE_NAME) {
+printemps::solver::Option read_option(const std::string &a_FILE_NAME) {
     std::fstream   option_file(a_FILE_NAME);
     nlohmann::json option_object;
     option_file >> option_object;

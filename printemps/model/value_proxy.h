@@ -290,7 +290,7 @@ inline void print_values(
 
 /*****************************************************************************/
 template <class T_Value>
-inline void write_values_by_name(
+void write_values_by_name(
     std::ofstream *                                            a_ofs,
     const std::unordered_map<std::string, ValueProxy<T_Value>> a_VALUE_PROXIES,
     const std::string &a_CATEGORY, const int a_INDENT_LEVEL) {
@@ -327,7 +327,7 @@ inline void write_values_by_name(
 
 /*****************************************************************************/
 template <class T_Value>
-inline void write_values_by_array(
+void write_values_by_array(
     std::ofstream *                                            a_ofs,
     const std::unordered_map<std::string, ValueProxy<T_Value>> a_VALUE_PROXIES,
     const std::string &a_CATEGORY, const int a_INDENT_LEVEL) {

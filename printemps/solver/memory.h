@@ -41,7 +41,7 @@ class Memory {
     }
 
     /*************************************************************************/
-    inline void initialize(void) {
+    void initialize(void) {
         m_variable_names.clear();
         m_last_update_iterations.clear();
         m_update_counts.clear();
@@ -75,7 +75,7 @@ class Memory {
     }
 
     /*************************************************************************/
-    inline void print_last_update_iterations(void) {
+    void print_last_update_iterations(void) {
         /// This method is for debug.
         int variable_proxies_size = m_variable_names.size();
         for (auto i = 0; i < variable_proxies_size; i++) {
@@ -92,7 +92,7 @@ class Memory {
     }
 
     /*************************************************************************/
-    inline void print_update_counts(void) {
+    void print_update_counts(void) {
         /// This method is for debug.
         int variable_proxies_size = m_variable_names.size();
         for (auto i = 0; i < variable_proxies_size; i++) {
@@ -109,7 +109,7 @@ class Memory {
     }
 
     /*************************************************************************/
-    inline void print_frequency(void) {
+    void print_frequency(void) {
         /// This method is for debug.
         int variable_proxies_size = m_variable_names.size();
         for (auto i = 0; i < variable_proxies_size; i++) {
@@ -126,13 +126,14 @@ class Memory {
     }
 
     /*************************************************************************/
-    inline void print_bias(void) {
+    void print_bias(void) {
         /// This method is for debug.
         utility::print(std::to_string(this->bias()));
     }
 
     /*************************************************************************/
-    inline double bias(void) const {
+    double bias(void) const noexcept {
+        /// This method cannot be constexpr for m_variable_names.size().
         double result                = 0.0;
         int    variable_proxies_size = m_variable_names.size();
         for (auto i = 0; i < variable_proxies_size; i++) {
@@ -149,9 +150,8 @@ class Memory {
 
     /*************************************************************************/
     template <class T_Variable, class T_Expression>
-    inline constexpr void update(
-        const model::Move<T_Variable, T_Expression> &a_MOVE,
-        const int                                    a_ITERATION) {
+    constexpr void update(const model::Move<T_Variable, T_Expression> &a_MOVE,
+                          const int a_ITERATION) noexcept {
         for (const auto &alteration : a_MOVE.alterations) {
             int id         = alteration.first->id();
             int flat_index = alteration.first->flat_index();
