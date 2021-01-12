@@ -472,6 +472,14 @@ constexpr int fix_redundant_variables(
         a_model->constraint_type_reference().set_packing_ptrs.size();
 
     /**
+     * If the problem is unconstrained, the following procedures will be
+     * skipped.
+     */
+    if (a_model->number_of_constraints() == 0) {
+        return 0;
+    }
+
+    /**
      * If the problem is not pure set partitioning/covering/packing problem, the
      * following procedures will be skipped.
      */
@@ -616,7 +624,8 @@ constexpr void presolve(Model<T_Variable, T_Expression> *a_model,  //
      * than the constant FIX_REDUNDANT_VARIABLES_THRESHOLD.
      */
     const int FIX_REDUNDANT_VARIABLES_THRESHOLD = 100000;
-    if (a_model->number_of_variables() <= FIX_REDUNDANT_VARIABLES_THRESHOLD) {
+    if (a_model->is_linear() &&
+        a_model->number_of_variables() <= FIX_REDUNDANT_VARIABLES_THRESHOLD) {
         fix_redundant_variables(a_model, a_IS_ENABLED_PRINT);
     }
     utility::print_message("Done.", a_IS_ENABLED_PRINT);
