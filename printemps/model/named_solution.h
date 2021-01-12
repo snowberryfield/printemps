@@ -52,7 +52,7 @@ class NamedSolution {
     }
 
     /*************************************************************************/
-    inline void initialize(void) {
+    void initialize(void) {
         m_variable_value_proxies.clear();
         m_expression_value_proxies.clear();
         m_constraint_value_proxies.clear();
@@ -84,8 +84,8 @@ class NamedSolution {
     }
 
     /*************************************************************************/
-    inline void write_json_by_name(const std::string&  a_FILE_NAME,
-                                   const ModelSummary& a_MODEL_SUMMARY) const {
+    void write_json_by_name(const std::string&  a_FILE_NAME,
+                            const ModelSummary& a_MODEL_SUMMARY) const {
         int indent_level = 0;
 
         std::ofstream ofs(a_FILE_NAME.c_str());
@@ -141,8 +141,8 @@ class NamedSolution {
     }
 
     /*************************************************************************/
-    inline void write_json_by_array(const std::string&  a_FILE_NAME,
-                                    const ModelSummary& a_MODEL_SUMMARY) const {
+    void write_json_by_array(const std::string&  a_FILE_NAME,
+                             const ModelSummary& a_MODEL_SUMMARY) const {
         int indent_level = 0;
 
         std::ofstream ofs(a_FILE_NAME.c_str());
@@ -198,7 +198,7 @@ class NamedSolution {
     }
 
     /*************************************************************************/
-    inline void write_solution(const std::string& a_FILE_NAME) const {
+    void write_solution(const std::string& a_FILE_NAME) const {
         std::ofstream ofs(a_FILE_NAME.c_str());
         if (m_is_feasible) {
             ofs << "=obj= " << m_objective << std::endl;

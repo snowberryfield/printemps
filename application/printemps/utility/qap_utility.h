@@ -93,13 +93,12 @@ class QAPLIBReader {
     }
 
     /*************************************************************************/
-    inline void initialize(void) {
+    void initialize(void) {
         m_model.initialize();
     }
 
     /*****************************************************************************/
-    inline model::IPModel& create_model_from_qaplib(
-        const std::string& a_FILE_NAME) {
+    model::IPModel& create_model_from_qaplib(const std::string& a_FILE_NAME) {
         QuadraticAssignmentProblem qap = read_qaplib(a_FILE_NAME);
 
         /*************************************************************************/

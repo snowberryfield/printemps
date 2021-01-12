@@ -47,7 +47,7 @@ struct LocalSearchResult {
     }
 
     /*************************************************************************/
-    inline void constexpr initialize(void) {
+    void initialize(void) {
         this->incumbent_holder.initialize();
         this->memory.initialize();
         this->total_update_status  = 0;

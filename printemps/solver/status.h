@@ -35,7 +35,7 @@ struct Status {
     }
 
     /*************************************************************************/
-    inline void initialize(void) {
+    void initialize(void) {
         this->penalty_coefficients.clear();
         this->update_counts.clear();
         this->is_found_feasible_solution         = false;
@@ -57,9 +57,8 @@ struct Status {
     }
 
     /*************************************************************************/
-    inline void write_json_by_name(
-        const std::string&         a_FILE_NAME,
-        const model::ModelSummary& a_MODEL_SUMMARY) const {
+    void write_json_by_name(const std::string&         a_FILE_NAME,
+                            const model::ModelSummary& a_MODEL_SUMMARY) const {
         int indent_level = 0;
 
         std::ofstream ofs(a_FILE_NAME.c_str());
@@ -121,9 +120,8 @@ struct Status {
     }
 
     /*************************************************************************/
-    inline void write_json_by_array(
-        const std::string&         a_FILE_NAME,
-        const model::ModelSummary& a_MODEL_SUMMARY) const {
+    void write_json_by_array(const std::string&         a_FILE_NAME,
+                             const model::ModelSummary& a_MODEL_SUMMARY) const {
         int indent_level = 0;
 
         std::ofstream ofs(a_FILE_NAME.c_str());

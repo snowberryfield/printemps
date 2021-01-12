@@ -92,7 +92,7 @@ class Variable : public AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr void initialize(void) {
+    void initialize(void) {
         AbstractMultiArrayElement::initialize();
         m_is_fixed = false;
         m_value    = 0;

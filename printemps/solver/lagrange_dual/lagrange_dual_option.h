@@ -43,7 +43,7 @@ struct LagrangeDualOption {
     }
 
     /*************************************************************************/
-    inline constexpr void initialize(void) {
+    void initialize(void) {
         this->iteration_max = LagrangeDualOptionConstant::DEFAULT_ITERATION_MAX;
         this->time_max      = LagrangeDualOptionConstant::DEFAULT_TIME_MAX;
         this->time_offset   = LagrangeDualOptionConstant::DEFAULT_TIME_OFFSET;
