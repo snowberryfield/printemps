@@ -6,45 +6,13 @@
 #ifndef PRINTEMPS_MODEL_PRESOLVER_H__
 #define PRINTEMPS_MODEL_PRESOLVER_H__
 
-#include <vector>
-#include <string>
-#include <numeric>
-#include <functional>
-#include <cmath>
-
-#include "variable_sense.h"
-#include "constraint_sense.h"
-#include "move_sense.h"
-#include "range.h"
-#include "selection_mode.h"
-
-#include "move.h"
-#include "variable_proxy.h"
-#include "expression_proxy.h"
-#include "constraint_proxy.h"
-#include "objective.h"
-#include "value_proxy.h"
-#include "solution.h"
-#include "model_summary.h"
-#include "named_solution.h"
-#include "plain_solution.h"
-#include "solution_score.h"
-#include "selection.h"
-#include "neighborhood.h"
-
-#include "expression_binary_operator.h"
-#include "constraint_binary_operator.h"
-
-#include "variable_reference.h"
-#include "constraint_reference.h"
-#include "constraint_type_reference.h"
-
 namespace printemps {
 namespace model {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-inline constexpr int remove_independent_variables(
-    Model<T_Variable, T_Expression> *a_model, const bool a_IS_ENABLED_PRINT) {
+constexpr int remove_independent_variables(
+    Model<T_Variable, T_Expression> *a_model,  //
+    const bool                       a_IS_ENABLED_PRINT) {
     int number_of_newly_fixed_variables = 0;
     for (auto &&proxy : a_model->variable_proxies()) {
         for (auto &&variable : proxy.flat_indexed_variables()) {
@@ -142,9 +110,9 @@ inline constexpr int remove_independent_variables(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-inline constexpr int
-remove_redundant_constraints_with_tightening_variable_bounds(
-    Model<T_Variable, T_Expression> *a_model, const bool a_IS_ENABLED_PRINT) {
+constexpr int remove_redundant_constraints_with_tightening_variable_bounds(
+    Model<T_Variable, T_Expression> *a_model,  //
+    const bool                       a_IS_ENABLED_PRINT) {
     const int BOUND_LIMIT = 100000;
 
     int number_of_newly_disabled_constraints = 0;
@@ -275,7 +243,6 @@ remove_redundant_constraints_with_tightening_variable_bounds(
                      * equality as ax+b=0, the value of the decision
                      * variable x will be fixed by -b/a.
                      */
-
                     utility::print_message(
                         "The constraint " + constraint.name() +
                             " was removed instead of fixing the value "
@@ -458,8 +425,9 @@ remove_redundant_constraints_with_tightening_variable_bounds(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-inline constexpr int fix_implicit_fixed_variables(
-    Model<T_Variable, T_Expression> *a_model, const bool a_IS_ENABLED_PRINT) {
+constexpr int fix_implicit_fixed_variables(
+    Model<T_Variable, T_Expression> *a_model,  //
+    const bool                       a_IS_ENABLED_PRINT) {
     int number_of_newly_fixed_variables = 0;
     for (auto &&proxy : a_model->variable_proxies()) {
         for (auto &&variable : proxy.flat_indexed_variables()) {
@@ -493,8 +461,9 @@ inline constexpr int fix_implicit_fixed_variables(
 }
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-inline constexpr int fix_redundant_variables(
-    Model<T_Variable, T_Expression> *a_model, const bool a_IS_ENABLED_PRINT) {
+constexpr int fix_redundant_variables(
+    Model<T_Variable, T_Expression> *a_model,  //
+    const bool                       a_IS_ENABLED_PRINT) {
     int number_of_set_partitionings =
         a_model->constraint_type_reference().set_partitioning_ptrs.size();
     int number_of_set_coverings =
@@ -502,84 +471,121 @@ inline constexpr int fix_redundant_variables(
     int number_of_set_packings =
         a_model->constraint_type_reference().set_packing_ptrs.size();
 
-    int number_of_newly_fixed_variables = 0;
-    if (a_model->number_of_constraints() ==
+    /**
+     * If the problem is not pure set partitioning/covering/packing problem, the
+     * following procedures will be skipped.
+     */
+    if (a_model->number_of_constraints() !=
         (number_of_set_partitionings + number_of_set_coverings +
          number_of_set_packings)) {
-        auto variable_ptrs = a_model->variable_reference().variable_ptrs;
+        return 0;
+    }
+    int  number_of_newly_fixed_variables = 0;
+    auto variable_ptrs = a_model->variable_reference().variable_ptrs;
 
-        if (a_model->is_minimization()) {
-            std::sort(variable_ptrs.begin(), variable_ptrs.end(),
-                      [](auto const &a_LHS, auto const &a_RHS) {
-                          if (a_LHS->related_constraint_ptrs() ==
-                              a_RHS->related_constraint_ptrs()) {
-                              return a_LHS->objective_sensitivity() >
-                                     a_RHS->objective_sensitivity();
-                          } else {
-                              return a_LHS->related_constraint_ptrs().size() <
-                                     a_RHS->related_constraint_ptrs().size();
-                          }
-                      });
-        } else {
-            std::sort(variable_ptrs.begin(), variable_ptrs.end(),
-                      [](auto const &a_LHS, auto const &a_RHS) {
-                          if (a_LHS->related_constraint_ptrs() ==
-                              a_RHS->related_constraint_ptrs()) {
-                              return a_LHS->objective_sensitivity() <
-                                     a_RHS->objective_sensitivity();
-                          } else {
-                              return a_LHS->related_constraint_ptrs().size() <
-                                     a_RHS->related_constraint_ptrs().size();
-                          }
-                      });
+    /**
+     * Pre-sort the decision variables pointers for efficient subsequent
+     * procedures.
+     */
+    if (a_model->is_minimization()) {
+        std::sort(variable_ptrs.begin(), variable_ptrs.end(),
+                  [](auto const &a_LHS, auto const &a_RHS) {
+                      if (a_LHS->related_constraint_ptrs() ==
+                          a_RHS->related_constraint_ptrs()) {
+                          return a_LHS->objective_sensitivity() >
+                                 a_RHS->objective_sensitivity();
+                      } else {
+                          return a_LHS->related_constraint_ptrs().size() <
+                                 a_RHS->related_constraint_ptrs().size();
+                      }
+                  });
+    } else {
+        std::sort(variable_ptrs.begin(), variable_ptrs.end(),
+                  [](auto const &a_LHS, auto const &a_RHS) {
+                      if (a_LHS->related_constraint_ptrs() ==
+                          a_RHS->related_constraint_ptrs()) {
+                          return a_LHS->objective_sensitivity() <
+                                 a_RHS->objective_sensitivity();
+                      } else {
+                          return a_LHS->related_constraint_ptrs().size() <
+                                 a_RHS->related_constraint_ptrs().size();
+                      }
+                  });
+    }
+
+    for (auto i = 0; i < a_model->number_of_variables(); i++) {
+        /**
+         * If the decision variable has already been fixed, the
+         * following procedures will be skipped.
+         */
+        if (variable_ptrs[i]->is_fixed()) {
+            continue;
         }
 
-        for (auto i = 0; i < a_model->number_of_variables(); i++) {
-            if (variable_ptrs[i]->is_fixed()) {
+        /**
+         * Fix the value of x_{i} by 0 if there exists a decision variable x_{j}
+         * which has same constraint coefficient patterns as x_{i} and not
+         * inferior objective coefficient than that of x_{i}.
+         */
+        for (auto j = i + 1; j < a_model->number_of_variables(); j++) {
+            /**
+             * If the number of non-zero coefficients of x_{j} is larger than
+             * that of x_{i}, the inner loop can be terminated because the all
+             * the following decision variables also have larger number of
+             * non-zero coefficients, by the pre-sort.
+             */
+            if (variable_ptrs[i]->related_constraint_ptrs().size() <
+                variable_ptrs[j]->related_constraint_ptrs().size()) {
+                break;
+            }
+
+            /**
+             * If x_{j} is fixed by 0, the following procedure can be skipped.
+             */
+            if (variable_ptrs[j]->is_fixed() &&
+                variable_ptrs[j]->value() == 0) {
                 continue;
             }
-            for (auto j = i + 1; j < a_model->number_of_variables(); j++) {
-                if (variable_ptrs[i]->related_constraint_ptrs().size() <
-                    variable_ptrs[j]->related_constraint_ptrs().size()) {
-                    break;
-                }
 
-                if (variable_ptrs[j]->is_fixed() &&
-                    variable_ptrs[j]->value() == 0) {
-                    continue;
-                }
+            /**
+             * If the constraint coefficient pattern of x_{j} differs from that
+             * of x_{i}, the following procedure can be skipped.
+             */
+            if (variable_ptrs[i]->constraint_sensitivities() !=
+                variable_ptrs[j]->constraint_sensitivities()) {
+                continue;
+            }
 
-                if (variable_ptrs[i]->constraint_sensitivities() !=
-                    variable_ptrs[j]->constraint_sensitivities()) {
-                    continue;
-                }
+            /**
+             * If x_{j} has superior objective coefficient than that of x_{i},
+             * the value of x_{i} will be fixed by 0.
+             */
+            if ((a_model->is_minimization() &&
+                 (variable_ptrs[i]->objective_sensitivity() >=
+                  variable_ptrs[j]->objective_sensitivity())) ||
+                (!a_model->is_minimization() &&
+                 (variable_ptrs[i]->objective_sensitivity() <=
+                  variable_ptrs[j]->objective_sensitivity()))) {
+                variable_ptrs[i]->fix_by(0);
+                utility::print_message(
+                    "The value of redundant decision variable " +
+                        variable_ptrs[i]->name() + " was fixed by " +
+                        std::to_string(0) + ".",
+                    a_IS_ENABLED_PRINT);
 
-                if ((a_model->is_minimization() &&
-                     (variable_ptrs[i]->objective_sensitivity() >=
-                      variable_ptrs[j]->objective_sensitivity())) ||
-                    (!a_model->is_minimization() &&
-                     (variable_ptrs[i]->objective_sensitivity() <=
-                      variable_ptrs[j]->objective_sensitivity()))) {
-                    variable_ptrs[i]->fix_by(0);
-                    utility::print_message(
-                        "The value of redundant decision variable " +
-                            variable_ptrs[i]->name() + " was fixed by " +
-                            std::to_string(0) + ".",
-                        a_IS_ENABLED_PRINT);
-
-                    number_of_newly_fixed_variables++;
-                    break;
-                }
+                number_of_newly_fixed_variables++;
+                break;
             }
         }
     }
+
     return number_of_newly_fixed_variables;
 }
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-inline constexpr void presolve(Model<T_Variable, T_Expression> *a_model,
-                               const bool a_IS_ENABLED_PRINT) {
+constexpr void presolve(Model<T_Variable, T_Expression> *a_model,  //
+                        const bool                       a_IS_ENABLED_PRINT) {
     utility::print_single_line(a_IS_ENABLED_PRINT);
     utility::print_message("Presolving...", a_IS_ENABLED_PRINT);
 
@@ -603,6 +609,12 @@ inline constexpr void presolve(Model<T_Variable, T_Expression> *a_model,
             break;
         }
     }
+
+    /**
+     * Since fix_redundant_variables() is expensive, it
+     * will be enabled if the number of decision variables is equal to or less
+     * than the constant FIX_REDUNDANT_VARIABLES_THRESHOLD.
+     */
     const int FIX_REDUNDANT_VARIABLES_THRESHOLD = 100000;
     if (a_model->number_of_variables() <= FIX_REDUNDANT_VARIABLES_THRESHOLD) {
         fix_redundant_variables(a_model, a_IS_ENABLED_PRINT);
