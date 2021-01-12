@@ -117,7 +117,7 @@ Result<T_Variable, T_Expression> solve(
                  master_option.is_enabled_user_defined_move,
                  master_option.is_enabled_chain_move,
                  master_option.selection_mode,
-                 master_option.verbose >= Verbose::Warning);
+                 master_option.verbose >= Verbose::Outer);
 
     /**
      * Print the problem size.
@@ -227,6 +227,7 @@ Result<T_Variable, T_Expression> solve(
      * Solve Lagrange dual to obtain a better initial solution ß(Optional).
      */
     if (master_option.is_enabled_lagrange_dual && !is_terminated) {
+        utility::print_single_line(master_option.verbose == Verbose::Outer);
         if (!model->is_linear()) {
             utility::print_warning(
                 "Solving lagrange dual was skipped because the problem is "
@@ -369,7 +370,7 @@ Result<T_Variable, T_Expression> solve(
      */
     if (master_option.is_enabled_local_search && !is_terminated) {
         double elapsed_time = time_keeper.clock();
-
+        utility::print_single_line(master_option.verbose == Verbose::Outer);
         /**
          *  Check the terminating condition.
          */
@@ -516,6 +517,7 @@ Result<T_Variable, T_Expression> solve(
     }
 
     while (!is_terminated) {
+        utility::print_single_line(master_option.verbose == Verbose::Outer);
         /**
          *  Check the terminating condition.
          */
