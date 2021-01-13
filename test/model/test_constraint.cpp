@@ -54,6 +54,8 @@ TEST_F(TestConstraint, initialize) {
     EXPECT_EQ(0, constraint.violation_value());
     EXPECT_EQ(true, constraint.is_linear());
     EXPECT_EQ(true, constraint.is_enabled());
+    EXPECT_EQ(HUGE_VALF, constraint.local_penalty_coefficient());
+    EXPECT_EQ(HUGE_VALF, constraint.global_penalty_coefficient());
 
     EXPECT_EQ(false, constraint.is_singleton());
     EXPECT_EQ(false, constraint.is_aggregation());
@@ -1048,6 +1050,11 @@ TEST_F(TestConstraint, evaluate_violation_expression_arg_move) {
 }
 
 /*****************************************************************************/
+TEST_F(TestConstraint, evaluate_violation_diff) {
+    /// The test for this function is omitted.
+}
+
+/*****************************************************************************/
 TEST_F(TestConstraint, update_arg_void) {
     /// This method is tested in following tests:
     /// - evaluate_function_arg_void()
@@ -1071,8 +1078,51 @@ TEST_F(TestConstraint, expression) {
 }
 
 /*****************************************************************************/
+TEST_F(TestConstraint, sense) {
+    /// This method is tested in tested in other cases.
+}
+
+/*****************************************************************************/
 TEST_F(TestConstraint, value) {
     /// This method is tested in tested in other cases.
+}
+
+/*****************************************************************************/
+TEST_F(TestConstraint, violation_value) {
+    /// This method is tested in tested in other cases.
+}
+
+/*****************************************************************************/
+TEST_F(TestConstraint, local_penalty_coefficient) {
+    auto constraint =
+        printemps::model::Constraint<int, double>::create_instance();
+    EXPECT_EQ(HUGE_VAL, constraint.local_penalty_coefficient());
+    constraint.local_penalty_coefficient() = 10.0;
+    EXPECT_EQ(10.0, constraint.local_penalty_coefficient());
+}
+
+/*****************************************************************************/
+TEST_F(TestConstraint, global_penalty_coefficient) {
+    auto constraint =
+        printemps::model::Constraint<int, double>::create_instance();
+    EXPECT_EQ(HUGE_VAL, constraint.global_penalty_coefficient());
+    constraint.global_penalty_coefficient() = 100.0;
+    EXPECT_EQ(100.0, constraint.global_penalty_coefficient());
+}
+
+/*****************************************************************************/
+TEST_F(TestConstraint, reset_local_penalty_coefficient) {
+    auto constraint =
+        printemps::model::Constraint<int, double>::create_instance();
+    EXPECT_EQ(HUGE_VAL, constraint.local_penalty_coefficient());
+    EXPECT_EQ(HUGE_VAL, constraint.global_penalty_coefficient());
+    constraint.local_penalty_coefficient()  = 10.0;
+    constraint.global_penalty_coefficient() = 100.0;
+    EXPECT_EQ(10.0, constraint.local_penalty_coefficient());
+    EXPECT_EQ(100.0, constraint.global_penalty_coefficient());
+    constraint.reset_local_penalty_coefficient();
+    EXPECT_EQ(100.0, constraint.local_penalty_coefficient());
+    EXPECT_EQ(100.0, constraint.global_penalty_coefficient());
 }
 
 /*****************************************************************************/

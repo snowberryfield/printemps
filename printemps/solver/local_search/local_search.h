@@ -25,10 +25,6 @@ template <class T_Variable, class T_Expression>
 LocalSearchResult<T_Variable, T_Expression> solve(
     model::Model<T_Variable, T_Expression>* a_model,   //
     const Option&                           a_OPTION,  //
-    const std::vector<model::ValueProxy<double>>&      //
-        a_LOCAL_PENALTY_COEFFICIENT_PROXIES,           //
-    const std::vector<model::ValueProxy<double>>&      //
-        a_GLOBAL_PENALTY_COEFFICIENT_PROXIES,          //
     const std::vector<model::ValueProxy<T_Variable>>&  //
         a_INITIAL_VARIABLE_VALUE_PROXIES,              //
     const IncumbentHolder<T_Variable, T_Expression>&   //
@@ -54,11 +50,6 @@ LocalSearchResult<T_Variable, T_Expression> solve(
     Option   option = a_OPTION;
     Memory   memory = a_MEMORY;
 
-    std::vector<model::ValueProxy<double>> local_penalty_coefficient_proxies =
-        a_LOCAL_PENALTY_COEFFICIENT_PROXIES;
-    std::vector<model::ValueProxy<double>> global_penalty_coefficient_proxies =
-        a_GLOBAL_PENALTY_COEFFICIENT_PROXIES;
-
     IncumbentHolder_T incumbent_holder = a_INCUMBENT_HOLDER;
 
     /**
@@ -77,10 +68,7 @@ LocalSearchResult<T_Variable, T_Expression> solve(
     model->import_variable_values(a_INITIAL_VARIABLE_VALUE_PROXIES);
     model->update();
 
-    model::SolutionScore solution_score =
-        model->evaluate({},                                 //
-                        local_penalty_coefficient_proxies,  //
-                        global_penalty_coefficient_proxies);
+    model::SolutionScore solution_score = model->evaluate({});
 
     int update_status =
         incumbent_holder.try_update_incumbent(model, solution_score);
@@ -216,16 +204,10 @@ LocalSearchResult<T_Variable, T_Expression> solve(
              * ordinary(slow) evaluation methods.
              */
             if (model->is_enabled_fast_evaluation()) {
-                trial_solution_score                                      //
-                    = model->evaluate(*move_ptr,                          //
-                                      solution_score,                     //
-                                      local_penalty_coefficient_proxies,  //
-                                      global_penalty_coefficient_proxies);
+                trial_solution_score =
+                    model->evaluate(*move_ptr, solution_score);
             } else {
-                trial_solution_score                                      //
-                    = model->evaluate(*move_ptr,                          //
-                                      local_penalty_coefficient_proxies,  //
-                                      global_penalty_coefficient_proxies);
+                trial_solution_score = model->evaluate(*move_ptr);
             }
 
             /**

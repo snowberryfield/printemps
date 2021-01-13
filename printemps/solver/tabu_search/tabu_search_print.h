@@ -17,7 +17,7 @@ namespace tabu_search {
 struct TabuSearchMoveScore;
 
 /*****************************************************************************/
-void print_table_header(const bool a_IS_ENABLED_PRINT) {
+inline void print_table_header(const bool a_IS_ENABLED_PRINT) {
     if (!a_IS_ENABLED_PRINT) {
         return;
     }
@@ -41,7 +41,7 @@ void print_table_header(const bool a_IS_ENABLED_PRINT) {
 }
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-void print_table_initial(
+inline void print_table_initial(
     const model::Model<T_Variable, T_Expression> *   a_MODEL,
     const model::SolutionScore &                     a_CURRENT_SOLUTION_SCORE,
     const IncumbentHolder<T_Variable, T_Expression> &a_INCUMBENT_HOLDER,
@@ -63,7 +63,7 @@ void print_table_initial(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-void print_table_body(
+inline void print_table_body(
     const model::Model<T_Variable, T_Expression> *a_MODEL,                //
     const int                                     a_ITERATION,            //
     const int                   a_NUMBER_OF_ALL_NEIGHBORHOODS,            //
@@ -127,7 +127,7 @@ void print_table_body(
         a_INCUMBENT_HOLDER.feasible_incumbent_objective() * a_MODEL->sign());
 }
 /*****************************************************************************/
-void print_table_footer(const bool a_IS_ENABLED_PRINT) {
+inline void print_table_footer(const bool a_IS_ENABLED_PRINT) {
     if (!a_IS_ENABLED_PRINT) {
         return;
     }

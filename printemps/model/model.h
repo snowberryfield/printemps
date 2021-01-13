@@ -1558,11 +1558,7 @@ class Model {
     }
 
     /*************************************************************************/
-    SolutionScore evaluate(const Move<T_Variable, T_Expression> &a_MOVE,
-                           const std::vector<ValueProxy<double>>
-                               &a_LOCAL_PENALTY_COEFFICIENT_PROXIES,
-                           const std::vector<ValueProxy<double>>
-                               &a_GLOBAL_PENALTY_COEFFICIENT_PROXIES) const
+    SolutionScore evaluate(const Move<T_Variable, T_Expression> &a_MOVE) const
         noexcept {
         double total_violation = 0.0;
         double local_penalty   = 0.0;
@@ -1582,20 +1578,14 @@ class Model {
                 }
                 double violation = constraints[j].evaluate_violation(a_MOVE);
 
-                if (violation + constant::EPSILON <
-                    constraints[j].violation_value()) {
+                if (violation < constraints[j].violation_value()) {
                     is_constraint_improvable = true;
                 }
                 total_violation += violation;
-
                 local_penalty +=
-                    a_LOCAL_PENALTY_COEFFICIENT_PROXIES[i].flat_indexed_values(
-                        j) *
-                    violation;
+                    violation * constraints[j].local_penalty_coefficient();
                 global_penalty +=
-                    a_GLOBAL_PENALTY_COEFFICIENT_PROXIES[i].flat_indexed_values(
-                        j) *
-                    violation;
+                    violation * constraints[j].global_penalty_coefficient();
             }
         }
 
@@ -1608,9 +1598,6 @@ class Model {
                 m_objective.value() * this->sign() - objective;
         }
 
-        double local_augmented_objective  = objective + local_penalty;
-        double global_augmented_objective = objective + global_penalty;
-
         SolutionScore score;
 
         score.objective                  = objective;
@@ -1618,8 +1605,8 @@ class Model {
         score.total_violation            = total_violation;
         score.local_penalty              = local_penalty;
         score.global_penalty             = global_penalty;
-        score.local_augmented_objective  = local_augmented_objective;
-        score.global_augmented_objective = global_augmented_objective;
+        score.local_augmented_objective  = objective + local_penalty;
+        score.global_augmented_objective = objective + global_penalty;
         score.is_objective_improvable =
             objective_improvement > constant::EPSILON;
         score.is_constraint_improvable = is_constraint_improvable;
@@ -1630,11 +1617,7 @@ class Model {
 
     /*************************************************************************/
     SolutionScore evaluate(const Move<T_Variable, T_Expression> &a_MOVE,
-                           const SolutionScore &a_CURRENT_SCORE,
-                           const std::vector<ValueProxy<double>>
-                               &a_LOCAL_PENALTY_COEFFICIENT_PROXIES,
-                           const std::vector<ValueProxy<double>>
-                               &a_GLOBAL_PENALTY_COEFFICIENT_PROXIES) const
+                           const SolutionScore &a_CURRENT_SCORE) const
         noexcept {
         SolutionScore score = a_CURRENT_SCORE;
 
@@ -1648,25 +1631,18 @@ class Model {
             if (!constraint_ptr->is_enabled()) {
                 continue;
             }
-            double violation_diff = constraint_ptr->evaluate_violation(a_MOVE) -
-                                    constraint_ptr->violation_value();
+            double violation_diff =
+                constraint_ptr->evaluate_violation_diff(a_MOVE);
             total_violation += violation_diff;
 
-            if (violation_diff + constant::EPSILON < 0) {
+            if (violation_diff < 0) {
                 is_constraint_improvable = true;
             }
 
-            int id         = constraint_ptr->id();
-            int flat_index = constraint_ptr->flat_index();
-
             local_penalty +=
-                violation_diff *
-                a_LOCAL_PENALTY_COEFFICIENT_PROXIES[id].flat_indexed_values(
-                    flat_index);
+                violation_diff * constraint_ptr->local_penalty_coefficient();
             global_penalty +=
-                violation_diff *
-                a_GLOBAL_PENALTY_COEFFICIENT_PROXIES[id].flat_indexed_values(
-                    flat_index);
+                violation_diff * constraint_ptr->global_penalty_coefficient();
         }
 
         double objective             = 0.0;
@@ -1678,16 +1654,13 @@ class Model {
                 m_objective.value() * this->sign() - objective;
         }
 
-        double local_augmented_objective  = objective + local_penalty;
-        double global_augmented_objective = objective + global_penalty;
-
         score.objective                  = objective;
         score.objective_improvement      = objective_improvement;
         score.total_violation            = total_violation;
         score.local_penalty              = local_penalty;
         score.global_penalty             = global_penalty;
-        score.local_augmented_objective  = local_augmented_objective;
-        score.global_augmented_objective = global_augmented_objective;
+        score.local_augmented_objective  = objective + local_penalty;
+        score.global_augmented_objective = objective + global_penalty;
         score.is_objective_improvable =
             objective_improvement > constant::EPSILON;
         score.is_constraint_improvable = is_constraint_improvable;
@@ -1772,6 +1745,29 @@ class Model {
             constraint_parameter_proxies.push_back(constraint_parameter_proxy);
         }
         return constraint_parameter_proxies;
+    }
+
+    /*************************************************************************/
+    std::vector<ValueProxy<double>> export_local_penalty_coefficient_proxies(
+        void) const {
+        std::vector<ValueProxy<double>> local_penalty_coefficient_proxies;
+        for (const auto &proxy : m_constraint_proxies) {
+            ValueProxy<double> local_penalty_coefficient_proxy(proxy.id(),
+                                                               proxy.shape());
+
+            int number_of_elements = proxy.number_of_elements();
+
+            for (auto i = 0; i < number_of_elements; i++) {
+                local_penalty_coefficient_proxy.flat_indexed_names(i) =
+                    proxy.flat_indexed_constraints(i).name();
+                local_penalty_coefficient_proxy.flat_indexed_values(i) =
+                    proxy.flat_indexed_constraints(i)
+                        .local_penalty_coefficient();
+            }
+            local_penalty_coefficient_proxies.push_back(
+                local_penalty_coefficient_proxy);
+        }
+        return local_penalty_coefficient_proxies;
     }
 
     /*************************************************************************/
