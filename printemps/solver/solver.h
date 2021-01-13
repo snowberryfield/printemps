@@ -176,14 +176,16 @@ Result<T_Variable, T_Expression> solve(
         "Optimization starts.", master_option.verbose >= Verbose::Outer);
 
     /**
-     * Create local and global penalty coefficient for each constraint.
+     * Set local and global penalty coefficient for each constraint.
      */
-    std::vector<model::ValueProxy<double>> penalty_coefficient_proxies =
-        model->generate_constraint_parameter_proxies(
-            master_option.initial_penalty_coefficient);
-
-    auto global_penalty_coefficient_proxies = penalty_coefficient_proxies;
-    auto local_penalty_coefficient_proxies  = penalty_coefficient_proxies;
+    for (auto&& proxy : model->constraint_proxies()) {
+        for (auto&& constraint : proxy.flat_indexed_constraints()) {
+            constraint.local_penalty_coefficient() =
+                master_option.initial_penalty_coefficient;
+            constraint.global_penalty_coefficient() =
+                master_option.initial_penalty_coefficient;
+        }
+    }
 
     /**
      * Create memory which stores updating count for each decision variable.
@@ -207,10 +209,7 @@ Result<T_Variable, T_Expression> solve(
     Solution_T        previous_solution;
     IncumbentHolder_T incumbent_holder;
 
-    model::SolutionScore current_solution_score =
-        model->evaluate({},                                 //
-                        local_penalty_coefficient_proxies,  //
-                        global_penalty_coefficient_proxies);
+    model::SolutionScore current_solution_score = model->evaluate({});
     model::SolutionScore previous_solution_score;
 
     [[maybe_unused]] int update_status = incumbent_holder.try_update_incumbent(
@@ -277,12 +276,10 @@ Result<T_Variable, T_Expression> solve(
                  * Run the lagrange dual search.
                  */
                 auto result =
-                    lagrange_dual::solve(model,                               //
-                                         option,                              //
-                                         local_penalty_coefficient_proxies,   //
-                                         global_penalty_coefficient_proxies,  //
-                                         initial_variable_value_proxies,      //
-                                         incumbent_holder);                   //
+                    lagrange_dual::solve(model,                           //
+                                         option,                          //
+                                         initial_variable_value_proxies,  //
+                                         incumbent_holder);               //
 
                 /**
                  * Update the current solution.
@@ -407,13 +404,11 @@ Result<T_Variable, T_Expression> solve(
              * Run the local search.
              */
             auto result =
-                local_search::solve(model,                               //
-                                    option,                              //
-                                    local_penalty_coefficient_proxies,   //
-                                    global_penalty_coefficient_proxies,  //
-                                    initial_variable_value_proxies,      //
-                                    incumbent_holder,                    //
-                                    memory);                             //
+                local_search::solve(model,                           //
+                                    option,                          //
+                                    initial_variable_value_proxies,  //
+                                    incumbent_holder,                //
+                                    memory);                         //
 
             /**
              * Update the current solution.
@@ -575,12 +570,10 @@ Result<T_Variable, T_Expression> solve(
         /**
          * Run the tabu search.
          */
-        auto result = tabu_search::solve(model,                               //
-                                         option,                              //
-                                         local_penalty_coefficient_proxies,   //
-                                         global_penalty_coefficient_proxies,  //
-                                         initial_variable_value_proxies,      //
-                                         incumbent_holder,                    //
+        auto result = tabu_search::solve(model,                           //
+                                         option,                          //
+                                         initial_variable_value_proxies,  //
+                                         incumbent_holder,                //
                                          memory);
 
         /**
@@ -794,8 +787,11 @@ Result<T_Variable, T_Expression> solve(
              * If penalty_coefficient_reset_flag is true, the penalty
              * coefficients will be reset.
              */
-            local_penalty_coefficient_proxies =
-                global_penalty_coefficient_proxies;
+            for (auto&& proxy : model->constraint_proxies()) {
+                for (auto&& constraint : proxy.flat_indexed_constraints()) {
+                    constraint.reset_local_penalty_coefficient();
+                }
+            }
         } else if (penalty_coefficient_tightening_flag) {
             /**
              * Tighten the local penalty coefficients.
@@ -814,34 +810,35 @@ Result<T_Variable, T_Expression> solve(
             double gap     = result_global_augmented_incumbent_objective -
                          result_local_augmented_incumbent_objective;
 
-            for (auto&& proxy : local_penalty_coefficient_proxies) {
-                int  id = proxy.id();
-                auto violation_values =
+            for (auto&& proxy : model->constraint_proxies()) {
+                auto& violation_values =
                     result_local_augmented_incumbent_solution
-                        .violation_value_proxies[id]
+                        .violation_value_proxies[proxy.id()]
                         .flat_indexed_values();
 
-                int flat_index = 0;
-                for (auto&& element : proxy.flat_indexed_values()) {
+                for (auto&& constraint : proxy.flat_indexed_constraints()) {
                     double delta_penalty_constant =
                         std::max(0.0, gap) / total_penalty;
                     double delta_penalty_proportional =
                         std::max(0.0, gap) / total_squared_violation *
-                        violation_values[flat_index];
+                        violation_values[constraint.flat_index()];
 
-                    element +=
+                    constraint.local_penalty_coefficient() +=
                         master_option.penalty_coefficient_tightening_rate *
                         (balance * delta_penalty_constant +
                          (1.0 - balance) * delta_penalty_proportional);
-
-                    flat_index++;
                 }
 
                 if (master_option.is_enabled_grouping_penalty_coefficient) {
-                    double max_penalty =
-                        utility::max(proxy.flat_indexed_values());
-                    for (auto&& element : proxy.flat_indexed_values()) {
-                        element = max_penalty;
+                    double max_local_penalty_coefficient = 0;
+                    for (auto&& constraint : proxy.flat_indexed_constraints()) {
+                        max_local_penalty_coefficient =
+                            std::max(max_local_penalty_coefficient,
+                                     constraint.local_penalty_coefficient());
+                    }
+                    for (auto&& constraint : proxy.flat_indexed_constraints()) {
+                        constraint.local_penalty_coefficient() =
+                            max_local_penalty_coefficient;
                     }
                 }
 
@@ -849,9 +846,10 @@ Result<T_Variable, T_Expression> solve(
                  * Penalty coefficients are bounded by the initial penalty
                  * coefficient specified in option.
                  */
-                for (auto&& element : proxy.flat_indexed_values()) {
-                    element = std::min(
-                        element, master_option.initial_penalty_coefficient);
+                for (auto&& constraint : proxy.flat_indexed_constraints()) {
+                    constraint.local_penalty_coefficient() =
+                        std::min(constraint.local_penalty_coefficient(),
+                                 master_option.initial_penalty_coefficient);
                 }
             }
         } else if (penalty_coefficient_relaxing_flag) {
@@ -869,18 +867,17 @@ Result<T_Variable, T_Expression> solve(
                              result.objective_constraint_ratio * MARGIN);
             }
 
-            for (auto&& proxy : local_penalty_coefficient_proxies) {
-                int  id = proxy.id();
-                auto violation_values =
-                    current_solution.violation_value_proxies[id]
+            for (auto&& proxy : model->constraint_proxies()) {
+                auto& violation_values =
+                    current_solution.violation_value_proxies[proxy.id()]
                         .flat_indexed_values();
 
-                int flat_index = 0;
-                for (auto&& element : proxy.flat_indexed_values()) {
-                    if (violation_values[flat_index] < constant::EPSILON) {
-                        element *= penalty_coefficient_relaxing_rate;
+                for (auto&& constraint : proxy.flat_indexed_constraints()) {
+                    if (violation_values[constraint.flat_index()] <
+                        constant::EPSILON) {
+                        constraint.local_penalty_coefficient() *=
+                            penalty_coefficient_relaxing_rate;
                     }
-                    flat_index++;
                 }
             }
         }
@@ -1340,6 +1337,9 @@ Result<T_Variable, T_Expression> solve(
      */
     std::unordered_map<std::string, model::ValueProxy<double>>
         named_penalty_coefficients;
+
+    std::vector<model::ValueProxy<double>> local_penalty_coefficient_proxies =
+        model->export_local_penalty_coefficient_proxies();
 
     int        constraint_proxies_size = model->constraint_proxies().size();
     const auto constraint_names        = model->constraint_names();
