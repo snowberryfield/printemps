@@ -276,9 +276,6 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                         accept_objective_improvable   = true;
                         accept_feasibility_improvable = false;
                     } else {
-                        // model->reset_variable_feasibility_improvability();
-                        // model->update_variable_feasibility_improvability();
-
                         if (iteration == 0) {
                             model->reset_variable_feasibility_improvability();
                             model->update_variable_feasibility_improvability();
