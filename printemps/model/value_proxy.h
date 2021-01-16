@@ -293,7 +293,8 @@ template <class T_Value>
 void write_values_by_name(
     std::ofstream *                                            a_ofs,
     const std::unordered_map<std::string, ValueProxy<T_Value>> a_VALUE_PROXIES,
-    const std::string &a_CATEGORY, const int a_INDENT_LEVEL) {
+    const std::string &a_CATEGORY, const int a_INDENT_LEVEL,
+    const std::string a_FORMAT, const bool a_ADD_LAST_COMMA) {
     int indent_level = a_INDENT_LEVEL;
 
     *a_ofs << utility::indent_spaces(indent_level)
@@ -310,7 +311,8 @@ void write_values_by_name(
                    << "\"" +
                           utility::delete_space(proxy.flat_indexed_names(i)) +
                           "\" : " +
-                          std::to_string(proxy.flat_indexed_values(i));
+                          utility::to_string(proxy.flat_indexed_values(i),
+                                             a_FORMAT);
 
             if ((i == number_of_elements - 1) &&
                 (count == value_proxies_size - 1)) {
@@ -322,7 +324,11 @@ void write_values_by_name(
         count++;
     }
     indent_level--;
-    *a_ofs << utility::indent_spaces(indent_level) << "}" << std::endl;
+    if (a_ADD_LAST_COMMA) {
+        *a_ofs << utility::indent_spaces(indent_level) << "}," << std::endl;
+    } else {
+        *a_ofs << utility::indent_spaces(indent_level) << "}" << std::endl;
+    }
 }
 
 /*****************************************************************************/
@@ -330,7 +336,8 @@ template <class T_Value>
 void write_values_by_array(
     std::ofstream *                                            a_ofs,
     const std::unordered_map<std::string, ValueProxy<T_Value>> a_VALUE_PROXIES,
-    const std::string &a_CATEGORY, const int a_INDENT_LEVEL) {
+    const std::string &a_CATEGORY, const int a_INDENT_LEVEL,
+    const std::string &a_FORMAT, const bool a_ADD_LAST_COMMA) {
     int indent_level = a_INDENT_LEVEL;
 
     *a_ofs << utility::indent_spaces(indent_level)
@@ -366,12 +373,14 @@ void write_values_by_array(
             if (index[current_dimension] ==
                 proxy.shape()[current_dimension] - 1) {
                 *a_ofs << utility::indent_spaces(indent_level)
-                       << std::to_string(proxy.flat_indexed_values(i))
+                       << utility::to_string(proxy.flat_indexed_values(i),
+                                             a_FORMAT)
                        << std::endl;
             } else {
                 *a_ofs << utility::indent_spaces(indent_level)
-                       << std::to_string(proxy.flat_indexed_values(i)) << ","
-                       << std::endl;
+                       << utility::to_string(proxy.flat_indexed_values(i),
+                                             a_FORMAT)
+                       << "," << std::endl;
             }
 
             for (auto j = current_dimension; j > 0; j--) {
@@ -402,7 +411,11 @@ void write_values_by_array(
     }
 
     indent_level--;
-    *a_ofs << utility::indent_spaces(indent_level) << "}" << std::endl;
+    if (a_ADD_LAST_COMMA) {
+        *a_ofs << utility::indent_spaces(indent_level) << "}," << std::endl;
+    } else {
+        *a_ofs << utility::indent_spaces(indent_level) << "}" << std::endl;
+    }
 }
 }  // namespace model
 }  // namespace printemps
