@@ -412,13 +412,10 @@ TabuSearchResult<T_Variable, T_Expression> solve(
              * accepted (optional).
              */
             if (option.tabu_search.ignore_tabu_if_augmented_incumbent) {
-                if (!trial_move_scores[argmin_global_augmented_objective]
-                         .is_permissible &&
-                    trial_solution_scores[argmin_global_augmented_objective]
-                                .global_augmented_objective +
-                            constant::EPSILON <
-                        incumbent_holder
-                            .global_augmented_incumbent_objective()) {
+                if (trial_solution_scores[argmin_global_augmented_objective]
+                            .global_augmented_objective +
+                        constant::EPSILON <
+                    incumbent_holder.global_augmented_incumbent_objective()) {
                     selected_index = argmin_global_augmented_objective;
                 }
             }
@@ -430,12 +427,10 @@ TabuSearchResult<T_Variable, T_Expression> solve(
             if (option.tabu_search.ignore_tabu_if_feasible_incumbent) {
                 if (trial_solution_scores[argmin_global_augmented_objective]
                         .is_feasible) {
-                    if (!trial_move_scores[argmin_global_augmented_objective]
-                             .is_permissible &&
-                        trial_solution_scores[argmin_global_augmented_objective]
-                                    .global_augmented_objective +
-                                constant::EPSILON <
-                            incumbent_holder.feasible_incumbent_objective()) {
+                    if (trial_solution_scores[argmin_global_augmented_objective]
+                                .global_augmented_objective +
+                            constant::EPSILON <
+                        incumbent_holder.feasible_incumbent_objective()) {
                         selected_index = argmin_global_augmented_objective;
                     }
                 }
