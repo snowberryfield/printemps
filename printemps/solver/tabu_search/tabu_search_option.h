@@ -40,7 +40,7 @@ struct TabuSearchOptionConstant {
     static constexpr int    DEFAULT_BIAS_DECREASE_COUNT_THRESHOLD      = 10;
     static constexpr double DEFAULT_ITERATION_INCREASE_RATE            = 1.5;
     static constexpr double DEFAULT_ITERATION_DEREASE_RATE             = 0.9;
-    static constexpr double DEFAULT_IGNORE_TABU_IF_AUGMENTED_INCUMBENT = false;
+    static constexpr double DEFAULT_IGNORE_TABU_IF_AUGMENTED_INCUMBENT = true;
     static constexpr double DEFAULT_IGNORE_TABU_IF_FEASIBLE_INCUMBENT  = true;
     static constexpr bool   DEFAULT_NUMBER_OF_INITIAL_MODIFICATION     = 0;
     static constexpr int    DEFAULT_SEED                               = 1;
