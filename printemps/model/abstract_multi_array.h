@@ -29,8 +29,10 @@ class AbstractMultiArray {
     void compute_strides(void) {
         m_strides.resize(m_number_of_dimensions);
         m_strides.at(m_number_of_dimensions - 1) = 1;
-        std::partial_sum(m_shape.rbegin(), m_shape.rend() - 1,
-                         m_strides.rbegin() + 1, std::multiplies<int>());
+        std::partial_sum(m_shape.rbegin(),        //
+                         m_shape.rend() - 1,      //
+                         m_strides.rbegin() + 1,  //
+                         std::multiplies<int>());
     }
 
     /*************************************************************************/
@@ -67,6 +69,7 @@ class AbstractMultiArray {
         m_number_of_dimensions = (a_SHAPE.size());
         m_shape                = a_SHAPE;
         m_max_digits           = std::to_string(utility::max(a_SHAPE)).size();
+
         this->compute_strides();
     }
 

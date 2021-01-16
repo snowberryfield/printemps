@@ -521,15 +521,12 @@ TabuSearchResult<T_Variable, T_Expression> solve(
 
         if (update_status &
             IncumbentHolderConstant::STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
-            last_local_augmented_incumbent_update_iteration  = iteration;
             last_global_augmented_incumbent_update_iteration = iteration;
         }
 
         if (update_status &
             IncumbentHolderConstant::STATUS_FEASIBLE_INCUMBENT_UPDATE) {
-            last_local_augmented_incumbent_update_iteration  = iteration;
-            last_global_augmented_incumbent_update_iteration = iteration;
-            last_feasible_incumbent_update_iteration         = iteration;
+            last_feasible_incumbent_update_iteration = iteration;
         }
 
         /**
@@ -730,8 +727,8 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     auto abs_max_objective = std::max(fabs(max_objective), fabs(min_objective));
 
     result.objective_constraint_ratio =
-        std::max(1.0,
-                 std::max(abs_max_objective, max_objective - min_objective)) /
+        std::max(1.0, std::max(abs_max_objective,  //
+                               max_objective - min_objective)) /
         std::max(1.0, min_local_penalty);
 
     result.termination_status            = termination_status;

@@ -391,6 +391,7 @@ class Model {
             ExpressionProxy<T_Variable, T_Expression>::create_instance(id));
         m_expression_names.push_back(a_NAME);
         m_expression_proxies.back() = a_EXPRESSION_LIKE.to_expression();
+
         return m_expression_proxies.back();
     }
 
@@ -420,6 +421,7 @@ class Model {
             ExpressionProxy<T_Variable, T_Expression>::create_instance(id));
         m_expression_names.push_back(a_NAME);
         m_expression_proxies.back() = a_EXPRESSION;
+
         return m_expression_proxies.back();
     }
 
