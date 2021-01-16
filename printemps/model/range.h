@@ -10,7 +10,6 @@ namespace printemps {
 namespace model {
 /*****************************************************************************/
 enum Range : int { All = -1 };
-
 }  // namespace model
 }  // namespace printemps
 #endif

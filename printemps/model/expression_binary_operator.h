@@ -31,7 +31,8 @@ template <class T_Variable, class T_Expression, class T_Value,
           template <class, class> class T_ExpressionLike>
 constexpr auto operator+(
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE,
-    const T_Value a_VALUE) -> decltype(a_EXPRESSION_LIKE.to_expression()) {
+    const T_Value                                     a_VALUE)  //
+    -> decltype(a_EXPRESSION_LIKE.to_expression()) {
     return a_EXPRESSION_LIKE.to_expression() + a_VALUE;
 }
 
@@ -63,7 +64,8 @@ template <class T_Variable, class T_Expression, class T_Value,
           template <class, class> class T_ExpressionLike>
 auto operator-(
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE,
-    const T_Value a_VALUE) -> decltype(a_EXPRESSION_LIKE.to_expression()) {
+    const T_Value                                     a_VALUE)  //
+    -> decltype(a_EXPRESSION_LIKE.to_expression()) {
     return a_EXPRESSION_LIKE.to_expression() - a_VALUE;
 }
 
@@ -95,7 +97,8 @@ template <class T_Variable, class T_Expression, class T_Value,
           template <class, class> class T_ExpressionLike>
 auto operator*(
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE,
-    const T_Value a_VALUE) -> decltype(a_EXPRESSION_LIKE.to_expression()) {
+    const T_Value                                     a_VALUE)  //
+    -> decltype(a_EXPRESSION_LIKE.to_expression()) {
     return a_EXPRESSION_LIKE.to_expression() * a_VALUE;
 }
 
@@ -114,7 +117,8 @@ template <class T_Variable, class T_Expression, class T_Value,
           template <class, class> class T_ExpressionLike>
 constexpr auto operator/(
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE,
-    const T_Value a_VALUE) -> decltype(a_EXPRESSION_LIKE.to_expression()) {
+    const T_Value                                     a_VALUE)  //
+    -> decltype(a_EXPRESSION_LIKE.to_expression()) {
     return a_EXPRESSION_LIKE.to_expression() / a_VALUE;
 }
 

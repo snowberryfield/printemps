@@ -11,7 +11,6 @@
 
 namespace printemps {
 namespace model {
-
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 constexpr bool has_fixed_variables(

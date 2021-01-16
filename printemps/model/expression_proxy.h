@@ -159,7 +159,6 @@ class ExpressionProxy : public AbstractMultiArray {
                 __FILE__, __LINE__, __func__,
                 "The number of elements is not one."));
         }
-
         return m_expressions[0].evaluate();
     }
 
@@ -171,7 +170,6 @@ class ExpressionProxy : public AbstractMultiArray {
                 __FILE__, __LINE__, __func__,
                 "The number of elements is not one."));
         }
-
         return m_expressions[0].evaluate(a_MOVE);
     }
 
@@ -322,7 +320,6 @@ class ExpressionProxy : public AbstractMultiArray {
         for (const auto &expression_ptr : expression_ptrs) {
             result += *expression_ptr;
         }
-
         return result;
     }
 
@@ -641,7 +638,6 @@ class ExpressionProxy : public AbstractMultiArray {
         auto flat_index = std::inner_product(a_MULTI_DIMENSIONAL_INDEX.begin(),
                                              a_MULTI_DIMENSIONAL_INDEX.end(),
                                              m_strides.begin(), 0);
-
         return m_expressions[flat_index];
     }
 
