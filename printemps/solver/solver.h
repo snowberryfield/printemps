@@ -495,9 +495,9 @@ Result<T_Variable, T_Expression> solve(
     /**
      * Run tabu searches to find better solutions.
      */
-    int iteration                                   = 0;
-    int not_global_augmented_incumbent_update_count = 0;
-    int not_update_count                            = 0;
+    int iteration                                  = 0;
+    int no_global_augmented_incumbent_update_count = 0;
+    int no_update_count                            = 0;
 
     bool penalty_coefficient_reset_flag = false;
 
@@ -584,16 +584,30 @@ Result<T_Variable, T_Expression> solve(
             result.incumbent_holder.global_augmented_incumbent_solution(),
             result.incumbent_holder.global_augmented_incumbent_score());
 
+        /**
+         * Reset the penalty coefficients if the incumbent solution was not
+         * updated for specified count of loops.
+         */
         if ((update_status && (IncumbentHolderConstant::
                                    STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE))) {
-            not_global_augmented_incumbent_update_count = 0;
-            penalty_coefficient_reset_flag              = false;
+            /**
+             * Reset the count of loops with no-update if the incumbent solution
+             * was updated.
+             */
+            no_global_augmented_incumbent_update_count = 0;
+            penalty_coefficient_reset_flag             = false;
         } else {
-            not_global_augmented_incumbent_update_count++;
-            if (not_global_augmented_incumbent_update_count ==
+            no_global_augmented_incumbent_update_count++;
+
+            if (no_global_augmented_incumbent_update_count ==
                 master_option.penalty_coefficient_reset_count_threshold) {
-                penalty_coefficient_reset_flag              = true;
-                not_global_augmented_incumbent_update_count = 0;
+                /**
+                 * Activate the flag to reset the penalty coefficients if the
+                 * count reaches the specified value, and then also reset the
+                 * count.
+                 */
+                penalty_coefficient_reset_flag             = true;
+                no_global_augmented_incumbent_update_count = 0;
             } else {
                 penalty_coefficient_reset_flag = false;
             }
@@ -640,79 +654,166 @@ Result<T_Variable, T_Expression> solve(
         bool penalty_coefficient_relaxing_flag        = false;
         bool is_enabled_forcibly_initial_modification = false;
 
+        /**
+         * If the improvability_screening_mode was set to "Automatic", determine
+         * the mode according to the search status so far.
+         */
         if (master_option.improvability_screening_mode ==
             ImprovabilityScreeningMode::Automatic) {
             if (result.total_update_status &
                 IncumbentHolderConstant::
                     STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
+                /**
+                 * If the incumbent solution was updated in the last loop, the
+                 * improvability screening mode is set to "Intensive" to search
+                 * better solutions by intensive search.
+                 */
                 improvability_screening_mode =
                     ImprovabilityScreeningMode::Intensive;
-            } else if (result.total_update_status ==
-                       IncumbentHolderConstant::STATUS_NO_UPDATED) {
+            } else if (result.is_few_permissible_neighborhood) {
+                /**
+                 * If the last loop encountered a situation where there is no
+                 * permissible solution, the improvability screening mode is set
+                 * to "Soft" for search diversity.
+                 */
+                improvability_screening_mode = ImprovabilityScreeningMode::Soft;
+            } else if (!result.is_found_new_feasible_solution) {
+                /**
+                 * If the last loop failed to find any feasible solution, the
+                 * improvability screening mode is set to "Aggressive" to
+                 * prioritize the search for feasible solutions.
+                 */
                 improvability_screening_mode =
                     ImprovabilityScreeningMode::Aggressive;
-            } else if (result.is_few_permissible_neighborhood) {
-                improvability_screening_mode = ImprovabilityScreeningMode::Soft;
             } else {
-                if (incumbent_holder.is_found_feasible_solution()) {
-                    improvability_screening_mode =
-                        ImprovabilityScreeningMode::Soft;
-                } else {
-                    improvability_screening_mode =
-                        ImprovabilityScreeningMode::Aggressive;
-                }
+                /**
+                 * Otherwise, the improvability screening mode is set to "Soft"
+                 * for search diversity.
+                 */
+                improvability_screening_mode = ImprovabilityScreeningMode::Soft;
             }
         }
 
+        /**
+         * Determine the initial solution for the next loop and flags to tighten
+         * or relax the penalty coefficients.
+         */
+
+        /**
+         *  NOTE: The gap can takes both of positive and negative value.
+         */
+        double gap = result_global_augmented_incumbent_objective -
+                     result_local_augmented_incumbent_objective;
+
         if (result.total_update_status &
             IncumbentHolderConstant::STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
+            /**
+             * If the global incumbent solution was updated in the last loop,
+             * the global incumbent is employed as the initial solution for the
+             * next loop.
+             */
             employing_global_augmented_solution_flag = true;
-            penalty_coefficient_tightening_flag      = false;
-            penalty_coefficient_relaxing_flag        = true;
-            not_update_count                         = 0;
+
+            /**
+             * The penalty coefficients are to be relaxed if
+             */
+            if (gap < constant::EPSILON) {
+                penalty_coefficient_relaxing_flag = true;
+            }
+
+            /**
+             * The variable no_update_count is a count that the
+             * result.total_update_status consecutively has taken the value of
+             * IncumbentHolderConstant::NO_UPDATE.
+             */
+            no_update_count = 0;
         } else {
             if (result.total_update_status ==
                 IncumbentHolderConstant::STATUS_NO_UPDATED) {
-                employing_global_augmented_solution_flag = true;
+                /**
+                 * If the last loop failed to find any local/global incumbent
+                 * solution, the previous initial solution is employed as
+                 * the initial solution for the next loop with some initial
+                 * modifications. The penalty coefficients are to be relaxed
+                 * after two consecutive search failures.
+                 */
+                employing_previous_solution_flag         = true;
                 is_enabled_forcibly_initial_modification = true;
                 if (result_local_augmented_incumbent_score.is_feasible) {
-                    penalty_coefficient_tightening_flag = false;
-                    penalty_coefficient_relaxing_flag   = true;
-                    not_update_count                    = 0;
+                    penalty_coefficient_relaxing_flag = true;
+                    no_update_count                   = 0;
                 } else {
-                    if (not_update_count < 1) {
-                        penalty_coefficient_tightening_flag = false;
-                        penalty_coefficient_relaxing_flag   = false;
-                        not_update_count++;
+                    if (no_update_count < 1) {
+                        no_update_count++;
                     } else {
-                        penalty_coefficient_tightening_flag = false;
-                        penalty_coefficient_relaxing_flag   = true;
-                        not_update_count                    = 0;
+                        penalty_coefficient_relaxing_flag = true;
+                        no_update_count                   = 0;
                     }
                 }
             } else {
-                double gap = result_global_augmented_incumbent_objective -
-                             result_local_augmented_incumbent_objective;
-
-                not_update_count = 0;
+                /**
+                 * If a local incumbent solution was updated the last loop, the
+                 * initial solution for the next loop and flags to tighten or
+                 * relax the penalty coefficients will be determined by
+                 * complexed rules below.
+                 */
+                no_update_count = 0;
 
                 if (gap < constant::EPSILON) {
+                    /**
+                     * The fact that the gap is negative implies that the
+                     * obtained local incumbent solution is worse than the
+                     * global incumbent solution. For this case, the initial
+                     * solution for the next loop is reset by the global
+                     * incumbent solution with some initial modifications. The
+                     * penalty coefficients are to be relaxed or tightened
+                     * according to the feasibility of the local incumbent
+                     * solution.
+                     */
                     employing_global_augmented_solution_flag = true;
                     is_enabled_forcibly_initial_modification = true;
+
                     if (result_local_augmented_incumbent_score.is_feasible) {
-                        penalty_coefficient_tightening_flag = false;
-                        penalty_coefficient_relaxing_flag   = true;
+                        penalty_coefficient_relaxing_flag = true;
                     } else {
                         penalty_coefficient_tightening_flag = true;
-                        penalty_coefficient_relaxing_flag   = false;
                     }
                 } else {
+                    /**
+                     * If the gap is positive and the local incumbent solution
+                     * is feasible, the local incumbent solution is employed as
+                     * the initial solution for the next loop. The penalty
+                     * coefficients are to be relaxed.
+                     */
                     if (result_local_augmented_incumbent_score.is_feasible) {
                         employing_local_augmented_solution_flag = true;
-                        penalty_coefficient_tightening_flag     = false;
                         penalty_coefficient_relaxing_flag       = true;
 
                     } else {
+                        /**
+                         * For the case that the gap is positive and the local
+                         * incumbent solution is not feasible, the following
+                         * rules will be applied:
+                         * (1) If no feasible solution has been found in the
+                         * previous loops:
+                         * -> The obtained local incumbent solution is
+                         * employed as the initial solution for the next loop.
+                         * (2) If a feasible solution has been found in the
+                         * previous loops:
+                         * (2.1) If the obtained local incumbent solution
+                         * improves the objective function value or global
+                         * penalty than those of global incumbent solution:
+                         * -> The obtained local incumbent solution is
+                         * employed as the initial solution for the next loop.
+                         * (2.2) Otherwise; if the obtained local incumbent
+                         * solution does not improve either objective function
+                         * value or global penalty:
+                         * -> The previous initial solution is employed as the
+                         * initial solution for the next loop.
+                         *
+                         * For all cases, penalty coefficients are to be
+                         * tightened.
+                         */
                         if (incumbent_holder.is_found_feasible_solution()) {
                             if ((result_local_augmented_incumbent_score
                                      .objective <
@@ -729,12 +830,15 @@ Result<T_Variable, T_Expression> solve(
                             employing_local_augmented_solution_flag = true;
                         }
                         penalty_coefficient_tightening_flag = true;
-                        penalty_coefficient_relaxing_flag   = false;
                     }
                 }
             }
         }
 
+        /**
+         * Set the current solution and its score according to the result of the
+         * above process.
+         */
         if (employing_global_augmented_solution_flag) {
             current_solution       = result_global_augmented_incumbent_solution;
             current_solution_score = result_global_augmented_incumbent_score;
@@ -765,8 +869,8 @@ Result<T_Variable, T_Expression> solve(
         }
 
         /**
-         * Update the feasible incumbent solution if it was improved by the
-         * tabu search.
+         * Update the feasible incumbent solution if it was improved by the tabu
+         * search.
          */
         if (result.incumbent_holder.is_found_feasible_solution()) {
             update_status = incumbent_holder.try_update_incumbent(
@@ -857,14 +961,23 @@ Result<T_Variable, T_Expression> solve(
              * Relax the local penalty coefficients of which
              * corresponding constraints are satisfied.
              */
-            auto penalty_coefficient_relaxing_rate =
+            double penalty_coefficient_relaxing_rate =
                 master_option.penalty_coefficient_relaxing_rate;
-            if (result.objective_constraint_ratio > constant::EPSILON &&
-                result.is_found_new_feasible_solution) {
-                const double MARGIN = 100.0;
-                penalty_coefficient_relaxing_rate =
-                    std::min(penalty_coefficient_relaxing_rate,
-                             result.objective_constraint_ratio * MARGIN);
+
+            if (result.objective_constraint_ratio > constant::EPSILON) {
+                if (result.is_found_new_feasible_solution) {
+                    const double MARGIN = 10.0;
+                    penalty_coefficient_relaxing_rate =
+                        std::min(penalty_coefficient_relaxing_rate,
+                                 result.objective_constraint_ratio * MARGIN);
+                } else {
+                    const double RELAXING_RATE_MAX    = 0.995;
+                    const double MARGIN               = 0.990;
+                    penalty_coefficient_relaxing_rate = std::min(
+                        std::max(penalty_coefficient_relaxing_rate,
+                                 result.objective_constraint_ratio * MARGIN),
+                        RELAXING_RATE_MAX);
+                }
             }
 
             for (auto&& proxy : model->constraint_proxies()) {
@@ -1226,15 +1339,15 @@ Result<T_Variable, T_Expression> solve(
             }
             case ImprovabilityScreeningMode::Aggressive: {
                 utility::print_message(
-                    "The aggressive improvability screening will be applied "
-                    "in the next loop.",
+                    "The aggressive improvability screening will be applied in "
+                    "the next loop.",
                     master_option.verbose >= Verbose::Outer);
                 break;
             }
             case ImprovabilityScreeningMode::Intensive: {
                 utility::print_message(
-                    "The intensive improvability screening will be applied "
-                    "in the next loop.",
+                    "The intensive improvability screening will be applied in "
+                    "the next loop.",
                     master_option.verbose >= Verbose::Outer);
                 break;
             }
@@ -1255,25 +1368,26 @@ Result<T_Variable, T_Expression> solve(
                 master_option.verbose >= Verbose::Outer);
         } else if (employing_local_augmented_solution_flag) {
             utility::print_message(
-                "The next loop will be start from the local incumbent "
-                "solution found in the previous loop.",
+                "The next loop will be start from the local incumbent solution "
+                "found in the previous loop.",
                 master_option.verbose >= Verbose::Outer);
         } else if (employing_previous_solution_flag) {
             utility::print_message(
-                "The next loop will be start from the same initial solution "
-                "of the previous loop.",
+                "The next loop will be start from the same initial solution of "
+                "the previous loop.",
                 master_option.verbose >= Verbose::Outer);
         }
 
         /**
-         * Print the number of initial modification for the next loop.
+         * Print the number of initial modification for the next
+         * loop.
          */
         if (number_of_initial_modification > 0) {
             utility::print_message(
                 "For the initial " +
                     std::to_string(number_of_initial_modification) +
-                    " iterations in the next loop, the solution will "
-                    "be randomly updated to escape from the local optimum.",
+                    " iterations in the next loop, the solution will be "
+                    "randomly updated to escape from the local optimum.",
                 master_option.verbose >= Verbose::Outer);
         }
 
@@ -1283,8 +1397,8 @@ Result<T_Variable, T_Expression> solve(
         if (master_option.tabu_search
                 .is_enabled_automatic_iteration_adjustment) {
             utility::print_message(
-                "The maximum number of iterations for the next loop was "
-                "set to " +
+                "The maximum number of iterations for the next loop was set "
+                "to " +
                     std::to_string(iteration_max) + ".",
                 master_option.verbose >= Verbose::Outer);
         }
