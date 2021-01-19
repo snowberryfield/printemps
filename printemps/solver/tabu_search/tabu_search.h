@@ -411,28 +411,12 @@ TabuSearchResult<T_Variable, T_Expression> solve(
              * A move which improves the augmented incumbent solution can be
              * accepted (optional).
              */
-            if (option.tabu_search.ignore_tabu_if_augmented_incumbent) {
+            if (option.tabu_search.ignore_tabu_if_global_incumbent) {
                 if (trial_solution_scores[argmin_global_augmented_objective]
                             .global_augmented_objective +
                         constant::EPSILON <
                     incumbent_holder.global_augmented_incumbent_objective()) {
                     selected_index = argmin_global_augmented_objective;
-                }
-            }
-
-            /**
-             * A move which improves the feasible incumbent solution can be
-             * accepted (optional).
-             */
-            if (option.tabu_search.ignore_tabu_if_feasible_incumbent) {
-                if (trial_solution_scores[argmin_global_augmented_objective]
-                        .is_feasible) {
-                    if (trial_solution_scores[argmin_global_augmented_objective]
-                                .global_augmented_objective +
-                            constant::EPSILON <
-                        incumbent_holder.feasible_incumbent_objective()) {
-                        selected_index = argmin_global_augmented_objective;
-                    }
                 }
             }
         }

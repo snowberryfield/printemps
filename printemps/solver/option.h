@@ -470,15 +470,10 @@ struct Option {
             utility::to_string(this->tabu_search.iteration_decrease_rate,
                                "%f"));
 
-        utility::print(                                               //
-            " -- tabu_search.ignore_tabu_if_augmented_incumbent: " +  //
+        utility::print(                                            //
+            " -- tabu_search.ignore_tabu_if_global_incumbent: " +  //
             utility::to_string(
-                this->tabu_search.ignore_tabu_if_augmented_incumbent, "%d"));
-
-        utility::print(                                              //
-            " -- tabu_search.ignore_tabu_if_feasible_incumbent: " +  //
-            utility::to_string(
-                this->tabu_search.ignore_tabu_if_feasible_incumbent, "%d"));
+                this->tabu_search.ignore_tabu_if_global_incumbent, "%d"));
 
         utility::print(                                           //
             " -- tabu_search.number_of_initial_modification: " +  //

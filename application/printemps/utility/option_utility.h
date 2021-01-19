@@ -459,15 +459,9 @@ printemps::solver::Option read_option(const std::string &a_FILE_NAME) {
                   option_object_tabu_search);
 
         /**********************************************************************/
-        /// tabu_search.ignore_tabu_if_augmented_incumbent
-        read_json(&option.tabu_search.ignore_tabu_if_augmented_incumbent,  //
-                  "ignore_tabu_if_augmented_incumbent",                    //
-                  option_object_tabu_search);
-
-        /**********************************************************************/
-        /// tabu_search.ignore_tabu_if_feasible_incumbent
-        read_json(&option.tabu_search.ignore_tabu_if_feasible_incumbent,  //
-                  "ignore_tabu_if_feasible_incumbent",                    //
+        /// tabu_search.ignore_tabu_if_global_incumbent
+        read_json(&option.tabu_search.ignore_tabu_if_global_incumbent,  //
+                  "ignore_tabu_if_global_incumbent",                    //
                   option_object_tabu_search);
 
         /**********************************************************************/
