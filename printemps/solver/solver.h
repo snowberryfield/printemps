@@ -710,16 +710,10 @@ Result<T_Variable, T_Expression> solve(
             /**
              * If the global incumbent solution was updated in the last loop,
              * the global incumbent is employed as the initial solution for the
-             * next loop.
+             * next loop. The penalty coefficients are to be relaxed.
              */
             employing_global_augmented_solution_flag = true;
-
-            /**
-             * The penalty coefficients are to be relaxed if
-             */
-            if (gap < constant::EPSILON) {
-                penalty_coefficient_relaxing_flag = true;
-            }
+            penalty_coefficient_relaxing_flag        = true;
 
             /**
              * The variable no_update_count is a count that the
@@ -732,13 +726,14 @@ Result<T_Variable, T_Expression> solve(
                 IncumbentHolderConstant::STATUS_NO_UPDATED) {
                 /**
                  * If the last loop failed to find any local/global incumbent
-                 * solution, the previous initial solution is employed as
+                 * solution, the global incumbent solution is employed as
                  * the initial solution for the next loop with some initial
                  * modifications. The penalty coefficients are to be relaxed
                  * after two consecutive search failures.
                  */
-                employing_previous_solution_flag         = true;
+                employing_global_augmented_solution_flag = true;
                 is_enabled_forcibly_initial_modification = true;
+
                 if (result_local_augmented_incumbent_score.is_feasible) {
                     penalty_coefficient_relaxing_flag = true;
                     no_update_count                   = 0;
@@ -966,17 +961,10 @@ Result<T_Variable, T_Expression> solve(
 
             if (result.objective_constraint_ratio > constant::EPSILON) {
                 if (result.is_found_new_feasible_solution) {
-                    const double MARGIN = 10.0;
+                    const double MARGIN = 100.0;
                     penalty_coefficient_relaxing_rate =
                         std::min(penalty_coefficient_relaxing_rate,
                                  result.objective_constraint_ratio * MARGIN);
-                } else {
-                    const double RELAXING_RATE_MAX    = 0.995;
-                    const double MARGIN               = 0.990;
-                    penalty_coefficient_relaxing_rate = std::min(
-                        std::max(penalty_coefficient_relaxing_rate,
-                                 result.objective_constraint_ratio * MARGIN),
-                        RELAXING_RATE_MAX);
                 }
             }
 
