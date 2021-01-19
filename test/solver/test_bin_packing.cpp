@@ -135,8 +135,7 @@ TEST_F(TestBinpacking, bin_packing) {
     option.tabu_search.is_enabled_automatic_break                  = true;
     option.tabu_search.is_enabled_automatic_tabu_tenure_adjustment = true;
     option.tabu_search.is_enabled_initial_modification             = true;
-    option.tabu_search.ignore_tabu_if_augmented_incumbent          = true;
-    option.tabu_search.ignore_tabu_if_feasible_incumbent           = true;
+    option.tabu_search.ignore_tabu_if_global_incumbent             = true;
 
     auto result = printemps::solver::solve(&model, option);
     EXPECT_EQ(true, result.solution.is_feasible());
