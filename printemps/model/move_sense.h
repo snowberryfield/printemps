@@ -6,9 +6,6 @@
 #ifndef PRINTEMPS_MODEL_MOVE_SENSE_H__
 #define PRINTEMPS_MODEL_MOVE_SENSE_H__
 
-#include <vector>
-#include <unordered_set>
-
 namespace printemps {
 namespace model {
 /*****************************************************************************/

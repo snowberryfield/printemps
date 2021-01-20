@@ -943,14 +943,13 @@ class Neighborhood {
             move_index++;
         }
 
-        auto exclusive_move_updater =  //
-            [this, variable_ptrs, associated_variables_ptrs, variables_size](
-                auto *                      a_moves,                          //
-                auto *                      a_flags,                          //
-                const bool                  a_ACCEPT_ALL,                     //
-                const bool                  a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
-                const bool                  a_ACCEPT_FEASIBILITY_IMPROVABLE,  //
-                [[maybe_unused]] const bool a_IS_ENABLED_PARALLEL) {
+        auto exclusive_move_updater =                           //
+            [this](auto *     a_moves,                          //
+                   auto *     a_flags,                          //
+                   const bool a_ACCEPT_ALL,                     //
+                   const bool a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
+                   const bool a_ACCEPT_FEASIBILITY_IMPROVABLE,  //
+                   [[maybe_unused]] const bool a_IS_ENABLED_PARALLEL) {
                 int moves_size = a_moves->size();
 #ifdef _OPENMP
 #pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
