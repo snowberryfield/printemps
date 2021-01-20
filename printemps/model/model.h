@@ -1600,19 +1600,16 @@ class Model {
                 m_objective.value() * this->sign() - objective;
         }
 
-        SolutionScore score;
-
-        score.objective                  = objective;
-        score.objective_improvement      = objective_improvement;
-        score.total_violation            = total_violation;
-        score.local_penalty              = local_penalty;
-        score.global_penalty             = global_penalty;
-        score.local_augmented_objective  = objective + local_penalty;
-        score.global_augmented_objective = objective + global_penalty;
-        score.is_objective_improvable =
-            objective_improvement > constant::EPSILON;
-        score.is_constraint_improvable = is_constraint_improvable;
-        score.is_feasible              = !(total_violation > constant::EPSILON);
+        SolutionScore score({objective,                                  //
+                             objective_improvement,                      //
+                             total_violation,                            //
+                             local_penalty,                              //
+                             global_penalty,                             //
+                             objective + local_penalty,                  //
+                             objective + global_penalty,                 //
+                             !(total_violation > constant::EPSILON),     //
+                             objective_improvement > constant::EPSILON,  //
+                             is_constraint_improvable});
 
         return score;
     }
@@ -1621,13 +1618,11 @@ class Model {
     SolutionScore evaluate(const Move<T_Variable, T_Expression> &a_MOVE,
                            const SolutionScore &a_CURRENT_SCORE) const
         noexcept {
-        SolutionScore score = a_CURRENT_SCORE;
-
         bool is_constraint_improvable = false;
 
-        double total_violation = score.total_violation;
-        double local_penalty   = score.local_penalty;
-        double global_penalty  = score.global_penalty;
+        double total_violation = a_CURRENT_SCORE.total_violation;
+        double local_penalty   = a_CURRENT_SCORE.local_penalty;
+        double global_penalty  = a_CURRENT_SCORE.global_penalty;
 
         for (const auto &constraint_ptr : a_MOVE.related_constraint_ptrs) {
             if (!constraint_ptr->is_enabled()) {
@@ -1656,17 +1651,16 @@ class Model {
                 m_objective.value() * this->sign() - objective;
         }
 
-        score.objective                  = objective;
-        score.objective_improvement      = objective_improvement;
-        score.total_violation            = total_violation;
-        score.local_penalty              = local_penalty;
-        score.global_penalty             = global_penalty;
-        score.local_augmented_objective  = objective + local_penalty;
-        score.global_augmented_objective = objective + global_penalty;
-        score.is_objective_improvable =
-            objective_improvement > constant::EPSILON;
-        score.is_constraint_improvable = is_constraint_improvable;
-        score.is_feasible              = !(total_violation > constant::EPSILON);
+        SolutionScore score({objective,                                  //
+                             objective_improvement,                      //
+                             total_violation,                            //
+                             local_penalty,                              //
+                             global_penalty,                             //
+                             objective + local_penalty,                  //
+                             objective + global_penalty,                 //
+                             !(total_violation > constant::EPSILON),     //
+                             objective_improvement > constant::EPSILON,  //
+                             is_constraint_improvable});
 
         return score;
     }
