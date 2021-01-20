@@ -73,6 +73,7 @@ inline void print_table_body(
     const model::SolutionScore &a_CURRENT_SOLUTION_SCORE,                 //
     const int                   a_STATUS,                                 //
     const IncumbentHolder<T_Variable, T_Expression> &a_INCUMBENT_HOLDER,  //
+    const bool                                       a_IS_ASPIRATED,      //
     const bool                                       a_IS_ENABLED_PRINT) {
     if (!a_IS_ENABLED_PRINT) {
         return;
@@ -91,12 +92,21 @@ inline void print_table_body(
         IncumbentHolderConstant::STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
         mark_current                    = '#';
         mark_global_augmented_incumbent = '#';
+        if (a_IS_ASPIRATED) {
+            mark_current                    = '@';
+            mark_global_augmented_incumbent = '@';
+        }
     }
 
     if (a_STATUS & IncumbentHolderConstant::STATUS_FEASIBLE_INCUMBENT_UPDATE) {
         mark_current                    = '*';
         mark_global_augmented_incumbent = '*';
         mark_feasible_incumbent         = '*';
+        if (a_IS_ASPIRATED) {
+            mark_current                    = '@';
+            mark_global_augmented_incumbent = '@';
+            mark_feasible_incumbent         = '@';
+        }
     }
 
     auto int_format = [](const int a_VALUE) {
@@ -133,8 +143,8 @@ inline void print_table_footer(const bool a_IS_ENABLED_PRINT) {
     }
 
     utility::print(
-        "---------+------------------------+----------------------+-----------"
-        "-----------");
+        "---------+------------------------+----------------------+------------"
+        "----------");
 }
 }  // namespace tabu_search
 }  // namespace solver

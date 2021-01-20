@@ -391,8 +391,9 @@ TabuSearchResult<T_Variable, T_Expression> solve(
         int argmin_global_augmented_objective =
             utility::argmin(global_augmented_objectives);
 
-        int argmin_total_score = utility::argmin(total_scores);
-        int selected_index     = 0;
+        int  argmin_total_score = utility::argmin(total_scores);
+        int  selected_index     = 0;
+        bool is_aspirated       = false;
 
         if (iteration < option.tabu_search.number_of_initial_modification) {
             /**
@@ -417,6 +418,9 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                         constant::EPSILON <
                     incumbent_holder.global_augmented_incumbent_objective()) {
                     selected_index = argmin_global_augmented_objective;
+                    if (!trial_move_scores[selected_index].is_permissible) {
+                        is_aspirated = true;
+                    }
                 }
             }
         }
@@ -639,6 +643,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                              current_solution_score,               //
                              update_status,                        //
                              incumbent_holder,                     //
+                             is_aspirated,                         //
                              option.verbose >= Verbose::Full);
         }
 
