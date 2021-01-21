@@ -29,16 +29,17 @@ class ExpressionProxy;
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value,
           template <class, class> class T_ExpressionLike>
-inline constexpr auto operator+(
+constexpr auto operator+(
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE,
-    const T_Value a_VALUE) -> decltype(a_EXPRESSION_LIKE.to_expression()) {
+    const T_Value                                     a_VALUE)  //
+    -> decltype(a_EXPRESSION_LIKE.to_expression()) {
     return a_EXPRESSION_LIKE.to_expression() + a_VALUE;
 }
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value,
           template <class, class> class T_ExpressionLike>
-inline constexpr auto operator+(
+constexpr auto operator+(
     const T_Value                                     a_VALUE,
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE)
     -> decltype(a_EXPRESSION_LIKE.to_expression()) {
@@ -49,11 +50,10 @@ inline constexpr auto operator+(
 template <class T_Variable, class T_Expression,
           template <class, class> class T_ExpressionLikeLeft,
           template <class, class> class T_ExpressionLikeRight>
-inline constexpr auto operator+(
-    const T_ExpressionLikeLeft<T_Variable, T_Expression>
-        &a_EXPRESSION_LIKE_LEFT,
-    const T_ExpressionLikeRight<T_Variable, T_Expression>
-        &a_EXPRESSION_LIKE_RIGHT)
+constexpr auto operator+(const T_ExpressionLikeLeft<T_Variable, T_Expression>
+                             &a_EXPRESSION_LIKE_LEFT,
+                         const T_ExpressionLikeRight<T_Variable, T_Expression>
+                             &a_EXPRESSION_LIKE_RIGHT)
     -> decltype(a_EXPRESSION_LIKE_LEFT.to_expression()) {
     return a_EXPRESSION_LIKE_LEFT.to_expression() +
            a_EXPRESSION_LIKE_RIGHT.to_expression();
@@ -62,16 +62,17 @@ inline constexpr auto operator+(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value,
           template <class, class> class T_ExpressionLike>
-inline auto operator-(
+auto operator-(
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE,
-    const T_Value a_VALUE) -> decltype(a_EXPRESSION_LIKE.to_expression()) {
+    const T_Value                                     a_VALUE)  //
+    -> decltype(a_EXPRESSION_LIKE.to_expression()) {
     return a_EXPRESSION_LIKE.to_expression() - a_VALUE;
 }
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value,
           template <class, class> class T_ExpressionLike>
-inline constexpr auto operator-(
+constexpr auto operator-(
     const T_Value                                     a_VALUE,
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE)
     -> decltype(a_EXPRESSION_LIKE.to_expression()) {
@@ -82,11 +83,10 @@ inline constexpr auto operator-(
 template <class T_Variable, class T_Expression,
           template <class, class> class T_ExpressionLikeLeft,
           template <class, class> class T_ExpressionLikeRight>
-inline constexpr auto operator-(
-    const T_ExpressionLikeLeft<T_Variable, T_Expression>
-        &a_EXPRESSION_LIKE_LEFT,
-    const T_ExpressionLikeRight<T_Variable, T_Expression>
-        &a_EXPRESSION_LIKE_RIGHT)
+constexpr auto operator-(const T_ExpressionLikeLeft<T_Variable, T_Expression>
+                             &a_EXPRESSION_LIKE_LEFT,
+                         const T_ExpressionLikeRight<T_Variable, T_Expression>
+                             &a_EXPRESSION_LIKE_RIGHT)
     -> decltype(a_EXPRESSION_LIKE_LEFT.to_expression()) {
     return a_EXPRESSION_LIKE_LEFT.to_expression() -
            a_EXPRESSION_LIKE_RIGHT.to_expression();
@@ -95,16 +95,17 @@ inline constexpr auto operator-(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value,
           template <class, class> class T_ExpressionLike>
-inline auto operator*(
+auto operator*(
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE,
-    const T_Value a_VALUE) -> decltype(a_EXPRESSION_LIKE.to_expression()) {
+    const T_Value                                     a_VALUE)  //
+    -> decltype(a_EXPRESSION_LIKE.to_expression()) {
     return a_EXPRESSION_LIKE.to_expression() * a_VALUE;
 }
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value,
           template <class, class> class T_ExpressionLike>
-inline auto operator*(
+auto operator*(
     const T_Value                                     a_VALUE,
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE)
     -> decltype(a_EXPRESSION_LIKE.to_expression()) {
@@ -114,9 +115,10 @@ inline auto operator*(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value,
           template <class, class> class T_ExpressionLike>
-inline constexpr auto operator/(
+constexpr auto operator/(
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE,
-    const T_Value a_VALUE) -> decltype(a_EXPRESSION_LIKE.to_expression()) {
+    const T_Value                                     a_VALUE)  //
+    -> decltype(a_EXPRESSION_LIKE.to_expression()) {
     return a_EXPRESSION_LIKE.to_expression() / a_VALUE;
 }
 
@@ -125,7 +127,7 @@ inline constexpr auto operator/(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression,
           template <class, class> class T_ExpressionLike>
-inline constexpr auto operator+(
+constexpr auto operator+(
     const Expression<T_Variable, T_Expression> &      a_EXPRESSION,
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE)
     -> decltype(a_EXPRESSION.copy()) {
@@ -135,7 +137,7 @@ inline constexpr auto operator+(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression,
           template <class, class> class T_ExpressionLike>
-inline constexpr auto operator+(
+constexpr auto operator+(
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE,
     const Expression<T_Variable, T_Expression> &      a_EXPRESSION)
     -> decltype(a_EXPRESSION.copy()) {
@@ -145,7 +147,7 @@ inline constexpr auto operator+(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression,
           template <class, class> class T_ExpressionLike>
-inline constexpr auto operator-(
+constexpr auto operator-(
     const Expression<T_Variable, T_Expression> &      a_EXPRESSION,
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE)
     -> decltype(a_EXPRESSION.copy()) {
@@ -155,7 +157,7 @@ inline constexpr auto operator-(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression,
           template <class, class> class T_ExpressionLike>
-inline constexpr auto operator-(
+constexpr auto operator-(
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE,
     const Expression<T_Variable, T_Expression> &      a_EXPRESSION)
     -> decltype(a_EXPRESSION.copy()) {
@@ -166,7 +168,7 @@ inline constexpr auto operator-(
 // EXPRESSION
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value>
-inline constexpr Expression<T_Variable, T_Expression> operator+(
+constexpr Expression<T_Variable, T_Expression> operator+(
     const Expression<T_Variable, T_Expression> &a_EXPRESSION,
     const T_Value                               a_VALUE) {
     auto result = a_EXPRESSION.copy();
@@ -175,7 +177,7 @@ inline constexpr Expression<T_Variable, T_Expression> operator+(
 }
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value>
-inline constexpr Expression<T_Variable, T_Expression> operator+(
+constexpr Expression<T_Variable, T_Expression> operator+(
     const T_Value                               a_VALUE,
     const Expression<T_Variable, T_Expression> &a_EXPRESSION) {
     auto result = a_EXPRESSION.copy();
@@ -185,7 +187,7 @@ inline constexpr Expression<T_Variable, T_Expression> operator+(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-inline constexpr Expression<T_Variable, T_Expression> operator+(
+constexpr Expression<T_Variable, T_Expression> operator+(
     const Expression<T_Variable, T_Expression> &a_EXPRESSION_1,
     const Expression<T_Variable, T_Expression> &a_EXPRESSION_2) {
     auto result = a_EXPRESSION_1.copy();
@@ -195,7 +197,7 @@ inline constexpr Expression<T_Variable, T_Expression> operator+(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value>
-inline constexpr Expression<T_Variable, T_Expression> operator-(
+constexpr Expression<T_Variable, T_Expression> operator-(
     const Expression<T_Variable, T_Expression> &a_EXPRESSION,
     const T_Value &                             a_VALUE) {
     auto result = a_EXPRESSION.copy();
@@ -204,7 +206,7 @@ inline constexpr Expression<T_Variable, T_Expression> operator-(
 }
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value>
-inline constexpr Expression<T_Variable, T_Expression> operator-(
+constexpr Expression<T_Variable, T_Expression> operator-(
     const T_Value                               a_VALUE,
     const Expression<T_Variable, T_Expression> &a_EXPRESSION) {
     auto result = -a_EXPRESSION.copy();
@@ -214,7 +216,7 @@ inline constexpr Expression<T_Variable, T_Expression> operator-(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-inline constexpr Expression<T_Variable, T_Expression> operator-(
+constexpr Expression<T_Variable, T_Expression> operator-(
     const Expression<T_Variable, T_Expression> &a_EXPRESSION_1,
     const Expression<T_Variable, T_Expression> &a_EXPRESSION_2) {
     auto result = a_EXPRESSION_1.copy();
@@ -224,7 +226,7 @@ inline constexpr Expression<T_Variable, T_Expression> operator-(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value>
-inline constexpr Expression<T_Variable, T_Expression> operator*(
+constexpr Expression<T_Variable, T_Expression> operator*(
     const Expression<T_Variable, T_Expression> &a_EXPRESSION,
     const T_Value                               a_VALUE) {
     auto result = a_EXPRESSION.copy();
@@ -234,7 +236,7 @@ inline constexpr Expression<T_Variable, T_Expression> operator*(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value>
-inline constexpr Expression<T_Variable, T_Expression> operator*(
+constexpr Expression<T_Variable, T_Expression> operator*(
     const T_Value                               a_VALUE,
     const Expression<T_Variable, T_Expression> &a_EXPRESSION) {
     auto result = a_EXPRESSION.copy();
@@ -244,7 +246,7 @@ inline constexpr Expression<T_Variable, T_Expression> operator*(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value>
-inline constexpr Expression<T_Variable, T_Expression> operator/(
+constexpr Expression<T_Variable, T_Expression> operator/(
     const Expression<T_Variable, T_Expression> &a_EXPRESSION,
     const T_Value                               a_VALUE) {
     auto result = a_EXPRESSION.copy();

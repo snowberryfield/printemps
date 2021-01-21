@@ -17,7 +17,7 @@ struct TabuSearchMoveScore {
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-inline constexpr bool compute_permissibility(
+constexpr bool compute_permissibility(
     const model::Move<T_Variable, T_Expression> &a_MOVE,       //
     const Memory &                               a_MEMORY,     //
     const int                                    a_ITERATION,  //
@@ -75,7 +75,7 @@ inline constexpr bool compute_permissibility(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-inline constexpr double compute_frequency_penalty(
+constexpr double compute_frequency_penalty(
     const model::Move<T_Variable, T_Expression> &a_MOVE,
     const Memory &                               a_MEMORY,     //
     [[maybe_unused]] const int                   a_ITERATION,  //

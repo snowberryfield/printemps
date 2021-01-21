@@ -129,7 +129,7 @@ class Objective {
     }
 
     /*************************************************************************/
-    inline constexpr void initialize(void) {
+    void initialize(void) {
         m_function =
             []([[maybe_unused]] const Move<T_Variable, T_Expression> &a_MOVE) {
                 return 0.0;
@@ -140,17 +140,15 @@ class Objective {
     }
 
     /*************************************************************************/
-    inline constexpr void setup(
-        const std::function<
-            T_Expression(const Move<T_Variable, T_Expression> &)> &a_FUNCTION) {
+    void setup(const std::function<T_Expression(
+                   const Move<T_Variable, T_Expression> &)> &a_FUNCTION) {
         this->initialize();
         m_is_linear = false;
         m_function  = a_FUNCTION;
     }
 
     /*************************************************************************/
-    inline constexpr void setup(
-        const Expression<T_Variable, T_Expression> &a_EXPRESSION) {
+    void setup(const Expression<T_Variable, T_Expression> &a_EXPRESSION) {
         this->initialize();
         m_is_linear  = true;
         m_expression = a_EXPRESSION;

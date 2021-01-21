@@ -119,7 +119,7 @@ struct Option {
     }
 
     /*************************************************************************/
-    inline constexpr void initialize(void) {
+    void initialize(void) {
         this->iteration_max = OptionConstant::DEFAULT_ITERATION_MAX;
         this->time_max      = OptionConstant::DEFAULT_TIME_MAX;
         this->time_offset   = OptionConstant::DEFAULT_TIME_OFFSET;
@@ -182,7 +182,7 @@ struct Option {
     }
 
     /*************************************************************************/
-    inline void print(void) const {
+    void print(void) const {
         utility::print_single_line(true);
         utility::print_info("The values for options are specified as follows:",
                             true);
@@ -470,15 +470,10 @@ struct Option {
             utility::to_string(this->tabu_search.iteration_decrease_rate,
                                "%f"));
 
-        utility::print(                                               //
-            " -- tabu_search.ignore_tabu_if_augmented_incumbent: " +  //
+        utility::print(                                            //
+            " -- tabu_search.ignore_tabu_if_global_incumbent: " +  //
             utility::to_string(
-                this->tabu_search.ignore_tabu_if_augmented_incumbent, "%d"));
-
-        utility::print(                                              //
-            " -- tabu_search.ignore_tabu_if_feasible_incumbent: " +  //
-            utility::to_string(
-                this->tabu_search.ignore_tabu_if_feasible_incumbent, "%d"));
+                this->tabu_search.ignore_tabu_if_global_incumbent, "%d"));
 
         utility::print(                                           //
             " -- tabu_search.number_of_initial_modification: " +  //

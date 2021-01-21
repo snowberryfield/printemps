@@ -35,7 +35,7 @@ struct VariableReference {
     }
 
     /*************************************************************************/
-    inline void initialize(void) {
+    void initialize(void) {
         this->variable_ptrs.clear();
         this->fixed_variable_ptrs.clear();
         this->not_fixed_variable_ptrs.clear();

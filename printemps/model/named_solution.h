@@ -52,7 +52,7 @@ class NamedSolution {
     }
 
     /*************************************************************************/
-    inline void initialize(void) {
+    void initialize(void) {
         m_variable_value_proxies.clear();
         m_expression_value_proxies.clear();
         m_constraint_value_proxies.clear();
@@ -84,8 +84,8 @@ class NamedSolution {
     }
 
     /*************************************************************************/
-    inline void write_json_by_name(const std::string&  a_FILE_NAME,
-                                   const ModelSummary& a_MODEL_SUMMARY) const {
+    void write_json_by_name(const std::string&  a_FILE_NAME,
+                            const ModelSummary& a_MODEL_SUMMARY) const {
         int indent_level = 0;
 
         std::ofstream ofs(a_FILE_NAME.c_str());
@@ -109,31 +109,45 @@ class NamedSolution {
             << std::endl;
 
         ofs << utility::indent_spaces(indent_level)
-            << "\"objective\" : " + std::to_string(m_objective) << ","
-            << std::endl;
+            << "\"objective\" : " + utility::to_string(m_objective, "%.10e")
+            << "," << std::endl;
 
         ofs << utility::indent_spaces(indent_level)
-            << "\"total_violation\" : " + std::to_string(m_total_violation)
+            << "\"total_violation\" : " +
+                   utility::to_string(m_total_violation, "%.10e")
             << "," << std::endl;
 
         /// Decision variables
-        write_values_by_name(&ofs, m_variable_value_proxies, "variables",
-                             indent_level);
-        ofs << "," << std::endl;
+        write_values_by_name(&ofs,                      //
+                             m_variable_value_proxies,  //
+                             "variables",               //
+                             indent_level,              //
+                             "%d",                      //
+                             true);
 
         /// Expressions
-        write_values_by_name(&ofs, m_expression_value_proxies, "expressions",
-                             indent_level);
-        ofs << "," << std::endl;
+        write_values_by_name(&ofs,                        //
+                             m_expression_value_proxies,  //
+                             "expressions",               //
+                             indent_level,                //
+                             "%.10e",                     //
+                             true);
 
         /// Constraints
-        write_values_by_name(&ofs, m_constraint_value_proxies, "constraints",
-                             indent_level);
-        ofs << "," << std::endl;
+        write_values_by_name(&ofs,                        //
+                             m_constraint_value_proxies,  //
+                             "constraints",               //
+                             indent_level,                //
+                             "%.10e",                     //
+                             true);
 
         /// Violations
-        write_values_by_name(&ofs, m_violation_value_proxies, "violations",
-                             indent_level);
+        write_values_by_name(&ofs,                       //
+                             m_violation_value_proxies,  //
+                             "violations",               //
+                             indent_level,               //
+                             "%.10e",                    //
+                             false);
 
         indent_level--;
         ofs << utility::indent_spaces(indent_level) << "}" << std::endl;
@@ -141,8 +155,8 @@ class NamedSolution {
     }
 
     /*************************************************************************/
-    inline void write_json_by_array(const std::string&  a_FILE_NAME,
-                                    const ModelSummary& a_MODEL_SUMMARY) const {
+    void write_json_by_array(const std::string&  a_FILE_NAME,
+                             const ModelSummary& a_MODEL_SUMMARY) const {
         int indent_level = 0;
 
         std::ofstream ofs(a_FILE_NAME.c_str());
@@ -166,31 +180,45 @@ class NamedSolution {
             << std::endl;
 
         ofs << utility::indent_spaces(indent_level)
-            << "\"objective\" : " + std::to_string(m_objective) << ","
-            << std::endl;
+            << "\"objective\" : " + utility::to_string(m_objective, "%.10e")
+            << "," << std::endl;
 
         ofs << utility::indent_spaces(indent_level)
-            << "\"total_violation\" : " + std::to_string(m_total_violation)
+            << "\"total_violation\" : " +
+                   utility::to_string(m_total_violation, "%.10e")
             << "," << std::endl;
 
         /// Decision variables
-        write_values_by_array(&ofs, m_variable_value_proxies, "variables",
-                              indent_level);
-        ofs << "," << std::endl;
+        write_values_by_array(&ofs,                      //
+                              m_variable_value_proxies,  //
+                              "variables",               //
+                              indent_level,              //
+                              "%d",                      //
+                              true);
 
         /// Expressions
-        write_values_by_array(&ofs, m_expression_value_proxies, "expressions",
-                              indent_level);
-        ofs << "," << std::endl;
+        write_values_by_array(&ofs,                        //
+                              m_expression_value_proxies,  //
+                              "expressions",               //
+                              indent_level,                //
+                              "%.10e",                     //
+                              true);
 
         /// Constraints
-        write_values_by_array(&ofs, m_constraint_value_proxies, "constraints",
-                              indent_level);
-        ofs << "," << std::endl;
+        write_values_by_array(&ofs,                        //
+                              m_constraint_value_proxies,  //
+                              "constraints",               //
+                              indent_level,                //
+                              "%.10e",                     //
+                              true);
 
         /// Violations
-        write_values_by_array(&ofs, m_violation_value_proxies, "violations",
-                              indent_level);
+        write_values_by_array(&ofs,                       //
+                              m_violation_value_proxies,  //
+                              "violations",               //
+                              indent_level,               //
+                              "%.10e",                    //
+                              false);
 
         indent_level--;
         ofs << utility::indent_spaces(indent_level) << "}" << std::endl;
@@ -198,10 +226,12 @@ class NamedSolution {
     }
 
     /*************************************************************************/
-    inline void write_solution(const std::string& a_FILE_NAME) const {
+    void write_solution(const std::string& a_FILE_NAME) const {
         std::ofstream ofs(a_FILE_NAME.c_str());
+
         if (m_is_feasible) {
-            ofs << "=obj= " << m_objective << std::endl;
+            ofs << "=obj= " << utility::to_string(m_objective, "%.10e")
+                << std::endl;
             for (const auto& item : m_variable_value_proxies) {
                 auto& proxy              = item.second;
                 int   number_of_elements = proxy.number_of_elements();

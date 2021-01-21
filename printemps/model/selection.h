@@ -34,7 +34,7 @@ struct Selection {
         /// nothing to do
     }
     /*************************************************************************/
-    inline void initialize(void) {
+    void initialize(void) {
         variable_ptrs.clear();
         selected_variable_ptr = nullptr;
         constraint_ptr        = nullptr;

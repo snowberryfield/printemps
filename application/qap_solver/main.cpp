@@ -73,11 +73,11 @@ int main([[maybe_unused]] int argc, char *argv[]) {
      */
     printemps::utility::print_info(
         "status: " + std::to_string(result.solution.is_feasible()),
-        option.verbose != printemps::solver::Verbose::None);
+        option.verbose >= printemps::solver::Verbose::Outer);
 
     printemps::utility::print_info(
         "objective: " + std::to_string(result.solution.objective()),
-        option.verbose != printemps::solver::Verbose::None);
+        option.verbose >= printemps::solver::Verbose::Outer);
 
     auto summary = model.export_summary();
     result.solution.write_json_by_name("incumbent.json", summary);

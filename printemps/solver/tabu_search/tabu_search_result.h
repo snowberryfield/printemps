@@ -57,7 +57,7 @@ struct TabuSearchResult {
     }
 
     /*************************************************************************/
-    inline void constexpr initialize(void) {
+    void initialize(void) {
         this->incumbent_holder.initialize();
         this->memory.initialize();
 

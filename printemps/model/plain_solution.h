@@ -35,7 +35,7 @@ struct PlainSolution {
     }
 
     /*************************************************************************/
-    inline void initialize(void) {
+    void initialize(void) {
         this->variables.clear();
 
         this->objective       = 0;
@@ -44,7 +44,7 @@ struct PlainSolution {
     }
 
     /*************************************************************************/
-    inline void write(std::ofstream* a_ofs, const int a_INDENT_LEVEL) const {
+    void write(std::ofstream* a_ofs, const int a_INDENT_LEVEL) const {
         int indent_level = a_INDENT_LEVEL;
         *a_ofs << utility::indent_spaces(indent_level) << "{" << std::endl;
         indent_level++;

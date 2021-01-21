@@ -25,23 +25,6 @@ struct SolutionScore {
     bool is_feasible;
     bool is_objective_improvable;
     bool is_constraint_improvable;
-
-    /*************************************************************************/
-    SolutionScore(void)
-        : objective(0.0),
-          objective_improvement(0.0),
-          total_violation(0.0),
-          local_penalty(0.0),
-          global_penalty(0.0),
-          local_augmented_objective(0.0),
-          global_augmented_objective(0.0),
-          is_feasible(false),
-          is_objective_improvable(false),
-          is_constraint_improvable(false)
-
-    {
-        /// nothing to do
-    }
 };
 
 /*****************************************************************************/

@@ -46,7 +46,7 @@ class TimeKeeper {
     }
 
     /*************************************************************************/
-    inline constexpr void initialize(void) {
+    void initialize(void) {
         m_start_time   = 0.0;
         m_elapsed_time = 0.0;
     }
