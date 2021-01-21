@@ -10,9 +10,8 @@ namespace printemps {
 namespace model {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-inline constexpr void verify_problem(
-    Model<T_Variable, T_Expression> *a_model,  //
-    const bool                       a_IS_ENABLED_PRINT) {
+constexpr void verify_problem(Model<T_Variable, T_Expression> *a_model,  //
+                              const bool a_IS_ENABLED_PRINT) {
     utility::print_single_line(a_IS_ENABLED_PRINT);
     utility::print_message("Verifying the problem...", a_IS_ENABLED_PRINT);
 
@@ -32,7 +31,7 @@ inline constexpr void verify_problem(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-inline constexpr void verify_and_correct_selection_variables_initial_values(
+constexpr void verify_and_correct_selection_variables_initial_values(
     Model<T_Variable, T_Expression> *a_model,                 //
     const bool                       a_IS_ENABLED_CORRECTON,  //
     const bool                       a_IS_ENABLED_PRINT) {
@@ -196,7 +195,7 @@ inline constexpr void verify_and_correct_selection_variables_initial_values(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-inline constexpr void verify_and_correct_binary_variables_initial_values(
+constexpr void verify_and_correct_binary_variables_initial_values(
     Model<T_Variable, T_Expression> *a_model,                 //
     const bool                       a_IS_ENABLED_CORRECTON,  //
     const bool                       a_IS_ENABLED_PRINT) {
@@ -246,7 +245,7 @@ inline constexpr void verify_and_correct_binary_variables_initial_values(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-inline constexpr void verify_and_correct_integer_variables_initial_values(
+constexpr void verify_and_correct_integer_variables_initial_values(
     Model<T_Variable, T_Expression> *a_model,                 //
     const bool                       a_IS_ENABLED_CORRECTON,  //
     const bool                       a_IS_ENABLED_PRINT) {

@@ -112,7 +112,7 @@ class Model {
     }
 
     /*************************************************************************/
-    inline void initialize(void) {
+    void initialize(void) {
         m_name = "";
 
         m_variable_proxies.reserve(
@@ -154,7 +154,7 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr VariableProxy<T_Variable, T_Expression> &create_variable(
+    constexpr VariableProxy<T_Variable, T_Expression> &create_variable(
         const std::string &a_NAME) {
         if (utility::has_space(a_NAME)) {
             throw std::logic_error(utility::format_error_location(
@@ -182,9 +182,10 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr VariableProxy<T_Variable, T_Expression> &create_variable(
-        const std::string &a_NAME, const T_Variable a_LOWER_BOUND,
-        const T_Variable a_UPPER_BOUND) {
+    constexpr VariableProxy<T_Variable, T_Expression> &create_variable(
+        const std::string &a_NAME,         //
+        const T_Variable   a_LOWER_BOUND,  //
+        const T_Variable   a_UPPER_BOUND) {
         auto &variable_proxy = this->create_variable(a_NAME);
         variable_proxy.set_bound(a_LOWER_BOUND, a_UPPER_BOUND);
 
@@ -192,8 +193,9 @@ class Model {
     }
 
     /*************************************************************************/
-    inline VariableProxy<T_Variable, T_Expression> &create_variables(
-        const std::string &a_NAME, const int a_NUMBER_OF_ELEMENTS) {
+    constexpr VariableProxy<T_Variable, T_Expression> &create_variables(
+        const std::string &a_NAME,  //
+        const int          a_NUMBER_OF_ELEMENTS) {
         if (utility::has_space(a_NAME)) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -221,9 +223,11 @@ class Model {
     }
 
     /*************************************************************************/
-    inline VariableProxy<T_Variable, T_Expression> &create_variables(
-        const std::string &a_NAME, const int a_NUMBER_OF_ELEMENTS,
-        const T_Variable a_LOWER_BOUND, const T_Variable a_UPPER_BOUND) {
+    constexpr VariableProxy<T_Variable, T_Expression> &create_variables(
+        const std::string &a_NAME,                //
+        const int          a_NUMBER_OF_ELEMENTS,  //
+        const T_Variable   a_LOWER_BOUND,         //
+        const T_Variable   a_UPPER_BOUND) {
         auto &variable_proxy = create_variables(a_NAME, a_NUMBER_OF_ELEMENTS);
         variable_proxy.set_bound(a_LOWER_BOUND, a_UPPER_BOUND);
 
@@ -231,8 +235,9 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr VariableProxy<T_Variable, T_Expression> &create_variables(
-        const std::string &a_NAME, const std::vector<int> &a_SHAPE) {
+    constexpr VariableProxy<T_Variable, T_Expression> &create_variables(
+        const std::string &     a_NAME,  //
+        const std::vector<int> &a_SHAPE) {
         if (utility::has_space(a_NAME)) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -260,9 +265,11 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr VariableProxy<T_Variable, T_Expression> &create_variables(
-        const std::string &a_NAME, const std::vector<int> &a_SHAPE,
-        const T_Variable a_LOWER_BOUND, const T_Variable a_UPPER_BOUND) {
+    constexpr VariableProxy<T_Variable, T_Expression> &create_variables(
+        const std::string &     a_NAME,         //
+        const std::vector<int> &a_SHAPE,        //
+        const T_Variable        a_LOWER_BOUND,  //
+        const T_Variable        a_UPPER_BOUND) {
         auto &variable_proxy = create_variables(a_NAME, a_SHAPE);
         variable_proxy.set_bound(a_LOWER_BOUND, a_UPPER_BOUND);
 
@@ -298,8 +305,9 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr ExpressionProxy<T_Variable, T_Expression> &
-    create_expressions(const std::string &a_NAME, int a_NUMBER_OF_ELEMENTS) {
+    constexpr ExpressionProxy<T_Variable, T_Expression> &create_expressions(
+        const std::string &a_NAME,  //
+        int                a_NUMBER_OF_ELEMENTS) {
         if (utility::has_space(a_NAME)) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -327,9 +335,9 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr ExpressionProxy<T_Variable, T_Expression>
-        &create_expressions(const std::string &     a_NAME,
-                            const std::vector<int> &a_SHAPE) {
+    constexpr ExpressionProxy<T_Variable, T_Expression> &create_expressions(
+        const std::string &     a_NAME,  //
+        const std::vector<int> &a_SHAPE) {
         if (utility::has_space(a_NAME)) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -358,9 +366,8 @@ class Model {
 
     /*************************************************************************/
     template <template <class, class> class T_ExpressionLike>
-    inline constexpr ExpressionProxy<T_Variable, T_Expression> &
-    create_expression(
-        const std::string &                               a_NAME,
+    constexpr ExpressionProxy<T_Variable, T_Expression> &create_expression(
+        const std::string &                               a_NAME,  //
         const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE) {
         if (utility::has_space(a_NAME)) {
             throw std::logic_error(utility::format_error_location(
@@ -384,14 +391,14 @@ class Model {
             ExpressionProxy<T_Variable, T_Expression>::create_instance(id));
         m_expression_names.push_back(a_NAME);
         m_expression_proxies.back() = a_EXPRESSION_LIKE.to_expression();
+
         return m_expression_proxies.back();
     }
 
     /*************************************************************************/
-    inline constexpr ExpressionProxy<T_Variable, T_Expression>
-        &create_expression(
-            const std::string &                         a_NAME,
-            const Expression<T_Variable, T_Expression> &a_EXPRESSION) {
+    constexpr ExpressionProxy<T_Variable, T_Expression> &create_expression(
+        const std::string &                         a_NAME,  //
+        const Expression<T_Variable, T_Expression> &a_EXPRESSION) {
         if (utility::has_space(a_NAME)) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -414,12 +421,13 @@ class Model {
             ExpressionProxy<T_Variable, T_Expression>::create_instance(id));
         m_expression_names.push_back(a_NAME);
         m_expression_proxies.back() = a_EXPRESSION;
+
         return m_expression_proxies.back();
     }
 
     /*************************************************************************/
-    inline constexpr ConstraintProxy<T_Variable, T_Expression>
-        &create_constraint(const std::string &a_NAME) {
+    constexpr ConstraintProxy<T_Variable, T_Expression> &create_constraint(
+        const std::string &a_NAME) {
         if (utility::has_space(a_NAME)) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -446,8 +454,9 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr ConstraintProxy<T_Variable, T_Expression> &
-    create_constraints(const std::string &a_NAME, int a_NUMBER_OF_ELEMENTS) {
+    constexpr ConstraintProxy<T_Variable, T_Expression> &create_constraints(
+        const std::string &a_NAME,  //
+        int                a_NUMBER_OF_ELEMENTS) {
         if (utility::has_space(a_NAME)) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -475,9 +484,9 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr ConstraintProxy<T_Variable, T_Expression>
-        &create_constraints(const std::string &     a_NAME,
-                            const std::vector<int> &a_SHAPE) {
+    constexpr ConstraintProxy<T_Variable, T_Expression> &create_constraints(
+        const std::string &     a_NAME,  //
+        const std::vector<int> &a_SHAPE) {
         if (utility::has_space(a_NAME)) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -505,10 +514,9 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr ConstraintProxy<T_Variable, T_Expression>
-        &create_constraint(
-            const std::string &                         a_NAME,
-            const Constraint<T_Variable, T_Expression> &a_CONSTRAINT) {
+    constexpr ConstraintProxy<T_Variable, T_Expression> &create_constraint(
+        const std::string &                         a_NAME,  //
+        const Constraint<T_Variable, T_Expression> &a_CONSTRAINT) {
         if (utility::has_space(a_NAME)) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -601,17 +609,16 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void setup(
-        const bool           a_IS_ENABLED_PRESOLVE,                  //
-        const bool           a_IS_ENABLED_INITIAL_VALUE_CORRECTION,  //
-        const bool           a_IS_ENABLED_AGGREGATION_MOVE,
-        const bool           a_IS_ENABLED_PRECEDENCE_MOVE,
-        const bool           a_IS_ENABLED_VARIABLE_BOUND_MOVE,
-        const bool           a_IS_ENABLED_EXCLUSIVE_MOVE,
-        const bool           a_IS_ENABLED_CHAIN_MOVE,
-        const bool           a_IS_ENABLED_USER_DEFINED_MOVE,
-        const SelectionMode &a_SELECTION_MODE,  //
-        const bool           a_IS_ENABLED_PRINT) {
+    constexpr void setup(const bool a_IS_ENABLED_PRESOLVE,                  //
+                         const bool a_IS_ENABLED_INITIAL_VALUE_CORRECTION,  //
+                         const bool a_IS_ENABLED_AGGREGATION_MOVE,          //
+                         const bool a_IS_ENABLED_PRECEDENCE_MOVE,           //
+                         const bool a_IS_ENABLED_VARIABLE_BOUND_MOVE,       //
+                         const bool a_IS_ENABLED_EXCLUSIVE_MOVE,            //
+                         const bool a_IS_ENABLED_CHAIN_MOVE,                //
+                         const bool a_IS_ENABLED_USER_DEFINED_MOVE,         //
+                         const SelectionMode &a_SELECTION_MODE,             //
+                         const bool           a_IS_ENABLED_PRINT) {
         verify_problem(this, a_IS_ENABLED_PRINT);
 
         this->setup_variable_related_constraints();
@@ -665,12 +672,11 @@ class Model {
             a_IS_ENABLED_PRINT);
 
         this->setup_fixed_sensitivities(a_IS_ENABLED_PRINT);
-
         this->setup_is_enabled_fast_evaluation();
     }
 
     /*************************************************************************/
-    inline constexpr void setup_variable_related_constraints(void) {
+    constexpr void setup_variable_related_constraints(void) {
         for (auto &&proxy : m_variable_proxies) {
             for (auto &&variable : proxy.flat_indexed_variables()) {
                 variable.reset_related_constraint_ptrs();
@@ -688,7 +694,7 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void setup_unique_name(void) {
+    constexpr void setup_unique_name(void) {
         int variable_proxies_size   = m_variable_proxies.size();
         int expression_proxies_size = m_expression_proxies.size();
         int constraint_proxies_size = m_constraint_proxies.size();
@@ -740,7 +746,7 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void setup_is_linear(void) {
+    constexpr void setup_is_linear(void) {
         m_is_linear = true;
         for (auto &&proxy : m_constraint_proxies) {
             for (auto &&constraint : proxy.flat_indexed_constraints()) {
@@ -756,7 +762,7 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void setup_is_enabled_fast_evaluation(void) {
+    constexpr void setup_is_enabled_fast_evaluation(void) {
         m_is_enabled_fast_evaluation = true;
         for (auto &&proxy : m_constraint_proxies) {
             for (auto &&constraint : proxy.flat_indexed_constraints()) {
@@ -772,7 +778,7 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void setup_variable_sensitivity(void) {
+    constexpr void setup_variable_sensitivity(void) {
         for (auto &&proxy : m_variable_proxies) {
             for (auto &&variable : proxy.flat_indexed_variables()) {
                 variable.reset_constraint_sensitivities();
@@ -793,7 +799,7 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void categorize_variables(void) {
+    constexpr void categorize_variables(void) {
         VariableReference<T_Variable, T_Expression> variable_reference;
 
         for (auto &&proxy : m_variable_proxies) {
@@ -823,7 +829,7 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void categorize_constraints(void) {
+    constexpr void categorize_constraints(void) {
         ConstraintReference<T_Variable, T_Expression> constraint_reference;
         ConstraintTypeReference<T_Variable, T_Expression>
             constraint_type_reference;
@@ -909,8 +915,7 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void extract_selections(
-        const SelectionMode &a_SELECTION_MODE) {
+    constexpr void extract_selections(const SelectionMode &a_SELECTION_MODE) {
         std::vector<Variable<T_Variable, T_Expression> *>
             extracted_selection_variable_ptrs;
 
@@ -1073,13 +1078,13 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void setup_neighborhood(
-        const bool a_IS_ENABLED_AGGREGATION_MOVE,
-        const bool a_IS_ENABLED_PRECEDENCE_MOVE,
-        const bool a_IS_ENABLED_VARIABLE_BOUND_MOVE,
-        const bool a_IS_ENABLED_EXCLUSIVE_MOVE,     //
-        const bool a_IS_ENABLED_CHAIN_MOVE,         //
-        const bool a_IS_ENABLED_USER_DEFINED_MOVE,  //
+    constexpr void setup_neighborhood(
+        const bool a_IS_ENABLED_AGGREGATION_MOVE,     //
+        const bool a_IS_ENABLED_PRECEDENCE_MOVE,      //
+        const bool a_IS_ENABLED_VARIABLE_BOUND_MOVE,  //
+        const bool a_IS_ENABLED_EXCLUSIVE_MOVE,       //
+        const bool a_IS_ENABLED_CHAIN_MOVE,           //
+        const bool a_IS_ENABLED_USER_DEFINED_MOVE,    //
         const bool a_IS_ENABLED_PRINT) {
         utility::print_single_line(a_IS_ENABLED_PRINT);
         utility::print_message("Detecting the neighborhood structure...",
@@ -1133,8 +1138,7 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void setup_fixed_sensitivities(
-        const bool a_IS_ENABLED_PRINT) {
+    constexpr void setup_fixed_sensitivities(const bool a_IS_ENABLED_PRINT) {
         utility::print_single_line(a_IS_ENABLED_PRINT);
         utility::print_message("Creating the sensitivity matrix...",
                                a_IS_ENABLED_PRINT);
@@ -1149,12 +1153,11 @@ class Model {
          * The fixed sensitivities for the constraints and the objective are
          * build in their own setup() methods.
          */
-
         utility::print_message("Done.", a_IS_ENABLED_PRINT);
     }
 
     /*************************************************************************/
-    inline constexpr void print_number_of_variables(void) const {
+    constexpr void print_number_of_variables(void) const {
         utility::print_single_line(true);
         if (this->number_of_fixed_variables() == 0) {
             utility::print_info(
@@ -1193,7 +1196,7 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void print_number_of_constraints(void) const {
+    constexpr void print_number_of_constraints(void) const {
         utility::print_single_line(true);
         if (this->number_of_disabled_constraints() == 0) {
             utility::print_info(
@@ -1313,7 +1316,7 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void import_variable_values(
+    constexpr void import_variable_values(
         const std::vector<ValueProxy<T_Variable>> &a_PROXIES) {
         for (auto &&proxy : m_variable_proxies) {
             for (auto &&variable : proxy.flat_indexed_variables()) {
@@ -1332,7 +1335,7 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void update(void) {
+    constexpr void update(void) {
         /**
          * Update in order of expressions -> objective, constraints. For
          * typical problem.
@@ -1357,7 +1360,7 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void update(const Move<T_Variable, T_Expression> &a_MOVE) {
+    constexpr void update(const Move<T_Variable, T_Expression> &a_MOVE) {
         /**
          * Update in order of objective, constraints -> expressions ->
          * variables.
@@ -1451,7 +1454,7 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void update_variable_objective_improvability(
+    constexpr void update_variable_objective_improvability(
         const std::vector<Variable<T_Variable, T_Expression> *>
             &a_VARIABLE_PTRS) const noexcept {
         for (const auto &variable_ptr : a_VARIABLE_PTRS) {
@@ -1475,7 +1478,7 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void update_variable_feasibility_improvability(
+    constexpr void update_variable_feasibility_improvability(
         const std::vector<Constraint<T_Variable, T_Expression> *>
             &a_CONSTRAINT_PTRS) const noexcept {
         for (const auto &constraint_ptr : a_CONSTRAINT_PTRS) {
@@ -1557,12 +1560,8 @@ class Model {
     }
 
     /*************************************************************************/
-    inline SolutionScore evaluate(
-        const Move<T_Variable, T_Expression> &a_MOVE,
-        const std::vector<ValueProxy<double>>
-            &a_LOCAL_PENALTY_COEFFICIENT_PROXIES,
-        const std::vector<ValueProxy<double>>
-            &a_GLOBAL_PENALTY_COEFFICIENT_PROXIES) const noexcept {
+    SolutionScore evaluate(const Move<T_Variable, T_Expression> &a_MOVE) const
+        noexcept {
         double total_violation = 0.0;
         double local_penalty   = 0.0;
         double global_penalty  = 0.0;
@@ -1581,20 +1580,14 @@ class Model {
                 }
                 double violation = constraints[j].evaluate_violation(a_MOVE);
 
-                if (violation + constant::EPSILON <
-                    constraints[j].violation_value()) {
+                if (violation < constraints[j].violation_value()) {
                     is_constraint_improvable = true;
                 }
                 total_violation += violation;
-
                 local_penalty +=
-                    a_LOCAL_PENALTY_COEFFICIENT_PROXIES[i].flat_indexed_values(
-                        j) *
-                    violation;
+                    violation * constraints[j].local_penalty_coefficient();
                 global_penalty +=
-                    a_GLOBAL_PENALTY_COEFFICIENT_PROXIES[i].flat_indexed_values(
-                        j) *
-                    violation;
+                    violation * constraints[j].global_penalty_coefficient();
             }
         }
 
@@ -1607,65 +1600,46 @@ class Model {
                 m_objective.value() * this->sign() - objective;
         }
 
-        double local_augmented_objective  = objective + local_penalty;
-        double global_augmented_objective = objective + global_penalty;
-
-        SolutionScore score;
-
-        score.objective                  = objective;
-        score.objective_improvement      = objective_improvement;
-        score.total_violation            = total_violation;
-        score.local_penalty              = local_penalty;
-        score.global_penalty             = global_penalty;
-        score.local_augmented_objective  = local_augmented_objective;
-        score.global_augmented_objective = global_augmented_objective;
-        score.is_objective_improvable =
-            objective_improvement > constant::EPSILON;
-        score.is_constraint_improvable = is_constraint_improvable;
-        score.is_feasible              = !(total_violation > constant::EPSILON);
+        SolutionScore score({objective,                                  //
+                             objective_improvement,                      //
+                             total_violation,                            //
+                             local_penalty,                              //
+                             global_penalty,                             //
+                             objective + local_penalty,                  //
+                             objective + global_penalty,                 //
+                             !(total_violation > constant::EPSILON),     //
+                             objective_improvement > constant::EPSILON,  //
+                             is_constraint_improvable});
 
         return score;
     }
 
     /*************************************************************************/
-    inline SolutionScore evaluate(
-        const Move<T_Variable, T_Expression> &a_MOVE,
-        const SolutionScore &                 a_CURRENT_SCORE,
-        const std::vector<ValueProxy<double>>
-            &a_LOCAL_PENALTY_COEFFICIENT_PROXIES,
-        const std::vector<ValueProxy<double>>
-            &a_GLOBAL_PENALTY_COEFFICIENT_PROXIES) const noexcept {
-        SolutionScore score = a_CURRENT_SCORE;
-
+    SolutionScore evaluate(const Move<T_Variable, T_Expression> &a_MOVE,
+                           const SolutionScore &a_CURRENT_SCORE) const
+        noexcept {
         bool is_constraint_improvable = false;
 
-        double total_violation = score.total_violation;
-        double local_penalty   = score.local_penalty;
-        double global_penalty  = score.global_penalty;
+        double total_violation = a_CURRENT_SCORE.total_violation;
+        double local_penalty   = a_CURRENT_SCORE.local_penalty;
+        double global_penalty  = a_CURRENT_SCORE.global_penalty;
 
         for (const auto &constraint_ptr : a_MOVE.related_constraint_ptrs) {
             if (!constraint_ptr->is_enabled()) {
                 continue;
             }
-            double violation_diff = constraint_ptr->evaluate_violation(a_MOVE) -
-                                    constraint_ptr->violation_value();
+            double violation_diff =
+                constraint_ptr->evaluate_violation_diff(a_MOVE);
             total_violation += violation_diff;
 
-            if (violation_diff + constant::EPSILON < 0) {
+            if (violation_diff < 0) {
                 is_constraint_improvable = true;
             }
 
-            int id         = constraint_ptr->id();
-            int flat_index = constraint_ptr->flat_index();
-
             local_penalty +=
-                violation_diff *
-                a_LOCAL_PENALTY_COEFFICIENT_PROXIES[id].flat_indexed_values(
-                    flat_index);
+                violation_diff * constraint_ptr->local_penalty_coefficient();
             global_penalty +=
-                violation_diff *
-                a_GLOBAL_PENALTY_COEFFICIENT_PROXIES[id].flat_indexed_values(
-                    flat_index);
+                violation_diff * constraint_ptr->global_penalty_coefficient();
         }
 
         double objective             = 0.0;
@@ -1677,27 +1651,24 @@ class Model {
                 m_objective.value() * this->sign() - objective;
         }
 
-        double local_augmented_objective  = objective + local_penalty;
-        double global_augmented_objective = objective + global_penalty;
-
-        score.objective                  = objective;
-        score.objective_improvement      = objective_improvement;
-        score.total_violation            = total_violation;
-        score.local_penalty              = local_penalty;
-        score.global_penalty             = global_penalty;
-        score.local_augmented_objective  = local_augmented_objective;
-        score.global_augmented_objective = global_augmented_objective;
-        score.is_objective_improvable =
-            objective_improvement > constant::EPSILON;
-        score.is_constraint_improvable = is_constraint_improvable;
-        score.is_feasible              = !(total_violation > constant::EPSILON);
+        SolutionScore score({objective,                                  //
+                             objective_improvement,                      //
+                             total_violation,                            //
+                             local_penalty,                              //
+                             global_penalty,                             //
+                             objective + local_penalty,                  //
+                             objective + global_penalty,                 //
+                             !(total_violation > constant::EPSILON),     //
+                             objective_improvement > constant::EPSILON,  //
+                             is_constraint_improvable});
 
         return score;
     }
 
     /*************************************************************************/
-    double compute_lagrangian(const std::vector<model::ValueProxy<double>>
-                                  &a_LAGRANGE_MULTIPLIER_PROXIES) {
+    constexpr double compute_lagrangian(
+        const std::vector<model::ValueProxy<double>>
+            &a_LAGRANGE_MULTIPLIER_PROXIES) const noexcept {
         double lagrangian = m_objective.value();
 
         for (auto &&constraint_ptr : m_constraint_reference.constraint_ptrs) {
@@ -1713,7 +1684,7 @@ class Model {
 
     /*************************************************************************/
     template <class T_Value>
-    inline constexpr std::vector<ValueProxy<T_Value>>
+    constexpr std::vector<ValueProxy<T_Value>>
     generate_variable_parameter_proxies(const T_Value a_VALUE) const {
         std::vector<ValueProxy<T_Value>> variable_parameter_proxies;
 
@@ -1734,7 +1705,7 @@ class Model {
 
     /*************************************************************************/
     template <class T_Value>
-    inline constexpr std::vector<ValueProxy<T_Value>>
+    constexpr std::vector<ValueProxy<T_Value>>
     generate_expression_parameter_proxies(const T_Value a_VALUE) const {
         std::vector<ValueProxy<T_Value>> expression_parameter_proxies;
 
@@ -1754,7 +1725,7 @@ class Model {
 
     /*************************************************************************/
     template <class T_Value>
-    inline constexpr std::vector<ValueProxy<T_Value>>
+    constexpr std::vector<ValueProxy<T_Value>>
     generate_constraint_parameter_proxies(const T_Value a_VALUE) const {
         std::vector<ValueProxy<T_Value>> constraint_parameter_proxies;
 
@@ -1773,7 +1744,30 @@ class Model {
     }
 
     /*************************************************************************/
-    inline Solution<T_Variable, T_Expression> export_solution(void) const {
+    std::vector<ValueProxy<double>> export_local_penalty_coefficient_proxies(
+        void) const {
+        std::vector<ValueProxy<double>> local_penalty_coefficient_proxies;
+        for (const auto &proxy : m_constraint_proxies) {
+            ValueProxy<double> local_penalty_coefficient_proxy(proxy.id(),
+                                                               proxy.shape());
+
+            int number_of_elements = proxy.number_of_elements();
+
+            for (auto i = 0; i < number_of_elements; i++) {
+                local_penalty_coefficient_proxy.flat_indexed_names(i) =
+                    proxy.flat_indexed_constraints(i).name();
+                local_penalty_coefficient_proxy.flat_indexed_values(i) =
+                    proxy.flat_indexed_constraints(i)
+                        .local_penalty_coefficient();
+            }
+            local_penalty_coefficient_proxies.push_back(
+                local_penalty_coefficient_proxy);
+        }
+        return local_penalty_coefficient_proxies;
+    }
+
+    /*************************************************************************/
+    Solution<T_Variable, T_Expression> export_solution(void) const {
         /// This method cannot be constexpr by clang.
         Solution<T_Variable, T_Expression> solution;
 
@@ -1813,13 +1807,13 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr NamedSolution<T_Variable, T_Expression>
-    export_named_solution(void) const {
+    constexpr NamedSolution<T_Variable, T_Expression> export_named_solution(
+        void) const {
         return this->convert_to_named_solution(this->export_solution());
     }
 
     /*************************************************************************/
-    inline NamedSolution<T_Variable, T_Expression> convert_to_named_solution(
+    NamedSolution<T_Variable, T_Expression> convert_to_named_solution(
         const Solution<T_Variable, T_Expression> &a_SOLUTION) const {
         /// This method cannot be constexpr by clang.
         NamedSolution<T_Variable, T_Expression> named_solution;
@@ -1860,8 +1854,7 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr PlainSolution<T_Variable, T_Expression>
-    export_plain_solution(void) const {
+    PlainSolution<T_Variable, T_Expression> export_plain_solution(void) const {
         PlainSolution<T_Variable, T_Expression> plain_solution;
 
         /// Decision variables
@@ -1887,8 +1880,7 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr PlainSolution<T_Variable, T_Expression>
-    convert_to_plain_solution(
+    PlainSolution<T_Variable, T_Expression> convert_to_plain_solution(
         const Solution<T_Variable, T_Expression> &a_SOLUTION) const {
         PlainSolution<T_Variable, T_Expression> plain_solution;
 
@@ -1907,7 +1899,7 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void import_solution(
+    constexpr void import_solution(
         const std::unordered_map<std::string, int> &a_SOLUTION) {
         for (auto &&proxy : m_variable_proxies) {
             for (auto &&variable : proxy.flat_indexed_variables()) {
@@ -1921,7 +1913,7 @@ class Model {
     }
 
     /*************************************************************************/
-    inline ModelSummary export_summary(void) const {
+    ModelSummary export_summary(void) const {
         /// This method cannot be constexpr by clang.
         ModelSummary summary;
         summary.name                  = m_name;

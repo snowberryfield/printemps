@@ -31,10 +31,6 @@ template <class T_Variable, class T_Expression>
 TabuSearchResult<T_Variable, T_Expression> solve(
     model::Model<T_Variable, T_Expression>* a_model,   //
     const Option&                           a_OPTION,  //
-    const std::vector<model::ValueProxy<double>>&      //
-        a_LOCAL_PENALTY_COEFFICIENT_PROXIES,           //
-    const std::vector<model::ValueProxy<double>>&      //
-        a_GLOBAL_PENALTY_COEFFICIENT_PROXIES,          //
     const std::vector<model::ValueProxy<T_Variable>>&  //
         a_INITIAL_VARIABLE_VALUE_PROXIES,              //
     const IncumbentHolder<T_Variable, T_Expression>&   //
@@ -61,11 +57,6 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     Option   option = a_OPTION;
     Memory   memory = a_MEMORY;
 
-    std::vector<model::ValueProxy<double>> local_penalty_coefficient_proxies =
-        a_LOCAL_PENALTY_COEFFICIENT_PROXIES;
-    std::vector<model::ValueProxy<double>> global_penalty_coefficient_proxies =
-        a_GLOBAL_PENALTY_COEFFICIENT_PROXIES;
-
     IncumbentHolder_T incumbent_holder = a_INCUMBENT_HOLDER;
 
     /**
@@ -84,10 +75,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     model->import_variable_values(a_INITIAL_VARIABLE_VALUE_PROXIES);
     model->update();
 
-    model::SolutionScore current_solution_score =
-        model->evaluate({},                                 //
-                        local_penalty_coefficient_proxies,  //
-                        global_penalty_coefficient_proxies);
+    model::SolutionScore current_solution_score = model->evaluate({});
     model::SolutionScore previous_solution_score;
 
     int update_status =
@@ -276,9 +264,6 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                         accept_objective_improvable   = true;
                         accept_feasibility_improvable = false;
                     } else {
-                        // model->reset_variable_feasibility_improvability();
-                        // model->update_variable_feasibility_improvability();
-
                         if (iteration == 0) {
                             model->reset_variable_feasibility_improvability();
                             model->update_variable_feasibility_improvability();
@@ -355,17 +340,12 @@ TabuSearchResult<T_Variable, T_Expression> solve(
              * or ordinary(slow) evaluation methods.
              */
             if (model->is_enabled_fast_evaluation()) {
-                trial_solution_scores[i]                                  //
-                    = model->evaluate(*trial_move_ptrs[i],                //
-                                      current_solution_score,             //
-                                      local_penalty_coefficient_proxies,  //
-                                      global_penalty_coefficient_proxies);
+                trial_solution_scores[i]                    //
+                    = model->evaluate(*trial_move_ptrs[i],  //
+                                      current_solution_score);
 
             } else {
-                trial_solution_scores[i]                                  //
-                    = model->evaluate(*trial_move_ptrs[i],                //
-                                      local_penalty_coefficient_proxies,  //
-                                      global_penalty_coefficient_proxies);
+                trial_solution_scores[i] = model->evaluate(*trial_move_ptrs[i]);
             }
 
             trial_move_scores[i]                      //
@@ -411,8 +391,9 @@ TabuSearchResult<T_Variable, T_Expression> solve(
         int argmin_global_augmented_objective =
             utility::argmin(global_augmented_objectives);
 
-        int argmin_total_score = utility::argmin(total_scores);
-        int selected_index     = 0;
+        int  argmin_total_score = utility::argmin(total_scores);
+        int  selected_index     = 0;
+        bool is_aspirated       = false;
 
         if (iteration < option.tabu_search.number_of_initial_modification) {
             /**
@@ -431,32 +412,14 @@ TabuSearchResult<T_Variable, T_Expression> solve(
              * A move which improves the augmented incumbent solution can be
              * accepted (optional).
              */
-            if (option.tabu_search.ignore_tabu_if_augmented_incumbent) {
-                if (!trial_move_scores[argmin_global_augmented_objective]
-                         .is_permissible &&
-                    trial_solution_scores[argmin_global_augmented_objective]
-                                .global_augmented_objective +
-                            constant::EPSILON <
-                        incumbent_holder
-                            .global_augmented_incumbent_objective()) {
-                    selected_index = argmin_global_augmented_objective;
-                }
-            }
-
-            /**
-             * A move which improves the feasible incumbent solution can be
-             * accepted (optional).
-             */
-            if (option.tabu_search.ignore_tabu_if_feasible_incumbent) {
+            if (option.tabu_search.ignore_tabu_if_global_incumbent) {
                 if (trial_solution_scores[argmin_global_augmented_objective]
-                        .is_feasible) {
-                    if (!trial_move_scores[argmin_global_augmented_objective]
-                             .is_permissible &&
-                        trial_solution_scores[argmin_global_augmented_objective]
-                                    .global_augmented_objective +
-                                constant::EPSILON <
-                            incumbent_holder.feasible_incumbent_objective()) {
-                        selected_index = argmin_global_augmented_objective;
+                            .global_augmented_objective +
+                        constant::EPSILON <
+                    incumbent_holder.global_augmented_incumbent_objective()) {
+                    selected_index = argmin_global_augmented_objective;
+                    if (!trial_move_scores[selected_index].is_permissible) {
+                        is_aspirated = true;
                     }
                 }
             }
@@ -541,15 +504,12 @@ TabuSearchResult<T_Variable, T_Expression> solve(
 
         if (update_status &
             IncumbentHolderConstant::STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
-            last_local_augmented_incumbent_update_iteration  = iteration;
             last_global_augmented_incumbent_update_iteration = iteration;
         }
 
         if (update_status &
             IncumbentHolderConstant::STATUS_FEASIBLE_INCUMBENT_UPDATE) {
-            last_local_augmented_incumbent_update_iteration  = iteration;
-            last_global_augmented_incumbent_update_iteration = iteration;
-            last_feasible_incumbent_update_iteration         = iteration;
+            last_feasible_incumbent_update_iteration = iteration;
         }
 
         /**
@@ -683,6 +643,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                              current_solution_score,               //
                              update_status,                        //
                              incumbent_holder,                     //
+                             is_aspirated,                         //
                              option.verbose >= Verbose::Full);
         }
 
@@ -750,8 +711,8 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     auto abs_max_objective = std::max(fabs(max_objective), fabs(min_objective));
 
     result.objective_constraint_ratio =
-        std::max(1.0,
-                 std::max(abs_max_objective, max_objective - min_objective)) /
+        std::max(1.0, std::max(abs_max_objective,  //
+                               max_objective - min_objective)) /
         std::max(1.0, min_local_penalty);
 
     result.termination_status            = termination_status;

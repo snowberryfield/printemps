@@ -1919,21 +1919,11 @@ TEST_F(TestModel, evaluate) {
         [[maybe_unused]] auto& h =
             model.create_constraint("h", x(0) + x(1) <= 1);
 
-        printemps::model::ValueProxy<double> local_penalty_coefficient_proxy(1);
-        local_penalty_coefficient_proxy.value() = 100;
+        g(0).local_penalty_coefficient() = 100;
+        h(0).local_penalty_coefficient() = 100;
 
-        printemps::model::ValueProxy<double> global_penalty_coefficient_proxy(
-            1);
-        global_penalty_coefficient_proxy.value() = 10000;
-
-        std::vector<printemps::model::ValueProxy<double>>
-            local_penalty_coefficient_proxies = {
-                local_penalty_coefficient_proxy,
-                local_penalty_coefficient_proxy};
-        std::vector<printemps::model::ValueProxy<double>>
-            global_penalty_coefficient_proxies = {
-                global_penalty_coefficient_proxy,
-                global_penalty_coefficient_proxy};
+        g(0).global_penalty_coefficient() = 10000;
+        h(0).global_penalty_coefficient() = 10000;
 
         model.minimize(p);
 
@@ -1948,9 +1938,7 @@ TEST_F(TestModel, evaluate) {
         }
 
         model.update();
-        auto score_before =
-            model.evaluate({}, local_penalty_coefficient_proxies,
-                           global_penalty_coefficient_proxies);
+        auto score_before = model.evaluate({});
 
         {
             printemps::model::Move<int, double> move;
@@ -1962,13 +1950,8 @@ TEST_F(TestModel, evaluate) {
                 }
             }
 
-            auto score_after_0 =
-                model.evaluate(move, local_penalty_coefficient_proxies,
-                               global_penalty_coefficient_proxies);
-
-            auto score_after_1 = model.evaluate(
-                move, score_before, local_penalty_coefficient_proxies,
-                global_penalty_coefficient_proxies);
+            auto score_after_0 = model.evaluate(move);
+            auto score_after_1 = model.evaluate(move, score_before);
 
             EXPECT_EQ(46, score_after_0.objective);
             EXPECT_EQ(5 + 1, score_after_0.total_violation);
@@ -2008,13 +1991,8 @@ TEST_F(TestModel, evaluate) {
                 }
             }
 
-            auto score_after_0 =
-                model.evaluate(move, local_penalty_coefficient_proxies,
-                               global_penalty_coefficient_proxies);
-
-            auto score_after_1 = model.evaluate(
-                move, score_before, local_penalty_coefficient_proxies,
-                global_penalty_coefficient_proxies);
+            auto score_after_0 = model.evaluate(move);
+            auto score_after_1 = model.evaluate(move, score_before);
 
             EXPECT_EQ(1, score_after_0.objective);
             EXPECT_EQ(0, score_after_0.total_violation);
@@ -2049,13 +2027,8 @@ TEST_F(TestModel, evaluate) {
                 }
             }
 
-            auto score_after_0 =
-                model.evaluate(move, local_penalty_coefficient_proxies,
-                               global_penalty_coefficient_proxies);
-
-            auto score_after_1 = model.evaluate(
-                move, score_before, local_penalty_coefficient_proxies,
-                global_penalty_coefficient_proxies);
+            auto score_after_0 = model.evaluate(move);
+            auto score_after_1 = model.evaluate(move, score_before);
 
             EXPECT_EQ(11, score_after_0.objective);
             EXPECT_EQ(1, score_after_0.total_violation);
@@ -2094,21 +2067,11 @@ TEST_F(TestModel, evaluate) {
         [[maybe_unused]] auto& h =
             model.create_constraint("h", x(0) + x(1) <= 1);
 
-        printemps::model::ValueProxy<double> local_penalty_coefficient_proxy(1);
-        local_penalty_coefficient_proxy.value() = 100;
+        g(0).local_penalty_coefficient() = 100;
+        h(0).local_penalty_coefficient() = 100;
 
-        printemps::model::ValueProxy<double> global_penalty_coefficient_proxy(
-            1);
-        global_penalty_coefficient_proxy.value() = 10000;
-
-        std::vector<printemps::model::ValueProxy<double>>
-            local_penalty_coefficient_proxies = {
-                local_penalty_coefficient_proxy,
-                local_penalty_coefficient_proxy};
-        std::vector<printemps::model::ValueProxy<double>>
-            global_penalty_coefficient_proxies = {
-                global_penalty_coefficient_proxy,
-                global_penalty_coefficient_proxy};
+        g(0).global_penalty_coefficient() = 10000;
+        h(0).global_penalty_coefficient() = 10000;
 
         model.maximize(p);
 
@@ -2122,9 +2085,7 @@ TEST_F(TestModel, evaluate) {
             element = 1;
         }
         model.update();
-        auto score_before =
-            model.evaluate({}, local_penalty_coefficient_proxies,
-                           global_penalty_coefficient_proxies);
+        auto score_before = model.evaluate({});
 
         {
             printemps::model::Move<int, double> move;
@@ -2136,12 +2097,8 @@ TEST_F(TestModel, evaluate) {
                 }
             }
 
-            auto score_after_0 =
-                model.evaluate(move, local_penalty_coefficient_proxies,
-                               global_penalty_coefficient_proxies);
-            auto score_after_1 = model.evaluate(
-                move, score_before, local_penalty_coefficient_proxies,
-                global_penalty_coefficient_proxies);
+            auto score_after_0 = model.evaluate(move);
+            auto score_after_1 = model.evaluate(move, score_before);
 
             EXPECT_EQ(-46, score_after_0.objective);
             EXPECT_EQ(5 + 1, score_after_0.total_violation);
@@ -2180,13 +2137,8 @@ TEST_F(TestModel, evaluate) {
                 }
             }
 
-            auto score_after_0 =
-                model.evaluate(move, local_penalty_coefficient_proxies,
-                               global_penalty_coefficient_proxies);
-
-            auto score_after_1 = model.evaluate(
-                move, score_before, local_penalty_coefficient_proxies,
-                global_penalty_coefficient_proxies);
+            auto score_after_0 = model.evaluate(move);
+            auto score_after_1 = model.evaluate(move, score_before);
 
             EXPECT_EQ(-1, score_after_0.objective);
             EXPECT_EQ(0, score_after_0.total_violation);
@@ -2221,13 +2173,8 @@ TEST_F(TestModel, evaluate) {
                 }
             }
 
-            auto score_after_0 =
-                model.evaluate(move, local_penalty_coefficient_proxies,
-                               global_penalty_coefficient_proxies);
-
-            auto score_after_1 = model.evaluate(
-                move, score_before, local_penalty_coefficient_proxies,
-                global_penalty_coefficient_proxies);
+            auto score_after_0 = model.evaluate(move);
+            auto score_after_1 = model.evaluate(move, score_before);
 
             EXPECT_EQ(-11, score_after_0.objective);
             EXPECT_EQ(1, score_after_0.total_violation);

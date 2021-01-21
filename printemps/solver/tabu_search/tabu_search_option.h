@@ -35,15 +35,14 @@ struct TabuSearchOptionConstant {
         true;
     static constexpr bool DEFAULT_IS_ENABLED_AUTOMATIC_ITERATION_ADJUSTMENT =
         true;
-    static constexpr bool   DEFAULT_IS_ENABLED_INITIAL_MODIFICATION    = true;
-    static constexpr int    DEFAULT_BIAS_INCREASE_COUNT_THRESHOLD      = 10;
-    static constexpr int    DEFAULT_BIAS_DECREASE_COUNT_THRESHOLD      = 10;
-    static constexpr double DEFAULT_ITERATION_INCREASE_RATE            = 1.5;
-    static constexpr double DEFAULT_ITERATION_DEREASE_RATE             = 0.9;
-    static constexpr double DEFAULT_IGNORE_TABU_IF_AUGMENTED_INCUMBENT = false;
-    static constexpr double DEFAULT_IGNORE_TABU_IF_FEASIBLE_INCUMBENT  = true;
-    static constexpr bool   DEFAULT_NUMBER_OF_INITIAL_MODIFICATION     = 0;
-    static constexpr int    DEFAULT_SEED                               = 1;
+    static constexpr bool   DEFAULT_IS_ENABLED_INITIAL_MODIFICATION = true;
+    static constexpr int    DEFAULT_BIAS_INCREASE_COUNT_THRESHOLD   = 10;
+    static constexpr int    DEFAULT_BIAS_DECREASE_COUNT_THRESHOLD   = 10;
+    static constexpr double DEFAULT_ITERATION_INCREASE_RATE         = 1.5;
+    static constexpr double DEFAULT_ITERATION_DEREASE_RATE          = 0.9;
+    static constexpr double DEFAULT_IGNORE_TABU_IF_GLOBAL_INCUMBENT = true;
+    static constexpr bool   DEFAULT_NUMBER_OF_INITIAL_MODIFICATION  = 0;
+    static constexpr int    DEFAULT_SEED                            = 1;
 };
 
 /*****************************************************************************/
@@ -69,8 +68,7 @@ struct TabuSearchOption {
     int      bias_decrease_count_threshold;                // hidden
     double   iteration_increase_rate;                      // hidden
     double   iteration_decrease_rate;                      // hidden
-    bool     ignore_tabu_if_augmented_incumbent;           // hidden
-    bool     ignore_tabu_if_feasible_incumbent;            // hidden
+    bool     ignore_tabu_if_global_incumbent;              // hidden
     int      number_of_initial_modification;               // hidden
     int      seed;                                         // hidden
 
@@ -85,7 +83,7 @@ struct TabuSearchOption {
     }
 
     /*************************************************************************/
-    inline constexpr void initialize(void) {
+    void initialize(void) {
         this->iteration_max = TabuSearchOptionConstant::DEFAULT_ITERATION_MAX;
         this->time_max      = TabuSearchOptionConstant::DEFAULT_TIME_MAX;
         this->time_offset   = TabuSearchOptionConstant::DEFAULT_TIME_OFFSET;
@@ -125,10 +123,8 @@ struct TabuSearchOption {
             TabuSearchOptionConstant::DEFAULT_ITERATION_INCREASE_RATE;
         this->iteration_decrease_rate =
             TabuSearchOptionConstant::DEFAULT_ITERATION_DEREASE_RATE;
-        this->ignore_tabu_if_augmented_incumbent = TabuSearchOptionConstant::
-            DEFAULT_IGNORE_TABU_IF_AUGMENTED_INCUMBENT;
-        this->ignore_tabu_if_feasible_incumbent =
-            TabuSearchOptionConstant::DEFAULT_IGNORE_TABU_IF_FEASIBLE_INCUMBENT;
+        this->ignore_tabu_if_global_incumbent =
+            TabuSearchOptionConstant::DEFAULT_IGNORE_TABU_IF_GLOBAL_INCUMBENT;
         this->number_of_initial_modification =
             TabuSearchOptionConstant::DEFAULT_NUMBER_OF_INITIAL_MODIFICATION;
         this->seed = TabuSearchOptionConstant::DEFAULT_SEED;

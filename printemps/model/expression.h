@@ -134,7 +134,7 @@ class Expression : public AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr void initialize(void) {
+    void initialize(void) {
         AbstractMultiArrayElement::initialize();
         m_constant_value = 0;
         m_value          = 0;
