@@ -3,13 +3,23 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_MODEL_RANGE_H__
-#define PRINTEMPS_MODEL_RANGE_H__
+#ifndef PRINTEMPS_MODEL_MOVE_SENSE_H__
+#define PRINTEMPS_MODEL_MOVE_SENSE_H__
 
 namespace printemps {
 namespace model {
 /*****************************************************************************/
-enum Range : int { All = -1 };
+enum class MoveSense {
+    Binary,         //
+    Integer,        //
+    Selection,      //
+    Precedence,     //
+    Aggregation,    //
+    VariableBound,  //
+    Exclusive,      //
+    Chain,          //
+    UserDefined
+};
 }  // namespace model
 }  // namespace printemps
 #endif

@@ -26,7 +26,7 @@ struct Result {
     }
 
     /*************************************************************************/
-    inline void constexpr initialize(void) {
+    void initialize(void) {
         this->solution.initialize();
         this->status.initialize();
         this->solution_archive.initialize();

@@ -32,13 +32,10 @@ template <class T_Variable, class T_Expression>
 class Constraint;
 
 /*****************************************************************************/
-enum class ConstraintSense;
-
-/*****************************************************************************/
 // LOWER
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value>
-inline constexpr Constraint<T_Variable, T_Expression> operator<=(
+constexpr Constraint<T_Variable, T_Expression> operator<=(
     const std::function<T_Expression(const Move<T_Variable, T_Expression> &)>
         &         a_FUNCTION,
     const T_Value a_TARGET) {
@@ -51,7 +48,7 @@ inline constexpr Constraint<T_Variable, T_Expression> operator<=(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value>
-inline constexpr Constraint<T_Variable, T_Expression> operator<=(
+constexpr Constraint<T_Variable, T_Expression> operator<=(
     const T_Value a_TARGET,
     const std::function<T_Expression(const Move<T_Variable, T_Expression> &)>
         &a_FUNCTION) {
@@ -65,7 +62,7 @@ inline constexpr Constraint<T_Variable, T_Expression> operator<=(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value,
           template <class, class> class T_ExpressionLike>
-inline constexpr Constraint<T_Variable, T_Expression> operator<=(
+constexpr Constraint<T_Variable, T_Expression> operator<=(
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE,
     const T_Value                                     a_TARGET) {
     return Constraint<T_Variable, T_Expression>::create_instance(
@@ -75,7 +72,7 @@ inline constexpr Constraint<T_Variable, T_Expression> operator<=(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value,
           template <class, class> class T_ExpressionLike>
-inline constexpr Constraint<T_Variable, T_Expression> operator<=(
+constexpr Constraint<T_Variable, T_Expression> operator<=(
     const T_Value                                     a_TARGET,
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE) {
     return Constraint<T_Variable, T_Expression>::create_instance(
@@ -84,7 +81,7 @@ inline constexpr Constraint<T_Variable, T_Expression> operator<=(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value>
-inline constexpr Constraint<T_Variable, T_Expression> operator<=(
+constexpr Constraint<T_Variable, T_Expression> operator<=(
     const Expression<T_Variable, T_Expression> &a_EXPRESSION,
     const T_Value                               a_TARGET) {
     return Constraint<T_Variable, T_Expression>::create_instance(
@@ -93,7 +90,7 @@ inline constexpr Constraint<T_Variable, T_Expression> operator<=(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value>
-inline constexpr Constraint<T_Variable, T_Expression> operator<=(
+constexpr Constraint<T_Variable, T_Expression> operator<=(
     const T_Value                               a_TARGET,
     const Expression<T_Variable, T_Expression> &a_EXPRESSION) {
     return Constraint<T_Variable, T_Expression>::create_instance(
@@ -103,7 +100,7 @@ inline constexpr Constraint<T_Variable, T_Expression> operator<=(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression,
           template <class, class> class T_ExpressionLike>
-inline constexpr Constraint<T_Variable, T_Expression> operator<=(
+constexpr Constraint<T_Variable, T_Expression> operator<=(
     const Expression<T_Variable, T_Expression> &      a_EXPRESSION,
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE) {
     return Constraint<T_Variable, T_Expression>::create_instance(
@@ -114,7 +111,7 @@ inline constexpr Constraint<T_Variable, T_Expression> operator<=(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression,
           template <class, class> class T_ExpressionLike>
-inline constexpr Constraint<T_Variable, T_Expression> operator<=(
+constexpr Constraint<T_Variable, T_Expression> operator<=(
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE,
     const Expression<T_Variable, T_Expression> &      a_EXPRESSION) {
     return Constraint<T_Variable, T_Expression>::create_instance(
@@ -126,7 +123,7 @@ inline constexpr Constraint<T_Variable, T_Expression> operator<=(
 template <class T_Variable, class T_Expression,
           template <class, class> class T_ExpressionLikeLeft,
           template <class, class> class T_ExpressionLikeRight>
-inline constexpr Constraint<T_Variable, T_Expression> operator<=(
+constexpr Constraint<T_Variable, T_Expression> operator<=(
     const T_ExpressionLikeLeft<T_Variable, T_Expression>
         &a_EXPRESSION_LIKE_LEFT,
     const T_ExpressionLikeRight<T_Variable, T_Expression>
@@ -139,7 +136,7 @@ inline constexpr Constraint<T_Variable, T_Expression> operator<=(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-inline constexpr Constraint<T_Variable, T_Expression> operator<=(
+constexpr Constraint<T_Variable, T_Expression> operator<=(
     const Expression<T_Variable, T_Expression> &a_EXPRESSION_LEFT,
     const Expression<T_Variable, T_Expression> &a_EXPRESSION_RIGHT) {
     return Constraint<T_Variable, T_Expression>::create_instance(
@@ -151,7 +148,7 @@ inline constexpr Constraint<T_Variable, T_Expression> operator<=(
 // Equal
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value>
-inline constexpr Constraint<T_Variable, T_Expression> operator==(
+constexpr Constraint<T_Variable, T_Expression> operator==(
     const std::function<T_Expression(const Move<T_Variable, T_Expression> &)>
         &         a_FUNCTION,
     const T_Value a_TARGET) {
@@ -164,7 +161,7 @@ inline constexpr Constraint<T_Variable, T_Expression> operator==(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value>
-inline constexpr Constraint<T_Variable, T_Expression> operator==(
+constexpr Constraint<T_Variable, T_Expression> operator==(
     const T_Value a_TARGET,
     const std::function<T_Expression(const Move<T_Variable, T_Expression> &)>
         &a_FUNCTION) {
@@ -178,7 +175,7 @@ inline constexpr Constraint<T_Variable, T_Expression> operator==(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value,
           template <class, class> class T_ExpressionLike>
-inline constexpr Constraint<T_Variable, T_Expression> operator==(
+constexpr Constraint<T_Variable, T_Expression> operator==(
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE,
     const T_Value                                     a_TARGET) {
     return Constraint<T_Variable, T_Expression>::create_instance(
@@ -188,7 +185,7 @@ inline constexpr Constraint<T_Variable, T_Expression> operator==(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value,
           template <class, class> class T_ExpressionLike>
-inline constexpr Constraint<T_Variable, T_Expression> operator==(
+constexpr Constraint<T_Variable, T_Expression> operator==(
     const T_Value                                     a_TARGET,
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE) {
     return Constraint<T_Variable, T_Expression>::create_instance(
@@ -197,7 +194,7 @@ inline constexpr Constraint<T_Variable, T_Expression> operator==(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value>
-inline constexpr Constraint<T_Variable, T_Expression> operator==(
+constexpr Constraint<T_Variable, T_Expression> operator==(
     const Expression<T_Variable, T_Expression> &a_EXPRESSION,
     const T_Value                               a_TARGET) {
     return Constraint<T_Variable, T_Expression>::create_instance(
@@ -206,7 +203,7 @@ inline constexpr Constraint<T_Variable, T_Expression> operator==(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value>
-inline constexpr Constraint<T_Variable, T_Expression> operator==(
+constexpr Constraint<T_Variable, T_Expression> operator==(
     const T_Value                               a_TARGET,
     const Expression<T_Variable, T_Expression> &a_EXPRESSION) {
     return Constraint<T_Variable, T_Expression>::create_instance(
@@ -216,7 +213,7 @@ inline constexpr Constraint<T_Variable, T_Expression> operator==(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression,
           template <class, class> class T_ExpressionLike>
-inline constexpr Constraint<T_Variable, T_Expression> operator==(
+constexpr Constraint<T_Variable, T_Expression> operator==(
     const Expression<T_Variable, T_Expression> &      a_EXPRESSION,
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE) {
     return Constraint<T_Variable, T_Expression>::create_instance(
@@ -227,7 +224,7 @@ inline constexpr Constraint<T_Variable, T_Expression> operator==(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression,
           template <class, class> class T_ExpressionLike>
-inline constexpr Constraint<T_Variable, T_Expression> operator==(
+constexpr Constraint<T_Variable, T_Expression> operator==(
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE,
     const Expression<T_Variable, T_Expression> &      a_EXPRESSION) {
     return Constraint<T_Variable, T_Expression>::create_instance(
@@ -239,7 +236,7 @@ inline constexpr Constraint<T_Variable, T_Expression> operator==(
 template <class T_Variable, class T_Expression,
           template <class, class> class T_ExpressionLikeLeft,
           template <class, class> class T_ExpressionLikeRight>
-inline constexpr Constraint<T_Variable, T_Expression> operator==(
+constexpr Constraint<T_Variable, T_Expression> operator==(
     const T_ExpressionLikeLeft<T_Variable, T_Expression>
         &a_EXPRESSION_LIKE_LEFT,
     const T_ExpressionLikeRight<T_Variable, T_Expression>
@@ -252,7 +249,7 @@ inline constexpr Constraint<T_Variable, T_Expression> operator==(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-inline constexpr Constraint<T_Variable, T_Expression> operator==(
+constexpr Constraint<T_Variable, T_Expression> operator==(
     const Expression<T_Variable, T_Expression> &a_EXPRESSION_LEFT,
     const Expression<T_Variable, T_Expression> &a_EXPRESSION_RIGHT) {
     return Constraint<T_Variable, T_Expression>::create_instance(
@@ -264,7 +261,7 @@ inline constexpr Constraint<T_Variable, T_Expression> operator==(
 // Upper
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value>
-inline constexpr Constraint<T_Variable, T_Expression> operator>=(
+constexpr Constraint<T_Variable, T_Expression> operator>=(
     const std::function<T_Expression(const Move<T_Variable, T_Expression> &)>
         &         a_FUNCTION,
     const T_Value a_TARGET) {
@@ -277,7 +274,7 @@ inline constexpr Constraint<T_Variable, T_Expression> operator>=(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value>
-inline constexpr Constraint<T_Variable, T_Expression> operator>=(
+constexpr Constraint<T_Variable, T_Expression> operator>=(
     const T_Value a_TARGET,
     const std::function<T_Expression(const Move<T_Variable, T_Expression> &)>
         &a_FUNCTION) {
@@ -291,7 +288,7 @@ inline constexpr Constraint<T_Variable, T_Expression> operator>=(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value,
           template <class, class> class T_ExpressionLike>
-inline constexpr Constraint<T_Variable, T_Expression> operator>=(
+constexpr Constraint<T_Variable, T_Expression> operator>=(
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE,
     const T_Value                                     a_TARGET) {
     return Constraint<T_Variable, T_Expression>::create_instance(
@@ -301,7 +298,7 @@ inline constexpr Constraint<T_Variable, T_Expression> operator>=(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value,
           template <class, class> class T_ExpressionLike>
-inline constexpr Constraint<T_Variable, T_Expression> operator>=(
+constexpr Constraint<T_Variable, T_Expression> operator>=(
     const T_Value                                     a_TARGET,
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE) {
     return Constraint<T_Variable, T_Expression>::create_instance(
@@ -310,7 +307,7 @@ inline constexpr Constraint<T_Variable, T_Expression> operator>=(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value>
-inline constexpr Constraint<T_Variable, T_Expression> operator>=(
+constexpr Constraint<T_Variable, T_Expression> operator>=(
     const Expression<T_Variable, T_Expression> &a_EXPRESSION,
     const T_Value                               a_TARGET) {
     return Constraint<T_Variable, T_Expression>::create_instance(
@@ -319,7 +316,7 @@ inline constexpr Constraint<T_Variable, T_Expression> operator>=(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value>
-inline constexpr Constraint<T_Variable, T_Expression> operator>=(
+constexpr Constraint<T_Variable, T_Expression> operator>=(
     const T_Value                               a_TARGET,
     const Expression<T_Variable, T_Expression> &a_EXPRESSION) {
     return Constraint<T_Variable, T_Expression>::create_instance(
@@ -329,7 +326,7 @@ inline constexpr Constraint<T_Variable, T_Expression> operator>=(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression,
           template <class, class> class T_ExpressionLike>
-inline constexpr Constraint<T_Variable, T_Expression> operator>=(
+constexpr Constraint<T_Variable, T_Expression> operator>=(
     const Expression<T_Variable, T_Expression> &      a_EXPRESSION,
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE) {
     return Constraint<T_Variable, T_Expression>::create_instance(
@@ -340,7 +337,7 @@ inline constexpr Constraint<T_Variable, T_Expression> operator>=(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression,
           template <class, class> class T_ExpressionLike>
-inline constexpr Constraint<T_Variable, T_Expression> operator>=(
+constexpr Constraint<T_Variable, T_Expression> operator>=(
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE,
     const Expression<T_Variable, T_Expression> &      a_EXPRESSION) {
     return Constraint<T_Variable, T_Expression>::create_instance(
@@ -352,7 +349,7 @@ inline constexpr Constraint<T_Variable, T_Expression> operator>=(
 template <class T_Variable, class T_Expression,
           template <class, class> class T_ExpressionLikeLeft,
           template <class, class> class T_ExpressionLikeRight>
-inline constexpr Constraint<T_Variable, T_Expression> operator>=(
+constexpr Constraint<T_Variable, T_Expression> operator>=(
     const T_ExpressionLikeLeft<T_Variable, T_Expression>
         &a_EXPRESSION_LIKE_LEFT,
     const T_ExpressionLikeRight<T_Variable, T_Expression>
@@ -365,7 +362,7 @@ inline constexpr Constraint<T_Variable, T_Expression> operator>=(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-inline constexpr Constraint<T_Variable, T_Expression> operator>=(
+constexpr Constraint<T_Variable, T_Expression> operator>=(
     const Expression<T_Variable, T_Expression> &a_EXPRESSION_LEFT,
     const Expression<T_Variable, T_Expression> &a_EXPRESSION_RIGHT) {
     return Constraint<T_Variable, T_Expression>::create_instance(

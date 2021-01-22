@@ -36,8 +36,7 @@ class IntegerUniformRandom {
     }
 
     /*************************************************************************/
-    inline void setup(const int a_MIN, const int a_MAX,
-                      const unsigned int a_SEED) {
+    void setup(const int a_MIN, const int a_MAX, const unsigned int a_SEED) {
         m_distribution = new std::uniform_int_distribution<>(a_MIN, a_MAX);
         m_engine.seed(a_SEED);
     }

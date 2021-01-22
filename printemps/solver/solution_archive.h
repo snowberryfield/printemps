@@ -34,15 +34,14 @@ class SolutionArchive {
     }
 
     /*************************************************************************/
-    inline constexpr void initialize(void) {
+    void initialize(void) {
         m_max_size     = 0;
         m_is_ascending = true;
         m_solutions.clear();
     }
 
     /*************************************************************************/
-    inline constexpr void setup(const int  a_MAX_SIZE,
-                                const bool a_is_ASCENDING) {
+    void setup(const int a_MAX_SIZE, const bool a_is_ASCENDING) {
         m_max_size     = a_MAX_SIZE;
         m_is_ascending = a_is_ASCENDING;
         m_solutions.clear();
@@ -57,7 +56,7 @@ class SolutionArchive {
     }
 
     /*************************************************************************/
-    inline constexpr void push(
+    constexpr void push(
         const std::vector<model::PlainSolution<T_Variable, T_Expression>>&
             a_SOLUTIONS) {
         auto& solutions = m_solutions;
@@ -111,7 +110,7 @@ class SolutionArchive {
     }
 
     /*************************************************************************/
-    inline void write_solutions_json(
+    void write_solutions_json(
         const std::string&         a_FILE_NAME,
         const model::ModelSummary& a_MODEL_SUMMARY) const {
         int indent_level = 0;

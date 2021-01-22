@@ -25,13 +25,6 @@ template <class T_Variable, class T_Expression>
 struct Selection;
 
 /*****************************************************************************/
-enum class VariableSense {
-    Selection,  //
-    Binary,     //
-    Integer     //
-};
-
-/*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class Variable : public AbstractMultiArrayElement {
     /**
@@ -49,7 +42,10 @@ class Variable : public AbstractMultiArrayElement {
     T_Variable    m_lower_bound;
     T_Variable    m_upper_bound;
     bool          m_has_bounds;
-    bool          m_is_improvable;
+    bool          m_is_objective_improvable;
+    bool          m_is_feasibility_improvable;
+    bool          m_has_lower_bound_margin;
+    bool          m_has_upper_bound_margin;
     VariableSense m_sense;
 
     Selection<T_Variable, T_Expression> *m_selection_ptr;
@@ -96,7 +92,7 @@ class Variable : public AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr void initialize(void) {
+    void initialize(void) {
         AbstractMultiArrayElement::initialize();
         m_is_fixed = false;
         m_value    = 0;
@@ -106,10 +102,16 @@ class Variable : public AbstractMultiArrayElement {
          * sufficiently large negative and positive integer, respectively. The
          * default bounds have margin to avoid overflows in calculating moves.
          */
-        m_lower_bound   = constant::INT_HALF_MIN;
-        m_upper_bound   = constant::INT_HALF_MAX;
-        m_has_bounds    = false;
-        m_is_improvable = false;
+        m_lower_bound = constant::INT_HALF_MIN;
+        m_upper_bound = constant::INT_HALF_MAX;
+        m_has_bounds  = false;
+
+        m_is_objective_improvable   = false;
+        m_is_feasibility_improvable = false;
+
+        m_has_lower_bound_margin = true;
+        m_has_upper_bound_margin = true;
+
         m_sense         = VariableSense::Integer;
         m_selection_ptr = nullptr;
         m_related_constraint_ptrs.clear();
@@ -120,12 +122,14 @@ class Variable : public AbstractMultiArrayElement {
     /*************************************************************************/
     inline constexpr void set_value_force(const T_Variable a_VALUE) {
         m_value = a_VALUE;
+        this->update_margin();
     }
 
     /*************************************************************************/
     inline constexpr void set_value_if_not_fixed(const T_Variable a_VALUE) {
         if (!m_is_fixed) {
             m_value = a_VALUE;
+            this->update_margin();
         }
     }
 
@@ -142,6 +146,7 @@ class Variable : public AbstractMultiArrayElement {
                 "A fixed variable was attempted to be changed."));
         }
         m_value = a_VALUE;
+        this->update_margin();
     }
 
     /*************************************************************************/
@@ -183,6 +188,7 @@ class Variable : public AbstractMultiArrayElement {
     inline constexpr void fix_by(const T_Variable a_VALUE) {
         m_value    = a_VALUE;
         m_is_fixed = true;
+        this->update_margin();
     }
 
     /*************************************************************************/
@@ -201,6 +207,7 @@ class Variable : public AbstractMultiArrayElement {
         m_has_bounds  = true;
 
         this->setup_sense();
+        this->update_margin();
     }
 
     /*************************************************************************/
@@ -210,15 +217,16 @@ class Variable : public AbstractMultiArrayElement {
         m_has_bounds    = false;
         m_sense         = VariableSense::Integer;
         m_selection_ptr = nullptr;
+        this->update_margin();
     }
 
     /*************************************************************************/
-    inline constexpr T_Variable lower_bound(void) const {
+    inline constexpr T_Variable lower_bound(void) const noexcept {
         return m_lower_bound;
     }
 
     /*************************************************************************/
-    inline constexpr T_Variable upper_bound(void) const {
+    inline constexpr T_Variable upper_bound(void) const noexcept {
         return m_upper_bound;
     }
 
@@ -228,17 +236,29 @@ class Variable : public AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr void set_is_improvable(const bool a_IS_IMPROVABLE) {
-        m_is_improvable = a_IS_IMPROVABLE;
+    inline constexpr void set_is_objective_improvable(
+        const bool a_IS_OBJECTIVE_IMPROVABLE) noexcept {
+        m_is_objective_improvable = a_IS_OBJECTIVE_IMPROVABLE;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_improvable(void) const {
-        return m_is_improvable;
+    inline constexpr void set_is_feasibility_improvable(
+        const bool a_IS_FEASIBILITY_IMPROVABLE) noexcept {
+        m_is_feasibility_improvable = a_IS_FEASIBILITY_IMPROVABLE;
     }
 
     /*************************************************************************/
-    inline constexpr VariableSense sense(void) const {
+    inline constexpr bool is_objective_improvable(void) const noexcept {
+        return m_is_objective_improvable;
+    }
+
+    /*************************************************************************/
+    inline constexpr bool is_feasibility_improvable(void) const noexcept {
+        return m_is_feasibility_improvable;
+    }
+
+    /*************************************************************************/
+    inline constexpr VariableSense sense(void) const noexcept {
         return m_sense;
     }
 
@@ -314,8 +334,24 @@ class Variable : public AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr T_Expression objective_sensitivity(void) const {
+    inline constexpr T_Expression objective_sensitivity(void) const noexcept {
         return m_objective_sensitivity;
+    }
+
+    /*************************************************************************/
+    inline constexpr void update_margin(void) {
+        m_has_lower_bound_margin = m_value > m_lower_bound;
+        m_has_upper_bound_margin = m_value < m_upper_bound;
+    }
+
+    /*************************************************************************/
+    inline constexpr bool has_lower_bound_margin(void) const noexcept {
+        return m_has_lower_bound_margin;
+    }
+
+    /*************************************************************************/
+    inline constexpr bool has_upper_bound_margin(void) const noexcept {
+        return m_has_upper_bound_margin;
     }
 
     /*************************************************************************/
@@ -355,6 +391,7 @@ class Variable : public AbstractMultiArrayElement {
                 "A fixed variable was attempted to be changed."));
         }
         m_value = a_VALUE;
+        this->update_margin();
         return *this;
     }
 };

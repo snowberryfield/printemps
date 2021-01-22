@@ -25,10 +25,6 @@ template <class T_Variable, class T_Expression>
 LocalSearchResult<T_Variable, T_Expression> solve(
     model::Model<T_Variable, T_Expression>* a_model,   //
     const Option&                           a_OPTION,  //
-    const std::vector<model::ValueProxy<double>>&      //
-        a_LOCAL_PENALTY_COEFFICIENT_PROXIES,           //
-    const std::vector<model::ValueProxy<double>>&      //
-        a_GLOBAL_PENALTY_COEFFICIENT_PROXIES,          //
     const std::vector<model::ValueProxy<T_Variable>>&  //
         a_INITIAL_VARIABLE_VALUE_PROXIES,              //
     const IncumbentHolder<T_Variable, T_Expression>&   //
@@ -54,11 +50,6 @@ LocalSearchResult<T_Variable, T_Expression> solve(
     Option   option = a_OPTION;
     Memory   memory = a_MEMORY;
 
-    std::vector<model::ValueProxy<double>> local_penalty_coefficient_proxies =
-        a_LOCAL_PENALTY_COEFFICIENT_PROXIES;
-    std::vector<model::ValueProxy<double>> global_penalty_coefficient_proxies =
-        a_GLOBAL_PENALTY_COEFFICIENT_PROXIES;
-
     IncumbentHolder_T incumbent_holder = a_INCUMBENT_HOLDER;
 
     /**
@@ -77,10 +68,7 @@ LocalSearchResult<T_Variable, T_Expression> solve(
     model->import_variable_values(a_INITIAL_VARIABLE_VALUE_PROXIES);
     model->update();
 
-    model::SolutionScore solution_score =
-        model->evaluate({},                                 //
-                        local_penalty_coefficient_proxies,  //
-                        global_penalty_coefficient_proxies);
+    model::SolutionScore solution_score = model->evaluate({});
 
     int update_status =
         incumbent_holder.try_update_incumbent(model, solution_score);
@@ -98,10 +86,20 @@ LocalSearchResult<T_Variable, T_Expression> solve(
         historical_feasible_solutions;
 
     /**
+     * Reset the variable improvability.
+     */
+    model->reset_variable_objective_improvability();
+    model->reset_variable_feasibility_improvability();
+
+    /**
      * Prepare other local variables.
      */
+
     LocalSearchTerminationStatus termination_status =
         LocalSearchTerminationStatus::ITERATION_OVER;
+
+    model::Move<T_Variable, T_Expression> previous_move;
+    model::Move<T_Variable, T_Expression> current_move;
 
     /**
      * Print the header of optimization progress table and print the initial
@@ -145,13 +143,45 @@ LocalSearchResult<T_Variable, T_Expression> solve(
         /**
          * Update the moves.
          */
+        bool accept_all                    = true;
+        bool accept_objective_improvable   = true;
+        bool accept_feasibility_improvable = true;
+
         if (model->is_linear()) {
-            model->update_variable_improvability(true);
+            auto changed_variable_ptrs =
+                utility::to_vector(model::related_variable_ptrs(current_move));
+            auto changed_constraint_ptrs =
+                utility::to_vector(current_move.related_constraint_ptrs);
+
+            if (iteration == 0) {
+                model->update_variable_objective_improvability();
+            } else {
+                model->update_variable_objective_improvability(
+                    changed_variable_ptrs);
+            }
+
+            if (model->is_feasible()) {
+                accept_all                    = false;
+                accept_objective_improvable   = true;
+                accept_feasibility_improvable = false;
+            } else {
+                model->reset_variable_feasibility_improvability();
+                model->update_variable_feasibility_improvability();
+
+                accept_all                    = false;
+                accept_objective_improvable   = false;
+                accept_feasibility_improvable = true;
+            }
         }
-        model->neighborhood().update_moves();
+        model->neighborhood().update_moves(
+            accept_all,                     //
+            accept_objective_improvable,    //
+            accept_feasibility_improvable,  //
+            option.is_enabled_parallel_neighborhood_update);
+
         model->neighborhood().shuffle_moves(&get_rand_mt);
 
-        bool found_improving_solution = false;
+        bool is_found_improving_solution = false;
 
         const auto& move_ptrs = model->neighborhood().move_ptrs();
 
@@ -175,13 +205,9 @@ LocalSearchResult<T_Variable, T_Expression> solve(
              */
             if (model->is_enabled_fast_evaluation()) {
                 trial_solution_score =
-                    model->evaluate(*move_ptr, solution_score,
-                                    local_penalty_coefficient_proxies,
-                                    global_penalty_coefficient_proxies);
+                    model->evaluate(*move_ptr, solution_score);
             } else {
-                trial_solution_score = model->evaluate(
-                    *move_ptr, local_penalty_coefficient_proxies,
-                    global_penalty_coefficient_proxies);
+                trial_solution_score = model->evaluate(*move_ptr);
             }
 
             /**
@@ -190,8 +216,11 @@ LocalSearchResult<T_Variable, T_Expression> solve(
             if (trial_solution_score.local_augmented_objective +
                     constant::EPSILON <
                 incumbent_holder.local_augmented_incumbent_objective()) {
-                solution_score           = trial_solution_score;
-                found_improving_solution = true;
+                solution_score              = trial_solution_score;
+                is_found_improving_solution = true;
+
+                previous_move = current_move;
+                current_move  = *move_ptr;
                 break;
             }
 
@@ -202,7 +231,7 @@ LocalSearchResult<T_Variable, T_Expression> solve(
          * The local search will be terminated if there is no improving solution
          * in the checked neighborhood.
          */
-        if (!found_improving_solution) {
+        if (!is_found_improving_solution) {
             termination_status = LocalSearchTerminationStatus::LOCAL_OPTIMAL;
             break;
         }

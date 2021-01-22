@@ -11,6 +11,7 @@
 
 namespace printemps {
 namespace model {
+/*****************************************************************************/
 class AbstractMultiArrayElement {
    protected:
     int              m_id;
@@ -29,7 +30,7 @@ class AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline void initialize(void) {
+    void initialize(void) {
         m_id                      = 0;
         m_flat_index              = 0;
         m_multi_dimensional_index = {0};

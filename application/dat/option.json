@@ -6,6 +6,7 @@
     "initial_penalty_coefficient": 1E7,
     "is_enabled_lagrange_dual": false,
     "is_enabled_local_search": false,
+    "is_enabled_grouping_penalty_coefficient": false,
     "is_enabled_presolve": true,
     "is_enabled_initial_value_correction": true,
     "is_enabled_parallel_evaluation": true,
@@ -17,7 +18,6 @@
     "is_enabled_variable_bound_move": false,
     "is_enabled_exclusive_move": false,
     "is_enabled_chain_move": false,
-    "is_enabled_user_defined_move": false,
     "selection_mode": 0,
     "improvability_screening_mode": 3,
     "target_objective_value": -1E100,
@@ -38,7 +38,6 @@
     "tabu_search": {
         "iteration_max": 200,
         "time_max": 120,
-        "time_offset": 0.0,
         "log_interval": 10,
         "initial_tabu_tenure": 10,
         "tabu_tenure_randomize_rate": 0.5,

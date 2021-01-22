@@ -47,7 +47,10 @@ TEST_F(TestVariable, initialize) {
     EXPECT_EQ(printemps::constant::INT_HALF_MIN, variable.lower_bound());
     EXPECT_EQ(printemps::constant::INT_HALF_MAX, variable.upper_bound());
     EXPECT_EQ(false, variable.has_bounds());
-    EXPECT_EQ(false, variable.is_improvable());
+    EXPECT_EQ(false, variable.is_objective_improvable());
+    EXPECT_EQ(false, variable.is_feasibility_improvable());
+    EXPECT_EQ(true, variable.has_lower_bound_margin());
+    EXPECT_EQ(true, variable.has_upper_bound_margin());
     EXPECT_EQ(printemps::model::VariableSense::Integer, variable.sense());
     EXPECT_EQ(nullptr, variable.selection_ptr());
     EXPECT_EQ(true, variable.related_constraint_ptrs().empty());
@@ -232,13 +235,33 @@ TEST_F(TestVariable, has_bounds) {
 }
 
 /*****************************************************************************/
-TEST_F(TestVariable, set_is_improvable) {
+TEST_F(TestVariable, set_is_objective_improvable) {
     auto variable = printemps::model::Variable<int, double>::create_instance();
-    EXPECT_EQ(false, variable.is_improvable());
-    variable.set_is_improvable(true);
-    EXPECT_EQ(true, variable.is_improvable());
-    variable.set_is_improvable(false);
-    EXPECT_EQ(false, variable.is_improvable());
+    EXPECT_EQ(false, variable.is_objective_improvable());
+    variable.set_is_objective_improvable(true);
+    EXPECT_EQ(true, variable.is_objective_improvable());
+    variable.set_is_objective_improvable(false);
+    EXPECT_EQ(false, variable.is_objective_improvable());
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, is_objective_improvable) {
+    /// This method is tested in set_is_objective_improvable().
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, set_is_feasibility_improvable) {
+    auto variable = printemps::model::Variable<int, double>::create_instance();
+    EXPECT_EQ(false, variable.is_feasibility_improvable());
+    variable.set_is_feasibility_improvable(true);
+    EXPECT_EQ(true, variable.is_feasibility_improvable());
+    variable.set_is_feasibility_improvable(false);
+    EXPECT_EQ(false, variable.is_feasibility_improvable());
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, is_feasibility_improvable) {
+    /// This method is tested in set_is_feasibility_improvable().
 }
 
 /*****************************************************************************/
@@ -368,6 +391,41 @@ TEST_F(TestVariable, set_objective_sensitivity) {
 /*****************************************************************************/
 TEST_F(TestVariable, objective_sensitivity) {
     /// This method is tested in set_objective_sensitivity().
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, update_margin) {
+    auto variable = printemps::model::Variable<int, double>::create_instance();
+    variable.set_bound(-10, 10);
+    variable.set_value(-10);  /// includes update_margin()
+    EXPECT_EQ(false, variable.has_lower_bound_margin());
+    EXPECT_EQ(true, variable.has_upper_bound_margin());
+
+    variable.set_value_if_not_fixed(10);  /// includes update_margin()
+    EXPECT_EQ(true, variable.has_lower_bound_margin());
+    EXPECT_EQ(false, variable.has_upper_bound_margin());
+
+    variable.set_bound(-100, 100);  /// includes update_margin()
+    EXPECT_EQ(true, variable.has_lower_bound_margin());
+    EXPECT_EQ(true, variable.has_upper_bound_margin());
+
+    variable = -100;  /// includes update_margin()
+    EXPECT_EQ(false, variable.has_lower_bound_margin());
+    EXPECT_EQ(true, variable.has_upper_bound_margin());
+
+    variable.fix_by(100);  /// includes update_margin()
+    EXPECT_EQ(true, variable.has_lower_bound_margin());
+    EXPECT_EQ(false, variable.has_upper_bound_margin());
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, has_lower_bound_margin) {
+    /// This method is tested in update_margin().
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, has_upper_bound_margin) {
+    /// This method is tested in update_margin().
 }
 
 /*****************************************************************************/

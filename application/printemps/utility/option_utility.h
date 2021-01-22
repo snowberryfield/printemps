@@ -14,8 +14,8 @@ namespace printemps {
 namespace utility {
 /******************************************************************************/
 template <class T>
-inline bool read_json(T *a_parameter, const std::string &a_NAME,
-                      const nlohmann::json &a_JSON) {
+bool read_json(T *a_parameter, const std::string &a_NAME,
+               const nlohmann::json &a_JSON) {
     if (a_JSON.find(a_NAME) != a_JSON.end()) {
         *a_parameter = a_JSON.at(a_NAME).get<T>();
         return true;
@@ -24,7 +24,7 @@ inline bool read_json(T *a_parameter, const std::string &a_NAME,
 }
 
 /******************************************************************************/
-inline printemps::solver::Option read_option(const std::string &a_FILE_NAME) {
+printemps::solver::Option read_option(const std::string &a_FILE_NAME) {
     std::fstream   option_file(a_FILE_NAME);
     nlohmann::json option_object;
     option_file >> option_object;
@@ -170,6 +170,12 @@ inline printemps::solver::Option read_option(const std::string &a_FILE_NAME) {
     /// is_enabled_user_defined_move
     read_json(&option.is_enabled_user_defined_move,  //
               "is_enabled_user_defined_move",        //
+              option_object);
+
+    /**********************************************************************/
+    /// chain_move_capacity
+    read_json(&option.chain_move_capacity,  //
+              "chain_move_capacity",        //
               option_object);
 
     /**************************************************************************/
@@ -453,15 +459,9 @@ inline printemps::solver::Option read_option(const std::string &a_FILE_NAME) {
                   option_object_tabu_search);
 
         /**********************************************************************/
-        /// tabu_search.ignore_tabu_if_augmented_incumbent
-        read_json(&option.tabu_search.ignore_tabu_if_augmented_incumbent,  //
-                  "ignore_tabu_if_augmented_incumbent",                    //
-                  option_object_tabu_search);
-
-        /**********************************************************************/
-        /// tabu_search.ignore_tabu_if_feasible_incumbent
-        read_json(&option.tabu_search.ignore_tabu_if_feasible_incumbent,  //
-                  "ignore_tabu_if_feasible_incumbent",                    //
+        /// tabu_search.ignore_tabu_if_global_incumbent
+        read_json(&option.tabu_search.ignore_tabu_if_global_incumbent,  //
+                  "ignore_tabu_if_global_incumbent",                    //
                   option_object_tabu_search);
 
         /**********************************************************************/
