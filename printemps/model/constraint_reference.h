@@ -34,7 +34,7 @@ struct ConstraintReference {
     }
 
     /*************************************************************************/
-    inline void initialize(void) {
+    void initialize(void) {
         this->constraint_ptrs.clear();
         this->selection_constraint_ptrs.clear();
         this->disabled_constraint_ptrs.clear();

@@ -64,7 +64,7 @@ struct MPSVariable {
     }
 
     /*************************************************************************/
-    inline void initialize(void) {
+    void initialize(void) {
         sense                  = MPSVariableSense::Continuous;
         name                   = "";
         integer_lower_bound    = 0;
@@ -96,7 +96,7 @@ struct MPSConstraint {
     }
 
     /*************************************************************************/
-    inline void initialize(void) {
+    void initialize(void) {
         sense = MPSConstraintSense::Lower;
         name  = "";
         sensitivities.clear();
@@ -121,7 +121,7 @@ struct MPSObjective {
     }
 
     /*************************************************************************/
-    inline void initialize(void) {
+    void initialize(void) {
         sense = MPSObjectiveSense::Minimize;
         name  = "";
         sensitivities.clear();
@@ -149,7 +149,7 @@ struct MPS {
     }
 
     /*************************************************************************/
-    inline void initialize(void) {
+    void initialize(void) {
         name = "";
         variables.clear();
         constraints.clear();
@@ -166,7 +166,7 @@ struct MPS {
 };
 
 /*****************************************************************************/
-inline MPS read_mps(const std::string &a_FILE_NAME) {
+MPS read_mps(const std::string &a_FILE_NAME) {
     MPS mps;
 
     bool is_valid = false;
@@ -472,12 +472,12 @@ class MPSReader {
     }
 
     /*************************************************************************/
-    inline void initialize(void) {
+    void initialize(void) {
         m_model.initialize();
     }
 
     /*************************************************************************/
-    inline model::IPModel &create_model_from_mps(
+    model::IPModel &create_model_from_mps(
         const std::string &a_FILE_NAME,
         const bool         a_IS_ENABLED_SEPARATE_EQUALITY) {
         MPS mps = read_mps(a_FILE_NAME);

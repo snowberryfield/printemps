@@ -27,7 +27,7 @@ struct ModelSummary {
     }
 
     /*************************************************************************/
-    inline void initialize(void) {
+    void initialize(void) {
         this->name                  = "";
         this->number_of_variables   = 0;
         this->number_of_constraints = 0;

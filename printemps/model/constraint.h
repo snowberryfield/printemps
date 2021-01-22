@@ -19,13 +19,6 @@ template <class T_Variable, class T_Expression>
 class Expression;
 
 /*****************************************************************************/
-enum class ConstraintSense {
-    Lower,  // <= target
-    Equal,  // = target
-    Upper   // >= target
-};
-
-/*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class Constraint : public AbstractMultiArrayElement {
     /**
@@ -53,6 +46,9 @@ class Constraint : public AbstractMultiArrayElement {
     T_Expression                         m_violation_value;
     bool                                 m_is_linear;
     bool                                 m_is_enabled;
+
+    double m_local_penalty_coefficient;
+    double m_global_penalty_coefficient;
 
     bool m_is_singleton;
     bool m_is_aggregation;
@@ -165,7 +161,7 @@ class Constraint : public AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr void initialize(void) {
+    void initialize(void) {
         AbstractMultiArrayElement::initialize();
 
         m_function =  //
@@ -182,11 +178,13 @@ class Constraint : public AbstractMultiArrayElement {
             };
 
         m_expression.initialize();
-        m_sense            = ConstraintSense::Lower;
-        m_constraint_value = 0;
-        m_violation_value  = 0;
-        m_is_linear        = true;
-        m_is_enabled       = true;
+        m_sense                      = ConstraintSense::Lower;
+        m_constraint_value           = 0;
+        m_violation_value            = 0;
+        m_is_linear                  = true;
+        m_is_enabled                 = true;
+        m_local_penalty_coefficient  = HUGE_VALF;
+        m_global_penalty_coefficient = HUGE_VALF;
 
         this->clear_constraint_type();
     }
@@ -210,7 +208,7 @@ class Constraint : public AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr void setup(
+    constexpr void setup(
         const std::function<
             T_Expression(const Move<T_Variable, T_Expression> &)> &a_FUNCTION,
         const ConstraintSense                                      a_SENSE) {
@@ -260,7 +258,7 @@ class Constraint : public AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr void setup(
+    constexpr void setup(
         const Expression<T_Variable, T_Expression> &a_EXPRESSION,
         const ConstraintSense                       a_SENSE) {
         m_function =  //
@@ -314,7 +312,7 @@ class Constraint : public AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr void setup_constraint_type(void) {
+    constexpr void setup_constraint_type(void) {
         /// Singleton
         if (m_expression.sensitivities().size() == 1) {
             m_is_singleton = true;
@@ -490,6 +488,12 @@ class Constraint : public AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
+    inline constexpr T_Expression evaluate_violation_diff(
+        const Move<T_Variable, T_Expression> &a_MOVE) const noexcept {
+        return m_violation_function(a_MOVE) - m_violation_value;
+    }
+
+    /*************************************************************************/
     inline constexpr void update(void) {
         /**
          * m_expression must be updated at first.
@@ -527,18 +531,43 @@ class Constraint : public AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr ConstraintSense sense(void) const {
+    inline constexpr ConstraintSense sense(void) const noexcept {
         return m_sense;
     }
 
     /*************************************************************************/
-    inline constexpr T_Expression constraint_value(void) const {
+    inline constexpr T_Expression constraint_value(void) const noexcept {
         return m_constraint_value;
     }
 
     /*************************************************************************/
-    inline constexpr T_Expression violation_value(void) const {
+    inline constexpr T_Expression violation_value(void) const noexcept {
         return m_violation_value;
+    }
+
+    /*************************************************************************/
+    inline constexpr double &local_penalty_coefficient(void) {
+        return m_local_penalty_coefficient;
+    }
+
+    /*************************************************************************/
+    inline constexpr double local_penalty_coefficient(void) const noexcept {
+        return m_local_penalty_coefficient;
+    }
+
+    /*************************************************************************/
+    inline constexpr double &global_penalty_coefficient(void) {
+        return m_global_penalty_coefficient;
+    }
+
+    /*************************************************************************/
+    inline constexpr double global_penalty_coefficient(void) const noexcept {
+        return m_global_penalty_coefficient;
+    }
+
+    /*************************************************************************/
+    inline constexpr void reset_local_penalty_coefficient(void) {
+        m_local_penalty_coefficient = m_global_penalty_coefficient;
     }
 
     /*************************************************************************/

@@ -44,7 +44,7 @@ struct ConstraintTypeReference {
     }
 
     /*************************************************************************/
-    inline void initialize(void) {
+    void initialize(void) {
         this->singleton_ptrs.clear();
         this->aggregation_ptrs.clear();
         this->precedence_ptrs.clear();

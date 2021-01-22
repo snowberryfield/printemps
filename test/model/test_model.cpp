@@ -740,41 +740,6 @@ TEST_F(TestModel, setup) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModel, verify_problem) {
-    /// No decision variables.
-    {
-        printemps::model::Model<int, double> model;
-        ASSERT_THROW(model.verify_problem(false), std::logic_error);
-    }
-
-    /// No constraint functions.
-    {
-        printemps::model::Model<int, double> model;
-
-        auto& x = model.create_variable("x");
-        model.minimize(x);
-        model.verify_problem(false);
-    }
-
-    /// No objective function.
-    {
-        printemps::model::Model<int, double> model;
-
-        auto& x = model.create_variable("x");
-        model.create_constraint("g", x == 1);
-        model.verify_problem(false);
-    }
-
-    /// No constraint functions and no objective function
-    {
-        printemps::model::Model<int, double> model;
-
-        [[maybe_unused]] auto& x = model.create_variable("x");
-        ASSERT_THROW(model.verify_problem(false), std::logic_error);
-    }
-}
-
-/*****************************************************************************/
 TEST_F(TestModel, setup_variable_related_constraints) {
     printemps::model::Model<int, double> model;
 
@@ -1039,433 +1004,6 @@ TEST_F(TestModel, setup_variable_sensitivity) {
             EXPECT_EQ(5, y(i, j).objective_sensitivity());
         }
     }
-}
-
-/*****************************************************************************/
-TEST_F(TestModel, presolve) {
-    printemps::model::Model<int, double> model;
-
-    auto& x = model.create_variables("x", 10, -10, 10);
-    model.minimize(x.sum());
-    model.create_constraint("g_0", 2 * x(0) == 4);
-    model.create_constraint("g_1", 3 * x(1) <= 10);
-    model.create_constraint("g_2", 8 * x(1) >= 20);
-    model.create_constraint("g_3", x(1) + x(2) + 1 == 8);
-    model.setup_variable_related_constraints();
-    model.setup_is_linear();
-
-    model.presolve(false);
-
-    model.categorize_variables();
-    model.categorize_constraints();
-
-    EXPECT_EQ(10, model.number_of_fixed_variables());
-    EXPECT_EQ(4, model.number_of_disabled_constraints());
-    EXPECT_EQ(true, x(0).is_fixed());
-    EXPECT_EQ(2, x(0).value());
-    EXPECT_EQ(true, x(1).is_fixed());
-    EXPECT_EQ(3, x(1).value());
-    EXPECT_EQ(true, x(2).is_fixed());
-    EXPECT_EQ(4, x(2).value());
-
-    for (auto i = 3; i < 10; i++) {
-        EXPECT_EQ(true, x(i).is_fixed());
-        EXPECT_EQ(-10, x(i).value());
-    }
-}
-
-/*****************************************************************************/
-TEST_F(TestModel, remove_independent_variables) {
-    {
-        printemps::model::Model<int, double> model;
-
-        auto& x = model.create_variables("x", 10, 0, 1);
-        model.minimize(x.sum());
-        model.setup_variable_related_constraints();
-        model.setup_is_linear();
-        model.remove_independent_variables(false);
-        for (auto i = 0; i < 10; i++) {
-            EXPECT_EQ(true, x(i).is_fixed());
-            EXPECT_EQ(0, x(i).value());
-        }
-        model.categorize_variables();
-        model.categorize_constraints();
-
-        EXPECT_EQ(10, model.number_of_fixed_variables());
-    }
-    {
-        printemps::model::Model<int, double> model;
-
-        auto& x = model.create_variables("x", 10, 0, 1);
-        model.maximize(x.sum());
-        model.setup_variable_related_constraints();
-        model.setup_is_linear();
-        model.remove_independent_variables(false);
-        for (auto i = 0; i < 10; i++) {
-            EXPECT_EQ(true, x(i).is_fixed());
-            EXPECT_EQ(1, x(i).value());
-        }
-        model.categorize_variables();
-        model.categorize_constraints();
-
-        EXPECT_EQ(10, model.number_of_fixed_variables());
-    }
-    {
-        printemps::model::Model<int, double> model;
-
-        auto& x = model.create_variables("x", 10, 0, 1);
-        model.minimize(-x.sum());
-        model.setup_variable_related_constraints();
-        model.setup_is_linear();
-        model.remove_independent_variables(false);
-        for (auto i = 0; i < 10; i++) {
-            EXPECT_EQ(true, x(i).is_fixed());
-            EXPECT_EQ(1, x(i).value());
-        }
-        model.categorize_variables();
-        model.categorize_constraints();
-
-        EXPECT_EQ(10, model.number_of_fixed_variables());
-    }
-    {
-        printemps::model::Model<int, double> model;
-
-        auto& x = model.create_variables("x", 10, 0, 1);
-        model.maximize(-x.sum());
-        model.setup_variable_related_constraints();
-        model.setup_is_linear();
-        model.remove_independent_variables(false);
-        for (auto i = 0; i < 10; i++) {
-            EXPECT_EQ(true, x(i).is_fixed());
-            EXPECT_EQ(0, x(i).value());
-        }
-        model.categorize_variables();
-        model.categorize_constraints();
-
-        EXPECT_EQ(10, model.number_of_fixed_variables());
-    }
-}
-
-/*****************************************************************************/
-TEST_F(TestModel,
-       remove_redundant_constraints_with_tightening_variable_bounds) {
-    {
-        printemps::model::Model<int, double> model;
-
-        auto& x = model.create_variable("x", 0, 10);
-        auto& g = model.create_constraint("g", 3 * x + 1 == 7);
-
-        model.remove_redundant_constraints_with_tightening_variable_bounds(
-            false);
-        EXPECT_EQ(true, x.is_fixed());
-        EXPECT_EQ(2, x.value());
-        EXPECT_EQ(false, g.is_enabled());
-    }
-    {
-        printemps::model::Model<int, double> model;
-
-        auto& x = model.create_variable("x", 0, 10);
-        auto& g = model.create_constraint("g", 3 * x + 1 <= 7);
-
-        model.remove_redundant_constraints_with_tightening_variable_bounds(
-            false);
-        EXPECT_EQ(false, x.is_fixed());
-        EXPECT_EQ(0, x.lower_bound());
-        EXPECT_EQ(2, x.upper_bound());
-        EXPECT_EQ(false, g.is_enabled());
-    }
-    {
-        printemps::model::Model<int, double> model;
-
-        auto& x = model.create_variable("x", 0, 10);
-        auto& g = model.create_constraint("g", 3 * x + 1 >= 7);
-
-        model.remove_redundant_constraints_with_tightening_variable_bounds(
-            false);
-        EXPECT_EQ(false, x.is_fixed());
-        EXPECT_EQ(2, x.lower_bound());
-        EXPECT_EQ(10, x.upper_bound());
-        EXPECT_EQ(false, g.is_enabled());
-    }
-
-    {
-        printemps::model::Model<int, double> model;
-
-        auto& x = model.create_variable("x", -10, 10);
-        auto& g = model.create_constraint("g", -3 * x + 1 == 7);
-
-        model.remove_redundant_constraints_with_tightening_variable_bounds(
-            false);
-        EXPECT_EQ(true, x.is_fixed());
-        EXPECT_EQ(-2, x.value());
-        EXPECT_EQ(false, g.is_enabled());
-    }
-    {
-        printemps::model::Model<int, double> model;
-
-        auto& x = model.create_variable("x", -10, 10);
-        auto& g = model.create_constraint("g", -3 * x + 1 <= 7);
-
-        model.remove_redundant_constraints_with_tightening_variable_bounds(
-            false);
-        EXPECT_EQ(false, x.is_fixed());
-        EXPECT_EQ(-2, x.lower_bound());
-        EXPECT_EQ(10, x.upper_bound());
-        EXPECT_EQ(false, g.is_enabled());
-    }
-    {
-        printemps::model::Model<int, double> model;
-
-        auto& x = model.create_variable("x", -10, 10);
-        auto& g = model.create_constraint("g", -3 * x + 1 >= 7);
-
-        model.remove_redundant_constraints_with_tightening_variable_bounds(
-            false);
-        EXPECT_EQ(false, x.is_fixed());
-        EXPECT_EQ(-10, x.lower_bound());
-        EXPECT_EQ(-2, x.upper_bound());
-        EXPECT_EQ(false, g.is_enabled());
-    }
-
-    {
-        printemps::model::Model<int, double> model;
-
-        auto& x = model.create_variable("x", 0, 10);
-        auto& y = model.create_variable("y", 0, 1);
-        auto& g = model.create_constraint("g", 3 * x + y == 7);
-        y.fix_by(1);
-
-        model.remove_redundant_constraints_with_tightening_variable_bounds(
-            false);
-        EXPECT_EQ(true, x.is_fixed());
-        EXPECT_EQ(2, x.value());
-        EXPECT_EQ(false, g.is_enabled());
-    }
-    {
-        printemps::model::Model<int, double> model;
-
-        auto& x = model.create_variable("x", 0, 10);
-        auto& y = model.create_variable("y", 0, 1);
-        auto& g = model.create_constraint("g", 3 * x + y <= 7);
-        y.fix_by(1);
-
-        model.remove_redundant_constraints_with_tightening_variable_bounds(
-            false);
-        EXPECT_EQ(false, x.is_fixed());
-        EXPECT_EQ(0, x.lower_bound());
-        EXPECT_EQ(2, x.upper_bound());
-        EXPECT_EQ(false, g.is_enabled());
-    }
-    {
-        printemps::model::Model<int, double> model;
-
-        auto& x = model.create_variable("x", 0, 10);
-        auto& y = model.create_variable("y", 0, 1);
-        auto& g = model.create_constraint("g", 3 * x + y >= 7);
-        y.fix_by(1);
-
-        model.remove_redundant_constraints_with_tightening_variable_bounds(
-            false);
-        EXPECT_EQ(false, x.is_fixed());
-        EXPECT_EQ(2, x.lower_bound());
-        EXPECT_EQ(10, x.upper_bound());
-        EXPECT_EQ(false, g.is_enabled());
-    }
-    {
-        printemps::model::Model<int, double> model;
-
-        auto& x = model.create_variable("x", -10, 10);
-        auto& y = model.create_variable("y", 0, 1);
-        auto& g = model.create_constraint("g", -3 * x + y == 7);
-        y.fix_by(1);
-
-        model.remove_redundant_constraints_with_tightening_variable_bounds(
-            false);
-        EXPECT_EQ(true, x.is_fixed());
-        EXPECT_EQ(-2, x.value());
-        EXPECT_EQ(false, g.is_enabled());
-    }
-    {
-        printemps::model::Model<int, double> model;
-
-        auto& x = model.create_variable("x", -10, 10);
-        auto& y = model.create_variable("y", 0, 1);
-        auto& g = model.create_constraint("g", -3 * x + y <= 7);
-        y.fix_by(1);
-
-        model.remove_redundant_constraints_with_tightening_variable_bounds(
-            false);
-        EXPECT_EQ(false, x.is_fixed());
-        EXPECT_EQ(-2, x.lower_bound());
-        EXPECT_EQ(10, x.upper_bound());
-        EXPECT_EQ(false, g.is_enabled());
-    }
-    {
-        printemps::model::Model<int, double> model;
-
-        auto& x = model.create_variable("x", -10, 10);
-        auto& y = model.create_variable("y", 0, 1);
-        auto& g = model.create_constraint("g", -3 * x + y >= 7);
-        y.fix_by(1);
-
-        model.remove_redundant_constraints_with_tightening_variable_bounds(
-            false);
-        EXPECT_EQ(false, x.is_fixed());
-        EXPECT_EQ(-10, x.lower_bound());
-        EXPECT_EQ(-2, x.upper_bound());
-        EXPECT_EQ(false, g.is_enabled());
-    }
-
-    {
-        printemps::model::Model<int, double> model;
-
-        auto& x = model.create_variable("x", 0, 10);
-        auto& g = model.create_constraint("g", 3 * x + 1 == 7);
-        x.fix_by(2);
-
-        model.remove_redundant_constraints_with_tightening_variable_bounds(
-            false);
-        EXPECT_EQ(true, x.is_fixed());
-        EXPECT_EQ(false, g.is_enabled());
-    }
-    {
-        printemps::model::Model<int, double> model;
-
-        auto& x = model.create_variable("x", 0, 10);
-        auto& g = model.create_constraint("g", 3 * x + 1 <= 7);
-        x.fix_by(1);
-
-        model.remove_redundant_constraints_with_tightening_variable_bounds(
-            false);
-        EXPECT_EQ(true, x.is_fixed());
-        EXPECT_EQ(false, g.is_enabled());
-    }
-    {
-        printemps::model::Model<int, double> model;
-
-        auto& x = model.create_variable("x", 0, 10);
-        auto& g = model.create_constraint("g", 3 * x + 1 >= 7);
-        x.fix_by(3);
-
-        model.remove_redundant_constraints_with_tightening_variable_bounds(
-            false);
-        EXPECT_EQ(true, x.is_fixed());
-        EXPECT_EQ(false, g.is_enabled());
-    }
-
-    {
-        printemps::model::Model<int, double> model;
-
-        auto& x = model.create_variable("x", -10, 10);
-        auto& g = model.create_constraint("g", -3 * x + 1 == 7);
-        x.fix_by(-2);
-
-        model.remove_redundant_constraints_with_tightening_variable_bounds(
-            false);
-        EXPECT_EQ(true, x.is_fixed());
-        EXPECT_EQ(false, g.is_enabled());
-    }
-    {
-        printemps::model::Model<int, double> model;
-
-        auto& x = model.create_variable("x", -10, 10);
-        auto& g = model.create_constraint("g", -3 * x + 1 <= 7);
-        x.fix_by(-2);
-
-        model.remove_redundant_constraints_with_tightening_variable_bounds(
-            false);
-        EXPECT_EQ(true, x.is_fixed());
-        EXPECT_EQ(false, g.is_enabled());
-    }
-    {
-        printemps::model::Model<int, double> model;
-
-        auto& x = model.create_variable("x", -10, 10);
-        auto& g = model.create_constraint("g", -3 * x + 1 >= 7);
-        x.fix_by(-2);
-
-        model.remove_redundant_constraints_with_tightening_variable_bounds(
-            false);
-        EXPECT_EQ(true, x.is_fixed());
-        EXPECT_EQ(false, g.is_enabled());
-    }
-
-    {
-        printemps::model::Model<int, double> model;
-
-        auto& x = model.create_variable("x", 0, 10);
-        auto& y = model.create_variable("y", 0, 1);
-        auto& g = model.create_constraint("g", 3 * x + y <= 7);
-
-        model.remove_redundant_constraints_with_tightening_variable_bounds(
-            false);
-        EXPECT_EQ(false, x.is_fixed());
-        EXPECT_EQ(0, x.lower_bound());
-        EXPECT_EQ(2, x.upper_bound());
-        EXPECT_EQ(true, g.is_enabled());
-    }
-    {
-        printemps::model::Model<int, double> model;
-
-        auto& x = model.create_variable("x", 0, 10);
-        auto& y = model.create_variable("y", 0, 1);
-        auto& g = model.create_constraint("g", 3 * x + y >= 7);
-
-        model.remove_redundant_constraints_with_tightening_variable_bounds(
-            false);
-        EXPECT_EQ(false, x.is_fixed());
-        EXPECT_EQ(2, x.lower_bound());
-        EXPECT_EQ(10, x.upper_bound());
-        EXPECT_EQ(true, g.is_enabled());
-    }
-
-    {
-        printemps::model::Model<int, double> model;
-
-        auto& x = model.create_variable("x", -10, 10);
-        auto& y = model.create_variable("y", 0, 1);
-        auto& g = model.create_constraint("g", -3 * x + y <= 7);
-
-        model.remove_redundant_constraints_with_tightening_variable_bounds(
-            false);
-        EXPECT_EQ(false, x.is_fixed());
-        EXPECT_EQ(-2, x.lower_bound());
-        EXPECT_EQ(10, x.upper_bound());
-        EXPECT_EQ(true, g.is_enabled());
-    }
-    {
-        printemps::model::Model<int, double> model;
-
-        auto& x = model.create_variable("x", -10, 10);
-        auto& y = model.create_variable("y", 0, 1);
-        auto& g = model.create_constraint("g", -3 * x + y >= 7);
-
-        model.remove_redundant_constraints_with_tightening_variable_bounds(
-            false);
-        EXPECT_EQ(false, x.is_fixed());
-        EXPECT_EQ(-10, x.lower_bound());
-        EXPECT_EQ(-2, x.upper_bound());
-        EXPECT_EQ(true, g.is_enabled());
-    }
-}
-
-/*****************************************************************************/
-TEST_F(TestModel, fix_implicit_fixed_variables) {
-    printemps::model::Model<int, double> model;
-
-    auto& x = model.create_variables("x", 10, -10, 10);
-    x(0).set_bound(5, 5);
-    model.fix_implicit_fixed_variables(false);
-    EXPECT_EQ(5, x(0).value());
-    EXPECT_EQ(true, x(0).is_fixed());
-
-    for (auto i = 1; i < 10; i++) {
-        EXPECT_EQ(false, x(i).is_fixed());
-    }
-    model.categorize_variables();
-    model.categorize_constraints();
-
-    EXPECT_EQ(1, model.number_of_fixed_variables());
 }
 
 /*****************************************************************************/
@@ -1836,436 +1374,6 @@ TEST_F(TestModel, setup_neighborhood) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModel, verify_and_correct_selection_variables_initial_values) {
-    /// There is a fixed variable with an invalid initial value.
-    /// correction: true
-    {
-        printemps::model::Model<int, double> model;
-
-        auto& x = model.create_variables("x", 10, 0, 1);
-        model.create_constraint("g", x.selection());
-        x(0).fix_by(2);
-
-        model.categorize_variables();
-        model.categorize_constraints();
-        model.extract_selections(printemps::model::SelectionMode::Defined);
-
-        ASSERT_THROW(
-            model.verify_and_correct_selection_variables_initial_values(true,
-                                                                        false),
-            std::logic_error);
-    }
-
-    /// There is a fixed variable with an invalid initial value.
-    /// correction: false
-    {
-        printemps::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
-        model.create_constraint("g", x.selection());
-        x(0).fix_by(2);
-
-        model.categorize_variables();
-        model.categorize_constraints();
-        model.extract_selections(printemps::model::SelectionMode::Defined);
-
-        ASSERT_THROW(
-            model.verify_and_correct_selection_variables_initial_values(false,
-                                                                        false),
-            std::logic_error);
-    }
-
-    /// There is one fixed selected variable.
-    /// correction: true
-    {
-        printemps::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
-        model.create_constraint("g", x.selection());
-        x(0).fix_by(1);
-
-        model.categorize_variables();
-        model.categorize_constraints();
-        model.extract_selections(printemps::model::SelectionMode::Defined);
-
-        model.verify_and_correct_selection_variables_initial_values(true,
-                                                                    false);
-        EXPECT_EQ(1, x(0).value());
-    }
-
-    /// There is one fixed selected variable.
-    /// correction: false
-    {
-        printemps::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
-        model.create_constraint("g", x.selection());
-        x(0).fix_by(1);
-
-        model.categorize_variables();
-        model.categorize_constraints();
-        model.extract_selections(printemps::model::SelectionMode::Defined);
-
-        model.verify_and_correct_selection_variables_initial_values(false,
-                                                                    false);
-        EXPECT_EQ(1, x(0).value());
-    }
-
-    /// There are two fixed selected variables.
-    /// correction: true
-    {
-        printemps::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
-        model.create_constraint("g", x.selection());
-        x(0).fix_by(1);
-        x(1).fix_by(1);
-
-        model.categorize_variables();
-        model.categorize_constraints();
-        model.extract_selections(printemps::model::SelectionMode::Defined);
-
-        ASSERT_THROW(
-            model.verify_and_correct_selection_variables_initial_values(true,
-                                                                        false),
-            std::logic_error);
-    }
-
-    /// There are two fixed selected variables.
-    /// correction: true
-    {
-        printemps::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
-        model.create_constraint("g", x.selection());
-        x(0).fix_by(1);
-        x(1).fix_by(1);
-
-        model.categorize_variables();
-        model.categorize_constraints();
-        model.extract_selections(printemps::model::SelectionMode::Defined);
-
-        ASSERT_THROW(
-            model.verify_and_correct_selection_variables_initial_values(false,
-                                                                        false),
-            std::logic_error);
-    }
-
-    /// There are two variables with invalid initial values.
-    /// correction: true
-    {
-        printemps::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
-        model.create_constraint("g", x.selection());
-        x(0) = 2;
-        x(1) = 3;
-        model.categorize_variables();
-        model.categorize_constraints();
-        model.extract_selections(printemps::model::SelectionMode::Defined);
-
-        model.verify_and_correct_selection_variables_initial_values(true,
-                                                                    false);
-
-        EXPECT_EQ(0, x(0).value());
-        EXPECT_EQ(0, x(1).value());
-    }
-
-    /// There are two variables with invalid initial values.
-    /// correction: false
-    {
-        printemps::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
-        model.create_constraint("g", x.selection());
-        x(0) = 2;
-        x(1) = 3;
-
-        model.categorize_variables();
-        model.categorize_constraints();
-        model.extract_selections(printemps::model::SelectionMode::Defined);
-
-        ASSERT_THROW(
-            model.verify_and_correct_selection_variables_initial_values(false,
-                                                                        false),
-            std::logic_error);
-    }
-
-    /// There is no selected variable.
-    /// correction: true
-    {
-        printemps::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
-        model.create_constraint("g", x.selection());
-
-        model.categorize_variables();
-        model.categorize_constraints();
-        model.extract_selections(printemps::model::SelectionMode::Defined);
-
-        model.verify_and_correct_selection_variables_initial_values(true,
-                                                                    false);
-
-        /// selected_variable_ptr is not always &x(0).
-        auto selected_variable_ptr =
-            model.selections().front().variable_ptrs.front();
-        EXPECT_EQ(1, selected_variable_ptr->value());
-    }
-
-    /// There is no selected variable.
-    /// correction: false
-    {
-        printemps::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
-        model.create_constraint("g", x.selection());
-
-        model.categorize_variables();
-        model.categorize_constraints();
-        model.extract_selections(printemps::model::SelectionMode::Defined);
-
-        ASSERT_THROW(
-            model.verify_and_correct_selection_variables_initial_values(false,
-                                                                        false),
-            std::logic_error);
-    }
-
-    /// There is one selected variable.
-    /// correction: true
-    {
-        printemps::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
-        model.create_constraint("g", x.selection());
-        x(0) = 1;
-
-        model.categorize_variables();
-        model.categorize_constraints();
-        model.extract_selections(printemps::model::SelectionMode::Defined);
-
-        model.verify_and_correct_selection_variables_initial_values(true,
-                                                                    false);
-
-        EXPECT_EQ(1, x(0).value());
-    }
-
-    /// There is one selected variable.
-    /// correction: false
-    {
-        printemps::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
-        model.create_constraint("g", x.selection());
-        x(0) = 1;
-
-        model.categorize_variables();
-        model.categorize_constraints();
-        model.extract_selections(printemps::model::SelectionMode::Defined);
-
-        model.verify_and_correct_selection_variables_initial_values(false,
-                                                                    false);
-
-        EXPECT_EQ(1, x(0).value());
-    }
-
-    /// There are two unfixed selected variable.
-    /// correction: true
-    {
-        printemps::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
-        model.create_constraint("g", x.selection());
-        x(0) = 1;
-        x(1) = 1;
-
-        model.categorize_variables();
-        model.categorize_constraints();
-        model.extract_selections(printemps::model::SelectionMode::Defined);
-
-        model.verify_and_correct_selection_variables_initial_values(true,
-                                                                    false);
-
-        /// selected_variable is not always x(0).
-        EXPECT_EQ(1, x(0).value() + x(1).value());
-    }
-
-    /// There are two unfixed selected variable.
-    /// correction: false
-    {
-        printemps::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
-        model.create_constraint("g", x.selection());
-        x(0) = 1;
-        x(1) = 1;
-
-        model.categorize_variables();
-        model.categorize_constraints();
-        model.extract_selections(printemps::model::SelectionMode::Defined);
-
-        ASSERT_THROW(
-            model.verify_and_correct_selection_variables_initial_values(false,
-                                                                        false),
-            std::logic_error);
-    }
-
-    /// There are 1 fixed and 1 unfixed selected variable.
-    /// correction: true
-    {
-        printemps::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
-        model.create_constraint("g", x.selection());
-        x(0) = 1;
-        x(1).fix_by(1);
-
-        model.categorize_variables();
-        model.categorize_constraints();
-        model.extract_selections(printemps::model::SelectionMode::Defined);
-
-        model.verify_and_correct_selection_variables_initial_values(true,
-                                                                    false);
-        EXPECT_EQ(0, x(0).value());
-        EXPECT_EQ(1, x(1).value());
-    }
-
-    /// There are 1 fixed and 1 unfixed selected variable.
-    /// correction: false
-    {
-        printemps::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
-        model.create_constraint("g", x.selection());
-        x(0) = 1;
-        x(1).fix_by(1);
-
-        model.categorize_variables();
-        model.categorize_constraints();
-        model.extract_selections(printemps::model::SelectionMode::Defined);
-
-        ASSERT_THROW(
-            model.verify_and_correct_selection_variables_initial_values(false,
-                                                                        false),
-            std::logic_error);
-    }
-}
-
-/*****************************************************************************/
-TEST_F(TestModel, verify_and_correct_binary_variables_initial_values) {
-    /// There is a fixed variable with an invalid initial value.
-    /// correction: true
-    {
-        printemps::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
-        x(0).fix_by(2);
-
-        model.categorize_variables();
-        model.categorize_constraints();
-
-        ASSERT_THROW(model.verify_and_correct_binary_variables_initial_values(
-                         true, false),
-                     std::logic_error);
-    }
-
-    /// There is a fixed variable with an invalid initial value.
-    /// correction: false
-    {
-        printemps::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
-        x(0).fix_by(-1);
-
-        model.categorize_variables();
-        model.categorize_constraints();
-
-        ASSERT_THROW(model.verify_and_correct_binary_variables_initial_values(
-                         false, false),
-                     std::logic_error);
-    }
-
-    /// There is a variable with an invalid initial value.
-    /// correction: true
-    {
-        printemps::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
-        x(0)    = 2;
-        x(1)    = -1;
-
-        model.categorize_variables();
-        model.categorize_constraints();
-
-        model.verify_and_correct_binary_variables_initial_values(true, false);
-        EXPECT_EQ(1, x(0).value());
-        EXPECT_EQ(0, x(1).value());
-    }
-
-    /// There is a variable with an invalid initial value.
-    /// correction: false
-    {
-        printemps::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
-        x(0)    = 2;
-        x(1)    = -1;
-
-        model.categorize_variables();
-        model.categorize_constraints();
-
-        ASSERT_THROW(model.verify_and_correct_binary_variables_initial_values(
-                         false, false),
-                     std::logic_error);
-    }
-}
-
-/*****************************************************************************/
-TEST_F(TestModel, verify_and_correct_integer_variables_initial_values) {
-    /// There is a fixed variable with an invalid initial value.
-    /// correction: true
-    {
-        printemps::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, -10, 10);
-        x(0).fix_by(11);
-
-        model.categorize_variables();
-        model.categorize_constraints();
-
-        ASSERT_THROW(model.verify_and_correct_integer_variables_initial_values(
-                         true, false),
-                     std::logic_error);
-    }
-
-    /// There is a fixed variable with an invalid initial value.
-    /// correction: false
-    {
-        printemps::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, -10, 10);
-        x(0).fix_by(-11);
-
-        model.categorize_variables();
-        model.categorize_constraints();
-
-        ASSERT_THROW(model.verify_and_correct_integer_variables_initial_values(
-                         false, false),
-                     std::logic_error);
-    }
-
-    /// There is a variable with an invalid initial value.
-    /// correction: true
-    {
-        printemps::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, -10, 10);
-        x(0)    = 11;
-        x(1)    = -11;
-
-        model.categorize_variables();
-        model.categorize_constraints();
-
-        model.verify_and_correct_integer_variables_initial_values(true, false);
-        EXPECT_EQ(10, x(0).value());
-        EXPECT_EQ(-10, x(1).value());
-    }
-
-    /// There is a variable with an invalid initial value.
-    /// correction: false
-    {
-        printemps::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, -10, 10);
-        x(0)    = 11;
-        x(1)    = -11;
-
-        model.categorize_variables();
-        model.categorize_constraints();
-
-        ASSERT_THROW(model.verify_and_correct_integer_variables_initial_values(
-                         false, false),
-                     std::logic_error);
-    }
-}
-
-/*****************************************************************************/
 TEST_F(TestModel, setup_fixed_sensitivities) {
     /// This method is tested in test_expression.h
 }
@@ -2348,266 +1456,6 @@ TEST_F(TestModel, update_arg_void) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModel, update_variable_improvability) {
-    {
-        printemps::model::Model<int, double> model;
-
-        auto& x = model.create_variable("x", -10, 10);
-        auto& y = model.create_variable("y", -10, 10);
-
-        [[maybe_unused]] auto& g = model.create_constraint("g", x - y <= 0);
-
-        model.minimize(-x + y);
-        model.categorize_variables();
-        model.categorize_constraints();
-        model.setup_variable_sensitivity();
-        model.setup_fixed_sensitivities(false);
-
-        x = -10;
-        y = -10;
-
-        model.update();
-        model.update_variable_improvability(true);
-        EXPECT_EQ(true, x(0).is_improvable());
-        EXPECT_EQ(false, y(0).is_improvable());
-
-        x = 10;
-        y = 10;
-        model.update();
-        model.update_variable_improvability(true);
-        EXPECT_EQ(false, x(0).is_improvable());
-        EXPECT_EQ(true, y(0).is_improvable());
-
-        x = 10;
-        y = -10;
-        model.update();
-        model.update_variable_improvability(true);
-        EXPECT_EQ(true, x(0).is_improvable());
-        EXPECT_EQ(true, y(0).is_improvable());
-    }
-    {
-        printemps::model::Model<int, double> model;
-
-        auto& x = model.create_variable("x", -10, 10);
-        auto& y = model.create_variable("y", -10, 10);
-
-        [[maybe_unused]] auto& g = model.create_constraint("g", x - y == 0);
-
-        model.minimize(-x + y);
-        model.categorize_variables();
-        model.categorize_constraints();
-        model.setup_variable_sensitivity();
-        model.setup_fixed_sensitivities(false);
-
-        x = -10;
-        y = -10;
-
-        model.update();
-        model.update_variable_improvability(true);
-        EXPECT_EQ(true, x(0).is_improvable());
-        EXPECT_EQ(false, y(0).is_improvable());
-
-        x = 10;
-        y = 10;
-        model.update();
-        model.update_variable_improvability(true);
-        EXPECT_EQ(false, x(0).is_improvable());
-        EXPECT_EQ(true, y(0).is_improvable());
-
-        x = 10;
-        y = -10;
-        model.update();
-        model.update_variable_improvability(true);
-        EXPECT_EQ(true, x(0).is_improvable());
-        EXPECT_EQ(true, y(0).is_improvable());
-    }
-    {
-        printemps::model::Model<int, double> model;
-
-        auto& x = model.create_variable("x", -10, 10);
-        auto& y = model.create_variable("y", -10, 10);
-
-        [[maybe_unused]] auto& g = model.create_constraint("g", x - y >= 0);
-
-        model.minimize(-x + y);
-        model.categorize_variables();
-        model.categorize_constraints();
-        model.setup_variable_sensitivity();
-        model.setup_fixed_sensitivities(false);
-
-        x = -10;
-        y = -10;
-
-        model.update();
-        model.update_variable_improvability(true);
-        EXPECT_EQ(true, x(0).is_improvable());
-        EXPECT_EQ(false, y(0).is_improvable());
-
-        x = 10;
-        y = 10;
-        model.update();
-        model.update_variable_improvability(true);
-        EXPECT_EQ(false, x(0).is_improvable());
-        EXPECT_EQ(true, y(0).is_improvable());
-
-        x = -10;
-        y = 10;
-        model.update();
-        model.update_variable_improvability(true);
-        EXPECT_EQ(true, x(0).is_improvable());
-        EXPECT_EQ(true, y(0).is_improvable());
-    }
-    {
-        printemps::model::Model<int, double> model;
-
-        auto& x = model.create_variable("x", -10, 10);
-        auto& y = model.create_variable("y", -10, 10);
-
-        [[maybe_unused]] auto& g = model.create_constraint("g", x - y <= 0);
-
-        model.maximize(-x + y);
-        model.categorize_variables();
-        model.categorize_constraints();
-        model.setup_variable_sensitivity();
-        model.setup_fixed_sensitivities(false);
-
-        x = -10;
-        y = -10;
-
-        model.update();
-        model.update_variable_improvability(true);
-        EXPECT_EQ(false, x(0).is_improvable());
-        EXPECT_EQ(true, y(0).is_improvable());
-
-        x = 10;
-        y = 10;
-        model.update();
-        model.update_variable_improvability(true);
-        EXPECT_EQ(true, x(0).is_improvable());
-        EXPECT_EQ(false, y(0).is_improvable());
-
-        x = 10;
-        y = -10;
-        model.update();
-        model.update_variable_improvability(true);
-        EXPECT_EQ(true, x(0).is_improvable());
-        EXPECT_EQ(true, y(0).is_improvable());
-    }
-    {
-        printemps::model::Model<int, double> model;
-
-        auto& x = model.create_variable("x", -10, 10);
-        auto& y = model.create_variable("y", -10, 10);
-
-        [[maybe_unused]] auto& g = model.create_constraint("g", x - y == 0);
-
-        model.maximize(-x + y);
-        model.categorize_variables();
-        model.categorize_constraints();
-        model.setup_variable_sensitivity();
-        model.setup_fixed_sensitivities(false);
-
-        x = -10;
-        y = -10;
-
-        model.update();
-        model.update_variable_improvability(true);
-        EXPECT_EQ(false, x(0).is_improvable());
-        EXPECT_EQ(true, y(0).is_improvable());
-
-        x = 10;
-        y = 10;
-        model.update();
-        model.update_variable_improvability(true);
-        EXPECT_EQ(true, x(0).is_improvable());
-        EXPECT_EQ(false, y(0).is_improvable());
-
-        x = 10;
-        y = -10;
-        model.update();
-        model.update_variable_improvability(true);
-        EXPECT_EQ(true, x(0).is_improvable());
-        EXPECT_EQ(true, y(0).is_improvable());
-    }
-    {
-        printemps::model::Model<int, double> model;
-
-        auto& x = model.create_variable("x", -10, 10);
-        auto& y = model.create_variable("y", -10, 10);
-
-        [[maybe_unused]] auto& g = model.create_constraint("g", x - y >= 0);
-
-        model.maximize(-x + y);
-        model.categorize_variables();
-        model.categorize_constraints();
-        model.setup_variable_sensitivity();
-        model.setup_fixed_sensitivities(false);
-
-        x = -10;
-        y = -10;
-
-        model.update();
-        model.update_variable_improvability(true);
-        EXPECT_EQ(false, x(0).is_improvable());
-        EXPECT_EQ(true, y(0).is_improvable());
-
-        x = 10;
-        y = 10;
-        model.update();
-        model.update_variable_improvability(true);
-        EXPECT_EQ(true, x(0).is_improvable());
-        EXPECT_EQ(false, y(0).is_improvable());
-
-        x = -10;
-        y = 10;
-        model.update();
-        model.update_variable_improvability(true);
-        EXPECT_EQ(true, x(0).is_improvable());
-        EXPECT_EQ(true, y(0).is_improvable());
-    }
-
-    {
-        printemps::model::Model<int, double> model;
-
-        auto& x = model.create_variable("x", -10, 10);
-        auto& y = model.create_variable("y", -10, 10);
-        auto& z = model.create_variable("z", -10, 10);
-
-        [[maybe_unused]] auto& g = model.create_constraint("g", x - y >= 0);
-
-        model.minimize(-x + y + z);
-        model.categorize_variables();
-        model.categorize_constraints();
-        model.setup_variable_sensitivity();
-        model.setup_fixed_sensitivities(false);
-
-        x = -10;
-        y = 10;
-        z = 10;
-        model.update();
-        model.update_variable_improvability(true);
-        EXPECT_EQ(true, x(0).is_improvable());
-        EXPECT_EQ(true, y(0).is_improvable());
-        EXPECT_EQ(false, z(0).is_improvable());
-        model.update_variable_improvability(false);
-        EXPECT_EQ(true, x(0).is_improvable());
-        EXPECT_EQ(true, y(0).is_improvable());
-        EXPECT_EQ(true, z(0).is_improvable());
-
-        z = -10;
-        model.update();
-        model.update_variable_improvability(true);
-        EXPECT_EQ(true, x(0).is_improvable());
-        EXPECT_EQ(true, y(0).is_improvable());
-        EXPECT_EQ(false, z(0).is_improvable());
-        model.update_variable_improvability(false);
-        EXPECT_EQ(true, x(0).is_improvable());
-        EXPECT_EQ(true, y(0).is_improvable());
-        EXPECT_EQ(false, z(0).is_improvable());
-    }
-}
-
-/*****************************************************************************/
 TEST_F(TestModel, update_arg_move) {
     printemps::model::Model<int, double> model;
 
@@ -2638,6 +1486,403 @@ TEST_F(TestModel, update_arg_move) {
     EXPECT_EQ(10, p(0).value());
     EXPECT_EQ(10, model.objective().value());
     EXPECT_EQ(&x(9), model.selections().front().selected_variable_ptr);
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, reset_variable_objective_improvability_arg_void) {
+    printemps::model::Model<int, double> model;
+
+    auto& x = model.create_variable("x", 0, 1);
+    auto& y = model.create_variables("y", 10, 0, 1);
+    model.categorize_variables();
+
+    x(0).set_is_objective_improvable(true);
+    EXPECT_EQ(true, x(0).is_objective_improvable());
+    for (auto i = 0; i < 10; i++) {
+        y(i).set_is_objective_improvable(true);
+        EXPECT_EQ(true, y(i).is_objective_improvable());
+    }
+    model.reset_variable_objective_improvability();
+
+    EXPECT_EQ(false, x(0).is_objective_improvable());
+    for (auto i = 0; i < 10; i++) {
+        EXPECT_EQ(false, y(i).is_objective_improvable());
+    }
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, reset_variable_objective_improvability_arg_variable_ptrs) {
+    printemps::model::Model<int, double> model;
+
+    auto& x = model.create_variable("x", 0, 1);
+    auto& y = model.create_variables("y", 10, 0, 1);
+    model.categorize_variables();
+
+    x(0).set_is_objective_improvable(true);
+    EXPECT_EQ(true, x(0).is_objective_improvable());
+    for (auto i = 0; i < 10; i++) {
+        y(i).set_is_objective_improvable(true);
+        EXPECT_EQ(true, y(i).is_objective_improvable());
+    }
+    model.reset_variable_objective_improvability({&x(0), &y(0), &y(9)});
+
+    EXPECT_EQ(false, x(0).is_objective_improvable());
+    EXPECT_EQ(false, y(0).is_objective_improvable());
+    EXPECT_EQ(false, y(9).is_objective_improvable());
+    for (auto i = 1; i < 9; i++) {
+        EXPECT_EQ(true, y(i).is_objective_improvable());
+    }
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, reset_variable_feasibility_improvability_arg_void) {
+    printemps::model::Model<int, double> model;
+
+    auto& x = model.create_variable("x", 0, 1);
+    auto& y = model.create_variables("y", 10, 0, 1);
+    model.categorize_variables();
+
+    x(0).set_is_feasibility_improvable(true);
+    EXPECT_EQ(true, x(0).is_feasibility_improvable());
+    for (auto i = 0; i < 10; i++) {
+        y(i).set_is_feasibility_improvable(true);
+        EXPECT_EQ(true, y(i).is_feasibility_improvable());
+    }
+    model.reset_variable_feasibility_improvability();
+
+    EXPECT_EQ(false, x(0).is_feasibility_improvable());
+    for (auto i = 0; i < 10; i++) {
+        EXPECT_EQ(false, y(i).is_feasibility_improvable());
+    }
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, reset_variable_feasibility_improvability_arg_variable_ptrs) {
+    printemps::model::Model<int, double> model;
+
+    auto& x = model.create_variable("x", 0, 1);
+    auto& y = model.create_variables("y", 10, 0, 1);
+    model.categorize_variables();
+
+    x(0).set_is_feasibility_improvable(true);
+    EXPECT_EQ(true, x(0).is_feasibility_improvable());
+    for (auto i = 0; i < 10; i++) {
+        y(i).set_is_feasibility_improvable(true);
+        EXPECT_EQ(true, y(i).is_feasibility_improvable());
+    }
+    model.reset_variable_feasibility_improvability({&x(0), &y(0), &y(9)});
+
+    EXPECT_EQ(false, x(0).is_feasibility_improvable());
+    EXPECT_EQ(false, y(0).is_feasibility_improvable());
+    EXPECT_EQ(false, y(9).is_feasibility_improvable());
+    for (auto i = 1; i < 9; i++) {
+        EXPECT_EQ(true, y(i).is_feasibility_improvable());
+    }
+}
+
+/*****************************************************************************/
+TEST_F(TestModel,
+       reset_variable_feasibility_improvability_arg_constraint_ptrs) {
+    printemps::model::Model<int, double> model;
+
+    auto& x = model.create_variable("x", 0, 1);
+    auto& y = model.create_variables("y", 10, 0, 1);
+    auto& g = model.create_constraints("g", 2);
+
+    g(0) = x <= y(0);
+    g(1) = y(1) == y(9);
+
+    model.categorize_variables();
+    model.categorize_constraints();
+
+    x(0).set_is_feasibility_improvable(true);
+    EXPECT_EQ(true, x(0).is_feasibility_improvable());
+    for (auto i = 0; i < 10; i++) {
+        y(i).set_is_feasibility_improvable(true);
+        EXPECT_EQ(true, y(i).is_feasibility_improvable());
+    }
+    std::vector<printemps::model::Constraint<int, double>*> constraint_ptrs = {
+        &g(0), &g(1)};
+    model.reset_variable_feasibility_improvability(constraint_ptrs);
+
+    EXPECT_EQ(false, x(0).is_feasibility_improvable());
+    EXPECT_EQ(false, y(0).is_feasibility_improvable());
+    EXPECT_EQ(false, y(1).is_feasibility_improvable());
+    EXPECT_EQ(false, y(9).is_feasibility_improvable());
+    for (auto i = 2; i < 9; i++) {
+        EXPECT_EQ(true, y(i).is_feasibility_improvable());
+    }
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, update_variable_improvability) {
+    {
+        printemps::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x", -10, 10);
+        auto& y = model.create_variable("y", -10, 10);
+
+        [[maybe_unused]] auto& g = model.create_constraint("g", x - y <= 0);
+
+        model.minimize(-x + y);
+        model.categorize_variables();
+        model.categorize_constraints();
+        model.setup_variable_sensitivity();
+        model.setup_fixed_sensitivities(false);
+
+        x = -10;
+        y = -10;
+        model.update();
+        model.update_variable_objective_improvability();
+        model.update_variable_feasibility_improvability();
+        EXPECT_EQ(true, x(0).is_objective_improvable());
+        EXPECT_EQ(false, y(0).is_objective_improvable());
+        EXPECT_EQ(false, x(0).is_feasibility_improvable());
+        EXPECT_EQ(false, y(0).is_feasibility_improvable());
+
+        x = 10;
+        y = 10;
+        model.update();
+        model.update_variable_objective_improvability();
+        model.update_variable_feasibility_improvability();
+        EXPECT_EQ(false, x(0).is_objective_improvable());
+        EXPECT_EQ(true, y(0).is_objective_improvable());
+        EXPECT_EQ(false, x(0).is_feasibility_improvable());
+        EXPECT_EQ(false, y(0).is_feasibility_improvable());
+
+        x = 10;
+        y = -10;
+        model.update();
+        model.update_variable_objective_improvability();
+        model.update_variable_feasibility_improvability();
+        EXPECT_EQ(false, x(0).is_objective_improvable());
+        EXPECT_EQ(false, y(0).is_objective_improvable());
+        EXPECT_EQ(true, x(0).is_feasibility_improvable());
+        EXPECT_EQ(true, y(0).is_feasibility_improvable());
+    }
+    {
+        printemps::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x", -10, 10);
+        auto& y = model.create_variable("y", -10, 10);
+
+        [[maybe_unused]] auto& g = model.create_constraint("g", x - y == 0);
+
+        model.minimize(-x + y);
+        model.categorize_variables();
+        model.categorize_constraints();
+        model.setup_variable_sensitivity();
+        model.setup_fixed_sensitivities(false);
+
+        x = -10;
+        y = -10;
+        model.update();
+        model.update_variable_objective_improvability();
+        model.update_variable_feasibility_improvability();
+        EXPECT_EQ(true, x(0).is_objective_improvable());
+        EXPECT_EQ(false, y(0).is_objective_improvable());
+        EXPECT_EQ(false, x(0).is_feasibility_improvable());
+        EXPECT_EQ(false, y(0).is_feasibility_improvable());
+
+        x = 10;
+        y = 10;
+        model.update();
+        model.update_variable_objective_improvability();
+        model.update_variable_feasibility_improvability();
+        EXPECT_EQ(false, x(0).is_objective_improvable());
+        EXPECT_EQ(true, y(0).is_objective_improvable());
+        EXPECT_EQ(false, x(0).is_feasibility_improvable());
+        EXPECT_EQ(false, y(0).is_feasibility_improvable());
+
+        x = 10;
+        y = -10;
+        model.update();
+        model.update_variable_objective_improvability();
+        model.update_variable_feasibility_improvability();
+        EXPECT_EQ(false, x(0).is_objective_improvable());
+        EXPECT_EQ(false, y(0).is_objective_improvable());
+        EXPECT_EQ(true, x(0).is_feasibility_improvable());
+        EXPECT_EQ(true, y(0).is_feasibility_improvable());
+    }
+    {
+        printemps::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x", -10, 10);
+        auto& y = model.create_variable("y", -10, 10);
+
+        [[maybe_unused]] auto& g = model.create_constraint("g", x - y >= 0);
+
+        model.minimize(-x + y);
+        model.categorize_variables();
+        model.categorize_constraints();
+        model.setup_variable_sensitivity();
+        model.setup_fixed_sensitivities(false);
+
+        x = -10;
+        y = -10;
+        model.update();
+        model.update_variable_objective_improvability();
+        model.update_variable_feasibility_improvability();
+        EXPECT_EQ(true, x(0).is_objective_improvable());
+        EXPECT_EQ(false, y(0).is_objective_improvable());
+        EXPECT_EQ(false, x(0).is_feasibility_improvable());
+        EXPECT_EQ(false, y(0).is_feasibility_improvable());
+
+        x = 10;
+        y = 10;
+        model.update();
+        model.update_variable_objective_improvability();
+        model.update_variable_feasibility_improvability();
+        EXPECT_EQ(false, x(0).is_objective_improvable());
+        EXPECT_EQ(true, y(0).is_objective_improvable());
+        EXPECT_EQ(false, x(0).is_feasibility_improvable());
+        EXPECT_EQ(false, y(0).is_feasibility_improvable());
+
+        x = -10;
+        y = 10;
+        model.update();
+        model.update_variable_objective_improvability();
+        model.update_variable_feasibility_improvability();
+        EXPECT_EQ(true, x(0).is_objective_improvable());
+        EXPECT_EQ(true, y(0).is_objective_improvable());
+        EXPECT_EQ(true, x(0).is_feasibility_improvable());
+        EXPECT_EQ(true, y(0).is_feasibility_improvable());
+    }
+    {
+        printemps::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x", -10, 10);
+        auto& y = model.create_variable("y", -10, 10);
+
+        [[maybe_unused]] auto& g = model.create_constraint("g", x - y <= 0);
+
+        model.maximize(-x + y);
+        model.categorize_variables();
+        model.categorize_constraints();
+        model.setup_variable_sensitivity();
+        model.setup_fixed_sensitivities(false);
+
+        x = -10;
+        y = -10;
+
+        model.update();
+        model.update_variable_objective_improvability();
+        model.update_variable_feasibility_improvability();
+        EXPECT_EQ(false, x(0).is_objective_improvable());
+        EXPECT_EQ(true, y(0).is_objective_improvable());
+        EXPECT_EQ(false, x(0).is_feasibility_improvable());
+        EXPECT_EQ(false, y(0).is_feasibility_improvable());
+
+        x = 10;
+        y = 10;
+        model.update();
+        model.update_variable_objective_improvability();
+        model.update_variable_feasibility_improvability();
+        EXPECT_EQ(true, x(0).is_objective_improvable());
+        EXPECT_EQ(false, y(0).is_objective_improvable());
+        EXPECT_EQ(false, x(0).is_feasibility_improvable());
+        EXPECT_EQ(false, y(0).is_feasibility_improvable());
+
+        x = 10;
+        y = -10;
+        model.update();
+        model.update_variable_objective_improvability();
+        model.update_variable_feasibility_improvability();
+        EXPECT_EQ(true, x(0).is_objective_improvable());
+        EXPECT_EQ(true, y(0).is_objective_improvable());
+        EXPECT_EQ(true, x(0).is_feasibility_improvable());
+        EXPECT_EQ(true, y(0).is_feasibility_improvable());
+    }
+    {
+        printemps::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x", -10, 10);
+        auto& y = model.create_variable("y", -10, 10);
+
+        [[maybe_unused]] auto& g = model.create_constraint("g", x - y == 0);
+
+        model.maximize(-x + y);
+        model.categorize_variables();
+        model.categorize_constraints();
+        model.setup_variable_sensitivity();
+        model.setup_fixed_sensitivities(false);
+
+        x = -10;
+        y = -10;
+
+        model.update();
+        model.update_variable_objective_improvability();
+        model.update_variable_feasibility_improvability();
+        EXPECT_EQ(false, x(0).is_objective_improvable());
+        EXPECT_EQ(true, y(0).is_objective_improvable());
+        EXPECT_EQ(false, x(0).is_feasibility_improvable());
+        EXPECT_EQ(false, y(0).is_feasibility_improvable());
+
+        x = 10;
+        y = 10;
+        model.update();
+        model.update_variable_objective_improvability();
+        model.update_variable_feasibility_improvability();
+        EXPECT_EQ(true, x(0).is_objective_improvable());
+        EXPECT_EQ(false, y(0).is_objective_improvable());
+        EXPECT_EQ(false, x(0).is_feasibility_improvable());
+        EXPECT_EQ(false, y(0).is_feasibility_improvable());
+
+        x = 10;
+        y = -10;
+        model.update();
+        model.update_variable_objective_improvability();
+        model.update_variable_feasibility_improvability();
+        EXPECT_EQ(true, x(0).is_objective_improvable());
+        EXPECT_EQ(true, y(0).is_objective_improvable());
+        EXPECT_EQ(true, x(0).is_feasibility_improvable());
+        EXPECT_EQ(true, y(0).is_feasibility_improvable());
+    }
+    {
+        printemps::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x", -10, 10);
+        auto& y = model.create_variable("y", -10, 10);
+
+        [[maybe_unused]] auto& g = model.create_constraint("g", x - y >= 0);
+
+        model.maximize(-x + y);
+        model.categorize_variables();
+        model.categorize_constraints();
+        model.setup_variable_sensitivity();
+        model.setup_fixed_sensitivities(false);
+
+        x = -10;
+        y = -10;
+
+        model.update();
+        model.update_variable_objective_improvability();
+        model.update_variable_feasibility_improvability();
+        EXPECT_EQ(false, x(0).is_objective_improvable());
+        EXPECT_EQ(true, y(0).is_objective_improvable());
+        EXPECT_EQ(false, x(0).is_feasibility_improvable());
+        EXPECT_EQ(false, y(0).is_feasibility_improvable());
+
+        x = 10;
+        y = 10;
+        model.update();
+        model.update_variable_objective_improvability();
+        model.update_variable_feasibility_improvability();
+        EXPECT_EQ(true, x(0).is_objective_improvable());
+        EXPECT_EQ(false, y(0).is_objective_improvable());
+        EXPECT_EQ(false, x(0).is_feasibility_improvable());
+        EXPECT_EQ(false, y(0).is_feasibility_improvable());
+
+        x = -10;
+        y = 10;
+        model.update();
+        model.update_variable_objective_improvability();
+        model.update_variable_feasibility_improvability();
+        EXPECT_EQ(false, x(0).is_objective_improvable());
+        EXPECT_EQ(false, y(0).is_objective_improvable());
+        EXPECT_EQ(true, x(0).is_feasibility_improvable());
+        EXPECT_EQ(true, y(0).is_feasibility_improvable());
+    }
 }
 
 /*****************************************************************************/
@@ -2674,21 +1919,11 @@ TEST_F(TestModel, evaluate) {
         [[maybe_unused]] auto& h =
             model.create_constraint("h", x(0) + x(1) <= 1);
 
-        printemps::model::ValueProxy<double> local_penalty_coefficient_proxy(1);
-        local_penalty_coefficient_proxy.value() = 100;
+        g(0).local_penalty_coefficient() = 100;
+        h(0).local_penalty_coefficient() = 100;
 
-        printemps::model::ValueProxy<double> global_penalty_coefficient_proxy(
-            1);
-        global_penalty_coefficient_proxy.value() = 10000;
-
-        std::vector<printemps::model::ValueProxy<double>>
-            local_penalty_coefficient_proxies = {
-                local_penalty_coefficient_proxy,
-                local_penalty_coefficient_proxy};
-        std::vector<printemps::model::ValueProxy<double>>
-            global_penalty_coefficient_proxies = {
-                global_penalty_coefficient_proxy,
-                global_penalty_coefficient_proxy};
+        g(0).global_penalty_coefficient() = 10000;
+        h(0).global_penalty_coefficient() = 10000;
 
         model.minimize(p);
 
@@ -2703,9 +1938,7 @@ TEST_F(TestModel, evaluate) {
         }
 
         model.update();
-        auto score_before =
-            model.evaluate({}, local_penalty_coefficient_proxies,
-                           global_penalty_coefficient_proxies);
+        auto score_before = model.evaluate({});
 
         {
             printemps::model::Move<int, double> move;
@@ -2717,13 +1950,8 @@ TEST_F(TestModel, evaluate) {
                 }
             }
 
-            auto score_after_0 =
-                model.evaluate(move, local_penalty_coefficient_proxies,
-                               global_penalty_coefficient_proxies);
-
-            auto score_after_1 = model.evaluate(
-                move, score_before, local_penalty_coefficient_proxies,
-                global_penalty_coefficient_proxies);
+            auto score_after_0 = model.evaluate(move);
+            auto score_after_1 = model.evaluate(move, score_before);
 
             EXPECT_EQ(46, score_after_0.objective);
             EXPECT_EQ(5 + 1, score_after_0.total_violation);
@@ -2763,13 +1991,8 @@ TEST_F(TestModel, evaluate) {
                 }
             }
 
-            auto score_after_0 =
-                model.evaluate(move, local_penalty_coefficient_proxies,
-                               global_penalty_coefficient_proxies);
-
-            auto score_after_1 = model.evaluate(
-                move, score_before, local_penalty_coefficient_proxies,
-                global_penalty_coefficient_proxies);
+            auto score_after_0 = model.evaluate(move);
+            auto score_after_1 = model.evaluate(move, score_before);
 
             EXPECT_EQ(1, score_after_0.objective);
             EXPECT_EQ(0, score_after_0.total_violation);
@@ -2804,13 +2027,8 @@ TEST_F(TestModel, evaluate) {
                 }
             }
 
-            auto score_after_0 =
-                model.evaluate(move, local_penalty_coefficient_proxies,
-                               global_penalty_coefficient_proxies);
-
-            auto score_after_1 = model.evaluate(
-                move, score_before, local_penalty_coefficient_proxies,
-                global_penalty_coefficient_proxies);
+            auto score_after_0 = model.evaluate(move);
+            auto score_after_1 = model.evaluate(move, score_before);
 
             EXPECT_EQ(11, score_after_0.objective);
             EXPECT_EQ(1, score_after_0.total_violation);
@@ -2849,21 +2067,11 @@ TEST_F(TestModel, evaluate) {
         [[maybe_unused]] auto& h =
             model.create_constraint("h", x(0) + x(1) <= 1);
 
-        printemps::model::ValueProxy<double> local_penalty_coefficient_proxy(1);
-        local_penalty_coefficient_proxy.value() = 100;
+        g(0).local_penalty_coefficient() = 100;
+        h(0).local_penalty_coefficient() = 100;
 
-        printemps::model::ValueProxy<double> global_penalty_coefficient_proxy(
-            1);
-        global_penalty_coefficient_proxy.value() = 10000;
-
-        std::vector<printemps::model::ValueProxy<double>>
-            local_penalty_coefficient_proxies = {
-                local_penalty_coefficient_proxy,
-                local_penalty_coefficient_proxy};
-        std::vector<printemps::model::ValueProxy<double>>
-            global_penalty_coefficient_proxies = {
-                global_penalty_coefficient_proxy,
-                global_penalty_coefficient_proxy};
+        g(0).global_penalty_coefficient() = 10000;
+        h(0).global_penalty_coefficient() = 10000;
 
         model.maximize(p);
 
@@ -2877,9 +2085,7 @@ TEST_F(TestModel, evaluate) {
             element = 1;
         }
         model.update();
-        auto score_before =
-            model.evaluate({}, local_penalty_coefficient_proxies,
-                           global_penalty_coefficient_proxies);
+        auto score_before = model.evaluate({});
 
         {
             printemps::model::Move<int, double> move;
@@ -2891,12 +2097,8 @@ TEST_F(TestModel, evaluate) {
                 }
             }
 
-            auto score_after_0 =
-                model.evaluate(move, local_penalty_coefficient_proxies,
-                               global_penalty_coefficient_proxies);
-            auto score_after_1 = model.evaluate(
-                move, score_before, local_penalty_coefficient_proxies,
-                global_penalty_coefficient_proxies);
+            auto score_after_0 = model.evaluate(move);
+            auto score_after_1 = model.evaluate(move, score_before);
 
             EXPECT_EQ(-46, score_after_0.objective);
             EXPECT_EQ(5 + 1, score_after_0.total_violation);
@@ -2935,13 +2137,8 @@ TEST_F(TestModel, evaluate) {
                 }
             }
 
-            auto score_after_0 =
-                model.evaluate(move, local_penalty_coefficient_proxies,
-                               global_penalty_coefficient_proxies);
-
-            auto score_after_1 = model.evaluate(
-                move, score_before, local_penalty_coefficient_proxies,
-                global_penalty_coefficient_proxies);
+            auto score_after_0 = model.evaluate(move);
+            auto score_after_1 = model.evaluate(move, score_before);
 
             EXPECT_EQ(-1, score_after_0.objective);
             EXPECT_EQ(0, score_after_0.total_violation);
@@ -2976,13 +2173,8 @@ TEST_F(TestModel, evaluate) {
                 }
             }
 
-            auto score_after_0 =
-                model.evaluate(move, local_penalty_coefficient_proxies,
-                               global_penalty_coefficient_proxies);
-
-            auto score_after_1 = model.evaluate(
-                move, score_before, local_penalty_coefficient_proxies,
-                global_penalty_coefficient_proxies);
+            auto score_after_0 = model.evaluate(move);
+            auto score_after_1 = model.evaluate(move, score_before);
 
             EXPECT_EQ(-11, score_after_0.objective);
             EXPECT_EQ(1, score_after_0.total_violation);
