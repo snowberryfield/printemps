@@ -4,7 +4,7 @@ layout: default
 ---
 
 
-[Abstract](#abstract) | [Algorithm](#algorithm) | [Installation](#installation) | [Example](#example) | [Compilation](#compilation) | [Standalone Solver](#standalone-solver) | [Documents](#documents) | [Benchmark](#benchmark) | [Test](#test) | [License](#license) | [References](#references)
+[Abstract](#abstract) | [News](#news) | [Algorithm](#algorithm) | [Installation](#installation) | [Example](#example) | [Compilation](#compilation) | [Standalone Solver](#standalone-solver) | [Documents](#documents) | [Benchmark](#benchmark) | [Test](#test) | [License](#license) | [References](#references)
 
 
 
@@ -15,6 +15,12 @@ __PRINTEMPS__ is a C++ metaheuristics modeler/solver library for general combina
 - __Intuitiveness in modeling.__ It provides an intuitive modeling environment to define a optimization model as a program code. Users can define constraint and objective functions using arithmetic operations on decision variables.
 
 - __Flexibility to define neighborhood.__ It automatically detects the neighborhood structure of the problem. In addition to this, PRINTEMPS also accepts user-defined neighborhood.
+
+## News
+|     Date      | Update                                                                                            |
+|:-------------:|:--------------------------------------------------------------------------------------------------|
+| Jan. 24, 2021 | [Benchmark results](./contents/benchmark/index.md) of PRINTEMPS v1.5.2 were added.                |
+| Jan. 22, 2021 | [PRINTEMPS v1.5.2](https://github.com/snowberryfield/printemps/releases/tag/v1.5.2) was released. |
 
 ## Algorithm
 PRINTEMPS can compute approximate solutions for __linear and nonlinear integer optimization problems__. It employs __Tabu Search__ [1], a metaheuristics technique, to solve problems. In solving, it replaces constraints with penalty functions which return violations to the corresponding constraints, and the penalty functions multiplied by positive penalty coefficients are added to the objective function. The penalty coefficients are updated iteratively and automatically in a method similar (not exact same) to the one proposed in paper [2].
