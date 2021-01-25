@@ -363,9 +363,11 @@ MPS read_mps(const std::string &a_FILE_NAME) {
                         mps.variables[v_name].continuous_upper_bound = HUGE_VAL;
                     } else if (category == "BV") {
                         mps.variables[v_name].sense = MPSVariableSense::Integer;
-                        mps.variables[v_name].is_bound_defined    = true;
-                        mps.variables[v_name].integer_lower_bound = 0;
-                        mps.variables[v_name].integer_upper_bound = 1;
+                        mps.variables[v_name].is_bound_defined       = true;
+                        mps.variables[v_name].integer_lower_bound    = 0;
+                        mps.variables[v_name].integer_upper_bound    = 1;
+                        mps.variables[v_name].continuous_lower_bound = 0;
+                        mps.variables[v_name].continuous_upper_bound = 1;
                     } else if (category == "MI") {
                         mps.variables[v_name].is_bound_defined = true;
                         mps.variables[v_name].integer_lower_bound =
@@ -397,6 +399,8 @@ MPS read_mps(const std::string &a_FILE_NAME) {
                         mps.variables[v_name].is_bound_defined = true;
                         mps.variables[v_name].integer_lower_bound =
                             integer_value;
+                        mps.variables[v_name].continuous_lower_bound =
+                            continuous_value;
                     } else if (category == "UP") {
                         mps.variables[v_name].is_bound_defined = true;
                         mps.variables[v_name].integer_upper_bound =
@@ -408,6 +412,8 @@ MPS read_mps(const std::string &a_FILE_NAME) {
                         mps.variables[v_name].is_bound_defined = true;
                         mps.variables[v_name].integer_upper_bound =
                             integer_value;
+                        mps.variables[v_name].continuous_upper_bound =
+                            continuous_value;
                     } else if (category == "FX") {
                         mps.variables[v_name].is_bound_defined = true;
                         mps.variables[v_name].is_fixed         = true;
@@ -479,7 +485,8 @@ class MPSReader {
     /*************************************************************************/
     model::IPModel &create_model_from_mps(
         const std::string &a_FILE_NAME,
-        const bool         a_IS_ENABLED_SEPARATE_EQUALITY) {
+        const bool         a_IS_ENABLED_SEPARATE_EQUALITY,
+        const bool         a_ACCEPT_CONTINUOUS) {
         MPS mps = read_mps(a_FILE_NAME);
 
         std::unordered_map<std::string, model::IPVariable *> variable_ptrs;
@@ -491,9 +498,16 @@ class MPSReader {
             auto &variable = mps.variables[name];
 
             if (variable.sense == MPSVariableSense::Continuous) {
-                throw std::logic_error(utility::format_error_location(
-                    __FILE__, __LINE__, __func__,
-                    "The MPS file includes continuous variables."));
+                if (a_ACCEPT_CONTINUOUS) {
+                    utility::print_warning(
+                        "The continuous variable " + name +
+                            " will be regarded as an integer variable.",
+                        true);
+                } else {
+                    throw std::logic_error(utility::format_error_location(
+                        __FILE__, __LINE__, __func__,
+                        "The MPS file includes continuous variables."));
+                }
             }
 
             variable_proxy(count).set_bound(variable.integer_lower_bound,
