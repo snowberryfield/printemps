@@ -40,6 +40,7 @@ constexpr bool compute_permissibility(
                     return true;
                 }
             }
+            return false;
             break;
         }
         case TabuMode::Any: {
@@ -56,6 +57,7 @@ constexpr bool compute_permissibility(
                     return false;
                 }
             }
+            return true;
             break;
         }
 
