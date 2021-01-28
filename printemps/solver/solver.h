@@ -1255,31 +1255,46 @@ Result<T_Variable, T_Expression> solve(
          */
         if (!current_solution.is_feasible) {
             int number_of_violative_constraints = 0;
+            /**
+             * Due to the slow speed of standard output in the Windows DOS,
+             * printing all violations will affect performance. To avoid
+             * this problem, the maximum number of violations to be printed
+             * is 20.
+             */
+            const int MAX_NUMBER_OF_PRINT_ITEMS = 20;
+
+            utility::print_message(
+                "The current solution does not satisfy the following "
+                "constraints:",
+                master_option.verbose >= Verbose::Outer);
 
             for (const auto& proxy : current_solution.violation_value_proxies) {
                 auto& values      = proxy.flat_indexed_values();
                 auto& names       = proxy.flat_indexed_names();
                 int   values_size = values.size();
 
-                utility::print_message(
-                    "The current solution does not satisfy the following "
-                    "constraints:",
-                    master_option.verbose >= Verbose::Outer);
                 for (auto i = 0; i < values_size; i++) {
                     if (values[i] > 0) {
                         number_of_violative_constraints++;
-                        utility::print_info(
-                            " -- " + names[i] + " (violation: " +
-                                std::to_string(values[i]) + ")",
-                            master_option.verbose >= Verbose::Outer);
+                        if (number_of_violative_constraints <=
+                            MAX_NUMBER_OF_PRINT_ITEMS) {
+                            utility::print_info(
+                                " -- " + names[i] + " (violation: " +
+                                    std::to_string(values[i]) + ")",
+                                master_option.verbose >= Verbose::Outer);
+                        }
                     }
                 }
-                utility::print_message(
-                    "There are " +
-                        std::to_string(number_of_violative_constraints) +
-                        " violative constraints.",
-                    master_option.verbose >= Verbose::Outer);
             }
+            if (number_of_violative_constraints > MAX_NUMBER_OF_PRINT_ITEMS) {
+                utility::print_info("and much more...",
+                                    master_option.verbose >= Verbose::Outer);
+            }
+
+            utility::print_message(
+                "There are " + std::to_string(number_of_violative_constraints) +
+                    " violative constraints.",
+                master_option.verbose >= Verbose::Outer);
         }
 
         /**
