@@ -1560,7 +1560,25 @@ class Model {
     }
 
     /*************************************************************************/
-    SolutionScore evaluate(const Move<T_Variable, T_Expression> &a_MOVE) const
+    inline SolutionScore evaluate(
+        const Move<T_Variable, T_Expression> &a_MOVE) const noexcept {
+        SolutionScore score;
+        this->evaluate(&score, a_MOVE);
+        return score;
+    }
+
+    /*************************************************************************/
+    inline SolutionScore evaluate(const Move<T_Variable, T_Expression> &a_MOVE,
+                                  const SolutionScore &a_CURRENT_SCORE) const
+        noexcept {
+        SolutionScore score;
+        this->evaluate(&score, a_MOVE, a_CURRENT_SCORE);
+        return score;
+    }
+
+    /*************************************************************************/
+    constexpr void evaluate(SolutionScore *a_score_ptr,  //
+                            const Move<T_Variable, T_Expression> &a_MOVE) const
         noexcept {
         double total_violation = 0.0;
         double local_penalty   = 0.0;
@@ -1580,9 +1598,10 @@ class Model {
                 }
                 double violation = constraints[j].evaluate_violation(a_MOVE);
 
-                if (violation < constraints[j].violation_value()) {
-                    is_constraint_improvable = true;
-                }
+                is_constraint_improvable =
+                    is_constraint_improvable ||
+                    (violation < constraints[j].violation_value());
+
                 total_violation += violation;
                 local_penalty +=
                     violation * constraints[j].local_penalty_coefficient();
@@ -1591,32 +1610,29 @@ class Model {
             }
         }
 
-        double objective             = 0.0;
-        double objective_improvement = 0.0;
+        double objective = m_is_defined_objective *
+                           m_objective.evaluate(a_MOVE) * this->sign();
+        double objective_improvement =
+            m_is_defined_objective *
+            (m_objective.value() * this->sign() - objective);
 
-        if (m_is_defined_objective) {
-            objective = m_objective.evaluate(a_MOVE) * this->sign();
-            objective_improvement =
-                m_objective.value() * this->sign() - objective;
-        }
-
-        SolutionScore score({objective,                                  //
-                             objective_improvement,                      //
-                             total_violation,                            //
-                             local_penalty,                              //
-                             global_penalty,                             //
-                             objective + local_penalty,                  //
-                             objective + global_penalty,                 //
-                             !(total_violation > constant::EPSILON),     //
-                             objective_improvement > constant::EPSILON,  //
-                             is_constraint_improvable});
-
-        return score;
+        a_score_ptr->objective                  = objective;
+        a_score_ptr->objective_improvement      = objective_improvement;
+        a_score_ptr->total_violation            = total_violation;
+        a_score_ptr->local_penalty              = local_penalty;
+        a_score_ptr->global_penalty             = global_penalty;
+        a_score_ptr->local_augmented_objective  = objective + local_penalty;
+        a_score_ptr->global_augmented_objective = objective + global_penalty;
+        a_score_ptr->is_feasible = !(total_violation > constant::EPSILON);
+        a_score_ptr->is_objective_improvable =
+            objective_improvement > constant::EPSILON;
+        a_score_ptr->is_constraint_improvable = is_constraint_improvable;
     }
 
     /*************************************************************************/
-    SolutionScore evaluate(const Move<T_Variable, T_Expression> &a_MOVE,
-                           const SolutionScore &a_CURRENT_SCORE) const
+    constexpr void evaluate(SolutionScore *a_score_ptr,  //
+                            const Move<T_Variable, T_Expression> &a_MOVE,
+                            const SolutionScore &a_CURRENT_SCORE) const
         noexcept {
         bool is_constraint_improvable = false;
 
@@ -1632,9 +1648,8 @@ class Model {
                 constraint_ptr->evaluate_violation_diff(a_MOVE);
             total_violation += violation_diff;
 
-            if (violation_diff < 0) {
-                is_constraint_improvable = true;
-            }
+            is_constraint_improvable =
+                is_constraint_improvable || (violation_diff < 0);
 
             local_penalty +=
                 violation_diff * constraint_ptr->local_penalty_coefficient();
@@ -1642,27 +1657,23 @@ class Model {
                 violation_diff * constraint_ptr->global_penalty_coefficient();
         }
 
-        double objective             = 0.0;
-        double objective_improvement = 0.0;
+        double objective = m_is_defined_objective *
+                           m_objective.evaluate(a_MOVE) * this->sign();
+        double objective_improvement =
+            m_is_defined_objective *
+            (m_objective.value() * this->sign() - objective);
 
-        if (m_is_defined_objective) {
-            objective = m_objective.evaluate(a_MOVE) * this->sign();
-            objective_improvement =
-                m_objective.value() * this->sign() - objective;
-        }
-
-        SolutionScore score({objective,                                  //
-                             objective_improvement,                      //
-                             total_violation,                            //
-                             local_penalty,                              //
-                             global_penalty,                             //
-                             objective + local_penalty,                  //
-                             objective + global_penalty,                 //
-                             !(total_violation > constant::EPSILON),     //
-                             objective_improvement > constant::EPSILON,  //
-                             is_constraint_improvable});
-
-        return score;
+        a_score_ptr->objective                  = objective;
+        a_score_ptr->objective_improvement      = objective_improvement;
+        a_score_ptr->total_violation            = total_violation;
+        a_score_ptr->local_penalty              = local_penalty;
+        a_score_ptr->global_penalty             = global_penalty;
+        a_score_ptr->local_augmented_objective  = objective + local_penalty;
+        a_score_ptr->global_augmented_objective = objective + global_penalty;
+        a_score_ptr->is_feasible = !(total_violation > constant::EPSILON);
+        a_score_ptr->is_objective_improvable =
+            objective_improvement > constant::EPSILON;
+        a_score_ptr->is_constraint_improvable = is_constraint_improvable;
     }
 
     /*************************************************************************/

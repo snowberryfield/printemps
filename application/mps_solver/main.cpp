@@ -4,6 +4,8 @@
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
 
+#define _MPS_SOLVER
+
 #include <string>
 #include <iostream>
 
