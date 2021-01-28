@@ -23,7 +23,6 @@ constexpr bool compute_permissibility(
     const int                                    a_ITERATION,  //
     const Option &                               a_OPTION,     //
     const int                                    a_TABU_TENURE) {
-    bool        is_permissible         = true;
     const auto &last_update_iterations = a_MEMORY.last_update_iterations();
 
     switch (a_OPTION.tabu_search.tabu_mode) {
@@ -33,14 +32,12 @@ constexpr bool compute_permissibility(
              * The move is regarded as "tabu" if all of the variable to
              * be altered are included in the tabu list.
              */
-            is_permissible = false;
             for (const auto &alteration : a_MOVE.alterations) {
-                if (a_ITERATION - last_update_iterations[alteration.first->id()]
-                                                        [alteration.first
-                                                             ->flat_index()] >=
-                    a_TABU_TENURE) {
-                    is_permissible = true;
-                    break;
+                const int last_update_iteration =
+                    last_update_iterations[alteration.first->id()]
+                                          [alteration.first->flat_index()];
+                if (a_ITERATION - last_update_iteration >= a_TABU_TENURE) {
+                    return true;
                 }
             }
             break;
@@ -51,14 +48,12 @@ constexpr bool compute_permissibility(
              * The move is regarded as "tabu" if it includes any alteration
              * about a variable in the tabu list.
              */
-            is_permissible = true;
             for (const auto &alteration : a_MOVE.alterations) {
-                if (a_ITERATION -
-                        last_update_iterations[alteration.first->id()]
-                                              [alteration.first->flat_index()] <
-                    a_TABU_TENURE) {
-                    is_permissible = false;
-                    break;
+                const int last_update_iteration =
+                    last_update_iterations[alteration.first->id()]
+                                          [alteration.first->flat_index()];
+                if (a_ITERATION - last_update_iteration < a_TABU_TENURE) {
+                    return false;
                 }
             }
             break;
@@ -70,21 +65,18 @@ constexpr bool compute_permissibility(
                 "The specified tabu mode is invalid."));
         }
     }
-    return is_permissible;
+    /**
+     * If the process is normal, this return statement is not reached.
+     */
+    return true;
 }
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 constexpr double compute_frequency_penalty(
-    const model::Move<T_Variable, T_Expression> &a_MOVE,
-    const Memory &                               a_MEMORY,     //
-    [[maybe_unused]] const int                   a_ITERATION,  //
-    const Option &                               a_OPTION,     //
-    [[maybe_unused]] const int                   a_TABU_TENURE) noexcept {
-    if (a_ITERATION == 0) {
-        return 0.0;
-    }
-
+    const model::Move<T_Variable, T_Expression> &a_MOVE,    //
+    const Memory &                               a_MEMORY,  //
+    const Option &                               a_OPTION) noexcept {
     const auto &update_counts = a_MEMORY.update_counts();
 
     int move_update_count = 0;
@@ -106,10 +98,23 @@ constexpr void evaluate_move(
     const Memory &                               a_MEMORY,     //
     const Option &                               a_OPTION,     //
     const int                                    a_TABU_TENURE) noexcept {
-    a_score_ptr->is_permissible = compute_permissibility(
-        a_MOVE, a_MEMORY, a_ITERATION, a_OPTION, a_TABU_TENURE);
-    a_score_ptr->frequency_penalty = compute_frequency_penalty(
-        a_MOVE, a_MEMORY, a_ITERATION, a_OPTION, a_TABU_TENURE);
+    /**
+     * Check if the move is permissible or not.
+     */
+    a_score_ptr->is_permissible                //
+        = compute_permissibility(a_MOVE,       //
+                                 a_MEMORY,     //
+                                 a_ITERATION,  //
+                                 a_OPTION,     //
+                                 a_TABU_TENURE);
+
+    /**
+     * Compute the frequency pnalty of the move.
+     */
+    a_score_ptr->frequency_penalty             //
+        = compute_frequency_penalty(a_MOVE,    //
+                                    a_MEMORY,  //
+                                    a_OPTION);
 }
 }  // namespace tabu_search
 }  // namespace solver
