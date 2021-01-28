@@ -99,20 +99,17 @@ constexpr double compute_frequency_penalty(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-inline TabuSearchMoveScore evaluate_move(
+constexpr void evaluate_move(
+    TabuSearchMoveScore *                        a_score_ptr,  //
     const model::Move<T_Variable, T_Expression> &a_MOVE,       //
     const int                                    a_ITERATION,  //
     const Memory &                               a_MEMORY,     //
     const Option &                               a_OPTION,     //
     const int                                    a_TABU_TENURE) noexcept {
-    TabuSearchMoveScore score;
-
-    score.is_permissible = compute_permissibility(a_MOVE, a_MEMORY, a_ITERATION,
-                                                  a_OPTION, a_TABU_TENURE);
-    score.frequency_penalty = compute_frequency_penalty(
+    a_score_ptr->is_permissible = compute_permissibility(
         a_MOVE, a_MEMORY, a_ITERATION, a_OPTION, a_TABU_TENURE);
-
-    return score;
+    a_score_ptr->frequency_penalty = compute_frequency_penalty(
+        a_MOVE, a_MEMORY, a_ITERATION, a_OPTION, a_TABU_TENURE);
 }
 }  // namespace tabu_search
 }  // namespace solver

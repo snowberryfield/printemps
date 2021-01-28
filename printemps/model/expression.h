@@ -188,9 +188,11 @@ class Expression : public AbstractMultiArrayElement {
     inline constexpr T_Expression evaluate(
         const Move<T_Variable, T_Expression> &a_MOVE) const noexcept {
         /// The following code is required for nonlinear objective functions.
+#ifndef _MPS_SOLVER
         if (a_MOVE.alterations.size() == 0) {
             return this->evaluate();
         }
+#endif
 
         T_Expression new_value = m_value;
         for (const auto &alteration : a_MOVE.alterations) {
