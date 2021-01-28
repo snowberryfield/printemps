@@ -1598,9 +1598,9 @@ class Model {
                 }
                 double violation = constraints[j].evaluate_violation(a_MOVE);
 
-                is_constraint_improvable =
-                    is_constraint_improvable ||
-                    (violation < constraints[j].violation_value());
+                if (violation < constraints[j].violation_value()) {
+                    is_constraint_improvable = true;
+                }
 
                 total_violation += violation;
                 local_penalty +=
@@ -1610,11 +1610,13 @@ class Model {
             }
         }
 
-        double objective = m_is_defined_objective *
-                           m_objective.evaluate(a_MOVE) * this->sign();
-        double objective_improvement =
-            m_is_defined_objective *
-            (m_objective.value() * this->sign() - objective);
+        double objective             = 0.0;
+        double objective_improvement = 0.0;
+        if (m_is_defined_objective) {
+            objective = m_objective.evaluate(a_MOVE) * this->sign();
+            objective_improvement =
+                m_objective.value() * this->sign() - objective;
+        }
 
         a_score_ptr->objective                  = objective;
         a_score_ptr->objective_improvement      = objective_improvement;
@@ -1648,8 +1650,9 @@ class Model {
                 constraint_ptr->evaluate_violation_diff(a_MOVE);
             total_violation += violation_diff;
 
-            is_constraint_improvable =
-                is_constraint_improvable || (violation_diff < 0);
+            if (violation_diff < 0) {
+                is_constraint_improvable = true;
+            }
 
             local_penalty +=
                 violation_diff * constraint_ptr->local_penalty_coefficient();
@@ -1657,11 +1660,14 @@ class Model {
                 violation_diff * constraint_ptr->global_penalty_coefficient();
         }
 
-        double objective = m_is_defined_objective *
-                           m_objective.evaluate(a_MOVE) * this->sign();
-        double objective_improvement =
-            m_is_defined_objective *
-            (m_objective.value() * this->sign() - objective);
+        double objective             = 0.0;
+        double objective_improvement = 0.0;
+
+        if (m_is_defined_objective) {
+            objective = m_objective.evaluate(a_MOVE) * this->sign();
+            objective_improvement =
+                m_objective.value() * this->sign() - objective;
+        }
 
         a_score_ptr->objective                  = objective;
         a_score_ptr->objective_improvement      = objective_improvement;
