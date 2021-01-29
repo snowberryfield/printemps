@@ -37,6 +37,25 @@ template <class T_Variable, class T_Expression>
 Result<T_Variable, T_Expression> solve(
     model::Model<T_Variable, T_Expression>* a_model,  //
     const Option&                           a_OPTION) {
+    /**
+     * Start to measure computational time and get the starting time.
+     */
+    utility::TimeKeeper time_keeper;
+    std::string         start_date_time = utility::date_time();
+
+    /**
+     * Print the program name, the project url, and the starting time.
+     */
+    utility::print_single_line(a_OPTION.verbose >= Verbose::Outer);
+    utility::print(
+        "PRINTEMPS " + constant::VERSION + " (" + constant::PROJECT_URL + ")",
+        a_OPTION.verbose >= Verbose::Outer);
+    utility::print("running from " + start_date_time,
+                   a_OPTION.verbose >= Verbose::Outer);
+
+    /**
+     * The model can be solved only once.
+     */
     if (a_model->is_solved()) {
         throw std::logic_error(utility::format_error_location(
             __FILE__, __LINE__, __func__,
@@ -44,16 +63,13 @@ Result<T_Variable, T_Expression> solve(
     } else {
         a_model->set_is_solved(true);
     }
+
     /**
      * Define type aliases.
      */
     using Model_T           = model::Model<T_Variable, T_Expression>;
     using Solution_T        = model::Solution<T_Variable, T_Expression>;
     using IncumbentHolder_T = IncumbentHolder<T_Variable, T_Expression>;
-    /**
-     * Start to measure computational time.
-     */
-    utility::TimeKeeper time_keeper;
 
     /**
      * Copy arguments as local variables.
@@ -107,7 +123,6 @@ Result<T_Variable, T_Expression> solve(
      * - verify_and_correct_integer_variables_initial_values()
      * - setup_fixed_sensitivities()
      */
-
     model->setup(master_option.is_enabled_presolve,
                  master_option.is_enabled_initial_value_correction,
                  master_option.is_enabled_aggregation_move,
@@ -205,6 +220,9 @@ Result<T_Variable, T_Expression> solve(
      */
     model->update();
 
+    /**
+     * Prepare local variables to be updated in the following process.
+     */
     Solution_T        current_solution = model->export_solution();
     Solution_T        previous_solution;
     IncumbentHolder_T incumbent_holder;
@@ -1255,31 +1273,46 @@ Result<T_Variable, T_Expression> solve(
          */
         if (!current_solution.is_feasible) {
             int number_of_violative_constraints = 0;
+            /**
+             * Due to the slow speed of standard output in the Windows DOS,
+             * printing all violations will affect performance. To avoid
+             * this problem, the maximum number of violations to be printed
+             * is 20.
+             */
+            const int MAX_NUMBER_OF_PRINT_ITEMS = 20;
+
+            utility::print_message(
+                "The current solution does not satisfy the following "
+                "constraints:",
+                master_option.verbose >= Verbose::Outer);
 
             for (const auto& proxy : current_solution.violation_value_proxies) {
                 auto& values      = proxy.flat_indexed_values();
                 auto& names       = proxy.flat_indexed_names();
                 int   values_size = values.size();
 
-                utility::print_message(
-                    "The current solution does not satisfy the following "
-                    "constraints:",
-                    master_option.verbose >= Verbose::Outer);
                 for (auto i = 0; i < values_size; i++) {
                     if (values[i] > 0) {
                         number_of_violative_constraints++;
-                        utility::print_info(
-                            " -- " + names[i] + " (violation: " +
-                                std::to_string(values[i]) + ")",
-                            master_option.verbose >= Verbose::Outer);
+                        if (number_of_violative_constraints <=
+                            MAX_NUMBER_OF_PRINT_ITEMS) {
+                            utility::print_info(
+                                " -- " + names[i] + " (violation: " +
+                                    std::to_string(values[i]) + ")",
+                                master_option.verbose >= Verbose::Outer);
+                        }
                     }
                 }
-                utility::print_message(
-                    "There are " +
-                        std::to_string(number_of_violative_constraints) +
-                        " violative constraints.",
-                    master_option.verbose >= Verbose::Outer);
             }
+            if (number_of_violative_constraints > MAX_NUMBER_OF_PRINT_ITEMS) {
+                utility::print_info("and much more...",
+                                    master_option.verbose >= Verbose::Outer);
+            }
+
+            utility::print_message(
+                "There are " + std::to_string(number_of_violative_constraints) +
+                    " violative constraints.",
+                master_option.verbose >= Verbose::Outer);
         }
 
         /**
@@ -1412,6 +1445,11 @@ Result<T_Variable, T_Expression> solve(
     }
 
     /**
+     * Get the finish time.
+     */
+    std::string finish_date_time = utility::date_time();
+
+    /**
      * If a feasible solution is found in optimization, the incumbent
      * solution is defined by the solution with the best objective function
      * value among the feasible solutions. If no feasible solution is found,
@@ -1466,11 +1504,12 @@ Result<T_Variable, T_Expression> solve(
      * Prepare the result object to return.
      */
     Result<T_Variable, T_Expression> result;
-    result.solution = named_solution;
-
+    result.solution                          = named_solution;
     result.status.penalty_coefficients       = named_penalty_coefficients;
     result.status.update_counts              = named_update_counts;
     result.status.is_found_feasible_solution = named_solution.is_feasible();
+    result.status.start_date_time            = start_date_time;
+    result.status.finish_date_time           = finish_date_time;
     result.status.elapsed_time               = time_keeper.elapsed_time();
     result.status.number_of_lagrange_dual_iterations =
         number_of_lagrange_dual_iterations;

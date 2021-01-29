@@ -203,13 +203,16 @@ LocalSearchResult<T_Variable, T_Expression> solve(
              * The neighborhood solutions are evaluated in sequential by fast or
              * ordinary(slow) evaluation methods.
              */
+#ifndef _MPS_SOLVER
             if (model->is_enabled_fast_evaluation()) {
-                trial_solution_score =
-                    model->evaluate(*move_ptr, solution_score);
+#endif
+                model->evaluate(&trial_solution_score, *move_ptr,
+                                solution_score);
+#ifndef _MPS_SOLVER
             } else {
-                trial_solution_score = model->evaluate(*move_ptr);
+                model->evaluate(&trial_solution_score, *move_ptr);
             }
-
+#endif
             /**
              * Update the incumbent if the evaluated solution improves it.
              */

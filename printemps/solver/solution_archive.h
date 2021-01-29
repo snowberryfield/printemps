@@ -120,6 +120,9 @@ class SolutionArchive {
         indent_level++;
 
         /// Summary
+        ofs << utility::indent_spaces(indent_level) << "\"version\" : "
+            << "\"" << constant::VERSION << "\"," << std::endl;
+
         ofs << utility::indent_spaces(indent_level) << "\"name\" : "
             << "\"" << a_MODEL_SUMMARY.name << "\"," << std::endl;
 
