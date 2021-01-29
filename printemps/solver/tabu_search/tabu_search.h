@@ -339,21 +339,23 @@ TabuSearchResult<T_Variable, T_Expression> solve(
              * The neighborhood solutions will be evaluated in parallel by fast
              * or ordinary(slow) evaluation methods.
              */
+#ifndef _MPS_SOLVER
             if (model->is_enabled_fast_evaluation()) {
-                trial_solution_scores[i]                    //
-                    = model->evaluate(*trial_move_ptrs[i],  //
-                                      current_solution_score);
-
+#endif
+                model->evaluate(&trial_solution_scores[i],  //
+                                *trial_move_ptrs[i],        //
+                                current_solution_score);
+#ifndef _MPS_SOLVER
             } else {
-                trial_solution_scores[i] = model->evaluate(*trial_move_ptrs[i]);
+                model->evaluate(&trial_solution_scores[i],  //
+                                *trial_move_ptrs[i]);
             }
-
-            trial_move_scores[i]                      //
-                = evaluate_move(*trial_move_ptrs[i],  //
-                                iteration,            //
-                                memory,               //
-                                option,               //
-                                tabu_tenure);
+#endif
+            evaluate_move(&trial_move_scores[i], *trial_move_ptrs[i],  //
+                          iteration,                                   //
+                          memory,                                      //
+                          option,                                      //
+                          tabu_tenure);
 
             objective_improvements[i] =
                 trial_solution_scores[i].objective_improvement;
