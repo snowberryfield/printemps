@@ -37,7 +37,7 @@ TEST_F(TestConstraint, initialize) {
         printemps::model::Constraint<int, double>::create_instance();
 
     /// Check the initial values of the base class members.
-    EXPECT_EQ(0, constraint.id());
+    EXPECT_EQ(0, constraint.proxy_index());
     EXPECT_EQ(0, constraint.flat_index());
     EXPECT_EQ(0, constraint.multi_dimensional_index()[0]);
     EXPECT_EQ("", constraint.name());
@@ -1057,10 +1057,10 @@ TEST_F(TestConstraint, evaluate_violation_diff) {
 /*****************************************************************************/
 TEST_F(TestConstraint, update_arg_void) {
     /// This method is tested in following tests:
-    /// - evaluate_function_arg_void()
-    /// - evaluate_expression_arg_void()
-    /// - evaluate_violation_function_arg_void()
-    /// - evaluate_violation_expression_arg_void()
+    /// - evaluate_function_arg_voindex()
+    /// - evaluate_expression_arg_voindex()
+    /// - evaluate_violation_function_arg_voindex()
+    /// - evaluate_violation_expression_arg_voindex()
 }
 
 /*****************************************************************************/

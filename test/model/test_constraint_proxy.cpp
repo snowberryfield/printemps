@@ -37,7 +37,7 @@ TEST_F(TestConstraintProxy, scalar_create_instance) {
     auto& constraint_proxy = model.create_constraint("c");
 
     /// Check the initial values of the base class members.
-    EXPECT_EQ(0, constraint_proxy.id());
+    EXPECT_EQ(0, constraint_proxy.index());
     EXPECT_EQ(1, constraint_proxy.shape()[0]);
     EXPECT_EQ(1, constraint_proxy.strides()[0]);
     EXPECT_EQ(1, constraint_proxy.number_of_dimensions());
@@ -276,7 +276,7 @@ TEST_F(TestConstraintProxy, one_dimensional_create_instance) {
     auto& expression_proxy = model.create_expressions("e", 2);
 
     /// Check the initial values of the base class members.
-    EXPECT_EQ(0, expression_proxy.id());
+    EXPECT_EQ(0, expression_proxy.index());
     EXPECT_EQ(2, expression_proxy.shape()[0]);
     EXPECT_EQ(1, expression_proxy.strides()[0]);
     EXPECT_EQ(1, expression_proxy.number_of_dimensions());
@@ -546,7 +546,7 @@ TEST_F(TestConstraintProxy, two_dimensional_create_instance) {
     auto& expression_proxy = model.create_expressions("e", {2, 3});
 
     /// Check the initial values of the base class members.
-    EXPECT_EQ(0, expression_proxy.id());
+    EXPECT_EQ(0, expression_proxy.index());
     EXPECT_EQ(2, expression_proxy.shape()[0]);
     EXPECT_EQ(3, expression_proxy.shape()[1]);
     EXPECT_EQ(3, expression_proxy.strides()[0]);
@@ -825,7 +825,7 @@ TEST_F(TestConstraintProxy, three_dimensional_create_instance) {
     auto& constraint_proxy = model.create_constraints("c", {2, 3, 4});
 
     /// Check the initial values of the base class members.
-    EXPECT_EQ(0, constraint_proxy.id());
+    EXPECT_EQ(0, constraint_proxy.index());
     EXPECT_EQ(2, constraint_proxy.shape()[0]);
     EXPECT_EQ(3, constraint_proxy.shape()[1]);
     EXPECT_EQ(4, constraint_proxy.shape()[2]);
@@ -882,7 +882,7 @@ TEST_F(TestConstraintProxy, four_dimensional_create_instance) {
     auto& constraint_proxy = model.create_constraints("c", {2, 3, 4, 5});
 
     /// Check the initial values of the base class members.
-    EXPECT_EQ(0, constraint_proxy.id());
+    EXPECT_EQ(0, constraint_proxy.index());
     EXPECT_EQ(2, constraint_proxy.shape()[0]);
     EXPECT_EQ(3, constraint_proxy.shape()[1]);
     EXPECT_EQ(4, constraint_proxy.shape()[2]);

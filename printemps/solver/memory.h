@@ -153,7 +153,7 @@ class Memory {
     constexpr void update(const model::Move<T_Variable, T_Expression> &a_MOVE,
                           const int a_ITERATION) noexcept {
         for (const auto &alteration : a_MOVE.alterations) {
-            int id         = alteration.first->id();
+            int id         = alteration.first->proxy_index();
             int flat_index = alteration.first->flat_index();
 
             m_last_update_iterations[id][flat_index] = a_ITERATION;
@@ -172,7 +172,7 @@ class Memory {
             this->update(a_MOVE, a_ITERATION);
         } else {
             for (const auto &alteration : a_MOVE.alterations) {
-                int id         = alteration.first->id();
+                int id         = alteration.first->proxy_index();
                 int flat_index = alteration.first->flat_index();
                 int randomness =
                     (*get_rand_mt)() % (2 * a_RANDOM_WIDTH) - a_RANDOM_WIDTH;

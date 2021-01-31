@@ -34,7 +34,7 @@ constexpr bool compute_permissibility(
              */
             for (const auto &alteration : a_MOVE.alterations) {
                 const int last_update_iteration =
-                    last_update_iterations[alteration.first->id()]
+                    last_update_iterations[alteration.first->proxy_index()]
                                           [alteration.first->flat_index()];
                 if (a_ITERATION - last_update_iteration >= a_TABU_TENURE) {
                     return true;
@@ -51,7 +51,7 @@ constexpr bool compute_permissibility(
              */
             for (const auto &alteration : a_MOVE.alterations) {
                 const int last_update_iteration =
-                    last_update_iterations[alteration.first->id()]
+                    last_update_iterations[alteration.first->proxy_index()]
                                           [alteration.first->flat_index()];
                 if (a_ITERATION - last_update_iteration < a_TABU_TENURE) {
                     return false;
@@ -83,7 +83,7 @@ constexpr double compute_frequency_penalty(
 
     int move_update_count = 0;
     for (const auto &alteration : a_MOVE.alterations) {
-        move_update_count += update_counts[alteration.first->id()]
+        move_update_count += update_counts[alteration.first->proxy_index()]
                                           [alteration.first->flat_index()];
     }
     return move_update_count *

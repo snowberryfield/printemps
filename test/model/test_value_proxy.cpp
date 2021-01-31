@@ -35,7 +35,7 @@ TEST_F(TestValueProxy, scalar_constructor) {
     const int                         ID = -1;
     printemps::model::ValueProxy<int> value_proxy(ID);
 
-    EXPECT_EQ(ID, value_proxy.id());
+    EXPECT_EQ(ID, value_proxy.index());
     EXPECT_EQ(1, value_proxy.shape()[0]);
     EXPECT_EQ(1, value_proxy.strides()[0]);
     EXPECT_EQ(1, static_cast<int>(value_proxy.number_of_dimensions()));
@@ -147,7 +147,7 @@ TEST_F(TestValueProxy, one_dimensional_constructor) {
     const int                         ID = -1;
     printemps::model::ValueProxy<int> value_proxy(ID, 2);
 
-    EXPECT_EQ(ID, value_proxy.id());
+    EXPECT_EQ(ID, value_proxy.index());
     EXPECT_EQ(2, value_proxy.shape()[0]);
     EXPECT_EQ(1, value_proxy.strides()[0]);
     EXPECT_EQ(1, static_cast<int>(value_proxy.number_of_dimensions()));
@@ -249,7 +249,7 @@ TEST_F(TestValueProxy, two_dimensional_constructor) {
     const int                         ID = -1;
     printemps::model::ValueProxy<int> value_proxy(ID, {2, 3});
 
-    EXPECT_EQ(ID, value_proxy.id());
+    EXPECT_EQ(ID, value_proxy.index());
     EXPECT_EQ(2, value_proxy.shape()[0]);
     EXPECT_EQ(3, value_proxy.shape()[1]);
     EXPECT_EQ(3, value_proxy.strides()[0]);
@@ -354,7 +354,7 @@ TEST_F(TestValueProxy, three_dimensional_constructor) {
     const int                         ID = -1;
     printemps::model::ValueProxy<int> value_proxy(ID, {2, 3, 4});
 
-    EXPECT_EQ(-1, value_proxy.id());
+    EXPECT_EQ(-1, value_proxy.index());
     EXPECT_EQ(2, value_proxy.shape()[0]);
     EXPECT_EQ(3, value_proxy.shape()[1]);
     EXPECT_EQ(4, value_proxy.shape()[2]);
@@ -415,7 +415,7 @@ TEST_F(TestValueProxy, four_dimensional_constructor) {
     const int                         ID = -1;
     printemps::model::ValueProxy<int> value_proxy(ID, {2, 3, 4, 5});
 
-    EXPECT_EQ(-1, value_proxy.id());
+    EXPECT_EQ(-1, value_proxy.index());
     EXPECT_EQ(2, value_proxy.shape()[0]);
     EXPECT_EQ(3, value_proxy.shape()[1]);
     EXPECT_EQ(4, value_proxy.shape()[2]);

@@ -86,7 +86,7 @@ class VariableProxy : public AbstractMultiArray {
 
         std::vector<int> multi_dimensional_index(this->number_of_dimensions());
         for (auto &&variable : m_variables) {
-            variable.set_id(m_id);
+            variable.set_proxy_index(m_index);
             variable.set_flat_index(flat_index);
             this->update_multi_dimensional_index(&multi_dimensional_index,
                                                  flat_index);
@@ -340,7 +340,7 @@ class VariableProxy : public AbstractMultiArray {
     /*************************************************************************/
     inline constexpr ValueProxy<T_Variable> export_values_and_names(
         void) const {
-        ValueProxy<T_Variable> proxy(m_id, m_shape);
+        ValueProxy<T_Variable> proxy(m_index, m_shape);
 
         int number_of_elements = this->number_of_elements();
         for (auto i = 0; i < number_of_elements; i++) {
