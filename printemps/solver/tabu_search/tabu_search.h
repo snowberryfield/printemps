@@ -485,16 +485,9 @@ TabuSearchResult<T_Variable, T_Expression> solve(
         /**
          * Update the memory.
          */
-        int tabu_tenure_random_width = static_cast<int>(
+        int random_width = static_cast<int>(
             option.tabu_search.tabu_tenure_randomize_rate * tabu_tenure);
-
-        int tabu_tenure_randomness = 0;
-        if (tabu_tenure_random_width > 0) {
-            tabu_tenure_randomness =
-                get_rand_mt() % (2 * tabu_tenure_random_width) -
-                tabu_tenure_random_width;
-        }
-        memory.update(*move_ptr, iteration + tabu_tenure_randomness);
+        memory.update(*move_ptr, iteration, random_width, &get_rand_mt);
 
         /**
          * Calculate various statistics for logging.
