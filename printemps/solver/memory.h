@@ -163,6 +163,29 @@ class Memory {
     }
 
     /*************************************************************************/
+    template <class T_Variable, class T_Expression>
+    constexpr void update(const model::Move<T_Variable, T_Expression> &a_MOVE,
+                          const int     a_ITERATION,     //
+                          const int     a_RANDOM_WIDTH,  //
+                          std::mt19937 *get_rand_mt) noexcept {
+        if (a_RANDOM_WIDTH == 0) {
+            this->update(a_MOVE, a_ITERATION);
+        } else {
+            for (const auto &alteration : a_MOVE.alterations) {
+                int id         = alteration.first->id();
+                int flat_index = alteration.first->flat_index();
+                int randomness =
+                    (*get_rand_mt)() % (2 * a_RANDOM_WIDTH) - a_RANDOM_WIDTH;
+
+                m_last_update_iterations[id][flat_index] =
+                    a_ITERATION + randomness;
+                m_update_counts[id][flat_index]++;
+                m_total_update_counts++;
+            }
+        }
+    }
+
+    /*************************************************************************/
     inline void reset_last_update_iterations(void) {
         /// This method cannot be constexpr.
         for (auto &&proxy : m_last_update_iterations) {
