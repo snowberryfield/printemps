@@ -184,12 +184,6 @@ Result<T_Variable, T_Expression> solve(
      */
     std::mt19937 get_rand_mt(master_option.seed);
 
-    utility::print_single_line(  //
-        master_option.verbose >= Verbose::Outer);
-
-    utility::print_message(  //
-        "Optimization starts.", master_option.verbose >= Verbose::Outer);
-
     /**
      * Set local and global penalty coefficient for each constraint.
      */
@@ -239,6 +233,15 @@ Result<T_Variable, T_Expression> solve(
     int number_of_tabu_search_loops        = 0;
 
     bool is_terminated = false;
+
+    /**
+     * Start optimization.
+     */
+    utility::print_single_line(  //
+        master_option.verbose >= Verbose::Outer);
+
+    utility::print_message(  //
+        "Optimization starts.", master_option.verbose >= Verbose::Outer);
 
     /**
      * Solve Lagrange dual to obtain a better initial solution ß(Optional).
@@ -930,7 +933,7 @@ Result<T_Variable, T_Expression> solve(
             for (auto&& proxy : model->constraint_proxies()) {
                 auto& violation_values =
                     result_local_augmented_incumbent_solution
-                        .violation_value_proxies[proxy.id()]
+                        .violation_value_proxies[proxy.index()]
                         .flat_indexed_values();
 
                 for (auto&& constraint : proxy.flat_indexed_constraints()) {
@@ -988,7 +991,7 @@ Result<T_Variable, T_Expression> solve(
 
             for (auto&& proxy : model->constraint_proxies()) {
                 auto& violation_values =
-                    current_solution.violation_value_proxies[proxy.id()]
+                    current_solution.violation_value_proxies[proxy.index()]
                         .flat_indexed_values();
 
                 for (auto&& constraint : proxy.flat_indexed_constraints()) {

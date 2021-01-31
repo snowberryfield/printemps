@@ -81,7 +81,7 @@ class ConstraintProxy : public AbstractMultiArray {
 
         std::vector<int> multi_dimensional_index(this->number_of_dimensions());
         for (auto &&constraint : m_constraints) {
-            constraint.set_id(m_id);
+            constraint.set_proxy_index(m_index);
             constraint.set_flat_index(flat_index);
             this->update_multi_dimensional_index(&multi_dimensional_index,
                                                  flat_index);
@@ -201,7 +201,7 @@ class ConstraintProxy : public AbstractMultiArray {
     /*************************************************************************/
     inline constexpr ValueProxy<T_Expression> export_values_and_names(
         void) const {
-        ValueProxy<T_Expression> proxy(m_id, m_shape);
+        ValueProxy<T_Expression> proxy(m_index, m_shape);
 
         int number_of_elements = this->number_of_elements();
         for (auto i = 0; i < number_of_elements; i++) {
@@ -215,7 +215,7 @@ class ConstraintProxy : public AbstractMultiArray {
     /*************************************************************************/
     inline constexpr ValueProxy<T_Expression> export_violations_and_names(
         void) const {
-        ValueProxy<T_Expression> proxy(m_id, m_shape);
+        ValueProxy<T_Expression> proxy(m_index, m_shape);
 
         int number_of_elements = this->number_of_elements();
         for (auto i = 0; i < number_of_elements; i++) {

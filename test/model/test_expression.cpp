@@ -37,7 +37,7 @@ TEST_F(TestExpression, initialize) {
         printemps::model::Expression<int, double>::create_instance();
 
     /// Check the initial values of the base class members.
-    EXPECT_EQ(0, expression.id());
+    EXPECT_EQ(0, expression.proxy_index());
     EXPECT_EQ(0, expression.flat_index());
     EXPECT_EQ(0, expression.multi_dimensional_index()[0]);
     EXPECT_EQ("", expression.name());
