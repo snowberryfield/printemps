@@ -566,7 +566,7 @@ constexpr int fix_redundant_variables(
 
             /**
              * If x_{j} has superior objective coefficient than that of x_{i},
-             * the value of x_{i} will be fixed by 0.
+             * the value of x_{i} will be fixed by 0 and break.
              */
             if ((a_model->is_minimization() &&
                  (variable_ptrs[i]->objective_sensitivity() >=
@@ -583,6 +583,26 @@ constexpr int fix_redundant_variables(
 
                 number_of_newly_fixed_variables++;
                 break;
+
+            }
+            /**
+             * If x_{j} does not have superior objective coefficient than that
+             * of x_{i}, the value of x_{j} will be fixed by 0.
+             */
+            else if ((a_model->is_minimization() &&
+                      (variable_ptrs[i]->objective_sensitivity() <
+                       variable_ptrs[j]->objective_sensitivity())) ||
+                     (!a_model->is_minimization() &&
+                      (variable_ptrs[i]->objective_sensitivity() >
+                       variable_ptrs[j]->objective_sensitivity()))) {
+                variable_ptrs[j]->fix_by(0);
+                utility::print_message(
+                    "The value of redundant decision variable " +
+                        variable_ptrs[j]->name() + " was fixed by " +
+                        std::to_string(0) + ".",
+                    a_IS_ENABLED_PRINT);
+
+                number_of_newly_fixed_variables++;
             }
         }
     }
@@ -619,9 +639,9 @@ constexpr void presolve(Model<T_Variable, T_Expression> *a_model,  //
     }
 
     /**
-     * Since fix_redundant_variables() is expensive, it
-     * will be enabled if the number of decision variables is equal to or less
-     * than the constant FIX_REDUNDANT_VARIABLES_THRESHOLD.
+     * Since fix_redundant_variables() is expensive, it will be enabled if the
+     * number of decision variables is equal to or less than the constant
+     * FIX_REDUNDANT_VARIABLES_THRESHOLD.
      */
     const int FIX_REDUNDANT_VARIABLES_THRESHOLD = 100000;
     if (a_model->is_linear() &&
