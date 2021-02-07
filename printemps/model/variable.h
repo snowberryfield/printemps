@@ -309,6 +309,13 @@ class Variable : public AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
+    inline constexpr const std::unordered_set<
+        Constraint<T_Variable, T_Expression> *>
+        &related_constraint_ptrs(void) const {
+        return m_related_constraint_ptrs;
+    }
+
+    /*************************************************************************/
     inline constexpr void register_constraint_sensitivity(
         Constraint<T_Variable, T_Expression> *a_constraint_ptr,
         const T_Expression                    a_SENSITIVITY) {
@@ -318,6 +325,13 @@ class Variable : public AbstractMultiArrayElement {
     /*************************************************************************/
     inline constexpr void reset_constraint_sensitivities(void) {
         m_constraint_sensitivities.clear();
+    }
+
+    /*************************************************************************/
+    inline constexpr std::unordered_map<Constraint<T_Variable, T_Expression> *,
+                                        T_Expression>
+        &constraint_sensitivities(void) {
+        return m_constraint_sensitivities;
     }
 
     /*************************************************************************/
