@@ -76,10 +76,15 @@ constexpr bool compute_permissibility(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 constexpr double compute_frequency_penalty(
-    const model::Move<T_Variable, T_Expression> &a_MOVE,    //
-    const Memory &                               a_MEMORY,  //
+    const model::Move<T_Variable, T_Expression> &a_MOVE,       //
+    const int                                    a_ITERATION,  //
+    const Memory &                               a_MEMORY,     //
     const Option &                               a_OPTION) noexcept {
     const auto &update_counts = a_MEMORY.update_counts();
+
+    if (a_ITERATION == 0) {
+        return 0.0;
+    }
 
     int move_update_count = 0;
     for (const auto &alteration : a_MOVE.alterations) {
@@ -113,9 +118,10 @@ constexpr void evaluate_move(
     /**
      * Compute the frequency pnalty of the move.
      */
-    a_score_ptr->frequency_penalty             //
-        = compute_frequency_penalty(a_MOVE,    //
-                                    a_MEMORY,  //
+    a_score_ptr->frequency_penalty                //
+        = compute_frequency_penalty(a_MOVE,       //
+                                    a_ITERATION,  //
+                                    a_MEMORY,     //
                                     a_OPTION);
 }
 }  // namespace tabu_search
