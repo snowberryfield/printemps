@@ -1320,7 +1320,7 @@ class Model {
         const std::vector<ValueProxy<T_Variable>> &a_PROXIES) {
         for (auto &&proxy : m_variable_proxies) {
             for (auto &&variable : proxy.flat_indexed_variables()) {
-                int id         = variable.id();
+                int id         = variable.proxy_index();
                 int flat_index = variable.flat_index();
                 variable.set_value_if_not_fixed(
                     a_PROXIES[id].flat_indexed_values(flat_index));
@@ -1689,7 +1689,7 @@ class Model {
         double lagrangian = m_objective.value();
 
         for (auto &&constraint_ptr : m_constraint_reference.constraint_ptrs) {
-            int id         = constraint_ptr->id();
+            int id         = constraint_ptr->proxy_index();
             int flat_index = constraint_ptr->flat_index();
 
             lagrangian += a_LAGRANGE_MULTIPLIER_PROXIES[id].flat_indexed_values(
@@ -1706,7 +1706,7 @@ class Model {
         std::vector<ValueProxy<T_Value>> variable_parameter_proxies;
 
         for (const auto &proxy : m_variable_proxies) {
-            ValueProxy<T_Value> variable_parameter_proxy(proxy.id(),
+            ValueProxy<T_Value> variable_parameter_proxy(proxy.index(),
                                                          proxy.shape());
             variable_parameter_proxy.fill(a_VALUE);
             int number_of_elements = proxy.number_of_elements();
@@ -1727,7 +1727,7 @@ class Model {
         std::vector<ValueProxy<T_Value>> expression_parameter_proxies;
 
         for (const auto &proxy : m_expression_proxies) {
-            ValueProxy<T_Value> expression_parameter_proxy(proxy.id(),
+            ValueProxy<T_Value> expression_parameter_proxy(proxy.index(),
                                                            proxy.shape());
             expression_parameter_proxy.fill(a_VALUE);
             int number_of_elements = proxy.number_of_elements();
@@ -1747,7 +1747,7 @@ class Model {
         std::vector<ValueProxy<T_Value>> constraint_parameter_proxies;
 
         for (const auto &proxy : m_constraint_proxies) {
-            ValueProxy<T_Value> constraint_parameter_proxy(proxy.id(),
+            ValueProxy<T_Value> constraint_parameter_proxy(proxy.index(),
                                                            proxy.shape());
             constraint_parameter_proxy.fill(a_VALUE);
             int number_of_elements = proxy.number_of_elements();
@@ -1765,7 +1765,7 @@ class Model {
         void) const {
         std::vector<ValueProxy<double>> local_penalty_coefficient_proxies;
         for (const auto &proxy : m_constraint_proxies) {
-            ValueProxy<double> local_penalty_coefficient_proxy(proxy.id(),
+            ValueProxy<double> local_penalty_coefficient_proxy(proxy.index(),
                                                                proxy.shape());
 
             int number_of_elements = proxy.number_of_elements();

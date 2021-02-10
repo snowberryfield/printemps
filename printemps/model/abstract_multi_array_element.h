@@ -14,7 +14,7 @@ namespace model {
 /*****************************************************************************/
 class AbstractMultiArrayElement {
    protected:
-    int              m_id;
+    int              m_proxy_index;
     int              m_flat_index;
     std::vector<int> m_multi_dimensional_index;
     std::string      m_name;
@@ -31,7 +31,7 @@ class AbstractMultiArrayElement {
 
     /*************************************************************************/
     void initialize(void) {
-        m_id                      = 0;
+        m_proxy_index             = 0;
         m_flat_index              = 0;
         m_multi_dimensional_index = {0};
         m_name                    = "";
@@ -39,13 +39,13 @@ class AbstractMultiArrayElement {
 
    public:
     /*************************************************************************/
-    inline constexpr void set_id(const int a_ID) {
-        m_id = a_ID;
+    inline constexpr void set_proxy_index(const int a_proxy_index) {
+        m_proxy_index = a_proxy_index;
     }
 
     /*************************************************************************/
-    inline constexpr int id(void) const {
-        return m_id;
+    inline constexpr int proxy_index(void) const {
+        return m_proxy_index;
     }
 
     /*************************************************************************/
