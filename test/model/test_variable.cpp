@@ -36,7 +36,7 @@ TEST_F(TestVariable, initialize) {
     auto variable = printemps::model::Variable<int, double>::create_instance();
 
     /// Check the initial values of the base class members.
-    EXPECT_EQ(0, variable.id());
+    EXPECT_EQ(0, variable.proxy_index());
     EXPECT_EQ(0, variable.flat_index());
     EXPECT_EQ(0, variable.multi_dimensional_index()[0]);
     EXPECT_EQ("", variable.name());

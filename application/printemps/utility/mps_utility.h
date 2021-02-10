@@ -203,6 +203,7 @@ MPS read_mps(const std::string &a_FILE_NAME) {
     std::stringstream        stream;
     std::vector<std::string> items;
     std::string              name;
+    std::string              name_new;
     std::string              category;
 
     /**
@@ -343,9 +344,66 @@ MPS read_mps(const std::string &a_FILE_NAME) {
                 break;
             }
             case MPSReadMode::Ranges: {
-                throw std::logic_error(utility::format_error_location(
-                    __FILE__, __LINE__, __func__,
-                    "This program does not compatible to RANGES section."));
+                /**
+                 * The specification of RANGES section is based on the following
+                 * site:
+                 * https://www.ibm.com/support/knowledgecenter/vi/SSSA5P_20.1.0/ilog.odms.cplex.help/CPLEX/FileFormats/topics/MPS_records.html
+                 */
+                if (items_size < 3) {
+                    throw std::logic_error(utility::format_error_location(
+                        __FILE__, __LINE__, __func__,
+                        "The MPS file has something wrong in RANGES section."));
+                }
+
+                for (auto i = 0; i < (items_size - 1) / 2; i++) {
+                    name         = items[2 * i + 1];
+                    double range = atof(items[2 * i + 2].c_str());
+                    name_new     = name + "_range";
+
+                    mps.constraints[name_new].name = name_new;
+                    mps.constraints[name_new].sensitivities =
+                        mps.constraints[name].sensitivities;
+                    switch (mps.constraints[name].sense) {
+                        case MPSConstraintSense::Lower: {
+                            mps.constraints[name_new].sense =
+                                MPSConstraintSense::Upper;
+                            mps.constraints[name_new].rhs =
+                                mps.constraints[name].rhs + fabs(range);
+                            break;
+                        }
+                        case MPSConstraintSense::Upper: {
+                            mps.constraints[name_new].sense =
+                                MPSConstraintSense::Lower;
+                            mps.constraints[name_new].rhs =
+                                mps.constraints[name].rhs - fabs(range);
+                            break;
+                        }
+                        case MPSConstraintSense::Equal: {
+                            if (range > 0) {
+                                mps.constraints[name_new].sense =
+                                    MPSConstraintSense::Upper;
+                                mps.constraints[name_new].rhs =
+                                    mps.constraints[name].rhs + fabs(range);
+                            } else {
+                                mps.constraints[name_new].sense =
+                                    MPSConstraintSense::Lower;
+                                mps.constraints[name_new].rhs =
+                                    mps.constraints[name].rhs - fabs(range);
+                            }
+                            break;
+                        }
+                        default: {
+                            throw std::logic_error(
+                                utility::format_error_location(
+                                    __FILE__, __LINE__, __func__,
+                                    "The MPS file has something wrong in "
+                                    "RANGES section."));
+                        }
+                    }
+
+                    mps.constraint_names.push_back(name_new);
+                    mps.number_of_lower_constraints++;
+                }
                 break;
             }
             case MPSReadMode::Bounds: {

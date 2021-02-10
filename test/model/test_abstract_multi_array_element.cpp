@@ -38,24 +38,24 @@ TEST_F(TestAbstractMultiArrayElement, initialize) {
      */
     auto element = printemps::model::Variable<int, double>::create_instance();
 
-    EXPECT_EQ(0, element.id());
+    EXPECT_EQ(0, element.proxy_index());
     EXPECT_EQ(0, element.flat_index());
     EXPECT_EQ(0, element.multi_dimensional_index()[0]);
     EXPECT_EQ("", element.name());
 }
 
 /*****************************************************************************/
-TEST_F(TestAbstractMultiArrayElement, set_id) {
+TEST_F(TestAbstractMultiArrayElement, set_proxy_index) {
     auto element = printemps::model::Variable<int, double>::create_instance();
 
     auto id = random_integer();
-    element.set_id(id);
-    EXPECT_EQ(id, element.id());
+    element.set_proxy_index(id);
+    EXPECT_EQ(id, element.proxy_index());
 }
 
 /*****************************************************************************/
-TEST_F(TestAbstractMultiArrayElement, id) {
-    /// This method is tested in set_id().
+TEST_F(TestAbstractMultiArrayElement, proxy_index) {
+    /// This method is tested in set_proxy_index().
 }
 
 /*****************************************************************************/
