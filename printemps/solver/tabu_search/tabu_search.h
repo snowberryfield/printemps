@@ -131,6 +131,8 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     int last_global_augmented_incumbent_update_iteration = -1;
     int last_feasible_incumbent_update_iteration         = -1;
 
+    int local_augmented_incumbent_update_count = 0;
+
     TabuSearchTerminationStatus termination_status =
         TabuSearchTerminationStatus::ITERATION_OVER;
 
@@ -194,6 +196,12 @@ TabuSearchResult<T_Variable, T_Expression> solve(
         if (incumbent_holder.feasible_incumbent_objective() <=
             option.target_objective_value) {
             termination_status = TabuSearchTerminationStatus::REACH_TARGET;
+            break;
+        }
+
+        if (local_augmented_incumbent_update_count ==
+            option.tabu_search.pruning_count_threshold) {
+            termination_status = TabuSearchTerminationStatus::EARLY_STOP;
             break;
         }
 
@@ -505,6 +513,19 @@ TabuSearchResult<T_Variable, T_Expression> solve(
         if (update_status &
             IncumbentHolderConstant::STATUS_FEASIBLE_INCUMBENT_UPDATE) {
             last_feasible_incumbent_update_iteration = iteration;
+        }
+
+        /**
+         * For pruning, count updating of the local augmented incumbent without
+         * global augmented incumbent improvement.
+         */
+        if (update_status ==
+            IncumbentHolderConstant::STATUS_LOCAL_AUGMENTED_INCUMBENT_UPDATE) {
+            local_augmented_incumbent_update_count++;
+        } else if (update_status &
+                   IncumbentHolderConstant::
+                       STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
+            local_augmented_incumbent_update_count = 0;
         }
 
         /**
