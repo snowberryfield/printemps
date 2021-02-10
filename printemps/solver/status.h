@@ -135,7 +135,7 @@ struct Status {
                                     this->update_counts,  //
                                     "update_counts",      //
                                     indent_level,         //
-                                    "%.d", false);
+                                    "%d", false);
 
         indent_level--;
         ofs << utility::indent_spaces(indent_level) << "}" << std::endl;
