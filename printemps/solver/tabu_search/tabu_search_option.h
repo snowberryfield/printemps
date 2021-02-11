@@ -27,6 +27,7 @@ struct TabuSearchOptionConstant {
     static constexpr double DEFAULT_INITIAL_MODIFICATION_RANDOMIZE_RATE = 0.5;
     static constexpr double DEFAULT_MOVE_PRESERVE_RATE                  = 1.0;
     static constexpr double DEFAULT_FREQUENCY_PENALTY_COEFFICIENT       = 1E-5;
+    static constexpr double DEFAULT_PRUNING_RATE_THRESHOLD              = 0.5;
 
     static constexpr double DEFAULT_IS_ENABLED_SHUFFLE         = true;
     static constexpr double DEFAULT_IS_ENABLED_MOVE_CURTAIL    = false;
@@ -58,6 +59,7 @@ struct TabuSearchOption {
     TabuMode tabu_mode;
     double   move_preserve_rate;                           // hidden
     double   frequency_penalty_coefficient;                // hidden
+    double   pruning_rate_threshold;                       // hidden
     bool     is_enabled_shuffle;                           // hidden
     bool     is_enabled_move_curtail;                      // hidden
     bool     is_enabled_automatic_break;                   // hidden
@@ -101,6 +103,8 @@ struct TabuSearchOption {
             TabuSearchOptionConstant::DEFAULT_MOVE_PRESERVE_RATE;
         this->frequency_penalty_coefficient =
             TabuSearchOptionConstant::DEFAULT_FREQUENCY_PENALTY_COEFFICIENT;
+        this->pruning_rate_threshold =
+            TabuSearchOptionConstant::DEFAULT_PRUNING_RATE_THRESHOLD;
         this->is_enabled_shuffle =
             TabuSearchOptionConstant::DEFAULT_IS_ENABLED_SHUFFLE;
         this->is_enabled_move_curtail =

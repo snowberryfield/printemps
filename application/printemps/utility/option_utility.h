@@ -397,6 +397,12 @@ printemps::solver::Option read_option(const std::string &a_FILE_NAME) {
                   option_object_tabu_search);
 
         /**********************************************************************/
+        /// tabu_search.pruning_rate_threshold
+        read_json(&option.tabu_search.pruning_rate_threshold,  //
+                  "pruning_rate_threshold",                    //
+                  option_object_tabu_search);
+
+        /**********************************************************************/
         /// tabu_search.is_enabled_shuffle
         read_json(&option.tabu_search.is_enabled_shuffle,  //
                   "is_enabled_shuffle",                    //
