@@ -222,7 +222,6 @@ TabuSearchResult<T_Variable, T_Expression> solve(
              * If the option improvability_screening_mode is not None,
              * only improvable moves will be generated.
              */
-
             auto changed_variable_ptrs =
                 utility::to_vector(model::related_variable_ptrs(current_move));
             auto changed_constraint_ptrs =
@@ -307,8 +306,8 @@ TabuSearchResult<T_Variable, T_Expression> solve(
             model->neighborhood().shuffle_moves(&get_rand_mt);
         }
 
-        auto& trial_move_ptrs = model->neighborhood().move_ptrs();
-        int   number_of_moves = trial_move_ptrs.size();
+        const auto& trial_move_ptrs = model->neighborhood().move_ptrs();
+        int         number_of_moves = trial_move_ptrs.size();
 
         if (option.tabu_search.is_enabled_move_curtail) {
             number_of_moves = static_cast<int>(

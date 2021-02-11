@@ -91,9 +91,9 @@ class Expression : public AbstractMultiArrayElement {
     /*************************************************************************/
     /// Copy assignment
     /**
-     * NOTE: The members id and flat_index will be discarded in the copy
-     * assignment and related methods. It's not a problem because the program
-     * does not use flat_index at the moment.
+     * NOTE: The members proxy_index and flat_index will be discarded in the
+     * copy assignment and related methods. It's not a problem because the
+     * program does not use flat_index at the moment.
      */
     Expression<T_Variable, T_Expression> &operator    =(
         const Expression<T_Variable, T_Expression> &) = default;

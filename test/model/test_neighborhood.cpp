@@ -381,34 +381,34 @@ TEST_F(TestNeighborhood, setup_move_updater) {
      * Check the numbers of filtered moves. *
      */
     {
-        int selections_size = model.selections().size();
+        const int SELECTIONS_SIZE = model.selections().size();
 
-        int binary_variables_size =
+        const int BINARY_VARIABLES_SIZE =
             model.variable_reference().binary_variable_ptrs.size();
 
-        int integer_variables_size =
+        const int INTEGER_VARIABLES_SIZE =
             model.variable_reference().integer_variable_ptrs.size();
 
-        int aggregations_size =
+        const int AGGREGATIONS_SIZE =
             model.constraint_type_reference().aggregation_ptrs.size();
 
-        int precedences_size =
+        const int PRECEDENCES_SIZE =
             model.constraint_type_reference().precedence_ptrs.size();
 
-        int variable_bounds_size =
+        const int VARIABLE_BOUNDS_SIZE =
             model.constraint_type_reference().variable_bound_ptrs.size();
 
-        int selection_variables_size =
+        const int SELECTIONS_VARIABLES_SIZE =
             model.variable_reference().selection_variable_ptrs.size();
 
         EXPECT_EQ(                                          //
-            (binary_variables_size)                         // Binary
-                + (4 * integer_variables_size - 4 - 2 - 2)  // Integer
-                + (4 * aggregations_size - 5)               // Aggregation
-                + (2 * precedences_size - 4)                // Precedence
-                + (4 * variable_bounds_size)                // Variable Bound
+            (BINARY_VARIABLES_SIZE)                         // Binary
+                + (4 * INTEGER_VARIABLES_SIZE - 4 - 2 - 2)  // Integer
+                + (4 * AGGREGATIONS_SIZE - 5)               // Aggregation
+                + (2 * PRECEDENCES_SIZE - 4)                // Precedence
+                + (4 * VARIABLE_BOUNDS_SIZE)                // Variable Bound
                 + (21)                                      // Exclusive
-                + (selection_variables_size - selections_size),  // Selection
+                + (SELECTIONS_VARIABLES_SIZE - SELECTIONS_SIZE),  // Selection
             static_cast<int>(model.neighborhood().move_ptrs().size()));
     }
 }
@@ -422,8 +422,9 @@ TEST_F(TestNeighborhood, register_chain_move) {
     model.categorize_constraints();
     model.setup_neighborhood(true, true, true, true, false, false, false);
 
-    EXPECT_EQ(0, model.neighborhood().chain_moves().size());
-    EXPECT_EQ(0, model.neighborhood().chain_move_flags().size());
+    EXPECT_EQ(0, static_cast<int>(model.neighborhood().chain_moves().size()));
+    EXPECT_EQ(0,
+              static_cast<int>(model.neighborhood().chain_move_flags().size()));
 
     printemps::model::Move<int, double> move;
     move.alterations.emplace_back(&x(0), 1);
@@ -433,8 +434,9 @@ TEST_F(TestNeighborhood, register_chain_move) {
 
     model.neighborhood().register_chain_move(move);
 
-    EXPECT_EQ(1, model.neighborhood().chain_moves().size());
-    EXPECT_EQ(1, model.neighborhood().chain_move_flags().size());
+    EXPECT_EQ(1, static_cast<int>(model.neighborhood().chain_moves().size()));
+    EXPECT_EQ(1,
+              static_cast<int>(model.neighborhood().chain_move_flags().size()));
 
     EXPECT_EQ(&x(0),
               model.neighborhood().chain_moves()[0].alterations[0].first);
@@ -445,8 +447,9 @@ TEST_F(TestNeighborhood, register_chain_move) {
     EXPECT_EQ(1, model.neighborhood().chain_moves()[0].alterations[1].second);
 
     model.neighborhood().clear_chain_moves();
-    EXPECT_EQ(0, model.neighborhood().chain_moves().size());
-    EXPECT_EQ(0, model.neighborhood().chain_move_flags().size());
+    EXPECT_EQ(0, static_cast<int>(model.neighborhood().chain_moves().size()));
+    EXPECT_EQ(0,
+              static_cast<int>(model.neighborhood().chain_move_flags().size()));
 }
 
 /*****************************************************************************/
@@ -463,8 +466,9 @@ TEST_F(TestNeighborhood, deduplicate_chain_moves) {
     model.categorize_constraints();
     model.setup_neighborhood(true, true, true, true, false, false, false);
 
-    EXPECT_EQ(0, model.neighborhood().chain_moves().size());
-    EXPECT_EQ(0, model.neighborhood().chain_move_flags().size());
+    EXPECT_EQ(0, static_cast<int>(model.neighborhood().chain_moves().size()));
+    EXPECT_EQ(0,
+              static_cast<int>(model.neighborhood().chain_move_flags().size()));
     printemps::model::Move<int, double> move1;
     move1.alterations.emplace_back(&x(0), 1);
     move1.alterations.emplace_back(&x(1), 1);
@@ -502,12 +506,14 @@ TEST_F(TestNeighborhood, deduplicate_chain_moves) {
         model.neighborhood().register_chain_move(move4);
         model.neighborhood().register_chain_move(move5);
     }
-    EXPECT_EQ(25, model.neighborhood().chain_moves().size());
-    EXPECT_EQ(25, model.neighborhood().chain_move_flags().size());
+    EXPECT_EQ(25, static_cast<int>(model.neighborhood().chain_moves().size()));
+    EXPECT_EQ(25,
+              static_cast<int>(model.neighborhood().chain_move_flags().size()));
 
     model.neighborhood().deduplicate_chain_moves();
-    EXPECT_EQ(5, model.neighborhood().chain_moves().size());
-    EXPECT_EQ(5, model.neighborhood().chain_move_flags().size());
+    EXPECT_EQ(5, static_cast<int>(model.neighborhood().chain_moves().size()));
+    EXPECT_EQ(5,
+              static_cast<int>(model.neighborhood().chain_move_flags().size()));
 }
 
 /*****************************************************************************/
@@ -533,26 +539,30 @@ TEST_F(TestNeighborhood, reduce_chain_moves) {
     std::mt19937 rand;
     rand.seed(1);
     model.neighborhood().reduce_chain_moves(CHAIN_MOVE_CAPACITY, &rand);
-    EXPECT_EQ(5000, model.neighborhood().chain_moves().size());
-    EXPECT_EQ(5000, model.neighborhood().chain_move_flags().size());
+    EXPECT_EQ(5000,
+              static_cast<int>(model.neighborhood().chain_moves().size()));
+    EXPECT_EQ(5000,
+              static_cast<int>(model.neighborhood().chain_move_flags().size()));
 
     for (auto i = 0; i < 5000; i++) {
         model.neighborhood().register_chain_move(move);
     }
 
     model.neighborhood().reduce_chain_moves(CHAIN_MOVE_CAPACITY, &rand);
-    EXPECT_EQ(CHAIN_MOVE_CAPACITY, model.neighborhood().chain_moves().size());
     EXPECT_EQ(CHAIN_MOVE_CAPACITY,
-              model.neighborhood().chain_move_flags().size());
+              static_cast<int>(model.neighborhood().chain_moves().size()));
+    EXPECT_EQ(CHAIN_MOVE_CAPACITY,
+              static_cast<int>(model.neighborhood().chain_move_flags().size()));
 
     for (auto i = 0; i < 5000; i++) {
         model.neighborhood().register_chain_move(move);
     }
 
     model.neighborhood().reduce_chain_moves(CHAIN_MOVE_CAPACITY, &rand);
-    EXPECT_EQ(CHAIN_MOVE_CAPACITY, model.neighborhood().chain_moves().size());
     EXPECT_EQ(CHAIN_MOVE_CAPACITY,
-              model.neighborhood().chain_move_flags().size());
+              static_cast<int>(model.neighborhood().chain_moves().size()));
+    EXPECT_EQ(CHAIN_MOVE_CAPACITY,
+              static_cast<int>(model.neighborhood().chain_move_flags().size()));
 }
 
 /*****************************************************************************/
