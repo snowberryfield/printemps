@@ -48,9 +48,9 @@ TEST_F(TestAbstractMultiArrayElement, initialize) {
 TEST_F(TestAbstractMultiArrayElement, set_proxy_index) {
     auto element = printemps::model::Variable<int, double>::create_instance();
 
-    auto id = random_integer();
-    element.set_proxy_index(id);
-    EXPECT_EQ(id, element.proxy_index());
+    auto proxy_index = random_integer();
+    element.set_proxy_index(proxy_index);
+    EXPECT_EQ(proxy_index, element.proxy_index());
 }
 
 /*****************************************************************************/

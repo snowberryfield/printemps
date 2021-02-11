@@ -379,8 +379,9 @@ class VariableProxy : public AbstractMultiArray {
     /*************************************************************************/
     inline constexpr Expression<T_Variable, T_Expression> sum(
         const std::vector<int> &a_MULTI_DIMENSIONAL_INDEX) const {
-        int multi_dimensional_index_size = a_MULTI_DIMENSIONAL_INDEX.size();
-        if (this->number_of_dimensions() != multi_dimensional_index_size) {
+        const int MULTI_DIMENSIONAL_INDEX_SIZE =
+            a_MULTI_DIMENSIONAL_INDEX.size();
+        if (this->number_of_dimensions() != MULTI_DIMENSIONAL_INDEX_SIZE) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of dimensions does not match."));
@@ -435,8 +436,8 @@ class VariableProxy : public AbstractMultiArray {
                 "The number of dimensions does not one."));
         }
 
-        int coefficients_size = a_COEFFICIENTS.size();
-        if (this->number_of_elements() != coefficients_size) {
+        const int COEFFICIENTS_SIZE = a_COEFFICIENTS.size();
+        if (this->number_of_elements() != COEFFICIENTS_SIZE) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of elements does not match."));
@@ -461,8 +462,9 @@ class VariableProxy : public AbstractMultiArray {
     inline constexpr Expression<T_Variable, T_Expression> dot(
         const std::vector<int> &a_MULTI_DIMENSIONAL_INDEX,
         const T_Array &         a_COEFFICIENTS) {
-        int multi_dimensional_index_size = a_MULTI_DIMENSIONAL_INDEX.size();
-        if (this->number_of_dimensions() != multi_dimensional_index_size) {
+        const int MULTI_DIMENSIONAL_INDEX_SIZE =
+            a_MULTI_DIMENSIONAL_INDEX.size();
+        if (this->number_of_dimensions() != MULTI_DIMENSIONAL_INDEX_SIZE) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of dimensions does not match."));
@@ -582,8 +584,9 @@ class VariableProxy : public AbstractMultiArray {
     /*************************************************************************/
     inline constexpr Variable<T_Variable, T_Expression> &operator()(
         const std::vector<int> &a_MULTI_DIMENSIONAL_INDEX) {
-        int multi_dimensional_index_size = a_MULTI_DIMENSIONAL_INDEX.size();
-        if (this->number_of_dimensions() != multi_dimensional_index_size) {
+        const int MULTI_DIMENSIONAL_INDEX_SIZE =
+            a_MULTI_DIMENSIONAL_INDEX.size();
+        if (this->number_of_dimensions() != MULTI_DIMENSIONAL_INDEX_SIZE) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of dimensions does not match."));

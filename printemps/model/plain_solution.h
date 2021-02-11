@@ -57,10 +57,10 @@ struct PlainSolution {
                << std::endl;
         *a_ofs << utility::indent_spaces(indent_level) << "\"variables\" : ";
         *a_ofs << "[";
-        auto& variables      = this->variables;
-        int   variables_size = variables.size();
-        for (auto i = 0; i < variables_size; i++) {
-            if (i != variables_size - 1) {
+        const auto& variables      = this->variables;
+        const int   VARIABLES_SIZE = variables.size();
+        for (auto i = 0; i < VARIABLES_SIZE; i++) {
+            if (i != VARIABLES_SIZE - 1) {
                 *a_ofs << variables[i] << ", ";
             } else {
                 *a_ofs << variables[i] << "]" << std::endl;

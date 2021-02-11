@@ -283,8 +283,9 @@ class ExpressionProxy : public AbstractMultiArray {
     /*************************************************************************/
     inline constexpr Expression<T_Variable, T_Expression> sum(
         const std::vector<int> &a_MULTI_DIMENSIONAL_INDEX) const {
-        int multi_dimensional_index_size = a_MULTI_DIMENSIONAL_INDEX.size();
-        if (this->number_of_dimensions() != multi_dimensional_index_size) {
+        const int MULTI_DIMENSIONAL_INDEX_SIZE =
+            a_MULTI_DIMENSIONAL_INDEX.size();
+        if (this->number_of_dimensions() != MULTI_DIMENSIONAL_INDEX_SIZE) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "Number of dimensions does not match."));
@@ -332,8 +333,8 @@ class ExpressionProxy : public AbstractMultiArray {
                 __FILE__, __LINE__, __func__,
                 "Number of dimensions does not 1."));
         }
-        int coefficient_size = a_COEFFICIENTS.size();
-        if (this->number_of_elements() != coefficient_size) {
+        const int COEFFICIENTS_SIZE = a_COEFFICIENTS.size();
+        if (this->number_of_elements() != COEFFICIENTS_SIZE) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "Number of elements does not match."));
@@ -352,8 +353,8 @@ class ExpressionProxy : public AbstractMultiArray {
     inline constexpr Expression<T_Variable, T_Expression> dot(
         const std::vector<int> &a_MULTI_DIMENSIONAL_INDEX,
         const T_Array &         a_COEFFICIENTS) {
-        int multi_dimensional_index_size = a_MULTI_DIMENSIONAL_INDEX.size();
-        if (this->number_of_dimensions() != multi_dimensional_index_size) {
+        const int MULTI_DIMENSIONAL_INDEX = a_MULTI_DIMENSIONAL_INDEX.size();
+        if (this->number_of_dimensions() != MULTI_DIMENSIONAL_INDEX) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "Number of dimensions does not match."));
@@ -400,8 +401,8 @@ class ExpressionProxy : public AbstractMultiArray {
 
         auto result = Expression<T_Variable, T_Expression>::create_instance();
 
-        int expression_size = expression_ptrs.size();
-        for (auto i = 0; i < expression_size; i++) {
+        const int EXPRESSIONS_SIZE = expression_ptrs.size();
+        for (auto i = 0; i < EXPRESSIONS_SIZE; i++) {
             result += (*expression_ptrs[i]) * a_COEFFICIENTS[i];
         }
 
@@ -628,8 +629,9 @@ class ExpressionProxy : public AbstractMultiArray {
     /*************************************************************************/
     inline constexpr Expression<T_Variable, T_Expression> &operator()(
         const std::vector<int> &a_MULTI_DIMENSIONAL_INDEX) {
-        int multi_dimensional_index_size = a_MULTI_DIMENSIONAL_INDEX.size();
-        if (this->number_of_dimensions() != multi_dimensional_index_size) {
+        const int MULTI_DIMENSIONAL_INDEX_SIZE =
+            a_MULTI_DIMENSIONAL_INDEX.size();
+        if (this->number_of_dimensions() != MULTI_DIMENSIONAL_INDEX_SIZE) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of dimensions does not match."));
@@ -644,8 +646,9 @@ class ExpressionProxy : public AbstractMultiArray {
     /*************************************************************************/
     inline constexpr const Expression<T_Variable, T_Expression> &operator()(
         const std::vector<int> &a_MULTI_DIMENSIONAL_INDEX) const {
-        int multi_dimensional_index_size = a_MULTI_DIMENSIONAL_INDEX.size();
-        if (this->number_of_dimensions() != multi_dimensional_index_size) {
+        const int MULTI_DIMENSIONAL_INDEX_SIZE =
+            a_MULTI_DIMENSIONAL_INDEX.size();
+        if (this->number_of_dimensions() != MULTI_DIMENSIONAL_INDEX_SIZE) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of dimensions does not match."));

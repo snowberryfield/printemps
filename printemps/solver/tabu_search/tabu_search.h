@@ -131,6 +131,8 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     int last_global_augmented_incumbent_update_iteration = -1;
     int last_feasible_incumbent_update_iteration         = -1;
 
+    int local_augmented_incumbent_update_count = 0;
+
     TabuSearchTerminationStatus termination_status =
         TabuSearchTerminationStatus::ITERATION_OVER;
 
@@ -197,6 +199,13 @@ TabuSearchResult<T_Variable, T_Expression> solve(
             break;
         }
 
+        if (local_augmented_incumbent_update_count >
+            option.tabu_search.pruning_rate_threshold *
+                option.tabu_search.iteration_max) {
+            termination_status = TabuSearchTerminationStatus::EARLY_STOP;
+            break;
+        }
+
         /**
          * Update the moves.
          */
@@ -213,7 +222,6 @@ TabuSearchResult<T_Variable, T_Expression> solve(
              * If the option improvability_screening_mode is not None,
              * only improvable moves will be generated.
              */
-
             auto changed_variable_ptrs =
                 utility::to_vector(model::related_variable_ptrs(current_move));
             auto changed_constraint_ptrs =
@@ -298,8 +306,8 @@ TabuSearchResult<T_Variable, T_Expression> solve(
             model->neighborhood().shuffle_moves(&get_rand_mt);
         }
 
-        auto& trial_move_ptrs = model->neighborhood().move_ptrs();
-        int   number_of_moves = trial_move_ptrs.size();
+        const auto& trial_move_ptrs = model->neighborhood().move_ptrs();
+        int         number_of_moves = trial_move_ptrs.size();
 
         if (option.tabu_search.is_enabled_move_curtail) {
             number_of_moves = static_cast<int>(
@@ -505,6 +513,19 @@ TabuSearchResult<T_Variable, T_Expression> solve(
         if (update_status &
             IncumbentHolderConstant::STATUS_FEASIBLE_INCUMBENT_UPDATE) {
             last_feasible_incumbent_update_iteration = iteration;
+        }
+
+        /**
+         * For pruning, count updating of the local augmented incumbent without
+         * global augmented incumbent improvement.
+         */
+        if (update_status ==
+            IncumbentHolderConstant::STATUS_LOCAL_AUGMENTED_INCUMBENT_UPDATE) {
+            local_augmented_incumbent_update_count++;
+        } else if (update_status &
+                   IncumbentHolderConstant::
+                       STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
+            local_augmented_incumbent_update_count = 0;
         }
 
         /**

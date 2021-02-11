@@ -113,8 +113,8 @@ class ValueProxy : public AbstractMultiArray {
     /*************************************************************************/
     inline constexpr T_Value &values(
         const std::vector<int> &a_MULTI_DIMENSIONAL_INDEX) {
-        int multi_dimensional_index_size = a_MULTI_DIMENSIONAL_INDEX.size();
-        if (this->number_of_dimensions() != multi_dimensional_index_size) {
+        int MULTI_DIMENSIONAL_INDEX_SIZE = a_MULTI_DIMENSIONAL_INDEX.size();
+        if (this->number_of_dimensions() != MULTI_DIMENSIONAL_INDEX_SIZE) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of dimensions does not match."));
@@ -129,8 +129,8 @@ class ValueProxy : public AbstractMultiArray {
     /*************************************************************************/
     inline constexpr T_Value values(
         const std::vector<int> &a_MULTI_DIMENSIONAL_INDEX) const {
-        int multi_dimensional_index_size = a_MULTI_DIMENSIONAL_INDEX.size();
-        if (this->number_of_dimensions() != multi_dimensional_index_size) {
+        int MULTI_DIMENSIONAL_INDEX_SIZE = a_MULTI_DIMENSIONAL_INDEX.size();
+        if (this->number_of_dimensions() != MULTI_DIMENSIONAL_INDEX_SIZE) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of dimensions does not match."));
@@ -291,22 +291,25 @@ inline void print_values(
 /*****************************************************************************/
 template <class T_Value>
 void write_values_by_name(
-    std::ofstream *                                            a_ofs,
-    const std::unordered_map<std::string, ValueProxy<T_Value>> a_VALUE_PROXIES,
-    const std::string &a_CATEGORY, const int a_INDENT_LEVEL,
-    const std::string a_FORMAT, const bool a_ADD_LAST_COMMA) {
+    std::ofstream *a_ofs,  //
+    const std::unordered_map<std::string, ValueProxy<T_Value>>
+                       a_VALUE_PROXIES,  //
+    const std::string &a_CATEGORY,       //
+    const int          a_INDENT_LEVEL,   //
+    const std::string  a_FORMAT,         //
+    const bool         a_ADD_LAST_COMMA) {
     int indent_level = a_INDENT_LEVEL;
 
     *a_ofs << utility::indent_spaces(indent_level)
            << "\"" + a_CATEGORY + "\" : {" << std::endl;
     indent_level++;
 
-    int count              = 0;
-    int value_proxies_size = a_VALUE_PROXIES.size();
+    int       count              = 0;
+    const int VALUE_PROXIES_SIZE = a_VALUE_PROXIES.size();
     for (const auto &item : a_VALUE_PROXIES) {
-        auto &proxy              = item.second;
-        int   number_of_elements = proxy.number_of_elements();
-        for (auto i = 0; i < number_of_elements; i++) {
+        auto &    proxy              = item.second;
+        const int NUMBER_OF_ELEMENTS = proxy.number_of_elements();
+        for (auto i = 0; i < NUMBER_OF_ELEMENTS; i++) {
             *a_ofs << utility::indent_spaces(indent_level)
                    << "\"" +
                           utility::delete_space(proxy.flat_indexed_names(i)) +
@@ -314,8 +317,8 @@ void write_values_by_name(
                           utility::to_string(proxy.flat_indexed_values(i),
                                              a_FORMAT);
 
-            if ((i == number_of_elements - 1) &&
-                (count == value_proxies_size - 1)) {
+            if ((i == NUMBER_OF_ELEMENTS - 1) &&
+                (count == VALUE_PROXIES_SIZE - 1)) {
                 *a_ofs << std::endl;
             } else {
                 *a_ofs << "," << std::endl;
@@ -334,10 +337,13 @@ void write_values_by_name(
 /*****************************************************************************/
 template <class T_Value>
 void write_values_by_array(
-    std::ofstream *                                            a_ofs,
-    const std::unordered_map<std::string, ValueProxy<T_Value>> a_VALUE_PROXIES,
-    const std::string &a_CATEGORY, const int a_INDENT_LEVEL,
-    const std::string &a_FORMAT, const bool a_ADD_LAST_COMMA) {
+    std::ofstream *a_ofs,  //
+    const std::unordered_map<std::string, ValueProxy<T_Value>>
+                       a_VALUE_PROXIES,  //
+    const std::string &a_CATEGORY,       //
+    const int          a_INDENT_LEVEL,   //
+    const std::string &a_FORMAT,         //
+    const bool         a_ADD_LAST_COMMA) {
     int indent_level = a_INDENT_LEVEL;
 
     *a_ofs << utility::indent_spaces(indent_level)
@@ -345,21 +351,21 @@ void write_values_by_array(
     indent_level++;
 
     int count              = 0;
-    int value_proxies_size = a_VALUE_PROXIES.size();
+    int VALUE_PROXIES_SIZE = a_VALUE_PROXIES.size();
     for (const auto &item : a_VALUE_PROXIES) {
-        auto &proxy                = item.second;
-        int   number_of_dimensions = proxy.number_of_dimensions();
-        int   number_of_elements   = proxy.number_of_elements();
+        auto &    proxy                = item.second;
+        const int NUMBER_OF_DIMENSIONS = proxy.number_of_dimensions();
+        const int NUMBER_OF_ELEMENTS   = proxy.number_of_elements();
 
         *a_ofs << utility::indent_spaces(indent_level)
                << "\"" + item.first + "\" : [" << std::endl;
         indent_level++;
 
         int current_dimension = 0;
-        for (auto i = 0; i < number_of_elements; i++) {
+        for (auto i = 0; i < NUMBER_OF_ELEMENTS; i++) {
             std::vector<int> index = proxy.multi_dimensional_index(i);
 
-            for (auto j = current_dimension; j < number_of_dimensions - 1;
+            for (auto j = current_dimension; j < NUMBER_OF_DIMENSIONS - 1;
                  j++) {
                 if (index[j + 1] == 0) {
                     *a_ofs << utility::indent_spaces(indent_level) << "["
@@ -403,7 +409,7 @@ void write_values_by_array(
         indent_level--;
         count++;
 
-        if (count == value_proxies_size) {
+        if (count == VALUE_PROXIES_SIZE) {
             *a_ofs << utility::indent_spaces(indent_level) << "]" << std::endl;
         } else {
             *a_ofs << utility::indent_spaces(indent_level) << "]," << std::endl;

@@ -217,37 +217,37 @@ MPS read_mps(const std::string &a_FILE_NAME) {
         while (stream >> item) {
             items.push_back(item);
         }
-        int items_size = items.size();
+        const int ITEMS_SIZE = items.size();
 
-        if (items_size == 0) {
+        if (ITEMS_SIZE == 0) {
             continue;
         }
 
         if (items.front() == "NAME") {
             read_mode = MPSReadMode::Name;
-        } else if (items.front() == "ROWS" && items_size == 1) {
+        } else if (items.front() == "ROWS" && ITEMS_SIZE == 1) {
             read_mode = MPSReadMode::Rows;
             continue;
-        } else if (items.front() == "COLUMNS" && items_size == 1) {
+        } else if (items.front() == "COLUMNS" && ITEMS_SIZE == 1) {
             read_mode = MPSReadMode::Columns;
             continue;
-        } else if (items.front() == "RHS" && items_size == 1) {
+        } else if (items.front() == "RHS" && ITEMS_SIZE == 1) {
             read_mode = MPSReadMode::Rhs;
             continue;
-        } else if (items.front() == "RANGES" && items_size == 1) {
+        } else if (items.front() == "RANGES" && ITEMS_SIZE == 1) {
             read_mode = MPSReadMode::Ranges;
             continue;
-        } else if (items.front() == "BOUNDS" && items_size == 1) {
+        } else if (items.front() == "BOUNDS" && ITEMS_SIZE == 1) {
             read_mode = MPSReadMode::Bounds;
             continue;
-        } else if (items.front() == "ENDATA" && items_size == 1) {
+        } else if (items.front() == "ENDATA" && ITEMS_SIZE == 1) {
             read_mode = MPSReadMode::Endata;
             is_valid  = true;
             break;
         }
         switch (read_mode) {
             case MPSReadMode::Name: {
-                if (items_size < 2) {
+                if (ITEMS_SIZE < 2) {
                     throw std::logic_error(utility::format_error_location(
                         __FILE__, __LINE__, __func__,
                         "The MPS file has something wrong in NAME section."));
@@ -286,7 +286,7 @@ MPS read_mps(const std::string &a_FILE_NAME) {
                 break;
             }
             case MPSReadMode::Columns: {
-                if (items_size < 3) {
+                if (ITEMS_SIZE < 3) {
                     throw std::logic_error(utility::format_error_location(
                         __FILE__, __LINE__, __func__,
                         "The MPS file has something wrong in COLUMNS "
@@ -302,7 +302,7 @@ MPS read_mps(const std::string &a_FILE_NAME) {
                 }
 
                 name = items[0];
-                for (auto i = 0; i < (items_size - 1) / 2; i++) {
+                for (auto i = 0; i < (ITEMS_SIZE - 1) / 2; i++) {
                     std::string expression_name = items[2 * i + 1];
                     double      sensitivity = atof(items[2 * i + 2].c_str());
 
@@ -329,13 +329,13 @@ MPS read_mps(const std::string &a_FILE_NAME) {
                 break;
             }
             case MPSReadMode::Rhs: {
-                if (items_size < 3) {
+                if (ITEMS_SIZE < 3) {
                     throw std::logic_error(utility::format_error_location(
                         __FILE__, __LINE__, __func__,
                         "The MPS file has something wrong in RHS section."));
                 }
 
-                for (auto i = 0; i < (items_size - 1) / 2; i++) {
+                for (auto i = 0; i < (ITEMS_SIZE - 1) / 2; i++) {
                     name       = items[2 * i + 1];
                     double rhs = atof(items[2 * i + 2].c_str());
 
@@ -349,13 +349,13 @@ MPS read_mps(const std::string &a_FILE_NAME) {
                  * site:
                  * https://www.ibm.com/support/knowledgecenter/vi/SSSA5P_20.1.0/ilog.odms.cplex.help/CPLEX/FileFormats/topics/MPS_records.html
                  */
-                if (items_size < 3) {
+                if (ITEMS_SIZE < 3) {
                     throw std::logic_error(utility::format_error_location(
                         __FILE__, __LINE__, __func__,
                         "The MPS file has something wrong in RANGES section."));
                 }
 
-                for (auto i = 0; i < (items_size - 1) / 2; i++) {
+                for (auto i = 0; i < (ITEMS_SIZE - 1) / 2; i++) {
                     name         = items[2 * i + 1];
                     double range = atof(items[2 * i + 2].c_str());
                     name_new     = name + "_range";
@@ -407,7 +407,7 @@ MPS read_mps(const std::string &a_FILE_NAME) {
                 break;
             }
             case MPSReadMode::Bounds: {
-                if (items_size < 3) {
+                if (ITEMS_SIZE < 3) {
                     throw std::logic_error(utility::format_error_location(
                         __FILE__, __LINE__, __func__,
                         "The MPS file has something wrong in BOUNDS section."));
@@ -421,7 +421,7 @@ MPS read_mps(const std::string &a_FILE_NAME) {
                         "An undefined decision variable name is specified in "
                         "RHS section."));
                 }
-                if (items_size == 3) {
+                if (ITEMS_SIZE == 3) {
                     if (category == "FR") {
                         mps.variables[name].is_bound_defined = true;
                         mps.variables[name].integer_lower_bound =
@@ -452,7 +452,7 @@ MPS read_mps(const std::string &a_FILE_NAME) {
                         mps.variables[name].continuous_lower_bound = 0;
                         mps.variables[name].continuous_upper_bound = HUGE_VAL;
                     }
-                } else if (items_size == 4) {
+                } else if (ITEMS_SIZE == 4) {
                     double continuous_value = atof(items[3].c_str());
                     int    integer_value = static_cast<int>(continuous_value);
 
@@ -718,9 +718,9 @@ std::unordered_map<std::string, int> read_solution(
         while (stream >> item) {
             items.push_back(item);
         }
-        int items_size = items.size();
+        int ITEMS_SIZE = items.size();
 
-        if (items_size != 2) {
+        if (ITEMS_SIZE != 2) {
             continue;
         }
         solution[items[0]] =

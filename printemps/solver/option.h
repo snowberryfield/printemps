@@ -419,6 +419,10 @@ struct Option {
             utility::to_string(this->tabu_search.frequency_penalty_coefficient,
                                "%f"));
 
+        utility::print(                                   //
+            " -- tabu_search.pruning_rate_threshold: " +  //
+            utility::to_string(this->tabu_search.pruning_rate_threshold, "%f"));
+
         utility::print(                               //
             " -- tabu_search.is_enabled_shuffle: " +  //
             utility::to_string(this->tabu_search.is_enabled_shuffle, "%d"));
