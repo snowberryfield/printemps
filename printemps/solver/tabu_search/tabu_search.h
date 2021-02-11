@@ -199,8 +199,9 @@ TabuSearchResult<T_Variable, T_Expression> solve(
             break;
         }
 
-        if (local_augmented_incumbent_update_count ==
-            option.tabu_search.pruning_count_threshold) {
+        if (local_augmented_incumbent_update_count >
+            option.tabu_search.pruning_rate_threshold *
+                option.tabu_search.iteration_max) {
             termination_status = TabuSearchTerminationStatus::EARLY_STOP;
             break;
         }
