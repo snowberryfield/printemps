@@ -36,10 +36,10 @@ struct Move {
 template <class T_Variable, class T_Expression>
 constexpr bool has_duplicate_variable(
     const Move<T_Variable, T_Expression> &a_MOVE) {
-    auto &alterations      = a_MOVE.alterations;
-    int   alterations_size = alterations.size();
-    for (auto i = 0; i < alterations_size; i++) {
-        for (auto j = i + 1; j < alterations_size; j++) {
+    auto &    alterations      = a_MOVE.alterations;
+    const int ALTERATIONS_SIZE = alterations.size();
+    for (auto i = 0; i < ALTERATIONS_SIZE; i++) {
+        for (auto j = i + 1; j < ALTERATIONS_SIZE; j++) {
             if (alterations[i].first == alterations[j].first) {
                 return true;
             }
@@ -96,8 +96,8 @@ constexpr bool operator==(const Move<T_Variable, T_Expression> &a_MOVE_1,
         return false;
     }
 
-    int alterations_size = a_MOVE_1.alterations.size();
-    for (auto i = 0; i < alterations_size; i++) {
+    int ALTERATIONS_SIZE = a_MOVE_1.alterations.size();
+    for (auto i = 0; i < ALTERATIONS_SIZE; i++) {
         if (a_MOVE_1.alterations[i] != a_MOVE_2.alterations[i]) {
             return false;
         }

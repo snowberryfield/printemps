@@ -162,9 +162,9 @@ class Model {
                 "The name of decision variable must not contain spaces."));
         }
 
-        int id = m_variable_proxies.size();
+        int proxy_index = m_variable_proxies.size();
 
-        if (id >= ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES) {
+        if (proxy_index >= ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of decision variable definitions must be equal to "
@@ -175,7 +175,8 @@ class Model {
         }
 
         m_variable_proxies.emplace_back(
-            VariableProxy<T_Variable, T_Expression>::create_instance(id));
+            VariableProxy<T_Variable, T_Expression>::create_instance(
+                proxy_index));
         m_variable_names.push_back(a_NAME);
 
         return m_variable_proxies.back();
@@ -202,9 +203,9 @@ class Model {
                 "The name of decision variable must not contain spaces."));
         }
 
-        int id = m_variable_proxies.size();
+        int proxy_index = m_variable_proxies.size();
 
-        if (id >= ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES) {
+        if (proxy_index >= ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of decision variable definitions must be equal to "
@@ -216,7 +217,7 @@ class Model {
 
         m_variable_proxies.emplace_back(
             VariableProxy<T_Variable, T_Expression>::create_instance(
-                id, a_NUMBER_OF_ELEMENTS));
+                proxy_index, a_NUMBER_OF_ELEMENTS));
         m_variable_names.push_back(a_NAME);
 
         return m_variable_proxies.back();
@@ -244,9 +245,9 @@ class Model {
                 "The name of decision variable must not contain spaces."));
         }
 
-        int id = m_variable_proxies.size();
+        int proxy_index = m_variable_proxies.size();
 
-        if (id >= ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES) {
+        if (proxy_index >= ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of decision variable definitions must be equal to "
@@ -257,8 +258,8 @@ class Model {
         }
 
         m_variable_proxies.emplace_back(
-            VariableProxy<T_Variable, T_Expression>::create_instance(id,
-                                                                     a_SHAPE));
+            VariableProxy<T_Variable, T_Expression>::create_instance(
+                proxy_index, a_SHAPE));
         m_variable_names.push_back(a_NAME);
 
         return m_variable_proxies.back();
@@ -285,9 +286,9 @@ class Model {
                 "The name of expression must not contain spaces."));
         }
 
-        int id = m_expression_proxies.size();
+        int proxy_index = m_expression_proxies.size();
 
-        if (id >= ModelConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES) {
+        if (proxy_index >= ModelConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of expression definitions must be equal to or "
@@ -298,7 +299,8 @@ class Model {
         }
 
         m_expression_proxies.emplace_back(
-            ExpressionProxy<T_Variable, T_Expression>::create_instance(id));
+            ExpressionProxy<T_Variable, T_Expression>::create_instance(
+                proxy_index));
         m_expression_names.push_back(a_NAME);
 
         return m_expression_proxies.back();
@@ -314,9 +316,9 @@ class Model {
                 "The name of expression must not contain spaces."));
         }
 
-        int id = m_expression_proxies.size();
+        int proxy_index = m_expression_proxies.size();
 
-        if (id >= ModelConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES) {
+        if (proxy_index >= ModelConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of expression definitions must be equal to or "
@@ -328,7 +330,7 @@ class Model {
 
         m_expression_proxies.emplace_back(
             ExpressionProxy<T_Variable, T_Expression>::create_instance(
-                id, a_NUMBER_OF_ELEMENTS));
+                proxy_index, a_NUMBER_OF_ELEMENTS));
         m_expression_names.push_back(a_NAME);
 
         return m_expression_proxies.back();
@@ -344,9 +346,9 @@ class Model {
                 "The name of expression must not contain spaces."));
         }
 
-        int id = m_expression_proxies.size();
+        int proxy_index = m_expression_proxies.size();
 
-        if (id >= ModelConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES) {
+        if (proxy_index >= ModelConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of expression definitions must be equal to or "
@@ -358,7 +360,7 @@ class Model {
 
         m_expression_proxies.emplace_back(
             ExpressionProxy<T_Variable, T_Expression>::create_instance(
-                id, a_SHAPE));
+                proxy_index, a_SHAPE));
         m_expression_names.push_back(a_NAME);
 
         return m_expression_proxies.back();
@@ -375,9 +377,9 @@ class Model {
                 "The name of expression must not contain spaces."));
         }
 
-        int id = m_expression_proxies.size();
+        int proxy_index = m_expression_proxies.size();
 
-        if (id >= ModelConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES) {
+        if (proxy_index >= ModelConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of expression definitions must be equal to or "
@@ -388,7 +390,8 @@ class Model {
         }
 
         m_expression_proxies.emplace_back(
-            ExpressionProxy<T_Variable, T_Expression>::create_instance(id));
+            ExpressionProxy<T_Variable, T_Expression>::create_instance(
+                proxy_index));
         m_expression_names.push_back(a_NAME);
         m_expression_proxies.back() = a_EXPRESSION_LIKE.to_expression();
 
@@ -405,9 +408,9 @@ class Model {
                 "The name of expression must not contain spaces."));
         }
 
-        int id = m_expression_proxies.size();
+        int proxy_index = m_expression_proxies.size();
 
-        if (id >= ModelConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES) {
+        if (proxy_index >= ModelConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of expression definitions must be equal to or "
@@ -418,7 +421,8 @@ class Model {
         }
 
         m_expression_proxies.emplace_back(
-            ExpressionProxy<T_Variable, T_Expression>::create_instance(id));
+            ExpressionProxy<T_Variable, T_Expression>::create_instance(
+                proxy_index));
         m_expression_names.push_back(a_NAME);
         m_expression_proxies.back() = a_EXPRESSION;
 
@@ -434,9 +438,9 @@ class Model {
                 "The name of constraint must not contain spaces."));
         }
 
-        int id = m_constraint_proxies.size();
+        int proxy_index = m_constraint_proxies.size();
 
-        if (id >= ModelConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES) {
+        if (proxy_index >= ModelConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of constraint definitions must be equal to or "
@@ -447,7 +451,8 @@ class Model {
         }
 
         m_constraint_proxies.emplace_back(
-            ConstraintProxy<T_Variable, T_Expression>::create_instance(id));
+            ConstraintProxy<T_Variable, T_Expression>::create_instance(
+                proxy_index));
         m_constraint_names.push_back(a_NAME);
 
         return m_constraint_proxies.back();
@@ -463,9 +468,9 @@ class Model {
                 "The name of constraint must not contain spaces."));
         }
 
-        int id = m_constraint_proxies.size();
+        int proxy_index = m_constraint_proxies.size();
 
-        if (id >= ModelConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES) {
+        if (proxy_index >= ModelConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of constraint definitions must be equal to or "
@@ -477,7 +482,7 @@ class Model {
 
         m_constraint_proxies.emplace_back(
             ConstraintProxy<T_Variable, T_Expression>::create_instance(
-                id, a_NUMBER_OF_ELEMENTS));
+                proxy_index, a_NUMBER_OF_ELEMENTS));
         m_constraint_names.push_back(a_NAME);
 
         return m_constraint_proxies.back();
@@ -493,9 +498,9 @@ class Model {
                 "The name of constraint must not contain spaces."));
         }
 
-        int id = m_constraint_proxies.size();
+        int proxy_index = m_constraint_proxies.size();
 
-        if (id >= ModelConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES) {
+        if (proxy_index >= ModelConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of constraint definitions must be equal to or "
@@ -507,7 +512,7 @@ class Model {
 
         m_constraint_proxies.emplace_back(
             ConstraintProxy<T_Variable, T_Expression>::create_instance(
-                id, a_SHAPE));
+                proxy_index, a_SHAPE));
         m_constraint_names.push_back(a_NAME);
 
         return m_constraint_proxies.back();
@@ -523,9 +528,9 @@ class Model {
                 "The name of constraint must not contain spaces."));
         }
 
-        int id = m_constraint_proxies.size();
+        int proxy_index = m_constraint_proxies.size();
 
-        if (id >= ModelConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES) {
+        if (proxy_index >= ModelConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of constraint definitions must be equal to or "
@@ -536,7 +541,8 @@ class Model {
         }
 
         m_constraint_proxies.emplace_back(
-            ConstraintProxy<T_Variable, T_Expression>::create_instance(id));
+            ConstraintProxy<T_Variable, T_Expression>::create_instance(
+                proxy_index));
         m_constraint_names.push_back(a_NAME);
         m_constraint_proxies.back() = a_CONSTRAINT;
 
@@ -695,11 +701,11 @@ class Model {
 
     /*************************************************************************/
     constexpr void setup_unique_name(void) {
-        int variable_proxies_size   = m_variable_proxies.size();
-        int expression_proxies_size = m_expression_proxies.size();
-        int constraint_proxies_size = m_constraint_proxies.size();
+        const int VARIABLE_PROXIES_SIZE   = m_variable_proxies.size();
+        const int EXPRESSION_PROXIES_SIZE = m_expression_proxies.size();
+        const int CONSTRAINT_PROXIES_SIZE = m_constraint_proxies.size();
 
-        for (auto i = 0; i < variable_proxies_size; i++) {
+        for (auto i = 0; i < VARIABLE_PROXIES_SIZE; i++) {
             int number_of_elements = m_variable_proxies[i].number_of_elements();
             for (auto j = 0; j < number_of_elements; j++) {
                 auto &variable =
@@ -713,7 +719,7 @@ class Model {
         }
 
         /// Expression
-        for (auto i = 0; i < expression_proxies_size; i++) {
+        for (auto i = 0; i < EXPRESSION_PROXIES_SIZE; i++) {
             int number_of_elements =
                 m_expression_proxies[i].number_of_elements();
             for (auto j = 0; j < number_of_elements; j++) {
@@ -729,7 +735,7 @@ class Model {
         }
 
         /// Constraint
-        for (auto i = 0; i < constraint_proxies_size; i++) {
+        for (auto i = 0; i < CONSTRAINT_PROXIES_SIZE; i++) {
             int number_of_elements =
                 m_constraint_proxies[i].number_of_elements();
             for (auto j = 0; j < number_of_elements; j++) {
@@ -993,11 +999,11 @@ class Model {
                 }
             }
         } else if (a_SELECTION_MODE == SelectionMode::Independent) {
-            int raw_selections_size = raw_selections.size();
-            for (auto i = 0; i < raw_selections_size; i++) {
+            const int RAW_SELECTIONS_SIZE = raw_selections.size();
+            for (auto i = 0; i < RAW_SELECTIONS_SIZE; i++) {
                 bool has_overlap = false;
                 for (auto &&variable_ptr : raw_selections[i].variable_ptrs) {
-                    for (auto j = 0; j < raw_selections_size; j++) {
+                    for (auto j = 0; j < RAW_SELECTIONS_SIZE; j++) {
                         if (j != i &&
                             std::find(raw_selections[j].variable_ptrs.begin(),
                                       raw_selections[j].variable_ptrs.end(),
@@ -1320,10 +1326,10 @@ class Model {
         const std::vector<ValueProxy<T_Variable>> &a_PROXIES) {
         for (auto &&proxy : m_variable_proxies) {
             for (auto &&variable : proxy.flat_indexed_variables()) {
-                int id         = variable.proxy_index();
-                int flat_index = variable.flat_index();
+                int proxy_index = variable.proxy_index();
+                int flat_index  = variable.flat_index();
                 variable.set_value_if_not_fixed(
-                    a_PROXIES[id].flat_indexed_values(flat_index));
+                    a_PROXIES[proxy_index].flat_indexed_values(flat_index));
             }
         }
         verify_and_correct_selection_variables_initial_values(  //
@@ -1481,7 +1487,12 @@ class Model {
     constexpr void update_variable_feasibility_improvability(
         const std::vector<Constraint<T_Variable, T_Expression> *>
             &a_CONSTRAINT_PTRS) const noexcept {
-        for (const auto &constraint_ptr : a_CONSTRAINT_PTRS) {
+        const int MASK_LOWER_OR_EQUAL = 0b10;
+        const int MASK_UPPER_OR_EQUAL = 0b11;
+
+        const int CONSTRAINTS_SIZE = a_CONSTRAINT_PTRS.size();
+        for (auto i = 0; i < CONSTRAINTS_SIZE; i++) {
+            const auto constraint_ptr = a_CONSTRAINT_PTRS[i];
             if (!constraint_ptr->is_enabled()) {
                 continue;
             }
@@ -1491,9 +1502,6 @@ class Model {
             const auto &sensitivities =
                 constraint_ptr->expression().sensitivities();
             const auto &constraint_value = constraint_ptr->constraint_value();
-
-            const int MASK_LOWER_OR_EQUAL = 0b10;
-            const int MASK_UPPER_OR_EQUAL = 0b11;
 
             if (constraint_value > 0) {
                 if ((constraint_ptr->sense() & MASK_LOWER_OR_EQUAL) == 0) {
@@ -1584,15 +1592,15 @@ class Model {
         double local_penalty   = 0.0;
         double global_penalty  = 0.0;
 
-        int  constraint_proxies_size  = m_constraint_proxies.size();
-        bool is_constraint_improvable = false;
+        const int CONSTRAINT_PROXIES_SIZE  = m_constraint_proxies.size();
+        bool      is_constraint_improvable = false;
 
-        for (auto i = 0; i < constraint_proxies_size; i++) {
+        for (auto i = 0; i < CONSTRAINT_PROXIES_SIZE; i++) {
             auto &constraints =
                 m_constraint_proxies[i].flat_indexed_constraints();
 
-            int constraints_size = constraints.size();
-            for (auto j = 0; j < constraints_size; j++) {
+            const int CONSTRAINTS_SIZE = constraints.size();
+            for (auto j = 0; j < CONSTRAINTS_SIZE; j++) {
                 if (!constraints[j].is_enabled()) {
                     continue;
                 }
@@ -1689,12 +1697,13 @@ class Model {
         double lagrangian = m_objective.value();
 
         for (auto &&constraint_ptr : m_constraint_reference.constraint_ptrs) {
-            int id         = constraint_ptr->proxy_index();
-            int flat_index = constraint_ptr->flat_index();
+            int proxy_index = constraint_ptr->proxy_index();
+            int flat_index  = constraint_ptr->flat_index();
 
-            lagrangian += a_LAGRANGE_MULTIPLIER_PROXIES[id].flat_indexed_values(
-                              flat_index) *
-                          constraint_ptr->constraint_value();
+            lagrangian +=
+                a_LAGRANGE_MULTIPLIER_PROXIES[proxy_index].flat_indexed_values(
+                    flat_index) *
+                constraint_ptr->constraint_value();
         }
         return lagrangian;
     }
@@ -1835,30 +1844,30 @@ class Model {
         /// This method cannot be constexpr by clang.
         NamedSolution<T_Variable, T_Expression> named_solution;
 
-        int variable_proxies_size   = m_variable_proxies.size();
-        int expression_proxies_size = m_expression_proxies.size();
-        int constraint_proxies_size = m_constraint_proxies.size();
+        int VARIABLE_PROXIES_SIZE   = m_variable_proxies.size();
+        int EXPRESSION_PROXIES_SIZE = m_expression_proxies.size();
+        int CONSTRAINT_PROXIES_SIZE = m_constraint_proxies.size();
 
         /// Decision variables
-        for (auto i = 0; i < variable_proxies_size; i++) {
+        for (auto i = 0; i < VARIABLE_PROXIES_SIZE; i++) {
             named_solution.m_variable_value_proxies[m_variable_names[i]] =
                 a_SOLUTION.variable_value_proxies[i];
         }
 
         /// Expression
-        for (auto i = 0; i < expression_proxies_size; i++) {
+        for (auto i = 0; i < EXPRESSION_PROXIES_SIZE; i++) {
             named_solution.m_expression_value_proxies[m_expression_names[i]] =
                 a_SOLUTION.expression_value_proxies[i];
         }
 
         /// Constraint
-        for (auto i = 0; i < constraint_proxies_size; i++) {
+        for (auto i = 0; i < CONSTRAINT_PROXIES_SIZE; i++) {
             named_solution.m_constraint_value_proxies[m_constraint_names[i]] =
                 a_SOLUTION.constraint_value_proxies[i];
         }
 
         /// Violation
-        for (auto i = 0; i < constraint_proxies_size; i++) {
+        for (auto i = 0; i < CONSTRAINT_PROXIES_SIZE; i++) {
             named_solution.m_violation_value_proxies[m_constraint_names[i]] =
                 a_SOLUTION.violation_value_proxies[i];
         }

@@ -931,7 +931,7 @@ Result<T_Variable, T_Expression> solve(
                          result_local_augmented_incumbent_objective;
 
             for (auto&& proxy : model->constraint_proxies()) {
-                auto& violation_values =
+                const auto& violation_values =
                     result_local_augmented_incumbent_solution
                         .violation_value_proxies[proxy.index()]
                         .flat_indexed_values();
@@ -990,7 +990,7 @@ Result<T_Variable, T_Expression> solve(
             }
 
             for (auto&& proxy : model->constraint_proxies()) {
-                auto& violation_values =
+                const auto& violation_values =
                     current_solution.violation_value_proxies[proxy.index()]
                         .flat_indexed_values();
 
@@ -1290,11 +1290,11 @@ Result<T_Variable, T_Expression> solve(
                 master_option.verbose >= Verbose::Outer);
 
             for (const auto& proxy : current_solution.violation_value_proxies) {
-                auto& values      = proxy.flat_indexed_values();
-                auto& names       = proxy.flat_indexed_names();
-                int   values_size = values.size();
+                const auto& values      = proxy.flat_indexed_values();
+                const auto& names       = proxy.flat_indexed_names();
+                const int   VALUES_SIZE = values.size();
 
-                for (auto i = 0; i < values_size; i++) {
+                for (auto i = 0; i < VALUES_SIZE; i++) {
                     if (values[i] > 0) {
                         number_of_violative_constraints++;
                         if (number_of_violative_constraints <=
@@ -1484,9 +1484,9 @@ Result<T_Variable, T_Expression> solve(
     std::vector<model::ValueProxy<double>> local_penalty_coefficient_proxies =
         model->export_local_penalty_coefficient_proxies();
 
-    int        constraint_proxies_size = model->constraint_proxies().size();
-    const auto constraint_names        = model->constraint_names();
-    for (auto i = 0; i < constraint_proxies_size; i++) {
+    const int   CONSTRAINT_PROXIES_SIZE = model->constraint_proxies().size();
+    const auto& constraint_names        = model->constraint_names();
+    for (auto i = 0; i < CONSTRAINT_PROXIES_SIZE; i++) {
         named_penalty_coefficients[constraint_names[i]] =
             local_penalty_coefficient_proxies[i];
     }
@@ -1495,11 +1495,11 @@ Result<T_Variable, T_Expression> solve(
      * Export the final variable update counts.
      */
     std::unordered_map<std::string, model::ValueProxy<int>> named_update_counts;
-    int         variable_proxies_size = model->variable_proxies().size();
+    const int   VARIABLE_PROXIES_SIZE = model->variable_proxies().size();
     const auto& variable_names        = model->variable_names();
 
     const auto& update_counts = memory.update_counts();
-    for (auto i = 0; i < variable_proxies_size; i++) {
+    for (auto i = 0; i < VARIABLE_PROXIES_SIZE; i++) {
         named_update_counts[variable_names[i]] = update_counts[i];
     }
 
