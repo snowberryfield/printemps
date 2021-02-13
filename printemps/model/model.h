@@ -1592,8 +1592,8 @@ class Model {
         double local_penalty   = 0.0;
         double global_penalty  = 0.0;
 
-        const int CONSTRAINT_PROXIES_SIZE  = m_constraint_proxies.size();
-        bool      is_constraint_improvable = false;
+        const int CONSTRAINT_PROXIES_SIZE   = m_constraint_proxies.size();
+        bool      is_feasibility_improvable = false;
 
         for (auto i = 0; i < CONSTRAINT_PROXIES_SIZE; i++) {
             auto &constraints =
@@ -1607,7 +1607,7 @@ class Model {
                 double violation = constraints[j].evaluate_violation(a_MOVE);
 
                 if (violation < constraints[j].violation_value()) {
-                    is_constraint_improvable = true;
+                    is_feasibility_improvable = true;
                 }
 
                 total_violation += violation;
@@ -1636,7 +1636,7 @@ class Model {
         a_score_ptr->is_feasible = !(total_violation > constant::EPSILON);
         a_score_ptr->is_objective_improvable =
             objective_improvement > constant::EPSILON;
-        a_score_ptr->is_constraint_improvable = is_constraint_improvable;
+        a_score_ptr->is_feasibility_improvable = is_feasibility_improvable;
     }
 
     /*************************************************************************/
@@ -1644,7 +1644,7 @@ class Model {
                             const Move<T_Variable, T_Expression> &a_MOVE,
                             const SolutionScore &a_CURRENT_SCORE) const
         noexcept {
-        bool is_constraint_improvable = false;
+        bool is_feasibility_improvable = false;
 
         double total_violation = a_CURRENT_SCORE.total_violation;
         double local_penalty   = a_CURRENT_SCORE.local_penalty;
@@ -1659,7 +1659,7 @@ class Model {
             total_violation += violation_diff;
 
             if (violation_diff < 0) {
-                is_constraint_improvable = true;
+                is_feasibility_improvable = true;
             }
 
             local_penalty +=
@@ -1687,7 +1687,7 @@ class Model {
         a_score_ptr->is_feasible = !(total_violation > constant::EPSILON);
         a_score_ptr->is_objective_improvable =
             objective_improvement > constant::EPSILON;
-        a_score_ptr->is_constraint_improvable = is_constraint_improvable;
+        a_score_ptr->is_feasibility_improvable = is_feasibility_improvable;
     }
 
     /*************************************************************************/
