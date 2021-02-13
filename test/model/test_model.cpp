@@ -1962,7 +1962,7 @@ TEST_F(TestModel, evaluate) {
             EXPECT_EQ(46 + 5 * 10000 + 10000,
                       score_after_0.global_augmented_objective);
             EXPECT_EQ(false, score_after_0.is_objective_improvable);
-            EXPECT_EQ(false, score_after_0.is_constraint_improvable);
+            EXPECT_EQ(false, score_after_0.is_feasibility_improvable);
             EXPECT_EQ(false, score_after_0.is_feasible);
 
             EXPECT_EQ(46, score_after_1.objective);
@@ -1974,7 +1974,7 @@ TEST_F(TestModel, evaluate) {
             EXPECT_EQ(46 + 5 * 10000 + 10000,
                       score_after_1.global_augmented_objective);
             EXPECT_EQ(false, score_after_1.is_objective_improvable);
-            EXPECT_EQ(false, score_after_1.is_constraint_improvable);
+            EXPECT_EQ(false, score_after_1.is_feasibility_improvable);
             EXPECT_EQ(false, score_after_1.is_feasible);
 
             model.update(move);
@@ -2001,7 +2001,7 @@ TEST_F(TestModel, evaluate) {
             EXPECT_EQ(1, score_after_0.local_augmented_objective);
             EXPECT_EQ(1, score_after_0.global_augmented_objective);
             EXPECT_EQ(true, score_after_0.is_objective_improvable);
-            EXPECT_EQ(true, score_after_0.is_constraint_improvable);
+            EXPECT_EQ(true, score_after_0.is_feasibility_improvable);
             EXPECT_EQ(true, score_after_0.is_feasible);
 
             EXPECT_EQ(1, score_after_1.objective);
@@ -2011,7 +2011,7 @@ TEST_F(TestModel, evaluate) {
             EXPECT_EQ(1, score_after_1.local_augmented_objective);
             EXPECT_EQ(1, score_after_1.global_augmented_objective);
             EXPECT_EQ(true, score_after_1.is_objective_improvable);
-            EXPECT_EQ(true, score_after_1.is_constraint_improvable);
+            EXPECT_EQ(true, score_after_1.is_feasibility_improvable);
             EXPECT_EQ(true, score_after_1.is_feasible);
 
             model.update(move);
@@ -2037,7 +2037,7 @@ TEST_F(TestModel, evaluate) {
             EXPECT_EQ(11 + 100, score_after_0.local_augmented_objective);
             EXPECT_EQ(11 + 10000, score_after_0.global_augmented_objective);
             EXPECT_EQ(false, score_after_0.is_objective_improvable);
-            EXPECT_EQ(false, score_after_0.is_constraint_improvable);
+            EXPECT_EQ(false, score_after_0.is_feasibility_improvable);
             EXPECT_EQ(false, score_after_0.is_feasible);
 
             EXPECT_EQ(11, score_after_1.objective);
@@ -2047,7 +2047,7 @@ TEST_F(TestModel, evaluate) {
             EXPECT_EQ(11 + 100, score_after_1.local_augmented_objective);
             EXPECT_EQ(11 + 10000, score_after_1.global_augmented_objective);
             EXPECT_EQ(false, score_after_1.is_objective_improvable);
-            EXPECT_EQ(false, score_after_1.is_constraint_improvable);
+            EXPECT_EQ(false, score_after_1.is_feasibility_improvable);
             EXPECT_EQ(false, score_after_1.is_feasible);
 
             model.update(move);
@@ -2109,7 +2109,7 @@ TEST_F(TestModel, evaluate) {
             EXPECT_EQ(-46 + 5 * 10000 + 10000,
                       score_after_0.global_augmented_objective);
             EXPECT_EQ(false, score_after_0.is_objective_improvable);
-            EXPECT_EQ(false, score_after_0.is_constraint_improvable);
+            EXPECT_EQ(false, score_after_0.is_feasibility_improvable);
             EXPECT_EQ(false, score_after_0.is_feasible);
 
             EXPECT_EQ(-46, score_after_1.objective);
@@ -2121,7 +2121,7 @@ TEST_F(TestModel, evaluate) {
             EXPECT_EQ(-46 + 5 * 10000 + 10000,
                       score_after_1.global_augmented_objective);
             EXPECT_EQ(false, score_after_1.is_objective_improvable);
-            EXPECT_EQ(false, score_after_1.is_constraint_improvable);
+            EXPECT_EQ(false, score_after_1.is_feasibility_improvable);
             EXPECT_EQ(false, score_after_1.is_feasible);
 
             model.update(move);
@@ -2147,7 +2147,7 @@ TEST_F(TestModel, evaluate) {
             EXPECT_EQ(-1, score_after_0.local_augmented_objective);
             EXPECT_EQ(-1, score_after_0.global_augmented_objective);
             EXPECT_EQ(false, score_after_0.is_objective_improvable);
-            EXPECT_EQ(true, score_after_0.is_constraint_improvable);
+            EXPECT_EQ(true, score_after_0.is_feasibility_improvable);
             EXPECT_EQ(true, score_after_0.is_feasible);
 
             EXPECT_EQ(-1, score_after_1.objective);
@@ -2157,7 +2157,7 @@ TEST_F(TestModel, evaluate) {
             EXPECT_EQ(-1, score_after_1.local_augmented_objective);
             EXPECT_EQ(-1, score_after_1.global_augmented_objective);
             EXPECT_EQ(false, score_after_1.is_objective_improvable);
-            EXPECT_EQ(true, score_after_1.is_constraint_improvable);
+            EXPECT_EQ(true, score_after_1.is_feasibility_improvable);
             EXPECT_EQ(true, score_after_1.is_feasible);
 
             model.update(move);
@@ -2183,7 +2183,7 @@ TEST_F(TestModel, evaluate) {
             EXPECT_EQ(-11 + 100, score_after_0.local_augmented_objective);
             EXPECT_EQ(-11 + 10000, score_after_0.global_augmented_objective);
             EXPECT_EQ(true, score_after_0.is_objective_improvable);
-            EXPECT_EQ(false, score_after_0.is_constraint_improvable);
+            EXPECT_EQ(false, score_after_0.is_feasibility_improvable);
             EXPECT_EQ(false, score_after_0.is_feasible);
 
             EXPECT_EQ(-11, score_after_1.objective);
@@ -2193,7 +2193,7 @@ TEST_F(TestModel, evaluate) {
             EXPECT_EQ(-11 + 100, score_after_1.local_augmented_objective);
             EXPECT_EQ(-11 + 10000, score_after_1.global_augmented_objective);
             EXPECT_EQ(true, score_after_1.is_objective_improvable);
-            EXPECT_EQ(false, score_after_1.is_constraint_improvable);
+            EXPECT_EQ(false, score_after_1.is_feasibility_improvable);
             EXPECT_EQ(false, score_after_1.is_feasible);
 
             model.update(move);
