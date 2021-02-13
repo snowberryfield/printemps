@@ -12,7 +12,7 @@ namespace printemps {
 namespace utility {
 /*****************************************************************************/
 template <class T>
-inline constexpr std::unordered_set<T> intersection_set(
+constexpr std::unordered_set<T> intersection_set(
     const std::unordered_set<T> &a_FIRST,
     const std::unordered_set<T> &a_SECOND) {
     std::unordered_set<T> result;
@@ -31,18 +31,40 @@ inline constexpr std::unordered_set<T> intersection_set(
     }
     return result;
 }
+
 /*****************************************************************************/
 template <class T>
-inline constexpr std::unordered_set<T> union_set(
+constexpr void update_intersection_set(std::unordered_set<T> *      a_first,
+                                       const std::unordered_set<T> &a_SECOND) {
+    for (auto it = a_first->begin(); it != a_first->end();) {
+        if (a_SECOND.find(*it) == a_SECOND.end()) {
+            it = a_first->erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+
+/*****************************************************************************/
+template <class T>
+constexpr std::unordered_set<T> union_set(
     const std::unordered_set<T> &a_FIRST,
     const std::unordered_set<T> &a_SECOND) {
     std::unordered_set<T> result = a_FIRST;
     result.insert(a_SECOND.begin(), a_SECOND.end());
     return result;
 }
+
 /*****************************************************************************/
 template <class T>
-inline constexpr std::vector<T> to_vector(
+constexpr void update_union_set(std::unordered_set<T> *      a_first,
+                                const std::unordered_set<T> &a_SECOND) {
+    a_first->insert(a_SECOND.begin(), a_SECOND.end());
+}
+
+/*****************************************************************************/
+template <class T>
+constexpr std::vector<T> to_vector(
     const std::unordered_set<T> &a_UNORDERED_SET) {
     std::vector<T> result(a_UNORDERED_SET.begin(), a_UNORDERED_SET.end());
     return result;
