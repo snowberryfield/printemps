@@ -286,6 +286,9 @@ class Neighborhood {
                 not_fixed_variable_ptrs[i]->related_constraint_ptrs();
             m_binary_moves[i].alterations.emplace_back(
                 not_fixed_variable_ptrs[i], 0);
+            m_binary_moves[i].is_special_neighborhood_move = false;
+            m_binary_moves[i].is_available                 = true;
+            m_binary_moves[i].overlap_rate                 = 0.0;
         }
 
         auto binary_move_updater =  //
@@ -349,6 +352,9 @@ class Neighborhood {
                     not_fixed_variable_ptrs[i]->related_constraint_ptrs();
                 m_integer_moves[4 * i + j].alterations.emplace_back(
                     not_fixed_variable_ptrs[i], 0);
+                m_integer_moves[4 * i + j].is_special_neighborhood_move = false;
+                m_integer_moves[4 * i + j].is_available                 = true;
+                m_integer_moves[4 * i + j].overlap_rate                 = 0.0;
             }
         }
 
@@ -476,6 +482,10 @@ class Neighborhood {
                 variable_ptr_pairs[i][1]->related_constraint_ptrs().begin(),
                 variable_ptr_pairs[i][1]->related_constraint_ptrs().end());
 
+            m_aggregation_moves[4 * i].is_special_neighborhood_move = true;
+            m_aggregation_moves[4 * i].is_available                 = true;
+            m_aggregation_moves[4 * i].overlap_rate                 = 0.0;
+
             m_aggregation_moves[4 * i + 1] = m_aggregation_moves[4 * i];
             m_aggregation_moves[4 * i + 2] = m_aggregation_moves[4 * i];
             m_aggregation_moves[4 * i + 3] = m_aggregation_moves[4 * i];
@@ -596,6 +606,10 @@ class Neighborhood {
             m_precedence_moves[2 * i].related_constraint_ptrs.insert(
                 variable_ptr_pairs[i][1]->related_constraint_ptrs().begin(),
                 variable_ptr_pairs[i][1]->related_constraint_ptrs().end());
+
+            m_precedence_moves[2 * i].is_special_neighborhood_move = true;
+            m_precedence_moves[2 * i].is_available                 = true;
+            m_precedence_moves[2 * i].overlap_rate                 = 0.0;
 
             m_precedence_moves[2 * i].alterations.emplace_back(
                 variable_ptr_pairs[i][0], 0);
@@ -723,6 +737,10 @@ class Neighborhood {
             m_variable_bound_moves[4 * i].related_constraint_ptrs.insert(
                 variable_ptr_pairs[i][1]->related_constraint_ptrs().begin(),
                 variable_ptr_pairs[i][1]->related_constraint_ptrs().end());
+
+            m_variable_bound_moves[4 * i].is_special_neighborhood_move = true;
+            m_variable_bound_moves[4 * i].is_available                 = true;
+            m_variable_bound_moves[4 * i].overlap_rate                 = 0.0;
 
             m_variable_bound_moves[4 * i + 1] = m_variable_bound_moves[4 * i];
             m_variable_bound_moves[4 * i + 2] = m_variable_bound_moves[4 * i];
@@ -928,6 +946,11 @@ class Neighborhood {
             m_exclusive_moves[move_index].sense = MoveSense::Exclusive;
             m_exclusive_moves[move_index].alterations.emplace_back(variable_ptr,
                                                                    1);
+
+            m_exclusive_moves[move_index].is_special_neighborhood_move = true;
+            m_exclusive_moves[move_index].is_available                 = true;
+            m_exclusive_moves[move_index].overlap_rate                 = 0.0;
+
             m_exclusive_moves[move_index].related_constraint_ptrs.insert(
                 variable_ptr->related_constraint_ptrs().begin(),
                 variable_ptr->related_constraint_ptrs().end());
@@ -999,6 +1022,9 @@ class Neighborhood {
             m_selection_moves[i].sense = MoveSense::Selection;
             m_selection_moves[i].related_constraint_ptrs =
                 a_VARIABLE_PTRS[i]->selection_ptr()->related_constraint_ptrs;
+            m_selection_moves[i].is_special_neighborhood_move = false;
+            m_selection_moves[i].is_available                 = true;
+            m_selection_moves[i].overlap_rate                 = 0.0;
         }
 
         auto selection_move_updater =  //
@@ -1129,35 +1155,31 @@ class Neighborhood {
 
     /*************************************************************************/
     constexpr void deduplicate_chain_moves() {
-        std::vector<Move<T_Variable, T_Expression>> chain_moves;
-        const int CHAIN_MOVES_SIZE = m_chain_moves.size();
-        chain_moves.reserve(CHAIN_MOVES_SIZE);
-
-        for (auto i = 0; i < CHAIN_MOVES_SIZE; i++) {
-            bool has_duplicated_move = false;
-            for (auto j = 0; j < static_cast<int>(chain_moves.size()); j++) {
-                if (m_chain_moves[i] == m_chain_moves[j]) {
-                    has_duplicated_move = true;
-                    break;
-                }
-            }
-            if (!has_duplicated_move) {
-                chain_moves.push_back(m_chain_moves[i]);
-            }
-        }
-        m_chain_moves = chain_moves;
-        m_chain_move_flags.resize(chain_moves.size());
+        m_chain_moves.erase(std::unique(m_chain_moves.begin(),  //
+                                        m_chain_moves.end()),
+                            m_chain_moves.end());
+        m_chain_move_flags.resize(m_chain_moves.size());
     }
 
     /*************************************************************************/
-    inline constexpr void reduce_chain_moves(const int     a_NUMBER_OF_MOVES,
-                                             std::mt19937 *a_rand) noexcept {
-        const int CHAIN_MOVES_SIZE = m_chain_moves.size();
-        if (CHAIN_MOVES_SIZE <= a_NUMBER_OF_MOVES) {
+    inline constexpr void sort_chain_moves(void) {
+        std::sort(m_chain_moves.begin(), m_chain_moves.end(),
+                  [](auto const &a_LHS, auto const &a_RHS) {
+                      return a_LHS.overlap_rate > a_RHS.overlap_rate;
+                  });
+    }
+
+    /*************************************************************************/
+    inline constexpr void shuffle_chain_moves(std::mt19937 *a_rand) {
+        std::shuffle(m_chain_moves.begin(), m_chain_moves.end(), *a_rand);
+    }
+
+    /*************************************************************************/
+    inline constexpr void reduce_chain_moves(const int a_NUMBER_OF_MOVES) {
+        if (static_cast<int>(m_chain_moves.size()) <= a_NUMBER_OF_MOVES) {
             return;
         }
 
-        std::shuffle(m_chain_moves.begin(), m_chain_moves.end(), *a_rand);
         m_chain_moves.resize(a_NUMBER_OF_MOVES);
         m_chain_move_flags.resize(a_NUMBER_OF_MOVES);
     }
@@ -1367,6 +1389,7 @@ class Neighborhood {
                                  a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
                                  a_ACCEPT_FEASIBILITY_IMPROVABLE,  //
                                  a_IS_ENABLED_PARALLEL);
+
             number_of_candidate_moves +=
                 std::count(chain_move_flags.begin(),  //
                            chain_move_flags.end(), 1);
@@ -1720,6 +1743,52 @@ class Neighborhood {
     inline constexpr void disable_user_defined_move(void) {
         m_is_enabled_user_defined_move = false;
     }
+
+    /*************************************************************************/
+    inline constexpr void reset_special_neighborhood_moves_availability(
+        void) noexcept {
+        for (auto &move : m_precedence_moves) {
+            move.is_available = true;
+        }
+        for (auto &move : m_aggregation_moves) {
+            move.is_available = true;
+        }
+        for (auto &move : m_variable_bound_moves) {
+            move.is_available = true;
+        }
+        for (auto &move : m_exclusive_moves) {
+            move.is_available = true;
+        }
+        for (auto &move : m_chain_moves) {
+            move.is_available = true;
+        }
+    }
+
+    /*************************************************************************/
+    inline constexpr bool is_enabled_special_neighborhood_move(void) const {
+        if (m_is_enabled_aggregation_move) {
+            return true;
+        }
+
+        if (m_is_enabled_precedence_move) {
+            return true;
+        }
+
+        if (m_is_enabled_variable_bound_move) {
+            return true;
+        }
+
+        if (m_is_enabled_exclusive_move) {
+            return true;
+        }
+
+        if (m_is_enabled_chain_move) {
+            return true;
+        }
+
+        return false;
+    }
+
 };  // namespace model
 }  // namespace model
 }  // namespace printemps
