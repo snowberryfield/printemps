@@ -143,7 +143,25 @@ Result<T_Variable, T_Expression> solve(
     }
 
     /**
-     * Enables the default neighborhood moves.
+     * Print the problem size.
+     */
+    if (master_option.verbose >= Verbose::Outer) {
+        model->print_number_of_variables();
+        model->print_number_of_constraints();
+    }
+
+    /**
+     * Disable the Chain move neighborhood for the problem with nonlinear
+     * constraints and user-defined moves. This condition can be checked by
+     * model.is_enabled_fast_evaluation().
+     */
+    if (!model->is_enabled_fast_evaluation()) {
+        master_option.is_enabled_chain_move = false;
+    }
+
+    /**
+     * Enables the default neighborhood moves. Special neighborhood moves will
+     * be enabled when optimization stagnates.
      */
     if (master_option.is_enabled_binary_move) {
         model->neighborhood().enable_binary_move();
@@ -160,11 +178,6 @@ Result<T_Variable, T_Expression> solve(
     if (master_option.selection_mode != model::SelectionMode::None) {
         model->neighborhood().enable_selection_move();
     }
-
-    /**
-     * NOTE: Special neighborhood moves will be enabled when optimization
-     * stagnates.
-     */
 
     /**
      * Check whether there exist special neighborhood moves or not.
@@ -522,7 +535,9 @@ Result<T_Variable, T_Expression> solve(
 
     bool penalty_coefficient_reset_flag = false;
 
-    int inital_tabu_tenure = master_option.tabu_search.initial_tabu_tenure;
+    int    inital_tabu_tenure = master_option.tabu_search.initial_tabu_tenure;
+    double pruning_rate_threshold =
+        master_option.tabu_search.pruning_rate_threshold;
     int number_of_initial_modification = 0;
     int iteration_max = master_option.tabu_search.iteration_max;
 
@@ -579,7 +594,8 @@ Result<T_Variable, T_Expression> solve(
         option.tabu_search.seed += iteration;
         option.tabu_search.number_of_initial_modification =
             number_of_initial_modification;
-        option.tabu_search.initial_tabu_tenure = inital_tabu_tenure;
+        option.tabu_search.initial_tabu_tenure    = inital_tabu_tenure;
+        option.tabu_search.pruning_rate_threshold = pruning_rate_threshold;
 
         /**
          * Prepare the initial variable values.
@@ -631,16 +647,6 @@ Result<T_Variable, T_Expression> solve(
                 no_global_augmented_incumbent_update_count = 0;
             } else {
                 penalty_coefficient_reset_flag = false;
-            }
-        }
-
-        /**
-         * Reset chain moves if the global augmented objective was updated.
-         */
-        if (update_status &
-            IncumbentHolderConstant::STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
-            if (option.is_enabled_chain_move) {
-                model->neighborhood().clear_chain_moves();
             }
         }
 
@@ -980,12 +986,12 @@ Result<T_Variable, T_Expression> solve(
             double penalty_coefficient_relaxing_rate =
                 master_option.penalty_coefficient_relaxing_rate;
 
-            if (result.objective_constraint_ratio > constant::EPSILON) {
+            if (result.objective_constraint_rate > constant::EPSILON) {
                 if (result.is_found_new_feasible_solution) {
-                    const double MARGIN = 100.0;
+                    const double MARGIN = 1.0;
                     penalty_coefficient_relaxing_rate =
                         std::min(penalty_coefficient_relaxing_rate,
-                                 result.objective_constraint_ratio * MARGIN);
+                                 result.objective_constraint_rate * MARGIN);
                 }
             }
 
@@ -1077,7 +1083,8 @@ Result<T_Variable, T_Expression> solve(
         }
 
         /**
-         * Update the maximum number of iterations for the next loop.
+         * Update the maximum number of iterations and pruning rate threshold
+         * for the next loop.
          */
         if (master_option.tabu_search
                 .is_enabled_automatic_iteration_adjustment &&
@@ -1101,13 +1108,20 @@ Result<T_Variable, T_Expression> solve(
                 std::max(master_option.tabu_search.initial_tabu_tenure,
                          std::min(master_option.tabu_search.iteration_max,
                                   iteration_max_temp));
+
+            if (iteration_max == master_option.tabu_search.iteration_max) {
+                pruning_rate_threshold =
+                    master_option.tabu_search.pruning_rate_threshold;
+            } else {
+                pruning_rate_threshold = 1.0;
+            }
         }
 
         /**
          * Update the neighborhood moves to be employed for the next loop.
          */
-        bool is_enabled_special_neighborhood_move  = false;
-        bool is_disabled_special_neighborhood_move = false;
+        bool is_activated_special_neighborhood_move   = false;
+        bool is_deactivated_special_neighborhood_move = false;
 
         if (result.total_update_status &
             IncumbentHolderConstant::STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
@@ -1119,7 +1133,7 @@ Result<T_Variable, T_Expression> solve(
             if (master_option.is_enabled_aggregation_move) {
                 if (model->neighborhood().is_enabled_aggregation_move()) {
                     model->neighborhood().disable_aggregation_move();
-                    is_disabled_special_neighborhood_move = true;
+                    is_deactivated_special_neighborhood_move = true;
                 }
             }
 
@@ -1127,7 +1141,7 @@ Result<T_Variable, T_Expression> solve(
             if (master_option.is_enabled_precedence_move) {
                 if (model->neighborhood().is_enabled_precedence_move()) {
                     model->neighborhood().disable_precedence_move();
-                    is_disabled_special_neighborhood_move = true;
+                    is_deactivated_special_neighborhood_move = true;
                 }
             }
 
@@ -1135,7 +1149,7 @@ Result<T_Variable, T_Expression> solve(
             if (master_option.is_enabled_variable_bound_move) {
                 if (model->neighborhood().is_enabled_variable_bound_move()) {
                     model->neighborhood().disable_variable_bound_move();
-                    is_disabled_special_neighborhood_move = true;
+                    is_deactivated_special_neighborhood_move = true;
                 }
             }
 
@@ -1143,7 +1157,7 @@ Result<T_Variable, T_Expression> solve(
             if (master_option.is_enabled_exclusive_move) {
                 if (model->neighborhood().is_enabled_exclusive_move()) {
                     model->neighborhood().disable_exclusive_move();
-                    is_disabled_special_neighborhood_move = true;
+                    is_deactivated_special_neighborhood_move = true;
                 }
             }
 
@@ -1151,7 +1165,7 @@ Result<T_Variable, T_Expression> solve(
             if (master_option.is_enabled_chain_move) {
                 if (model->neighborhood().is_enabled_chain_move()) {
                     model->neighborhood().disable_chain_move();
-                    is_disabled_special_neighborhood_move = true;
+                    is_deactivated_special_neighborhood_move = true;
                 }
             }
 
@@ -1166,7 +1180,7 @@ Result<T_Variable, T_Expression> solve(
                 if (master_option.is_enabled_aggregation_move) {
                     if (!model->neighborhood().is_enabled_aggregation_move()) {
                         model->neighborhood().enable_aggregation_move();
-                        is_enabled_special_neighborhood_move = true;
+                        is_activated_special_neighborhood_move = true;
                     }
                 }
 
@@ -1174,7 +1188,7 @@ Result<T_Variable, T_Expression> solve(
                 if (master_option.is_enabled_precedence_move) {
                     if (!model->neighborhood().is_enabled_precedence_move()) {
                         model->neighborhood().enable_precedence_move();
-                        is_enabled_special_neighborhood_move = true;
+                        is_activated_special_neighborhood_move = true;
                     }
                 }
 
@@ -1183,7 +1197,7 @@ Result<T_Variable, T_Expression> solve(
                     if (!model->neighborhood()
                              .is_enabled_variable_bound_move()) {
                         model->neighborhood().enable_variable_bound_move();
-                        is_enabled_special_neighborhood_move = true;
+                        is_activated_special_neighborhood_move = true;
                     }
                 }
 
@@ -1191,7 +1205,7 @@ Result<T_Variable, T_Expression> solve(
                 if (master_option.is_enabled_exclusive_move) {
                     if (!model->neighborhood().is_enabled_exclusive_move()) {
                         model->neighborhood().enable_exclusive_move();
-                        is_enabled_special_neighborhood_move = true;
+                        is_activated_special_neighborhood_move = true;
                     }
                 }
 
@@ -1199,19 +1213,62 @@ Result<T_Variable, T_Expression> solve(
                 if (master_option.is_enabled_chain_move) {
                     if (!model->neighborhood().is_enabled_chain_move()) {
                         model->neighborhood().enable_chain_move();
-                        is_enabled_special_neighborhood_move = true;
+                        is_activated_special_neighborhood_move = true;
                     }
                 }
             }
         }
 
         /**
-         * Suppress the number of registered chain moves.
+         * Sort and deduplicate registered chain moves.
          */
         if (model->neighborhood().is_enabled_chain_move() &&
             master_option.chain_move_capacity > 0) {
-            model->neighborhood().reduce_chain_moves(
-                master_option.chain_move_capacity, &get_rand_mt);
+            model->neighborhood().sort_chain_moves();
+            model->neighborhood().deduplicate_chain_moves();
+        }
+
+        /**
+         * Reduce the registered chain moves.
+         */
+        if (static_cast<int>(model->neighborhood().chain_moves().size()) >
+            master_option.chain_move_capacity) {
+            switch (master_option.chain_move_reduce_mode) {
+                case ChainMoveReduceMode::OverlapRate: {
+                    model->neighborhood().reduce_chain_moves(
+                        master_option.chain_move_capacity);
+                    break;
+                }
+                case ChainMoveReduceMode::Shuffle: {
+                    model->neighborhood().shuffle_chain_moves(&get_rand_mt);
+                    model->neighborhood().reduce_chain_moves(
+                        master_option.chain_move_capacity);
+                    break;
+                }
+                default: {
+                    throw std::logic_error(utility::format_error_location(
+                        __FILE__, __LINE__, __func__,
+                        "The specified Chain move reduce mode is invalid."));
+                }
+            }
+        }
+
+        /**
+         * Reset chain moves if the global augmented objective was updated.
+         */
+        if (update_status &
+            IncumbentHolderConstant::STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
+            if (option.is_enabled_chain_move) {
+                model->neighborhood().clear_chain_moves();
+            }
+        }
+
+        /**
+         * Reset the availability of special neighborhood moves.
+         */
+        if (model->neighborhood().is_enabled_special_neighborhood_move()) {
+            model->neighborhood()
+                .reset_special_neighborhood_moves_availability();
         }
 
         /**
@@ -1431,16 +1488,27 @@ Result<T_Variable, T_Expression> solve(
          * Print a message of the special neighborhood moves
          * activation/deactivation.
          */
-        if (is_disabled_special_neighborhood_move &&
+        if (is_deactivated_special_neighborhood_move &&
             has_special_neighborhood_moves) {
             utility::print_message("Special neighborhood moves were disabled.",
                                    master_option.verbose >= Verbose::Outer);
         }
 
-        if (is_enabled_special_neighborhood_move &&
+        if (is_activated_special_neighborhood_move &&
             has_special_neighborhood_moves) {
             utility::print_message("Special neighborhood moves were enabled.",
                                    master_option.verbose >= Verbose::Outer);
+        }
+
+        /**
+         * Print the number of the stored chain neighborhood moves.
+         */
+        if (model->neighborhood().is_enabled_chain_move()) {
+            utility::print_message(
+                "There are " +
+                    std::to_string(model->neighborhood().chain_moves().size()) +
+                    " stored chain moves.",
+                master_option.verbose >= Verbose::Outer);
         }
 
         model->callback();
