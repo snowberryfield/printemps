@@ -9,6 +9,8 @@
 #include <vector>
 #include <unordered_set>
 
+#include "../utility/utility.h"
+
 namespace printemps {
 namespace model {
 /*****************************************************************************/
@@ -30,6 +32,25 @@ struct Move {
     MoveSense                                         sense;
     std::unordered_set<Constraint<T_Variable, T_Expression> *>
         related_constraint_ptrs;
+
+    /**
+     * The following members are for special neighborhood moves.
+     */
+    bool is_special_neighborhood_move;
+    bool is_available;
+
+    /**
+     * The following member is for Chain moves.
+     */
+    double overlap_rate;
+
+    /*************************************************************************/
+    Move(void)
+        : is_special_neighborhood_move(false),
+          is_available(true),
+          overlap_rate(0.0) {
+        /// nothing to do
+    }
 };
 
 /*****************************************************************************/
@@ -47,6 +68,46 @@ constexpr bool has_duplicate_variable(
     }
     return false;
 }
+
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+constexpr double compute_overlap_rate(
+    const std::vector<Alteration<T_Variable, T_Expression>> &a_ALTERATIONS) {
+    auto union_ptrs = a_ALTERATIONS.front().first->related_constraint_ptrs();
+    auto intersection_ptrs =
+        a_ALTERATIONS.front().first->related_constraint_ptrs();
+
+    const int ALTERATIONS_SIZE = a_ALTERATIONS.size();
+    for (auto i = 1; i < ALTERATIONS_SIZE; i++) {
+        utility::update_union_set(  //
+            &union_ptrs,            //
+            a_ALTERATIONS[i].first->related_constraint_ptrs());
+
+        utility::update_intersection_set(
+            &intersection_ptrs,  //
+            a_ALTERATIONS[i].first->related_constraint_ptrs());
+    }
+    if (union_ptrs.size() == 0) {
+        return 0;
+    } else {
+        return pow(static_cast<double>(intersection_ptrs.size()) /
+                       static_cast<double>(union_ptrs.size()),
+                   1.0 / (a_ALTERATIONS.size() - 1));
+    }
+};
+
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+constexpr std::uint_fast64_t compute_hash(
+    const std::vector<Alteration<T_Variable, T_Expression>> &a_ALTERATIONS) {
+    std::uint_fast64_t integer_hash = 0;
+    for (const auto &alteration : a_ALTERATIONS) {
+        integer_hash = integer_hash ^
+                       reinterpret_cast<std::uint_fast64_t>(alteration.first);
+    }
+    constexpr const int BUCKET_SIZE = 1 << 10;
+    return static_cast<double>(integer_hash & (BUCKET_SIZE - 1)) / BUCKET_SIZE;
+};
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
@@ -75,30 +136,45 @@ related_variable_ptrs(const Move<T_Variable, T_Expression> &a_MOVE) {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 constexpr Move<T_Variable, T_Expression> operator+(
-    const Move<T_Variable, T_Expression> &a_MOVE_1,
-    const Move<T_Variable, T_Expression> &a_MOVE_2) {
-    auto result = a_MOVE_1;
+    const Move<T_Variable, T_Expression> &a_MOVE_FIRST,
+    const Move<T_Variable, T_Expression> &a_MOVE_SECOND) {
+    auto result = a_MOVE_FIRST;
+
     result.alterations.insert(result.alterations.end(),
-                              a_MOVE_2.alterations.begin(),
-                              a_MOVE_2.alterations.end());
+                              a_MOVE_SECOND.alterations.begin(),
+                              a_MOVE_SECOND.alterations.end());
     result.related_constraint_ptrs.insert(
-        a_MOVE_2.related_constraint_ptrs.begin(),
-        a_MOVE_2.related_constraint_ptrs.end());
-    result.sense = MoveSense::Chain;
+        a_MOVE_SECOND.related_constraint_ptrs.begin(),
+        a_MOVE_SECOND.related_constraint_ptrs.end());
+
+    result.sense        = MoveSense::Chain;
+    result.is_available = false;
+
+    auto         overlap_rate = compute_overlap_rate(result.alterations);
+    auto         hash         = compute_hash(result.alterations);
+    const double HASH_WEIGHT  = 1E-4;
+
+    result.overlap_rate = overlap_rate + HASH_WEIGHT * hash;
+
     return result;
 };
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-constexpr bool operator==(const Move<T_Variable, T_Expression> &a_MOVE_1,
-                          const Move<T_Variable, T_Expression> &a_MOVE_2) {
-    if (a_MOVE_1.alterations.size() != a_MOVE_2.alterations.size()) {
+constexpr bool operator==(const Move<T_Variable, T_Expression> &a_MOVE_FIRST,
+                          const Move<T_Variable, T_Expression> &a_MOVE_SECOND) {
+    if (a_MOVE_FIRST.alterations.size() != a_MOVE_SECOND.alterations.size()) {
         return false;
     }
 
-    int ALTERATIONS_SIZE = a_MOVE_1.alterations.size();
+    if (fabs(a_MOVE_FIRST.overlap_rate - a_MOVE_SECOND.overlap_rate) >
+        constant::EPSILON_10) {
+        return false;
+    }
+
+    const int ALTERATIONS_SIZE = a_MOVE_FIRST.alterations.size();
     for (auto i = 0; i < ALTERATIONS_SIZE; i++) {
-        if (a_MOVE_1.alterations[i] != a_MOVE_2.alterations[i]) {
+        if (a_MOVE_FIRST.alterations[i] != a_MOVE_SECOND.alterations[i]) {
             return false;
         }
     }
