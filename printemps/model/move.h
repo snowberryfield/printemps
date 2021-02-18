@@ -87,6 +87,12 @@ constexpr double compute_overlap_rate(
             &intersection_ptrs,  //
             a_ALTERATIONS[i].first->related_constraint_ptrs());
     }
+
+    /**
+     * If the union of related constraints is empty, the overlap rate is set 0.
+     * Otherwise, the overlap rate is computed bu (#intersection / #union)
+     * ^{1/(#alterations -1)}, where # denotes the number of elements in a set.
+     */
     if (union_ptrs.size() == 0) {
         return 0;
     } else {
@@ -100,12 +106,23 @@ constexpr double compute_overlap_rate(
 template <class T_Variable, class T_Expression>
 constexpr std::uint_fast64_t compute_hash(
     const std::vector<Alteration<T_Variable, T_Expression>> &a_ALTERATIONS) {
+    /**
+     * NOTE: Chain moves will be sorted in descending order by overlap_ratio to
+     * apply std::unique()in Neighborhood.deduplicate_chain_move().A hash is
+     * calculated and added to the overlap_rate so that the same moves are
+     * sorted next to each other as much as possible (In the deduplication, it
+     * is not required completely uniqueness).
+     */
     std::uint_fast64_t integer_hash = 0;
     for (const auto &alteration : a_ALTERATIONS) {
         integer_hash = integer_hash ^
                        reinterpret_cast<std::uint_fast64_t>(alteration.first);
     }
     constexpr const int BUCKET_SIZE = 1 << 10;
+
+    /**
+     * Computed has will be normalized.
+     */
     return static_cast<double>(integer_hash & (BUCKET_SIZE - 1)) / BUCKET_SIZE;
 };
 
@@ -163,16 +180,30 @@ constexpr Move<T_Variable, T_Expression> operator+(
 template <class T_Variable, class T_Expression>
 constexpr bool operator==(const Move<T_Variable, T_Expression> &a_MOVE_FIRST,
                           const Move<T_Variable, T_Expression> &a_MOVE_SECOND) {
+    /**
+     * If the numbers of alterations of two moves are different, they
+     * must be different.
+     */
     if (a_MOVE_FIRST.alterations.size() != a_MOVE_SECOND.alterations.size()) {
         return false;
     }
 
+    /**
+     * If the overlap_rates including hashes of two moves are different, they
+     * are likely to be different. See compute_hash() for detail.
+     */
     if (fabs(a_MOVE_FIRST.overlap_rate - a_MOVE_SECOND.overlap_rate) >
         constant::EPSILON_10) {
         return false;
     }
 
+    /**
+     * Otherwise, check the variables included in two moves. Moves including
+     * same variables but different in their order, are regarded as different
+     * moves.
+     */
     const int ALTERATIONS_SIZE = a_MOVE_FIRST.alterations.size();
+
     for (auto i = 0; i < ALTERATIONS_SIZE; i++) {
         if (a_MOVE_FIRST.alterations[i] != a_MOVE_SECOND.alterations[i]) {
             return false;
