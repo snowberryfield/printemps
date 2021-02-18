@@ -178,6 +178,18 @@ printemps::solver::Option read_option(const std::string &a_FILE_NAME) {
               "chain_move_capacity",        //
               option_object);
 
+    /**********************************************************************/
+    /// chain_move_reduce_mode
+    read_json(&option.chain_move_reduce_mode,  //
+              "chain_move_reduce_mode",        //
+              option_object);
+
+    /**********************************************************************/
+    /// chain_move_overlap_rate_threshold
+    read_json(&option.chain_move_overlap_rate_threshold,  //
+              "chain_move_overlap_rate_threshold",        //
+              option_object);
+
     /**************************************************************************/
     /// selection_mode
     read_json(&option.selection_mode,  //
