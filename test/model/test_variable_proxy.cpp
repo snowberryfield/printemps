@@ -77,8 +77,8 @@ TEST_F(TestVariableProxy, scalar_evaluate_arg_void) {
 /*****************************************************************************/
 TEST_F(TestVariableProxy, scalar_evaluate_arg_move) {
     printemps::model::Model<int, double> model;
-    auto& variable_proxy_0 = model.create_variable("x0");
-    auto& variable_proxy_1 = model.create_variable("x1");
+    auto& variable_proxy_0 = model.create_variable("x_0");
+    auto& variable_proxy_1 = model.create_variable("x_1");
 
     auto value_0_before = random_integer();
     auto value_1_before = random_integer();
