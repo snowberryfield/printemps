@@ -164,8 +164,9 @@ constexpr Move<T_Variable, T_Expression> operator+(
         a_MOVE_SECOND.related_constraint_ptrs.begin(),
         a_MOVE_SECOND.related_constraint_ptrs.end());
 
-    result.sense        = MoveSense::Chain;
-    result.is_available = false;
+    result.sense                        = MoveSense::Chain;
+    result.is_available                 = false;
+    result.is_special_neighborhood_move = true;
 
     auto         overlap_rate = compute_overlap_rate(result.alterations);
     auto         hash         = compute_hash(result.alterations);
