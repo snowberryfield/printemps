@@ -638,6 +638,8 @@ class Model {
         this->categorize_variables();
         this->categorize_constraints();
 
+        this->setup_variable_related_monic_constraints();
+
         /**
          * Presolve the problem by removing redundant constraints and fixing
          * decision variables implicitly fixed.
@@ -918,6 +920,16 @@ class Model {
         }
         m_constraint_reference      = constraint_reference;
         m_constraint_type_reference = constraint_type_reference;
+    }
+
+    /*************************************************************************/
+    constexpr void setup_variable_related_monic_constraints(void) {
+        for (auto &&proxy : m_variable_proxies) {
+            for (auto &&variable : proxy.flat_indexed_variables()) {
+                variable.reset_related_monic_constraint_ptrs();
+                variable.setup_related_monic_constraint_ptrs();
+            }
+        }
     }
 
     /*************************************************************************/
@@ -2127,6 +2139,26 @@ class Model {
     /*************************************************************************/
     inline constexpr int number_of_disabled_constraints(void) const {
         return m_constraint_reference.disabled_constraint_ptrs.size();
+    }
+
+    /*************************************************************************/
+    inline constexpr bool has_monic_constraints(void) const {
+        if (m_constraint_type_reference.set_partitioning_ptrs.size() > 0) {
+            return true;
+        }
+        if (m_constraint_type_reference.set_packing_ptrs.size() > 0) {
+            return true;
+        }
+        if (m_constraint_type_reference.set_covering_ptrs.size() > 0) {
+            return true;
+        }
+        if (m_constraint_type_reference.cardinality_ptrs.size() > 0) {
+            return true;
+        }
+        if (m_constraint_type_reference.invariant_knapsack_ptrs.size() > 0) {
+            return true;
+        }
+        return false;
     }
 
     /*************************************************************************/

@@ -65,20 +65,15 @@ TEST_F(TestMove, has_duplicate_variable) {
 TEST_F(TestMove, compute_overlap_rate) {
     printemps::model::Model<int, double> model;
     auto& x = model.create_variables("x", 4, 0, 1);
-    auto& g = model.create_constraints("g", 8);
+    auto& g = model.create_constraints("g", 3);
 
-    g(0) = x(0) + x(1) <= 1;
-    g(1) = x(0) + x(2) <= 1;
-    g(2) = x(0) + x(3) <= 1;
-    g(3) = x(1) + x(2) <= 1;
-    g(4) = x(1) + x(3) <= 1;
-    g(5) = x(0) + x(1) + x(2) <= 1;
-    g(6) = x(0) + x(1) + x(3) <= 1;
-    g(7) = x(0) + x(2) + x(3) <= 1;
+    g(0) = x(0) + x(1) + x(2) <= 1;
+    g(1) = x(0) + x(1) + x(3) <= 1;
+    g(2) = x(0) + x(2) + x(3) <= 1;
 
     model.setup_variable_related_constraints();
-    model.categorize_variables();
     model.categorize_constraints();
+    model.setup_variable_related_monic_constraints();
 
     {
         printemps::model::Move<int, double> move;
@@ -87,7 +82,7 @@ TEST_F(TestMove, compute_overlap_rate) {
         double overlap_rate =
             printemps::model::compute_overlap_rate(move.alterations);
 
-        EXPECT_FLOAT_EQ(3.0 / 8.0, overlap_rate);
+        EXPECT_FLOAT_EQ(2.0 / 3.0, overlap_rate);
     }
 
     {
@@ -98,7 +93,7 @@ TEST_F(TestMove, compute_overlap_rate) {
         double overlap_rate =
             printemps::model::compute_overlap_rate(move.alterations);
 
-        EXPECT_FLOAT_EQ(pow(1.0 / 8.0, 1.0 / (3 - 1)), overlap_rate);
+        EXPECT_FLOAT_EQ(pow(1.0 / 3.0, 1.0 / (3 - 1)), overlap_rate);
     }
 
     {

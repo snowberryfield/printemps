@@ -1122,6 +1122,51 @@ TEST_F(TestModel, categorize_constraints) {
 }
 
 /*****************************************************************************/
+TEST_F(TestModel, setup_variable_related_monic_constraint_ptrs) {
+    printemps::model::Model<int, double> model;
+
+    auto& x = model.create_variables("x", 10, 0, 1);
+    auto& y = model.create_variables("y", 10, 0, 10);
+
+    auto& g = model.create_constraints("g", 4);
+    g(0)    = x.selection();
+    g(1)    = 2 * x.sum() <= 2;
+    g(2)    = y.sum() <= 2;
+    g(3)    = x.sum() + y.sum() >= 1;
+
+    model.setup_variable_related_constraints();
+    model.categorize_constraints();
+    model.setup_variable_related_monic_constraints();
+
+    for (auto i = 0; i < 10; i++) {
+        EXPECT_EQ(true, x(i).related_monic_constraint_ptrs().find(&g(0)) !=
+                            x(i).related_monic_constraint_ptrs().end());
+        EXPECT_EQ(false, x(i).related_monic_constraint_ptrs().find(&g(1)) !=
+                             x(i).related_monic_constraint_ptrs().end());
+        EXPECT_EQ(false, x(i).related_monic_constraint_ptrs().find(&g(2)) !=
+                             x(i).related_monic_constraint_ptrs().end());
+        EXPECT_EQ(false, x(i).related_monic_constraint_ptrs().find(&g(3)) !=
+                             x(i).related_monic_constraint_ptrs().end());
+    }
+
+    for (auto i = 0; i < 10; i++) {
+        EXPECT_EQ(false, y(i).related_monic_constraint_ptrs().find(&g(0)) !=
+                             y(i).related_monic_constraint_ptrs().end());
+        EXPECT_EQ(false, y(i).related_monic_constraint_ptrs().find(&g(1)) !=
+                             y(i).related_monic_constraint_ptrs().end());
+        EXPECT_EQ(false, y(i).related_monic_constraint_ptrs().find(&g(2)) !=
+                             y(i).related_monic_constraint_ptrs().end());
+        EXPECT_EQ(false, y(i).related_monic_constraint_ptrs().find(&g(3)) !=
+                             y(i).related_monic_constraint_ptrs().end());
+    }
+
+    for (auto i = 0; i < 10; i++) {
+        x(i).reset_related_monic_constraint_ptrs();
+        EXPECT_EQ(true, x(i).related_monic_constraint_ptrs().empty());
+    }
+}
+
+/*****************************************************************************/
 TEST_F(TestModel, extract_selections_larger) {
     printemps::model::Model<int, double> model;
 
@@ -1146,7 +1191,7 @@ TEST_F(TestModel, extract_selections_larger) {
      */
     model.create_constraint(
         "c_1", (x_0.sum({1, printemps::model::Range::All}) +
-               x_1.sum({1, printemps::model::Range::All}) + x_2(0)) == 1);
+                x_1.sum({1, printemps::model::Range::All}) + x_2(0)) == 1);
 
     /**
      * Selection constraint with 400 decision variables. The priority of this
@@ -1283,7 +1328,7 @@ TEST_F(TestModel, extract_selections_independent) {
      */
     model.create_constraint(
         "c_1", (x_0.sum({1, printemps::model::Range::All}) +
-               x_1.sum({1, printemps::model::Range::All}) + x_2(0)) == 1);
+                x_1.sum({1, printemps::model::Range::All}) + x_2(0)) == 1);
 
     /**
      * Selection constraint with 400 decision variables (overlap).

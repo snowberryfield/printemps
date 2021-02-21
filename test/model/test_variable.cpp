@@ -54,6 +54,7 @@ TEST_F(TestVariable, initialize) {
     EXPECT_EQ(printemps::model::VariableSense::Integer, variable.sense());
     EXPECT_EQ(nullptr, variable.selection_ptr());
     EXPECT_EQ(true, variable.related_constraint_ptrs().empty());
+    EXPECT_EQ(true, variable.related_monic_constraint_ptrs().empty());
     EXPECT_EQ(true, variable.constraint_sensitivities().empty());
     EXPECT_EQ(0.0, variable.objective_sensitivity());
 }
@@ -346,6 +347,24 @@ TEST_F(TestVariable, reset_related_constraint_ptrs) {
 /*****************************************************************************/
 TEST_F(TestVariable, related_constraint_ptrs) {
     /// This method is tested in register_related_constraint_ptr().
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, setup_related_monic_constraint_ptrs) {
+    /// This method is tested in
+    /// Model.setup_variable_related_monic_constraint_ptrs().
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, reset_setup_monic_constraint_ptrs) {
+    /// This method is tested in
+    /// Model.setup_variable_related_monic_constraint_ptrs().
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, related_monic_constraint_ptrs) {
+    /// This method is tested in
+    /// Model.setup_variable_related_monic_constraint_ptrs().
 }
 
 /*****************************************************************************/
