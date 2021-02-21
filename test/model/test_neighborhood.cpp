@@ -134,10 +134,10 @@ TEST_F(TestNeighborhood, setup_move_updater) {
     model.create_constraint("c_7", -x_2(0) + x_2(1) <= 1);  // eff. : 1
     model.create_constraint("c_8", x_2(0) - x_2(1) >= 1);   // eff. : 1
     model.create_constraint("c_9", -x_2(0) + x_2(1) >= 1);  // eff. : 1
-    model.create_constraint("c_10", z(0) - z(1) <= 10);    // eff. : 2
-    model.create_constraint("c_11", -z(0) + z(1) <= 10);   // eff. : 2
-    model.create_constraint("c_12", z(0) - z(1) >= 10);    // eff. : 2
-    model.create_constraint("c_13", -z(0) + z(1) >= 10);   // eff. : 2
+    model.create_constraint("c_10", z(0) - z(1) <= 10);     // eff. : 2
+    model.create_constraint("c_11", -z(0) + z(1) <= 10);    // eff. : 2
+    model.create_constraint("c_12", z(0) - z(1) >= 10);     // eff. : 2
+    model.create_constraint("c_13", -z(0) + z(1) >= 10);    // eff. : 2
 
     /// Variable bound constraints.
     model.create_constraint("c_14", 3 * z(0) + 10 * z(1) <= 20);  // eff. : 4
@@ -425,9 +425,8 @@ TEST_F(TestNeighborhood, register_chain_move) {
               static_cast<int>(model.neighborhood().chain_move_flags().size()));
 
     model.neighborhood().clear_chain_moves();
-    EXPECT_EQ(0, static_cast<int>(model.neighborhood().chain_moves().size()));
-    EXPECT_EQ(0,
-              static_cast<int>(model.neighborhood().chain_move_flags().size()));
+    EXPECT_EQ(true, model.neighborhood().chain_moves().empty());
+    EXPECT_EQ(true, model.neighborhood().chain_move_flags().empty());
 }
 
 /*****************************************************************************/
