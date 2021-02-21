@@ -151,12 +151,18 @@ Result<T_Variable, T_Expression> solve(
     }
 
     /**
-     * Disable the Chain move neighborhood for the problem with nonlinear
-     * constraints and user-defined moves. This condition can be checked by
-     * model.is_enabled_fast_evaluation().
+     * Disable the Chain move for the problem with no monic
+     * constraints (set partitioning, set packing, set covering, cardinality,
+     * and invariant knapsack).
      */
-    if (!model->is_enabled_fast_evaluation()) {
+    if (master_option.is_enabled_chain_move &&
+        !model->has_monic_constraints()) {
         master_option.is_enabled_chain_move = false;
+        utility::print_warning(
+            "Chain move was disabled because the problem does not include any "
+            "monic constraints (set partitioning/packing/covering, "
+            "cardinality, and invariant knapsack).",
+            master_option.verbose >= Verbose::Warning);
     }
 
     /**
@@ -622,6 +628,16 @@ Result<T_Variable, T_Expression> solve(
             result.incumbent_holder.global_augmented_incumbent_score());
 
         /**
+         * Update the feasible incumbent solution if it was improved by the tabu
+         * search.
+         */
+        if (result.incumbent_holder.is_found_feasible_solution()) {
+            update_status = incumbent_holder.try_update_incumbent(
+                result.incumbent_holder.feasible_incumbent_solution(),
+                result.incumbent_holder.feasible_incumbent_score());
+        }
+
+        /**
          * Reset the penalty coefficients if the incumbent solution was not
          * updated for specified count of loops.
          */
@@ -891,16 +907,6 @@ Result<T_Variable, T_Expression> solve(
         }
 
         /**
-         * Update the feasible incumbent solution if it was improved by the tabu
-         * search.
-         */
-        if (result.incumbent_holder.is_found_feasible_solution()) {
-            update_status = incumbent_holder.try_update_incumbent(
-                result.incumbent_holder.feasible_incumbent_solution(),
-                result.incumbent_holder.feasible_incumbent_score());
-        }
-
-        /**
          * Update the memory.
          */
         memory = result.memory;
@@ -1118,6 +1124,16 @@ Result<T_Variable, T_Expression> solve(
         }
 
         /**
+         * Reset chain moves if the global augmented objective was updated.
+         */
+        if (result.total_update_status &
+            IncumbentHolderConstant::STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
+            if (option.is_enabled_chain_move) {
+                model->neighborhood().clear_chain_moves();
+            }
+        }
+
+        /**
          * Update the neighborhood moves to be employed for the next loop.
          */
         bool is_activated_special_neighborhood_move   = false;
@@ -1250,16 +1266,6 @@ Result<T_Variable, T_Expression> solve(
                         __FILE__, __LINE__, __func__,
                         "The specified Chain move reduce mode is invalid."));
                 }
-            }
-        }
-
-        /**
-         * Reset chain moves if the global augmented objective was updated.
-         */
-        if (update_status &
-            IncumbentHolderConstant::STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
-            if (option.is_enabled_chain_move) {
-                model->neighborhood().clear_chain_moves();
             }
         }
 
@@ -1501,7 +1507,7 @@ Result<T_Variable, T_Expression> solve(
         }
 
         /**
-         * Print the number of the stored chain neighborhood moves.
+         * Print the number of the stored chain moves.
          */
         if (model->neighborhood().is_enabled_chain_move()) {
             utility::print_message(

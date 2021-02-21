@@ -576,15 +576,12 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                  current_move.sense == model::MoveSense::Binary &&
                  previous_move.alterations.front().second !=
                      current_move.alterations.front().second) ||
-                (previous_move.sense == model::MoveSense::Chain &&
+                (previous_move.sense == model::MoveSense::Chain ||
                  current_move.sense == model::MoveSense::Chain)) {
                 auto chain_move = previous_move + current_move;
 
-                double upper_limit = 1 - constant::EPSILON;
-                double lower_limit = option.chain_move_overlap_rate_threshold;
-
-                if (chain_move.overlap_rate < upper_limit &&
-                    chain_move.overlap_rate > lower_limit &&
+                if (chain_move.overlap_rate >
+                        option.chain_move_overlap_rate_threshold &&
                     !model::has_duplicate_variable(chain_move)) {
                     auto back_chain_move = chain_move;
                     for (auto&& alteration : back_chain_move.alterations) {

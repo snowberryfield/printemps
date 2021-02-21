@@ -73,19 +73,24 @@ constexpr bool has_duplicate_variable(
 template <class T_Variable, class T_Expression>
 constexpr double compute_overlap_rate(
     const std::vector<Alteration<T_Variable, T_Expression>> &a_ALTERATIONS) {
-    auto union_ptrs = a_ALTERATIONS.front().first->related_constraint_ptrs();
+    auto union_ptrs =
+        a_ALTERATIONS.front().first->related_monic_constraint_ptrs();
+    if (union_ptrs.size() == 0) {
+        return 0.0;
+    }
+
     auto intersection_ptrs =
-        a_ALTERATIONS.front().first->related_constraint_ptrs();
+        a_ALTERATIONS.front().first->related_monic_constraint_ptrs();
 
     const int ALTERATIONS_SIZE = a_ALTERATIONS.size();
     for (auto i = 1; i < ALTERATIONS_SIZE; i++) {
         utility::update_union_set(  //
             &union_ptrs,            //
-            a_ALTERATIONS[i].first->related_constraint_ptrs());
+            a_ALTERATIONS[i].first->related_monic_constraint_ptrs());
 
         utility::update_intersection_set(
             &intersection_ptrs,  //
-            a_ALTERATIONS[i].first->related_constraint_ptrs());
+            a_ALTERATIONS[i].first->related_monic_constraint_ptrs());
     }
 
     /**
@@ -93,13 +98,9 @@ constexpr double compute_overlap_rate(
      * Otherwise, the overlap rate is computed bu (#intersection / #union)
      * ^{1/(#alterations -1)}, where # denotes the number of elements in a set.
      */
-    if (union_ptrs.size() == 0) {
-        return 0;
-    } else {
-        return pow(static_cast<double>(intersection_ptrs.size()) /
-                       static_cast<double>(union_ptrs.size()),
-                   1.0 / (a_ALTERATIONS.size() - 1));
-    }
+    return pow(static_cast<double>(intersection_ptrs.size()) /
+                   static_cast<double>(union_ptrs.size()),
+               1.0 / (a_ALTERATIONS.size() - 1));
 };
 
 /*****************************************************************************/
