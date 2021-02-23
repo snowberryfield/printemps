@@ -1122,12 +1122,57 @@ TEST_F(TestModel, categorize_constraints) {
 }
 
 /*****************************************************************************/
+TEST_F(TestModel, setup_variable_related_monic_constraint_ptrs) {
+    printemps::model::Model<int, double> model;
+
+    auto& x = model.create_variables("x", 10, 0, 1);
+    auto& y = model.create_variables("y", 10, 0, 10);
+
+    auto& g = model.create_constraints("g", 4);
+    g(0)    = x.selection();
+    g(1)    = 2 * x.sum() <= 2;
+    g(2)    = y.sum() <= 2;
+    g(3)    = x.sum() + y.sum() >= 1;
+
+    model.setup_variable_related_constraints();
+    model.categorize_constraints();
+    model.setup_variable_related_monic_constraints();
+
+    for (auto i = 0; i < 10; i++) {
+        EXPECT_EQ(true, x(i).related_monic_constraint_ptrs().find(&g(0)) !=
+                            x(i).related_monic_constraint_ptrs().end());
+        EXPECT_EQ(false, x(i).related_monic_constraint_ptrs().find(&g(1)) !=
+                             x(i).related_monic_constraint_ptrs().end());
+        EXPECT_EQ(false, x(i).related_monic_constraint_ptrs().find(&g(2)) !=
+                             x(i).related_monic_constraint_ptrs().end());
+        EXPECT_EQ(false, x(i).related_monic_constraint_ptrs().find(&g(3)) !=
+                             x(i).related_monic_constraint_ptrs().end());
+    }
+
+    for (auto i = 0; i < 10; i++) {
+        EXPECT_EQ(false, y(i).related_monic_constraint_ptrs().find(&g(0)) !=
+                             y(i).related_monic_constraint_ptrs().end());
+        EXPECT_EQ(false, y(i).related_monic_constraint_ptrs().find(&g(1)) !=
+                             y(i).related_monic_constraint_ptrs().end());
+        EXPECT_EQ(false, y(i).related_monic_constraint_ptrs().find(&g(2)) !=
+                             y(i).related_monic_constraint_ptrs().end());
+        EXPECT_EQ(false, y(i).related_monic_constraint_ptrs().find(&g(3)) !=
+                             y(i).related_monic_constraint_ptrs().end());
+    }
+
+    for (auto i = 0; i < 10; i++) {
+        x(i).reset_related_monic_constraint_ptrs();
+        EXPECT_EQ(true, x(i).related_monic_constraint_ptrs().empty());
+    }
+}
+
+/*****************************************************************************/
 TEST_F(TestModel, extract_selections_larger) {
     printemps::model::Model<int, double> model;
 
-    auto& x0 = model.create_variables("x0", {10, 10}, 0, 1);
-    auto& x1 = model.create_variables("x1", {20, 20}, 0, 1);
-    auto& x2 = model.create_variables("x2", 2, 0, 1);
+    auto& x_0 = model.create_variables("x_0", {10, 10}, 0, 1);
+    auto& x_1 = model.create_variables("x_1", {20, 20}, 0, 1);
+    auto& x_2 = model.create_variables("x_2", 2, 0, 1);
 
     auto& y = model.create_variables("y", {30, 30}, -10, 10);
 
@@ -1136,31 +1181,31 @@ TEST_F(TestModel, extract_selections_larger) {
      * constraint is the third, and it will be employed for a swap
      * neighborhood.
      */
-    model.create_constraint("c0",
-                            x0.selection({0, printemps::model::Range::All}));
+    model.create_constraint("c_0",
+                            x_0.selection({0, printemps::model::Range::All}));
 
     /**
      * Selection constraint with 32 decision variables. The priority of this
      * constraint is the second, and it will NOT be employed for a swap
-     * neighborhood because higher-priority constraint c1 covers x1.
+     * neighborhood because higher-priority constraint c_1 covers x_1.
      */
     model.create_constraint(
-        "c1", (x0.sum({1, printemps::model::Range::All}) +
-               x1.sum({1, printemps::model::Range::All}) + x2(0)) == 1);
+        "c_1", (x_0.sum({1, printemps::model::Range::All}) +
+                x_1.sum({1, printemps::model::Range::All}) + x_2(0)) == 1);
 
     /**
      * Selection constraint with 400 decision variables. The priority of this
      * constraint is the first, and it will be employed for a swap
      * neighborhood.
      */
-    model.create_constraint("c2", x1.selection());
+    model.create_constraint("c_2", x_1.selection());
 
     /**
      * Selection constraint with 2 decision variables. The priority of this
      * constraint is the fourth, and it will NOT be employed for a swap
      * neighborhood.
      */
-    model.create_constraint("c3", x2.selection());
+    model.create_constraint("c_3", x_2.selection());
 
     model.categorize_variables();
     model.categorize_constraints();
@@ -1173,36 +1218,36 @@ TEST_F(TestModel, extract_selections_larger) {
      * Check the numbers of covered variables and variable pointers.
      */
     {
-        /// Constraint c2
+        /// Constraint c_2
         auto variable_ptrs = model.selections()[0].variable_ptrs;
         EXPECT_EQ(400, static_cast<int>(variable_ptrs.size()));
 
         EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x1(0, 0)) != variable_ptrs.end()));
+                                   &x_1(0, 0)) != variable_ptrs.end()));
         EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x1(19, 19)) != variable_ptrs.end()));
+                                   &x_1(19, 19)) != variable_ptrs.end()));
     }
 
     {
-        /// Constraint c0
+        /// Constraint c_0
         auto variable_ptrs = model.selections()[1].variable_ptrs;
         EXPECT_EQ(10, static_cast<int>(variable_ptrs.size()));
 
         EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x0(0, 0)) != variable_ptrs.end()));
+                                   &x_0(0, 0)) != variable_ptrs.end()));
         EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x0(0, 9)) != variable_ptrs.end()));
+                                   &x_0(0, 9)) != variable_ptrs.end()));
         EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x0(1, 0)) != variable_ptrs.end()));
+                                    &x_0(1, 0)) != variable_ptrs.end()));
     }
 
     /**
      * Check whether the corresponding constraint is enabled or not.
      */
-    /// Constraint c2
+    /// Constraint c_2
     EXPECT_EQ(false, model.selections()[0].constraint_ptr->is_enabled());
 
-    /// Constraint c0
+    /// Constraint c_0
     EXPECT_EQ(false, model.selections()[1].constraint_ptr->is_enabled());
 
     /**
@@ -1214,19 +1259,19 @@ TEST_F(TestModel, extract_selections_larger) {
         auto variable_ptrs = model.variable_reference().selection_variable_ptrs;
         EXPECT_EQ(20 * 20 + 1 * 10, model.number_of_selection_variables());
 
-        /// Constraint c2
+        /// Constraint c_2
         EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x1(0, 0)) != variable_ptrs.end()));
+                                   &x_1(0, 0)) != variable_ptrs.end()));
         EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x1(19, 19)) != variable_ptrs.end()));
+                                   &x_1(19, 19)) != variable_ptrs.end()));
 
-        /// Constraint c0
+        /// Constraint c_0
         EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x0(0, 0)) != variable_ptrs.end()));
+                                   &x_0(0, 0)) != variable_ptrs.end()));
         EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x0(0, 9)) != variable_ptrs.end()));
+                                   &x_0(0, 9)) != variable_ptrs.end()));
         EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x0(1, 0)) != variable_ptrs.end()));
+                                    &x_0(1, 0)) != variable_ptrs.end()));
     }
 
     /// Binary
@@ -1235,19 +1280,19 @@ TEST_F(TestModel, extract_selections_larger) {
         EXPECT_EQ(10 * 10 + 20 * 20 + 2 - (20 * 20 + 1 * 10),
                   model.number_of_binary_variables());
 
-        /// Constraint c2
+        /// Constraint c_2
         EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x1(0, 0)) != variable_ptrs.end()));
+                                    &x_1(0, 0)) != variable_ptrs.end()));
         EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x1(19, 19)) != variable_ptrs.end()));
+                                    &x_1(19, 19)) != variable_ptrs.end()));
 
-        /// Constraint c0
+        /// Constraint c_0
         EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x0(0, 0)) != variable_ptrs.end()));
+                                    &x_0(0, 0)) != variable_ptrs.end()));
         EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x0(0, 9)) != variable_ptrs.end()));
+                                    &x_0(0, 9)) != variable_ptrs.end()));
         EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x0(1, 0)) != variable_ptrs.end()));
+                                   &x_0(1, 0)) != variable_ptrs.end()));
     }
 
     /// Integer
@@ -1266,34 +1311,34 @@ TEST_F(TestModel, extract_selections_larger) {
 TEST_F(TestModel, extract_selections_independent) {
     printemps::model::Model<int, double> model;
 
-    auto& x0 = model.create_variables("x0", {10, 10}, 0, 1);
-    auto& x1 = model.create_variables("x1", {20, 20}, 0, 1);
-    auto& x2 = model.create_variables("x2", 2, 0, 1);
+    auto& x_0 = model.create_variables("x_0", {10, 10}, 0, 1);
+    auto& x_1 = model.create_variables("x_1", {20, 20}, 0, 1);
+    auto& x_2 = model.create_variables("x_2", 2, 0, 1);
 
     auto& y = model.create_variables("y", {30, 30}, -10, 10);
 
     /**
      * Selection constraint with 10 decision variables (no overlap).
      */
-    model.create_constraint("c0",
-                            x0.selection({0, printemps::model::Range::All}));
+    model.create_constraint("c_0",
+                            x_0.selection({0, printemps::model::Range::All}));
 
     /**
      * Selection constraint with 32 decision variables (overlap).
      */
     model.create_constraint(
-        "c1", (x0.sum({1, printemps::model::Range::All}) +
-               x1.sum({1, printemps::model::Range::All}) + x2(0)) == 1);
+        "c_1", (x_0.sum({1, printemps::model::Range::All}) +
+                x_1.sum({1, printemps::model::Range::All}) + x_2(0)) == 1);
 
     /**
      * Selection constraint with 400 decision variables (overlap).
      */
-    model.create_constraint("c2", x1.selection());
+    model.create_constraint("c_2", x_1.selection());
 
     /**
      * Selection constraint with 2 decision variables (overlap).
      */
-    model.create_constraint("c3", x2.selection());
+    model.create_constraint("c_3", x_2.selection());
 
     model.categorize_variables();
     model.categorize_constraints();
@@ -1306,22 +1351,22 @@ TEST_F(TestModel, extract_selections_independent) {
      * Check the numbers of covered variables and variable pointers.
      */
     {
-        /// Constraint c0
+        /// Constraint c_0
         auto variable_ptrs = model.selections()[0].variable_ptrs;
         EXPECT_EQ(10, static_cast<int>(variable_ptrs.size()));
 
         EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x0(0, 0)) != variable_ptrs.end()));
+                                   &x_0(0, 0)) != variable_ptrs.end()));
         EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x0(0, 9)) != variable_ptrs.end()));
+                                   &x_0(0, 9)) != variable_ptrs.end()));
         EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x0(1, 0)) != variable_ptrs.end()));
+                                    &x_0(1, 0)) != variable_ptrs.end()));
     }
 
     /**
      * Check whether the corresponding constraint is enabled or not.
      */
-    /// Constraint c0
+    /// Constraint c_0
     EXPECT_EQ(false, model.selections()[0].constraint_ptr->is_enabled());
 
     /**
@@ -1332,13 +1377,13 @@ TEST_F(TestModel, extract_selections_independent) {
         auto variable_ptrs = model.variable_reference().selection_variable_ptrs;
         EXPECT_EQ(10, model.number_of_selection_variables());
 
-        /// Constraint c0
+        /// Constraint c_0
         EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x0(0, 0)) != variable_ptrs.end()));
+                                   &x_0(0, 0)) != variable_ptrs.end()));
         EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x0(0, 9)) != variable_ptrs.end()));
+                                   &x_0(0, 9)) != variable_ptrs.end()));
         EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x0(1, 0)) != variable_ptrs.end()));
+                                    &x_0(1, 0)) != variable_ptrs.end()));
     }
 
     /// Binary
@@ -1347,13 +1392,13 @@ TEST_F(TestModel, extract_selections_independent) {
         EXPECT_EQ(10 * 10 + 20 * 20 + 2 - 10,
                   model.number_of_binary_variables());
 
-        /// Constraint c0
+        /// Constraint c_0
         EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x0(0, 0)) != variable_ptrs.end()));
+                                    &x_0(0, 0)) != variable_ptrs.end()));
         EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x0(0, 9)) != variable_ptrs.end()));
+                                    &x_0(0, 9)) != variable_ptrs.end()));
         EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x0(1, 0)) != variable_ptrs.end()));
+                                   &x_0(1, 0)) != variable_ptrs.end()));
     }
 
     /// Integer
@@ -1962,7 +2007,7 @@ TEST_F(TestModel, evaluate) {
             EXPECT_EQ(46 + 5 * 10000 + 10000,
                       score_after_0.global_augmented_objective);
             EXPECT_EQ(false, score_after_0.is_objective_improvable);
-            EXPECT_EQ(false, score_after_0.is_constraint_improvable);
+            EXPECT_EQ(false, score_after_0.is_feasibility_improvable);
             EXPECT_EQ(false, score_after_0.is_feasible);
 
             EXPECT_EQ(46, score_after_1.objective);
@@ -1974,7 +2019,7 @@ TEST_F(TestModel, evaluate) {
             EXPECT_EQ(46 + 5 * 10000 + 10000,
                       score_after_1.global_augmented_objective);
             EXPECT_EQ(false, score_after_1.is_objective_improvable);
-            EXPECT_EQ(false, score_after_1.is_constraint_improvable);
+            EXPECT_EQ(false, score_after_1.is_feasibility_improvable);
             EXPECT_EQ(false, score_after_1.is_feasible);
 
             model.update(move);
@@ -2001,7 +2046,7 @@ TEST_F(TestModel, evaluate) {
             EXPECT_EQ(1, score_after_0.local_augmented_objective);
             EXPECT_EQ(1, score_after_0.global_augmented_objective);
             EXPECT_EQ(true, score_after_0.is_objective_improvable);
-            EXPECT_EQ(true, score_after_0.is_constraint_improvable);
+            EXPECT_EQ(true, score_after_0.is_feasibility_improvable);
             EXPECT_EQ(true, score_after_0.is_feasible);
 
             EXPECT_EQ(1, score_after_1.objective);
@@ -2011,7 +2056,7 @@ TEST_F(TestModel, evaluate) {
             EXPECT_EQ(1, score_after_1.local_augmented_objective);
             EXPECT_EQ(1, score_after_1.global_augmented_objective);
             EXPECT_EQ(true, score_after_1.is_objective_improvable);
-            EXPECT_EQ(true, score_after_1.is_constraint_improvable);
+            EXPECT_EQ(true, score_after_1.is_feasibility_improvable);
             EXPECT_EQ(true, score_after_1.is_feasible);
 
             model.update(move);
@@ -2037,7 +2082,7 @@ TEST_F(TestModel, evaluate) {
             EXPECT_EQ(11 + 100, score_after_0.local_augmented_objective);
             EXPECT_EQ(11 + 10000, score_after_0.global_augmented_objective);
             EXPECT_EQ(false, score_after_0.is_objective_improvable);
-            EXPECT_EQ(false, score_after_0.is_constraint_improvable);
+            EXPECT_EQ(false, score_after_0.is_feasibility_improvable);
             EXPECT_EQ(false, score_after_0.is_feasible);
 
             EXPECT_EQ(11, score_after_1.objective);
@@ -2047,7 +2092,7 @@ TEST_F(TestModel, evaluate) {
             EXPECT_EQ(11 + 100, score_after_1.local_augmented_objective);
             EXPECT_EQ(11 + 10000, score_after_1.global_augmented_objective);
             EXPECT_EQ(false, score_after_1.is_objective_improvable);
-            EXPECT_EQ(false, score_after_1.is_constraint_improvable);
+            EXPECT_EQ(false, score_after_1.is_feasibility_improvable);
             EXPECT_EQ(false, score_after_1.is_feasible);
 
             model.update(move);
@@ -2109,7 +2154,7 @@ TEST_F(TestModel, evaluate) {
             EXPECT_EQ(-46 + 5 * 10000 + 10000,
                       score_after_0.global_augmented_objective);
             EXPECT_EQ(false, score_after_0.is_objective_improvable);
-            EXPECT_EQ(false, score_after_0.is_constraint_improvable);
+            EXPECT_EQ(false, score_after_0.is_feasibility_improvable);
             EXPECT_EQ(false, score_after_0.is_feasible);
 
             EXPECT_EQ(-46, score_after_1.objective);
@@ -2121,7 +2166,7 @@ TEST_F(TestModel, evaluate) {
             EXPECT_EQ(-46 + 5 * 10000 + 10000,
                       score_after_1.global_augmented_objective);
             EXPECT_EQ(false, score_after_1.is_objective_improvable);
-            EXPECT_EQ(false, score_after_1.is_constraint_improvable);
+            EXPECT_EQ(false, score_after_1.is_feasibility_improvable);
             EXPECT_EQ(false, score_after_1.is_feasible);
 
             model.update(move);
@@ -2147,7 +2192,7 @@ TEST_F(TestModel, evaluate) {
             EXPECT_EQ(-1, score_after_0.local_augmented_objective);
             EXPECT_EQ(-1, score_after_0.global_augmented_objective);
             EXPECT_EQ(false, score_after_0.is_objective_improvable);
-            EXPECT_EQ(true, score_after_0.is_constraint_improvable);
+            EXPECT_EQ(true, score_after_0.is_feasibility_improvable);
             EXPECT_EQ(true, score_after_0.is_feasible);
 
             EXPECT_EQ(-1, score_after_1.objective);
@@ -2157,7 +2202,7 @@ TEST_F(TestModel, evaluate) {
             EXPECT_EQ(-1, score_after_1.local_augmented_objective);
             EXPECT_EQ(-1, score_after_1.global_augmented_objective);
             EXPECT_EQ(false, score_after_1.is_objective_improvable);
-            EXPECT_EQ(true, score_after_1.is_constraint_improvable);
+            EXPECT_EQ(true, score_after_1.is_feasibility_improvable);
             EXPECT_EQ(true, score_after_1.is_feasible);
 
             model.update(move);
@@ -2183,7 +2228,7 @@ TEST_F(TestModel, evaluate) {
             EXPECT_EQ(-11 + 100, score_after_0.local_augmented_objective);
             EXPECT_EQ(-11 + 10000, score_after_0.global_augmented_objective);
             EXPECT_EQ(true, score_after_0.is_objective_improvable);
-            EXPECT_EQ(false, score_after_0.is_constraint_improvable);
+            EXPECT_EQ(false, score_after_0.is_feasibility_improvable);
             EXPECT_EQ(false, score_after_0.is_feasible);
 
             EXPECT_EQ(-11, score_after_1.objective);
@@ -2193,7 +2238,7 @@ TEST_F(TestModel, evaluate) {
             EXPECT_EQ(-11 + 100, score_after_1.local_augmented_objective);
             EXPECT_EQ(-11 + 10000, score_after_1.global_augmented_objective);
             EXPECT_EQ(true, score_after_1.is_objective_improvable);
-            EXPECT_EQ(false, score_after_1.is_constraint_improvable);
+            EXPECT_EQ(false, score_after_1.is_feasibility_improvable);
             EXPECT_EQ(false, score_after_1.is_feasible);
 
             model.update(move);

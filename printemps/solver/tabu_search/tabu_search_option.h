@@ -27,7 +27,7 @@ struct TabuSearchOptionConstant {
     static constexpr double DEFAULT_INITIAL_MODIFICATION_RANDOMIZE_RATE = 0.5;
     static constexpr double DEFAULT_MOVE_PRESERVE_RATE                  = 1.0;
     static constexpr double DEFAULT_FREQUENCY_PENALTY_COEFFICIENT       = 1E-5;
-    static constexpr double DEFAULT_PRUNING_RATE_THRESHOLD              = 0.5;
+    static constexpr double DEFAULT_PRUNING_RATE_THRESHOLD              = 1.0;
 
     static constexpr double DEFAULT_IS_ENABLED_SHUFFLE         = true;
     static constexpr double DEFAULT_IS_ENABLED_MOVE_CURTAIL    = false;

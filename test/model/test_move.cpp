@@ -32,6 +32,14 @@ class TestMove : public ::testing::Test {
 };
 
 /*****************************************************************************/
+TEST_F(TestMove, constructor) {
+    printemps::model::Move<int, double> move;
+    EXPECT_EQ(false, move.is_special_neighborhood_move);
+    EXPECT_EQ(true, move.is_available);
+    EXPECT_EQ(0.0, move.overlap_rate);
+}
+
+/*****************************************************************************/
 TEST_F(TestMove, has_duplicate_variable) {
     auto variable_0 =
         printemps::model::Variable<int, double>::create_instance();
@@ -50,6 +58,94 @@ TEST_F(TestMove, has_duplicate_variable) {
         move.alterations.emplace_back(&variable_0, 1);
         move.alterations.emplace_back(&variable_1, 1);
         EXPECT_EQ(false, printemps::model::has_duplicate_variable(move));
+    }
+}
+
+/*****************************************************************************/
+TEST_F(TestMove, compute_overlap_rate) {
+    printemps::model::Model<int, double> model;
+    auto& x = model.create_variables("x", 4, 0, 1);
+    auto& g = model.create_constraints("g", 3);
+
+    g(0) = x(0) + x(1) + x(2) <= 1;
+    g(1) = x(0) + x(1) + x(3) <= 1;
+    g(2) = x(0) + x(2) + x(3) <= 1;
+
+    model.setup_variable_related_constraints();
+    model.categorize_constraints();
+    model.setup_variable_related_monic_constraints();
+
+    {
+        printemps::model::Move<int, double> move;
+        move.alterations.emplace_back(&x(0), 1);
+        move.alterations.emplace_back(&x(1), 1);
+        double overlap_rate =
+            printemps::model::compute_overlap_rate(move.alterations);
+
+        EXPECT_FLOAT_EQ(2.0 / 3.0, overlap_rate);
+    }
+
+    {
+        printemps::model::Move<int, double> move;
+        move.alterations.emplace_back(&x(0), 1);
+        move.alterations.emplace_back(&x(1), 1);
+        move.alterations.emplace_back(&x(2), 1);
+        double overlap_rate =
+            printemps::model::compute_overlap_rate(move.alterations);
+
+        EXPECT_FLOAT_EQ(pow(1.0 / 3.0, 1.0 / (3 - 1)), overlap_rate);
+    }
+
+    {
+        printemps::model::Move<int, double> move;
+        move.alterations.emplace_back(&x(0), 1);
+        move.alterations.emplace_back(&x(1), 1);
+        move.alterations.emplace_back(&x(2), 1);
+        move.alterations.emplace_back(&x(3), 1);
+        double overlap_rate =
+            printemps::model::compute_overlap_rate(move.alterations);
+
+        EXPECT_FLOAT_EQ(0.0, overlap_rate);
+    }
+}
+
+/*****************************************************************************/
+TEST_F(TestMove, compute_hash) {
+    printemps::model::Model<int, double> model;
+    auto& x = model.create_variables("x", 4, 0, 1);
+
+    model.setup_variable_related_constraints();
+    model.categorize_variables();
+    model.categorize_constraints();
+
+    {
+        printemps::model::Move<int, double> move;
+        move.alterations.emplace_back(&x(0), 1);
+        move.alterations.emplace_back(&x(1), 1);
+        double hash = printemps::model::compute_hash(move.alterations);
+
+        EXPECT_EQ(true, hash < 1.0);
+    }
+
+    {
+        printemps::model::Move<int, double> move;
+        move.alterations.emplace_back(&x(0), 1);
+        move.alterations.emplace_back(&x(1), 1);
+        move.alterations.emplace_back(&x(2), 1);
+        double hash = printemps::model::compute_hash(move.alterations);
+
+        EXPECT_EQ(true, hash < 1.0);
+    }
+
+    {
+        printemps::model::Move<int, double> move;
+        move.alterations.emplace_back(&x(0), 1);
+        move.alterations.emplace_back(&x(1), 1);
+        move.alterations.emplace_back(&x(2), 1);
+        move.alterations.emplace_back(&x(3), 1);
+        double hash = printemps::model::compute_hash(move.alterations);
+
+        EXPECT_EQ(true, hash < 1.0);
     }
 }
 

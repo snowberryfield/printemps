@@ -87,9 +87,9 @@ TEST_F(TestNeighborhood, set_has_selection_variables) {
 TEST_F(TestNeighborhood, setup_move_updater) {
     printemps::model::Model<int, double> model;
 
-    auto& x0 = model.create_variables("x0", {10, 10}, 0, 1);
-    auto& x1 = model.create_variables("x1", {20, 20}, 0, 1);
-    auto& x2 = model.create_variables("x2", 2, 0, 1);
+    auto& x_0 = model.create_variables("x_0", {10, 10}, 0, 1);
+    auto& x_1 = model.create_variables("x_1", {20, 20}, 0, 1);
+    auto& x_2 = model.create_variables("x_2", 2, 0, 1);
 
     auto& y = model.create_variables("y", {30, 30}, -10, 10);
     auto& z = model.create_variables("z", 2, -10, 10);
@@ -99,55 +99,55 @@ TEST_F(TestNeighborhood, setup_move_updater) {
      * this constraint is the third in determining selection neighborhoods,
      * and it will be employed.
      */
-    model.create_constraint("c0",
-                            x0.selection({0, printemps::model::Range::All}));
+    model.create_constraint("c_0",
+                            x_0.selection({0, printemps::model::Range::All}));
 
     /**
      * Set partitioning  constraint with 31 decision variables. The priority of
      * this constraint is the second in determining selection neighborhoods,
-     * and it will NOT be employed because higher-priority constraint c1 has
-     * already covered x1.
+     * and it will NOT be employed because higher-priority constraint c_1 has
+     * already covered x_1.
      */
     model.create_constraint(
-        "c1", (x0.sum({1, printemps::model::Range::All}) +
-               x1.sum({1, printemps::model::Range::All}) + x2(0)) == 1);
+        "c_1", (x_0.sum({1, printemps::model::Range::All}) +
+                x_1.sum({1, printemps::model::Range::All}) + x_2(0)) == 1);
 
     /**
-     * Set partitioning  constraint with 400 decision variables. The priority of
+     * Set partitioning constraint with 400 decision variables. The priority of
      * this constraint is the first in determining selection neighborhoods,
      * and it will be employed.
      */
-    model.create_constraint("c2", x1.selection());
+    model.create_constraint("c_2", x_1.selection());
 
     /**
      * Set partitioning constraint with 2 decision variables. This constraint is
      * not the candidate for a selection neighborhood.
      */
-    model.create_constraint("c3", x2.selection());
+    model.create_constraint("c_3", x_2.selection());
 
     /// Aggregation constraints.
-    model.create_constraint("c4", x2(0) + x2(1) == 1);    // eff. : 0
-    model.create_constraint("c5", z(0) + 4 * z(1) == 8);  // eff. : 3
+    model.create_constraint("c_4", x_2(0) + x_2(1) == 1);  // eff. : 0
+    model.create_constraint("c_5", z(0) + 4 * z(1) == 8);  // eff. : 3
 
     /// Precedence constraints.
-    model.create_constraint("c6", x2(0) - x2(1) <= 1);   // eff. : 1
-    model.create_constraint("c7", -x2(0) + x2(1) <= 1);  // eff. : 1
-    model.create_constraint("c8", x2(0) - x2(1) >= 1);   // eff. : 1
-    model.create_constraint("c9", -x2(0) + x2(1) >= 1);  // eff. : 1
-    model.create_constraint("c10", z(0) - z(1) <= 10);   // eff. : 2
-    model.create_constraint("c11", -z(0) + z(1) <= 10);  // eff. : 2
-    model.create_constraint("c12", z(0) - z(1) >= 10);   // eff. : 2
-    model.create_constraint("c13", -z(0) + z(1) >= 10);  // eff. : 2
+    model.create_constraint("c_6", x_2(0) - x_2(1) <= 1);   // eff. : 1
+    model.create_constraint("c_7", -x_2(0) + x_2(1) <= 1);  // eff. : 1
+    model.create_constraint("c_8", x_2(0) - x_2(1) >= 1);   // eff. : 1
+    model.create_constraint("c_9", -x_2(0) + x_2(1) >= 1);  // eff. : 1
+    model.create_constraint("c_10", z(0) - z(1) <= 10);     // eff. : 2
+    model.create_constraint("c_11", -z(0) + z(1) <= 10);    // eff. : 2
+    model.create_constraint("c_12", z(0) - z(1) >= 10);     // eff. : 2
+    model.create_constraint("c_13", -z(0) + z(1) >= 10);    // eff. : 2
 
     /// Variable bound constraints.
-    model.create_constraint("c14", 3 * z(0) + 10 * z(1) <= 20);  // eff. : 4
-    model.create_constraint("c15", 3 * z(0) - 10 * z(1) <= 20);  // eff. : 4
-    model.create_constraint("c16", 3 * z(0) + 10 * z(1) >= 20);  // eff. : 4
-    model.create_constraint("c17", 3 * z(0) - 10 * z(1) >= 20);  // eff. : 4
+    model.create_constraint("c_14", 3 * z(0) + 10 * z(1) <= 20);  // eff. : 4
+    model.create_constraint("c_15", 3 * z(0) - 10 * z(1) <= 20);  // eff. : 4
+    model.create_constraint("c_16", 3 * z(0) + 10 * z(1) >= 20);  // eff. : 4
+    model.create_constraint("c_17", 3 * z(0) - 10 * z(1) >= 20);  // eff. : 4
 
     /// Set packing constraints.
-    model.create_constraint("c18",
-                            x0.sum({2, printemps::model::Range::All}) <= 1);
+    model.create_constraint("c_18",
+                            x_0.sum({2, printemps::model::Range::All}) <= 1);
 
     y(0, 0).fix_by(0);
     y(0, 1) = -10;
@@ -336,9 +336,9 @@ TEST_F(TestNeighborhood, setup_move_updater) {
         auto moves = model.neighborhood().exclusive_moves();
         auto flags = model.neighborhood().exclusive_move_flags();
 
-        /// x0(1,0), ..., x(1,9),
-        /// x0(2,0), ..., x(1,9),
-        /// x2(0)
+        /// x_0(1,0), ..., x(1,9),
+        /// x_0(2,0), ..., x(1,9),
+        /// x_2(0)
         EXPECT_EQ(21, static_cast<int>(moves.size()));
         EXPECT_EQ(21, static_cast<int>(flags.size()));
     }
@@ -416,21 +416,7 @@ TEST_F(TestNeighborhood, setup_move_updater) {
 /*****************************************************************************/
 TEST_F(TestNeighborhood, register_chain_move) {
     printemps::model::Model<int, double> model;
-
-    auto& x = model.create_variables("x", 10, 0, 1);
-    model.categorize_variables();
-    model.categorize_constraints();
-    model.setup_neighborhood(true, true, true, true, false, false, false);
-
-    EXPECT_EQ(0, static_cast<int>(model.neighborhood().chain_moves().size()));
-    EXPECT_EQ(0,
-              static_cast<int>(model.neighborhood().chain_move_flags().size()));
-
-    printemps::model::Move<int, double> move;
-    move.alterations.emplace_back(&x(0), 1);
-    move.alterations.emplace_back(&x(1), 1);
-    move.related_constraint_ptrs = {};
-    move.sense                   = printemps::model::MoveSense::Chain;
+    printemps::model::Move<int, double>  move;
 
     model.neighborhood().register_chain_move(move);
 
@@ -438,18 +424,9 @@ TEST_F(TestNeighborhood, register_chain_move) {
     EXPECT_EQ(1,
               static_cast<int>(model.neighborhood().chain_move_flags().size()));
 
-    EXPECT_EQ(&x(0),
-              model.neighborhood().chain_moves()[0].alterations[0].first);
-    EXPECT_EQ(1, model.neighborhood().chain_moves()[0].alterations[0].second);
-
-    EXPECT_EQ(&x(1),
-              model.neighborhood().chain_moves()[0].alterations[1].first);
-    EXPECT_EQ(1, model.neighborhood().chain_moves()[0].alterations[1].second);
-
     model.neighborhood().clear_chain_moves();
-    EXPECT_EQ(0, static_cast<int>(model.neighborhood().chain_moves().size()));
-    EXPECT_EQ(0,
-              static_cast<int>(model.neighborhood().chain_move_flags().size()));
+    EXPECT_EQ(true, model.neighborhood().chain_moves().empty());
+    EXPECT_EQ(true, model.neighborhood().chain_move_flags().empty());
 }
 
 /*****************************************************************************/
@@ -461,84 +438,63 @@ TEST_F(TestNeighborhood, clear_chain_moves) {
 TEST_F(TestNeighborhood, deduplicate_chain_moves) {
     printemps::model::Model<int, double> model;
 
-    auto& x = model.create_variables("x0", 10, 0, 1);
-    model.categorize_variables();
-    model.categorize_constraints();
-    model.setup_neighborhood(true, true, true, true, false, false, false);
+    printemps::model::Move<int, double> move_0;
+    move_0.overlap_rate = 0.1;
 
-    EXPECT_EQ(0, static_cast<int>(model.neighborhood().chain_moves().size()));
-    EXPECT_EQ(0,
-              static_cast<int>(model.neighborhood().chain_move_flags().size()));
-    printemps::model::Move<int, double> move1;
-    move1.alterations.emplace_back(&x(0), 1);
-    move1.alterations.emplace_back(&x(1), 1);
-    move1.related_constraint_ptrs = {};
-    move1.sense                   = printemps::model::MoveSense::Chain;
+    printemps::model::Move<int, double> move_1;
+    move_1.overlap_rate = 0.2;
 
-    printemps::model::Move<int, double> move2;
-    move2.alterations.emplace_back(&x(0), 0);
-    move2.alterations.emplace_back(&x(1), 1);
-    move2.related_constraint_ptrs = {};
-    move2.sense                   = printemps::model::MoveSense::Chain;
+    printemps::model::Move<int, double> move_2;
+    move_2.overlap_rate = 0.3;
 
-    printemps::model::Move<int, double> move3;
-    move3.alterations.emplace_back(&x(0), 1);
-    move3.alterations.emplace_back(&x(1), 0);
-    move3.related_constraint_ptrs = {};
-    move3.sense                   = printemps::model::MoveSense::Chain;
-
-    printemps::model::Move<int, double> move4;
-    move4.alterations.emplace_back(&x(0), 1);
-    move4.alterations.emplace_back(&x(2), 1);
-    move4.related_constraint_ptrs = {};
-    move4.sense                   = printemps::model::MoveSense::Chain;
-
-    printemps::model::Move<int, double> move5;
-    move5.alterations.emplace_back(&x(1), 1);
-    move5.alterations.emplace_back(&x(0), 1);
-    move5.related_constraint_ptrs = {};
-    move5.sense                   = printemps::model::MoveSense::Chain;
-
-    for (auto i = 0; i < 5; i++) {
-        model.neighborhood().register_chain_move(move1);
-        model.neighborhood().register_chain_move(move2);
-        model.neighborhood().register_chain_move(move3);
-        model.neighborhood().register_chain_move(move4);
-        model.neighborhood().register_chain_move(move5);
+    for (auto i = 0; i < 3; i++) {
+        model.neighborhood().register_chain_move(move_0);
+        model.neighborhood().register_chain_move(move_1);
+        model.neighborhood().register_chain_move(move_2);
     }
-    EXPECT_EQ(25, static_cast<int>(model.neighborhood().chain_moves().size()));
-    EXPECT_EQ(25,
+    EXPECT_EQ(9, static_cast<int>(model.neighborhood().chain_moves().size()));
+    EXPECT_EQ(9,
               static_cast<int>(model.neighborhood().chain_move_flags().size()));
+
+    model.neighborhood().sort_chain_moves();
+    EXPECT_EQ(0.3, model.neighborhood().chain_moves()[0].overlap_rate);
+    EXPECT_EQ(0.3, model.neighborhood().chain_moves()[1].overlap_rate);
+    EXPECT_EQ(0.3, model.neighborhood().chain_moves()[2].overlap_rate);
+    EXPECT_EQ(0.2, model.neighborhood().chain_moves()[3].overlap_rate);
+    EXPECT_EQ(0.2, model.neighborhood().chain_moves()[4].overlap_rate);
+    EXPECT_EQ(0.2, model.neighborhood().chain_moves()[5].overlap_rate);
+    EXPECT_EQ(0.1, model.neighborhood().chain_moves()[6].overlap_rate);
+    EXPECT_EQ(0.1, model.neighborhood().chain_moves()[7].overlap_rate);
+    EXPECT_EQ(0.1, model.neighborhood().chain_moves()[8].overlap_rate);
 
     model.neighborhood().deduplicate_chain_moves();
-    EXPECT_EQ(5, static_cast<int>(model.neighborhood().chain_moves().size()));
-    EXPECT_EQ(5,
+    EXPECT_EQ(3, static_cast<int>(model.neighborhood().chain_moves().size()));
+    EXPECT_EQ(3,
               static_cast<int>(model.neighborhood().chain_move_flags().size()));
+}
+
+/*****************************************************************************/
+TEST_F(TestNeighborhood, sort_chain_moves) {
+    /// This method is tested in deduplicate_chain_moves().
+}
+
+/*****************************************************************************/
+TEST_F(TestNeighborhood, shuffle_chain_moves) {
+    /// This test is skipped.
 }
 
 /*****************************************************************************/
 TEST_F(TestNeighborhood, reduce_chain_moves) {
     printemps::model::Model<int, double> model;
-
-    auto& x = model.create_variables("x0", 10, 0, 1);
-    model.categorize_variables();
-    model.categorize_constraints();
-    model.setup_neighborhood(true, true, true, true, false, false, false);
-
-    printemps::model::Move<int, double> move;
-    move.alterations.emplace_back(&x(0), 1);
-    move.alterations.emplace_back(&x(1), 1);
-    move.related_constraint_ptrs = {};
-    move.sense                   = printemps::model::MoveSense::Chain;
+    printemps::model::Move<int, double>  move;
 
     for (auto i = 0; i < 5000; i++) {
         model.neighborhood().register_chain_move(move);
     }
 
-    const int    CHAIN_MOVE_CAPACITY = 10000;
-    std::mt19937 rand;
-    rand.seed(1);
-    model.neighborhood().reduce_chain_moves(CHAIN_MOVE_CAPACITY, &rand);
+    const int CHAIN_MOVE_CAPACITY = 10000;
+
+    model.neighborhood().reduce_chain_moves(CHAIN_MOVE_CAPACITY);
     EXPECT_EQ(5000,
               static_cast<int>(model.neighborhood().chain_moves().size()));
     EXPECT_EQ(5000,
@@ -548,7 +504,7 @@ TEST_F(TestNeighborhood, reduce_chain_moves) {
         model.neighborhood().register_chain_move(move);
     }
 
-    model.neighborhood().reduce_chain_moves(CHAIN_MOVE_CAPACITY, &rand);
+    model.neighborhood().reduce_chain_moves(CHAIN_MOVE_CAPACITY);
     EXPECT_EQ(CHAIN_MOVE_CAPACITY,
               static_cast<int>(model.neighborhood().chain_moves().size()));
     EXPECT_EQ(CHAIN_MOVE_CAPACITY,
@@ -558,7 +514,7 @@ TEST_F(TestNeighborhood, reduce_chain_moves) {
         model.neighborhood().register_chain_move(move);
     }
 
-    model.neighborhood().reduce_chain_moves(CHAIN_MOVE_CAPACITY, &rand);
+    model.neighborhood().reduce_chain_moves(CHAIN_MOVE_CAPACITY);
     EXPECT_EQ(CHAIN_MOVE_CAPACITY,
               static_cast<int>(model.neighborhood().chain_moves().size()));
     EXPECT_EQ(CHAIN_MOVE_CAPACITY,
@@ -908,6 +864,49 @@ TEST_F(TestNeighborhood, enable_exclusive_move) {
 /*****************************************************************************/
 TEST_F(TestNeighborhood, disable_exclusive_move) {
     /// This method is tested in is_enabled_exclusive_move().
+}
+
+/*****************************************************************************/
+TEST_F(TestNeighborhood, reset_special_neighborhood_moves_availability) {
+    /// This test is skipped.
+}
+
+/*****************************************************************************/
+TEST_F(TestNeighborhood, is_enabled_special_neighborhood_move) {
+    printemps::model::Neighborhood<int, double> neighborhood;
+
+    /// initial status
+    EXPECT_EQ(false, neighborhood.is_enabled_special_neighborhood_move());
+
+    /// Aggregation
+    neighborhood.enable_aggregation_move();
+    EXPECT_EQ(true, neighborhood.is_enabled_special_neighborhood_move());
+    neighborhood.disable_aggregation_move();
+    EXPECT_EQ(false, neighborhood.is_enabled_special_neighborhood_move());
+
+    /// Precedence
+    neighborhood.enable_precedence_move();
+    EXPECT_EQ(true, neighborhood.is_enabled_special_neighborhood_move());
+    neighborhood.disable_precedence_move();
+    EXPECT_EQ(false, neighborhood.is_enabled_special_neighborhood_move());
+
+    /// Variable Bound
+    neighborhood.enable_variable_bound_move();
+    EXPECT_EQ(true, neighborhood.is_enabled_special_neighborhood_move());
+    neighborhood.disable_variable_bound_move();
+    EXPECT_EQ(false, neighborhood.is_enabled_special_neighborhood_move());
+
+    /// Exclusive
+    neighborhood.enable_exclusive_move();
+    EXPECT_EQ(true, neighborhood.is_enabled_special_neighborhood_move());
+    neighborhood.disable_exclusive_move();
+    EXPECT_EQ(false, neighborhood.is_enabled_special_neighborhood_move());
+
+    /// Chain
+    neighborhood.enable_chain_move();
+    EXPECT_EQ(true, neighborhood.is_enabled_special_neighborhood_move());
+    neighborhood.disable_chain_move();
+    EXPECT_EQ(false, neighborhood.is_enabled_special_neighborhood_move());
 }
 
 /*****************************************************************************/

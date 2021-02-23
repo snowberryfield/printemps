@@ -638,6 +638,8 @@ class Model {
         this->categorize_variables();
         this->categorize_constraints();
 
+        this->setup_variable_related_monic_constraints();
+
         /**
          * Presolve the problem by removing redundant constraints and fixing
          * decision variables implicitly fixed.
@@ -918,6 +920,16 @@ class Model {
         }
         m_constraint_reference      = constraint_reference;
         m_constraint_type_reference = constraint_type_reference;
+    }
+
+    /*************************************************************************/
+    constexpr void setup_variable_related_monic_constraints(void) {
+        for (auto &&proxy : m_variable_proxies) {
+            for (auto &&variable : proxy.flat_indexed_variables()) {
+                variable.reset_related_monic_constraint_ptrs();
+                variable.setup_related_monic_constraint_ptrs();
+            }
+        }
     }
 
     /*************************************************************************/
@@ -1592,8 +1604,8 @@ class Model {
         double local_penalty   = 0.0;
         double global_penalty  = 0.0;
 
-        const int CONSTRAINT_PROXIES_SIZE  = m_constraint_proxies.size();
-        bool      is_constraint_improvable = false;
+        const int CONSTRAINT_PROXIES_SIZE   = m_constraint_proxies.size();
+        bool      is_feasibility_improvable = false;
 
         for (auto i = 0; i < CONSTRAINT_PROXIES_SIZE; i++) {
             auto &constraints =
@@ -1607,7 +1619,7 @@ class Model {
                 double violation = constraints[j].evaluate_violation(a_MOVE);
 
                 if (violation < constraints[j].violation_value()) {
-                    is_constraint_improvable = true;
+                    is_feasibility_improvable = true;
                 }
 
                 total_violation += violation;
@@ -1636,7 +1648,7 @@ class Model {
         a_score_ptr->is_feasible = !(total_violation > constant::EPSILON);
         a_score_ptr->is_objective_improvable =
             objective_improvement > constant::EPSILON;
-        a_score_ptr->is_constraint_improvable = is_constraint_improvable;
+        a_score_ptr->is_feasibility_improvable = is_feasibility_improvable;
     }
 
     /*************************************************************************/
@@ -1644,7 +1656,7 @@ class Model {
                             const Move<T_Variable, T_Expression> &a_MOVE,
                             const SolutionScore &a_CURRENT_SCORE) const
         noexcept {
-        bool is_constraint_improvable = false;
+        bool is_feasibility_improvable = false;
 
         double total_violation = a_CURRENT_SCORE.total_violation;
         double local_penalty   = a_CURRENT_SCORE.local_penalty;
@@ -1659,7 +1671,7 @@ class Model {
             total_violation += violation_diff;
 
             if (violation_diff < 0) {
-                is_constraint_improvable = true;
+                is_feasibility_improvable = true;
             }
 
             local_penalty +=
@@ -1687,7 +1699,7 @@ class Model {
         a_score_ptr->is_feasible = !(total_violation > constant::EPSILON);
         a_score_ptr->is_objective_improvable =
             objective_improvement > constant::EPSILON;
-        a_score_ptr->is_constraint_improvable = is_constraint_improvable;
+        a_score_ptr->is_feasibility_improvable = is_feasibility_improvable;
     }
 
     /*************************************************************************/
@@ -2127,6 +2139,26 @@ class Model {
     /*************************************************************************/
     inline constexpr int number_of_disabled_constraints(void) const {
         return m_constraint_reference.disabled_constraint_ptrs.size();
+    }
+
+    /*************************************************************************/
+    inline constexpr bool has_monic_constraints(void) const {
+        if (m_constraint_type_reference.set_partitioning_ptrs.size() > 0) {
+            return true;
+        }
+        if (m_constraint_type_reference.set_packing_ptrs.size() > 0) {
+            return true;
+        }
+        if (m_constraint_type_reference.set_covering_ptrs.size() > 0) {
+            return true;
+        }
+        if (m_constraint_type_reference.cardinality_ptrs.size() > 0) {
+            return true;
+        }
+        if (m_constraint_type_reference.invariant_knapsack_ptrs.size() > 0) {
+            return true;
+        }
+        return false;
     }
 
     /*************************************************************************/
