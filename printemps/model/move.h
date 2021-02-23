@@ -105,7 +105,7 @@ constexpr double compute_overlap_rate(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-constexpr std::uint_fast64_t compute_hash(
+constexpr double compute_hash(
     const std::vector<Alteration<T_Variable, T_Expression>> &a_ALTERATIONS) {
     /**
      * NOTE: Chain moves will be sorted in descending order by overlap_ratio to
