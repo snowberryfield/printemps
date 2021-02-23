@@ -24,7 +24,7 @@ struct SolutionScore {
 
     bool is_feasible;
     bool is_objective_improvable;
-    bool is_constraint_improvable;
+    bool is_feasibility_improvable;
 };
 
 /*****************************************************************************/

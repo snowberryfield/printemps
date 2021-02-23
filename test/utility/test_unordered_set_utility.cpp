@@ -51,7 +51,61 @@ TEST_F(TestUnorderedSetUtility, intersection_set) {
 }
 
 /*****************************************************************************/
+TEST_F(TestUnorderedSetUtility, update_intersection_set) {
+    std::unordered_set<int>         set_int_0    = {1, 2, 3, 4, 5};
+    std::unordered_set<int>         set_int_1    = {3, 4, 5, 6, 7};
+    std::unordered_set<std::string> set_string_0 = {"a", "b", "c", "d", "e"};
+    std::unordered_set<std::string> set_string_1 = {"c", "d", "e", "f", "g"};
+
+    printemps::utility::update_intersection_set(&set_int_0, set_int_1);
+    printemps::utility::update_intersection_set(&set_string_0, set_string_1);
+
+    EXPECT_EQ(false, set_int_0.find(1) != set_int_0.end());
+    EXPECT_EQ(false, set_int_0.find(2) != set_int_0.end());
+    EXPECT_EQ(true, set_int_0.find(3) != set_int_0.end());
+    EXPECT_EQ(true, set_int_0.find(4) != set_int_0.end());
+    EXPECT_EQ(true, set_int_0.find(5) != set_int_0.end());
+    EXPECT_EQ(false, set_int_0.find(6) != set_int_0.end());
+    EXPECT_EQ(false, set_int_0.find(7) != set_int_0.end());
+
+    EXPECT_EQ(false, set_string_0.find("a") != set_string_0.end());
+    EXPECT_EQ(false, set_string_0.find("b") != set_string_0.end());
+    EXPECT_EQ(true, set_string_0.find("c") != set_string_0.end());
+    EXPECT_EQ(true, set_string_0.find("d") != set_string_0.end());
+    EXPECT_EQ(true, set_string_0.find("e") != set_string_0.end());
+    EXPECT_EQ(false, set_string_0.find("f") != set_string_0.end());
+    EXPECT_EQ(false, set_string_0.find("g") != set_string_0.end());
+}
+
+/*****************************************************************************/
 TEST_F(TestUnorderedSetUtility, union_set) {
+    std::unordered_set<int>         set_int_0    = {1, 2, 3, 4, 5};
+    std::unordered_set<int>         set_int_1    = {3, 4, 5, 6, 7};
+    std::unordered_set<std::string> set_string_0 = {"a", "b", "c", "d", "e"};
+    std::unordered_set<std::string> set_string_1 = {"c", "d", "e", "f", "g"};
+
+    printemps::utility::update_union_set(&set_int_0, set_int_1);
+    printemps::utility::update_union_set(&set_string_0, set_string_1);
+
+    EXPECT_EQ(true, set_int_0.find(1) != set_int_0.end());
+    EXPECT_EQ(true, set_int_0.find(2) != set_int_0.end());
+    EXPECT_EQ(true, set_int_0.find(3) != set_int_0.end());
+    EXPECT_EQ(true, set_int_0.find(4) != set_int_0.end());
+    EXPECT_EQ(true, set_int_0.find(5) != set_int_0.end());
+    EXPECT_EQ(true, set_int_0.find(6) != set_int_0.end());
+    EXPECT_EQ(true, set_int_0.find(7) != set_int_0.end());
+
+    EXPECT_EQ(true, set_string_0.find("a") != set_string_0.end());
+    EXPECT_EQ(true, set_string_0.find("b") != set_string_0.end());
+    EXPECT_EQ(true, set_string_0.find("c") != set_string_0.end());
+    EXPECT_EQ(true, set_string_0.find("d") != set_string_0.end());
+    EXPECT_EQ(true, set_string_0.find("e") != set_string_0.end());
+    EXPECT_EQ(true, set_string_0.find("f") != set_string_0.end());
+    EXPECT_EQ(true, set_string_0.find("g") != set_string_0.end());
+}
+
+/*****************************************************************************/
+TEST_F(TestUnorderedSetUtility, update_union_set) {
     std::unordered_set<int>         set_int_0    = {1, 2, 3, 4, 5};
     std::unordered_set<int>         set_int_1    = {3, 4, 5, 6, 7};
     std::unordered_set<std::string> set_string_0 = {"a", "b", "c", "d", "e"};
