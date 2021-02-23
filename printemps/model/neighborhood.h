@@ -538,6 +538,10 @@ class Neighborhood {
 #endif
                 for (auto i = 0; i < MOVES_SIZE; i++) {
                     (*a_flags)[i] = 1;
+                    if (!(*a_moves)[i].is_available) {
+                        (*a_flags)[i] = 0;
+                        continue;
+                    }
                     if (model::has_bound_violation((*a_moves)[i])) {
                         (*a_flags)[i] = 0;
                         continue;
@@ -655,6 +659,10 @@ class Neighborhood {
 #endif
                 for (auto i = 0; i < MOVES_SIZE; i++) {
                     (*a_flags)[i] = 1;
+                    if (!(*a_moves)[i].is_available) {
+                        (*a_flags)[i] = 0;
+                        continue;
+                    }
                     if (model::has_bound_violation((*a_moves)[i])) {
                         (*a_flags)[i] = 0;
                         continue;
@@ -830,6 +838,10 @@ class Neighborhood {
 #endif
                 for (auto i = 0; i < MOVES_SIZE; i++) {
                     (*a_flags)[i] = 1;
+                    if (!(*a_moves)[i].is_available) {
+                        (*a_flags)[i] = 0;
+                        continue;
+                    }
                     if (model::has_bound_violation((*a_moves)[i])) {
                         (*a_flags)[i] = 0;
                         continue;
@@ -979,6 +991,10 @@ class Neighborhood {
 #endif
                 for (auto i = 0; i < MOVES_SIZE; i++) {
                     (*a_flags)[i] = 1;
+                    if (!(*a_moves)[i].is_available) {
+                        (*a_flags)[i] = 0;
+                        continue;
+                    }
                     if ((*a_moves)[i].alterations[0].first->value() == 1) {
                         (*a_flags)[i] = 0;
                         continue;
@@ -1104,6 +1120,10 @@ class Neighborhood {
 #endif
                 for (auto i = 0; i < MOVES_SIZE; i++) {
                     (*a_flags)[i] = 1;
+                    if (!(*a_moves)[i].is_available) {
+                        (*a_flags)[i] = 0;
+                        continue;
+                    }
                     if (m_has_fixed_variables &&
                         model::has_fixed_variables((*a_moves)[i])) {
                         (*a_flags)[i] = 0;
@@ -1167,6 +1187,16 @@ class Neighborhood {
                   [](auto const &a_LHS, auto const &a_RHS) {
                       return a_LHS.overlap_rate > a_RHS.overlap_rate;
                   });
+        /*
+                for (const auto &move : m_chain_moves) {
+                    std::cout << &move << " " << move.overlap_rate << std::endl;
+                    for (const auto &alteration : move.alterations) {
+                        std::cout << alteration.first->name() << ": "
+                                  << alteration.second << " ";
+                    }
+                    std::cout << std::endl;
+                }
+                */
     }
 
     /*************************************************************************/

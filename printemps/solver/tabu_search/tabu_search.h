@@ -378,17 +378,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
              * selecting a move for the next solution.
              */
             if (!trial_move_scores[i].is_permissible) {
-                total_scores[i] = HUGE_VALF;
-            }
-
-            /**
-             * If the move is not available, it will be set lower priorities in
-             * selecting a move for the next solution. This rule is applied to
-             * only special neighborhood moves, Aggregation, Precedence,
-             * Variable Bound, Exclusive, and Chain.
-             */
-            if (!trial_move_ptrs[i]->is_available) {
-                total_scores[i] = HUGE_VALF;
+                total_scores[i] += constant::LARGE_VALUE_50;
             }
 
             /**
@@ -398,7 +388,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
             if (trial_move_ptrs[i]->is_special_neighborhood_move &&
                 !(trial_solution_scores[i].is_objective_improvable ||
                   trial_solution_scores[i].is_feasibility_improvable)) {
-                total_scores[i] = HUGE_VALF;
+                total_scores[i] += constant::LARGE_VALUE_100;
             }
         }
 
