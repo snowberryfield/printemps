@@ -57,7 +57,7 @@ struct OptionConstant {
     static constexpr int  DEFAULT_CHAIN_MOVE_CAPACITY            = 10000;
     static constexpr ChainMoveReduceMode DEFAULT_CHAIN_MOVE_REDUCE_MODE =
         ChainMoveReduceMode::OverlapRate;
-    static constexpr double DEFAULT_CHAIN_MOVE_OVERLAP_RATE_THRESHOLD = 0.8;
+    static constexpr double DEFAULT_CHAIN_MOVE_OVERLAP_RATE_THRESHOLD = 0.5;
 
     static constexpr model::SelectionMode DEFAULT_SELECTION_MODE =
         model::SelectionMode::None;
