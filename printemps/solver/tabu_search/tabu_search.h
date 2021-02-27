@@ -313,8 +313,26 @@ TabuSearchResult<T_Variable, T_Expression> solve(
          * be terminated.
          */
         if (number_of_moves == 0) {
-            termination_status = TabuSearchTerminationStatus::NO_MOVE;
-            break;
+            if (model->is_linear() && model->is_feasible()) {
+                /**
+                 * If the current solution is feasible and there is no
+                 * improvable solution, the solution should be an optimum.
+                 * It can happen for decomp2 instance in MIPLIB 2017.
+                 */
+                termination_status = TabuSearchTerminationStatus::OPTIMAL;
+                for (const auto& variable_ptr :
+                     model->variable_reference().variable_ptrs) {
+                    if (variable_ptr->is_objective_improvable()) {
+                        termination_status =
+                            TabuSearchTerminationStatus::OPTIMAL;
+                        break;
+                    }
+                }
+                break;
+            } else {
+                termination_status = TabuSearchTerminationStatus::NO_MOVE;
+                break;
+            }
         }
 
         /**
