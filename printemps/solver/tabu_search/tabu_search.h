@@ -584,7 +584,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                  current_move.sense == model::MoveSense::Binary &&
                  previous_move.alterations.front().second !=
                      current_move.alterations.front().second) ||
-                (previous_move.sense == model::MoveSense::Chain ||
+                (previous_move.sense == model::MoveSense::Chain &&
                  current_move.sense == model::MoveSense::Chain)) {
                 auto chain_move = previous_move + current_move;
 
