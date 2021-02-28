@@ -324,7 +324,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                      model->variable_reference().variable_ptrs) {
                     if (variable_ptr->is_objective_improvable()) {
                         termination_status =
-                            TabuSearchTerminationStatus::OPTIMAL;
+                            TabuSearchTerminationStatus::NO_MOVE;
                         break;
                     }
                 }
@@ -668,16 +668,17 @@ TabuSearchResult<T_Variable, T_Expression> solve(
          */
         if (iteration % std::max(option.tabu_search.log_interval, 1) == 0 ||
             update_status > 0) {
-            print_table_body(model,                                //
-                             iteration,                            //
-                             number_of_all_neighborhoods,          //
-                             number_of_feasible_neighborhoods,     //
-                             number_of_permissible_neighborhoods,  //
-                             number_of_improvable_neighborhoods,   //
-                             current_solution_score,               //
-                             update_status,                        //
-                             incumbent_holder,                     //
-                             is_aspirated,                         //
+            print_table_body(model,                                      //
+                             iteration,                                  //
+                             current_move.is_special_neighborhood_move,  //
+                             number_of_all_neighborhoods,                //
+                             number_of_feasible_neighborhoods,           //
+                             number_of_permissible_neighborhoods,        //
+                             number_of_improvable_neighborhoods,         //
+                             current_solution_score,                     //
+                             update_status,                              //
+                             incumbent_holder,                           //
+                             is_aspirated,                               //
                              option.verbose >= Verbose::Full);
         }
 
