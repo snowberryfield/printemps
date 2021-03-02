@@ -1011,7 +1011,7 @@ Result<T_Variable, T_Expression> solve(
                 master_option.penalty_coefficient_relaxing_rate;
 
             if (result.objective_constraint_rate > constant::EPSILON) {
-                if (result.is_found_new_feasible_solution) {
+                if (result_local_augmented_incumbent_score.is_feasible) {
                     const double MARGIN = 1.0;
                     penalty_coefficient_relaxing_rate =
                         std::min(penalty_coefficient_relaxing_rate,

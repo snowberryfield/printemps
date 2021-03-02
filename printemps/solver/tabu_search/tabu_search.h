@@ -586,7 +586,13 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                      current_move.alterations.front().second) ||
                 (previous_move.sense == model::MoveSense::Chain &&
                  current_move.sense == model::MoveSense::Chain)) {
-                auto chain_move = previous_move + current_move;
+                Move_T chain_move;
+                if (previous_move.alterations.front().first <
+                    current_move.alterations.front().first)
+                    chain_move = previous_move + current_move;
+                else {
+                    chain_move = current_move + previous_move;
+                }
 
                 if (chain_move.overlap_rate >
                         option.chain_move_overlap_rate_threshold &&
