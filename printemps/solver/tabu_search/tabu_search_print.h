@@ -66,6 +66,7 @@ template <class T_Variable, class T_Expression>
 inline void print_table_body(
     const model::Model<T_Variable, T_Expression> *a_MODEL,                //
     const int                                     a_ITERATION,            //
+    const bool                  a_IS_SPECIAL_NEIGHBORHOOD_MOVE,           //
     const int                   a_NUMBER_OF_ALL_NEIGHBORHOODS,            //
     const int                   a_NUMBER_OF_FEASIBLE_NEIGHBORHOODS,       //
     const int                   a_NUMBER_OF_PERMISSIBLE_NEIGHBORHOOD,     //
@@ -79,9 +80,14 @@ inline void print_table_body(
         return;
     }
 
+    char mark_special_neighborhood_move  = ' ';
     char mark_current                    = ' ';
     char mark_global_augmented_incumbent = ' ';
     char mark_feasible_incumbent         = ' ';
+
+    if (a_IS_SPECIAL_NEIGHBORHOOD_MOVE) {
+        mark_special_neighborhood_move = 's';
+    }
 
     if (a_STATUS &
         IncumbentHolderConstant::STATUS_LOCAL_AUGMENTED_INCUMBENT_UPDATE) {
@@ -118,8 +124,9 @@ inline void print_table_body(
     };
 
     std::printf(
-        "%8d |%s %s %s %s |%c%9.2e(%9.2e) |%c%9.2e %c%9.2e\n",
+        "%8d%c|%s %s %s %s |%c%9.2e(%9.2e) |%c%9.2e %c%9.2e\n",
         a_ITERATION,                                               //
+        mark_special_neighborhood_move,                            //
         int_format(a_NUMBER_OF_ALL_NEIGHBORHOODS).c_str(),         //
         int_format(a_NUMBER_OF_FEASIBLE_NEIGHBORHOODS).c_str(),    //
         int_format(a_NUMBER_OF_PERMISSIBLE_NEIGHBORHOOD).c_str(),  //

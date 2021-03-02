@@ -1187,16 +1187,6 @@ class Neighborhood {
                   [](auto const &a_LHS, auto const &a_RHS) {
                       return a_LHS.overlap_rate > a_RHS.overlap_rate;
                   });
-        /*
-                for (const auto &move : m_chain_moves) {
-                    std::cout << &move << " " << move.overlap_rate << std::endl;
-                    for (const auto &alteration : move.alterations) {
-                        std::cout << alteration.first->name() << ": "
-                                  << alteration.second << " ";
-                    }
-                    std::cout << std::endl;
-                }
-                */
     }
 
     /*************************************************************************/

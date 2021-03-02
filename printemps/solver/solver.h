@@ -538,6 +538,8 @@ Result<T_Variable, T_Expression> solve(
     int iteration                                  = 0;
     int no_global_augmented_incumbent_update_count = 0;
     int no_update_count                            = 0;
+    tabu_search::TabuSearchTerminationStatus termination_status =
+        tabu_search::TabuSearchTerminationStatus::ITERATION_OVER;
 
     bool penalty_coefficient_reset_flag = false;
 
@@ -577,6 +579,14 @@ Result<T_Variable, T_Expression> solve(
                 "Outer loop was terminated because of feasible objective "
                 "reaches the target limit (" +
                     utility::to_string(iteration, "%d") + " iterations).",
+                master_option.verbose >= Verbose::Outer);
+            is_terminated = true;
+        } else if (iteration > 0 &&
+                   termination_status ==
+                       tabu_search::TabuSearchTerminationStatus::OPTIMAL) {
+            utility::print_message(
+                "Outer loop was terminated because an optimal solution was "
+                "found.",
                 master_option.verbose >= Verbose::Outer);
             is_terminated = true;
         }
@@ -636,6 +646,16 @@ Result<T_Variable, T_Expression> solve(
                 result.incumbent_holder.feasible_incumbent_solution(),
                 result.incumbent_holder.feasible_incumbent_score());
         }
+
+        /**
+         * Update the memory.
+         */
+        memory = result.memory;
+
+        /**
+         * Update the termination status.
+         */
+        termination_status = result.termination_status;
 
         /**
          * Reset the penalty coefficients if the incumbent solution was not
@@ -703,9 +723,12 @@ Result<T_Variable, T_Expression> solve(
          */
         if (master_option.improvability_screening_mode ==
             ImprovabilityScreeningMode::Automatic) {
-            if (result.total_update_status &
-                IncumbentHolderConstant::
-                    STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
+            if (result.termination_status ==
+                tabu_search::TabuSearchTerminationStatus::NO_MOVE) {
+                improvability_screening_mode = ImprovabilityScreeningMode::Soft;
+            } else if (result.total_update_status &
+                       IncumbentHolderConstant::
+                           STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
                 /**
                  * If the incumbent solution was updated in the last loop, the
                  * improvability screening mode is set to "Intensive" to search
@@ -907,11 +930,6 @@ Result<T_Variable, T_Expression> solve(
         }
 
         /**
-         * Update the memory.
-         */
-        memory = result.memory;
-
-        /**
          * Update the local penalty coefficients.
          */
         if (penalty_coefficient_reset_flag) {
@@ -993,7 +1011,7 @@ Result<T_Variable, T_Expression> solve(
                 master_option.penalty_coefficient_relaxing_rate;
 
             if (result.objective_constraint_rate > constant::EPSILON) {
-                if (result.is_found_new_feasible_solution) {
+                if (result_local_augmented_incumbent_score.is_feasible) {
                     const double MARGIN = 1.0;
                     penalty_coefficient_relaxing_rate =
                         std::min(penalty_coefficient_relaxing_rate,
