@@ -19,7 +19,8 @@ enum class TabuSearchTerminationStatus {
     ITERATION_OVER,
     NO_MOVE,
     REACH_TARGET,
-    EARLY_STOP
+    EARLY_STOP,
+    OPTIMAL
 };
 
 /*****************************************************************************/

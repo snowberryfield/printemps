@@ -17,7 +17,7 @@
     "is_enabled_precedence_move": false,
     "is_enabled_variable_bound_move": false,
     "is_enabled_exclusive_move": false,
-    "is_enabled_chain_move": false,
+    "is_enabled_chain_move": true,
     "selection_mode": 0,
     "improvability_screening_mode": 3,
     "target_objective_value": -1E100,

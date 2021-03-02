@@ -313,8 +313,26 @@ TabuSearchResult<T_Variable, T_Expression> solve(
          * be terminated.
          */
         if (number_of_moves == 0) {
-            termination_status = TabuSearchTerminationStatus::NO_MOVE;
-            break;
+            if (model->is_linear() && model->is_feasible()) {
+                /**
+                 * If the current solution is feasible and there is no
+                 * improvable solution, the solution should be an optimum.
+                 * It can happen for decomp2 instance in MIPLIB 2017.
+                 */
+                termination_status = TabuSearchTerminationStatus::OPTIMAL;
+                for (const auto& variable_ptr :
+                     model->variable_reference().variable_ptrs) {
+                    if (variable_ptr->is_objective_improvable()) {
+                        termination_status =
+                            TabuSearchTerminationStatus::NO_MOVE;
+                        break;
+                    }
+                }
+                break;
+            } else {
+                termination_status = TabuSearchTerminationStatus::NO_MOVE;
+                break;
+            }
         }
 
         /**
@@ -566,9 +584,15 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                  current_move.sense == model::MoveSense::Binary &&
                  previous_move.alterations.front().second !=
                      current_move.alterations.front().second) ||
-                (previous_move.sense == model::MoveSense::Chain ||
+                (previous_move.sense == model::MoveSense::Chain &&
                  current_move.sense == model::MoveSense::Chain)) {
-                auto chain_move = previous_move + current_move;
+                Move_T chain_move;
+                if (previous_move.alterations.front().first <
+                    current_move.alterations.front().first)
+                    chain_move = previous_move + current_move;
+                else {
+                    chain_move = current_move + previous_move;
+                }
 
                 if (chain_move.overlap_rate >
                         option.chain_move_overlap_rate_threshold &&
@@ -650,16 +674,17 @@ TabuSearchResult<T_Variable, T_Expression> solve(
          */
         if (iteration % std::max(option.tabu_search.log_interval, 1) == 0 ||
             update_status > 0) {
-            print_table_body(model,                                //
-                             iteration,                            //
-                             number_of_all_neighborhoods,          //
-                             number_of_feasible_neighborhoods,     //
-                             number_of_permissible_neighborhoods,  //
-                             number_of_improvable_neighborhoods,   //
-                             current_solution_score,               //
-                             update_status,                        //
-                             incumbent_holder,                     //
-                             is_aspirated,                         //
+            print_table_body(model,                                      //
+                             iteration,                                  //
+                             current_move.is_special_neighborhood_move,  //
+                             number_of_all_neighborhoods,                //
+                             number_of_feasible_neighborhoods,           //
+                             number_of_permissible_neighborhoods,        //
+                             number_of_improvable_neighborhoods,         //
+                             current_solution_score,                     //
+                             update_status,                              //
+                             incumbent_holder,                           //
+                             is_aspirated,                               //
                              option.verbose >= Verbose::Full);
         }
 
