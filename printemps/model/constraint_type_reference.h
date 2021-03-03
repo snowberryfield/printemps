@@ -51,6 +51,7 @@ struct ConstraintTypeReference {
         this->variable_bound_ptrs.clear();
         this->set_partitioning_ptrs.clear();
         this->set_packing_ptrs.clear();
+        this->set_covering_ptrs.clear();
         this->cardinality_ptrs.clear();
         this->invariant_knapsack_ptrs.clear();
         this->equation_knapsack_ptrs.clear();

@@ -17,7 +17,11 @@ struct Status {
 
     std::unordered_map<std::string, model::ValueProxy<int>> update_counts;
 
-    bool   is_found_feasible_solution;
+    bool is_found_feasible_solution;
+
+    std::string start_date_time;
+    std::string finish_date_time;
+
     double elapsed_time;
     int    number_of_lagrange_dual_iterations;
     int    number_of_local_search_iterations;
@@ -38,7 +42,9 @@ struct Status {
     void initialize(void) {
         this->penalty_coefficients.clear();
         this->update_counts.clear();
-        this->is_found_feasible_solution         = false;
+        this->is_found_feasible_solution = false;
+        this->start_date_time.clear();
+        this->finish_date_time.clear();
         this->elapsed_time                       = 0.0;
         this->number_of_local_search_iterations  = 0;
         this->number_of_lagrange_dual_iterations = 0;
@@ -66,6 +72,9 @@ struct Status {
         indent_level++;
 
         /// Summary
+        ofs << utility::indent_spaces(indent_level) << "\"version\" : "
+            << "\"" << constant::VERSION << "\"," << std::endl;
+
         ofs << utility::indent_spaces(indent_level) << "\"name\" : "
             << "\"" << a_MODEL_SUMMARY.name << "\"," << std::endl;
 
@@ -79,30 +88,39 @@ struct Status {
 
         ofs << utility::indent_spaces(indent_level)
             << "\"is_found_feasible_solution\" : "
-            << (is_found_feasible_solution ? "true," : "false,") << std::endl;
+            << (this->is_found_feasible_solution ? "true," : "false,")
+            << std::endl;
 
         ofs << utility::indent_spaces(indent_level)
-            << "\"elapsed_time\" : " + std::to_string(elapsed_time) << ","
+            << "\"start_date_time\" : \"" + this->start_date_time + "\""
+            << "," << std::endl;
+
+        ofs << utility::indent_spaces(indent_level)
+            << "\"finish_date_time\" : \"" + this->finish_date_time + "\""
+            << "," << std::endl;
+
+        ofs << utility::indent_spaces(indent_level)
+            << "\"elapsed_time\" : " + std::to_string(this->elapsed_time) << ","
             << std::endl;
 
         ofs << utility::indent_spaces(indent_level)
             << "\"number_of_lagrange_dual_iterations\" : " +
-                   std::to_string(number_of_lagrange_dual_iterations)
+                   std::to_string(this->number_of_lagrange_dual_iterations)
             << "," << std::endl;
 
         ofs << utility::indent_spaces(indent_level)
             << "\"number_of_local_search_iterations\" : " +
-                   std::to_string(number_of_local_search_iterations)
+                   std::to_string(this->number_of_local_search_iterations)
             << "," << std::endl;
 
         ofs << utility::indent_spaces(indent_level)
             << "\"number_of_tabu_search_iterations\" : " +
-                   std::to_string(number_of_tabu_search_iterations)
+                   std::to_string(this->number_of_tabu_search_iterations)
             << "," << std::endl;
 
         ofs << utility::indent_spaces(indent_level)
             << "\"number_of_tabu_search_loops\" : " +
-                   std::to_string(number_of_tabu_search_loops)
+                   std::to_string(this->number_of_tabu_search_loops)
             << "," << std::endl;
 
         /// Penalty coefficients
@@ -117,7 +135,7 @@ struct Status {
                                     this->update_counts,  //
                                     "update_counts",      //
                                     indent_level,         //
-                                    "%.10e", false);
+                                    "%d", false);
 
         indent_level--;
         ofs << utility::indent_spaces(indent_level) << "}" << std::endl;
@@ -134,6 +152,9 @@ struct Status {
         indent_level++;
 
         /// Summary
+        ofs << utility::indent_spaces(indent_level) << "\"version\" : "
+            << "\"" << constant::VERSION << "\"," << std::endl;
+
         ofs << utility::indent_spaces(indent_level) << "\"name\" : "
             << "\"" << a_MODEL_SUMMARY.name << "\"," << std::endl;
 
@@ -147,30 +168,39 @@ struct Status {
 
         ofs << utility::indent_spaces(indent_level)
             << "\"is_found_feasible_solution\" : "
-            << (is_found_feasible_solution ? "true," : "false,") << std::endl;
+            << (this->is_found_feasible_solution ? "true," : "false,")
+            << std::endl;
 
         ofs << utility::indent_spaces(indent_level)
-            << "\"elapsed_time\" : " + std::to_string(elapsed_time) << ","
+            << "\"start_date_time\" : \"" + this->start_date_time + "\""
+            << "," << std::endl;
+
+        ofs << utility::indent_spaces(indent_level)
+            << "\"finish_date_time\" : \"" + this->finish_date_time + "\""
+            << "," << std::endl;
+
+        ofs << utility::indent_spaces(indent_level)
+            << "\"elapsed_time\" : " + std::to_string(this->elapsed_time) << ","
             << std::endl;
 
         ofs << utility::indent_spaces(indent_level)
             << "\"number_of_lagrange_dual_iterations\" : " +
-                   std::to_string(number_of_lagrange_dual_iterations)
+                   std::to_string(this->number_of_lagrange_dual_iterations)
             << "," << std::endl;
 
         ofs << utility::indent_spaces(indent_level)
             << "\"number_of_local_search_iterations\" : " +
-                   std::to_string(number_of_local_search_iterations)
+                   std::to_string(this->number_of_local_search_iterations)
             << "," << std::endl;
 
         ofs << utility::indent_spaces(indent_level)
             << "\"number_of_tabu_search_iterations\" : " +
-                   std::to_string(number_of_tabu_search_iterations)
+                   std::to_string(this->number_of_tabu_search_iterations)
             << "," << std::endl;
 
         ofs << utility::indent_spaces(indent_level)
             << "\"number_of_tabu_search_loops\" : " +
-                   std::to_string(number_of_tabu_search_loops)
+                   std::to_string(this->number_of_tabu_search_loops)
             << "," << std::endl;
 
         /// Penalty coefficients

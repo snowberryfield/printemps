@@ -18,7 +18,7 @@ namespace model {
  */
 class AbstractMultiArray {
    protected:
-    int              m_id;
+    int              m_index;
     int              m_number_of_dimensions;
     int              m_number_of_elements;
     int              m_max_digits;
@@ -41,8 +41,8 @@ class AbstractMultiArray {
     }
 
     /*************************************************************************/
-    AbstractMultiArray(const int a_ID) {
-        m_id                   = a_ID;
+    AbstractMultiArray(const int a_INDEX) {
+        m_index                = a_INDEX;
         m_number_of_elements   = 1;
         m_number_of_dimensions = 1;
         m_shape                = {1};
@@ -52,8 +52,8 @@ class AbstractMultiArray {
     }
 
     /*************************************************************************/
-    AbstractMultiArray(const int a_ID, const int a_NUMBER_OF_ELEMENTS) {
-        m_id                   = a_ID;
+    AbstractMultiArray(const int a_INDEX, const int a_NUMBER_OF_ELEMENTS) {
+        m_index                = a_INDEX;
         m_number_of_elements   = a_NUMBER_OF_ELEMENTS;
         m_number_of_dimensions = 1;
         m_shape                = {a_NUMBER_OF_ELEMENTS};
@@ -62,8 +62,8 @@ class AbstractMultiArray {
         this->compute_strides();
     }
     /*************************************************************************/
-    AbstractMultiArray(const int a_ID, const std::vector<int> &a_SHAPE) {
-        m_id                   = a_ID;
+    AbstractMultiArray(const int a_INDEX, const std::vector<int> &a_SHAPE) {
+        m_index                = a_INDEX;
         m_number_of_elements   = std::accumulate(a_SHAPE.begin(), a_SHAPE.end(),
                                                1, std::multiplies<int>());
         m_number_of_dimensions = (a_SHAPE.size());
@@ -83,6 +83,10 @@ class AbstractMultiArray {
     inline int flat_index(
         const std::vector<int> &a_MULTI_DIMENSIONAL_INDEX) const {
         /// cannot be constexpr
+        /**
+         * NOTE: The flat_index computed in this method is for elements managed
+         * in a proxy object.
+         */
         return std::inner_product(a_MULTI_DIMENSIONAL_INDEX.begin(),
                                   a_MULTI_DIMENSIONAL_INDEX.end(),
                                   m_strides.begin(), 0);
@@ -92,6 +96,10 @@ class AbstractMultiArray {
     inline std::vector<int> multi_dimensional_index(
         const int a_FLAT_INDEX) const {
         /// cannot be constexpr
+        /**
+         * NOTE: The flat_index computed in this method is for elements managed
+         * in a proxy object.
+         */
         std::vector<int> result(m_number_of_dimensions);
 
         int remain = a_FLAT_INDEX;
@@ -107,8 +115,9 @@ class AbstractMultiArray {
         std::vector<int> *a_multi_dimensional_index,
         const int         a_FLAT_INDEX) const {
         /**
-         * This method is used to reduce the number of generating
-         * std::vector<int>.
+         * NOTE: The flat_index computed in this method is for elements managed
+         * in a proxy object. This method is used to reduce the number of
+         * generating std::vector<int>.
          */
         int remain = a_FLAT_INDEX;
         for (auto i = 0; i < m_number_of_dimensions; i++) {
@@ -139,8 +148,8 @@ class AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr int id(void) const {
-        return m_id;
+    inline constexpr int index(void) const {
+        return m_index;
     }
 
     /*************************************************************************/

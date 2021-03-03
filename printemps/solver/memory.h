@@ -59,8 +59,8 @@ class Memory {
          * variable has been updated last. The initial value of the short-term
          * memory must be sufficiently large and finite negative value. The
          * finiteness is required so that an operation a_ITERATION -
-         * last_update_iterations[id][index] in tabu_search_move_score.h can
-         * return finite integer value.
+         * last_update_iterations[proxy_index][index] in
+         * tabu_search_move_score.h can return finite integer value.
          */
         m_last_update_iterations = a_model->generate_variable_parameter_proxies(
             MemoryConstant::INITIAL_LAST_UPDATE_ITERATION);
@@ -77,14 +77,15 @@ class Memory {
     /*************************************************************************/
     void print_last_update_iterations(void) {
         /// This method is for debug.
-        int variable_proxies_size = m_variable_names.size();
-        for (auto i = 0; i < variable_proxies_size; i++) {
-            auto &      last_update_iteration = m_last_update_iterations[i];
-            std::string name                  = m_variable_names[i];
-            int number_of_elements = last_update_iteration.number_of_elements();
-            for (auto j = 0; j < number_of_elements; j++) {
+        const int VARIABLE_PROXIES_SIZE = m_variable_names.size();
+        for (auto i = 0; i < VARIABLE_PROXIES_SIZE; i++) {
+            auto &last_update_iteration = m_last_update_iterations[i];
+            const std::string NAME      = m_variable_names[i];
+            const int         NUMBER_OF_ELEMENTS =
+                last_update_iteration.number_of_elements();
+            for (auto j = 0; j < NUMBER_OF_ELEMENTS; j++) {
                 utility::print(
-                    name + last_update_iteration.indices_label(j) + " = " +
+                    NAME + last_update_iteration.indices_label(j) + " = " +
                     std::to_string(
                         last_update_iteration.flat_indexed_values(j)));
             }
@@ -94,15 +95,14 @@ class Memory {
     /*************************************************************************/
     void print_update_counts(void) {
         /// This method is for debug.
-        int variable_proxies_size = m_variable_names.size();
-        for (auto i = 0; i < variable_proxies_size; i++) {
-            auto &      update_count = m_update_counts[i];
-            std::string name         = m_variable_names[i];
-
-            int number_of_elements = update_count.number_of_elements();
-            for (auto j = 0; j < number_of_elements; j++) {
+        const int VARIABLE_PROXIES_SIZE = m_variable_names.size();
+        for (auto i = 0; i < VARIABLE_PROXIES_SIZE; i++) {
+            auto &            update_count = m_update_counts[i];
+            const std::string NAME         = m_variable_names[i];
+            const int NUMBER_OF_ELEMENTS   = update_count.number_of_elements();
+            for (auto j = 0; j < NUMBER_OF_ELEMENTS; j++) {
                 utility::print(
-                    name + update_count.indices_label(j) + " = " +
+                    NAME + update_count.indices_label(j) + " = " +
                     std::to_string(update_count.flat_indexed_values(j)));
             }
         }
@@ -111,14 +111,14 @@ class Memory {
     /*************************************************************************/
     void print_frequency(void) {
         /// This method is for debug.
-        int variable_proxies_size = m_variable_names.size();
-        for (auto i = 0; i < variable_proxies_size; i++) {
-            auto &      update_count       = m_update_counts[i];
-            std::string name               = m_variable_names[i];
-            int         number_of_elements = update_count.number_of_elements();
-            for (auto j = 0; j < number_of_elements; j++) {
+        const int VARIABLE_PROXIES_SIZE = m_variable_names.size();
+        for (auto i = 0; i < VARIABLE_PROXIES_SIZE; i++) {
+            auto &            update_count = m_update_counts[i];
+            const std::string NAME         = m_variable_names[i];
+            const int NUMBER_OF_ELEMENTS   = update_count.number_of_elements();
+            for (auto j = 0; j < NUMBER_OF_ELEMENTS; j++) {
                 utility::print(
-                    name + update_count.indices_label(j) + " = " +
+                    NAME + update_count.indices_label(j) + " = " +
                     std::to_string(update_count.flat_indexed_values(j) /
                                    static_cast<double>(m_total_update_counts)));
             }
@@ -134,12 +134,12 @@ class Memory {
     /*************************************************************************/
     double bias(void) const noexcept {
         /// This method cannot be constexpr for m_variable_names.size().
-        double result                = 0.0;
-        int    variable_proxies_size = m_variable_names.size();
-        for (auto i = 0; i < variable_proxies_size; i++) {
-            auto &update_count       = m_update_counts[i];
-            int   number_of_elements = update_count.number_of_elements();
-            for (auto j = 0; j < number_of_elements; j++) {
+        double    result                = 0.0;
+        const int VARIABLE_PROXIES_SIZE = m_variable_names.size();
+        for (auto i = 0; i < VARIABLE_PROXIES_SIZE; i++) {
+            auto &    update_count       = m_update_counts[i];
+            const int NUMBER_OF_ELEMENTS = update_count.number_of_elements();
+            for (auto j = 0; j < NUMBER_OF_ELEMENTS; j++) {
                 double frequency = update_count.flat_indexed_values(j) /
                                    static_cast<double>(m_total_update_counts);
                 result += frequency * frequency;
@@ -153,12 +153,35 @@ class Memory {
     constexpr void update(const model::Move<T_Variable, T_Expression> &a_MOVE,
                           const int a_ITERATION) noexcept {
         for (const auto &alteration : a_MOVE.alterations) {
-            int id         = alteration.first->id();
-            int flat_index = alteration.first->flat_index();
+            int proxy_index = alteration.first->proxy_index();
+            int flat_index  = alteration.first->flat_index();
 
-            m_last_update_iterations[id][flat_index] = a_ITERATION;
-            m_update_counts[id][flat_index]++;
+            m_last_update_iterations[proxy_index][flat_index] = a_ITERATION;
+            m_update_counts[proxy_index][flat_index]++;
             m_total_update_counts++;
+        }
+    }
+
+    /*************************************************************************/
+    template <class T_Variable, class T_Expression>
+    constexpr void update(const model::Move<T_Variable, T_Expression> &a_MOVE,
+                          const int     a_ITERATION,     //
+                          const int     a_RANDOM_WIDTH,  //
+                          std::mt19937 *get_rand_mt) noexcept {
+        if (a_RANDOM_WIDTH == 0) {
+            this->update(a_MOVE, a_ITERATION);
+        } else {
+            for (const auto &alteration : a_MOVE.alterations) {
+                int proxy_index = alteration.first->proxy_index();
+                int flat_index  = alteration.first->flat_index();
+                int randomness =
+                    (*get_rand_mt)() % (2 * a_RANDOM_WIDTH) - a_RANDOM_WIDTH;
+
+                m_last_update_iterations[proxy_index][flat_index] =
+                    a_ITERATION + randomness;
+                m_update_counts[proxy_index][flat_index]++;
+                m_total_update_counts++;
+            }
         }
     }
 
