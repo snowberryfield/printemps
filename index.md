@@ -118,9 +118,9 @@ where the options `CC` and `CXX` respectively designate the paths of C and C++ c
 
 The solver can be run by the following command:
 ```
-$./mps_solver.exe mps_file [-p option_file] [--separate]
+$./mps_solver.exe mps_file [-p option_file] [--separate] [--accept-continuous] 
 ```
-where the argument `mps_file` is the path of the MPS file. The argument `-p option_file` is optional and it specifies solver options and parameters via a JSON file. If the optional flag `--separate` is activated, equality constraints (`=`) will be divided into pairs of inequality constraints (`<=, >=`). Activation of this flag often gives better results for problems with many equality constraints (e.g. set partitioning problems). An example of solver option JSON file is provided as [`application/dat/option.json`](https://github.com/snowberryfield/printemps/blob/master/application/dat/option.json).
+where the argument `mps_file` is the path of the MPS file. The argument `-p option_file` is optional and it specifies solver options and parameters via a JSON file. If the optional flag `--separate` is activated, equality constraints (`=`) will be divided into pairs of inequality constraints (`<=, >=`). Activation of this flag often gives better results for problems with many equality constraints (e.g. set partitioning problems). If the optional flag `--accept-continuous` is activated, the solver accepts an MPS file which includes continuous variables. Then the continuous variables will be regarded as integer variables. An example of solver option JSON file is provided as [`application/dat/option.json`](https://github.com/snowberryfield/printemps/blob/master/application/dat/option.json).
 
 ## Documents
 - [Starter Guide](./contents/starter_guide.md) describes the basic usage of PRINTEMPS including modeling of optimization problems, running the solver, and accessing the optimization results.
