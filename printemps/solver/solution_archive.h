@@ -120,6 +120,9 @@ class SolutionArchive {
         indent_level++;
 
         /// Summary
+        ofs << utility::indent_spaces(indent_level) << "\"version\" : "
+            << "\"" << constant::VERSION << "\"," << std::endl;
+
         ofs << utility::indent_spaces(indent_level) << "\"name\" : "
             << "\"" << a_MODEL_SUMMARY.name << "\"," << std::endl;
 
@@ -136,11 +139,11 @@ class SolutionArchive {
             << std::endl;
 
         indent_level++;
-        auto& solutions      = this->m_solutions;
-        int   solutions_size = solutions.size();
-        for (auto i = 0; i < solutions_size; i++) {
+        auto&     solutions      = this->m_solutions;
+        const int SOLUTIONS_SIZE = solutions.size();
+        for (auto i = 0; i < SOLUTIONS_SIZE; i++) {
             solutions[i].write(&ofs, indent_level);
-            if (i != solutions_size - 1) {
+            if (i != SOLUTIONS_SIZE - 1) {
                 ofs << "," << std::endl;
             } else {
                 ofs << std::endl;

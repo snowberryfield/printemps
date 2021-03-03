@@ -38,7 +38,7 @@ TEST_F(TestAbstractMultiArray, scalar_create_instance) {
      */
     printemps::model::Model<int, double> model;
     auto& variable_proxy = model.create_variable("x");
-    EXPECT_EQ(0, variable_proxy.id());
+    EXPECT_EQ(0, variable_proxy.index());
     EXPECT_EQ(1, variable_proxy.shape()[0]);
     EXPECT_EQ(1, variable_proxy.strides()[0]);
     EXPECT_EQ(1, variable_proxy.number_of_dimensions());
@@ -50,7 +50,7 @@ TEST_F(TestAbstractMultiArray, one_dimensional_create_instance) {
     printemps::model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", 2);
-    EXPECT_EQ(0, variable_proxy.id());
+    EXPECT_EQ(0, variable_proxy.index());
     EXPECT_EQ(2, variable_proxy.shape()[0]);
     EXPECT_EQ(1, variable_proxy.strides()[0]);
     EXPECT_EQ(1, variable_proxy.number_of_dimensions());
@@ -61,7 +61,7 @@ TEST_F(TestAbstractMultiArray, one_dimensional_create_instance) {
 TEST_F(TestAbstractMultiArray, two_dimensional_create_instance) {
     printemps::model::Model<int, double> model;
     auto& variable_proxy = model.create_variables("x", {2, 3});
-    EXPECT_EQ(0, variable_proxy.id());
+    EXPECT_EQ(0, variable_proxy.index());
     EXPECT_EQ(2, variable_proxy.shape()[0]);
     EXPECT_EQ(3, variable_proxy.shape()[1]);
     EXPECT_EQ(3, variable_proxy.strides()[0]);
@@ -74,7 +74,7 @@ TEST_F(TestAbstractMultiArray, two_dimensional_create_instance) {
 TEST_F(TestAbstractMultiArray, three_dimensional_create_instance) {
     printemps::model::Model<int, double> model;
     auto& variable_proxy = model.create_variables("x", {2, 3, 4});
-    EXPECT_EQ(0, variable_proxy.id());
+    EXPECT_EQ(0, variable_proxy.index());
     EXPECT_EQ(2, variable_proxy.shape()[0]);
     EXPECT_EQ(3, variable_proxy.shape()[1]);
     EXPECT_EQ(4, variable_proxy.shape()[2]);
@@ -89,7 +89,7 @@ TEST_F(TestAbstractMultiArray, three_dimensional_create_instance) {
 TEST_F(TestAbstractMultiArray, four_dimensional_create_instance) {
     printemps::model::Model<int, double> model;
     auto& variable_proxy = model.create_variables("x", {2, 3, 4, 5});
-    EXPECT_EQ(0, variable_proxy.id());
+    EXPECT_EQ(0, variable_proxy.index());
     EXPECT_EQ(2, variable_proxy.shape()[0]);
     EXPECT_EQ(3, variable_proxy.shape()[1]);
     EXPECT_EQ(4, variable_proxy.shape()[2]);

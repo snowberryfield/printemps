@@ -25,6 +25,9 @@ enum ImprovabilityScreeningMode : int {
 };
 
 /*****************************************************************************/
+enum ChainMoveReduceMode : int { OverlapRate, Shuffle };
+
+/*****************************************************************************/
 struct OptionConstant {
     static constexpr int    DEFAULT_ITERATION_MAX                       = 100;
     static constexpr double DEFAULT_TIME_MAX                            = 120.0;
@@ -52,6 +55,9 @@ struct OptionConstant {
     static constexpr bool DEFAULT_IS_ENABLED_CHAIN_MOVE          = false;
     static constexpr bool DEFAULT_IS_ENABLED_USER_DEFINED_MOVE   = false;
     static constexpr int  DEFAULT_CHAIN_MOVE_CAPACITY            = 10000;
+    static constexpr ChainMoveReduceMode DEFAULT_CHAIN_MOVE_REDUCE_MODE =
+        ChainMoveReduceMode::OverlapRate;
+    static constexpr double DEFAULT_CHAIN_MOVE_OVERLAP_RATE_THRESHOLD = 0.2;
 
     static constexpr model::SelectionMode DEFAULT_SELECTION_MODE =
         model::SelectionMode::None;
@@ -93,7 +99,9 @@ struct Option {
     bool is_enabled_chain_move;
     bool is_enabled_user_defined_move;
 
-    int chain_move_capacity;
+    int                 chain_move_capacity;                // hidden
+    ChainMoveReduceMode chain_move_reduce_mode;             // hidden
+    double              chain_move_overlap_rate_threshold;  // hidden
 
     model::SelectionMode       selection_mode;
     ImprovabilityScreeningMode improvability_screening_mode;
@@ -163,6 +171,10 @@ struct Option {
         this->is_enabled_user_defined_move =
             OptionConstant::DEFAULT_IS_ENABLED_USER_DEFINED_MOVE;
         this->chain_move_capacity = OptionConstant::DEFAULT_CHAIN_MOVE_CAPACITY;
+        this->chain_move_reduce_mode =
+            OptionConstant::DEFAULT_CHAIN_MOVE_REDUCE_MODE;
+        this->chain_move_overlap_rate_threshold =
+            OptionConstant::DEFAULT_CHAIN_MOVE_OVERLAP_RATE_THRESHOLD;
 
         this->selection_mode = OptionConstant::DEFAULT_SELECTION_MODE;
         this->improvability_screening_mode =
@@ -288,6 +300,14 @@ struct Option {
         utility::print(                    //
             " -- chain_move_capacity: " +  //
             utility::to_string(this->chain_move_capacity, "%d"));
+
+        utility::print(                       //
+            " -- chain_move_reduce_mode: " +  //
+            utility::to_string(this->chain_move_reduce_mode, "%d"));
+
+        utility::print(                                  //
+            " -- chain_move_overlap_rate_threshold: " +  //
+            utility::to_string(this->chain_move_overlap_rate_threshold, "%d"));
 
         utility::print(               //
             " -- selection_mode: " +  //
@@ -418,6 +438,10 @@ struct Option {
             " -- tabu_search.frequency_penalty_coefficient: " +  //
             utility::to_string(this->tabu_search.frequency_penalty_coefficient,
                                "%f"));
+
+        utility::print(                                   //
+            " -- tabu_search.pruning_rate_threshold: " +  //
+            utility::to_string(this->tabu_search.pruning_rate_threshold, "%f"));
 
         utility::print(                               //
             " -- tabu_search.is_enabled_shuffle: " +  //

@@ -81,7 +81,7 @@ class ConstraintProxy : public AbstractMultiArray {
 
         std::vector<int> multi_dimensional_index(this->number_of_dimensions());
         for (auto &&constraint : m_constraints) {
-            constraint.set_id(m_id);
+            constraint.set_proxy_index(m_index);
             constraint.set_flat_index(flat_index);
             this->update_multi_dimensional_index(&multi_dimensional_index,
                                                  flat_index);
@@ -201,7 +201,7 @@ class ConstraintProxy : public AbstractMultiArray {
     /*************************************************************************/
     inline constexpr ValueProxy<T_Expression> export_values_and_names(
         void) const {
-        ValueProxy<T_Expression> proxy(m_id, m_shape);
+        ValueProxy<T_Expression> proxy(m_index, m_shape);
 
         int number_of_elements = this->number_of_elements();
         for (auto i = 0; i < number_of_elements; i++) {
@@ -215,7 +215,7 @@ class ConstraintProxy : public AbstractMultiArray {
     /*************************************************************************/
     inline constexpr ValueProxy<T_Expression> export_violations_and_names(
         void) const {
-        ValueProxy<T_Expression> proxy(m_id, m_shape);
+        ValueProxy<T_Expression> proxy(m_index, m_shape);
 
         int number_of_elements = this->number_of_elements();
         for (auto i = 0; i < number_of_elements; i++) {
@@ -266,8 +266,9 @@ class ConstraintProxy : public AbstractMultiArray {
     /*************************************************************************/
     inline constexpr Constraint<T_Variable, T_Expression> &operator()(
         const std::vector<int> &a_MULTI_DIMENSIONAL_INDEX) {
-        int multi_dimensional_index_size = a_MULTI_DIMENSIONAL_INDEX.size();
-        if (this->number_of_dimensions() != multi_dimensional_index_size) {
+        const int MULTI_DIMENSIONAL_INDEX_SIZE =
+            a_MULTI_DIMENSIONAL_INDEX.size();
+        if (this->number_of_dimensions() != MULTI_DIMENSIONAL_INDEX_SIZE) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of dimensions does not match."));

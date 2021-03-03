@@ -93,6 +93,9 @@ class NamedSolution {
         indent_level++;
 
         /// Summary
+        ofs << utility::indent_spaces(indent_level) << "\"version\" : "
+            << "\"" << constant::VERSION << "\"," << std::endl;
+
         ofs << utility::indent_spaces(indent_level) << "\"name\" : "
             << "\"" << a_MODEL_SUMMARY.name << "\"," << std::endl;
 
@@ -164,6 +167,9 @@ class NamedSolution {
         indent_level++;
 
         /// Summary
+        ofs << utility::indent_spaces(indent_level) << "\"version\" : "
+            << "\"" << constant::VERSION << "\"," << std::endl;
+
         ofs << utility::indent_spaces(indent_level) << "\"name\" : "
             << "\"" << a_MODEL_SUMMARY.name << "\"," << std::endl;
 
@@ -233,8 +239,8 @@ class NamedSolution {
             ofs << "=obj= " << utility::to_string(m_objective, "%.10e")
                 << std::endl;
             for (const auto& item : m_variable_value_proxies) {
-                auto& proxy              = item.second;
-                int   number_of_elements = proxy.number_of_elements();
+                const auto& proxy              = item.second;
+                int         number_of_elements = proxy.number_of_elements();
                 for (auto i = 0; i < number_of_elements; i++) {
                     ofs << proxy.flat_indexed_names(i) << " "
                         << proxy.flat_indexed_values(i) << std::endl;

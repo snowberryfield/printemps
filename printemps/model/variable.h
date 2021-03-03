@@ -51,6 +51,10 @@ class Variable : public AbstractMultiArrayElement {
     Selection<T_Variable, T_Expression> *m_selection_ptr;
     std::unordered_set<Constraint<T_Variable, T_Expression> *>
         m_related_constraint_ptrs;
+
+    std::unordered_set<Constraint<T_Variable, T_Expression> *>
+        m_related_monic_constraint_ptrs;
+
     std::unordered_map<Constraint<T_Variable, T_Expression> *, T_Expression>
                  m_constraint_sensitivities;
     T_Expression m_objective_sensitivity;
@@ -293,8 +297,8 @@ class Variable : public AbstractMultiArrayElement {
 
     /*************************************************************************/
     inline constexpr void register_related_constraint_ptr(
-        Constraint<T_Variable, T_Expression> *a_related_constraint_ptr) {
-        m_related_constraint_ptrs.insert(a_related_constraint_ptr);
+        Constraint<T_Variable, T_Expression> *a_constraint_ptr) {
+        m_related_constraint_ptrs.insert(a_constraint_ptr);
     }
 
     /*************************************************************************/
@@ -309,6 +313,47 @@ class Variable : public AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
+    inline constexpr const std::unordered_set<
+        Constraint<T_Variable, T_Expression> *>
+        &related_constraint_ptrs(void) const {
+        return m_related_constraint_ptrs;
+    }
+
+    /*************************************************************************/
+    inline constexpr void setup_related_monic_constraint_ptrs(void) {
+        /**
+         * NOTE: This method must be called after constraint categorization.
+         */
+        for (const auto &constraint_ptr : m_related_constraint_ptrs) {
+            if (constraint_ptr->is_set_partitioning() ||
+                constraint_ptr->is_set_packing() ||
+                constraint_ptr->is_set_covering() ||
+                constraint_ptr->is_cardinality() ||
+                constraint_ptr->is_invariant_knapsack()) {
+                m_related_monic_constraint_ptrs.insert(constraint_ptr);
+            }
+        }
+    }
+
+    /*************************************************************************/
+    inline constexpr void reset_related_monic_constraint_ptrs(void) {
+        m_related_monic_constraint_ptrs.clear();
+    }
+
+    /*************************************************************************/
+    inline constexpr std::unordered_set<Constraint<T_Variable, T_Expression> *>
+        &related_monic_constraint_ptrs(void) {
+        return m_related_monic_constraint_ptrs;
+    }
+
+    /*************************************************************************/
+    inline constexpr const std::unordered_set<
+        Constraint<T_Variable, T_Expression> *>
+        &related_monic_constraint_ptrs(void) const {
+        return m_related_monic_constraint_ptrs;
+    }
+
+    /*************************************************************************/
     inline constexpr void register_constraint_sensitivity(
         Constraint<T_Variable, T_Expression> *a_constraint_ptr,
         const T_Expression                    a_SENSITIVITY) {
@@ -318,6 +363,13 @@ class Variable : public AbstractMultiArrayElement {
     /*************************************************************************/
     inline constexpr void reset_constraint_sensitivities(void) {
         m_constraint_sensitivities.clear();
+    }
+
+    /*************************************************************************/
+    inline constexpr std::unordered_map<Constraint<T_Variable, T_Expression> *,
+                                        T_Expression>
+        &constraint_sensitivities(void) {
+        return m_constraint_sensitivities;
     }
 
     /*************************************************************************/

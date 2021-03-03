@@ -28,11 +28,12 @@ void bound_dual(model::Model<T_Variable, T_Expression>* a_model,
                 std::vector<model::ValueProxy<double>>* a_dual_value_proxies) {
     for (auto&& proxy : a_model->constraint_proxies()) {
         for (auto&& constraint : proxy.flat_indexed_constraints()) {
-            int id         = constraint.id();
-            int flat_index = constraint.flat_index();
+            int proxy_index = constraint.proxy_index();
+            int flat_index  = constraint.flat_index();
 
             auto& lagrange_multiplier =
-                (*a_dual_value_proxies)[id].flat_indexed_values(flat_index);
+                (*a_dual_value_proxies)[proxy_index].flat_indexed_values(
+                    flat_index);
 
             switch (constraint.sense()) {
                 case model::ConstraintSense::Lower: {
@@ -147,8 +148,12 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
     utility::print_message("Lagrange dual starts.",
                            option.verbose >= Verbose::Full);
     print_table_header(option.verbose >= Verbose::Full);
-    print_table_initial(model, -HUGE_VALF, step_size, solution_score,
-                        incumbent_holder, option.verbose >= Verbose::Full);
+    print_table_initial(model,             //
+                        -HUGE_VALF,        //
+                        step_size,         //
+                        solution_score,    //
+                        incumbent_holder,  //
+                        option.verbose >= Verbose::Full);
 
     /**
      * Iterations start.
@@ -184,17 +189,17 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
         /**
          * Update the dual solution.
          */
-        int constraint_size = constraint_ptrs.size();
+        const int CONSTRAINTS_SIZE = constraint_ptrs.size();
 #ifdef _OPENMP
 #pragma omp parallel for if (option.is_enabled_parallel_evaluation) \
     schedule(static)
 #endif
-        for (auto i = 0; i < constraint_size; i++) {
+        for (auto i = 0; i < CONSTRAINTS_SIZE; i++) {
             double constraint_value = constraint_ptrs[i]->constraint_value();
-            int    id               = constraint_ptrs[i]->id();
+            int    proxy_index      = constraint_ptrs[i]->proxy_index();
             int    flat_index       = constraint_ptrs[i]->flat_index();
 
-            dual_value_proxies[id].flat_indexed_values(flat_index) +=
+            dual_value_proxies[proxy_index].flat_indexed_values(flat_index) +=
                 step_size * constraint_value;
         }
 
@@ -207,26 +212,27 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
          * Update the primal optimal solution so that it minimizes lagrangian
          * for the updated dual solution.
          */
-        int variable_size = variable_ptrs.size();
+        const int VARIABLES_SIZE = variable_ptrs.size();
 #ifdef _OPENMP
 #pragma omp parallel for if (option.is_enabled_parallel_evaluation) \
     schedule(static)
 #endif
-        for (auto i = 0; i < variable_size; i++) {
+        for (auto i = 0; i < VARIABLES_SIZE; i++) {
             if (variable_ptrs[i]->is_fixed()) {
                 continue;
             }
             double coefficient = variable_ptrs[i]->objective_sensitivity();
 
             for (auto&& item : variable_ptrs[i]->constraint_sensitivities()) {
-                auto&  constraint_ptr = item.first;
-                double sensitivity    = item.second;
+                const auto& constraint_ptr = item.first;
+                double      sensitivity    = item.second;
 
-                int id         = constraint_ptr->id();
-                int flat_index = constraint_ptr->flat_index();
+                int proxy_index = constraint_ptr->proxy_index();
+                int flat_index  = constraint_ptr->flat_index();
 
                 coefficient +=
-                    dual_value_proxies[id].flat_indexed_values(flat_index) *
+                    dual_value_proxies[proxy_index].flat_indexed_values(
+                        flat_index) *
                     sensitivity * model->sign();
             }
 

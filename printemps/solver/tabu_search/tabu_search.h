@@ -131,17 +131,13 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     int last_global_augmented_incumbent_update_iteration = -1;
     int last_feasible_incumbent_update_iteration         = -1;
 
+    int local_augmented_incumbent_update_count = 0;
+
     TabuSearchTerminationStatus termination_status =
         TabuSearchTerminationStatus::ITERATION_OVER;
 
     model::Move<T_Variable, T_Expression> previous_move;
     model::Move<T_Variable, T_Expression> current_move;
-
-    double previous_improvement = 0;
-    double current_improvement  = 0;
-
-    double previous_global_augmented_objective = HUGE_VALF;
-    double current_global_augmented_objective  = HUGE_VALF;
 
     bool is_few_permissible_neighborhood = false;
     bool is_found_new_feasible_solution  = false;
@@ -197,6 +193,13 @@ TabuSearchResult<T_Variable, T_Expression> solve(
             break;
         }
 
+        if (local_augmented_incumbent_update_count >
+            option.tabu_search.pruning_rate_threshold *
+                option.tabu_search.iteration_max) {
+            termination_status = TabuSearchTerminationStatus::EARLY_STOP;
+            break;
+        }
+
         /**
          * Update the moves.
          */
@@ -213,7 +216,6 @@ TabuSearchResult<T_Variable, T_Expression> solve(
              * If the option improvability_screening_mode is not None,
              * only improvable moves will be generated.
              */
-
             auto changed_variable_ptrs =
                 utility::to_vector(model::related_variable_ptrs(current_move));
             auto changed_constraint_ptrs =
@@ -298,8 +300,8 @@ TabuSearchResult<T_Variable, T_Expression> solve(
             model->neighborhood().shuffle_moves(&get_rand_mt);
         }
 
-        auto& trial_move_ptrs = model->neighborhood().move_ptrs();
-        int   number_of_moves = trial_move_ptrs.size();
+        const auto& trial_move_ptrs = model->neighborhood().move_ptrs();
+        int         number_of_moves = trial_move_ptrs.size();
 
         if (option.tabu_search.is_enabled_move_curtail) {
             number_of_moves = static_cast<int>(
@@ -311,8 +313,26 @@ TabuSearchResult<T_Variable, T_Expression> solve(
          * be terminated.
          */
         if (number_of_moves == 0) {
-            termination_status = TabuSearchTerminationStatus::NO_MOVE;
-            break;
+            if (model->is_linear() && model->is_feasible()) {
+                /**
+                 * If the current solution is feasible and there is no
+                 * improvable solution, the solution should be an optimum.
+                 * It can happen for decomp2 instance in MIPLIB 2017.
+                 */
+                termination_status = TabuSearchTerminationStatus::OPTIMAL;
+                for (const auto& variable_ptr :
+                     model->variable_reference().variable_ptrs) {
+                    if (variable_ptr->is_objective_improvable()) {
+                        termination_status =
+                            TabuSearchTerminationStatus::NO_MOVE;
+                        break;
+                    }
+                }
+                break;
+            } else {
+                termination_status = TabuSearchTerminationStatus::NO_MOVE;
+                break;
+            }
         }
 
         /**
@@ -339,21 +359,23 @@ TabuSearchResult<T_Variable, T_Expression> solve(
              * The neighborhood solutions will be evaluated in parallel by fast
              * or ordinary(slow) evaluation methods.
              */
+#ifndef _MPS_SOLVER
             if (model->is_enabled_fast_evaluation()) {
-                trial_solution_scores[i]                    //
-                    = model->evaluate(*trial_move_ptrs[i],  //
-                                      current_solution_score);
-
+#endif
+                model->evaluate(&trial_solution_scores[i],  //
+                                *trial_move_ptrs[i],        //
+                                current_solution_score);
+#ifndef _MPS_SOLVER
             } else {
-                trial_solution_scores[i] = model->evaluate(*trial_move_ptrs[i]);
+                model->evaluate(&trial_solution_scores[i],  //
+                                *trial_move_ptrs[i]);
             }
-
-            trial_move_scores[i]                      //
-                = evaluate_move(*trial_move_ptrs[i],  //
-                                iteration,            //
-                                memory,               //
-                                option,               //
-                                tabu_tenure);
+#endif
+            evaluate_move(&trial_move_scores[i], *trial_move_ptrs[i],  //
+                          iteration,                                   //
+                          memory,                                      //
+                          option,                                      //
+                          tabu_tenure);
 
             objective_improvements[i] =
                 trial_solution_scores[i].objective_improvement;
@@ -374,14 +396,17 @@ TabuSearchResult<T_Variable, T_Expression> solve(
              * selecting a move for the next solution.
              */
             if (!trial_move_scores[i].is_permissible) {
-                total_scores[i] = HUGE_VALF;
+                total_scores[i] += constant::LARGE_VALUE_50;
             }
 
-            if (trial_move_ptrs[i]->sense == model::MoveSense::Chain &&
-                fabs(current_global_augmented_objective -
-                     trial_solution_scores[i].global_augmented_objective) <
-                    constant::EPSILON) {
-                total_scores[i] = HUGE_VALF;
+            /**
+             * If the move is special neighborhood moves, it must improves
+             * objective or feasibility.
+             */
+            if (trial_move_ptrs[i]->is_special_neighborhood_move &&
+                !(trial_solution_scores[i].is_objective_improvable ||
+                  trial_solution_scores[i].is_feasibility_improvable)) {
+                total_scores[i] += constant::LARGE_VALUE_100;
             }
         }
 
@@ -425,14 +450,10 @@ TabuSearchResult<T_Variable, T_Expression> solve(
             }
         }
         /**
-         * Backup the previous solution score, move, improvement and global
-         * incumbent objective.
+         * Backup the previous solution score and move.
          */
         previous_solution_score = current_solution_score;
         previous_move           = current_move;
-        previous_improvement    = current_improvement;
-        previous_global_augmented_objective =
-            current_global_augmented_objective;
 
         /**
          * Update the model by the selected move.
@@ -441,15 +462,10 @@ TabuSearchResult<T_Variable, T_Expression> solve(
         model->update(*move_ptr);
 
         /**
-         * Update the current solution score, move, improvement and global
-         * incumbent objective.
+         * Update the current solution score and move.
          */
         current_solution_score = trial_solution_scores[selected_index];
         current_move           = *move_ptr;
-        current_global_augmented_objective =
-            current_solution_score.global_augmented_objective;
-        current_improvement = previous_global_augmented_objective -
-                              current_global_augmented_objective;
 
         min_objective =
             std::min(min_objective, current_solution_score.objective);
@@ -483,16 +499,20 @@ TabuSearchResult<T_Variable, T_Expression> solve(
         /**
          * Update the memory.
          */
-        int tabu_tenure_random_width = static_cast<int>(
+        int random_width = static_cast<int>(
             option.tabu_search.tabu_tenure_randomize_rate * tabu_tenure);
+        memory.update(*move_ptr,     //
+                      iteration,     //
+                      random_width,  //
+                      &get_rand_mt);
 
-        int tabu_tenure_randomness = 0;
-        if (tabu_tenure_random_width > 0) {
-            tabu_tenure_randomness =
-                get_rand_mt() % (2 * tabu_tenure_random_width) -
-                tabu_tenure_random_width;
+        /**
+         * To avoid cycling, each special neighborhood can be used only once in
+         * one tabu search loop.
+         */
+        if (move_ptr->is_special_neighborhood_move) {
+            move_ptr->is_available = false;
         }
-        memory.update(*move_ptr, iteration + tabu_tenure_randomness);
 
         /**
          * Calculate various statistics for logging.
@@ -513,6 +533,19 @@ TabuSearchResult<T_Variable, T_Expression> solve(
         }
 
         /**
+         * For pruning, count updating of the local augmented incumbent without
+         * global augmented incumbent improvement.
+         */
+        if (update_status ==
+            IncumbentHolderConstant::STATUS_LOCAL_AUGMENTED_INCUMBENT_UPDATE) {
+            local_augmented_incumbent_update_count++;
+        } else if (update_status &
+                   IncumbentHolderConstant::
+                       STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
+            local_augmented_incumbent_update_count = 0;
+        }
+
+        /**
          * Calculate the number of moves for each type.
          */
         int number_of_all_neighborhoods         = number_of_moves;
@@ -526,7 +559,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                 number_of_feasible_neighborhoods++;
             }
             if (score.is_objective_improvable ||
-                score.is_constraint_improvable) {
+                score.is_feasibility_improvable) {
                 number_of_improvable_neighborhoods++;
             }
         }
@@ -544,25 +577,32 @@ TabuSearchResult<T_Variable, T_Expression> solve(
         }
 
         /**
-         * Register a chain move. To prevent the duplication of same chain move,
-         * moves of the initial tabu_tenure iterations will be ignored.
+         * Register a chain move.
          */
-        if (iteration > tabu_tenure && option.is_enabled_chain_move) {
-            if (current_improvement * previous_improvement < 0) {
-                auto chain_move = previous_move + current_move;
-                if (!model::has_duplicate_variable(chain_move) &&
-                    previous_move.sense != model::MoveSense::Selection &&
-                    current_move.sense != model::MoveSense::Selection) {
-                    model->neighborhood().register_chain_move(chain_move);
+        if (iteration > 0 && option.is_enabled_chain_move) {
+            if ((previous_move.sense == model::MoveSense::Binary &&
+                 current_move.sense == model::MoveSense::Binary &&
+                 previous_move.alterations.front().second !=
+                     current_move.alterations.front().second) ||
+                (previous_move.sense == model::MoveSense::Chain &&
+                 current_move.sense == model::MoveSense::Chain)) {
+                Move_T chain_move;
+                if (previous_move.alterations.front().first <
+                    current_move.alterations.front().first)
+                    chain_move = previous_move + current_move;
+                else {
+                    chain_move = current_move + previous_move;
+                }
 
-                    if (model::is_binary_swap(chain_move)) {
-                        auto back_chain_move = chain_move;
-                        for (auto&& alteration : back_chain_move.alterations) {
-                            alteration.second = 1 - alteration.second;
-                        }
-                        model->neighborhood().register_chain_move(
-                            back_chain_move);
+                if (chain_move.overlap_rate >
+                        option.chain_move_overlap_rate_threshold &&
+                    !model::has_duplicate_variable(chain_move)) {
+                    auto back_chain_move = chain_move;
+                    for (auto&& alteration : back_chain_move.alterations) {
+                        alteration.second = 1 - alteration.second;
                     }
+                    model->neighborhood().register_chain_move(chain_move);
+                    model->neighborhood().register_chain_move(back_chain_move);
                 }
             }
         }
@@ -634,16 +674,17 @@ TabuSearchResult<T_Variable, T_Expression> solve(
          */
         if (iteration % std::max(option.tabu_search.log_interval, 1) == 0 ||
             update_status > 0) {
-            print_table_body(model,                                //
-                             iteration,                            //
-                             number_of_all_neighborhoods,          //
-                             number_of_feasible_neighborhoods,     //
-                             number_of_permissible_neighborhoods,  //
-                             number_of_improvable_neighborhoods,   //
-                             current_solution_score,               //
-                             update_status,                        //
-                             incumbent_holder,                     //
-                             is_aspirated,                         //
+            print_table_body(model,                                      //
+                             iteration,                                  //
+                             current_move.is_special_neighborhood_move,  //
+                             number_of_all_neighborhoods,                //
+                             number_of_feasible_neighborhoods,           //
+                             number_of_permissible_neighborhoods,        //
+                             number_of_improvable_neighborhoods,         //
+                             current_solution_score,                     //
+                             update_status,                              //
+                             incumbent_holder,                           //
+                             is_aspirated,                               //
                              option.verbose >= Verbose::Full);
         }
 
@@ -710,7 +751,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
 
     auto abs_max_objective = std::max(fabs(max_objective), fabs(min_objective));
 
-    result.objective_constraint_ratio =
+    result.objective_constraint_rate =
         std::max(1.0, std::max(abs_max_objective,  //
                                max_objective - min_objective)) /
         std::max(1.0, min_local_penalty);

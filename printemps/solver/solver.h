@@ -37,6 +37,25 @@ template <class T_Variable, class T_Expression>
 Result<T_Variable, T_Expression> solve(
     model::Model<T_Variable, T_Expression>* a_model,  //
     const Option&                           a_OPTION) {
+    /**
+     * Start to measure computational time and get the starting time.
+     */
+    utility::TimeKeeper time_keeper;
+    std::string         start_date_time = utility::date_time();
+
+    /**
+     * Print the program name, the project url, and the starting time.
+     */
+    utility::print_single_line(a_OPTION.verbose >= Verbose::Outer);
+    utility::print(
+        "PRINTEMPS " + constant::VERSION + " (" + constant::PROJECT_URL + ")",
+        a_OPTION.verbose >= Verbose::Outer);
+    utility::print("running from " + start_date_time,
+                   a_OPTION.verbose >= Verbose::Outer);
+
+    /**
+     * The model can be solved only once.
+     */
     if (a_model->is_solved()) {
         throw std::logic_error(utility::format_error_location(
             __FILE__, __LINE__, __func__,
@@ -44,16 +63,13 @@ Result<T_Variable, T_Expression> solve(
     } else {
         a_model->set_is_solved(true);
     }
+
     /**
      * Define type aliases.
      */
     using Model_T           = model::Model<T_Variable, T_Expression>;
     using Solution_T        = model::Solution<T_Variable, T_Expression>;
     using IncumbentHolder_T = IncumbentHolder<T_Variable, T_Expression>;
-    /**
-     * Start to measure computational time.
-     */
-    utility::TimeKeeper time_keeper;
 
     /**
      * Copy arguments as local variables.
@@ -107,7 +123,6 @@ Result<T_Variable, T_Expression> solve(
      * - verify_and_correct_integer_variables_initial_values()
      * - setup_fixed_sensitivities()
      */
-
     model->setup(master_option.is_enabled_presolve,
                  master_option.is_enabled_initial_value_correction,
                  master_option.is_enabled_aggregation_move,
@@ -128,7 +143,31 @@ Result<T_Variable, T_Expression> solve(
     }
 
     /**
-     * Enables the default neighborhood moves.
+     * Print the problem size.
+     */
+    if (master_option.verbose >= Verbose::Outer) {
+        model->print_number_of_variables();
+        model->print_number_of_constraints();
+    }
+
+    /**
+     * Disable the Chain move for the problem with no monic
+     * constraints (set partitioning, set packing, set covering, cardinality,
+     * and invariant knapsack).
+     */
+    if (master_option.is_enabled_chain_move &&
+        !model->has_monic_constraints()) {
+        master_option.is_enabled_chain_move = false;
+        utility::print_warning(
+            "Chain move was disabled because the problem does not include any "
+            "monic constraints (set partitioning/packing/covering, "
+            "cardinality, and invariant knapsack).",
+            master_option.verbose >= Verbose::Warning);
+    }
+
+    /**
+     * Enables the default neighborhood moves. Special neighborhood moves will
+     * be enabled when optimization stagnates.
      */
     if (master_option.is_enabled_binary_move) {
         model->neighborhood().enable_binary_move();
@@ -147,11 +186,6 @@ Result<T_Variable, T_Expression> solve(
     }
 
     /**
-     * NOTE: Special neighborhood moves will be enabled when optimization
-     * stagnates.
-     */
-
-    /**
      * Check whether there exist special neighborhood moves or not.
      */
     bool has_special_neighborhood_moves =
@@ -168,12 +202,6 @@ Result<T_Variable, T_Expression> solve(
      * Prepare a random generator.
      */
     std::mt19937 get_rand_mt(master_option.seed);
-
-    utility::print_single_line(  //
-        master_option.verbose >= Verbose::Outer);
-
-    utility::print_message(  //
-        "Optimization starts.", master_option.verbose >= Verbose::Outer);
 
     /**
      * Set local and global penalty coefficient for each constraint.
@@ -205,6 +233,9 @@ Result<T_Variable, T_Expression> solve(
      */
     model->update();
 
+    /**
+     * Prepare local variables to be updated in the following process.
+     */
     Solution_T        current_solution = model->export_solution();
     Solution_T        previous_solution;
     IncumbentHolder_T incumbent_holder;
@@ -221,6 +252,15 @@ Result<T_Variable, T_Expression> solve(
     int number_of_tabu_search_loops        = 0;
 
     bool is_terminated = false;
+
+    /**
+     * Start optimization.
+     */
+    utility::print_single_line(  //
+        master_option.verbose >= Verbose::Outer);
+
+    utility::print_message(  //
+        "Optimization starts.", master_option.verbose >= Verbose::Outer);
 
     /**
      * Solve Lagrange dual to obtain a better initial solution ß(Optional).
@@ -498,10 +538,14 @@ Result<T_Variable, T_Expression> solve(
     int iteration                                  = 0;
     int no_global_augmented_incumbent_update_count = 0;
     int no_update_count                            = 0;
+    tabu_search::TabuSearchTerminationStatus termination_status =
+        tabu_search::TabuSearchTerminationStatus::ITERATION_OVER;
 
     bool penalty_coefficient_reset_flag = false;
 
-    int inital_tabu_tenure = master_option.tabu_search.initial_tabu_tenure;
+    int    inital_tabu_tenure = master_option.tabu_search.initial_tabu_tenure;
+    double pruning_rate_threshold =
+        master_option.tabu_search.pruning_rate_threshold;
     int number_of_initial_modification = 0;
     int iteration_max = master_option.tabu_search.iteration_max;
 
@@ -537,6 +581,14 @@ Result<T_Variable, T_Expression> solve(
                     utility::to_string(iteration, "%d") + " iterations).",
                 master_option.verbose >= Verbose::Outer);
             is_terminated = true;
+        } else if (iteration > 0 &&
+                   termination_status ==
+                       tabu_search::TabuSearchTerminationStatus::OPTIMAL) {
+            utility::print_message(
+                "Outer loop was terminated because an optimal solution was "
+                "found.",
+                master_option.verbose >= Verbose::Outer);
+            is_terminated = true;
         }
 
         if (is_terminated) {
@@ -558,7 +610,8 @@ Result<T_Variable, T_Expression> solve(
         option.tabu_search.seed += iteration;
         option.tabu_search.number_of_initial_modification =
             number_of_initial_modification;
-        option.tabu_search.initial_tabu_tenure = inital_tabu_tenure;
+        option.tabu_search.initial_tabu_tenure    = inital_tabu_tenure;
+        option.tabu_search.pruning_rate_threshold = pruning_rate_threshold;
 
         /**
          * Prepare the initial variable values.
@@ -583,6 +636,26 @@ Result<T_Variable, T_Expression> solve(
         update_status = incumbent_holder.try_update_incumbent(
             result.incumbent_holder.global_augmented_incumbent_solution(),
             result.incumbent_holder.global_augmented_incumbent_score());
+
+        /**
+         * Update the feasible incumbent solution if it was improved by the tabu
+         * search.
+         */
+        if (result.incumbent_holder.is_found_feasible_solution()) {
+            update_status = incumbent_holder.try_update_incumbent(
+                result.incumbent_holder.feasible_incumbent_solution(),
+                result.incumbent_holder.feasible_incumbent_score());
+        }
+
+        /**
+         * Update the memory.
+         */
+        memory = result.memory;
+
+        /**
+         * Update the termination status.
+         */
+        termination_status = result.termination_status;
 
         /**
          * Reset the penalty coefficients if the incumbent solution was not
@@ -610,16 +683,6 @@ Result<T_Variable, T_Expression> solve(
                 no_global_augmented_incumbent_update_count = 0;
             } else {
                 penalty_coefficient_reset_flag = false;
-            }
-        }
-
-        /**
-         * Reset chain moves if the global augmented objective was updated.
-         */
-        if (update_status &
-            IncumbentHolderConstant::STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
-            if (option.is_enabled_chain_move) {
-                model->neighborhood().clear_chain_moves();
             }
         }
 
@@ -660,9 +723,12 @@ Result<T_Variable, T_Expression> solve(
          */
         if (master_option.improvability_screening_mode ==
             ImprovabilityScreeningMode::Automatic) {
-            if (result.total_update_status &
-                IncumbentHolderConstant::
-                    STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
+            if (result.termination_status ==
+                tabu_search::TabuSearchTerminationStatus::NO_MOVE) {
+                improvability_screening_mode = ImprovabilityScreeningMode::Soft;
+            } else if (result.total_update_status &
+                       IncumbentHolderConstant::
+                           STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
                 /**
                  * If the incumbent solution was updated in the last loop, the
                  * improvability screening mode is set to "Intensive" to search
@@ -864,21 +930,6 @@ Result<T_Variable, T_Expression> solve(
         }
 
         /**
-         * Update the feasible incumbent solution if it was improved by the tabu
-         * search.
-         */
-        if (result.incumbent_holder.is_found_feasible_solution()) {
-            update_status = incumbent_holder.try_update_incumbent(
-                result.incumbent_holder.feasible_incumbent_solution(),
-                result.incumbent_holder.feasible_incumbent_score());
-        }
-
-        /**
-         * Update the memory.
-         */
-        memory = result.memory;
-
-        /**
          * Update the local penalty coefficients.
          */
         if (penalty_coefficient_reset_flag) {
@@ -910,9 +961,9 @@ Result<T_Variable, T_Expression> solve(
                          result_local_augmented_incumbent_objective;
 
             for (auto&& proxy : model->constraint_proxies()) {
-                auto& violation_values =
+                const auto& violation_values =
                     result_local_augmented_incumbent_solution
-                        .violation_value_proxies[proxy.id()]
+                        .violation_value_proxies[proxy.index()]
                         .flat_indexed_values();
 
                 for (auto&& constraint : proxy.flat_indexed_constraints()) {
@@ -959,18 +1010,18 @@ Result<T_Variable, T_Expression> solve(
             double penalty_coefficient_relaxing_rate =
                 master_option.penalty_coefficient_relaxing_rate;
 
-            if (result.objective_constraint_ratio > constant::EPSILON) {
-                if (result.is_found_new_feasible_solution) {
-                    const double MARGIN = 100.0;
+            if (result.objective_constraint_rate > constant::EPSILON) {
+                if (result_local_augmented_incumbent_score.is_feasible) {
+                    const double MARGIN = 1.0;
                     penalty_coefficient_relaxing_rate =
                         std::min(penalty_coefficient_relaxing_rate,
-                                 result.objective_constraint_ratio * MARGIN);
+                                 result.objective_constraint_rate * MARGIN);
                 }
             }
 
             for (auto&& proxy : model->constraint_proxies()) {
-                auto& violation_values =
-                    current_solution.violation_value_proxies[proxy.id()]
+                const auto& violation_values =
+                    current_solution.violation_value_proxies[proxy.index()]
                         .flat_indexed_values();
 
                 for (auto&& constraint : proxy.flat_indexed_constraints()) {
@@ -1056,7 +1107,8 @@ Result<T_Variable, T_Expression> solve(
         }
 
         /**
-         * Update the maximum number of iterations for the next loop.
+         * Update the maximum number of iterations and pruning rate threshold
+         * for the next loop.
          */
         if (master_option.tabu_search
                 .is_enabled_automatic_iteration_adjustment &&
@@ -1080,13 +1132,30 @@ Result<T_Variable, T_Expression> solve(
                 std::max(master_option.tabu_search.initial_tabu_tenure,
                          std::min(master_option.tabu_search.iteration_max,
                                   iteration_max_temp));
+
+            if (iteration_max == master_option.tabu_search.iteration_max) {
+                pruning_rate_threshold =
+                    master_option.tabu_search.pruning_rate_threshold;
+            } else {
+                pruning_rate_threshold = 1.0;
+            }
+        }
+
+        /**
+         * Reset chain moves if the global augmented objective was updated.
+         */
+        if (result.total_update_status &
+            IncumbentHolderConstant::STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
+            if (option.is_enabled_chain_move) {
+                model->neighborhood().clear_chain_moves();
+            }
         }
 
         /**
          * Update the neighborhood moves to be employed for the next loop.
          */
-        bool is_enabled_special_neighborhood_move  = false;
-        bool is_disabled_special_neighborhood_move = false;
+        bool is_activated_special_neighborhood_move   = false;
+        bool is_deactivated_special_neighborhood_move = false;
 
         if (result.total_update_status &
             IncumbentHolderConstant::STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
@@ -1098,7 +1167,7 @@ Result<T_Variable, T_Expression> solve(
             if (master_option.is_enabled_aggregation_move) {
                 if (model->neighborhood().is_enabled_aggregation_move()) {
                     model->neighborhood().disable_aggregation_move();
-                    is_disabled_special_neighborhood_move = true;
+                    is_deactivated_special_neighborhood_move = true;
                 }
             }
 
@@ -1106,7 +1175,7 @@ Result<T_Variable, T_Expression> solve(
             if (master_option.is_enabled_precedence_move) {
                 if (model->neighborhood().is_enabled_precedence_move()) {
                     model->neighborhood().disable_precedence_move();
-                    is_disabled_special_neighborhood_move = true;
+                    is_deactivated_special_neighborhood_move = true;
                 }
             }
 
@@ -1114,7 +1183,7 @@ Result<T_Variable, T_Expression> solve(
             if (master_option.is_enabled_variable_bound_move) {
                 if (model->neighborhood().is_enabled_variable_bound_move()) {
                     model->neighborhood().disable_variable_bound_move();
-                    is_disabled_special_neighborhood_move = true;
+                    is_deactivated_special_neighborhood_move = true;
                 }
             }
 
@@ -1122,7 +1191,7 @@ Result<T_Variable, T_Expression> solve(
             if (master_option.is_enabled_exclusive_move) {
                 if (model->neighborhood().is_enabled_exclusive_move()) {
                     model->neighborhood().disable_exclusive_move();
-                    is_disabled_special_neighborhood_move = true;
+                    is_deactivated_special_neighborhood_move = true;
                 }
             }
 
@@ -1130,7 +1199,7 @@ Result<T_Variable, T_Expression> solve(
             if (master_option.is_enabled_chain_move) {
                 if (model->neighborhood().is_enabled_chain_move()) {
                     model->neighborhood().disable_chain_move();
-                    is_disabled_special_neighborhood_move = true;
+                    is_deactivated_special_neighborhood_move = true;
                 }
             }
 
@@ -1145,7 +1214,7 @@ Result<T_Variable, T_Expression> solve(
                 if (master_option.is_enabled_aggregation_move) {
                     if (!model->neighborhood().is_enabled_aggregation_move()) {
                         model->neighborhood().enable_aggregation_move();
-                        is_enabled_special_neighborhood_move = true;
+                        is_activated_special_neighborhood_move = true;
                     }
                 }
 
@@ -1153,7 +1222,7 @@ Result<T_Variable, T_Expression> solve(
                 if (master_option.is_enabled_precedence_move) {
                     if (!model->neighborhood().is_enabled_precedence_move()) {
                         model->neighborhood().enable_precedence_move();
-                        is_enabled_special_neighborhood_move = true;
+                        is_activated_special_neighborhood_move = true;
                     }
                 }
 
@@ -1162,7 +1231,7 @@ Result<T_Variable, T_Expression> solve(
                     if (!model->neighborhood()
                              .is_enabled_variable_bound_move()) {
                         model->neighborhood().enable_variable_bound_move();
-                        is_enabled_special_neighborhood_move = true;
+                        is_activated_special_neighborhood_move = true;
                     }
                 }
 
@@ -1170,7 +1239,7 @@ Result<T_Variable, T_Expression> solve(
                 if (master_option.is_enabled_exclusive_move) {
                     if (!model->neighborhood().is_enabled_exclusive_move()) {
                         model->neighborhood().enable_exclusive_move();
-                        is_enabled_special_neighborhood_move = true;
+                        is_activated_special_neighborhood_move = true;
                     }
                 }
 
@@ -1178,19 +1247,52 @@ Result<T_Variable, T_Expression> solve(
                 if (master_option.is_enabled_chain_move) {
                     if (!model->neighborhood().is_enabled_chain_move()) {
                         model->neighborhood().enable_chain_move();
-                        is_enabled_special_neighborhood_move = true;
+                        is_activated_special_neighborhood_move = true;
                     }
                 }
             }
         }
 
         /**
-         * Suppress the number of registered chain moves.
+         * Sort and deduplicate registered chain moves.
          */
         if (model->neighborhood().is_enabled_chain_move() &&
             master_option.chain_move_capacity > 0) {
-            model->neighborhood().reduce_chain_moves(
-                master_option.chain_move_capacity, &get_rand_mt);
+            model->neighborhood().sort_chain_moves();
+            model->neighborhood().deduplicate_chain_moves();
+        }
+
+        /**
+         * Reduce the registered chain moves.
+         */
+        if (static_cast<int>(model->neighborhood().chain_moves().size()) >
+            master_option.chain_move_capacity) {
+            switch (master_option.chain_move_reduce_mode) {
+                case ChainMoveReduceMode::OverlapRate: {
+                    model->neighborhood().reduce_chain_moves(
+                        master_option.chain_move_capacity);
+                    break;
+                }
+                case ChainMoveReduceMode::Shuffle: {
+                    model->neighborhood().shuffle_chain_moves(&get_rand_mt);
+                    model->neighborhood().reduce_chain_moves(
+                        master_option.chain_move_capacity);
+                    break;
+                }
+                default: {
+                    throw std::logic_error(utility::format_error_location(
+                        __FILE__, __LINE__, __func__,
+                        "The specified Chain move reduce mode is invalid."));
+                }
+            }
+        }
+
+        /**
+         * Reset the availability of special neighborhood moves.
+         */
+        if (model->neighborhood().is_enabled_special_neighborhood_move()) {
+            model->neighborhood()
+                .reset_special_neighborhood_moves_availability();
         }
 
         /**
@@ -1255,31 +1357,46 @@ Result<T_Variable, T_Expression> solve(
          */
         if (!current_solution.is_feasible) {
             int number_of_violative_constraints = 0;
+            /**
+             * Due to the slow speed of standard output in the Windows DOS,
+             * printing all violations will affect performance. To avoid
+             * this problem, the maximum number of violations to be printed
+             * is 20.
+             */
+            const int MAX_NUMBER_OF_PRINT_ITEMS = 20;
+
+            utility::print_message(
+                "The current solution does not satisfy the following "
+                "constraints:",
+                master_option.verbose >= Verbose::Outer);
 
             for (const auto& proxy : current_solution.violation_value_proxies) {
-                auto& values      = proxy.flat_indexed_values();
-                auto& names       = proxy.flat_indexed_names();
-                int   values_size = values.size();
+                const auto& values      = proxy.flat_indexed_values();
+                const auto& names       = proxy.flat_indexed_names();
+                const int   VALUES_SIZE = values.size();
 
-                utility::print_message(
-                    "The current solution does not satisfy the following "
-                    "constraints:",
-                    master_option.verbose >= Verbose::Outer);
-                for (auto i = 0; i < values_size; i++) {
+                for (auto i = 0; i < VALUES_SIZE; i++) {
                     if (values[i] > 0) {
                         number_of_violative_constraints++;
-                        utility::print_info(
-                            " -- " + names[i] + " (violation: " +
-                                std::to_string(values[i]) + ")",
-                            master_option.verbose >= Verbose::Outer);
+                        if (number_of_violative_constraints <=
+                            MAX_NUMBER_OF_PRINT_ITEMS) {
+                            utility::print_info(
+                                " -- " + names[i] + " (violation: " +
+                                    std::to_string(values[i]) + ")",
+                                master_option.verbose >= Verbose::Outer);
+                        }
                     }
                 }
-                utility::print_message(
-                    "There are " +
-                        std::to_string(number_of_violative_constraints) +
-                        " violative constraints.",
-                    master_option.verbose >= Verbose::Outer);
             }
+            if (number_of_violative_constraints > MAX_NUMBER_OF_PRINT_ITEMS) {
+                utility::print_info("and much more...",
+                                    master_option.verbose >= Verbose::Outer);
+            }
+
+            utility::print_message(
+                "There are " + std::to_string(number_of_violative_constraints) +
+                    " violative constraints.",
+                master_option.verbose >= Verbose::Outer);
         }
 
         /**
@@ -1395,21 +1512,37 @@ Result<T_Variable, T_Expression> solve(
          * Print a message of the special neighborhood moves
          * activation/deactivation.
          */
-        if (is_disabled_special_neighborhood_move &&
+        if (is_deactivated_special_neighborhood_move &&
             has_special_neighborhood_moves) {
             utility::print_message("Special neighborhood moves were disabled.",
                                    master_option.verbose >= Verbose::Outer);
         }
 
-        if (is_enabled_special_neighborhood_move &&
+        if (is_activated_special_neighborhood_move &&
             has_special_neighborhood_moves) {
             utility::print_message("Special neighborhood moves were enabled.",
                                    master_option.verbose >= Verbose::Outer);
         }
 
+        /**
+         * Print the number of the stored chain moves.
+         */
+        if (model->neighborhood().is_enabled_chain_move()) {
+            utility::print_message(
+                "There are " +
+                    std::to_string(model->neighborhood().chain_moves().size()) +
+                    " stored chain moves.",
+                master_option.verbose >= Verbose::Outer);
+        }
+
         model->callback();
         iteration++;
     }
+
+    /**
+     * Get the finish time.
+     */
+    std::string finish_date_time = utility::date_time();
 
     /**
      * If a feasible solution is found in optimization, the incumbent
@@ -1443,9 +1576,9 @@ Result<T_Variable, T_Expression> solve(
     std::vector<model::ValueProxy<double>> local_penalty_coefficient_proxies =
         model->export_local_penalty_coefficient_proxies();
 
-    int        constraint_proxies_size = model->constraint_proxies().size();
-    const auto constraint_names        = model->constraint_names();
-    for (auto i = 0; i < constraint_proxies_size; i++) {
+    const int   CONSTRAINT_PROXIES_SIZE = model->constraint_proxies().size();
+    const auto& constraint_names        = model->constraint_names();
+    for (auto i = 0; i < CONSTRAINT_PROXIES_SIZE; i++) {
         named_penalty_coefficients[constraint_names[i]] =
             local_penalty_coefficient_proxies[i];
     }
@@ -1454,11 +1587,11 @@ Result<T_Variable, T_Expression> solve(
      * Export the final variable update counts.
      */
     std::unordered_map<std::string, model::ValueProxy<int>> named_update_counts;
-    int         variable_proxies_size = model->variable_proxies().size();
+    const int   VARIABLE_PROXIES_SIZE = model->variable_proxies().size();
     const auto& variable_names        = model->variable_names();
 
     const auto& update_counts = memory.update_counts();
-    for (auto i = 0; i < variable_proxies_size; i++) {
+    for (auto i = 0; i < VARIABLE_PROXIES_SIZE; i++) {
         named_update_counts[variable_names[i]] = update_counts[i];
     }
 
@@ -1466,11 +1599,12 @@ Result<T_Variable, T_Expression> solve(
      * Prepare the result object to return.
      */
     Result<T_Variable, T_Expression> result;
-    result.solution = named_solution;
-
+    result.solution                          = named_solution;
     result.status.penalty_coefficients       = named_penalty_coefficients;
     result.status.update_counts              = named_update_counts;
     result.status.is_found_feasible_solution = named_solution.is_feasible();
+    result.status.start_date_time            = start_date_time;
+    result.status.finish_date_time           = finish_date_time;
     result.status.elapsed_time               = time_keeper.elapsed_time();
     result.status.number_of_lagrange_dual_iterations =
         number_of_lagrange_dual_iterations;

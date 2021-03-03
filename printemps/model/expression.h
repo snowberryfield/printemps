@@ -91,9 +91,9 @@ class Expression : public AbstractMultiArrayElement {
     /*************************************************************************/
     /// Copy assignment
     /**
-     * NOTE: The members id and flat_index will be discarded in the copy
-     * assignment and related methods. It's not a problem because the program
-     * does not use flat_index at the moment.
+     * NOTE: The members proxy_index and flat_index will be discarded in the
+     * copy assignment and related methods. It's not a problem because the
+     * program does not use flat_index at the moment.
      */
     Expression<T_Variable, T_Expression> &operator    =(
         const Expression<T_Variable, T_Expression> &) = default;
@@ -188,9 +188,11 @@ class Expression : public AbstractMultiArrayElement {
     inline constexpr T_Expression evaluate(
         const Move<T_Variable, T_Expression> &a_MOVE) const noexcept {
         /// The following code is required for nonlinear objective functions.
+#ifndef _MPS_SOLVER
         if (a_MOVE.alterations.size() == 0) {
             return this->evaluate();
         }
+#endif
 
         T_Expression new_value = m_value;
         for (const auto &alteration : a_MOVE.alterations) {
