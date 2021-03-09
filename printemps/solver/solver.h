@@ -946,12 +946,12 @@ Result<T_Variable, T_Expression> solve(
             /**
              * Tighten the local penalty coefficients.
              */
-            double total_violation         = 0.0;
+            double total_penalty           = 0.0;
             double total_squared_violation = 0.0;
             for (const auto& proxy : result_local_augmented_incumbent_solution
                                          .violation_value_proxies) {
                 for (const auto& element : proxy.flat_indexed_values()) {
-                    total_violation += element;
+                    total_penalty += element;
                     total_squared_violation += element * element;
                 }
             }
@@ -968,7 +968,7 @@ Result<T_Variable, T_Expression> solve(
 
                 for (auto&& constraint : proxy.flat_indexed_constraints()) {
                     double delta_penalty_constant =
-                        std::max(0.0, gap) / total_violation;
+                        std::max(0.0, gap) / total_penalty;
                     double delta_penalty_proportional =
                         std::max(0.0, gap) / total_squared_violation *
                         violation_values[constraint.flat_index()];
