@@ -37,8 +37,8 @@ constexpr void verify_and_correct_selection_variables_initial_values(
     const bool                       a_IS_ENABLED_PRINT) {
     utility::print_single_line(a_IS_ENABLED_PRINT);
     utility::print_message(
-        "Verifying the initial values of the binary decisionvariables included "
-        "in the selection constraints...",
+        "Verifying the initial values of the binary decision variables "
+        "included in the selection constraints...",
         a_IS_ENABLED_PRINT);
 
     for (auto &&selection : a_model->selections()) {
