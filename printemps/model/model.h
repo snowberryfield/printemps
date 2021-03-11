@@ -1951,6 +1951,32 @@ class Model {
     }
 
     /*************************************************************************/
+    constexpr void fix_variables(
+        const std::unordered_map<std::string, int> &a_SOLUTION) {
+        for (auto &&proxy : m_variable_proxies) {
+            for (auto &&variable : proxy.flat_indexed_variables()) {
+                if (a_SOLUTION.find(variable.name()) != a_SOLUTION.end()) {
+                    variable.fix_by(a_SOLUTION.at(variable.name()));
+                }
+            }
+        }
+    }
+
+    /*************************************************************************/
+    constexpr void unfix_variables(
+        const std::unordered_set<std::string> &a_VARIABLE_NAMES) {
+        for (auto &&proxy : m_variable_proxies) {
+            for (auto &&variable : proxy.flat_indexed_variables()) {
+                variable.fix_by(0);
+                if (a_VARIABLE_NAMES.find(variable.name()) !=
+                    a_VARIABLE_NAMES.end()) {
+                    variable.unfix();
+                }
+            }
+        }
+    }
+
+    /*************************************************************************/
     ModelSummary export_summary(void) const {
         /// This method cannot be constexpr by clang.
         ModelSummary summary;
