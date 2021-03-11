@@ -2800,6 +2800,91 @@ TEST_F(TestModel, convert_to_plain_solution) {
 }
 
 /*****************************************************************************/
+TEST_F(TestModel, import_solution) {
+    printemps::model::Model<int, double> model;
+
+    auto& x = model.create_variable("x");
+    auto& y = model.create_variables("y", 10);
+    auto& z = model.create_variables("z", {20, 30});
+
+    model.setup_unique_name();
+
+    std::unordered_map<std::string, int> solution;
+    solution["x"]         = 1;
+    solution["y[ 0]"]     = 2;
+    solution["y[ 9]"]     = 3;
+    solution["z[ 0,  0]"] = 4;
+    solution["z[19, 19]"] = 5;
+    model.import_solution(solution);
+
+    EXPECT_EQ(x.value(), 1);
+    EXPECT_EQ(y(0).value(), 2);
+    EXPECT_EQ(y(9).value(), 3);
+    EXPECT_EQ(z(0, 0).value(), 4);
+    EXPECT_EQ(z(19, 19).value(), 5);
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, fix_variables) {
+    printemps::model::Model<int, double> model;
+
+    auto& x = model.create_variable("x");
+    auto& y = model.create_variables("y", 10);
+    auto& z = model.create_variables("z", {20, 30});
+
+    model.setup_unique_name();
+
+    std::unordered_map<std::string, int> solution;
+    solution["x"]         = 1;
+    solution["y[ 0]"]     = 2;
+    solution["y[ 9]"]     = 3;
+    solution["z[ 0,  0]"] = 4;
+    solution["z[19, 19]"] = 5;
+    model.fix_variables(solution);
+
+    EXPECT_EQ(1, x.value());
+    EXPECT_EQ(2, y(0).value());
+    EXPECT_EQ(3, y(9).value());
+    EXPECT_EQ(4, z(0, 0).value());
+    EXPECT_EQ(5, z(19, 19).value());
+
+    EXPECT_EQ(true, x.is_fixed());
+    EXPECT_EQ(true, y(0).is_fixed());
+    EXPECT_EQ(true, y(9).is_fixed());
+    EXPECT_EQ(true, z(0, 0).is_fixed());
+    EXPECT_EQ(true, z(19, 19).is_fixed());
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, unfix_variables) {
+    printemps::model::Model<int, double> model;
+
+    auto& x = model.create_variable("x");
+    auto& y = model.create_variables("y", 10);
+    auto& z = model.create_variables("z", {20, 30});
+
+    model.setup_unique_name();
+
+    std::unordered_set<std::string> mutable_variable_names;
+    mutable_variable_names.insert("x");
+    mutable_variable_names.insert("y[ 0]");
+    mutable_variable_names.insert("y[ 9]");
+    mutable_variable_names.insert("z[ 0,  0]");
+    mutable_variable_names.insert("z[19, 19]");
+    model.unfix_variables(mutable_variable_names);
+
+    EXPECT_EQ(false, x.is_fixed());
+    EXPECT_EQ(false, y(0).is_fixed());
+    EXPECT_EQ(true, y(1).is_fixed());
+    EXPECT_EQ(true, y(8).is_fixed());
+    EXPECT_EQ(false, y(9).is_fixed());
+    EXPECT_EQ(false, z(0, 0).is_fixed());
+    EXPECT_EQ(true, z(0, 1).is_fixed());
+    EXPECT_EQ(true, z(19, 18).is_fixed());
+    EXPECT_EQ(false, z(19, 19).is_fixed());
+}
+
+/*****************************************************************************/
 TEST_F(TestModel, export_summary) {
     printemps::model::Model<int, double> model("name");
 
