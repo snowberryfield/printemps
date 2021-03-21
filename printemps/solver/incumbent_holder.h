@@ -6,9 +6,6 @@
 #ifndef PRINTEMPS_SOLVER_INCUMBENT_HOLDER_H__
 #define PRINTEMPS_SOLVER_INCUMBENT_HOLDER_H__
 
-#include <unordered_map>
-#include <string>
-
 namespace printemps {
 namespace solver {
 /*****************************************************************************/

@@ -10,8 +10,6 @@
 #include "lagrange_dual_print.h"
 #include "lagrange_dual_result.h"
 
-#include <deque>
-
 namespace printemps {
 namespace solver {
 /*****************************************************************************/

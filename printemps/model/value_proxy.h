@@ -8,9 +8,6 @@
 #define PRINTEMPS_MODEL_VALUE_PROXY_H__
 
 #include "abstract_multi_array.h"
-#include <vector>
-#include <iostream>
-#include <fstream>
 
 namespace printemps {
 namespace model {

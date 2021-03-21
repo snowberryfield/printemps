@@ -6,8 +6,6 @@
 #ifndef PRINTEMPS_MODEL_SOLUTION_H__
 #define PRINTEMPS_MODEL_SOLUTION_H__
 
-#include <vector>
-
 namespace printemps {
 namespace model {
 /*****************************************************************************/

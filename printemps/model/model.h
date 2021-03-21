@@ -6,12 +6,6 @@
 #ifndef PRINTEMPS_MODEL_MODEL_H__
 #define PRINTEMPS_MODEL_MODEL_H__
 
-#include <vector>
-#include <string>
-#include <numeric>
-#include <functional>
-#include <cmath>
-
 #include "variable_sense.h"
 #include "constraint_sense.h"
 #include "range.h"

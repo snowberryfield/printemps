@@ -6,10 +6,6 @@
 #ifndef PRINTEMPS_SOLVER_H__
 #define PRINTEMPS_SOLVER_H__
 
-#include <iostream>
-#include <cstdlib>
-#include <random>
-
 #include "../model/model.h"
 #include "../utility/utility.h"
 

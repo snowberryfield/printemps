@@ -6,8 +6,6 @@
 #ifndef PRINTEMPS_MODEL_CONSTRAINT_BINARY_OPERATOR_H__
 #define PRINTEMPS_MODEL_CONSTRAINT_BINARY_OPERATOR_H__
 
-#include <functional>
-
 namespace printemps {
 namespace neighborhood {
 /*****************************************************************************/

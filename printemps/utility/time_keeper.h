@@ -7,14 +7,6 @@
 #ifndef PRINTEMPS_UTILITY_TIME_KEEPER_H__
 #define PRINTEMPS_UTILITY_TIME_KEEPER_H__
 
-#include <iostream>
-#include <cstdlib>
-
-#include <ctime>
-#ifdef _OPENMP
-#include <omp.h>
-#endif
-
 namespace printemps {
 namespace utility {
 /*****************************************************************************/

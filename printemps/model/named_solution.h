@@ -6,11 +6,6 @@
 #ifndef PRINTEMPS_MODEL_NAMED_SOLUTION_H__
 #define PRINTEMPS_MODEL_NAMED_SOLUTION_H__
 
-#include <vector>
-#include <iostream>
-#include <fstream>
-#include <unordered_map>
-
 namespace printemps {
 namespace model {
 /*****************************************************************************/

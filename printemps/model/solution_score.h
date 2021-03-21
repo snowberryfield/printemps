@@ -6,7 +6,6 @@
 #ifndef PRINTEMPS_MODEL_SOLUTION_SCORE_H__
 #define PRINTEMPS_MODEL_SOLUTION_SCORE_H__
 
-#include <vector>
 #include "../utility/utility.h"
 
 namespace printemps {

@@ -6,9 +6,6 @@
 #ifndef PRINTEMPS_NEIGHBORHOOD_NEIGHBORHOOD_H__
 #define PRINTEMPS_NEIGHBORHOOD_NEIGHBORHOOD_H__
 
-#include <vector>
-#include <typeinfo>
-
 #include "move_sense.h"
 #include "move.h"
 

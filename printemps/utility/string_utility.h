@@ -6,9 +6,6 @@
 #ifndef PRINTEMPS_UTILITY_STRING_UTILITY_H__
 #define PRINTEMPS_UTILITY_STRING_UTILITY_H__
 
-#include <string>
-#include <sstream>
-
 namespace printemps {
 namespace utility {
 /******************************************************************************/

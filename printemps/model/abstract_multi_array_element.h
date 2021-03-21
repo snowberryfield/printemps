@@ -6,9 +6,6 @@
 #ifndef PRINTEMPS_MODEL_ABSTRACT_MULTI_ARRAY_ELEMENT_H__
 #define PRINTEMPS_MODEL_ABSTRACT_MULTI_ARRAY_ELEMENT_H__
 
-#include <string>
-#include <vector>
-
 namespace printemps {
 namespace model {
 /*****************************************************************************/

@@ -6,8 +6,6 @@
 #ifndef PRINTEMPS_MODEL_VARIABLE_REFERENCE_H__
 #define PRINTEMPS_MODEL_VARIABLE_REFERENCE_H__
 
-#include <vector>
-
 namespace printemps {
 namespace model {
 /*****************************************************************************/

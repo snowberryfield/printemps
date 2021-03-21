@@ -6,9 +6,6 @@
 #ifndef PRINTEMPS_MODEL_EXPRESSION_H__
 #define PRINTEMPS_MODEL_EXPRESSION_H__
 
-#include <vector>
-#include <unordered_map>
-
 #include "abstract_multi_array_element.h"
 #include "../utility/utility.h"
 
