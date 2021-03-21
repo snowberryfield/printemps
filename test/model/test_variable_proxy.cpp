@@ -88,8 +88,8 @@ TEST_F(TestVariableProxy, scalar_evaluate_arg_move) {
     variable_proxy_0 = value_0_before;
     variable_proxy_1 = value_1_before;
 
-    printemps::model::Move<int, double> move_0;
-    printemps::model::Move<int, double> move_1;
+    printemps::neighborhood::Move<int, double> move_0;
+    printemps::neighborhood::Move<int, double> move_1;
     move_0.alterations.emplace_back(&variable_proxy_0[0], value_0_after);
     move_1.alterations.emplace_back(&variable_proxy_1[0], value_1_after);
 

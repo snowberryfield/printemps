@@ -8,7 +8,14 @@
 
 #include <functional>
 #include <vector>
-#include "move.h"
+
+namespace printemps {
+namespace neighborhood {
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+struct Move;
+}  // namespace neighborhood
+}  // namespace printemps
 
 namespace printemps {
 namespace model {
@@ -37,7 +44,8 @@ class Objective {
     friend class Model<T_Variable, T_Expression>;
 
    private:
-    std::function<T_Expression(const Move<T_Variable, T_Expression> &)>
+    std::function<T_Expression(
+        const neighborhood::Move<T_Variable, T_Expression> &)>
         m_function;
 
     Expression<T_Variable, T_Expression> m_expression;
@@ -56,7 +64,8 @@ class Objective {
 
     /*************************************************************************/
     Objective(const std::function<T_Expression(
-                  const Move<T_Variable, T_Expression> &)> &a_FUNCTION) {
+                  const neighborhood::Move<T_Variable, T_Expression> &)>
+                  &a_FUNCTION) {
         this->setup(a_FUNCTION);
     }
 
@@ -108,7 +117,8 @@ class Objective {
     /*************************************************************************/
     inline static constexpr Objective<T_Variable, T_Expression> create_instance(
         const std::function<
-            T_Expression(const Move<T_Variable, T_Expression> &)> &a_FUNCTION) {
+            T_Expression(const neighborhood::Move<T_Variable, T_Expression> &)>
+            &a_FUNCTION) {
         /**
          * When instantiation, instead of constructor, create_instance() should
          * be called.
@@ -130,10 +140,8 @@ class Objective {
 
     /*************************************************************************/
     void initialize(void) {
-        m_function =
-            []([[maybe_unused]] const Move<T_Variable, T_Expression> &a_MOVE) {
-                return 0.0;
-            };
+        m_function = []([[maybe_unused]] const neighborhood::Move<
+                         T_Variable, T_Expression> &a_MOVE) { return 0.0; };
         m_expression.initialize();
         m_value     = 0;
         m_is_linear = true;
@@ -141,7 +149,8 @@ class Objective {
 
     /*************************************************************************/
     void setup(const std::function<T_Expression(
-                   const Move<T_Variable, T_Expression> &)> &a_FUNCTION) {
+                   const neighborhood::Move<T_Variable, T_Expression> &)>
+                   &a_FUNCTION) {
         this->initialize();
         m_is_linear = false;
         m_function  = a_FUNCTION;
@@ -166,7 +175,8 @@ class Objective {
 
     /*************************************************************************/
     inline constexpr T_Expression evaluate(
-        const Move<T_Variable, T_Expression> &a_MOVE) const noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
+        const noexcept {
         if (m_is_linear) {
             return m_expression.evaluate(a_MOVE);
         } else {
@@ -185,7 +195,8 @@ class Objective {
     }
 
     /*************************************************************************/
-    inline constexpr void update(const Move<T_Variable, T_Expression> &a_MOVE) {
+    inline constexpr void update(
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) {
         if (m_is_linear) {
             m_expression.update(a_MOVE);
             m_value = m_expression.value();

@@ -10,7 +10,14 @@
 #include <vector>
 
 #include "abstract_multi_array_element.h"
-#include "move.h"
+
+namespace printemps {
+namespace neighborhood {
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+struct Move;
+}  // namespace neighborhood
+}  // namespace printemps
 
 namespace printemps {
 namespace model {
@@ -31,13 +38,16 @@ class Constraint : public AbstractMultiArrayElement {
      */
 
    public:
-    std::function<T_Expression(const Move<T_Variable, T_Expression> &)>
+    std::function<T_Expression(
+        const neighborhood::Move<T_Variable, T_Expression> &)>
         m_function;
 
-    std::function<T_Expression(const Move<T_Variable, T_Expression> &)>
+    std::function<T_Expression(
+        const neighborhood::Move<T_Variable, T_Expression> &)>
         m_constraint_function;
 
-    std::function<T_Expression(const Move<T_Variable, T_Expression> &)>
+    std::function<T_Expression(
+        const neighborhood::Move<T_Variable, T_Expression> &)>
         m_violation_function;
 
     Expression<T_Variable, T_Expression> m_expression;
@@ -76,9 +86,10 @@ class Constraint : public AbstractMultiArrayElement {
     Constraint(const Constraint<T_Variable, T_Expression> &) = default;
 
     /*************************************************************************/
-    Constraint(const std::function<T_Expression(
-                   const Move<T_Variable, T_Expression> &)> &a_FUNCTION,
-               const ConstraintSense                         a_SENSE) {
+    Constraint(
+        const std::function<T_Expression(
+            const neighborhood::Move<T_Variable, T_Expression> &)> &a_FUNCTION,
+        const ConstraintSense                                       a_SENSE) {
         this->setup(a_FUNCTION, a_SENSE);
     }
 
@@ -137,9 +148,10 @@ class Constraint : public AbstractMultiArrayElement {
 
     /*************************************************************************/
     inline static constexpr Constraint<T_Variable, T_Expression>
-    create_instance(const std::function<T_Expression(
-                        const Move<T_Variable, T_Expression> &)> &a_FUNCTION,
-                    const ConstraintSense                         a_SENSE) {
+    create_instance(
+        const std::function<T_Expression(
+            const neighborhood::Move<T_Variable, T_Expression> &)> &a_FUNCTION,
+        const ConstraintSense                                       a_SENSE) {
         /**
          * When instantiation, instead of constructor, create_instance() should
          * be called.
@@ -165,17 +177,18 @@ class Constraint : public AbstractMultiArrayElement {
         AbstractMultiArrayElement::initialize();
 
         m_function =  //
-            []([[maybe_unused]] const Move<T_Variable, T_Expression> &a_MOVE) {
+            []([[maybe_unused]] const neighborhood::Move<
+                T_Variable, T_Expression> &a_MOVE) {
                 return static_cast<T_Expression>(0);
             };
-        m_constraint_function =
-            []([[maybe_unused]] const Move<T_Variable, T_Expression> &a_MOVE) {
-                return static_cast<T_Expression>(0);
-            };
-        m_violation_function =
-            []([[maybe_unused]] const Move<T_Variable, T_Expression> &a_MOVE) {
-                return static_cast<T_Expression>(0);
-            };
+        m_constraint_function = []([[maybe_unused]] const neighborhood::Move<
+                                    T_Variable, T_Expression> &a_MOVE) {
+            return static_cast<T_Expression>(0);
+        };
+        m_violation_function = []([[maybe_unused]] const neighborhood::Move<
+                                   T_Variable, T_Expression> &a_MOVE) {
+            return static_cast<T_Expression>(0);
+        };
 
         m_expression.initialize();
         m_sense                      = ConstraintSense::Lower;
@@ -209,9 +222,9 @@ class Constraint : public AbstractMultiArrayElement {
 
     /*************************************************************************/
     constexpr void setup(
-        const std::function<
-            T_Expression(const Move<T_Variable, T_Expression> &)> &a_FUNCTION,
-        const ConstraintSense                                      a_SENSE) {
+        const std::function<T_Expression(
+            const neighborhood::Move<T_Variable, T_Expression> &)> &a_FUNCTION,
+        const ConstraintSense                                       a_SENSE) {
         m_function = a_FUNCTION;
         m_expression.initialize();
         m_sense            = a_SENSE;
@@ -223,14 +236,15 @@ class Constraint : public AbstractMultiArrayElement {
         this->clear_constraint_type();
 
         m_constraint_function =
-            [this](const Move<T_Variable, T_Expression> &a_MOVE) {
+            [this](const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) {
                 return m_function(a_MOVE);
             };
 
         switch (m_sense) {
             case ConstraintSense::Lower: {
                 m_violation_function =
-                    [this](const Move<T_Variable, T_Expression> &a_MOVE) {
+                    [this](const neighborhood::Move<T_Variable, T_Expression>
+                               &a_MOVE) {
                         return std::max(m_function(a_MOVE),
                                         static_cast<T_Expression>(0));
                     };
@@ -238,14 +252,14 @@ class Constraint : public AbstractMultiArrayElement {
             }
             case ConstraintSense::Equal: {
                 m_violation_function =
-                    [this](const Move<T_Variable, T_Expression> &a_MOVE) {
-                        return std::abs(m_function(a_MOVE));
-                    };
+                    [this](const neighborhood::Move<T_Variable, T_Expression> &
+                               a_MOVE) { return std::abs(m_function(a_MOVE)); };
                 break;
             }
             case ConstraintSense::Upper: {
                 m_violation_function =
-                    [this](const Move<T_Variable, T_Expression> &a_MOVE) {
+                    [this](const neighborhood::Move<T_Variable, T_Expression>
+                               &a_MOVE) {
                         return std::max(-m_function(a_MOVE),
                                         static_cast<T_Expression>(0));
                     };
@@ -262,7 +276,8 @@ class Constraint : public AbstractMultiArrayElement {
         const Expression<T_Variable, T_Expression> &a_EXPRESSION,
         const ConstraintSense                       a_SENSE) {
         m_function =  //
-            []([[maybe_unused]] const Move<T_Variable, T_Expression> &a_MOVE) {
+            []([[maybe_unused]] const neighborhood::Move<
+                T_Variable, T_Expression> &a_MOVE) {
                 return static_cast<T_Expression>(0);
             };
         m_expression       = a_EXPRESSION;
@@ -277,14 +292,15 @@ class Constraint : public AbstractMultiArrayElement {
         m_expression.setup_fixed_sensitivities();
 
         m_constraint_function =
-            [this](const Move<T_Variable, T_Expression> &a_MOVE) {
+            [this](const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) {
                 return m_expression.evaluate(a_MOVE);
             };
 
         switch (m_sense) {
             case ConstraintSense::Lower: {
                 m_violation_function =
-                    [this](const Move<T_Variable, T_Expression> &a_MOVE) {
+                    [this](const neighborhood::Move<T_Variable, T_Expression>
+                               &a_MOVE) {
                         return std::max(m_expression.evaluate(a_MOVE),
                                         static_cast<T_Expression>(0));
                     };
@@ -292,14 +308,16 @@ class Constraint : public AbstractMultiArrayElement {
             }
             case ConstraintSense::Equal: {
                 m_violation_function =
-                    [this](const Move<T_Variable, T_Expression> &a_MOVE) {
+                    [this](const neighborhood::Move<T_Variable, T_Expression>
+                               &a_MOVE) {
                         return std::abs(m_expression.evaluate(a_MOVE));
                     };
                 break;
             }
             case ConstraintSense::Upper: {
                 m_violation_function =
-                    [this](const Move<T_Variable, T_Expression> &a_MOVE) {
+                    [this](const neighborhood::Move<T_Variable, T_Expression>
+                               &a_MOVE) {
                         return std::max(-m_expression.evaluate(a_MOVE),
                                         static_cast<T_Expression>(0));
                     };
@@ -472,7 +490,8 @@ class Constraint : public AbstractMultiArrayElement {
 
     /*************************************************************************/
     inline constexpr T_Expression evaluate_constraint(
-        const Move<T_Variable, T_Expression> &a_MOVE) const noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
+        const noexcept {
         return m_constraint_function(a_MOVE);
     }
 
@@ -483,13 +502,15 @@ class Constraint : public AbstractMultiArrayElement {
 
     /*************************************************************************/
     inline constexpr T_Expression evaluate_violation(
-        const Move<T_Variable, T_Expression> &a_MOVE) const noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
+        const noexcept {
         return m_violation_function(a_MOVE);
     }
 
     /*************************************************************************/
     inline constexpr T_Expression evaluate_violation_diff(
-        const Move<T_Variable, T_Expression> &a_MOVE) const noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
+        const noexcept {
         return m_violation_function(a_MOVE) - m_violation_value;
     }
 
@@ -506,7 +527,8 @@ class Constraint : public AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr void update(const Move<T_Variable, T_Expression> &a_MOVE) {
+    inline constexpr void update(
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) {
         /**
          * m_expression must be updated after m_constraint_value and
          * m_violation.

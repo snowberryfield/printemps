@@ -33,7 +33,7 @@ class TestNeighborhood : public ::testing::Test {
 
 /*****************************************************************************/
 TEST_F(TestNeighborhood, initialize) {
-    printemps::model::Neighborhood<int, double> neighborhood;
+    printemps::neighborhood::Neighborhood<int, double> neighborhood;
 
     EXPECT_EQ(true, neighborhood.binary_moves().empty());
     EXPECT_EQ(true, neighborhood.integer_moves().empty());
@@ -61,7 +61,7 @@ TEST_F(TestNeighborhood, initialize) {
 
 /*****************************************************************************/
 TEST_F(TestNeighborhood, set_has_fixed_variables) {
-    printemps::model::Neighborhood<int, double> neighborhood;
+    printemps::neighborhood::Neighborhood<int, double> neighborhood;
     EXPECT_EQ(false, neighborhood.has_fixed_variables());
 
     neighborhood.set_has_fixed_variables(true);
@@ -73,7 +73,7 @@ TEST_F(TestNeighborhood, set_has_fixed_variables) {
 
 /*****************************************************************************/
 TEST_F(TestNeighborhood, set_has_selection_variables) {
-    printemps::model::Neighborhood<int, double> neighborhood;
+    printemps::neighborhood::Neighborhood<int, double> neighborhood;
     EXPECT_EQ(false, neighborhood.has_selection_variables());
 
     neighborhood.set_has_selection_variables(true);
@@ -201,7 +201,7 @@ TEST_F(TestNeighborhood, setup_move_updater) {
         EXPECT_EQ(not_fixed_variable_ptrs.size(), moves.size());
 
         for (auto& move : moves) {
-            EXPECT_EQ(printemps::model::MoveSense::Binary, move.sense);
+            EXPECT_EQ(printemps::neighborhood::MoveSense::Binary, move.sense);
             EXPECT_EQ(false, move.alterations[0].first->is_fixed());
 
             EXPECT_EQ(move.alterations[0].second,
@@ -242,7 +242,7 @@ TEST_F(TestNeighborhood, setup_move_updater) {
             for (auto j = 0; j < 4; j++) {
                 EXPECT_EQ(
                     1, static_cast<int>(moves[4 * i + j].alterations.size()));
-                EXPECT_EQ(printemps::model::MoveSense::Integer,
+                EXPECT_EQ(printemps::neighborhood::MoveSense::Integer,
                           moves[4 * i + j].sense);
                 EXPECT_EQ(false,
                           moves[4 * i + j].alterations[0].first->is_fixed());
@@ -351,7 +351,8 @@ TEST_F(TestNeighborhood, setup_move_updater) {
         EXPECT_EQ(variable_ptrs.size(), moves.size());
         EXPECT_EQ(variable_ptrs.size(), flags.size());
         for (auto& move : moves) {
-            EXPECT_EQ(printemps::model::MoveSense::Selection, move.sense);
+            EXPECT_EQ(printemps::neighborhood::MoveSense::Selection,
+                      move.sense);
             EXPECT_EQ(2, static_cast<int>(move.alterations.size()));
             EXPECT_EQ(1, move.alterations[0].first->value());
             EXPECT_EQ(0, move.alterations[0].second);
@@ -415,8 +416,8 @@ TEST_F(TestNeighborhood, setup_move_updater) {
 
 /*****************************************************************************/
 TEST_F(TestNeighborhood, register_chain_move) {
-    printemps::model::Model<int, double> model;
-    printemps::model::Move<int, double>  move;
+    printemps::model::Model<int, double>       model;
+    printemps::neighborhood::Move<int, double> move;
 
     model.neighborhood().register_chain_move(move);
 
@@ -438,13 +439,13 @@ TEST_F(TestNeighborhood, clear_chain_moves) {
 TEST_F(TestNeighborhood, deduplicate_chain_moves) {
     printemps::model::Model<int, double> model;
 
-    printemps::model::Move<int, double> move_0;
+    printemps::neighborhood::Move<int, double> move_0;
     move_0.overlap_rate = 0.1;
 
-    printemps::model::Move<int, double> move_1;
+    printemps::neighborhood::Move<int, double> move_1;
     move_1.overlap_rate = 0.2;
 
-    printemps::model::Move<int, double> move_2;
+    printemps::neighborhood::Move<int, double> move_2;
     move_2.overlap_rate = 0.3;
 
     for (auto i = 0; i < 3; i++) {
@@ -485,8 +486,8 @@ TEST_F(TestNeighborhood, shuffle_chain_moves) {
 
 /*****************************************************************************/
 TEST_F(TestNeighborhood, reduce_chain_moves) {
-    printemps::model::Model<int, double> model;
-    printemps::model::Move<int, double>  move;
+    printemps::model::Model<int, double>       model;
+    printemps::neighborhood::Move<int, double> move;
 
     for (auto i = 0; i < 5000; i++) {
         model.neighborhood().register_chain_move(move);
@@ -532,10 +533,12 @@ TEST_F(TestNeighborhood, set_user_defined_move_updater) {
     x(1).fix_by(1);
 
     auto move_updater =
-        [&x, n](std::vector<printemps::model::Move<int, double>>* a_moves) {
+        [&x,
+         n](std::vector<printemps::neighborhood::Move<int, double>>* a_moves) {
             a_moves->resize(n);
             for (auto i = 0; i < n; i++) {
-                (*a_moves)[i].sense = printemps::model::MoveSense::UserDefined;
+                (*a_moves)[i].sense =
+                    printemps::neighborhood::MoveSense::UserDefined;
                 (*a_moves)[i].alterations.clear();
                 (*a_moves)[i].alterations.emplace_back(&x(i), 1 - x(i).value());
             }
@@ -558,7 +561,7 @@ TEST_F(TestNeighborhood, set_user_defined_move_updater) {
     auto moves = model.neighborhood().user_defined_moves();
     EXPECT_EQ(n, static_cast<int>(moves.size()));
     for (auto& move : moves) {
-        EXPECT_EQ(printemps::model::MoveSense::UserDefined, move.sense);
+        EXPECT_EQ(printemps::neighborhood::MoveSense::UserDefined, move.sense);
         EXPECT_EQ(1, static_cast<int>(move.alterations.size()));
         EXPECT_EQ(true, (move.alterations[0].first->value() == 0 ||
                          move.alterations[0].first->value() == 1));
@@ -676,7 +679,7 @@ TEST_F(TestNeighborhood, user_defined_move_flags) {
 
 /*****************************************************************************/
 TEST_F(TestNeighborhood, is_enabled_binary_move) {
-    printemps::model::Neighborhood<int, double> neighborhood;
+    printemps::neighborhood::Neighborhood<int, double> neighborhood;
 
     /// initial status
     EXPECT_EQ(false, neighborhood.is_enabled_binary_move());
@@ -700,7 +703,7 @@ TEST_F(TestNeighborhood, disable_binary_move) {
 
 /*****************************************************************************/
 TEST_F(TestNeighborhood, is_enabled_integer_move) {
-    printemps::model::Neighborhood<int, double> neighborhood;
+    printemps::neighborhood::Neighborhood<int, double> neighborhood;
 
     /// initial status
     EXPECT_EQ(false, neighborhood.is_enabled_integer_move());
@@ -724,7 +727,7 @@ TEST_F(TestNeighborhood, disable_integer_move) {
 
 /*****************************************************************************/
 TEST_F(TestNeighborhood, is_enabled_user_defined_move) {
-    printemps::model::Neighborhood<int, double> neighborhood;
+    printemps::neighborhood::Neighborhood<int, double> neighborhood;
 
     /// initial status
     EXPECT_EQ(false, neighborhood.is_enabled_user_defined_move());
@@ -748,7 +751,7 @@ TEST_F(TestNeighborhood, disable_user_defined_move) {
 
 /*****************************************************************************/
 TEST_F(TestNeighborhood, is_enabled_aggregation_move) {
-    printemps::model::Neighborhood<int, double> neighborhood;
+    printemps::neighborhood::Neighborhood<int, double> neighborhood;
 
     /// initial status
     EXPECT_EQ(false, neighborhood.is_enabled_aggregation_move());
@@ -772,7 +775,7 @@ TEST_F(TestNeighborhood, disable_aggregation_move) {
 
 /*****************************************************************************/
 TEST_F(TestNeighborhood, is_enabled_precedence_move) {
-    printemps::model::Neighborhood<int, double> neighborhood;
+    printemps::neighborhood::Neighborhood<int, double> neighborhood;
 
     /// initial status
     EXPECT_EQ(false, neighborhood.is_enabled_precedence_move());
@@ -796,7 +799,7 @@ TEST_F(TestNeighborhood, disable_precedence_move) {
 
 /*****************************************************************************/
 TEST_F(TestNeighborhood, is_enabled_variable_bound_move) {
-    printemps::model::Neighborhood<int, double> neighborhood;
+    printemps::neighborhood::Neighborhood<int, double> neighborhood;
 
     /// initial status
     EXPECT_EQ(false, neighborhood.is_enabled_variable_bound_move());
@@ -820,7 +823,7 @@ TEST_F(TestNeighborhood, disable_variable_bound_move) {
 
 /*****************************************************************************/
 TEST_F(TestNeighborhood, is_enabled_selection_move) {
-    printemps::model::Neighborhood<int, double> neighborhood;
+    printemps::neighborhood::Neighborhood<int, double> neighborhood;
 
     /// initial status
     EXPECT_EQ(false, neighborhood.is_enabled_selection_move());
@@ -844,7 +847,7 @@ TEST_F(TestNeighborhood, disable_selection_move) {
 
 /*****************************************************************************/
 TEST_F(TestNeighborhood, is_enabled_exclusive_move) {
-    printemps::model::Neighborhood<int, double> neighborhood;
+    printemps::neighborhood::Neighborhood<int, double> neighborhood;
 
     /// initial status
     EXPECT_EQ(false, neighborhood.is_enabled_exclusive_move());
@@ -873,7 +876,7 @@ TEST_F(TestNeighborhood, reset_special_neighborhood_moves_availability) {
 
 /*****************************************************************************/
 TEST_F(TestNeighborhood, is_enabled_special_neighborhood_move) {
-    printemps::model::Neighborhood<int, double> neighborhood;
+    printemps::neighborhood::Neighborhood<int, double> neighborhood;
 
     /// initial status
     EXPECT_EQ(false, neighborhood.is_enabled_special_neighborhood_move());

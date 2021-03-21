@@ -3,11 +3,11 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_MODEL_MOVE_SENSE_H__
-#define PRINTEMPS_MODEL_MOVE_SENSE_H__
+#ifndef PRINTEMPS_NEIGHBORHOOD_MOVE_SENSE_H__
+#define PRINTEMPS_NEIGHBORHOOD_MOVE_SENSE_H__
 
 namespace printemps {
-namespace model {
+namespace neighborhood {
 /*****************************************************************************/
 enum class MoveSense {
     Binary,         //
@@ -20,7 +20,7 @@ enum class MoveSense {
     Chain,          //
     UserDefined
 };
-}  // namespace model
+}  // namespace neighborhood
 }  // namespace printemps
 #endif
 /*****************************************************************************/

@@ -3,11 +3,18 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_MODEL_CONSTRAINT_LOWER_BINARY_OPERATOR_H__
-#define PRINTEMPS_MODEL_CONSTRAINT_LOWER_BINARY_OPERATOR_H__
+#ifndef PRINTEMPS_MODEL_CONSTRAINT_BINARY_OPERATOR_H__
+#define PRINTEMPS_MODEL_CONSTRAINT_BINARY_OPERATOR_H__
 
 #include <functional>
-#include "move.h"
+
+namespace printemps {
+namespace neighborhood {
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+struct Move;
+}  // namespace neighborhood
+}  // namespace printemps
 
 namespace printemps {
 namespace model {
@@ -21,44 +28,14 @@ class Expression;
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-class VariableProxy;
-
-/*****************************************************************************/
-template <class T_Variable, class T_Expression>
-class ExpressionProxy;
-
-/*****************************************************************************/
-template <class T_Variable, class T_Expression>
 class Constraint;
+}  // namespace model
+}  // namespace printemps
 
+namespace printemps {
+namespace model {
 /*****************************************************************************/
 // LOWER
-/*****************************************************************************/
-template <class T_Variable, class T_Expression, class T_Value>
-constexpr Constraint<T_Variable, T_Expression> operator<=(
-    const std::function<T_Expression(const Move<T_Variable, T_Expression> &)>
-        &         a_FUNCTION,
-    const T_Value a_TARGET) {
-    return Constraint<T_Variable, T_Expression>::create_instance(
-        [&a_FUNCTION, a_TARGET](const Move<T_Variable, T_Expression> &a_MOVE) {
-            return a_FUNCTION(a_MOVE) - a_TARGET;
-        },
-        ConstraintSense::Lower);
-}
-
-/*****************************************************************************/
-template <class T_Variable, class T_Expression, class T_Value>
-constexpr Constraint<T_Variable, T_Expression> operator<=(
-    const T_Value a_TARGET,
-    const std::function<T_Expression(const Move<T_Variable, T_Expression> &)>
-        &a_FUNCTION) {
-    return Constraint<T_Variable, T_Expression>::create_instance(
-        [&a_FUNCTION, a_TARGET](const Move<T_Variable, T_Expression> &a_MOVE) {
-            return a_TARGET - a_FUNCTION(a_MOVE);
-        },
-        ConstraintSense::Lower);
-}
-
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value,
           template <class, class> class T_ExpressionLike>
@@ -147,32 +124,6 @@ constexpr Constraint<T_Variable, T_Expression> operator<=(
 /*****************************************************************************/
 // Equal
 /*****************************************************************************/
-template <class T_Variable, class T_Expression, class T_Value>
-constexpr Constraint<T_Variable, T_Expression> operator==(
-    const std::function<T_Expression(const Move<T_Variable, T_Expression> &)>
-        &         a_FUNCTION,
-    const T_Value a_TARGET) {
-    return Constraint<T_Variable, T_Expression>::create_instance(
-        [&a_FUNCTION, a_TARGET](const Move<T_Variable, T_Expression> &a_MOVE) {
-            return a_FUNCTION(a_MOVE) - a_TARGET;
-        },
-        ConstraintSense::Equal);
-}
-
-/*****************************************************************************/
-template <class T_Variable, class T_Expression, class T_Value>
-constexpr Constraint<T_Variable, T_Expression> operator==(
-    const T_Value a_TARGET,
-    const std::function<T_Expression(const Move<T_Variable, T_Expression> &)>
-        &a_FUNCTION) {
-    return Constraint<T_Variable, T_Expression>::create_instance(
-        [&a_FUNCTION, a_TARGET](const Move<T_Variable, T_Expression> &a_MOVE) {
-            return a_TARGET - a_FUNCTION(a_MOVE);
-        },
-        ConstraintSense::Equal);
-}
-
-/*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value,
           template <class, class> class T_ExpressionLike>
 constexpr Constraint<T_Variable, T_Expression> operator==(
@@ -260,32 +211,6 @@ constexpr Constraint<T_Variable, T_Expression> operator==(
 /*****************************************************************************/
 // Upper
 /*****************************************************************************/
-template <class T_Variable, class T_Expression, class T_Value>
-constexpr Constraint<T_Variable, T_Expression> operator>=(
-    const std::function<T_Expression(const Move<T_Variable, T_Expression> &)>
-        &         a_FUNCTION,
-    const T_Value a_TARGET) {
-    return Constraint<T_Variable, T_Expression>::create_instance(
-        [&a_FUNCTION, a_TARGET](const Move<T_Variable, T_Expression> &a_MOVE) {
-            return a_FUNCTION(a_MOVE) - a_TARGET;
-        },
-        ConstraintSense::Upper);
-}
-
-/*****************************************************************************/
-template <class T_Variable, class T_Expression, class T_Value>
-constexpr Constraint<T_Variable, T_Expression> operator>=(
-    const T_Value a_TARGET,
-    const std::function<T_Expression(const Move<T_Variable, T_Expression> &)>
-        &a_FUNCTION) {
-    return Constraint<T_Variable, T_Expression>::create_instance(
-        [&a_FUNCTION, a_TARGET](const Move<T_Variable, T_Expression> &a_MOVE) {
-            return a_TARGET - a_FUNCTION(a_MOVE);
-        },
-        ConstraintSense::Upper);
-}
-
-/*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value,
           template <class, class> class T_ExpressionLike>
 constexpr Constraint<T_Variable, T_Expression> operator>=(
@@ -371,6 +296,105 @@ constexpr Constraint<T_Variable, T_Expression> operator>=(
 }
 }  // namespace model
 }  // namespace printemps
+
+/**
+ * NOTE: The following operators must be defined in global namespace.
+ */
+/*****************************************************************************/
+// LOWER
+/*****************************************************************************/
+template <class T_Variable, class T_Expression, class T_Value>
+constexpr printemps::model::Constraint<T_Variable, T_Expression> operator<=(
+    const std::function<T_Expression(
+        const printemps::neighborhood::Move<T_Variable, T_Expression> &)>
+        &         a_FUNCTION,
+    const T_Value a_TARGET) {
+    return printemps::model::Constraint<T_Variable, T_Expression>::
+        create_instance(
+            [&a_FUNCTION, a_TARGET](
+                const printemps::neighborhood::Move<T_Variable, T_Expression>
+                    &a_MOVE) { return a_FUNCTION(a_MOVE) - a_TARGET; },
+            printemps::model::ConstraintSense::Lower);
+}
+
+/*****************************************************************************/
+template <class T_Variable, class T_Expression, class T_Value>
+constexpr printemps::model::Constraint<T_Variable, T_Expression> operator<=(
+    const T_Value a_TARGET,
+    const std::function<T_Expression(
+        const printemps::neighborhood::Move<T_Variable, T_Expression> &)>
+        &a_FUNCTION) {
+    return printemps::model::Constraint<T_Variable, T_Expression>::
+        create_instance(
+            [&a_FUNCTION, a_TARGET](
+                const printemps::neighborhood::Move<T_Variable, T_Expression>
+                    &a_MOVE) { return a_TARGET - a_FUNCTION(a_MOVE); },
+            printemps::model::ConstraintSense::Lower);
+}
+
+/*****************************************************************************/
+// Equal
+/*****************************************************************************/
+template <class T_Variable, class T_Expression, class T_Value>
+constexpr printemps::model::Constraint<T_Variable, T_Expression> operator==(
+    const std::function<T_Expression(
+        const printemps::neighborhood::Move<T_Variable, T_Expression> &)>
+        &         a_FUNCTION,
+    const T_Value a_TARGET) {
+    return printemps::model::Constraint<T_Variable, T_Expression>::
+        create_instance(
+            [&a_FUNCTION, a_TARGET](
+                const printemps::neighborhood::Move<T_Variable, T_Expression>
+                    &a_MOVE) { return a_FUNCTION(a_MOVE) - a_TARGET; },
+            printemps::model::ConstraintSense::Equal);
+}
+
+/*****************************************************************************/
+template <class T_Variable, class T_Expression, class T_Value>
+constexpr printemps::model::Constraint<T_Variable, T_Expression> operator==(
+    const T_Value a_TARGET,
+    const std::function<T_Expression(
+        const printemps::neighborhood::Move<T_Variable, T_Expression> &)>
+        &a_FUNCTION) {
+    return printemps::model::Constraint<T_Variable, T_Expression>::
+        create_instance(
+            [&a_FUNCTION, a_TARGET](
+                const printemps::neighborhood::Move<T_Variable, T_Expression>
+                    &a_MOVE) { return a_TARGET - a_FUNCTION(a_MOVE); },
+            printemps::model::ConstraintSense::Equal);
+}
+
+/*****************************************************************************/
+// Upper
+/*****************************************************************************/
+template <class T_Variable, class T_Expression, class T_Value>
+constexpr printemps::model::Constraint<T_Variable, T_Expression> operator>=(
+    const std::function<T_Expression(
+        const printemps::neighborhood::Move<T_Variable, T_Expression> &)>
+        &         a_FUNCTION,
+    const T_Value a_TARGET) {
+    return printemps::model::Constraint<T_Variable, T_Expression>::
+        create_instance(
+            [&a_FUNCTION, a_TARGET](
+                const printemps::neighborhood::Move<T_Variable, T_Expression>
+                    &a_MOVE) { return a_FUNCTION(a_MOVE) - a_TARGET; },
+            printemps::model::ConstraintSense::Upper);
+}
+/*****************************************************************************/
+template <class T_Variable, class T_Expression, class T_Value>
+constexpr printemps::model::Constraint<T_Variable, T_Expression> operator>=(
+    const T_Value a_TARGET,
+    const std::function<T_Expression(
+        const printemps::neighborhood::Move<T_Variable, T_Expression> &)>
+        &a_FUNCTION) {
+    return printemps::model::Constraint<T_Variable, T_Expression>::
+        create_instance(
+            [&a_FUNCTION, a_TARGET](
+                const printemps::neighborhood::Move<T_Variable, T_Expression>
+                    &a_MOVE) { return a_TARGET - a_FUNCTION(a_MOVE); },
+            printemps::model::ConstraintSense::Upper);
+}
+
 #endif
 /*****************************************************************************/
 // END

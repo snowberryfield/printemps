@@ -150,8 +150,9 @@ class Memory {
 
     /*************************************************************************/
     template <class T_Variable, class T_Expression>
-    constexpr void update(const model::Move<T_Variable, T_Expression> &a_MOVE,
-                          const int a_ITERATION) noexcept {
+    constexpr void update(
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE,
+        const int a_ITERATION) noexcept {
         for (const auto &alteration : a_MOVE.alterations) {
             int proxy_index = alteration.first->proxy_index();
             int flat_index  = alteration.first->flat_index();
@@ -164,10 +165,11 @@ class Memory {
 
     /*************************************************************************/
     template <class T_Variable, class T_Expression>
-    constexpr void update(const model::Move<T_Variable, T_Expression> &a_MOVE,
-                          const int     a_ITERATION,     //
-                          const int     a_RANDOM_WIDTH,  //
-                          std::mt19937 *get_rand_mt) noexcept {
+    constexpr void update(
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE,
+        const int                                           a_ITERATION,     //
+        const int                                           a_RANDOM_WIDTH,  //
+        std::mt19937 *get_rand_mt) noexcept {
         if (a_RANDOM_WIDTH == 0) {
             this->update(a_MOVE, a_ITERATION);
         } else {

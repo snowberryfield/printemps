@@ -153,7 +153,7 @@ TEST_F(TestExpression, evaluate_arg_move) {
 
     expression.update();
 
-    printemps::model::Move<int, double> move;
+    printemps::neighborhood::Move<int, double> move;
     v_value_0 = random_integer();
     v_value_1 = random_integer();
 
@@ -225,7 +225,7 @@ TEST_F(TestExpression, update_arg_move) {
     variable_1 = v_value_1;
 
     expression.update();
-    printemps::model::Move<int, double> move;
+    printemps::neighborhood::Move<int, double> move;
     v_value_0 = random_integer();
     v_value_1 = random_integer();
 

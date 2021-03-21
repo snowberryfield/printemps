@@ -12,6 +12,14 @@
 #include "variable.h"
 
 namespace printemps {
+namespace neighborhood {
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+struct Move;
+}  // namespace neighborhood
+}  // namespace printemps
+
+namespace printemps {
 namespace model {
 /*****************************************************************************/
 template <class T_Value>
@@ -171,7 +179,7 @@ class VariableProxy : public AbstractMultiArray {
 
     /*************************************************************************/
     inline constexpr T_Expression evaluate(
-        const Move<T_Variable, T_Expression> &a_MOVE) const {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,

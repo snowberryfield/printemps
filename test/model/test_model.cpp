@@ -579,7 +579,7 @@ TEST_F(TestModel, minimize_arg_function) {
     auto& x = model.create_variables("x", 10, -1, 1);
     auto& p = model.create_expression("p", x.sum() + 1);
 
-    auto f = [&p](const printemps::model::Move<int, double>& a_MOVE) {
+    auto f = [&p](const printemps::neighborhood::Move<int, double>& a_MOVE) {
         return p.evaluate(a_MOVE);
     };
     model.minimize(f);
@@ -606,7 +606,7 @@ TEST_F(TestModel, minimize_arg_expression_like) {
     auto& p = model.create_expression("p", x.sum() + 1);
 
     [[maybe_unused]] auto f =
-        [&p](const printemps::model::Move<int, double>& a_MOVE) {
+        [&p](const printemps::neighborhood::Move<int, double>& a_MOVE) {
             return p.evaluate(a_MOVE);
         };
     model.minimize(p);
@@ -634,7 +634,7 @@ TEST_F(TestModel, minimize_arg_expression) {
     auto& p = model.create_expression("p", x.sum() + 1);
 
     [[maybe_unused]] auto f =
-        [&p](const printemps::model::Move<int, double>& a_MOVE) {
+        [&p](const printemps::neighborhood::Move<int, double>& a_MOVE) {
             return p.evaluate(a_MOVE);
         };
     model.minimize(p(0));
@@ -661,7 +661,7 @@ TEST_F(TestModel, maximize_arg_function) {
     auto& x = model.create_variables("x", 10, -1, 1);
     auto& p = model.create_expression("p", x.sum() + 1);
 
-    auto f = [&p](const printemps::model::Move<int, double>& a_MOVE) {
+    auto f = [&p](const printemps::neighborhood::Move<int, double>& a_MOVE) {
         return p.evaluate(a_MOVE);
     };
     model.maximize(f);
@@ -688,7 +688,7 @@ TEST_F(TestModel, maximize_arg_expression_like) {
     auto& p = model.create_expression("p", x.sum() + 1);
 
     [[maybe_unused]] auto f =
-        [&p](const printemps::model::Move<int, double>& a_MOVE) {
+        [&p](const printemps::neighborhood::Move<int, double>& a_MOVE) {
             return p.evaluate(a_MOVE);
         };
     model.maximize(p);
@@ -714,7 +714,7 @@ TEST_F(TestModel, maximize_arg_expression) {
     auto&                 x = model.create_variables("x", 10, -1, 1);
     auto&                 p = model.create_expression("p", x.sum() + 1);
     [[maybe_unused]] auto f =
-        [&p](const printemps::model::Move<int, double>& a_MOVE) {
+        [&p](const printemps::neighborhood::Move<int, double>& a_MOVE) {
             return p.evaluate(a_MOVE);
         };
     model.maximize(p(0));
@@ -826,8 +826,8 @@ TEST_F(TestModel, setup_is_linear) {
 
         auto& x = model.create_variable("x");
 
-        std::function<double(const printemps::model::Move<int, double>&)> g =
-            [&x](const printemps::model::Move<int, double>& a_MOVE) {
+        std::function<double(const printemps::neighborhood::Move<int, double>&)>
+            g = [&x](const printemps::neighborhood::Move<int, double>& a_MOVE) {
                 return x.evaluate(a_MOVE);
             };
 
@@ -846,8 +846,8 @@ TEST_F(TestModel, setup_is_linear) {
 
         auto& x = model.create_variable("x");
 
-        std::function<double(const printemps::model::Move<int, double>&)> f =
-            [&x](const printemps::model::Move<int, double>& a_MOVE) {
+        std::function<double(const printemps::neighborhood::Move<int, double>&)>
+            f = [&x](const printemps::neighborhood::Move<int, double>& a_MOVE) {
                 return x.evaluate(a_MOVE);
             };
 
@@ -866,13 +866,13 @@ TEST_F(TestModel, setup_is_linear) {
 
         auto& x = model.create_variable("x");
 
-        std::function<double(const printemps::model::Move<int, double>&)> g =
-            [&x](const printemps::model::Move<int, double>& a_MOVE) {
+        std::function<double(const printemps::neighborhood::Move<int, double>&)>
+            g = [&x](const printemps::neighborhood::Move<int, double>& a_MOVE) {
                 return x.evaluate(a_MOVE);
             };
 
-        std::function<double(const printemps::model::Move<int, double>&)> f =
-            [&x](const printemps::model::Move<int, double>& a_MOVE) {
+        std::function<double(const printemps::neighborhood::Move<int, double>&)>
+            f = [&x](const printemps::neighborhood::Move<int, double>& a_MOVE) {
                 return x.evaluate(a_MOVE);
             };
 
@@ -911,8 +911,8 @@ TEST_F(TestModel, setup_is_enabled_fast_evaluation) {
 
         auto& x = model.create_variable("x");
 
-        std::function<double(const printemps::model::Move<int, double>&)> g =
-            [&x](const printemps::model::Move<int, double>& a_MOVE) {
+        std::function<double(const printemps::neighborhood::Move<int, double>&)>
+            g = [&x](const printemps::neighborhood::Move<int, double>& a_MOVE) {
                 return x.evaluate(a_MOVE);
             };
 
@@ -932,8 +932,8 @@ TEST_F(TestModel, setup_is_enabled_fast_evaluation) {
 
         auto& x = model.create_variable("x");
 
-        std::function<double(const printemps::model::Move<int, double>&)> f =
-            [&x](const printemps::model::Move<int, double>& a_MOVE) {
+        std::function<double(const printemps::neighborhood::Move<int, double>&)>
+            f = [&x](const printemps::neighborhood::Move<int, double>& a_MOVE) {
                 return x.evaluate(a_MOVE);
             };
 
@@ -958,7 +958,7 @@ TEST_F(TestModel, setup_is_enabled_fast_evaluation) {
 
         auto move_updater =
             [&x]([[maybe_unused]] std::vector<
-                 printemps::model::Move<int, double>>* a_moves) { ; };
+                 printemps::neighborhood::Move<int, double>>* a_moves) { ; };
 
         model.neighborhood().set_user_defined_move_updater(move_updater);
         model.neighborhood().enable_user_defined_move();
@@ -1088,8 +1088,8 @@ TEST_F(TestModel, categorize_constraints) {
     general_liner       = x + r.sum() == 50;
 
     auto& nonlinear = model.create_constraint("nonlinear");
-    std::function<double(const printemps::model::Move<int, double>&)> f =
-        [&x](const printemps::model::Move<int, double>& a_MOVE) {
+    std::function<double(const printemps::neighborhood::Move<int, double>&)> f =
+        [&x](const printemps::neighborhood::Move<int, double>& a_MOVE) {
             return x.evaluate(a_MOVE) - 1;
         };
     nonlinear = f <= 5;
@@ -1520,8 +1520,8 @@ TEST_F(TestModel, update_arg_move) {
 
     model.update();
 
-    printemps::model::Move<int, double> move;
-    move.sense = printemps::model::MoveSense::Selection;
+    printemps::neighborhood::Move<int, double> move;
+    move.sense = printemps::neighborhood::MoveSense::Selection;
     move.alterations.emplace_back(&x(0), 0);
     move.alterations.emplace_back(&x(9), 1);
 
@@ -1986,7 +1986,7 @@ TEST_F(TestModel, evaluate) {
         auto score_before = model.evaluate({});
 
         {
-            printemps::model::Move<int, double> move;
+            printemps::neighborhood::Move<int, double> move;
             for (auto&& element : x.flat_indexed_variables()) {
                 move.alterations.emplace_back(&element, 1);
                 for (auto&& constraint_ptr :
@@ -2027,7 +2027,7 @@ TEST_F(TestModel, evaluate) {
         }
 
         {
-            printemps::model::Move<int, double> move;
+            printemps::neighborhood::Move<int, double> move;
             for (auto&& element : x.flat_indexed_variables()) {
                 move.alterations.emplace_back(&element, 0);
                 for (auto&& constraint_ptr :
@@ -2064,7 +2064,7 @@ TEST_F(TestModel, evaluate) {
         }
 
         {
-            printemps::model::Move<int, double> move;
+            printemps::neighborhood::Move<int, double> move;
             for (auto i = 0; i < 5; i++) {
                 move.alterations.emplace_back(&x(i), 1);
                 for (auto&& constraint_ptr : x(i).related_constraint_ptrs()) {
@@ -2133,7 +2133,7 @@ TEST_F(TestModel, evaluate) {
         auto score_before = model.evaluate({});
 
         {
-            printemps::model::Move<int, double> move;
+            printemps::neighborhood::Move<int, double> move;
             for (auto&& element : x.flat_indexed_variables()) {
                 move.alterations.emplace_back(&element, 1);
                 for (auto&& constraint_ptr :
@@ -2173,7 +2173,7 @@ TEST_F(TestModel, evaluate) {
             score_before = score_after_1;
         }
         {
-            printemps::model::Move<int, double> move;
+            printemps::neighborhood::Move<int, double> move;
             for (auto&& element : x.flat_indexed_variables()) {
                 move.alterations.emplace_back(&element, 0);
                 for (auto&& constraint_ptr :
@@ -2210,7 +2210,7 @@ TEST_F(TestModel, evaluate) {
         }
 
         {
-            printemps::model::Move<int, double> move;
+            printemps::neighborhood::Move<int, double> move;
             for (auto i = 0; i < 5; i++) {
                 move.alterations.emplace_back(&x(i), 1);
                 for (auto&& constraint_ptr : x(i).related_constraint_ptrs()) {

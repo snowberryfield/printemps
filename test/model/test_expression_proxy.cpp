@@ -125,7 +125,7 @@ TEST_F(TestExpressionProxy, scalar_evaluate_arg_move) {
 
     expression_proxy.update();
 
-    printemps::model::Move<int, double> move;
+    printemps::neighborhood::Move<int, double> move;
     value_0 = random_integer();
     value_1 = random_integer();
 
@@ -197,7 +197,7 @@ TEST_F(TestExpressionProxy, scalar_update_arg_move) {
 
     expression_proxy.update();
 
-    printemps::model::Move<int, double> move;
+    printemps::neighborhood::Move<int, double> move;
     value_0 = random_integer();
     value_1 = random_integer();
 
