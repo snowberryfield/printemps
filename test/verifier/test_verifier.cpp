@@ -36,7 +36,7 @@ TEST_F(TestVerifier, verify_problem) {
     /// No decision variables.
     {
         printemps::model::Model<int, double> model;
-        ASSERT_THROW(printemps::model::verify_problem(&model, false),
+        ASSERT_THROW(printemps::verifier::verify_problem(&model, false),
                      std::logic_error);
     }
 
@@ -46,7 +46,7 @@ TEST_F(TestVerifier, verify_problem) {
 
         auto& x = model.create_variable("x");
         model.minimize(x);
-        printemps::model::verify_problem(&model, false);
+        printemps::verifier::verify_problem(&model, false);
     }
 
     /// No objective function.
@@ -55,7 +55,7 @@ TEST_F(TestVerifier, verify_problem) {
 
         auto& x = model.create_variable("x");
         model.create_constraint("g", x == 1);
-        printemps::model::verify_problem(&model, false);
+        printemps::verifier::verify_problem(&model, false);
     }
 
     /// No constraint functions and no objective function
@@ -63,7 +63,7 @@ TEST_F(TestVerifier, verify_problem) {
         printemps::model::Model<int, double> model;
 
         [[maybe_unused]] auto& x = model.create_variable("x");
-        ASSERT_THROW(printemps::model::verify_problem(&model, false),
+        ASSERT_THROW(printemps::verifier::verify_problem(&model, false),
                      std::logic_error);
     }
 }
@@ -84,7 +84,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model.extract_selections(printemps::model::SelectionMode::Defined);
 
         ASSERT_THROW(
-            printemps::model::
+            printemps::verifier::
                 verify_and_correct_selection_variables_initial_values(  //
                     &model, true, false),
             std::logic_error);
@@ -103,7 +103,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model.extract_selections(printemps::model::SelectionMode::Defined);
 
         ASSERT_THROW(
-            printemps::model::
+            printemps::verifier::
                 verify_and_correct_selection_variables_initial_values(  //
                     &model, false, false),
             std::logic_error);
@@ -121,7 +121,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model.categorize_constraints();
         model.extract_selections(printemps::model::SelectionMode::Defined);
 
-        printemps::model::
+        printemps::verifier::
             verify_and_correct_selection_variables_initial_values(  //
                 &model, true, false);
         EXPECT_EQ(1, x(0).value());
@@ -139,7 +139,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model.categorize_constraints();
         model.extract_selections(printemps::model::SelectionMode::Defined);
 
-        printemps::model::
+        printemps::verifier::
             verify_and_correct_selection_variables_initial_values(  //
                 &model, false, false);
         EXPECT_EQ(1, x(0).value());
@@ -159,7 +159,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model.extract_selections(printemps::model::SelectionMode::Defined);
 
         ASSERT_THROW(
-            printemps::model::
+            printemps::verifier::
                 verify_and_correct_selection_variables_initial_values(  //
                     &model, true, false),
             std::logic_error);
@@ -179,7 +179,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model.extract_selections(printemps::model::SelectionMode::Defined);
 
         ASSERT_THROW(
-            printemps::model::
+            printemps::verifier::
                 verify_and_correct_selection_variables_initial_values(  //
                     &model, false, false),
             std::logic_error);
@@ -197,7 +197,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model.categorize_constraints();
         model.extract_selections(printemps::model::SelectionMode::Defined);
 
-        printemps::model::
+        printemps::verifier::
             verify_and_correct_selection_variables_initial_values(  //
                 &model, true, false);
 
@@ -219,7 +219,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model.extract_selections(printemps::model::SelectionMode::Defined);
 
         ASSERT_THROW(
-            printemps::model::
+            printemps::verifier::
                 verify_and_correct_selection_variables_initial_values(  //
                     &model, false, false),
             std::logic_error);
@@ -236,7 +236,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model.categorize_constraints();
         model.extract_selections(printemps::model::SelectionMode::Defined);
 
-        printemps::model::
+        printemps::verifier::
             verify_and_correct_selection_variables_initial_values(  //
                 &model, true, false);
 
@@ -258,7 +258,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model.extract_selections(printemps::model::SelectionMode::Defined);
 
         ASSERT_THROW(
-            printemps::model::
+            printemps::verifier::
                 verify_and_correct_selection_variables_initial_values(  //
                     &model, false, false),
             std::logic_error);
@@ -276,7 +276,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model.categorize_constraints();
         model.extract_selections(printemps::model::SelectionMode::Defined);
 
-        printemps::model::
+        printemps::verifier::
             verify_and_correct_selection_variables_initial_values(  //
                 &model, true, false);
 
@@ -295,7 +295,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model.categorize_constraints();
         model.extract_selections(printemps::model::SelectionMode::Defined);
 
-        printemps::model::
+        printemps::verifier::
             verify_and_correct_selection_variables_initial_values(  //
                 &model, false, false);
 
@@ -315,7 +315,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model.categorize_constraints();
         model.extract_selections(printemps::model::SelectionMode::Defined);
 
-        printemps::model::
+        printemps::verifier::
             verify_and_correct_selection_variables_initial_values(  //
                 &model, true, false);
 
@@ -337,7 +337,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model.extract_selections(printemps::model::SelectionMode::Defined);
 
         ASSERT_THROW(
-            printemps::model::
+            printemps::verifier::
                 verify_and_correct_selection_variables_initial_values(  //
                     &model, false, false),
             std::logic_error);
@@ -356,7 +356,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model.categorize_constraints();
         model.extract_selections(printemps::model::SelectionMode::Defined);
 
-        printemps::model::
+        printemps::verifier::
             verify_and_correct_selection_variables_initial_values(  //
                 &model, true, false);
 
@@ -378,7 +378,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model.extract_selections(printemps::model::SelectionMode::Defined);
 
         ASSERT_THROW(
-            printemps::model::
+            printemps::verifier::
                 verify_and_correct_selection_variables_initial_values(  //
                     &model, false, false),
             std::logic_error);
@@ -398,7 +398,7 @@ TEST_F(TestVerifier, verify_and_correct_binary_variables_initial_values) {
         model.categorize_constraints();
 
         ASSERT_THROW(  //
-            printemps::model::
+            printemps::verifier::
                 verify_and_correct_binary_variables_initial_values(  //
                     &model, true, false),
             std::logic_error);
@@ -415,7 +415,7 @@ TEST_F(TestVerifier, verify_and_correct_binary_variables_initial_values) {
         model.categorize_constraints();
 
         ASSERT_THROW(  //
-            printemps::model::
+            printemps::verifier::
                 verify_and_correct_binary_variables_initial_values(  //
                     &model, false, false),
             std::logic_error);
@@ -432,7 +432,7 @@ TEST_F(TestVerifier, verify_and_correct_binary_variables_initial_values) {
         model.categorize_variables();
         model.categorize_constraints();
 
-        printemps::model::
+        printemps::verifier::
             verify_and_correct_binary_variables_initial_values(  //
                 &model, true, false);
         EXPECT_EQ(1, x(0).value());
@@ -451,7 +451,7 @@ TEST_F(TestVerifier, verify_and_correct_binary_variables_initial_values) {
         model.categorize_constraints();
 
         ASSERT_THROW(  //
-            printemps::model::
+            printemps::verifier::
                 verify_and_correct_binary_variables_initial_values(  //
                     &model, false, false),
             std::logic_error);
@@ -471,7 +471,7 @@ TEST_F(TestVerifier, verify_and_correct_integer_variables_initial_values) {
         model.categorize_constraints();
 
         ASSERT_THROW(  //
-            printemps::model::
+            printemps::verifier::
                 verify_and_correct_integer_variables_initial_values(  //
                     &model, true, false),
             std::logic_error);
@@ -488,7 +488,7 @@ TEST_F(TestVerifier, verify_and_correct_integer_variables_initial_values) {
         model.categorize_constraints();
 
         ASSERT_THROW(  //
-            printemps::model::
+            printemps::verifier::
                 verify_and_correct_integer_variables_initial_values(  //
                     &model, false, false),
             std::logic_error);
@@ -505,7 +505,7 @@ TEST_F(TestVerifier, verify_and_correct_integer_variables_initial_values) {
         model.categorize_variables();
         model.categorize_constraints();
 
-        printemps::model::
+        printemps::verifier::
             verify_and_correct_integer_variables_initial_values(  //
                 &model, true, false);
         EXPECT_EQ(10, x(0).value());
@@ -524,7 +524,7 @@ TEST_F(TestVerifier, verify_and_correct_integer_variables_initial_values) {
         model.categorize_constraints();
 
         ASSERT_THROW(  //
-            printemps::model::
+            printemps::verifier::
                 verify_and_correct_integer_variables_initial_values(  //
                     &model, false, false),
             std::logic_error);
