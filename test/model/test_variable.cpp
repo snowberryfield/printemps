@@ -133,8 +133,8 @@ TEST_F(TestVariable, evaluate_arg_move) {
     variable_0 = value_0_before;
     variable_1 = value_1_before;
 
-    printemps::model::Move<int, double> move_0;
-    printemps::model::Move<int, double> move_1;
+    printemps::neighborhood::Move<int, double> move_0;
+    printemps::neighborhood::Move<int, double> move_1;
     move_0.alterations.emplace_back(&variable_0, value_0_after);
     move_1.alterations.emplace_back(&variable_1, value_1_after);
 

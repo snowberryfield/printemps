@@ -145,7 +145,7 @@ TEST_F(TestPresolver,
         auto& x = model.create_variable("x", 0, 10);
         auto& g = model.create_constraint("g", 3 * x + 1 == 7);
 
-        printemps::model::
+        printemps::presolver::
             remove_redundant_constraints_with_tightening_variable_bounds(&model,
                                                                          false);
         EXPECT_EQ(true, x.is_fixed());

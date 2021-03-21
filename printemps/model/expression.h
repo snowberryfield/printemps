@@ -9,10 +9,16 @@
 #include <vector>
 #include <unordered_map>
 
+#include "abstract_multi_array_element.h"
 #include "../utility/utility.h"
 
-#include "abstract_multi_array_element.h"
-#include "move.h"
+namespace printemps {
+namespace neighborhood {
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+struct Move;
+}  // namespace neighborhood
+}  // namespace printemps
 
 namespace printemps {
 namespace model {
@@ -186,7 +192,8 @@ class Expression : public AbstractMultiArrayElement {
 
     /*************************************************************************/
     inline constexpr T_Expression evaluate(
-        const Move<T_Variable, T_Expression> &a_MOVE) const noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
+        const noexcept {
         /// The following code is required for nonlinear objective functions.
 #ifndef _MPS_SOLVER
         if (a_MOVE.alterations.size() == 0) {
@@ -208,7 +215,8 @@ class Expression : public AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr void update(const Move<T_Variable, T_Expression> &a_MOVE) {
+    inline constexpr void update(
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) {
         m_value = this->evaluate(a_MOVE);
     }
 

@@ -3,14 +3,32 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_MODEL_NEIGHBORHOOD_H__
-#define PRINTEMPS_MODEL_NEIGHBORHOOD_H__
+#ifndef PRINTEMPS_NEIGHBORHOOD_NEIGHBORHOOD_H__
+#define PRINTEMPS_NEIGHBORHOOD_NEIGHBORHOOD_H__
 
 #include <vector>
 #include <typeinfo>
 
+#include "move_sense.h"
+#include "move.h"
+
 namespace printemps {
 namespace model {
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+class Variable;
+
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+class Constraint;
+
+/*****************************************************************************/
+enum class VariableSense;
+}  // namespace model
+}  // namespace printemps
+
+namespace printemps {
+namespace neighborhood {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 constexpr bool has_fixed_variables(
@@ -28,7 +46,7 @@ template <class T_Variable, class T_Expression>
 constexpr bool has_selection_variables(
     const Move<T_Variable, T_Expression> &a_MOVE) {
     for (const auto &alteration : a_MOVE.alterations) {
-        if (alteration.first->sense() == VariableSense::Selection) {
+        if (alteration.first->sense() == model::VariableSense::Selection) {
             return true;
         }
     }
@@ -73,10 +91,6 @@ constexpr bool has_feasibility_improvable_variable(
     }
     return false;
 };
-
-/*****************************************************************************/
-template <class T_Variable, class T_Expression>
-class Variable;
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
@@ -259,7 +273,7 @@ class Neighborhood {
 
     /*************************************************************************/
     constexpr void setup_binary_move_updater(
-        const std::vector<Variable<T_Variable, T_Expression> *>
+        const std::vector<model::Variable<T_Variable, T_Expression> *>
             &a_VARIABLE_PTRS) {
         /**
          * "Flip" move for binary variables:
@@ -268,7 +282,7 @@ class Neighborhood {
          *        {(x = 0)} (if x = 1)
          */
 
-        std::vector<Variable<T_Variable, T_Expression> *>
+        std::vector<model::Variable<T_Variable, T_Expression> *>
             not_fixed_variable_ptrs;
         for (auto &&variable_ptr : a_VARIABLE_PTRS) {
             if (!variable_ptr->is_fixed()) {
@@ -323,7 +337,7 @@ class Neighborhood {
 
     /*************************************************************************/
     constexpr void setup_integer_move_updater(
-        const std::vector<Variable<T_Variable, T_Expression> *>
+        const std::vector<model::Variable<T_Variable, T_Expression> *>
             &a_VARIABLE_PTRS) {
         /**
          *  "Shift" move for integer variables:
@@ -333,7 +347,7 @@ class Neighborhood {
          *        {(x = 9), (x = 5)} (if x = 10)
          */
 
-        std::vector<Variable<T_Variable, T_Expression> *>
+        std::vector<model::Variable<T_Variable, T_Expression> *>
             not_fixed_variable_ptrs;
         for (auto &&variable_ptr : a_VARIABLE_PTRS) {
             if (!variable_ptr->is_fixed()) {
@@ -434,11 +448,11 @@ class Neighborhood {
 
     /*************************************************************************/
     constexpr void setup_aggregation_move_updater(
-        const std::vector<Constraint<T_Variable, T_Expression> *>
+        const std::vector<model::Constraint<T_Variable, T_Expression> *>
             &a_CONSTRAINT_PTRS) {
         const int RAW_CONSTRAINTS_SIZE = a_CONSTRAINT_PTRS.size();
 
-        std::vector<std::vector<Variable<T_Variable, T_Expression> *>>
+        std::vector<std::vector<model::Variable<T_Variable, T_Expression> *>>
                                                variable_ptr_pairs;
         std::vector<std::vector<T_Expression>> sensitivity_pairs;
         std::vector<T_Expression>              constants;
@@ -447,7 +461,7 @@ class Neighborhood {
             if (a_CONSTRAINT_PTRS[i]->is_enabled()) {
                 auto &expression    = a_CONSTRAINT_PTRS[i]->expression();
                 auto &sensitivities = expression.sensitivities();
-                std::vector<Variable<T_Variable, T_Expression> *>
+                std::vector<model::Variable<T_Variable, T_Expression> *>
                                           variable_ptr_pair;
                 std::vector<T_Expression> sensitivity_pair;
                 for (auto &&sensitivity : sensitivities) {
@@ -457,9 +471,9 @@ class Neighborhood {
                 if (variable_ptr_pair[0]->is_fixed() ||
                     variable_ptr_pair[1]->is_fixed() ||
                     (variable_ptr_pair[0]->sense() ==
-                     VariableSense::Selection) ||
+                     model::VariableSense::Selection) ||
                     (variable_ptr_pair[1]->sense() ==
-                     VariableSense::Selection)) {
+                     model::VariableSense::Selection)) {
                     continue;
                 } else {
                     variable_ptr_pairs.push_back(variable_ptr_pair);
@@ -542,7 +556,7 @@ class Neighborhood {
                         (*a_flags)[i] = 0;
                         continue;
                     }
-                    if (model::has_bound_violation((*a_moves)[i])) {
+                    if (neighborhood::has_bound_violation((*a_moves)[i])) {
                         (*a_flags)[i] = 0;
                         continue;
                     }
@@ -550,13 +564,13 @@ class Neighborhood {
                         /** nothing to do */
                     } else {
                         if (a_ACCEPT_OBJECTIVE_IMPROVABLE &&
-                            model::has_objective_improvable_variable(
+                            neighborhood::has_objective_improvable_variable(
                                 (*a_moves)[i])) {
                             continue;
                         }
 
                         if (a_ACCEPT_FEASIBILITY_IMPROVABLE &&
-                            model::has_feasibility_improvable_variable(
+                            neighborhood::has_feasibility_improvable_variable(
                                 (*a_moves)[i])) {
                             continue;
                         }
@@ -569,18 +583,18 @@ class Neighborhood {
 
     /*************************************************************************/
     constexpr void setup_precedence_move_updater(
-        const std::vector<Constraint<T_Variable, T_Expression> *>
+        const std::vector<model::Constraint<T_Variable, T_Expression> *>
             &a_CONSTRAINT_PTRS) {
         const int RAW_CONSTRAINTS_SIZE = a_CONSTRAINT_PTRS.size();
 
-        std::vector<std::vector<Variable<T_Variable, T_Expression> *>>
+        std::vector<std::vector<model::Variable<T_Variable, T_Expression> *>>
             variable_ptr_pairs;
 
         for (auto i = 0; i < RAW_CONSTRAINTS_SIZE; i++) {
             if (a_CONSTRAINT_PTRS[i]->is_enabled()) {
                 auto &sensitivities =
                     a_CONSTRAINT_PTRS[i]->expression().sensitivities();
-                std::vector<Variable<T_Variable, T_Expression> *>
+                std::vector<model::Variable<T_Variable, T_Expression> *>
                     variable_ptr_pair;
                 for (auto &&sensitivity : sensitivities) {
                     variable_ptr_pair.push_back(sensitivity.first);
@@ -588,9 +602,9 @@ class Neighborhood {
                 if (variable_ptr_pair[0]->is_fixed() ||
                     variable_ptr_pair[1]->is_fixed() ||
                     (variable_ptr_pair[0]->sense() ==
-                     VariableSense::Selection) ||
+                     model::VariableSense::Selection) ||
                     (variable_ptr_pair[1]->sense() ==
-                     VariableSense::Selection)) {
+                     model::VariableSense::Selection)) {
                     continue;
                 } else {
                     variable_ptr_pairs.push_back(variable_ptr_pair);
@@ -663,7 +677,7 @@ class Neighborhood {
                         (*a_flags)[i] = 0;
                         continue;
                     }
-                    if (model::has_bound_violation((*a_moves)[i])) {
+                    if (neighborhood::has_bound_violation((*a_moves)[i])) {
                         (*a_flags)[i] = 0;
                         continue;
                     }
@@ -671,13 +685,13 @@ class Neighborhood {
                         /** nothing to do */
                     } else {
                         if (a_ACCEPT_OBJECTIVE_IMPROVABLE &&
-                            model::has_objective_improvable_variable(
+                            neighborhood::has_objective_improvable_variable(
                                 (*a_moves)[i])) {
                             continue;
                         }
 
                         if (a_ACCEPT_FEASIBILITY_IMPROVABLE &&
-                            model::has_feasibility_improvable_variable(
+                            neighborhood::has_feasibility_improvable_variable(
                                 (*a_moves)[i])) {
                             continue;
                         }
@@ -690,25 +704,25 @@ class Neighborhood {
 
     /*************************************************************************/
     void setup_variable_bound_move_updater(
-        const std::vector<Constraint<T_Variable, T_Expression> *>
+        const std::vector<model::Constraint<T_Variable, T_Expression> *>
             &a_CONSTRAINT_PTRS) {
         /**
          * NOTE: This method cannot be constexpr by clang for
-         * std::vector<ConstraintSense>.
+         * std::vector<model::ConstraintSense>.
          */
         const int RAW_CONSTRAINTS_SIZE = a_CONSTRAINT_PTRS.size();
 
-        std::vector<std::vector<Variable<T_Variable, T_Expression> *>>
+        std::vector<std::vector<model::Variable<T_Variable, T_Expression> *>>
                                                variable_ptr_pairs;
         std::vector<std::vector<T_Expression>> sensitivity_pairs;
         std::vector<T_Expression>              constants;
-        std::vector<ConstraintSense>           senses;
+        std::vector<model::ConstraintSense>    senses;
 
         for (auto i = 0; i < RAW_CONSTRAINTS_SIZE; i++) {
             if (a_CONSTRAINT_PTRS[i]->is_enabled()) {
                 auto &expression    = a_CONSTRAINT_PTRS[i]->expression();
                 auto &sensitivities = expression.sensitivities();
-                std::vector<Variable<T_Variable, T_Expression> *>
+                std::vector<model::Variable<T_Variable, T_Expression> *>
                                           variable_ptr_pair;
                 std::vector<T_Expression> sensitivity_pair;
 
@@ -720,9 +734,9 @@ class Neighborhood {
                 if (variable_ptr_pair[0]->is_fixed() ||
                     variable_ptr_pair[1]->is_fixed() ||
                     (variable_ptr_pair[0]->sense() ==
-                     VariableSense::Selection) ||
+                     model::VariableSense::Selection) ||
                     (variable_ptr_pair[1]->sense() ==
-                     VariableSense::Selection)) {
+                     model::VariableSense::Selection)) {
                     continue;
                 } else {
                     variable_ptr_pairs.push_back(variable_ptr_pair);
@@ -785,9 +799,9 @@ class Neighborhood {
                             T_Variable target = 0;
 
                             if ((sensitivity_pairs[i][1 - j] > 0 &&
-                                 senses[i] == ConstraintSense::Lower) ||
+                                 senses[i] == model::ConstraintSense::Lower) ||
                                 (sensitivity_pairs[i][1 - j] < 0 &&
-                                 senses[i] == ConstraintSense::Upper)) {
+                                 senses[i] == model::ConstraintSense::Upper)) {
                                 target = std::min(value_pair[1 - j],
                                                   static_cast<T_Variable>(
                                                       std::floor(target_temp)));
@@ -814,9 +828,9 @@ class Neighborhood {
                             T_Variable target = 0;
 
                             if ((sensitivity_pairs[i][1 - j] > 0 &&
-                                 senses[i] == ConstraintSense::Lower) ||
+                                 senses[i] == model::ConstraintSense::Lower) ||
                                 (sensitivity_pairs[i][1 - j] < 0 &&
-                                 senses[i] == ConstraintSense::Upper)) {
+                                 senses[i] == model::ConstraintSense::Upper)) {
                                 target = std::min(value_pair[1 - j],
                                                   static_cast<T_Variable>(
                                                       std::floor(target_temp)));
@@ -842,7 +856,7 @@ class Neighborhood {
                         (*a_flags)[i] = 0;
                         continue;
                     }
-                    if (model::has_bound_violation((*a_moves)[i])) {
+                    if (neighborhood::has_bound_violation((*a_moves)[i])) {
                         (*a_flags)[i] = 0;
                         continue;
                     }
@@ -850,13 +864,13 @@ class Neighborhood {
                         /** nothing to do */
                     } else {
                         if (a_ACCEPT_OBJECTIVE_IMPROVABLE &&
-                            model::has_objective_improvable_variable(
+                            neighborhood::has_objective_improvable_variable(
                                 (*a_moves)[i])) {
                             continue;
                         }
 
                         if (a_ACCEPT_FEASIBILITY_IMPROVABLE &&
-                            model::has_feasibility_improvable_variable(
+                            neighborhood::has_feasibility_improvable_variable(
                                 (*a_moves)[i])) {
                             continue;
                         }
@@ -869,16 +883,16 @@ class Neighborhood {
 
     /*************************************************************************/
     constexpr void setup_exclusive_move_updater(
-        const std::vector<Constraint<T_Variable, T_Expression> *>
+        const std::vector<model::Constraint<T_Variable, T_Expression> *>
             &a_SET_PARTITIONING_PTRS,
-        const std::vector<Constraint<T_Variable, T_Expression> *>
+        const std::vector<model::Constraint<T_Variable, T_Expression> *>
             &a_SET_PACKING_PTRS) {
         int SET_PARTITIONINGS_SIZE = a_SET_PARTITIONING_PTRS.size();
         int SET_PACKINGS_SIZE      = a_SET_PACKING_PTRS.size();
 
         std::unordered_map<
-            Variable<T_Variable, T_Expression> *,
-            std::unordered_set<Variable<T_Variable, T_Expression> *>>
+            model::Variable<T_Variable, T_Expression> *,
+            std::unordered_set<model::Variable<T_Variable, T_Expression> *>>
             associations;
 
         for (auto i = 0; i < SET_PARTITIONINGS_SIZE; i++) {
@@ -896,9 +910,9 @@ class Neighborhood {
                         if (variable_ptr_first->is_fixed() ||
                             variable_ptr_second->is_fixed() ||
                             (variable_ptr_first->sense() ==
-                             VariableSense::Selection) ||
+                             model::VariableSense::Selection) ||
                             (variable_ptr_second->sense() ==
-                             VariableSense::Selection)) {
+                             model::VariableSense::Selection)) {
                             continue;
                         } else {
                             associations[variable_ptr_first].insert(
@@ -925,9 +939,9 @@ class Neighborhood {
                         if (variable_ptr_first->is_fixed() ||
                             variable_ptr_second->is_fixed() ||
                             (variable_ptr_first->sense() ==
-                             VariableSense::Selection) ||
+                             model::VariableSense::Selection) ||
                             (variable_ptr_second->sense() ==
-                             VariableSense::Selection)) {
+                             model::VariableSense::Selection)) {
                             continue;
                         } else {
                             associations[variable_ptr_first].insert(
@@ -942,9 +956,10 @@ class Neighborhood {
         m_exclusive_moves.resize(VARIABLES_SIZE);
         m_exclusive_move_flags.resize(VARIABLES_SIZE);
 
-        std::vector<Variable<T_Variable, T_Expression> *> variable_ptrs(
+        std::vector<model::Variable<T_Variable, T_Expression> *> variable_ptrs(
             VARIABLES_SIZE);
-        std::vector<std::unordered_set<Variable<T_Variable, T_Expression> *>>
+        std::vector<
+            std::unordered_set<model::Variable<T_Variable, T_Expression> *>>
             associated_variables_ptrs(VARIABLES_SIZE);
 
         int move_index = 0;
@@ -1003,13 +1018,13 @@ class Neighborhood {
                         /** nothing to do */
                     } else {
                         if (a_ACCEPT_OBJECTIVE_IMPROVABLE &&
-                            model::has_objective_improvable_variable(
+                            neighborhood::has_objective_improvable_variable(
                                 (*a_moves)[i])) {
                             continue;
                         }
 
                         if (a_ACCEPT_FEASIBILITY_IMPROVABLE &&
-                            model::has_feasibility_improvable_variable(
+                            neighborhood::has_feasibility_improvable_variable(
                                 (*a_moves)[i])) {
                             continue;
                         }
@@ -1022,7 +1037,8 @@ class Neighborhood {
 
     /*************************************************************************/
     constexpr void setup_selection_move_updater(
-        std::vector<Variable<T_Variable, T_Expression> *> &a_VARIABLE_PTRS) {
+        std::vector<model::Variable<T_Variable, T_Expression> *>
+            &a_VARIABLE_PTRS) {
         /**
          *  "Swap" move for binary variables in selection
          * constraints: e.g.) selection constraint x + y + z = 1 (x,
@@ -1074,7 +1090,7 @@ class Neighborhood {
                 for (auto i = 0; i < MOVES_SIZE; i++) {
                     (*a_flags)[i] = 1;
                     if (m_has_fixed_variables &&
-                        model::has_fixed_variables((*a_moves)[i])) {
+                        neighborhood::has_fixed_variables((*a_moves)[i])) {
                         (*a_flags)[i] = 0;
                         continue;
                     }
@@ -1088,13 +1104,13 @@ class Neighborhood {
                         /** nothing to do */
                     } else {
                         if (a_ACCEPT_OBJECTIVE_IMPROVABLE &&
-                            model::has_objective_improvable_variable(
+                            neighborhood::has_objective_improvable_variable(
                                 (*a_moves)[i])) {
                             continue;
                         }
 
                         if (a_ACCEPT_FEASIBILITY_IMPROVABLE &&
-                            model::has_feasibility_improvable_variable(
+                            neighborhood::has_feasibility_improvable_variable(
                                 (*a_moves)[i])) {
                             continue;
                         }
@@ -1125,7 +1141,7 @@ class Neighborhood {
                         continue;
                     }
                     if (m_has_fixed_variables &&
-                        model::has_fixed_variables((*a_moves)[i])) {
+                        neighborhood::has_fixed_variables((*a_moves)[i])) {
                         (*a_flags)[i] = 0;
                         continue;
                     }
@@ -1143,13 +1159,13 @@ class Neighborhood {
                         /** nothing to do */
                     } else {
                         if (a_ACCEPT_OBJECTIVE_IMPROVABLE &&
-                            model::has_objective_improvable_variable(
+                            neighborhood::has_objective_improvable_variable(
                                 (*a_moves)[i])) {
                             continue;
                         }
 
                         if (a_ACCEPT_FEASIBILITY_IMPROVABLE &&
-                            model::has_feasibility_improvable_variable(
+                            neighborhood::has_feasibility_improvable_variable(
                                 (*a_moves)[i])) {
                             continue;
                         }
@@ -1230,16 +1246,16 @@ class Neighborhood {
                 for (auto i = 0; i < MOVES_SIZE; i++) {
                     (*a_flags)[i] = 1;
                     if (m_has_fixed_variables &&
-                        model::has_fixed_variables((*a_moves)[i])) {
+                        neighborhood::has_fixed_variables((*a_moves)[i])) {
                         (*a_flags)[i] = 0;
                         continue;
                     }
                     if (m_has_selection_variables &&
-                        model::has_selection_variables((*a_moves)[i])) {
+                        neighborhood::has_selection_variables((*a_moves)[i])) {
                         (*a_flags)[i] = 0;
                         continue;
                     }
-                    if (model::has_bound_violation((*a_moves)[i])) {
+                    if (neighborhood::has_bound_violation((*a_moves)[i])) {
                         (*a_flags)[i] = 0;
                         continue;
                     }
@@ -1247,13 +1263,13 @@ class Neighborhood {
                         /** nothing to do */
                     } else {
                         if (a_ACCEPT_OBJECTIVE_IMPROVABLE &&
-                            model::has_objective_improvable_variable(
+                            neighborhood::has_objective_improvable_variable(
                                 (*a_moves)[i])) {
                             continue;
                         }
 
                         if (a_ACCEPT_FEASIBILITY_IMPROVABLE &&
-                            model::has_feasibility_improvable_variable(
+                            neighborhood::has_feasibility_improvable_variable(
                                 (*a_moves)[i])) {
                             continue;
                         }
@@ -1810,7 +1826,7 @@ class Neighborhood {
     }
 
 };  // namespace model
-}  // namespace model
+}  // namespace neighborhood
 }  // namespace printemps
 #endif
 /*****************************************************************************/

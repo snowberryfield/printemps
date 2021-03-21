@@ -18,11 +18,11 @@ struct TabuSearchMoveScore {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 constexpr bool compute_permissibility(
-    const model::Move<T_Variable, T_Expression> &a_MOVE,       //
-    const Memory &                               a_MEMORY,     //
-    const int                                    a_ITERATION,  //
-    const Option &                               a_OPTION,     //
-    const int                                    a_TABU_TENURE) {
+    const neighborhood::Move<T_Variable, T_Expression> &a_MOVE,       //
+    const Memory &                                      a_MEMORY,     //
+    const int                                           a_ITERATION,  //
+    const Option &                                      a_OPTION,     //
+    const int                                           a_TABU_TENURE) {
     const auto &last_update_iterations = a_MEMORY.last_update_iterations();
 
     switch (a_OPTION.tabu_search.tabu_mode) {
@@ -76,10 +76,10 @@ constexpr bool compute_permissibility(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 constexpr double compute_frequency_penalty(
-    const model::Move<T_Variable, T_Expression> &a_MOVE,       //
-    const int                                    a_ITERATION,  //
-    const Memory &                               a_MEMORY,     //
-    const Option &                               a_OPTION) noexcept {
+    const neighborhood::Move<T_Variable, T_Expression> &a_MOVE,       //
+    const int                                           a_ITERATION,  //
+    const Memory &                                      a_MEMORY,     //
+    const Option &                                      a_OPTION) noexcept {
     const auto &update_counts = a_MEMORY.update_counts();
 
     if (a_ITERATION == 0) {
@@ -99,12 +99,12 @@ constexpr double compute_frequency_penalty(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 constexpr void evaluate_move(
-    TabuSearchMoveScore *                        a_score_ptr,  //
-    const model::Move<T_Variable, T_Expression> &a_MOVE,       //
-    const int                                    a_ITERATION,  //
-    const Memory &                               a_MEMORY,     //
-    const Option &                               a_OPTION,     //
-    const int                                    a_TABU_TENURE) noexcept {
+    TabuSearchMoveScore *                               a_score_ptr,  //
+    const neighborhood::Move<T_Variable, T_Expression> &a_MOVE,       //
+    const int                                           a_ITERATION,  //
+    const Memory &                                      a_MEMORY,     //
+    const Option &                                      a_OPTION,     //
+    const int a_TABU_TENURE) noexcept {
     /**
      * Check if the move is permissible or not.
      */

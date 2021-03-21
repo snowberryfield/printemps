@@ -42,7 +42,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     using Model_T           = model::Model<T_Variable, T_Expression>;
     using Result_T          = TabuSearchResult<T_Variable, T_Expression>;
     using IncumbentHolder_T = IncumbentHolder<T_Variable, T_Expression>;
-    using Move_T            = model::Move<T_Variable, T_Expression>;
+    using Move_T            = neighborhood::Move<T_Variable, T_Expression>;
     using MoveScore         = TabuSearchMoveScore;
 
     /**
@@ -136,8 +136,8 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     TabuSearchTerminationStatus termination_status =
         TabuSearchTerminationStatus::ITERATION_OVER;
 
-    model::Move<T_Variable, T_Expression> previous_move;
-    model::Move<T_Variable, T_Expression> current_move;
+    neighborhood::Move<T_Variable, T_Expression> previous_move;
+    neighborhood::Move<T_Variable, T_Expression> current_move;
 
     bool is_few_permissible_neighborhood = false;
     bool is_found_new_feasible_solution  = false;
@@ -216,8 +216,8 @@ TabuSearchResult<T_Variable, T_Expression> solve(
              * If the option improvability_screening_mode is not None,
              * only improvable moves will be generated.
              */
-            auto changed_variable_ptrs =
-                utility::to_vector(model::related_variable_ptrs(current_move));
+            auto changed_variable_ptrs = utility::to_vector(
+                neighborhood::related_variable_ptrs(current_move));
             auto changed_constraint_ptrs =
                 utility::to_vector(current_move.related_constraint_ptrs);
 
@@ -580,12 +580,12 @@ TabuSearchResult<T_Variable, T_Expression> solve(
          * Register a chain move.
          */
         if (iteration > 0 && option.is_enabled_chain_move) {
-            if ((previous_move.sense == model::MoveSense::Binary &&
-                 current_move.sense == model::MoveSense::Binary &&
+            if ((previous_move.sense == neighborhood::MoveSense::Binary &&
+                 current_move.sense == neighborhood::MoveSense::Binary &&
                  previous_move.alterations.front().second !=
                      current_move.alterations.front().second) ||
-                (previous_move.sense == model::MoveSense::Chain &&
-                 current_move.sense == model::MoveSense::Chain)) {
+                (previous_move.sense == neighborhood::MoveSense::Chain &&
+                 current_move.sense == neighborhood::MoveSense::Chain)) {
                 Move_T chain_move;
                 if (previous_move.alterations.front().first <
                     current_move.alterations.front().first)
@@ -596,7 +596,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
 
                 if (chain_move.overlap_rate >
                         option.chain_move_overlap_rate_threshold &&
-                    !model::has_duplicate_variable(chain_move)) {
+                    !neighborhood::has_duplicate_variable(chain_move)) {
                     auto back_chain_move = chain_move;
                     for (auto&& alteration : back_chain_move.alterations) {
                         alteration.second = 1 - alteration.second;

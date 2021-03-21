@@ -36,7 +36,7 @@ LocalSearchResult<T_Variable, T_Expression> solve(
     using Model_T           = model::Model<T_Variable, T_Expression>;
     using Result_T          = LocalSearchResult<T_Variable, T_Expression>;
     using IncumbentHolder_T = IncumbentHolder<T_Variable, T_Expression>;
-    using Move_T            = model::Move<T_Variable, T_Expression>;
+    using Move_T            = neighborhood::Move<T_Variable, T_Expression>;
 
     /**
      * Start to measure computational time.
@@ -98,8 +98,8 @@ LocalSearchResult<T_Variable, T_Expression> solve(
     LocalSearchTerminationStatus termination_status =
         LocalSearchTerminationStatus::ITERATION_OVER;
 
-    model::Move<T_Variable, T_Expression> previous_move;
-    model::Move<T_Variable, T_Expression> current_move;
+    neighborhood::Move<T_Variable, T_Expression> previous_move;
+    neighborhood::Move<T_Variable, T_Expression> current_move;
 
     /**
      * Print the header of optimization progress table and print the initial
@@ -150,8 +150,8 @@ LocalSearchResult<T_Variable, T_Expression> solve(
         bool accept_feasibility_improvable = true;
 
         if (model->is_linear()) {
-            auto changed_variable_ptrs =
-                utility::to_vector(model::related_variable_ptrs(current_move));
+            auto changed_variable_ptrs = utility::to_vector(
+                neighborhood::related_variable_ptrs(current_move));
             auto changed_constraint_ptrs =
                 utility::to_vector(current_move.related_constraint_ptrs);
 

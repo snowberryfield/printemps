@@ -11,6 +11,14 @@
 #include "abstract_multi_array_element.h"
 
 namespace printemps {
+namespace neighborhood {
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+struct Move;
+}  // namespace neighborhood
+}  // namespace printemps
+
+namespace printemps {
 namespace model {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
@@ -160,7 +168,8 @@ class Variable : public AbstractMultiArrayElement {
 
     /*************************************************************************/
     inline constexpr T_Expression evaluate(
-        const Move<T_Variable, T_Expression> &a_MOVE) const noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
+        const noexcept {
         if (a_MOVE.alterations.size() == 0) {
             return this->value();
         }

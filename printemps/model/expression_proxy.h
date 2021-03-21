@@ -164,7 +164,7 @@ class ExpressionProxy : public AbstractMultiArray {
 
     /*************************************************************************/
     inline constexpr T_Expression evaluate(
-        const Move<T_Variable, T_Expression> &a_MOVE) {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -184,7 +184,8 @@ class ExpressionProxy : public AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr void update(const Move<T_Variable, T_Expression> &a_MOVE) {
+    inline constexpr void update(
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,

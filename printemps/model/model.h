@@ -14,11 +14,9 @@
 
 #include "variable_sense.h"
 #include "constraint_sense.h"
-#include "move_sense.h"
 #include "range.h"
 #include "selection_mode.h"
 
-#include "move.h"
 #include "variable_proxy.h"
 #include "expression_proxy.h"
 #include "constraint_proxy.h"
@@ -30,7 +28,6 @@
 #include "plain_solution.h"
 #include "solution_score.h"
 #include "selection.h"
-#include "neighborhood.h"
 
 #include "expression_binary_operator.h"
 #include "constraint_binary_operator.h"
@@ -39,6 +36,7 @@
 #include "constraint_reference.h"
 #include "constraint_type_reference.h"
 
+#include "../neighborhood/neighborhood.h"
 #include "../presolver/presolver.h"
 #include "../verifier/verifier.h"
 
@@ -85,8 +83,8 @@ class Model {
     ConstraintTypeReference<T_Variable, T_Expression>
         m_constraint_type_reference;
 
-    Neighborhood<T_Variable, T_Expression> m_neighborhood;
-    std::function<void(void)>              m_callback;
+    neighborhood::Neighborhood<T_Variable, T_Expression> m_neighborhood;
+    std::function<void(void)>                            m_callback;
 
     /*************************************************************************/
     Model(const Model &) = default;
@@ -552,7 +550,8 @@ class Model {
     /*************************************************************************/
     inline constexpr void minimize(
         const std::function<
-            T_Expression(const Move<T_Variable, T_Expression> &)> &a_FUNCTION) {
+            T_Expression(const neighborhood::Move<T_Variable, T_Expression> &)>
+            &a_FUNCTION) {
         auto objective =
             Objective<T_Variable, T_Expression>::create_instance(a_FUNCTION);
         m_objective            = objective;
@@ -585,7 +584,8 @@ class Model {
     /*************************************************************************/
     inline constexpr void maximize(
         const std::function<
-            T_Expression(const Move<T_Variable, T_Expression> &)> &a_FUNCTION) {
+            T_Expression(const neighborhood::Move<T_Variable, T_Expression> &)>
+            &a_FUNCTION) {
         auto objective =
             Objective<T_Variable, T_Expression>::create_instance(a_FUNCTION);
         m_objective            = objective;
@@ -1378,7 +1378,8 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void update(const Move<T_Variable, T_Expression> &a_MOVE) {
+    constexpr void update(
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) {
         /**
          * Update in order of objective, constraints -> expressions ->
          * variables.
@@ -1413,7 +1414,7 @@ class Model {
             alteration.first->set_value_if_not_fixed(alteration.second);
         }
 
-        if (a_MOVE.sense == MoveSense::Selection) {
+        if (a_MOVE.sense == neighborhood::MoveSense::Selection) {
             a_MOVE.alterations[1].first->select();
         }
 
@@ -1581,7 +1582,8 @@ class Model {
 
     /*************************************************************************/
     inline SolutionScore evaluate(
-        const Move<T_Variable, T_Expression> &a_MOVE) const noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
+        const noexcept {
         SolutionScore score;
         this->evaluate(&score, a_MOVE);
         return score;
@@ -1589,17 +1591,17 @@ class Model {
 
     /*************************************************************************/
     inline SolutionScore evaluate(
-        const Move<T_Variable, T_Expression> &a_MOVE,
-        const SolutionScore &                 a_CURRENT_SCORE) const noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE,
+        const SolutionScore &a_CURRENT_SCORE) const noexcept {
         SolutionScore score;
         this->evaluate(&score, a_MOVE, a_CURRENT_SCORE);
         return score;
     }
 
     /*************************************************************************/
-    constexpr void evaluate(
-        SolutionScore *                       a_score_ptr,  //
-        const Move<T_Variable, T_Expression> &a_MOVE) const noexcept {
+    constexpr void evaluate(SolutionScore *a_score_ptr,  //
+                            const neighborhood::Move<T_Variable, T_Expression>
+                                &a_MOVE) const noexcept {
         double total_violation = 0.0;
         double local_penalty   = 0.0;
         double global_penalty  = 0.0;
@@ -1653,9 +1655,9 @@ class Model {
 
     /*************************************************************************/
     constexpr void evaluate(
-        SolutionScore *                       a_score_ptr,  //
-        const Move<T_Variable, T_Expression> &a_MOVE,
-        const SolutionScore &                 a_CURRENT_SCORE) const noexcept {
+        SolutionScore *                                     a_score_ptr,  //
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE,
+        const SolutionScore &a_CURRENT_SCORE) const noexcept {
         bool is_feasibility_improvable = false;
 
         double total_violation = a_CURRENT_SCORE.total_violation;
@@ -2188,8 +2190,8 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr Neighborhood<T_Variable, T_Expression> &neighborhood(
-        void) {
+    inline constexpr neighborhood::Neighborhood<T_Variable, T_Expression>
+        &neighborhood(void) {
         return m_neighborhood;
     }
 };

@@ -3,8 +3,8 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_MODEL_MOVE_H__
-#define PRINTEMPS_MODEL_MOVE_H__
+#ifndef PRINTEMPS_NEIGHBORHOOD_MOVE_H__
+#define PRINTEMPS_NEIGHBORHOOD_MOVE_H__
 
 #include <vector>
 #include <unordered_set>
@@ -22,15 +22,23 @@ template <class T_Variable, class T_Expression>
 class Constraint;
 
 /*****************************************************************************/
+enum class VariableSense;
+}  // namespace model
+}  // namespace printemps
+
+namespace printemps {
+namespace neighborhood {
+/*****************************************************************************/
 template <class T_Variable, class T_Expression>
-using Alteration = std::pair<Variable<T_Variable, T_Expression> *, T_Variable>;
+using Alteration =
+    std::pair<model::Variable<T_Variable, T_Expression> *, T_Variable>;
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 struct Move {
     std::vector<Alteration<T_Variable, T_Expression>> alterations;
     MoveSense                                         sense;
-    std::unordered_set<Constraint<T_Variable, T_Expression> *>
+    std::unordered_set<model::Constraint<T_Variable, T_Expression> *>
         related_constraint_ptrs;
 
     /**
@@ -56,7 +64,7 @@ struct Move {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 constexpr bool has_duplicate_variable(
-    const Move<T_Variable, T_Expression> &a_MOVE) {
+    const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) {
     auto &    alterations      = a_MOVE.alterations;
     const int ALTERATIONS_SIZE = alterations.size();
     for (auto i = 0; i < ALTERATIONS_SIZE; i++) {
@@ -131,7 +139,7 @@ constexpr double compute_hash(
 template <class T_Variable, class T_Expression>
 constexpr bool is_binary_swap(const Move<T_Variable, T_Expression> &a_MOVE) {
     for (const auto &alteration : a_MOVE.alterations) {
-        if (alteration.first->sense() != VariableSense::Binary) {
+        if (alteration.first->sense() != model::VariableSense::Binary) {
             return false;
         }
     }
@@ -141,9 +149,9 @@ constexpr bool is_binary_swap(const Move<T_Variable, T_Expression> &a_MOVE) {
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-constexpr std::unordered_set<Variable<T_Variable, T_Expression> *>
+constexpr std::unordered_set<model::Variable<T_Variable, T_Expression> *>
 related_variable_ptrs(const Move<T_Variable, T_Expression> &a_MOVE) {
-    std::unordered_set<Variable<T_Variable, T_Expression> *> result;
+    std::unordered_set<model::Variable<T_Variable, T_Expression> *> result;
     for (const auto &alteration : a_MOVE.alterations) {
         result.insert(alteration.first);
     }
@@ -216,7 +224,7 @@ constexpr bool operator==(const Move<T_Variable, T_Expression> &a_MOVE_FIRST,
 };
 
 using IPMove = Move<int, double>;
-}  // namespace model
+}  // namespace neighborhood
 }  // namespace printemps
 #endif
 /*****************************************************************************/
