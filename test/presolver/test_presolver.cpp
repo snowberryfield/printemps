@@ -44,7 +44,7 @@ TEST_F(TestPresolver, presolve) {
     model.setup_variable_related_constraints();
     model.setup_is_linear();
 
-    printemps::model::presolve(&model, false);
+    printemps::presolver::presolve(&model, false);
 
     model.categorize_variables();
     model.categorize_constraints();
@@ -73,7 +73,7 @@ TEST_F(TestPresolver, remove_independent_variables) {
         model.minimize(x.sum());
         model.setup_variable_related_constraints();
         model.setup_is_linear();
-        printemps::model::remove_independent_variables(&model, false);
+        printemps::presolver::remove_independent_variables(&model, false);
         for (auto i = 0; i < 10; i++) {
             EXPECT_EQ(true, x(i).is_fixed());
             EXPECT_EQ(0, x(i).value());
@@ -90,7 +90,7 @@ TEST_F(TestPresolver, remove_independent_variables) {
         model.maximize(x.sum());
         model.setup_variable_related_constraints();
         model.setup_is_linear();
-        printemps::model::remove_independent_variables(&model, false);
+        printemps::presolver::remove_independent_variables(&model, false);
         for (auto i = 0; i < 10; i++) {
             EXPECT_EQ(true, x(i).is_fixed());
             EXPECT_EQ(1, x(i).value());
@@ -107,7 +107,7 @@ TEST_F(TestPresolver, remove_independent_variables) {
         model.minimize(-x.sum());
         model.setup_variable_related_constraints();
         model.setup_is_linear();
-        printemps::model::remove_independent_variables(&model, false);
+        printemps::presolver::remove_independent_variables(&model, false);
         for (auto i = 0; i < 10; i++) {
             EXPECT_EQ(true, x(i).is_fixed());
             EXPECT_EQ(1, x(i).value());
@@ -124,7 +124,7 @@ TEST_F(TestPresolver, remove_independent_variables) {
         model.maximize(-x.sum());
         model.setup_variable_related_constraints();
         model.setup_is_linear();
-        printemps::model::remove_independent_variables(&model, false);
+        printemps::presolver::remove_independent_variables(&model, false);
         for (auto i = 0; i < 10; i++) {
             EXPECT_EQ(true, x(i).is_fixed());
             EXPECT_EQ(0, x(i).value());
@@ -158,7 +158,7 @@ TEST_F(TestPresolver,
         auto& x = model.create_variable("x", 0, 10);
         auto& g = model.create_constraint("g", 3 * x + 1 <= 7);
 
-        printemps::model::
+        printemps::presolver::
             remove_redundant_constraints_with_tightening_variable_bounds(&model,
                                                                          false);
         EXPECT_EQ(false, x.is_fixed());
@@ -172,7 +172,7 @@ TEST_F(TestPresolver,
         auto& x = model.create_variable("x", 0, 10);
         auto& g = model.create_constraint("g", 3 * x + 1 >= 7);
 
-        printemps::model::
+        printemps::presolver::
             remove_redundant_constraints_with_tightening_variable_bounds(&model,
                                                                          false);
         EXPECT_EQ(false, x.is_fixed());
@@ -187,7 +187,7 @@ TEST_F(TestPresolver,
         auto& x = model.create_variable("x", -10, 10);
         auto& g = model.create_constraint("g", -3 * x + 1 == 7);
 
-        printemps::model::
+        printemps::presolver::
             remove_redundant_constraints_with_tightening_variable_bounds(&model,
                                                                          false);
         EXPECT_EQ(true, x.is_fixed());
@@ -200,7 +200,7 @@ TEST_F(TestPresolver,
         auto& x = model.create_variable("x", -10, 10);
         auto& g = model.create_constraint("g", -3 * x + 1 <= 7);
 
-        printemps::model::
+        printemps::presolver::
             remove_redundant_constraints_with_tightening_variable_bounds(&model,
                                                                          false);
         EXPECT_EQ(false, x.is_fixed());
@@ -214,7 +214,7 @@ TEST_F(TestPresolver,
         auto& x = model.create_variable("x", -10, 10);
         auto& g = model.create_constraint("g", -3 * x + 1 >= 7);
 
-        printemps::model::
+        printemps::presolver::
             remove_redundant_constraints_with_tightening_variable_bounds(&model,
                                                                          false);
         EXPECT_EQ(false, x.is_fixed());
@@ -231,7 +231,7 @@ TEST_F(TestPresolver,
         auto& g = model.create_constraint("g", 3 * x + y == 7);
         y.fix_by(1);
 
-        printemps::model::
+        printemps::presolver::
             remove_redundant_constraints_with_tightening_variable_bounds(&model,
                                                                          false);
         EXPECT_EQ(true, x.is_fixed());
@@ -246,7 +246,7 @@ TEST_F(TestPresolver,
         auto& g = model.create_constraint("g", 3 * x + y <= 7);
         y.fix_by(1);
 
-        printemps::model::
+        printemps::presolver::
             remove_redundant_constraints_with_tightening_variable_bounds(&model,
                                                                          false);
         EXPECT_EQ(false, x.is_fixed());
@@ -262,7 +262,7 @@ TEST_F(TestPresolver,
         auto& g = model.create_constraint("g", 3 * x + y >= 7);
         y.fix_by(1);
 
-        printemps::model::
+        printemps::presolver::
             remove_redundant_constraints_with_tightening_variable_bounds(&model,
                                                                          false);
         EXPECT_EQ(false, x.is_fixed());
@@ -278,7 +278,7 @@ TEST_F(TestPresolver,
         auto& g = model.create_constraint("g", -3 * x + y == 7);
         y.fix_by(1);
 
-        printemps::model::
+        printemps::presolver::
             remove_redundant_constraints_with_tightening_variable_bounds(&model,
                                                                          false);
         EXPECT_EQ(true, x.is_fixed());
@@ -293,7 +293,7 @@ TEST_F(TestPresolver,
         auto& g = model.create_constraint("g", -3 * x + y <= 7);
         y.fix_by(1);
 
-        printemps::model::
+        printemps::presolver::
             remove_redundant_constraints_with_tightening_variable_bounds(&model,
                                                                          false);
         EXPECT_EQ(false, x.is_fixed());
@@ -309,7 +309,7 @@ TEST_F(TestPresolver,
         auto& g = model.create_constraint("g", -3 * x + y >= 7);
         y.fix_by(1);
 
-        printemps::model::
+        printemps::presolver::
             remove_redundant_constraints_with_tightening_variable_bounds(&model,
                                                                          false);
         EXPECT_EQ(false, x.is_fixed());
@@ -325,7 +325,7 @@ TEST_F(TestPresolver,
         auto& g = model.create_constraint("g", 3 * x + 1 == 7);
         x.fix_by(2);
 
-        printemps::model::
+        printemps::presolver::
             remove_redundant_constraints_with_tightening_variable_bounds(&model,
                                                                          false);
         EXPECT_EQ(true, x.is_fixed());
@@ -338,7 +338,7 @@ TEST_F(TestPresolver,
         auto& g = model.create_constraint("g", 3 * x + 1 <= 7);
         x.fix_by(1);
 
-        printemps::model::
+        printemps::presolver::
             remove_redundant_constraints_with_tightening_variable_bounds(&model,
                                                                          false);
         EXPECT_EQ(true, x.is_fixed());
@@ -351,7 +351,7 @@ TEST_F(TestPresolver,
         auto& g = model.create_constraint("g", 3 * x + 1 >= 7);
         x.fix_by(3);
 
-        printemps::model::
+        printemps::presolver::
             remove_redundant_constraints_with_tightening_variable_bounds(&model,
                                                                          false);
         EXPECT_EQ(true, x.is_fixed());
@@ -365,7 +365,7 @@ TEST_F(TestPresolver,
         auto& g = model.create_constraint("g", -3 * x + 1 == 7);
         x.fix_by(-2);
 
-        printemps::model::
+        printemps::presolver::
             remove_redundant_constraints_with_tightening_variable_bounds(&model,
                                                                          false);
         EXPECT_EQ(true, x.is_fixed());
@@ -378,7 +378,7 @@ TEST_F(TestPresolver,
         auto& g = model.create_constraint("g", -3 * x + 1 <= 7);
         x.fix_by(-2);
 
-        printemps::model::
+        printemps::presolver::
             remove_redundant_constraints_with_tightening_variable_bounds(&model,
                                                                          false);
         EXPECT_EQ(true, x.is_fixed());
@@ -391,7 +391,7 @@ TEST_F(TestPresolver,
         auto& g = model.create_constraint("g", -3 * x + 1 >= 7);
         x.fix_by(-2);
 
-        printemps::model::
+        printemps::presolver::
             remove_redundant_constraints_with_tightening_variable_bounds(&model,
                                                                          false);
         EXPECT_EQ(true, x.is_fixed());
@@ -405,7 +405,7 @@ TEST_F(TestPresolver,
         auto& y = model.create_variable("y", 0, 1);
         auto& g = model.create_constraint("g", 3 * x + y <= 7);
 
-        printemps::model::
+        printemps::presolver::
             remove_redundant_constraints_with_tightening_variable_bounds(&model,
                                                                          false);
         EXPECT_EQ(false, x.is_fixed());
@@ -420,7 +420,7 @@ TEST_F(TestPresolver,
         auto& y = model.create_variable("y", 0, 1);
         auto& g = model.create_constraint("g", 3 * x + y >= 7);
 
-        printemps::model::
+        printemps::presolver::
             remove_redundant_constraints_with_tightening_variable_bounds(&model,
                                                                          false);
         EXPECT_EQ(false, x.is_fixed());
@@ -436,7 +436,7 @@ TEST_F(TestPresolver,
         auto& y = model.create_variable("y", 0, 1);
         auto& g = model.create_constraint("g", -3 * x + y <= 7);
 
-        printemps::model::
+        printemps::presolver::
             remove_redundant_constraints_with_tightening_variable_bounds(&model,
                                                                          false);
         EXPECT_EQ(false, x.is_fixed());
@@ -451,7 +451,7 @@ TEST_F(TestPresolver,
         auto& y = model.create_variable("y", 0, 1);
         auto& g = model.create_constraint("g", -3 * x + y >= 7);
 
-        printemps::model::
+        printemps::presolver::
             remove_redundant_constraints_with_tightening_variable_bounds(&model,
                                                                          false);
         EXPECT_EQ(false, x.is_fixed());
@@ -467,7 +467,7 @@ TEST_F(TestPresolver, fix_implicit_fixed_variables) {
 
     auto& x = model.create_variables("x", 10, -10, 10);
     x(0).set_bound(5, 5);
-    printemps::model::fix_implicit_fixed_variables(&model, false);
+    printemps::presolver::fix_implicit_fixed_variables(&model, false);
     EXPECT_EQ(5, x(0).value());
     EXPECT_EQ(true, x(0).is_fixed());
 
@@ -509,7 +509,7 @@ TEST_F(TestPresolver, fix_redundant_variables) {
 
         model.categorize_variables();
         model.categorize_constraints();
-        printemps::model::fix_redundant_variables(&model, false);
+        printemps::presolver::fix_redundant_variables(&model, false);
         model.categorize_variables();
         model.categorize_constraints();
 
@@ -545,7 +545,7 @@ TEST_F(TestPresolver, fix_redundant_variables) {
 
         model.categorize_variables();
         model.categorize_constraints();
-        printemps::model::fix_redundant_variables(&model, false);
+        printemps::presolver::fix_redundant_variables(&model, false);
         model.categorize_variables();
         model.categorize_constraints();
 

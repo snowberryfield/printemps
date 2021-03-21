@@ -3,16 +3,16 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_MODEL_PRESOLVER_H__
-#define PRINTEMPS_MODEL_PRESOLVER_H__
+#ifndef PRINTEMPS_PRESOLVER_PRESOLVER_H__
+#define PRINTEMPS_PRESOLVER_PRESOLVER_H__
 
 namespace printemps {
-namespace model {
+namespace presolver {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 constexpr int remove_independent_variables(
-    Model<T_Variable, T_Expression> *a_model,  //
-    const bool                       a_IS_ENABLED_PRINT) {
+    model::Model<T_Variable, T_Expression> *a_model,  //
+    const bool                              a_IS_ENABLED_PRINT) {
     int number_of_newly_fixed_variables = 0;
     for (auto &&proxy : a_model->variable_proxies()) {
         for (auto &&variable : proxy.flat_indexed_variables()) {
@@ -111,8 +111,8 @@ constexpr int remove_independent_variables(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 constexpr int remove_redundant_constraints_with_tightening_variable_bounds(
-    Model<T_Variable, T_Expression> *a_model,  //
-    const bool                       a_IS_ENABLED_PRINT) {
+    model::Model<T_Variable, T_Expression> *a_model,  //
+    const bool                              a_IS_ENABLED_PRINT) {
     const int BOUND_LIMIT = 100000;
 
     int number_of_newly_disabled_constraints = 0;
@@ -137,14 +137,14 @@ constexpr int remove_redundant_constraints_with_tightening_variable_bounds(
             auto &sensitivities  = constraint.expression().sensitivities();
             auto  constant_value = constraint.expression().constant_value();
 
-            std::vector<
-                std::pair<Variable<T_Variable, T_Expression> *, T_Expression>>
-                not_fixed_variable_sensitivities;
-            std::vector<
-                std::pair<Variable<T_Variable, T_Expression> *, T_Expression>>
+            using Sensitivity_T =
+                std::pair<model::Variable<T_Variable, T_Expression> *,
+                          T_Expression>;
+
+            std::vector<Sensitivity_T> not_fixed_variable_sensitivities;
+            std::vector<Sensitivity_T>
                 positive_coefficient_not_fixed_variable_sensitivities;
-            std::vector<
-                std::pair<Variable<T_Variable, T_Expression> *, T_Expression>>
+            std::vector<Sensitivity_T>
                 negative_coefficient_not_fixed_variable_sensitivities;
 
             not_fixed_variable_sensitivities.reserve(sensitivities.size());
@@ -198,14 +198,14 @@ constexpr int remove_redundant_constraints_with_tightening_variable_bounds(
              * If the constraint is always satisfied obviously, it will be
              * removed.
              */
-            if ((constraint.sense() == ConstraintSense::Equal &&
+            if ((constraint.sense() == model::ConstraintSense::Equal &&
                  not_fixed_variable_sensitivities.size() == 0 &&
                  fixed_term_value + constant_value == 0) ||
-                (constraint.sense() == ConstraintSense::Lower &&
+                (constraint.sense() == model::ConstraintSense::Lower &&
                  not_fixed_term_upper_bound + fixed_term_value +
                          constant_value <=
                      0) ||
-                (constraint.sense() == ConstraintSense::Upper &&
+                (constraint.sense() == model::ConstraintSense::Upper &&
                  not_fixed_term_lower_bound + fixed_term_value +
                          constant_value >=
                      0)) {
@@ -237,7 +237,7 @@ constexpr int remove_redundant_constraints_with_tightening_variable_bounds(
                 auto bound_temp =
                     -(fixed_term_value + constant_value) / coefficient;
 
-                if (constraint.sense() == ConstraintSense::Equal) {
+                if (constraint.sense() == model::ConstraintSense::Equal) {
                     /**
                      * If the singleton constraint is defined by an
                      * equality as ax+b=0, the value of the decision
@@ -256,9 +256,11 @@ constexpr int remove_redundant_constraints_with_tightening_variable_bounds(
                         constraint.disable();
                         number_of_newly_disabled_constraints++;
                     }
-                } else if ((constraint.sense() == ConstraintSense::Lower &&
+                } else if ((constraint.sense() ==
+                                model::ConstraintSense::Lower &&
                             coefficient > 0) ||
-                           (constraint.sense() == ConstraintSense::Upper &&
+                           (constraint.sense() ==
+                                model::ConstraintSense::Upper &&
                             coefficient < 0)) {
                     /**
                      * If the singleton constraint is defined by an
@@ -290,9 +292,11 @@ constexpr int remove_redundant_constraints_with_tightening_variable_bounds(
                         number_of_newly_disabled_constraints++;
                     }
 
-                } else if ((constraint.sense() == ConstraintSense::Upper &&
+                } else if ((constraint.sense() ==
+                                model::ConstraintSense::Upper &&
                             coefficient > 0) ||
-                           (constraint.sense() == ConstraintSense::Lower &&
+                           (constraint.sense() ==
+                                model::ConstraintSense::Lower &&
                             coefficient < 0)) {
                     /**
                      * If the singleton constraint is defined by an
@@ -339,7 +343,7 @@ constexpr int remove_redundant_constraints_with_tightening_variable_bounds(
                 auto lower_bound = variable_ptr->lower_bound();
                 auto upper_bound = variable_ptr->upper_bound();
 
-                if (constraint.sense() == ConstraintSense::Upper) {
+                if (constraint.sense() == model::ConstraintSense::Upper) {
                     auto bound_temp = -(not_fixed_term_upper_bound -
                                         coefficient * upper_bound +
                                         fixed_term_value + constant_value) /
@@ -355,7 +359,8 @@ constexpr int remove_redundant_constraints_with_tightening_variable_bounds(
                             a_IS_ENABLED_PRINT);
                         variable_ptr->set_bound(bound_ceil, upper_bound);
                     }
-                } else if (constraint.sense() == ConstraintSense::Lower) {
+                } else if (constraint.sense() ==
+                           model::ConstraintSense::Lower) {
                     auto bound_temp = -(not_fixed_term_lower_bound -
                                         coefficient * lower_bound +
                                         fixed_term_value + constant_value) /
@@ -382,7 +387,7 @@ constexpr int remove_redundant_constraints_with_tightening_variable_bounds(
                 auto lower_bound = variable_ptr->lower_bound();
                 auto upper_bound = variable_ptr->upper_bound();
 
-                if (constraint.sense() == ConstraintSense::Upper) {
+                if (constraint.sense() == model::ConstraintSense::Upper) {
                     auto bound_temp = -(not_fixed_term_upper_bound -
                                         coefficient * lower_bound +
                                         fixed_term_value + constant_value) /
@@ -400,7 +405,7 @@ constexpr int remove_redundant_constraints_with_tightening_variable_bounds(
                     }
                 }
 
-                else if (constraint.sense() == ConstraintSense::Lower) {
+                else if (constraint.sense() == model::ConstraintSense::Lower) {
                     auto bound_temp = -(not_fixed_term_lower_bound -
                                         coefficient * upper_bound +
                                         fixed_term_value + constant_value) /
@@ -426,8 +431,8 @@ constexpr int remove_redundant_constraints_with_tightening_variable_bounds(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 constexpr int fix_implicit_fixed_variables(
-    Model<T_Variable, T_Expression> *a_model,  //
-    const bool                       a_IS_ENABLED_PRINT) {
+    model::Model<T_Variable, T_Expression> *a_model,  //
+    const bool                              a_IS_ENABLED_PRINT) {
     int number_of_newly_fixed_variables = 0;
     for (auto &&proxy : a_model->variable_proxies()) {
         for (auto &&variable : proxy.flat_indexed_variables()) {
@@ -462,8 +467,8 @@ constexpr int fix_implicit_fixed_variables(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 constexpr int fix_redundant_variables(
-    Model<T_Variable, T_Expression> *a_model,  //
-    const bool                       a_IS_ENABLED_PRINT) {
+    model::Model<T_Variable, T_Expression> *a_model,  //
+    const bool                              a_IS_ENABLED_PRINT) {
     int number_of_set_partitionings =
         a_model->constraint_type_reference().set_partitioning_ptrs.size();
     int number_of_set_coverings =
@@ -612,8 +617,8 @@ constexpr int fix_redundant_variables(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-constexpr void presolve(Model<T_Variable, T_Expression> *a_model,  //
-                        const bool                       a_IS_ENABLED_PRINT) {
+constexpr void presolve(model::Model<T_Variable, T_Expression> *a_model,  //
+                        const bool a_IS_ENABLED_PRINT) {
     utility::print_single_line(a_IS_ENABLED_PRINT);
     utility::print_message("Presolving...", a_IS_ENABLED_PRINT);
 
@@ -650,7 +655,7 @@ constexpr void presolve(Model<T_Variable, T_Expression> *a_model,  //
     }
     utility::print_message("Done.", a_IS_ENABLED_PRINT);
 }
-}  // namespace model
+}  // namespace presolver
 }  // namespace printemps
 #endif
 /*****************************************************************************/

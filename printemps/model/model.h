@@ -39,8 +39,8 @@
 #include "constraint_reference.h"
 #include "constraint_type_reference.h"
 
-#include "presolver.h"
-#include "verifier.h"
+#include "../presolver/presolver.h"
+#include "../verifier/verifier.h"
 
 namespace printemps {
 namespace model {
@@ -625,7 +625,7 @@ class Model {
                          const bool a_IS_ENABLED_USER_DEFINED_MOVE,         //
                          const SelectionMode &a_SELECTION_MODE,             //
                          const bool           a_IS_ENABLED_PRINT) {
-        verify_problem(this, a_IS_ENABLED_PRINT);
+        verifier::verify_problem(this, a_IS_ENABLED_PRINT);
 
         this->setup_variable_related_constraints();
         this->setup_unique_name();
@@ -645,7 +645,7 @@ class Model {
          * decision variables implicitly fixed.
          */
         if (a_IS_ENABLED_PRESOLVE) {
-            presolve(this, a_IS_ENABLED_PRINT);
+            presolver::presolve(this, a_IS_ENABLED_PRINT);
         }
 
         /// Categorize again to reflect the presolving result.
@@ -664,17 +664,17 @@ class Model {
                                  a_IS_ENABLED_CHAIN_MOVE,           //
                                  a_IS_ENABLED_PRINT);
 
-        verify_and_correct_selection_variables_initial_values(  //
-            this,                                               //
-            a_IS_ENABLED_INITIAL_VALUE_CORRECTION,              //
+        verifier::verify_and_correct_selection_variables_initial_values(  //
+            this,                                                         //
+            a_IS_ENABLED_INITIAL_VALUE_CORRECTION,                        //
             a_IS_ENABLED_PRINT);
 
-        verify_and_correct_binary_variables_initial_values(
+        verifier::verify_and_correct_binary_variables_initial_values(
             this,                                   //
             a_IS_ENABLED_INITIAL_VALUE_CORRECTION,  //
             a_IS_ENABLED_PRINT);
 
-        verify_and_correct_integer_variables_initial_values(
+        verifier::verify_and_correct_integer_variables_initial_values(
             this,                                   //
             a_IS_ENABLED_INITIAL_VALUE_CORRECTION,  //
             a_IS_ENABLED_PRINT);
@@ -1344,11 +1344,11 @@ class Model {
                     a_PROXIES[proxy_index].flat_indexed_values(flat_index));
             }
         }
-        verify_and_correct_selection_variables_initial_values(  //
+        verifier::verify_and_correct_selection_variables_initial_values(  //
             this, false, false);
-        verify_and_correct_binary_variables_initial_values(  //
+        verifier::verify_and_correct_binary_variables_initial_values(  //
             this, false, false);
-        verify_and_correct_integer_variables_initial_values(  //
+        verifier::verify_and_correct_integer_variables_initial_values(  //
             this, false, false);
     }
 
@@ -1588,18 +1588,18 @@ class Model {
     }
 
     /*************************************************************************/
-    inline SolutionScore evaluate(const Move<T_Variable, T_Expression> &a_MOVE,
-                                  const SolutionScore &a_CURRENT_SCORE) const
-        noexcept {
+    inline SolutionScore evaluate(
+        const Move<T_Variable, T_Expression> &a_MOVE,
+        const SolutionScore &                 a_CURRENT_SCORE) const noexcept {
         SolutionScore score;
         this->evaluate(&score, a_MOVE, a_CURRENT_SCORE);
         return score;
     }
 
     /*************************************************************************/
-    constexpr void evaluate(SolutionScore *a_score_ptr,  //
-                            const Move<T_Variable, T_Expression> &a_MOVE) const
-        noexcept {
+    constexpr void evaluate(
+        SolutionScore *                       a_score_ptr,  //
+        const Move<T_Variable, T_Expression> &a_MOVE) const noexcept {
         double total_violation = 0.0;
         double local_penalty   = 0.0;
         double global_penalty  = 0.0;
@@ -1652,10 +1652,10 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void evaluate(SolutionScore *a_score_ptr,  //
-                            const Move<T_Variable, T_Expression> &a_MOVE,
-                            const SolutionScore &a_CURRENT_SCORE) const
-        noexcept {
+    constexpr void evaluate(
+        SolutionScore *                       a_score_ptr,  //
+        const Move<T_Variable, T_Expression> &a_MOVE,
+        const SolutionScore &                 a_CURRENT_SCORE) const noexcept {
         bool is_feasibility_improvable = false;
 
         double total_violation = a_CURRENT_SCORE.total_violation;
