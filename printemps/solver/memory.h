@@ -6,8 +6,6 @@
 #ifndef PRINTEMPS_SOLVER_MEMORY_H__
 #define PRINTEMPS_SOLVER_MEMORY_H__
 
-#include <vector>
-
 namespace printemps {
 namespace solver {
 /*****************************************************************************/

@@ -6,8 +6,6 @@
 #ifndef PRINTEMPS_UTILITY_UNORDERED_UTILITY_H__
 #define PRINTEMPS_UTILITY_UNORDERED_UTILITY_H__
 
-#include <unordered_set>
-
 namespace printemps {
 namespace utility {
 /*****************************************************************************/

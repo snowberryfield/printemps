@@ -6,8 +6,6 @@
 #ifndef PRINTEMPS_MODEL_SUMMARY_H__
 #define PRINTEMPS_MODEL_SUMMARY_H__
 
-#include <string>
-
 namespace printemps {
 namespace model {
 /*****************************************************************************/

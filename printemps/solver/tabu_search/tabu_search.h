@@ -6,10 +6,6 @@
 #ifndef PRINTEMPS_SOLVER_TABU_SEARCH_TABU_SEARCH_H__
 #define PRINTEMPS_SOLVER_TABU_SEARCH_TABU_SEARCH_H__
 
-#ifdef _OPENMP
-#include <omp.h>
-#endif
-
 #include "../memory.h"
 #include "tabu_search_move_score.h"
 #include "tabu_search_option.h"

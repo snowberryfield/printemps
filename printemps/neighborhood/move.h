@@ -6,9 +6,6 @@
 #ifndef PRINTEMPS_NEIGHBORHOOD_MOVE_H__
 #define PRINTEMPS_NEIGHBORHOOD_MOVE_H__
 
-#include <vector>
-#include <unordered_set>
-
 #include "../utility/utility.h"
 
 namespace printemps {

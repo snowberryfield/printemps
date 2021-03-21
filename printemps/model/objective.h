@@ -6,9 +6,6 @@
 #ifndef PRINTEMPS_MODEL_OBJECTIVE_H__
 #define PRINTEMPS_MODEL_OBJECTIVE_H__
 
-#include <functional>
-#include <vector>
-
 namespace printemps {
 namespace neighborhood {
 /*****************************************************************************/

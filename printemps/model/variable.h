@@ -6,8 +6,6 @@
 #ifndef PRINTEMPS_MODEL_VARIABLE_H__
 #define PRINTEMPS_MODEL_VARIABLE_H__
 
-#include <unordered_map>
-#include <unordered_set>
 #include "abstract_multi_array_element.h"
 
 namespace printemps {

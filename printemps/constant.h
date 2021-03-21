@@ -6,9 +6,6 @@
 #ifndef PRINTEMPS_CONSTANT_H__
 #define PRINTEMPS_CONSTANT_H__
 
-#include <string>
-#include <limits>
-
 namespace printemps {
 namespace constant {
 static constexpr auto EPSILON      = 1E-5;

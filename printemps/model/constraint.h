@@ -6,9 +6,6 @@
 #ifndef PRINTEMPS_MODEL_CONSTRAINT_H__
 #define PRINTEMPS_MODEL_CONSTRAINT_H__
 
-#include <functional>
-#include <vector>
-
 #include "abstract_multi_array_element.h"
 
 namespace printemps {
