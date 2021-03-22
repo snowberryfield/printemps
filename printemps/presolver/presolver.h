@@ -335,7 +335,7 @@ constexpr int remove_redundant_constraints_with_tightening_variable_bounds(
              * Tighten the lower and upper bounds of the decision variables
              * based on the bounds of the rest part.
              */
-            for (auto &sensitivity :
+            for (auto &&sensitivity :
                  positive_coefficient_not_fixed_variable_sensitivities) {
                 auto variable_ptr = sensitivity.first;
                 auto coefficient  = sensitivity.second;
@@ -379,7 +379,7 @@ constexpr int remove_redundant_constraints_with_tightening_variable_bounds(
                 }
             }
 
-            for (auto &sensitivity :
+            for (auto &&sensitivity :
                  negative_coefficient_not_fixed_variable_sensitivities) {
                 auto variable_ptr = sensitivity.first;
                 auto coefficient  = sensitivity.second;

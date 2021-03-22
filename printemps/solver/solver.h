@@ -166,29 +166,29 @@ Result<T_Variable, T_Expression> solve(
      * be enabled when optimization stagnates.
      */
     if (master_option.is_enabled_binary_move) {
-        model->neighborhood().enable_binary_move();
+        model->neighborhood().binary().enable();
     }
 
     if (master_option.is_enabled_integer_move) {
-        model->neighborhood().enable_integer_move();
+        model->neighborhood().integer().enable();
     }
 
     if (master_option.is_enabled_user_defined_move) {
-        model->neighborhood().enable_user_defined_move();
+        model->neighborhood().user_defined().enable();
     }
 
     if (master_option.selection_mode != model::SelectionMode::None) {
-        model->neighborhood().enable_selection_move();
+        model->neighborhood().selection().enable();
     }
 
     /**
      * Check whether there exist special neighborhood moves or not.
      */
     bool has_special_neighborhood_moves =
-        (model->neighborhood().aggregation_moves().size() +
-         model->neighborhood().precedence_moves().size() +
-         model->neighborhood().variable_bound_moves().size() +
-         model->neighborhood().exclusive_moves().size()) > 0;
+        (model->neighborhood().aggregation().moves().size() +
+         model->neighborhood().precedence().moves().size() +
+         model->neighborhood().variable_bound().moves().size() +
+         model->neighborhood().exclusive().moves().size()) > 0;
 
     if (master_option.is_enabled_chain_move) {
         has_special_neighborhood_moves = true;
@@ -1143,7 +1143,7 @@ Result<T_Variable, T_Expression> solve(
         if (result.total_update_status &
             IncumbentHolderConstant::STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
             if (option.is_enabled_chain_move) {
-                model->neighborhood().clear_chain_moves();
+                model->neighborhood().chain().clear_moves();
             }
         }
 
@@ -1161,40 +1161,40 @@ Result<T_Variable, T_Expression> solve(
              */
             /// Aggregation
             if (master_option.is_enabled_aggregation_move) {
-                if (model->neighborhood().is_enabled_aggregation_move()) {
-                    model->neighborhood().disable_aggregation_move();
+                if (model->neighborhood().aggregation().is_enabled()) {
+                    model->neighborhood().aggregation().disable();
                     is_deactivated_special_neighborhood_move = true;
                 }
             }
 
             /// Precedence
             if (master_option.is_enabled_precedence_move) {
-                if (model->neighborhood().is_enabled_precedence_move()) {
-                    model->neighborhood().disable_precedence_move();
+                if (model->neighborhood().precedence().is_enabled()) {
+                    model->neighborhood().precedence().disable();
                     is_deactivated_special_neighborhood_move = true;
                 }
             }
 
             /// Variable Bound
             if (master_option.is_enabled_variable_bound_move) {
-                if (model->neighborhood().is_enabled_variable_bound_move()) {
-                    model->neighborhood().disable_variable_bound_move();
+                if (model->neighborhood().variable_bound().is_enabled()) {
+                    model->neighborhood().variable_bound().disable();
                     is_deactivated_special_neighborhood_move = true;
                 }
             }
 
             /// Exclusive
             if (master_option.is_enabled_exclusive_move) {
-                if (model->neighborhood().is_enabled_exclusive_move()) {
-                    model->neighborhood().disable_exclusive_move();
+                if (model->neighborhood().exclusive().is_enabled()) {
+                    model->neighborhood().exclusive().disable();
                     is_deactivated_special_neighborhood_move = true;
                 }
             }
 
             /// Chain
             if (master_option.is_enabled_chain_move) {
-                if (model->neighborhood().is_enabled_chain_move()) {
-                    model->neighborhood().disable_chain_move();
+                if (model->neighborhood().chain().is_enabled()) {
+                    model->neighborhood().chain().disable();
                     is_deactivated_special_neighborhood_move = true;
                 }
             }
@@ -1208,41 +1208,40 @@ Result<T_Variable, T_Expression> solve(
                 master_option.tabu_search.iteration_max) {
                 /// Aggregation
                 if (master_option.is_enabled_aggregation_move) {
-                    if (!model->neighborhood().is_enabled_aggregation_move()) {
-                        model->neighborhood().enable_aggregation_move();
+                    if (!model->neighborhood().aggregation().is_enabled()) {
+                        model->neighborhood().aggregation().enable();
                         is_activated_special_neighborhood_move = true;
                     }
                 }
 
                 /// Precedence
                 if (master_option.is_enabled_precedence_move) {
-                    if (!model->neighborhood().is_enabled_precedence_move()) {
-                        model->neighborhood().enable_precedence_move();
+                    if (!model->neighborhood().precedence().is_enabled()) {
+                        model->neighborhood().precedence().enable();
                         is_activated_special_neighborhood_move = true;
                     }
                 }
 
                 /// Variable Bound
                 if (master_option.is_enabled_variable_bound_move) {
-                    if (!model->neighborhood()
-                             .is_enabled_variable_bound_move()) {
-                        model->neighborhood().enable_variable_bound_move();
+                    if (!model->neighborhood().variable_bound().is_enabled()) {
+                        model->neighborhood().variable_bound().enable();
                         is_activated_special_neighborhood_move = true;
                     }
                 }
 
                 /// Exclusive
                 if (master_option.is_enabled_exclusive_move) {
-                    if (!model->neighborhood().is_enabled_exclusive_move()) {
-                        model->neighborhood().enable_exclusive_move();
+                    if (!model->neighborhood().exclusive().is_enabled()) {
+                        model->neighborhood().exclusive().enable();
                         is_activated_special_neighborhood_move = true;
                     }
                 }
 
                 /// Chain
                 if (master_option.is_enabled_chain_move) {
-                    if (!model->neighborhood().is_enabled_chain_move()) {
-                        model->neighborhood().enable_chain_move();
+                    if (!model->neighborhood().chain().is_enabled()) {
+                        model->neighborhood().chain().enable();
                         is_activated_special_neighborhood_move = true;
                     }
                 }
@@ -1252,26 +1251,26 @@ Result<T_Variable, T_Expression> solve(
         /**
          * Sort and deduplicate registered chain moves.
          */
-        if (model->neighborhood().is_enabled_chain_move() &&
+        if (model->neighborhood().chain().is_enabled() &&
             master_option.chain_move_capacity > 0) {
-            model->neighborhood().sort_chain_moves();
-            model->neighborhood().deduplicate_chain_moves();
+            model->neighborhood().chain().sort_moves();
+            model->neighborhood().chain().deduplicate_moves();
         }
 
         /**
          * Reduce the registered chain moves.
          */
-        if (static_cast<int>(model->neighborhood().chain_moves().size()) >
+        if (static_cast<int>(model->neighborhood().chain().moves().size()) >
             master_option.chain_move_capacity) {
             switch (master_option.chain_move_reduce_mode) {
                 case ChainMoveReduceMode::OverlapRate: {
-                    model->neighborhood().reduce_chain_moves(
+                    model->neighborhood().chain().reduce_moves(
                         master_option.chain_move_capacity);
                     break;
                 }
                 case ChainMoveReduceMode::Shuffle: {
-                    model->neighborhood().shuffle_chain_moves(&get_rand_mt);
-                    model->neighborhood().reduce_chain_moves(
+                    model->neighborhood().chain().shuffle_moves(&get_rand_mt);
+                    model->neighborhood().chain().reduce_moves(
                         master_option.chain_move_capacity);
                     break;
                 }
@@ -1523,10 +1522,11 @@ Result<T_Variable, T_Expression> solve(
         /**
          * Print the number of the stored chain moves.
          */
-        if (model->neighborhood().is_enabled_chain_move()) {
+        if (model->neighborhood().chain().is_enabled()) {
             utility::print_message(
                 "There are " +
-                    std::to_string(model->neighborhood().chain_moves().size()) +
+                    std::to_string(
+                        model->neighborhood().chain().moves().size()) +
                     " stored chain moves.",
                 master_option.verbose >= Verbose::Outer);
         }

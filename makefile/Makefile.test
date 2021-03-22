@@ -7,7 +7,12 @@ CC = gcc
 
 .PHOBY: test
 test: build
-	$(BUILD_DIR)/test_model $(BUILD_DIR)/test_presolver $(BUILD_DIR)/test_verifier $(BUILD_DIR)/test_neighborhood; $(BUILD_DIR)/test_solver; $(BUILD_DIR)/test_utility
+	$(BUILD_DIR)/test_model; \
+	$(BUILD_DIR)/test_presolver; \
+	$(BUILD_DIR)/test_verifier; \
+	$(BUILD_DIR)/test_neighborhood; \
+	$(BUILD_DIR)/test_solver; \
+	$(BUILD_DIR)/test_utility
 
 .PHONY: build
 build:

@@ -134,7 +134,7 @@ TEST_F(TestQuadracitAssignment, quadratic_assignment) {
                     }
                 }
             };
-    model.neighborhood().set_user_defined_move_updater(move_updater);
+    model.neighborhood().user_defined().set_move_updater(move_updater);
 
     /// initial solution
     for (auto n = 0; n < qap.N; n++) {

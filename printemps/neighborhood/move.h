@@ -60,6 +60,69 @@ struct Move {
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
+constexpr bool has_fixed_variables(
+    const Move<T_Variable, T_Expression> &a_MOVE) {
+    for (const auto &alteration : a_MOVE.alterations) {
+        if (alteration.first->is_fixed()) {
+            return true;
+        }
+    }
+    return false;
+};
+
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+constexpr bool has_selection_variables(
+    const Move<T_Variable, T_Expression> &a_MOVE) {
+    for (const auto &alteration : a_MOVE.alterations) {
+        if (alteration.first->sense() == model::VariableSense::Selection) {
+            return true;
+        }
+    }
+    return false;
+};
+
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+constexpr bool has_bound_violation(
+    const Move<T_Variable, T_Expression> &a_MOVE) {
+    for (const auto &alteration : a_MOVE.alterations) {
+        if (alteration.second < alteration.first->lower_bound()) {
+            return true;
+        }
+        if (alteration.second > alteration.first->upper_bound()) {
+            return true;
+        }
+    }
+    return false;
+};
+
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+constexpr bool has_objective_improvable_variable(
+    const Move<T_Variable, T_Expression> &a_MOVE) {
+    for (const auto &alteration : a_MOVE.alterations) {
+        if (alteration.first->is_objective_improvable()) {
+            return true;
+        }
+    }
+    return false;
+};
+
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+constexpr bool has_feasibility_improvable_variable(
+    const Move<T_Variable, T_Expression> &a_MOVE) {
+    for (const auto &alteration : a_MOVE.alterations) {
+        if (alteration.first->is_feasibility_improvable()) {
+            return true;
+        }
+    }
+    return false;
+};
+
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
 constexpr bool has_duplicate_variable(
     const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) {
     auto &    alterations      = a_MOVE.alterations;
