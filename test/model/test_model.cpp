@@ -960,8 +960,8 @@ TEST_F(TestModel, setup_is_enabled_fast_evaluation) {
             [&x]([[maybe_unused]] std::vector<
                  printemps::neighborhood::Move<int, double>>* a_moves) { ; };
 
-        model.neighborhood().set_user_defined_move_updater(move_updater);
-        model.neighborhood().enable_user_defined_move();
+        model.neighborhood().user_defined().set_move_updater(move_updater);
+        model.neighborhood().user_defined().enable();
         model.setup_is_enabled_fast_evaluation();
 
         EXPECT_EQ(false, model.is_enabled_fast_evaluation());

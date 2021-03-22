@@ -173,7 +173,7 @@ class QAPLIBReader {
                     }
                 }
             };
-        m_model.neighborhood().set_user_defined_move_updater(move_updater);
+        m_model.neighborhood().user_defined().set_move_updater(move_updater);
         return m_model;
     }
 };

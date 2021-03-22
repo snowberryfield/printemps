@@ -597,8 +597,9 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                     for (auto&& alteration : back_chain_move.alterations) {
                         alteration.second = 1 - alteration.second;
                     }
-                    model->neighborhood().register_chain_move(chain_move);
-                    model->neighborhood().register_chain_move(back_chain_move);
+                    model->neighborhood().chain().register_move(chain_move);
+                    model->neighborhood().chain().register_move(
+                        back_chain_move);
                 }
             }
         }

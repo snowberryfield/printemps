@@ -774,7 +774,7 @@ class Model {
             }
         }
 
-        if (m_neighborhood.is_enabled_user_defined_move()) {
+        if (m_neighborhood.user_defined().is_enabled()) {
             m_is_enabled_fast_evaluation = false;
         }
     }
@@ -1101,49 +1101,43 @@ class Model {
         utility::print_single_line(a_IS_ENABLED_PRINT);
         utility::print_message("Detecting the neighborhood structure...",
                                a_IS_ENABLED_PRINT);
-        bool has_fixed_variables = this->number_of_fixed_variables() > 0;
-        bool has_selection_variables =
-            this->number_of_selection_variables() > 0;
 
-        m_neighborhood.set_has_fixed_variables(has_fixed_variables);
-        m_neighborhood.set_has_selection_variables(has_selection_variables);
-
-        m_neighborhood.setup_binary_move_updater(
+        m_neighborhood.binary().setup(
             m_variable_reference.binary_variable_ptrs);
 
-        m_neighborhood.setup_integer_move_updater(
+        m_neighborhood.integer().setup(
             m_variable_reference.integer_variable_ptrs);
 
-        m_neighborhood.setup_selection_move_updater(
+        m_neighborhood.selection().setup(
             m_variable_reference.selection_variable_ptrs);
 
         if (a_IS_ENABLED_AGGREGATION_MOVE) {
-            m_neighborhood.setup_aggregation_move_updater(
+            m_neighborhood.aggregation().setup(
                 m_constraint_type_reference.aggregation_ptrs);
         }
 
         if (a_IS_ENABLED_PRECEDENCE_MOVE) {
-            m_neighborhood.setup_precedence_move_updater(
+            m_neighborhood.precedence().setup(
                 m_constraint_type_reference.precedence_ptrs);
         }
 
+        if (a_IS_ENABLED_VARIABLE_BOUND_MOVE) {
+            m_neighborhood.variable_bound().setup(
+                m_constraint_type_reference.variable_bound_ptrs);
+        }
+
         if (a_IS_ENABLED_EXCLUSIVE_MOVE) {
-            m_neighborhood.setup_exclusive_move_updater(
+            m_neighborhood.exclusive().setup(
                 m_constraint_type_reference.set_partitioning_ptrs,  //
                 m_constraint_type_reference.set_packing_ptrs);
         }
 
-        if (a_IS_ENABLED_VARIABLE_BOUND_MOVE) {
-            m_neighborhood.setup_variable_bound_move_updater(
-                m_constraint_type_reference.variable_bound_ptrs);
-        }
-
         if (a_IS_ENABLED_CHAIN_MOVE) {
-            m_neighborhood.setup_chain_move_updater();
+            m_neighborhood.chain().setup();
         }
 
         if (a_IS_ENABLED_USER_DEFINED_MOVE) {
-            m_neighborhood.setup_user_defined_move_updater();
+            m_neighborhood.user_defined().setup();
         }
 
         utility::print_message("Done.", a_IS_ENABLED_PRINT);
@@ -1382,7 +1376,7 @@ class Model {
             m_objective.update(a_MOVE);
         }
 
-        if (m_neighborhood.is_enabled_user_defined_move()) {
+        if (m_neighborhood.user_defined().is_enabled()) {
             for (auto &&proxy : m_constraint_proxies) {
                 for (auto &&constraint : proxy.flat_indexed_constraints()) {
                     if (constraint.is_enabled()) {

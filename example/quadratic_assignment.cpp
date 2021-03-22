@@ -171,7 +171,7 @@ int main(void) {
                     }
                 }
             };
-    model.neighborhood().set_user_defined_move_updater(move_updater);
+    model.neighborhood().user_defined().set_move_updater(move_updater);
 
     /*************************************************************************/
     /// Run solver

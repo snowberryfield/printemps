@@ -13,8 +13,8 @@ enum class MoveSense {
     Binary,         //
     Integer,        //
     Selection,      //
-    Precedence,     //
     Aggregation,    //
+    Precedence,     //
     VariableBound,  //
     Exclusive,      //
     Chain,          //
