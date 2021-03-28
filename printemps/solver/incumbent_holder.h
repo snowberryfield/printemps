@@ -24,12 +24,12 @@ class IncumbentHolder {
    private:
     bool m_is_found_feasible_solution;
 
-    model::Solution<T_Variable, T_Expression>
+    solution::Solution<T_Variable, T_Expression>
         m_local_augmented_incumbent_solution;
-    model::Solution<T_Variable, T_Expression>
+    solution::Solution<T_Variable, T_Expression>
         m_global_augmented_incumbent_solution;
 
-    model::Solution<T_Variable, T_Expression> m_feasible_incumbent_solution;
+    solution::Solution<T_Variable, T_Expression> m_feasible_incumbent_solution;
 
     /**
      * following double-type members contain incumbent objective values as
@@ -39,9 +39,9 @@ class IncumbentHolder {
     double m_global_augmented_incumbent_objective;
     double m_feasible_incumbent_objective;
 
-    model::SolutionScore m_local_augmented_incumbent_score;
-    model::SolutionScore m_global_augmented_incumbent_score;
-    model::SolutionScore m_feasible_incumbent_score;
+    solution::SolutionScore m_local_augmented_incumbent_score;
+    solution::SolutionScore m_global_augmented_incumbent_score;
+    solution::SolutionScore m_feasible_incumbent_score;
 
    public:
     /*************************************************************************/
@@ -71,8 +71,8 @@ class IncumbentHolder {
 
     /*************************************************************************/
     constexpr int try_update_incumbent(
-        const model::Solution<T_Variable, T_Expression> &a_SOLUTION,
-        const model::SolutionScore &                     a_SCORE) {
+        const solution::Solution<T_Variable, T_Expression> &a_SOLUTION,
+        const solution::SolutionScore &                     a_SCORE) {
         int status = IncumbentHolderConstant::STATUS_NO_UPDATED;
 
         /**
@@ -119,9 +119,9 @@ class IncumbentHolder {
     /*************************************************************************/
     constexpr int try_update_incumbent(
         model::Model<T_Variable, T_Expression> *a_model,
-        const model::SolutionScore &            a_SCORE) {
+        const solution::SolutionScore &         a_SCORE) {
         /// solution here defined is not substituted when no improvement
-        model::Solution<T_Variable, T_Expression> solution;
+        solution::Solution<T_Variable, T_Expression> solution;
 
         bool is_solution_updated = false;
 
@@ -191,19 +191,19 @@ class IncumbentHolder {
     }
 
     /*************************************************************************/
-    inline constexpr const model::Solution<T_Variable, T_Expression>
+    inline constexpr const solution::Solution<T_Variable, T_Expression>
         &local_augmented_incumbent_solution(void) const {
         return m_local_augmented_incumbent_solution;
     }
 
     /*************************************************************************/
-    inline constexpr const model::Solution<T_Variable, T_Expression>
+    inline constexpr const solution::Solution<T_Variable, T_Expression>
         &global_augmented_incumbent_solution(void) const {
         return m_global_augmented_incumbent_solution;
     }
 
     /*************************************************************************/
-    inline constexpr const model::Solution<T_Variable, T_Expression>
+    inline constexpr const solution::Solution<T_Variable, T_Expression>
         &feasible_incumbent_solution(void) const {
         return m_feasible_incumbent_solution;
     }
@@ -239,21 +239,21 @@ class IncumbentHolder {
     }
 
     /*************************************************************************/
-    inline const model::SolutionScore &local_augmented_incumbent_score(
+    inline const solution::SolutionScore &local_augmented_incumbent_score(
         void) const {
         /// cannot be constexpr by clang
         return m_local_augmented_incumbent_score;
     }
 
     /*************************************************************************/
-    inline const model::SolutionScore &global_augmented_incumbent_score(
+    inline const solution::SolutionScore &global_augmented_incumbent_score(
         void) const {
         /// cannot be constexpr by clang
         return m_global_augmented_incumbent_score;
     }
 
     /*************************************************************************/
-    inline const model::SolutionScore &feasible_incumbent_score(void) const {
+    inline const solution::SolutionScore &feasible_incumbent_score(void) const {
         /// cannot be constexpr by clang
         return m_feasible_incumbent_score;
     }

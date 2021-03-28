@@ -6,18 +6,22 @@
 #ifndef PRINTEMPS_MODEL_CONSTRAINT_PROXY_H__
 #define PRINTEMPS_MODEL_CONSTRAINT_PROXY_H__
 
-#include "abstract_multi_array.h"
+#include "../multi_array/abstract_multi_array.h"
 #include "constraint.h"
+
+namespace printemps {
+namespace multi_array {
+/*****************************************************************************/
+template <class T_Value>
+class ValueProxy;
+}  // namespace multi_array
+}  // namespace printemps
 
 namespace printemps {
 namespace model {
 /*****************************************************************************/
-template <class T_Value>
-class ValueProxy;
-
-/*****************************************************************************/
 template <class T_Variable, class T_Expression>
-class ConstraintProxy : public AbstractMultiArray {
+class ConstraintProxy : public multi_array::AbstractMultiArray {
     /**
      * [Access controls for special member functions]
      *  -- Default constructor : default, private
@@ -47,19 +51,19 @@ class ConstraintProxy : public AbstractMultiArray {
         const ConstraintProxy<T_Variable, T_Expression> &) = delete;
 
     /*************************************************************************/
-    ConstraintProxy(const int a_ID) : AbstractMultiArray(a_ID) {
+    ConstraintProxy(const int a_ID) : multi_array::AbstractMultiArray(a_ID) {
         this->setup_constraints();
     }
 
     /*************************************************************************/
     ConstraintProxy(const int a_ID, const int a_NUMBER_OF_ELEMENTS)
-        : AbstractMultiArray(a_ID, a_NUMBER_OF_ELEMENTS) {
+        : multi_array::AbstractMultiArray(a_ID, a_NUMBER_OF_ELEMENTS) {
         this->setup_constraints();
     }
 
     /*************************************************************************/
     ConstraintProxy(int a_ID, const std::vector<int> &a_SHAPE)
-        : AbstractMultiArray(a_ID, a_SHAPE) {
+        : multi_array::AbstractMultiArray(a_ID, a_SHAPE) {
         this->setup_constraints();
     }
 
@@ -199,9 +203,9 @@ class ConstraintProxy : public AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr ValueProxy<T_Expression> export_values_and_names(
-        void) const {
-        ValueProxy<T_Expression> proxy(m_index, m_shape);
+    inline constexpr multi_array::ValueProxy<T_Expression>
+    export_values_and_names(void) const {
+        multi_array::ValueProxy<T_Expression> proxy(m_index, m_shape);
 
         int number_of_elements = this->number_of_elements();
         for (auto i = 0; i < number_of_elements; i++) {
@@ -213,9 +217,9 @@ class ConstraintProxy : public AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr ValueProxy<T_Expression> export_violations_and_names(
-        void) const {
-        ValueProxy<T_Expression> proxy(m_index, m_shape);
+    inline constexpr multi_array::ValueProxy<T_Expression>
+    export_violations_and_names(void) const {
+        multi_array::ValueProxy<T_Expression> proxy(m_index, m_shape);
 
         int number_of_elements = this->number_of_elements();
         for (auto i = 0; i < number_of_elements; i++) {

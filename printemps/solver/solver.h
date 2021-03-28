@@ -8,11 +8,11 @@
 
 #include "../model/model.h"
 #include "../utility/utility.h"
+#include "../solution/solution_archive.h"
 
 #include "incumbent_holder.h"
 #include "option.h"
 #include "status.h"
-#include "solution_archive.h"
 #include "result.h"
 #include "tabu_search/tabu_search.h"
 #include "local_search/local_search.h"
@@ -64,7 +64,7 @@ Result<T_Variable, T_Expression> solve(
      * Define type aliases.
      */
     using Model_T           = model::Model<T_Variable, T_Expression>;
-    using Solution_T        = model::Solution<T_Variable, T_Expression>;
+    using Solution_T        = solution::Solution<T_Variable, T_Expression>;
     using IncumbentHolder_T = IncumbentHolder<T_Variable, T_Expression>;
 
     /**
@@ -217,7 +217,7 @@ Result<T_Variable, T_Expression> solve(
     /**
      * Prepare feasible solutions archive.
      */
-    SolutionArchive<T_Variable, T_Expression>                     //
+    solution::SolutionArchive<T_Variable, T_Expression>           //
         solution_archive(master_option.historical_data_capacity,  //
                          model->is_minimization(),                //
                          model->name(),                           //
@@ -237,8 +237,8 @@ Result<T_Variable, T_Expression> solve(
     Solution_T        previous_solution;
     IncumbentHolder_T incumbent_holder;
 
-    model::SolutionScore current_solution_score = model->evaluate({});
-    model::SolutionScore previous_solution_score;
+    solution::SolutionScore current_solution_score = model->evaluate({});
+    solution::SolutionScore previous_solution_score;
 
     [[maybe_unused]] int update_status = incumbent_holder.try_update_incumbent(
         current_solution, current_solution_score);
@@ -305,7 +305,7 @@ Result<T_Variable, T_Expression> solve(
                 /**
                  * Prepare the initial variable values.
                  */
-                std::vector<model::ValueProxy<T_Variable>>
+                std::vector<multi_array::ValueProxy<T_Variable>>
                     initial_variable_value_proxies =
                         current_solution.variable_value_proxies;
 
@@ -433,7 +433,7 @@ Result<T_Variable, T_Expression> solve(
             /**
              * Prepare the initial variable values.
              */
-            std::vector<model::ValueProxy<T_Variable>>
+            std::vector<multi_array::ValueProxy<T_Variable>>
                 initial_variable_value_proxies =
                     current_solution.variable_value_proxies;
 
@@ -613,7 +613,7 @@ Result<T_Variable, T_Expression> solve(
         /**
          * Prepare the initial variable values.
          */
-        std::vector<model::ValueProxy<T_Variable>>
+        std::vector<multi_array::ValueProxy<T_Variable>>
             initial_variable_value_proxies =
                 current_solution.variable_value_proxies;
 
@@ -1551,11 +1551,12 @@ Result<T_Variable, T_Expression> solve(
     /**
      * Export the final penalty coefficient values.
      */
-    std::unordered_map<std::string, model::ValueProxy<double>>
+    std::unordered_map<std::string, multi_array::ValueProxy<double>>
         named_penalty_coefficients;
 
-    std::vector<model::ValueProxy<double>> local_penalty_coefficient_proxies =
-        model->export_local_penalty_coefficient_proxies();
+    std::vector<multi_array::ValueProxy<double>>
+        local_penalty_coefficient_proxies =
+            model->export_local_penalty_coefficient_proxies();
 
     const int   CONSTRAINT_PROXIES_SIZE = model->constraint_proxies().size();
     const auto& constraint_names        = model->constraint_names();
@@ -1567,7 +1568,8 @@ Result<T_Variable, T_Expression> solve(
     /**
      * Export the final variable update counts.
      */
-    std::unordered_map<std::string, model::ValueProxy<int>> named_update_counts;
+    std::unordered_map<std::string, multi_array::ValueProxy<int>>
+                named_update_counts;
     const int   VARIABLE_PROXIES_SIZE = model->variable_proxies().size();
     const auto& variable_names        = model->variable_names();
 

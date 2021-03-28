@@ -13,10 +13,16 @@
 namespace printemps {
 namespace solver {
 /*****************************************************************************/
-enum Verbose : int { None, Warning, Outer, Full, Debug };
+enum Verbose : int {  //
+    None,
+    Warning,
+    Outer,
+    Full,
+    Debug
+};
 
 /*****************************************************************************/
-enum ImprovabilityScreeningMode : int {
+enum ImprovabilityScreeningMode : int {  //
     Off,
     Soft,
     Aggressive,
@@ -25,7 +31,10 @@ enum ImprovabilityScreeningMode : int {
 };
 
 /*****************************************************************************/
-enum ChainMoveReduceMode : int { OverlapRate, Shuffle };
+enum ChainMoveReduceMode : int {  //
+    OverlapRate,
+    Shuffle
+};
 
 /*****************************************************************************/
 struct OptionConstant {

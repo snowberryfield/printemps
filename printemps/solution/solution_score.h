@@ -3,13 +3,13 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_MODEL_SOLUTION_SCORE_H__
-#define PRINTEMPS_MODEL_SOLUTION_SCORE_H__
+#ifndef PRINTEMPS_SOLUTION_SOLUTION_SCORE_H__
+#define PRINTEMPS_SOLUTION_SOLUTION_SCORE_H__
 
 #include "../utility/utility.h"
 
 namespace printemps {
-namespace model {
+namespace solution {
 /*****************************************************************************/
 struct SolutionScore {
     double objective;
@@ -97,7 +97,7 @@ inline int argmin_index_global_augmented_objective(
     return utility::argmin(global_augmented_objectives);
 }
 
-}  // namespace model
+}  // namespace solution
 }  // namespace printemps
 #endif
 /*****************************************************************************/

@@ -7,8 +7,7 @@
 #define PRINTEMPS_MODEL_VARIABLE_PROXY_H__
 
 #include "../utility/utility.h"
-
-#include "abstract_multi_array.h"
+#include "../multi_array/abstract_multi_array.h"
 #include "variable.h"
 
 namespace printemps {
@@ -20,11 +19,15 @@ struct Move;
 }  // namespace printemps
 
 namespace printemps {
-namespace model {
+namespace multi_array {
 /*****************************************************************************/
 template <class T_Value>
 class ValueProxy;
+}  // namespace multi_array
+}  // namespace printemps
 
+namespace printemps {
+namespace model {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class Expression;
@@ -35,7 +38,7 @@ class Constraint;
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-class VariableProxy : public AbstractMultiArray {
+class VariableProxy : public multi_array::AbstractMultiArray {
     /**
      * [Access controls for special member functions]
      *  -- Default constructor : default, private
@@ -62,19 +65,19 @@ class VariableProxy : public AbstractMultiArray {
         const VariableProxy<T_Variable, T_Expression> &) = delete;
 
     /*************************************************************************/
-    VariableProxy(const int a_ID) : AbstractMultiArray(a_ID) {
+    VariableProxy(const int a_ID) : multi_array::AbstractMultiArray(a_ID) {
         this->setup_variables();
     }
 
     /*************************************************************************/
     VariableProxy(const int a_ID, const int a_NUMBER_OF_ELEMENTS)
-        : AbstractMultiArray(a_ID, a_NUMBER_OF_ELEMENTS) {
+        : multi_array::AbstractMultiArray(a_ID, a_NUMBER_OF_ELEMENTS) {
         this->setup_variables();
     }
 
     /*************************************************************************/
     VariableProxy(const int a_ID, const std::vector<int> &a_SHAPE)
-        : AbstractMultiArray(a_ID, a_SHAPE) {
+        : multi_array::AbstractMultiArray(a_ID, a_SHAPE) {
         this->setup_variables();
     }
 
@@ -346,9 +349,9 @@ class VariableProxy : public AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr ValueProxy<T_Variable> export_values_and_names(
-        void) const {
-        ValueProxy<T_Variable> proxy(m_index, m_shape);
+    inline constexpr multi_array::ValueProxy<T_Variable>
+    export_values_and_names(void) const {
+        multi_array::ValueProxy<T_Variable> proxy(m_index, m_shape);
 
         int number_of_elements = this->number_of_elements();
         for (auto i = 0; i < number_of_elements; i++) {

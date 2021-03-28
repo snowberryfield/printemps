@@ -3,11 +3,11 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_MODEL_ABSTRACT_MULTI_ARRAY_H__
-#define PRINTEMPS_MODEL_ABSTRACT_MULTI_ARRAY_H__
+#ifndef PRINTEMPS_MULTI_ARRAY_ABSTRACT_MULTI_ARRAY_H__
+#define PRINTEMPS_MULTI_ARRAY_ABSTRACT_MULTI_ARRAY_H__
 
 namespace printemps {
-namespace model {
+namespace multi_array {
 /*****************************************************************************/
 /**
  * This class was designed with reference to the following site.
@@ -169,7 +169,7 @@ class AbstractMultiArray {
         return m_number_of_elements;
     }
 };
-}  // namespace model
+}  // namespace multi_array
 }  // namespace printemps
 #endif
 

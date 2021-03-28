@@ -15,11 +15,7 @@
 #include "expression_proxy.h"
 #include "constraint_proxy.h"
 #include "objective.h"
-#include "value_proxy.h"
-#include "solution.h"
-#include "named_solution.h"
-#include "plain_solution.h"
-#include "solution_score.h"
+#include "../multi_array/value_proxy.h"
 #include "selection.h"
 
 #include "expression_binary_operator.h"
@@ -32,6 +28,11 @@
 #include "../neighborhood/neighborhood.h"
 #include "../presolver/presolver.h"
 #include "../verifier/verifier.h"
+
+#include "../solution/solution.h"
+#include "../solution/named_solution.h"
+#include "../solution/plain_solution.h"
+#include "../solution/solution_score.h"
 
 namespace printemps {
 namespace model {
@@ -1313,7 +1314,7 @@ class Model {
 
     /*************************************************************************/
     constexpr void import_variable_values(
-        const std::vector<ValueProxy<T_Variable>> &a_PROXIES) {
+        const std::vector<multi_array::ValueProxy<T_Variable>> &a_PROXIES) {
         for (auto &&proxy : m_variable_proxies) {
             for (auto &&variable : proxy.flat_indexed_variables()) {
                 int proxy_index = variable.proxy_index();
@@ -1559,25 +1560,25 @@ class Model {
     }
 
     /*************************************************************************/
-    inline SolutionScore evaluate(
+    inline solution::SolutionScore evaluate(
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
         const noexcept {
-        SolutionScore score;
+        solution::SolutionScore score;
         this->evaluate(&score, a_MOVE);
         return score;
     }
 
     /*************************************************************************/
-    inline SolutionScore evaluate(
+    inline solution::SolutionScore evaluate(
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE,
-        const SolutionScore &a_CURRENT_SCORE) const noexcept {
-        SolutionScore score;
+        const solution::SolutionScore &a_CURRENT_SCORE) const noexcept {
+        solution::SolutionScore score;
         this->evaluate(&score, a_MOVE, a_CURRENT_SCORE);
         return score;
     }
 
     /*************************************************************************/
-    constexpr void evaluate(SolutionScore *a_score_ptr,  //
+    constexpr void evaluate(solution::SolutionScore *a_score_ptr,  //
                             const neighborhood::Move<T_Variable, T_Expression>
                                 &a_MOVE) const noexcept {
         double total_violation = 0.0;
@@ -1633,9 +1634,9 @@ class Model {
 
     /*************************************************************************/
     constexpr void evaluate(
-        SolutionScore *                                     a_score_ptr,  //
+        solution::SolutionScore *                           a_score_ptr,  //
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE,
-        const SolutionScore &a_CURRENT_SCORE) const noexcept {
+        const solution::SolutionScore &a_CURRENT_SCORE) const noexcept {
         bool is_feasibility_improvable = false;
 
         double total_violation = a_CURRENT_SCORE.total_violation;
@@ -1684,7 +1685,7 @@ class Model {
 
     /*************************************************************************/
     constexpr double compute_lagrangian(
-        const std::vector<model::ValueProxy<double>>
+        const std::vector<multi_array::ValueProxy<double>>
             &a_LAGRANGE_MULTIPLIER_PROXIES) const noexcept {
         double lagrangian = m_objective.value();
 
@@ -1702,13 +1703,14 @@ class Model {
 
     /*************************************************************************/
     template <class T_Value>
-    constexpr std::vector<ValueProxy<T_Value>>
+    constexpr std::vector<multi_array::ValueProxy<T_Value>>
     generate_variable_parameter_proxies(const T_Value a_VALUE) const {
-        std::vector<ValueProxy<T_Value>> variable_parameter_proxies;
+        std::vector<multi_array::ValueProxy<T_Value>>
+            variable_parameter_proxies;
 
         for (const auto &proxy : m_variable_proxies) {
-            ValueProxy<T_Value> variable_parameter_proxy(proxy.index(),
-                                                         proxy.shape());
+            multi_array::ValueProxy<T_Value> variable_parameter_proxy(
+                proxy.index(), proxy.shape());
             variable_parameter_proxy.fill(a_VALUE);
             int number_of_elements = proxy.number_of_elements();
             for (auto i = 0; i < number_of_elements; i++) {
@@ -1723,13 +1725,14 @@ class Model {
 
     /*************************************************************************/
     template <class T_Value>
-    constexpr std::vector<ValueProxy<T_Value>>
+    constexpr std::vector<multi_array::ValueProxy<T_Value>>
     generate_expression_parameter_proxies(const T_Value a_VALUE) const {
-        std::vector<ValueProxy<T_Value>> expression_parameter_proxies;
+        std::vector<multi_array::ValueProxy<T_Value>>
+            expression_parameter_proxies;
 
         for (const auto &proxy : m_expression_proxies) {
-            ValueProxy<T_Value> expression_parameter_proxy(proxy.index(),
-                                                           proxy.shape());
+            multi_array::ValueProxy<T_Value> expression_parameter_proxy(
+                proxy.index(), proxy.shape());
             expression_parameter_proxy.fill(a_VALUE);
             int number_of_elements = proxy.number_of_elements();
             for (auto i = 0; i < number_of_elements; i++) {
@@ -1743,13 +1746,14 @@ class Model {
 
     /*************************************************************************/
     template <class T_Value>
-    constexpr std::vector<ValueProxy<T_Value>>
+    constexpr std::vector<multi_array::ValueProxy<T_Value>>
     generate_constraint_parameter_proxies(const T_Value a_VALUE) const {
-        std::vector<ValueProxy<T_Value>> constraint_parameter_proxies;
+        std::vector<multi_array::ValueProxy<T_Value>>
+            constraint_parameter_proxies;
 
         for (const auto &proxy : m_constraint_proxies) {
-            ValueProxy<T_Value> constraint_parameter_proxy(proxy.index(),
-                                                           proxy.shape());
+            multi_array::ValueProxy<T_Value> constraint_parameter_proxy(
+                proxy.index(), proxy.shape());
             constraint_parameter_proxy.fill(a_VALUE);
             int number_of_elements = proxy.number_of_elements();
             for (auto i = 0; i < number_of_elements; i++) {
@@ -1762,12 +1766,13 @@ class Model {
     }
 
     /*************************************************************************/
-    std::vector<ValueProxy<double>> export_local_penalty_coefficient_proxies(
-        void) const {
-        std::vector<ValueProxy<double>> local_penalty_coefficient_proxies;
+    std::vector<multi_array::ValueProxy<double>>
+    export_local_penalty_coefficient_proxies(void) const {
+        std::vector<multi_array::ValueProxy<double>>
+            local_penalty_coefficient_proxies;
         for (const auto &proxy : m_constraint_proxies) {
-            ValueProxy<double> local_penalty_coefficient_proxy(proxy.index(),
-                                                               proxy.shape());
+            multi_array::ValueProxy<double> local_penalty_coefficient_proxy(
+                proxy.index(), proxy.shape());
 
             int number_of_elements = proxy.number_of_elements();
 
@@ -1785,9 +1790,9 @@ class Model {
     }
 
     /*************************************************************************/
-    Solution<T_Variable, T_Expression> export_solution(void) const {
+    solution::Solution<T_Variable, T_Expression> export_solution(void) const {
         /// This method cannot be constexpr by clang.
-        Solution<T_Variable, T_Expression> solution;
+        solution::Solution<T_Variable, T_Expression> solution;
 
         /// Decision variables
         for (const auto &proxy : m_variable_proxies) {
@@ -1825,16 +1830,16 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr NamedSolution<T_Variable, T_Expression> export_named_solution(
-        void) const {
+    constexpr solution::NamedSolution<T_Variable, T_Expression>
+    export_named_solution(void) const {
         return this->convert_to_named_solution(this->export_solution());
     }
 
     /*************************************************************************/
-    NamedSolution<T_Variable, T_Expression> convert_to_named_solution(
-        const Solution<T_Variable, T_Expression> &a_SOLUTION) const {
+    solution::NamedSolution<T_Variable, T_Expression> convert_to_named_solution(
+        const solution::Solution<T_Variable, T_Expression> &a_SOLUTION) const {
         /// This method cannot be constexpr by clang.
-        NamedSolution<T_Variable, T_Expression> named_solution;
+        solution::NamedSolution<T_Variable, T_Expression> named_solution;
 
         int VARIABLE_PROXIES_SIZE   = m_variable_proxies.size();
         int EXPRESSION_PROXIES_SIZE = m_expression_proxies.size();
@@ -1875,8 +1880,9 @@ class Model {
     }
 
     /*************************************************************************/
-    PlainSolution<T_Variable, T_Expression> export_plain_solution(void) const {
-        PlainSolution<T_Variable, T_Expression> plain_solution;
+    solution::PlainSolution<T_Variable, T_Expression> export_plain_solution(
+        void) const {
+        solution::PlainSolution<T_Variable, T_Expression> plain_solution;
 
         /// Decision variables
         for (const auto &proxy : m_variable_proxies) {
@@ -1901,9 +1907,9 @@ class Model {
     }
 
     /*************************************************************************/
-    PlainSolution<T_Variable, T_Expression> convert_to_plain_solution(
-        const Solution<T_Variable, T_Expression> &a_SOLUTION) const {
-        PlainSolution<T_Variable, T_Expression> plain_solution;
+    solution::PlainSolution<T_Variable, T_Expression> convert_to_plain_solution(
+        const solution::Solution<T_Variable, T_Expression> &a_SOLUTION) const {
+        solution::PlainSolution<T_Variable, T_Expression> plain_solution;
 
         /// Decision variables
         for (const auto &proxy : a_SOLUTION.variable_value_proxies) {

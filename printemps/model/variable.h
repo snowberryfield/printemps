@@ -6,7 +6,7 @@
 #ifndef PRINTEMPS_MODEL_VARIABLE_H__
 #define PRINTEMPS_MODEL_VARIABLE_H__
 
-#include "abstract_multi_array_element.h"
+#include "../multi_array/abstract_multi_array_element.h"
 
 namespace printemps {
 namespace neighborhood {
@@ -32,7 +32,7 @@ struct Selection;
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-class Variable : public AbstractMultiArrayElement {
+class Variable : public multi_array::AbstractMultiArrayElement {
     /**
      * [Access controls for special member functions]
      *  -- Default constructor : default, private
@@ -103,7 +103,7 @@ class Variable : public AbstractMultiArrayElement {
 
     /*************************************************************************/
     void initialize(void) {
-        AbstractMultiArrayElement::initialize();
+        multi_array::AbstractMultiArrayElement::initialize();
         m_is_fixed = false;
         m_value    = 0;
 

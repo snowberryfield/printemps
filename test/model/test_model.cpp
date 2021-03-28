@@ -1447,9 +1447,9 @@ TEST_F(TestModel, import_variable_values) {
     auto& y = model.create_variables("y", 10);
     auto& z = model.create_variables("z", {10, 10});
 
-    printemps::model::ValueProxy<int> x_value(x.index());
-    printemps::model::ValueProxy<int> y_value(y.index(), 10);
-    printemps::model::ValueProxy<int> z_value(z.index(), {10, 10});
+    printemps::multi_array::ValueProxy<int> x_value(x.index());
+    printemps::multi_array::ValueProxy<int> y_value(y.index(), 10);
+    printemps::multi_array::ValueProxy<int> z_value(z.index(), {10, 10});
 
     x_value.value() = 1;
 
@@ -2262,11 +2262,11 @@ TEST_F(TestModel, compute_lagrangian) {
     model.categorize_variables();
     model.categorize_constraints();
 
-    printemps::model::ValueProxy<double> dual_value_proxy(1);
+    printemps::multi_array::ValueProxy<double> dual_value_proxy(1);
     dual_value_proxy.value() = 100;
 
-    std::vector<printemps::model::ValueProxy<double>> dual_value_proxies = {
-        dual_value_proxy, dual_value_proxy};
+    std::vector<printemps::multi_array::ValueProxy<double>> dual_value_proxies =
+        {dual_value_proxy, dual_value_proxy};
 
     for (auto&& element : x.flat_indexed_variables()) {
         element = 1;

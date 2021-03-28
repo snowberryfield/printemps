@@ -6,7 +6,7 @@
 #ifndef PRINTEMPS_MODEL_CONSTRAINT_H__
 #define PRINTEMPS_MODEL_CONSTRAINT_H__
 
-#include "abstract_multi_array_element.h"
+#include "../multi_array/abstract_multi_array_element.h"
 
 namespace printemps {
 namespace neighborhood {
@@ -24,7 +24,7 @@ class Expression;
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-class Constraint : public AbstractMultiArrayElement {
+class Constraint : public multi_array::AbstractMultiArrayElement {
     /**
      * [Access controls for special member functions]
      *  -- Default constructor : default, private
@@ -171,7 +171,7 @@ class Constraint : public AbstractMultiArrayElement {
 
     /*************************************************************************/
     void initialize(void) {
-        AbstractMultiArrayElement::initialize();
+        multi_array::AbstractMultiArrayElement::initialize();
 
         m_function =  //
             []([[maybe_unused]] const neighborhood::Move<
