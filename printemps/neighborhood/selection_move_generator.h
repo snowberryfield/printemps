@@ -12,7 +12,7 @@ namespace printemps {
 namespace neighborhood {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-class Move;
+struct Move;
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
@@ -94,8 +94,8 @@ class SelectionMoveGenerator
                         (*a_flags)[i] = 0;
                         continue;
                     }
-                    if (((*a_moves)[i].alterations[0].first ==
-                         (*a_moves)[i].alterations[1].first)) {
+                    if ((*a_moves)[i].alterations[0].first ==
+                        (*a_moves)[i].alterations[1].first) {
                         (*a_flags)[i] = 0;
                         continue;
                     }

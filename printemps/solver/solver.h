@@ -658,8 +658,8 @@ Result<T_Variable, T_Expression> solve(
          * Reset the penalty coefficients if the incumbent solution was not
          * updated for specified count of loops.
          */
-        if ((update_status && (IncumbentHolderConstant::
-                                   STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE))) {
+        if ((update_status & (IncumbentHolderConstant::
+                                  STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE))) {
             /**
              * Reset the count of loops with no-update if the incumbent solution
              * was updated.
