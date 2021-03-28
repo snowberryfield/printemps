@@ -8,7 +8,7 @@
 
 #include "move_sense.h"
 #include "move.h"
-#include "BinomialConstraint.h"
+#include "binomial_constraint.h"
 
 #include "binary_move_generator.h"
 #include "integer_move_generator.h"
