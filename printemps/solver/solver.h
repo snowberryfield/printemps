@@ -217,9 +217,12 @@ Result<T_Variable, T_Expression> solve(
     /**
      * Prepare feasible solutions archive.
      */
-    SolutionArchive<T_Variable, T_Expression>  //
-        solution_archive(master_option.historical_data_capacity,
-                         model->is_minimization());
+    SolutionArchive<T_Variable, T_Expression>                     //
+        solution_archive(master_option.historical_data_capacity,  //
+                         model->is_minimization(),                //
+                         model->name(),                           //
+                         model->number_of_variables(),            //
+                         model->number_of_constraints());
 
     /**
      * Compute the values of expressions, constraints, and the objective
@@ -1583,6 +1586,9 @@ Result<T_Variable, T_Expression> solve(
     result.status.is_found_feasible_solution = named_solution.is_feasible();
     result.status.start_date_time            = start_date_time;
     result.status.finish_date_time           = finish_date_time;
+    result.status.name                       = model->name();
+    result.status.number_of_variables        = model->number_of_variables();
+    result.status.number_of_constraints      = model->number_of_constraints();
     result.status.elapsed_time               = time_keeper.elapsed_time();
     result.status.number_of_lagrange_dual_iterations =
         number_of_lagrange_dual_iterations;

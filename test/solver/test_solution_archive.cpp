@@ -39,25 +39,36 @@ TEST_F(TestSolutionArchive, initialize) {
     EXPECT_EQ(0, archive.max_size());
     EXPECT_TRUE(archive.is_ascending());
     EXPECT_TRUE(archive.solutions().empty());
+    EXPECT_EQ("", archive.name());
+    EXPECT_EQ(0, archive.number_of_variables());
+    EXPECT_EQ(0, archive.number_of_constraints());
 }
 
 /*****************************************************************************/
 TEST_F(TestSolutionArchive, setup) {
     {
-        printemps::solver::SolutionArchive<int, double> archive(100, true);
+        printemps::solver::SolutionArchive<int, double>  //
+            archive(100, true, "name", 10, 20);
 
         EXPECT_EQ(0, archive.size());
         EXPECT_EQ(100, archive.max_size());
         EXPECT_TRUE(archive.is_ascending());
         EXPECT_TRUE(archive.solutions().empty());
+        EXPECT_EQ("name", archive.name());
+        EXPECT_EQ(10, archive.number_of_variables());
+        EXPECT_EQ(20, archive.number_of_constraints());
     }
     {
-        printemps::solver::SolutionArchive<int, double> archive(200, false);
+        printemps::solver::SolutionArchive<int, double>  //
+            archive(00, true, "name", 10, 20);
 
         EXPECT_EQ(0, archive.size());
         EXPECT_EQ(200, archive.max_size());
         EXPECT_FALSE(archive.is_ascending());
         EXPECT_TRUE(archive.solutions().empty());
+        EXPECT_EQ("name", archive.name());
+        EXPECT_EQ(10, archive.number_of_variables());
+        EXPECT_EQ(20, archive.number_of_constraints());
     }
 }
 
@@ -101,7 +112,8 @@ TEST_F(TestSolutionArchive, push) {
         solution_0, solution_1, solution_2, solution_3};
 
     {
-        printemps::solver::SolutionArchive<int, double> archive(2, true);
+        printemps::solver::SolutionArchive<int, double>  //
+            archive(2, true, "name", 10, 20);
 
         archive.push(solution_0);
         EXPECT_EQ(1, archive.size());
@@ -119,7 +131,8 @@ TEST_F(TestSolutionArchive, push) {
         EXPECT_EQ(5, archive.solutions()[1].objective);
     }
     {
-        printemps::solver::SolutionArchive<int, double> archive(2, false);
+        printemps::solver::SolutionArchive<int, double>  //
+            archive(2, true, "name", 10, 20);
 
         archive.push(solutions);
         EXPECT_EQ(2, archive.size());
@@ -145,6 +158,21 @@ TEST_F(TestSolutionArchive, is_ascending) {
 
 /*****************************************************************************/
 TEST_F(TestSolutionArchive, solutions) {
+    /// This method is tested in push().
+}
+
+/*****************************************************************************/
+TEST_F(TestSolutionArchive, name) {
+    /// This method is tested in setup().
+}
+
+/*****************************************************************************/
+TEST_F(TestSolutionArchive, number_of_variables) {
+    /// This method is tested in setup().
+}
+
+/*****************************************************************************/
+TEST_F(TestSolutionArchive, number_of_constraints) {
     /// This method is tested in push().
 }
 
