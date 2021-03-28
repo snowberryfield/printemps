@@ -124,7 +124,6 @@ Result<T_Variable, T_Expression> solve(
                  master_option.is_enabled_aggregation_move,
                  master_option.is_enabled_precedence_move,
                  master_option.is_enabled_variable_bound_move,
-                 master_option.is_enabled_exclusive_move,
                  master_option.is_enabled_user_defined_move,
                  master_option.is_enabled_chain_move,
                  master_option.selection_mode,
@@ -187,8 +186,7 @@ Result<T_Variable, T_Expression> solve(
     bool has_special_neighborhood_moves =
         (model->neighborhood().aggregation().moves().size() +
          model->neighborhood().precedence().moves().size() +
-         model->neighborhood().variable_bound().moves().size() +
-         model->neighborhood().exclusive().moves().size()) > 0;
+         model->neighborhood().variable_bound().moves().size()) > 0;
 
     if (master_option.is_enabled_chain_move) {
         has_special_neighborhood_moves = true;
@@ -1040,24 +1038,24 @@ Result<T_Variable, T_Expression> solve(
                     STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
                 inital_tabu_tenure =
                     std::min(master_option.tabu_search.initial_tabu_tenure,
-                             model->number_of_not_fixed_variables());
+                             model->number_of_mutable_variables());
             } else if (result.total_update_status ==
                        IncumbentHolderConstant::STATUS_NO_UPDATED) {
                 inital_tabu_tenure = std::max(
                     option.tabu_search.initial_tabu_tenure - 1,
                     std::min(master_option.tabu_search.initial_tabu_tenure,
-                             model->number_of_not_fixed_variables()));
+                             model->number_of_mutable_variables()));
             } else if (result.tabu_tenure >
                        option.tabu_search.initial_tabu_tenure) {
                 inital_tabu_tenure =
                     std::min(option.tabu_search.initial_tabu_tenure + 1,
-                             model->number_of_not_fixed_variables());
+                             model->number_of_mutable_variables());
 
             } else {
                 inital_tabu_tenure = std::max(
                     option.tabu_search.initial_tabu_tenure - 1,
                     std::min(master_option.tabu_search.initial_tabu_tenure,
-                             model->number_of_not_fixed_variables()));
+                             model->number_of_mutable_variables()));
             }
         } else {
             inital_tabu_tenure = master_option.tabu_search.initial_tabu_tenure;
@@ -1183,14 +1181,6 @@ Result<T_Variable, T_Expression> solve(
                 }
             }
 
-            /// Exclusive
-            if (master_option.is_enabled_exclusive_move) {
-                if (model->neighborhood().exclusive().is_enabled()) {
-                    model->neighborhood().exclusive().disable();
-                    is_deactivated_special_neighborhood_move = true;
-                }
-            }
-
             /// Chain
             if (master_option.is_enabled_chain_move) {
                 if (model->neighborhood().chain().is_enabled()) {
@@ -1226,14 +1216,6 @@ Result<T_Variable, T_Expression> solve(
                 if (master_option.is_enabled_variable_bound_move) {
                     if (!model->neighborhood().variable_bound().is_enabled()) {
                         model->neighborhood().variable_bound().enable();
-                        is_activated_special_neighborhood_move = true;
-                    }
-                }
-
-                /// Exclusive
-                if (master_option.is_enabled_exclusive_move) {
-                    if (!model->neighborhood().exclusive().is_enabled()) {
-                        model->neighborhood().exclusive().enable();
                         is_activated_special_neighborhood_move = true;
                     }
                 }

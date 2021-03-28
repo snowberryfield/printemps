@@ -7,10 +7,29 @@
 #define PRINTEMPS_NEIGHBORHOOD_ABSTRACT_MOVE_GENERATOR_H__
 
 namespace printemps {
+namespace model {
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+class Variable;
+
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+class Constraint;
+
+/*****************************************************************************/
+enum class VariableSense;
+}  // namespace model
+}  // namespace printemps
+
+namespace printemps {
 namespace neighborhood {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class Move;
+
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+class BinomialConstraint;
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
@@ -123,6 +142,87 @@ class AbstractMoveGenerator {
         }
     }
 };
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+constexpr std::vector<model::Variable<T_Variable, T_Expression> *>
+extract_mutable_variable_ptrs(
+    const std::vector<model::Variable<T_Variable, T_Expression> *>
+        &a_RAW_VARIABLE_PTRS) {
+    std::vector<model::Variable<T_Variable, T_Expression> *> results;
+    for (auto &&variable_ptr : a_RAW_VARIABLE_PTRS) {
+        if (!variable_ptr->is_fixed()) {
+            results.push_back(variable_ptr);
+        }
+    }
+    return results;
+}
+
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+constexpr std::vector<model::Constraint<T_Variable, T_Expression> *>
+extract_effective_constraint_ptrs(
+    const std::vector<model::Constraint<T_Variable, T_Expression> *>
+        &a_RAW_CONSTRAINT_PTRS) {
+    std::vector<model::Constraint<T_Variable, T_Expression> *> results;
+    for (const auto &constraint_ptr : a_RAW_CONSTRAINT_PTRS) {
+        if (!constraint_ptr->is_enabled()) {
+            continue;
+        }
+
+        bool  has_fixed_or_selection_variables = false;
+        auto &expression                       = constraint_ptr->expression();
+        for (const auto &sensitivity : expression.sensitivities()) {
+            if (sensitivity.first->is_fixed() ||
+                sensitivity.first->sense() == model::VariableSense::Selection) {
+                has_fixed_or_selection_variables = true;
+                break;
+            }
+        }
+
+        if (!has_fixed_or_selection_variables) {
+            results.push_back(constraint_ptr);
+        }
+    }
+    return results;
+}
+
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+constexpr std::vector<BinomialConstraint<T_Variable, T_Expression>>
+convert_to_binomial_constraints(
+    const std::vector<model::Constraint<T_Variable, T_Expression> *>
+        &a_CONSTRAINT_PTRS) {
+    std::vector<BinomialConstraint<T_Variable, T_Expression>> results;
+    for (const auto &constraint_ptr : a_CONSTRAINT_PTRS) {
+        auto &expression = constraint_ptr->expression();
+
+        if (expression.sensitivities().size() != 2) {
+            throw std::logic_error(utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "The constraint is not binomial."));
+        }
+
+        auto vector_pair = utility::to_vector_pair(expression.sensitivities());
+
+        if (vector_pair.first[0] > vector_pair.first[1]) {
+            std::swap(vector_pair.first[0], vector_pair.first[1]);
+            std::swap(vector_pair.second[0], vector_pair.second[1]);
+        }
+
+        BinomialConstraint<T_Variable, T_Expression> binomial;
+
+        binomial.variable_ptr_first  = vector_pair.first[0];
+        binomial.variable_ptr_second = vector_pair.first[1];
+        binomial.sensitivity_first   = vector_pair.second[0];
+        binomial.sensitivity_second  = vector_pair.second[1];
+        binomial.constant_value      = expression.constant_value();
+        binomial.sense               = constraint_ptr->sense();
+        results.push_back(binomial);
+    }
+
+    return results;
+}
+
 }  // namespace neighborhood
 }  // namespace printemps
 #endif

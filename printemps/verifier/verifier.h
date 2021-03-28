@@ -97,7 +97,7 @@ constexpr void verify_and_correct_selection_variables_initial_values(
                     T_Variable old_value = variable_ptr->value();
                     T_Variable new_value = 0;
 
-                    variable_ptr->set_value_if_not_fixed(new_value);
+                    variable_ptr->set_value_if_mutable(new_value);
 
                     utility::print_warning(
                         "The initial value " + variable_ptr->name() + " = " +
@@ -134,7 +134,7 @@ constexpr void verify_and_correct_selection_variables_initial_values(
                         T_Variable old_value = 1;
                         T_Variable new_value = 0;
 
-                        variable_ptr->set_value_if_not_fixed(new_value);
+                        variable_ptr->set_value_if_mutable(new_value);
 
                         utility::print_warning(
                             "The initial value " + variable_ptr->name() +
@@ -145,7 +145,7 @@ constexpr void verify_and_correct_selection_variables_initial_values(
                     }
                 }
 
-                selected_variable_ptr->set_value_if_not_fixed(1);
+                selected_variable_ptr->set_value_if_mutable(1);
                 selected_variable_ptr->select();
 
             } else {
@@ -165,7 +165,7 @@ constexpr void verify_and_correct_selection_variables_initial_values(
                 bool       is_corrected = false;
                 for (auto &&variable_ptr : selection.variable_ptrs) {
                     if (!variable_ptr->is_fixed()) {
-                        variable_ptr->set_value_if_not_fixed(new_value);
+                        variable_ptr->set_value_if_mutable(new_value);
 
                         utility::print_warning(
                             "The initial value " + variable_ptr->name() +
@@ -225,7 +225,7 @@ constexpr void verify_and_correct_binary_variables_initial_values(
                             new_value = variable.upper_bound();
                         }
 
-                        variable.set_value_if_not_fixed(new_value);
+                        variable.set_value_if_mutable(new_value);
 
                         utility::print_warning(
                             "The initial value " + variable.name() + " = " +
@@ -276,7 +276,7 @@ constexpr void verify_and_correct_integer_variables_initial_values(
                         new_value = variable.upper_bound();
                     }
 
-                    variable.set_value_if_not_fixed(new_value);
+                    variable.set_value_if_mutable(new_value);
 
                     utility::print_warning(
                         "The initial value " + variable.name() + " = " +

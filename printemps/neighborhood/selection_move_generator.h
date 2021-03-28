@@ -9,19 +9,6 @@
 #include "abstract_move_generator.h"
 
 namespace printemps {
-namespace model {
-/*****************************************************************************/
-template <class T_Variable, class T_Expression>
-class Variable;
-
-/*****************************************************************************/
-template <class T_Variable, class T_Expression>
-class Constraint;
-
-}  // namespace model
-}  // namespace printemps
-
-namespace printemps {
 namespace neighborhood {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
@@ -53,6 +40,10 @@ class SelectionMoveGenerator
          * y, z \in {0, 1}) move: {(x = 0, y = 1), (x = 0, z = 1)}
          * (if x = 1, y = 0, z = 0)
          */
+
+        /**
+         * Setup move objects.
+         */
         const int VARIABLES_SIZE = a_VARIABLE_PTRS.size();
         this->m_moves.resize(VARIABLES_SIZE);
         this->m_flags.resize(VARIABLES_SIZE);
@@ -66,6 +57,9 @@ class SelectionMoveGenerator
             this->m_moves[i].overlap_rate                 = 0.0;
         }
 
+        /**
+         * Setup move updater
+         */
         auto move_updater =  //
             [this, a_VARIABLE_PTRS, VARIABLES_SIZE](
                 auto *                      a_moves,                          //
@@ -96,7 +90,7 @@ class SelectionMoveGenerator
 #endif
                 for (auto i = 0; i < MOVES_SIZE; i++) {
                     (*a_flags)[i] = 1;
-                    if (neighborhood::has_fixed_variables((*a_moves)[i])) {
+                    if (neighborhood::has_fixed_variable((*a_moves)[i])) {
                         (*a_flags)[i] = 0;
                         continue;
                     }

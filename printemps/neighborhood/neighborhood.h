@@ -8,13 +8,13 @@
 
 #include "move_sense.h"
 #include "move.h"
+#include "BinomialConstraint.h"
 
 #include "binary_move_generator.h"
 #include "integer_move_generator.h"
 #include "aggregation_move_generator.h"
 #include "precedence_move_generator.h"
 #include "variable_bound_move_generator.h"
-#include "exclusive_move_generator.h"
 #include "selection_move_generator.h"
 #include "chain_move_generator.h"
 #include "user_defined_move_generator.h"
@@ -31,7 +31,6 @@ class Neighborhood {
     AggregationMoveGenerator<T_Variable, T_Expression>   m_aggregation;
     PrecedenceMoveGenerator<T_Variable, T_Expression>    m_precedence;
     VariableBoundMoveGenerator<T_Variable, T_Expression> m_variable_bound;
-    ExclusiveMoveGenerator<T_Variable, T_Expression>     m_exclusive;
     SelectionMoveGenerator<T_Variable, T_Expression>     m_selection;
     ChainMoveGenerator<T_Variable, T_Expression>         m_chain;
     UserDefinedMoveGenerator<T_Variable, T_Expression>   m_user_defined;
@@ -58,7 +57,6 @@ class Neighborhood {
         m_precedence.initialize();
         m_aggregation.initialize();
         m_variable_bound.initialize();
-        m_exclusive.initialize();
         m_selection.initialize();
         m_chain.initialize();
         m_user_defined.initialize();
@@ -68,7 +66,6 @@ class Neighborhood {
                                  &m_aggregation,     //
                                  &m_precedence,      //
                                  &m_variable_bound,  //
-                                 &m_exclusive,       //
                                  &m_selection,       //
                                  &m_chain,           //
                                  &m_user_defined};
@@ -140,7 +137,6 @@ class Neighborhood {
         m_aggregation.reset_availability();
         m_precedence.reset_availability();
         m_variable_bound.reset_availability();
-        m_exclusive.reset_availability();
         m_chain.reset_availability();
         m_precedence.reset_availability();
     }
@@ -156,10 +152,6 @@ class Neighborhood {
         }
 
         if (m_variable_bound.is_enabled()) {
-            return true;
-        }
-
-        if (m_exclusive.is_enabled()) {
             return true;
         }
 
@@ -228,18 +220,6 @@ class Neighborhood {
     inline constexpr const VariableBoundMoveGenerator<T_Variable, T_Expression>
         &variable_bound(void) const noexcept {
         return m_variable_bound;
-    }
-
-    /*************************************************************************/
-    inline constexpr ExclusiveMoveGenerator<T_Variable, T_Expression>  //
-        &exclusive(void) noexcept {
-        return m_exclusive;
-    }
-
-    /*************************************************************************/
-    inline constexpr const ExclusiveMoveGenerator<T_Variable, T_Expression>  //
-        &exclusive(void) const noexcept {
-        return m_exclusive;
     }
 
     /*************************************************************************/

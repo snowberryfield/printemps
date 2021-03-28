@@ -75,7 +75,6 @@ TEST_F(TestSimple2, simple_2) {
     option.is_enabled_aggregation_move             = true;
     option.is_enabled_precedence_move              = true;
     option.is_enabled_variable_bound_move          = true;
-    option.is_enabled_exclusive_move               = true;
     option.is_enabled_chain_move                   = true;
     option.is_enabled_user_defined_move            = true;
     option.target_objective_value                  = -1E100;
@@ -94,7 +93,7 @@ TEST_F(TestSimple2, simple_2) {
     option.tabu_search.ignore_tabu_if_global_incumbent             = true;
 
     auto result = printemps::solver::solve(&model, option);
-    EXPECT_EQ(true, result.solution.is_feasible());
+    EXPECT_TRUE(result.solution.is_feasible());
     EXPECT_EQ(1, result.solution.variables("x").values(0));
     EXPECT_EQ(1, result.solution.variables("x").values(1));
     EXPECT_EQ(0, result.solution.variables("x").values(2));

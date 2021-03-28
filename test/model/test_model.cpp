@@ -53,17 +53,17 @@ TEST_F(TestModel, initialize) {
     EXPECT_EQ(max_number_of_constraint_proxies,
               static_cast<int>(model.constraint_proxies().capacity()));
 
-    EXPECT_EQ(true, model.variable_names().empty());
-    EXPECT_EQ(true, model.expression_names().empty());
-    EXPECT_EQ(true, model.constraint_names().empty());
+    EXPECT_TRUE(model.variable_names().empty());
+    EXPECT_TRUE(model.expression_names().empty());
+    EXPECT_TRUE(model.constraint_names().empty());
 
-    EXPECT_EQ(false, model.is_defined_objective());
-    EXPECT_EQ(true, model.is_enabled_fast_evaluation());
-    EXPECT_EQ(true, model.is_linear());
-    EXPECT_EQ(true, model.is_minimization());
+    EXPECT_FALSE(model.is_defined_objective());
+    EXPECT_TRUE(model.is_enabled_fast_evaluation());
+    EXPECT_TRUE(model.is_linear());
+    EXPECT_TRUE(model.is_minimization());
     EXPECT_EQ(1.0, model.sign());
-    EXPECT_EQ(false, model.is_solved());
-    EXPECT_EQ(false, model.is_feasible());
+    EXPECT_FALSE(model.is_solved());
+    EXPECT_FALSE(model.is_feasible());
 
     /// Variable Reference
     EXPECT_EQ(  //
@@ -158,7 +158,7 @@ TEST_F(TestModel, create_variable_scalar_without_bound) {
             EXPECT_EQ(i, x.index());
             EXPECT_EQ(printemps::constant::INT_HALF_MIN, x.lower_bound());
             EXPECT_EQ(printemps::constant::INT_HALF_MAX, x.upper_bound());
-            EXPECT_EQ(false, x.has_bounds());
+            EXPECT_FALSE(x.has_bounds());
             EXPECT_EQ(printemps::model::VariableSense::Integer, x.sense());
             EXPECT_EQ(&x, &model.variable_proxies().back());
             EXPECT_EQ(name, model.variable_names().back());
@@ -185,7 +185,7 @@ TEST_F(TestModel, create_variable_scalar_with_bound) {
             EXPECT_EQ(i, x.index());
             EXPECT_EQ(0, x.lower_bound());
             EXPECT_EQ(1, x.upper_bound());
-            EXPECT_EQ(true, x.has_bounds());
+            EXPECT_TRUE(x.has_bounds());
             EXPECT_EQ(printemps::model::VariableSense::Binary, x.sense());
             EXPECT_EQ(&x, &model.variable_proxies().back());
             EXPECT_EQ(name, model.variable_names().back());
@@ -213,7 +213,7 @@ TEST_F(TestModel, create_variable_one_dimensional_without_bound) {
             EXPECT_EQ(i, x.index());
             EXPECT_EQ(printemps::constant::INT_HALF_MIN, x(0).lower_bound());
             EXPECT_EQ(printemps::constant::INT_HALF_MAX, x(0).upper_bound());
-            EXPECT_EQ(false, x(0).has_bounds());
+            EXPECT_FALSE(x(0).has_bounds());
             EXPECT_EQ(printemps::model::VariableSense::Integer, x(0).sense());
             EXPECT_EQ(&x, &model.variable_proxies().back());
             EXPECT_EQ(name, model.variable_names().back());
@@ -240,7 +240,7 @@ TEST_F(TestModel, create_variable_one_dimensional_with_bound) {
             EXPECT_EQ(i, x.index());
             EXPECT_EQ(0, x(0).lower_bound());
             EXPECT_EQ(1, x(0).upper_bound());
-            EXPECT_EQ(true, x(0).has_bounds());
+            EXPECT_TRUE(x(0).has_bounds());
             EXPECT_EQ(printemps::model::VariableSense::Binary, x(0).sense());
             EXPECT_EQ(&x, &model.variable_proxies().back());
             EXPECT_EQ(name, model.variable_names().back());
@@ -269,7 +269,7 @@ TEST_F(TestModel, create_variable_two_dimensional_without_bound) {
             EXPECT_EQ(i, x.index());
             EXPECT_EQ(printemps::constant::INT_HALF_MIN, x(0, 0).lower_bound());
             EXPECT_EQ(printemps::constant::INT_HALF_MAX, x(0, 0).upper_bound());
-            EXPECT_EQ(false, x(0, 0).has_bounds());
+            EXPECT_FALSE(x(0, 0).has_bounds());
             EXPECT_EQ(printemps::model::VariableSense::Integer,
                       x(0, 0).sense());
             EXPECT_EQ(&x, &model.variable_proxies().back());
@@ -298,7 +298,7 @@ TEST_F(TestModel, create_variable_two_dimensional_with_bound) {
             EXPECT_EQ(i, x.index());
             EXPECT_EQ(0, x(0, 0).lower_bound());
             EXPECT_EQ(1, x(0, 0).upper_bound());
-            EXPECT_EQ(true, x(0, 0).has_bounds());
+            EXPECT_TRUE(x(0, 0).has_bounds());
             EXPECT_EQ(printemps::model::VariableSense::Binary, x(0, 0).sense());
             EXPECT_EQ(&x, &model.variable_proxies().back());
             EXPECT_EQ(name, model.variable_names().back());
@@ -584,12 +584,12 @@ TEST_F(TestModel, minimize_arg_function) {
     };
     model.minimize(f);
 
-    EXPECT_EQ(true, model.is_defined_objective());
-    EXPECT_EQ(true, model.is_minimization());
+    EXPECT_TRUE(model.is_defined_objective());
+    EXPECT_TRUE(model.is_minimization());
     EXPECT_EQ(1.0, model.sign());
-    EXPECT_EQ(true, model.objective().expression().sensitivities().empty());
+    EXPECT_TRUE(model.objective().expression().sensitivities().empty());
     EXPECT_EQ(0, model.objective().expression().constant_value());
-    EXPECT_EQ(false, model.objective().is_linear());
+    EXPECT_FALSE(model.objective().is_linear());
 
     for (auto&& element : x.flat_indexed_variables()) {
         element = 1;
@@ -611,13 +611,13 @@ TEST_F(TestModel, minimize_arg_expression_like) {
         };
     model.minimize(p);
 
-    EXPECT_EQ(true, model.is_defined_objective());
-    EXPECT_EQ(true, model.is_minimization());
+    EXPECT_TRUE(model.is_defined_objective());
+    EXPECT_TRUE(model.is_minimization());
     EXPECT_EQ(1.0, model.sign());
     EXPECT_EQ(10, static_cast<int>(
                       model.objective().expression().sensitivities().size()));
     EXPECT_EQ(1, model.objective().expression().constant_value());
-    EXPECT_EQ(true, model.objective().is_linear());
+    EXPECT_TRUE(model.objective().is_linear());
 
     for (auto&& element : x.flat_indexed_variables()) {
         element = 1;
@@ -639,13 +639,13 @@ TEST_F(TestModel, minimize_arg_expression) {
         };
     model.minimize(p(0));
 
-    EXPECT_EQ(true, model.is_defined_objective());
-    EXPECT_EQ(true, model.is_minimization());
+    EXPECT_TRUE(model.is_defined_objective());
+    EXPECT_TRUE(model.is_minimization());
     EXPECT_EQ(1.0, model.sign());
     EXPECT_EQ(10, static_cast<int>(
                       model.objective().expression().sensitivities().size()));
     EXPECT_EQ(1, model.objective().expression().constant_value());
-    EXPECT_EQ(true, model.objective().is_linear());
+    EXPECT_TRUE(model.objective().is_linear());
 
     for (auto&& element : x.flat_indexed_variables()) {
         element = 1;
@@ -666,12 +666,12 @@ TEST_F(TestModel, maximize_arg_function) {
     };
     model.maximize(f);
 
-    EXPECT_EQ(true, model.is_defined_objective());
-    EXPECT_EQ(false, model.is_minimization());
+    EXPECT_TRUE(model.is_defined_objective());
+    EXPECT_FALSE(model.is_minimization());
     EXPECT_EQ(-1.0, model.sign());
-    EXPECT_EQ(true, model.objective().expression().sensitivities().empty());
+    EXPECT_TRUE(model.objective().expression().sensitivities().empty());
     EXPECT_EQ(0, model.objective().expression().constant_value());
-    EXPECT_EQ(false, model.objective().is_linear());
+    EXPECT_FALSE(model.objective().is_linear());
 
     for (auto&& element : x.flat_indexed_variables()) {
         element = 1;
@@ -693,13 +693,13 @@ TEST_F(TestModel, maximize_arg_expression_like) {
         };
     model.maximize(p);
 
-    EXPECT_EQ(true, model.is_defined_objective());
-    EXPECT_EQ(false, model.is_minimization());
+    EXPECT_TRUE(model.is_defined_objective());
+    EXPECT_FALSE(model.is_minimization());
     EXPECT_EQ(-1.0, model.sign());
     EXPECT_EQ(10, static_cast<int>(
                       model.objective().expression().sensitivities().size()));
     EXPECT_EQ(1, model.objective().expression().constant_value());
-    EXPECT_EQ(true, model.objective().is_linear());
+    EXPECT_TRUE(model.objective().is_linear());
 
     for (auto&& element : x.flat_indexed_variables()) {
         element = 1;
@@ -719,13 +719,13 @@ TEST_F(TestModel, maximize_arg_expression) {
         };
     model.maximize(p(0));
 
-    EXPECT_EQ(true, model.is_defined_objective());
-    EXPECT_EQ(false, model.is_minimization());
+    EXPECT_TRUE(model.is_defined_objective());
+    EXPECT_FALSE(model.is_minimization());
     EXPECT_EQ(-1.0, model.sign());
     EXPECT_EQ(10, static_cast<int>(
                       model.objective().expression().sensitivities().size()));
     EXPECT_EQ(1, model.objective().expression().constant_value());
-    EXPECT_EQ(true, model.objective().is_linear());
+    EXPECT_TRUE(model.objective().is_linear());
 
     for (auto&& element : x.flat_indexed_variables()) {
         element = 1;
@@ -754,10 +754,10 @@ TEST_F(TestModel, setup_variable_related_constraints) {
     model.setup_variable_related_constraints();
 
     for (auto i = 0; i < 10; i++) {
-        EXPECT_EQ(true, x(i).related_constraint_ptrs().find(&g(0)) !=
-                            x(i).related_constraint_ptrs().end());
-        EXPECT_EQ(false, x(i).related_constraint_ptrs().find(&g(1)) !=
-                             x(i).related_constraint_ptrs().end());
+        EXPECT_TRUE(x(i).related_constraint_ptrs().find(&g(0)) !=
+                    x(i).related_constraint_ptrs().end());
+        EXPECT_FALSE(x(i).related_constraint_ptrs().find(&g(1)) !=
+                     x(i).related_constraint_ptrs().end());
         /// Only x(0) is related to g(2).
         EXPECT_EQ(i == 0, x(i).related_constraint_ptrs().find(&g(2)) !=
                               x(i).related_constraint_ptrs().end());
@@ -765,10 +765,10 @@ TEST_F(TestModel, setup_variable_related_constraints) {
 
     for (auto i = 0; i < 20; i++) {
         for (auto j = 0; j < 30; j++) {
-            EXPECT_EQ(false, y(i, j).related_constraint_ptrs().find(&g(0)) !=
-                                 y(i, j).related_constraint_ptrs().end());
-            EXPECT_EQ(true, y(i, j).related_constraint_ptrs().find(&g(1)) !=
-                                y(i, j).related_constraint_ptrs().end());
+            EXPECT_FALSE(y(i, j).related_constraint_ptrs().find(&g(0)) !=
+                         y(i, j).related_constraint_ptrs().end());
+            EXPECT_TRUE(y(i, j).related_constraint_ptrs().find(&g(1)) !=
+                        y(i, j).related_constraint_ptrs().end());
             /// Only y(0,*) is related to g(2).
             EXPECT_EQ(i == 0, y(i, j).related_constraint_ptrs().find(&g(2)) !=
                                   y(i, j).related_constraint_ptrs().end());
@@ -816,7 +816,7 @@ TEST_F(TestModel, setup_is_linear) {
 
         model.setup_is_linear();
 
-        EXPECT_EQ(true, model.is_linear());
+        EXPECT_TRUE(model.is_linear());
     }
 
     /// Constraint: nonlinear (user-defined lambda)
@@ -836,7 +836,7 @@ TEST_F(TestModel, setup_is_linear) {
 
         model.setup_is_linear();
 
-        EXPECT_EQ(false, model.is_linear());
+        EXPECT_FALSE(model.is_linear());
     }
 
     /// Constraint: linear
@@ -856,7 +856,7 @@ TEST_F(TestModel, setup_is_linear) {
 
         model.setup_is_linear();
 
-        EXPECT_EQ(false, model.is_linear());
+        EXPECT_FALSE(model.is_linear());
     }
 
     /// Constraint: nonlinear
@@ -881,7 +881,7 @@ TEST_F(TestModel, setup_is_linear) {
 
         model.setup_is_linear();
 
-        EXPECT_EQ(false, model.is_linear());
+        EXPECT_FALSE(model.is_linear());
     }
 }
 
@@ -900,7 +900,7 @@ TEST_F(TestModel, setup_is_enabled_fast_evaluation) {
 
         model.setup_is_enabled_fast_evaluation();
 
-        EXPECT_EQ(true, model.is_enabled_fast_evaluation());
+        EXPECT_TRUE(model.is_enabled_fast_evaluation());
     }
 
     /// Constraint: nonlinear (user-defined lambda)
@@ -921,7 +921,7 @@ TEST_F(TestModel, setup_is_enabled_fast_evaluation) {
 
         model.setup_is_enabled_fast_evaluation();
 
-        EXPECT_EQ(false, model.is_enabled_fast_evaluation());
+        EXPECT_FALSE(model.is_enabled_fast_evaluation());
     }
 
     /// Constraint: linear
@@ -942,7 +942,7 @@ TEST_F(TestModel, setup_is_enabled_fast_evaluation) {
 
         model.setup_is_enabled_fast_evaluation();
 
-        EXPECT_EQ(true, model.is_enabled_fast_evaluation());
+        EXPECT_TRUE(model.is_enabled_fast_evaluation());
     }
 
     /// Constraint: linear
@@ -964,7 +964,7 @@ TEST_F(TestModel, setup_is_enabled_fast_evaluation) {
         model.neighborhood().user_defined().enable();
         model.setup_is_enabled_fast_evaluation();
 
-        EXPECT_EQ(false, model.is_enabled_fast_evaluation());
+        EXPECT_FALSE(model.is_enabled_fast_evaluation());
     }
 }
 
@@ -1022,7 +1022,7 @@ TEST_F(TestModel, categorize_variables) {
 
     EXPECT_EQ(1 + 10 + 20 * 30, model.number_of_variables());
     EXPECT_EQ(3, model.number_of_fixed_variables());
-    EXPECT_EQ(1 + 10 + 20 * 30 - 3, model.number_of_not_fixed_variables());
+    EXPECT_EQ(1 + 10 + 20 * 30 - 3, model.number_of_mutable_variables());
     EXPECT_EQ(11, model.number_of_binary_variables());
     EXPECT_EQ(600, model.number_of_integer_variables());
 }
@@ -1139,30 +1139,30 @@ TEST_F(TestModel, setup_variable_related_monic_constraint_ptrs) {
     model.setup_variable_related_monic_constraints();
 
     for (auto i = 0; i < 10; i++) {
-        EXPECT_EQ(true, x(i).related_monic_constraint_ptrs().find(&g(0)) !=
-                            x(i).related_monic_constraint_ptrs().end());
-        EXPECT_EQ(false, x(i).related_monic_constraint_ptrs().find(&g(1)) !=
-                             x(i).related_monic_constraint_ptrs().end());
-        EXPECT_EQ(false, x(i).related_monic_constraint_ptrs().find(&g(2)) !=
-                             x(i).related_monic_constraint_ptrs().end());
-        EXPECT_EQ(false, x(i).related_monic_constraint_ptrs().find(&g(3)) !=
-                             x(i).related_monic_constraint_ptrs().end());
+        EXPECT_TRUE(x(i).related_monic_constraint_ptrs().find(&g(0)) !=
+                    x(i).related_monic_constraint_ptrs().end());
+        EXPECT_FALSE(x(i).related_monic_constraint_ptrs().find(&g(1)) !=
+                     x(i).related_monic_constraint_ptrs().end());
+        EXPECT_FALSE(x(i).related_monic_constraint_ptrs().find(&g(2)) !=
+                     x(i).related_monic_constraint_ptrs().end());
+        EXPECT_FALSE(x(i).related_monic_constraint_ptrs().find(&g(3)) !=
+                     x(i).related_monic_constraint_ptrs().end());
     }
 
     for (auto i = 0; i < 10; i++) {
-        EXPECT_EQ(false, y(i).related_monic_constraint_ptrs().find(&g(0)) !=
-                             y(i).related_monic_constraint_ptrs().end());
-        EXPECT_EQ(false, y(i).related_monic_constraint_ptrs().find(&g(1)) !=
-                             y(i).related_monic_constraint_ptrs().end());
-        EXPECT_EQ(false, y(i).related_monic_constraint_ptrs().find(&g(2)) !=
-                             y(i).related_monic_constraint_ptrs().end());
-        EXPECT_EQ(false, y(i).related_monic_constraint_ptrs().find(&g(3)) !=
-                             y(i).related_monic_constraint_ptrs().end());
+        EXPECT_FALSE(y(i).related_monic_constraint_ptrs().find(&g(0)) !=
+                     y(i).related_monic_constraint_ptrs().end());
+        EXPECT_FALSE(y(i).related_monic_constraint_ptrs().find(&g(1)) !=
+                     y(i).related_monic_constraint_ptrs().end());
+        EXPECT_FALSE(y(i).related_monic_constraint_ptrs().find(&g(2)) !=
+                     y(i).related_monic_constraint_ptrs().end());
+        EXPECT_FALSE(y(i).related_monic_constraint_ptrs().find(&g(3)) !=
+                     y(i).related_monic_constraint_ptrs().end());
     }
 
     for (auto i = 0; i < 10; i++) {
         x(i).reset_related_monic_constraint_ptrs();
-        EXPECT_EQ(true, x(i).related_monic_constraint_ptrs().empty());
+        EXPECT_TRUE(x(i).related_monic_constraint_ptrs().empty());
     }
 }
 
@@ -1222,10 +1222,10 @@ TEST_F(TestModel, extract_selections_larger) {
         auto variable_ptrs = model.selections()[0].variable_ptrs;
         EXPECT_EQ(400, static_cast<int>(variable_ptrs.size()));
 
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x_1(0, 0)) != variable_ptrs.end()));
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x_1(19, 19)) != variable_ptrs.end()));
+        EXPECT_TRUE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                               &x_1(0, 0)) != variable_ptrs.end()));
+        EXPECT_TRUE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                               &x_1(19, 19)) != variable_ptrs.end()));
     }
 
     {
@@ -1233,22 +1233,22 @@ TEST_F(TestModel, extract_selections_larger) {
         auto variable_ptrs = model.selections()[1].variable_ptrs;
         EXPECT_EQ(10, static_cast<int>(variable_ptrs.size()));
 
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x_0(0, 0)) != variable_ptrs.end()));
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x_0(0, 9)) != variable_ptrs.end()));
-        EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x_0(1, 0)) != variable_ptrs.end()));
+        EXPECT_TRUE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                               &x_0(0, 0)) != variable_ptrs.end()));
+        EXPECT_TRUE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                               &x_0(0, 9)) != variable_ptrs.end()));
+        EXPECT_FALSE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                                &x_0(1, 0)) != variable_ptrs.end()));
     }
 
     /**
      * Check whether the corresponding constraint is enabled or not.
      */
     /// Constraint c_2
-    EXPECT_EQ(false, model.selections()[0].constraint_ptr->is_enabled());
+    EXPECT_FALSE(model.selections()[0].constraint_ptr->is_enabled());
 
     /// Constraint c_0
-    EXPECT_EQ(false, model.selections()[1].constraint_ptr->is_enabled());
+    EXPECT_FALSE(model.selections()[1].constraint_ptr->is_enabled());
 
     /**
      * Check the number of covered variables and variable pointers for each
@@ -1260,18 +1260,18 @@ TEST_F(TestModel, extract_selections_larger) {
         EXPECT_EQ(20 * 20 + 1 * 10, model.number_of_selection_variables());
 
         /// Constraint c_2
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x_1(0, 0)) != variable_ptrs.end()));
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x_1(19, 19)) != variable_ptrs.end()));
+        EXPECT_TRUE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                               &x_1(0, 0)) != variable_ptrs.end()));
+        EXPECT_TRUE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                               &x_1(19, 19)) != variable_ptrs.end()));
 
         /// Constraint c_0
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x_0(0, 0)) != variable_ptrs.end()));
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x_0(0, 9)) != variable_ptrs.end()));
-        EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x_0(1, 0)) != variable_ptrs.end()));
+        EXPECT_TRUE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                               &x_0(0, 0)) != variable_ptrs.end()));
+        EXPECT_TRUE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                               &x_0(0, 9)) != variable_ptrs.end()));
+        EXPECT_FALSE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                                &x_0(1, 0)) != variable_ptrs.end()));
     }
 
     /// Binary
@@ -1281,18 +1281,18 @@ TEST_F(TestModel, extract_selections_larger) {
                   model.number_of_binary_variables());
 
         /// Constraint c_2
-        EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x_1(0, 0)) != variable_ptrs.end()));
-        EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x_1(19, 19)) != variable_ptrs.end()));
+        EXPECT_FALSE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                                &x_1(0, 0)) != variable_ptrs.end()));
+        EXPECT_FALSE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                                &x_1(19, 19)) != variable_ptrs.end()));
 
         /// Constraint c_0
-        EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x_0(0, 0)) != variable_ptrs.end()));
-        EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x_0(0, 9)) != variable_ptrs.end()));
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x_0(1, 0)) != variable_ptrs.end()));
+        EXPECT_FALSE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                                &x_0(0, 0)) != variable_ptrs.end()));
+        EXPECT_FALSE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                                &x_0(0, 9)) != variable_ptrs.end()));
+        EXPECT_TRUE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                               &x_0(1, 0)) != variable_ptrs.end()));
     }
 
     /// Integer
@@ -1300,10 +1300,10 @@ TEST_F(TestModel, extract_selections_larger) {
         auto variable_ptrs = model.variable_reference().integer_variable_ptrs;
         EXPECT_EQ(30 * 30, model.number_of_integer_variables());
 
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &y(0, 0)) != variable_ptrs.end()));
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &y(29, 29)) != variable_ptrs.end()));
+        EXPECT_TRUE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                               &y(0, 0)) != variable_ptrs.end()));
+        EXPECT_TRUE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                               &y(29, 29)) != variable_ptrs.end()));
     }
 }
 
@@ -1355,19 +1355,19 @@ TEST_F(TestModel, extract_selections_independent) {
         auto variable_ptrs = model.selections()[0].variable_ptrs;
         EXPECT_EQ(10, static_cast<int>(variable_ptrs.size()));
 
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x_0(0, 0)) != variable_ptrs.end()));
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x_0(0, 9)) != variable_ptrs.end()));
-        EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x_0(1, 0)) != variable_ptrs.end()));
+        EXPECT_TRUE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                               &x_0(0, 0)) != variable_ptrs.end()));
+        EXPECT_TRUE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                               &x_0(0, 9)) != variable_ptrs.end()));
+        EXPECT_FALSE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                                &x_0(1, 0)) != variable_ptrs.end()));
     }
 
     /**
      * Check whether the corresponding constraint is enabled or not.
      */
     /// Constraint c_0
-    EXPECT_EQ(false, model.selections()[0].constraint_ptr->is_enabled());
+    EXPECT_FALSE(model.selections()[0].constraint_ptr->is_enabled());
 
     /**
      * Check the number of covered variables and variable pointers for each
@@ -1378,12 +1378,12 @@ TEST_F(TestModel, extract_selections_independent) {
         EXPECT_EQ(10, model.number_of_selection_variables());
 
         /// Constraint c_0
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x_0(0, 0)) != variable_ptrs.end()));
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x_0(0, 9)) != variable_ptrs.end()));
-        EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x_0(1, 0)) != variable_ptrs.end()));
+        EXPECT_TRUE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                               &x_0(0, 0)) != variable_ptrs.end()));
+        EXPECT_TRUE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                               &x_0(0, 9)) != variable_ptrs.end()));
+        EXPECT_FALSE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                                &x_0(1, 0)) != variable_ptrs.end()));
     }
 
     /// Binary
@@ -1393,12 +1393,12 @@ TEST_F(TestModel, extract_selections_independent) {
                   model.number_of_binary_variables());
 
         /// Constraint c_0
-        EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x_0(0, 0)) != variable_ptrs.end()));
-        EXPECT_EQ(false, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                    &x_0(0, 9)) != variable_ptrs.end()));
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &x_0(1, 0)) != variable_ptrs.end()));
+        EXPECT_FALSE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                                &x_0(0, 0)) != variable_ptrs.end()));
+        EXPECT_FALSE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                                &x_0(0, 9)) != variable_ptrs.end()));
+        EXPECT_TRUE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                               &x_0(1, 0)) != variable_ptrs.end()));
     }
 
     /// Integer
@@ -1406,10 +1406,10 @@ TEST_F(TestModel, extract_selections_independent) {
         auto variable_ptrs = model.variable_reference().integer_variable_ptrs;
         EXPECT_EQ(30 * 30, model.number_of_integer_variables());
 
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &y(0, 0)) != variable_ptrs.end()));
-        EXPECT_EQ(true, (std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                   &y(29, 29)) != variable_ptrs.end()));
+        EXPECT_TRUE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                               &y(0, 0)) != variable_ptrs.end()));
+        EXPECT_TRUE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                               &y(29, 29)) != variable_ptrs.end()));
     }
 }
 
@@ -1542,16 +1542,16 @@ TEST_F(TestModel, reset_variable_objective_improvability_arg_void) {
     model.categorize_variables();
 
     x(0).set_is_objective_improvable(true);
-    EXPECT_EQ(true, x(0).is_objective_improvable());
+    EXPECT_TRUE(x(0).is_objective_improvable());
     for (auto i = 0; i < 10; i++) {
         y(i).set_is_objective_improvable(true);
-        EXPECT_EQ(true, y(i).is_objective_improvable());
+        EXPECT_TRUE(y(i).is_objective_improvable());
     }
     model.reset_variable_objective_improvability();
 
-    EXPECT_EQ(false, x(0).is_objective_improvable());
+    EXPECT_FALSE(x(0).is_objective_improvable());
     for (auto i = 0; i < 10; i++) {
-        EXPECT_EQ(false, y(i).is_objective_improvable());
+        EXPECT_FALSE(y(i).is_objective_improvable());
     }
 }
 
@@ -1564,18 +1564,18 @@ TEST_F(TestModel, reset_variable_objective_improvability_arg_variable_ptrs) {
     model.categorize_variables();
 
     x(0).set_is_objective_improvable(true);
-    EXPECT_EQ(true, x(0).is_objective_improvable());
+    EXPECT_TRUE(x(0).is_objective_improvable());
     for (auto i = 0; i < 10; i++) {
         y(i).set_is_objective_improvable(true);
-        EXPECT_EQ(true, y(i).is_objective_improvable());
+        EXPECT_TRUE(y(i).is_objective_improvable());
     }
     model.reset_variable_objective_improvability({&x(0), &y(0), &y(9)});
 
-    EXPECT_EQ(false, x(0).is_objective_improvable());
-    EXPECT_EQ(false, y(0).is_objective_improvable());
-    EXPECT_EQ(false, y(9).is_objective_improvable());
+    EXPECT_FALSE(x(0).is_objective_improvable());
+    EXPECT_FALSE(y(0).is_objective_improvable());
+    EXPECT_FALSE(y(9).is_objective_improvable());
     for (auto i = 1; i < 9; i++) {
-        EXPECT_EQ(true, y(i).is_objective_improvable());
+        EXPECT_TRUE(y(i).is_objective_improvable());
     }
 }
 
@@ -1588,16 +1588,16 @@ TEST_F(TestModel, reset_variable_feasibility_improvability_arg_void) {
     model.categorize_variables();
 
     x(0).set_is_feasibility_improvable(true);
-    EXPECT_EQ(true, x(0).is_feasibility_improvable());
+    EXPECT_TRUE(x(0).is_feasibility_improvable());
     for (auto i = 0; i < 10; i++) {
         y(i).set_is_feasibility_improvable(true);
-        EXPECT_EQ(true, y(i).is_feasibility_improvable());
+        EXPECT_TRUE(y(i).is_feasibility_improvable());
     }
     model.reset_variable_feasibility_improvability();
 
-    EXPECT_EQ(false, x(0).is_feasibility_improvable());
+    EXPECT_FALSE(x(0).is_feasibility_improvable());
     for (auto i = 0; i < 10; i++) {
-        EXPECT_EQ(false, y(i).is_feasibility_improvable());
+        EXPECT_FALSE(y(i).is_feasibility_improvable());
     }
 }
 
@@ -1610,18 +1610,18 @@ TEST_F(TestModel, reset_variable_feasibility_improvability_arg_variable_ptrs) {
     model.categorize_variables();
 
     x(0).set_is_feasibility_improvable(true);
-    EXPECT_EQ(true, x(0).is_feasibility_improvable());
+    EXPECT_TRUE(x(0).is_feasibility_improvable());
     for (auto i = 0; i < 10; i++) {
         y(i).set_is_feasibility_improvable(true);
-        EXPECT_EQ(true, y(i).is_feasibility_improvable());
+        EXPECT_TRUE(y(i).is_feasibility_improvable());
     }
     model.reset_variable_feasibility_improvability({&x(0), &y(0), &y(9)});
 
-    EXPECT_EQ(false, x(0).is_feasibility_improvable());
-    EXPECT_EQ(false, y(0).is_feasibility_improvable());
-    EXPECT_EQ(false, y(9).is_feasibility_improvable());
+    EXPECT_FALSE(x(0).is_feasibility_improvable());
+    EXPECT_FALSE(y(0).is_feasibility_improvable());
+    EXPECT_FALSE(y(9).is_feasibility_improvable());
     for (auto i = 1; i < 9; i++) {
-        EXPECT_EQ(true, y(i).is_feasibility_improvable());
+        EXPECT_TRUE(y(i).is_feasibility_improvable());
     }
 }
 
@@ -1641,21 +1641,21 @@ TEST_F(TestModel,
     model.categorize_constraints();
 
     x(0).set_is_feasibility_improvable(true);
-    EXPECT_EQ(true, x(0).is_feasibility_improvable());
+    EXPECT_TRUE(x(0).is_feasibility_improvable());
     for (auto i = 0; i < 10; i++) {
         y(i).set_is_feasibility_improvable(true);
-        EXPECT_EQ(true, y(i).is_feasibility_improvable());
+        EXPECT_TRUE(y(i).is_feasibility_improvable());
     }
     std::vector<printemps::model::Constraint<int, double>*> constraint_ptrs = {
         &g(0), &g(1)};
     model.reset_variable_feasibility_improvability(constraint_ptrs);
 
-    EXPECT_EQ(false, x(0).is_feasibility_improvable());
-    EXPECT_EQ(false, y(0).is_feasibility_improvable());
-    EXPECT_EQ(false, y(1).is_feasibility_improvable());
-    EXPECT_EQ(false, y(9).is_feasibility_improvable());
+    EXPECT_FALSE(x(0).is_feasibility_improvable());
+    EXPECT_FALSE(y(0).is_feasibility_improvable());
+    EXPECT_FALSE(y(1).is_feasibility_improvable());
+    EXPECT_FALSE(y(9).is_feasibility_improvable());
     for (auto i = 2; i < 9; i++) {
-        EXPECT_EQ(true, y(i).is_feasibility_improvable());
+        EXPECT_TRUE(y(i).is_feasibility_improvable());
     }
 }
 
@@ -1680,30 +1680,30 @@ TEST_F(TestModel, update_variable_improvability) {
         model.update();
         model.update_variable_objective_improvability();
         model.update_variable_feasibility_improvability();
-        EXPECT_EQ(true, x(0).is_objective_improvable());
-        EXPECT_EQ(false, y(0).is_objective_improvable());
-        EXPECT_EQ(false, x(0).is_feasibility_improvable());
-        EXPECT_EQ(false, y(0).is_feasibility_improvable());
+        EXPECT_TRUE(x(0).is_objective_improvable());
+        EXPECT_FALSE(y(0).is_objective_improvable());
+        EXPECT_FALSE(x(0).is_feasibility_improvable());
+        EXPECT_FALSE(y(0).is_feasibility_improvable());
 
         x = 10;
         y = 10;
         model.update();
         model.update_variable_objective_improvability();
         model.update_variable_feasibility_improvability();
-        EXPECT_EQ(false, x(0).is_objective_improvable());
-        EXPECT_EQ(true, y(0).is_objective_improvable());
-        EXPECT_EQ(false, x(0).is_feasibility_improvable());
-        EXPECT_EQ(false, y(0).is_feasibility_improvable());
+        EXPECT_FALSE(x(0).is_objective_improvable());
+        EXPECT_TRUE(y(0).is_objective_improvable());
+        EXPECT_FALSE(x(0).is_feasibility_improvable());
+        EXPECT_FALSE(y(0).is_feasibility_improvable());
 
         x = 10;
         y = -10;
         model.update();
         model.update_variable_objective_improvability();
         model.update_variable_feasibility_improvability();
-        EXPECT_EQ(false, x(0).is_objective_improvable());
-        EXPECT_EQ(false, y(0).is_objective_improvable());
-        EXPECT_EQ(true, x(0).is_feasibility_improvable());
-        EXPECT_EQ(true, y(0).is_feasibility_improvable());
+        EXPECT_FALSE(x(0).is_objective_improvable());
+        EXPECT_FALSE(y(0).is_objective_improvable());
+        EXPECT_TRUE(x(0).is_feasibility_improvable());
+        EXPECT_TRUE(y(0).is_feasibility_improvable());
     }
     {
         printemps::model::Model<int, double> model;
@@ -1724,30 +1724,30 @@ TEST_F(TestModel, update_variable_improvability) {
         model.update();
         model.update_variable_objective_improvability();
         model.update_variable_feasibility_improvability();
-        EXPECT_EQ(true, x(0).is_objective_improvable());
-        EXPECT_EQ(false, y(0).is_objective_improvable());
-        EXPECT_EQ(false, x(0).is_feasibility_improvable());
-        EXPECT_EQ(false, y(0).is_feasibility_improvable());
+        EXPECT_TRUE(x(0).is_objective_improvable());
+        EXPECT_FALSE(y(0).is_objective_improvable());
+        EXPECT_FALSE(x(0).is_feasibility_improvable());
+        EXPECT_FALSE(y(0).is_feasibility_improvable());
 
         x = 10;
         y = 10;
         model.update();
         model.update_variable_objective_improvability();
         model.update_variable_feasibility_improvability();
-        EXPECT_EQ(false, x(0).is_objective_improvable());
-        EXPECT_EQ(true, y(0).is_objective_improvable());
-        EXPECT_EQ(false, x(0).is_feasibility_improvable());
-        EXPECT_EQ(false, y(0).is_feasibility_improvable());
+        EXPECT_FALSE(x(0).is_objective_improvable());
+        EXPECT_TRUE(y(0).is_objective_improvable());
+        EXPECT_FALSE(x(0).is_feasibility_improvable());
+        EXPECT_FALSE(y(0).is_feasibility_improvable());
 
         x = 10;
         y = -10;
         model.update();
         model.update_variable_objective_improvability();
         model.update_variable_feasibility_improvability();
-        EXPECT_EQ(false, x(0).is_objective_improvable());
-        EXPECT_EQ(false, y(0).is_objective_improvable());
-        EXPECT_EQ(true, x(0).is_feasibility_improvable());
-        EXPECT_EQ(true, y(0).is_feasibility_improvable());
+        EXPECT_FALSE(x(0).is_objective_improvable());
+        EXPECT_FALSE(y(0).is_objective_improvable());
+        EXPECT_TRUE(x(0).is_feasibility_improvable());
+        EXPECT_TRUE(y(0).is_feasibility_improvable());
     }
     {
         printemps::model::Model<int, double> model;
@@ -1768,30 +1768,30 @@ TEST_F(TestModel, update_variable_improvability) {
         model.update();
         model.update_variable_objective_improvability();
         model.update_variable_feasibility_improvability();
-        EXPECT_EQ(true, x(0).is_objective_improvable());
-        EXPECT_EQ(false, y(0).is_objective_improvable());
-        EXPECT_EQ(false, x(0).is_feasibility_improvable());
-        EXPECT_EQ(false, y(0).is_feasibility_improvable());
+        EXPECT_TRUE(x(0).is_objective_improvable());
+        EXPECT_FALSE(y(0).is_objective_improvable());
+        EXPECT_FALSE(x(0).is_feasibility_improvable());
+        EXPECT_FALSE(y(0).is_feasibility_improvable());
 
         x = 10;
         y = 10;
         model.update();
         model.update_variable_objective_improvability();
         model.update_variable_feasibility_improvability();
-        EXPECT_EQ(false, x(0).is_objective_improvable());
-        EXPECT_EQ(true, y(0).is_objective_improvable());
-        EXPECT_EQ(false, x(0).is_feasibility_improvable());
-        EXPECT_EQ(false, y(0).is_feasibility_improvable());
+        EXPECT_FALSE(x(0).is_objective_improvable());
+        EXPECT_TRUE(y(0).is_objective_improvable());
+        EXPECT_FALSE(x(0).is_feasibility_improvable());
+        EXPECT_FALSE(y(0).is_feasibility_improvable());
 
         x = -10;
         y = 10;
         model.update();
         model.update_variable_objective_improvability();
         model.update_variable_feasibility_improvability();
-        EXPECT_EQ(true, x(0).is_objective_improvable());
-        EXPECT_EQ(true, y(0).is_objective_improvable());
-        EXPECT_EQ(true, x(0).is_feasibility_improvable());
-        EXPECT_EQ(true, y(0).is_feasibility_improvable());
+        EXPECT_TRUE(x(0).is_objective_improvable());
+        EXPECT_TRUE(y(0).is_objective_improvable());
+        EXPECT_TRUE(x(0).is_feasibility_improvable());
+        EXPECT_TRUE(y(0).is_feasibility_improvable());
     }
     {
         printemps::model::Model<int, double> model;
@@ -1813,30 +1813,30 @@ TEST_F(TestModel, update_variable_improvability) {
         model.update();
         model.update_variable_objective_improvability();
         model.update_variable_feasibility_improvability();
-        EXPECT_EQ(false, x(0).is_objective_improvable());
-        EXPECT_EQ(true, y(0).is_objective_improvable());
-        EXPECT_EQ(false, x(0).is_feasibility_improvable());
-        EXPECT_EQ(false, y(0).is_feasibility_improvable());
+        EXPECT_FALSE(x(0).is_objective_improvable());
+        EXPECT_TRUE(y(0).is_objective_improvable());
+        EXPECT_FALSE(x(0).is_feasibility_improvable());
+        EXPECT_FALSE(y(0).is_feasibility_improvable());
 
         x = 10;
         y = 10;
         model.update();
         model.update_variable_objective_improvability();
         model.update_variable_feasibility_improvability();
-        EXPECT_EQ(true, x(0).is_objective_improvable());
-        EXPECT_EQ(false, y(0).is_objective_improvable());
-        EXPECT_EQ(false, x(0).is_feasibility_improvable());
-        EXPECT_EQ(false, y(0).is_feasibility_improvable());
+        EXPECT_TRUE(x(0).is_objective_improvable());
+        EXPECT_FALSE(y(0).is_objective_improvable());
+        EXPECT_FALSE(x(0).is_feasibility_improvable());
+        EXPECT_FALSE(y(0).is_feasibility_improvable());
 
         x = 10;
         y = -10;
         model.update();
         model.update_variable_objective_improvability();
         model.update_variable_feasibility_improvability();
-        EXPECT_EQ(true, x(0).is_objective_improvable());
-        EXPECT_EQ(true, y(0).is_objective_improvable());
-        EXPECT_EQ(true, x(0).is_feasibility_improvable());
-        EXPECT_EQ(true, y(0).is_feasibility_improvable());
+        EXPECT_TRUE(x(0).is_objective_improvable());
+        EXPECT_TRUE(y(0).is_objective_improvable());
+        EXPECT_TRUE(x(0).is_feasibility_improvable());
+        EXPECT_TRUE(y(0).is_feasibility_improvable());
     }
     {
         printemps::model::Model<int, double> model;
@@ -1858,30 +1858,30 @@ TEST_F(TestModel, update_variable_improvability) {
         model.update();
         model.update_variable_objective_improvability();
         model.update_variable_feasibility_improvability();
-        EXPECT_EQ(false, x(0).is_objective_improvable());
-        EXPECT_EQ(true, y(0).is_objective_improvable());
-        EXPECT_EQ(false, x(0).is_feasibility_improvable());
-        EXPECT_EQ(false, y(0).is_feasibility_improvable());
+        EXPECT_FALSE(x(0).is_objective_improvable());
+        EXPECT_TRUE(y(0).is_objective_improvable());
+        EXPECT_FALSE(x(0).is_feasibility_improvable());
+        EXPECT_FALSE(y(0).is_feasibility_improvable());
 
         x = 10;
         y = 10;
         model.update();
         model.update_variable_objective_improvability();
         model.update_variable_feasibility_improvability();
-        EXPECT_EQ(true, x(0).is_objective_improvable());
-        EXPECT_EQ(false, y(0).is_objective_improvable());
-        EXPECT_EQ(false, x(0).is_feasibility_improvable());
-        EXPECT_EQ(false, y(0).is_feasibility_improvable());
+        EXPECT_TRUE(x(0).is_objective_improvable());
+        EXPECT_FALSE(y(0).is_objective_improvable());
+        EXPECT_FALSE(x(0).is_feasibility_improvable());
+        EXPECT_FALSE(y(0).is_feasibility_improvable());
 
         x = 10;
         y = -10;
         model.update();
         model.update_variable_objective_improvability();
         model.update_variable_feasibility_improvability();
-        EXPECT_EQ(true, x(0).is_objective_improvable());
-        EXPECT_EQ(true, y(0).is_objective_improvable());
-        EXPECT_EQ(true, x(0).is_feasibility_improvable());
-        EXPECT_EQ(true, y(0).is_feasibility_improvable());
+        EXPECT_TRUE(x(0).is_objective_improvable());
+        EXPECT_TRUE(y(0).is_objective_improvable());
+        EXPECT_TRUE(x(0).is_feasibility_improvable());
+        EXPECT_TRUE(y(0).is_feasibility_improvable());
     }
     {
         printemps::model::Model<int, double> model;
@@ -1903,30 +1903,30 @@ TEST_F(TestModel, update_variable_improvability) {
         model.update();
         model.update_variable_objective_improvability();
         model.update_variable_feasibility_improvability();
-        EXPECT_EQ(false, x(0).is_objective_improvable());
-        EXPECT_EQ(true, y(0).is_objective_improvable());
-        EXPECT_EQ(false, x(0).is_feasibility_improvable());
-        EXPECT_EQ(false, y(0).is_feasibility_improvable());
+        EXPECT_FALSE(x(0).is_objective_improvable());
+        EXPECT_TRUE(y(0).is_objective_improvable());
+        EXPECT_FALSE(x(0).is_feasibility_improvable());
+        EXPECT_FALSE(y(0).is_feasibility_improvable());
 
         x = 10;
         y = 10;
         model.update();
         model.update_variable_objective_improvability();
         model.update_variable_feasibility_improvability();
-        EXPECT_EQ(true, x(0).is_objective_improvable());
-        EXPECT_EQ(false, y(0).is_objective_improvable());
-        EXPECT_EQ(false, x(0).is_feasibility_improvable());
-        EXPECT_EQ(false, y(0).is_feasibility_improvable());
+        EXPECT_TRUE(x(0).is_objective_improvable());
+        EXPECT_FALSE(y(0).is_objective_improvable());
+        EXPECT_FALSE(x(0).is_feasibility_improvable());
+        EXPECT_FALSE(y(0).is_feasibility_improvable());
 
         x = -10;
         y = 10;
         model.update();
         model.update_variable_objective_improvability();
         model.update_variable_feasibility_improvability();
-        EXPECT_EQ(false, x(0).is_objective_improvable());
-        EXPECT_EQ(false, y(0).is_objective_improvable());
-        EXPECT_EQ(true, x(0).is_feasibility_improvable());
-        EXPECT_EQ(true, y(0).is_feasibility_improvable());
+        EXPECT_FALSE(x(0).is_objective_improvable());
+        EXPECT_FALSE(y(0).is_objective_improvable());
+        EXPECT_TRUE(x(0).is_feasibility_improvable());
+        EXPECT_TRUE(y(0).is_feasibility_improvable());
     }
 }
 
@@ -1939,15 +1939,15 @@ TEST_F(TestModel, update_feasibility) {
 
     x = 4;
     model.update();  // include update_feasibility()
-    EXPECT_EQ(true, model.is_feasible());
+    EXPECT_TRUE(model.is_feasible());
 
     x = 5;
     model.update();
-    EXPECT_EQ(true, model.is_feasible());
+    EXPECT_TRUE(model.is_feasible());
 
     x = 6;
     model.update();
-    EXPECT_EQ(false, model.is_feasible());
+    EXPECT_FALSE(model.is_feasible());
 }
 
 /*****************************************************************************/
@@ -2006,9 +2006,9 @@ TEST_F(TestModel, evaluate) {
                       score_after_0.local_augmented_objective);
             EXPECT_EQ(46 + 5 * 10000 + 10000,
                       score_after_0.global_augmented_objective);
-            EXPECT_EQ(false, score_after_0.is_objective_improvable);
-            EXPECT_EQ(false, score_after_0.is_feasibility_improvable);
-            EXPECT_EQ(false, score_after_0.is_feasible);
+            EXPECT_FALSE(score_after_0.is_objective_improvable);
+            EXPECT_FALSE(score_after_0.is_feasibility_improvable);
+            EXPECT_FALSE(score_after_0.is_feasible);
 
             EXPECT_EQ(46, score_after_1.objective);
             EXPECT_EQ(5 + 1, score_after_1.total_violation);
@@ -2018,9 +2018,9 @@ TEST_F(TestModel, evaluate) {
                       score_after_1.local_augmented_objective);
             EXPECT_EQ(46 + 5 * 10000 + 10000,
                       score_after_1.global_augmented_objective);
-            EXPECT_EQ(false, score_after_1.is_objective_improvable);
-            EXPECT_EQ(false, score_after_1.is_feasibility_improvable);
-            EXPECT_EQ(false, score_after_1.is_feasible);
+            EXPECT_FALSE(score_after_1.is_objective_improvable);
+            EXPECT_FALSE(score_after_1.is_feasibility_improvable);
+            EXPECT_FALSE(score_after_1.is_feasible);
 
             model.update(move);
             score_before = score_after_1;
@@ -2045,9 +2045,9 @@ TEST_F(TestModel, evaluate) {
             EXPECT_EQ(0, score_after_0.global_penalty);
             EXPECT_EQ(1, score_after_0.local_augmented_objective);
             EXPECT_EQ(1, score_after_0.global_augmented_objective);
-            EXPECT_EQ(true, score_after_0.is_objective_improvable);
-            EXPECT_EQ(true, score_after_0.is_feasibility_improvable);
-            EXPECT_EQ(true, score_after_0.is_feasible);
+            EXPECT_TRUE(score_after_0.is_objective_improvable);
+            EXPECT_TRUE(score_after_0.is_feasibility_improvable);
+            EXPECT_TRUE(score_after_0.is_feasible);
 
             EXPECT_EQ(1, score_after_1.objective);
             EXPECT_EQ(0, score_after_1.total_violation);
@@ -2055,9 +2055,9 @@ TEST_F(TestModel, evaluate) {
             EXPECT_EQ(0, score_after_1.global_penalty);
             EXPECT_EQ(1, score_after_1.local_augmented_objective);
             EXPECT_EQ(1, score_after_1.global_augmented_objective);
-            EXPECT_EQ(true, score_after_1.is_objective_improvable);
-            EXPECT_EQ(true, score_after_1.is_feasibility_improvable);
-            EXPECT_EQ(true, score_after_1.is_feasible);
+            EXPECT_TRUE(score_after_1.is_objective_improvable);
+            EXPECT_TRUE(score_after_1.is_feasibility_improvable);
+            EXPECT_TRUE(score_after_1.is_feasible);
 
             model.update(move);
             score_before = score_after_1;
@@ -2081,9 +2081,9 @@ TEST_F(TestModel, evaluate) {
             EXPECT_EQ(10000, score_after_0.global_penalty);
             EXPECT_EQ(11 + 100, score_after_0.local_augmented_objective);
             EXPECT_EQ(11 + 10000, score_after_0.global_augmented_objective);
-            EXPECT_EQ(false, score_after_0.is_objective_improvable);
-            EXPECT_EQ(false, score_after_0.is_feasibility_improvable);
-            EXPECT_EQ(false, score_after_0.is_feasible);
+            EXPECT_FALSE(score_after_0.is_objective_improvable);
+            EXPECT_FALSE(score_after_0.is_feasibility_improvable);
+            EXPECT_FALSE(score_after_0.is_feasible);
 
             EXPECT_EQ(11, score_after_1.objective);
             EXPECT_EQ(1, score_after_1.total_violation);
@@ -2091,9 +2091,9 @@ TEST_F(TestModel, evaluate) {
             EXPECT_EQ(10000, score_after_1.global_penalty);
             EXPECT_EQ(11 + 100, score_after_1.local_augmented_objective);
             EXPECT_EQ(11 + 10000, score_after_1.global_augmented_objective);
-            EXPECT_EQ(false, score_after_1.is_objective_improvable);
-            EXPECT_EQ(false, score_after_1.is_feasibility_improvable);
-            EXPECT_EQ(false, score_after_1.is_feasible);
+            EXPECT_FALSE(score_after_1.is_objective_improvable);
+            EXPECT_FALSE(score_after_1.is_feasibility_improvable);
+            EXPECT_FALSE(score_after_1.is_feasible);
 
             model.update(move);
             score_before = score_after_1;
@@ -2153,9 +2153,9 @@ TEST_F(TestModel, evaluate) {
                       score_after_0.local_augmented_objective);
             EXPECT_EQ(-46 + 5 * 10000 + 10000,
                       score_after_0.global_augmented_objective);
-            EXPECT_EQ(false, score_after_0.is_objective_improvable);
-            EXPECT_EQ(false, score_after_0.is_feasibility_improvable);
-            EXPECT_EQ(false, score_after_0.is_feasible);
+            EXPECT_FALSE(score_after_0.is_objective_improvable);
+            EXPECT_FALSE(score_after_0.is_feasibility_improvable);
+            EXPECT_FALSE(score_after_0.is_feasible);
 
             EXPECT_EQ(-46, score_after_1.objective);
             EXPECT_EQ(5 + 1, score_after_1.total_violation);
@@ -2165,9 +2165,9 @@ TEST_F(TestModel, evaluate) {
                       score_after_1.local_augmented_objective);
             EXPECT_EQ(-46 + 5 * 10000 + 10000,
                       score_after_1.global_augmented_objective);
-            EXPECT_EQ(false, score_after_1.is_objective_improvable);
-            EXPECT_EQ(false, score_after_1.is_feasibility_improvable);
-            EXPECT_EQ(false, score_after_1.is_feasible);
+            EXPECT_FALSE(score_after_1.is_objective_improvable);
+            EXPECT_FALSE(score_after_1.is_feasibility_improvable);
+            EXPECT_FALSE(score_after_1.is_feasible);
 
             model.update(move);
             score_before = score_after_1;
@@ -2191,9 +2191,9 @@ TEST_F(TestModel, evaluate) {
             EXPECT_EQ(0, score_after_0.global_penalty);
             EXPECT_EQ(-1, score_after_0.local_augmented_objective);
             EXPECT_EQ(-1, score_after_0.global_augmented_objective);
-            EXPECT_EQ(false, score_after_0.is_objective_improvable);
-            EXPECT_EQ(true, score_after_0.is_feasibility_improvable);
-            EXPECT_EQ(true, score_after_0.is_feasible);
+            EXPECT_FALSE(score_after_0.is_objective_improvable);
+            EXPECT_TRUE(score_after_0.is_feasibility_improvable);
+            EXPECT_TRUE(score_after_0.is_feasible);
 
             EXPECT_EQ(-1, score_after_1.objective);
             EXPECT_EQ(0, score_after_0.total_violation);
@@ -2201,9 +2201,9 @@ TEST_F(TestModel, evaluate) {
             EXPECT_EQ(0, score_after_1.global_penalty);
             EXPECT_EQ(-1, score_after_1.local_augmented_objective);
             EXPECT_EQ(-1, score_after_1.global_augmented_objective);
-            EXPECT_EQ(false, score_after_1.is_objective_improvable);
-            EXPECT_EQ(true, score_after_1.is_feasibility_improvable);
-            EXPECT_EQ(true, score_after_1.is_feasible);
+            EXPECT_FALSE(score_after_1.is_objective_improvable);
+            EXPECT_TRUE(score_after_1.is_feasibility_improvable);
+            EXPECT_TRUE(score_after_1.is_feasible);
 
             model.update(move);
             score_before = score_after_1;
@@ -2227,9 +2227,9 @@ TEST_F(TestModel, evaluate) {
             EXPECT_EQ(10000, score_after_0.global_penalty);
             EXPECT_EQ(-11 + 100, score_after_0.local_augmented_objective);
             EXPECT_EQ(-11 + 10000, score_after_0.global_augmented_objective);
-            EXPECT_EQ(true, score_after_0.is_objective_improvable);
-            EXPECT_EQ(false, score_after_0.is_feasibility_improvable);
-            EXPECT_EQ(false, score_after_0.is_feasible);
+            EXPECT_TRUE(score_after_0.is_objective_improvable);
+            EXPECT_FALSE(score_after_0.is_feasibility_improvable);
+            EXPECT_FALSE(score_after_0.is_feasible);
 
             EXPECT_EQ(-11, score_after_1.objective);
             EXPECT_EQ(1, score_after_1.total_violation);
@@ -2237,9 +2237,9 @@ TEST_F(TestModel, evaluate) {
             EXPECT_EQ(10000, score_after_1.global_penalty);
             EXPECT_EQ(-11 + 100, score_after_1.local_augmented_objective);
             EXPECT_EQ(-11 + 10000, score_after_1.global_augmented_objective);
-            EXPECT_EQ(true, score_after_1.is_objective_improvable);
-            EXPECT_EQ(false, score_after_1.is_feasibility_improvable);
-            EXPECT_EQ(false, score_after_1.is_feasible);
+            EXPECT_TRUE(score_after_1.is_objective_improvable);
+            EXPECT_FALSE(score_after_1.is_feasibility_improvable);
+            EXPECT_FALSE(score_after_1.is_feasible);
 
             model.update(move);
             score_before = score_after_1;
@@ -2848,11 +2848,11 @@ TEST_F(TestModel, fix_variables) {
     EXPECT_EQ(4, z(0, 0).value());
     EXPECT_EQ(5, z(19, 19).value());
 
-    EXPECT_EQ(true, x.is_fixed());
-    EXPECT_EQ(true, y(0).is_fixed());
-    EXPECT_EQ(true, y(9).is_fixed());
-    EXPECT_EQ(true, z(0, 0).is_fixed());
-    EXPECT_EQ(true, z(19, 19).is_fixed());
+    EXPECT_TRUE(x.is_fixed());
+    EXPECT_TRUE(y(0).is_fixed());
+    EXPECT_TRUE(y(9).is_fixed());
+    EXPECT_TRUE(z(0, 0).is_fixed());
+    EXPECT_TRUE(z(19, 19).is_fixed());
 }
 
 /*****************************************************************************/
@@ -2873,15 +2873,15 @@ TEST_F(TestModel, unfix_variables) {
     mutable_variable_names.insert("z[19, 19]");
     model.unfix_variables(mutable_variable_names);
 
-    EXPECT_EQ(false, x.is_fixed());
-    EXPECT_EQ(false, y(0).is_fixed());
-    EXPECT_EQ(true, y(1).is_fixed());
-    EXPECT_EQ(true, y(8).is_fixed());
-    EXPECT_EQ(false, y(9).is_fixed());
-    EXPECT_EQ(false, z(0, 0).is_fixed());
-    EXPECT_EQ(true, z(0, 1).is_fixed());
-    EXPECT_EQ(true, z(19, 18).is_fixed());
-    EXPECT_EQ(false, z(19, 19).is_fixed());
+    EXPECT_FALSE(x.is_fixed());
+    EXPECT_FALSE(y(0).is_fixed());
+    EXPECT_TRUE(y(1).is_fixed());
+    EXPECT_TRUE(y(8).is_fixed());
+    EXPECT_FALSE(y(9).is_fixed());
+    EXPECT_FALSE(z(0, 0).is_fixed());
+    EXPECT_TRUE(z(0, 1).is_fixed());
+    EXPECT_TRUE(z(19, 18).is_fixed());
+    EXPECT_FALSE(z(19, 19).is_fixed());
 }
 
 /*****************************************************************************/
@@ -2988,11 +2988,11 @@ TEST_F(TestModel, sign) {
 /*****************************************************************************/
 TEST_F(TestModel, set_is_solved) {
     printemps::model::Model<int, double> model;
-    EXPECT_EQ(false, model.is_solved());
+    EXPECT_FALSE(model.is_solved());
     model.set_is_solved(true);
-    EXPECT_EQ(true, model.is_solved());
+    EXPECT_TRUE(model.is_solved());
     model.set_is_solved(false);
-    EXPECT_EQ(false, model.is_solved());
+    EXPECT_FALSE(model.is_solved());
 }
 
 /*****************************************************************************/
@@ -3016,7 +3016,7 @@ TEST_F(TestModel, number_of_fixed_variables) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModel, number_of_not_fixed_variables) {
+TEST_F(TestModel, number_of_mutable_variables) {
     /// This method is tested in categorize_variables().
 }
 

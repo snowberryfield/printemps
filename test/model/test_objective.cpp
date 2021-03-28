@@ -38,10 +38,10 @@ TEST_F(TestObjective, initialize) {
 
     EXPECT_EQ(0, objective.evaluate());
     EXPECT_EQ(0, objective.evaluate({}));
-    EXPECT_EQ(true, objective.expression().sensitivities().empty());
+    EXPECT_TRUE(objective.expression().sensitivities().empty());
     EXPECT_EQ(0, objective.expression().constant_value());
     EXPECT_EQ(0, objective.value());
-    EXPECT_EQ(true, objective.is_linear());
+    EXPECT_TRUE(objective.is_linear());
 }
 
 /*****************************************************************************/
@@ -63,10 +63,10 @@ TEST_F(TestObjective, create_instance_arg_function) {
     auto objective =
         printemps::model::Objective<int, double>::create_instance(f);
 
-    EXPECT_EQ(true, objective.expression().sensitivities().empty());
+    EXPECT_TRUE(objective.expression().sensitivities().empty());
     EXPECT_EQ(0, objective.expression().constant_value());
     EXPECT_EQ(0, objective.value());
-    EXPECT_EQ(false, objective.is_linear());
+    EXPECT_FALSE(objective.is_linear());
 }
 
 /*****************************************************************************/
@@ -89,7 +89,7 @@ TEST_F(TestObjective, create_instance_arg_expression) {
               objective.expression().sensitivities().at(&variable));
     EXPECT_EQ(constant, objective.expression().constant_value());
     EXPECT_EQ(0, objective.value());
-    EXPECT_EQ(true, objective.is_linear());
+    EXPECT_TRUE(objective.is_linear());
 }
 
 /*****************************************************************************/
@@ -102,10 +102,10 @@ TEST_F(TestObjective, setup_arg_function) {
         printemps::model::Objective<int, double>::create_instance();
     objective.setup(f);
 
-    EXPECT_EQ(true, objective.expression().sensitivities().empty());
+    EXPECT_TRUE(objective.expression().sensitivities().empty());
     EXPECT_EQ(0, objective.expression().constant_value());
     EXPECT_EQ(0, objective.value());
-    EXPECT_EQ(false, objective.is_linear());
+    EXPECT_FALSE(objective.is_linear());
 }
 
 /*****************************************************************************/
@@ -127,7 +127,7 @@ TEST_F(TestObjective, setup_arg_expression) {
               objective.expression().sensitivities().at(&variable));
     EXPECT_EQ(constant, objective.expression().constant_value());
     EXPECT_EQ(0, objective.value());
-    EXPECT_EQ(true, objective.is_linear());
+    EXPECT_TRUE(objective.is_linear());
 }
 
 /*****************************************************************************/

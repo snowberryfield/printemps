@@ -4,39 +4,155 @@
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
 #include <gtest/gtest.h>
-#include <random>
-
 #include <printemps.h>
 
 namespace {
 /*****************************************************************************/
 class TestMove : public ::testing::Test {
    protected:
-    printemps::utility::IntegerUniformRandom m_random_integer;
-    printemps::utility::IntegerUniformRandom m_random_positive_integer;
-
     virtual void SetUp(void) {
-        m_random_integer.setup(-1000, 1000, 0);
-        m_random_positive_integer.setup(1, 1000, 0);
+        /// nothing to do
     }
     virtual void TearDown() {
         /// nothing to do
-    }
-    int random_integer(void) {
-        return m_random_integer.generate_random();
-    }
-
-    int random_positive_integer(void) {
-        return m_random_positive_integer.generate_random();
     }
 };
 
 /*****************************************************************************/
 TEST_F(TestMove, constructor) {
     printemps::neighborhood::Move<int, double> move;
-    EXPECT_EQ(false, move.is_special_neighborhood_move);
-    EXPECT_EQ(true, move.is_available);
+    EXPECT_FALSE(move.is_special_neighborhood_move);
+    EXPECT_TRUE(move.is_available);
     EXPECT_EQ(0.0, move.overlap_rate);
+}
+
+/*****************************************************************************/
+TEST_F(TestMove, has_fixed_variable) {
+    auto variable_0 =
+        printemps::model::Variable<int, double>::create_instance();
+    auto variable_1 =
+        printemps::model::Variable<int, double>::create_instance();
+    variable_1.fix();
+
+    /// The move does not have a fixed variable.
+    {
+        printemps::neighborhood::Move<int, double> move;
+        move.alterations.emplace_back(&variable_0, 1);
+        EXPECT_FALSE(printemps::neighborhood::has_fixed_variable(move));
+    }
+
+    /// The move have a fixed variable.
+    {
+        printemps::neighborhood::Move<int, double> move;
+        move.alterations.emplace_back(&variable_0, 1);
+        move.alterations.emplace_back(&variable_1, 1);
+        EXPECT_TRUE(printemps::neighborhood::has_fixed_variable(move));
+    }
+}
+
+/*****************************************************************************/
+TEST_F(TestMove, has_selection_variable) {
+    auto variable_0 =
+        printemps::model::Variable<int, double>::create_instance();
+    auto variable_1 =
+        printemps::model::Variable<int, double>::create_instance();
+
+    printemps::model::Selection<int, double> selection;
+    variable_1.set_selection_ptr(&selection);
+
+    /// The move does not have a selection variable.
+    {
+        printemps::neighborhood::Move<int, double> move;
+        move.alterations.emplace_back(&variable_0, 1);
+        EXPECT_FALSE(printemps::neighborhood::has_selection_variable(move));
+    }
+
+    /// The move has a selection variable.
+    {
+        printemps::neighborhood::Move<int, double> move;
+        move.alterations.emplace_back(&variable_0, 1);
+        move.alterations.emplace_back(&variable_1, 1);
+        EXPECT_TRUE(printemps::neighborhood::has_selection_variable(move));
+    }
+}
+
+/*****************************************************************************/
+TEST_F(TestMove, has_bound_violation) {
+    auto variable_0 =
+        printemps::model::Variable<int, double>::create_instance();
+    auto variable_1 =
+        printemps::model::Variable<int, double>::create_instance();
+    variable_0.set_bound(0, 10);
+    variable_1.set_bound(0, 10);
+
+    /// The move does not have a bound violation.
+    {
+        printemps::neighborhood::Move<int, double> move;
+        move.alterations.emplace_back(&variable_0, 1);
+        EXPECT_FALSE(printemps::neighborhood::has_bound_violation(move));
+    }
+
+    /// The move has a bound violation.
+    {
+        printemps::neighborhood::Move<int, double> move;
+        move.alterations.emplace_back(&variable_0, 1);
+        move.alterations.emplace_back(&variable_1, 20);
+        EXPECT_TRUE(printemps::neighborhood::has_bound_violation(move));
+    }
+}
+
+/*****************************************************************************/
+TEST_F(TestMove, has_objective_improvable_variable) {
+    auto variable_0 =
+        printemps::model::Variable<int, double>::create_instance();
+    auto variable_1 =
+        printemps::model::Variable<int, double>::create_instance();
+    variable_0.set_is_objective_improvable(false);
+    variable_1.set_is_objective_improvable(true);
+
+    /// The move does not have an objective improvable variable.
+    {
+        printemps::neighborhood::Move<int, double> move;
+        move.alterations.emplace_back(&variable_0, 1);
+        EXPECT_FALSE(
+            printemps::neighborhood::has_objective_improvable_variable(move));
+    }
+
+    /// The move has an objective improvable variable.
+    {
+        printemps::neighborhood::Move<int, double> move;
+        move.alterations.emplace_back(&variable_0, 1);
+        move.alterations.emplace_back(&variable_1, 1);
+        EXPECT_TRUE(
+            printemps::neighborhood::has_objective_improvable_variable(move));
+    }
+}
+
+/*****************************************************************************/
+TEST_F(TestMove, has_feasibility_improvable_variable) {
+    auto variable_0 =
+        printemps::model::Variable<int, double>::create_instance();
+    auto variable_1 =
+        printemps::model::Variable<int, double>::create_instance();
+    variable_0.set_is_feasibility_improvable(false);
+    variable_1.set_is_feasibility_improvable(true);
+
+    /// The move does not have a feasibility improvable variable.
+    {
+        printemps::neighborhood::Move<int, double> move;
+        move.alterations.emplace_back(&variable_0, 1);
+        EXPECT_FALSE(
+            printemps::neighborhood::has_feasibility_improvable_variable(move));
+    }
+
+    /// The move has a feasibility improvable variable.
+    {
+        printemps::neighborhood::Move<int, double> move;
+        move.alterations.emplace_back(&variable_0, 1);
+        move.alterations.emplace_back(&variable_1, 1);
+        EXPECT_TRUE(
+            printemps::neighborhood::has_feasibility_improvable_variable(move));
+    }
 }
 
 /*****************************************************************************/
@@ -46,18 +162,20 @@ TEST_F(TestMove, has_duplicate_variable) {
     auto variable_1 =
         printemps::model::Variable<int, double>::create_instance();
 
-    {
-        printemps::neighborhood::Move<int, double> move;
-        move.alterations.emplace_back(&variable_0, 1);
-        move.alterations.emplace_back(&variable_0, 1);
-        EXPECT_EQ(true, printemps::neighborhood::has_duplicate_variable(move));
-    }
-
+    /// The move does not have a duplicated variable.
     {
         printemps::neighborhood::Move<int, double> move;
         move.alterations.emplace_back(&variable_0, 1);
         move.alterations.emplace_back(&variable_1, 1);
-        EXPECT_EQ(false, printemps::neighborhood::has_duplicate_variable(move));
+        EXPECT_FALSE(printemps::neighborhood::has_duplicate_variable(move));
+    }
+
+    /// The move has a duplicated variable.
+    {
+        printemps::neighborhood::Move<int, double> move;
+        move.alterations.emplace_back(&variable_0, 1);
+        move.alterations.emplace_back(&variable_0, 1);
+        EXPECT_TRUE(printemps::neighborhood::has_duplicate_variable(move));
     }
 }
 
@@ -75,6 +193,7 @@ TEST_F(TestMove, compute_overlap_rate) {
     model.categorize_constraints();
     model.setup_variable_related_monic_constraints();
 
+    /// x(0) and x(1) have two common constraints.
     {
         printemps::neighborhood::Move<int, double> move;
         move.alterations.emplace_back(&x(0), 1);
@@ -85,6 +204,7 @@ TEST_F(TestMove, compute_overlap_rate) {
         EXPECT_FLOAT_EQ(2.0 / 3.0, overlap_rate);
     }
 
+    /// x(0), x(1), and x(2) have one common constraint.
     {
         printemps::neighborhood::Move<int, double> move;
         move.alterations.emplace_back(&x(0), 1);
@@ -96,6 +216,7 @@ TEST_F(TestMove, compute_overlap_rate) {
         EXPECT_FLOAT_EQ(pow(1.0 / 3.0, 1.0 / (3 - 1)), overlap_rate);
     }
 
+    /// x(0), x(1), x(2), and x(3) has no common constraint.
     {
         printemps::neighborhood::Move<int, double> move;
         move.alterations.emplace_back(&x(0), 1);
@@ -118,15 +239,20 @@ TEST_F(TestMove, compute_hash) {
     model.categorize_variables();
     model.categorize_constraints();
 
+    /**
+     * Check only that the computed hashes are less than 1.
+     */
+    /// Case 1
     {
         printemps::neighborhood::Move<int, double> move;
         move.alterations.emplace_back(&x(0), 1);
         move.alterations.emplace_back(&x(1), 1);
         double hash = printemps::neighborhood::compute_hash(move.alterations);
 
-        EXPECT_EQ(true, hash < 1.0);
+        EXPECT_TRUE(hash < 1.0);
     }
 
+    /// Case 2
     {
         printemps::neighborhood::Move<int, double> move;
         move.alterations.emplace_back(&x(0), 1);
@@ -134,9 +260,10 @@ TEST_F(TestMove, compute_hash) {
         move.alterations.emplace_back(&x(2), 1);
         double hash = printemps::neighborhood::compute_hash(move.alterations);
 
-        EXPECT_EQ(true, hash < 1.0);
+        EXPECT_TRUE(hash < 1.0);
     }
 
+    /// Case 3
     {
         printemps::neighborhood::Move<int, double> move;
         move.alterations.emplace_back(&x(0), 1);
@@ -145,7 +272,7 @@ TEST_F(TestMove, compute_hash) {
         move.alterations.emplace_back(&x(3), 1);
         double hash = printemps::neighborhood::compute_hash(move.alterations);
 
-        EXPECT_EQ(true, hash < 1.0);
+        EXPECT_TRUE(hash < 1.0);
     }
 }
 
@@ -167,6 +294,7 @@ TEST_F(TestMove, operator_plus) {
 
     auto variable_ptrs = model.variable_reference().variable_ptrs;
 
+    /// Single moves.
     printemps::neighborhood::Move<int, double> move_x;
     move_x.alterations.emplace_back(variable_ptrs[0], 1);
     move_x.related_constraint_ptrs =
@@ -182,8 +310,9 @@ TEST_F(TestMove, operator_plus) {
     move_z.related_constraint_ptrs =
         variable_ptrs[2]->related_constraint_ptrs();
 
+    /// Combined move for x and y.
     auto move_x_y = move_x + move_y;
-    EXPECT_EQ(false, printemps::neighborhood::has_duplicate_variable(move_x_y));
+    EXPECT_FALSE(printemps::neighborhood::has_duplicate_variable(move_x_y));
     EXPECT_EQ(2, static_cast<int>(move_x_y.alterations.size()));
     EXPECT_EQ(3, static_cast<int>(move_x_y.related_constraint_ptrs.size()));
     EXPECT_EQ(printemps::neighborhood::MoveSense::Chain, move_x_y.sense);
@@ -194,6 +323,7 @@ TEST_F(TestMove, operator_plus) {
     EXPECT_EQ(variable_ptrs[1], move_x_y.alterations[1].first);
     EXPECT_EQ(2, move_x_y.alterations[1].second);
 
+    /// Combined move for x, y, and z.
     auto move_x_y_z = move_x_y + move_z;
     EXPECT_EQ(false,
               printemps::neighborhood::has_duplicate_variable(move_x_y_z));
@@ -210,6 +340,7 @@ TEST_F(TestMove, operator_plus) {
     EXPECT_EQ(variable_ptrs[2], move_x_y_z.alterations[2].first);
     EXPECT_EQ(3, move_x_y_z.alterations[2].second);
 
+    /// Combined move for x, y, and z, which has duplication.
     auto move_x_y_z_z = move_x_y_z + move_z;
     EXPECT_EQ(true,
               printemps::neighborhood::has_duplicate_variable(move_x_y_z_z));
@@ -228,6 +359,121 @@ TEST_F(TestMove, operator_plus) {
 
     EXPECT_EQ(variable_ptrs[2], move_x_y_z_z.alterations[3].first);
     EXPECT_EQ(3, move_x_y_z_z.alterations[3].second);
+}
+
+/*****************************************************************************/
+TEST_F(TestMove, operator_equal) {
+    auto variable_0 =
+        printemps::model::Variable<int, double>::create_instance();
+    auto variable_1 =
+        printemps::model::Variable<int, double>::create_instance();
+
+    auto constraint =
+        printemps::model::Constraint<int, double>::create_instance();
+
+    /// Not equal: The number of alterations are different.
+    {
+        printemps::neighborhood::Move<int, double> move_0;
+        move_0.alterations.emplace_back(&variable_0, 1);
+
+        printemps::neighborhood::Move<int, double> move_1;
+        move_1.alterations.emplace_back(&variable_0, 1);
+        move_1.alterations.emplace_back(&variable_1, 1);
+
+        EXPECT_FALSE(move_0 == move_1);
+        EXPECT_TRUE(move_0 != move_1);
+    }
+
+    /// Not equal: The number of related constraints are different.
+    {
+        printemps::neighborhood::Move<int, double> move_0;
+        move_0.alterations.emplace_back(&variable_0, 1);
+
+        printemps::neighborhood::Move<int, double> move_1;
+        move_1.alterations.emplace_back(&variable_0, 1);
+        move_1.related_constraint_ptrs.insert(&constraint);
+
+        EXPECT_FALSE(move_0 == move_1);
+        EXPECT_TRUE(move_0 != move_1);
+    }
+
+    /// Not equal: The overlap rates are different.
+    {
+        printemps::neighborhood::Move<int, double> move_0;
+        move_0.alterations.emplace_back(&variable_0, 1);
+        move_0.overlap_rate = 0.0;
+
+        printemps::neighborhood::Move<int, double> move_1;
+        move_1.alterations.emplace_back(&variable_0, 1);
+        move_1.overlap_rate = 0.1;
+
+        EXPECT_FALSE(move_0 == move_1);
+        EXPECT_TRUE(move_0 != move_1);
+    }
+
+    /// Not equal: The included variables are different.
+    {
+        printemps::neighborhood::Move<int, double> move_0;
+        move_0.alterations.emplace_back(&variable_0, 1);
+
+        printemps::neighborhood::Move<int, double> move_1;
+        move_1.alterations.emplace_back(&variable_1, 1);
+
+        EXPECT_FALSE(move_0 == move_1);
+        EXPECT_TRUE(move_0 != move_1);
+    }
+
+    /// Not equal: The target values are different.
+    {
+        printemps::neighborhood::Move<int, double> move_0;
+        move_0.alterations.emplace_back(&variable_0, 0);
+
+        printemps::neighborhood::Move<int, double> move_1;
+        move_1.alterations.emplace_back(&variable_0, 1);
+
+        EXPECT_FALSE(move_0 == move_1);
+        EXPECT_TRUE(move_0 != move_1);
+    }
+
+    /// Not equal: The included variables are different.
+    {
+        printemps::neighborhood::Move<int, double> move_0;
+        move_0.alterations.emplace_back(&variable_0, 0);
+        move_0.alterations.emplace_back(&variable_1, 1);
+
+        printemps::neighborhood::Move<int, double> move_1;
+        move_0.alterations.emplace_back(&variable_1, 1);
+        move_0.alterations.emplace_back(&variable_1, 1);
+
+        EXPECT_FALSE(move_0 == move_1);
+        EXPECT_TRUE(move_0 != move_1);
+    }
+
+    /// Equal
+    {
+        printemps::neighborhood::Move<int, double> move_0;
+        move_0.alterations.emplace_back(&variable_0, 1);
+
+        printemps::neighborhood::Move<int, double> move_1;
+        move_1.alterations.emplace_back(&variable_0, 1);
+
+        EXPECT_TRUE(move_0 == move_1);
+        EXPECT_FALSE(move_0 != move_1);
+    }
+
+    /// Equal
+    {
+        printemps::neighborhood::Move<int, double> move_0;
+        move_0.alterations.emplace_back(&variable_0, 1);
+        move_0.alterations.emplace_back(&variable_1, 1);
+
+        printemps::neighborhood::Move<int, double> move_1;
+        move_1.alterations.emplace_back(&variable_0, 1);
+        move_1.alterations.emplace_back(&variable_1, 1);
+
+        EXPECT_TRUE(move_0 == move_1);
+        EXPECT_FALSE(move_0 != move_1);
+    }
 }
 /*****************************************************************************/
 }  // namespace

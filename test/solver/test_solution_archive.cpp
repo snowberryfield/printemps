@@ -37,8 +37,8 @@ TEST_F(TestSolutionArchive, initialize) {
 
     EXPECT_EQ(0, archive.size());
     EXPECT_EQ(0, archive.max_size());
-    EXPECT_EQ(true, archive.is_ascending());
-    EXPECT_EQ(true, archive.solutions().empty());
+    EXPECT_TRUE(archive.is_ascending());
+    EXPECT_TRUE(archive.solutions().empty());
 }
 
 /*****************************************************************************/
@@ -48,16 +48,16 @@ TEST_F(TestSolutionArchive, setup) {
 
         EXPECT_EQ(0, archive.size());
         EXPECT_EQ(100, archive.max_size());
-        EXPECT_EQ(true, archive.is_ascending());
-        EXPECT_EQ(true, archive.solutions().empty());
+        EXPECT_TRUE(archive.is_ascending());
+        EXPECT_TRUE(archive.solutions().empty());
     }
     {
         printemps::solver::SolutionArchive<int, double> archive(200, false);
 
         EXPECT_EQ(0, archive.size());
         EXPECT_EQ(200, archive.max_size());
-        EXPECT_EQ(false, archive.is_ascending());
-        EXPECT_EQ(true, archive.solutions().empty());
+        EXPECT_FALSE(archive.is_ascending());
+        EXPECT_TRUE(archive.solutions().empty());
     }
 }
 

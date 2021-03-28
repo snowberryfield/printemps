@@ -51,7 +51,6 @@ struct OptionConstant {
     static constexpr bool DEFAULT_IS_ENABLED_AGGREGATION_MOVE    = false;
     static constexpr bool DEFAULT_IS_ENABLED_PRECEDENCE_MOVE     = false;
     static constexpr bool DEFAULT_IS_ENABLED_VARIABLE_BOUND_MOVE = false;
-    static constexpr bool DEFAULT_IS_ENABLED_EXCLUSIVE_MOVE      = false;
     static constexpr bool DEFAULT_IS_ENABLED_CHAIN_MOVE          = false;
     static constexpr bool DEFAULT_IS_ENABLED_USER_DEFINED_MOVE   = false;
     static constexpr int  DEFAULT_CHAIN_MOVE_CAPACITY            = 10000;
@@ -95,7 +94,6 @@ struct Option {
     bool is_enabled_aggregation_move;
     bool is_enabled_precedence_move;
     bool is_enabled_variable_bound_move;
-    bool is_enabled_exclusive_move;
     bool is_enabled_chain_move;
     bool is_enabled_user_defined_move;
 
@@ -164,8 +162,6 @@ struct Option {
             OptionConstant::DEFAULT_IS_ENABLED_PRECEDENCE_MOVE;
         this->is_enabled_variable_bound_move =
             OptionConstant::DEFAULT_IS_ENABLED_VARIABLE_BOUND_MOVE;
-        this->is_enabled_exclusive_move =
-            OptionConstant::DEFAULT_IS_ENABLED_EXCLUSIVE_MOVE;
         this->is_enabled_chain_move =
             OptionConstant::DEFAULT_IS_ENABLED_CHAIN_MOVE;
         this->is_enabled_user_defined_move =
@@ -284,10 +280,6 @@ struct Option {
         utility::print(                               //
             " -- is_enabled_variable_bound_move: " +  //
             utility::to_string(this->is_enabled_variable_bound_move, "%d"));
-
-        utility::print(                          //
-            " -- is_enabled_exclusive_move: " +  //
-            utility::to_string(this->is_enabled_exclusive_move, "%d"));
 
         utility::print(                      //
             " -- is_enabled_chain_move: " +  //

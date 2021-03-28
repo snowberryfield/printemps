@@ -42,20 +42,20 @@ TEST_F(TestVariable, initialize) {
     EXPECT_EQ("", variable.name());
 
     /// Check the initial values of the derived class members.
-    EXPECT_EQ(false, variable.is_fixed());
+    EXPECT_FALSE(variable.is_fixed());
     EXPECT_EQ(0, variable.value());
     EXPECT_EQ(printemps::constant::INT_HALF_MIN, variable.lower_bound());
     EXPECT_EQ(printemps::constant::INT_HALF_MAX, variable.upper_bound());
-    EXPECT_EQ(false, variable.has_bounds());
-    EXPECT_EQ(false, variable.is_objective_improvable());
-    EXPECT_EQ(false, variable.is_feasibility_improvable());
-    EXPECT_EQ(true, variable.has_lower_bound_margin());
-    EXPECT_EQ(true, variable.has_upper_bound_margin());
+    EXPECT_FALSE(variable.has_bounds());
+    EXPECT_FALSE(variable.is_objective_improvable());
+    EXPECT_FALSE(variable.is_feasibility_improvable());
+    EXPECT_TRUE(variable.has_lower_bound_margin());
+    EXPECT_TRUE(variable.has_upper_bound_margin());
     EXPECT_EQ(printemps::model::VariableSense::Integer, variable.sense());
     EXPECT_EQ(nullptr, variable.selection_ptr());
-    EXPECT_EQ(true, variable.related_constraint_ptrs().empty());
-    EXPECT_EQ(true, variable.related_monic_constraint_ptrs().empty());
-    EXPECT_EQ(true, variable.constraint_sensitivities().empty());
+    EXPECT_TRUE(variable.related_constraint_ptrs().empty());
+    EXPECT_TRUE(variable.related_monic_constraint_ptrs().empty());
+    EXPECT_TRUE(variable.constraint_sensitivities().empty());
     EXPECT_EQ(0.0, variable.objective_sensitivity());
 }
 
@@ -74,7 +74,7 @@ TEST_F(TestVariable, set_value_force) {
 }
 
 /*****************************************************************************/
-TEST_F(TestVariable, set_value_if_not_fixed) {
+TEST_F(TestVariable, set_value_if_mutable) {
     auto variable = printemps::model::Variable<int, double>::create_instance();
 
     auto value_0 = random_integer();
@@ -84,7 +84,7 @@ TEST_F(TestVariable, set_value_if_not_fixed) {
     variable.fix();
 
     auto value_1 = random_integer();
-    variable.set_value_if_not_fixed(value_1);
+    variable.set_value_if_mutable(value_1);
     EXPECT_EQ(value_0, variable.value());
 }
 
@@ -148,9 +148,9 @@ TEST_F(TestVariable, evaluate_arg_move) {
 TEST_F(TestVariable, fix) {
     auto variable = printemps::model::Variable<int, double>::create_instance();
     variable.fix();
-    EXPECT_EQ(true, variable.is_fixed());
+    EXPECT_TRUE(variable.is_fixed());
     variable.unfix();
-    EXPECT_EQ(false, variable.is_fixed());
+    EXPECT_FALSE(variable.is_fixed());
 }
 
 /*****************************************************************************/
@@ -169,7 +169,7 @@ TEST_F(TestVariable, fix_by) {
 
     auto value = random_integer();
     variable.fix_by(value);
-    EXPECT_EQ(true, variable.is_fixed());
+    EXPECT_TRUE(variable.is_fixed());
     EXPECT_EQ(value, variable.value());
 }
 
@@ -204,7 +204,7 @@ TEST_F(TestVariable, set_bound) {
     variable.set_bound(lower_bound, upper_bound);
     EXPECT_EQ(lower_bound, variable.lower_bound());
     EXPECT_EQ(upper_bound, variable.upper_bound());
-    EXPECT_EQ(true, variable.has_bounds());
+    EXPECT_TRUE(variable.has_bounds());
 
     ASSERT_THROW(variable.set_bound(upper_bound, lower_bound),
                  std::logic_error);
@@ -212,7 +212,7 @@ TEST_F(TestVariable, set_bound) {
     variable.reset_bound();
     EXPECT_EQ(printemps::constant::INT_HALF_MIN, variable.lower_bound());
     EXPECT_EQ(printemps::constant::INT_HALF_MAX, variable.upper_bound());
-    EXPECT_EQ(false, variable.has_bounds());
+    EXPECT_FALSE(variable.has_bounds());
 }
 
 /*****************************************************************************/
@@ -238,11 +238,11 @@ TEST_F(TestVariable, has_bounds) {
 /*****************************************************************************/
 TEST_F(TestVariable, set_is_objective_improvable) {
     auto variable = printemps::model::Variable<int, double>::create_instance();
-    EXPECT_EQ(false, variable.is_objective_improvable());
+    EXPECT_FALSE(variable.is_objective_improvable());
     variable.set_is_objective_improvable(true);
-    EXPECT_EQ(true, variable.is_objective_improvable());
+    EXPECT_TRUE(variable.is_objective_improvable());
     variable.set_is_objective_improvable(false);
-    EXPECT_EQ(false, variable.is_objective_improvable());
+    EXPECT_FALSE(variable.is_objective_improvable());
 }
 
 /*****************************************************************************/
@@ -253,11 +253,11 @@ TEST_F(TestVariable, is_objective_improvable) {
 /*****************************************************************************/
 TEST_F(TestVariable, set_is_feasibility_improvable) {
     auto variable = printemps::model::Variable<int, double>::create_instance();
-    EXPECT_EQ(false, variable.is_feasibility_improvable());
+    EXPECT_FALSE(variable.is_feasibility_improvable());
     variable.set_is_feasibility_improvable(true);
-    EXPECT_EQ(true, variable.is_feasibility_improvable());
+    EXPECT_TRUE(variable.is_feasibility_improvable());
     variable.set_is_feasibility_improvable(false);
-    EXPECT_EQ(false, variable.is_feasibility_improvable());
+    EXPECT_FALSE(variable.is_feasibility_improvable());
 }
 
 /*****************************************************************************/
@@ -304,39 +304,39 @@ TEST_F(TestVariable, register_related_constraint_ptr) {
     auto constraint_1 =
         printemps::model::Constraint<int, double>::create_instance();
 
-    EXPECT_EQ(true, variable.related_constraint_ptrs().empty());
-    EXPECT_EQ(false, variable.related_constraint_ptrs().find(&constraint_0) !=
-                         variable.related_constraint_ptrs().end());
-    EXPECT_EQ(false, variable.related_constraint_ptrs().find(&constraint_1) !=
-                         variable.related_constraint_ptrs().end());
+    EXPECT_TRUE(variable.related_constraint_ptrs().empty());
+    EXPECT_FALSE(variable.related_constraint_ptrs().find(&constraint_0) !=
+                 variable.related_constraint_ptrs().end());
+    EXPECT_FALSE(variable.related_constraint_ptrs().find(&constraint_1) !=
+                 variable.related_constraint_ptrs().end());
 
     variable.register_related_constraint_ptr(&constraint_0);
     EXPECT_EQ(1, static_cast<int>(variable.related_constraint_ptrs().size()));
-    EXPECT_EQ(true, variable.related_constraint_ptrs().find(&constraint_0) !=
-                        variable.related_constraint_ptrs().end());
-    EXPECT_EQ(false, variable.related_constraint_ptrs().find(&constraint_1) !=
-                         variable.related_constraint_ptrs().end());
+    EXPECT_TRUE(variable.related_constraint_ptrs().find(&constraint_0) !=
+                variable.related_constraint_ptrs().end());
+    EXPECT_FALSE(variable.related_constraint_ptrs().find(&constraint_1) !=
+                 variable.related_constraint_ptrs().end());
 
     variable.register_related_constraint_ptr(&constraint_1);
     EXPECT_EQ(2, static_cast<int>(variable.related_constraint_ptrs().size()));
-    EXPECT_EQ(true, variable.related_constraint_ptrs().find(&constraint_0) !=
-                        variable.related_constraint_ptrs().end());
-    EXPECT_EQ(true, variable.related_constraint_ptrs().find(&constraint_1) !=
-                        variable.related_constraint_ptrs().end());
+    EXPECT_TRUE(variable.related_constraint_ptrs().find(&constraint_0) !=
+                variable.related_constraint_ptrs().end());
+    EXPECT_TRUE(variable.related_constraint_ptrs().find(&constraint_1) !=
+                variable.related_constraint_ptrs().end());
 
     variable.register_related_constraint_ptr(&constraint_1);
     EXPECT_EQ(2, static_cast<int>(variable.related_constraint_ptrs().size()));
-    EXPECT_EQ(true, variable.related_constraint_ptrs().find(&constraint_0) !=
-                        variable.related_constraint_ptrs().end());
-    EXPECT_EQ(true, variable.related_constraint_ptrs().find(&constraint_1) !=
-                        variable.related_constraint_ptrs().end());
+    EXPECT_TRUE(variable.related_constraint_ptrs().find(&constraint_0) !=
+                variable.related_constraint_ptrs().end());
+    EXPECT_TRUE(variable.related_constraint_ptrs().find(&constraint_1) !=
+                variable.related_constraint_ptrs().end());
 
     variable.reset_related_constraint_ptrs();
-    EXPECT_EQ(true, variable.related_constraint_ptrs().empty());
-    EXPECT_EQ(false, variable.related_constraint_ptrs().find(&constraint_0) !=
-                         variable.related_constraint_ptrs().end());
-    EXPECT_EQ(false, variable.related_constraint_ptrs().find(&constraint_1) !=
-                         variable.related_constraint_ptrs().end());
+    EXPECT_TRUE(variable.related_constraint_ptrs().empty());
+    EXPECT_FALSE(variable.related_constraint_ptrs().find(&constraint_0) !=
+                 variable.related_constraint_ptrs().end());
+    EXPECT_FALSE(variable.related_constraint_ptrs().find(&constraint_1) !=
+                 variable.related_constraint_ptrs().end());
 }
 
 /*****************************************************************************/
@@ -375,7 +375,7 @@ TEST_F(TestVariable, register_constraint_sensitivity) {
     auto constraint_1 =
         printemps::model::Constraint<int, double>::create_instance();
 
-    EXPECT_EQ(true, variable.constraint_sensitivities().empty());
+    EXPECT_TRUE(variable.constraint_sensitivities().empty());
 
     variable.register_constraint_sensitivity(&constraint_0, 10);
     EXPECT_EQ(1, static_cast<int>(variable.constraint_sensitivities().size()));
@@ -386,7 +386,7 @@ TEST_F(TestVariable, register_constraint_sensitivity) {
     EXPECT_EQ(20, variable.constraint_sensitivities().at(&constraint_1));
 
     variable.reset_constraint_sensitivities();
-    EXPECT_EQ(true, variable.constraint_sensitivities().empty());
+    EXPECT_TRUE(variable.constraint_sensitivities().empty());
 }
 
 /*****************************************************************************/
@@ -417,24 +417,24 @@ TEST_F(TestVariable, update_margin) {
     auto variable = printemps::model::Variable<int, double>::create_instance();
     variable.set_bound(-10, 10);
     variable.set_value(-10);  /// includes update_margin()
-    EXPECT_EQ(false, variable.has_lower_bound_margin());
-    EXPECT_EQ(true, variable.has_upper_bound_margin());
+    EXPECT_FALSE(variable.has_lower_bound_margin());
+    EXPECT_TRUE(variable.has_upper_bound_margin());
 
-    variable.set_value_if_not_fixed(10);  /// includes update_margin()
-    EXPECT_EQ(true, variable.has_lower_bound_margin());
-    EXPECT_EQ(false, variable.has_upper_bound_margin());
+    variable.set_value_if_mutable(10);  /// includes update_margin()
+    EXPECT_TRUE(variable.has_lower_bound_margin());
+    EXPECT_FALSE(variable.has_upper_bound_margin());
 
     variable.set_bound(-100, 100);  /// includes update_margin()
-    EXPECT_EQ(true, variable.has_lower_bound_margin());
-    EXPECT_EQ(true, variable.has_upper_bound_margin());
+    EXPECT_TRUE(variable.has_lower_bound_margin());
+    EXPECT_TRUE(variable.has_upper_bound_margin());
 
     variable = -100;  /// includes update_margin()
-    EXPECT_EQ(false, variable.has_lower_bound_margin());
-    EXPECT_EQ(true, variable.has_upper_bound_margin());
+    EXPECT_FALSE(variable.has_lower_bound_margin());
+    EXPECT_TRUE(variable.has_upper_bound_margin());
 
     variable.fix_by(100);  /// includes update_margin()
-    EXPECT_EQ(true, variable.has_lower_bound_margin());
-    EXPECT_EQ(false, variable.has_upper_bound_margin());
+    EXPECT_TRUE(variable.has_lower_bound_margin());
+    EXPECT_FALSE(variable.has_upper_bound_margin());
 }
 
 /*****************************************************************************/
