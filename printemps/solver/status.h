@@ -22,11 +22,14 @@ struct Status {
     std::string start_date_time;
     std::string finish_date_time;
 
-    double elapsed_time;
-    int    number_of_lagrange_dual_iterations;
-    int    number_of_local_search_iterations;
-    int    number_of_tabu_search_iterations;
-    int    number_of_tabu_search_loops;
+    std::string name;
+    int         number_of_variables;
+    int         number_of_constraints;
+    double      elapsed_time;
+    int         number_of_lagrange_dual_iterations;
+    int         number_of_local_search_iterations;
+    int         number_of_tabu_search_iterations;
+    int         number_of_tabu_search_loops;
 
     /*************************************************************************/
     Status(void) {
@@ -45,6 +48,9 @@ struct Status {
         this->is_found_feasible_solution = false;
         this->start_date_time.clear();
         this->finish_date_time.clear();
+        this->name                               = "";
+        this->number_of_variables                = 0;
+        this->number_of_constraints              = 0;
         this->elapsed_time                       = 0.0;
         this->number_of_local_search_iterations  = 0;
         this->number_of_lagrange_dual_iterations = 0;
@@ -63,8 +69,7 @@ struct Status {
     }
 
     /*************************************************************************/
-    void write_json_by_name(const std::string&         a_FILE_NAME,
-                            const model::ModelSummary& a_MODEL_SUMMARY) const {
+    void write_json_by_name(const std::string& a_FILE_NAME) const {
         int indent_level = 0;
 
         std::ofstream ofs(a_FILE_NAME.c_str());
@@ -76,15 +81,15 @@ struct Status {
             << "\"" << constant::VERSION << "\"," << std::endl;
 
         ofs << utility::indent_spaces(indent_level) << "\"name\" : "
-            << "\"" << a_MODEL_SUMMARY.name << "\"," << std::endl;
+            << "\"" << this->name << "\"," << std::endl;
 
         ofs << utility::indent_spaces(indent_level)
-            << "\"number_of_variables\" : "
-            << a_MODEL_SUMMARY.number_of_variables << "," << std::endl;
+            << "\"number_of_variables\" : " << this->number_of_variables << ","
+            << std::endl;
 
         ofs << utility::indent_spaces(indent_level)
-            << "\"number_of_constraints\" : "
-            << a_MODEL_SUMMARY.number_of_constraints << "," << std::endl;
+            << "\"number_of_constraints\" : " << this->number_of_constraints
+            << "," << std::endl;
 
         ofs << utility::indent_spaces(indent_level)
             << "\"is_found_feasible_solution\" : "
@@ -143,8 +148,7 @@ struct Status {
     }
 
     /*************************************************************************/
-    void write_json_by_array(const std::string&         a_FILE_NAME,
-                             const model::ModelSummary& a_MODEL_SUMMARY) const {
+    void write_json_by_array(const std::string& a_FILE_NAME) const {
         int indent_level = 0;
 
         std::ofstream ofs(a_FILE_NAME.c_str());
@@ -156,15 +160,15 @@ struct Status {
             << "\"" << constant::VERSION << "\"," << std::endl;
 
         ofs << utility::indent_spaces(indent_level) << "\"name\" : "
-            << "\"" << a_MODEL_SUMMARY.name << "\"," << std::endl;
+            << "\"" << this->name << "\"," << std::endl;
 
         ofs << utility::indent_spaces(indent_level)
-            << "\"number_of_variables\" : "
-            << a_MODEL_SUMMARY.number_of_variables << "," << std::endl;
+            << "\"number_of_variables\" : " << this->number_of_variables << ","
+            << std::endl;
 
         ofs << utility::indent_spaces(indent_level)
-            << "\"number_of_constraints\" : "
-            << a_MODEL_SUMMARY.number_of_constraints << "," << std::endl;
+            << "\"number_of_constraints\" : " << this->number_of_constraints
+            << "," << std::endl;
 
         ofs << utility::indent_spaces(indent_level)
             << "\"is_found_feasible_solution\" : "

@@ -31,6 +31,9 @@ class NamedSolution {
     std::unordered_map<std::string, ValueProxy<T_Expression>>
         m_violation_value_proxies;
 
+    std::string  m_name;
+    int          m_number_of_variables;
+    int          m_number_of_constraints;
     T_Expression m_objective;
     T_Expression m_total_violation;
     bool         m_is_feasible;
@@ -79,8 +82,7 @@ class NamedSolution {
     }
 
     /*************************************************************************/
-    void write_json_by_name(const std::string&  a_FILE_NAME,
-                            const ModelSummary& a_MODEL_SUMMARY) const {
+    void write_json_by_name(const std::string& a_FILE_NAME) const {
         int indent_level = 0;
 
         std::ofstream ofs(a_FILE_NAME.c_str());
@@ -92,15 +94,15 @@ class NamedSolution {
             << "\"" << constant::VERSION << "\"," << std::endl;
 
         ofs << utility::indent_spaces(indent_level) << "\"name\" : "
-            << "\"" << a_MODEL_SUMMARY.name << "\"," << std::endl;
+            << "\"" << m_name << "\"," << std::endl;
 
         ofs << utility::indent_spaces(indent_level)
-            << "\"number_of_variables\" : "
-            << a_MODEL_SUMMARY.number_of_variables << "," << std::endl;
+            << "\"number_of_variables\" : " << m_number_of_variables << ","
+            << std::endl;
 
         ofs << utility::indent_spaces(indent_level)
-            << "\"number_of_constraints\" : "
-            << a_MODEL_SUMMARY.number_of_constraints << "," << std::endl;
+            << "\"number_of_constraints\" : " << m_number_of_constraints << ","
+            << std::endl;
 
         ofs << utility::indent_spaces(indent_level)
             << "\"is_feasible\" : " << (m_is_feasible ? "true," : "false,")
@@ -153,8 +155,7 @@ class NamedSolution {
     }
 
     /*************************************************************************/
-    void write_json_by_array(const std::string&  a_FILE_NAME,
-                             const ModelSummary& a_MODEL_SUMMARY) const {
+    void write_json_by_array(const std::string& a_FILE_NAME) const {
         int indent_level = 0;
 
         std::ofstream ofs(a_FILE_NAME.c_str());
@@ -166,15 +167,15 @@ class NamedSolution {
             << "\"" << constant::VERSION << "\"," << std::endl;
 
         ofs << utility::indent_spaces(indent_level) << "\"name\" : "
-            << "\"" << a_MODEL_SUMMARY.name << "\"," << std::endl;
+            << "\"" << m_name << "\"," << std::endl;
 
         ofs << utility::indent_spaces(indent_level)
-            << "\"number_of_variables\" : "
-            << a_MODEL_SUMMARY.number_of_variables << "," << std::endl;
+            << "\"number_of_variables\" : " << m_number_of_variables << ","
+            << std::endl;
 
         ofs << utility::indent_spaces(indent_level)
-            << "\"number_of_constraints\" : "
-            << a_MODEL_SUMMARY.number_of_constraints << "," << std::endl;
+            << "\"number_of_constraints\" : " << m_number_of_constraints << ","
+            << std::endl;
 
         ofs << utility::indent_spaces(indent_level)
             << "\"is_feasible\" : " << (m_is_feasible ? "true," : "false,")

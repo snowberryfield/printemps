@@ -17,6 +17,10 @@ class SolutionArchive {
     std::vector<model::PlainSolution<T_Variable, T_Expression>>  //
         m_solutions;
 
+    std::string m_name;
+    int         m_number_of_variables;
+    int         m_number_of_constraints;
+
    public:
     /*************************************************************************/
     SolutionArchive(void) {
@@ -29,8 +33,16 @@ class SolutionArchive {
     }
 
     /*************************************************************************/
-    SolutionArchive(const int a_MAX_SIZE, const bool a_is_ASCENDING) {
-        this->setup(a_MAX_SIZE, a_is_ASCENDING);
+    SolutionArchive(const int          a_MAX_SIZE,             //
+                    const bool         a_is_ASCENDING,         //
+                    const std::string& a_NAME,                 //
+                    const int          a_NUMBER_OF_VARIABLES,  //
+                    const int          a_NUMBER_OF_CONSTRAINTS) {
+        this->setup(a_MAX_SIZE,             //
+                    a_is_ASCENDING,         //
+                    a_NAME,                 //
+                    a_NUMBER_OF_VARIABLES,  //
+                    a_NUMBER_OF_CONSTRAINTS);
     }
 
     /*************************************************************************/
@@ -38,13 +50,23 @@ class SolutionArchive {
         m_max_size     = 0;
         m_is_ascending = true;
         m_solutions.clear();
+        m_name                  = "";
+        m_number_of_variables   = 0;
+        m_number_of_constraints = 0;
     }
 
     /*************************************************************************/
-    void setup(const int a_MAX_SIZE, const bool a_is_ASCENDING) {
+    void setup(const int          a_MAX_SIZE,             //
+               const bool         a_is_ASCENDING,         //
+               const std::string& a_NAME,                 //
+               const int          a_NUMBER_OF_VARIABLES,  //
+               const int          a_NUMBER_OF_CONSTRAINTS) {
         m_max_size     = a_MAX_SIZE;
         m_is_ascending = a_is_ASCENDING;
         m_solutions.clear();
+        m_name                  = a_NAME;
+        m_number_of_variables   = a_NUMBER_OF_VARIABLES;
+        m_number_of_constraints = a_NUMBER_OF_CONSTRAINTS;
     }
 
     /*************************************************************************/
@@ -103,6 +125,21 @@ class SolutionArchive {
     }
 
     /*************************************************************************/
+    inline constexpr std::string name(void) const {
+        return m_name;
+    }
+
+    /*************************************************************************/
+    inline constexpr int number_of_variables(void) const {
+        return m_number_of_variables;
+    }
+
+    /*************************************************************************/
+    inline constexpr int number_of_constraints(void) const {
+        return m_number_of_constraints;
+    }
+
+    /*************************************************************************/
     inline constexpr const std::vector<
         model::PlainSolution<T_Variable, T_Expression>>&
     solutions(void) const {
@@ -110,9 +147,7 @@ class SolutionArchive {
     }
 
     /*************************************************************************/
-    void write_solutions_json(
-        const std::string&         a_FILE_NAME,
-        const model::ModelSummary& a_MODEL_SUMMARY) const {
+    void write_solutions_json(const std::string& a_FILE_NAME) const {
         int indent_level = 0;
 
         std::ofstream ofs(a_FILE_NAME.c_str());
@@ -124,15 +159,15 @@ class SolutionArchive {
             << "\"" << constant::VERSION << "\"," << std::endl;
 
         ofs << utility::indent_spaces(indent_level) << "\"name\" : "
-            << "\"" << a_MODEL_SUMMARY.name << "\"," << std::endl;
+            << "\"" << m_name << "\"," << std::endl;
 
         ofs << utility::indent_spaces(indent_level)
-            << "\"number_of_variables\" : "
-            << a_MODEL_SUMMARY.number_of_variables << "," << std::endl;
+            << "\"number_of_variables\" : " << m_number_of_variables << ","
+            << std::endl;
 
         ofs << utility::indent_spaces(indent_level)
-            << "\"number_of_constraints\" : "
-            << a_MODEL_SUMMARY.number_of_constraints << "," << std::endl;
+            << "\"number_of_constraints\" : " << m_number_of_constraints << ","
+            << std::endl;
 
         /// Solutions
         ofs << utility::indent_spaces(indent_level) << "\"solutions\": ["

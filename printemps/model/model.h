@@ -17,7 +17,6 @@
 #include "objective.h"
 #include "value_proxy.h"
 #include "solution.h"
-#include "model_summary.h"
 #include "named_solution.h"
 #include "plain_solution.h"
 #include "solution_score.h"
@@ -1865,9 +1864,12 @@ class Model {
                 a_SOLUTION.violation_value_proxies[i];
         }
 
-        named_solution.m_objective       = a_SOLUTION.objective;
-        named_solution.m_total_violation = a_SOLUTION.total_violation;
-        named_solution.m_is_feasible     = a_SOLUTION.is_feasible;
+        named_solution.m_name                  = m_name;
+        named_solution.m_number_of_variables   = this->number_of_variables();
+        named_solution.m_number_of_constraints = this->number_of_constraints();
+        named_solution.m_objective             = a_SOLUTION.objective;
+        named_solution.m_total_violation       = a_SOLUTION.total_violation;
+        named_solution.m_is_feasible           = a_SOLUTION.is_feasible;
 
         return named_solution;
     }
@@ -1955,16 +1957,6 @@ class Model {
                 }
             }
         }
-    }
-
-    /*************************************************************************/
-    ModelSummary export_summary(void) const {
-        /// This method cannot be constexpr by clang.
-        ModelSummary summary;
-        summary.name                  = m_name;
-        summary.number_of_variables   = this->number_of_variables();
-        summary.number_of_constraints = this->number_of_constraints();
-        return summary;
     }
 
     /*************************************************************************/
