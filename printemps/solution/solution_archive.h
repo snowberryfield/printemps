@@ -10,7 +10,7 @@ namespace printemps {
 namespace solution {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-class PlainSolution;
+struct PlainSolution;
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
@@ -129,7 +129,7 @@ class SolutionArchive {
     }
 
     /*************************************************************************/
-    inline constexpr std::string name(void) const {
+    inline constexpr const std::string& name(void) const {
         return m_name;
     }
 

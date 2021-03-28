@@ -25,7 +25,7 @@ namespace printemps {
 namespace neighborhood {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-class Move;
+struct Move;
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
