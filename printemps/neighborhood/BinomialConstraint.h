@@ -19,7 +19,7 @@ template <class T_Variable, class T_Expression>
 class Constraint;
 
 /*****************************************************************************/
-enum ConstraintSense;
+enum ConstraintSense : int;
 }  // namespace model
 }  // namespace printemps
 
