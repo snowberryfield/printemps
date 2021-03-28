@@ -51,15 +51,15 @@ TEST_F(TestPresolver, presolve) {
 
     EXPECT_EQ(10, model.number_of_fixed_variables());
     EXPECT_EQ(4, model.number_of_disabled_constraints());
-    EXPECT_EQ(true, x(0).is_fixed());
+    EXPECT_TRUE(x(0).is_fixed());
     EXPECT_EQ(2, x(0).value());
-    EXPECT_EQ(true, x(1).is_fixed());
+    EXPECT_TRUE(x(1).is_fixed());
     EXPECT_EQ(3, x(1).value());
-    EXPECT_EQ(true, x(2).is_fixed());
+    EXPECT_TRUE(x(2).is_fixed());
     EXPECT_EQ(4, x(2).value());
 
     for (auto i = 3; i < 10; i++) {
-        EXPECT_EQ(true, x(i).is_fixed());
+        EXPECT_TRUE(x(i).is_fixed());
         EXPECT_EQ(-10, x(i).value());
     }
 }
@@ -75,7 +75,7 @@ TEST_F(TestPresolver, remove_independent_variables) {
         model.setup_is_linear();
         printemps::presolver::remove_independent_variables(&model, false);
         for (auto i = 0; i < 10; i++) {
-            EXPECT_EQ(true, x(i).is_fixed());
+            EXPECT_TRUE(x(i).is_fixed());
             EXPECT_EQ(0, x(i).value());
         }
         model.categorize_variables();
@@ -92,7 +92,7 @@ TEST_F(TestPresolver, remove_independent_variables) {
         model.setup_is_linear();
         printemps::presolver::remove_independent_variables(&model, false);
         for (auto i = 0; i < 10; i++) {
-            EXPECT_EQ(true, x(i).is_fixed());
+            EXPECT_TRUE(x(i).is_fixed());
             EXPECT_EQ(1, x(i).value());
         }
         model.categorize_variables();
@@ -109,7 +109,7 @@ TEST_F(TestPresolver, remove_independent_variables) {
         model.setup_is_linear();
         printemps::presolver::remove_independent_variables(&model, false);
         for (auto i = 0; i < 10; i++) {
-            EXPECT_EQ(true, x(i).is_fixed());
+            EXPECT_TRUE(x(i).is_fixed());
             EXPECT_EQ(1, x(i).value());
         }
         model.categorize_variables();
@@ -126,7 +126,7 @@ TEST_F(TestPresolver, remove_independent_variables) {
         model.setup_is_linear();
         printemps::presolver::remove_independent_variables(&model, false);
         for (auto i = 0; i < 10; i++) {
-            EXPECT_EQ(true, x(i).is_fixed());
+            EXPECT_TRUE(x(i).is_fixed());
             EXPECT_EQ(0, x(i).value());
         }
         model.categorize_variables();
@@ -148,9 +148,9 @@ TEST_F(TestPresolver,
         printemps::presolver::
             remove_redundant_constraints_with_tightening_variable_bounds(&model,
                                                                          false);
-        EXPECT_EQ(true, x.is_fixed());
+        EXPECT_TRUE(x.is_fixed());
         EXPECT_EQ(2, x.value());
-        EXPECT_EQ(false, g.is_enabled());
+        EXPECT_FALSE(g.is_enabled());
     }
     {
         printemps::model::Model<int, double> model;
@@ -161,10 +161,10 @@ TEST_F(TestPresolver,
         printemps::presolver::
             remove_redundant_constraints_with_tightening_variable_bounds(&model,
                                                                          false);
-        EXPECT_EQ(false, x.is_fixed());
+        EXPECT_FALSE(x.is_fixed());
         EXPECT_EQ(0, x.lower_bound());
         EXPECT_EQ(2, x.upper_bound());
-        EXPECT_EQ(false, g.is_enabled());
+        EXPECT_FALSE(g.is_enabled());
     }
     {
         printemps::model::Model<int, double> model;
@@ -175,10 +175,10 @@ TEST_F(TestPresolver,
         printemps::presolver::
             remove_redundant_constraints_with_tightening_variable_bounds(&model,
                                                                          false);
-        EXPECT_EQ(false, x.is_fixed());
+        EXPECT_FALSE(x.is_fixed());
         EXPECT_EQ(2, x.lower_bound());
         EXPECT_EQ(10, x.upper_bound());
-        EXPECT_EQ(false, g.is_enabled());
+        EXPECT_FALSE(g.is_enabled());
     }
 
     {
@@ -190,9 +190,9 @@ TEST_F(TestPresolver,
         printemps::presolver::
             remove_redundant_constraints_with_tightening_variable_bounds(&model,
                                                                          false);
-        EXPECT_EQ(true, x.is_fixed());
+        EXPECT_TRUE(x.is_fixed());
         EXPECT_EQ(-2, x.value());
-        EXPECT_EQ(false, g.is_enabled());
+        EXPECT_FALSE(g.is_enabled());
     }
     {
         printemps::model::Model<int, double> model;
@@ -203,10 +203,10 @@ TEST_F(TestPresolver,
         printemps::presolver::
             remove_redundant_constraints_with_tightening_variable_bounds(&model,
                                                                          false);
-        EXPECT_EQ(false, x.is_fixed());
+        EXPECT_FALSE(x.is_fixed());
         EXPECT_EQ(-2, x.lower_bound());
         EXPECT_EQ(10, x.upper_bound());
-        EXPECT_EQ(false, g.is_enabled());
+        EXPECT_FALSE(g.is_enabled());
     }
     {
         printemps::model::Model<int, double> model;
@@ -217,10 +217,10 @@ TEST_F(TestPresolver,
         printemps::presolver::
             remove_redundant_constraints_with_tightening_variable_bounds(&model,
                                                                          false);
-        EXPECT_EQ(false, x.is_fixed());
+        EXPECT_FALSE(x.is_fixed());
         EXPECT_EQ(-10, x.lower_bound());
         EXPECT_EQ(-2, x.upper_bound());
-        EXPECT_EQ(false, g.is_enabled());
+        EXPECT_FALSE(g.is_enabled());
     }
 
     {
@@ -234,9 +234,9 @@ TEST_F(TestPresolver,
         printemps::presolver::
             remove_redundant_constraints_with_tightening_variable_bounds(&model,
                                                                          false);
-        EXPECT_EQ(true, x.is_fixed());
+        EXPECT_TRUE(x.is_fixed());
         EXPECT_EQ(2, x.value());
-        EXPECT_EQ(false, g.is_enabled());
+        EXPECT_FALSE(g.is_enabled());
     }
     {
         printemps::model::Model<int, double> model;
@@ -249,10 +249,10 @@ TEST_F(TestPresolver,
         printemps::presolver::
             remove_redundant_constraints_with_tightening_variable_bounds(&model,
                                                                          false);
-        EXPECT_EQ(false, x.is_fixed());
+        EXPECT_FALSE(x.is_fixed());
         EXPECT_EQ(0, x.lower_bound());
         EXPECT_EQ(2, x.upper_bound());
-        EXPECT_EQ(false, g.is_enabled());
+        EXPECT_FALSE(g.is_enabled());
     }
     {
         printemps::model::Model<int, double> model;
@@ -265,10 +265,10 @@ TEST_F(TestPresolver,
         printemps::presolver::
             remove_redundant_constraints_with_tightening_variable_bounds(&model,
                                                                          false);
-        EXPECT_EQ(false, x.is_fixed());
+        EXPECT_FALSE(x.is_fixed());
         EXPECT_EQ(2, x.lower_bound());
         EXPECT_EQ(10, x.upper_bound());
-        EXPECT_EQ(false, g.is_enabled());
+        EXPECT_FALSE(g.is_enabled());
     }
     {
         printemps::model::Model<int, double> model;
@@ -281,9 +281,9 @@ TEST_F(TestPresolver,
         printemps::presolver::
             remove_redundant_constraints_with_tightening_variable_bounds(&model,
                                                                          false);
-        EXPECT_EQ(true, x.is_fixed());
+        EXPECT_TRUE(x.is_fixed());
         EXPECT_EQ(-2, x.value());
-        EXPECT_EQ(false, g.is_enabled());
+        EXPECT_FALSE(g.is_enabled());
     }
     {
         printemps::model::Model<int, double> model;
@@ -296,10 +296,10 @@ TEST_F(TestPresolver,
         printemps::presolver::
             remove_redundant_constraints_with_tightening_variable_bounds(&model,
                                                                          false);
-        EXPECT_EQ(false, x.is_fixed());
+        EXPECT_FALSE(x.is_fixed());
         EXPECT_EQ(-2, x.lower_bound());
         EXPECT_EQ(10, x.upper_bound());
-        EXPECT_EQ(false, g.is_enabled());
+        EXPECT_FALSE(g.is_enabled());
     }
     {
         printemps::model::Model<int, double> model;
@@ -312,10 +312,10 @@ TEST_F(TestPresolver,
         printemps::presolver::
             remove_redundant_constraints_with_tightening_variable_bounds(&model,
                                                                          false);
-        EXPECT_EQ(false, x.is_fixed());
+        EXPECT_FALSE(x.is_fixed());
         EXPECT_EQ(-10, x.lower_bound());
         EXPECT_EQ(-2, x.upper_bound());
-        EXPECT_EQ(false, g.is_enabled());
+        EXPECT_FALSE(g.is_enabled());
     }
 
     {
@@ -328,8 +328,8 @@ TEST_F(TestPresolver,
         printemps::presolver::
             remove_redundant_constraints_with_tightening_variable_bounds(&model,
                                                                          false);
-        EXPECT_EQ(true, x.is_fixed());
-        EXPECT_EQ(false, g.is_enabled());
+        EXPECT_TRUE(x.is_fixed());
+        EXPECT_FALSE(g.is_enabled());
     }
     {
         printemps::model::Model<int, double> model;
@@ -341,8 +341,8 @@ TEST_F(TestPresolver,
         printemps::presolver::
             remove_redundant_constraints_with_tightening_variable_bounds(&model,
                                                                          false);
-        EXPECT_EQ(true, x.is_fixed());
-        EXPECT_EQ(false, g.is_enabled());
+        EXPECT_TRUE(x.is_fixed());
+        EXPECT_FALSE(g.is_enabled());
     }
     {
         printemps::model::Model<int, double> model;
@@ -354,8 +354,8 @@ TEST_F(TestPresolver,
         printemps::presolver::
             remove_redundant_constraints_with_tightening_variable_bounds(&model,
                                                                          false);
-        EXPECT_EQ(true, x.is_fixed());
-        EXPECT_EQ(false, g.is_enabled());
+        EXPECT_TRUE(x.is_fixed());
+        EXPECT_FALSE(g.is_enabled());
     }
 
     {
@@ -368,8 +368,8 @@ TEST_F(TestPresolver,
         printemps::presolver::
             remove_redundant_constraints_with_tightening_variable_bounds(&model,
                                                                          false);
-        EXPECT_EQ(true, x.is_fixed());
-        EXPECT_EQ(false, g.is_enabled());
+        EXPECT_TRUE(x.is_fixed());
+        EXPECT_FALSE(g.is_enabled());
     }
     {
         printemps::model::Model<int, double> model;
@@ -381,8 +381,8 @@ TEST_F(TestPresolver,
         printemps::presolver::
             remove_redundant_constraints_with_tightening_variable_bounds(&model,
                                                                          false);
-        EXPECT_EQ(true, x.is_fixed());
-        EXPECT_EQ(false, g.is_enabled());
+        EXPECT_TRUE(x.is_fixed());
+        EXPECT_FALSE(g.is_enabled());
     }
     {
         printemps::model::Model<int, double> model;
@@ -394,8 +394,8 @@ TEST_F(TestPresolver,
         printemps::presolver::
             remove_redundant_constraints_with_tightening_variable_bounds(&model,
                                                                          false);
-        EXPECT_EQ(true, x.is_fixed());
-        EXPECT_EQ(false, g.is_enabled());
+        EXPECT_TRUE(x.is_fixed());
+        EXPECT_FALSE(g.is_enabled());
     }
 
     {
@@ -408,10 +408,10 @@ TEST_F(TestPresolver,
         printemps::presolver::
             remove_redundant_constraints_with_tightening_variable_bounds(&model,
                                                                          false);
-        EXPECT_EQ(false, x.is_fixed());
+        EXPECT_FALSE(x.is_fixed());
         EXPECT_EQ(0, x.lower_bound());
         EXPECT_EQ(2, x.upper_bound());
-        EXPECT_EQ(true, g.is_enabled());
+        EXPECT_TRUE(g.is_enabled());
     }
     {
         printemps::model::Model<int, double> model;
@@ -423,10 +423,10 @@ TEST_F(TestPresolver,
         printemps::presolver::
             remove_redundant_constraints_with_tightening_variable_bounds(&model,
                                                                          false);
-        EXPECT_EQ(false, x.is_fixed());
+        EXPECT_FALSE(x.is_fixed());
         EXPECT_EQ(2, x.lower_bound());
         EXPECT_EQ(10, x.upper_bound());
-        EXPECT_EQ(true, g.is_enabled());
+        EXPECT_TRUE(g.is_enabled());
     }
 
     {
@@ -439,10 +439,10 @@ TEST_F(TestPresolver,
         printemps::presolver::
             remove_redundant_constraints_with_tightening_variable_bounds(&model,
                                                                          false);
-        EXPECT_EQ(false, x.is_fixed());
+        EXPECT_FALSE(x.is_fixed());
         EXPECT_EQ(-2, x.lower_bound());
         EXPECT_EQ(10, x.upper_bound());
-        EXPECT_EQ(true, g.is_enabled());
+        EXPECT_TRUE(g.is_enabled());
     }
     {
         printemps::model::Model<int, double> model;
@@ -454,10 +454,10 @@ TEST_F(TestPresolver,
         printemps::presolver::
             remove_redundant_constraints_with_tightening_variable_bounds(&model,
                                                                          false);
-        EXPECT_EQ(false, x.is_fixed());
+        EXPECT_FALSE(x.is_fixed());
         EXPECT_EQ(-10, x.lower_bound());
         EXPECT_EQ(-2, x.upper_bound());
-        EXPECT_EQ(true, g.is_enabled());
+        EXPECT_TRUE(g.is_enabled());
     }
 }
 
@@ -469,10 +469,10 @@ TEST_F(TestPresolver, fix_implicit_fixed_variables) {
     x(0).set_bound(5, 5);
     printemps::presolver::fix_implicit_fixed_variables(&model, false);
     EXPECT_EQ(5, x(0).value());
-    EXPECT_EQ(true, x(0).is_fixed());
+    EXPECT_TRUE(x(0).is_fixed());
 
     for (auto i = 1; i < 10; i++) {
-        EXPECT_EQ(false, x(i).is_fixed());
+        EXPECT_FALSE(x(i).is_fixed());
     }
     model.categorize_variables();
     model.categorize_constraints();
@@ -513,9 +513,9 @@ TEST_F(TestPresolver, fix_redundant_variables) {
         model.categorize_variables();
         model.categorize_constraints();
 
-        EXPECT_EQ(true, x(3).is_fixed());
-        EXPECT_EQ(true, x(4).is_fixed());
-        EXPECT_EQ(true, x(8).is_fixed());
+        EXPECT_TRUE(x(3).is_fixed());
+        EXPECT_TRUE(x(4).is_fixed());
+        EXPECT_TRUE(x(8).is_fixed());
     }
 
     {
@@ -549,10 +549,10 @@ TEST_F(TestPresolver, fix_redundant_variables) {
         model.categorize_variables();
         model.categorize_constraints();
 
-        EXPECT_EQ(true, x(4).is_fixed());
-        EXPECT_EQ(true, x(5).is_fixed());
-        EXPECT_EQ(true, x(6).is_fixed());
-        EXPECT_EQ(true, x(7).is_fixed());
+        EXPECT_TRUE(x(4).is_fixed());
+        EXPECT_TRUE(x(5).is_fixed());
+        EXPECT_TRUE(x(6).is_fixed());
+        EXPECT_TRUE(x(7).is_fixed());
     }
 }
 /*****************************************************************************/

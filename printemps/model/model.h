@@ -614,7 +614,6 @@ class Model {
                          const bool a_IS_ENABLED_AGGREGATION_MOVE,          //
                          const bool a_IS_ENABLED_PRECEDENCE_MOVE,           //
                          const bool a_IS_ENABLED_VARIABLE_BOUND_MOVE,       //
-                         const bool a_IS_ENABLED_EXCLUSIVE_MOVE,            //
                          const bool a_IS_ENABLED_CHAIN_MOVE,                //
                          const bool a_IS_ENABLED_USER_DEFINED_MOVE,         //
                          const SelectionMode &a_SELECTION_MODE,             //
@@ -653,7 +652,6 @@ class Model {
         this->setup_neighborhood(a_IS_ENABLED_AGGREGATION_MOVE,     //
                                  a_IS_ENABLED_PRECEDENCE_MOVE,      //
                                  a_IS_ENABLED_VARIABLE_BOUND_MOVE,  //
-                                 a_IS_ENABLED_EXCLUSIVE_MOVE,       //
                                  a_IS_ENABLED_USER_DEFINED_MOVE,    //
                                  a_IS_ENABLED_CHAIN_MOVE,           //
                                  a_IS_ENABLED_PRINT);
@@ -810,7 +808,7 @@ class Model {
                 if (variable.is_fixed()) {
                     variable_reference.fixed_variable_ptrs.push_back(&variable);
                 } else {
-                    variable_reference.not_fixed_variable_ptrs.push_back(
+                    variable_reference.mutable_variable_ptrs.push_back(
                         &variable);
                 }
                 if (variable.sense() == VariableSense::Selection) {
@@ -1094,7 +1092,6 @@ class Model {
         const bool a_IS_ENABLED_AGGREGATION_MOVE,     //
         const bool a_IS_ENABLED_PRECEDENCE_MOVE,      //
         const bool a_IS_ENABLED_VARIABLE_BOUND_MOVE,  //
-        const bool a_IS_ENABLED_EXCLUSIVE_MOVE,       //
         const bool a_IS_ENABLED_CHAIN_MOVE,           //
         const bool a_IS_ENABLED_USER_DEFINED_MOVE,    //
         const bool a_IS_ENABLED_PRINT) {
@@ -1124,12 +1121,6 @@ class Model {
         if (a_IS_ENABLED_VARIABLE_BOUND_MOVE) {
             m_neighborhood.variable_bound().setup(
                 m_constraint_type_reference.variable_bound_ptrs);
-        }
-
-        if (a_IS_ENABLED_EXCLUSIVE_MOVE) {
-            m_neighborhood.exclusive().setup(
-                m_constraint_type_reference.set_partitioning_ptrs,  //
-                m_constraint_type_reference.set_packing_ptrs);
         }
 
         if (a_IS_ENABLED_CHAIN_MOVE) {
@@ -1328,7 +1319,7 @@ class Model {
             for (auto &&variable : proxy.flat_indexed_variables()) {
                 int proxy_index = variable.proxy_index();
                 int flat_index  = variable.flat_index();
-                variable.set_value_if_not_fixed(
+                variable.set_value_if_mutable(
                     a_PROXIES[proxy_index].flat_indexed_values(flat_index));
             }
         }
@@ -1399,7 +1390,7 @@ class Model {
         }
 
         for (auto &&alteration : a_MOVE.alterations) {
-            alteration.first->set_value_if_not_fixed(alteration.second);
+            alteration.first->set_value_if_mutable(alteration.second);
         }
 
         if (a_MOVE.sense == neighborhood::MoveSense::Selection) {
@@ -2123,8 +2114,8 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr int number_of_not_fixed_variables(void) const {
-        return m_variable_reference.not_fixed_variable_ptrs.size();
+    inline constexpr int number_of_mutable_variables(void) const {
+        return m_variable_reference.mutable_variable_ptrs.size();
     }
 
     /*************************************************************************/

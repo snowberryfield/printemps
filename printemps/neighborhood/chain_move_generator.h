@@ -9,19 +9,6 @@
 #include "abstract_move_generator.h"
 
 namespace printemps {
-namespace model {
-/*****************************************************************************/
-template <class T_Variable, class T_Expression>
-class Variable;
-
-/*****************************************************************************/
-template <class T_Variable, class T_Expression>
-class Constraint;
-
-}  // namespace model
-}  // namespace printemps
-
-namespace printemps {
 namespace neighborhood {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
@@ -44,7 +31,7 @@ class ChainMoveGenerator
     }
 
     /*************************************************************************/
-    constexpr void setup(void) {
+    void setup(void) {
         auto move_updater =                                     //
             [this](auto *     a_moves,                          //
                    auto *     a_flags,                          //
@@ -62,7 +49,7 @@ class ChainMoveGenerator
                         (*a_flags)[i] = 0;
                         continue;
                     }
-                    if (neighborhood::has_fixed_variables((*a_moves)[i])) {
+                    if (neighborhood::has_fixed_variable((*a_moves)[i])) {
                         (*a_flags)[i] = 0;
                         continue;
                     }

@@ -105,7 +105,7 @@ TEST_F(TestVariableProxy, scalar_fix) {
 
     auto& variable_proxy = model.create_variable("x");
     variable_proxy.fix();
-    EXPECT_EQ(true, variable_proxy.is_fixed());
+    EXPECT_TRUE(variable_proxy.is_fixed());
 }
 
 /*****************************************************************************/
@@ -114,7 +114,7 @@ TEST_F(TestVariableProxy, scalar_is_fixed) {
 
     auto& variable_proxy = model.create_variable("x");
     variable_proxy.unfix();
-    EXPECT_EQ(false, variable_proxy.is_fixed());
+    EXPECT_FALSE(variable_proxy.is_fixed());
 }
 
 /*****************************************************************************/
@@ -123,9 +123,9 @@ TEST_F(TestVariableProxy, scalar_unfix) {
 
     auto& variable_proxy = model.create_variable("x");
     variable_proxy.fix();
-    EXPECT_EQ(true, variable_proxy.is_fixed());
+    EXPECT_TRUE(variable_proxy.is_fixed());
     variable_proxy.unfix();
-    EXPECT_EQ(false, variable_proxy.is_fixed());
+    EXPECT_FALSE(variable_proxy.is_fixed());
 }
 
 /*****************************************************************************/
@@ -135,7 +135,7 @@ TEST_F(TestVariableProxy, scalar_fix_by) {
     auto& variable_proxy = model.create_variable("x");
     auto  value          = random_integer();
     variable_proxy.fix_by(value);
-    EXPECT_EQ(true, variable_proxy.is_fixed());
+    EXPECT_TRUE(variable_proxy.is_fixed());
     EXPECT_EQ(value, variable_proxy.value());
 }
 
@@ -177,7 +177,7 @@ TEST_F(TestVariableProxy, scaler_set_bound) {
 
     EXPECT_EQ(lower_bound, variable_proxy.lower_bound());
     EXPECT_EQ(upper_bound, variable_proxy.upper_bound());
-    EXPECT_EQ(true, variable_proxy.has_bounds());
+    EXPECT_TRUE(variable_proxy.has_bounds());
 
     ASSERT_THROW(variable_proxy.set_bound(upper_bound, lower_bound),
                  std::logic_error);
@@ -534,10 +534,10 @@ TEST_F(TestVariableProxy, one_dimensional_set_bound) {
 
     EXPECT_EQ(lower_bound, variable_proxy[0].lower_bound());
     EXPECT_EQ(upper_bound, variable_proxy[0].upper_bound());
-    EXPECT_EQ(true, variable_proxy[0].has_bounds());
+    EXPECT_TRUE(variable_proxy[0].has_bounds());
     EXPECT_EQ(lower_bound, variable_proxy[1].lower_bound());
     EXPECT_EQ(upper_bound, variable_proxy[1].upper_bound());
-    EXPECT_EQ(true, variable_proxy[0].has_bounds());
+    EXPECT_TRUE(variable_proxy[0].has_bounds());
 
     ASSERT_THROW(variable_proxy.lower_bound(), std::logic_error);
     ASSERT_THROW(variable_proxy.upper_bound(), std::logic_error);
@@ -928,10 +928,10 @@ TEST_F(TestVariableProxy, two_dimensional_set_bound) {
 
     EXPECT_EQ(lower_bound, variable_proxy[0].lower_bound());
     EXPECT_EQ(upper_bound, variable_proxy[0].upper_bound());
-    EXPECT_EQ(true, variable_proxy[0].has_bounds());
+    EXPECT_TRUE(variable_proxy[0].has_bounds());
     EXPECT_EQ(lower_bound, variable_proxy[2 * 3 - 1].lower_bound());
     EXPECT_EQ(upper_bound, variable_proxy[2 * 3 - 1].upper_bound());
-    EXPECT_EQ(true, variable_proxy[2 * 3 - 1].has_bounds());
+    EXPECT_TRUE(variable_proxy[2 * 3 - 1].has_bounds());
 
     ASSERT_THROW(variable_proxy.lower_bound(), std::logic_error);
     ASSERT_THROW(variable_proxy.upper_bound(), std::logic_error);

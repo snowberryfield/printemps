@@ -87,7 +87,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
      * Set up the tabu tenure and related parameters.
      */
     int original_tabu_tenure = std::min(option.tabu_search.initial_tabu_tenure,
-                                        model->number_of_not_fixed_variables());
+                                        model->number_of_mutable_variables());
     int tabu_tenure          = original_tabu_tenure;
 
     double bias_previous       = 0.0;
@@ -640,7 +640,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                         bias_increase_count = 0;
                         tabu_tenure =
                             std::min(tabu_tenure + 1,
-                                     model->number_of_not_fixed_variables());
+                                     model->number_of_mutable_variables());
                         last_tabu_tenure_updated_iteration = iteration;
                         utility::print_debug("Tabu tenure increased: " +
                                                  std::to_string(tabu_tenure) +

@@ -9,19 +9,6 @@
 #include "abstract_move_generator.h"
 
 namespace printemps {
-namespace model {
-/*****************************************************************************/
-template <class T_Variable, class T_Expression>
-class Variable;
-
-/*****************************************************************************/
-template <class T_Variable, class T_Expression>
-class Constraint;
-
-}  // namespace model
-}  // namespace printemps
-
-namespace printemps {
 namespace neighborhood {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
@@ -44,9 +31,8 @@ class IntegerMoveGenerator
     }
 
     /*************************************************************************/
-    constexpr void setup(
-        const std::vector<model::Variable<T_Variable, T_Expression> *>
-            &a_VARIABLE_PTRS) {
+    void setup(const std::vector<model::Variable<T_Variable, T_Expression> *>
+                   &a_RAW_VARIABLE_PTRS) {
         /**
          *  "Shift" move for integer variables:
          *  e.g) integer variable 0 <= x <= 10 (x \in Z)
@@ -55,15 +41,16 @@ class IntegerMoveGenerator
          *        {(x = 9), (x = 5)} (if x = 10)
          */
 
-        std::vector<model::Variable<T_Variable, T_Expression> *>
-            not_fixed_variable_ptrs;
-        for (auto &&variable_ptr : a_VARIABLE_PTRS) {
-            if (!variable_ptr->is_fixed()) {
-                not_fixed_variable_ptrs.push_back(variable_ptr);
-            }
-        }
+        /**
+         * Extract mutable variables.
+         */
+        auto mutable_variable_ptrs =
+            extract_mutable_variable_ptrs(a_RAW_VARIABLE_PTRS);
 
-        const int VARIABLES_SIZE = not_fixed_variable_ptrs.size();
+        /**
+         * Setup move objects.
+         */
+        const int VARIABLES_SIZE = mutable_variable_ptrs.size();
         this->m_moves.resize(4 * VARIABLES_SIZE);
         this->m_flags.resize(4 * VARIABLES_SIZE);
 
@@ -71,17 +58,20 @@ class IntegerMoveGenerator
             for (auto j = 0; j < 4; j++) {
                 this->m_moves[4 * i + j].sense = MoveSense::Integer;
                 this->m_moves[4 * i + j].related_constraint_ptrs =
-                    not_fixed_variable_ptrs[i]->related_constraint_ptrs();
+                    mutable_variable_ptrs[i]->related_constraint_ptrs();
                 this->m_moves[4 * i + j].alterations.emplace_back(
-                    not_fixed_variable_ptrs[i], 0);
+                    mutable_variable_ptrs[i], 0);
                 this->m_moves[4 * i + j].is_special_neighborhood_move = false;
                 this->m_moves[4 * i + j].is_available                 = true;
                 this->m_moves[4 * i + j].overlap_rate                 = 0.0;
             }
         }
 
+        /**
+         * Setup move updater.
+         */
         auto move_updater =  //
-            [this, not_fixed_variable_ptrs, VARIABLES_SIZE](
+            [this, mutable_variable_ptrs, VARIABLES_SIZE](
                 auto *                      a_moves,                          //
                 auto *                      a_flags,                          //
                 const bool                  a_ACCEPT_ALL,                     //
@@ -93,18 +83,17 @@ class IntegerMoveGenerator
 #pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
 #endif
                 for (auto i = 0; i < VARIABLES_SIZE; i++) {
-                    const auto value = not_fixed_variable_ptrs[i]->value();
+                    const auto value = mutable_variable_ptrs[i]->value();
                     const auto lower_bound =
-                        not_fixed_variable_ptrs[i]->lower_bound();
+                        mutable_variable_ptrs[i]->lower_bound();
                     const auto upper_bound =
-                        not_fixed_variable_ptrs[i]->upper_bound();
+                        mutable_variable_ptrs[i]->upper_bound();
 
                     if (a_ACCEPT_ALL ||
                         (a_ACCEPT_OBJECTIVE_IMPROVABLE &&
-                         not_fixed_variable_ptrs[i]
-                             ->is_objective_improvable()) ||
+                         mutable_variable_ptrs[i]->is_objective_improvable()) ||
                         (a_ACCEPT_FEASIBILITY_IMPROVABLE &&
-                         not_fixed_variable_ptrs[i]
+                         mutable_variable_ptrs[i]
                              ->is_feasibility_improvable())) {
                         if (value == upper_bound) {
                             (*a_flags)[4 * i] = 0;

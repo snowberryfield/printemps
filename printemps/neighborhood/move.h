@@ -60,7 +60,7 @@ struct Move {
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-constexpr bool has_fixed_variables(
+constexpr bool has_fixed_variable(
     const Move<T_Variable, T_Expression> &a_MOVE) {
     for (const auto &alteration : a_MOVE.alterations) {
         if (alteration.first->is_fixed()) {
@@ -72,7 +72,7 @@ constexpr bool has_fixed_variables(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-constexpr bool has_selection_variables(
+constexpr bool has_selection_variable(
     const Move<T_Variable, T_Expression> &a_MOVE) {
     for (const auto &alteration : a_MOVE.alterations) {
         if (alteration.first->sense() == model::VariableSense::Selection) {
@@ -203,7 +203,6 @@ constexpr bool is_binary_swap(const Move<T_Variable, T_Expression> &a_MOVE) {
             return false;
         }
     }
-
     return true;
 }
 
@@ -215,7 +214,6 @@ related_variable_ptrs(const Move<T_Variable, T_Expression> &a_MOVE) {
     for (const auto &alteration : a_MOVE.alterations) {
         result.insert(alteration.first);
     }
-
     return result;
 }
 
@@ -259,6 +257,15 @@ constexpr bool operator==(const Move<T_Variable, T_Expression> &a_MOVE_FIRST,
     }
 
     /**
+     * If the numbers of related constraints of two moves are different, they
+     * must be different.
+     */
+    if (a_MOVE_FIRST.related_constraint_ptrs.size() !=
+        a_MOVE_SECOND.related_constraint_ptrs.size()) {
+        return false;
+    }
+
+    /**
      * If the overlap_rates including hashes of two moves are different, they
      * are likely to be different. See compute_hash() for detail.
      */
@@ -281,6 +288,13 @@ constexpr bool operator==(const Move<T_Variable, T_Expression> &a_MOVE_FIRST,
     }
 
     return true;
+};
+
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+constexpr bool operator!=(const Move<T_Variable, T_Expression> &a_MOVE_FIRST,
+                          const Move<T_Variable, T_Expression> &a_MOVE_SECOND) {
+    return !(a_MOVE_FIRST == a_MOVE_SECOND);
 };
 
 using IPMove = Move<int, double>;

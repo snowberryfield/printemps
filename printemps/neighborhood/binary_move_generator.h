@@ -44,9 +44,8 @@ class BinaryMoveGenerator
     }
 
     /*************************************************************************/
-    constexpr void setup(
-        const std::vector<model::Variable<T_Variable, T_Expression> *>
-            &a_VARIABLE_PTRS) {
+    void setup(const std::vector<model::Variable<T_Variable, T_Expression> *>
+                   &a_RAW_VARIABLE_PTRS) {
         /**
          * "Flip" move for binary variables:
          * e.g) binary variable x \in {0, 1}
@@ -54,31 +53,35 @@ class BinaryMoveGenerator
          *        {(x = 0)} (if x = 1)
          */
 
-        std::vector<model::Variable<T_Variable, T_Expression> *>
-            not_fixed_variable_ptrs;
-        for (auto &&variable_ptr : a_VARIABLE_PTRS) {
-            if (!variable_ptr->is_fixed()) {
-                not_fixed_variable_ptrs.push_back(variable_ptr);
-            }
-        }
+        /**
+         * Extract mutable variables.
+         */
+        auto mutable_variable_ptrs =
+            extract_mutable_variable_ptrs(a_RAW_VARIABLE_PTRS);
 
-        const int VARIABLES_SIZE = not_fixed_variable_ptrs.size();
+        /**
+         * Setup move objects.
+         */
+        const int VARIABLES_SIZE = mutable_variable_ptrs.size();
         this->m_moves.resize(VARIABLES_SIZE);
         this->m_flags.resize(VARIABLES_SIZE);
 
         for (auto i = 0; i < VARIABLES_SIZE; i++) {
             this->m_moves[i].sense = MoveSense::Binary;
             this->m_moves[i].related_constraint_ptrs =
-                not_fixed_variable_ptrs[i]->related_constraint_ptrs();
-            this->m_moves[i].alterations.emplace_back(
-                not_fixed_variable_ptrs[i], 0);
+                mutable_variable_ptrs[i]->related_constraint_ptrs();
+            this->m_moves[i].alterations.emplace_back(mutable_variable_ptrs[i],
+                                                      0);
             this->m_moves[i].is_special_neighborhood_move = false;
             this->m_moves[i].is_available                 = true;
             this->m_moves[i].overlap_rate                 = 0.0;
         }
 
+        /**
+         * Setup move updater.
+         */
         auto move_updater =  //
-            [this, not_fixed_variable_ptrs, VARIABLES_SIZE](
+            [this, mutable_variable_ptrs, VARIABLES_SIZE](
                 auto *                      a_moves,                          //
                 auto *                      a_flags,                          //
                 const bool                  a_ACCEPT_ALL,                     //
@@ -91,13 +94,12 @@ class BinaryMoveGenerator
                 for (auto i = 0; i < VARIABLES_SIZE; i++) {
                     if (a_ACCEPT_ALL ||
                         (a_ACCEPT_OBJECTIVE_IMPROVABLE &&
-                         not_fixed_variable_ptrs[i]
-                             ->is_objective_improvable()) ||
+                         mutable_variable_ptrs[i]->is_objective_improvable()) ||
                         (a_ACCEPT_FEASIBILITY_IMPROVABLE &&
-                         not_fixed_variable_ptrs[i]
+                         mutable_variable_ptrs[i]
                              ->is_feasibility_improvable())) {
                         (*a_moves)[i].alterations.front().second =
-                            1 - not_fixed_variable_ptrs[i]->value();
+                            1 - mutable_variable_ptrs[i]->value();
                         (*a_flags)[i] = 1;
                     } else {
                         (*a_flags)[i] = 0;

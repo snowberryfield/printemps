@@ -136,7 +136,7 @@ class Variable : public AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr void set_value_if_not_fixed(const T_Variable a_VALUE) {
+    inline constexpr void set_value_if_mutable(const T_Variable a_VALUE) {
         if (!m_is_fixed) {
             m_value = a_VALUE;
             this->update_margin();

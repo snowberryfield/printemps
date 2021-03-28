@@ -141,16 +141,16 @@ constexpr int remove_redundant_constraints_with_tightening_variable_bounds(
                 std::pair<model::Variable<T_Variable, T_Expression> *,
                           T_Expression>;
 
-            std::vector<Sensitivity_T> not_fixed_variable_sensitivities;
+            std::vector<Sensitivity_T> mutable_variable_sensitivities;
             std::vector<Sensitivity_T>
-                positive_coefficient_not_fixed_variable_sensitivities;
+                positive_coefficient_mutable_variable_sensitivities;
             std::vector<Sensitivity_T>
-                negative_coefficient_not_fixed_variable_sensitivities;
+                negative_coefficient_mutable_variable_sensitivities;
 
-            not_fixed_variable_sensitivities.reserve(sensitivities.size());
-            positive_coefficient_not_fixed_variable_sensitivities.reserve(
+            mutable_variable_sensitivities.reserve(sensitivities.size());
+            positive_coefficient_mutable_variable_sensitivities.reserve(
                 sensitivities.size());
-            negative_coefficient_not_fixed_variable_sensitivities.reserve(
+            negative_coefficient_mutable_variable_sensitivities.reserve(
                 sensitivities.size());
             int number_of_fixed_variables = 0;
 
@@ -160,9 +160,9 @@ constexpr int remove_redundant_constraints_with_tightening_variable_bounds(
              * decision variables are not fixed, b^{T}y are terms with fixed
              * decision variables, and c is the constant term.
              */
-            double not_fixed_term_lower_bound = 0.0;
-            double not_fixed_term_upper_bound = 0.0;
-            double fixed_term_value           = 0.0;
+            double mutable_term_lower_bound = 0.0;
+            double mutable_term_upper_bound = 0.0;
+            double fixed_term_value         = 0.0;
 
             for (const auto &sensitivity : sensitivities) {
                 if (sensitivity.first->is_fixed()) {
@@ -171,25 +171,25 @@ constexpr int remove_redundant_constraints_with_tightening_variable_bounds(
                         sensitivity.first->value() * sensitivity.second;
                 } else {
                     if (sensitivity.second > 0) {
-                        not_fixed_term_lower_bound +=
+                        mutable_term_lower_bound +=
                             sensitivity.first->lower_bound() *
                             sensitivity.second;
-                        not_fixed_term_upper_bound +=
+                        mutable_term_upper_bound +=
                             sensitivity.first->upper_bound() *
                             sensitivity.second;
-                        positive_coefficient_not_fixed_variable_sensitivities
+                        positive_coefficient_mutable_variable_sensitivities
                             .push_back(sensitivity);
-                        not_fixed_variable_sensitivities.push_back(sensitivity);
+                        mutable_variable_sensitivities.push_back(sensitivity);
                     } else {
-                        not_fixed_term_lower_bound +=
+                        mutable_term_lower_bound +=
                             sensitivity.first->upper_bound() *
                             sensitivity.second;
-                        not_fixed_term_upper_bound +=
+                        mutable_term_upper_bound +=
                             sensitivity.first->lower_bound() *
                             sensitivity.second;
-                        negative_coefficient_not_fixed_variable_sensitivities
+                        negative_coefficient_mutable_variable_sensitivities
                             .push_back(sensitivity);
-                        not_fixed_variable_sensitivities.push_back(sensitivity);
+                        mutable_variable_sensitivities.push_back(sensitivity);
                     }
                 }
             }
@@ -199,15 +199,13 @@ constexpr int remove_redundant_constraints_with_tightening_variable_bounds(
              * removed.
              */
             if ((constraint.sense() == model::ConstraintSense::Equal &&
-                 not_fixed_variable_sensitivities.size() == 0 &&
+                 mutable_variable_sensitivities.size() == 0 &&
                  fixed_term_value + constant_value == 0) ||
                 (constraint.sense() == model::ConstraintSense::Lower &&
-                 not_fixed_term_upper_bound + fixed_term_value +
-                         constant_value <=
+                 mutable_term_upper_bound + fixed_term_value + constant_value <=
                      0) ||
                 (constraint.sense() == model::ConstraintSense::Upper &&
-                 not_fixed_term_lower_bound + fixed_term_value +
-                         constant_value >=
+                 mutable_term_lower_bound + fixed_term_value + constant_value >=
                      0)) {
                 utility::print_message("The redundant constraint " +
                                            constraint.name() + " was removed.",
@@ -225,11 +223,11 @@ constexpr int remove_redundant_constraints_with_tightening_variable_bounds(
              * of fixing or tightening the lower and upper bounds of the
              * decision variable included in the constraint.
              */
-            if (not_fixed_variable_sensitivities.size() == 1) {
+            if (mutable_variable_sensitivities.size() == 1) {
                 auto variable_ptr =
-                    not_fixed_variable_sensitivities.front().first;
+                    mutable_variable_sensitivities.front().first;
                 auto coefficient =
-                    not_fixed_variable_sensitivities.front().second;
+                    mutable_variable_sensitivities.front().second;
 
                 auto lower_bound = variable_ptr->lower_bound();
                 auto upper_bound = variable_ptr->upper_bound();
@@ -336,7 +334,7 @@ constexpr int remove_redundant_constraints_with_tightening_variable_bounds(
              * based on the bounds of the rest part.
              */
             for (auto &&sensitivity :
-                 positive_coefficient_not_fixed_variable_sensitivities) {
+                 positive_coefficient_mutable_variable_sensitivities) {
                 auto variable_ptr = sensitivity.first;
                 auto coefficient  = sensitivity.second;
 
@@ -344,10 +342,10 @@ constexpr int remove_redundant_constraints_with_tightening_variable_bounds(
                 auto upper_bound = variable_ptr->upper_bound();
 
                 if (constraint.sense() == model::ConstraintSense::Upper) {
-                    auto bound_temp = -(not_fixed_term_upper_bound -
-                                        coefficient * upper_bound +
-                                        fixed_term_value + constant_value) /
-                                      coefficient;
+                    auto bound_temp =
+                        -(mutable_term_upper_bound - coefficient * upper_bound +
+                          fixed_term_value + constant_value) /
+                        coefficient;
                     auto bound_ceil =
                         static_cast<T_Variable>(std::ceil(bound_temp));
                     if (bound_ceil > lower_bound &&
@@ -361,10 +359,10 @@ constexpr int remove_redundant_constraints_with_tightening_variable_bounds(
                     }
                 } else if (constraint.sense() ==
                            model::ConstraintSense::Lower) {
-                    auto bound_temp = -(not_fixed_term_lower_bound -
-                                        coefficient * lower_bound +
-                                        fixed_term_value + constant_value) /
-                                      coefficient;
+                    auto bound_temp =
+                        -(mutable_term_lower_bound - coefficient * lower_bound +
+                          fixed_term_value + constant_value) /
+                        coefficient;
                     auto bound_floor =
                         static_cast<T_Variable>(std::floor(bound_temp));
                     if (bound_floor < upper_bound &&
@@ -380,7 +378,7 @@ constexpr int remove_redundant_constraints_with_tightening_variable_bounds(
             }
 
             for (auto &&sensitivity :
-                 negative_coefficient_not_fixed_variable_sensitivities) {
+                 negative_coefficient_mutable_variable_sensitivities) {
                 auto variable_ptr = sensitivity.first;
                 auto coefficient  = sensitivity.second;
 
@@ -388,10 +386,10 @@ constexpr int remove_redundant_constraints_with_tightening_variable_bounds(
                 auto upper_bound = variable_ptr->upper_bound();
 
                 if (constraint.sense() == model::ConstraintSense::Upper) {
-                    auto bound_temp = -(not_fixed_term_upper_bound -
-                                        coefficient * lower_bound +
-                                        fixed_term_value + constant_value) /
-                                      coefficient;
+                    auto bound_temp =
+                        -(mutable_term_upper_bound - coefficient * lower_bound +
+                          fixed_term_value + constant_value) /
+                        coefficient;
                     auto bound_floor =
                         static_cast<T_Variable>(std::floor(bound_temp));
                     if (bound_floor < upper_bound &&
@@ -406,10 +404,10 @@ constexpr int remove_redundant_constraints_with_tightening_variable_bounds(
                 }
 
                 else if (constraint.sense() == model::ConstraintSense::Lower) {
-                    auto bound_temp = -(not_fixed_term_lower_bound -
-                                        coefficient * upper_bound +
-                                        fixed_term_value + constant_value) /
-                                      coefficient;
+                    auto bound_temp =
+                        -(mutable_term_lower_bound - coefficient * upper_bound +
+                          fixed_term_value + constant_value) /
+                        coefficient;
                     auto bound_ceil =
                         static_cast<T_Variable>(std::ceil(bound_temp));
                     if (bound_ceil > lower_bound &&

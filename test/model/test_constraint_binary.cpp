@@ -50,7 +50,7 @@ TEST_F(TestConstraintBinary, function_lower) {
     {
         auto constraint = f <= target;
 
-        EXPECT_EQ(false, constraint.is_linear());
+        EXPECT_FALSE(constraint.is_linear());
         EXPECT_EQ(printemps::model::ConstraintSense::Lower, constraint.sense());
 
         auto value = random_integer();
@@ -64,7 +64,7 @@ TEST_F(TestConstraintBinary, function_lower) {
     {
         auto constraint = target <= f;
 
-        EXPECT_EQ(false, constraint.is_linear());
+        EXPECT_FALSE(constraint.is_linear());
         EXPECT_EQ(printemps::model::ConstraintSense::Lower, constraint.sense());
 
         auto value = random_integer();
@@ -95,7 +95,7 @@ TEST_F(TestConstraintBinary, function_equal) {
     {
         auto constraint = f == target;
 
-        EXPECT_EQ(false, constraint.is_linear());
+        EXPECT_FALSE(constraint.is_linear());
         EXPECT_EQ(printemps::model::ConstraintSense::Equal, constraint.sense());
 
         auto value = random_integer();
@@ -109,7 +109,7 @@ TEST_F(TestConstraintBinary, function_equal) {
     {
         auto constraint = target == f;
 
-        EXPECT_EQ(false, constraint.is_linear());
+        EXPECT_FALSE(constraint.is_linear());
         EXPECT_EQ(printemps::model::ConstraintSense::Equal, constraint.sense());
 
         auto value = random_integer();
@@ -140,7 +140,7 @@ TEST_F(TestConstraintBinary, function_upper) {
     {
         auto constraint = f >= target;
 
-        EXPECT_EQ(false, constraint.is_linear());
+        EXPECT_FALSE(constraint.is_linear());
         EXPECT_EQ(printemps::model::ConstraintSense::Upper, constraint.sense());
 
         auto value = random_integer();
@@ -154,7 +154,7 @@ TEST_F(TestConstraintBinary, function_upper) {
     {
         auto constraint = target >= f;
 
-        EXPECT_EQ(false, constraint.is_linear());
+        EXPECT_FALSE(constraint.is_linear());
         EXPECT_EQ(printemps::model::ConstraintSense::Upper, constraint.sense());
 
         auto value = random_integer();

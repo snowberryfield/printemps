@@ -450,13 +450,13 @@ TEST_F(TestExpressionProxy, scalar_is_enabled) {
     printemps::model::Model<int, double> model;
     auto& expression_proxy = model.create_expression("e");
     expression_proxy.disable();
-    EXPECT_EQ(false, expression_proxy.is_enabled());
+    EXPECT_FALSE(expression_proxy.is_enabled());
 
     expression_proxy.enable();
-    EXPECT_EQ(true, expression_proxy.is_enabled());
+    EXPECT_TRUE(expression_proxy.is_enabled());
 
     expression_proxy.disable();
-    EXPECT_EQ(false, expression_proxy.is_enabled());
+    EXPECT_FALSE(expression_proxy.is_enabled());
 }
 
 /*****************************************************************************/
@@ -1121,18 +1121,18 @@ TEST_F(TestExpressionProxy, one_dimensional_is_enabled) {
     auto& expression_proxy = model.create_expressions("e", 2);
     expression_proxy.disable();
     ASSERT_THROW(expression_proxy.is_enabled(), std::logic_error);
-    EXPECT_EQ(false, expression_proxy[0].is_enabled());
-    EXPECT_EQ(false, expression_proxy[1].is_enabled());
+    EXPECT_FALSE(expression_proxy[0].is_enabled());
+    EXPECT_FALSE(expression_proxy[1].is_enabled());
 
     expression_proxy.enable();
     ASSERT_THROW(expression_proxy.is_enabled(), std::logic_error);
-    EXPECT_EQ(true, expression_proxy[0].is_enabled());
-    EXPECT_EQ(true, expression_proxy[1].is_enabled());
+    EXPECT_TRUE(expression_proxy[0].is_enabled());
+    EXPECT_TRUE(expression_proxy[1].is_enabled());
 
     expression_proxy.disable();
     ASSERT_THROW(expression_proxy.is_enabled(), std::logic_error);
-    EXPECT_EQ(false, expression_proxy[0].is_enabled());
-    EXPECT_EQ(false, expression_proxy[1].is_enabled());
+    EXPECT_FALSE(expression_proxy[0].is_enabled());
+    EXPECT_FALSE(expression_proxy[1].is_enabled());
 }
 
 /*****************************************************************************/
@@ -1719,18 +1719,18 @@ TEST_F(TestExpressionProxy, two_dimensional_is_enabled) {
     auto& expression_proxy = model.create_expressions("e", {2, 3});
     expression_proxy.disable();
     ASSERT_THROW(expression_proxy.is_enabled(), std::logic_error);
-    EXPECT_EQ(false, expression_proxy[0].is_enabled());
-    EXPECT_EQ(false, expression_proxy[2 * 3 - 1].is_enabled());
+    EXPECT_FALSE(expression_proxy[0].is_enabled());
+    EXPECT_FALSE(expression_proxy[2 * 3 - 1].is_enabled());
 
     expression_proxy.enable();
     ASSERT_THROW(expression_proxy.is_enabled(), std::logic_error);
-    EXPECT_EQ(true, expression_proxy[0].is_enabled());
-    EXPECT_EQ(true, expression_proxy[2 * 3 - 1].is_enabled());
+    EXPECT_TRUE(expression_proxy[0].is_enabled());
+    EXPECT_TRUE(expression_proxy[2 * 3 - 1].is_enabled());
 
     expression_proxy.disable();
     ASSERT_THROW(expression_proxy.is_enabled(), std::logic_error);
-    EXPECT_EQ(false, expression_proxy[0].is_enabled());
-    EXPECT_EQ(false, expression_proxy[2 * 3 - 1].is_enabled());
+    EXPECT_FALSE(expression_proxy[0].is_enabled());
+    EXPECT_FALSE(expression_proxy[2 * 3 - 1].is_enabled());
 }
 
 /*****************************************************************************/

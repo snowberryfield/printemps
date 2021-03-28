@@ -236,19 +236,19 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
 
             if (coefficient > 0) {
                 if (model->is_minimization()) {
-                    variable_ptrs[i]->set_value_if_not_fixed(
+                    variable_ptrs[i]->set_value_if_mutable(
                         variable_ptrs[i]->lower_bound());
                 } else {
-                    variable_ptrs[i]->set_value_if_not_fixed(
+                    variable_ptrs[i]->set_value_if_mutable(
                         variable_ptrs[i]->upper_bound());
                 }
 
             } else {
                 if (model->is_minimization()) {
-                    variable_ptrs[i]->set_value_if_not_fixed(
+                    variable_ptrs[i]->set_value_if_mutable(
                         variable_ptrs[i]->upper_bound());
                 } else {
-                    variable_ptrs[i]->set_value_if_not_fixed(
+                    variable_ptrs[i]->set_value_if_mutable(
                         variable_ptrs[i]->lower_bound());
                 }
             }

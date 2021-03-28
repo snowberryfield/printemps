@@ -120,7 +120,6 @@ TEST_F(TestBinpacking, bin_packing) {
     option.is_enabled_aggregation_move             = true;
     option.is_enabled_precedence_move              = true;
     option.is_enabled_variable_bound_move          = true;
-    option.is_enabled_exclusive_move               = true;
     option.is_enabled_chain_move                   = true;
     option.is_enabled_user_defined_move            = true;
     option.target_objective_value                  = -1E100;
@@ -138,7 +137,7 @@ TEST_F(TestBinpacking, bin_packing) {
     option.tabu_search.ignore_tabu_if_global_incumbent             = true;
 
     auto result = printemps::solver::solve(&model, option);
-    EXPECT_EQ(true, result.solution.is_feasible());
+    EXPECT_TRUE(result.solution.is_feasible());
 
     ASSERT_THROW(printemps::solver::solve(&model, option), std::logic_error);
 }

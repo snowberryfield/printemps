@@ -45,8 +45,8 @@ TEST_F(TestExpression, initialize) {
     /// Check the initial values of the derived class members.
     EXPECT_EQ(0, expression.constant_value());
     EXPECT_EQ(0, expression.value());
-    EXPECT_EQ(true, expression.sensitivities().empty());
-    EXPECT_EQ(true, expression.is_enabled());
+    EXPECT_TRUE(expression.sensitivities().empty());
+    EXPECT_TRUE(expression.is_enabled());
 }
 
 /*****************************************************************************/
@@ -278,13 +278,13 @@ TEST_F(TestExpression, is_enabled) {
     auto expression =
         printemps::model::Expression<int, double>::create_instance();
     expression.disable();
-    EXPECT_EQ(false, expression.is_enabled());
+    EXPECT_FALSE(expression.is_enabled());
 
     expression.enable();
-    EXPECT_EQ(true, expression.is_enabled());
+    EXPECT_TRUE(expression.is_enabled());
 
     expression.disable();
-    EXPECT_EQ(false, expression.is_enabled());
+    EXPECT_FALSE(expression.is_enabled());
 }
 
 /*****************************************************************************/
