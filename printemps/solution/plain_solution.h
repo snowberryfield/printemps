@@ -3,19 +3,23 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_MODEL_PLAIN_SOLUTION_H__
-#define PRINTEMPS_MODEL_PLAIN_SOLUTION_H__
+#ifndef PRINTEMPS_SOLUTION_PLAIN_SOLUTION_H__
+#define PRINTEMPS_SOLUTION_PLAIN_SOLUTION_H__
 
 namespace printemps {
 namespace model {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class Model;
+}  // namespace model
+}  // namespace printemps
 
+namespace printemps {
+namespace solution {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 struct PlainSolution {
-    friend class Model<T_Variable, T_Expression>;
+    friend class model::Model<T_Variable, T_Expression>;
 
     T_Expression            objective;
     T_Expression            total_violation;
@@ -69,7 +73,7 @@ struct PlainSolution {
     }
 };
 using IPPlainSolution = PlainSolution<int, double>;
-}  // namespace model
+}  // namespace solution
 }  // namespace printemps
 #endif
 /*****************************************************************************/

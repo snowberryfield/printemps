@@ -11,6 +11,7 @@ test: build
 	$(BUILD_DIR)/test_presolver; \
 	$(BUILD_DIR)/test_verifier; \
 	$(BUILD_DIR)/test_neighborhood; \
+	$(BUILD_DIR)/test_solution; \
 	$(BUILD_DIR)/test_solver; \
 	$(BUILD_DIR)/test_utility
 

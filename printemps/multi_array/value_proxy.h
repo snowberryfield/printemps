@@ -4,13 +4,13 @@
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
 
-#ifndef PRINTEMPS_MODEL_VALUE_PROXY_H__
-#define PRINTEMPS_MODEL_VALUE_PROXY_H__
+#ifndef PRINTEMPS_MULTI_ARRAY_VALUE_PROXY_H__
+#define PRINTEMPS_MULTI_ARRAY_VALUE_PROXY_H__
 
 #include "abstract_multi_array.h"
 
 namespace printemps {
-namespace model {
+namespace multi_array {
 /*****************************************************************************/
 template <class T_Value>
 class ValueProxy : public AbstractMultiArray {
@@ -420,7 +420,7 @@ void write_values_by_array(
         *a_ofs << utility::indent_spaces(indent_level) << "}" << std::endl;
     }
 }
-}  // namespace model
+}  // namespace multi_array
 }  // namespace printemps
 #endif
 

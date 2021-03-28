@@ -25,12 +25,12 @@ namespace tabu_search {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 TabuSearchResult<T_Variable, T_Expression> solve(
-    model::Model<T_Variable, T_Expression>* a_model,   //
-    const Option&                           a_OPTION,  //
-    const std::vector<model::ValueProxy<T_Variable>>&  //
-        a_INITIAL_VARIABLE_VALUE_PROXIES,              //
-    const IncumbentHolder<T_Variable, T_Expression>&   //
-                 a_INCUMBENT_HOLDER,                   //
+    model::Model<T_Variable, T_Expression>* a_model,         //
+    const Option&                           a_OPTION,        //
+    const std::vector<multi_array::ValueProxy<T_Variable>>&  //
+        a_INITIAL_VARIABLE_VALUE_PROXIES,                    //
+    const IncumbentHolder<T_Variable, T_Expression>&         //
+                 a_INCUMBENT_HOLDER,                         //
     const Memory a_MEMORY) {
     /**
      * Define type aliases.
@@ -71,8 +71,8 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     model->import_variable_values(a_INITIAL_VARIABLE_VALUE_PROXIES);
     model->update();
 
-    model::SolutionScore current_solution_score = model->evaluate({});
-    model::SolutionScore previous_solution_score;
+    solution::SolutionScore current_solution_score = model->evaluate({});
+    solution::SolutionScore previous_solution_score;
 
     int update_status =
         incumbent_holder.try_update_incumbent(model, current_solution_score);
@@ -100,7 +100,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     /**
      * Prepare historical solutions holder.
      */
-    std::vector<model::PlainSolution<T_Variable, T_Expression>>
+    std::vector<solution::PlainSolution<T_Variable, T_Expression>>
         historical_feasible_solutions;
 
     /**
@@ -113,8 +113,8 @@ TabuSearchResult<T_Variable, T_Expression> solve(
      * Prepare other local variables.
      */
 
-    std::vector<model::SolutionScore> trial_solution_scores;
-    std::vector<MoveScore>            trial_move_scores;
+    std::vector<solution::SolutionScore> trial_solution_scores;
+    std::vector<MoveScore>               trial_move_scores;
 
     std::vector<double> objective_improvements;
     std::vector<double> local_penalties;

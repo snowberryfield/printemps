@@ -16,10 +16,10 @@ struct MemoryConstant {
 /*****************************************************************************/
 class Memory {
    private:
-    std::vector<std::string>            m_variable_names;
-    std::vector<model::ValueProxy<int>> m_last_update_iterations;
-    std::vector<model::ValueProxy<int>> m_update_counts;
-    long                                m_total_update_counts;
+    std::vector<std::string>                  m_variable_names;
+    std::vector<multi_array::ValueProxy<int>> m_last_update_iterations;
+    std::vector<multi_array::ValueProxy<int>> m_update_counts;
+    long                                      m_total_update_counts;
 
    public:
     /*************************************************************************/
@@ -196,14 +196,14 @@ class Memory {
     }
 
     /*************************************************************************/
-    inline constexpr const std::vector<model::ValueProxy<int>>
+    inline constexpr const std::vector<multi_array::ValueProxy<int>>
         &last_update_iterations(void) const {
         return m_last_update_iterations;
     }
 
     /*************************************************************************/
-    inline constexpr const std::vector<model::ValueProxy<int>> &update_counts(
-        void) const {
+    inline constexpr const std::vector<multi_array::ValueProxy<int>>
+        &update_counts(void) const {
         return m_update_counts;
     }
 

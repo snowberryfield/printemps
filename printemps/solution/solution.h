@@ -3,26 +3,26 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_MODEL_SOLUTION_H__
-#define PRINTEMPS_MODEL_SOLUTION_H__
+#ifndef PRINTEMPS_SOLUTION_SOLUTION_H__
+#define PRINTEMPS_SOLUTION_SOLUTION_H__
 
 namespace printemps {
-namespace model {
+namespace multi_array {
 /*****************************************************************************/
 template <class T_Value>
 class ValueProxy;
+}  // namespace multi_array
+}  // namespace printemps
 
-/*****************************************************************************/
-template <class T_Variable, class T_Expression>
-class Model;
-
+namespace printemps {
+namespace solution {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 struct Solution {
-    std::vector<ValueProxy<T_Variable>>   variable_value_proxies;
-    std::vector<ValueProxy<T_Expression>> expression_value_proxies;
-    std::vector<ValueProxy<T_Expression>> constraint_value_proxies;
-    std::vector<ValueProxy<T_Expression>> violation_value_proxies;
+    std::vector<multi_array::ValueProxy<T_Variable>>   variable_value_proxies;
+    std::vector<multi_array::ValueProxy<T_Expression>> expression_value_proxies;
+    std::vector<multi_array::ValueProxy<T_Expression>> constraint_value_proxies;
+    std::vector<multi_array::ValueProxy<T_Expression>> violation_value_proxies;
 
     T_Expression objective;
     T_Expression total_violation;
@@ -51,7 +51,7 @@ struct Solution {
     }
 };
 using IPSolution = Solution<int, double>;
-}  // namespace model
+}  // namespace solution
 }  // namespace printemps
 #endif
 /*****************************************************************************/

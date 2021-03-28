@@ -6,7 +6,7 @@
 #ifndef PRINTEMPS_MODEL_EXPRESSION_H__
 #define PRINTEMPS_MODEL_EXPRESSION_H__
 
-#include "abstract_multi_array_element.h"
+#include "../multi_array/abstract_multi_array_element.h"
 #include "../utility/utility.h"
 
 namespace printemps {
@@ -38,7 +38,7 @@ struct ExpressionConstant {
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-class Expression : public AbstractMultiArrayElement {
+class Expression : public multi_array::AbstractMultiArrayElement {
     /**
      * [Access controls for special member functions]
      *  -- Default constructor : default, private
@@ -138,7 +138,7 @@ class Expression : public AbstractMultiArrayElement {
 
     /*************************************************************************/
     void initialize(void) {
-        AbstractMultiArrayElement::initialize();
+        multi_array::AbstractMultiArrayElement::initialize();
         m_constant_value = 0;
         m_value          = 0;
         m_is_enabled     = true;

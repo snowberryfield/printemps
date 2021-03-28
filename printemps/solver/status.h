@@ -6,16 +6,14 @@
 #ifndef PRINTEMPS_SOLVER_STATUS_H__
 #define PRINTEMPS_SOLVER_STATUS_H__
 
-#include "../model/model.h"
-
 namespace printemps {
 namespace solver {
 /*****************************************************************************/
 struct Status {
-    std::unordered_map<std::string, model::ValueProxy<double>>
+    std::unordered_map<std::string, multi_array::ValueProxy<double>>
         penalty_coefficients;
 
-    std::unordered_map<std::string, model::ValueProxy<int>> update_counts;
+    std::unordered_map<std::string, multi_array::ValueProxy<int>> update_counts;
 
     bool is_found_feasible_solution;
 
@@ -60,12 +58,13 @@ struct Status {
 
     /*************************************************************************/
     inline void print_penalty_coefficients(void) const {
-        model::print_values(this->penalty_coefficients, "penalty_coefficients");
+        multi_array::print_values(this->penalty_coefficients,
+                                  "penalty_coefficients");
     }
 
     /*************************************************************************/
     inline void print_update_counts(void) const {
-        model::print_values(this->update_counts, "update_counts");
+        multi_array::print_values(this->update_counts, "update_counts");
     }
 
     /*************************************************************************/
@@ -129,18 +128,18 @@ struct Status {
             << "," << std::endl;
 
         /// Penalty coefficients
-        model::write_values_by_name(&ofs,                        //
-                                    this->penalty_coefficients,  //
-                                    "penalty_coefficients",      //
-                                    indent_level,                //
-                                    "%.10e", true);
+        multi_array::write_values_by_name(&ofs,                        //
+                                          this->penalty_coefficients,  //
+                                          "penalty_coefficients",      //
+                                          indent_level,                //
+                                          "%.10e", true);
 
         /// Update counts
-        model::write_values_by_name(&ofs,                 //
-                                    this->update_counts,  //
-                                    "update_counts",      //
-                                    indent_level,         //
-                                    "%d", false);
+        multi_array::write_values_by_name(&ofs,                 //
+                                          this->update_counts,  //
+                                          "update_counts",      //
+                                          indent_level,         //
+                                          "%d", false);
 
         indent_level--;
         ofs << utility::indent_spaces(indent_level) << "}" << std::endl;
@@ -208,20 +207,20 @@ struct Status {
             << "," << std::endl;
 
         /// Penalty coefficients
-        model::write_values_by_array(&ofs,                        //
-                                     this->penalty_coefficients,  //
-                                     "penalty_coefficients",      //
-                                     indent_level,                //
-                                     "%.10e",                     //
-                                     true);
+        multi_array::write_values_by_array(&ofs,                        //
+                                           this->penalty_coefficients,  //
+                                           "penalty_coefficients",      //
+                                           indent_level,                //
+                                           "%.10e",                     //
+                                           true);
 
         /// Update counts
-        model::write_values_by_array(&ofs,                 //
-                                     this->update_counts,  //
-                                     "update_counts",      //
-                                     indent_level,         //
-                                     "%d",                 //
-                                     false);
+        multi_array::write_values_by_array(&ofs,                 //
+                                           this->update_counts,  //
+                                           "update_counts",      //
+                                           indent_level,         //
+                                           "%d",                 //
+                                           false);
 
         indent_level--;
         ofs << utility::indent_spaces(indent_level) << "}" << std::endl;

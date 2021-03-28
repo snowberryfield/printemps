@@ -43,7 +43,7 @@ inline void print_table_header(const bool a_IS_ENABLED_PRINT) {
 template <class T_Variable, class T_Expression>
 inline void print_table_initial(
     const model::Model<T_Variable, T_Expression> *   a_MODEL,
-    const model::SolutionScore &                     a_CURRENT_SOLUTION_SCORE,
+    const solution::SolutionScore &                  a_CURRENT_SOLUTION_SCORE,
     const IncumbentHolder<T_Variable, T_Expression> &a_INCUMBENT_HOLDER,
     const bool                                       a_IS_ENABLED_PRINT) {
     if (!a_IS_ENABLED_PRINT) {
@@ -66,13 +66,13 @@ template <class T_Variable, class T_Expression>
 inline void print_table_body(
     const model::Model<T_Variable, T_Expression> *a_MODEL,                //
     const int                                     a_ITERATION,            //
-    const bool                  a_IS_SPECIAL_NEIGHBORHOOD_MOVE,           //
-    const int                   a_NUMBER_OF_ALL_NEIGHBORHOODS,            //
-    const int                   a_NUMBER_OF_FEASIBLE_NEIGHBORHOODS,       //
-    const int                   a_NUMBER_OF_PERMISSIBLE_NEIGHBORHOOD,     //
-    const int                   a_NUMBER_OF_IMPROVABLE_NEIGHBORHOOD,      //
-    const model::SolutionScore &a_CURRENT_SOLUTION_SCORE,                 //
-    const int                   a_STATUS,                                 //
+    const bool                     a_IS_SPECIAL_NEIGHBORHOOD_MOVE,        //
+    const int                      a_NUMBER_OF_ALL_NEIGHBORHOODS,         //
+    const int                      a_NUMBER_OF_FEASIBLE_NEIGHBORHOODS,    //
+    const int                      a_NUMBER_OF_PERMISSIBLE_NEIGHBORHOOD,  //
+    const int                      a_NUMBER_OF_IMPROVABLE_NEIGHBORHOOD,   //
+    const solution::SolutionScore &a_CURRENT_SOLUTION_SCORE,              //
+    const int                      a_STATUS,                              //
     const IncumbentHolder<T_Variable, T_Expression> &a_INCUMBENT_HOLDER,  //
     const bool                                       a_IS_ASPIRATED,      //
     const bool                                       a_IS_ENABLED_PRINT) {

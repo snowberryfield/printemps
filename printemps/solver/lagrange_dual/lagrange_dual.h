@@ -22,8 +22,9 @@ struct Option;
 namespace lagrange_dual {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-void bound_dual(model::Model<T_Variable, T_Expression>* a_model,
-                std::vector<model::ValueProxy<double>>* a_dual_value_proxies) {
+void bound_dual(
+    model::Model<T_Variable, T_Expression>*       a_model,
+    std::vector<multi_array::ValueProxy<double>>* a_dual_value_proxies) {
     for (auto&& proxy : a_model->constraint_proxies()) {
         for (auto&& constraint : proxy.flat_indexed_constraints()) {
             int proxy_index = constraint.proxy_index();
@@ -57,11 +58,11 @@ void bound_dual(model::Model<T_Variable, T_Expression>* a_model,
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 LagrangeDualResult<T_Variable, T_Expression> solve(
-    model::Model<T_Variable, T_Expression>* a_model,   //
-    const Option&                           a_OPTION,  //
-    const std::vector<model::ValueProxy<T_Variable>>&  //
-        a_INITIAL_VARIABLE_VALUE_PROXIES,              //
-    const IncumbentHolder<T_Variable, T_Expression>&   //
+    model::Model<T_Variable, T_Expression>* a_model,         //
+    const Option&                           a_OPTION,        //
+    const std::vector<multi_array::ValueProxy<T_Variable>>&  //
+        a_INITIAL_VARIABLE_VALUE_PROXIES,                    //
+    const IncumbentHolder<T_Variable, T_Expression>&         //
         a_INCUMBENT_HOLDER) {
     /**
      * Define type aliases.
@@ -94,7 +95,7 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
     /**
      * Initialize the solution and update the model.
      */
-    model::SolutionScore solution_score = model->evaluate({});
+    solution::SolutionScore solution_score = model->evaluate({});
 
     int update_status =
         incumbent_holder.try_update_incumbent(model, solution_score);
@@ -108,7 +109,7 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
     /**
      * Prepare the dual solution as lagrange multipliers.
      */
-    std::vector<model::ValueProxy<double>> dual_value_proxies =
+    std::vector<multi_array::ValueProxy<double>> dual_value_proxies =
         model->generate_constraint_parameter_proxies(0.0);
     bound_dual(model, &dual_value_proxies);
 
@@ -129,7 +130,7 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
     /**
      * Prepare historical solutions holder.
      */
-    std::vector<model::PlainSolution<T_Variable, T_Expression>>
+    std::vector<solution::PlainSolution<T_Variable, T_Expression>>
         historical_feasible_solutions;
 
     /**

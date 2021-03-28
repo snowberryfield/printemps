@@ -3,18 +3,22 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_SOLVER_SOLUTION_ARCHIVE_H__
-#define PRINTEMPS_SOLVER_SOLUTION_ARCHIVE_H__
+#ifndef PRINTEMPS_SOLUTION_SOLUTION_ARCHIVE_H__
+#define PRINTEMPS_SOLUTION_SOLUTION_ARCHIVE_H__
 
 namespace printemps {
-namespace solver {
+namespace solution {
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+class PlainSolution;
+
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class SolutionArchive {
    private:
     int  m_max_size;
     bool m_is_ascending;
-    std::vector<model::PlainSolution<T_Variable, T_Expression>>  //
+    std::vector<PlainSolution<T_Variable, T_Expression>>  //
         m_solutions;
 
     std::string m_name;
@@ -71,15 +75,15 @@ class SolutionArchive {
 
     /*************************************************************************/
     inline constexpr void push(
-        const model::PlainSolution<T_Variable, T_Expression>& a_SOLUTION) {
-        std::vector<model::PlainSolution<T_Variable, T_Expression>> solutions =
-            {a_SOLUTION};
+        const PlainSolution<T_Variable, T_Expression>& a_SOLUTION) {
+        std::vector<PlainSolution<T_Variable, T_Expression>> solutions = {
+            a_SOLUTION};
         this->push(solutions);
     }
 
     /*************************************************************************/
     constexpr void push(
-        const std::vector<model::PlainSolution<T_Variable, T_Expression>>&
+        const std::vector<PlainSolution<T_Variable, T_Expression>>&
             a_SOLUTIONS) {
         auto& solutions = m_solutions;
         solutions.insert(solutions.end(), a_SOLUTIONS.begin(),
@@ -140,8 +144,7 @@ class SolutionArchive {
     }
 
     /*************************************************************************/
-    inline constexpr const std::vector<
-        model::PlainSolution<T_Variable, T_Expression>>&
+    inline constexpr const std::vector<PlainSolution<T_Variable, T_Expression>>&
     solutions(void) const {
         return m_solutions;
     }
@@ -191,7 +194,7 @@ class SolutionArchive {
         ofs.close();
     }
 };
-}  // namespace solver
+}  // namespace solution
 }  // namespace printemps
 
 #endif
