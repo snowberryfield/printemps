@@ -25,47 +25,37 @@ constexpr bool compute_permissibility(
     const int                                           a_TABU_TENURE) {
     const auto &last_update_iterations = a_MEMORY.last_update_iterations();
 
-    switch (a_OPTION.tabu_search.tabu_mode) {
-        case TabuMode::All: {
-            /**
-             * "All" tabu mode
-             * The move is regarded as "tabu" if all of the variable to
-             * be altered are included in the tabu list.
-             */
-            for (const auto &alteration : a_MOVE.alterations) {
-                const int last_update_iteration =
-                    last_update_iterations[alteration.first->proxy_index()]
-                                          [alteration.first->flat_index()];
-                if (a_ITERATION - last_update_iteration >= a_TABU_TENURE) {
-                    return true;
-                }
+    if (a_OPTION.tabu_search.tabu_mode == TabuMode::All &&
+        a_MOVE.sense != neighborhood::MoveSense::Selection) {
+        /**
+         * "All" tabu mode
+         * The move is regarded as "tabu" if all of the variable to
+         * be altered are included in the tabu list.
+         */
+        for (const auto &alteration : a_MOVE.alterations) {
+            const int last_update_iteration =
+                last_update_iterations[alteration.first->proxy_index()]
+                                      [alteration.first->flat_index()];
+            if (a_ITERATION - last_update_iteration >= a_TABU_TENURE) {
+                return true;
             }
-            return false;
-            break;
         }
-        case TabuMode::Any: {
-            /**
-             * "Any" tabu mode
-             * The move is regarded as "tabu" if it includes any alteration
-             * about a variable in the tabu list.
-             */
-            for (const auto &alteration : a_MOVE.alterations) {
-                const int last_update_iteration =
-                    last_update_iterations[alteration.first->proxy_index()]
-                                          [alteration.first->flat_index()];
-                if (a_ITERATION - last_update_iteration < a_TABU_TENURE) {
-                    return false;
-                }
+        return false;
+    } else {
+        /**
+         * "Any" tabu mode
+         * The move is regarded as "tabu" if it includes any alteration
+         * about a variable in the tabu list.
+         */
+        for (const auto &alteration : a_MOVE.alterations) {
+            const int last_update_iteration =
+                last_update_iterations[alteration.first->proxy_index()]
+                                      [alteration.first->flat_index()];
+            if (a_ITERATION - last_update_iteration < a_TABU_TENURE) {
+                return false;
             }
-            return true;
-            break;
         }
-
-        default: {
-            throw std::logic_error(utility::format_error_location(
-                __FILE__, __LINE__, __func__,
-                "The specified tabu mode is invalid."));
-        }
+        return true;
     }
     /**
      * If the process is normal, this return statement is not reached.

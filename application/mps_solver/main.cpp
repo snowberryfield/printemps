@@ -37,10 +37,6 @@ int main([[maybe_unused]] int argc, char *argv[]) {
                "name."
             << std::endl;
         std::cout  //
-            << "  --separate: Separate equality constraints into lower "
-               "and upper constraints."
-            << std::endl;
-        std::cout  //
             << "  --accept-continuous: Accept continuous variables as integer "
                "variables."
             << std::endl;
@@ -55,8 +51,7 @@ int main([[maybe_unused]] int argc, char *argv[]) {
     std::string initial_solution_file_name;
     std::string mutable_variable_file_name;
     std::string fixed_variable_file_name;
-    bool        is_enabled_separate_equality = false;
-    bool        accept_continuous_variables  = false;
+    bool        accept_continuous_variables = false;
 
     std::vector<std::string> args(argv, argv + argc);
     int                      i = 1;
@@ -73,9 +68,6 @@ int main([[maybe_unused]] int argc, char *argv[]) {
         } else if (args[i] == "-f") {
             fixed_variable_file_name = args[i + 1];
             i += 2;
-        } else if (args[i] == "--separate") {
-            is_enabled_separate_equality = true;
-            i++;
         } else if (args[i] == "--accept-continuous") {
             accept_continuous_variables = true;
             i++;
@@ -98,7 +90,6 @@ int main([[maybe_unused]] int argc, char *argv[]) {
     printemps::utility::MPSReader mps_reader;
 
     auto &model = mps_reader.create_model_from_mps(mps_file_name,
-                                                   is_enabled_separate_equality,
                                                    accept_continuous_variables);
     model.set_name(printemps::utility::base_name(mps_file_name));
 

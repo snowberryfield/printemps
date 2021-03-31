@@ -201,10 +201,10 @@ constexpr int remove_redundant_constraints_with_tightening_variable_bounds(
             if ((constraint.sense() == model::ConstraintSense::Equal &&
                  mutable_variable_sensitivities.size() == 0 &&
                  fixed_term_value + constant_value == 0) ||
-                (constraint.sense() == model::ConstraintSense::Lower &&
+                (constraint.sense() == model::ConstraintSense::Less &&
                  mutable_term_upper_bound + fixed_term_value + constant_value <=
                      0) ||
-                (constraint.sense() == model::ConstraintSense::Upper &&
+                (constraint.sense() == model::ConstraintSense::Greater &&
                  mutable_term_lower_bound + fixed_term_value + constant_value >=
                      0)) {
                 utility::print_message("The redundant constraint " +
@@ -255,10 +255,10 @@ constexpr int remove_redundant_constraints_with_tightening_variable_bounds(
                         number_of_newly_disabled_constraints++;
                     }
                 } else if ((constraint.sense() ==
-                                model::ConstraintSense::Lower &&
+                                model::ConstraintSense::Less &&
                             coefficient > 0) ||
                            (constraint.sense() ==
-                                model::ConstraintSense::Upper &&
+                                model::ConstraintSense::Greater &&
                             coefficient < 0)) {
                     /**
                      * If the singleton constraint is defined by an
@@ -291,10 +291,10 @@ constexpr int remove_redundant_constraints_with_tightening_variable_bounds(
                     }
 
                 } else if ((constraint.sense() ==
-                                model::ConstraintSense::Upper &&
+                                model::ConstraintSense::Greater &&
                             coefficient > 0) ||
                            (constraint.sense() ==
-                                model::ConstraintSense::Lower &&
+                                model::ConstraintSense::Less &&
                             coefficient < 0)) {
                     /**
                      * If the singleton constraint is defined by an
@@ -341,7 +341,7 @@ constexpr int remove_redundant_constraints_with_tightening_variable_bounds(
                 auto lower_bound = variable_ptr->lower_bound();
                 auto upper_bound = variable_ptr->upper_bound();
 
-                if (constraint.sense() == model::ConstraintSense::Upper) {
+                if (constraint.sense() == model::ConstraintSense::Greater) {
                     auto bound_temp =
                         -(mutable_term_upper_bound - coefficient * upper_bound +
                           fixed_term_value + constant_value) /
@@ -357,8 +357,7 @@ constexpr int remove_redundant_constraints_with_tightening_variable_bounds(
                             a_IS_ENABLED_PRINT);
                         variable_ptr->set_bound(bound_ceil, upper_bound);
                     }
-                } else if (constraint.sense() ==
-                           model::ConstraintSense::Lower) {
+                } else if (constraint.sense() == model::ConstraintSense::Less) {
                     auto bound_temp =
                         -(mutable_term_lower_bound - coefficient * lower_bound +
                           fixed_term_value + constant_value) /
@@ -385,7 +384,7 @@ constexpr int remove_redundant_constraints_with_tightening_variable_bounds(
                 auto lower_bound = variable_ptr->lower_bound();
                 auto upper_bound = variable_ptr->upper_bound();
 
-                if (constraint.sense() == model::ConstraintSense::Upper) {
+                if (constraint.sense() == model::ConstraintSense::Greater) {
                     auto bound_temp =
                         -(mutable_term_upper_bound - coefficient * lower_bound +
                           fixed_term_value + constant_value) /
@@ -403,7 +402,7 @@ constexpr int remove_redundant_constraints_with_tightening_variable_bounds(
                     }
                 }
 
-                else if (constraint.sense() == model::ConstraintSense::Lower) {
+                else if (constraint.sense() == model::ConstraintSense::Less) {
                     auto bound_temp =
                         -(mutable_term_lower_bound - coefficient * upper_bound +
                           fixed_term_value + constant_value) /

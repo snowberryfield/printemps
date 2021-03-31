@@ -202,10 +202,9 @@ Result<T_Variable, T_Expression> solve(
      */
     for (auto&& proxy : model->constraint_proxies()) {
         for (auto&& constraint : proxy.flat_indexed_constraints()) {
-            constraint.local_penalty_coefficient() =
-                master_option.initial_penalty_coefficient;
             constraint.global_penalty_coefficient() =
                 master_option.initial_penalty_coefficient;
+            constraint.reset_local_penalty_coefficient();
         }
     }
 
@@ -958,33 +957,60 @@ Result<T_Variable, T_Expression> solve(
                          result_local_augmented_incumbent_objective;
 
             for (auto&& proxy : model->constraint_proxies()) {
+                const auto& constraint_values =
+                    result_local_augmented_incumbent_solution
+                        .constraint_value_proxies[proxy.index()]
+                        .flat_indexed_values();
+
                 const auto& violation_values =
                     result_local_augmented_incumbent_solution
                         .violation_value_proxies[proxy.index()]
                         .flat_indexed_values();
 
                 for (auto&& constraint : proxy.flat_indexed_constraints()) {
-                    double delta_penalty_constant =
-                        std::max(0.0, gap) / total_violation;
-                    double delta_penalty_proportional =
-                        std::max(0.0, gap) / total_squared_violation *
+                    double constraint_value =
+                        constraint_values[constraint.flat_index()];
+                    double violation_value =
                         violation_values[constraint.flat_index()];
+                    double delta_penalty_coefficient_constant =
+                        std::max(0.0, gap) / total_violation;
+                    double delta_penalty_coefficient_proportional =
+                        std::max(0.0, gap) / total_squared_violation *
+                        violation_value;
 
-                    constraint.local_penalty_coefficient() +=
-                        master_option.penalty_coefficient_tightening_rate *
-                        (balance * delta_penalty_constant +
-                         (1.0 - balance) * delta_penalty_proportional);
+                    double positive_part = std::max(constraint_value, 0.0);
+                    double negative_part = -std::min(constraint_value, 0.0);
+                    double delta_penalty_coefficient =
+                        (balance * delta_penalty_coefficient_constant +
+                         (1.0 - balance) *
+                             delta_penalty_coefficient_proportional);
+
+                    if (constraint.is_less_or_equal() && positive_part > 0) {
+                        constraint.local_penalty_coefficient_less() +=
+                            master_option.penalty_coefficient_tightening_rate *
+                            delta_penalty_coefficient;
+                    } else if (constraint.is_greater_or_equal() &&
+                               negative_part > 0) {
+                        constraint.local_penalty_coefficient_greater() +=
+                            master_option.penalty_coefficient_tightening_rate *
+                            delta_penalty_coefficient;
+                    }
                 }
 
                 if (master_option.is_enabled_grouping_penalty_coefficient) {
                     double max_local_penalty_coefficient = 0;
                     for (auto&& constraint : proxy.flat_indexed_constraints()) {
-                        max_local_penalty_coefficient =
-                            std::max(max_local_penalty_coefficient,
-                                     constraint.local_penalty_coefficient());
+                        max_local_penalty_coefficient = std::max(
+                            max_local_penalty_coefficient,
+                            constraint.local_penalty_coefficient_less());
+                        max_local_penalty_coefficient = std::max(
+                            max_local_penalty_coefficient,
+                            constraint.local_penalty_coefficient_greater());
                     }
                     for (auto&& constraint : proxy.flat_indexed_constraints()) {
-                        constraint.local_penalty_coefficient() =
+                        constraint.local_penalty_coefficient_less() =
+                            max_local_penalty_coefficient;
+                        constraint.local_penalty_coefficient_greater() =
                             max_local_penalty_coefficient;
                     }
                 }
@@ -994,8 +1020,11 @@ Result<T_Variable, T_Expression> solve(
                  * coefficient specified in option.
                  */
                 for (auto&& constraint : proxy.flat_indexed_constraints()) {
-                    constraint.local_penalty_coefficient() =
-                        std::min(constraint.local_penalty_coefficient(),
+                    constraint.local_penalty_coefficient_less() =
+                        std::min(constraint.local_penalty_coefficient_less(),
+                                 master_option.initial_penalty_coefficient);
+                    constraint.local_penalty_coefficient_greater() =
+                        std::min(constraint.local_penalty_coefficient_greater(),
                                  master_option.initial_penalty_coefficient);
                 }
             }
@@ -1017,14 +1046,24 @@ Result<T_Variable, T_Expression> solve(
             }
 
             for (auto&& proxy : model->constraint_proxies()) {
-                const auto& violation_values =
-                    current_solution.violation_value_proxies[proxy.index()]
+                const auto& constraint_values =
+                    current_solution.constraint_value_proxies[proxy.index()]
                         .flat_indexed_values();
 
                 for (auto&& constraint : proxy.flat_indexed_constraints()) {
-                    if (violation_values[constraint.flat_index()] <
-                        constant::EPSILON) {
-                        constraint.local_penalty_coefficient() *=
+                    double constraint_value =
+                        constraint_values[constraint.flat_index()];
+                    double positive_part = std::max(constraint_value, 0.0);
+                    double negative_part = -std::min(constraint_value, 0.0);
+
+                    if (constraint.is_less_or_equal() &&
+                        positive_part < constant::EPSILON) {
+                        constraint.local_penalty_coefficient_less() *=
+                            penalty_coefficient_relaxing_rate;
+                    }
+                    if (constraint.is_greater_or_equal() &&
+                        negative_part < constant::EPSILON) {
+                        constraint.local_penalty_coefficient_greater() *=
                             penalty_coefficient_relaxing_rate;
                     }
                 }

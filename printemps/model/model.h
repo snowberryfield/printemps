@@ -1479,9 +1479,6 @@ class Model {
     constexpr void update_variable_feasibility_improvability(
         const std::vector<Constraint<T_Variable, T_Expression> *>
             &a_CONSTRAINT_PTRS) const noexcept {
-        const int MASK_LOWER_OR_EQUAL = 0b10;
-        const int MASK_UPPER_OR_EQUAL = 0b11;
-
         const int CONSTRAINTS_SIZE = a_CONSTRAINT_PTRS.size();
         for (auto i = 0; i < CONSTRAINTS_SIZE; i++) {
             const auto constraint_ptr = a_CONSTRAINT_PTRS[i];
@@ -1496,7 +1493,7 @@ class Model {
             const auto &constraint_value = constraint_ptr->constraint_value();
 
             if (constraint_value > 0) {
-                if ((constraint_ptr->sense() & MASK_LOWER_OR_EQUAL) == 0) {
+                if (constraint_ptr->is_less_or_equal()) {
                     for (const auto &sensitivity : sensitivities) {
                         const auto &variable_ptr = sensitivity.first;
                         const auto &coefficient  = sensitivity.second;
@@ -1520,7 +1517,7 @@ class Model {
                     }
                 }
             } else if (constraint_value < 0) {
-                if ((constraint_ptr->sense() & MASK_UPPER_OR_EQUAL)) {
+                if (constraint_ptr->is_greater_or_equal()) {
                     for (const auto &sensitivity : sensitivities) {
                         const auto &variable_ptr = sensitivity.first;
                         const auto &coefficient  = sensitivity.second;
@@ -1597,15 +1594,30 @@ class Model {
                 if (!constraints[j].is_enabled()) {
                     continue;
                 }
-                double violation = constraints[j].evaluate_violation(a_MOVE);
+                double constraint_value =
+                    constraints[j].evaluate_constraint(a_MOVE);
+                double positive_part = std::max(constraint_value, 0.0);
+                double negative_part = -std::min(constraint_value, 0.0);
+                double violation     = 0.0;
+                double local_penalty_coefficient = 0.0;
+
+                if (constraints[j].is_less_or_equal() && positive_part > 0) {
+                    violation = positive_part;
+                    local_penalty_coefficient =
+                        constraints[j].local_penalty_coefficient_less();
+                } else if (constraints[j].is_greater_or_equal() &&
+                           negative_part > 0) {
+                    violation = negative_part;
+                    local_penalty_coefficient =
+                        constraints[j].local_penalty_coefficient_greater();
+                }
 
                 if (violation < constraints[j].violation_value()) {
                     is_feasibility_improvable = true;
                 }
 
                 total_violation += violation;
-                local_penalty +=
-                    violation * constraints[j].local_penalty_coefficient();
+                local_penalty += violation * local_penalty_coefficient;
                 global_penalty +=
                     violation * constraints[j].global_penalty_coefficient();
             }
@@ -1647,18 +1659,42 @@ class Model {
             if (!constraint_ptr->is_enabled()) {
                 continue;
             }
-            double violation_diff =
-                constraint_ptr->evaluate_violation_diff(a_MOVE);
-            total_violation += violation_diff;
 
-            if (violation_diff < 0) {
-                is_feasibility_improvable = true;
+            const double constraint_value =
+                constraint_ptr->evaluate_constraint(a_MOVE);
+            const double positive_part = std::max(constraint_value, 0.0);
+            const double negative_part = -std::min(constraint_value, 0.0);
+
+            if (constraint_ptr->is_less_or_equal()) {
+                const double violation_diff =
+                    positive_part - constraint_ptr->positive_part();
+                total_violation += violation_diff;
+
+                if (violation_diff < 0) {
+                    is_feasibility_improvable = true;
+                }
+
+                local_penalty +=
+                    violation_diff *
+                    constraint_ptr->local_penalty_coefficient_less();
+                global_penalty += violation_diff *
+                                  constraint_ptr->global_penalty_coefficient();
             }
+            if (constraint_ptr->is_greater_or_equal()) {
+                const double violation_diff =
+                    negative_part - constraint_ptr->negative_part();
+                total_violation += violation_diff;
 
-            local_penalty +=
-                violation_diff * constraint_ptr->local_penalty_coefficient();
-            global_penalty +=
-                violation_diff * constraint_ptr->global_penalty_coefficient();
+                if (violation_diff < 0) {
+                    is_feasibility_improvable = true;
+                }
+
+                local_penalty +=
+                    violation_diff *
+                    constraint_ptr->local_penalty_coefficient_greater();
+                global_penalty += violation_diff *
+                                  constraint_ptr->global_penalty_coefficient();
+            }
         }
 
         double objective             = 0.0;
@@ -1780,8 +1816,10 @@ class Model {
                 local_penalty_coefficient_proxy.flat_indexed_names(i) =
                     proxy.flat_indexed_constraints(i).name();
                 local_penalty_coefficient_proxy.flat_indexed_values(i) =
-                    proxy.flat_indexed_constraints(i)
-                        .local_penalty_coefficient();
+                    std::max(proxy.flat_indexed_constraints(i)
+                                 .local_penalty_coefficient_less(),
+                             proxy.flat_indexed_constraints(i)
+                                 .local_penalty_coefficient_less());
             }
             local_penalty_coefficient_proxies.push_back(
                 local_penalty_coefficient_proxy);

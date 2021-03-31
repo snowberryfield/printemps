@@ -101,10 +101,10 @@ class VariableBoundMoveGenerator
 
                         if ((binomials[i].sensitivity_second > 0 &&
                              binomials[i].sense ==
-                                 model::ConstraintSense::Lower) ||
+                                 model::ConstraintSense::Less) ||
                             (binomials[i].sensitivity_second < 0 &&
                              binomials[i].sense ==
-                                 model::ConstraintSense::Upper)) {
+                                 model::ConstraintSense::Greater)) {
                             target = static_cast<T_Variable>(
                                 std::floor(target_temp));
 
@@ -132,10 +132,10 @@ class VariableBoundMoveGenerator
 
                         if ((binomials[i].sensitivity_second > 0 &&
                              binomials[i].sense ==
-                                 model::ConstraintSense::Lower) ||
+                                 model::ConstraintSense::Less) ||
                             (binomials[i].sensitivity_second < 0 &&
                              binomials[i].sense ==
-                                 model::ConstraintSense::Upper)) {
+                                 model::ConstraintSense::Greater)) {
                             target = static_cast<T_Variable>(
                                 std::floor(target_temp));
 
@@ -163,10 +163,10 @@ class VariableBoundMoveGenerator
 
                         if ((binomials[i].sensitivity_first > 0 &&
                              binomials[i].sense ==
-                                 model::ConstraintSense::Lower) ||
+                                 model::ConstraintSense::Less) ||
                             (binomials[i].sensitivity_first < 0 &&
                              binomials[i].sense ==
-                                 model::ConstraintSense::Upper)) {
+                                 model::ConstraintSense::Greater)) {
                             target = static_cast<T_Variable>(
                                 std::floor(target_temp));
 
@@ -194,10 +194,10 @@ class VariableBoundMoveGenerator
 
                         if ((binomials[i].sensitivity_first > 0 &&
                              binomials[i].sense ==
-                                 model::ConstraintSense::Lower) ||
+                                 model::ConstraintSense::Less) ||
                             (binomials[i].sensitivity_first < 0 &&
                              binomials[i].sense ==
-                                 model::ConstraintSense::Upper)) {
+                                 model::ConstraintSense::Greater)) {
                             target = static_cast<T_Variable>(
                                 std::floor(target_temp));
 

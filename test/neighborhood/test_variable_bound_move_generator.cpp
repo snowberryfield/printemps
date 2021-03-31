@@ -20,7 +20,7 @@ class TestVariableBoundMoveGenerator : public ::testing::Test {
 
 /*****************************************************************************/
 TEST_F(TestVariableBoundMoveGenerator, setup) {
-    /// Lower
+    /// Less
     {
         printemps::model::Model<int, double> model;
 
@@ -87,7 +87,7 @@ TEST_F(TestVariableBoundMoveGenerator, setup) {
         EXPECT_TRUE(moves[3].related_constraint_ptrs.find(&c[0]) !=
                     moves[3].related_constraint_ptrs.end());
     }
-    /// Upper
+    /// Greater
     {
         printemps::model::Model<int, double> model;
 

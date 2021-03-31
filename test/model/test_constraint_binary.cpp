@@ -51,7 +51,7 @@ TEST_F(TestConstraintBinary, function_lower) {
         auto constraint = f <= target;
 
         EXPECT_FALSE(constraint.is_linear());
-        EXPECT_EQ(printemps::model::ConstraintSense::Lower, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Less, constraint.sense());
 
         auto value = random_integer();
         variable   = value;
@@ -65,7 +65,7 @@ TEST_F(TestConstraintBinary, function_lower) {
         auto constraint = target <= f;
 
         EXPECT_FALSE(constraint.is_linear());
-        EXPECT_EQ(printemps::model::ConstraintSense::Lower, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Less, constraint.sense());
 
         auto value = random_integer();
         variable   = value;
@@ -141,7 +141,8 @@ TEST_F(TestConstraintBinary, function_upper) {
         auto constraint = f >= target;
 
         EXPECT_FALSE(constraint.is_linear());
-        EXPECT_EQ(printemps::model::ConstraintSense::Upper, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Greater,
+                  constraint.sense());
 
         auto value = random_integer();
         variable   = value;
@@ -155,7 +156,8 @@ TEST_F(TestConstraintBinary, function_upper) {
         auto constraint = target >= f;
 
         EXPECT_FALSE(constraint.is_linear());
-        EXPECT_EQ(printemps::model::ConstraintSense::Upper, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Greater,
+                  constraint.sense());
 
         auto value = random_integer();
         variable   = value;
@@ -185,7 +187,7 @@ TEST_F(TestConstraintBinary, variable_lower) {
 
         EXPECT_EQ(0, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Lower, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Less, constraint.sense());
     }
 
     /// Variable <= Integer
@@ -194,7 +196,7 @@ TEST_F(TestConstraintBinary, variable_lower) {
 
         EXPECT_EQ(1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(-constant, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Lower, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Less, constraint.sense());
     }
 
     ///  Integer <= Variable
@@ -203,7 +205,7 @@ TEST_F(TestConstraintBinary, variable_lower) {
 
         EXPECT_EQ(-1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(constant, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Lower, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Less, constraint.sense());
     }
 
     /// Variable <= VariableProxy
@@ -214,7 +216,7 @@ TEST_F(TestConstraintBinary, variable_lower) {
         EXPECT_EQ(
             -1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Lower, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Less, constraint.sense());
     }
 
     /// VariableProxy <= Variable
@@ -225,7 +227,7 @@ TEST_F(TestConstraintBinary, variable_lower) {
             1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(-1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Lower, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Less, constraint.sense());
     }
 
     /// Variable <= Expression
@@ -234,7 +236,7 @@ TEST_F(TestConstraintBinary, variable_lower) {
 
         EXPECT_EQ(0, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Lower, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Less, constraint.sense());
     }
 
     /// Expression <= Variable
@@ -243,7 +245,7 @@ TEST_F(TestConstraintBinary, variable_lower) {
 
         EXPECT_EQ(0, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Lower, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Less, constraint.sense());
     }
 
     /// Variable <= ExpressionProxy
@@ -254,7 +256,7 @@ TEST_F(TestConstraintBinary, variable_lower) {
         EXPECT_EQ(
             -1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Lower, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Less, constraint.sense());
     }
 
     /// ExpressionProxy <= Variable
@@ -265,7 +267,7 @@ TEST_F(TestConstraintBinary, variable_lower) {
             1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(-1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Lower, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Less, constraint.sense());
     }
 }
 
@@ -393,7 +395,8 @@ TEST_F(TestConstraintBinary, variable_upper) {
 
         EXPECT_EQ(0, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Upper, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Greater,
+                  constraint.sense());
     }
 
     /// Variable >= Integer
@@ -402,7 +405,8 @@ TEST_F(TestConstraintBinary, variable_upper) {
 
         EXPECT_EQ(1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(-constant, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Upper, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Greater,
+                  constraint.sense());
     }
 
     ///  Integer >= Variable
@@ -411,7 +415,8 @@ TEST_F(TestConstraintBinary, variable_upper) {
 
         EXPECT_EQ(-1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(constant, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Upper, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Greater,
+                  constraint.sense());
     }
 
     /// Variable >= VariableProxy
@@ -422,7 +427,8 @@ TEST_F(TestConstraintBinary, variable_upper) {
         EXPECT_EQ(
             -1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Upper, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Greater,
+                  constraint.sense());
     }
 
     /// VariableProxy >= Variable
@@ -433,7 +439,8 @@ TEST_F(TestConstraintBinary, variable_upper) {
             1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(-1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Upper, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Greater,
+                  constraint.sense());
     }
 
     /// Variable >= Expression
@@ -442,7 +449,8 @@ TEST_F(TestConstraintBinary, variable_upper) {
 
         EXPECT_EQ(0, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Upper, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Greater,
+                  constraint.sense());
     }
 
     /// Expression >= Variable
@@ -451,7 +459,8 @@ TEST_F(TestConstraintBinary, variable_upper) {
 
         EXPECT_EQ(0, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Upper, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Greater,
+                  constraint.sense());
     }
 
     /// Variable >= ExpressionProxy
@@ -462,7 +471,8 @@ TEST_F(TestConstraintBinary, variable_upper) {
         EXPECT_EQ(
             -1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Upper, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Greater,
+                  constraint.sense());
     }
 
     /// ExpressionProxy >= Variable
@@ -473,7 +483,8 @@ TEST_F(TestConstraintBinary, variable_upper) {
             1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(-1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Upper, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Greater,
+                  constraint.sense());
     }
 }
 
@@ -498,7 +509,7 @@ TEST_F(TestConstraintBinary, variable_proxy_lower) {
         EXPECT_EQ(
             0, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Lower, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Less, constraint.sense());
     }
 
     /// VariableProxy <= Integer
@@ -508,7 +519,7 @@ TEST_F(TestConstraintBinary, variable_proxy_lower) {
         EXPECT_EQ(
             1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(-constant, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Lower, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Less, constraint.sense());
     }
 
     ///  Integer <= VariableProxy
@@ -518,7 +529,7 @@ TEST_F(TestConstraintBinary, variable_proxy_lower) {
         EXPECT_EQ(
             -1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(constant, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Lower, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Less, constraint.sense());
     }
 
     /// VariableProxy <= Variable
@@ -529,7 +540,7 @@ TEST_F(TestConstraintBinary, variable_proxy_lower) {
             1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(-1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Lower, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Less, constraint.sense());
     }
 
     /// Variable <= VariableProxy
@@ -540,7 +551,7 @@ TEST_F(TestConstraintBinary, variable_proxy_lower) {
         EXPECT_EQ(
             -1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Lower, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Less, constraint.sense());
     }
 
     /// VariableProxy <= Expression
@@ -551,7 +562,7 @@ TEST_F(TestConstraintBinary, variable_proxy_lower) {
             1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(-1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Lower, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Less, constraint.sense());
     }
 
     /// Expression <= VariableProxy
@@ -562,7 +573,7 @@ TEST_F(TestConstraintBinary, variable_proxy_lower) {
         EXPECT_EQ(
             -1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Lower, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Less, constraint.sense());
     }
 
     /// VariableProxy <= ExpressionProxy
@@ -572,7 +583,7 @@ TEST_F(TestConstraintBinary, variable_proxy_lower) {
         EXPECT_EQ(
             0, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Lower, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Less, constraint.sense());
     }
 
     /// ExpressionProxy <= VariableProxy
@@ -582,7 +593,7 @@ TEST_F(TestConstraintBinary, variable_proxy_lower) {
         EXPECT_EQ(
             0, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Lower, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Less, constraint.sense());
     }
 }
 
@@ -716,7 +727,8 @@ TEST_F(TestConstraintBinary, variable_proxy_upper) {
         EXPECT_EQ(
             0, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Upper, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Greater,
+                  constraint.sense());
     }
 
     /// VariableProxy >= Integer
@@ -726,7 +738,8 @@ TEST_F(TestConstraintBinary, variable_proxy_upper) {
         EXPECT_EQ(
             1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(-constant, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Upper, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Greater,
+                  constraint.sense());
     }
 
     ///  Integer >= VariableProxy
@@ -736,7 +749,8 @@ TEST_F(TestConstraintBinary, variable_proxy_upper) {
         EXPECT_EQ(
             -1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(constant, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Upper, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Greater,
+                  constraint.sense());
     }
 
     /// VariableProxy <= Variable
@@ -747,7 +761,8 @@ TEST_F(TestConstraintBinary, variable_proxy_upper) {
             1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(-1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Upper, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Greater,
+                  constraint.sense());
     }
 
     /// Variable <= VariableProxy
@@ -758,7 +773,8 @@ TEST_F(TestConstraintBinary, variable_proxy_upper) {
         EXPECT_EQ(
             -1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Upper, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Greater,
+                  constraint.sense());
     }
 
     /// VariableProxy >= Expression
@@ -769,7 +785,8 @@ TEST_F(TestConstraintBinary, variable_proxy_upper) {
             1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(-1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Upper, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Greater,
+                  constraint.sense());
     }
 
     /// Expression >= VariableProxy
@@ -780,7 +797,8 @@ TEST_F(TestConstraintBinary, variable_proxy_upper) {
         EXPECT_EQ(
             -1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Upper, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Greater,
+                  constraint.sense());
     }
 
     /// VariableProxy >= ExpressionProxy
@@ -790,7 +808,8 @@ TEST_F(TestConstraintBinary, variable_proxy_upper) {
         EXPECT_EQ(
             0, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Upper, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Greater,
+                  constraint.sense());
     }
 
     /// ExpressionProxy >= VariableProxy
@@ -800,7 +819,8 @@ TEST_F(TestConstraintBinary, variable_proxy_upper) {
         EXPECT_EQ(
             0, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Upper, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Greater,
+                  constraint.sense());
     }
 }
 
@@ -824,7 +844,7 @@ TEST_F(TestConstraintBinary, expression_lower) {
 
         EXPECT_EQ(0, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Lower, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Less, constraint.sense());
     }
 
     /// Expression <= Integer
@@ -833,7 +853,7 @@ TEST_F(TestConstraintBinary, expression_lower) {
 
         EXPECT_EQ(1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(-constant, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Lower, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Less, constraint.sense());
     }
 
     ///  Integer <= Expression
@@ -842,7 +862,7 @@ TEST_F(TestConstraintBinary, expression_lower) {
 
         EXPECT_EQ(-1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(constant, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Lower, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Less, constraint.sense());
     }
 
     /// Expression <= Variable
@@ -851,7 +871,7 @@ TEST_F(TestConstraintBinary, expression_lower) {
 
         EXPECT_EQ(0, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Lower, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Less, constraint.sense());
     }
 
     /// Variable <= Expression
@@ -860,7 +880,7 @@ TEST_F(TestConstraintBinary, expression_lower) {
 
         EXPECT_EQ(0, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Lower, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Less, constraint.sense());
     }
 
     /// Expression <= VariableProxy
@@ -871,7 +891,7 @@ TEST_F(TestConstraintBinary, expression_lower) {
         EXPECT_EQ(
             -1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Lower, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Less, constraint.sense());
     }
 
     /// VariableProxy <= Expression
@@ -882,7 +902,7 @@ TEST_F(TestConstraintBinary, expression_lower) {
             1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(-1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Lower, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Less, constraint.sense());
     }
 
     /// Expression <= ExpressionProxy
@@ -893,7 +913,7 @@ TEST_F(TestConstraintBinary, expression_lower) {
         EXPECT_EQ(
             -1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Lower, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Less, constraint.sense());
     }
 
     /// ExpressionProxy <= Expression
@@ -904,7 +924,7 @@ TEST_F(TestConstraintBinary, expression_lower) {
             1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(-1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Lower, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Less, constraint.sense());
     }
 }
 
@@ -1032,7 +1052,8 @@ TEST_F(TestConstraintBinary, expression_upper) {
 
         EXPECT_EQ(0, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Upper, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Greater,
+                  constraint.sense());
     }
 
     /// Expression >= Integer
@@ -1041,7 +1062,8 @@ TEST_F(TestConstraintBinary, expression_upper) {
 
         EXPECT_EQ(1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(-constant, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Upper, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Greater,
+                  constraint.sense());
     }
 
     ///  Integer >= Expression
@@ -1050,7 +1072,8 @@ TEST_F(TestConstraintBinary, expression_upper) {
 
         EXPECT_EQ(-1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(constant, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Upper, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Greater,
+                  constraint.sense());
     }
 
     /// Expression >= Variable
@@ -1059,7 +1082,8 @@ TEST_F(TestConstraintBinary, expression_upper) {
 
         EXPECT_EQ(0, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Upper, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Greater,
+                  constraint.sense());
     }
 
     /// Variable >= Expression
@@ -1068,7 +1092,8 @@ TEST_F(TestConstraintBinary, expression_upper) {
 
         EXPECT_EQ(0, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Upper, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Greater,
+                  constraint.sense());
     }
 
     /// Expression >= VariableProxy
@@ -1079,7 +1104,8 @@ TEST_F(TestConstraintBinary, expression_upper) {
         EXPECT_EQ(
             -1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Upper, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Greater,
+                  constraint.sense());
     }
 
     /// VariableProxy >= Expression
@@ -1090,7 +1116,8 @@ TEST_F(TestConstraintBinary, expression_upper) {
             1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(-1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Upper, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Greater,
+                  constraint.sense());
     }
 
     /// Expression >= ExpressionProxy
@@ -1101,7 +1128,8 @@ TEST_F(TestConstraintBinary, expression_upper) {
         EXPECT_EQ(
             -1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Upper, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Greater,
+                  constraint.sense());
     }
 
     /// ExpressionProxy >= Expression
@@ -1112,7 +1140,8 @@ TEST_F(TestConstraintBinary, expression_upper) {
             1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(-1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Upper, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Greater,
+                  constraint.sense());
     }
 }
 
@@ -1137,7 +1166,7 @@ TEST_F(TestConstraintBinary, expression_proxy_lower) {
         EXPECT_EQ(
             0, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Lower, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Less, constraint.sense());
     }
 
     /// ExpressionProxy <= Integer
@@ -1147,7 +1176,7 @@ TEST_F(TestConstraintBinary, expression_proxy_lower) {
         EXPECT_EQ(
             1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(-constant, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Lower, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Less, constraint.sense());
     }
 
     ///  Integer <= ExpressionProxy
@@ -1157,7 +1186,7 @@ TEST_F(TestConstraintBinary, expression_proxy_lower) {
         EXPECT_EQ(
             -1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(constant, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Lower, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Less, constraint.sense());
     }
 
     /// ExpressionProxy <= Variable
@@ -1168,7 +1197,7 @@ TEST_F(TestConstraintBinary, expression_proxy_lower) {
             1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(-1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Lower, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Less, constraint.sense());
     }
 
     /// Variable <= ExpressionProxy
@@ -1179,7 +1208,7 @@ TEST_F(TestConstraintBinary, expression_proxy_lower) {
         EXPECT_EQ(
             -1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Lower, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Less, constraint.sense());
     }
 
     /// ExpressionProxy <= Expression
@@ -1190,7 +1219,7 @@ TEST_F(TestConstraintBinary, expression_proxy_lower) {
             1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(-1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Lower, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Less, constraint.sense());
     }
 
     /// Expression <= ExpressionProxy
@@ -1201,7 +1230,7 @@ TEST_F(TestConstraintBinary, expression_proxy_lower) {
         EXPECT_EQ(
             -1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Lower, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Less, constraint.sense());
     }
 }
 
@@ -1315,7 +1344,8 @@ TEST_F(TestConstraintBinary, expression_proxy_upper) {
         EXPECT_EQ(
             0, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Upper, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Greater,
+                  constraint.sense());
     }
 
     /// ExpressionProxy >= Integer
@@ -1325,7 +1355,8 @@ TEST_F(TestConstraintBinary, expression_proxy_upper) {
         EXPECT_EQ(
             1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(-constant, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Upper, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Greater,
+                  constraint.sense());
     }
 
     ///  Integer >= ExpressionProxy
@@ -1335,7 +1366,8 @@ TEST_F(TestConstraintBinary, expression_proxy_upper) {
         EXPECT_EQ(
             -1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(constant, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Upper, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Greater,
+                  constraint.sense());
     }
 
     /// ExpressionProxy >= Variable
@@ -1346,7 +1378,8 @@ TEST_F(TestConstraintBinary, expression_proxy_upper) {
             1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(-1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Upper, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Greater,
+                  constraint.sense());
     }
 
     /// Variable >= ExpressionProxy
@@ -1357,7 +1390,8 @@ TEST_F(TestConstraintBinary, expression_proxy_upper) {
         EXPECT_EQ(
             -1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Upper, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Greater,
+                  constraint.sense());
     }
 
     /// ExpressionProxy >= Expression
@@ -1368,7 +1402,8 @@ TEST_F(TestConstraintBinary, expression_proxy_upper) {
             1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(-1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Upper, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Greater,
+                  constraint.sense());
     }
 
     /// Expression >= ExpressionProxy
@@ -1379,7 +1414,8 @@ TEST_F(TestConstraintBinary, expression_proxy_upper) {
         EXPECT_EQ(
             -1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Upper, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Greater,
+                  constraint.sense());
     }
 }
 
