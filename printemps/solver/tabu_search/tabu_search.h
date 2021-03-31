@@ -78,8 +78,6 @@ TabuSearchResult<T_Variable, T_Expression> solve(
         incumbent_holder.try_update_incumbent(model, current_solution_score);
     int total_update_status = IncumbentHolderConstant::STATUS_NO_UPDATED;
 
-    double initial_objective = current_solution_score.objective;
-
     /**
      * Reset the last update iterations.
      */
@@ -197,16 +195,6 @@ TabuSearchResult<T_Variable, T_Expression> solve(
             termination_status = TabuSearchTerminationStatus::EARLY_STOP;
             break;
         }
-
-        /*
-                if (initial_objective <
-                        incumbent_holder.global_augmented_incumbent_score().objective
-           && incumbent_holder.local_augmented_incumbent_score().objective >
-                        incumbent_holder.global_augmented_incumbent_score().objective)
-           { termination_status = TabuSearchTerminationStatus::EARLY_STOP;
-                    break;
-                }
-                */
 
         /**
          * Update the moves.
