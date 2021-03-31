@@ -12,22 +12,11 @@ namespace {
 /*****************************************************************************/
 class TestAbstractMultiArray : public ::testing::Test {
    protected:
-    printemps::utility::IntegerUniformRandom m_random_integer;
-    printemps::utility::IntegerUniformRandom m_random_positive_integer;
-
     virtual void SetUp(void) {
-        m_random_integer.setup(-1000, 1000, 0);
-        m_random_positive_integer.setup(1, 1000, 0);
+        /// nothing to do
     }
     virtual void TearDown() {
         /// nothing to do
-    }
-    int random_integer(void) {
-        return m_random_integer.generate_random();
-    }
-
-    int random_positive_integer(void) {
-        return m_random_positive_integer.generate_random();
     }
 };
 

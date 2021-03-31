@@ -1964,8 +1964,8 @@ TEST_F(TestModel, evaluate) {
         [[maybe_unused]] auto& h =
             model.create_constraint("h", x(0) + x(1) <= 1);
 
-        g(0).local_penalty_coefficient() = 100;
-        h(0).local_penalty_coefficient() = 100;
+        g(0).local_penalty_coefficient_less() = 100;
+        h(0).local_penalty_coefficient_less() = 100;
 
         g(0).global_penalty_coefficient() = 10000;
         h(0).global_penalty_coefficient() = 10000;
@@ -2112,8 +2112,8 @@ TEST_F(TestModel, evaluate) {
         [[maybe_unused]] auto& h =
             model.create_constraint("h", x(0) + x(1) <= 1);
 
-        g(0).local_penalty_coefficient() = 100;
-        h(0).local_penalty_coefficient() = 100;
+        g(0).local_penalty_coefficient_less() = 100;
+        h(0).local_penalty_coefficient_less() = 100;
 
         g(0).global_penalty_coefficient() = 10000;
         h(0).global_penalty_coefficient() = 10000;

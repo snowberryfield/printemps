@@ -41,6 +41,7 @@ include(test_presolver.cmake)
 include(test_verifier.cmake)
 include(test_utility.cmake)
 include(test_solver.cmake)
+include(test_solution.cmake)
 
 ###############################################################################
 ## END

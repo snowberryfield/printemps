@@ -35,11 +35,11 @@ void bound_dual(
                     flat_index);
 
             switch (constraint.sense()) {
-                case model::ConstraintSense::Lower: {
+                case model::ConstraintSense::Less: {
                     lagrange_multiplier = std::max(lagrange_multiplier, 0.0);
                     break;
                 }
-                case model::ConstraintSense::Upper: {
+                case model::ConstraintSense::Greater: {
                     lagrange_multiplier = std::min(lagrange_multiplier, 0.0);
                     break;
                 }

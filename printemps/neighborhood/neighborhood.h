@@ -25,9 +25,8 @@ namespace neighborhood {
 template <class T_Variable, class T_Expression>
 class Neighborhood {
    private:
-    BinaryMoveGenerator<T_Variable, T_Expression>  m_binary;
-    IntegerMoveGenerator<T_Variable, T_Expression> m_integer;
-
+    BinaryMoveGenerator<T_Variable, T_Expression>        m_binary;
+    IntegerMoveGenerator<T_Variable, T_Expression>       m_integer;
     AggregationMoveGenerator<T_Variable, T_Expression>   m_aggregation;
     PrecedenceMoveGenerator<T_Variable, T_Expression>    m_precedence;
     VariableBoundMoveGenerator<T_Variable, T_Expression> m_variable_bound;

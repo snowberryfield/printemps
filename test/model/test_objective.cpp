@@ -264,8 +264,8 @@ TEST_F(TestObjective, evaluate_expression_arg_move) {
 
 /*****************************************************************************/
 TEST_F(TestObjective, update_arg_void) {
-    /// This method is tested in evaluate_function_arg_voindex() and
-    /// tested in evaluate_expression_arg_voindex().
+    /// This method is tested in evaluate_function_arg_void() and
+    /// tested in evaluate_expression_arg_void().
 }
 
 /*****************************************************************************/
