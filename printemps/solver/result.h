@@ -9,11 +9,14 @@
 namespace printemps {
 namespace solver {
 /*****************************************************************************/
+struct Status;
+
+/*****************************************************************************/
 template <class T_Variable, class T_Expression>
 struct Result {
-    model::NamedSolution<T_Variable, T_Expression> solution;
-    Status                                         status;
-    SolutionArchive<T_Variable, T_Expression>      solution_archive;
+    solution::NamedSolution<T_Variable, T_Expression>   solution;
+    Status                                              status;
+    solution::SolutionArchive<T_Variable, T_Expression> solution_archive;
 
     /*************************************************************************/
     Result(void) {

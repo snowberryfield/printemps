@@ -6,10 +6,6 @@
 #ifndef PRINTEMPS_SOLVER_TABU_SEARCH_TABU_SEARCH_H__
 #define PRINTEMPS_SOLVER_TABU_SEARCH_TABU_SEARCH_H__
 
-#ifdef _OPENMP
-#include <omp.h>
-#endif
-
 #include "../memory.h"
 #include "tabu_search_move_score.h"
 #include "tabu_search_option.h"
@@ -29,12 +25,12 @@ namespace tabu_search {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 TabuSearchResult<T_Variable, T_Expression> solve(
-    model::Model<T_Variable, T_Expression>* a_model,   //
-    const Option&                           a_OPTION,  //
-    const std::vector<model::ValueProxy<T_Variable>>&  //
-        a_INITIAL_VARIABLE_VALUE_PROXIES,              //
-    const IncumbentHolder<T_Variable, T_Expression>&   //
-                 a_INCUMBENT_HOLDER,                   //
+    model::Model<T_Variable, T_Expression>* a_model,         //
+    const Option&                           a_OPTION,        //
+    const std::vector<multi_array::ValueProxy<T_Variable>>&  //
+        a_INITIAL_VARIABLE_VALUE_PROXIES,                    //
+    const IncumbentHolder<T_Variable, T_Expression>&         //
+                 a_INCUMBENT_HOLDER,                         //
     const Memory a_MEMORY) {
     /**
      * Define type aliases.
@@ -42,7 +38,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     using Model_T           = model::Model<T_Variable, T_Expression>;
     using Result_T          = TabuSearchResult<T_Variable, T_Expression>;
     using IncumbentHolder_T = IncumbentHolder<T_Variable, T_Expression>;
-    using Move_T            = model::Move<T_Variable, T_Expression>;
+    using Move_T            = neighborhood::Move<T_Variable, T_Expression>;
     using MoveScore         = TabuSearchMoveScore;
 
     /**
@@ -75,8 +71,8 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     model->import_variable_values(a_INITIAL_VARIABLE_VALUE_PROXIES);
     model->update();
 
-    model::SolutionScore current_solution_score = model->evaluate({});
-    model::SolutionScore previous_solution_score;
+    solution::SolutionScore current_solution_score = model->evaluate({});
+    solution::SolutionScore previous_solution_score;
 
     int update_status =
         incumbent_holder.try_update_incumbent(model, current_solution_score);
@@ -91,7 +87,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
      * Set up the tabu tenure and related parameters.
      */
     int original_tabu_tenure = std::min(option.tabu_search.initial_tabu_tenure,
-                                        model->number_of_not_fixed_variables());
+                                        model->number_of_mutable_variables());
     int tabu_tenure          = original_tabu_tenure;
 
     double bias_previous       = 0.0;
@@ -104,7 +100,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     /**
      * Prepare historical solutions holder.
      */
-    std::vector<model::PlainSolution<T_Variable, T_Expression>>
+    std::vector<solution::PlainSolution<T_Variable, T_Expression>>
         historical_feasible_solutions;
 
     /**
@@ -117,8 +113,8 @@ TabuSearchResult<T_Variable, T_Expression> solve(
      * Prepare other local variables.
      */
 
-    std::vector<model::SolutionScore> trial_solution_scores;
-    std::vector<MoveScore>            trial_move_scores;
+    std::vector<solution::SolutionScore> trial_solution_scores;
+    std::vector<MoveScore>               trial_move_scores;
 
     std::vector<double> objective_improvements;
     std::vector<double> local_penalties;
@@ -136,8 +132,8 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     TabuSearchTerminationStatus termination_status =
         TabuSearchTerminationStatus::ITERATION_OVER;
 
-    model::Move<T_Variable, T_Expression> previous_move;
-    model::Move<T_Variable, T_Expression> current_move;
+    neighborhood::Move<T_Variable, T_Expression> previous_move;
+    neighborhood::Move<T_Variable, T_Expression> current_move;
 
     bool is_few_permissible_neighborhood = false;
     bool is_found_new_feasible_solution  = false;
@@ -216,8 +212,8 @@ TabuSearchResult<T_Variable, T_Expression> solve(
              * If the option improvability_screening_mode is not None,
              * only improvable moves will be generated.
              */
-            auto changed_variable_ptrs =
-                utility::to_vector(model::related_variable_ptrs(current_move));
+            auto changed_variable_ptrs = utility::to_vector(
+                neighborhood::related_variable_ptrs(current_move));
             auto changed_constraint_ptrs =
                 utility::to_vector(current_move.related_constraint_ptrs);
 
@@ -580,12 +576,12 @@ TabuSearchResult<T_Variable, T_Expression> solve(
          * Register a chain move.
          */
         if (iteration > 0 && option.is_enabled_chain_move) {
-            if ((previous_move.sense == model::MoveSense::Binary &&
-                 current_move.sense == model::MoveSense::Binary &&
+            if ((previous_move.sense == neighborhood::MoveSense::Binary &&
+                 current_move.sense == neighborhood::MoveSense::Binary &&
                  previous_move.alterations.front().second !=
                      current_move.alterations.front().second) ||
-                (previous_move.sense == model::MoveSense::Chain &&
-                 current_move.sense == model::MoveSense::Chain)) {
+                (previous_move.sense == neighborhood::MoveSense::Chain &&
+                 current_move.sense == neighborhood::MoveSense::Chain)) {
                 Move_T chain_move;
                 if (previous_move.alterations.front().first <
                     current_move.alterations.front().first)
@@ -596,13 +592,14 @@ TabuSearchResult<T_Variable, T_Expression> solve(
 
                 if (chain_move.overlap_rate >
                         option.chain_move_overlap_rate_threshold &&
-                    !model::has_duplicate_variable(chain_move)) {
+                    !neighborhood::has_duplicate_variable(chain_move)) {
                     auto back_chain_move = chain_move;
                     for (auto&& alteration : back_chain_move.alterations) {
                         alteration.second = 1 - alteration.second;
                     }
-                    model->neighborhood().register_chain_move(chain_move);
-                    model->neighborhood().register_chain_move(back_chain_move);
+                    model->neighborhood().chain().register_move(chain_move);
+                    model->neighborhood().chain().register_move(
+                        back_chain_move);
                 }
             }
         }
@@ -643,7 +640,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                         bias_increase_count = 0;
                         tabu_tenure =
                             std::min(tabu_tenure + 1,
-                                     model->number_of_not_fixed_variables());
+                                     model->number_of_mutable_variables());
                         last_tabu_tenure_updated_iteration = iteration;
                         utility::print_debug("Tabu tenure increased: " +
                                                  std::to_string(tabu_tenure) +

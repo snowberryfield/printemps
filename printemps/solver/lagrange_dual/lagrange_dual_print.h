@@ -41,7 +41,7 @@ template <class T_Variable, class T_Expression>
 inline void print_table_initial(
     const model::Model<T_Variable, T_Expression> *a_MODEL,
     const double a_LAGRANGIAN, const double a_STEP_SIZE,
-    const model::SolutionScore &                     a_CURRENT_SOLUTION_SCORE,
+    const solution::SolutionScore &                  a_CURRENT_SOLUTION_SCORE,
     const IncumbentHolder<T_Variable, T_Expression> &a_INCUMBENT_HOLDER,
     const bool                                       a_IS_ENABLED_PRINT) {
     if (!a_IS_ENABLED_PRINT) {
@@ -67,7 +67,7 @@ inline void print_table_body(
     const int                                     a_ITERATION,               //
     const double                                  a_LAGRANGIAN,              //
     const double                                  a_STEP_SIZE,               //
-    const model::SolutionScore &                  a_CURRENT_SOLUTION_SCORE,  //
+    const solution::SolutionScore &               a_CURRENT_SOLUTION_SCORE,  //
     const int                                     a_STATUS,                  //
     const IncumbentHolder<T_Variable, T_Expression> &a_INCUMBENT_HOLDER,
     const bool                                       a_IS_ENABLED_PRINT) {

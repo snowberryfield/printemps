@@ -9,15 +9,12 @@
 namespace printemps {
 namespace model {
 /*****************************************************************************/
-/**
- * NOTE: The enum ConstraintSense is defined as an unscoped enumeration type for
- * bitwise calculations in Model.update_variable_feasibility_improvability().
- * */
-enum ConstraintSense : int {
-    Lower,  // <= target
-    Equal,  // = target
-    Upper   // >= target
+enum class ConstraintSense {
+    Less,    // <= target
+    Equal,   // = target
+    Greater  // >= target
 };
+
 }  // namespace model
 }  // namespace printemps
 #endif

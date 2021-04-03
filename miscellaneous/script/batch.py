@@ -8,23 +8,24 @@
 import subprocess
 import json
 import argparse
+import numpy as np
 
 ###############################################################################
 
 
-def run_batch(executable, mps_list, option_file_name,
-              is_enabled_separate_equality):
+def run_batch(executable, mps_list, option_file_name):
     results = []
     index = 0
+    print('-----+-------------+----------+-------------+-------------+-----------+--------')
+    print(
+        ' no. | name        | feasible |   objective |  known best | violation | time[s]')
+    print('-----+-------------+----------+-------------+-------------+-----------+--------')
+
     for mps in mps_list:
         commands = [executable, mps]
-        if (is_enabled_separate_equality):
-            commands.append('--separate')
         if (option_file_name):
             commands.append('-p')
             commands.append(option_file_name)
-
-        print('#{} Solving'.format(index) + mps + '...')
         subprocess.run(commands)
 
         with open('status.json', 'r') as f:
@@ -50,15 +51,15 @@ def run_batch(executable, mps_list, option_file_name,
             }
         }
         results.append(result)
-        print('  n.variables:{0}, n.constraints:{1}, is_feasible:{2}, objective:{3}, total violation:{4}, elapsed time[sec]:{5}'.format(
-            status['number_of_variables'],
-            status['number_of_constraints'],
-            status['is_found_feasible_solution'],
-            incumbent['objective'],
-            incumbent['total_violation'],
-            status['elapsed_time']
+        print(' {0:03d} | {1:11s} | {2:8s} | {3:11.4e} | {4:11.4e} | {5:9.3e} | {6:7.1f}'.format(
+            index,
+            result['instance']['name'][:11],
+            'Yes' if result['computed']['is_found_feasible_solution'] == 1 else 'No',
+            np.nan if result['computed']['objective'] == 'N/A' else result['computed']['objective'],
+            np.nan,
+            np.nan if result['computed']['total_violation'] == 'N/A' else result['computed']['total_violation'],
+            np.nan if result['computed']['elapsed_time'] == 'N/A' else result['computed']['elapsed_time']
         ))
-        print()
         index += 1
 
     return results
@@ -111,9 +112,6 @@ def main():
     parser.add_argument('-p', '--option',
                         help='specify the option file name.',
                         type=str)
-    parser.add_argument('--separate',
-                        help='separate equality constraints into lower and upper constraints.',
-                        action='store_true')
     args = parser.parse_args()
 
     mps_list_file_name = args.mps_list
@@ -123,8 +121,7 @@ def main():
 
     results = run_batch(args.executable,
                         mps_list,
-                        args.option,
-                        args.separate)
+                        args.option)
 
     with open('batch_result.json', 'w') as f:
         json.dump(results, f, indent=4)

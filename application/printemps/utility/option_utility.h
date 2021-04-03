@@ -155,12 +155,6 @@ printemps::solver::Option read_option(const std::string &a_FILE_NAME) {
               option_object);
 
     /**********************************************************************/
-    /// is_enabled_exclusive_move
-    read_json(&option.is_enabled_exclusive_move,  //
-              "is_enabled_exclusive_move",        //
-              option_object);
-
-    /**********************************************************************/
     /// is_enabled_chain_move
     read_json(&option.is_enabled_chain_move,  //
               "is_enabled_chain_move",        //

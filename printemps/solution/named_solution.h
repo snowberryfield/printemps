@@ -3,39 +3,37 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_MODEL_NAMED_SOLUTION_H__
-#define PRINTEMPS_MODEL_NAMED_SOLUTION_H__
-
-#include <vector>
-#include <iostream>
-#include <fstream>
-#include <unordered_map>
+#ifndef PRINTEMPS_SOLUTION_NAMED_SOLUTION_H__
+#define PRINTEMPS_SOLUTION_NAMED_SOLUTION_H__
 
 namespace printemps {
-namespace model {
+namespace multi_array {
 /*****************************************************************************/
 template <class T_Value>
 class ValueProxy;
+}  // namespace multi_array
+}  // namespace printemps
 
-/*****************************************************************************/
-template <class T_Variable, class T_Expression>
-class Model;
-
+namespace printemps {
+namespace solution {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class NamedSolution {
-    friend class Model<T_Variable, T_Expression>;
+    friend class model::Model<T_Variable, T_Expression>;
 
    private:
-    std::unordered_map<std::string, ValueProxy<T_Variable>>
+    std::unordered_map<std::string, multi_array::ValueProxy<T_Variable>>
         m_variable_value_proxies;
-    std::unordered_map<std::string, ValueProxy<T_Expression>>
+    std::unordered_map<std::string, multi_array::ValueProxy<T_Expression>>
         m_expression_value_proxies;
-    std::unordered_map<std::string, ValueProxy<T_Expression>>
+    std::unordered_map<std::string, multi_array::ValueProxy<T_Expression>>
         m_constraint_value_proxies;
-    std::unordered_map<std::string, ValueProxy<T_Expression>>
+    std::unordered_map<std::string, multi_array::ValueProxy<T_Expression>>
         m_violation_value_proxies;
 
+    std::string  m_name;
+    int          m_number_of_variables;
+    int          m_number_of_constraints;
     T_Expression m_objective;
     T_Expression m_total_violation;
     bool         m_is_feasible;
@@ -84,8 +82,7 @@ class NamedSolution {
     }
 
     /*************************************************************************/
-    void write_json_by_name(const std::string&  a_FILE_NAME,
-                            const ModelSummary& a_MODEL_SUMMARY) const {
+    void write_json_by_name(const std::string& a_FILE_NAME) const {
         int indent_level = 0;
 
         std::ofstream ofs(a_FILE_NAME.c_str());
@@ -97,15 +94,15 @@ class NamedSolution {
             << "\"" << constant::VERSION << "\"," << std::endl;
 
         ofs << utility::indent_spaces(indent_level) << "\"name\" : "
-            << "\"" << a_MODEL_SUMMARY.name << "\"," << std::endl;
+            << "\"" << m_name << "\"," << std::endl;
 
         ofs << utility::indent_spaces(indent_level)
-            << "\"number_of_variables\" : "
-            << a_MODEL_SUMMARY.number_of_variables << "," << std::endl;
+            << "\"number_of_variables\" : " << m_number_of_variables << ","
+            << std::endl;
 
         ofs << utility::indent_spaces(indent_level)
-            << "\"number_of_constraints\" : "
-            << a_MODEL_SUMMARY.number_of_constraints << "," << std::endl;
+            << "\"number_of_constraints\" : " << m_number_of_constraints << ","
+            << std::endl;
 
         ofs << utility::indent_spaces(indent_level)
             << "\"is_feasible\" : " << (m_is_feasible ? "true," : "false,")
@@ -158,8 +155,7 @@ class NamedSolution {
     }
 
     /*************************************************************************/
-    void write_json_by_array(const std::string&  a_FILE_NAME,
-                             const ModelSummary& a_MODEL_SUMMARY) const {
+    void write_json_by_array(const std::string& a_FILE_NAME) const {
         int indent_level = 0;
 
         std::ofstream ofs(a_FILE_NAME.c_str());
@@ -171,15 +167,15 @@ class NamedSolution {
             << "\"" << constant::VERSION << "\"," << std::endl;
 
         ofs << utility::indent_spaces(indent_level) << "\"name\" : "
-            << "\"" << a_MODEL_SUMMARY.name << "\"," << std::endl;
+            << "\"" << m_name << "\"," << std::endl;
 
         ofs << utility::indent_spaces(indent_level)
-            << "\"number_of_variables\" : "
-            << a_MODEL_SUMMARY.number_of_variables << "," << std::endl;
+            << "\"number_of_variables\" : " << m_number_of_variables << ","
+            << std::endl;
 
         ofs << utility::indent_spaces(indent_level)
-            << "\"number_of_constraints\" : "
-            << a_MODEL_SUMMARY.number_of_constraints << "," << std::endl;
+            << "\"number_of_constraints\" : " << m_number_of_constraints << ","
+            << std::endl;
 
         ofs << utility::indent_spaces(indent_level)
             << "\"is_feasible\" : " << (m_is_feasible ? "true," : "false,")
@@ -253,53 +249,53 @@ class NamedSolution {
     }
 
     /*************************************************************************/
-    inline constexpr const std::unordered_map<std::string,
-                                              ValueProxy<T_Variable>>&
+    inline constexpr const std::unordered_map<
+        std::string, multi_array::ValueProxy<T_Variable>>&
     variables(void) const {
         return m_variable_value_proxies;
     }
 
     /*************************************************************************/
-    inline constexpr const ValueProxy<T_Variable>& variables(
+    inline constexpr const multi_array::ValueProxy<T_Variable>& variables(
         const std::string& a_NAME) const {
         return m_variable_value_proxies.at(a_NAME);
     }
 
     /*************************************************************************/
-    inline constexpr const std::unordered_map<std::string,
-                                              ValueProxy<T_Expression>>&
+    inline constexpr const std::unordered_map<
+        std::string, multi_array::ValueProxy<T_Expression>>&
     expressions(void) const {
         return m_expression_value_proxies;
     }
 
     /*************************************************************************/
-    inline constexpr const ValueProxy<T_Expression>& expressions(
+    inline constexpr const multi_array::ValueProxy<T_Expression>& expressions(
         const std::string& a_NAME) const {
         return m_expression_value_proxies.at(a_NAME);
     }
 
     /*************************************************************************/
-    inline constexpr const std::unordered_map<std::string,
-                                              ValueProxy<T_Expression>>&
+    inline constexpr const std::unordered_map<
+        std::string, multi_array::ValueProxy<T_Expression>>&
     constraints(void) const {
         return m_constraint_value_proxies;
     }
 
     /*************************************************************************/
-    inline constexpr const ValueProxy<T_Expression>& constraints(
+    inline constexpr const multi_array::ValueProxy<T_Expression>& constraints(
         const std::string& a_NAME) const {
         return m_constraint_value_proxies.at(a_NAME);
     }
 
     /*************************************************************************/
-    inline constexpr const std::unordered_map<std::string,
-                                              ValueProxy<T_Expression>>&
+    inline constexpr const std::unordered_map<
+        std::string, multi_array::ValueProxy<T_Expression>>&
     violations(void) const {
         return m_violation_value_proxies;
     }
 
     /*************************************************************************/
-    inline constexpr const ValueProxy<T_Expression>& violations(
+    inline constexpr const multi_array::ValueProxy<T_Expression>& violations(
         const std::string& a_NAME) const {
         return m_violation_value_proxies.at(a_NAME);
     }
@@ -320,7 +316,7 @@ class NamedSolution {
     }
 };
 using IPNamedSolution = NamedSolution<int, double>;
-}  // namespace model
+}  // namespace solution
 }  // namespace printemps
 #endif
 /*****************************************************************************/

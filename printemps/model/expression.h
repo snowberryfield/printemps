@@ -6,13 +6,16 @@
 #ifndef PRINTEMPS_MODEL_EXPRESSION_H__
 #define PRINTEMPS_MODEL_EXPRESSION_H__
 
-#include <vector>
-#include <unordered_map>
-
+#include "../multi_array/abstract_multi_array_element.h"
 #include "../utility/utility.h"
 
-#include "abstract_multi_array_element.h"
-#include "move.h"
+namespace printemps {
+namespace neighborhood {
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+struct Move;
+}  // namespace neighborhood
+}  // namespace printemps
 
 namespace printemps {
 namespace model {
@@ -35,7 +38,7 @@ struct ExpressionConstant {
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-class Expression : public AbstractMultiArrayElement {
+class Expression : public multi_array::AbstractMultiArrayElement {
     /**
      * [Access controls for special member functions]
      *  -- Default constructor : default, private
@@ -135,7 +138,7 @@ class Expression : public AbstractMultiArrayElement {
 
     /*************************************************************************/
     void initialize(void) {
-        AbstractMultiArrayElement::initialize();
+        multi_array::AbstractMultiArrayElement::initialize();
         m_constant_value = 0;
         m_value          = 0;
         m_is_enabled     = true;
@@ -186,7 +189,8 @@ class Expression : public AbstractMultiArrayElement {
 
     /*************************************************************************/
     inline constexpr T_Expression evaluate(
-        const Move<T_Variable, T_Expression> &a_MOVE) const noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
+        const noexcept {
         /// The following code is required for nonlinear objective functions.
 #ifndef _MPS_SOLVER
         if (a_MOVE.alterations.size() == 0) {
@@ -208,7 +212,8 @@ class Expression : public AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr void update(const Move<T_Variable, T_Expression> &a_MOVE) {
+    inline constexpr void update(
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) {
         m_value = this->evaluate(a_MOVE);
     }
 

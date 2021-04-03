@@ -6,17 +6,13 @@
 #ifndef PRINTEMPS_SOLVER_H__
 #define PRINTEMPS_SOLVER_H__
 
-#include <iostream>
-#include <cstdlib>
-#include <random>
-
 #include "../model/model.h"
 #include "../utility/utility.h"
+#include "../solution/solution_archive.h"
 
 #include "incumbent_holder.h"
 #include "option.h"
 #include "status.h"
-#include "solution_archive.h"
 #include "result.h"
 #include "tabu_search/tabu_search.h"
 #include "local_search/local_search.h"
@@ -68,7 +64,7 @@ Result<T_Variable, T_Expression> solve(
      * Define type aliases.
      */
     using Model_T           = model::Model<T_Variable, T_Expression>;
-    using Solution_T        = model::Solution<T_Variable, T_Expression>;
+    using Solution_T        = solution::Solution<T_Variable, T_Expression>;
     using IncumbentHolder_T = IncumbentHolder<T_Variable, T_Expression>;
 
     /**
@@ -128,19 +124,10 @@ Result<T_Variable, T_Expression> solve(
                  master_option.is_enabled_aggregation_move,
                  master_option.is_enabled_precedence_move,
                  master_option.is_enabled_variable_bound_move,
-                 master_option.is_enabled_exclusive_move,
                  master_option.is_enabled_user_defined_move,
                  master_option.is_enabled_chain_move,
                  master_option.selection_mode,
                  master_option.verbose >= Verbose::Outer);
-
-    /**
-     * Print the problem size.
-     */
-    if (master_option.verbose >= Verbose::Outer) {
-        model->print_number_of_variables();
-        model->print_number_of_constraints();
-    }
 
     /**
      * Print the problem size.
@@ -170,29 +157,28 @@ Result<T_Variable, T_Expression> solve(
      * be enabled when optimization stagnates.
      */
     if (master_option.is_enabled_binary_move) {
-        model->neighborhood().enable_binary_move();
+        model->neighborhood().binary().enable();
     }
 
     if (master_option.is_enabled_integer_move) {
-        model->neighborhood().enable_integer_move();
+        model->neighborhood().integer().enable();
     }
 
     if (master_option.is_enabled_user_defined_move) {
-        model->neighborhood().enable_user_defined_move();
+        model->neighborhood().user_defined().enable();
     }
 
     if (master_option.selection_mode != model::SelectionMode::None) {
-        model->neighborhood().enable_selection_move();
+        model->neighborhood().selection().enable();
     }
 
     /**
      * Check whether there exist special neighborhood moves or not.
      */
     bool has_special_neighborhood_moves =
-        (model->neighborhood().aggregation_moves().size() +
-         model->neighborhood().precedence_moves().size() +
-         model->neighborhood().variable_bound_moves().size() +
-         model->neighborhood().exclusive_moves().size()) > 0;
+        (model->neighborhood().aggregation().moves().size() +
+         model->neighborhood().precedence().moves().size() +
+         model->neighborhood().variable_bound().moves().size()) > 0;
 
     if (master_option.is_enabled_chain_move) {
         has_special_neighborhood_moves = true;
@@ -208,10 +194,9 @@ Result<T_Variable, T_Expression> solve(
      */
     for (auto&& proxy : model->constraint_proxies()) {
         for (auto&& constraint : proxy.flat_indexed_constraints()) {
-            constraint.local_penalty_coefficient() =
-                master_option.initial_penalty_coefficient;
             constraint.global_penalty_coefficient() =
                 master_option.initial_penalty_coefficient;
+            constraint.reset_local_penalty_coefficient();
         }
     }
 
@@ -223,9 +208,12 @@ Result<T_Variable, T_Expression> solve(
     /**
      * Prepare feasible solutions archive.
      */
-    SolutionArchive<T_Variable, T_Expression>  //
-        solution_archive(master_option.historical_data_capacity,
-                         model->is_minimization());
+    solution::SolutionArchive<T_Variable, T_Expression>           //
+        solution_archive(master_option.historical_data_capacity,  //
+                         model->is_minimization(),                //
+                         model->name(),                           //
+                         model->number_of_variables(),            //
+                         model->number_of_constraints());
 
     /**
      * Compute the values of expressions, constraints, and the objective
@@ -240,8 +228,8 @@ Result<T_Variable, T_Expression> solve(
     Solution_T        previous_solution;
     IncumbentHolder_T incumbent_holder;
 
-    model::SolutionScore current_solution_score = model->evaluate({});
-    model::SolutionScore previous_solution_score;
+    solution::SolutionScore current_solution_score = model->evaluate({});
+    solution::SolutionScore previous_solution_score;
 
     [[maybe_unused]] int update_status = incumbent_holder.try_update_incumbent(
         current_solution, current_solution_score);
@@ -308,7 +296,7 @@ Result<T_Variable, T_Expression> solve(
                 /**
                  * Prepare the initial variable values.
                  */
-                std::vector<model::ValueProxy<T_Variable>>
+                std::vector<multi_array::ValueProxy<T_Variable>>
                     initial_variable_value_proxies =
                         current_solution.variable_value_proxies;
 
@@ -436,7 +424,7 @@ Result<T_Variable, T_Expression> solve(
             /**
              * Prepare the initial variable values.
              */
-            std::vector<model::ValueProxy<T_Variable>>
+            std::vector<multi_array::ValueProxy<T_Variable>>
                 initial_variable_value_proxies =
                     current_solution.variable_value_proxies;
 
@@ -616,7 +604,7 @@ Result<T_Variable, T_Expression> solve(
         /**
          * Prepare the initial variable values.
          */
-        std::vector<model::ValueProxy<T_Variable>>
+        std::vector<multi_array::ValueProxy<T_Variable>>
             initial_variable_value_proxies =
                 current_solution.variable_value_proxies;
 
@@ -661,8 +649,8 @@ Result<T_Variable, T_Expression> solve(
          * Reset the penalty coefficients if the incumbent solution was not
          * updated for specified count of loops.
          */
-        if ((update_status && (IncumbentHolderConstant::
-                                   STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE))) {
+        if ((update_status & (IncumbentHolderConstant::
+                                  STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE))) {
             /**
              * Reset the count of loops with no-update if the incumbent solution
              * was updated.
@@ -961,33 +949,61 @@ Result<T_Variable, T_Expression> solve(
                          result_local_augmented_incumbent_objective;
 
             for (auto&& proxy : model->constraint_proxies()) {
+                const auto& constraint_values =
+                    result_local_augmented_incumbent_solution
+                        .constraint_value_proxies[proxy.index()]
+                        .flat_indexed_values();
+
                 const auto& violation_values =
                     result_local_augmented_incumbent_solution
                         .violation_value_proxies[proxy.index()]
                         .flat_indexed_values();
 
                 for (auto&& constraint : proxy.flat_indexed_constraints()) {
-                    double delta_penalty_constant =
-                        std::max(0.0, gap) / total_violation;
-                    double delta_penalty_proportional =
-                        std::max(0.0, gap) / total_squared_violation *
+                    double constraint_value =
+                        constraint_values[constraint.flat_index()];
+                    double violation_value =
                         violation_values[constraint.flat_index()];
+                    double delta_penalty_coefficient_constant =
+                        std::max(0.0, gap) / total_violation;
+                    double delta_penalty_coefficient_proportional =
+                        std::max(0.0, gap) / total_squared_violation *
+                        violation_value;
 
-                    constraint.local_penalty_coefficient() +=
-                        master_option.penalty_coefficient_tightening_rate *
-                        (balance * delta_penalty_constant +
-                         (1.0 - balance) * delta_penalty_proportional);
+                    double positive_part = std::max(constraint_value, 0.0);
+                    double negative_part = -std::min(constraint_value, 0.0);
+                    double delta_penalty_coefficient =
+                        (balance * delta_penalty_coefficient_constant +
+                         (1.0 - balance) *
+                             delta_penalty_coefficient_proportional);
+
+                    if (constraint.is_less_or_equal() &&
+                        positive_part > constant::EPSILON) {
+                        constraint.local_penalty_coefficient_less() +=
+                            master_option.penalty_coefficient_tightening_rate *
+                            delta_penalty_coefficient;
+                    } else if (constraint.is_greater_or_equal() &&
+                               negative_part > constant::EPSILON) {
+                        constraint.local_penalty_coefficient_greater() +=
+                            master_option.penalty_coefficient_tightening_rate *
+                            delta_penalty_coefficient;
+                    }
                 }
 
                 if (master_option.is_enabled_grouping_penalty_coefficient) {
                     double max_local_penalty_coefficient = 0;
                     for (auto&& constraint : proxy.flat_indexed_constraints()) {
-                        max_local_penalty_coefficient =
-                            std::max(max_local_penalty_coefficient,
-                                     constraint.local_penalty_coefficient());
+                        max_local_penalty_coefficient = std::max(
+                            max_local_penalty_coefficient,
+                            constraint.local_penalty_coefficient_less());
+                        max_local_penalty_coefficient = std::max(
+                            max_local_penalty_coefficient,
+                            constraint.local_penalty_coefficient_greater());
                     }
                     for (auto&& constraint : proxy.flat_indexed_constraints()) {
-                        constraint.local_penalty_coefficient() =
+                        constraint.local_penalty_coefficient_less() =
+                            max_local_penalty_coefficient;
+                        constraint.local_penalty_coefficient_greater() =
                             max_local_penalty_coefficient;
                     }
                 }
@@ -997,8 +1013,11 @@ Result<T_Variable, T_Expression> solve(
                  * coefficient specified in option.
                  */
                 for (auto&& constraint : proxy.flat_indexed_constraints()) {
-                    constraint.local_penalty_coefficient() =
-                        std::min(constraint.local_penalty_coefficient(),
+                    constraint.local_penalty_coefficient_less() =
+                        std::min(constraint.local_penalty_coefficient_less(),
+                                 master_option.initial_penalty_coefficient);
+                    constraint.local_penalty_coefficient_greater() =
+                        std::min(constraint.local_penalty_coefficient_greater(),
                                  master_option.initial_penalty_coefficient);
                 }
             }
@@ -1020,14 +1039,24 @@ Result<T_Variable, T_Expression> solve(
             }
 
             for (auto&& proxy : model->constraint_proxies()) {
-                const auto& violation_values =
-                    current_solution.violation_value_proxies[proxy.index()]
+                const auto& constraint_values =
+                    current_solution.constraint_value_proxies[proxy.index()]
                         .flat_indexed_values();
 
                 for (auto&& constraint : proxy.flat_indexed_constraints()) {
-                    if (violation_values[constraint.flat_index()] <
-                        constant::EPSILON) {
-                        constraint.local_penalty_coefficient() *=
+                    double constraint_value =
+                        constraint_values[constraint.flat_index()];
+                    double positive_part = std::max(constraint_value, 0.0);
+                    double negative_part = -std::min(constraint_value, 0.0);
+
+                    if (constraint.is_less_or_equal() &&
+                        positive_part < constant::EPSILON) {
+                        constraint.local_penalty_coefficient_less() *=
+                            penalty_coefficient_relaxing_rate;
+                    }
+                    if (constraint.is_greater_or_equal() &&
+                        negative_part < constant::EPSILON) {
+                        constraint.local_penalty_coefficient_greater() *=
                             penalty_coefficient_relaxing_rate;
                     }
                 }
@@ -1044,24 +1073,24 @@ Result<T_Variable, T_Expression> solve(
                     STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
                 inital_tabu_tenure =
                     std::min(master_option.tabu_search.initial_tabu_tenure,
-                             model->number_of_not_fixed_variables());
+                             model->number_of_mutable_variables());
             } else if (result.total_update_status ==
                        IncumbentHolderConstant::STATUS_NO_UPDATED) {
                 inital_tabu_tenure = std::max(
                     option.tabu_search.initial_tabu_tenure - 1,
                     std::min(master_option.tabu_search.initial_tabu_tenure,
-                             model->number_of_not_fixed_variables()));
+                             model->number_of_mutable_variables()));
             } else if (result.tabu_tenure >
                        option.tabu_search.initial_tabu_tenure) {
                 inital_tabu_tenure =
                     std::min(option.tabu_search.initial_tabu_tenure + 1,
-                             model->number_of_not_fixed_variables());
+                             model->number_of_mutable_variables());
 
             } else {
                 inital_tabu_tenure = std::max(
                     option.tabu_search.initial_tabu_tenure - 1,
                     std::min(master_option.tabu_search.initial_tabu_tenure,
-                             model->number_of_not_fixed_variables()));
+                             model->number_of_mutable_variables()));
             }
         } else {
             inital_tabu_tenure = master_option.tabu_search.initial_tabu_tenure;
@@ -1147,7 +1176,7 @@ Result<T_Variable, T_Expression> solve(
         if (result.total_update_status &
             IncumbentHolderConstant::STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
             if (option.is_enabled_chain_move) {
-                model->neighborhood().clear_chain_moves();
+                model->neighborhood().chain().clear_moves();
             }
         }
 
@@ -1165,40 +1194,32 @@ Result<T_Variable, T_Expression> solve(
              */
             /// Aggregation
             if (master_option.is_enabled_aggregation_move) {
-                if (model->neighborhood().is_enabled_aggregation_move()) {
-                    model->neighborhood().disable_aggregation_move();
+                if (model->neighborhood().aggregation().is_enabled()) {
+                    model->neighborhood().aggregation().disable();
                     is_deactivated_special_neighborhood_move = true;
                 }
             }
 
             /// Precedence
             if (master_option.is_enabled_precedence_move) {
-                if (model->neighborhood().is_enabled_precedence_move()) {
-                    model->neighborhood().disable_precedence_move();
+                if (model->neighborhood().precedence().is_enabled()) {
+                    model->neighborhood().precedence().disable();
                     is_deactivated_special_neighborhood_move = true;
                 }
             }
 
             /// Variable Bound
             if (master_option.is_enabled_variable_bound_move) {
-                if (model->neighborhood().is_enabled_variable_bound_move()) {
-                    model->neighborhood().disable_variable_bound_move();
-                    is_deactivated_special_neighborhood_move = true;
-                }
-            }
-
-            /// Exclusive
-            if (master_option.is_enabled_exclusive_move) {
-                if (model->neighborhood().is_enabled_exclusive_move()) {
-                    model->neighborhood().disable_exclusive_move();
+                if (model->neighborhood().variable_bound().is_enabled()) {
+                    model->neighborhood().variable_bound().disable();
                     is_deactivated_special_neighborhood_move = true;
                 }
             }
 
             /// Chain
             if (master_option.is_enabled_chain_move) {
-                if (model->neighborhood().is_enabled_chain_move()) {
-                    model->neighborhood().disable_chain_move();
+                if (model->neighborhood().chain().is_enabled()) {
+                    model->neighborhood().chain().disable();
                     is_deactivated_special_neighborhood_move = true;
                 }
             }
@@ -1212,41 +1233,32 @@ Result<T_Variable, T_Expression> solve(
                 master_option.tabu_search.iteration_max) {
                 /// Aggregation
                 if (master_option.is_enabled_aggregation_move) {
-                    if (!model->neighborhood().is_enabled_aggregation_move()) {
-                        model->neighborhood().enable_aggregation_move();
+                    if (!model->neighborhood().aggregation().is_enabled()) {
+                        model->neighborhood().aggregation().enable();
                         is_activated_special_neighborhood_move = true;
                     }
                 }
 
                 /// Precedence
                 if (master_option.is_enabled_precedence_move) {
-                    if (!model->neighborhood().is_enabled_precedence_move()) {
-                        model->neighborhood().enable_precedence_move();
+                    if (!model->neighborhood().precedence().is_enabled()) {
+                        model->neighborhood().precedence().enable();
                         is_activated_special_neighborhood_move = true;
                     }
                 }
 
                 /// Variable Bound
                 if (master_option.is_enabled_variable_bound_move) {
-                    if (!model->neighborhood()
-                             .is_enabled_variable_bound_move()) {
-                        model->neighborhood().enable_variable_bound_move();
-                        is_activated_special_neighborhood_move = true;
-                    }
-                }
-
-                /// Exclusive
-                if (master_option.is_enabled_exclusive_move) {
-                    if (!model->neighborhood().is_enabled_exclusive_move()) {
-                        model->neighborhood().enable_exclusive_move();
+                    if (!model->neighborhood().variable_bound().is_enabled()) {
+                        model->neighborhood().variable_bound().enable();
                         is_activated_special_neighborhood_move = true;
                     }
                 }
 
                 /// Chain
                 if (master_option.is_enabled_chain_move) {
-                    if (!model->neighborhood().is_enabled_chain_move()) {
-                        model->neighborhood().enable_chain_move();
+                    if (!model->neighborhood().chain().is_enabled()) {
+                        model->neighborhood().chain().enable();
                         is_activated_special_neighborhood_move = true;
                     }
                 }
@@ -1256,26 +1268,26 @@ Result<T_Variable, T_Expression> solve(
         /**
          * Sort and deduplicate registered chain moves.
          */
-        if (model->neighborhood().is_enabled_chain_move() &&
+        if (model->neighborhood().chain().is_enabled() &&
             master_option.chain_move_capacity > 0) {
-            model->neighborhood().sort_chain_moves();
-            model->neighborhood().deduplicate_chain_moves();
+            model->neighborhood().chain().sort_moves();
+            model->neighborhood().chain().deduplicate_moves();
         }
 
         /**
          * Reduce the registered chain moves.
          */
-        if (static_cast<int>(model->neighborhood().chain_moves().size()) >
+        if (static_cast<int>(model->neighborhood().chain().moves().size()) >
             master_option.chain_move_capacity) {
             switch (master_option.chain_move_reduce_mode) {
                 case ChainMoveReduceMode::OverlapRate: {
-                    model->neighborhood().reduce_chain_moves(
+                    model->neighborhood().chain().reduce_moves(
                         master_option.chain_move_capacity);
                     break;
                 }
                 case ChainMoveReduceMode::Shuffle: {
-                    model->neighborhood().shuffle_chain_moves(&get_rand_mt);
-                    model->neighborhood().reduce_chain_moves(
+                    model->neighborhood().chain().shuffle_moves(&get_rand_mt);
+                    model->neighborhood().chain().reduce_moves(
                         master_option.chain_move_capacity);
                     break;
                 }
@@ -1527,10 +1539,11 @@ Result<T_Variable, T_Expression> solve(
         /**
          * Print the number of the stored chain moves.
          */
-        if (model->neighborhood().is_enabled_chain_move()) {
+        if (model->neighborhood().chain().is_enabled()) {
             utility::print_message(
                 "There are " +
-                    std::to_string(model->neighborhood().chain_moves().size()) +
+                    std::to_string(
+                        model->neighborhood().chain().moves().size()) +
                     " stored chain moves.",
                 master_option.verbose >= Verbose::Outer);
         }
@@ -1570,11 +1583,12 @@ Result<T_Variable, T_Expression> solve(
     /**
      * Export the final penalty coefficient values.
      */
-    std::unordered_map<std::string, model::ValueProxy<double>>
+    std::unordered_map<std::string, multi_array::ValueProxy<double>>
         named_penalty_coefficients;
 
-    std::vector<model::ValueProxy<double>> local_penalty_coefficient_proxies =
-        model->export_local_penalty_coefficient_proxies();
+    std::vector<multi_array::ValueProxy<double>>
+        local_penalty_coefficient_proxies =
+            model->export_local_penalty_coefficient_proxies();
 
     const int   CONSTRAINT_PROXIES_SIZE = model->constraint_proxies().size();
     const auto& constraint_names        = model->constraint_names();
@@ -1586,7 +1600,8 @@ Result<T_Variable, T_Expression> solve(
     /**
      * Export the final variable update counts.
      */
-    std::unordered_map<std::string, model::ValueProxy<int>> named_update_counts;
+    std::unordered_map<std::string, multi_array::ValueProxy<int>>
+                named_update_counts;
     const int   VARIABLE_PROXIES_SIZE = model->variable_proxies().size();
     const auto& variable_names        = model->variable_names();
 
@@ -1605,6 +1620,9 @@ Result<T_Variable, T_Expression> solve(
     result.status.is_found_feasible_solution = named_solution.is_feasible();
     result.status.start_date_time            = start_date_time;
     result.status.finish_date_time           = finish_date_time;
+    result.status.name                       = model->name();
+    result.status.number_of_variables        = model->number_of_variables();
+    result.status.number_of_constraints      = model->number_of_constraints();
     result.status.elapsed_time               = time_keeper.elapsed_time();
     result.status.number_of_lagrange_dual_iterations =
         number_of_lagrange_dual_iterations;

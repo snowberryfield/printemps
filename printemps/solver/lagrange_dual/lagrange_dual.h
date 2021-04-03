@@ -10,8 +10,6 @@
 #include "lagrange_dual_print.h"
 #include "lagrange_dual_result.h"
 
-#include <deque>
-
 namespace printemps {
 namespace solver {
 /*****************************************************************************/
@@ -24,8 +22,9 @@ struct Option;
 namespace lagrange_dual {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-void bound_dual(model::Model<T_Variable, T_Expression>* a_model,
-                std::vector<model::ValueProxy<double>>* a_dual_value_proxies) {
+void bound_dual(
+    model::Model<T_Variable, T_Expression>*       a_model,
+    std::vector<multi_array::ValueProxy<double>>* a_dual_value_proxies) {
     for (auto&& proxy : a_model->constraint_proxies()) {
         for (auto&& constraint : proxy.flat_indexed_constraints()) {
             int proxy_index = constraint.proxy_index();
@@ -36,11 +35,11 @@ void bound_dual(model::Model<T_Variable, T_Expression>* a_model,
                     flat_index);
 
             switch (constraint.sense()) {
-                case model::ConstraintSense::Lower: {
+                case model::ConstraintSense::Less: {
                     lagrange_multiplier = std::max(lagrange_multiplier, 0.0);
                     break;
                 }
-                case model::ConstraintSense::Upper: {
+                case model::ConstraintSense::Greater: {
                     lagrange_multiplier = std::min(lagrange_multiplier, 0.0);
                     break;
                 }
@@ -59,11 +58,11 @@ void bound_dual(model::Model<T_Variable, T_Expression>* a_model,
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 LagrangeDualResult<T_Variable, T_Expression> solve(
-    model::Model<T_Variable, T_Expression>* a_model,   //
-    const Option&                           a_OPTION,  //
-    const std::vector<model::ValueProxy<T_Variable>>&  //
-        a_INITIAL_VARIABLE_VALUE_PROXIES,              //
-    const IncumbentHolder<T_Variable, T_Expression>&   //
+    model::Model<T_Variable, T_Expression>* a_model,         //
+    const Option&                           a_OPTION,        //
+    const std::vector<multi_array::ValueProxy<T_Variable>>&  //
+        a_INITIAL_VARIABLE_VALUE_PROXIES,                    //
+    const IncumbentHolder<T_Variable, T_Expression>&         //
         a_INCUMBENT_HOLDER) {
     /**
      * Define type aliases.
@@ -96,7 +95,7 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
     /**
      * Initialize the solution and update the model.
      */
-    model::SolutionScore solution_score = model->evaluate({});
+    solution::SolutionScore solution_score = model->evaluate({});
 
     int update_status =
         incumbent_holder.try_update_incumbent(model, solution_score);
@@ -110,7 +109,7 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
     /**
      * Prepare the dual solution as lagrange multipliers.
      */
-    std::vector<model::ValueProxy<double>> dual_value_proxies =
+    std::vector<multi_array::ValueProxy<double>> dual_value_proxies =
         model->generate_constraint_parameter_proxies(0.0);
     bound_dual(model, &dual_value_proxies);
 
@@ -131,7 +130,7 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
     /**
      * Prepare historical solutions holder.
      */
-    std::vector<model::PlainSolution<T_Variable, T_Expression>>
+    std::vector<solution::PlainSolution<T_Variable, T_Expression>>
         historical_feasible_solutions;
 
     /**
@@ -238,19 +237,19 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
 
             if (coefficient > 0) {
                 if (model->is_minimization()) {
-                    variable_ptrs[i]->set_value_if_not_fixed(
+                    variable_ptrs[i]->set_value_if_mutable(
                         variable_ptrs[i]->lower_bound());
                 } else {
-                    variable_ptrs[i]->set_value_if_not_fixed(
+                    variable_ptrs[i]->set_value_if_mutable(
                         variable_ptrs[i]->upper_bound());
                 }
 
             } else {
                 if (model->is_minimization()) {
-                    variable_ptrs[i]->set_value_if_not_fixed(
+                    variable_ptrs[i]->set_value_if_mutable(
                         variable_ptrs[i]->upper_bound());
                 } else {
-                    variable_ptrs[i]->set_value_if_not_fixed(
+                    variable_ptrs[i]->set_value_if_mutable(
                         variable_ptrs[i]->lower_bound());
                 }
             }
