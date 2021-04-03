@@ -614,8 +614,8 @@ class Model {
                          const bool a_IS_ENABLED_AGGREGATION_MOVE,          //
                          const bool a_IS_ENABLED_PRECEDENCE_MOVE,           //
                          const bool a_IS_ENABLED_VARIABLE_BOUND_MOVE,       //
-                         const bool a_IS_ENABLED_CHAIN_MOVE,                //
                          const bool a_IS_ENABLED_USER_DEFINED_MOVE,         //
+                         const bool a_IS_ENABLED_CHAIN_MOVE,                //
                          const SelectionMode &a_SELECTION_MODE,             //
                          const bool           a_IS_ENABLED_PRINT) {
         verifier::verify_problem(this, a_IS_ENABLED_PRINT);
@@ -1092,8 +1092,8 @@ class Model {
         const bool a_IS_ENABLED_AGGREGATION_MOVE,     //
         const bool a_IS_ENABLED_PRECEDENCE_MOVE,      //
         const bool a_IS_ENABLED_VARIABLE_BOUND_MOVE,  //
-        const bool a_IS_ENABLED_CHAIN_MOVE,           //
         const bool a_IS_ENABLED_USER_DEFINED_MOVE,    //
+        const bool a_IS_ENABLED_CHAIN_MOVE,           //
         const bool a_IS_ENABLED_PRINT) {
         utility::print_single_line(a_IS_ENABLED_PRINT);
         utility::print_message("Detecting the neighborhood structure...",

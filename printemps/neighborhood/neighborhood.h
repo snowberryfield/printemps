@@ -81,8 +81,7 @@ class Neighborhood {
         auto number_of_candidate_moves = 0;
 
         for (auto &&move_generator_ptr : m_move_generator_ptrs) {
-            if (move_generator_ptr->moves().size() > 0 &&
-                move_generator_ptr->is_enabled()) {
+            if (move_generator_ptr->is_enabled()) {
                 move_generator_ptr->update_moves(
                     a_ACCEPT_ALL,                     //
                     a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
@@ -90,7 +89,7 @@ class Neighborhood {
                     a_IS_ENABLED_PARALLEL);
                 auto &flags = move_generator_ptr->flags();
                 number_of_candidate_moves +=
-                    std::count(flags.begin(), flags.end(), 1);
+                    std::accumulate(flags.begin(), flags.end(), 0);
             }
         }
 
