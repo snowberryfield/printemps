@@ -2700,8 +2700,9 @@ TEST_F(TestModel, export_plain_solution) {
 
     model.minimize(random_integer() * x.sum() + random_integer() * y.sum() +
                    random_integer() * z.sum());
+    model.setup_unique_name();
 
-    x = random_integer();
+    x = 10;
     for (auto i = 0; i < 10; i++) {
         y(i) = random_integer();
     }
@@ -2718,18 +2719,7 @@ TEST_F(TestModel, export_plain_solution) {
     EXPECT_EQ(model.objective().value(), plain_solution.objective);
     EXPECT_EQ(model.is_feasible(), plain_solution.is_feasible);
 
-    int index = 0;
-    EXPECT_EQ(x.value(), plain_solution.variables[index++]);
-
-    for (auto i = 0; i < 10; i++) {
-        EXPECT_EQ(y(i).value(), plain_solution.variables[index++]);
-    }
-
-    for (auto i = 0; i < 20; i++) {
-        for (auto j = 0; j < 30; j++) {
-            EXPECT_EQ(z(i, j).value(), plain_solution.variables[index++]);
-        }
-    }
+    EXPECT_EQ(10, plain_solution.variables["x"]);
 }
 
 /*****************************************************************************/
@@ -2759,8 +2749,9 @@ TEST_F(TestModel, convert_to_plain_solution) {
     }
     model.minimize(random_integer() * p + random_integer() * q.sum() +
                    random_integer() * r.sum());
+    model.setup_unique_name();
 
-    x = random_integer();
+    x = 10;
     for (auto i = 0; i < 10; i++) {
         y(i) = random_integer();
     }
@@ -2785,18 +2776,7 @@ TEST_F(TestModel, convert_to_plain_solution) {
     EXPECT_EQ(total_violation, plain_solution.total_violation);
     EXPECT_EQ(model.is_feasible(), plain_solution.is_feasible);
 
-    int index = 0;
-    EXPECT_EQ(x.value(), plain_solution.variables[index++]);
-
-    for (auto i = 0; i < 10; i++) {
-        EXPECT_EQ(y(i).value(), plain_solution.variables[index++]);
-    }
-
-    for (auto i = 0; i < 20; i++) {
-        for (auto j = 0; j < 30; j++) {
-            EXPECT_EQ(z(i, j).value(), plain_solution.variables[index++]);
-        }
-    }
+    EXPECT_EQ(10, plain_solution.variables["x"]);
 }
 
 /*****************************************************************************/
