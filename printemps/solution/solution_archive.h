@@ -180,7 +180,38 @@ class SolutionArchive {
         auto&     solutions      = this->m_solutions;
         const int SOLUTIONS_SIZE = solutions.size();
         for (auto i = 0; i < SOLUTIONS_SIZE; i++) {
-            solutions[i].write(&ofs, indent_level);
+            ofs << utility::indent_spaces(indent_level) << "{" << std::endl;
+            indent_level++;
+            ofs << utility::indent_spaces(indent_level) << "\"is_feasible\" : "
+                << (m_solutions[i].is_feasible ? "true," : "false,")
+                << std::endl;
+            ofs << utility::indent_spaces(indent_level)
+                << "\"objective\" : " << m_solutions[i].objective << ","
+                << std::endl;
+            ofs << utility::indent_spaces(indent_level)
+                << "\"total_violation\" : " << m_solutions[i].total_violation
+                << "," << std::endl;
+            ofs << utility::indent_spaces(indent_level) << "\"variables\" : {"
+                << std::endl;
+            indent_level++;
+
+            const auto& variables      = m_solutions[i].variables;
+            const int   VARIABLES_SIZE = variables.size();
+            int         count          = 0;
+            for (const auto& variable : variables) {
+                ofs << utility::indent_spaces(indent_level) << "\""
+                    << variable.first << "\" : " << variable.second;
+                count++;
+                if (count != VARIABLES_SIZE) {
+                    ofs << "," << std::endl;
+                } else {
+                    ofs << std::endl;
+                }
+            }
+            indent_level--;
+            ofs << utility::indent_spaces(indent_level) << "}" << std::endl;
+            indent_level--;
+            ofs << utility::indent_spaces(indent_level) << "}";
             if (i != SOLUTIONS_SIZE - 1) {
                 ofs << "," << std::endl;
             } else {

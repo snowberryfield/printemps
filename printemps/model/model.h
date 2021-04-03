@@ -1558,8 +1558,8 @@ class Model {
 
     /*************************************************************************/
     inline solution::SolutionScore evaluate(
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
-        noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
+        const noexcept {
         solution::SolutionScore score;
         this->evaluate(&score, a_MOVE);
         return score;
@@ -1575,10 +1575,9 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void evaluate(
-        solution::SolutionScore *                           a_score_ptr,  //
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
-        noexcept {
+    constexpr void evaluate(solution::SolutionScore *a_score_ptr,  //
+                            const neighborhood::Move<T_Variable, T_Expression>
+                                &a_MOVE) const noexcept {
         double total_violation = 0.0;
         double local_penalty   = 0.0;
         double global_penalty  = 0.0;
@@ -1926,7 +1925,10 @@ class Model {
         /// Decision variables
         for (const auto &proxy : m_variable_proxies) {
             for (const auto &variable : proxy.flat_indexed_variables()) {
-                plain_solution.variables.push_back(variable.value());
+                if (variable.value() != 0) {
+                    plain_solution.variables[variable.name()] =
+                        variable.value();
+                }
             }
         }
 
@@ -1951,9 +1953,12 @@ class Model {
         solution::PlainSolution<T_Variable, T_Expression> plain_solution;
 
         /// Decision variables
-        for (const auto &proxy : a_SOLUTION.variable_value_proxies) {
-            for (const auto &value : proxy.flat_indexed_values()) {
-                plain_solution.variables.push_back(value);
+        for (const auto &proxy : m_variable_proxies) {
+            for (const auto &variable : proxy.flat_indexed_variables()) {
+                if (variable.value() != 0) {
+                    plain_solution.variables[variable.name()] =
+                        variable.value();
+                }
             }
         }
 
