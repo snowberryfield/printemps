@@ -1492,7 +1492,7 @@ class Model {
                 constraint_ptr->expression().sensitivities();
             const auto &constraint_value = constraint_ptr->constraint_value();
 
-            if (constraint_value > 0) {
+            if (constraint_value > constant::EPSILON) {
                 if (constraint_ptr->is_less_or_equal()) {
                     for (const auto &sensitivity : sensitivities) {
                         const auto &variable_ptr = sensitivity.first;
@@ -1516,7 +1516,7 @@ class Model {
                         }
                     }
                 }
-            } else if (constraint_value < 0) {
+            } else if (constraint_value < -constant::EPSILON) {
                 if (constraint_ptr->is_greater_or_equal()) {
                     for (const auto &sensitivity : sensitivities) {
                         const auto &variable_ptr = sensitivity.first;
@@ -1558,8 +1558,8 @@ class Model {
 
     /*************************************************************************/
     inline solution::SolutionScore evaluate(
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
-        const noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
+        noexcept {
         solution::SolutionScore score;
         this->evaluate(&score, a_MOVE);
         return score;
@@ -1575,9 +1575,10 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void evaluate(solution::SolutionScore *a_score_ptr,  //
-                            const neighborhood::Move<T_Variable, T_Expression>
-                                &a_MOVE) const noexcept {
+    constexpr void evaluate(
+        solution::SolutionScore *                           a_score_ptr,  //
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
+        noexcept {
         double total_violation = 0.0;
         double local_penalty   = 0.0;
         double global_penalty  = 0.0;
