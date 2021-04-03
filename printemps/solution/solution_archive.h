@@ -3,19 +3,27 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_SOLVER_SOLUTION_ARCHIVE_H__
-#define PRINTEMPS_SOLVER_SOLUTION_ARCHIVE_H__
+#ifndef PRINTEMPS_SOLUTION_SOLUTION_ARCHIVE_H__
+#define PRINTEMPS_SOLUTION_SOLUTION_ARCHIVE_H__
 
 namespace printemps {
-namespace solver {
+namespace solution {
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+struct PlainSolution;
+
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class SolutionArchive {
    private:
     int  m_max_size;
     bool m_is_ascending;
-    std::vector<model::PlainSolution<T_Variable, T_Expression>>  //
+    std::vector<PlainSolution<T_Variable, T_Expression>>  //
         m_solutions;
+
+    std::string m_name;
+    int         m_number_of_variables;
+    int         m_number_of_constraints;
 
    public:
     /*************************************************************************/
@@ -29,8 +37,16 @@ class SolutionArchive {
     }
 
     /*************************************************************************/
-    SolutionArchive(const int a_MAX_SIZE, const bool a_is_ASCENDING) {
-        this->setup(a_MAX_SIZE, a_is_ASCENDING);
+    SolutionArchive(const int          a_MAX_SIZE,             //
+                    const bool         a_is_ASCENDING,         //
+                    const std::string& a_NAME,                 //
+                    const int          a_NUMBER_OF_VARIABLES,  //
+                    const int          a_NUMBER_OF_CONSTRAINTS) {
+        this->setup(a_MAX_SIZE,             //
+                    a_is_ASCENDING,         //
+                    a_NAME,                 //
+                    a_NUMBER_OF_VARIABLES,  //
+                    a_NUMBER_OF_CONSTRAINTS);
     }
 
     /*************************************************************************/
@@ -38,26 +54,36 @@ class SolutionArchive {
         m_max_size     = 0;
         m_is_ascending = true;
         m_solutions.clear();
+        m_name                  = "";
+        m_number_of_variables   = 0;
+        m_number_of_constraints = 0;
     }
 
     /*************************************************************************/
-    void setup(const int a_MAX_SIZE, const bool a_is_ASCENDING) {
+    void setup(const int          a_MAX_SIZE,             //
+               const bool         a_is_ASCENDING,         //
+               const std::string& a_NAME,                 //
+               const int          a_NUMBER_OF_VARIABLES,  //
+               const int          a_NUMBER_OF_CONSTRAINTS) {
         m_max_size     = a_MAX_SIZE;
         m_is_ascending = a_is_ASCENDING;
         m_solutions.clear();
+        m_name                  = a_NAME;
+        m_number_of_variables   = a_NUMBER_OF_VARIABLES;
+        m_number_of_constraints = a_NUMBER_OF_CONSTRAINTS;
     }
 
     /*************************************************************************/
     inline constexpr void push(
-        const model::PlainSolution<T_Variable, T_Expression>& a_SOLUTION) {
-        std::vector<model::PlainSolution<T_Variable, T_Expression>> solutions =
-            {a_SOLUTION};
+        const PlainSolution<T_Variable, T_Expression>& a_SOLUTION) {
+        std::vector<PlainSolution<T_Variable, T_Expression>> solutions = {
+            a_SOLUTION};
         this->push(solutions);
     }
 
     /*************************************************************************/
     constexpr void push(
-        const std::vector<model::PlainSolution<T_Variable, T_Expression>>&
+        const std::vector<PlainSolution<T_Variable, T_Expression>>&
             a_SOLUTIONS) {
         auto& solutions = m_solutions;
         solutions.insert(solutions.end(), a_SOLUTIONS.begin(),
@@ -103,16 +129,28 @@ class SolutionArchive {
     }
 
     /*************************************************************************/
-    inline constexpr const std::vector<
-        model::PlainSolution<T_Variable, T_Expression>>&
+    inline constexpr const std::string& name(void) const {
+        return m_name;
+    }
+
+    /*************************************************************************/
+    inline constexpr int number_of_variables(void) const {
+        return m_number_of_variables;
+    }
+
+    /*************************************************************************/
+    inline constexpr int number_of_constraints(void) const {
+        return m_number_of_constraints;
+    }
+
+    /*************************************************************************/
+    inline constexpr const std::vector<PlainSolution<T_Variable, T_Expression>>&
     solutions(void) const {
         return m_solutions;
     }
 
     /*************************************************************************/
-    void write_solutions_json(
-        const std::string&         a_FILE_NAME,
-        const model::ModelSummary& a_MODEL_SUMMARY) const {
+    void write_solutions_json(const std::string& a_FILE_NAME) const {
         int indent_level = 0;
 
         std::ofstream ofs(a_FILE_NAME.c_str());
@@ -124,15 +162,15 @@ class SolutionArchive {
             << "\"" << constant::VERSION << "\"," << std::endl;
 
         ofs << utility::indent_spaces(indent_level) << "\"name\" : "
-            << "\"" << a_MODEL_SUMMARY.name << "\"," << std::endl;
+            << "\"" << m_name << "\"," << std::endl;
 
         ofs << utility::indent_spaces(indent_level)
-            << "\"number_of_variables\" : "
-            << a_MODEL_SUMMARY.number_of_variables << "," << std::endl;
+            << "\"number_of_variables\" : " << m_number_of_variables << ","
+            << std::endl;
 
         ofs << utility::indent_spaces(indent_level)
-            << "\"number_of_constraints\" : "
-            << a_MODEL_SUMMARY.number_of_constraints << "," << std::endl;
+            << "\"number_of_constraints\" : " << m_number_of_constraints << ","
+            << std::endl;
 
         /// Solutions
         ofs << utility::indent_spaces(indent_level) << "\"solutions\": ["
@@ -142,7 +180,38 @@ class SolutionArchive {
         auto&     solutions      = this->m_solutions;
         const int SOLUTIONS_SIZE = solutions.size();
         for (auto i = 0; i < SOLUTIONS_SIZE; i++) {
-            solutions[i].write(&ofs, indent_level);
+            ofs << utility::indent_spaces(indent_level) << "{" << std::endl;
+            indent_level++;
+            ofs << utility::indent_spaces(indent_level) << "\"is_feasible\" : "
+                << (m_solutions[i].is_feasible ? "true," : "false,")
+                << std::endl;
+            ofs << utility::indent_spaces(indent_level)
+                << "\"objective\" : " << m_solutions[i].objective << ","
+                << std::endl;
+            ofs << utility::indent_spaces(indent_level)
+                << "\"total_violation\" : " << m_solutions[i].total_violation
+                << "," << std::endl;
+            ofs << utility::indent_spaces(indent_level) << "\"variables\" : {"
+                << std::endl;
+            indent_level++;
+
+            const auto& variables      = m_solutions[i].variables;
+            const int   VARIABLES_SIZE = variables.size();
+            int         count          = 0;
+            for (const auto& variable : variables) {
+                ofs << utility::indent_spaces(indent_level) << "\""
+                    << variable.first << "\" : " << variable.second;
+                count++;
+                if (count != VARIABLES_SIZE) {
+                    ofs << "," << std::endl;
+                } else {
+                    ofs << std::endl;
+                }
+            }
+            indent_level--;
+            ofs << utility::indent_spaces(indent_level) << "}" << std::endl;
+            indent_level--;
+            ofs << utility::indent_spaces(indent_level) << "}";
             if (i != SOLUTIONS_SIZE - 1) {
                 ofs << "," << std::endl;
             } else {
@@ -156,7 +225,7 @@ class SolutionArchive {
         ofs.close();
     }
 };
-}  // namespace solver
+}  // namespace solution
 }  // namespace printemps
 
 #endif

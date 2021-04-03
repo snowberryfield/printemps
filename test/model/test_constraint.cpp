@@ -47,30 +47,35 @@ TEST_F(TestConstraint, initialize) {
     EXPECT_EQ(0, constraint.evaluate_constraint({}));
     EXPECT_EQ(0, constraint.evaluate_violation());
     EXPECT_EQ(0, constraint.evaluate_violation({}));
-    EXPECT_EQ(true, constraint.expression().sensitivities().empty());
+    EXPECT_TRUE(constraint.expression().sensitivities().empty());
     EXPECT_EQ(0, constraint.expression().constant_value());
-    EXPECT_EQ(printemps::model::ConstraintSense::Lower, constraint.sense());
+    EXPECT_EQ(printemps::model::ConstraintSense::Less, constraint.sense());
     EXPECT_EQ(0, constraint.constraint_value());
     EXPECT_EQ(0, constraint.violation_value());
-    EXPECT_EQ(true, constraint.is_linear());
-    EXPECT_EQ(true, constraint.is_enabled());
-    EXPECT_EQ(HUGE_VALF, constraint.local_penalty_coefficient());
+    EXPECT_EQ(0, constraint.positive_part());
+    EXPECT_EQ(0, constraint.negative_part());
+    EXPECT_TRUE(constraint.is_linear());
+    EXPECT_TRUE(constraint.is_enabled());
+    EXPECT_FALSE(constraint.is_less_or_equal());
+    EXPECT_FALSE(constraint.is_greater_or_equal());
+    EXPECT_EQ(HUGE_VALF, constraint.local_penalty_coefficient_less());
+    EXPECT_EQ(HUGE_VALF, constraint.local_penalty_coefficient_greater());
     EXPECT_EQ(HUGE_VALF, constraint.global_penalty_coefficient());
 
-    EXPECT_EQ(false, constraint.is_singleton());
-    EXPECT_EQ(false, constraint.is_aggregation());
-    EXPECT_EQ(false, constraint.is_precedence());
-    EXPECT_EQ(false, constraint.is_variable_bound());
-    EXPECT_EQ(false, constraint.is_set_partitioning());
-    EXPECT_EQ(false, constraint.is_set_packing());
-    EXPECT_EQ(false, constraint.is_set_covering());
-    EXPECT_EQ(false, constraint.is_cardinality());
-    EXPECT_EQ(false, constraint.is_invariant_knapsack());
-    EXPECT_EQ(false, constraint.is_equation_knapsack());
-    EXPECT_EQ(false, constraint.is_bin_packing());
-    EXPECT_EQ(false, constraint.is_knapsack());
-    EXPECT_EQ(false, constraint.is_integer_knapsack());
-    EXPECT_EQ(false, constraint.is_general_linear());
+    EXPECT_FALSE(constraint.is_singleton());
+    EXPECT_FALSE(constraint.is_aggregation());
+    EXPECT_FALSE(constraint.is_precedence());
+    EXPECT_FALSE(constraint.is_variable_bound());
+    EXPECT_FALSE(constraint.is_set_partitioning());
+    EXPECT_FALSE(constraint.is_set_packing());
+    EXPECT_FALSE(constraint.is_set_covering());
+    EXPECT_FALSE(constraint.is_cardinality());
+    EXPECT_FALSE(constraint.is_invariant_knapsack());
+    EXPECT_FALSE(constraint.is_equation_knapsack());
+    EXPECT_FALSE(constraint.is_bin_packing());
+    EXPECT_FALSE(constraint.is_knapsack());
+    EXPECT_FALSE(constraint.is_integer_knapsack());
+    EXPECT_FALSE(constraint.is_general_linear());
 }
 
 /*****************************************************************************/
@@ -84,48 +89,61 @@ TEST_F(TestConstraint, constructor_arg_function) {
     auto target      = random_integer();
 
     expression = sensitivity * variable + constant;
-    std::function<double(const printemps::model::Move<int, double>&)> f =
-        [&expression](const printemps::model::Move<int, double>& a_MOVE) {
+    std::function<double(const printemps::neighborhood::Move<int, double>&)> f =
+        [&expression](const auto& a_MOVE) {
             return expression.evaluate(a_MOVE);
         };
 
-    /// Lower
+    /// Less
     {
         printemps::model::Constraint<int, double> constraint(f <= target);
 
-        EXPECT_EQ(true, constraint.expression().sensitivities().empty());
+        EXPECT_TRUE(constraint.expression().sensitivities().empty());
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Lower, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Less, constraint.sense());
         EXPECT_EQ(0, constraint.constraint_value());
         EXPECT_EQ(0, constraint.violation_value());
-        EXPECT_EQ(false, constraint.is_linear());
-        EXPECT_EQ(true, constraint.is_enabled());
+        EXPECT_EQ(0, constraint.positive_part());
+        EXPECT_EQ(0, constraint.negative_part());
+        EXPECT_FALSE(constraint.is_linear());
+        EXPECT_TRUE(constraint.is_enabled());
+        EXPECT_TRUE(constraint.is_less_or_equal());
+        EXPECT_FALSE(constraint.is_greater_or_equal());
     }
 
     /// Equal
     {
         printemps::model::Constraint<int, double> constraint(f == target);
 
-        EXPECT_EQ(true, constraint.expression().sensitivities().empty());
+        EXPECT_TRUE(constraint.expression().sensitivities().empty());
         EXPECT_EQ(0, constraint.expression().constant_value());
         EXPECT_EQ(printemps::model::ConstraintSense::Equal, constraint.sense());
         EXPECT_EQ(0, constraint.constraint_value());
         EXPECT_EQ(0, constraint.violation_value());
-        EXPECT_EQ(false, constraint.is_linear());
-        EXPECT_EQ(true, constraint.is_enabled());
+        EXPECT_EQ(0, constraint.positive_part());
+        EXPECT_EQ(0, constraint.negative_part());
+        EXPECT_FALSE(constraint.is_linear());
+        EXPECT_TRUE(constraint.is_enabled());
+        EXPECT_TRUE(constraint.is_less_or_equal());
+        EXPECT_TRUE(constraint.is_greater_or_equal());
     }
 
-    /// Upper
+    /// Greater
     {
         printemps::model::Constraint<int, double> constraint(f >= target);
 
-        EXPECT_EQ(true, constraint.expression().sensitivities().empty());
+        EXPECT_TRUE(constraint.expression().sensitivities().empty());
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Upper, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Greater,
+                  constraint.sense());
         EXPECT_EQ(0, constraint.constraint_value());
         EXPECT_EQ(0, constraint.violation_value());
-        EXPECT_EQ(false, constraint.is_linear());
-        EXPECT_EQ(true, constraint.is_enabled());
+        EXPECT_EQ(0, constraint.positive_part());
+        EXPECT_EQ(0, constraint.negative_part());
+        EXPECT_FALSE(constraint.is_linear());
+        EXPECT_TRUE(constraint.is_enabled());
+        EXPECT_FALSE(constraint.is_less_or_equal());
+        EXPECT_TRUE(constraint.is_greater_or_equal());
     }
 }
 
@@ -141,7 +159,7 @@ TEST_F(TestConstraint, constructor_arg_expression) {
 
     expression = sensitivity * variable + constant;
 
-    /// Lower
+    /// Less
     {
         printemps::model::Constraint<int, double> constraint(expression <=
                                                              target);
@@ -150,11 +168,15 @@ TEST_F(TestConstraint, constructor_arg_expression) {
                   constraint.expression().sensitivities().at(&variable));
 
         EXPECT_EQ(constant - target, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Lower, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Less, constraint.sense());
         EXPECT_EQ(0, constraint.constraint_value());
         EXPECT_EQ(0, constraint.violation_value());
-        EXPECT_EQ(true, constraint.is_linear());
-        EXPECT_EQ(true, constraint.is_enabled());
+        EXPECT_EQ(0, constraint.positive_part());
+        EXPECT_EQ(0, constraint.negative_part());
+        EXPECT_TRUE(constraint.is_linear());
+        EXPECT_TRUE(constraint.is_enabled());
+        EXPECT_TRUE(constraint.is_less_or_equal());
+        EXPECT_FALSE(constraint.is_greater_or_equal());
     }
 
     /// Equal
@@ -168,11 +190,15 @@ TEST_F(TestConstraint, constructor_arg_expression) {
         EXPECT_EQ(printemps::model::ConstraintSense::Equal, constraint.sense());
         EXPECT_EQ(0, constraint.constraint_value());
         EXPECT_EQ(0, constraint.violation_value());
-        EXPECT_EQ(true, constraint.is_linear());
-        EXPECT_EQ(true, constraint.is_enabled());
+        EXPECT_EQ(0, constraint.positive_part());
+        EXPECT_EQ(0, constraint.negative_part());
+        EXPECT_TRUE(constraint.is_linear());
+        EXPECT_TRUE(constraint.is_enabled());
+        EXPECT_TRUE(constraint.is_less_or_equal());
+        EXPECT_TRUE(constraint.is_greater_or_equal());
     }
 
-    /// Upper
+    /// Greater
     {
         printemps::model::Constraint<int, double> constraint(expression >=
                                                              target);
@@ -180,11 +206,16 @@ TEST_F(TestConstraint, constructor_arg_expression) {
         EXPECT_EQ(sensitivity,
                   constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(constant - target, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Upper, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Greater,
+                  constraint.sense());
         EXPECT_EQ(0, constraint.constraint_value());
         EXPECT_EQ(0, constraint.violation_value());
-        EXPECT_EQ(true, constraint.is_linear());
-        EXPECT_EQ(true, constraint.is_enabled());
+        EXPECT_EQ(0, constraint.positive_part());
+        EXPECT_EQ(0, constraint.negative_part());
+        EXPECT_TRUE(constraint.is_linear());
+        EXPECT_TRUE(constraint.is_enabled());
+        EXPECT_FALSE(constraint.is_less_or_equal());
+        EXPECT_TRUE(constraint.is_greater_or_equal());
     }
 }
 
@@ -200,26 +231,30 @@ TEST_F(TestConstraint, setup_arg_function) {
 
     expression = sensitivity * variable + constant;
 
-    std::function<double(const printemps::model::Move<int, double>&)> f =
+    std::function<double(const printemps::neighborhood::Move<int, double>&)> f =
         [&expression,
-         target](const printemps::model::Move<int, double>& a_MOVE) {
+         target](const printemps::neighborhood::Move<int, double>& a_MOVE) {
             return expression.evaluate(a_MOVE) - target;
         };
 
-    /// Lower
+    /// Less
     {
         auto constraint =
             printemps::model::Constraint<int, double>::create_instance();
 
-        constraint.setup(f, printemps::model::ConstraintSense::Lower);
+        constraint.setup(f, printemps::model::ConstraintSense::Less);
 
-        EXPECT_EQ(true, constraint.expression().sensitivities().empty());
+        EXPECT_TRUE(constraint.expression().sensitivities().empty());
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Lower, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Less, constraint.sense());
         EXPECT_EQ(0, constraint.constraint_value());
         EXPECT_EQ(0, constraint.violation_value());
-        EXPECT_EQ(false, constraint.is_linear());
-        EXPECT_EQ(true, constraint.is_enabled());
+        EXPECT_EQ(0, constraint.positive_part());
+        EXPECT_EQ(0, constraint.negative_part());
+        EXPECT_FALSE(constraint.is_linear());
+        EXPECT_TRUE(constraint.is_enabled());
+        EXPECT_TRUE(constraint.is_less_or_equal());
+        EXPECT_FALSE(constraint.is_greater_or_equal());
     }
 
     /// Equal
@@ -228,29 +263,38 @@ TEST_F(TestConstraint, setup_arg_function) {
             printemps::model::Constraint<int, double>::create_instance();
         constraint.setup(f, printemps::model::ConstraintSense::Equal);
 
-        EXPECT_EQ(true, constraint.expression().sensitivities().empty());
+        EXPECT_TRUE(constraint.expression().sensitivities().empty());
         EXPECT_EQ(0, constraint.expression().constant_value());
         EXPECT_EQ(printemps::model::ConstraintSense::Equal, constraint.sense());
         EXPECT_EQ(0, constraint.constraint_value());
         EXPECT_EQ(0, constraint.violation_value());
-        EXPECT_EQ(false, constraint.is_linear());
-        EXPECT_EQ(true, constraint.is_enabled());
+        EXPECT_EQ(0, constraint.positive_part());
+        EXPECT_EQ(0, constraint.negative_part());
+        EXPECT_FALSE(constraint.is_linear());
+        EXPECT_TRUE(constraint.is_enabled());
+        EXPECT_TRUE(constraint.is_less_or_equal());
+        EXPECT_TRUE(constraint.is_greater_or_equal());
     }
 
-    /// Upper
+    /// Greater
     {
         auto constraint =
             printemps::model::Constraint<int, double>::create_instance();
         ;
-        constraint.setup(f, printemps::model::ConstraintSense::Upper);
+        constraint.setup(f, printemps::model::ConstraintSense::Greater);
 
-        EXPECT_EQ(true, constraint.expression().sensitivities().empty());
+        EXPECT_TRUE(constraint.expression().sensitivities().empty());
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Upper, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Greater,
+                  constraint.sense());
         EXPECT_EQ(0, constraint.constraint_value());
         EXPECT_EQ(0, constraint.violation_value());
-        EXPECT_EQ(false, constraint.is_linear());
-        EXPECT_EQ(true, constraint.is_enabled());
+        EXPECT_EQ(0, constraint.positive_part());
+        EXPECT_EQ(0, constraint.negative_part());
+        EXPECT_FALSE(constraint.is_linear());
+        EXPECT_TRUE(constraint.is_enabled());
+        EXPECT_FALSE(constraint.is_less_or_equal());
+        EXPECT_TRUE(constraint.is_greater_or_equal());
     }
 }
 
@@ -266,21 +310,25 @@ TEST_F(TestConstraint, setup_arg_expression) {
 
     expression = sensitivity * variable + constant;
 
-    /// Lower
+    /// Less
     {
         auto constraint =
             printemps::model::Constraint<int, double>::create_instance();
         constraint.setup(expression - target,
-                         printemps::model::ConstraintSense::Lower);
+                         printemps::model::ConstraintSense::Less);
 
         EXPECT_EQ(sensitivity,
                   constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(constant - target, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Lower, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Less, constraint.sense());
         EXPECT_EQ(0, constraint.constraint_value());
         EXPECT_EQ(0, constraint.violation_value());
-        EXPECT_EQ(true, constraint.is_linear());
-        EXPECT_EQ(true, constraint.is_enabled());
+        EXPECT_EQ(0, constraint.positive_part());
+        EXPECT_EQ(0, constraint.negative_part());
+        EXPECT_TRUE(constraint.is_linear());
+        EXPECT_TRUE(constraint.is_enabled());
+        EXPECT_TRUE(constraint.is_less_or_equal());
+        EXPECT_FALSE(constraint.is_greater_or_equal());
     }
 
     /// Equal
@@ -297,25 +345,34 @@ TEST_F(TestConstraint, setup_arg_expression) {
         EXPECT_EQ(printemps::model::ConstraintSense::Equal, constraint.sense());
         EXPECT_EQ(0, constraint.constraint_value());
         EXPECT_EQ(0, constraint.violation_value());
-        EXPECT_EQ(true, constraint.is_linear());
-        EXPECT_EQ(true, constraint.is_enabled());
+        EXPECT_EQ(0, constraint.positive_part());
+        EXPECT_EQ(0, constraint.negative_part());
+        EXPECT_TRUE(constraint.is_linear());
+        EXPECT_TRUE(constraint.is_enabled());
+        EXPECT_TRUE(constraint.is_less_or_equal());
+        EXPECT_TRUE(constraint.is_greater_or_equal());
     }
 
-    /// Upper
+    /// Greater
     {
         auto constraint =
             printemps::model::Constraint<int, double>::create_instance();
         constraint.setup(expression - target,
-                         printemps::model::ConstraintSense::Upper);
+                         printemps::model::ConstraintSense::Greater);
 
         EXPECT_EQ(sensitivity,
                   constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(constant - target, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Upper, constraint.sense());
+        EXPECT_EQ(printemps::model::ConstraintSense::Greater,
+                  constraint.sense());
         EXPECT_EQ(0, constraint.constraint_value());
         EXPECT_EQ(0, constraint.violation_value());
-        EXPECT_EQ(true, constraint.is_linear());
-        EXPECT_EQ(true, constraint.is_enabled());
+        EXPECT_EQ(0, constraint.positive_part());
+        EXPECT_EQ(0, constraint.negative_part());
+        EXPECT_TRUE(constraint.is_linear());
+        EXPECT_TRUE(constraint.is_enabled());
+        EXPECT_FALSE(constraint.is_less_or_equal());
+        EXPECT_TRUE(constraint.is_greater_or_equal());
     }
 }
 
@@ -334,9 +391,9 @@ TEST_F(TestConstraint, setup_constraint_type) {
     {
         auto constraint =
             printemps::model::Constraint<int, double>::create_instance();
-        constraint.setup(2 * x - 10, printemps::model::ConstraintSense::Lower);
+        constraint.setup(2 * x - 10, printemps::model::ConstraintSense::Less);
         constraint.setup_constraint_type();
-        EXPECT_EQ(true, constraint.is_singleton());
+        EXPECT_TRUE(constraint.is_singleton());
     }
 
     /// Aggregation
@@ -346,7 +403,7 @@ TEST_F(TestConstraint, setup_constraint_type) {
         constraint.setup(2 * x + 3 * y - 10,
                          printemps::model::ConstraintSense::Equal);
         constraint.setup_constraint_type();
-        EXPECT_EQ(true, constraint.is_aggregation());
+        EXPECT_TRUE(constraint.is_aggregation());
     }
 
     /// Precedence
@@ -354,33 +411,33 @@ TEST_F(TestConstraint, setup_constraint_type) {
         auto constraint =
             printemps::model::Constraint<int, double>::create_instance();
         constraint.setup(2 * x - 2 * y - 5,
-                         printemps::model::ConstraintSense::Lower);
+                         printemps::model::ConstraintSense::Less);
         constraint.setup_constraint_type();
-        EXPECT_EQ(true, constraint.is_precedence());
+        EXPECT_TRUE(constraint.is_precedence());
     }
     {
         auto constraint =
             printemps::model::Constraint<int, double>::create_instance();
         constraint.setup(-2 * x + 2 * y - 5,
-                         printemps::model::ConstraintSense::Lower);
+                         printemps::model::ConstraintSense::Less);
         constraint.setup_constraint_type();
-        EXPECT_EQ(true, constraint.is_precedence());
+        EXPECT_TRUE(constraint.is_precedence());
     }
     {
         auto constraint =
             printemps::model::Constraint<int, double>::create_instance();
         constraint.setup(2 * x - 2 * y - 5,
-                         printemps::model::ConstraintSense::Upper);
+                         printemps::model::ConstraintSense::Greater);
         constraint.setup_constraint_type();
-        EXPECT_EQ(true, constraint.is_precedence());
+        EXPECT_TRUE(constraint.is_precedence());
     }
     {
         auto constraint =
             printemps::model::Constraint<int, double>::create_instance();
         constraint.setup(-2 * x + 2 * y - 5,
-                         printemps::model::ConstraintSense::Upper);
+                         printemps::model::ConstraintSense::Greater);
         constraint.setup_constraint_type();
-        EXPECT_EQ(true, constraint.is_precedence());
+        EXPECT_TRUE(constraint.is_precedence());
     }
 
     /// Variable Bound
@@ -388,17 +445,17 @@ TEST_F(TestConstraint, setup_constraint_type) {
         auto constraint =
             printemps::model::Constraint<int, double>::create_instance();
         constraint.setup(2 * z(0) + 3 * z(1) - 5,
-                         printemps::model::ConstraintSense::Lower);
+                         printemps::model::ConstraintSense::Less);
         constraint.setup_constraint_type();
-        EXPECT_EQ(true, constraint.is_variable_bound());
+        EXPECT_TRUE(constraint.is_variable_bound());
     }
     {
         auto constraint =
             printemps::model::Constraint<int, double>::create_instance();
         constraint.setup(2 * z(0) + 3 * z(1) - 5,
-                         printemps::model::ConstraintSense::Upper);
+                         printemps::model::ConstraintSense::Greater);
         constraint.setup_constraint_type();
-        EXPECT_EQ(true, constraint.is_variable_bound());
+        EXPECT_TRUE(constraint.is_variable_bound());
     }
 
     /// Set Partitioning
@@ -407,25 +464,26 @@ TEST_F(TestConstraint, setup_constraint_type) {
             printemps::model::Constraint<int, double>::create_instance();
         constraint.setup(z.sum() - 1, printemps::model::ConstraintSense::Equal);
         constraint.setup_constraint_type();
-        EXPECT_EQ(true, constraint.is_set_partitioning());
+        EXPECT_TRUE(constraint.is_set_partitioning());
     }
 
     /// Set Packing
     {
         auto constraint =
             printemps::model::Constraint<int, double>::create_instance();
-        constraint.setup(z.sum() - 1, printemps::model::ConstraintSense::Lower);
+        constraint.setup(z.sum() - 1, printemps::model::ConstraintSense::Less);
         constraint.setup_constraint_type();
-        EXPECT_EQ(true, constraint.is_set_packing());
+        EXPECT_TRUE(constraint.is_set_packing());
     }
 
     /// Set Covering
     {
         auto constraint =
             printemps::model::Constraint<int, double>::create_instance();
-        constraint.setup(z.sum() - 1, printemps::model::ConstraintSense::Upper);
+        constraint.setup(z.sum() - 1,
+                         printemps::model::ConstraintSense::Greater);
         constraint.setup_constraint_type();
-        EXPECT_EQ(true, constraint.is_set_covering());
+        EXPECT_TRUE(constraint.is_set_covering());
     }
 
     /// Cardinality
@@ -434,16 +492,16 @@ TEST_F(TestConstraint, setup_constraint_type) {
             printemps::model::Constraint<int, double>::create_instance();
         constraint.setup(z.sum() - 5, printemps::model::ConstraintSense::Equal);
         constraint.setup_constraint_type();
-        EXPECT_EQ(true, constraint.is_cardinality());
+        EXPECT_TRUE(constraint.is_cardinality());
     }
 
     /// Invariant Knapsack
     {
         auto constraint =
             printemps::model::Constraint<int, double>::create_instance();
-        constraint.setup(z.sum() - 5, printemps::model::ConstraintSense::Lower);
+        constraint.setup(z.sum() - 5, printemps::model::ConstraintSense::Less);
         constraint.setup_constraint_type();
-        EXPECT_EQ(true, constraint.is_invariant_knapsack());
+        EXPECT_TRUE(constraint.is_invariant_knapsack());
     }
 
     /// Equation Knapsack
@@ -453,7 +511,7 @@ TEST_F(TestConstraint, setup_constraint_type) {
         constraint.setup(z.dot(coefficients) - 30,
                          printemps::model::ConstraintSense::Equal);
         constraint.setup_constraint_type();
-        EXPECT_EQ(true, constraint.is_equation_knapsack());
+        EXPECT_TRUE(constraint.is_equation_knapsack());
     }
 
     /// Bin Packing
@@ -461,18 +519,18 @@ TEST_F(TestConstraint, setup_constraint_type) {
         auto constraint =
             printemps::model::Constraint<int, double>::create_instance();
         constraint.setup(z.dot(coefficients) + 5 * w - 5,
-                         printemps::model::ConstraintSense::Lower);
+                         printemps::model::ConstraintSense::Less);
         constraint.setup_constraint_type();
-        EXPECT_EQ(true, constraint.is_bin_packing());
+        EXPECT_TRUE(constraint.is_bin_packing());
     }
 
     {
         auto constraint =
             printemps::model::Constraint<int, double>::create_instance();
         constraint.setup(z.dot(coefficients) - 5 * w + 5,
-                         printemps::model::ConstraintSense::Upper);
+                         printemps::model::ConstraintSense::Greater);
         constraint.setup_constraint_type();
-        EXPECT_EQ(true, constraint.is_bin_packing());
+        EXPECT_TRUE(constraint.is_bin_packing());
     }
 
     /// Knapsack
@@ -480,18 +538,18 @@ TEST_F(TestConstraint, setup_constraint_type) {
         auto constraint =
             printemps::model::Constraint<int, double>::create_instance();
         constraint.setup(z.dot(coefficients) - 50,
-                         printemps::model::ConstraintSense::Lower);
+                         printemps::model::ConstraintSense::Less);
         constraint.setup_constraint_type();
-        EXPECT_EQ(true, constraint.is_knapsack());
+        EXPECT_TRUE(constraint.is_knapsack());
     }
 
     {
         auto constraint =
             printemps::model::Constraint<int, double>::create_instance();
         constraint.setup(z.dot(coefficients) + 50,
-                         printemps::model::ConstraintSense::Upper);
+                         printemps::model::ConstraintSense::Greater);
         constraint.setup_constraint_type();
-        EXPECT_EQ(true, constraint.is_knapsack());
+        EXPECT_TRUE(constraint.is_knapsack());
     }
 
     /// Integer Knapsack
@@ -499,18 +557,18 @@ TEST_F(TestConstraint, setup_constraint_type) {
         auto constraint =
             printemps::model::Constraint<int, double>::create_instance();
         constraint.setup(r.dot(coefficients) - 50,
-                         printemps::model::ConstraintSense::Lower);
+                         printemps::model::ConstraintSense::Less);
         constraint.setup_constraint_type();
-        EXPECT_EQ(true, constraint.is_integer_knapsack());
+        EXPECT_TRUE(constraint.is_integer_knapsack());
     }
 
     {
         auto constraint =
             printemps::model::Constraint<int, double>::create_instance();
         constraint.setup(r.dot(coefficients) + 50,
-                         printemps::model::ConstraintSense::Upper);
+                         printemps::model::ConstraintSense::Greater);
         constraint.setup_constraint_type();
-        EXPECT_EQ(true, constraint.is_integer_knapsack());
+        EXPECT_TRUE(constraint.is_integer_knapsack());
     }
 
     /// General Linear
@@ -520,7 +578,7 @@ TEST_F(TestConstraint, setup_constraint_type) {
         constraint.setup(x + r.sum() - 50,
                          printemps::model::ConstraintSense::Equal);
         constraint.setup_constraint_type();
-        EXPECT_EQ(true, constraint.is_general_linear());
+        EXPECT_TRUE(constraint.is_general_linear());
     }
 }
 
@@ -536,16 +594,16 @@ TEST_F(TestConstraint, evaluate_function_arg_void) {
 
     expression = sensitivity * variable + constant;
 
-    std::function<double(const printemps::model::Move<int, double>&)> f =
+    std::function<double(const printemps::neighborhood::Move<int, double>&)> f =
         [&expression,
-         target](const printemps::model::Move<int, double>& a_MOVE) {
+         target](const printemps::neighborhood::Move<int, double>& a_MOVE) {
             return expression.evaluate(a_MOVE) - target;
         };
 
     auto constraint =
         printemps::model::Constraint<int, double>::create_instance();
 
-    constraint.setup(f, printemps::model::ConstraintSense::Lower);
+    constraint.setup(f, printemps::model::ConstraintSense::Less);
 
     auto value = random_integer();
     variable   = value;
@@ -554,6 +612,9 @@ TEST_F(TestConstraint, evaluate_function_arg_void) {
     EXPECT_EQ(expected_value, constraint.evaluate_constraint());
     constraint.update();
     EXPECT_EQ(expected_value, constraint.constraint_value());
+
+    EXPECT_EQ(std::max(expected_value, 0), constraint.positive_part());
+    EXPECT_EQ(-std::min(expected_value, 0), constraint.negative_part());
 }
 
 /*****************************************************************************/
@@ -571,7 +632,7 @@ TEST_F(TestConstraint, evaluate_expression_arg_void) {
     auto constraint =
         printemps::model::Constraint<int, double>::create_instance();
     constraint.setup(expression - target,
-                     printemps::model::ConstraintSense::Lower);
+                     printemps::model::ConstraintSense::Less);
 
     auto value = random_integer();
     variable   = value;
@@ -580,6 +641,9 @@ TEST_F(TestConstraint, evaluate_expression_arg_void) {
     EXPECT_EQ(expected_value, constraint.evaluate_constraint());
     constraint.update();
     EXPECT_EQ(expected_value, constraint.constraint_value());
+
+    EXPECT_EQ(std::max(expected_value, 0), constraint.positive_part());
+    EXPECT_EQ(-std::min(expected_value, 0), constraint.negative_part());
 }
 
 /*****************************************************************************/
@@ -595,15 +659,15 @@ TEST_F(TestConstraint, evaluate_function_arg_move) {
     expression = sensitivity * variable + constant;
     expression.setup_fixed_sensitivities();
 
-    std::function<double(const printemps::model::Move<int, double>&)> f =
+    std::function<double(const printemps::neighborhood::Move<int, double>&)> f =
         [&expression,
-         target](const printemps::model::Move<int, double>& a_MOVE) {
+         target](const printemps::neighborhood::Move<int, double>& a_MOVE) {
             return expression.evaluate(a_MOVE) - target;
         };
 
     auto constraint =
         printemps::model::Constraint<int, double>::create_instance();
-    constraint.setup(f, printemps::model::ConstraintSense::Lower);
+    constraint.setup(f, printemps::model::ConstraintSense::Less);
 
     /// initial
     {
@@ -617,18 +681,24 @@ TEST_F(TestConstraint, evaluate_function_arg_move) {
 
         /// expression.update() must be called after constraint.update();
         expression.update();
+
+        EXPECT_EQ(std::max(expected_value, 0), constraint.positive_part());
+        EXPECT_EQ(-std::min(expected_value, 0), constraint.negative_part());
     }
     /// after move
     {
         auto value = random_integer();
 
-        printemps::model::Move<int, double> move;
+        printemps::neighborhood::Move<int, double> move;
         move.alterations.emplace_back(&variable, value);
 
         auto expected_value = sensitivity * value + constant - target;
         EXPECT_EQ(expected_value, constraint.evaluate_constraint(move));
         constraint.update(move);
         EXPECT_EQ(expected_value, constraint.constraint_value());
+
+        EXPECT_EQ(std::max(expected_value, 0), constraint.positive_part());
+        EXPECT_EQ(-std::min(expected_value, 0), constraint.negative_part());
     }
 }
 
@@ -647,7 +717,7 @@ TEST_F(TestConstraint, evaluate_expression_arg_move) {
     auto constraint =
         printemps::model::Constraint<int, double>::create_instance();
     constraint.setup(expression - target,
-                     printemps::model::ConstraintSense::Lower);
+                     printemps::model::ConstraintSense::Less);
 
     /// initial
     {
@@ -659,19 +729,25 @@ TEST_F(TestConstraint, evaluate_expression_arg_move) {
         EXPECT_EQ(expected_value, constraint.evaluate_constraint());
         constraint.update();
         EXPECT_EQ(expected_value, constraint.constraint_value());
+
+        EXPECT_EQ(std::max(expected_value, 0), constraint.positive_part());
+        EXPECT_EQ(-std::min(expected_value, 0), constraint.negative_part());
     }
 
     /// after move
     {
         auto value = random_integer();
 
-        printemps::model::Move<int, double> move;
+        printemps::neighborhood::Move<int, double> move;
         move.alterations.emplace_back(&variable, value);
 
         auto expected_value = sensitivity * value + constant - target;
         EXPECT_EQ(expected_value, constraint.evaluate_constraint(move));
         constraint.update(move);
         EXPECT_EQ(expected_value, constraint.constraint_value());
+
+        EXPECT_EQ(std::max(expected_value, 0), constraint.positive_part());
+        EXPECT_EQ(-std::min(expected_value, 0), constraint.negative_part());
     }
 }
 
@@ -687,17 +763,17 @@ TEST_F(TestConstraint, evaluate_violation_function_arg_void) {
 
     expression = sensitivity * variable + constant;
 
-    std::function<double(const printemps::model::Move<int, double>&)> f =
+    std::function<double(const printemps::neighborhood::Move<int, double>&)> f =
         [&expression,
-         target](const printemps::model::Move<int, double>& a_MOVE) {
+         target](const printemps::neighborhood::Move<int, double>& a_MOVE) {
             return expression.evaluate(a_MOVE) - target;
         };
 
-    /// Lower
+    /// Less
     {
         auto constraint =
             printemps::model::Constraint<int, double>::create_instance();
-        constraint.setup(f, printemps::model::ConstraintSense::Lower);
+        constraint.setup(f, printemps::model::ConstraintSense::Less);
 
         auto value = random_integer();
         variable   = value;
@@ -724,11 +800,11 @@ TEST_F(TestConstraint, evaluate_violation_function_arg_void) {
         EXPECT_EQ(expected_value, constraint.violation_value());
     }
 
-    /// Upper
+    /// Greater
     {
         auto constraint =
             printemps::model::Constraint<int, double>::create_instance();
-        constraint.setup(f, printemps::model::ConstraintSense::Upper);
+        constraint.setup(f, printemps::model::ConstraintSense::Greater);
 
         auto value = random_integer();
         variable   = value;
@@ -753,12 +829,12 @@ TEST_F(TestConstraint, evaluate_violation_expression_arg_void) {
 
     expression = sensitivity * variable + constant;
 
-    /// Lower
+    /// Less
     {
         auto constraint =
             printemps::model::Constraint<int, double>::create_instance();
         constraint.setup(expression - target,
-                         printemps::model::ConstraintSense::Lower);
+                         printemps::model::ConstraintSense::Less);
 
         auto value = random_integer();
         variable   = value;
@@ -786,12 +862,12 @@ TEST_F(TestConstraint, evaluate_violation_expression_arg_void) {
         EXPECT_EQ(expected_value, constraint.violation_value());
     }
 
-    /// Upper
+    /// Greater
     {
         auto constraint =
             printemps::model::Constraint<int, double>::create_instance();
         constraint.setup(expression - target,
-                         printemps::model::ConstraintSense::Upper);
+                         printemps::model::ConstraintSense::Greater);
 
         auto value = random_integer();
         variable   = value;
@@ -817,17 +893,17 @@ TEST_F(TestConstraint, evaluate_violation_function_arg_move) {
     expression = sensitivity * variable + constant;
     expression.setup_fixed_sensitivities();
 
-    std::function<double(const printemps::model::Move<int, double>&)> f =
+    std::function<double(const printemps::neighborhood::Move<int, double>&)> f =
         [&expression,
-         target](const printemps::model::Move<int, double>& a_MOVE) {
+         target](const printemps::neighborhood::Move<int, double>& a_MOVE) {
             return expression.evaluate(a_MOVE) - target;
         };
 
-    /// Lower
+    /// Less
     {
         auto constraint =
             printemps::model::Constraint<int, double>::create_instance();
-        constraint.setup(f, printemps::model::ConstraintSense::Lower);
+        constraint.setup(f, printemps::model::ConstraintSense::Less);
 
         /// initial
         {
@@ -848,7 +924,7 @@ TEST_F(TestConstraint, evaluate_violation_function_arg_move) {
         {
             auto value = random_integer();
 
-            printemps::model::Move<int, double> move;
+            printemps::neighborhood::Move<int, double> move;
             move.alterations.emplace_back(&variable, value);
 
             auto expected_value =
@@ -884,7 +960,7 @@ TEST_F(TestConstraint, evaluate_violation_function_arg_move) {
         {
             auto value = random_integer();
 
-            printemps::model::Move<int, double> move;
+            printemps::neighborhood::Move<int, double> move;
             move.alterations.emplace_back(&variable, value);
 
             auto expected_value =
@@ -895,11 +971,11 @@ TEST_F(TestConstraint, evaluate_violation_function_arg_move) {
         }
     }
 
-    /// Upper
+    /// Greater
     {
         auto constraint =
             printemps::model::Constraint<int, double>::create_instance();
-        constraint.setup(f, printemps::model::ConstraintSense::Upper);
+        constraint.setup(f, printemps::model::ConstraintSense::Greater);
 
         /// initial
         {
@@ -920,7 +996,7 @@ TEST_F(TestConstraint, evaluate_violation_function_arg_move) {
         {
             auto value = random_integer();
 
-            printemps::model::Move<int, double> move;
+            printemps::neighborhood::Move<int, double> move;
             move.alterations.emplace_back(&variable, value);
 
             auto expected_value =
@@ -944,12 +1020,12 @@ TEST_F(TestConstraint, evaluate_violation_expression_arg_move) {
 
     expression = sensitivity * variable + constant;
 
-    /// Lower
+    /// Less
     {
         auto constraint =
             printemps::model::Constraint<int, double>::create_instance();
         constraint.setup(expression - target,
-                         printemps::model::ConstraintSense::Lower);
+                         printemps::model::ConstraintSense::Less);
 
         /// initial
         {
@@ -968,7 +1044,7 @@ TEST_F(TestConstraint, evaluate_violation_expression_arg_move) {
         {
             auto value = random_integer();
 
-            printemps::model::Move<int, double> move;
+            printemps::neighborhood::Move<int, double> move;
             move.alterations.emplace_back(&variable, value);
 
             auto expected_value =
@@ -1003,7 +1079,7 @@ TEST_F(TestConstraint, evaluate_violation_expression_arg_move) {
         {
             auto value = random_integer();
 
-            printemps::model::Move<int, double> move;
+            printemps::neighborhood::Move<int, double> move;
             move.alterations.emplace_back(&variable, value);
 
             auto expected_value =
@@ -1014,12 +1090,12 @@ TEST_F(TestConstraint, evaluate_violation_expression_arg_move) {
         }
     }
 
-    /// Upper
+    /// Greater
     {
         auto constraint =
             printemps::model::Constraint<int, double>::create_instance();
         constraint.setup(expression - target,
-                         printemps::model::ConstraintSense::Upper);
+                         printemps::model::ConstraintSense::Greater);
 
         /// initial
         {
@@ -1036,8 +1112,8 @@ TEST_F(TestConstraint, evaluate_violation_expression_arg_move) {
 
         /// after move
         {
-            auto                                value = random_integer();
-            printemps::model::Move<int, double> move;
+            auto                                       value = random_integer();
+            printemps::neighborhood::Move<int, double> move;
             move.alterations.emplace_back(&variable, value);
 
             auto expected_value =
@@ -1057,10 +1133,10 @@ TEST_F(TestConstraint, evaluate_violation_diff) {
 /*****************************************************************************/
 TEST_F(TestConstraint, update_arg_void) {
     /// This method is tested in following tests:
-    /// - evaluate_function_arg_voindex()
-    /// - evaluate_expression_arg_voindex()
-    /// - evaluate_violation_function_arg_voindex()
-    /// - evaluate_violation_expression_arg_voindex()
+    /// - evaluate_function_arg_void()
+    /// - evaluate_expression_arg_void()
+    /// - evaluate_violation_function_arg_void()
+    /// - evaluate_violation_expression_arg_void()
 }
 
 /*****************************************************************************/
@@ -1093,12 +1169,31 @@ TEST_F(TestConstraint, violation_value) {
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraint, local_penalty_coefficient) {
+TEST_F(TestConstraint, positive_part) {
+    /// This method is tested in tested in other cases.
+}
+
+/*****************************************************************************/
+TEST_F(TestConstraint, negative_part) {
+    /// This method is tested in tested in other cases.
+}
+
+/*****************************************************************************/
+TEST_F(TestConstraint, local_penalty_coefficient_less) {
     auto constraint =
         printemps::model::Constraint<int, double>::create_instance();
-    EXPECT_EQ(HUGE_VAL, constraint.local_penalty_coefficient());
-    constraint.local_penalty_coefficient() = 10.0;
-    EXPECT_EQ(10.0, constraint.local_penalty_coefficient());
+    EXPECT_EQ(HUGE_VAL, constraint.local_penalty_coefficient_less());
+    constraint.local_penalty_coefficient_less() = 10.0;
+    EXPECT_EQ(10.0, constraint.local_penalty_coefficient_less());
+}
+
+/*****************************************************************************/
+TEST_F(TestConstraint, local_penalty_coefficient_greater) {
+    auto constraint =
+        printemps::model::Constraint<int, double>::create_instance();
+    EXPECT_EQ(HUGE_VAL, constraint.local_penalty_coefficient_greater());
+    constraint.local_penalty_coefficient_greater() = 10.0;
+    EXPECT_EQ(10.0, constraint.local_penalty_coefficient_greater());
 }
 
 /*****************************************************************************/
@@ -1114,14 +1209,18 @@ TEST_F(TestConstraint, global_penalty_coefficient) {
 TEST_F(TestConstraint, reset_local_penalty_coefficient) {
     auto constraint =
         printemps::model::Constraint<int, double>::create_instance();
-    EXPECT_EQ(HUGE_VAL, constraint.local_penalty_coefficient());
+    EXPECT_EQ(HUGE_VAL, constraint.local_penalty_coefficient_less());
+    EXPECT_EQ(HUGE_VAL, constraint.local_penalty_coefficient_greater());
     EXPECT_EQ(HUGE_VAL, constraint.global_penalty_coefficient());
-    constraint.local_penalty_coefficient()  = 10.0;
-    constraint.global_penalty_coefficient() = 100.0;
-    EXPECT_EQ(10.0, constraint.local_penalty_coefficient());
+    constraint.local_penalty_coefficient_less()    = 10.0;
+    constraint.local_penalty_coefficient_greater() = 10.0;
+    constraint.global_penalty_coefficient()        = 100.0;
+    EXPECT_EQ(10.0, constraint.local_penalty_coefficient_less());
+    EXPECT_EQ(10.0, constraint.local_penalty_coefficient_greater());
     EXPECT_EQ(100.0, constraint.global_penalty_coefficient());
     constraint.reset_local_penalty_coefficient();
-    EXPECT_EQ(100.0, constraint.local_penalty_coefficient());
+    EXPECT_EQ(100.0, constraint.local_penalty_coefficient_less());
+    EXPECT_EQ(100.0, constraint.local_penalty_coefficient_greater());
     EXPECT_EQ(100.0, constraint.global_penalty_coefficient());
 }
 
@@ -1207,13 +1306,13 @@ TEST_F(TestConstraint, is_enabled) {
     auto constraint =
         printemps::model::Constraint<int, double>::create_instance();
     constraint.disable();
-    EXPECT_EQ(false, constraint.is_enabled());
+    EXPECT_FALSE(constraint.is_enabled());
 
     constraint.enable();
-    EXPECT_EQ(true, constraint.is_enabled());
+    EXPECT_TRUE(constraint.is_enabled());
 
     constraint.disable();
-    EXPECT_EQ(false, constraint.is_enabled());
+    EXPECT_FALSE(constraint.is_enabled());
 }
 
 /*****************************************************************************/
@@ -1238,38 +1337,37 @@ TEST_F(TestConstraint, operator_equal_function) {
 
     expression = sensitivity * variable + constant;
 
-    std::function<double(const printemps::model::Move<int, double>&)> f =
+    std::function<double(const printemps::neighborhood::Move<int, double>&)> f =
         [&expression,
-         target](const printemps::model::Move<int, double>& a_MOVE) {
+         target](const printemps::neighborhood::Move<int, double>& a_MOVE) {
             return expression.evaluate(a_MOVE) - target;
         };
 
-    /// Lower
+    /// Less
     {
         auto constraint_source =
             printemps::model::Constraint<int, double>::create_instance();
-        constraint_source.setup(f, printemps::model::ConstraintSense::Lower);
+        constraint_source.setup(f, printemps::model::ConstraintSense::Less);
 
-        auto constraint_result =
+        auto constraint =
             printemps::model::Constraint<int, double>::create_instance();
 
-        EXPECT_EQ(false, (constraint_result = constraint_source).is_linear());
+        EXPECT_FALSE((constraint = constraint_source).is_linear());
 
-        EXPECT_EQ(true, constraint_result.expression().sensitivities().empty());
-        EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Lower,
-                  constraint_result.sense());
-        EXPECT_EQ(0, constraint_result.constraint_value());
-        EXPECT_EQ(0, constraint_result.violation_value());
-        EXPECT_EQ(false, constraint_result.is_linear());
+        EXPECT_TRUE(constraint.expression().sensitivities().empty());
+        EXPECT_EQ(0, constraint.expression().constant_value());
+        EXPECT_EQ(printemps::model::ConstraintSense::Less, constraint.sense());
+        EXPECT_EQ(0, constraint.constraint_value());
+        EXPECT_EQ(0, constraint.violation_value());
+        EXPECT_FALSE(constraint.is_linear());
 
         auto value = random_integer();
         variable   = value;
 
         auto expected_value = sensitivity * value + constant - target;
-        EXPECT_EQ(expected_value, constraint_result.evaluate_constraint());
-        constraint_result.update();
-        EXPECT_EQ(expected_value, constraint_result.constraint_value());
+        EXPECT_EQ(expected_value, constraint.evaluate_constraint());
+        constraint.update();
+        EXPECT_EQ(expected_value, constraint.constraint_value());
     }
 
     /// Equal
@@ -1277,53 +1375,52 @@ TEST_F(TestConstraint, operator_equal_function) {
         auto constraint_source =
             printemps::model::Constraint<int, double>::create_instance();
         constraint_source.setup(f, printemps::model::ConstraintSense::Equal);
-        auto constraint_result =
+        auto constraint =
             printemps::model::Constraint<int, double>::create_instance();
 
-        EXPECT_EQ(false, (constraint_result = constraint_source).is_linear());
+        EXPECT_FALSE((constraint = constraint_source).is_linear());
 
-        EXPECT_EQ(true, constraint_result.expression().sensitivities().empty());
-        EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Equal,
-                  constraint_result.sense());
-        EXPECT_EQ(0, constraint_result.constraint_value());
-        EXPECT_EQ(0, constraint_result.violation_value());
-        EXPECT_EQ(false, constraint_result.is_linear());
+        EXPECT_TRUE(constraint.expression().sensitivities().empty());
+        EXPECT_EQ(0, constraint.expression().constant_value());
+        EXPECT_EQ(printemps::model::ConstraintSense::Equal, constraint.sense());
+        EXPECT_EQ(0, constraint.constraint_value());
+        EXPECT_EQ(0, constraint.violation_value());
+        EXPECT_FALSE(constraint.is_linear());
 
         auto value = random_integer();
         variable   = value;
 
         auto expected_value = sensitivity * value + constant - target;
-        EXPECT_EQ(expected_value, constraint_result.evaluate_constraint());
-        constraint_result.update();
-        EXPECT_EQ(expected_value, constraint_result.constraint_value());
+        EXPECT_EQ(expected_value, constraint.evaluate_constraint());
+        constraint.update();
+        EXPECT_EQ(expected_value, constraint.constraint_value());
     }
 
-    /// Upper
+    /// Greater
     {
         auto constraint_source =
             printemps::model::Constraint<int, double>::create_instance();
-        constraint_source.setup(f, printemps::model::ConstraintSense::Upper);
-        auto constraint_result =
+        constraint_source.setup(f, printemps::model::ConstraintSense::Greater);
+        auto constraint =
             printemps::model::Constraint<int, double>::create_instance();
 
-        EXPECT_EQ(false, (constraint_result = constraint_source).is_linear());
+        EXPECT_FALSE((constraint = constraint_source).is_linear());
 
-        EXPECT_EQ(true, constraint_result.expression().sensitivities().empty());
-        EXPECT_EQ(0, constraint_result.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Upper,
-                  constraint_result.sense());
-        EXPECT_EQ(0, constraint_result.constraint_value());
-        EXPECT_EQ(0, constraint_result.violation_value());
-        EXPECT_EQ(false, constraint_result.is_linear());
+        EXPECT_TRUE(constraint.expression().sensitivities().empty());
+        EXPECT_EQ(0, constraint.expression().constant_value());
+        EXPECT_EQ(printemps::model::ConstraintSense::Greater,
+                  constraint.sense());
+        EXPECT_EQ(0, constraint.constraint_value());
+        EXPECT_EQ(0, constraint.violation_value());
+        EXPECT_FALSE(constraint.is_linear());
 
         auto value = random_integer();
         variable   = value;
 
         auto expected_value = sensitivity * value + constant - target;
-        EXPECT_EQ(expected_value, constraint_result.evaluate_constraint());
-        constraint_result.update();
-        EXPECT_EQ(expected_value, constraint_result.constraint_value());
+        EXPECT_EQ(expected_value, constraint.evaluate_constraint());
+        constraint.update();
+        EXPECT_EQ(expected_value, constraint.constraint_value());
     }
 }
 
@@ -1339,34 +1436,32 @@ TEST_F(TestConstraint, operator_equal_expression) {
 
     expression = sensitivity * variable + constant;
 
-    /// Lower
+    /// Less
     {
         auto constraint_source =
             printemps::model::Constraint<int, double>::create_instance();
         constraint_source.setup(expression - target,
-                                printemps::model::ConstraintSense::Lower);
-        auto constraint_result =
+                                printemps::model::ConstraintSense::Less);
+        auto constraint =
             printemps::model::Constraint<int, double>::create_instance();
 
-        EXPECT_EQ(true, (constraint_result = constraint_source).is_linear());
+        EXPECT_TRUE((constraint = constraint_source).is_linear());
 
         EXPECT_EQ(sensitivity,
-                  constraint_result.expression().sensitivities().at(&variable));
-        EXPECT_EQ(constant - target,
-                  constraint_result.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Lower,
-                  constraint_result.sense());
-        EXPECT_EQ(0, constraint_result.constraint_value());
-        EXPECT_EQ(0, constraint_result.violation_value());
-        EXPECT_EQ(true, constraint_result.is_linear());
+                  constraint.expression().sensitivities().at(&variable));
+        EXPECT_EQ(constant - target, constraint.expression().constant_value());
+        EXPECT_EQ(printemps::model::ConstraintSense::Less, constraint.sense());
+        EXPECT_EQ(0, constraint.constraint_value());
+        EXPECT_EQ(0, constraint.violation_value());
+        EXPECT_TRUE(constraint.is_linear());
 
         auto value = random_integer();
         variable   = value;
 
         auto expected_value = sensitivity * value + constant - target;
-        EXPECT_EQ(expected_value, constraint_result.evaluate_constraint());
-        constraint_result.update();
-        EXPECT_EQ(expected_value, constraint_result.constraint_value());
+        EXPECT_EQ(expected_value, constraint.evaluate_constraint());
+        constraint.update();
+        EXPECT_EQ(expected_value, constraint.constraint_value());
     }
 
     /// Equal
@@ -1375,58 +1470,55 @@ TEST_F(TestConstraint, operator_equal_expression) {
             printemps::model::Constraint<int, double>::create_instance();
         constraint_source.setup(expression - target,
                                 printemps::model::ConstraintSense::Equal);
-        auto constraint_result =
+        auto constraint =
             printemps::model::Constraint<int, double>::create_instance();
 
-        EXPECT_EQ(true, (constraint_result = constraint_source).is_linear());
+        EXPECT_TRUE((constraint = constraint_source).is_linear());
 
         EXPECT_EQ(sensitivity,
-                  constraint_result.expression().sensitivities().at(&variable));
-        EXPECT_EQ(constant - target,
-                  constraint_result.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Equal,
-                  constraint_result.sense());
-        EXPECT_EQ(0, constraint_result.constraint_value());
-        EXPECT_EQ(0, constraint_result.violation_value());
-        EXPECT_EQ(true, constraint_result.is_linear());
+                  constraint.expression().sensitivities().at(&variable));
+        EXPECT_EQ(constant - target, constraint.expression().constant_value());
+        EXPECT_EQ(printemps::model::ConstraintSense::Equal, constraint.sense());
+        EXPECT_EQ(0, constraint.constraint_value());
+        EXPECT_EQ(0, constraint.violation_value());
+        EXPECT_TRUE(constraint.is_linear());
 
         auto value = random_integer();
         variable   = value;
 
         auto expected_value = sensitivity * value + constant - target;
-        EXPECT_EQ(expected_value, constraint_result.evaluate_constraint());
-        constraint_result.update();
-        EXPECT_EQ(expected_value, constraint_result.constraint_value());
+        EXPECT_EQ(expected_value, constraint.evaluate_constraint());
+        constraint.update();
+        EXPECT_EQ(expected_value, constraint.constraint_value());
     }
 
-    /// Upper
+    /// Greater
     {
         auto constraint_source =
             printemps::model::Constraint<int, double>::create_instance();
         constraint_source.setup(expression - target,
-                                printemps::model::ConstraintSense::Upper);
-        auto constraint_result =
+                                printemps::model::ConstraintSense::Greater);
+        auto constraint =
             printemps::model::Constraint<int, double>::create_instance();
 
-        EXPECT_EQ(true, (constraint_result = constraint_source).is_linear());
+        EXPECT_TRUE((constraint = constraint_source).is_linear());
 
         EXPECT_EQ(sensitivity,
-                  constraint_result.expression().sensitivities().at(&variable));
-        EXPECT_EQ(constant - target,
-                  constraint_result.expression().constant_value());
-        EXPECT_EQ(printemps::model::ConstraintSense::Upper,
-                  constraint_result.sense());
-        EXPECT_EQ(0, constraint_result.constraint_value());
-        EXPECT_EQ(0, constraint_result.violation_value());
-        EXPECT_EQ(true, constraint_result.is_linear());
+                  constraint.expression().sensitivities().at(&variable));
+        EXPECT_EQ(constant - target, constraint.expression().constant_value());
+        EXPECT_EQ(printemps::model::ConstraintSense::Greater,
+                  constraint.sense());
+        EXPECT_EQ(0, constraint.constraint_value());
+        EXPECT_EQ(0, constraint.violation_value());
+        EXPECT_TRUE(constraint.is_linear());
 
         auto value = random_integer();
         variable   = value;
 
         auto expected_value = sensitivity * value + constant - target;
-        EXPECT_EQ(expected_value, constraint_result.evaluate_constraint());
-        constraint_result.update();
-        EXPECT_EQ(expected_value, constraint_result.constraint_value());
+        EXPECT_EQ(expected_value, constraint.evaluate_constraint());
+        constraint.update();
+        EXPECT_EQ(expected_value, constraint.constraint_value());
     }
 }
 

@@ -6,31 +6,17 @@
 #ifndef PRINTEMPS_MODEL_MODEL_H__
 #define PRINTEMPS_MODEL_MODEL_H__
 
-#include <vector>
-#include <string>
-#include <numeric>
-#include <functional>
-#include <cmath>
-
 #include "variable_sense.h"
 #include "constraint_sense.h"
-#include "move_sense.h"
 #include "range.h"
 #include "selection_mode.h"
 
-#include "move.h"
 #include "variable_proxy.h"
 #include "expression_proxy.h"
 #include "constraint_proxy.h"
 #include "objective.h"
-#include "value_proxy.h"
-#include "solution.h"
-#include "model_summary.h"
-#include "named_solution.h"
-#include "plain_solution.h"
-#include "solution_score.h"
+#include "../multi_array/value_proxy.h"
 #include "selection.h"
-#include "neighborhood.h"
 
 #include "expression_binary_operator.h"
 #include "constraint_binary_operator.h"
@@ -39,8 +25,14 @@
 #include "constraint_reference.h"
 #include "constraint_type_reference.h"
 
-#include "presolver.h"
-#include "verifier.h"
+#include "../neighborhood/neighborhood.h"
+#include "../presolver/presolver.h"
+#include "../verifier/verifier.h"
+
+#include "../solution/solution.h"
+#include "../solution/named_solution.h"
+#include "../solution/plain_solution.h"
+#include "../solution/solution_score.h"
 
 namespace printemps {
 namespace model {
@@ -85,8 +77,8 @@ class Model {
     ConstraintTypeReference<T_Variable, T_Expression>
         m_constraint_type_reference;
 
-    Neighborhood<T_Variable, T_Expression> m_neighborhood;
-    std::function<void(void)>              m_callback;
+    neighborhood::Neighborhood<T_Variable, T_Expression> m_neighborhood;
+    std::function<void(void)>                            m_callback;
 
     /*************************************************************************/
     Model(const Model &) = default;
@@ -552,7 +544,8 @@ class Model {
     /*************************************************************************/
     inline constexpr void minimize(
         const std::function<
-            T_Expression(const Move<T_Variable, T_Expression> &)> &a_FUNCTION) {
+            T_Expression(const neighborhood::Move<T_Variable, T_Expression> &)>
+            &a_FUNCTION) {
         auto objective =
             Objective<T_Variable, T_Expression>::create_instance(a_FUNCTION);
         m_objective            = objective;
@@ -585,7 +578,8 @@ class Model {
     /*************************************************************************/
     inline constexpr void maximize(
         const std::function<
-            T_Expression(const Move<T_Variable, T_Expression> &)> &a_FUNCTION) {
+            T_Expression(const neighborhood::Move<T_Variable, T_Expression> &)>
+            &a_FUNCTION) {
         auto objective =
             Objective<T_Variable, T_Expression>::create_instance(a_FUNCTION);
         m_objective            = objective;
@@ -620,12 +614,11 @@ class Model {
                          const bool a_IS_ENABLED_AGGREGATION_MOVE,          //
                          const bool a_IS_ENABLED_PRECEDENCE_MOVE,           //
                          const bool a_IS_ENABLED_VARIABLE_BOUND_MOVE,       //
-                         const bool a_IS_ENABLED_EXCLUSIVE_MOVE,            //
-                         const bool a_IS_ENABLED_CHAIN_MOVE,                //
                          const bool a_IS_ENABLED_USER_DEFINED_MOVE,         //
+                         const bool a_IS_ENABLED_CHAIN_MOVE,                //
                          const SelectionMode &a_SELECTION_MODE,             //
                          const bool           a_IS_ENABLED_PRINT) {
-        verify_problem(this, a_IS_ENABLED_PRINT);
+        verifier::verify_problem(this, a_IS_ENABLED_PRINT);
 
         this->setup_variable_related_constraints();
         this->setup_unique_name();
@@ -645,7 +638,7 @@ class Model {
          * decision variables implicitly fixed.
          */
         if (a_IS_ENABLED_PRESOLVE) {
-            presolve(this, a_IS_ENABLED_PRINT);
+            presolver::presolve(this, a_IS_ENABLED_PRINT);
         }
 
         /// Categorize again to reflect the presolving result.
@@ -659,22 +652,21 @@ class Model {
         this->setup_neighborhood(a_IS_ENABLED_AGGREGATION_MOVE,     //
                                  a_IS_ENABLED_PRECEDENCE_MOVE,      //
                                  a_IS_ENABLED_VARIABLE_BOUND_MOVE,  //
-                                 a_IS_ENABLED_EXCLUSIVE_MOVE,       //
                                  a_IS_ENABLED_USER_DEFINED_MOVE,    //
                                  a_IS_ENABLED_CHAIN_MOVE,           //
                                  a_IS_ENABLED_PRINT);
 
-        verify_and_correct_selection_variables_initial_values(  //
-            this,                                               //
-            a_IS_ENABLED_INITIAL_VALUE_CORRECTION,              //
+        verifier::verify_and_correct_selection_variables_initial_values(  //
+            this,                                                         //
+            a_IS_ENABLED_INITIAL_VALUE_CORRECTION,                        //
             a_IS_ENABLED_PRINT);
 
-        verify_and_correct_binary_variables_initial_values(
+        verifier::verify_and_correct_binary_variables_initial_values(
             this,                                   //
             a_IS_ENABLED_INITIAL_VALUE_CORRECTION,  //
             a_IS_ENABLED_PRINT);
 
-        verify_and_correct_integer_variables_initial_values(
+        verifier::verify_and_correct_integer_variables_initial_values(
             this,                                   //
             a_IS_ENABLED_INITIAL_VALUE_CORRECTION,  //
             a_IS_ENABLED_PRINT);
@@ -780,7 +772,7 @@ class Model {
             }
         }
 
-        if (m_neighborhood.is_enabled_user_defined_move()) {
+        if (m_neighborhood.user_defined().is_enabled()) {
             m_is_enabled_fast_evaluation = false;
         }
     }
@@ -816,7 +808,7 @@ class Model {
                 if (variable.is_fixed()) {
                     variable_reference.fixed_variable_ptrs.push_back(&variable);
                 } else {
-                    variable_reference.not_fixed_variable_ptrs.push_back(
+                    variable_reference.mutable_variable_ptrs.push_back(
                         &variable);
                 }
                 if (variable.sense() == VariableSense::Selection) {
@@ -1100,56 +1092,43 @@ class Model {
         const bool a_IS_ENABLED_AGGREGATION_MOVE,     //
         const bool a_IS_ENABLED_PRECEDENCE_MOVE,      //
         const bool a_IS_ENABLED_VARIABLE_BOUND_MOVE,  //
-        const bool a_IS_ENABLED_EXCLUSIVE_MOVE,       //
-        const bool a_IS_ENABLED_CHAIN_MOVE,           //
         const bool a_IS_ENABLED_USER_DEFINED_MOVE,    //
+        const bool a_IS_ENABLED_CHAIN_MOVE,           //
         const bool a_IS_ENABLED_PRINT) {
         utility::print_single_line(a_IS_ENABLED_PRINT);
         utility::print_message("Detecting the neighborhood structure...",
                                a_IS_ENABLED_PRINT);
-        bool has_fixed_variables = this->number_of_fixed_variables() > 0;
-        bool has_selection_variables =
-            this->number_of_selection_variables() > 0;
 
-        m_neighborhood.set_has_fixed_variables(has_fixed_variables);
-        m_neighborhood.set_has_selection_variables(has_selection_variables);
-
-        m_neighborhood.setup_binary_move_updater(
+        m_neighborhood.binary().setup(
             m_variable_reference.binary_variable_ptrs);
 
-        m_neighborhood.setup_integer_move_updater(
+        m_neighborhood.integer().setup(
             m_variable_reference.integer_variable_ptrs);
 
-        m_neighborhood.setup_selection_move_updater(
+        m_neighborhood.selection().setup(
             m_variable_reference.selection_variable_ptrs);
 
         if (a_IS_ENABLED_AGGREGATION_MOVE) {
-            m_neighborhood.setup_aggregation_move_updater(
+            m_neighborhood.aggregation().setup(
                 m_constraint_type_reference.aggregation_ptrs);
         }
 
         if (a_IS_ENABLED_PRECEDENCE_MOVE) {
-            m_neighborhood.setup_precedence_move_updater(
+            m_neighborhood.precedence().setup(
                 m_constraint_type_reference.precedence_ptrs);
         }
 
-        if (a_IS_ENABLED_EXCLUSIVE_MOVE) {
-            m_neighborhood.setup_exclusive_move_updater(
-                m_constraint_type_reference.set_partitioning_ptrs,  //
-                m_constraint_type_reference.set_packing_ptrs);
-        }
-
         if (a_IS_ENABLED_VARIABLE_BOUND_MOVE) {
-            m_neighborhood.setup_variable_bound_move_updater(
+            m_neighborhood.variable_bound().setup(
                 m_constraint_type_reference.variable_bound_ptrs);
         }
 
         if (a_IS_ENABLED_CHAIN_MOVE) {
-            m_neighborhood.setup_chain_move_updater();
+            m_neighborhood.chain().setup();
         }
 
         if (a_IS_ENABLED_USER_DEFINED_MOVE) {
-            m_neighborhood.setup_user_defined_move_updater();
+            m_neighborhood.user_defined().setup();
         }
 
         utility::print_message("Done.", a_IS_ENABLED_PRINT);
@@ -1335,20 +1314,20 @@ class Model {
 
     /*************************************************************************/
     constexpr void import_variable_values(
-        const std::vector<ValueProxy<T_Variable>> &a_PROXIES) {
+        const std::vector<multi_array::ValueProxy<T_Variable>> &a_PROXIES) {
         for (auto &&proxy : m_variable_proxies) {
             for (auto &&variable : proxy.flat_indexed_variables()) {
                 int proxy_index = variable.proxy_index();
                 int flat_index  = variable.flat_index();
-                variable.set_value_if_not_fixed(
+                variable.set_value_if_mutable(
                     a_PROXIES[proxy_index].flat_indexed_values(flat_index));
             }
         }
-        verify_and_correct_selection_variables_initial_values(  //
+        verifier::verify_and_correct_selection_variables_initial_values(  //
             this, false, false);
-        verify_and_correct_binary_variables_initial_values(  //
+        verifier::verify_and_correct_binary_variables_initial_values(  //
             this, false, false);
-        verify_and_correct_integer_variables_initial_values(  //
+        verifier::verify_and_correct_integer_variables_initial_values(  //
             this, false, false);
     }
 
@@ -1378,7 +1357,8 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void update(const Move<T_Variable, T_Expression> &a_MOVE) {
+    constexpr void update(
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) {
         /**
          * Update in order of objective, constraints -> expressions ->
          * variables.
@@ -1387,7 +1367,7 @@ class Model {
             m_objective.update(a_MOVE);
         }
 
-        if (m_neighborhood.is_enabled_user_defined_move()) {
+        if (m_neighborhood.user_defined().is_enabled()) {
             for (auto &&proxy : m_constraint_proxies) {
                 for (auto &&constraint : proxy.flat_indexed_constraints()) {
                     if (constraint.is_enabled()) {
@@ -1410,10 +1390,10 @@ class Model {
         }
 
         for (auto &&alteration : a_MOVE.alterations) {
-            alteration.first->set_value_if_not_fixed(alteration.second);
+            alteration.first->set_value_if_mutable(alteration.second);
         }
 
-        if (a_MOVE.sense == MoveSense::Selection) {
+        if (a_MOVE.sense == neighborhood::MoveSense::Selection) {
             a_MOVE.alterations[1].first->select();
         }
 
@@ -1499,9 +1479,6 @@ class Model {
     constexpr void update_variable_feasibility_improvability(
         const std::vector<Constraint<T_Variable, T_Expression> *>
             &a_CONSTRAINT_PTRS) const noexcept {
-        const int MASK_LOWER_OR_EQUAL = 0b10;
-        const int MASK_UPPER_OR_EQUAL = 0b11;
-
         const int CONSTRAINTS_SIZE = a_CONSTRAINT_PTRS.size();
         for (auto i = 0; i < CONSTRAINTS_SIZE; i++) {
             const auto constraint_ptr = a_CONSTRAINT_PTRS[i];
@@ -1515,8 +1492,8 @@ class Model {
                 constraint_ptr->expression().sensitivities();
             const auto &constraint_value = constraint_ptr->constraint_value();
 
-            if (constraint_value > 0) {
-                if ((constraint_ptr->sense() & MASK_LOWER_OR_EQUAL) == 0) {
+            if (constraint_value > constant::EPSILON) {
+                if (constraint_ptr->is_less_or_equal()) {
                     for (const auto &sensitivity : sensitivities) {
                         const auto &variable_ptr = sensitivity.first;
                         const auto &coefficient  = sensitivity.second;
@@ -1539,8 +1516,8 @@ class Model {
                         }
                     }
                 }
-            } else if (constraint_value < 0) {
-                if ((constraint_ptr->sense() & MASK_UPPER_OR_EQUAL)) {
+            } else if (constraint_value < -constant::EPSILON) {
+                if (constraint_ptr->is_greater_or_equal()) {
                     for (const auto &sensitivity : sensitivities) {
                         const auto &variable_ptr = sensitivity.first;
                         const auto &coefficient  = sensitivity.second;
@@ -1580,26 +1557,27 @@ class Model {
     }
 
     /*************************************************************************/
-    inline SolutionScore evaluate(
-        const Move<T_Variable, T_Expression> &a_MOVE) const noexcept {
-        SolutionScore score;
+    inline solution::SolutionScore evaluate(
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
+        const noexcept {
+        solution::SolutionScore score;
         this->evaluate(&score, a_MOVE);
         return score;
     }
 
     /*************************************************************************/
-    inline SolutionScore evaluate(const Move<T_Variable, T_Expression> &a_MOVE,
-                                  const SolutionScore &a_CURRENT_SCORE) const
-        noexcept {
-        SolutionScore score;
+    inline solution::SolutionScore evaluate(
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE,
+        const solution::SolutionScore &a_CURRENT_SCORE) const noexcept {
+        solution::SolutionScore score;
         this->evaluate(&score, a_MOVE, a_CURRENT_SCORE);
         return score;
     }
 
     /*************************************************************************/
-    constexpr void evaluate(SolutionScore *a_score_ptr,  //
-                            const Move<T_Variable, T_Expression> &a_MOVE) const
-        noexcept {
+    constexpr void evaluate(solution::SolutionScore *a_score_ptr,  //
+                            const neighborhood::Move<T_Variable, T_Expression>
+                                &a_MOVE) const noexcept {
         double total_violation = 0.0;
         double local_penalty   = 0.0;
         double global_penalty  = 0.0;
@@ -1616,15 +1594,30 @@ class Model {
                 if (!constraints[j].is_enabled()) {
                     continue;
                 }
-                double violation = constraints[j].evaluate_violation(a_MOVE);
+                double constraint_value =
+                    constraints[j].evaluate_constraint(a_MOVE);
+                double positive_part = std::max(constraint_value, 0.0);
+                double negative_part = -std::min(constraint_value, 0.0);
+                double violation     = 0.0;
+                double local_penalty_coefficient = 0.0;
+
+                if (constraints[j].is_less_or_equal() && positive_part > 0) {
+                    violation = positive_part;
+                    local_penalty_coefficient =
+                        constraints[j].local_penalty_coefficient_less();
+                } else if (constraints[j].is_greater_or_equal() &&
+                           negative_part > 0) {
+                    violation = negative_part;
+                    local_penalty_coefficient =
+                        constraints[j].local_penalty_coefficient_greater();
+                }
 
                 if (violation < constraints[j].violation_value()) {
                     is_feasibility_improvable = true;
                 }
 
                 total_violation += violation;
-                local_penalty +=
-                    violation * constraints[j].local_penalty_coefficient();
+                local_penalty += violation * local_penalty_coefficient;
                 global_penalty +=
                     violation * constraints[j].global_penalty_coefficient();
             }
@@ -1652,10 +1645,10 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void evaluate(SolutionScore *a_score_ptr,  //
-                            const Move<T_Variable, T_Expression> &a_MOVE,
-                            const SolutionScore &a_CURRENT_SCORE) const
-        noexcept {
+    constexpr void evaluate(
+        solution::SolutionScore *                           a_score_ptr,  //
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE,
+        const solution::SolutionScore &a_CURRENT_SCORE) const noexcept {
         bool is_feasibility_improvable = false;
 
         double total_violation = a_CURRENT_SCORE.total_violation;
@@ -1666,18 +1659,42 @@ class Model {
             if (!constraint_ptr->is_enabled()) {
                 continue;
             }
-            double violation_diff =
-                constraint_ptr->evaluate_violation_diff(a_MOVE);
-            total_violation += violation_diff;
 
-            if (violation_diff < 0) {
-                is_feasibility_improvable = true;
+            const double constraint_value =
+                constraint_ptr->evaluate_constraint(a_MOVE);
+            const double positive_part = std::max(constraint_value, 0.0);
+            const double negative_part = -std::min(constraint_value, 0.0);
+
+            if (constraint_ptr->is_less_or_equal()) {
+                const double violation_diff =
+                    positive_part - constraint_ptr->positive_part();
+                total_violation += violation_diff;
+
+                if (violation_diff < 0) {
+                    is_feasibility_improvable = true;
+                }
+
+                local_penalty +=
+                    violation_diff *
+                    constraint_ptr->local_penalty_coefficient_less();
+                global_penalty += violation_diff *
+                                  constraint_ptr->global_penalty_coefficient();
             }
+            if (constraint_ptr->is_greater_or_equal()) {
+                const double violation_diff =
+                    negative_part - constraint_ptr->negative_part();
+                total_violation += violation_diff;
 
-            local_penalty +=
-                violation_diff * constraint_ptr->local_penalty_coefficient();
-            global_penalty +=
-                violation_diff * constraint_ptr->global_penalty_coefficient();
+                if (violation_diff < 0) {
+                    is_feasibility_improvable = true;
+                }
+
+                local_penalty +=
+                    violation_diff *
+                    constraint_ptr->local_penalty_coefficient_greater();
+                global_penalty += violation_diff *
+                                  constraint_ptr->global_penalty_coefficient();
+            }
         }
 
         double objective             = 0.0;
@@ -1704,7 +1721,7 @@ class Model {
 
     /*************************************************************************/
     constexpr double compute_lagrangian(
-        const std::vector<model::ValueProxy<double>>
+        const std::vector<multi_array::ValueProxy<double>>
             &a_LAGRANGE_MULTIPLIER_PROXIES) const noexcept {
         double lagrangian = m_objective.value();
 
@@ -1722,13 +1739,14 @@ class Model {
 
     /*************************************************************************/
     template <class T_Value>
-    constexpr std::vector<ValueProxy<T_Value>>
+    constexpr std::vector<multi_array::ValueProxy<T_Value>>
     generate_variable_parameter_proxies(const T_Value a_VALUE) const {
-        std::vector<ValueProxy<T_Value>> variable_parameter_proxies;
+        std::vector<multi_array::ValueProxy<T_Value>>
+            variable_parameter_proxies;
 
         for (const auto &proxy : m_variable_proxies) {
-            ValueProxy<T_Value> variable_parameter_proxy(proxy.index(),
-                                                         proxy.shape());
+            multi_array::ValueProxy<T_Value> variable_parameter_proxy(
+                proxy.index(), proxy.shape());
             variable_parameter_proxy.fill(a_VALUE);
             int number_of_elements = proxy.number_of_elements();
             for (auto i = 0; i < number_of_elements; i++) {
@@ -1743,13 +1761,14 @@ class Model {
 
     /*************************************************************************/
     template <class T_Value>
-    constexpr std::vector<ValueProxy<T_Value>>
+    constexpr std::vector<multi_array::ValueProxy<T_Value>>
     generate_expression_parameter_proxies(const T_Value a_VALUE) const {
-        std::vector<ValueProxy<T_Value>> expression_parameter_proxies;
+        std::vector<multi_array::ValueProxy<T_Value>>
+            expression_parameter_proxies;
 
         for (const auto &proxy : m_expression_proxies) {
-            ValueProxy<T_Value> expression_parameter_proxy(proxy.index(),
-                                                           proxy.shape());
+            multi_array::ValueProxy<T_Value> expression_parameter_proxy(
+                proxy.index(), proxy.shape());
             expression_parameter_proxy.fill(a_VALUE);
             int number_of_elements = proxy.number_of_elements();
             for (auto i = 0; i < number_of_elements; i++) {
@@ -1763,13 +1782,14 @@ class Model {
 
     /*************************************************************************/
     template <class T_Value>
-    constexpr std::vector<ValueProxy<T_Value>>
+    constexpr std::vector<multi_array::ValueProxy<T_Value>>
     generate_constraint_parameter_proxies(const T_Value a_VALUE) const {
-        std::vector<ValueProxy<T_Value>> constraint_parameter_proxies;
+        std::vector<multi_array::ValueProxy<T_Value>>
+            constraint_parameter_proxies;
 
         for (const auto &proxy : m_constraint_proxies) {
-            ValueProxy<T_Value> constraint_parameter_proxy(proxy.index(),
-                                                           proxy.shape());
+            multi_array::ValueProxy<T_Value> constraint_parameter_proxy(
+                proxy.index(), proxy.shape());
             constraint_parameter_proxy.fill(a_VALUE);
             int number_of_elements = proxy.number_of_elements();
             for (auto i = 0; i < number_of_elements; i++) {
@@ -1782,12 +1802,13 @@ class Model {
     }
 
     /*************************************************************************/
-    std::vector<ValueProxy<double>> export_local_penalty_coefficient_proxies(
-        void) const {
-        std::vector<ValueProxy<double>> local_penalty_coefficient_proxies;
+    std::vector<multi_array::ValueProxy<double>>
+    export_local_penalty_coefficient_proxies(void) const {
+        std::vector<multi_array::ValueProxy<double>>
+            local_penalty_coefficient_proxies;
         for (const auto &proxy : m_constraint_proxies) {
-            ValueProxy<double> local_penalty_coefficient_proxy(proxy.index(),
-                                                               proxy.shape());
+            multi_array::ValueProxy<double> local_penalty_coefficient_proxy(
+                proxy.index(), proxy.shape());
 
             int number_of_elements = proxy.number_of_elements();
 
@@ -1795,8 +1816,10 @@ class Model {
                 local_penalty_coefficient_proxy.flat_indexed_names(i) =
                     proxy.flat_indexed_constraints(i).name();
                 local_penalty_coefficient_proxy.flat_indexed_values(i) =
-                    proxy.flat_indexed_constraints(i)
-                        .local_penalty_coefficient();
+                    std::max(proxy.flat_indexed_constraints(i)
+                                 .local_penalty_coefficient_less(),
+                             proxy.flat_indexed_constraints(i)
+                                 .local_penalty_coefficient_less());
             }
             local_penalty_coefficient_proxies.push_back(
                 local_penalty_coefficient_proxy);
@@ -1805,9 +1828,9 @@ class Model {
     }
 
     /*************************************************************************/
-    Solution<T_Variable, T_Expression> export_solution(void) const {
+    solution::Solution<T_Variable, T_Expression> export_solution(void) const {
         /// This method cannot be constexpr by clang.
-        Solution<T_Variable, T_Expression> solution;
+        solution::Solution<T_Variable, T_Expression> solution;
 
         /// Decision variables
         for (const auto &proxy : m_variable_proxies) {
@@ -1845,16 +1868,16 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr NamedSolution<T_Variable, T_Expression> export_named_solution(
-        void) const {
+    constexpr solution::NamedSolution<T_Variable, T_Expression>
+    export_named_solution(void) const {
         return this->convert_to_named_solution(this->export_solution());
     }
 
     /*************************************************************************/
-    NamedSolution<T_Variable, T_Expression> convert_to_named_solution(
-        const Solution<T_Variable, T_Expression> &a_SOLUTION) const {
+    solution::NamedSolution<T_Variable, T_Expression> convert_to_named_solution(
+        const solution::Solution<T_Variable, T_Expression> &a_SOLUTION) const {
         /// This method cannot be constexpr by clang.
-        NamedSolution<T_Variable, T_Expression> named_solution;
+        solution::NamedSolution<T_Variable, T_Expression> named_solution;
 
         int VARIABLE_PROXIES_SIZE   = m_variable_proxies.size();
         int EXPRESSION_PROXIES_SIZE = m_expression_proxies.size();
@@ -1884,21 +1907,28 @@ class Model {
                 a_SOLUTION.violation_value_proxies[i];
         }
 
-        named_solution.m_objective       = a_SOLUTION.objective;
-        named_solution.m_total_violation = a_SOLUTION.total_violation;
-        named_solution.m_is_feasible     = a_SOLUTION.is_feasible;
+        named_solution.m_name                  = m_name;
+        named_solution.m_number_of_variables   = this->number_of_variables();
+        named_solution.m_number_of_constraints = this->number_of_constraints();
+        named_solution.m_objective             = a_SOLUTION.objective;
+        named_solution.m_total_violation       = a_SOLUTION.total_violation;
+        named_solution.m_is_feasible           = a_SOLUTION.is_feasible;
 
         return named_solution;
     }
 
     /*************************************************************************/
-    PlainSolution<T_Variable, T_Expression> export_plain_solution(void) const {
-        PlainSolution<T_Variable, T_Expression> plain_solution;
+    solution::PlainSolution<T_Variable, T_Expression> export_plain_solution(
+        void) const {
+        solution::PlainSolution<T_Variable, T_Expression> plain_solution;
 
         /// Decision variables
         for (const auto &proxy : m_variable_proxies) {
             for (const auto &variable : proxy.flat_indexed_variables()) {
-                plain_solution.variables.push_back(variable.value());
+                if (variable.value() != 0) {
+                    plain_solution.variables[variable.name()] =
+                        variable.value();
+                }
             }
         }
 
@@ -1918,14 +1948,17 @@ class Model {
     }
 
     /*************************************************************************/
-    PlainSolution<T_Variable, T_Expression> convert_to_plain_solution(
-        const Solution<T_Variable, T_Expression> &a_SOLUTION) const {
-        PlainSolution<T_Variable, T_Expression> plain_solution;
+    solution::PlainSolution<T_Variable, T_Expression> convert_to_plain_solution(
+        const solution::Solution<T_Variable, T_Expression> &a_SOLUTION) const {
+        solution::PlainSolution<T_Variable, T_Expression> plain_solution;
 
         /// Decision variables
-        for (const auto &proxy : a_SOLUTION.variable_value_proxies) {
-            for (const auto &value : proxy.flat_indexed_values()) {
-                plain_solution.variables.push_back(value);
+        for (const auto &proxy : m_variable_proxies) {
+            for (const auto &variable : proxy.flat_indexed_variables()) {
+                if (variable.value() != 0) {
+                    plain_solution.variables[variable.name()] =
+                        variable.value();
+                }
             }
         }
 
@@ -1974,16 +2007,6 @@ class Model {
                 }
             }
         }
-    }
-
-    /*************************************************************************/
-    ModelSummary export_summary(void) const {
-        /// This method cannot be constexpr by clang.
-        ModelSummary summary;
-        summary.name                  = m_name;
-        summary.number_of_variables   = this->number_of_variables();
-        summary.number_of_constraints = this->number_of_constraints();
-        return summary;
     }
 
     /*************************************************************************/
@@ -2133,8 +2156,8 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr int number_of_not_fixed_variables(void) const {
-        return m_variable_reference.not_fixed_variable_ptrs.size();
+    inline constexpr int number_of_mutable_variables(void) const {
+        return m_variable_reference.mutable_variable_ptrs.size();
     }
 
     /*************************************************************************/
@@ -2188,8 +2211,8 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr Neighborhood<T_Variable, T_Expression> &neighborhood(
-        void) {
+    inline constexpr neighborhood::Neighborhood<T_Variable, T_Expression>
+        &neighborhood(void) {
         return m_neighborhood;
     }
 };

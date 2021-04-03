@@ -79,8 +79,8 @@ int main(void) {
     /*************************************************************************/
     /// Objective function definition
     /*************************************************************************/
-    std::function<double(const printemps::model::IPMove&)> f =
-        [&qap, &p](const printemps::model::IPMove& a_MOVE) {
+    std::function<double(const printemps::neighborhood::IPMove&)> f =
+        [&qap, &p](const printemps::neighborhood::IPMove& a_MOVE) {
             double f = 0.0;
 
             std::vector<int> p_values(qap.N);
@@ -116,61 +116,62 @@ int main(void) {
      * An user-defined neighborhood is defined by a lambda function which
      * updates candidate moves from the current solution to the next solution.
      * The candidate moves are expressed by std::vector of objects of
-     * "printemps::model::IPMove". A "printemps::model::IPMove" object contains
-     * a member "alterations" typed by std::vector of objects of
+     * "printemps:: neighborhood::IPMove". A "printemps:: neighborhood::IPMove"
+     * object contains a member "alterations" typed by std::vector of objects of
      * "printemps::model::Alteration". A "printemps::model::Alteration" object
      * is an alias of std::tuple of which the first element is a pointer to a
      * decision variable and the second element is a new value after movement.
      */
 
-    std::function<void(std::vector<printemps::model::IPMove>*)> move_updater =
-        [&qap, &p](std::vector<printemps::model::IPMove>* a_moves) {
-            /**
-             * This lambda function defines user-defined moves for "swap"
-             * neighborhood which are obtained by swaps between two or three
-             * elements in a permutation.
-             */
-            a_moves->resize(qap.N * (qap.N - 1) / 2 +
-                            qap.N * (qap.N - 1) * (qap.N - 2) / 3);
-            auto count = 0;
+    std::function<void(std::vector<printemps::neighborhood::IPMove>*)>
+        move_updater =
+            [&qap, &p](std::vector<printemps::neighborhood::IPMove>* a_moves) {
+                /**
+                 * This lambda function defines user-defined moves for "swap"
+                 * neighborhood which are obtained by swaps between two or three
+                 * elements in a permutation.
+                 */
+                a_moves->resize(qap.N * (qap.N - 1) / 2 +
+                                qap.N * (qap.N - 1) * (qap.N - 2) / 3);
+                auto count = 0;
 
-            /// Swap moves between two components
-            for (auto n = 0; n < qap.N; n++) {
-                for (auto m = n + 1; m < qap.N; m++) {
-                    (*a_moves)[count].alterations.clear();
-                    (*a_moves)[count].alterations.emplace_back(&p(n),
-                                                               p(m).value());
-                    (*a_moves)[count].alterations.emplace_back(&p(m),
-                                                               p(n).value());
-                    count++;
-                }
-            }
-            /// Swap moves between three components
-            for (auto n = 0; n < qap.N; n++) {
-                for (auto m = n + 1; m < qap.N; m++) {
-                    for (auto k = m + 1; k < qap.N; k++) {
+                /// Swap moves between two components
+                for (auto n = 0; n < qap.N; n++) {
+                    for (auto m = n + 1; m < qap.N; m++) {
                         (*a_moves)[count].alterations.clear();
                         (*a_moves)[count].alterations.emplace_back(
                             &p(n), p(m).value());
                         (*a_moves)[count].alterations.emplace_back(
-                            &p(m), p(k).value());
-                        (*a_moves)[count].alterations.emplace_back(
-                            &p(k), p(n).value());
-                        count++;
-
-                        (*a_moves)[count].alterations.clear();
-                        (*a_moves)[count].alterations.emplace_back(
-                            &p(n), p(k).value());
-                        (*a_moves)[count].alterations.emplace_back(
                             &p(m), p(n).value());
-                        (*a_moves)[count].alterations.emplace_back(
-                            &p(k), p(m).value());
                         count++;
                     }
                 }
-            }
-        };
-    model.neighborhood().set_user_defined_move_updater(move_updater);
+                /// Swap moves between three components
+                for (auto n = 0; n < qap.N; n++) {
+                    for (auto m = n + 1; m < qap.N; m++) {
+                        for (auto k = m + 1; k < qap.N; k++) {
+                            (*a_moves)[count].alterations.clear();
+                            (*a_moves)[count].alterations.emplace_back(
+                                &p(n), p(m).value());
+                            (*a_moves)[count].alterations.emplace_back(
+                                &p(m), p(k).value());
+                            (*a_moves)[count].alterations.emplace_back(
+                                &p(k), p(n).value());
+                            count++;
+
+                            (*a_moves)[count].alterations.clear();
+                            (*a_moves)[count].alterations.emplace_back(
+                                &p(n), p(k).value());
+                            (*a_moves)[count].alterations.emplace_back(
+                                &p(m), p(n).value());
+                            (*a_moves)[count].alterations.emplace_back(
+                                &p(k), p(m).value());
+                            count++;
+                        }
+                    }
+                }
+            };
+    model.neighborhood().user_defined().set_move_updater(move_updater);
 
     /*************************************************************************/
     /// Run solver

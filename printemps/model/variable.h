@@ -6,9 +6,15 @@
 #ifndef PRINTEMPS_MODEL_VARIABLE_H__
 #define PRINTEMPS_MODEL_VARIABLE_H__
 
-#include <unordered_map>
-#include <unordered_set>
-#include "abstract_multi_array_element.h"
+#include "../multi_array/abstract_multi_array_element.h"
+
+namespace printemps {
+namespace neighborhood {
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+struct Move;
+}  // namespace neighborhood
+}  // namespace printemps
 
 namespace printemps {
 namespace model {
@@ -26,7 +32,7 @@ struct Selection;
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-class Variable : public AbstractMultiArrayElement {
+class Variable : public multi_array::AbstractMultiArrayElement {
     /**
      * [Access controls for special member functions]
      *  -- Default constructor : default, private
@@ -97,7 +103,7 @@ class Variable : public AbstractMultiArrayElement {
 
     /*************************************************************************/
     void initialize(void) {
-        AbstractMultiArrayElement::initialize();
+        multi_array::AbstractMultiArrayElement::initialize();
         m_is_fixed = false;
         m_value    = 0;
 
@@ -130,7 +136,7 @@ class Variable : public AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr void set_value_if_not_fixed(const T_Variable a_VALUE) {
+    inline constexpr void set_value_if_mutable(const T_Variable a_VALUE) {
         if (!m_is_fixed) {
             m_value = a_VALUE;
             this->update_margin();
@@ -160,7 +166,8 @@ class Variable : public AbstractMultiArrayElement {
 
     /*************************************************************************/
     inline constexpr T_Expression evaluate(
-        const Move<T_Variable, T_Expression> &a_MOVE) const noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
+        const noexcept {
         if (a_MOVE.alterations.size() == 0) {
             return this->value();
         }

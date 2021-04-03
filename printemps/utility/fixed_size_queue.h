@@ -6,9 +6,6 @@
 #ifndef PRINTEMPS_UTILITY_FIXED_SIZE_QUEUE_H__
 #define PRINTEMPS_UTILITY_FIXED_SIZE_QUEUE_H__
 
-#include <algorithm>
-#include <deque>
-
 namespace printemps {
 namespace utility {
 /*****************************************************************************/

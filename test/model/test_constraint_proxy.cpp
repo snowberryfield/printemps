@@ -187,13 +187,13 @@ TEST_F(TestConstraintProxy, scalar_is_enabled) {
     printemps::model::Model<int, double> model;
     auto& constraint_proxy = model.create_constraint("e");
     constraint_proxy.disable();
-    EXPECT_EQ(false, constraint_proxy.is_enabled());
+    EXPECT_FALSE(constraint_proxy.is_enabled());
 
     constraint_proxy.enable();
-    EXPECT_EQ(true, constraint_proxy.is_enabled());
+    EXPECT_TRUE(constraint_proxy.is_enabled());
 
     constraint_proxy.disable();
-    EXPECT_EQ(false, constraint_proxy.is_enabled());
+    EXPECT_FALSE(constraint_proxy.is_enabled());
 }
 
 /*****************************************************************************/
@@ -450,18 +450,18 @@ TEST_F(TestConstraintProxy, one_dimensional_is_enabled) {
     auto& constraint_proxy = model.create_constraints("e", 2);
     constraint_proxy.disable();
     ASSERT_THROW(constraint_proxy.is_enabled(), std::logic_error);
-    EXPECT_EQ(false, constraint_proxy[0].is_enabled());
-    EXPECT_EQ(false, constraint_proxy[1].is_enabled());
+    EXPECT_FALSE(constraint_proxy[0].is_enabled());
+    EXPECT_FALSE(constraint_proxy[1].is_enabled());
 
     constraint_proxy.enable();
     ASSERT_THROW(constraint_proxy.is_enabled(), std::logic_error);
-    EXPECT_EQ(true, constraint_proxy[0].is_enabled());
-    EXPECT_EQ(true, constraint_proxy[1].is_enabled());
+    EXPECT_TRUE(constraint_proxy[0].is_enabled());
+    EXPECT_TRUE(constraint_proxy[1].is_enabled());
 
     constraint_proxy.disable();
     ASSERT_THROW(constraint_proxy.is_enabled(), std::logic_error);
-    EXPECT_EQ(false, constraint_proxy[0].is_enabled());
-    EXPECT_EQ(false, constraint_proxy[1].is_enabled());
+    EXPECT_FALSE(constraint_proxy[0].is_enabled());
+    EXPECT_FALSE(constraint_proxy[1].is_enabled());
 }
 
 /*****************************************************************************/
@@ -725,18 +725,18 @@ TEST_F(TestConstraintProxy, two_dimensional_is_enabled) {
     auto& constraint_proxy = model.create_constraints("c", {2, 3});
     constraint_proxy.disable();
     ASSERT_THROW(constraint_proxy.is_enabled(), std::logic_error);
-    EXPECT_EQ(false, constraint_proxy[0].is_enabled());
-    EXPECT_EQ(false, constraint_proxy[2 * 3 - 1].is_enabled());
+    EXPECT_FALSE(constraint_proxy[0].is_enabled());
+    EXPECT_FALSE(constraint_proxy[2 * 3 - 1].is_enabled());
 
     constraint_proxy.enable();
     ASSERT_THROW(constraint_proxy.is_enabled(), std::logic_error);
-    EXPECT_EQ(true, constraint_proxy[0].is_enabled());
-    EXPECT_EQ(true, constraint_proxy[2 * 3 - 1].is_enabled());
+    EXPECT_TRUE(constraint_proxy[0].is_enabled());
+    EXPECT_TRUE(constraint_proxy[2 * 3 - 1].is_enabled());
 
     constraint_proxy.disable();
     ASSERT_THROW(constraint_proxy.is_enabled(), std::logic_error);
-    EXPECT_EQ(false, constraint_proxy[0].is_enabled());
-    EXPECT_EQ(false, constraint_proxy[2 * 3 - 1].is_enabled());
+    EXPECT_FALSE(constraint_proxy[0].is_enabled());
+    EXPECT_FALSE(constraint_proxy[2 * 3 - 1].is_enabled());
 }
 
 /*****************************************************************************/

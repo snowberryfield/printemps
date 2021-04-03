@@ -3,15 +3,16 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_MODEL_VERIFIER_H__
-#define PRINTEMPS_MODEL_VERIFIER_H__
+#ifndef PRINTEMPS_VERIFIER_VERIFIER_H__
+#define PRINTEMPS_VERIFIER_VERIFIER_H__
 
 namespace printemps {
-namespace model {
+namespace verifier {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-constexpr void verify_problem(Model<T_Variable, T_Expression> *a_model,  //
-                              const bool a_IS_ENABLED_PRINT) {
+constexpr void verify_problem(
+    model::Model<T_Variable, T_Expression> *a_model,  //
+    const bool                              a_IS_ENABLED_PRINT) {
     utility::print_single_line(a_IS_ENABLED_PRINT);
     utility::print_message("Verifying the problem...", a_IS_ENABLED_PRINT);
 
@@ -32,9 +33,9 @@ constexpr void verify_problem(Model<T_Variable, T_Expression> *a_model,  //
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 constexpr void verify_and_correct_selection_variables_initial_values(
-    Model<T_Variable, T_Expression> *a_model,                 //
-    const bool                       a_IS_ENABLED_CORRECTON,  //
-    const bool                       a_IS_ENABLED_PRINT) {
+    model::Model<T_Variable, T_Expression> *a_model,                 //
+    const bool                              a_IS_ENABLED_CORRECTON,  //
+    const bool                              a_IS_ENABLED_PRINT) {
     utility::print_single_line(a_IS_ENABLED_PRINT);
     utility::print_message(
         "Verifying the initial values of the binary decision variables "
@@ -42,13 +43,14 @@ constexpr void verify_and_correct_selection_variables_initial_values(
         a_IS_ENABLED_PRINT);
 
     for (auto &&selection : a_model->selections()) {
-        std::vector<Variable<T_Variable, T_Expression> *>
+        std::vector<model::Variable<T_Variable, T_Expression> *>
             fixed_selected_variable_ptrs;
-        std::vector<Variable<T_Variable, T_Expression> *>
+        std::vector<model::Variable<T_Variable, T_Expression> *>
             selected_variable_ptrs;
-        std::vector<Variable<T_Variable, T_Expression> *>
-                                                          fixed_invalid_variable_ptrs;
-        std::vector<Variable<T_Variable, T_Expression> *> invalid_variable_ptrs;
+        std::vector<model::Variable<T_Variable, T_Expression> *>
+            fixed_invalid_variable_ptrs;
+        std::vector<model::Variable<T_Variable, T_Expression> *>
+            invalid_variable_ptrs;
 
         for (auto &&variable_ptr : selection.variable_ptrs) {
             if (variable_ptr->value() == 1) {
@@ -95,7 +97,7 @@ constexpr void verify_and_correct_selection_variables_initial_values(
                     T_Variable old_value = variable_ptr->value();
                     T_Variable new_value = 0;
 
-                    variable_ptr->set_value_if_not_fixed(new_value);
+                    variable_ptr->set_value_if_mutable(new_value);
 
                     utility::print_warning(
                         "The initial value " + variable_ptr->name() + " = " +
@@ -118,8 +120,8 @@ constexpr void verify_and_correct_selection_variables_initial_values(
          */
         if (selected_variable_ptrs.size() > 1) {
             if (a_IS_ENABLED_CORRECTON) {
-                Variable<T_Variable, T_Expression> *selected_variable_ptr =
-                    nullptr;
+                model::Variable<T_Variable, T_Expression>
+                    *selected_variable_ptr = nullptr;
                 if (fixed_selected_variable_ptrs.size() == 1) {
                     selected_variable_ptr =
                         fixed_selected_variable_ptrs.front();
@@ -132,7 +134,7 @@ constexpr void verify_and_correct_selection_variables_initial_values(
                         T_Variable old_value = 1;
                         T_Variable new_value = 0;
 
-                        variable_ptr->set_value_if_not_fixed(new_value);
+                        variable_ptr->set_value_if_mutable(new_value);
 
                         utility::print_warning(
                             "The initial value " + variable_ptr->name() +
@@ -143,7 +145,7 @@ constexpr void verify_and_correct_selection_variables_initial_values(
                     }
                 }
 
-                selected_variable_ptr->set_value_if_not_fixed(1);
+                selected_variable_ptr->set_value_if_mutable(1);
                 selected_variable_ptr->select();
 
             } else {
@@ -163,7 +165,7 @@ constexpr void verify_and_correct_selection_variables_initial_values(
                 bool       is_corrected = false;
                 for (auto &&variable_ptr : selection.variable_ptrs) {
                     if (!variable_ptr->is_fixed()) {
-                        variable_ptr->set_value_if_not_fixed(new_value);
+                        variable_ptr->set_value_if_mutable(new_value);
 
                         utility::print_warning(
                             "The initial value " + variable_ptr->name() +
@@ -196,9 +198,9 @@ constexpr void verify_and_correct_selection_variables_initial_values(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 constexpr void verify_and_correct_binary_variables_initial_values(
-    Model<T_Variable, T_Expression> *a_model,                 //
-    const bool                       a_IS_ENABLED_CORRECTON,  //
-    const bool                       a_IS_ENABLED_PRINT) {
+    model::Model<T_Variable, T_Expression> *a_model,                 //
+    const bool                              a_IS_ENABLED_CORRECTON,  //
+    const bool                              a_IS_ENABLED_PRINT) {
     utility::print_single_line(a_IS_ENABLED_PRINT);
     utility::print_message(
         "Verifying the initial values of the binary decision variables.",
@@ -206,7 +208,7 @@ constexpr void verify_and_correct_binary_variables_initial_values(
 
     for (auto &&proxy : a_model->variable_proxies()) {
         for (auto &&variable : proxy.flat_indexed_variables()) {
-            if (variable.sense() == VariableSense::Binary) {
+            if (variable.sense() == model::VariableSense::Binary) {
                 if (variable.value() != 0 && variable.value() != 1) {
                     if (variable.is_fixed()) {
                         throw std::logic_error(utility::format_error_location(
@@ -223,7 +225,7 @@ constexpr void verify_and_correct_binary_variables_initial_values(
                             new_value = variable.upper_bound();
                         }
 
-                        variable.set_value_if_not_fixed(new_value);
+                        variable.set_value_if_mutable(new_value);
 
                         utility::print_warning(
                             "The initial value " + variable.name() + " = " +
@@ -246,9 +248,9 @@ constexpr void verify_and_correct_binary_variables_initial_values(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 constexpr void verify_and_correct_integer_variables_initial_values(
-    Model<T_Variable, T_Expression> *a_model,                 //
-    const bool                       a_IS_ENABLED_CORRECTON,  //
-    const bool                       a_IS_ENABLED_PRINT) {
+    model::Model<T_Variable, T_Expression> *a_model,                 //
+    const bool                              a_IS_ENABLED_CORRECTON,  //
+    const bool                              a_IS_ENABLED_PRINT) {
     utility::print_single_line(a_IS_ENABLED_PRINT);
     utility::print_message(
         "Verifying the initial values of the integer decision variables.",
@@ -256,7 +258,7 @@ constexpr void verify_and_correct_integer_variables_initial_values(
 
     for (auto &&proxy : a_model->variable_proxies()) {
         for (auto &&variable : proxy.flat_indexed_variables()) {
-            if (variable.sense() == VariableSense::Integer &&
+            if (variable.sense() == model::VariableSense::Integer &&
                 (variable.value() < variable.lower_bound() ||
                  variable.value() > variable.upper_bound())) {
                 if (variable.is_fixed()) {
@@ -274,7 +276,7 @@ constexpr void verify_and_correct_integer_variables_initial_values(
                         new_value = variable.upper_bound();
                     }
 
-                    variable.set_value_if_not_fixed(new_value);
+                    variable.set_value_if_mutable(new_value);
 
                     utility::print_warning(
                         "The initial value " + variable.name() + " = " +
@@ -292,7 +294,7 @@ constexpr void verify_and_correct_integer_variables_initial_values(
     }
     utility::print_message("Done.", a_IS_ENABLED_PRINT);
 }
-}  // namespace model
+}  // namespace verifier
 }  // namespace printemps
 #endif
 /*****************************************************************************/
