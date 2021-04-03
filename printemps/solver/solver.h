@@ -537,6 +537,10 @@ Result<T_Variable, T_Expression> solve(
     int number_of_initial_modification = 0;
     int iteration_max = master_option.tabu_search.iteration_max;
 
+    double current_bias        = memory.bias();
+    double previous_bias       = current_bias;
+    int    bias_increase_count = 0;
+
     ImprovabilityScreeningMode improvability_screening_mode =
         master_option.improvability_screening_mode;
     if (improvability_screening_mode == ImprovabilityScreeningMode::Automatic) {
@@ -639,6 +643,9 @@ Result<T_Variable, T_Expression> solve(
          * Update the memory.
          */
         memory = result.memory;
+
+        previous_bias = current_bias;
+        current_bias  = memory.bias();
 
         /**
          * Update the termination status.
@@ -901,6 +908,20 @@ Result<T_Variable, T_Expression> solve(
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "An error ocurred in determining the next initial solution."));
+        }
+
+        /**
+         * If the search bias rises twice in a row, modify the initial solution
+         * to improve the diversity.
+         */
+        if (current_bias > previous_bias) {
+            bias_increase_count++;
+        } else {
+            bias_increase_count = 0;
+        }
+        if (bias_increase_count == 2) {
+            is_enabled_forcibly_initial_modification = true;
+            bias_increase_count                      = 0;
         }
 
         /**
@@ -1363,6 +1384,13 @@ Result<T_Variable, T_Expression> solve(
             utility::print_message("Incumbent objective was not updated.",
                                    master_option.verbose >= Verbose::Outer);
         }
+
+        /**
+         * Print the search bias.
+         */
+        utility::print_message(
+            "Historical search bias is " + std::to_string(memory.bias()) + ".",
+            master_option.verbose >= Verbose::Outer);
 
         /**
          * Print the number of violative constraints.
