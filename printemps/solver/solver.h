@@ -138,14 +138,6 @@ Result<T_Variable, T_Expression> solve(
     }
 
     /**
-     * Print the problem size.
-     */
-    if (master_option.verbose >= Verbose::Outer) {
-        model->print_number_of_variables();
-        model->print_number_of_constraints();
-    }
-
-    /**
      * Disable the Chain move for the problem with no monic
      * constraints (set partitioning, set packing, set covering, cardinality,
      * and invariant knapsack).
@@ -985,12 +977,13 @@ Result<T_Variable, T_Expression> solve(
                          (1.0 - balance) *
                              delta_penalty_coefficient_proportional);
 
-                    if (constraint.is_less_or_equal() && positive_part > 0) {
+                    if (constraint.is_less_or_equal() &&
+                        positive_part > constant::EPSILON) {
                         constraint.local_penalty_coefficient_less() +=
                             master_option.penalty_coefficient_tightening_rate *
                             delta_penalty_coefficient;
                     } else if (constraint.is_greater_or_equal() &&
-                               negative_part > 0) {
+                               negative_part > constant::EPSILON) {
                         constraint.local_penalty_coefficient_greater() +=
                             master_option.penalty_coefficient_tightening_rate *
                             delta_penalty_coefficient;
