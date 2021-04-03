@@ -68,7 +68,7 @@ struct OptionConstant {
     static constexpr double DEFAULT_CHAIN_MOVE_OVERLAP_RATE_THRESHOLD = 0.2;
 
     static constexpr model::SelectionMode DEFAULT_SELECTION_MODE =
-        model::SelectionMode::None;
+        model::SelectionMode::Independent;
     static constexpr ImprovabilityScreeningMode
         DEFAULT_IMPROVABILITY_SCREENING_MODE =
             ImprovabilityScreeningMode::Automatic;
