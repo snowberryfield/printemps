@@ -341,7 +341,7 @@ constexpr int remove_redundant_constraints_with_tightening_variable_bounds(
                 auto lower_bound = variable_ptr->lower_bound();
                 auto upper_bound = variable_ptr->upper_bound();
 
-                if (constraint.sense() == model::ConstraintSense::Greater) {
+                if (constraint.is_greater_or_equal()) {
                     auto bound_temp =
                         -(mutable_term_upper_bound - coefficient * upper_bound +
                           fixed_term_value + constant_value) /
@@ -357,7 +357,8 @@ constexpr int remove_redundant_constraints_with_tightening_variable_bounds(
                             a_IS_ENABLED_PRINT);
                         variable_ptr->set_bound(bound_ceil, upper_bound);
                     }
-                } else if (constraint.sense() == model::ConstraintSense::Less) {
+                }
+                if (constraint.is_less_or_equal()) {
                     auto bound_temp =
                         -(mutable_term_lower_bound - coefficient * lower_bound +
                           fixed_term_value + constant_value) /
@@ -384,7 +385,7 @@ constexpr int remove_redundant_constraints_with_tightening_variable_bounds(
                 auto lower_bound = variable_ptr->lower_bound();
                 auto upper_bound = variable_ptr->upper_bound();
 
-                if (constraint.sense() == model::ConstraintSense::Greater) {
+                if (constraint.is_greater_or_equal()) {
                     auto bound_temp =
                         -(mutable_term_upper_bound - coefficient * lower_bound +
                           fixed_term_value + constant_value) /
@@ -401,8 +402,7 @@ constexpr int remove_redundant_constraints_with_tightening_variable_bounds(
                         variable_ptr->set_bound(lower_bound, bound_floor);
                     }
                 }
-
-                else if (constraint.sense() == model::ConstraintSense::Less) {
+                if (constraint.is_less_or_equal()) {
                     auto bound_temp =
                         -(mutable_term_lower_bound - coefficient * upper_bound +
                           fixed_term_value + constant_value) /

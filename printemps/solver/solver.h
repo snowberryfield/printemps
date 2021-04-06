@@ -914,12 +914,14 @@ Result<T_Variable, T_Expression> solve(
          * If the search bias rises twice in a row, modify the initial solution
          * to improve the diversity.
          */
+
         if (current_bias > previous_bias) {
             bias_increase_count++;
         } else {
             bias_increase_count = 0;
         }
-        if (bias_increase_count == 2) {
+        const int BIAS_INCREASE_COUNT_THRESHOLD = 3;
+        if (bias_increase_count >= BIAS_INCREASE_COUNT_THRESHOLD) {
             is_enabled_forcibly_initial_modification = true;
             bias_increase_count                      = 0;
         }
@@ -992,7 +994,7 @@ Result<T_Variable, T_Expression> solve(
                         violation_value;
 
                     double positive_part = std::max(constraint_value, 0.0);
-                    double negative_part = -std::min(constraint_value, 0.0);
+                    double negative_part = std::max(-constraint_value, 0.0);
                     double delta_penalty_coefficient =
                         (balance * delta_penalty_coefficient_constant +
                          (1.0 - balance) *
@@ -1068,7 +1070,7 @@ Result<T_Variable, T_Expression> solve(
                     double constraint_value =
                         constraint_values[constraint.flat_index()];
                     double positive_part = std::max(constraint_value, 0.0);
-                    double negative_part = -std::min(constraint_value, 0.0);
+                    double negative_part = std::max(-constraint_value, 0.0);
 
                     if (constraint.is_less_or_equal() &&
                         positive_part < constant::EPSILON) {
