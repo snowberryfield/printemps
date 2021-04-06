@@ -76,6 +76,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     bool m_is_knapsack;
     bool m_is_integer_knapsack;
     bool m_is_general_linear;
+    bool m_is_monic;
 
     /*************************************************************************/
     /// Default constructor
@@ -412,6 +413,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
                 }
             }
             if (is_monic_of_binary_variables) {
+                m_is_monic = true;
                 /// Set Partitioning
                 if (m_expression.constant_value() == -1 &&
                     m_sense == ConstraintSense::Equal) {
@@ -735,6 +737,11 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     /*************************************************************************/
     inline constexpr bool is_general_linear(void) const noexcept {
         return m_is_general_linear;
+    }
+
+    /*************************************************************************/
+    inline constexpr bool is_monic(void) const noexcept {
+        return m_is_monic;
     }
 
     /*************************************************************************/

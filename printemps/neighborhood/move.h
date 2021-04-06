@@ -38,6 +38,8 @@ struct Move {
     std::unordered_set<model::Constraint<T_Variable, T_Expression> *>
         related_constraint_ptrs;
 
+    bool is_univariable_move;
+
     /**
      * The following members are for special neighborhood moves.
      */
@@ -51,7 +53,8 @@ struct Move {
 
     /*************************************************************************/
     Move(void)
-        : is_special_neighborhood_move(false),
+        : is_univariable_move(false),
+          is_special_neighborhood_move(false),
           is_available(true),
           overlap_rate(0.0) {
         /// nothing to do
@@ -232,6 +235,7 @@ constexpr Move<T_Variable, T_Expression> operator+(
         a_MOVE_SECOND.related_constraint_ptrs.end());
 
     result.sense                        = MoveSense::Chain;
+    result.is_univariable_move          = false;
     result.is_available                 = false;
     result.is_special_neighborhood_move = true;
 

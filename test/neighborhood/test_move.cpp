@@ -21,6 +21,7 @@ class TestMove : public ::testing::Test {
 /*****************************************************************************/
 TEST_F(TestMove, constructor) {
     printemps::neighborhood::Move<int, double> move;
+    EXPECT_FALSE(move.is_univariable_move);
     EXPECT_FALSE(move.is_special_neighborhood_move);
     EXPECT_TRUE(move.is_available);
     EXPECT_EQ(0.0, move.overlap_rate);
