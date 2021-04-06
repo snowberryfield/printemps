@@ -51,9 +51,8 @@ TEST_F(TestIntegerMoveGenerator, setup) {
     for (const auto& move : moves) {
         EXPECT_EQ(printemps::neighborhood::MoveSense::Integer, move.sense);
         EXPECT_FALSE(move.alterations.front().first->is_fixed());
-
         EXPECT_EQ(1, static_cast<int>(move.alterations.size()));
-
+        EXPECT_TRUE(move.is_univariable_move);
         for (auto& constraint_ptr :
              move.alterations.front().first->related_constraint_ptrs()) {
             EXPECT_TRUE(move.related_constraint_ptrs.find(constraint_ptr) !=

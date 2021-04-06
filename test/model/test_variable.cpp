@@ -51,6 +51,8 @@ TEST_F(TestVariable, initialize) {
     EXPECT_FALSE(variable.is_feasibility_improvable());
     EXPECT_TRUE(variable.has_lower_bound_margin());
     EXPECT_TRUE(variable.has_upper_bound_margin());
+    EXPECT_FALSE(variable.has_unique_sensitivity());
+    EXPECT_EQ(0.0, variable.unique_sensitivity());
     EXPECT_EQ(printemps::model::VariableSense::Integer, variable.sense());
     EXPECT_EQ(nullptr, variable.selection_ptr());
     EXPECT_TRUE(variable.related_constraint_ptrs().empty());
@@ -397,6 +399,51 @@ TEST_F(TestVariable, reset_constraint_sensitivities) {
 /*****************************************************************************/
 TEST_F(TestVariable, constraint_sensitivities) {
     /// This method is tested in register_constraint_sensitivity().
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, setup_unique_sensitivity) {
+    {
+        auto variable =
+            printemps::model::Variable<int, double>::create_instance();
+        auto constraint_0 =
+            printemps::model::Constraint<int, double>::create_instance();
+        auto constraint_1 =
+            printemps::model::Constraint<int, double>::create_instance();
+
+        variable.register_constraint_sensitivity(&constraint_0, 10);
+        variable.register_constraint_sensitivity(&constraint_1, 20);
+        variable.setup_unique_sensitivity();
+        EXPECT_FALSE(variable.has_unique_sensitivity());
+    }
+
+    {
+        auto variable =
+            printemps::model::Variable<int, double>::create_instance();
+        auto constraint_0 =
+            printemps::model::Constraint<int, double>::create_instance();
+        auto constraint_1 =
+            printemps::model::Constraint<int, double>::create_instance();
+
+        variable.register_constraint_sensitivity(&constraint_0, 10);
+        variable.register_constraint_sensitivity(&constraint_1, 10);
+        variable.setup_unique_sensitivity();
+        EXPECT_TRUE(variable.has_unique_sensitivity());
+        EXPECT_EQ(10.0, variable.unique_sensitivity());
+        variable.reset_constraint_sensitivities();
+        EXPECT_FALSE(variable.has_unique_sensitivity());
+        EXPECT_EQ(0.0, variable.unique_sensitivity());
+    }
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, has_unique_sensitivity) {
+    /// This method is tested in setup_unique_sensitivity().
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, unique_sensitivity) {
+    /// This method is tested in setup_unique_sensitivity().
 }
 
 /*****************************************************************************/

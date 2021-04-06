@@ -62,6 +62,7 @@ TEST_F(TestSelectionMoveGenerator, setup) {
             EXPECT_EQ(0, move.alterations[1].first->value());
             EXPECT_EQ(1, move.alterations[1].second);
         }
+        EXPECT_FALSE(move.is_univariable_move);
 
         for (auto& constraint_ptr :
              move.alterations[0].first->related_constraint_ptrs()) {

@@ -49,6 +49,7 @@ TEST_F(TestVariableBoundMoveGenerator, setup) {
         EXPECT_EQ(2, static_cast<int>(moves[0].alterations.size()));
         EXPECT_EQ(1, moves[0].alterations[0].second);
         EXPECT_EQ(2, moves[0].alterations[1].second);
+        EXPECT_FALSE(moves[0].is_univariable_move);
         EXPECT_EQ(printemps::neighborhood::MoveSense::VariableBound,
                   moves[0].sense);
         EXPECT_TRUE(moves[0].related_constraint_ptrs.find(&c[0]) !=

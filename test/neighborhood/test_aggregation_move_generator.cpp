@@ -40,6 +40,7 @@ TEST_F(TestAggregationMoveGenerator, setup) {
     EXPECT_EQ(4, static_cast<int>(flags.size()));
 
     /// (x,y) = (0,0) -> (1,2)
+    EXPECT_FALSE(moves[0].is_univariable_move);
     EXPECT_TRUE(moves[0].is_special_neighborhood_move);
     EXPECT_EQ(0, moves[0].overlap_rate);
     EXPECT_EQ(2, static_cast<int>(moves[0].alterations.size()));
@@ -50,6 +51,7 @@ TEST_F(TestAggregationMoveGenerator, setup) {
                 moves[0].related_constraint_ptrs.end());
 
     /// (x,y) = (0,0) -> (-1,3)
+    EXPECT_FALSE(moves[1].is_univariable_move);
     EXPECT_TRUE(moves[1].is_special_neighborhood_move);
     EXPECT_EQ(0, moves[1].overlap_rate);
     EXPECT_EQ(2, static_cast<int>(moves[1].alterations.size()));
@@ -60,6 +62,7 @@ TEST_F(TestAggregationMoveGenerator, setup) {
                 moves[1].related_constraint_ptrs.end());
 
     /// (x,y) = (0,0) -> (3,1)
+    EXPECT_FALSE(moves[2].is_univariable_move);
     EXPECT_TRUE(moves[2].is_special_neighborhood_move);
     EXPECT_EQ(0, moves[2].overlap_rate);
     EXPECT_EQ(2, static_cast<int>(moves[2].alterations.size()));
@@ -70,6 +73,7 @@ TEST_F(TestAggregationMoveGenerator, setup) {
                 moves[2].related_constraint_ptrs.end());
 
     /// (x,y) = (0,0) -> (7,-1)
+    EXPECT_FALSE(moves[3].is_univariable_move);
     EXPECT_TRUE(moves[3].is_special_neighborhood_move);
     EXPECT_EQ(0, moves[3].overlap_rate);
     EXPECT_EQ(2, static_cast<int>(moves[3].alterations.size()));

@@ -793,6 +793,13 @@ class Model {
                 }
             }
         }
+
+        for (auto &&proxy : m_variable_proxies) {
+            for (auto &&variable : proxy.flat_indexed_variables()) {
+                variable.setup_unique_sensitivity();
+            }
+        }
+
         for (auto &&sensitivity : m_objective.expression().sensitivities()) {
             sensitivity.first->set_objective_sensitivity(sensitivity.second);
         }
@@ -1597,7 +1604,7 @@ class Model {
                 double constraint_value =
                     constraints[j].evaluate_constraint(a_MOVE);
                 double positive_part = std::max(constraint_value, 0.0);
-                double negative_part = -std::min(constraint_value, 0.0);
+                double negative_part = std::max(-constraint_value, 0.0);
                 double violation     = 0.0;
                 double local_penalty_coefficient = 0.0;
 
@@ -1651,22 +1658,41 @@ class Model {
         const solution::SolutionScore &a_CURRENT_SCORE) const noexcept {
         bool is_feasibility_improvable = false;
 
-        double total_violation = a_CURRENT_SCORE.total_violation;
-        double local_penalty   = a_CURRENT_SCORE.local_penalty;
-        double global_penalty  = a_CURRENT_SCORE.global_penalty;
+        double total_violation  = a_CURRENT_SCORE.total_violation;
+        double local_penalty    = a_CURRENT_SCORE.local_penalty;
+        double global_penalty   = a_CURRENT_SCORE.global_penalty;
+        double constraint_value = 0.0;
+        double positive_part    = 0.0;
+        double negative_part    = 0.0;
+        double violation_diff   = 0.0;
 
         for (const auto &constraint_ptr : a_MOVE.related_constraint_ptrs) {
             if (!constraint_ptr->is_enabled()) {
                 continue;
             }
 
-            const double constraint_value =
-                constraint_ptr->evaluate_constraint(a_MOVE);
-            const double positive_part = std::max(constraint_value, 0.0);
-            const double negative_part = -std::min(constraint_value, 0.0);
+            if (constraint_ptr->is_monic() &&
+                a_MOVE.sense == neighborhood::MoveSense::Binary) {
+                constraint_value = constraint_ptr->constraint_value() +
+                                   a_MOVE.alterations.front().second -
+                                   a_MOVE.alterations.front().first->value();
+            } else if (a_MOVE.is_univariable_move &&
+                       a_MOVE.alterations.front()
+                           .first->has_unique_sensitivity()) {
+                auto &alteration = a_MOVE.alterations.front();
+                constraint_value =
+                    constraint_ptr->constraint_value() +
+                    alteration.first->unique_sensitivity() *
+                        (alteration.second - alteration.first->value());
+            } else {
+                constraint_value = constraint_ptr->evaluate_constraint(a_MOVE);
+            }
+
+            positive_part = std::max(constraint_value, 0.0);
+            negative_part = std::max(-constraint_value, 0.0);
 
             if (constraint_ptr->is_less_or_equal()) {
-                const double violation_diff =
+                violation_diff =
                     positive_part - constraint_ptr->positive_part();
                 total_violation += violation_diff;
 
@@ -1681,7 +1707,7 @@ class Model {
                                   constraint_ptr->global_penalty_coefficient();
             }
             if (constraint_ptr->is_greater_or_equal()) {
-                const double violation_diff =
+                violation_diff =
                     negative_part - constraint_ptr->negative_part();
                 total_violation += violation_diff;
 

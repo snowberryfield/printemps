@@ -43,15 +43,18 @@ class Variable : public multi_array::AbstractMultiArrayElement {
      */
 
    private:
-    bool          m_is_fixed;
-    T_Variable    m_value;
-    T_Variable    m_lower_bound;
-    T_Variable    m_upper_bound;
-    bool          m_has_bounds;
-    bool          m_is_objective_improvable;
-    bool          m_is_feasibility_improvable;
-    bool          m_has_lower_bound_margin;
-    bool          m_has_upper_bound_margin;
+    bool       m_is_fixed;
+    T_Variable m_value;
+    T_Variable m_lower_bound;
+    T_Variable m_upper_bound;
+    bool       m_has_bounds;
+    bool       m_is_objective_improvable;
+    bool       m_is_feasibility_improvable;
+    bool       m_has_lower_bound_margin;
+    bool       m_has_upper_bound_margin;
+    bool       m_has_unique_sensitivity;
+    T_Variable m_unique_sensitivity;
+
     VariableSense m_sense;
 
     Selection<T_Variable, T_Expression> *m_selection_ptr;
@@ -121,6 +124,9 @@ class Variable : public multi_array::AbstractMultiArrayElement {
 
         m_has_lower_bound_margin = true;
         m_has_upper_bound_margin = true;
+
+        m_has_unique_sensitivity = false;
+        m_unique_sensitivity     = 0;
 
         m_sense         = VariableSense::Integer;
         m_selection_ptr = nullptr;
@@ -370,6 +376,8 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     /*************************************************************************/
     inline constexpr void reset_constraint_sensitivities(void) {
         m_constraint_sensitivities.clear();
+        m_has_unique_sensitivity = false;
+        m_unique_sensitivity     = 0.0;
     }
 
     /*************************************************************************/
@@ -384,6 +392,31 @@ class Variable : public multi_array::AbstractMultiArrayElement {
         Constraint<T_Variable, T_Expression> *, T_Expression>
         &constraint_sensitivities(void) const {
         return m_constraint_sensitivities;
+    }
+
+    /*************************************************************************/
+    inline constexpr void setup_unique_sensitivity(void) {
+        std::unordered_set<T_Expression> coefficients;
+        for (const auto &sensitivity : m_constraint_sensitivities) {
+            coefficients.insert(sensitivity.second);
+        }
+        if (coefficients.size() == 1) {
+            m_has_unique_sensitivity = true;
+            m_unique_sensitivity     = *(coefficients.begin());
+        } else {
+            m_has_unique_sensitivity = false;
+            m_unique_sensitivity     = 0.0;
+        }
+    }
+
+    /*************************************************************************/
+    inline constexpr bool has_unique_sensitivity(void) const noexcept {
+        return m_has_unique_sensitivity;
+    }
+
+    /*************************************************************************/
+    inline constexpr T_Expression unique_sensitivity(void) const noexcept {
+        return m_unique_sensitivity;
     }
 
     /*************************************************************************/
