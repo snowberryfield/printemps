@@ -537,10 +537,6 @@ Result<T_Variable, T_Expression> solve(
     int number_of_initial_modification = 0;
     int iteration_max = master_option.tabu_search.iteration_max;
 
-    double current_bias        = memory.bias();
-    double previous_bias       = current_bias;
-    int    bias_increase_count = 0;
-
     ImprovabilityScreeningMode improvability_screening_mode =
         master_option.improvability_screening_mode;
     if (improvability_screening_mode == ImprovabilityScreeningMode::Automatic) {
@@ -643,9 +639,6 @@ Result<T_Variable, T_Expression> solve(
          * Update the memory.
          */
         memory = result.memory;
-
-        previous_bias = current_bias;
-        current_bias  = memory.bias();
 
         /**
          * Update the termination status.
@@ -908,22 +901,6 @@ Result<T_Variable, T_Expression> solve(
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "An error ocurred in determining the next initial solution."));
-        }
-
-        /**
-         * If the search bias rises twice in a row, modify the initial solution
-         * to improve the diversity.
-         */
-
-        if (current_bias > previous_bias) {
-            bias_increase_count++;
-        } else {
-            bias_increase_count = 0;
-        }
-        const int BIAS_INCREASE_COUNT_THRESHOLD = 3;
-        if (bias_increase_count >= BIAS_INCREASE_COUNT_THRESHOLD) {
-            is_enabled_forcibly_initial_modification = true;
-            bias_increase_count                      = 0;
         }
 
         /**
