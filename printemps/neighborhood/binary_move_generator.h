@@ -72,7 +72,7 @@ class BinaryMoveGenerator
                 mutable_variable_ptrs[i]->related_constraint_ptrs();
             this->m_moves[i].alterations.emplace_back(mutable_variable_ptrs[i],
                                                       0);
-            this->m_moves[i].is_univariable_move          = false;
+            this->m_moves[i].is_univariable_move          = true;
             this->m_moves[i].is_special_neighborhood_move = false;
             this->m_moves[i].is_available                 = true;
             this->m_moves[i].overlap_rate                 = 0.0;

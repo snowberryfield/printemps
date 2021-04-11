@@ -614,25 +614,29 @@ constexpr int fix_redundant_variables(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-constexpr void presolve(model::Model<T_Variable, T_Expression> *a_model,  //
+constexpr bool presolve(model::Model<T_Variable, T_Expression> *a_model,  //
                         const bool a_IS_ENABLED_PRINT) {
     utility::print_single_line(a_IS_ENABLED_PRINT);
     utility::print_message("Presolving...", a_IS_ENABLED_PRINT);
 
+    int number_of_disabled_constaints = 0;
+    int number_of_fixed_variables     = 0;
+
     if (a_model->is_linear()) {
-        remove_independent_variables(a_model, a_IS_ENABLED_PRINT);
+        number_of_fixed_variables +=
+            remove_independent_variables(a_model, a_IS_ENABLED_PRINT);
     }
 
     while (true) {
-        int number_of_newly_disabled_constaints = 0;
-        int number_of_newly_fixed_variables     = 0;
-
-        number_of_newly_disabled_constaints  //
-            += remove_redundant_constraints_with_tightening_variable_bounds(
+        int number_of_newly_disabled_constaints  //
+            = remove_redundant_constraints_with_tightening_variable_bounds(
                 a_model, a_IS_ENABLED_PRINT);
 
-        number_of_newly_fixed_variables  //
-            += fix_implicit_fixed_variables(a_model, a_IS_ENABLED_PRINT);
+        int number_of_newly_fixed_variables  //
+            = fix_implicit_fixed_variables(a_model, a_IS_ENABLED_PRINT);
+
+        number_of_disabled_constaints += number_of_newly_disabled_constaints;
+        number_of_fixed_variables += number_of_newly_fixed_variables;
 
         if (number_of_newly_disabled_constaints == 0 &&
             number_of_newly_fixed_variables == 0) {
@@ -648,9 +652,13 @@ constexpr void presolve(model::Model<T_Variable, T_Expression> *a_model,  //
     const int FIX_REDUNDANT_VARIABLES_THRESHOLD = 100000;
     if (a_model->is_linear() &&
         a_model->number_of_variables() <= FIX_REDUNDANT_VARIABLES_THRESHOLD) {
-        fix_redundant_variables(a_model, a_IS_ENABLED_PRINT);
+        number_of_fixed_variables +=
+            fix_redundant_variables(a_model, a_IS_ENABLED_PRINT);
     }
     utility::print_message("Done.", a_IS_ENABLED_PRINT);
+
+    return (number_of_disabled_constaints > 0) ||
+           (number_of_fixed_variables > 0);
 }
 }  // namespace presolver
 }  // namespace printemps
