@@ -740,43 +740,6 @@ TEST_F(TestModel, setup) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModel, setup_variable_related_constraints) {
-    printemps::model::Model<int, double> model;
-
-    auto& x = model.create_variables("x", 10, 0, 1);
-    auto& y = model.create_variables("y", {20, 30}, 0, 1);
-
-    auto& g = model.create_constraints("g", 3);
-    g(0)    = x.selection();
-    g(1)    = y.selection();
-    g(2)    = x(0) + y.sum({0, printemps::model::All}) >= 1;
-
-    model.setup_variable_related_constraints();
-
-    for (auto i = 0; i < 10; i++) {
-        EXPECT_TRUE(x(i).related_constraint_ptrs().find(&g(0)) !=
-                    x(i).related_constraint_ptrs().end());
-        EXPECT_FALSE(x(i).related_constraint_ptrs().find(&g(1)) !=
-                     x(i).related_constraint_ptrs().end());
-        /// Only x(0) is related to g(2).
-        EXPECT_EQ(i == 0, x(i).related_constraint_ptrs().find(&g(2)) !=
-                              x(i).related_constraint_ptrs().end());
-    }
-
-    for (auto i = 0; i < 20; i++) {
-        for (auto j = 0; j < 30; j++) {
-            EXPECT_FALSE(y(i, j).related_constraint_ptrs().find(&g(0)) !=
-                         y(i, j).related_constraint_ptrs().end());
-            EXPECT_TRUE(y(i, j).related_constraint_ptrs().find(&g(1)) !=
-                        y(i, j).related_constraint_ptrs().end());
-            /// Only y(0,*) is related to g(2).
-            EXPECT_EQ(i == 0, y(i, j).related_constraint_ptrs().find(&g(2)) !=
-                                  y(i, j).related_constraint_ptrs().end());
-        }
-    }
-}
-
-/*****************************************************************************/
 TEST_F(TestModel, setup_unique_name) {
     printemps::model::Model<int, double> model;
 
@@ -969,6 +932,64 @@ TEST_F(TestModel, setup_is_enabled_fast_evaluation) {
 }
 
 /*****************************************************************************/
+TEST_F(TestModel, setup_variable_related_constraints) {
+    printemps::model::Model<int, double> model;
+
+    auto& x = model.create_variables("x", 10, 0, 1);
+    auto& y = model.create_variables("y", {20, 30}, 0, 1);
+
+    auto& g = model.create_constraints("g", 3);
+    g(0)    = x.selection();
+    g(1)    = y.selection();
+    g(2)    = x(0) + 2 * y.sum({0, printemps::model::All}) >= 1;
+
+    model.categorize_constraints();
+    model.setup_variable_related_constraints();
+
+    for (auto i = 0; i < 10; i++) {
+        EXPECT_TRUE(x(i).related_constraint_ptrs().find(&g(0)) !=
+                    x(i).related_constraint_ptrs().end());
+        EXPECT_FALSE(x(i).related_constraint_ptrs().find(&g(1)) !=
+                     x(i).related_constraint_ptrs().end());
+        /// Only x(0) is related to g(2).
+        EXPECT_EQ(i == 0, x(i).related_constraint_ptrs().find(&g(2)) !=
+                              x(i).related_constraint_ptrs().end());
+    }
+
+    for (auto i = 0; i < 20; i++) {
+        for (auto j = 0; j < 30; j++) {
+            EXPECT_FALSE(y(i, j).related_constraint_ptrs().find(&g(0)) !=
+                         y(i, j).related_constraint_ptrs().end());
+            EXPECT_TRUE(y(i, j).related_constraint_ptrs().find(&g(1)) !=
+                        y(i, j).related_constraint_ptrs().end());
+            /// Only y(0,*) is related to g(2).
+            EXPECT_EQ(i == 0, y(i, j).related_constraint_ptrs().find(&g(2)) !=
+                                  y(i, j).related_constraint_ptrs().end());
+        }
+    }
+
+    for (auto i = 0; i < 10; i++) {
+        EXPECT_TRUE(x(i).related_monic_constraint_ptrs().find(&g(0)) !=
+                    x(i).related_monic_constraint_ptrs().end());
+        EXPECT_FALSE(x(i).related_monic_constraint_ptrs().find(&g(1)) !=
+                     x(i).related_monic_constraint_ptrs().end());
+    }
+
+    for (auto i = 0; i < 20; i++) {
+        for (auto j = 0; j < 30; j++) {
+            EXPECT_FALSE(y(i, j).related_monic_constraint_ptrs().find(&g(0)) !=
+                         y(i, j).related_monic_constraint_ptrs().end());
+            EXPECT_TRUE(y(i, j).related_monic_constraint_ptrs().find(&g(1)) !=
+                        y(i, j).related_monic_constraint_ptrs().end());
+            EXPECT_FALSE(y(i, j).related_monic_constraint_ptrs().find(&g(2)) !=
+                         y(i, j).related_monic_constraint_ptrs().end());
+        }
+    }
+    EXPECT_FALSE(x(0).related_monic_constraint_ptrs().find(&g(2)) !=
+                 x(0).related_monic_constraint_ptrs().end());
+}
+
+/*****************************************************************************/
 TEST_F(TestModel, setup_variable_sensitivity) {
     printemps::model::Model<int, double> model;
 
@@ -1119,51 +1140,6 @@ TEST_F(TestModel, categorize_constraints) {
     EXPECT_EQ(2, static_cast<int>(reference.integer_knapsack_ptrs.size()));
     EXPECT_EQ(1, static_cast<int>(reference.general_linear_ptrs.size()));
     EXPECT_EQ(1, static_cast<int>(reference.nonlinear_ptrs.size()));
-}
-
-/*****************************************************************************/
-TEST_F(TestModel, setup_variable_related_monic_constraint_ptrs) {
-    printemps::model::Model<int, double> model;
-
-    auto& x = model.create_variables("x", 10, 0, 1);
-    auto& y = model.create_variables("y", 10, 0, 10);
-
-    auto& g = model.create_constraints("g", 4);
-    g(0)    = x.selection();
-    g(1)    = 2 * x.sum() <= 2;
-    g(2)    = y.sum() <= 2;
-    g(3)    = x.sum() + y.sum() >= 1;
-
-    model.setup_variable_related_constraints();
-    model.categorize_constraints();
-    model.setup_variable_related_monic_constraints();
-
-    for (auto i = 0; i < 10; i++) {
-        EXPECT_TRUE(x(i).related_monic_constraint_ptrs().find(&g(0)) !=
-                    x(i).related_monic_constraint_ptrs().end());
-        EXPECT_FALSE(x(i).related_monic_constraint_ptrs().find(&g(1)) !=
-                     x(i).related_monic_constraint_ptrs().end());
-        EXPECT_FALSE(x(i).related_monic_constraint_ptrs().find(&g(2)) !=
-                     x(i).related_monic_constraint_ptrs().end());
-        EXPECT_FALSE(x(i).related_monic_constraint_ptrs().find(&g(3)) !=
-                     x(i).related_monic_constraint_ptrs().end());
-    }
-
-    for (auto i = 0; i < 10; i++) {
-        EXPECT_FALSE(y(i).related_monic_constraint_ptrs().find(&g(0)) !=
-                     y(i).related_monic_constraint_ptrs().end());
-        EXPECT_FALSE(y(i).related_monic_constraint_ptrs().find(&g(1)) !=
-                     y(i).related_monic_constraint_ptrs().end());
-        EXPECT_FALSE(y(i).related_monic_constraint_ptrs().find(&g(2)) !=
-                     y(i).related_monic_constraint_ptrs().end());
-        EXPECT_FALSE(y(i).related_monic_constraint_ptrs().find(&g(3)) !=
-                     y(i).related_monic_constraint_ptrs().end());
-    }
-
-    for (auto i = 0; i < 10; i++) {
-        x(i).reset_related_monic_constraint_ptrs();
-        EXPECT_TRUE(x(i).related_monic_constraint_ptrs().empty());
-    }
 }
 
 /*****************************************************************************/

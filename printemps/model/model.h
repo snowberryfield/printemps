@@ -620,30 +620,27 @@ class Model {
                          const bool           a_IS_ENABLED_PRINT) {
         verifier::verify_problem(this, a_IS_ENABLED_PRINT);
 
-        this->setup_variable_related_constraints();
         this->setup_unique_name();
         this->setup_is_linear();
 
-        if (this->is_linear()) {
+        while (true) {
+            this->categorize_variables();
+            this->categorize_constraints();
+            this->setup_variable_related_constraints();
             this->setup_variable_sensitivity();
+
+            /**
+             * Presolve the problem by removing redundant constraints and fixing
+             * decision variables implicitly fixed.
+             */
+            if (a_IS_ENABLED_PRESOLVE) {
+                if (!presolver::presolve(this, a_IS_ENABLED_PRINT)) {
+                    break;
+                }
+            } else {
+                break;
+            }
         }
-
-        this->categorize_variables();
-        this->categorize_constraints();
-
-        this->setup_variable_related_monic_constraints();
-
-        /**
-         * Presolve the problem by removing redundant constraints and fixing
-         * decision variables implicitly fixed.
-         */
-        if (a_IS_ENABLED_PRESOLVE) {
-            presolver::presolve(this, a_IS_ENABLED_PRINT);
-        }
-
-        /// Categorize again to reflect the presolving result.
-        this->categorize_variables();
-        this->categorize_constraints();
 
         if (a_SELECTION_MODE != SelectionMode::None) {
             this->extract_selections(a_SELECTION_MODE);
@@ -673,24 +670,6 @@ class Model {
 
         this->setup_fixed_sensitivities(a_IS_ENABLED_PRINT);
         this->setup_is_enabled_fast_evaluation();
-    }
-
-    /*************************************************************************/
-    constexpr void setup_variable_related_constraints(void) {
-        for (auto &&proxy : m_variable_proxies) {
-            for (auto &&variable : proxy.flat_indexed_variables()) {
-                variable.reset_related_constraint_ptrs();
-            }
-        }
-        for (auto &&proxy : m_constraint_proxies) {
-            for (auto &&constraint : proxy.flat_indexed_constraints()) {
-                for (auto &&sensitivity :
-                     constraint.expression().sensitivities()) {
-                    sensitivity.first->register_related_constraint_ptr(
-                        &constraint);
-                }
-            }
-        }
     }
 
     /*************************************************************************/
@@ -774,6 +753,32 @@ class Model {
 
         if (m_neighborhood.user_defined().is_enabled()) {
             m_is_enabled_fast_evaluation = false;
+        }
+    }
+
+    /*************************************************************************/
+    constexpr void setup_variable_related_constraints(void) {
+        for (auto &&proxy : m_variable_proxies) {
+            for (auto &&variable : proxy.flat_indexed_variables()) {
+                variable.reset_related_constraint_ptrs();
+            }
+        }
+
+        for (auto &&proxy : m_constraint_proxies) {
+            for (auto &&constraint : proxy.flat_indexed_constraints()) {
+                for (auto &&sensitivity :
+                     constraint.expression().sensitivities()) {
+                    sensitivity.first->register_related_constraint_ptr(
+                        &constraint);
+                }
+            }
+        }
+
+        for (auto &&proxy : m_variable_proxies) {
+            for (auto &&variable : proxy.flat_indexed_variables()) {
+                variable.reset_related_monic_constraint_ptrs();
+                variable.setup_related_monic_constraint_ptrs();
+            }
         }
     }
 
@@ -919,16 +924,6 @@ class Model {
         }
         m_constraint_reference      = constraint_reference;
         m_constraint_type_reference = constraint_type_reference;
-    }
-
-    /*************************************************************************/
-    constexpr void setup_variable_related_monic_constraints(void) {
-        for (auto &&proxy : m_variable_proxies) {
-            for (auto &&variable : proxy.flat_indexed_variables()) {
-                variable.reset_related_monic_constraint_ptrs();
-                variable.setup_related_monic_constraint_ptrs();
-            }
-        }
     }
 
     /*************************************************************************/
@@ -1565,8 +1560,8 @@ class Model {
 
     /*************************************************************************/
     inline solution::SolutionScore evaluate(
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
-        const noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
+        noexcept {
         solution::SolutionScore score;
         this->evaluate(&score, a_MOVE);
         return score;
@@ -1582,9 +1577,10 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void evaluate(solution::SolutionScore *a_score_ptr,  //
-                            const neighborhood::Move<T_Variable, T_Expression>
-                                &a_MOVE) const noexcept {
+    constexpr void evaluate(
+        solution::SolutionScore *                           a_score_ptr,  //
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
+        noexcept {
         double total_violation = 0.0;
         double local_penalty   = 0.0;
         double global_penalty  = 0.0;
