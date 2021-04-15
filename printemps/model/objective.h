@@ -158,7 +158,6 @@ class Objective {
         this->initialize();
         m_is_linear  = true;
         m_expression = a_EXPRESSION;
-        m_expression.setup_fixed_sensitivities();
     }
 
     /*************************************************************************/

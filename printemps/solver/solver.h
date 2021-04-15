@@ -138,16 +138,17 @@ Result<T_Variable, T_Expression> solve(
     }
 
     /**
-     * Disable the Chain move for the problem with no monic
+     * Disable the Chain move for the problem with no zero one_coefficient
      * constraints (set partitioning, set packing, set covering, cardinality,
      * and invariant knapsack).
      */
     if (master_option.is_enabled_chain_move &&
-        !model->has_monic_constraints()) {
+        !model->has_zero_one_coefficient_constraints()) {
         master_option.is_enabled_chain_move = false;
         utility::print_warning(
             "Chain move was disabled because the problem does not include any "
-            "monic constraints (set partitioning/packing/covering, "
+            "zero-one coefficient constraints (set "
+            "partitioning/packing/covering, "
             "cardinality, and invariant knapsack).",
             master_option.verbose >= Verbose::Warning);
     }
@@ -260,10 +261,12 @@ Result<T_Variable, T_Expression> solve(
                 "Solving lagrange dual was skipped because the problem is "
                 "nonlinear.",
                 master_option.verbose >= Verbose::Warning);
-        } else if (model->number_of_selection_variables() > 0) {
+        } else if (model->number_of_selection_variables() > 0 ||
+                   model->number_of_intermediate_variables() > 0) {
             utility::print_warning(
-                "Solving lagrange dual was skipped because it does not "
-                "applicable to selection variables.",
+                "Solving lagrange dual was skipped because it not "
+                "applicable to problems which include selection variables or "
+                "intermediate variables.",
                 master_option.verbose >= Verbose::Warning);
         } else {
             double elapsed_time = time_keeper.clock();

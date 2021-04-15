@@ -7,6 +7,18 @@
 #define PRINTEMPS_PRESOLVER_PRESOLVER_H__
 
 namespace printemps {
+namespace model {
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+class Variable;
+
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+class Constraint;
+}  // namespace model
+}  // namespace printemps
+
+namespace printemps {
 namespace presolver {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
@@ -615,9 +627,13 @@ constexpr int fix_redundant_variables(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 constexpr bool presolve(model::Model<T_Variable, T_Expression> *a_model,  //
+                        const int                               a_ITERATION,
+                        const bool a_IS_ENABLED_FIX_REDUNDANT_VARIABLES,
                         const bool a_IS_ENABLED_PRINT) {
     utility::print_single_line(a_IS_ENABLED_PRINT);
-    utility::print_message("Presolving...", a_IS_ENABLED_PRINT);
+    utility::print_message(
+        "Presolving...(Round " + std::to_string(a_ITERATION) + ")",
+        a_IS_ENABLED_PRINT);
 
     int number_of_disabled_constaints = 0;
     int number_of_fixed_variables     = 0;
@@ -650,7 +666,7 @@ constexpr bool presolve(model::Model<T_Variable, T_Expression> *a_model,  //
      * FIX_REDUNDANT_VARIABLES_THRESHOLD.
      */
     const int FIX_REDUNDANT_VARIABLES_THRESHOLD = 100000;
-    if (a_model->is_linear() &&
+    if (a_model->is_linear() && a_IS_ENABLED_FIX_REDUNDANT_VARIABLES &&
         a_model->number_of_variables() <= FIX_REDUNDANT_VARIABLES_THRESHOLD) {
         number_of_fixed_variables +=
             fix_redundant_variables(a_model, a_IS_ENABLED_PRINT);
@@ -660,6 +676,7 @@ constexpr bool presolve(model::Model<T_Variable, T_Expression> *a_model,  //
     return (number_of_disabled_constaints > 0) ||
            (number_of_fixed_variables > 0);
 }
+
 }  // namespace presolver
 }  // namespace printemps
 #endif
