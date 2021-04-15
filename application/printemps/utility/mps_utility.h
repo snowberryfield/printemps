@@ -306,17 +306,21 @@ MPS read_mps(const std::string &a_FILE_NAME) {
                     std::string expression_name = items[2 * i + 1];
                     double      sensitivity = atof(items[2 * i + 2].c_str());
 
-                    if (expression_name == mps.objective.name) {
-                        mps.objective.sensitivities[name] = sensitivity;
-                    } else if (mps.constraints.find(expression_name) !=
-                               mps.constraints.end()) {
-                        mps.constraints[expression_name].sensitivities[name] =
-                            sensitivity;
-                    } else {
-                        throw std::logic_error(utility::format_error_location(
-                            __FILE__, __LINE__, __func__,
-                            "An undefined constraint or objective function "
-                            "name is specified in RHS section."));
+                    if (fabs(sensitivity) > constant::EPSILON_10) {
+                        if (expression_name == mps.objective.name) {
+                            mps.objective.sensitivities[name] = sensitivity;
+                        } else if (mps.constraints.find(expression_name) !=
+                                   mps.constraints.end()) {
+                            mps.constraints[expression_name]
+                                .sensitivities[name] = sensitivity;
+                        } else {
+                            throw std::logic_error(
+                                utility::format_error_location(
+                                    __FILE__, __LINE__, __func__,
+                                    "An undefined constraint or objective "
+                                    "function "
+                                    "name is specified in RHS section."));
+                        }
                     }
                 }
                 if (mps.variables.find(name) == mps.variables.end()) {
