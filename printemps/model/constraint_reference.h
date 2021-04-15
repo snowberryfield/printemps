@@ -17,8 +17,6 @@ template <class T_Variable, class T_Expression>
 struct ConstraintReference {
     std::vector<Constraint<T_Variable, T_Expression> *> constraint_ptrs;
     std::vector<Constraint<T_Variable, T_Expression> *>
-        selection_constraint_ptrs;
-    std::vector<Constraint<T_Variable, T_Expression> *>
         disabled_constraint_ptrs;
 
     /*************************************************************************/
@@ -34,7 +32,6 @@ struct ConstraintReference {
     /*************************************************************************/
     void initialize(void) {
         this->constraint_ptrs.clear();
-        this->selection_constraint_ptrs.clear();
         this->disabled_constraint_ptrs.clear();
     }
 };

@@ -27,6 +27,8 @@
 
 #include "../neighborhood/neighborhood.h"
 #include "../presolver/presolver.h"
+#include "../presolver/intermediate_variable_extractor.h"
+#include "../presolver/selection_extractor.h"
 #include "../verifier/verifier.h"
 
 #include "../solution/solution.h"
@@ -72,9 +74,19 @@ class Model {
     bool m_is_feasible;
 
     std::vector<Selection<T_Variable, T_Expression>> m_selections;
-    VariableReference<T_Variable, T_Expression>      m_variable_reference;
-    ConstraintReference<T_Variable, T_Expression>    m_constraint_reference;
-    ConstraintTypeReference<T_Variable, T_Expression>
+
+    VariableReference<T_Variable, T_Expression>  //
+        m_variable_reference_original;
+    ConstraintReference<T_Variable, T_Expression>  //
+        m_constraint_reference_original;
+    ConstraintTypeReference<T_Variable, T_Expression>  //
+        m_constraint_type_reference_original;
+
+    VariableReference<T_Variable, T_Expression>  //
+        m_variable_reference;
+    ConstraintReference<T_Variable, T_Expression>  //
+        m_constraint_reference;
+    ConstraintTypeReference<T_Variable, T_Expression>  //
         m_constraint_type_reference;
 
     neighborhood::Neighborhood<T_Variable, T_Expression> m_neighborhood;
@@ -127,6 +139,10 @@ class Model {
         m_is_feasible                = false;
 
         m_selections.clear();
+        m_variable_reference_original.initialize();
+        m_constraint_reference_original.initialize();
+        m_constraint_type_reference_original.initialize();
+
         m_variable_reference.initialize();
         m_constraint_reference.initialize();
         m_constraint_type_reference.initialize();
@@ -622,10 +638,19 @@ class Model {
 
         this->setup_unique_name();
         this->setup_is_linear();
+        this->setup_is_enabled_fast_evaluation();
 
+        int iteration = 0;
         while (true) {
             this->categorize_variables();
             this->categorize_constraints();
+
+            if (iteration == 0) {
+                m_variable_reference_original   = m_variable_reference;
+                m_constraint_reference_original = m_constraint_reference;
+                m_constraint_type_reference_original =
+                    m_constraint_type_reference;
+            }
             this->setup_variable_related_constraints();
             this->setup_variable_sensitivity();
 
@@ -634,17 +659,51 @@ class Model {
              * decision variables implicitly fixed.
              */
             if (a_IS_ENABLED_PRESOLVE) {
-                if (!presolver::presolve(this, a_IS_ENABLED_PRINT)) {
+                bool is_enabled_fix_redundant_variables = (iteration == 0);
+                if (!presolver::presolve(this,                                //
+                                         iteration,                           //
+                                         is_enabled_fix_redundant_variables,  //
+                                         a_IS_ENABLED_PRINT)) {
                     break;
                 }
             } else {
                 break;
             }
+            iteration++;
+        }
+
+        iteration = 0;
+        while (true) {
+            this->categorize_variables();
+            this->categorize_constraints();
+            if (presolver::extract_independent_intermediate_variables(
+                    this,       //
+                    iteration,  //
+                    a_IS_ENABLED_PRINT) == 0) {
+                break;
+            }
+
+            this->categorize_variables();
+            this->categorize_constraints();
+            if (presolver::eliminate_independent_intermediate_variables(
+                    this,       //
+                    iteration,  //
+                    a_IS_ENABLED_PRINT) == 0) {
+                break;
+            }
+            iteration++;
         }
 
         if (a_SELECTION_MODE != SelectionMode::None) {
-            this->extract_selections(a_SELECTION_MODE);
+            presolver::extract_selections(this,              //
+                                          a_SELECTION_MODE,  //
+                                          a_IS_ENABLED_PRINT);
         }
+
+        this->categorize_variables();
+        this->categorize_constraints();
+        this->setup_variable_related_constraints();
+        this->setup_variable_sensitivity();
 
         this->setup_neighborhood(a_IS_ENABLED_AGGREGATION_MOVE,     //
                                  a_IS_ENABLED_PRECEDENCE_MOVE,      //
@@ -669,7 +728,6 @@ class Model {
             a_IS_ENABLED_PRINT);
 
         this->setup_fixed_sensitivities(a_IS_ENABLED_PRINT);
-        this->setup_is_enabled_fast_evaluation();
     }
 
     /*************************************************************************/
@@ -776,8 +834,8 @@ class Model {
 
         for (auto &&proxy : m_variable_proxies) {
             for (auto &&variable : proxy.flat_indexed_variables()) {
-                variable.reset_related_monic_constraint_ptrs();
-                variable.setup_related_monic_constraint_ptrs();
+                variable.reset_related_zero_one_coefficient_constraint_ptrs();
+                variable.setup_related_zero_one_coefficient_constraint_ptrs();
             }
         }
     }
@@ -823,16 +881,20 @@ class Model {
                     variable_reference.mutable_variable_ptrs.push_back(
                         &variable);
                 }
-                if (variable.sense() == VariableSense::Selection) {
-                    variable_reference.selection_variable_ptrs.push_back(
-                        &variable);
-                }
                 if (variable.sense() == VariableSense::Binary) {
                     variable_reference.binary_variable_ptrs.push_back(
                         &variable);
                 }
                 if (variable.sense() == VariableSense::Integer) {
                     variable_reference.integer_variable_ptrs.push_back(
+                        &variable);
+                }
+                if (variable.sense() == VariableSense::Selection) {
+                    variable_reference.selection_variable_ptrs.push_back(
+                        &variable);
+                }
+                if (variable.sense() == VariableSense::Intermediate) {
+                    variable_reference.intermediate_variable_ptrs.push_back(
                         &variable);
                 }
             }
@@ -915,6 +977,18 @@ class Model {
                         constraint_type_reference.integer_knapsack_ptrs
                             .push_back(&constraint);
                     }
+                    if (constraint.is_min_max()) {
+                        constraint_type_reference.min_max_ptrs.push_back(
+                            &constraint);
+                    }
+                    if (constraint.is_max_min()) {
+                        constraint_type_reference.max_min_ptrs.push_back(
+                            &constraint);
+                    }
+                    if (constraint.is_intermediate()) {
+                        constraint_type_reference.intermediate_ptrs.push_back(
+                            &constraint);
+                    }
                     if (constraint.is_general_linear()) {
                         constraint_type_reference.general_linear_ptrs.push_back(
                             &constraint);
@@ -924,169 +998,6 @@ class Model {
         }
         m_constraint_reference      = constraint_reference;
         m_constraint_type_reference = constraint_type_reference;
-    }
-
-    /*************************************************************************/
-    constexpr void extract_selections(const SelectionMode &a_SELECTION_MODE) {
-        std::vector<Variable<T_Variable, T_Expression> *>
-            extracted_selection_variable_ptrs;
-
-        std::vector<Selection<T_Variable, T_Expression>> raw_selections;
-        std::vector<Selection<T_Variable, T_Expression>> selections;
-
-        for (auto &&constraint_ptr :
-             m_constraint_type_reference.set_partitioning_ptrs) {
-            if (!constraint_ptr->is_enabled()) {
-                continue;
-            }
-
-            Selection<T_Variable, T_Expression> selection;
-            selection.constraint_ptr = constraint_ptr;
-
-            for (const auto &sensitivity :
-                 constraint_ptr->expression().sensitivities()) {
-                selection.variable_ptrs.push_back(sensitivity.first);
-            }
-            raw_selections.push_back(selection);
-        }
-
-        switch (a_SELECTION_MODE) {
-            case SelectionMode::None: {
-                break;
-            }
-            case SelectionMode::Defined: {
-                break;
-            }
-            case SelectionMode::Smaller: {
-                std::sort(raw_selections.begin(), raw_selections.end(),
-                          [](auto const &a_LHS, auto const &a_RHS) {
-                              return a_LHS.variable_ptrs.size() <
-                                     a_RHS.variable_ptrs.size();
-                          });
-                break;
-            }
-            case SelectionMode::Larger: {
-                std::sort(raw_selections.begin(), raw_selections.end(),
-                          [](auto const &a_LHS, auto const &a_RHS) {
-                              return a_LHS.variable_ptrs.size() >
-                                     a_RHS.variable_ptrs.size();
-                          });
-                break;
-            }
-            case SelectionMode::Independent: {
-                break;
-            }
-            default: {
-            }
-        }
-
-        if (a_SELECTION_MODE == SelectionMode::Defined ||
-            a_SELECTION_MODE == SelectionMode::Smaller ||
-            a_SELECTION_MODE == SelectionMode::Larger) {
-            for (auto &&selection : raw_selections) {
-                bool has_eliminated_variable_ptr = false;
-                for (auto &&variable_ptr : selection.variable_ptrs) {
-                    if (std::find(extracted_selection_variable_ptrs.begin(),
-                                  extracted_selection_variable_ptrs.end(),
-                                  variable_ptr) !=
-                        extracted_selection_variable_ptrs.end()) {
-                        has_eliminated_variable_ptr = true;
-                        break;
-                    }
-                }
-                if (has_eliminated_variable_ptr) {
-                    continue;
-                } else {
-                    selections.push_back(selection);
-                    extracted_selection_variable_ptrs.insert(
-                        extracted_selection_variable_ptrs.end(),
-                        selection.variable_ptrs.begin(),
-                        selection.variable_ptrs.end());
-                }
-            }
-        } else if (a_SELECTION_MODE == SelectionMode::Independent) {
-            const int RAW_SELECTIONS_SIZE = raw_selections.size();
-            for (auto i = 0; i < RAW_SELECTIONS_SIZE; i++) {
-                bool has_overlap = false;
-                for (auto &&variable_ptr : raw_selections[i].variable_ptrs) {
-                    for (auto j = 0; j < RAW_SELECTIONS_SIZE; j++) {
-                        if (j != i &&
-                            std::find(raw_selections[j].variable_ptrs.begin(),
-                                      raw_selections[j].variable_ptrs.end(),
-                                      variable_ptr) !=
-                                raw_selections[j].variable_ptrs.end()) {
-                            has_overlap = true;
-                            break;
-                        }
-                    }
-                    if (has_overlap) {
-                        break;
-                    }
-                }
-                if (has_overlap) {
-                    continue;
-                } else {
-                    selections.push_back(raw_selections[i]);
-                    extracted_selection_variable_ptrs.insert(
-                        extracted_selection_variable_ptrs.end(),
-                        raw_selections[i].variable_ptrs.begin(),
-                        raw_selections[i].variable_ptrs.end());
-                }
-            }
-        }
-
-        std::vector<Variable<T_Variable, T_Expression> *>
-            selection_variable_ptrs;
-        std::vector<Constraint<T_Variable, T_Expression> *>
-             selection_constraint_ptrs;
-        auto binary_variable_ptrs = m_variable_reference.binary_variable_ptrs;
-        auto disabled_constraint_ptrs =
-            m_constraint_reference.disabled_constraint_ptrs;
-
-        for (auto &&selection : selections) {
-            selection.constraint_ptr->disable();
-            selection_constraint_ptrs.push_back(selection.constraint_ptr);
-            disabled_constraint_ptrs.push_back(selection.constraint_ptr);
-
-            for (auto &&variable_ptr : selection.variable_ptrs) {
-                selection_variable_ptrs.push_back(variable_ptr);
-                binary_variable_ptrs.erase(
-                    std::remove(binary_variable_ptrs.begin(),
-                                binary_variable_ptrs.end(), variable_ptr),
-                    binary_variable_ptrs.end());
-            }
-        }
-
-        for (auto &&selection : selections) {
-            for (auto &variable_ptr : selection.variable_ptrs) {
-                auto &constraint_ptrs = variable_ptr->related_constraint_ptrs();
-                selection.related_constraint_ptrs.insert(
-                    constraint_ptrs.begin(), constraint_ptrs.end());
-            }
-        }
-
-        m_selections                                 = selections;
-        m_variable_reference.selection_variable_ptrs = selection_variable_ptrs;
-        m_constraint_reference.selection_constraint_ptrs =
-            selection_constraint_ptrs;
-        m_constraint_reference.disabled_constraint_ptrs =
-            disabled_constraint_ptrs;
-        m_variable_reference.binary_variable_ptrs = binary_variable_ptrs;
-
-        /**
-         * The following block must be after setting m_selections because
-         * variables have pointers to a element of m_selections.
-         */
-        for (auto &&selection : m_selections) {
-            for (auto &&variable_ptr : selection.variable_ptrs) {
-                /**
-                 * Register the selection object to the variables which is
-                 * covered by the corresponding selection constraint, and
-                 * categorize the variable into "Selection".
-                 */
-                variable_ptr->set_selection_ptr(&selection);
-            }
-        }
     }
 
     /*************************************************************************/
@@ -1148,11 +1059,35 @@ class Model {
             }
         }
 
+        for (auto &&proxy : m_constraint_proxies) {
+            for (auto &&constraint : proxy.flat_indexed_constraints()) {
+                constraint.expression().setup_fixed_sensitivities();
+            }
+        }
+        m_objective.expression().setup_fixed_sensitivities();
+
         /**
          * The fixed sensitivities for the constraints and the objective are
          * build in their own setup() methods.
          */
         utility::print_message("Done.", a_IS_ENABLED_PRINT);
+    }
+
+    /*************************************************************************/
+    constexpr void set_selections(
+        const std::vector<Selection<T_Variable, T_Expression>> &a_SELECTIONS) {
+        m_selections = a_SELECTIONS;
+
+        for (auto &&selection : m_selections) {
+            for (auto &&variable_ptr : selection.variable_ptrs) {
+                /**
+                 * Register the selection object to the variables which is
+                 * covered by the corresponding selection constraint, and
+                 * categorize the variable into "Selection".
+                 */
+                variable_ptr->set_selection_ptr(&selection);
+            }
+        }
     }
 
     /*************************************************************************/
@@ -1176,10 +1111,6 @@ class Model {
         }
 
         utility::print_info(
-            " -- Selection: " +
-                utility::to_string(this->number_of_selection_variables(), "%d"),
-            true);
-        utility::print_info(
             " -- Binary: " +
                 utility::to_string(this->number_of_binary_variables(), "%d"),
             true);
@@ -1187,7 +1118,15 @@ class Model {
             " -- Integer: " +
                 utility::to_string(this->number_of_integer_variables(), "%d"),
             true);
-
+        utility::print_info(
+            " -- Selection: " +
+                utility::to_string(this->number_of_selection_variables(), "%d"),
+            true);
+        utility::print_info(
+            " -- Intermediate: " +
+                utility::to_string(this->number_of_intermediate_variables(),
+                                   "%d"),
+            true);
         utility::print_info(
             "The number of fixed decision variables: " +
                 utility::to_string(this->number_of_fixed_variables(), "%d"),
@@ -1214,92 +1153,131 @@ class Model {
                 true);
         }
 
-        utility::print_info(
-            " -- Singleton: " +
-                utility::to_string(
-                    m_constraint_type_reference.singleton_ptrs.size(), "%d"),
-            true);
-        utility::print_info(
-            " -- Aggregation: " +
-                utility::to_string(
-                    m_constraint_type_reference.aggregation_ptrs.size(), "%d"),
-            true);
-        utility::print_info(
-            " -- Precedence: " +
-                utility::to_string(
-                    m_constraint_type_reference.precedence_ptrs.size(), "%d"),
-            true);
-        utility::print_info(
-            " -- Variable Bound: " +
-                utility::to_string(
-                    m_constraint_type_reference.variable_bound_ptrs.size(),
+        utility::print_info(         ///
+            " -- Singleton: " +      ///
+                utility::to_string(  ///
+                    m_constraint_type_reference_original.singleton_ptrs.size(),
                     "%d"),
             true);
-        utility::print_info(
-            " -- Set Partitioning: " +
-                utility::to_string(
-                    m_constraint_type_reference.set_partitioning_ptrs.size(),
+        utility::print_info(         //
+            " -- Aggregation: " +    //
+                utility::to_string(  //
+                    m_constraint_type_reference_original.aggregation_ptrs
+                        .size(),
                     "%d"),
             true);
-        utility::print_info(
-            " -- Set Packing: " +
-                utility::to_string(
-                    m_constraint_type_reference.set_packing_ptrs.size(), "%d"),
-            true);
-        utility::print_info(
-            " -- Set Covering: " +
-                utility::to_string(
-                    m_constraint_type_reference.set_covering_ptrs.size(), "%d"),
-            true);
-        utility::print_info(
-            " -- Cardinality: " +
-                utility::to_string(
-                    m_constraint_type_reference.cardinality_ptrs.size(), "%d"),
-            true);
-        utility::print_info(
-            " -- Invariant Knapsack: " +
-                utility::to_string(
-                    m_constraint_type_reference.invariant_knapsack_ptrs.size(),
+        utility::print_info(         ///
+            " -- Precedence: " +     ///
+                utility::to_string(  ///
+                    m_constraint_type_reference_original.precedence_ptrs.size(),
                     "%d"),
             true);
-        utility::print_info(
-            " -- Equation Knapsack: " +
-                utility::to_string(
-                    m_constraint_type_reference.equation_knapsack_ptrs.size(),
+        utility::print_info(          ///
+            " -- Variable Bound: " +  ///
+                utility::to_string(   ///
+                    m_constraint_type_reference_original.variable_bound_ptrs
+                        .size(),
                     "%d"),
             true);
-        utility::print_info(
-            " -- Bin Packing: " +
-                utility::to_string(
-                    m_constraint_type_reference.bin_packing_ptrs.size(), "%d"),
-            true);
-        utility::print_info(
-            " -- Knapsack: " +
-                utility::to_string(
-                    m_constraint_type_reference.knapsack_ptrs.size(), "%d"),
-            true);
-        utility::print_info(
-            " -- Integer Knapsack: " +
-                utility::to_string(
-                    m_constraint_type_reference.integer_knapsack_ptrs.size(),
+        utility::print_info(            ///
+            " -- Set Partitioning: " +  ///
+                utility::to_string(     ///
+                    m_constraint_type_reference_original.set_partitioning_ptrs
+                        .size(),
                     "%d"),
             true);
-        utility::print_info(
-            " -- General Linear: " +
-                utility::to_string(
-                    m_constraint_type_reference.general_linear_ptrs.size(),
+        utility::print_info(         ///
+            " -- Set Packing: " +    ///
+                utility::to_string(  ///
+                    m_constraint_type_reference_original.set_packing_ptrs
+                        .size(),
                     "%d"),
             true);
-        utility::print_info(
-            " -- Nonlinear: " +
-                utility::to_string(
-                    m_constraint_type_reference.nonlinear_ptrs.size(), "%d"),
+        utility::print_info(         ///
+            " -- Set Covering: " +   ///
+                utility::to_string(  ///
+                    m_constraint_type_reference_original.set_covering_ptrs
+                        .size(),
+                    "%d"),
+            true);
+        utility::print_info(         ///
+            " -- Cardinality: " +    ///
+                utility::to_string(  ///
+                    m_constraint_type_reference_original.cardinality_ptrs
+                        .size(),
+                    "%d"),
+            true);
+        utility::print_info(              ///
+            " -- Invariant Knapsack: " +  ///
+                utility::to_string(       ///
+                    m_constraint_type_reference_original.invariant_knapsack_ptrs
+                        .size(),
+                    "%d"),
+            true);
+        utility::print_info(             ///
+            " -- Equation Knapsack: " +  ///
+                utility::to_string(      ///
+                    m_constraint_type_reference_original.equation_knapsack_ptrs
+                        .size(),
+                    "%d"),
+            true);
+        utility::print_info(         ///
+            " -- Bin Packing: " +    ///
+                utility::to_string(  ///
+                    m_constraint_type_reference_original.bin_packing_ptrs
+                        .size(),
+                    "%d"),
+            true);
+        utility::print_info(         ///
+            " -- Knapsack: " +       ///
+                utility::to_string(  ///
+                    m_constraint_type_reference_original.knapsack_ptrs.size(),
+                    "%d"),
+            true);
+        utility::print_info(            ///
+            " -- Integer Knapsack: " +  ///
+                utility::to_string(     ///
+                    m_constraint_type_reference_original.integer_knapsack_ptrs
+                        .size(),
+                    "%d"),
+            true);
+        utility::print_info(          ///
+            " -- General Linear: " +  ///
+                utility::to_string(   ///
+                    m_constraint_type_reference_original.general_linear_ptrs
+                        .size(),
+                    "%d"),
+            true);
+        utility::print_info(         ///
+            " -- Min-Max: " +        ///
+                utility::to_string(  ///
+                    m_constraint_type_reference_original.min_max_ptrs.size(),
+                    "%d"),
+            true);
+        utility::print_info(         ///
+            " -- Max-Min: " +        ///
+                utility::to_string(  ///
+                    m_constraint_type_reference_original.max_min_ptrs.size(),
+                    "%d"),
+            true);
+        utility::print_info(         ///
+            " -- Intermediate: " +   ///
+                utility::to_string(  ///
+                    m_constraint_type_reference_original.intermediate_ptrs
+                        .size(),
+                    "%d"),
+            true);
+        utility::print_info(         ///
+            " -- Nonlinear: " +      ///
+                utility::to_string(  ///
+                    m_constraint_type_reference_original.nonlinear_ptrs.size(),
+                    "%d"),
             true);
 
-        utility::print_info(
-            "The number of reduced constraints: " +
-                utility::to_string(this->number_of_disabled_constraints(),
-                                   "%d"),
+        utility::print_info(                         ///
+            "The number of reduced constraints: " +  ///
+                utility::to_string(                  ///
+                    this->number_of_disabled_constraints(), "%d"),
             true);
     }
 
@@ -1336,8 +1314,7 @@ class Model {
     /*************************************************************************/
     constexpr void update(void) {
         /**
-         * Update in order of expressions -> objective, constraints. For
-         * typical problem.
+         * Update in order of expressions -> objective, constraints.
          */
         for (auto &&proxy : m_expression_proxies) {
             for (auto &&expression : proxy.flat_indexed_expressions()) {
@@ -1353,6 +1330,12 @@ class Model {
 
         if (m_is_defined_objective) {
             m_objective.update();
+        }
+
+        for (auto &&variable_ptr :
+             m_variable_reference.intermediate_variable_ptrs) {
+            variable_ptr->update_as_intermediate_variable();
+            variable_ptr->dependent_constraint_ptr()->update();
         }
 
         this->update_feasibility();
@@ -1397,6 +1380,12 @@ class Model {
 
         if (a_MOVE.sense == neighborhood::MoveSense::Selection) {
             a_MOVE.alterations[1].first->select();
+        }
+
+        for (auto &&variable_ptr :
+             m_variable_reference.intermediate_variable_ptrs) {
+            variable_ptr->update_as_intermediate_variable();
+            variable_ptr->dependent_constraint_ptr()->update();
         }
 
         this->update_feasibility();
@@ -1560,8 +1549,8 @@ class Model {
 
     /*************************************************************************/
     inline solution::SolutionScore evaluate(
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
-        noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
+        const noexcept {
         solution::SolutionScore score;
         this->evaluate(&score, a_MOVE);
         return score;
@@ -1577,10 +1566,9 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void evaluate(
-        solution::SolutionScore *                           a_score_ptr,  //
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
-        noexcept {
+    constexpr void evaluate(solution::SolutionScore *a_score_ptr,  //
+                            const neighborhood::Move<T_Variable, T_Expression>
+                                &a_MOVE) const noexcept {
         double total_violation = 0.0;
         double local_penalty   = 0.0;
         double global_penalty  = 0.0;
@@ -1667,7 +1655,7 @@ class Model {
                 continue;
             }
 
-            if (constraint_ptr->is_monic() &&
+            if (constraint_ptr->is_zero_one_coefficient() &&
                 a_MOVE.sense == neighborhood::MoveSense::Binary) {
                 constraint_value = constraint_ptr->constraint_value() +
                                    a_MOVE.alterations.front().second -
@@ -2146,8 +2134,8 @@ class Model {
     inline constexpr double sign(void) const {
         /**
          * In this program, maximization problems are solved as minimization
-         * problems by nagating the objective function values. This method is
-         * used to show objective function values for output.
+         * problems by nagating the objective function values. This method
+         * is used to show objective function values for output.
          */
         return m_is_minimization ? 1.0 : -1.0;
     }
@@ -2183,11 +2171,6 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr int number_of_selection_variables(void) const {
-        return m_variable_reference.selection_variable_ptrs.size();
-    }
-
-    /*************************************************************************/
     inline constexpr int number_of_binary_variables(void) const {
         return m_variable_reference.binary_variable_ptrs.size();
     }
@@ -2198,13 +2181,33 @@ class Model {
     }
 
     /*************************************************************************/
+    inline constexpr int number_of_selection_variables(void) const {
+        return m_variable_reference.selection_variable_ptrs.size();
+    }
+
+    /*************************************************************************/
+    inline constexpr int number_of_min_max_variables(void) const {
+        return m_variable_reference.min_max_variable_ptrs.size();
+    }
+
+    /*************************************************************************/
+    inline constexpr int number_of_max_min_variables(void) const {
+        return m_variable_reference.max_min_variable_ptrs.size();
+    }
+
+    /*************************************************************************/
+    inline constexpr int number_of_intermediate_variables(void) const {
+        return m_variable_reference.intermediate_variable_ptrs.size();
+    }
+
+    /*************************************************************************/
     inline constexpr int number_of_constraints(void) const {
         return m_constraint_reference.constraint_ptrs.size();
     }
 
     /*************************************************************************/
     inline constexpr int number_of_selection_constraints(void) const {
-        return m_constraint_reference.selection_constraint_ptrs.size();
+        return m_selections.size();
     }
 
     /*************************************************************************/
@@ -2213,7 +2216,7 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr bool has_monic_constraints(void) const {
+    inline constexpr bool has_zero_one_coefficient_constraints(void) const {
         if (m_constraint_type_reference.set_partitioning_ptrs.size() > 0) {
             return true;
         }

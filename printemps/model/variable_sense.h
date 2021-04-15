@@ -10,9 +10,10 @@ namespace printemps {
 namespace model {
 /*****************************************************************************/
 enum class VariableSense {
-    Selection,  //
-    Binary,     //
-    Integer     //
+    Binary,       //
+    Integer,      //
+    Selection,    //
+    Intermediate  //
 };
 }  // namespace model
 }  // namespace printemps
