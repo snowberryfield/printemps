@@ -56,7 +56,9 @@ TEST_F(TestVariable, initialize) {
     EXPECT_EQ(printemps::model::VariableSense::Integer, variable.sense());
     EXPECT_EQ(nullptr, variable.selection_ptr());
     EXPECT_TRUE(variable.related_constraint_ptrs().empty());
-    EXPECT_TRUE(variable.related_monic_constraint_ptrs().empty());
+    EXPECT_TRUE(
+        variable.related_zero_one_coefficient_constraint_ptrs().empty());
+    EXPECT_EQ(nullptr, variable.dependent_constraint_ptr());
     EXPECT_TRUE(variable.constraint_sensitivities().empty());
     EXPECT_EQ(0.0, variable.objective_sensitivity());
 }
@@ -186,13 +188,13 @@ TEST_F(TestVariable, sense) {
 }
 
 /*****************************************************************************/
-TEST_F(TestVariable, setup_sense) {
+TEST_F(TestVariable, setup_sense_binary_or_integer) {
     auto variable = printemps::model::Variable<int, double>::create_instance();
     variable.set_bound(0, 1);
     printemps::model::Selection<int, double> selection;
     variable.set_selection_ptr(&selection);
     EXPECT_EQ(printemps::model::VariableSense::Selection, variable.sense());
-    variable.setup_sense();
+    variable.setup_sense_binary_or_integer();
     EXPECT_EQ(printemps::model::VariableSense::Binary, variable.sense());
 }
 
@@ -299,6 +301,88 @@ TEST_F(TestVariable, select) {
 }
 
 /*****************************************************************************/
+TEST_F(TestVariable, update_as_intermediate_variable) {
+    {
+        auto variable =
+            printemps::model::Variable<int, double>::create_instance();
+        auto constraint =
+            printemps::model::Constraint<int, double>::create_instance();
+
+        variable.set_dependent_constraint_ptr(&constraint);
+        constraint = (variable <= 10);
+        variable   = 0;
+        constraint.update();
+        variable.update_as_intermediate_variable();
+        EXPECT_EQ(10, variable.value());
+    }
+    {
+        auto variable =
+            printemps::model::Variable<int, double>::create_instance();
+        auto constraint =
+            printemps::model::Constraint<int, double>::create_instance();
+
+        variable.set_dependent_constraint_ptr(&constraint);
+        constraint = (-variable <= 10);
+        variable   = 0;
+        constraint.update();
+        variable.update_as_intermediate_variable();
+        EXPECT_EQ(-10, variable.value());
+    }
+    {
+        auto variable =
+            printemps::model::Variable<int, double>::create_instance();
+        auto constraint =
+            printemps::model::Constraint<int, double>::create_instance();
+
+        variable.set_dependent_constraint_ptr(&constraint);
+        constraint = (variable >= 20);
+        variable   = 0;
+        constraint.update();
+        variable.update_as_intermediate_variable();
+        EXPECT_EQ(20, variable.value());
+    }
+    {
+        auto variable =
+            printemps::model::Variable<int, double>::create_instance();
+        auto constraint =
+            printemps::model::Constraint<int, double>::create_instance();
+
+        variable.set_dependent_constraint_ptr(&constraint);
+        constraint = (-variable >= 20);
+        variable   = 0;
+        constraint.update();
+        variable.update_as_intermediate_variable();
+        EXPECT_EQ(-20, variable.value());
+    }
+    {
+        auto variable =
+            printemps::model::Variable<int, double>::create_instance();
+        auto constraint =
+            printemps::model::Constraint<int, double>::create_instance();
+
+        variable.set_dependent_constraint_ptr(&constraint);
+        constraint = (variable == 30);
+        variable   = 0;
+        constraint.update();
+        variable.update_as_intermediate_variable();
+        EXPECT_EQ(30, variable.value());
+    }
+    {
+        auto variable =
+            printemps::model::Variable<int, double>::create_instance();
+        auto constraint =
+            printemps::model::Constraint<int, double>::create_instance();
+
+        variable.set_dependent_constraint_ptr(&constraint);
+        constraint = (-variable == 30);
+        variable   = 50;
+        constraint.update();
+        variable.update_as_intermediate_variable();
+        EXPECT_EQ(-30, variable.value());
+    }
+}
+
+/*****************************************************************************/
 TEST_F(TestVariable, register_related_constraint_ptr) {
     auto variable = printemps::model::Variable<int, double>::create_instance();
     auto constraint_0 =
@@ -352,21 +436,21 @@ TEST_F(TestVariable, related_constraint_ptrs) {
 }
 
 /*****************************************************************************/
-TEST_F(TestVariable, setup_related_monic_constraint_ptrs) {
+TEST_F(TestVariable, setup_related_zero_one_coefficient_constraint_ptrs) {
     /// This method is tested in
-    /// Model.setup_variable_related_monic_constraint_ptrs().
+    /// Model.setup_variable_related_zero_one_coefficient_constraint_ptrs().
 }
 
 /*****************************************************************************/
-TEST_F(TestVariable, reset_setup_monic_constraint_ptrs) {
+TEST_F(TestVariable, reset_setup_zero_one_coefficient_constraint_ptrs) {
     /// This method is tested in
-    /// Model.setup_variable_related_monic_constraint_ptrs().
+    /// Model.setup_variable_related_zero_one_coefficient_constraint_ptrs().
 }
 
 /*****************************************************************************/
-TEST_F(TestVariable, related_monic_constraint_ptrs) {
+TEST_F(TestVariable, related_zero_one_coefficient_constraint_ptrs) {
     /// This method is tested in
-    /// Model.setup_variable_related_monic_constraint_ptrs().
+    /// Model.setup_variable_related_zero_one_coefficient_constraint_ptrs().
 }
 
 /*****************************************************************************/
@@ -443,6 +527,35 @@ TEST_F(TestVariable, has_unique_sensitivity) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, unique_sensitivity) {
+    /// This method is tested in setup_unique_sensitivity().
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, set_dependent_constraint_ptr) {
+    auto variable = printemps::model::Variable<int, double>::create_instance();
+    auto constraint =
+        printemps::model::Constraint<int, double>::create_instance();
+
+    EXPECT_EQ(printemps::model::VariableSense::Integer, variable.sense());
+    EXPECT_EQ(nullptr, variable.dependent_constraint_ptr());
+
+    variable.set_dependent_constraint_ptr(&constraint);
+
+    EXPECT_EQ(printemps::model::VariableSense::Intermediate, variable.sense());
+    EXPECT_EQ(&constraint, variable.dependent_constraint_ptr());
+
+    variable.reset_dependent_constraint_ptr();
+    EXPECT_EQ(printemps::model::VariableSense::Integer, variable.sense());
+    EXPECT_EQ(nullptr, variable.dependent_constraint_ptr());
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, reset_dependent_constraint_ptr) {
+    /// This method is tested in setup_unique_sensitivity().
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, dependent_constraint_ptr) {
     /// This method is tested in setup_unique_sensitivity().
 }
 
