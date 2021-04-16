@@ -627,13 +627,10 @@ constexpr int fix_redundant_variables(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 constexpr bool presolve(model::Model<T_Variable, T_Expression> *a_model,  //
-                        const int                               a_ITERATION,
                         const bool a_IS_ENABLED_FIX_REDUNDANT_VARIABLES,
                         const bool a_IS_ENABLED_PRINT) {
     utility::print_single_line(a_IS_ENABLED_PRINT);
-    utility::print_message(
-        "Presolving...(Round " + std::to_string(a_ITERATION) + ")",
-        a_IS_ENABLED_PRINT);
+    utility::print_message("Presolving...", a_IS_ENABLED_PRINT);
 
     int number_of_disabled_constaints = 0;
     int number_of_fixed_variables     = 0;

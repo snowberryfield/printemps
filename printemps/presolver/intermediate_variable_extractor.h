@@ -25,12 +25,10 @@ namespace presolver {
 template <class T_Variable, class T_Expression>
 constexpr int extract_independent_intermediate_variables(
     model::Model<T_Variable, T_Expression> *a_model,  //
-    const int a_ITERATION, const bool a_IS_ENABLED_PRINT) {
+    const bool                              a_IS_ENABLED_PRINT) {
     utility::print_single_line(a_IS_ENABLED_PRINT);
-    utility::print_message(
-        "Extracting independent intermediate variables...(Round " +
-            std::to_string(a_ITERATION) + ")",
-        a_IS_ENABLED_PRINT);
+    utility::print_message("Extracting independent intermediate variables...",
+                           a_IS_ENABLED_PRINT);
 
     int number_of_newly_extracted_independent_intermediate_vairables = 0;
     std::unordered_map<model::Variable<T_Variable, T_Expression> *, int>
@@ -82,12 +80,10 @@ constexpr int extract_independent_intermediate_variables(
 template <class T_Variable, class T_Expression>
 constexpr int eliminate_independent_intermediate_variables(
     model::Model<T_Variable, T_Expression> *a_model,  //
-    const int a_ITERATION, const bool a_IS_ENABLED_PRINT) {
+    const bool                              a_IS_ENABLED_PRINT) {
     utility::print_single_line(a_IS_ENABLED_PRINT);
-    utility::print_message(
-        "Eliminating independent intermediate variables...(Round " +
-            std::to_string(a_ITERATION) + ")",
-        a_IS_ENABLED_PRINT);
+    utility::print_message("Eliminating independent intermediate variables...",
+                           a_IS_ENABLED_PRINT);
 
     int number_of_newly_eliminated_independent_intermediate_vairables = 0;
 
