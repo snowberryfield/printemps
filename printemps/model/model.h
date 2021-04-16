@@ -636,75 +636,95 @@ class Model {
                          const bool           a_IS_ENABLED_PRINT) {
         verifier::verify_problem(this, a_IS_ENABLED_PRINT);
 
+        /**
+         * Determine unique name of decision variables and constraints.
+         */
         this->setup_unique_name();
+
+        /**
+         * Determine the linearity.
+         */
         this->setup_is_linear();
+
+        /**
+         * Determine if the fast evaluation can be enabled.
+         */
         this->setup_is_enabled_fast_evaluation();
 
-        int iteration = 0;
-        while (true) {
-            this->categorize_variables();
-            this->categorize_constraints();
+        /**
+         * Initial categorization.
+         */
+        this->categorize_variables();
+        this->categorize_constraints();
+        this->setup_variable_related_constraints();
+        this->setup_variable_sensitivity();
 
-            if (iteration == 0) {
-                m_variable_reference_original   = m_variable_reference;
-                m_constraint_reference_original = m_constraint_reference;
-                m_constraint_type_reference_original =
-                    m_constraint_type_reference;
-            }
-            this->setup_variable_related_constraints();
-            this->setup_variable_sensitivity();
+        /**
+         * Store original categorization results. The final categorization would
+         * be changed by presolving, extracting/eliminating intermediate
+         * variables, and extracting selection constraints.
+         */
+        m_variable_reference_original        = m_variable_reference;
+        m_constraint_reference_original      = m_constraint_reference;
+        m_constraint_type_reference_original = m_constraint_type_reference;
 
-            /**
-             * Presolve the problem by removing redundant constraints and fixing
-             * decision variables implicitly fixed.
-             */
-            if (a_IS_ENABLED_PRESOLVE) {
-                bool is_enabled_fix_redundant_variables = (iteration == 0);
-                if (!presolver::presolve(this,                                //
-                                         iteration,                           //
-                                         is_enabled_fix_redundant_variables,  //
-                                         a_IS_ENABLED_PRINT)) {
+        /**
+         * Presolve the problem by removing redundant constraints and fixing
+         * decision variables implicitly fixed.
+         */
+        if (a_IS_ENABLED_PRESOLVE) {
+            presolver::presolve(this, true, a_IS_ENABLED_PRINT);
+        }
+
+        /**
+         * Extract and eliminate the intermediate variables.
+         */
+        if (m_is_linear) {
+            while (true) {
+                this->categorize_variables();
+                this->categorize_constraints();
+                this->setup_variable_related_constraints();
+                this->setup_variable_sensitivity();
+                if (presolver::extract_independent_intermediate_variables(
+                        this,  //
+                        a_IS_ENABLED_PRINT) == 0) {
                     break;
                 }
-            } else {
-                break;
+
+                while (true) {
+                    this->categorize_variables();
+                    this->categorize_constraints();
+                    this->setup_variable_related_constraints();
+                    this->setup_variable_sensitivity();
+                    if (presolver::eliminate_independent_intermediate_variables(
+                            this,  //
+                            a_IS_ENABLED_PRINT) == 0) {
+                        break;
+                    }
+                }
             }
-            iteration++;
         }
 
-        iteration = 0;
-        while (true) {
-            this->categorize_variables();
-            this->categorize_constraints();
-            if (presolver::extract_independent_intermediate_variables(
-                    this,       //
-                    iteration,  //
-                    a_IS_ENABLED_PRINT) == 0) {
-                break;
-            }
-
-            this->categorize_variables();
-            this->categorize_constraints();
-            if (presolver::eliminate_independent_intermediate_variables(
-                    this,       //
-                    iteration,  //
-                    a_IS_ENABLED_PRINT) == 0) {
-                break;
-            }
-            iteration++;
-        }
-
+        /**
+         * Extract selection constraints.
+         */
         if (a_SELECTION_MODE != SelectionMode::None) {
             presolver::extract_selections(this,              //
                                           a_SELECTION_MODE,  //
                                           a_IS_ENABLED_PRINT);
         }
 
+        /**
+         * Final categorization.
+         */
         this->categorize_variables();
         this->categorize_constraints();
         this->setup_variable_related_constraints();
         this->setup_variable_sensitivity();
 
+        /**
+         * Setup the neighborhood generators.
+         */
         this->setup_neighborhood(a_IS_ENABLED_AGGREGATION_MOVE,     //
                                  a_IS_ENABLED_PRECEDENCE_MOVE,      //
                                  a_IS_ENABLED_VARIABLE_BOUND_MOVE,  //
@@ -712,6 +732,9 @@ class Model {
                                  a_IS_ENABLED_CHAIN_MOVE,           //
                                  a_IS_ENABLED_PRINT);
 
+        /**
+         * Verify and correct the initial values.
+         */
         verifier::verify_and_correct_selection_variables_initial_values(  //
             this,                                                         //
             a_IS_ENABLED_INITIAL_VALUE_CORRECTION,                        //
@@ -727,6 +750,9 @@ class Model {
             a_IS_ENABLED_INITIAL_VALUE_CORRECTION,  //
             a_IS_ENABLED_PRINT);
 
+        /**
+         * Setup the fixed sensitivities for fast evaluation.
+         */
         this->setup_fixed_sensitivities(a_IS_ENABLED_PRINT);
     }
 

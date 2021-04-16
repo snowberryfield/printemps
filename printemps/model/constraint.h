@@ -547,8 +547,8 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
                         variable_ptr = item.first;
                         coefficient  = item.second;
                         number_of_integer_variables++;
-                    } else if (item.first->sense() == VariableSense::Binary ||
-                               item.first->sense() == VariableSense::Integer) {
+                    } else if (item.first->sense() !=
+                               VariableSense::Intermediate) {
                         if (item.second > 0) {
                             upper_bound +=
                                 item.second * item.first->upper_bound();

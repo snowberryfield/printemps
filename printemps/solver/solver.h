@@ -104,20 +104,7 @@ Result<T_Variable, T_Expression> solve(
     }
 
     /**
-     * Setup the model. This includes the following processes.
-     * - setup_variable_related_constraints()
-     * - setup_unique_name()
-     * - setup_is_linear()
-     * - setup_variable_sensitivity()
-     * - presolve()
-     * - categorize_variables()
-     * - categorize_constraints()
-     * - extract_selections()
-     * - setup_neighborhood()
-     * - verify_and_correct_selection_variables_initial_values()
-     * - verify_and_correct_binary_variables_initial_values()
-     * - verify_and_correct_integer_variables_initial_values()
-     * - setup_fixed_sensitivities()
+     * Setup the model.
      */
     model->setup(master_option.is_enabled_presolve,
                  master_option.is_enabled_initial_value_correction,
@@ -148,8 +135,8 @@ Result<T_Variable, T_Expression> solve(
         utility::print_warning(
             "Chain move was disabled because the problem does not include any "
             "zero-one coefficient constraints (set "
-            "partitioning/packing/covering, "
-            "cardinality, and invariant knapsack).",
+            "partitioning/packing/covering, cardinality, and invariant "
+            "knapsack).",
             master_option.verbose >= Verbose::Warning);
     }
 
