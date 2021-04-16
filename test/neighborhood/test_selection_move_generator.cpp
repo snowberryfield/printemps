@@ -29,8 +29,12 @@ TEST_F(TestSelectionMoveGenerator, setup) {
 
     model.categorize_variables();
     model.categorize_constraints();
-    model.extract_selections(printemps::model::SelectionMode::Larger);
+
+    printemps::presolver::extract_selections_by_number_of_variables_order(
+        &model, false, false);
     x(0).select();
+    model.categorize_variables();
+    model.categorize_constraints();
 
     auto selection_variable_ptrs =
         model.variable_reference().selection_variable_ptrs;

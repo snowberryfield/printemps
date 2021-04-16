@@ -85,8 +85,6 @@ TEST_F(TestModel, initialize) {
         true,   //
         model.constraint_reference().constraint_ptrs.empty());
     EXPECT_EQ(  //
-        true, model.constraint_reference().selection_constraint_ptrs.empty());
-    EXPECT_EQ(  //
         true, model.constraint_reference().disabled_constraint_ptrs.empty());
 
     /// Constraint Type Reference
@@ -969,24 +967,33 @@ TEST_F(TestModel, setup_variable_related_constraints) {
     }
 
     for (auto i = 0; i < 10; i++) {
-        EXPECT_TRUE(x(i).related_monic_constraint_ptrs().find(&g(0)) !=
-                    x(i).related_monic_constraint_ptrs().end());
-        EXPECT_FALSE(x(i).related_monic_constraint_ptrs().find(&g(1)) !=
-                     x(i).related_monic_constraint_ptrs().end());
+        EXPECT_TRUE(
+            x(i).related_zero_one_coefficient_constraint_ptrs().find(&g(0)) !=
+            x(i).related_zero_one_coefficient_constraint_ptrs().end());
+        EXPECT_FALSE(
+            x(i).related_zero_one_coefficient_constraint_ptrs().find(&g(1)) !=
+            x(i).related_zero_one_coefficient_constraint_ptrs().end());
     }
 
     for (auto i = 0; i < 20; i++) {
         for (auto j = 0; j < 30; j++) {
-            EXPECT_FALSE(y(i, j).related_monic_constraint_ptrs().find(&g(0)) !=
-                         y(i, j).related_monic_constraint_ptrs().end());
-            EXPECT_TRUE(y(i, j).related_monic_constraint_ptrs().find(&g(1)) !=
-                        y(i, j).related_monic_constraint_ptrs().end());
-            EXPECT_FALSE(y(i, j).related_monic_constraint_ptrs().find(&g(2)) !=
-                         y(i, j).related_monic_constraint_ptrs().end());
+            EXPECT_FALSE(
+                y(i, j).related_zero_one_coefficient_constraint_ptrs().find(
+                    &g(0)) !=
+                y(i, j).related_zero_one_coefficient_constraint_ptrs().end());
+            EXPECT_TRUE(
+                y(i, j).related_zero_one_coefficient_constraint_ptrs().find(
+                    &g(1)) !=
+                y(i, j).related_zero_one_coefficient_constraint_ptrs().end());
+            EXPECT_FALSE(
+                y(i, j).related_zero_one_coefficient_constraint_ptrs().find(
+                    &g(2)) !=
+                y(i, j).related_zero_one_coefficient_constraint_ptrs().end());
         }
     }
-    EXPECT_FALSE(x(0).related_monic_constraint_ptrs().find(&g(2)) !=
-                 x(0).related_monic_constraint_ptrs().end());
+    EXPECT_FALSE(
+        x(0).related_zero_one_coefficient_constraint_ptrs().find(&g(2)) !=
+        x(0).related_zero_one_coefficient_constraint_ptrs().end());
 }
 
 /*****************************************************************************/
@@ -1034,18 +1041,30 @@ TEST_F(TestModel, categorize_variables) {
     auto& x = model.create_variable("x", 0, 1);
     auto& y = model.create_variables("y", 10, 0, 1);
     auto& z = model.create_variables("z", {20, 30}, -10, 10);
+    auto& w = model.create_variable("w", -100, 100);
 
     x.fix_by(0);
     y(0).fix_by(0);
     z(0, 0).fix_by(0);
+    model.create_constraint("f", y.selection());
+    model.create_constraint("g", w == 2 * x + 3 * z(0, 0));
 
     model.categorize_variables();
+    model.categorize_constraints();
+    printemps::presolver::extract_independent_intermediate_variables(&model,
+                                                                     false);
+    printemps::presolver::extract_independent_selections(&model, false);
 
-    EXPECT_EQ(1 + 10 + 20 * 30, model.number_of_variables());
+    model.categorize_variables();
+    model.categorize_constraints();
+
+    EXPECT_EQ(1 + 10 + 20 * 30 + 1, model.number_of_variables());
     EXPECT_EQ(3, model.number_of_fixed_variables());
-    EXPECT_EQ(1 + 10 + 20 * 30 - 3, model.number_of_mutable_variables());
-    EXPECT_EQ(11, model.number_of_binary_variables());
+    EXPECT_EQ(1 + 10 + 20 * 30 + 1 - 3, model.number_of_mutable_variables());
+    EXPECT_EQ(1, model.number_of_binary_variables());
     EXPECT_EQ(600, model.number_of_integer_variables());
+    EXPECT_EQ(10, model.number_of_selection_variables());
+    EXPECT_EQ(1, model.number_of_intermediate_variables());
 }
 
 /*****************************************************************************/
@@ -1105,6 +1124,15 @@ TEST_F(TestModel, categorize_constraints) {
     integer_knapsack(0)    = r.dot(coefficients) <= 50;
     integer_knapsack(1)    = r.dot(coefficients) >= -50;
 
+    auto& min_max = model.create_constraint("min_max");
+    min_max       = 2 * z(0) + 3 * z(1) <= x;
+
+    auto& max_min = model.create_constraint("max_min");
+    max_min       = 2 * z(0) + 3 * z(1) >= x;
+
+    auto& intermediate = model.create_constraint("intermediate");
+    intermediate       = 2 * z(0) + 3 * z(1) == x;
+
     auto& general_liner = model.create_constraint("general_liner");
     general_liner       = x + r.sum() == 50;
 
@@ -1119,9 +1147,12 @@ TEST_F(TestModel, categorize_constraints) {
 
     model.categorize_variables();
     model.categorize_constraints();
-    model.extract_selections(printemps::model::SelectionMode::Defined);
 
-    EXPECT_EQ(22, model.number_of_constraints());
+    printemps::presolver::extract_selections_by_defined_order(&model, false);
+    model.categorize_variables();
+    model.categorize_constraints();
+
+    EXPECT_EQ(25, model.number_of_constraints());
     EXPECT_EQ(1, model.number_of_selection_constraints());
     EXPECT_EQ(2, model.number_of_disabled_constraints());
 
@@ -1138,255 +1169,11 @@ TEST_F(TestModel, categorize_constraints) {
     EXPECT_EQ(2, static_cast<int>(reference.bin_packing_ptrs.size()));
     EXPECT_EQ(2, static_cast<int>(reference.knapsack_ptrs.size()));
     EXPECT_EQ(2, static_cast<int>(reference.integer_knapsack_ptrs.size()));
+    EXPECT_EQ(1, static_cast<int>(reference.min_max_ptrs.size()));
+    EXPECT_EQ(1, static_cast<int>(reference.max_min_ptrs.size()));
+    EXPECT_EQ(1, static_cast<int>(reference.intermediate_ptrs.size()));
     EXPECT_EQ(1, static_cast<int>(reference.general_linear_ptrs.size()));
     EXPECT_EQ(1, static_cast<int>(reference.nonlinear_ptrs.size()));
-}
-
-/*****************************************************************************/
-TEST_F(TestModel, extract_selections_larger) {
-    printemps::model::Model<int, double> model;
-
-    auto& x_0 = model.create_variables("x_0", {10, 10}, 0, 1);
-    auto& x_1 = model.create_variables("x_1", {20, 20}, 0, 1);
-    auto& x_2 = model.create_variables("x_2", 2, 0, 1);
-
-    auto& y = model.create_variables("y", {30, 30}, -10, 10);
-
-    /**
-     * Selection constraint with 10 decision variables. The priority of this
-     * constraint is the third, and it will be employed for a swap
-     * neighborhood.
-     */
-    model.create_constraint("c_0",
-                            x_0.selection({0, printemps::model::Range::All}));
-
-    /**
-     * Selection constraint with 32 decision variables. The priority of this
-     * constraint is the second, and it will NOT be employed for a swap
-     * neighborhood because higher-priority constraint c_1 covers x_1.
-     */
-    model.create_constraint(
-        "c_1", (x_0.sum({1, printemps::model::Range::All}) +
-                x_1.sum({1, printemps::model::Range::All}) + x_2(0)) == 1);
-
-    /**
-     * Selection constraint with 400 decision variables. The priority of this
-     * constraint is the first, and it will be employed for a swap
-     * neighborhood.
-     */
-    model.create_constraint("c_2", x_1.selection());
-
-    /**
-     * Selection constraint with 2 decision variables. The priority of this
-     * constraint is the fourth, and it will NOT be employed for a swap
-     * neighborhood.
-     */
-    model.create_constraint("c_3", x_2.selection());
-
-    model.categorize_variables();
-    model.categorize_constraints();
-    model.extract_selections(printemps::model::SelectionMode::Larger);
-
-    EXPECT_EQ(2, model.number_of_selection_constraints());
-    EXPECT_EQ(2, static_cast<int>(model.selections().size()));
-
-    /**
-     * Check the numbers of covered variables and variable pointers.
-     */
-    {
-        /// Constraint c_2
-        auto variable_ptrs = model.selections()[0].variable_ptrs;
-        EXPECT_EQ(400, static_cast<int>(variable_ptrs.size()));
-
-        EXPECT_TRUE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                               &x_1(0, 0)) != variable_ptrs.end()));
-        EXPECT_TRUE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                               &x_1(19, 19)) != variable_ptrs.end()));
-    }
-
-    {
-        /// Constraint c_0
-        auto variable_ptrs = model.selections()[1].variable_ptrs;
-        EXPECT_EQ(10, static_cast<int>(variable_ptrs.size()));
-
-        EXPECT_TRUE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                               &x_0(0, 0)) != variable_ptrs.end()));
-        EXPECT_TRUE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                               &x_0(0, 9)) != variable_ptrs.end()));
-        EXPECT_FALSE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                &x_0(1, 0)) != variable_ptrs.end()));
-    }
-
-    /**
-     * Check whether the corresponding constraint is enabled or not.
-     */
-    /// Constraint c_2
-    EXPECT_FALSE(model.selections()[0].constraint_ptr->is_enabled());
-
-    /// Constraint c_0
-    EXPECT_FALSE(model.selections()[1].constraint_ptr->is_enabled());
-
-    /**
-     * Check the number of covered variables and variable pointers for each
-     * category. */
-
-    /// Selection
-    {
-        auto variable_ptrs = model.variable_reference().selection_variable_ptrs;
-        EXPECT_EQ(20 * 20 + 1 * 10, model.number_of_selection_variables());
-
-        /// Constraint c_2
-        EXPECT_TRUE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                               &x_1(0, 0)) != variable_ptrs.end()));
-        EXPECT_TRUE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                               &x_1(19, 19)) != variable_ptrs.end()));
-
-        /// Constraint c_0
-        EXPECT_TRUE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                               &x_0(0, 0)) != variable_ptrs.end()));
-        EXPECT_TRUE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                               &x_0(0, 9)) != variable_ptrs.end()));
-        EXPECT_FALSE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                &x_0(1, 0)) != variable_ptrs.end()));
-    }
-
-    /// Binary
-    {
-        auto variable_ptrs = model.variable_reference().binary_variable_ptrs;
-        EXPECT_EQ(10 * 10 + 20 * 20 + 2 - (20 * 20 + 1 * 10),
-                  model.number_of_binary_variables());
-
-        /// Constraint c_2
-        EXPECT_FALSE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                &x_1(0, 0)) != variable_ptrs.end()));
-        EXPECT_FALSE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                &x_1(19, 19)) != variable_ptrs.end()));
-
-        /// Constraint c_0
-        EXPECT_FALSE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                &x_0(0, 0)) != variable_ptrs.end()));
-        EXPECT_FALSE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                &x_0(0, 9)) != variable_ptrs.end()));
-        EXPECT_TRUE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                               &x_0(1, 0)) != variable_ptrs.end()));
-    }
-
-    /// Integer
-    {
-        auto variable_ptrs = model.variable_reference().integer_variable_ptrs;
-        EXPECT_EQ(30 * 30, model.number_of_integer_variables());
-
-        EXPECT_TRUE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                               &y(0, 0)) != variable_ptrs.end()));
-        EXPECT_TRUE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                               &y(29, 29)) != variable_ptrs.end()));
-    }
-}
-
-/*****************************************************************************/
-TEST_F(TestModel, extract_selections_independent) {
-    printemps::model::Model<int, double> model;
-
-    auto& x_0 = model.create_variables("x_0", {10, 10}, 0, 1);
-    auto& x_1 = model.create_variables("x_1", {20, 20}, 0, 1);
-    auto& x_2 = model.create_variables("x_2", 2, 0, 1);
-
-    auto& y = model.create_variables("y", {30, 30}, -10, 10);
-
-    /**
-     * Selection constraint with 10 decision variables (no overlap).
-     */
-    model.create_constraint("c_0",
-                            x_0.selection({0, printemps::model::Range::All}));
-
-    /**
-     * Selection constraint with 32 decision variables (overlap).
-     */
-    model.create_constraint(
-        "c_1", (x_0.sum({1, printemps::model::Range::All}) +
-                x_1.sum({1, printemps::model::Range::All}) + x_2(0)) == 1);
-
-    /**
-     * Selection constraint with 400 decision variables (overlap).
-     */
-    model.create_constraint("c_2", x_1.selection());
-
-    /**
-     * Selection constraint with 2 decision variables (overlap).
-     */
-    model.create_constraint("c_3", x_2.selection());
-
-    model.categorize_variables();
-    model.categorize_constraints();
-    model.extract_selections(printemps::model::SelectionMode::Independent);
-
-    EXPECT_EQ(1, model.number_of_selection_constraints());
-    EXPECT_EQ(1, static_cast<int>(model.selections().size()));
-
-    /**
-     * Check the numbers of covered variables and variable pointers.
-     */
-    {
-        /// Constraint c_0
-        auto variable_ptrs = model.selections()[0].variable_ptrs;
-        EXPECT_EQ(10, static_cast<int>(variable_ptrs.size()));
-
-        EXPECT_TRUE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                               &x_0(0, 0)) != variable_ptrs.end()));
-        EXPECT_TRUE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                               &x_0(0, 9)) != variable_ptrs.end()));
-        EXPECT_FALSE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                &x_0(1, 0)) != variable_ptrs.end()));
-    }
-
-    /**
-     * Check whether the corresponding constraint is enabled or not.
-     */
-    /// Constraint c_0
-    EXPECT_FALSE(model.selections()[0].constraint_ptr->is_enabled());
-
-    /**
-     * Check the number of covered variables and variable pointers for each
-     * category. */
-    /// Selection
-    {
-        auto variable_ptrs = model.variable_reference().selection_variable_ptrs;
-        EXPECT_EQ(10, model.number_of_selection_variables());
-
-        /// Constraint c_0
-        EXPECT_TRUE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                               &x_0(0, 0)) != variable_ptrs.end()));
-        EXPECT_TRUE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                               &x_0(0, 9)) != variable_ptrs.end()));
-        EXPECT_FALSE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                &x_0(1, 0)) != variable_ptrs.end()));
-    }
-
-    /// Binary
-    {
-        auto variable_ptrs = model.variable_reference().binary_variable_ptrs;
-        EXPECT_EQ(10 * 10 + 20 * 20 + 2 - 10,
-                  model.number_of_binary_variables());
-
-        /// Constraint c_0
-        EXPECT_FALSE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                &x_0(0, 0)) != variable_ptrs.end()));
-        EXPECT_FALSE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                &x_0(0, 9)) != variable_ptrs.end()));
-        EXPECT_TRUE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                               &x_0(1, 0)) != variable_ptrs.end()));
-    }
-
-    /// Integer
-    {
-        auto variable_ptrs = model.variable_reference().integer_variable_ptrs;
-        EXPECT_EQ(30 * 30, model.number_of_integer_variables());
-
-        EXPECT_TRUE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                               &y(0, 0)) != variable_ptrs.end()));
-        EXPECT_TRUE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                               &y(29, 29)) != variable_ptrs.end()));
-    }
 }
 
 /*****************************************************************************/
@@ -1491,7 +1278,7 @@ TEST_F(TestModel, update_arg_move) {
     model.minimize(p);
     model.categorize_variables();
     model.categorize_constraints();
-    model.extract_selections(printemps::model::SelectionMode::Defined);
+    printemps::presolver::extract_independent_selections(&model, false);
     model.setup_fixed_sensitivities(false);
 
     model.update();
@@ -1951,7 +1738,7 @@ TEST_F(TestModel, evaluate) {
         model.setup_variable_related_constraints();
         model.categorize_variables();
         model.categorize_constraints();
-        model.extract_selections(printemps::model::SelectionMode::Defined);
+        printemps::presolver::extract_independent_selections(&model, false);
         model.setup_fixed_sensitivities(false);
 
         for (auto&& element : x.flat_indexed_variables()) {
@@ -2099,7 +1886,7 @@ TEST_F(TestModel, evaluate) {
         model.setup_variable_related_constraints();
         model.categorize_variables();
         model.categorize_constraints();
-        model.extract_selections(printemps::model::SelectionMode::Defined);
+        printemps::presolver::extract_independent_selections(&model, false);
         model.setup_fixed_sensitivities(false);
 
         for (auto&& element : x.flat_indexed_variables()) {

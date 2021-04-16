@@ -37,7 +37,7 @@ TEST_F(TestPresolver, presolve) {
     model.setup_variable_related_constraints();
     model.setup_variable_sensitivity();
 
-    printemps::presolver::presolve(&model, false);
+    printemps::presolver::presolve(&model, true, false);
     model.categorize_variables();
     model.categorize_constraints();
 
