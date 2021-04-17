@@ -34,44 +34,35 @@ constexpr int extract_independent_intermediate_variables(
     std::unordered_map<model::Variable<T_Variable, T_Expression> *, int>
         intermediate_variable_counts;
 
-    for (auto &&proxy : a_model->constraint_proxies()) {
-        for (auto &&constraint : proxy.flat_indexed_constraints()) {
-            if (constraint.is_intermediate()) {
-                auto intermediate_variable_ptr =
-                    constraint.intermediate_variable_ptr();
-                if (intermediate_variable_counts.find(
-                        intermediate_variable_ptr) !=
-                    intermediate_variable_counts.end()) {
-                    intermediate_variable_counts[intermediate_variable_ptr]++;
-                } else {
-                    intermediate_variable_counts[intermediate_variable_ptr] = 1;
-                }
-            }
+    for (auto &&constraint_ptr :
+         a_model->constraint_type_reference().intermediate_ptrs) {
+        auto intermediate_variable_ptr =
+            constraint_ptr->intermediate_variable_ptr();
+        if (intermediate_variable_counts.find(intermediate_variable_ptr) !=
+            intermediate_variable_counts.end()) {
+            intermediate_variable_counts[intermediate_variable_ptr]++;
+        } else {
+            intermediate_variable_counts[intermediate_variable_ptr] = 1;
         }
     }
 
-    for (auto &&proxy : a_model->constraint_proxies()) {
-        for (auto &&constraint : proxy.flat_indexed_constraints()) {
-            if (constraint.is_intermediate()) {
-                auto intermediate_variable_ptr =
-                    constraint.intermediate_variable_ptr();
-                if (intermediate_variable_counts[intermediate_variable_ptr] ==
-                    1) {
-                    utility::print_message(
-                        "The decision variable " +
-                            intermediate_variable_ptr->name() +
-                            " in the constraint " + constraint.name() +
-                            " was extracted as an independent intermediate "
-                            "variable. ",
-                        a_IS_ENABLED_PRINT);
-                    constraint.disable();
-                    intermediate_variable_ptr->set_dependent_constraint_ptr(
-                        &constraint);
-                    number_of_newly_extracted_independent_intermediate_vairables++;
-                }
-            }
+    for (auto &&constraint_ptr :
+         a_model->constraint_type_reference().intermediate_ptrs) {
+        auto intermediate_variable_ptr =
+            constraint_ptr->intermediate_variable_ptr();
+        if (intermediate_variable_counts[intermediate_variable_ptr] == 1) {
+            utility::print_message(
+                "The decision variable " + intermediate_variable_ptr->name() +
+                    " in the constraint " + constraint_ptr->name() +
+                    " was extracted as an independent intermediate variable. ",
+                a_IS_ENABLED_PRINT);
+            constraint_ptr->disable();
+            intermediate_variable_ptr->set_dependent_constraint_ptr(
+                constraint_ptr);
+            number_of_newly_extracted_independent_intermediate_vairables++;
         }
     }
+
     utility::print_message("Done.", a_IS_ENABLED_PRINT);
     return number_of_newly_extracted_independent_intermediate_vairables;
 }
@@ -116,36 +107,34 @@ constexpr int eliminate_independent_intermediate_variables(
     }
 
     /// Constraint
-    for (auto &&proxy : a_model->constraint_proxies()) {
-        for (auto &&constraint : proxy.flat_indexed_constraints()) {
-            auto sensitivities = constraint.expression().sensitivities();
+    for (auto &&constrinat_ptr :
+         a_model->constraint_reference().constraint_ptrs) {
+        auto sensitivities = constrinat_ptr->expression().sensitivities();
 
-            for (auto &&variable_ptr :
-                 a_model->variable_reference().intermediate_variable_ptrs) {
-                if (&constraint == variable_ptr->dependent_constraint_ptr()) {
-                    continue;
-                }
-                if (sensitivities.find(variable_ptr) != sensitivities.end()) {
-                    auto dependent_constraint_ptr =
-                        variable_ptr->dependent_constraint_ptr();
-                    auto &sensitivities =
-                        dependent_constraint_ptr->expression().sensitivities();
+        for (auto &&variable_ptr :
+             a_model->variable_reference().intermediate_variable_ptrs) {
+            if (constrinat_ptr == variable_ptr->dependent_constraint_ptr()) {
+                continue;
+            }
+            if (sensitivities.find(variable_ptr) != sensitivities.end()) {
+                auto dependent_constraint_ptr =
+                    variable_ptr->dependent_constraint_ptr();
+                auto &sensitivities =
+                    dependent_constraint_ptr->expression().sensitivities();
 
-                    double sign =
-                        sensitivities.at(variable_ptr) > 0 ? -1.0 : 1.0;
+                double sign = sensitivities.at(variable_ptr) > 0 ? -1.0 : 1.0;
 
-                    constraint.expression().substitute(
-                        variable_ptr,
-                        sign * dependent_constraint_ptr->expression());
+                constrinat_ptr->expression().substitute(
+                    variable_ptr,
+                    sign * dependent_constraint_ptr->expression());
 
-                    number_of_newly_eliminated_independent_intermediate_vairables++;
+                number_of_newly_eliminated_independent_intermediate_vairables++;
 
-                    utility::print_message(
-                        "The independent intermediate variable " +
-                            variable_ptr->name() + " in the constraint " +
-                            constraint.name() + " was eliminated. ",
-                        a_IS_ENABLED_PRINT);
-                }
+                utility::print_message(
+                    "The independent intermediate variable " +
+                        variable_ptr->name() + " in the constraint " +
+                        constrinat_ptr->name() + " was eliminated. ",
+                    a_IS_ENABLED_PRINT);
             }
         }
     }

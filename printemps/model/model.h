@@ -679,7 +679,8 @@ class Model {
         /**
          * Extract and eliminate the intermediate variables.
          */
-        if (m_is_linear) {
+        if (m_is_linear &&
+            m_constraint_type_reference.intermediate_ptrs.size() > 0) {
             while (true) {
                 this->categorize_variables();
                 this->categorize_constraints();
@@ -1149,7 +1150,7 @@ class Model {
                 utility::to_string(this->number_of_selection_variables(), "%d"),
             true);
         utility::print_info(
-            " -- Intermediate: " +
+            " -- Independent Intermediate: " +
                 utility::to_string(this->number_of_intermediate_variables(),
                                    "%d"),
             true);
@@ -1629,7 +1630,8 @@ class Model {
                         constraints[j].local_penalty_coefficient_greater();
                 }
 
-                if (violation < constraints[j].violation_value()) {
+                if (violation + constant::EPSILON <
+                    constraints[j].violation_value()) {
                     is_feasibility_improvable = true;
                 }
 
@@ -1706,7 +1708,7 @@ class Model {
                     positive_part - constraint_ptr->positive_part();
                 total_violation += violation_diff;
 
-                if (violation_diff < 0) {
+                if (violation_diff < -constant::EPSILON) {
                     is_feasibility_improvable = true;
                 }
 
@@ -1721,7 +1723,7 @@ class Model {
                     negative_part - constraint_ptr->negative_part();
                 total_violation += violation_diff;
 
-                if (violation_diff < 0) {
+                if (violation_diff < -constant::EPSILON) {
                     is_feasibility_improvable = true;
                 }
 

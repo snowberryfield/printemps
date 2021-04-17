@@ -527,6 +527,8 @@ Result<T_Variable, T_Expression> solve(
     int number_of_initial_modification = 0;
     int iteration_max = master_option.tabu_search.iteration_max;
 
+    double bias = memory.bias();
+
     ImprovabilityScreeningMode improvability_screening_mode =
         master_option.improvability_screening_mode;
     if (improvability_screening_mode == ImprovabilityScreeningMode::Automatic) {
@@ -631,6 +633,11 @@ Result<T_Variable, T_Expression> solve(
         memory = result.memory;
 
         /**
+         * Update the bias.
+         */
+        bias = memory.bias();
+
+        /**
          * Update the termination status.
          */
         termination_status = result.termination_status;
@@ -649,18 +656,19 @@ Result<T_Variable, T_Expression> solve(
             penalty_coefficient_reset_flag             = false;
         } else {
             no_global_augmented_incumbent_update_count++;
-
-            if (no_global_augmented_incumbent_update_count ==
-                master_option.penalty_coefficient_reset_count_threshold) {
-                /**
-                 * Activate the flag to reset the penalty coefficients if the
-                 * count reaches the specified value, and then also reset the
-                 * count.
-                 */
-                penalty_coefficient_reset_flag             = true;
-                no_global_augmented_incumbent_update_count = 0;
-            } else {
-                penalty_coefficient_reset_flag = false;
+            if (master_option.penalty_coefficient_reset_count_threshold > 0) {
+                if (no_global_augmented_incumbent_update_count %
+                        master_option
+                            .penalty_coefficient_reset_count_threshold ==
+                    0) {
+                    /**
+                     * Activate the flag to reset the penalty coefficients if
+                     * the count reaches the specified value.
+                     */
+                    penalty_coefficient_reset_flag = true;
+                } else {
+                    penalty_coefficient_reset_flag = false;
+                }
             }
         }
 
@@ -691,9 +699,9 @@ Result<T_Variable, T_Expression> solve(
         bool employing_global_augmented_solution_flag = false;
         bool employing_previous_solution_flag         = false;
 
-        bool penalty_coefficient_tightening_flag      = false;
-        bool penalty_coefficient_relaxing_flag        = false;
-        bool is_enabled_forcibly_initial_modification = false;
+        bool is_enabled_penalty_coefficient_tightening = false;
+        bool is_enabled_penalty_coefficient_relaxing   = false;
+        bool is_enabled_forcibly_initial_modification  = false;
 
         /**
          * If the improvability_screening_mode was set to "Automatic", determine
@@ -757,7 +765,7 @@ Result<T_Variable, T_Expression> solve(
              * next loop. The penalty coefficients are to be relaxed.
              */
             employing_global_augmented_solution_flag = true;
-            penalty_coefficient_relaxing_flag        = true;
+            is_enabled_penalty_coefficient_relaxing  = true;
 
             /**
              * The variable no_update_count is a count that the
@@ -779,14 +787,14 @@ Result<T_Variable, T_Expression> solve(
                 is_enabled_forcibly_initial_modification = true;
 
                 if (result_local_augmented_incumbent_score.is_feasible) {
-                    penalty_coefficient_relaxing_flag = true;
-                    no_update_count                   = 0;
+                    is_enabled_penalty_coefficient_relaxing = true;
+                    no_update_count                         = 0;
                 } else {
                     if (no_update_count < 1) {
                         no_update_count++;
                     } else {
-                        penalty_coefficient_relaxing_flag = true;
-                        no_update_count                   = 0;
+                        is_enabled_penalty_coefficient_relaxing = true;
+                        no_update_count                         = 0;
                     }
                 }
             } else {
@@ -813,9 +821,9 @@ Result<T_Variable, T_Expression> solve(
                     is_enabled_forcibly_initial_modification = true;
 
                     if (result_local_augmented_incumbent_score.is_feasible) {
-                        penalty_coefficient_relaxing_flag = true;
+                        is_enabled_penalty_coefficient_relaxing = true;
                     } else {
-                        penalty_coefficient_tightening_flag = true;
+                        is_enabled_penalty_coefficient_tightening = true;
                     }
                 } else {
                     /**
@@ -826,7 +834,7 @@ Result<T_Variable, T_Expression> solve(
                      */
                     if (result_local_augmented_incumbent_score.is_feasible) {
                         employing_local_augmented_solution_flag = true;
-                        penalty_coefficient_relaxing_flag       = true;
+                        is_enabled_penalty_coefficient_relaxing = true;
 
                     } else {
                         /**
@@ -868,7 +876,7 @@ Result<T_Variable, T_Expression> solve(
                         } else {
                             employing_local_augmented_solution_flag = true;
                         }
-                        penalty_coefficient_tightening_flag = true;
+                        is_enabled_penalty_coefficient_tightening = true;
                     }
                 }
             }
@@ -920,7 +928,7 @@ Result<T_Variable, T_Expression> solve(
                     constraint.reset_local_penalty_coefficient();
                 }
             }
-        } else if (penalty_coefficient_tightening_flag) {
+        } else if (is_enabled_penalty_coefficient_tightening) {
             /**
              * Tighten the local penalty coefficients.
              */
@@ -1011,7 +1019,7 @@ Result<T_Variable, T_Expression> solve(
                                  master_option.initial_penalty_coefficient);
                 }
             }
-        } else if (penalty_coefficient_relaxing_flag) {
+        } else if (is_enabled_penalty_coefficient_relaxing) {
             /**
              * Relax the local penalty coefficients of which
              * corresponding constraints are satisfied.
@@ -1358,7 +1366,7 @@ Result<T_Variable, T_Expression> solve(
          * Print the search bias.
          */
         utility::print_message(
-            "Historical search bias is " + std::to_string(memory.bias()) + ".",
+            "Historical search bias is " + std::to_string(bias) + ".",
             master_option.verbose >= Verbose::Outer);
 
         /**
@@ -1416,11 +1424,11 @@ Result<T_Variable, T_Expression> solve(
                 "The penalty coefficients were reset due to search "
                 "stagnation.",
                 master_option.verbose >= Verbose::Outer);
-        } else if (penalty_coefficient_relaxing_flag) {
+        } else if (is_enabled_penalty_coefficient_relaxing) {
             utility::print_message(  //
                 "The penalty coefficients were relaxed.",
                 master_option.verbose >= Verbose::Outer);
-        } else if (penalty_coefficient_tightening_flag) {
+        } else if (is_enabled_penalty_coefficient_tightening) {
             utility::print_message(  //
                 "The penalty coefficients were tightened.",
                 master_option.verbose >= Verbose::Outer);
