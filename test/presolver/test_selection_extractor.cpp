@@ -36,7 +36,7 @@ TEST_F(TestSelectionExtractor, extract_selections_by_defined_order) {
                             x_0.selection({0, printemps::model::Range::All}));
 
     /**
-     * Selection constraint with 32 decision variables. The priority of this
+     * Selection constraint with 31 decision variables. The priority of this
      * constraint is the second.
      */
     model.create_constraint(
@@ -120,7 +120,7 @@ TEST_F(TestSelectionExtractor, extract_selections_by_defined_order) {
 
 /*****************************************************************************/
 TEST_F(TestSelectionExtractor,
-       extract_selections_by_number_of_variables_order) {
+       extract_selections_by_number_of_variables_smaller_order) {
     printemps::model::Model<int, double> model;
 
     auto& x_0 = model.create_variables("x_0", {10, 10}, 0, 1);
@@ -129,16 +129,14 @@ TEST_F(TestSelectionExtractor,
 
     /**
      * Selection constraint with 10 decision variables. The priority of this
-     * constraint is the third, and it will be employed for a swap
-     * neighborhood.
+     * constraint is the 1st.
      */
     model.create_constraint("c_0",
                             x_0.selection({0, printemps::model::Range::All}));
 
     /**
-     * Selection constraint with 32 decision variables. The priority of this
-     * constraint is the second, and it will NOT be employed for a swap
-     * neighborhood because higher-priority constraint c_1 covers x_1.
+     * Selection constraint with 31 decision variables. The priority of this
+     * constraint is the second.
      */
     model.create_constraint(
         "c_1", (x_0.sum({1, printemps::model::Range::All}) +
@@ -146,8 +144,114 @@ TEST_F(TestSelectionExtractor,
 
     /**
      * Selection constraint with 400 decision variables. The priority of this
-     * constraint is the first, and it will be employed for a swap
-     * neighborhood.
+     * constraint is the third.
+     */
+    model.create_constraint("c_2", x_1.selection());
+
+    /**
+     * This is not selection constraint (aggregation).
+     */
+    model.create_constraint("c_3", x_2.selection());
+
+    model.categorize_variables();
+    model.categorize_constraints();
+
+    printemps::presolver::extract_selections_by_number_of_variables_order(
+        &model, true, false);
+    model.categorize_variables();
+    model.categorize_constraints();
+
+    EXPECT_EQ(2, model.number_of_selection_constraints());
+    EXPECT_EQ(2, static_cast<int>(model.selections().size()));
+
+    /**
+     * Check the numbers of covered variables and variable pointers.
+     */
+    {
+        /// Constraint c_0
+        auto variable_ptrs = model.selections()[0].variable_ptrs;
+        EXPECT_EQ(10, static_cast<int>(variable_ptrs.size()));
+
+        EXPECT_TRUE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                               &x_0(0, 0)) != variable_ptrs.end()));
+        EXPECT_TRUE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                               &x_0(0, 9)) != variable_ptrs.end()));
+    }
+
+    {
+        /// Constraint c_1
+        auto variable_ptrs = model.selections()[1].variable_ptrs;
+        EXPECT_EQ(31, static_cast<int>(variable_ptrs.size()));
+
+        EXPECT_TRUE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                               &x_0(1, 0)) != variable_ptrs.end()));
+        EXPECT_TRUE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                               &x_0(1, 9)) != variable_ptrs.end()));
+        EXPECT_TRUE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                               &x_1(1, 0)) != variable_ptrs.end()));
+        EXPECT_TRUE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                               &x_1(1, 19)) != variable_ptrs.end()));
+        EXPECT_TRUE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                               &x_2(0)) != variable_ptrs.end()));
+    }
+
+    /**
+     * Check whether the corresponding constraint is enabled or not.
+     */
+
+    /// Constraint c_0
+    EXPECT_FALSE(model.selections()[0].constraint_ptr->is_enabled());
+
+    /// Constraint c_1
+    EXPECT_FALSE(model.selections()[1].constraint_ptr->is_enabled());
+
+    /**
+     * Check the number of covered variables and variable pointers for each
+     * category.
+     */
+
+    /// Selection
+    {
+        auto variable_ptrs = model.variable_reference().selection_variable_ptrs;
+        EXPECT_EQ(10 + 31, model.number_of_selection_variables());
+    }
+
+    /// Binary
+    {
+        auto variable_ptrs = model.variable_reference().binary_variable_ptrs;
+        EXPECT_EQ(10 * 10 + 20 * 20 + 2 - (10 + 31),
+                  model.number_of_binary_variables());
+    }
+}
+
+/*****************************************************************************/
+TEST_F(TestSelectionExtractor,
+       extract_selections_by_number_of_variables_larger_order) {
+    printemps::model::Model<int, double> model;
+
+    auto& x_0 = model.create_variables("x_0", {10, 10}, 0, 1);
+    auto& x_1 = model.create_variables("x_1", {20, 20}, 0, 1);
+    auto& x_2 = model.create_variables("x_2", 2, 0, 1);
+
+    /**
+     * Selection constraint with 10 decision variables. The priority of this
+     * constraint is the third.
+     */
+    model.create_constraint("c_0",
+                            x_0.selection({0, printemps::model::Range::All}));
+
+    /**
+     * Selection constraint with 31 decision variables. The priority of this
+     * constraint is the second. It will NOT be employed as selection constraint
+     * because higher-priority constraint c_1 covers x_1.
+     */
+    model.create_constraint(
+        "c_1", (x_0.sum({1, printemps::model::Range::All}) +
+                x_1.sum({1, printemps::model::Range::All}) + x_2(0)) == 1);
+
+    /**
+     * Selection constraint with 400 decision variables. The priority of this
+     * constraint is the first.
      */
     model.create_constraint("c_2", x_1.selection());
 
@@ -190,8 +294,6 @@ TEST_F(TestSelectionExtractor,
                                &x_0(0, 0)) != variable_ptrs.end()));
         EXPECT_TRUE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
                                &x_0(0, 9)) != variable_ptrs.end()));
-        EXPECT_FALSE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                &x_0(1, 0)) != variable_ptrs.end()));
     }
 
     /**
@@ -276,8 +378,6 @@ TEST_F(TestSelectionExtractor, extract_selections_independent) {
                                &x_0(0, 0)) != variable_ptrs.end()));
         EXPECT_TRUE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
                                &x_0(0, 9)) != variable_ptrs.end()));
-        EXPECT_FALSE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                &x_0(1, 0)) != variable_ptrs.end()));
     }
 
     /**
@@ -303,14 +403,6 @@ TEST_F(TestSelectionExtractor, extract_selections_independent) {
         auto variable_ptrs = model.variable_reference().binary_variable_ptrs;
         EXPECT_EQ(10 * 10 + 20 * 20 + 2 - 10,
                   model.number_of_binary_variables());
-
-        /// Constraint c_0
-        EXPECT_FALSE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                &x_0(0, 0)) != variable_ptrs.end()));
-        EXPECT_FALSE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                                &x_0(0, 9)) != variable_ptrs.end()));
-        EXPECT_TRUE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
-                               &x_0(1, 0)) != variable_ptrs.end()));
     }
 }
 
