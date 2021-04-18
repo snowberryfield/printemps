@@ -74,8 +74,8 @@ TEST_F(TestQuadracitAssignment, quadratic_assignment) {
     /*************************************************************************/
     /// Objective function definition
     /*************************************************************************/
-    std::function<double(const printemps::model::IPMove&)> f =
-        [&qap, &p](const printemps::model::IPMove& a_MOVE) {
+    std::function<double(const printemps::neighborhood::IPMove&)> f =
+        [&qap, &p](const printemps::neighborhood::IPMove& a_MOVE) {
             double f = 0.0;
 
             std::vector<int> p_values(qap.N);
@@ -94,46 +94,47 @@ TEST_F(TestQuadracitAssignment, quadratic_assignment) {
     /*************************************************************************/
     /// Neighborhood definition
     /*************************************************************************/
-    std::function<void(std::vector<printemps::model::IPMove>*)> move_updater =
-        [&qap, &p](std::vector<printemps::model::IPMove>* a_moves) {
-            a_moves->resize(qap.N * (qap.N - 1) / 2 +
-                            qap.N * (qap.N - 1) * (qap.N - 2) / 3);
-            auto count = 0;
-            for (auto n = 0; n < qap.N; n++) {
-                for (auto m = n + 1; m < qap.N; m++) {
-                    (*a_moves)[count].alterations.clear();
-                    (*a_moves)[count].alterations.emplace_back(&p(n),
-                                                               p(m).value());
-                    (*a_moves)[count].alterations.emplace_back(&p(m),
-                                                               p(n).value());
-                    count++;
-                }
-            }
-            for (auto n = 0; n < qap.N; n++) {
-                for (auto m = n + 1; m < qap.N; m++) {
-                    for (auto k = m + 1; k < qap.N; k++) {
+    std::function<void(std::vector<printemps::neighborhood::IPMove>*)>
+        move_updater =
+            [&qap, &p](std::vector<printemps::neighborhood::IPMove>* a_moves) {
+                a_moves->resize(qap.N * (qap.N - 1) / 2 +
+                                qap.N * (qap.N - 1) * (qap.N - 2) / 3);
+                auto count = 0;
+                for (auto n = 0; n < qap.N; n++) {
+                    for (auto m = n + 1; m < qap.N; m++) {
                         (*a_moves)[count].alterations.clear();
                         (*a_moves)[count].alterations.emplace_back(
                             &p(n), p(m).value());
                         (*a_moves)[count].alterations.emplace_back(
-                            &p(m), p(k).value());
-                        (*a_moves)[count].alterations.emplace_back(
-                            &p(k), p(n).value());
-                        count++;
-
-                        (*a_moves)[count].alterations.clear();
-                        (*a_moves)[count].alterations.emplace_back(
-                            &p(n), p(k).value());
-                        (*a_moves)[count].alterations.emplace_back(
                             &p(m), p(n).value());
-                        (*a_moves)[count].alterations.emplace_back(
-                            &p(k), p(m).value());
                         count++;
                     }
                 }
-            }
-        };
-    model.neighborhood().set_user_defined_move_updater(move_updater);
+                for (auto n = 0; n < qap.N; n++) {
+                    for (auto m = n + 1; m < qap.N; m++) {
+                        for (auto k = m + 1; k < qap.N; k++) {
+                            (*a_moves)[count].alterations.clear();
+                            (*a_moves)[count].alterations.emplace_back(
+                                &p(n), p(m).value());
+                            (*a_moves)[count].alterations.emplace_back(
+                                &p(m), p(k).value());
+                            (*a_moves)[count].alterations.emplace_back(
+                                &p(k), p(n).value());
+                            count++;
+
+                            (*a_moves)[count].alterations.clear();
+                            (*a_moves)[count].alterations.emplace_back(
+                                &p(n), p(k).value());
+                            (*a_moves)[count].alterations.emplace_back(
+                                &p(m), p(n).value());
+                            (*a_moves)[count].alterations.emplace_back(
+                                &p(k), p(m).value());
+                            count++;
+                        }
+                    }
+                }
+            };
+    model.neighborhood().user_defined().set_move_updater(move_updater);
 
     /// initial solution
     for (auto n = 0; n < qap.N; n++) {
@@ -154,7 +155,6 @@ TEST_F(TestQuadracitAssignment, quadratic_assignment) {
     option.is_enabled_aggregation_move             = false;
     option.is_enabled_precedence_move              = false;
     option.is_enabled_variable_bound_move          = false;
-    option.is_enabled_exclusive_move               = false;
     option.is_enabled_chain_move                   = true;
     option.is_enabled_user_defined_move            = true;
     option.target_objective_value                  = -1E100;
@@ -173,7 +173,7 @@ TEST_F(TestQuadracitAssignment, quadratic_assignment) {
     option.tabu_search.ignore_tabu_if_global_incumbent             = true;
 
     auto result = printemps::solver::solve(&model, option);
-    EXPECT_EQ(true, result.solution.is_feasible());
+    EXPECT_TRUE(result.solution.is_feasible());
 
     ASSERT_THROW(printemps::solver::solve(&model, option), std::logic_error);
 }

@@ -38,10 +38,10 @@ TEST_F(TestObjective, initialize) {
 
     EXPECT_EQ(0, objective.evaluate());
     EXPECT_EQ(0, objective.evaluate({}));
-    EXPECT_EQ(true, objective.expression().sensitivities().empty());
+    EXPECT_TRUE(objective.expression().sensitivities().empty());
     EXPECT_EQ(0, objective.expression().constant_value());
     EXPECT_EQ(0, objective.value());
-    EXPECT_EQ(true, objective.is_linear());
+    EXPECT_TRUE(objective.is_linear());
 }
 
 /*****************************************************************************/
@@ -55,17 +55,18 @@ TEST_F(TestObjective, create_instance_arg_function) {
 
     expression = sensitivity * variable + constant;
 
-    auto f = [&expression](const printemps::model::Move<int, double> &a_MOVE) {
+    auto f = [&expression](
+                 const printemps::neighborhood::Move<int, double> &a_MOVE) {
         return expression.evaluate(a_MOVE);
     };
 
     auto objective =
         printemps::model::Objective<int, double>::create_instance(f);
 
-    EXPECT_EQ(true, objective.expression().sensitivities().empty());
+    EXPECT_TRUE(objective.expression().sensitivities().empty());
     EXPECT_EQ(0, objective.expression().constant_value());
     EXPECT_EQ(0, objective.value());
-    EXPECT_EQ(false, objective.is_linear());
+    EXPECT_FALSE(objective.is_linear());
 }
 
 /*****************************************************************************/
@@ -88,24 +89,23 @@ TEST_F(TestObjective, create_instance_arg_expression) {
               objective.expression().sensitivities().at(&variable));
     EXPECT_EQ(constant, objective.expression().constant_value());
     EXPECT_EQ(0, objective.value());
-    EXPECT_EQ(true, objective.is_linear());
+    EXPECT_TRUE(objective.is_linear());
 }
 
 /*****************************************************************************/
 TEST_F(TestObjective, setup_arg_function) {
     auto f =
-        []([[maybe_unused]] const printemps::model::Move<int, double> &a_MOVE) {
-            return 0;
-        };
+        []([[maybe_unused]] const printemps::neighborhood::Move<int, double>
+               &a_MOVE) { return 0; };
 
     auto objective =
         printemps::model::Objective<int, double>::create_instance();
     objective.setup(f);
 
-    EXPECT_EQ(true, objective.expression().sensitivities().empty());
+    EXPECT_TRUE(objective.expression().sensitivities().empty());
     EXPECT_EQ(0, objective.expression().constant_value());
     EXPECT_EQ(0, objective.value());
-    EXPECT_EQ(false, objective.is_linear());
+    EXPECT_FALSE(objective.is_linear());
 }
 
 /*****************************************************************************/
@@ -127,7 +127,7 @@ TEST_F(TestObjective, setup_arg_expression) {
               objective.expression().sensitivities().at(&variable));
     EXPECT_EQ(constant, objective.expression().constant_value());
     EXPECT_EQ(0, objective.value());
-    EXPECT_EQ(true, objective.is_linear());
+    EXPECT_TRUE(objective.is_linear());
 }
 
 /*****************************************************************************/
@@ -142,7 +142,8 @@ TEST_F(TestObjective, evaluate_function_arg_void) {
     expression = sensitivity * variable + constant;
     expression.setup_fixed_sensitivities();
 
-    auto f = [&expression](const printemps::model::Move<int, double> &a_MOVE) {
+    auto f = [&expression](
+                 const printemps::neighborhood::Move<int, double> &a_MOVE) {
         return expression.evaluate(a_MOVE);
     };
 
@@ -171,6 +172,7 @@ TEST_F(TestObjective, evaluate_expression_arg_void) {
 
     auto objective =
         printemps::model::Objective<int, double>::create_instance(expression);
+    objective.expression().setup_fixed_sensitivities();
 
     auto value = random_integer();
     variable   = value;
@@ -193,8 +195,8 @@ TEST_F(TestObjective, evaluate_function_arg_move) {
     expression = sensitivity * variable + constant;
     expression.setup_fixed_sensitivities();
 
-    auto f = [&expression,
-              &variable](const printemps::model::Move<int, double> &a_MOVE) {
+    auto f = [&expression, &variable](
+                 const printemps::neighborhood::Move<int, double> &a_MOVE) {
         return expression.evaluate(a_MOVE);
     };
 
@@ -214,8 +216,8 @@ TEST_F(TestObjective, evaluate_function_arg_move) {
         expression.update();
     }
     {
-        auto                                value = random_integer();
-        printemps::model::Move<int, double> move;
+        auto                                       value = random_integer();
+        printemps::neighborhood::Move<int, double> move;
         move.alterations.emplace_back(&variable, value);
 
         auto expected_value = sensitivity * value + constant;
@@ -238,6 +240,7 @@ TEST_F(TestObjective, evaluate_expression_arg_move) {
 
     auto objective =
         printemps::model::Objective<int, double>::create_instance(expression);
+    objective.expression().setup_fixed_sensitivities();
 
     {
         auto value = random_integer();
@@ -250,8 +253,8 @@ TEST_F(TestObjective, evaluate_expression_arg_move) {
         EXPECT_EQ(expected_value, objective.value());
     }
     {
-        auto                                value = random_integer();
-        printemps::model::Move<int, double> move;
+        auto                                       value = random_integer();
+        printemps::neighborhood::Move<int, double> move;
         move.alterations.emplace_back(&variable, value);
 
         auto expected_value = sensitivity * value + constant;
@@ -263,8 +266,8 @@ TEST_F(TestObjective, evaluate_expression_arg_move) {
 
 /*****************************************************************************/
 TEST_F(TestObjective, update_arg_void) {
-    /// This method is tested in evaluate_function_arg_voindex() and
-    /// tested in evaluate_expression_arg_voindex().
+    /// This method is tested in evaluate_function_arg_void() and
+    /// tested in evaluate_expression_arg_void().
 }
 
 /*****************************************************************************/

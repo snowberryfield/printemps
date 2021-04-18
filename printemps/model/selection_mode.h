@@ -9,7 +9,13 @@
 namespace printemps {
 namespace model {
 /*****************************************************************************/
-enum SelectionMode : int { None, Defined, Smaller, Larger, Independent };
+enum SelectionMode : int {  //
+    None,
+    Defined,
+    Smaller,
+    Larger,
+    Independent
+};
 }  // namespace model
 }  // namespace printemps
 #endif

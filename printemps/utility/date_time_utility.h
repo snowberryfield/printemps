@@ -6,11 +6,6 @@
 #ifndef PRINTEMPS_UTILITY_DATE_TIME_UTILITY_H__
 #define PRINTEMPS_UTILITY_DATE_TIME_UTILITY_H__
 
-#include <chrono>
-#include <ctime>
-#include <iomanip>
-#include <sstream>
-
 namespace printemps {
 namespace utility {
 /******************************************************************************/

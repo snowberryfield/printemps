@@ -29,8 +29,12 @@ int main([[maybe_unused]] int argc, char *argv[]) {
                "file name."
             << std::endl;
         std::cout  //
-            << "  --separate: Separate equality constraints into lower "
-               "and upper constraints."
+            << "  -m MUTABLE_VARIABLE_FILE_NAME: Specify mutable variable file "
+               "name."
+            << std::endl;
+        std::cout  //
+            << "  -f FIXED_VARIABLE_FILE_NAME: Specify fixed variable file "
+               "name."
             << std::endl;
         std::cout  //
             << "  --accept-continuous: Accept continuous variables as integer "
@@ -45,8 +49,9 @@ int main([[maybe_unused]] int argc, char *argv[]) {
     std::string mps_file_name;
     std::string option_file_name;
     std::string initial_solution_file_name;
-    bool        is_enabled_separate_equality = false;
-    bool        accept_continuous_variables  = false;
+    std::string mutable_variable_file_name;
+    std::string fixed_variable_file_name;
+    bool        accept_continuous_variables = false;
 
     std::vector<std::string> args(argv, argv + argc);
     int                      i = 1;
@@ -57,9 +62,12 @@ int main([[maybe_unused]] int argc, char *argv[]) {
         } else if (args[i] == "-i") {
             initial_solution_file_name = args[i + 1];
             i += 2;
-        } else if (args[i] == "--separate") {
-            is_enabled_separate_equality = true;
-            i++;
+        } else if (args[i] == "-m") {
+            mutable_variable_file_name = args[i + 1];
+            i += 2;
+        } else if (args[i] == "-f") {
+            fixed_variable_file_name = args[i + 1];
+            i += 2;
         } else if (args[i] == "--accept-continuous") {
             accept_continuous_variables = true;
             i++;
@@ -69,13 +77,19 @@ int main([[maybe_unused]] int argc, char *argv[]) {
         }
     }
 
+    if (!mutable_variable_file_name.empty() &&
+        !fixed_variable_file_name.empty()) {
+        throw std::logic_error(printemps::utility::format_error_location(
+            __FILE__, __LINE__, __func__,
+            "The flags -m and -v cannot be used simultaneously."));
+    }
+
     /**
      * Read the specified MPS file and convert to the model.
      */
     printemps::utility::MPSReader mps_reader;
 
     auto &model = mps_reader.create_model_from_mps(mps_file_name,
-                                                   is_enabled_separate_equality,
                                                    accept_continuous_variables);
     model.set_name(printemps::utility::base_name(mps_file_name));
 
@@ -86,6 +100,26 @@ int main([[maybe_unused]] int argc, char *argv[]) {
     printemps::solver::Option option;
     if (!option_file_name.empty()) {
         option = printemps::utility::read_option(option_file_name);
+    }
+
+    /**
+     * If the mutable variable file is given, only the decision variables listed
+     * in the file can be changed.
+     */
+    if (!mutable_variable_file_name.empty()) {
+        auto mutable_variable_names =
+            printemps::utility::read_variable_names(mutable_variable_file_name);
+        model.unfix_variables(mutable_variable_names);
+    }
+
+    /**
+     * If the fixe variable file is given, the values of the decision
+     * variables will be fixed by the specified values.
+     */
+    if (!fixed_variable_file_name.empty()) {
+        auto solution =
+            printemps::utility::read_solution(fixed_variable_file_name);
+        model.fix_variables(solution);
     }
 
     /**
@@ -119,13 +153,12 @@ int main([[maybe_unused]] int argc, char *argv[]) {
         "total violation: " + std::to_string(result.solution.total_violation()),
         option.verbose >= printemps::solver::Verbose::Warning);
 
-    auto summary = model.export_summary();
-    result.solution.write_json_by_name("incumbent.json", summary);
+    result.solution.write_json_by_name("incumbent.json");
     result.solution.write_solution("incumbent.sol");
-    result.status.write_json_by_name("status.json", summary);
+    result.status.write_json_by_name("status.json");
 
     if (option.is_enabled_collect_historical_data) {
-        result.solution_archive.write_solutions_json("feasible.json", summary);
+        result.solution_archive.write_solutions_json("feasible.json");
     }
 
     return 0;

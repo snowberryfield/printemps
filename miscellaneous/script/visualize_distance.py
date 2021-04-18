@@ -16,11 +16,24 @@ import networkx as nx
 ###############################################################################
 
 
-def compute_distance(x, y):
+def compute_distance(first, second):
     '''
-    Compute the Manhattan distance between solutions x and y.
+    Compute the Manhattan distance between solutions first and second.
     '''
-    return np.abs(x - y).sum()
+    first_set = set(first.keys())
+    second_set = set(second.keys())
+    only_first = first_set - second_set
+    only_second = second_set - first_set
+    intersection = first_set & second_set
+
+    distance = 0
+    for key in only_first:
+        distance += abs(first[key])
+    for key in only_second:
+        distance += abs(second[key])
+    for key in intersection:
+        distance += abs(first[key] - second[key])
+    return distance
 
 ###############################################################################
 
@@ -36,47 +49,23 @@ def visualize_distance(solution_object, output_file_name,
     number_of_constraints = solution_object['number_of_constraints']
 
     # Copy and sort raw solutions.
-    raw_solutions = copy.deepcopy(solution_object['solutions'])
+    solutions = solution_object['solutions']
     if is_descending:
-        raw_solutions.sort(key=lambda x: -x['objective'])
+        solutions.sort(key=lambda x: -x['objective'])
     else:
-        raw_solutions.sort(key=lambda x: x['objective'])
+        solutions.sort(key=lambda x: x['objective'])
 
-    for solution in raw_solutions:
-        solution['variables'] = np.array(solution['variables'])
-
-    number_of_raw_solutions = len(raw_solutions)
-
-    # Deduplication of solutions.
-    unique_solutions = []
-    EPSILON = 1E-5
-
-    for i in range(number_of_raw_solutions):
-        is_unique = True
-        for j in range(i+1, number_of_raw_solutions):
-            if raw_solutions[i]['objective'] != raw_solutions[j]['objective']:
-                break
-            if compute_distance(raw_solutions[i]['variables'],
-                                raw_solutions[j]['variables']) < EPSILON:
-                is_unique = False
-                break
-
-        if is_unique:
-            unique_solutions.append(raw_solutions[i])
-            if len(unique_solutions) == max_number_of_solutions:
-                break
-
-    number_of_unique_solutions = len(unique_solutions)
+    number_of_solutions = len(solutions)
 
     # Compute Manhattan distance for each solutions pair.
     distances = np.zeros(
-        (number_of_unique_solutions, number_of_unique_solutions))
+        (number_of_solutions, number_of_solutions))
 
-    for i in range(number_of_unique_solutions):
-        for j in range(i+1, number_of_unique_solutions):
+    for i in range(number_of_solutions):
+        for j in range(i+1, number_of_solutions):
             distance = compute_distance(
-                unique_solutions[i]['variables'],
-                unique_solutions[j]['variables'])
+                solutions[i]['variables'],
+                solutions[j]['variables'])
             distances[i, j] = distance
             distances[j, i] = distance
 
@@ -92,8 +81,8 @@ def visualize_distance(solution_object, output_file_name,
     plt.imshow(distances)
     plt.xlabel('Solution No.')
     plt.ylabel('Solution No.')
-    plt.text(-0.1 * number_of_unique_solutions,
-             1.19 * number_of_unique_solutions,
+    plt.text(-0.1 * number_of_solutions,
+             1.19 * number_of_solutions,
              footnote_text)
 
     plt.grid(False)
@@ -112,18 +101,18 @@ def visualize_distance(solution_object, output_file_name,
             'label': label,
             'labelloc': 't'}
         edges = []
-        for i in range(number_of_unique_solutions):
-            for j in range(i+1, number_of_unique_solutions):
+        for i in range(number_of_solutions):
+            for j in range(i+1, number_of_solutions):
                 edges.append((i, j, distances[i, j]))
 
         graph.add_weighted_edges_from(edges)
         mst = nx.minimum_spanning_tree(graph)
 
-        objectives = [solution['objective'] for solution in unique_solutions]
+        objectives = [solution['objective'] for solution in solutions]
         min_objective = np.min(objectives)
         max_objective = np.max(objectives)
 
-        for i in range(number_of_unique_solutions):
+        for i in range(number_of_solutions):
             color = cm.summer(
                 np.sqrt(objectives[i] - min_objective) / np.sqrt(max_objective - min_objective))
             red = int(np.floor(color[0] * 255))

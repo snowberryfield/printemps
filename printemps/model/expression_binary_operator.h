@@ -16,14 +16,6 @@ class Variable;
 template <class T_Variable, class T_Expression>
 class Expression;
 
-/*****************************************************************************/
-template <class T_Variable, class T_Expression>
-class VariableProxy;
-
-/*****************************************************************************/
-template <class T_Variable, class T_Expression>
-class ExpressionProxy;
-
 // https://gintenlabo.hatenablog.com/entry/20110825/1314303669
 
 /*****************************************************************************/

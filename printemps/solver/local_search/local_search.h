@@ -23,12 +23,12 @@ namespace local_search {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 LocalSearchResult<T_Variable, T_Expression> solve(
-    model::Model<T_Variable, T_Expression>* a_model,   //
-    const Option&                           a_OPTION,  //
-    const std::vector<model::ValueProxy<T_Variable>>&  //
-        a_INITIAL_VARIABLE_VALUE_PROXIES,              //
-    const IncumbentHolder<T_Variable, T_Expression>&   //
-                  a_INCUMBENT_HOLDER,                  //
+    model::Model<T_Variable, T_Expression>* a_model,         //
+    const Option&                           a_OPTION,        //
+    const std::vector<multi_array::ValueProxy<T_Variable>>&  //
+        a_INITIAL_VARIABLE_VALUE_PROXIES,                    //
+    const IncumbentHolder<T_Variable, T_Expression>&         //
+                  a_INCUMBENT_HOLDER,                        //
     const Memory& a_MEMORY) {
     /**
      * Define type aliases.
@@ -36,7 +36,7 @@ LocalSearchResult<T_Variable, T_Expression> solve(
     using Model_T           = model::Model<T_Variable, T_Expression>;
     using Result_T          = LocalSearchResult<T_Variable, T_Expression>;
     using IncumbentHolder_T = IncumbentHolder<T_Variable, T_Expression>;
-    using Move_T            = model::Move<T_Variable, T_Expression>;
+    using Move_T            = neighborhood::Move<T_Variable, T_Expression>;
 
     /**
      * Start to measure computational time.
@@ -68,7 +68,7 @@ LocalSearchResult<T_Variable, T_Expression> solve(
     model->import_variable_values(a_INITIAL_VARIABLE_VALUE_PROXIES);
     model->update();
 
-    model::SolutionScore solution_score = model->evaluate({});
+    solution::SolutionScore solution_score = model->evaluate({});
 
     int update_status =
         incumbent_holder.try_update_incumbent(model, solution_score);
@@ -82,7 +82,7 @@ LocalSearchResult<T_Variable, T_Expression> solve(
     /**
      * Prepare historical solutions holder.
      */
-    std::vector<model::PlainSolution<T_Variable, T_Expression>>
+    std::vector<solution::PlainSolution<T_Variable, T_Expression>>
         historical_feasible_solutions;
 
     /**
@@ -98,8 +98,8 @@ LocalSearchResult<T_Variable, T_Expression> solve(
     LocalSearchTerminationStatus termination_status =
         LocalSearchTerminationStatus::ITERATION_OVER;
 
-    model::Move<T_Variable, T_Expression> previous_move;
-    model::Move<T_Variable, T_Expression> current_move;
+    neighborhood::Move<T_Variable, T_Expression> previous_move;
+    neighborhood::Move<T_Variable, T_Expression> current_move;
 
     /**
      * Print the header of optimization progress table and print the initial
@@ -150,8 +150,8 @@ LocalSearchResult<T_Variable, T_Expression> solve(
         bool accept_feasibility_improvable = true;
 
         if (model->is_linear()) {
-            auto changed_variable_ptrs =
-                utility::to_vector(model::related_variable_ptrs(current_move));
+            auto changed_variable_ptrs = utility::to_vector(
+                neighborhood::related_variable_ptrs(current_move));
             auto changed_constraint_ptrs =
                 utility::to_vector(current_move.related_constraint_ptrs);
 
@@ -200,7 +200,7 @@ LocalSearchResult<T_Variable, T_Expression> solve(
         }
 
         for (const auto& move_ptr : move_ptrs) {
-            model::SolutionScore trial_solution_score;
+            solution::SolutionScore trial_solution_score;
             /**
              * The neighborhood solutions are evaluated in sequential by fast or
              * ordinary(slow) evaluation methods.
