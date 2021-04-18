@@ -14,7 +14,7 @@ static constexpr auto INT_HALF_MIN = std::numeric_limits<int>::min() / 2 + 1;
 static constexpr auto INT_HALF_MAX = (std::numeric_limits<int>::max() - 1) / 2;
 static constexpr auto LARGE_VALUE_50  = 1E50;
 static constexpr auto LARGE_VALUE_100 = 1E100;
-static std::string    VERSION         = "v1.5.3";
+static std::string    VERSION         = "v1.6.0";
 static std::string PROJECT_URL = "https://snowberryfield.github.io/printemps/";
 }  // namespace constant
 }  // namespace printemps

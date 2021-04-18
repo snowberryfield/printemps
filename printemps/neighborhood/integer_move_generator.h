@@ -61,6 +61,7 @@ class IntegerMoveGenerator
                     mutable_variable_ptrs[i]->related_constraint_ptrs();
                 this->m_moves[4 * i + j].alterations.emplace_back(
                     mutable_variable_ptrs[i], 0);
+                this->m_moves[4 * i + j].is_univariable_move          = true;
                 this->m_moves[4 * i + j].is_special_neighborhood_move = false;
                 this->m_moves[4 * i + j].is_available                 = true;
                 this->m_moves[4 * i + j].overlap_rate                 = 0.0;

@@ -38,6 +38,8 @@ struct Move {
     std::unordered_set<model::Constraint<T_Variable, T_Expression> *>
         related_constraint_ptrs;
 
+    bool is_univariable_move;
+
     /**
      * The following members are for special neighborhood moves.
      */
@@ -51,7 +53,8 @@ struct Move {
 
     /*************************************************************************/
     Move(void)
-        : is_special_neighborhood_move(false),
+        : is_univariable_move(false),
+          is_special_neighborhood_move(false),
           is_available(true),
           overlap_rate(0.0) {
         /// nothing to do
@@ -142,23 +145,27 @@ template <class T_Variable, class T_Expression>
 constexpr double compute_overlap_rate(
     const std::vector<Alteration<T_Variable, T_Expression>> &a_ALTERATIONS) {
     auto union_ptrs =
-        a_ALTERATIONS.front().first->related_monic_constraint_ptrs();
+        a_ALTERATIONS.front()
+            .first->related_zero_one_coefficient_constraint_ptrs();
     if (union_ptrs.size() == 0) {
         return 0.0;
     }
 
     auto intersection_ptrs =
-        a_ALTERATIONS.front().first->related_monic_constraint_ptrs();
+        a_ALTERATIONS.front()
+            .first->related_zero_one_coefficient_constraint_ptrs();
 
     const int ALTERATIONS_SIZE = a_ALTERATIONS.size();
     for (auto i = 1; i < ALTERATIONS_SIZE; i++) {
         utility::update_union_set(  //
             &union_ptrs,            //
-            a_ALTERATIONS[i].first->related_monic_constraint_ptrs());
+            a_ALTERATIONS[i]
+                .first->related_zero_one_coefficient_constraint_ptrs());
 
         utility::update_intersection_set(
             &intersection_ptrs,  //
-            a_ALTERATIONS[i].first->related_monic_constraint_ptrs());
+            a_ALTERATIONS[i]
+                .first->related_zero_one_coefficient_constraint_ptrs());
     }
 
     /**
@@ -232,6 +239,7 @@ constexpr Move<T_Variable, T_Expression> operator+(
         a_MOVE_SECOND.related_constraint_ptrs.end());
 
     result.sense                        = MoveSense::Chain;
+    result.is_univariable_move          = false;
     result.is_available                 = false;
     result.is_special_neighborhood_move = true;
 

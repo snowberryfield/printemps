@@ -43,15 +43,18 @@ class Variable : public multi_array::AbstractMultiArrayElement {
      */
 
    private:
-    bool          m_is_fixed;
-    T_Variable    m_value;
-    T_Variable    m_lower_bound;
-    T_Variable    m_upper_bound;
-    bool          m_has_bounds;
-    bool          m_is_objective_improvable;
-    bool          m_is_feasibility_improvable;
-    bool          m_has_lower_bound_margin;
-    bool          m_has_upper_bound_margin;
+    bool       m_is_fixed;
+    T_Variable m_value;
+    T_Variable m_lower_bound;
+    T_Variable m_upper_bound;
+    bool       m_has_bounds;
+    bool       m_is_objective_improvable;
+    bool       m_is_feasibility_improvable;
+    bool       m_has_lower_bound_margin;
+    bool       m_has_upper_bound_margin;
+    bool       m_has_unique_sensitivity;
+    T_Variable m_unique_sensitivity;
+
     VariableSense m_sense;
 
     Selection<T_Variable, T_Expression> *m_selection_ptr;
@@ -59,7 +62,9 @@ class Variable : public multi_array::AbstractMultiArrayElement {
         m_related_constraint_ptrs;
 
     std::unordered_set<Constraint<T_Variable, T_Expression> *>
-        m_related_monic_constraint_ptrs;
+        m_related_zero_one_coefficient_constraint_ptrs;
+
+    Constraint<T_Variable, T_Expression> *m_dependent_constraint_ptr;
 
     std::unordered_map<Constraint<T_Variable, T_Expression> *, T_Expression>
                  m_constraint_sensitivities;
@@ -122,9 +127,14 @@ class Variable : public multi_array::AbstractMultiArrayElement {
         m_has_lower_bound_margin = true;
         m_has_upper_bound_margin = true;
 
+        m_has_unique_sensitivity = false;
+        m_unique_sensitivity     = 0;
+
         m_sense         = VariableSense::Integer;
         m_selection_ptr = nullptr;
         m_related_constraint_ptrs.clear();
+
+        m_dependent_constraint_ptr = nullptr;
         m_constraint_sensitivities.clear();
         m_objective_sensitivity = 0.0;
     }
@@ -217,7 +227,7 @@ class Variable : public multi_array::AbstractMultiArrayElement {
         m_upper_bound = a_UPPER_BOUND;
         m_has_bounds  = true;
 
-        this->setup_sense();
+        this->setup_sense_binary_or_integer();
         this->update_margin();
     }
 
@@ -274,7 +284,7 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr void setup_sense(void) {
+    inline constexpr void setup_sense_binary_or_integer(void) {
         if ((m_lower_bound == 0 && m_upper_bound == 1) ||
             (m_lower_bound == 0 && m_upper_bound == 0) ||
             (m_lower_bound == 1 && m_upper_bound == 1)) {
@@ -303,6 +313,21 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
+    inline constexpr void update_as_intermediate_variable(void) {
+        auto &sensitivities =
+            m_dependent_constraint_ptr->expression().sensitivities();
+
+        if (sensitivities.at(this) > 0) {
+            this->set_value(static_cast<T_Variable>(
+                m_value - m_dependent_constraint_ptr->constraint_value()));
+
+        } else {
+            this->set_value(static_cast<T_Variable>(
+                m_value + m_dependent_constraint_ptr->constraint_value()));
+        }
+    }
+
+    /*************************************************************************/
     inline constexpr void register_related_constraint_ptr(
         Constraint<T_Variable, T_Expression> *a_constraint_ptr) {
         m_related_constraint_ptrs.insert(a_constraint_ptr);
@@ -327,7 +352,8 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr void setup_related_monic_constraint_ptrs(void) {
+    inline constexpr void setup_related_zero_one_coefficient_constraint_ptrs(
+        void) {
         /**
          * NOTE: This method must be called after constraint categorization.
          */
@@ -337,27 +363,29 @@ class Variable : public multi_array::AbstractMultiArrayElement {
                 constraint_ptr->is_set_covering() ||
                 constraint_ptr->is_cardinality() ||
                 constraint_ptr->is_invariant_knapsack()) {
-                m_related_monic_constraint_ptrs.insert(constraint_ptr);
+                m_related_zero_one_coefficient_constraint_ptrs.insert(
+                    constraint_ptr);
             }
         }
     }
 
     /*************************************************************************/
-    inline constexpr void reset_related_monic_constraint_ptrs(void) {
-        m_related_monic_constraint_ptrs.clear();
+    inline constexpr void reset_related_zero_one_coefficient_constraint_ptrs(
+        void) {
+        m_related_zero_one_coefficient_constraint_ptrs.clear();
     }
 
     /*************************************************************************/
     inline constexpr std::unordered_set<Constraint<T_Variable, T_Expression> *>
-        &related_monic_constraint_ptrs(void) {
-        return m_related_monic_constraint_ptrs;
+        &related_zero_one_coefficient_constraint_ptrs(void) {
+        return m_related_zero_one_coefficient_constraint_ptrs;
     }
 
     /*************************************************************************/
     inline constexpr const std::unordered_set<
         Constraint<T_Variable, T_Expression> *>
-        &related_monic_constraint_ptrs(void) const {
-        return m_related_monic_constraint_ptrs;
+        &related_zero_one_coefficient_constraint_ptrs(void) const {
+        return m_related_zero_one_coefficient_constraint_ptrs;
     }
 
     /*************************************************************************/
@@ -370,6 +398,8 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     /*************************************************************************/
     inline constexpr void reset_constraint_sensitivities(void) {
         m_constraint_sensitivities.clear();
+        m_has_unique_sensitivity = false;
+        m_unique_sensitivity     = 0.0;
     }
 
     /*************************************************************************/
@@ -384,6 +414,51 @@ class Variable : public multi_array::AbstractMultiArrayElement {
         Constraint<T_Variable, T_Expression> *, T_Expression>
         &constraint_sensitivities(void) const {
         return m_constraint_sensitivities;
+    }
+
+    /*************************************************************************/
+    inline constexpr void setup_unique_sensitivity(void) {
+        std::unordered_set<T_Expression> coefficients;
+        for (const auto &sensitivity : m_constraint_sensitivities) {
+            coefficients.insert(sensitivity.second);
+        }
+        if (coefficients.size() == 1) {
+            m_has_unique_sensitivity = true;
+            m_unique_sensitivity     = *(coefficients.begin());
+        } else {
+            m_has_unique_sensitivity = false;
+            m_unique_sensitivity     = 0.0;
+        }
+    }
+
+    /*************************************************************************/
+    inline constexpr bool has_unique_sensitivity(void) const noexcept {
+        return m_has_unique_sensitivity;
+    }
+
+    /*************************************************************************/
+    inline constexpr T_Expression unique_sensitivity(void) const noexcept {
+        return m_unique_sensitivity;
+    }
+
+    /*************************************************************************/
+    inline constexpr void set_dependent_constraint_ptr(
+        Constraint<T_Variable, T_Expression> *a_constraint_ptr) {
+        m_dependent_constraint_ptr = a_constraint_ptr;
+        m_sense                    = VariableSense::Intermediate;
+    }
+
+    /*************************************************************************/
+    inline constexpr void reset_dependent_constraint_ptr(void) {
+        m_dependent_constraint_ptr = nullptr;
+        this->setup_sense_binary_or_integer();
+    }
+
+    /*************************************************************************/
+    inline constexpr Constraint<T_Variable, T_Expression>
+        *dependent_constraint_ptr(void) const {
+        return const_cast<Constraint<T_Variable, T_Expression> *>(
+            m_dependent_constraint_ptr);
     }
 
     /*************************************************************************/

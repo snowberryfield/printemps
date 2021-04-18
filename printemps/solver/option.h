@@ -57,7 +57,7 @@ struct OptionConstant {
         true;
     static constexpr bool DEFAULT_IS_ENABLED_BINARY_MOVE         = true;
     static constexpr bool DEFAULT_IS_ENABLED_INTEGER_MOVE        = true;
-    static constexpr bool DEFAULT_IS_ENABLED_AGGREGATION_MOVE    = false;
+    static constexpr bool DEFAULT_IS_ENABLED_AGGREGATION_MOVE    = true;
     static constexpr bool DEFAULT_IS_ENABLED_PRECEDENCE_MOVE     = false;
     static constexpr bool DEFAULT_IS_ENABLED_VARIABLE_BOUND_MOVE = false;
     static constexpr bool DEFAULT_IS_ENABLED_CHAIN_MOVE          = false;

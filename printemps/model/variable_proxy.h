@@ -295,16 +295,6 @@ class VariableProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr void setup_sense(void) const {
-        if (this->number_of_elements() != 1) {
-            throw std::logic_error(utility::format_error_location(
-                __FILE__, __LINE__, __func__,
-                "The number of elements is not one."));
-        }
-        m_variables[0].setup_sense();
-    }
-
-    /*************************************************************************/
     inline constexpr void set_name(const std::string &a_NAME) {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(

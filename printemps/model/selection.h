@@ -14,6 +14,10 @@ class Variable;
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
+class Constraint;
+
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
 struct Selection {
     std::vector<Variable<T_Variable, T_Expression> *> variable_ptrs;
     Variable<T_Variable, T_Expression> *              selected_variable_ptr;
@@ -28,15 +32,26 @@ struct Selection {
     }
 
     /*************************************************************************/
-    virtual ~Selection(void) {
-        /// nothing to do
+    Selection(Constraint<T_Variable, T_Expression> *a_constraint_ptr) {
+        this->setup(a_constraint_ptr);
     }
+
     /*************************************************************************/
     void initialize(void) {
         variable_ptrs.clear();
         selected_variable_ptr = nullptr;
         constraint_ptr        = nullptr;
         related_constraint_ptrs.clear();
+    }
+    /*************************************************************************/
+    void setup(Constraint<T_Variable, T_Expression> *a_constraint_ptr) {
+        this->initialize();
+        this->constraint_ptr = a_constraint_ptr;
+
+        for (const auto &sensitivity :
+             constraint_ptr->expression().sensitivities()) {
+            this->variable_ptrs.push_back(sensitivity.first);
+        }
     }
 };
 }  // namespace model

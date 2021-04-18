@@ -30,11 +30,14 @@ TEST_F(TestPresolver, presolve) {
     model.create_constraint("g_1", 3 * x(1) <= 10);
     model.create_constraint("g_2", 8 * x(1) >= 20);
     model.create_constraint("g_3", x(1) + x(2) + 1 == 8);
-    model.setup_variable_related_constraints();
+
     model.setup_is_linear();
+    model.categorize_variables();
+    model.categorize_constraints();
+    model.setup_variable_related_constraints();
+    model.setup_variable_sensitivity();
 
-    printemps::presolver::presolve(&model, false);
-
+    printemps::presolver::presolve(&model, true, false);
     model.categorize_variables();
     model.categorize_constraints();
 
@@ -60,68 +63,49 @@ TEST_F(TestPresolver, remove_independent_variables) {
 
         auto& x = model.create_variables("x", 10, 0, 1);
         model.minimize(x.sum());
-        model.setup_variable_related_constraints();
-        model.setup_is_linear();
+
         printemps::presolver::remove_independent_variables(&model, false);
+
         for (auto i = 0; i < 10; i++) {
             EXPECT_TRUE(x(i).is_fixed());
             EXPECT_EQ(0, x(i).value());
         }
-        model.categorize_variables();
-        model.categorize_constraints();
-
-        EXPECT_EQ(10, model.number_of_fixed_variables());
     }
     {
         printemps::model::Model<int, double> model;
 
         auto& x = model.create_variables("x", 10, 0, 1);
         model.maximize(x.sum());
-        model.setup_variable_related_constraints();
-        model.setup_is_linear();
+
         printemps::presolver::remove_independent_variables(&model, false);
         for (auto i = 0; i < 10; i++) {
             EXPECT_TRUE(x(i).is_fixed());
             EXPECT_EQ(1, x(i).value());
         }
-        model.categorize_variables();
-        model.categorize_constraints();
-
-        EXPECT_EQ(10, model.number_of_fixed_variables());
     }
     {
         printemps::model::Model<int, double> model;
 
         auto& x = model.create_variables("x", 10, 0, 1);
         model.minimize(-x.sum());
-        model.setup_variable_related_constraints();
-        model.setup_is_linear();
+
         printemps::presolver::remove_independent_variables(&model, false);
         for (auto i = 0; i < 10; i++) {
             EXPECT_TRUE(x(i).is_fixed());
             EXPECT_EQ(1, x(i).value());
         }
-        model.categorize_variables();
-        model.categorize_constraints();
-
-        EXPECT_EQ(10, model.number_of_fixed_variables());
     }
     {
         printemps::model::Model<int, double> model;
 
         auto& x = model.create_variables("x", 10, 0, 1);
         model.maximize(-x.sum());
-        model.setup_variable_related_constraints();
-        model.setup_is_linear();
+
         printemps::presolver::remove_independent_variables(&model, false);
         for (auto i = 0; i < 10; i++) {
             EXPECT_TRUE(x(i).is_fixed());
             EXPECT_EQ(0, x(i).value());
         }
-        model.categorize_variables();
-        model.categorize_constraints();
-
-        EXPECT_EQ(10, model.number_of_fixed_variables());
     }
 }
 
@@ -457,16 +441,13 @@ TEST_F(TestPresolver, fix_implicit_fixed_variables) {
     auto& x = model.create_variables("x", 10, -10, 10);
     x(0).set_bound(5, 5);
     printemps::presolver::fix_implicit_fixed_variables(&model, false);
+
     EXPECT_EQ(5, x(0).value());
     EXPECT_TRUE(x(0).is_fixed());
 
     for (auto i = 1; i < 10; i++) {
         EXPECT_FALSE(x(i).is_fixed());
     }
-    model.categorize_variables();
-    model.categorize_constraints();
-
-    EXPECT_EQ(1, model.number_of_fixed_variables());
 }
 
 /*****************************************************************************/
@@ -491,16 +472,13 @@ TEST_F(TestPresolver, fix_redundant_variables) {
                        + x(3) - x(4) - 2 * x(5)  //
                        + x(6) + x(7) + 2 * x(8));
 
-        model.setup_unique_name();
-        model.setup_variable_related_constraints();
         model.setup_is_linear();
+        model.categorize_variables();
+        model.categorize_constraints();
+        model.setup_variable_related_constraints();
         model.setup_variable_sensitivity();
 
-        model.categorize_variables();
-        model.categorize_constraints();
         printemps::presolver::fix_redundant_variables(&model, false);
-        model.categorize_variables();
-        model.categorize_constraints();
 
         EXPECT_TRUE(x(3).is_fixed());
         EXPECT_TRUE(x(4).is_fixed());
@@ -527,16 +505,12 @@ TEST_F(TestPresolver, fix_redundant_variables) {
                        + x(3) - x(4) - 2 * x(5)  //
                        + x(6) + x(7) + 2 * x(8));
 
-        model.setup_unique_name();
-        model.setup_variable_related_constraints();
         model.setup_is_linear();
+        model.categorize_variables();
+        model.categorize_constraints();
+        model.setup_variable_related_constraints();
         model.setup_variable_sensitivity();
-
-        model.categorize_variables();
-        model.categorize_constraints();
         printemps::presolver::fix_redundant_variables(&model, false);
-        model.categorize_variables();
-        model.categorize_constraints();
 
         EXPECT_TRUE(x(4).is_fixed());
         EXPECT_TRUE(x(5).is_fixed());
