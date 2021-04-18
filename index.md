@@ -19,9 +19,7 @@ __PRINTEMPS__ is a C++ metaheuristics modeler/solver library for general combina
 ## News
 |     Date      | Update                                                                                            |
 |:-------------:|:--------------------------------------------------------------------------------------------------|
-| Mar. 11, 2021 | [Benchmark results](./contents/benchmark/index.md) of PRINTEMPS v1.5.3 were added.                |
-| Mar.  6, 2021 | [Benchmark results](./contents/benchmark/index.md) of PRINTEMPS v1.5.3 were added.                |
-| Mar.  6, 2021 | [PRINTEMPS v1.5.3](https://github.com/snowberryfield/printemps/releases/tag/v1.5.3) was released. |
+| Apr. 18, 2021 | [PRINTEMPS v1.6.0](https://github.com/snowberryfield/printemps/releases/tag/v1.6.0) was released. |
 
 ## Algorithm
 PRINTEMPS can compute approximate solutions for __linear and nonlinear integer optimization problems__. It employs __Tabu Search__ [1], a metaheuristics technique, to solve problems. In solving, it replaces constraints with penalty functions which return violations to the corresponding constraints, and the penalty functions multiplied by positive penalty coefficients are added to the objective function. The penalty coefficients are updated iteratively and automatically in a method similar (not exact same) to the one proposed in paper [2].
@@ -95,12 +93,12 @@ The option `-fopenmp` is required to activate parallel computation. See [Solver 
 
 Following combinations of operating systems and compilers are confirmed compilation possible:
 
-|   Operating System   |                      Compiler (version)                      |
-|:--------------------:|:------------------------------------------------------------:|
-|  macOS Mojave 10.14  |                     gcc (9.3.0 Homebrew)                     |
-| macOS Catalina 10.15 |                 gcc (8.4.0, 9.3.0 Homebrew)                  |
-|     Ubuntu 16.04     | gcc (7.4.0, 8.3.0, 9.2.1) <br /> clang (6.0.0, 8.0.0, 9.0.1) |
-|     Ubuntu 18.04     | gcc (7.5.0, 8.4.0, 9.2.1) <br /> clang (6.0.0, 8.0.0, 9.0.0) |
+|   Operating System   |        Compiler (version)        |
+|:--------------------:|:--------------------------------:|
+|  macOS Mojave 10.14  |       gcc (9.3.0 Homebrew)       |
+| macOS Catalina 10.15 |       gcc (9.3.0 Homebrew)       |
+|     Ubuntu 16.04     | gcc (9.2.1) <br /> clang (9.0.1) |
+|     Ubuntu 18.04     | gcc (9.2.1) <br /> clang (9.0.0) |
 
 
 ## Standalone Solver
@@ -118,9 +116,9 @@ where the options `CC` and `CXX` respectively designate the paths of C and C++ c
 
 The solver can be run by the following command:
 ```
-$./mps_solver.exe mps_file [-p option_file] [--separate] [--accept-continuous] 
+$./mps_solver.exe mps_file [-p option_file] [--accept-continuous] 
 ```
-where the argument `mps_file` is the path of the MPS file. The argument `-p option_file` is optional and it specifies solver options and parameters via a JSON file. If the optional flag `--separate` is activated, equality constraints (`=`) will be divided into pairs of inequality constraints (`<=, >=`). Activation of this flag often gives better results for problems with many equality constraints (e.g. set partitioning problems). If the optional flag `--accept-continuous` is activated, the solver accepts an MPS file which includes continuous variables. Then the continuous variables will be regarded as integer variables. An example of solver option JSON file is provided as [`application/dat/option.json`](https://github.com/snowberryfield/printemps/blob/master/application/dat/option.json).
+where the argument `mps_file` is the path of the MPS file. The argument `-p option_file` is optional and it specifies solver options and parameters via a JSON file. If the optional flag `--accept-continuous` is activated, the solver accepts an MPS file which includes continuous variables. Then the continuous variables will be regarded as integer variables. An example of solver option JSON file is provided as [`application/dat/option.json`](https://github.com/snowberryfield/printemps/blob/master/application/dat/option.json).
 
 ## Documents
 - [Starter Guide](./contents/starter_guide.md) describes the basic usage of PRINTEMPS including modeling of optimization problems, running the solver, and accessing the optimization results.

@@ -4,7 +4,7 @@ layout: sub
 ---
 
 # Benchmark Results
-The following results were obtained by the solver detailed in [Standalone Solver](https://snowberryfield.github.io/printemps/#standalone-solver) with `--separate` flag. To refer each detail benchmark result, click the number in the `No.` column for each record.
+The following results were obtained by the solver detailed in [Standalone Solver](https://snowberryfield.github.io/printemps/#standalone-solver). To refer each detail benchmark result, click the number in the `No.` column for each record.
 
 ## v1.5.3
 
