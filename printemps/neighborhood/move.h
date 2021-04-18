@@ -53,11 +53,13 @@ struct Move {
 
     /*************************************************************************/
     Move(void)
-        : is_univariable_move(false),
+        : sense(MoveSense::Binary),
+          is_univariable_move(false),
           is_special_neighborhood_move(false),
           is_available(true),
           overlap_rate(0.0) {
-        /// nothing to do
+        this->alterations.clear();
+        this->related_constraint_ptrs.clear();
     }
 };
 

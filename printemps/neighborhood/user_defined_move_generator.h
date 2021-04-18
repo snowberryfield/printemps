@@ -59,7 +59,8 @@ class UserDefinedMoveGenerator
 #pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
 #endif
                 for (auto i = 0; i < MOVES_SIZE; i++) {
-                    (*a_flags)[i] = 1;
+                    (*a_moves)[i].sense = MoveSense::UserDefined;
+                    (*a_flags)[i]       = 1;
                     if (neighborhood::has_fixed_variable((*a_moves)[i])) {
                         (*a_flags)[i] = 0;
                         continue;
