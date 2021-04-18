@@ -75,6 +75,10 @@ constexpr void extract_selections_by_defined_order(
         if (has_excluded_variable_ptr) {
             continue;
         } else {
+            utility::print_message(  //
+                "The constraint " + selection.constraint_ptr->name() +
+                    " was detected as selection constraint.",
+                a_IS_ENABLED_PRINT);
             selections.push_back(selection);
             extracted_variable_ptrs.insert(extracted_variable_ptrs.end(),
                                            selection.variable_ptrs.begin(),
@@ -151,6 +155,10 @@ constexpr void extract_selections_by_number_of_variables_order(
         if (has_excluded_variable_ptr) {
             continue;
         } else {
+            utility::print_message(  //
+                "The constraint " + selection.constraint_ptr->name() +
+                    " was detected as selection constraint.",
+                a_IS_ENABLED_PRINT);
             selections.push_back(selection);
             extracted_variable_ptrs.insert(extracted_variable_ptrs.end(),
                                            selection.variable_ptrs.begin(),
@@ -192,7 +200,8 @@ constexpr void extract_independent_selections(
     std::vector<model::Variable<T_Variable, T_Expression> *>
         extracted_variable_ptrs;
 
-    const int RAW_SELECTIONS_SIZE = raw_selections.size();
+    const int MAX_NUMBER_OF_VARIABLES_PER_SELECTION = 100;
+    const int RAW_SELECTIONS_SIZE                   = raw_selections.size();
     for (auto i = 0; i < RAW_SELECTIONS_SIZE; i++) {
         bool has_overlap = false;
         for (auto &&variable_ptr : raw_selections[i].variable_ptrs) {
@@ -212,11 +221,31 @@ constexpr void extract_independent_selections(
         if (has_overlap) {
             continue;
         } else {
-            selections.push_back(raw_selections[i]);
-            extracted_variable_ptrs.insert(
-                extracted_variable_ptrs.end(),
-                raw_selections[i].variable_ptrs.begin(),
-                raw_selections[i].variable_ptrs.end());
+            if (raw_selections[i].variable_ptrs.size() <=
+                MAX_NUMBER_OF_VARIABLES_PER_SELECTION) {
+                utility::print_message(  //
+                    "The constraint " +
+                        raw_selections[i].constraint_ptr->name() +
+                        " was detected as selection constraint.",
+                    a_IS_ENABLED_PRINT);
+                selections.push_back(raw_selections[i]);
+                extracted_variable_ptrs.insert(
+                    extracted_variable_ptrs.end(),
+                    raw_selections[i].variable_ptrs.begin(),
+                    raw_selections[i].variable_ptrs.end());
+
+            } else {
+                utility::print_message(
+                    "The constraint " +
+                        raw_selections[i].constraint_ptr->name() +
+                        " was detected as selection constraint but not "
+                        "would be considered in neighborhood move generation, "
+                        "because the number of consisting binary variables "
+                        "exceeds the program limit(=" +
+                        std::to_string(MAX_NUMBER_OF_VARIABLES_PER_SELECTION) +
+                        "). ",
+                    a_IS_ENABLED_PRINT);
+            }
         }
     }
 

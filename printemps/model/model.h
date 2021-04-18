@@ -1576,8 +1576,8 @@ class Model {
 
     /*************************************************************************/
     inline solution::SolutionScore evaluate(
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
-        const noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
+        noexcept {
         solution::SolutionScore score;
         this->evaluate(&score, a_MOVE);
         return score;
@@ -1593,9 +1593,10 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void evaluate(solution::SolutionScore *a_score_ptr,  //
-                            const neighborhood::Move<T_Variable, T_Expression>
-                                &a_MOVE) const noexcept {
+    constexpr void evaluate(
+        solution::SolutionScore *                           a_score_ptr,  //
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
+        noexcept {
         double total_violation = 0.0;
         double local_penalty   = 0.0;
         double global_penalty  = 0.0;
