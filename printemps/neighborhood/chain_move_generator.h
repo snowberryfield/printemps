@@ -108,7 +108,7 @@ class ChainMoveGenerator
     /*************************************************************************/
     inline constexpr void sort_moves(void) {
         std::sort(this->m_moves.begin(), this->m_moves.end(),
-                  [](auto const &a_LHS, auto const &a_RHS) {
+                  [](const auto &a_LHS, const auto &a_RHS) {
                       return a_LHS.overlap_rate > a_RHS.overlap_rate;
                   });
     }
