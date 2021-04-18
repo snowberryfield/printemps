@@ -109,8 +109,8 @@ class QAPLIBReader {
         /*************************************************************************/
         /// Objective function definition
         /*************************************************************************/
-        std::function<double(const model::IPMove&)> f =
-            [qap, &p](const model::IPMove& a_MOVE) {
+        std::function<double(const neighborhood::IPMove&)> f =
+            [qap, &p](const neighborhood::IPMove& a_MOVE) {
                 double f = 0.0;
 
                 std::vector<int> p_values(qap.N);
@@ -131,8 +131,8 @@ class QAPLIBReader {
             p(n) = n;
         }
 
-        std::function<void(std::vector<model::IPMove>*)> move_updater =
-            [qap, &p](std::vector<model::IPMove>* a_moves) {
+        std::function<void(std::vector<neighborhood::IPMove>*)> move_updater =
+            [qap, &p](std::vector<neighborhood::IPMove>* a_moves) {
                 a_moves->resize(qap.N * (qap.N - 1) / 2 +
                                 qap.N * (qap.N - 1) * (qap.N - 2) / 3);
                 auto count = 0;
@@ -173,7 +173,7 @@ class QAPLIBReader {
                     }
                 }
             };
-        m_model.neighborhood().set_user_defined_move_updater(move_updater);
+        m_model.neighborhood().user_defined().set_move_updater(move_updater);
         return m_model;
     }
 };

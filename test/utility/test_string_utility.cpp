@@ -30,11 +30,11 @@ TEST_F(TestStringUtility, delete_space) {
 
 /*****************************************************************************/
 TEST_F(TestStringUtility, has_space) {
-    EXPECT_EQ(true, printemps::utility::has_space(" hoge hoge "));
-    EXPECT_EQ(true, printemps::utility::has_space("hoge hoge "));
-    EXPECT_EQ(true, printemps::utility::has_space(" hoge hoge"));
-    EXPECT_EQ(true, printemps::utility::has_space("hoge hoge"));
-    EXPECT_EQ(false, printemps::utility::has_space("hogehoge"));
+    EXPECT_TRUE(printemps::utility::has_space(" hoge hoge "));
+    EXPECT_TRUE(printemps::utility::has_space("hoge hoge "));
+    EXPECT_TRUE(printemps::utility::has_space(" hoge hoge"));
+    EXPECT_TRUE(printemps::utility::has_space("hoge hoge"));
+    EXPECT_FALSE(printemps::utility::has_space("hogehoge"));
 }
 
 /*****************************************************************************/

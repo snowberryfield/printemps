@@ -6,8 +6,6 @@
 #ifndef PRINTEMPS_SOLVER_MEMORY_H__
 #define PRINTEMPS_SOLVER_MEMORY_H__
 
-#include <vector>
-
 namespace printemps {
 namespace solver {
 /*****************************************************************************/
@@ -18,10 +16,10 @@ struct MemoryConstant {
 /*****************************************************************************/
 class Memory {
    private:
-    std::vector<std::string>            m_variable_names;
-    std::vector<model::ValueProxy<int>> m_last_update_iterations;
-    std::vector<model::ValueProxy<int>> m_update_counts;
-    long                                m_total_update_counts;
+    std::vector<std::string>                  m_variable_names;
+    std::vector<multi_array::ValueProxy<int>> m_last_update_iterations;
+    std::vector<multi_array::ValueProxy<int>> m_update_counts;
+    long                                      m_total_update_counts;
 
    public:
     /*************************************************************************/
@@ -150,8 +148,9 @@ class Memory {
 
     /*************************************************************************/
     template <class T_Variable, class T_Expression>
-    constexpr void update(const model::Move<T_Variable, T_Expression> &a_MOVE,
-                          const int a_ITERATION) noexcept {
+    constexpr void update(
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE,
+        const int a_ITERATION) noexcept {
         for (const auto &alteration : a_MOVE.alterations) {
             int proxy_index = alteration.first->proxy_index();
             int flat_index  = alteration.first->flat_index();
@@ -164,10 +163,11 @@ class Memory {
 
     /*************************************************************************/
     template <class T_Variable, class T_Expression>
-    constexpr void update(const model::Move<T_Variable, T_Expression> &a_MOVE,
-                          const int     a_ITERATION,     //
-                          const int     a_RANDOM_WIDTH,  //
-                          std::mt19937 *get_rand_mt) noexcept {
+    constexpr void update(
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE,
+        const int                                           a_ITERATION,     //
+        const int                                           a_RANDOM_WIDTH,  //
+        std::mt19937 *get_rand_mt) noexcept {
         if (a_RANDOM_WIDTH == 0) {
             this->update(a_MOVE, a_ITERATION);
         } else {
@@ -196,14 +196,14 @@ class Memory {
     }
 
     /*************************************************************************/
-    inline constexpr const std::vector<model::ValueProxy<int>>
+    inline constexpr const std::vector<multi_array::ValueProxy<int>>
         &last_update_iterations(void) const {
         return m_last_update_iterations;
     }
 
     /*************************************************************************/
-    inline constexpr const std::vector<model::ValueProxy<int>> &update_counts(
-        void) const {
+    inline constexpr const std::vector<multi_array::ValueProxy<int>>
+        &update_counts(void) const {
         return m_update_counts;
     }
 

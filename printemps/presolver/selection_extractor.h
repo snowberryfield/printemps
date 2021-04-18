@@ -1,0 +1,310 @@
+/*****************************************************************************/
+// Copyright (c) 2020 Yuji KOGUMA
+// Released under the MIT license
+// https://opensource.org/licenses/mit-license.php
+/*****************************************************************************/
+#ifndef PRINTEMPS_PRESOLVER_SELECTION_EXTRACTOR_H__
+#define PRINTEMPS_PRESOLVER_SELECTION_EXTRACTOR_H__
+
+namespace printemps {
+namespace model {
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+class Variable;
+
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+class Constraint;
+
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+struct Selection;
+
+/*****************************************************************************/
+enum SelectionMode : int;
+}  // namespace model
+}  // namespace printemps
+
+namespace printemps {
+namespace presolver {
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+constexpr std::vector<model::Selection<T_Variable, T_Expression>>
+convert_to_selections(
+    const std::vector<model::Constraint<T_Variable, T_Expression> *>
+        &a_CONSTRAINT_PTRS) {
+    std::vector<model::Selection<T_Variable, T_Expression>> selections;
+    for (auto &&constraint_ptr : a_CONSTRAINT_PTRS) {
+        if (!constraint_ptr->is_enabled()) {
+            continue;
+        }
+
+        model::Selection<T_Variable, T_Expression> selection(constraint_ptr);
+        selections.push_back(selection);
+    }
+    return selections;
+}
+
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+constexpr void extract_selections_by_defined_order(
+    model::Model<T_Variable, T_Expression> *a_model,
+    const bool                              a_IS_ENABLED_PRINT) {
+    utility::print_single_line(a_IS_ENABLED_PRINT);
+    utility::print_message("Extracting selection by defined order...",
+                           a_IS_ENABLED_PRINT);
+
+    std::vector<model::Selection<T_Variable, T_Expression>> selections;
+    std::vector<model::Selection<T_Variable, T_Expression>> raw_selections =
+        convert_to_selections(
+            a_model->constraint_type_reference().set_partitioning_ptrs);
+
+    std::vector<model::Variable<T_Variable, T_Expression> *>
+        extracted_variable_ptrs;
+
+    for (auto &&selection : raw_selections) {
+        bool has_excluded_variable_ptr = false;
+        for (auto &&variable_ptr : selection.variable_ptrs) {
+            if (std::find(extracted_variable_ptrs.begin(),
+                          extracted_variable_ptrs.end(),
+                          variable_ptr) != extracted_variable_ptrs.end()) {
+                has_excluded_variable_ptr = true;
+                break;
+            }
+        }
+        if (has_excluded_variable_ptr) {
+            continue;
+        } else {
+            utility::print_message(  //
+                "The constraint " + selection.constraint_ptr->name() +
+                    " was detected as selection constraint.",
+                a_IS_ENABLED_PRINT);
+            selections.push_back(selection);
+            extracted_variable_ptrs.insert(extracted_variable_ptrs.end(),
+                                           selection.variable_ptrs.begin(),
+                                           selection.variable_ptrs.end());
+        }
+    }
+
+    for (auto &&selection : selections) {
+        selection.constraint_ptr->disable();
+    }
+
+    for (auto &&selection : selections) {
+        for (auto &variable_ptr : selection.variable_ptrs) {
+            auto &constraint_ptrs = variable_ptr->related_constraint_ptrs();
+            selection.related_constraint_ptrs.insert(constraint_ptrs.begin(),
+                                                     constraint_ptrs.end());
+        }
+    }
+
+    a_model->set_selections(selections);
+
+    utility::print_message("Done.", a_IS_ENABLED_PRINT);
+}
+
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+constexpr void extract_selections_by_number_of_variables_order(
+    model::Model<T_Variable, T_Expression> *a_model,             //
+    const bool                              a_IS_SMALLER_ORDER,  //
+    const bool                              a_IS_ENABLED_PRINT) {
+    utility::print_single_line(a_IS_ENABLED_PRINT);
+    if (a_IS_SMALLER_ORDER) {
+        utility::print_message(
+            "Extracting selection by order of smaller number of variables...",
+            a_IS_ENABLED_PRINT);
+    } else {
+        utility::print_message(
+            "Extracting selection by order of larger number of variables... ",
+            a_IS_ENABLED_PRINT);
+    }
+
+    std::vector<model::Selection<T_Variable, T_Expression>> selections;
+    std::vector<model::Selection<T_Variable, T_Expression>> raw_selections =
+        convert_to_selections(
+            a_model->constraint_type_reference().set_partitioning_ptrs);
+
+    if (a_IS_SMALLER_ORDER) {
+        std::sort(raw_selections.begin(), raw_selections.end(),
+                  [](const auto &a_LHS, const auto &a_RHS) {
+                      return a_LHS.variable_ptrs.size() <
+                             a_RHS.variable_ptrs.size();
+                  });
+    } else {
+        std::sort(raw_selections.begin(), raw_selections.end(),
+                  [](const auto &a_LHS, const auto &a_RHS) {
+                      return a_LHS.variable_ptrs.size() >
+                             a_RHS.variable_ptrs.size();
+                  });
+    }
+
+    std::vector<model::Variable<T_Variable, T_Expression> *>
+        extracted_variable_ptrs;
+
+    for (auto &&selection : raw_selections) {
+        bool has_excluded_variable_ptr = false;
+        for (auto &&variable_ptr : selection.variable_ptrs) {
+            if (std::find(extracted_variable_ptrs.begin(),
+                          extracted_variable_ptrs.end(),
+                          variable_ptr) != extracted_variable_ptrs.end()) {
+                has_excluded_variable_ptr = true;
+                break;
+            }
+        }
+        if (has_excluded_variable_ptr) {
+            continue;
+        } else {
+            utility::print_message(  //
+                "The constraint " + selection.constraint_ptr->name() +
+                    " was detected as selection constraint.",
+                a_IS_ENABLED_PRINT);
+            selections.push_back(selection);
+            extracted_variable_ptrs.insert(extracted_variable_ptrs.end(),
+                                           selection.variable_ptrs.begin(),
+                                           selection.variable_ptrs.end());
+        }
+    }
+
+    for (auto &&selection : selections) {
+        selection.constraint_ptr->disable();
+    }
+
+    for (auto &&selection : selections) {
+        for (auto &variable_ptr : selection.variable_ptrs) {
+            auto &constraint_ptrs = variable_ptr->related_constraint_ptrs();
+            selection.related_constraint_ptrs.insert(constraint_ptrs.begin(),
+                                                     constraint_ptrs.end());
+        }
+    }
+
+    a_model->set_selections(selections);
+
+    utility::print_message("Done.", a_IS_ENABLED_PRINT);
+}
+
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+constexpr void extract_independent_selections(
+    model::Model<T_Variable, T_Expression> *a_model,
+    const int  a_MAX_NUMBER_OF_VARIABLES_PER_SELECTION,
+    const bool a_IS_ENABLED_PRINT) {
+    utility::print_single_line(a_IS_ENABLED_PRINT);
+    utility::print_message("Extracting independent selection variables...",
+                           a_IS_ENABLED_PRINT);
+
+    std::vector<model::Selection<T_Variable, T_Expression>> selections;
+    std::vector<model::Selection<T_Variable, T_Expression>> raw_selections =
+        convert_to_selections(
+            a_model->constraint_type_reference().set_partitioning_ptrs);
+
+    raw_selections.erase(
+        std::remove_if(
+            raw_selections.begin(), raw_selections.end(),
+            [a_MAX_NUMBER_OF_VARIABLES_PER_SELECTION](const auto &a_SELECTION) {
+                return (static_cast<int>(a_SELECTION.variable_ptrs.size()) >
+                        a_MAX_NUMBER_OF_VARIABLES_PER_SELECTION);
+            }),
+        raw_selections.end());
+
+    std::vector<model::Variable<T_Variable, T_Expression> *>
+        extracted_variable_ptrs;
+
+    const int RAW_SELECTIONS_SIZE = raw_selections.size();
+    for (auto i = 0; i < RAW_SELECTIONS_SIZE; i++) {
+        bool has_overlap = false;
+        for (auto &&variable_ptr : raw_selections[i].variable_ptrs) {
+            for (auto j = 0; j < RAW_SELECTIONS_SIZE; j++) {
+                if (j != i && std::find(raw_selections[j].variable_ptrs.begin(),
+                                        raw_selections[j].variable_ptrs.end(),
+                                        variable_ptr) !=
+                                  raw_selections[j].variable_ptrs.end()) {
+                    has_overlap = true;
+                    break;
+                }
+            }
+            if (has_overlap) {
+                break;
+            }
+        }
+        if (has_overlap) {
+            continue;
+        } else {
+            utility::print_message(  //
+                "The constraint " + raw_selections[i].constraint_ptr->name() +
+                    " was detected as selection constraint.",
+                a_IS_ENABLED_PRINT);
+            selections.push_back(raw_selections[i]);
+            extracted_variable_ptrs.insert(
+                extracted_variable_ptrs.end(),
+                raw_selections[i].variable_ptrs.begin(),
+                raw_selections[i].variable_ptrs.end());
+        }
+    }
+
+    for (auto &&selection : selections) {
+        selection.constraint_ptr->disable();
+    }
+
+    for (auto &&selection : selections) {
+        for (auto &variable_ptr : selection.variable_ptrs) {
+            auto &constraint_ptrs = variable_ptr->related_constraint_ptrs();
+            selection.related_constraint_ptrs.insert(constraint_ptrs.begin(),
+                                                     constraint_ptrs.end());
+        }
+    }
+
+    a_model->set_selections(selections);
+
+    utility::print_message("Done.", a_IS_ENABLED_PRINT);
+}
+
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+constexpr void extract_selections(
+    model::Model<T_Variable, T_Expression> *a_model,  //
+    const model::SelectionMode &            a_SELECTION_MODE,
+    const bool                              a_IS_ENABLED_PRINT) {
+    switch (a_SELECTION_MODE) {
+        case model::SelectionMode::None: {
+            break;
+        }
+        case model::SelectionMode::Defined: {
+            extract_selections_by_defined_order(a_model,  //
+                                                a_IS_ENABLED_PRINT);
+            break;
+        }
+        case model::SelectionMode::Smaller: {
+            extract_selections_by_number_of_variables_order(a_model,  //
+                                                            true,     //
+                                                            a_IS_ENABLED_PRINT);
+            break;
+        }
+        case model::SelectionMode::Larger: {
+            extract_selections_by_number_of_variables_order(a_model,  //
+                                                            false,    //
+                                                            a_IS_ENABLED_PRINT);
+            break;
+        }
+        case model::SelectionMode::Independent: {
+            const int MAX_NUMBER_OF_VARIABLES_PER_SELECTION = 100;
+            extract_independent_selections(
+                a_model,                                //
+                MAX_NUMBER_OF_VARIABLES_PER_SELECTION,  //
+                a_IS_ENABLED_PRINT);
+            break;
+        }
+        default: {
+            throw std::logic_error(utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "The specified selection mode is invalid."));
+        }
+    }
+}
+
+}  // namespace presolver
+}  // namespace printemps
+#endif
+/*****************************************************************************/
+// END
+/*****************************************************************************/

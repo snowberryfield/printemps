@@ -6,10 +6,6 @@
 #ifndef PRINTEMPS_UTILITY_VECTOR_UTILITY_H__
 #define PRINTEMPS_UTILITY_VECTOR_UTILITY_H__
 
-#include <algorithm>
-#include <vector>
-#include <set>
-
 namespace printemps {
 namespace utility {
 /*****************************************************************************/

@@ -6,8 +6,6 @@
 #ifndef PRINTEMPS_MODEL_CONSTRAINT_TYPE_REFERENCE_H__
 #define PRINTEMPS_MODEL_CONSTRAINT_TYPE_REFERENCE_H__
 
-#include <vector>
-
 namespace printemps {
 namespace model {
 /*****************************************************************************/
@@ -31,6 +29,9 @@ struct ConstraintTypeReference {
     std::vector<Constraint<T_Variable, T_Expression> *> knapsack_ptrs;
     std::vector<Constraint<T_Variable, T_Expression> *> integer_knapsack_ptrs;
     std::vector<Constraint<T_Variable, T_Expression> *> general_linear_ptrs;
+    std::vector<Constraint<T_Variable, T_Expression> *> min_max_ptrs;
+    std::vector<Constraint<T_Variable, T_Expression> *> max_min_ptrs;
+    std::vector<Constraint<T_Variable, T_Expression> *> intermediate_ptrs;
     std::vector<Constraint<T_Variable, T_Expression> *> nonlinear_ptrs;
 
     /*************************************************************************/
@@ -59,6 +60,9 @@ struct ConstraintTypeReference {
         this->knapsack_ptrs.clear();
         this->integer_knapsack_ptrs.clear();
         this->general_linear_ptrs.clear();
+        this->min_max_ptrs.clear();
+        this->max_min_ptrs.clear();
+        this->intermediate_ptrs.clear();
         this->nonlinear_ptrs.clear();
     }
 };

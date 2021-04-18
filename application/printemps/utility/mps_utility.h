@@ -26,7 +26,7 @@ namespace utility {
 enum class MPSVariableSense { Integer, Continuous };
 
 /*****************************************************************************/
-enum class MPSConstraintSense { Lower, Equal, Upper };
+enum class MPSConstraintSense { Less, Equal, Greater };
 
 /*****************************************************************************/
 enum class MPSObjectiveSense { Minimize, Maximize };
@@ -101,7 +101,7 @@ struct MPSConstraint {
 
     /*************************************************************************/
     void initialize(void) {
-        sense = MPSConstraintSense::Lower;
+        sense = MPSConstraintSense::Less;
         name  = "";
         sensitivities.clear();
         rhs = 0.0;
@@ -262,7 +262,7 @@ MPS read_mps(const std::string &a_FILE_NAME) {
                     mps.objective.name = name;
                 } else if (items.front() == "L") {
                     name                        = items[1];
-                    mps.constraints[name].sense = MPSConstraintSense::Lower;
+                    mps.constraints[name].sense = MPSConstraintSense::Less;
                     mps.constraints[name].name  = name;
                     mps.constraint_names.push_back(name);
                     mps.number_of_lower_constraints++;
@@ -274,7 +274,7 @@ MPS read_mps(const std::string &a_FILE_NAME) {
                     mps.number_of_equal_constraints++;
                 } else if (items.front() == "G") {
                     name                        = items[1];
-                    mps.constraints[name].sense = MPSConstraintSense::Upper;
+                    mps.constraints[name].sense = MPSConstraintSense::Greater;
                     mps.constraints[name].name  = name;
                     mps.constraint_names.push_back(name);
                     mps.number_of_upper_constraints++;
@@ -306,17 +306,21 @@ MPS read_mps(const std::string &a_FILE_NAME) {
                     std::string expression_name = items[2 * i + 1];
                     double      sensitivity = atof(items[2 * i + 2].c_str());
 
-                    if (expression_name == mps.objective.name) {
-                        mps.objective.sensitivities[name] = sensitivity;
-                    } else if (mps.constraints.find(expression_name) !=
-                               mps.constraints.end()) {
-                        mps.constraints[expression_name].sensitivities[name] =
-                            sensitivity;
-                    } else {
-                        throw std::logic_error(utility::format_error_location(
-                            __FILE__, __LINE__, __func__,
-                            "An undefined constraint or objective function "
-                            "name is specified in RHS section."));
+                    if (fabs(sensitivity) > constant::EPSILON_10) {
+                        if (expression_name == mps.objective.name) {
+                            mps.objective.sensitivities[name] = sensitivity;
+                        } else if (mps.constraints.find(expression_name) !=
+                                   mps.constraints.end()) {
+                            mps.constraints[expression_name]
+                                .sensitivities[name] = sensitivity;
+                        } else {
+                            throw std::logic_error(
+                                utility::format_error_location(
+                                    __FILE__, __LINE__, __func__,
+                                    "An undefined constraint or objective "
+                                    "function "
+                                    "name is specified in RHS section."));
+                        }
                     }
                 }
                 if (mps.variables.find(name) == mps.variables.end()) {
@@ -364,16 +368,16 @@ MPS read_mps(const std::string &a_FILE_NAME) {
                     mps.constraints[name_new].sensitivities =
                         mps.constraints[name].sensitivities;
                     switch (mps.constraints[name].sense) {
-                        case MPSConstraintSense::Lower: {
+                        case MPSConstraintSense::Less: {
                             mps.constraints[name_new].sense =
-                                MPSConstraintSense::Upper;
+                                MPSConstraintSense::Greater;
                             mps.constraints[name_new].rhs =
                                 mps.constraints[name].rhs + fabs(range);
                             break;
                         }
-                        case MPSConstraintSense::Upper: {
+                        case MPSConstraintSense::Greater: {
                             mps.constraints[name_new].sense =
-                                MPSConstraintSense::Lower;
+                                MPSConstraintSense::Less;
                             mps.constraints[name_new].rhs =
                                 mps.constraints[name].rhs - fabs(range);
                             break;
@@ -381,12 +385,12 @@ MPS read_mps(const std::string &a_FILE_NAME) {
                         case MPSConstraintSense::Equal: {
                             if (range > 0) {
                                 mps.constraints[name_new].sense =
-                                    MPSConstraintSense::Upper;
+                                    MPSConstraintSense::Greater;
                                 mps.constraints[name_new].rhs =
                                     mps.constraints[name].rhs + fabs(range);
                             } else {
                                 mps.constraints[name_new].sense =
-                                    MPSConstraintSense::Lower;
+                                    MPSConstraintSense::Less;
                                 mps.constraints[name_new].rhs =
                                     mps.constraints[name].rhs - fabs(range);
                             }
@@ -544,10 +548,8 @@ class MPSReader {
     }
 
     /*************************************************************************/
-    model::IPModel &create_model_from_mps(
-        const std::string &a_FILE_NAME,
-        const bool         a_IS_ENABLED_SEPARATE_EQUALITY,
-        const bool         a_ACCEPT_CONTINUOUS) {
+    model::IPModel &create_model_from_mps(const std::string &a_FILE_NAME,
+                                          const bool a_ACCEPT_CONTINUOUS) {
         MPS mps = read_mps(a_FILE_NAME);
         std::unordered_map<std::string, model::IPVariable *> variable_ptrs;
 
@@ -590,36 +592,18 @@ class MPSReader {
         /**
          * Set up the constraints.
          */
-        int raw_number_of_constraints = mps.constraint_names.size();
-        int mod_number_of_constraints = raw_number_of_constraints;
-        std::vector<int> offsets(raw_number_of_constraints);
+        int              number_of_constraints = mps.constraint_names.size();
+        std::vector<int> offsets(number_of_constraints);
 
-        if (a_IS_ENABLED_SEPARATE_EQUALITY) {
-            mod_number_of_constraints = mps.number_of_lower_constraints +
-                                        2 * mps.number_of_equal_constraints +
-                                        mps.number_of_upper_constraints;
-        }
+        auto &constraint_proxy =
+            m_model.create_constraints("constraints", number_of_constraints);
 
-        auto &constraint_proxy = m_model.create_constraints(
-            "constraints", mod_number_of_constraints);
-
-        int offset = 0;
-        for (auto i = 0; i < raw_number_of_constraints; i++) {
-            auto &name       = mps.constraint_names[i];
-            auto &constraint = mps.constraints[name];
-            offsets[i]       = offset++;
-            if (a_IS_ENABLED_SEPARATE_EQUALITY &&
-                (constraint.sense == MPSConstraintSense::Equal)) {
-                offset++;
-            }
-        }
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static)
 #endif
-        for (auto i = 0; i < raw_number_of_constraints; i++) {
+        for (auto i = 0; i < number_of_constraints; i++) {
             auto &name       = mps.constraint_names[i];
             auto &constraint = mps.constraints[name];
-            int   offset     = offsets[i];
             auto  expression = model::IPExpression::create_instance();
 
             std::unordered_map<model::IPVariable *, double>
@@ -633,36 +617,22 @@ class MPSReader {
             expression.set_sensitivities(expression_sensitivities);
 
             switch (constraint.sense) {
-                case MPSConstraintSense::Lower: {
-                    constraint_proxy(offset) = (expression <= constraint.rhs);
-                    constraint_proxy(offset).set_name(name);
+                case MPSConstraintSense::Less: {
+                    constraint_proxy(i) = (expression <= constraint.rhs);
                     break;
                 }
 
                 case MPSConstraintSense::Equal: {
-                    if (a_IS_ENABLED_SEPARATE_EQUALITY) {
-                        constraint_proxy(offset) =
-                            (expression <= constraint.rhs);
-                        constraint_proxy(offset).set_name(name + "_lower");
-
-                        constraint_proxy(offset + 1) =
-                            (expression >= constraint.rhs);
-                        constraint_proxy(offset + 1).set_name(name + "_upper");
-
-                    } else {
-                        constraint_proxy(offset) =
-                            (expression == constraint.rhs);
-                        constraint_proxy(offset).set_name(name);
-                    }
+                    constraint_proxy(i) = (expression == constraint.rhs);
                     break;
                 }
 
-                case MPSConstraintSense::Upper: {
-                    constraint_proxy(offset) = (expression >= constraint.rhs);
-                    constraint_proxy(offset).set_name(name);
+                case MPSConstraintSense::Greater: {
+                    constraint_proxy(i) = (expression >= constraint.rhs);
                     break;
                 }
             }
+            constraint_proxy(i).set_name(name);
         }
 
         /**
@@ -728,6 +698,52 @@ std::unordered_map<std::string, int> read_solution(
     }
 
     return solution;
+}
+
+/*****************************************************************************/
+std::unordered_set<std::string> read_variable_names(
+    const std::string &a_FILE_NAME) {
+    std::unordered_set<std::string> variable_names;
+    std::vector<std::string>        lines;
+    std::string                     item;
+
+    /**
+     * Read and store entire part of the variable names file.
+     */
+    {
+        std::ifstream ifs;
+        std::string   buffer;
+
+        ifs.open(a_FILE_NAME.c_str());
+        if (ifs.fail()) {
+            throw std::logic_error(utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "Cannot open the specified solution file: " + a_FILE_NAME));
+        }
+        while (std::getline(ifs, buffer)) {
+            lines.push_back(buffer);
+        }
+        ifs.close();
+    }
+
+    /**
+     * Parse the variable names file.
+     */
+    for (const auto &line : lines) {
+        std::stringstream        stream(line);
+        std::vector<std::string> items;
+        while (stream >> item) {
+            items.push_back(item);
+        }
+        int ITEMS_SIZE = items.size();
+
+        if (ITEMS_SIZE == 0) {
+            continue;
+        }
+        variable_names.insert(items[0]);
+    }
+
+    return variable_names;
 }
 }  // namespace utility
 }  // namespace printemps

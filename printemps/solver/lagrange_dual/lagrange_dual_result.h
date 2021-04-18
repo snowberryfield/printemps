@@ -24,15 +24,15 @@ enum class LagrangeDualTerminationStatus {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 struct LagrangeDualResult {
-    double                                    lagrangian;
-    model::Solution<T_Variable, T_Expression> primal_solution;
-    std::vector<model::ValueProxy<double>>    dual_value_proxies;
-    IncumbentHolder<T_Variable, T_Expression> incumbent_holder;
-    int                                       total_update_status;
-    int                                       number_of_iterations;
-    LagrangeDualTerminationStatus             termination_status;
+    double                                       lagrangian;
+    solution::Solution<T_Variable, T_Expression> primal_solution;
+    std::vector<multi_array::ValueProxy<double>> dual_value_proxies;
+    IncumbentHolder<T_Variable, T_Expression>    incumbent_holder;
+    int                                          total_update_status;
+    int                                          number_of_iterations;
+    LagrangeDualTerminationStatus                termination_status;
 
-    std::vector<model::PlainSolution<T_Variable, T_Expression>>
+    std::vector<solution::PlainSolution<T_Variable, T_Expression>>
         historical_feasible_solutions;
 
     /*************************************************************************/

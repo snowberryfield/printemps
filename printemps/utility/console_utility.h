@@ -6,8 +6,6 @@
 #ifndef PRINTEMPS_UTILITY_CONSOLE_UTILITY_H__
 #define PRINTEMPS_UTILITY_CONSOLE_UTILITY_H__
 
-#include <iostream>
-
 namespace printemps {
 namespace utility {
 /******************************************************************************/

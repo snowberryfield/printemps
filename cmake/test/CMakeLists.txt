@@ -36,8 +36,12 @@ link_directories(
 )
 
 include(test_model.cmake)
-include(test_solver.cmake)
+include(test_neighborhood.cmake)
+include(test_presolver.cmake)
+include(test_verifier.cmake)
 include(test_utility.cmake)
+include(test_solver.cmake)
+include(test_solution.cmake)
 
 ###############################################################################
 ## END

@@ -45,8 +45,8 @@ TEST_F(TestExpression, initialize) {
     /// Check the initial values of the derived class members.
     EXPECT_EQ(0, expression.constant_value());
     EXPECT_EQ(0, expression.value());
-    EXPECT_EQ(true, expression.sensitivities().empty());
-    EXPECT_EQ(true, expression.is_enabled());
+    EXPECT_TRUE(expression.sensitivities().empty());
+    EXPECT_TRUE(expression.is_enabled());
 }
 
 /*****************************************************************************/
@@ -153,7 +153,7 @@ TEST_F(TestExpression, evaluate_arg_move) {
 
     expression.update();
 
-    printemps::model::Move<int, double> move;
+    printemps::neighborhood::Move<int, double> move;
     v_value_0 = random_integer();
     v_value_1 = random_integer();
 
@@ -225,7 +225,7 @@ TEST_F(TestExpression, update_arg_move) {
     variable_1 = v_value_1;
 
     expression.update();
-    printemps::model::Move<int, double> move;
+    printemps::neighborhood::Move<int, double> move;
     v_value_0 = random_integer();
     v_value_1 = random_integer();
 
@@ -278,13 +278,13 @@ TEST_F(TestExpression, is_enabled) {
     auto expression =
         printemps::model::Expression<int, double>::create_instance();
     expression.disable();
-    EXPECT_EQ(false, expression.is_enabled());
+    EXPECT_FALSE(expression.is_enabled());
 
     expression.enable();
-    EXPECT_EQ(true, expression.is_enabled());
+    EXPECT_TRUE(expression.is_enabled());
 
     expression.disable();
-    EXPECT_EQ(false, expression.is_enabled());
+    EXPECT_FALSE(expression.is_enabled());
 }
 
 /*****************************************************************************/
@@ -298,6 +298,28 @@ TEST_F(TestExpression, disable) {
 }
 
 /*****************************************************************************/
+TEST_F(TestExpression, substitute) {
+    auto expression_0 =
+        printemps::model::Expression<int, double>::create_instance();
+    auto expression_1 =
+        printemps::model::Expression<int, double>::create_instance();
+
+    auto variable_0 =
+        printemps::model::Variable<int, double>::create_instance();
+    auto variable_1 =
+        printemps::model::Variable<int, double>::create_instance();
+
+    expression_0 = variable_0 + 2 * variable_1 + 4;
+    expression_1 = 3 * variable_0 + 7;
+    expression_0.substitute(&variable_1, expression_1);
+
+    EXPECT_EQ(7, expression_0.sensitivities().at(&variable_0));
+    EXPECT_EQ(18, expression_0.constant_value());
+    EXPECT_TRUE(expression_0.sensitivities().find(&variable_1) ==
+                expression_0.sensitivities().end());
+}
+
+/*****************************************************************************/
 TEST_F(TestExpression, operator_plus) {
     auto expression =
         printemps::model::Expression<int, double>::create_instance();
@@ -306,8 +328,6 @@ TEST_F(TestExpression, operator_plus) {
         printemps::model::Variable<int, double>::create_instance();
     auto variable_1 =
         printemps::model::Variable<int, double>::create_instance();
-    std::unordered_map<printemps::model::Variable<int, double>*, double>
-        sensitivities;
 
     auto sensitivity_0 = random_integer();
     auto sensitivity_1 = random_integer();
@@ -315,7 +335,6 @@ TEST_F(TestExpression, operator_plus) {
 
     expression =
         sensitivity_0 * variable_0 + sensitivity_1 * variable_1 + constant;
-    expression += constant;
 
     EXPECT_EQ(expression.value(), (+expression).value());
     EXPECT_EQ(expression.constant_value(), (+expression).constant_value());
@@ -336,8 +355,6 @@ TEST_F(TestExpression, operator_minus) {
         printemps::model::Variable<int, double>::create_instance();
     auto variable_1 =
         printemps::model::Variable<int, double>::create_instance();
-    std::unordered_map<printemps::model::Variable<int, double>*, double>
-        sensitivities;
 
     auto sensitivity_0 = random_integer();
     auto sensitivity_1 = random_integer();
