@@ -660,11 +660,12 @@ constexpr bool presolve(model::Model<T_Variable, T_Expression> *a_model,  //
     /**
      * Since fix_redundant_variables() is expensive, it will be enabled if the
      * number of decision variables is equal to or less than the constant
-     * FIX_REDUNDANT_VARIABLES_THRESHOLD.
+     * MAX_CONSIDERABLE_NUMBER_OF_VARIABLES.
      */
-    const int FIX_REDUNDANT_VARIABLES_THRESHOLD = 100000;
+    const int MAX_CONSIDERABLE_NUMBER_OF_VARIABLES = 100000;
     if (a_model->is_linear() && a_IS_ENABLED_FIX_REDUNDANT_VARIABLES &&
-        a_model->number_of_variables() <= FIX_REDUNDANT_VARIABLES_THRESHOLD) {
+        a_model->number_of_variables() <=
+            MAX_CONSIDERABLE_NUMBER_OF_VARIABLES) {
         number_of_fixed_variables +=
             fix_redundant_variables(a_model, a_IS_ENABLED_PRINT);
     }
