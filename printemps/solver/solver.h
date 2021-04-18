@@ -104,20 +104,7 @@ Result<T_Variable, T_Expression> solve(
     }
 
     /**
-     * Setup the model. This includes the following processes.
-     * - setup_variable_related_constraints()
-     * - setup_unique_name()
-     * - setup_is_linear()
-     * - setup_variable_sensitivity()
-     * - presolve()
-     * - categorize_variables()
-     * - categorize_constraints()
-     * - extract_selections()
-     * - setup_neighborhood()
-     * - verify_and_correct_selection_variables_initial_values()
-     * - verify_and_correct_binary_variables_initial_values()
-     * - verify_and_correct_integer_variables_initial_values()
-     * - setup_fixed_sensitivities()
+     * Setup the model.
      */
     model->setup(master_option.is_enabled_presolve,
                  master_option.is_enabled_initial_value_correction,
@@ -138,17 +125,18 @@ Result<T_Variable, T_Expression> solve(
     }
 
     /**
-     * Disable the Chain move for the problem with no monic
+     * Disable the Chain move for the problem with no zero one_coefficient
      * constraints (set partitioning, set packing, set covering, cardinality,
      * and invariant knapsack).
      */
     if (master_option.is_enabled_chain_move &&
-        !model->has_monic_constraints()) {
+        !model->has_zero_one_coefficient_constraints()) {
         master_option.is_enabled_chain_move = false;
         utility::print_warning(
             "Chain move was disabled because the problem does not include any "
-            "monic constraints (set partitioning/packing/covering, "
-            "cardinality, and invariant knapsack).",
+            "zero-one coefficient constraints (set "
+            "partitioning/packing/covering, cardinality, and invariant "
+            "knapsack).",
             master_option.verbose >= Verbose::Warning);
     }
 
@@ -260,10 +248,12 @@ Result<T_Variable, T_Expression> solve(
                 "Solving lagrange dual was skipped because the problem is "
                 "nonlinear.",
                 master_option.verbose >= Verbose::Warning);
-        } else if (model->number_of_selection_variables() > 0) {
+        } else if (model->number_of_selection_variables() > 0 ||
+                   model->number_of_intermediate_variables() > 0) {
             utility::print_warning(
-                "Solving lagrange dual was skipped because it does not "
-                "applicable to selection variables.",
+                "Solving lagrange dual was skipped because it not "
+                "applicable to problems which include selection variables or "
+                "intermediate variables.",
                 master_option.verbose >= Verbose::Warning);
         } else {
             double elapsed_time = time_keeper.clock();
@@ -537,6 +527,8 @@ Result<T_Variable, T_Expression> solve(
     int number_of_initial_modification = 0;
     int iteration_max = master_option.tabu_search.iteration_max;
 
+    double bias = memory.bias();
+
     ImprovabilityScreeningMode improvability_screening_mode =
         master_option.improvability_screening_mode;
     if (improvability_screening_mode == ImprovabilityScreeningMode::Automatic) {
@@ -641,6 +633,11 @@ Result<T_Variable, T_Expression> solve(
         memory = result.memory;
 
         /**
+         * Update the bias.
+         */
+        bias = memory.bias();
+
+        /**
          * Update the termination status.
          */
         termination_status = result.termination_status;
@@ -659,18 +656,19 @@ Result<T_Variable, T_Expression> solve(
             penalty_coefficient_reset_flag             = false;
         } else {
             no_global_augmented_incumbent_update_count++;
-
-            if (no_global_augmented_incumbent_update_count ==
-                master_option.penalty_coefficient_reset_count_threshold) {
-                /**
-                 * Activate the flag to reset the penalty coefficients if the
-                 * count reaches the specified value, and then also reset the
-                 * count.
-                 */
-                penalty_coefficient_reset_flag             = true;
-                no_global_augmented_incumbent_update_count = 0;
-            } else {
-                penalty_coefficient_reset_flag = false;
+            if (master_option.penalty_coefficient_reset_count_threshold > 0) {
+                if (no_global_augmented_incumbent_update_count %
+                        master_option
+                            .penalty_coefficient_reset_count_threshold ==
+                    0) {
+                    /**
+                     * Activate the flag to reset the penalty coefficients if
+                     * the count reaches the specified value.
+                     */
+                    penalty_coefficient_reset_flag = true;
+                } else {
+                    penalty_coefficient_reset_flag = false;
+                }
             }
         }
 
@@ -701,9 +699,9 @@ Result<T_Variable, T_Expression> solve(
         bool employing_global_augmented_solution_flag = false;
         bool employing_previous_solution_flag         = false;
 
-        bool penalty_coefficient_tightening_flag      = false;
-        bool penalty_coefficient_relaxing_flag        = false;
-        bool is_enabled_forcibly_initial_modification = false;
+        bool is_enabled_penalty_coefficient_tightening = false;
+        bool is_enabled_penalty_coefficient_relaxing   = false;
+        bool is_enabled_forcibly_initial_modification  = false;
 
         /**
          * If the improvability_screening_mode was set to "Automatic", determine
@@ -767,7 +765,7 @@ Result<T_Variable, T_Expression> solve(
              * next loop. The penalty coefficients are to be relaxed.
              */
             employing_global_augmented_solution_flag = true;
-            penalty_coefficient_relaxing_flag        = true;
+            is_enabled_penalty_coefficient_relaxing  = true;
 
             /**
              * The variable no_update_count is a count that the
@@ -789,14 +787,14 @@ Result<T_Variable, T_Expression> solve(
                 is_enabled_forcibly_initial_modification = true;
 
                 if (result_local_augmented_incumbent_score.is_feasible) {
-                    penalty_coefficient_relaxing_flag = true;
-                    no_update_count                   = 0;
+                    is_enabled_penalty_coefficient_relaxing = true;
+                    no_update_count                         = 0;
                 } else {
                     if (no_update_count < 1) {
                         no_update_count++;
                     } else {
-                        penalty_coefficient_relaxing_flag = true;
-                        no_update_count                   = 0;
+                        is_enabled_penalty_coefficient_relaxing = true;
+                        no_update_count                         = 0;
                     }
                 }
             } else {
@@ -823,9 +821,9 @@ Result<T_Variable, T_Expression> solve(
                     is_enabled_forcibly_initial_modification = true;
 
                     if (result_local_augmented_incumbent_score.is_feasible) {
-                        penalty_coefficient_relaxing_flag = true;
+                        is_enabled_penalty_coefficient_relaxing = true;
                     } else {
-                        penalty_coefficient_tightening_flag = true;
+                        is_enabled_penalty_coefficient_tightening = true;
                     }
                 } else {
                     /**
@@ -836,7 +834,7 @@ Result<T_Variable, T_Expression> solve(
                      */
                     if (result_local_augmented_incumbent_score.is_feasible) {
                         employing_local_augmented_solution_flag = true;
-                        penalty_coefficient_relaxing_flag       = true;
+                        is_enabled_penalty_coefficient_relaxing = true;
 
                     } else {
                         /**
@@ -878,7 +876,7 @@ Result<T_Variable, T_Expression> solve(
                         } else {
                             employing_local_augmented_solution_flag = true;
                         }
-                        penalty_coefficient_tightening_flag = true;
+                        is_enabled_penalty_coefficient_tightening = true;
                     }
                 }
             }
@@ -930,7 +928,7 @@ Result<T_Variable, T_Expression> solve(
                     constraint.reset_local_penalty_coefficient();
                 }
             }
-        } else if (penalty_coefficient_tightening_flag) {
+        } else if (is_enabled_penalty_coefficient_tightening) {
             /**
              * Tighten the local penalty coefficients.
              */
@@ -971,7 +969,7 @@ Result<T_Variable, T_Expression> solve(
                         violation_value;
 
                     double positive_part = std::max(constraint_value, 0.0);
-                    double negative_part = -std::min(constraint_value, 0.0);
+                    double negative_part = std::max(-constraint_value, 0.0);
                     double delta_penalty_coefficient =
                         (balance * delta_penalty_coefficient_constant +
                          (1.0 - balance) *
@@ -1021,7 +1019,7 @@ Result<T_Variable, T_Expression> solve(
                                  master_option.initial_penalty_coefficient);
                 }
             }
-        } else if (penalty_coefficient_relaxing_flag) {
+        } else if (is_enabled_penalty_coefficient_relaxing) {
             /**
              * Relax the local penalty coefficients of which
              * corresponding constraints are satisfied.
@@ -1047,7 +1045,7 @@ Result<T_Variable, T_Expression> solve(
                     double constraint_value =
                         constraint_values[constraint.flat_index()];
                     double positive_part = std::max(constraint_value, 0.0);
-                    double negative_part = -std::min(constraint_value, 0.0);
+                    double negative_part = std::max(-constraint_value, 0.0);
 
                     if (constraint.is_less_or_equal() &&
                         positive_part < constant::EPSILON) {
@@ -1365,6 +1363,13 @@ Result<T_Variable, T_Expression> solve(
         }
 
         /**
+         * Print the search bias.
+         */
+        utility::print_message(
+            "Historical search bias is " + std::to_string(bias) + ".",
+            master_option.verbose >= Verbose::Outer);
+
+        /**
          * Print the number of violative constraints.
          */
         if (!current_solution.is_feasible) {
@@ -1419,11 +1424,11 @@ Result<T_Variable, T_Expression> solve(
                 "The penalty coefficients were reset due to search "
                 "stagnation.",
                 master_option.verbose >= Verbose::Outer);
-        } else if (penalty_coefficient_relaxing_flag) {
+        } else if (is_enabled_penalty_coefficient_relaxing) {
             utility::print_message(  //
                 "The penalty coefficients were relaxed.",
                 master_option.verbose >= Verbose::Outer);
-        } else if (penalty_coefficient_tightening_flag) {
+        } else if (is_enabled_penalty_coefficient_tightening) {
             utility::print_message(  //
                 "The penalty coefficients were tightened.",
                 master_option.verbose >= Verbose::Outer);

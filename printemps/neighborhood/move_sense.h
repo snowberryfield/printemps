@@ -9,7 +9,7 @@
 namespace printemps {
 namespace neighborhood {
 /*****************************************************************************/
-enum struct MoveSense {
+enum class MoveSense {
     Binary,         //
     Integer,        //
     Selection,      //

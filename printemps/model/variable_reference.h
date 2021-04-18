@@ -21,6 +21,8 @@ struct VariableReference {
     std::vector<Variable<T_Variable, T_Expression> *> selection_variable_ptrs;
     std::vector<Variable<T_Variable, T_Expression> *> binary_variable_ptrs;
     std::vector<Variable<T_Variable, T_Expression> *> integer_variable_ptrs;
+    std::vector<Variable<T_Variable, T_Expression> *>
+        intermediate_variable_ptrs;
 
     /*************************************************************************/
     VariableReference(void) {
@@ -40,6 +42,7 @@ struct VariableReference {
         this->selection_variable_ptrs.clear();
         this->binary_variable_ptrs.clear();
         this->integer_variable_ptrs.clear();
+        this->intermediate_variable_ptrs.clear();
     }
 };
 }  // namespace model

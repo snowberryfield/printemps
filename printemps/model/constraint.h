@@ -75,7 +75,13 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     bool m_is_bin_packing;
     bool m_is_knapsack;
     bool m_is_integer_knapsack;
+    bool m_is_min_max;
+    bool m_is_max_min;
+    bool m_is_intermediate;
     bool m_is_general_linear;
+    bool m_is_zero_one_coefficient;
+
+    Variable<T_Variable, T_Expression> *m_intermediate_variable_ptr;
 
     /*************************************************************************/
     /// Default constructor
@@ -211,20 +217,26 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
 
     /*************************************************************************/
     inline constexpr void clear_constraint_type(void) {
-        m_is_singleton          = false;
-        m_is_aggregation        = false;
-        m_is_precedence         = false;
-        m_is_variable_bound     = false;
-        m_is_set_partitioning   = false;
-        m_is_set_packing        = false;
-        m_is_set_covering       = false;
-        m_is_cardinality        = false;
-        m_is_invariant_knapsack = false;
-        m_is_equation_knapsack  = false;
-        m_is_bin_packing        = false;
-        m_is_knapsack           = false;
-        m_is_integer_knapsack   = false;
-        m_is_general_linear     = false;
+        m_is_singleton            = false;
+        m_is_aggregation          = false;
+        m_is_precedence           = false;
+        m_is_variable_bound       = false;
+        m_is_set_partitioning     = false;
+        m_is_set_packing          = false;
+        m_is_set_covering         = false;
+        m_is_cardinality          = false;
+        m_is_invariant_knapsack   = false;
+        m_is_equation_knapsack    = false;
+        m_is_bin_packing          = false;
+        m_is_knapsack             = false;
+        m_is_integer_knapsack     = false;
+        m_is_min_max              = false;
+        m_is_max_min              = false;
+        m_is_intermediate         = false;
+        m_is_general_linear       = false;
+        m_is_zero_one_coefficient = false;
+
+        m_intermediate_variable_ptr = nullptr;
     }
 
     /*************************************************************************/
@@ -306,8 +318,6 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
 
         this->clear_constraint_type();
 
-        m_expression.setup_fixed_sensitivities();
-
         m_constraint_function =
             [this](const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) {
                 return m_expression.evaluate(a_MOVE);
@@ -354,6 +364,8 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
 
     /*************************************************************************/
     constexpr void setup_constraint_type(void) {
+        this->clear_constraint_type();
+
         /// Singleton
         if (m_expression.sensitivities().size() == 1) {
             m_is_singleton = true;
@@ -400,18 +412,20 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         /// Set Partitioning or Set Packing, Set Covering, Cardinality,
         /// Invariant Knapsack.
         {
-            bool is_monic_of_binary_variables = true;
+            bool is_zero_one_coefficient_constraint = true;
             for (const auto &sensitivity : m_expression.sensitivities()) {
-                if (sensitivity.first->sense() != VariableSense::Binary) {
-                    is_monic_of_binary_variables = false;
+                if ((sensitivity.first->sense() != VariableSense::Binary) &&
+                    (sensitivity.first->sense() != VariableSense::Selection)) {
+                    is_zero_one_coefficient_constraint = false;
                     break;
                 }
                 if (sensitivity.second != 1) {
-                    is_monic_of_binary_variables = false;
+                    is_zero_one_coefficient_constraint = false;
                     break;
                 }
             }
-            if (is_monic_of_binary_variables) {
+            if (is_zero_one_coefficient_constraint) {
+                m_is_zero_one_coefficient = true;
                 /// Set Partitioning
                 if (m_expression.constant_value() == -1 &&
                     m_sense == ConstraintSense::Equal) {
@@ -446,6 +460,8 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
                     m_is_invariant_knapsack = true;
                     return;
                 }
+            } else {
+                m_is_zero_one_coefficient = false;
             }
         }
 
@@ -455,7 +471,8 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
             bool has_bin_packing_variable  = false;
 
             for (const auto &sensitivity : m_expression.sensitivities()) {
-                if (sensitivity.first->sense() != VariableSense::Binary) {
+                if ((sensitivity.first->sense() != VariableSense::Binary) &&
+                    (sensitivity.first->sense() != VariableSense::Selection)) {
                     has_only_binary_variables = false;
                     break;
                 }
@@ -500,6 +517,89 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
              m_sense == ConstraintSense::Greater)) {
             m_is_integer_knapsack = true;
             return;
+        }
+
+        /// Min-Max, Max-Min, Intermediate
+        {
+            int                                 number_of_integer_variables = 0;
+            Variable<T_Variable, T_Expression> *variable_ptr = nullptr;
+            T_Expression                        coefficient  = 0;
+
+            auto is_integer = [](const T_Expression a_VALUE) {
+                return fabs(a_VALUE - floor(a_VALUE)) < constant::EPSILON_10;
+            };
+
+            auto constant_value = m_expression.constant_value();
+
+            if (is_integer(constant_value)) {
+                T_Expression lower_bound = constant_value;
+                T_Expression upper_bound = constant_value;
+                bool         is_valid    = true;
+
+                for (const auto &item : m_expression.sensitivities()) {
+                    if (!is_integer(item.second)) {
+                        is_valid = false;
+                        break;
+                    }
+
+                    if (item.first->sense() == VariableSense::Integer &&
+                        abs(item.second) == 1) {
+                        variable_ptr = item.first;
+                        coefficient  = item.second;
+                        number_of_integer_variables++;
+                    } else {
+                        if (item.second > 0) {
+                            upper_bound +=
+                                item.second * item.first->upper_bound();
+                            lower_bound -=
+                                item.second * item.first->lower_bound();
+                        } else {
+                            lower_bound +=
+                                item.second * item.first->upper_bound();
+                            upper_bound -=
+                                item.second * item.first->lower_bound();
+                        }
+                    }
+                    if (number_of_integer_variables > 1) {
+                        break;
+                    }
+                }
+
+                if (is_valid && number_of_integer_variables == 1) {
+                    if (coefficient > 0) {
+                        std::swap(lower_bound, upper_bound);
+                        lower_bound *= -1.0;
+                        upper_bound *= -1.0;
+                    }
+
+                    if ((variable_ptr->lower_bound() ==
+                             constant::INT_HALF_MIN ||
+                         variable_ptr->lower_bound() <= lower_bound) &&
+                        (variable_ptr->upper_bound() ==
+                             constant::INT_HALF_MAX ||
+                         variable_ptr->upper_bound() >= upper_bound)) {
+                        if ((m_sense == ConstraintSense::Less &&
+                             coefficient < 0) ||
+                            (m_sense == ConstraintSense::Greater &&
+                             coefficient > 0)) {
+                            m_is_min_max = true;
+                            return;
+                        }
+                        if ((m_sense == ConstraintSense::Greater &&
+                             coefficient < 0) ||
+                            (m_sense == ConstraintSense::Less &&
+                             coefficient > 0)) {
+                            m_is_max_min = true;
+                            return;
+                        }
+                        if (m_sense == ConstraintSense::Equal) {
+                            m_is_intermediate           = true;
+                            m_intermediate_variable_ptr = variable_ptr;
+                            return;
+                        }
+                    }
+                }
+            }
         }
 
         /// Otherwise, the constraint type is set to general linear.
@@ -738,6 +838,26 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
+    inline constexpr bool is_min_max(void) const noexcept {
+        return m_is_min_max;
+    }
+
+    /*************************************************************************/
+    inline constexpr bool is_max_min(void) const noexcept {
+        return m_is_max_min;
+    }
+
+    /*************************************************************************/
+    inline constexpr bool is_intermediate(void) const noexcept {
+        return m_is_intermediate;
+    }
+
+    /*************************************************************************/
+    inline constexpr bool is_zero_one_coefficient(void) const noexcept {
+        return m_is_zero_one_coefficient;
+    }
+
+    /*************************************************************************/
     inline constexpr bool is_enabled(void) const noexcept {
         return m_is_enabled;
     }
@@ -760,6 +880,13 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     /*************************************************************************/
     inline constexpr void disable(void) noexcept {
         m_is_enabled = false;
+    }
+
+    /*************************************************************************/
+    inline constexpr Variable<T_Variable, T_Expression>
+        *intermediate_variable_ptr(void) const {
+        return const_cast<Variable<T_Variable, T_Expression> *>(
+            m_intermediate_variable_ptr);
     }
 };
 using IPConstraint = Constraint<int, double>;

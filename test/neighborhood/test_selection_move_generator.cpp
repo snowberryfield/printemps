@@ -29,8 +29,12 @@ TEST_F(TestSelectionMoveGenerator, setup) {
 
     model.categorize_variables();
     model.categorize_constraints();
-    model.extract_selections(printemps::model::SelectionMode::Larger);
+
+    printemps::presolver::extract_selections_by_number_of_variables_order(
+        &model, false, false);
     x(0).select();
+    model.categorize_variables();
+    model.categorize_constraints();
 
     auto selection_variable_ptrs =
         model.variable_reference().selection_variable_ptrs;
@@ -62,6 +66,7 @@ TEST_F(TestSelectionMoveGenerator, setup) {
             EXPECT_EQ(0, move.alterations[1].first->value());
             EXPECT_EQ(1, move.alterations[1].second);
         }
+        EXPECT_FALSE(move.is_univariable_move);
 
         for (auto& constraint_ptr :
              move.alterations[0].first->related_constraint_ptrs()) {

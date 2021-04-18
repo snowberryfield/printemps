@@ -172,6 +172,7 @@ TEST_F(TestObjective, evaluate_expression_arg_void) {
 
     auto objective =
         printemps::model::Objective<int, double>::create_instance(expression);
+    objective.expression().setup_fixed_sensitivities();
 
     auto value = random_integer();
     variable   = value;
@@ -239,6 +240,7 @@ TEST_F(TestObjective, evaluate_expression_arg_move) {
 
     auto objective =
         printemps::model::Objective<int, double>::create_instance(expression);
+    objective.expression().setup_fixed_sensitivities();
 
     {
         auto value = random_integer();

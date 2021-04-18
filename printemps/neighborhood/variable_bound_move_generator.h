@@ -54,6 +54,7 @@ class VariableBoundMoveGenerator
                 binomials[i].variable_ptr_first, 0);
             this->m_moves[4 * i].alterations.emplace_back(
                 binomials[i].variable_ptr_second, 0);
+            this->m_moves[4 * i].is_univariable_move = false;
 
             utility::update_union_set(
                 &(this->m_moves[4 * i].related_constraint_ptrs),

@@ -21,6 +21,7 @@ class TestMove : public ::testing::Test {
 /*****************************************************************************/
 TEST_F(TestMove, constructor) {
     printemps::neighborhood::Move<int, double> move;
+    EXPECT_FALSE(move.is_univariable_move);
     EXPECT_FALSE(move.is_special_neighborhood_move);
     EXPECT_TRUE(move.is_available);
     EXPECT_EQ(0.0, move.overlap_rate);
@@ -189,9 +190,8 @@ TEST_F(TestMove, compute_overlap_rate) {
     g(1) = x(0) + x(1) + x(3) <= 1;
     g(2) = x(0) + x(2) + x(3) <= 1;
 
-    model.setup_variable_related_constraints();
     model.categorize_constraints();
-    model.setup_variable_related_monic_constraints();
+    model.setup_variable_related_constraints();
 
     /// x(0) and x(1) have two common constraints.
     {

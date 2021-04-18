@@ -7,6 +7,18 @@
 #define PRINTEMPS_PRESOLVER_PRESOLVER_H__
 
 namespace printemps {
+namespace model {
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+class Variable;
+
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+class Constraint;
+}  // namespace model
+}  // namespace printemps
+
+namespace printemps {
 namespace presolver {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
@@ -341,7 +353,7 @@ constexpr int remove_redundant_constraints_with_tightening_variable_bounds(
                 auto lower_bound = variable_ptr->lower_bound();
                 auto upper_bound = variable_ptr->upper_bound();
 
-                if (constraint.sense() == model::ConstraintSense::Greater) {
+                if (constraint.is_greater_or_equal()) {
                     auto bound_temp =
                         -(mutable_term_upper_bound - coefficient * upper_bound +
                           fixed_term_value + constant_value) /
@@ -357,7 +369,8 @@ constexpr int remove_redundant_constraints_with_tightening_variable_bounds(
                             a_IS_ENABLED_PRINT);
                         variable_ptr->set_bound(bound_ceil, upper_bound);
                     }
-                } else if (constraint.sense() == model::ConstraintSense::Less) {
+                }
+                if (constraint.is_less_or_equal()) {
                     auto bound_temp =
                         -(mutable_term_lower_bound - coefficient * lower_bound +
                           fixed_term_value + constant_value) /
@@ -384,7 +397,7 @@ constexpr int remove_redundant_constraints_with_tightening_variable_bounds(
                 auto lower_bound = variable_ptr->lower_bound();
                 auto upper_bound = variable_ptr->upper_bound();
 
-                if (constraint.sense() == model::ConstraintSense::Greater) {
+                if (constraint.is_greater_or_equal()) {
                     auto bound_temp =
                         -(mutable_term_upper_bound - coefficient * lower_bound +
                           fixed_term_value + constant_value) /
@@ -401,8 +414,7 @@ constexpr int remove_redundant_constraints_with_tightening_variable_bounds(
                         variable_ptr->set_bound(lower_bound, bound_floor);
                     }
                 }
-
-                else if (constraint.sense() == model::ConstraintSense::Less) {
+                if (constraint.is_less_or_equal()) {
                     auto bound_temp =
                         -(mutable_term_lower_bound - coefficient * upper_bound +
                           fixed_term_value + constant_value) /
@@ -614,25 +626,30 @@ constexpr int fix_redundant_variables(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-constexpr void presolve(model::Model<T_Variable, T_Expression> *a_model,  //
+constexpr bool presolve(model::Model<T_Variable, T_Expression> *a_model,  //
+                        const bool a_IS_ENABLED_FIX_REDUNDANT_VARIABLES,
                         const bool a_IS_ENABLED_PRINT) {
     utility::print_single_line(a_IS_ENABLED_PRINT);
     utility::print_message("Presolving...", a_IS_ENABLED_PRINT);
 
+    int number_of_disabled_constaints = 0;
+    int number_of_fixed_variables     = 0;
+
     if (a_model->is_linear()) {
-        remove_independent_variables(a_model, a_IS_ENABLED_PRINT);
+        number_of_fixed_variables +=
+            remove_independent_variables(a_model, a_IS_ENABLED_PRINT);
     }
 
     while (true) {
-        int number_of_newly_disabled_constaints = 0;
-        int number_of_newly_fixed_variables     = 0;
-
-        number_of_newly_disabled_constaints  //
-            += remove_redundant_constraints_with_tightening_variable_bounds(
+        int number_of_newly_disabled_constaints  //
+            = remove_redundant_constraints_with_tightening_variable_bounds(
                 a_model, a_IS_ENABLED_PRINT);
 
-        number_of_newly_fixed_variables  //
-            += fix_implicit_fixed_variables(a_model, a_IS_ENABLED_PRINT);
+        int number_of_newly_fixed_variables  //
+            = fix_implicit_fixed_variables(a_model, a_IS_ENABLED_PRINT);
+
+        number_of_disabled_constaints += number_of_newly_disabled_constaints;
+        number_of_fixed_variables += number_of_newly_fixed_variables;
 
         if (number_of_newly_disabled_constaints == 0 &&
             number_of_newly_fixed_variables == 0) {
@@ -643,15 +660,21 @@ constexpr void presolve(model::Model<T_Variable, T_Expression> *a_model,  //
     /**
      * Since fix_redundant_variables() is expensive, it will be enabled if the
      * number of decision variables is equal to or less than the constant
-     * FIX_REDUNDANT_VARIABLES_THRESHOLD.
+     * MAX_CONSIDERABLE_NUMBER_OF_VARIABLES.
      */
-    const int FIX_REDUNDANT_VARIABLES_THRESHOLD = 100000;
-    if (a_model->is_linear() &&
-        a_model->number_of_variables() <= FIX_REDUNDANT_VARIABLES_THRESHOLD) {
-        fix_redundant_variables(a_model, a_IS_ENABLED_PRINT);
+    const int MAX_CONSIDERABLE_NUMBER_OF_VARIABLES = 100000;
+    if (a_model->is_linear() && a_IS_ENABLED_FIX_REDUNDANT_VARIABLES &&
+        a_model->number_of_variables() <=
+            MAX_CONSIDERABLE_NUMBER_OF_VARIABLES) {
+        number_of_fixed_variables +=
+            fix_redundant_variables(a_model, a_IS_ENABLED_PRINT);
     }
     utility::print_message("Done.", a_IS_ENABLED_PRINT);
+
+    return (number_of_disabled_constaints > 0) ||
+           (number_of_fixed_variables > 0);
 }
+
 }  // namespace presolver
 }  // namespace printemps
 #endif

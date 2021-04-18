@@ -154,6 +154,13 @@ class Expression : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
+    inline constexpr std::unordered_map<Variable<T_Variable, T_Expression> *,
+                                        T_Expression>
+        &sensitivities(void) {
+        return m_sensitivities;
+    }
+
+    /*************************************************************************/
     inline constexpr const std::unordered_map<
         Variable<T_Variable, T_Expression> *, T_Expression>
         &sensitivities(void) const {
@@ -249,6 +256,14 @@ class Expression : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
+    inline constexpr void substitute(
+        Variable<T_Variable, T_Expression> *        a_variable_ptr,
+        const Expression<T_Variable, T_Expression> &a_EXPRESSION) {
+        *this += m_sensitivities[a_variable_ptr] * a_EXPRESSION;
+        m_sensitivities.erase(a_variable_ptr);
+    }
+
+    /*************************************************************************/
     inline constexpr Expression<T_Variable, T_Expression> operator+(
         void) const {
         return create_instance(this->sensitivities(), this->constant_value());
@@ -320,6 +335,7 @@ class Expression : public multi_array::AbstractMultiArrayElement {
                 m_sensitivities[append.first] = append.second;
             }
         }
+
         m_constant_value += a_EXPRESSION.m_constant_value;
         return *this;
     }
