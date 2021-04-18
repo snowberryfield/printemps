@@ -91,18 +91,18 @@ class SolutionArchive {
 
         if (m_is_ascending) {
             std::sort(solutions.begin(), solutions.end(),
-                      [](auto const& a_LHS, auto const& a_RHS) {
+                      [](const auto& a_LHS, const auto& a_RHS) {
                           return a_LHS.objective < a_RHS.objective;
                       });
         } else {
             std::sort(solutions.begin(), solutions.end(),
-                      [](auto const& a_LHS, auto const& a_RHS) {
+                      [](const auto& a_LHS, const auto& a_RHS) {
                           return a_LHS.objective > a_RHS.objective;
                       });
         }
 
         solutions.erase(std::unique(solutions.begin(), solutions.end(),
-                                    [](auto const& a_LHS, auto const& a_RHS) {
+                                    [](const auto& a_LHS, const auto& a_RHS) {
                                         return a_LHS.variables ==
                                                a_RHS.variables;
                                     }),

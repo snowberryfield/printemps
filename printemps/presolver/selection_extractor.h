@@ -127,13 +127,13 @@ constexpr void extract_selections_by_number_of_variables_order(
 
     if (a_IS_SMALLER_ORDER) {
         std::sort(raw_selections.begin(), raw_selections.end(),
-                  [](auto const &a_LHS, auto const &a_RHS) {
+                  [](const auto &a_LHS, const auto &a_RHS) {
                       return a_LHS.variable_ptrs.size() <
                              a_RHS.variable_ptrs.size();
                   });
     } else {
         std::sort(raw_selections.begin(), raw_selections.end(),
-                  [](auto const &a_LHS, auto const &a_RHS) {
+                  [](const auto &a_LHS, const auto &a_RHS) {
                       return a_LHS.variable_ptrs.size() >
                              a_RHS.variable_ptrs.size();
                   });
@@ -187,7 +187,8 @@ constexpr void extract_selections_by_number_of_variables_order(
 template <class T_Variable, class T_Expression>
 constexpr void extract_independent_selections(
     model::Model<T_Variable, T_Expression> *a_model,
-    const bool                              a_IS_ENABLED_PRINT) {
+    const int  a_MAX_NUMBER_OF_VARIABLES_PER_SELECTION,
+    const bool a_IS_ENABLED_PRINT) {
     utility::print_single_line(a_IS_ENABLED_PRINT);
     utility::print_message("Extracting independent selection variables...",
                            a_IS_ENABLED_PRINT);
@@ -197,11 +198,19 @@ constexpr void extract_independent_selections(
         convert_to_selections(
             a_model->constraint_type_reference().set_partitioning_ptrs);
 
+    raw_selections.erase(
+        std::remove_if(
+            raw_selections.begin(), raw_selections.end(),
+            [a_MAX_NUMBER_OF_VARIABLES_PER_SELECTION](const auto &a_SELECTION) {
+                return (static_cast<int>(a_SELECTION.variable_ptrs.size()) >
+                        a_MAX_NUMBER_OF_VARIABLES_PER_SELECTION);
+            }),
+        raw_selections.end());
+
     std::vector<model::Variable<T_Variable, T_Expression> *>
         extracted_variable_ptrs;
 
-    const int MAX_NUMBER_OF_VARIABLES_PER_SELECTION = 100;
-    const int RAW_SELECTIONS_SIZE                   = raw_selections.size();
+    const int RAW_SELECTIONS_SIZE = raw_selections.size();
     for (auto i = 0; i < RAW_SELECTIONS_SIZE; i++) {
         bool has_overlap = false;
         for (auto &&variable_ptr : raw_selections[i].variable_ptrs) {
@@ -221,31 +230,15 @@ constexpr void extract_independent_selections(
         if (has_overlap) {
             continue;
         } else {
-            if (raw_selections[i].variable_ptrs.size() <=
-                MAX_NUMBER_OF_VARIABLES_PER_SELECTION) {
-                utility::print_message(  //
-                    "The constraint " +
-                        raw_selections[i].constraint_ptr->name() +
-                        " was detected as selection constraint.",
-                    a_IS_ENABLED_PRINT);
-                selections.push_back(raw_selections[i]);
-                extracted_variable_ptrs.insert(
-                    extracted_variable_ptrs.end(),
-                    raw_selections[i].variable_ptrs.begin(),
-                    raw_selections[i].variable_ptrs.end());
-
-            } else {
-                utility::print_message(
-                    "The constraint " +
-                        raw_selections[i].constraint_ptr->name() +
-                        " was detected as selection constraint but not "
-                        "would be considered in neighborhood move generation, "
-                        "because the number of consisting binary variables "
-                        "exceeds the program limit(=" +
-                        std::to_string(MAX_NUMBER_OF_VARIABLES_PER_SELECTION) +
-                        "). ",
-                    a_IS_ENABLED_PRINT);
-            }
+            utility::print_message(  //
+                "The constraint " + raw_selections[i].constraint_ptr->name() +
+                    " was detected as selection constraint.",
+                a_IS_ENABLED_PRINT);
+            selections.push_back(raw_selections[i]);
+            extracted_variable_ptrs.insert(
+                extracted_variable_ptrs.end(),
+                raw_selections[i].variable_ptrs.begin(),
+                raw_selections[i].variable_ptrs.end());
         }
     }
 
@@ -294,7 +287,11 @@ constexpr void extract_selections(
             break;
         }
         case model::SelectionMode::Independent: {
-            extract_independent_selections(a_model, a_IS_ENABLED_PRINT);
+            const int MAX_NUMBER_OF_VARIABLES_PER_SELECTION = 100;
+            extract_independent_selections(
+                a_model,                                //
+                MAX_NUMBER_OF_VARIABLES_PER_SELECTION,  //
+                a_IS_ENABLED_PRINT);
             break;
         }
         default: {

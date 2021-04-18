@@ -85,6 +85,8 @@ TEST_F(TestModel, initialize) {
         true,   //
         model.constraint_reference().constraint_ptrs.empty());
     EXPECT_EQ(  //
+        true, model.constraint_reference().enabled_constraint_ptrs.empty());
+    EXPECT_EQ(  //
         true, model.constraint_reference().disabled_constraint_ptrs.empty());
 
     /// Constraint Type Reference
@@ -1053,7 +1055,7 @@ TEST_F(TestModel, categorize_variables) {
     model.categorize_constraints();
     printemps::presolver::extract_independent_intermediate_variables(&model,
                                                                      false);
-    printemps::presolver::extract_independent_selections(&model, false);
+    printemps::presolver::extract_independent_selections(&model, 1000, false);
 
     model.categorize_variables();
     model.categorize_constraints();
@@ -1154,6 +1156,7 @@ TEST_F(TestModel, categorize_constraints) {
 
     EXPECT_EQ(25, model.number_of_constraints());
     EXPECT_EQ(1, model.number_of_selection_constraints());
+    EXPECT_EQ(23, model.number_of_enabled_constraints());
     EXPECT_EQ(2, model.number_of_disabled_constraints());
 
     auto reference = model.constraint_type_reference();
@@ -1278,7 +1281,7 @@ TEST_F(TestModel, update_arg_move) {
     model.minimize(p);
     model.categorize_variables();
     model.categorize_constraints();
-    printemps::presolver::extract_independent_selections(&model, false);
+    printemps::presolver::extract_independent_selections(&model, 1000, false);
     model.setup_fixed_sensitivities(false);
 
     model.update();
@@ -1738,7 +1741,8 @@ TEST_F(TestModel, evaluate) {
         model.setup_variable_related_constraints();
         model.categorize_variables();
         model.categorize_constraints();
-        printemps::presolver::extract_independent_selections(&model, false);
+        printemps::presolver::extract_independent_selections(&model, 1000,
+                                                             false);
         model.setup_fixed_sensitivities(false);
 
         for (auto&& element : x.flat_indexed_variables()) {
@@ -1886,7 +1890,8 @@ TEST_F(TestModel, evaluate) {
         model.setup_variable_related_constraints();
         model.categorize_variables();
         model.categorize_constraints();
-        printemps::presolver::extract_independent_selections(&model, false);
+        printemps::presolver::extract_independent_selections(&model, 1000,
+                                                             false);
         model.setup_fixed_sensitivities(false);
 
         for (auto&& element : x.flat_indexed_variables()) {
@@ -2765,6 +2770,11 @@ TEST_F(TestModel, number_of_constraints) {
 /*****************************************************************************/
 TEST_F(TestModel, number_of_selection_constraints) {
     /// This method is tested in extract_selections_larger() and so on.
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, number_of_enabled_constraints) {
+    /// This method is tested in categorize_constraints().
 }
 
 /*****************************************************************************/
