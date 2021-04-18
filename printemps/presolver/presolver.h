@@ -511,7 +511,7 @@ constexpr int fix_redundant_variables(
      */
     if (a_model->is_minimization()) {
         std::sort(variable_ptrs.begin(), variable_ptrs.end(),
-                  [](auto const &a_LHS, auto const &a_RHS) {
+                  [](const auto &a_LHS, const auto &a_RHS) {
                       if (a_LHS->related_constraint_ptrs() ==
                           a_RHS->related_constraint_ptrs()) {
                           return a_LHS->objective_sensitivity() >
@@ -523,7 +523,7 @@ constexpr int fix_redundant_variables(
                   });
     } else {
         std::sort(variable_ptrs.begin(), variable_ptrs.end(),
-                  [](auto const &a_LHS, auto const &a_RHS) {
+                  [](const auto &a_LHS, const auto &a_RHS) {
                       if (a_LHS->related_constraint_ptrs() ==
                           a_RHS->related_constraint_ptrs()) {
                           return a_LHS->objective_sensitivity() <

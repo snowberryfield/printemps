@@ -944,7 +944,10 @@ class Model {
         for (auto &&proxy : m_constraint_proxies) {
             for (auto &&constraint : proxy.flat_indexed_constraints()) {
                 constraint_reference.constraint_ptrs.push_back(&constraint);
-                if (!constraint.is_enabled()) {
+                if (constraint.is_enabled()) {
+                    constraint_reference.enabled_constraint_ptrs.push_back(
+                        &constraint);
+                } else {
                     constraint_reference.disabled_constraint_ptrs.push_back(
                         &constraint);
                 }
@@ -1466,7 +1469,7 @@ class Model {
     /*************************************************************************/
     inline constexpr void update_variable_objective_improvability(void) {
         this->update_variable_objective_improvability(
-            this->variable_reference().variable_ptrs);
+            this->variable_reference().mutable_variable_ptrs);
     }
 
     /*************************************************************************/
@@ -1490,7 +1493,7 @@ class Model {
     /*************************************************************************/
     inline constexpr void update_variable_feasibility_improvability(void) {
         this->update_variable_feasibility_improvability(
-            this->constraint_reference().constraint_ptrs);
+            this->constraint_reference().enabled_constraint_ptrs);
     }
 
     /*************************************************************************/
@@ -1500,9 +1503,6 @@ class Model {
         const int CONSTRAINTS_SIZE = a_CONSTRAINT_PTRS.size();
         for (auto i = 0; i < CONSTRAINTS_SIZE; i++) {
             const auto constraint_ptr = a_CONSTRAINT_PTRS[i];
-            if (!constraint_ptr->is_enabled()) {
-                continue;
-            }
             if (constraint_ptr->violation_value() < constant::EPSILON) {
                 continue;
             }
@@ -2237,6 +2237,11 @@ class Model {
     /*************************************************************************/
     inline constexpr int number_of_selection_constraints(void) const {
         return m_selections.size();
+    }
+
+    /*************************************************************************/
+    inline constexpr int number_of_enabled_constraints(void) const {
+        return m_constraint_reference.enabled_constraint_ptrs.size();
     }
 
     /*************************************************************************/
