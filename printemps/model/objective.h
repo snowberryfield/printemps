@@ -162,43 +162,61 @@ class Objective {
 
     /*************************************************************************/
     inline constexpr T_Expression evaluate(void) const noexcept {
+#ifdef _MPS_SOLVER
+        return m_expression.evaluate();
+#else
         if (m_is_linear) {
             return m_expression.evaluate();
         } else {
             return m_function({});
         }
+#endif
     }
 
     /*************************************************************************/
     inline constexpr T_Expression evaluate(
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
-        const noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
+        noexcept {
+#ifdef _MPS_SOLVER
+        return m_expression.evaluate(a_MOVE);
+#else
         if (m_is_linear) {
             return m_expression.evaluate(a_MOVE);
         } else {
             return m_function(a_MOVE);
         }
+#endif
     }
 
     /*************************************************************************/
     inline constexpr void update(void) {
+#ifdef _MPS_SOLVER
+        m_expression.update();
+        m_value = m_expression.value();
+#else
         if (m_is_linear) {
             m_expression.update();
             m_value = m_expression.value();
         } else {
             m_value = m_function({});
         }
+#endif
     }
 
     /*************************************************************************/
     inline constexpr void update(
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) {
+#ifdef _MPS_SOLVER
+        m_expression.update(a_MOVE);
+        m_value = m_expression.value();
+#else
         if (m_is_linear) {
             m_expression.update(a_MOVE);
             m_value = m_expression.value();
         } else {
             m_value = m_function(a_MOVE);
         }
+#endif
     }
 
     /*************************************************************************/
