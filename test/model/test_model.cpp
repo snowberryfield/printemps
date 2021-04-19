@@ -1055,7 +1055,7 @@ TEST_F(TestModel, categorize_variables) {
     model.categorize_constraints();
     printemps::presolver::extract_independent_intermediate_variables(&model,
                                                                      false);
-    printemps::presolver::extract_independent_selections(&model, 1000, false);
+    printemps::presolver::extract_independent_selections(&model, false);
 
     model.categorize_variables();
     model.categorize_constraints();
@@ -1281,7 +1281,7 @@ TEST_F(TestModel, update_arg_move) {
     model.minimize(p);
     model.categorize_variables();
     model.categorize_constraints();
-    printemps::presolver::extract_independent_selections(&model, 1000, false);
+    printemps::presolver::extract_independent_selections(&model, false);
     model.setup_fixed_sensitivities(false);
 
     model.update();
@@ -1741,8 +1741,7 @@ TEST_F(TestModel, evaluate) {
         model.setup_variable_related_constraints();
         model.categorize_variables();
         model.categorize_constraints();
-        printemps::presolver::extract_independent_selections(&model, 1000,
-                                                             false);
+        printemps::presolver::extract_independent_selections(&model, false);
         model.setup_fixed_sensitivities(false);
 
         for (auto&& element : x.flat_indexed_variables()) {
@@ -1890,8 +1889,7 @@ TEST_F(TestModel, evaluate) {
         model.setup_variable_related_constraints();
         model.categorize_variables();
         model.categorize_constraints();
-        printemps::presolver::extract_independent_selections(&model, 1000,
-                                                             false);
+        printemps::presolver::extract_independent_selections(&model, false);
         model.setup_fixed_sensitivities(false);
 
         for (auto&& element : x.flat_indexed_variables()) {
