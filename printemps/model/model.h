@@ -707,12 +707,12 @@ class Model {
         }
 
         /**
-         * Extract selection constraints. If the number of constraints is close
-         * to or bigger than that of decision variables, this process will be
-         * skipped because it would affect computational efficiency.
+         * Extract selection constraints. If the number of constraints is bigger
+         * than that of decision variables, this process will be skipped because
+         * it would affect computational efficiency.
          */
         if (a_SELECTION_MODE != SelectionMode::None &&
-            this->number_of_variables() > 2 * this->number_of_constraints()) {
+            this->number_of_variables() > this->number_of_constraints()) {
             presolver::extract_selections(this,              //
                                           a_SELECTION_MODE,  //
                                           a_IS_ENABLED_PRINT);
