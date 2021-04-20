@@ -359,7 +359,7 @@ TEST_F(TestSelectionExtractor, extract_selections_independent) {
     model.categorize_variables();
     model.categorize_constraints();
 
-    printemps::presolver::extract_independent_selections(&model, 1000, false);
+    printemps::presolver::extract_independent_selections(&model, false);
     model.categorize_variables();
     model.categorize_constraints();
 

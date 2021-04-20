@@ -187,8 +187,7 @@ constexpr void extract_selections_by_number_of_variables_order(
 template <class T_Variable, class T_Expression>
 constexpr void extract_independent_selections(
     model::Model<T_Variable, T_Expression> *a_model,
-    const int  a_MAX_NUMBER_OF_VARIABLES_PER_SELECTION,
-    const bool a_IS_ENABLED_PRINT) {
+    const bool                              a_IS_ENABLED_PRINT) {
     utility::print_single_line(a_IS_ENABLED_PRINT);
     utility::print_message("Extracting independent selection variables...",
                            a_IS_ENABLED_PRINT);
@@ -197,15 +196,6 @@ constexpr void extract_independent_selections(
     std::vector<model::Selection<T_Variable, T_Expression>> raw_selections =
         convert_to_selections(
             a_model->constraint_type_reference().set_partitioning_ptrs);
-
-    raw_selections.erase(
-        std::remove_if(
-            raw_selections.begin(), raw_selections.end(),
-            [a_MAX_NUMBER_OF_VARIABLES_PER_SELECTION](const auto &a_SELECTION) {
-                return (static_cast<int>(a_SELECTION.variable_ptrs.size()) >
-                        a_MAX_NUMBER_OF_VARIABLES_PER_SELECTION);
-            }),
-        raw_selections.end());
 
     std::vector<model::Variable<T_Variable, T_Expression> *>
         extracted_variable_ptrs;
@@ -287,11 +277,8 @@ constexpr void extract_selections(
             break;
         }
         case model::SelectionMode::Independent: {
-            const int MAX_NUMBER_OF_VARIABLES_PER_SELECTION = 100;
-            extract_independent_selections(
-                a_model,                                //
-                MAX_NUMBER_OF_VARIABLES_PER_SELECTION,  //
-                a_IS_ENABLED_PRINT);
+            extract_independent_selections(a_model,  //
+                                           a_IS_ENABLED_PRINT);
             break;
         }
         default: {
