@@ -17,7 +17,8 @@ enum class MoveSense {
     Precedence,     //
     VariableBound,  //
     Chain,          //
-    UserDefined
+    UserDefined,    //
+    General
 };
 }  // namespace neighborhood
 }  // namespace printemps
