@@ -12,6 +12,8 @@ The following results were obtained by the solver detailed in [Standalone Solver
 |:----------------------------------------------:|:------:|:-------:|:----------------------------------------------------------------------------:|:------------:|:----------------:|:-----------------------------------------------:|:----:|-----|
 | [1](./results/v1.6.0/0001/benchmark_result.md) | Apr. 21, 2021 | v1.6.0 |  600sec   | [Benchmark Set](https://miplib.zib.de/tag_benchmark.html) <br />(89 instances) | Ubuntu 20.04 |    g++ 7.5.0     | Intel(R) Xeon(R) CPU E3-1270 v5 @ 3.60GHz | 16GB |     |
 | [2](./results/v1.6.0/0002/benchmark_result.md) | Apr. 21, 2021 | v1.6.0 |  600sec   | [Collection Set](https://miplib.zib.de/tag_collection.html) <br />(63 "open" instances) | Ubuntu 20.04 |    g++ 7.5.0     | Intel(R) Xeon(R) CPU E3-1270 v5 @ 3.60GHz | 16GB |     |
+| [3](./results/v1.6.0/0003/benchmark_result.md) | Apr. 29, 2021 | v1.6.0 |  3600sec   | [Benchmark Set](https://miplib.zib.de/tag_benchmark.html) <br />(89 instances) | Ubuntu 20.04 |    g++ 7.5.0     | Intel(R) Xeon(R) CPU E3-1270 v5 @ 3.60GHz | 16GB |     |
+| [4](./results/v1.6.0/0004/benchmark_result.md) | Apr. 29, 2021 | v1.6.0 |  3600sec   | [Collection Set](https://miplib.zib.de/tag_collection.html) <br />(63 "open" instances) | Ubuntu 20.04 |    g++ 7.5.0     | Intel(R) Xeon(R) CPU E3-1270 v5 @ 3.60GHz | 16GB |     |
 
 ## v1.5.3
 
