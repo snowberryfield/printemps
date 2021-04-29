@@ -81,6 +81,9 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     bool m_is_general_linear;
     bool m_is_zero_one_coefficient;
 
+    bool m_has_intermediate_lower_bound;
+    bool m_has_intermediate_upper_bound;
+
     Variable<T_Variable, T_Expression> *m_intermediate_variable_ptr;
 
     /*************************************************************************/
@@ -235,6 +238,9 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         m_is_intermediate         = false;
         m_is_general_linear       = false;
         m_is_zero_one_coefficient = false;
+
+        m_has_intermediate_lower_bound = false;
+        m_has_intermediate_upper_bound = false;
 
         m_intermediate_variable_ptr = nullptr;
     }
@@ -541,8 +547,8 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
                         is_valid = false;
                         break;
                     }
-
-                    if (item.first->sense() == VariableSense::Integer &&
+                    if ((item.first->sense() == VariableSense::Integer ||
+                         item.first->sense() == VariableSense::Intermediate) &&
                         abs(item.second) == 1) {
                         variable_ptr = item.first;
                         coefficient  = item.second;
@@ -551,12 +557,12 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
                         if (item.second > 0) {
                             upper_bound +=
                                 item.second * item.first->upper_bound();
-                            lower_bound -=
+                            lower_bound +=
                                 item.second * item.first->lower_bound();
                         } else {
                             lower_bound +=
                                 item.second * item.first->upper_bound();
-                            upper_bound -=
+                            upper_bound +=
                                 item.second * item.first->lower_bound();
                         }
                     }
@@ -572,31 +578,38 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
                         upper_bound *= -1.0;
                     }
 
-                    if ((variable_ptr->lower_bound() ==
-                             constant::INT_HALF_MIN ||
-                         variable_ptr->lower_bound() <= lower_bound) &&
-                        (variable_ptr->upper_bound() ==
-                             constant::INT_HALF_MAX ||
-                         variable_ptr->upper_bound() >= upper_bound)) {
-                        if ((m_sense == ConstraintSense::Less &&
-                             coefficient < 0) ||
-                            (m_sense == ConstraintSense::Greater &&
-                             coefficient > 0)) {
-                            m_is_min_max = true;
-                            return;
-                        }
-                        if ((m_sense == ConstraintSense::Greater &&
-                             coefficient < 0) ||
-                            (m_sense == ConstraintSense::Less &&
-                             coefficient > 0)) {
-                            m_is_max_min = true;
-                            return;
-                        }
-                        if (m_sense == ConstraintSense::Equal) {
-                            m_is_intermediate           = true;
-                            m_intermediate_variable_ptr = variable_ptr;
-                            return;
-                        }
+                    if (variable_ptr->lower_bound() != constant::INT_HALF_MIN &&
+                        variable_ptr->lower_bound() > lower_bound) {
+                        m_has_intermediate_lower_bound = true;
+                    } else {
+                        m_has_intermediate_lower_bound = false;
+                    }
+
+                    if (variable_ptr->upper_bound() != constant::INT_HALF_MAX &&
+                        variable_ptr->upper_bound() < upper_bound) {
+                        m_has_intermediate_upper_bound = true;
+                    } else {
+                        m_has_intermediate_upper_bound = false;
+                    }
+
+                    if ((m_sense == ConstraintSense::Less && coefficient < 0) ||
+                        (m_sense == ConstraintSense::Greater &&
+                         coefficient > 0)) {
+                        m_is_min_max = true;
+                        return;
+                    }
+
+                    if ((m_sense == ConstraintSense::Greater &&
+                         coefficient < 0) ||
+                        (m_sense == ConstraintSense::Less && coefficient > 0)) {
+                        m_is_max_min = true;
+                        return;
+                    }
+
+                    if (m_sense == ConstraintSense::Equal) {
+                        m_is_intermediate           = true;
+                        m_intermediate_variable_ptr = variable_ptr;
+                        return;
                     }
                 }
             }
@@ -617,8 +630,8 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
 
     /*************************************************************************/
     inline constexpr T_Expression evaluate_constraint(
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
-        const noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
+        noexcept {
 #ifdef _MPS_SOLVER
         return m_expression.evaluate(a_MOVE);
 #else
@@ -633,15 +646,15 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
 
     /*************************************************************************/
     inline constexpr T_Expression evaluate_violation(
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
-        const noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
+        noexcept {
         return m_violation_function(a_MOVE);
     }
 
     /*************************************************************************/
     inline constexpr T_Expression evaluate_violation_diff(
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
-        const noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
+        noexcept {
         return m_violation_function(a_MOVE) - m_violation_value;
     }
 
@@ -731,8 +744,8 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr double local_penalty_coefficient_less(
-        void) const noexcept {
+    inline constexpr double local_penalty_coefficient_less(void) const
+        noexcept {
         return m_local_penalty_coefficient_less;
     }
 
@@ -741,8 +754,8 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         return m_local_penalty_coefficient_greater;
     }
     /*************************************************************************/
-    inline constexpr double local_penalty_coefficient_greater(
-        void) const noexcept {
+    inline constexpr double local_penalty_coefficient_greater(void) const
+        noexcept {
         return m_local_penalty_coefficient_greater;
     }
 
@@ -880,6 +893,16 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     /*************************************************************************/
     inline constexpr void disable(void) noexcept {
         m_is_enabled = false;
+    }
+
+    /*************************************************************************/
+    inline constexpr bool has_intermediate_lower_bound(void) const noexcept {
+        return m_has_intermediate_lower_bound;
+    }
+
+    /*************************************************************************/
+    inline constexpr bool has_intermediate_upper_bound(void) const noexcept {
+        return m_has_intermediate_upper_bound;
     }
 
     /*************************************************************************/

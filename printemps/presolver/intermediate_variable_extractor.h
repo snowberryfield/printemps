@@ -46,8 +46,14 @@ constexpr int extract_independent_intermediate_variables(
         }
     }
 
+    std::vector<model::Constraint<T_Variable, T_Expression>>
+        additional_constraints;
+
     for (auto &&constraint_ptr :
          a_model->constraint_type_reference().intermediate_ptrs) {
+        if (!constraint_ptr->is_enabled()) {
+            continue;
+        }
         auto intermediate_variable_ptr =
             constraint_ptr->intermediate_variable_ptr();
         if (intermediate_variable_counts[intermediate_variable_ptr] == 1) {
@@ -56,10 +62,47 @@ constexpr int extract_independent_intermediate_variables(
                     " in the constraint " + constraint_ptr->name() +
                     " was extracted as an independent intermediate variable. ",
                 a_IS_ENABLED_PRINT);
+
             constraint_ptr->disable();
             intermediate_variable_ptr->set_dependent_constraint_ptr(
                 constraint_ptr);
+
+            auto & sensitivities = constraint_ptr->expression().sensitivities();
+            double sign =
+                sensitivities.at(intermediate_variable_ptr) > 0 ? -1.0 : 1.0;
+
+            auto modified_expression = constraint_ptr->expression().copy();
+            modified_expression.sensitivities().erase(
+                intermediate_variable_ptr);
+
+            if (constraint_ptr->has_intermediate_lower_bound()) {
+                additional_constraints.emplace_back(
+                    sign * modified_expression >=
+                    intermediate_variable_ptr->lower_bound());
+                additional_constraints.back().set_name(constraint_ptr->name() +
+                                                       "_lower");
+            }
+
+            if (constraint_ptr->has_intermediate_upper_bound()) {
+                additional_constraints.emplace_back(
+                    sign * modified_expression <=
+                    intermediate_variable_ptr->upper_bound());
+                additional_constraints.back().set_name(constraint_ptr->name() +
+                                                       "_upper");
+            }
             number_of_newly_extracted_independent_intermediate_vairables++;
+        }
+    }
+
+    if (additional_constraints.size() > 0) {
+        int   count                       = 0;
+        auto &additional_constraint_proxy = a_model->create_constraints(
+            "additional", additional_constraints.size());
+        for (auto &&constraint : additional_constraints) {
+            additional_constraint_proxy(count++) = constraint;
+            utility::print_info(
+                "An extra constraint " + constraint.name() + " was added.",
+                a_IS_ENABLED_PRINT);
         }
     }
 
@@ -138,6 +181,7 @@ constexpr int eliminate_independent_intermediate_variables(
             }
         }
     }
+
     utility::print_message("Done.", a_IS_ENABLED_PRINT);
     return number_of_newly_eliminated_independent_intermediate_vairables;
 }
