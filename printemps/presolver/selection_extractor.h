@@ -48,7 +48,7 @@ convert_to_selections(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 constexpr void extract_selections_by_defined_order(
-    model::Model<T_Variable, T_Expression> *a_model,
+    model::Model<T_Variable, T_Expression> *a_model_ptr,
     const bool                              a_IS_ENABLED_PRINT) {
     utility::print_single_line(a_IS_ENABLED_PRINT);
     utility::print_message("Extracting selection by defined order...",
@@ -57,7 +57,7 @@ constexpr void extract_selections_by_defined_order(
     std::vector<model::Selection<T_Variable, T_Expression>> selections;
     std::vector<model::Selection<T_Variable, T_Expression>> raw_selections =
         convert_to_selections(
-            a_model->constraint_type_reference().set_partitioning_ptrs);
+            a_model_ptr->constraint_type_reference().set_partitioning_ptrs);
 
     std::vector<model::Variable<T_Variable, T_Expression> *>
         extracted_variable_ptrs;
@@ -98,7 +98,7 @@ constexpr void extract_selections_by_defined_order(
         }
     }
 
-    a_model->set_selections(selections);
+    a_model_ptr->set_selections(selections);
 
     utility::print_message("Done.", a_IS_ENABLED_PRINT);
 }
@@ -106,7 +106,7 @@ constexpr void extract_selections_by_defined_order(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 constexpr void extract_selections_by_number_of_variables_order(
-    model::Model<T_Variable, T_Expression> *a_model,             //
+    model::Model<T_Variable, T_Expression> *a_model_ptr,         //
     const bool                              a_IS_SMALLER_ORDER,  //
     const bool                              a_IS_ENABLED_PRINT) {
     utility::print_single_line(a_IS_ENABLED_PRINT);
@@ -123,7 +123,7 @@ constexpr void extract_selections_by_number_of_variables_order(
     std::vector<model::Selection<T_Variable, T_Expression>> selections;
     std::vector<model::Selection<T_Variable, T_Expression>> raw_selections =
         convert_to_selections(
-            a_model->constraint_type_reference().set_partitioning_ptrs);
+            a_model_ptr->constraint_type_reference().set_partitioning_ptrs);
 
     if (a_IS_SMALLER_ORDER) {
         std::sort(raw_selections.begin(), raw_selections.end(),
@@ -178,7 +178,7 @@ constexpr void extract_selections_by_number_of_variables_order(
         }
     }
 
-    a_model->set_selections(selections);
+    a_model_ptr->set_selections(selections);
 
     utility::print_message("Done.", a_IS_ENABLED_PRINT);
 }
@@ -186,7 +186,7 @@ constexpr void extract_selections_by_number_of_variables_order(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 constexpr void extract_independent_selections(
-    model::Model<T_Variable, T_Expression> *a_model,
+    model::Model<T_Variable, T_Expression> *a_model_ptr,
     const bool                              a_IS_ENABLED_PRINT) {
     utility::print_single_line(a_IS_ENABLED_PRINT);
     utility::print_message("Extracting independent selection variables...",
@@ -195,7 +195,7 @@ constexpr void extract_independent_selections(
     std::vector<model::Selection<T_Variable, T_Expression>> selections;
     std::vector<model::Selection<T_Variable, T_Expression>> raw_selections =
         convert_to_selections(
-            a_model->constraint_type_reference().set_partitioning_ptrs);
+            a_model_ptr->constraint_type_reference().set_partitioning_ptrs);
 
     std::vector<model::Variable<T_Variable, T_Expression> *>
         extracted_variable_ptrs;
@@ -244,7 +244,7 @@ constexpr void extract_independent_selections(
         }
     }
 
-    a_model->set_selections(selections);
+    a_model_ptr->set_selections(selections);
 
     utility::print_message("Done.", a_IS_ENABLED_PRINT);
 }
@@ -252,7 +252,7 @@ constexpr void extract_independent_selections(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 constexpr void extract_selections(
-    model::Model<T_Variable, T_Expression> *a_model,  //
+    model::Model<T_Variable, T_Expression> *a_model_ptr,  //
     const model::SelectionMode &            a_SELECTION_MODE,
     const bool                              a_IS_ENABLED_PRINT) {
     switch (a_SELECTION_MODE) {
@@ -260,24 +260,24 @@ constexpr void extract_selections(
             break;
         }
         case model::SelectionMode::Defined: {
-            extract_selections_by_defined_order(a_model,  //
+            extract_selections_by_defined_order(a_model_ptr,  //
                                                 a_IS_ENABLED_PRINT);
             break;
         }
         case model::SelectionMode::Smaller: {
-            extract_selections_by_number_of_variables_order(a_model,  //
-                                                            true,     //
+            extract_selections_by_number_of_variables_order(a_model_ptr,  //
+                                                            true,         //
                                                             a_IS_ENABLED_PRINT);
             break;
         }
         case model::SelectionMode::Larger: {
-            extract_selections_by_number_of_variables_order(a_model,  //
-                                                            false,    //
+            extract_selections_by_number_of_variables_order(a_model_ptr,  //
+                                                            false,        //
                                                             a_IS_ENABLED_PRINT);
             break;
         }
         case model::SelectionMode::Independent: {
-            extract_independent_selections(a_model,  //
+            extract_independent_selections(a_model_ptr,  //
                                            a_IS_ENABLED_PRINT);
             break;
         }

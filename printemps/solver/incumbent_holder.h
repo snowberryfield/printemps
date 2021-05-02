@@ -118,7 +118,7 @@ class IncumbentHolder {
 
     /*************************************************************************/
     constexpr int try_update_incumbent(
-        model::Model<T_Variable, T_Expression> *a_model,
+        model::Model<T_Variable, T_Expression> *a_model_ptr,
         const solution::SolutionScore &         a_SCORE) {
         /// solution here defined is not substituted when no improvement
         solution::Solution<T_Variable, T_Expression> solution;
@@ -132,7 +132,7 @@ class IncumbentHolder {
                 STATUS_LOCAL_AUGMENTED_INCUMBENT_UPDATE;
 
             if (!is_solution_updated) {
-                solution            = a_model->export_solution();
+                solution            = a_model_ptr->export_solution();
                 is_solution_updated = true;
             }
 
@@ -148,7 +148,7 @@ class IncumbentHolder {
                 STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE;
 
             if (!is_solution_updated) {
-                solution            = a_model->export_solution();
+                solution            = a_model_ptr->export_solution();
                 is_solution_updated = true;
             }
 
@@ -167,7 +167,7 @@ class IncumbentHolder {
                     IncumbentHolderConstant::STATUS_FEASIBLE_INCUMBENT_UPDATE;
 
                 if (!is_solution_updated) {
-                    solution            = a_model->export_solution();
+                    solution            = a_model_ptr->export_solution();
                     is_solution_updated = true;
                 }
 
