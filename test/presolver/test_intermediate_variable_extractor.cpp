@@ -151,7 +151,7 @@ TEST_F(TestIntermediateVariableExtractor, extract_intermediate_variables) {
             printemps::presolver::
                 extract_independent_intermediate_variables(  //
                     &model,                                  //
-                    true);
+                    false);
 
             model.categorize_variables();
             model.categorize_constraints();

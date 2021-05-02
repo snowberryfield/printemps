@@ -192,6 +192,7 @@ TEST_F(TestMove, compute_overlap_rate) {
 
     model.categorize_constraints();
     model.setup_variable_related_constraints();
+    model.setup_variable_related_zero_one_coefficient_constraints();
 
     /// x(0) and x(1) have two common constraints.
     {
