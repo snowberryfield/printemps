@@ -656,6 +656,7 @@ class Model {
          */
         this->categorize_variables();
         this->categorize_constraints();
+        this->setup_variable_related_zero_one_coefficient_constraints();
         this->setup_variable_related_constraints();
         this->setup_variable_sensitivity();
 
@@ -679,11 +680,12 @@ class Model {
         /**
          * Extract and eliminate the intermediate variables.
          */
-        if (m_is_linear &&
+        if (a_IS_ENABLED_PRESOLVE && m_is_linear &&
             m_constraint_type_reference.intermediate_ptrs.size() > 0) {
             while (true) {
                 this->categorize_variables();
                 this->categorize_constraints();
+                this->setup_variable_related_zero_one_coefficient_constraints();
                 this->setup_variable_related_constraints();
                 this->setup_variable_sensitivity();
                 if (presolver::extract_independent_intermediate_variables(
@@ -695,6 +697,7 @@ class Model {
                 while (true) {
                     this->categorize_variables();
                     this->categorize_constraints();
+                    this->setup_variable_related_zero_one_coefficient_constraints();
                     this->setup_variable_related_constraints();
                     this->setup_variable_sensitivity();
                     if (presolver::eliminate_independent_intermediate_variables(
@@ -703,6 +706,8 @@ class Model {
                         break;
                     }
                 }
+
+                presolver::presolve(this, false, a_IS_ENABLED_PRINT);
             }
         }
 
@@ -723,6 +728,7 @@ class Model {
          */
         this->categorize_variables();
         this->categorize_constraints();
+        this->setup_variable_related_zero_one_coefficient_constraints();
         this->setup_variable_related_constraints();
         this->setup_variable_sensitivity();
 
@@ -861,13 +867,6 @@ class Model {
                 }
             }
         }
-
-        for (auto &&proxy : m_variable_proxies) {
-            for (auto &&variable : proxy.flat_indexed_variables()) {
-                variable.reset_related_zero_one_coefficient_constraint_ptrs();
-                variable.setup_related_zero_one_coefficient_constraint_ptrs();
-            }
-        }
     }
 
     /*************************************************************************/
@@ -895,6 +894,17 @@ class Model {
 
         for (auto &&sensitivity : m_objective.expression().sensitivities()) {
             sensitivity.first->set_objective_sensitivity(sensitivity.second);
+        }
+    }
+
+    /*************************************************************************/
+    constexpr void setup_variable_related_zero_one_coefficient_constraints(
+        void) {
+        for (auto &&proxy : m_variable_proxies) {
+            for (auto &&variable : proxy.flat_indexed_variables()) {
+                variable.reset_related_zero_one_coefficient_constraint_ptrs();
+                variable.setup_related_zero_one_coefficient_constraint_ptrs();
+            }
         }
     }
 
@@ -1126,191 +1136,393 @@ class Model {
     /*************************************************************************/
     constexpr void print_number_of_variables(void) const {
         utility::print_single_line(true);
-        if (this->number_of_fixed_variables() == 0) {
-            utility::print_info(
-                "The number of decision variables: " +
-                    utility::to_string(this->number_of_variables(), "%d"),
-                true);
-        } else {
-            utility::print_info(
-                "The number of decision variables: " +
-                    utility::to_string(this->number_of_variables(), "%d") +
-                    " (reduced to " +
-                    utility::to_string((this->number_of_variables() -
-                                        this->number_of_fixed_variables()),
-                                       "%d") +
-                    ")",
-                true);
-        }
 
-        utility::print_info(
+        const auto &original  = m_variable_reference_original;
+        const auto &presolved = m_variable_reference;
+
+        auto compute_number_of_variables = [](const auto &a_VARIABLE_PTRS) {
+            return a_VARIABLE_PTRS.size();
+        };
+
+        auto compute_number_of_mutable_variables =
+            [](const auto &a_VARIABLE_PTRS) {
+                return std::count_if(a_VARIABLE_PTRS.begin(),
+                                     a_VARIABLE_PTRS.end(),
+                                     [](const auto *a_VARIABLE_PTR) {
+                                         return !a_VARIABLE_PTR->is_fixed();
+                                     });
+            };
+
+        utility::print_info(  //
+            "The number of decision variables: " +
+                utility::to_string(               //
+                    compute_number_of_variables(  //
+                        original.variable_ptrs),
+                    "%d") +
+                " (" +
+                utility::to_string(                       //
+                    compute_number_of_mutable_variables(  //
+                        presolved.variable_ptrs),
+                    "%d") +
+                ")",
+            true);
+
+        utility::print_info(  //
             " -- Binary: " +
-                utility::to_string(this->number_of_binary_variables(), "%d"),
+                utility::to_string(               //
+                    compute_number_of_variables(  //
+                        original.binary_variable_ptrs),
+                    "%d") +
+                " (" +
+                utility::to_string(                       //
+                    compute_number_of_mutable_variables(  //
+                        presolved.binary_variable_ptrs),
+                    "%d") +
+                ")",
             true);
-        utility::print_info(
+
+        utility::print_info(  //
             " -- Integer: " +
-                utility::to_string(this->number_of_integer_variables(), "%d"),
+                utility::to_string(               //
+                    compute_number_of_variables(  //
+                        original.integer_variable_ptrs),
+                    "%d") +
+                " (" +
+                utility::to_string(  //
+                    compute_number_of_mutable_variables(
+                        presolved.integer_variable_ptrs),
+                    "%d") +
+                ")",
             true);
-        utility::print_info(
+
+        utility::print_info(  //
             " -- Selection: " +
-                utility::to_string(this->number_of_selection_variables(), "%d"),
+                utility::to_string(  //
+                    compute_number_of_variables(
+                        original.selection_variable_ptrs),
+                    "%d") +
+                " (" +
+                utility::to_string(  //
+                    compute_number_of_mutable_variables(
+                        presolved.selection_variable_ptrs),
+                    "%d") +
+                ")",
             true);
-        utility::print_info(
+
+        utility::print_info(  //
             " -- Independent Intermediate: " +
-                utility::to_string(this->number_of_intermediate_variables(),
-                                   "%d"),
+                utility::to_string(  //
+                    compute_number_of_variables(
+                        original.intermediate_variable_ptrs),
+                    "%d") +
+                " (" +
+                utility::to_string(  //
+                    compute_number_of_mutable_variables(
+                        presolved.intermediate_variable_ptrs),
+                    "%d") +
+                ")",
             true);
-        utility::print_info(
-            "The number of fixed decision variables: " +
-                utility::to_string(this->number_of_fixed_variables(), "%d"),
+
+        utility::print(  //
+            "          ( ) : Number of mutable variables after presolve.",
             true);
     }
 
     /*************************************************************************/
     constexpr void print_number_of_constraints(void) const {
         utility::print_single_line(true);
-        if (this->number_of_disabled_constraints() == 0) {
-            utility::print_info(
+
+        auto compute_number_of_constraints = [](const auto &a_CONSTRAINT_PTRS) {
+            return a_CONSTRAINT_PTRS.size();
+        };
+
+        auto compute_number_of_enabled_constraints =
+            [](const auto &a_CONSTRAINT_PTRS) {
+                return std::count_if(a_CONSTRAINT_PTRS.begin(),
+                                     a_CONSTRAINT_PTRS.end(),
+                                     [](const auto *a_CONSTRAINT_PTR) {
+                                         return a_CONSTRAINT_PTR->is_enabled();
+                                     });
+            };
+
+        {
+            const auto &original  = m_constraint_reference_original;
+            const auto &presolved = m_constraint_reference;
+
+            utility::print_info(  //
                 "The number of constraints: " +
-                    utility::to_string(this->number_of_constraints(), "%d"),
-                true);
-        } else {
-            utility::print_info(
-                "The number of constraints: " +
-                    utility::to_string(this->number_of_constraints(), "%d") +
-                    " (reduced to " +
-                    utility::to_string((this->number_of_constraints() -
-                                        this->number_of_disabled_constraints()),
-                                       "%d") +
+                    utility::to_string(                 //
+                        compute_number_of_constraints(  //
+                            original.constraint_ptrs),
+                        "%d") +
+                    " (" +
+                    utility::to_string(                         //
+                        compute_number_of_enabled_constraints(  //
+                            presolved.constraint_ptrs),
+                        "%d") +
                     ")",
                 true);
         }
 
-        utility::print_info(         ///
-            " -- Singleton: " +      ///
-                utility::to_string(  ///
-                    m_constraint_type_reference_original.singleton_ptrs.size(),
-                    "%d"),
-            true);
-        utility::print_info(         //
-            " -- Aggregation: " +    //
-                utility::to_string(  //
-                    m_constraint_type_reference_original.aggregation_ptrs
-                        .size(),
-                    "%d"),
-            true);
-        utility::print_info(         ///
-            " -- Precedence: " +     ///
-                utility::to_string(  ///
-                    m_constraint_type_reference_original.precedence_ptrs.size(),
-                    "%d"),
-            true);
-        utility::print_info(          ///
-            " -- Variable Bound: " +  ///
-                utility::to_string(   ///
-                    m_constraint_type_reference_original.variable_bound_ptrs
-                        .size(),
-                    "%d"),
-            true);
-        utility::print_info(            ///
-            " -- Set Partitioning: " +  ///
-                utility::to_string(     ///
-                    m_constraint_type_reference_original.set_partitioning_ptrs
-                        .size(),
-                    "%d"),
-            true);
-        utility::print_info(         ///
-            " -- Set Packing: " +    ///
-                utility::to_string(  ///
-                    m_constraint_type_reference_original.set_packing_ptrs
-                        .size(),
-                    "%d"),
-            true);
-        utility::print_info(         ///
-            " -- Set Covering: " +   ///
-                utility::to_string(  ///
-                    m_constraint_type_reference_original.set_covering_ptrs
-                        .size(),
-                    "%d"),
-            true);
-        utility::print_info(         ///
-            " -- Cardinality: " +    ///
-                utility::to_string(  ///
-                    m_constraint_type_reference_original.cardinality_ptrs
-                        .size(),
-                    "%d"),
-            true);
-        utility::print_info(              ///
-            " -- Invariant Knapsack: " +  ///
-                utility::to_string(       ///
-                    m_constraint_type_reference_original.invariant_knapsack_ptrs
-                        .size(),
-                    "%d"),
-            true);
-        utility::print_info(             ///
-            " -- Equation Knapsack: " +  ///
-                utility::to_string(      ///
-                    m_constraint_type_reference_original.equation_knapsack_ptrs
-                        .size(),
-                    "%d"),
-            true);
-        utility::print_info(         ///
-            " -- Bin Packing: " +    ///
-                utility::to_string(  ///
-                    m_constraint_type_reference_original.bin_packing_ptrs
-                        .size(),
-                    "%d"),
-            true);
-        utility::print_info(         ///
-            " -- Knapsack: " +       ///
-                utility::to_string(  ///
-                    m_constraint_type_reference_original.knapsack_ptrs.size(),
-                    "%d"),
-            true);
-        utility::print_info(            ///
-            " -- Integer Knapsack: " +  ///
-                utility::to_string(     ///
-                    m_constraint_type_reference_original.integer_knapsack_ptrs
-                        .size(),
-                    "%d"),
-            true);
-        utility::print_info(          ///
-            " -- General Linear: " +  ///
-                utility::to_string(   ///
-                    m_constraint_type_reference_original.general_linear_ptrs
-                        .size(),
-                    "%d"),
-            true);
-        utility::print_info(         ///
-            " -- Min-Max: " +        ///
-                utility::to_string(  ///
-                    m_constraint_type_reference_original.min_max_ptrs.size(),
-                    "%d"),
-            true);
-        utility::print_info(         ///
-            " -- Max-Min: " +        ///
-                utility::to_string(  ///
-                    m_constraint_type_reference_original.max_min_ptrs.size(),
-                    "%d"),
-            true);
-        utility::print_info(         ///
-            " -- Intermediate: " +   ///
-                utility::to_string(  ///
-                    m_constraint_type_reference_original.intermediate_ptrs
-                        .size(),
-                    "%d"),
-            true);
-        utility::print_info(         ///
-            " -- Nonlinear: " +      ///
-                utility::to_string(  ///
-                    m_constraint_type_reference_original.nonlinear_ptrs.size(),
-                    "%d"),
-            true);
+        {
+            const auto &original  = m_constraint_type_reference_original;
+            const auto &presolved = m_constraint_type_reference;
 
-        utility::print_info(                         ///
-            "The number of reduced constraints: " +  ///
-                utility::to_string(                  ///
-                    this->number_of_disabled_constraints(), "%d"),
+            utility::print_info(                        //
+                " -- Singleton: " +                     //
+                    utility::to_string(                 //
+                        compute_number_of_constraints(  //
+                            original.singleton_ptrs),
+                        "%d") +
+                    " (" +
+                    utility::to_string(                         //
+                        compute_number_of_enabled_constraints(  //
+                            presolved.singleton_ptrs),
+                        "%d") +
+                    ")",
+                true);
+
+            utility::print_info(                        //
+                " -- Aggregation: " +                   //
+                    utility::to_string(                 //
+                        compute_number_of_constraints(  //
+                            original.aggregation_ptrs),
+                        "%d") +
+                    " (" +
+                    utility::to_string(                         //
+                        compute_number_of_enabled_constraints(  //
+                            presolved.aggregation_ptrs),
+                        "%d") +
+                    ")",
+                true);
+
+            utility::print_info(                        //
+                " -- Precedence: " +                    //
+                    utility::to_string(                 //
+                        compute_number_of_constraints(  //
+                            original.precedence_ptrs),
+                        "%d") +
+                    " (" +
+                    utility::to_string(                         //
+                        compute_number_of_enabled_constraints(  //
+                            presolved.precedence_ptrs),
+                        "%d") +
+                    ")",
+                true);
+
+            utility::print_info(                        //
+                " -- Variable Bound: " +                //
+                    utility::to_string(                 //
+                        compute_number_of_constraints(  //
+                            original.variable_bound_ptrs),
+                        "%d") +
+                    " (" +
+                    utility::to_string(                         //
+                        compute_number_of_enabled_constraints(  //
+                            presolved.variable_bound_ptrs),
+                        "%d") +
+                    ")",
+                true);
+
+            utility::print_info(                        //
+                " -- Set Partitioning: " +              //
+                    utility::to_string(                 //
+                        compute_number_of_constraints(  //
+                            original.set_partitioning_ptrs),
+                        "%d") +
+                    " (" +
+                    utility::to_string(                         //
+                        compute_number_of_enabled_constraints(  //
+                            presolved.set_partitioning_ptrs),
+                        "%d") +
+                    ")",
+                true);
+
+            utility::print_info(                        //
+                " -- Set Packing: " +                   //
+                    utility::to_string(                 //
+                        compute_number_of_constraints(  //
+                            original.set_packing_ptrs),
+                        "%d") +
+                    " (" +
+                    utility::to_string(                         //
+                        compute_number_of_enabled_constraints(  //
+                            presolved.set_packing_ptrs),
+                        "%d") +
+                    ")",
+                true);
+
+            utility::print_info(                        //
+                " -- Set Covering: " +                  //
+                    utility::to_string(                 //
+                        compute_number_of_constraints(  //
+                            original.set_covering_ptrs),
+                        "%d") +
+                    " (" +
+                    utility::to_string(                         //
+                        compute_number_of_enabled_constraints(  //
+                            presolved.set_covering_ptrs),
+                        "%d") +
+                    ")",
+                true);
+
+            utility::print_info(                        //
+                " -- Cardinality: " +                   //
+                    utility::to_string(                 //
+                        compute_number_of_constraints(  //
+                            original.cardinality_ptrs),
+                        "%d") +
+                    " (" +
+                    utility::to_string(                         //
+                        compute_number_of_enabled_constraints(  //
+                            presolved.cardinality_ptrs),
+                        "%d") +
+                    ")",
+                true);
+
+            utility::print_info(                        //
+                " -- Invariant Knapsack: " +            //
+                    utility::to_string(                 //
+                        compute_number_of_constraints(  //
+                            original.invariant_knapsack_ptrs),
+                        "%d") +
+                    " (" +
+                    utility::to_string(                         //
+                        compute_number_of_enabled_constraints(  //
+                            presolved.invariant_knapsack_ptrs),
+                        "%d") +
+                    ")",
+                true);
+
+            utility::print_info(                        //
+                " -- Equation Knapsack: " +             //
+                    utility::to_string(                 //
+                        compute_number_of_constraints(  //
+                            original.equation_knapsack_ptrs),
+                        "%d") +
+                    " (" +
+                    utility::to_string(                         //
+                        compute_number_of_enabled_constraints(  //
+                            presolved.equation_knapsack_ptrs),
+                        "%d") +
+                    ")",
+                true);
+
+            utility::print_info(                        //
+                " -- Bin Packing: " +                   //
+                    utility::to_string(                 //
+                        compute_number_of_constraints(  //
+                            original.bin_packing_ptrs),
+                        "%d") +
+                    " (" +
+                    utility::to_string(                         //
+                        compute_number_of_enabled_constraints(  //
+                            presolved.bin_packing_ptrs),
+                        "%d") +
+                    ")",
+                true);
+
+            utility::print_info(                        //
+                " -- Knapsack: " +                      //
+                    utility::to_string(                 //
+                        compute_number_of_constraints(  //
+                            original.knapsack_ptrs),
+                        "%d") +
+                    " (" +
+                    utility::to_string(                         //
+                        compute_number_of_enabled_constraints(  //
+                            presolved.knapsack_ptrs),
+                        "%d") +
+                    ")",
+                true);
+
+            utility::print_info(                        //
+                " -- Integer Knapsack: " +              //
+                    utility::to_string(                 //
+                        compute_number_of_constraints(  //
+                            original.integer_knapsack_ptrs),
+                        "%d") +
+                    " (" +
+                    utility::to_string(                         //
+                        compute_number_of_enabled_constraints(  //
+                            presolved.integer_knapsack_ptrs),
+                        "%d") +
+                    ")",
+                true);
+
+            utility::print_info(                        //
+                " -- Min-Max: " +                       //
+                    utility::to_string(                 //
+                        compute_number_of_constraints(  //
+                            original.min_max_ptrs),
+                        "%d") +
+                    " (" +
+                    utility::to_string(                         //
+                        compute_number_of_enabled_constraints(  //
+                            presolved.min_max_ptrs),
+                        "%d") +
+                    ")",
+                true);
+
+            utility::print_info(                        //
+                " -- Max-Min: " +                       //
+                    utility::to_string(                 //
+                        compute_number_of_constraints(  //
+                            original.max_min_ptrs),
+                        "%d") +
+                    " (" +
+                    utility::to_string(                         //
+                        compute_number_of_enabled_constraints(  //
+                            presolved.max_min_ptrs),
+                        "%d") +
+                    ")",
+                true);
+
+            utility::print_info(                        //
+                " -- Intermediate: " +                  //
+                    utility::to_string(                 //
+                        compute_number_of_constraints(  //
+                            original.intermediate_ptrs),
+                        "%d") +
+                    " (" +
+                    utility::to_string(                         //
+                        compute_number_of_enabled_constraints(  //
+                            presolved.intermediate_ptrs),
+                        "%d") +
+                    ")",
+                true);
+
+            utility::print_info(                        //
+                " -- General Linear: " +                //
+                    utility::to_string(                 //
+                        compute_number_of_constraints(  //
+                            original.general_linear_ptrs),
+                        "%d") +
+                    " (" +
+                    utility::to_string(                         //
+                        compute_number_of_enabled_constraints(  //
+                            presolved.general_linear_ptrs),
+                        "%d") +
+                    ")",
+                true);
+
+            utility::print_info(                        //
+                " -- Nonlinear: " +                     //
+                    utility::to_string(                 //
+                        compute_number_of_constraints(  //
+                            original.nonlinear_ptrs),
+                        "%d") +
+                    " (" +
+                    utility::to_string(                         //
+                        compute_number_of_enabled_constraints(  //
+                            presolved.nonlinear_ptrs),
+                        "%d") +
+                    ")",
+                true);
+        }
+
+        utility::print(  //
+            "          ( ) : Number of enabled constraints after presolve.",
             true);
     }
 
@@ -1579,8 +1791,8 @@ class Model {
 
     /*************************************************************************/
     inline solution::SolutionScore evaluate(
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
-        noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
+        const noexcept {
         solution::SolutionScore score;
         this->evaluate(&score, a_MOVE);
         return score;
@@ -1596,10 +1808,9 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void evaluate(
-        solution::SolutionScore *                           a_score_ptr,  //
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
-        noexcept {
+    constexpr void evaluate(solution::SolutionScore *a_score_ptr,  //
+                            const neighborhood::Move<T_Variable, T_Expression>
+                                &a_MOVE) const noexcept {
         double total_violation = 0.0;
         double local_penalty   = 0.0;
         double global_penalty  = 0.0;
