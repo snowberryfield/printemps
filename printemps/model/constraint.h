@@ -81,6 +81,9 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     bool m_is_general_linear;
     bool m_is_zero_one_coefficient;
 
+    bool m_has_intermediate_lower_bound;
+    bool m_has_intermediate_upper_bound;
+
     Variable<T_Variable, T_Expression> *m_intermediate_variable_ptr;
 
     /*************************************************************************/
@@ -235,6 +238,9 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         m_is_intermediate         = false;
         m_is_general_linear       = false;
         m_is_zero_one_coefficient = false;
+
+        m_has_intermediate_lower_bound = false;
+        m_has_intermediate_upper_bound = false;
 
         m_intermediate_variable_ptr = nullptr;
     }
@@ -521,82 +527,93 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
 
         /// Min-Max, Max-Min, Intermediate
         {
-            int                                 number_of_integer_variables = 0;
-            Variable<T_Variable, T_Expression> *variable_ptr = nullptr;
-            T_Expression                        coefficient  = 0;
+            int number_of_mono_integer_variables = 0;
+
+            Variable<T_Variable, T_Expression> *intermediate_variable_ptr =
+                nullptr;
+            T_Expression intermediate_variable_coefficient = 0;
 
             auto is_integer = [](const T_Expression a_VALUE) {
                 return fabs(a_VALUE - floor(a_VALUE)) < constant::EPSILON_10;
             };
 
             auto constant_value = m_expression.constant_value();
-
             if (is_integer(constant_value)) {
-                T_Expression lower_bound = constant_value;
-                T_Expression upper_bound = constant_value;
-                bool         is_valid    = true;
-
+                bool is_valid = true;
                 for (const auto &item : m_expression.sensitivities()) {
                     if (!is_integer(item.second)) {
                         is_valid = false;
                         break;
                     }
-
-                    if (item.first->sense() == VariableSense::Integer &&
-                        abs(item.second) == 1) {
-                        variable_ptr = item.first;
-                        coefficient  = item.second;
-                        number_of_integer_variables++;
-                    } else {
-                        if (item.second > 0) {
-                            upper_bound +=
-                                item.second * item.first->upper_bound();
-                            lower_bound -=
-                                item.second * item.first->lower_bound();
-                        } else {
-                            lower_bound +=
-                                item.second * item.first->upper_bound();
-                            upper_bound -=
-                                item.second * item.first->lower_bound();
-                        }
+                    if ((item.first->sense() == VariableSense::Integer ||
+                         item.first->sense() == VariableSense::Intermediate) &&
+                        abs(item.second) == 1 && !item.first->is_fixed()) {
+                        intermediate_variable_ptr         = item.first;
+                        intermediate_variable_coefficient = item.second;
+                        number_of_mono_integer_variables++;
                     }
-                    if (number_of_integer_variables > 1) {
+                    if (number_of_mono_integer_variables > 1) {
+                        is_valid = false;
                         break;
                     }
                 }
 
-                if (is_valid && number_of_integer_variables == 1) {
-                    if (coefficient > 0) {
-                        std::swap(lower_bound, upper_bound);
-                        lower_bound *= -1.0;
-                        upper_bound *= -1.0;
+                if (number_of_mono_integer_variables != 1) {
+                    is_valid = false;
+                }
+
+                if (is_valid) {
+                    auto rest_part_expression = m_expression.copy();
+                    rest_part_expression.erase(intermediate_variable_ptr);
+                    T_Expression rest_part_lower_bound =
+                        rest_part_expression.lower_bound();
+                    T_Expression rest_part_upper_bound =
+                        rest_part_expression.upper_bound();
+
+                    if (intermediate_variable_coefficient > 0) {
+                        std::swap(rest_part_lower_bound, rest_part_upper_bound);
+                        rest_part_lower_bound *= -1.0;
+                        rest_part_upper_bound *= -1.0;
                     }
 
-                    if ((variable_ptr->lower_bound() ==
-                             constant::INT_HALF_MIN ||
-                         variable_ptr->lower_bound() <= lower_bound) &&
-                        (variable_ptr->upper_bound() ==
-                             constant::INT_HALF_MAX ||
-                         variable_ptr->upper_bound() >= upper_bound)) {
-                        if ((m_sense == ConstraintSense::Less &&
-                             coefficient < 0) ||
-                            (m_sense == ConstraintSense::Greater &&
-                             coefficient > 0)) {
-                            m_is_min_max = true;
-                            return;
-                        }
-                        if ((m_sense == ConstraintSense::Greater &&
-                             coefficient < 0) ||
-                            (m_sense == ConstraintSense::Less &&
-                             coefficient > 0)) {
-                            m_is_max_min = true;
-                            return;
-                        }
-                        if (m_sense == ConstraintSense::Equal) {
-                            m_is_intermediate           = true;
-                            m_intermediate_variable_ptr = variable_ptr;
-                            return;
-                        }
+                    if (intermediate_variable_ptr->lower_bound() !=
+                            constant::INT_HALF_MIN &&
+                        intermediate_variable_ptr->lower_bound() >
+                            rest_part_lower_bound) {
+                        m_has_intermediate_lower_bound = true;
+                    } else {
+                        m_has_intermediate_lower_bound = false;
+                    }
+
+                    if (intermediate_variable_ptr->upper_bound() !=
+                            constant::INT_HALF_MAX &&
+                        intermediate_variable_ptr->upper_bound() <
+                            rest_part_upper_bound) {
+                        m_has_intermediate_upper_bound = true;
+                    } else {
+                        m_has_intermediate_upper_bound = false;
+                    }
+
+                    if ((m_sense == ConstraintSense::Less &&
+                         intermediate_variable_coefficient < 0) ||
+                        (m_sense == ConstraintSense::Greater &&
+                         intermediate_variable_coefficient > 0)) {
+                        m_is_min_max = true;
+                        return;
+                    }
+
+                    if ((m_sense == ConstraintSense::Greater &&
+                         intermediate_variable_coefficient < 0) ||
+                        (m_sense == ConstraintSense::Less &&
+                         intermediate_variable_coefficient > 0)) {
+                        m_is_max_min = true;
+                        return;
+                    }
+
+                    if (m_sense == ConstraintSense::Equal) {
+                        m_is_intermediate           = true;
+                        m_intermediate_variable_ptr = intermediate_variable_ptr;
+                        return;
                     }
                 }
             }
@@ -880,6 +897,16 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     /*************************************************************************/
     inline constexpr void disable(void) noexcept {
         m_is_enabled = false;
+    }
+
+    /*************************************************************************/
+    inline constexpr bool has_intermediate_lower_bound(void) const noexcept {
+        return m_has_intermediate_lower_bound;
+    }
+
+    /*************************************************************************/
+    inline constexpr bool has_intermediate_upper_bound(void) const noexcept {
+        return m_has_intermediate_upper_bound;
     }
 
     /*************************************************************************/

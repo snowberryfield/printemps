@@ -63,6 +63,7 @@ TEST_F(TestPresolver, remove_independent_variables) {
 
         auto& x = model.create_variables("x", 10, 0, 1);
         model.minimize(x.sum());
+        model.setup_variable_sensitivity();
 
         printemps::presolver::remove_independent_variables(&model, false);
 
@@ -76,6 +77,7 @@ TEST_F(TestPresolver, remove_independent_variables) {
 
         auto& x = model.create_variables("x", 10, 0, 1);
         model.maximize(x.sum());
+        model.setup_variable_sensitivity();
 
         printemps::presolver::remove_independent_variables(&model, false);
         for (auto i = 0; i < 10; i++) {
@@ -88,6 +90,7 @@ TEST_F(TestPresolver, remove_independent_variables) {
 
         auto& x = model.create_variables("x", 10, 0, 1);
         model.minimize(-x.sum());
+        model.setup_variable_sensitivity();
 
         printemps::presolver::remove_independent_variables(&model, false);
         for (auto i = 0; i < 10; i++) {
@@ -100,6 +103,7 @@ TEST_F(TestPresolver, remove_independent_variables) {
 
         auto& x = model.create_variables("x", 10, 0, 1);
         model.maximize(-x.sum());
+        model.setup_variable_sensitivity();
 
         printemps::presolver::remove_independent_variables(&model, false);
         for (auto i = 0; i < 10; i++) {

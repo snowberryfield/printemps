@@ -11,18 +11,18 @@ namespace verifier {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 constexpr void verify_problem(
-    model::Model<T_Variable, T_Expression> *a_model,  //
+    model::Model<T_Variable, T_Expression> *a_model_ptr,  //
     const bool                              a_IS_ENABLED_PRINT) {
     utility::print_single_line(a_IS_ENABLED_PRINT);
     utility::print_message("Verifying the problem...", a_IS_ENABLED_PRINT);
 
-    if (a_model->variable_proxies().size() == 0) {
+    if (a_model_ptr->variable_proxies().size() == 0) {
         throw std::logic_error(utility::format_error_location(
             __FILE__, __LINE__, __func__,
             "No decision variables are defined."));
     }
-    if (a_model->constraint_proxies().size() == 0 &&
-        !a_model->is_defined_objective()) {
+    if (a_model_ptr->constraint_proxies().size() == 0 &&
+        !a_model_ptr->is_defined_objective()) {
         throw std::logic_error(utility::format_error_location(
             __FILE__, __LINE__, __func__,
             "Neither objective nor constraint functions are defined."));
@@ -33,7 +33,7 @@ constexpr void verify_problem(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 constexpr void verify_and_correct_selection_variables_initial_values(
-    model::Model<T_Variable, T_Expression> *a_model,                 //
+    model::Model<T_Variable, T_Expression> *a_model_ptr,             //
     const bool                              a_IS_ENABLED_CORRECTON,  //
     const bool                              a_IS_ENABLED_PRINT) {
     utility::print_single_line(a_IS_ENABLED_PRINT);
@@ -42,7 +42,7 @@ constexpr void verify_and_correct_selection_variables_initial_values(
         "included in the selection constraints...",
         a_IS_ENABLED_PRINT);
 
-    for (auto &&selection : a_model->selections()) {
+    for (auto &&selection : a_model_ptr->selections()) {
         std::vector<model::Variable<T_Variable, T_Expression> *>
             fixed_selected_variable_ptrs;
         std::vector<model::Variable<T_Variable, T_Expression> *>
@@ -198,7 +198,7 @@ constexpr void verify_and_correct_selection_variables_initial_values(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 constexpr void verify_and_correct_binary_variables_initial_values(
-    model::Model<T_Variable, T_Expression> *a_model,                 //
+    model::Model<T_Variable, T_Expression> *a_model_ptr,             //
     const bool                              a_IS_ENABLED_CORRECTON,  //
     const bool                              a_IS_ENABLED_PRINT) {
     utility::print_single_line(a_IS_ENABLED_PRINT);
@@ -206,7 +206,7 @@ constexpr void verify_and_correct_binary_variables_initial_values(
         "Verifying the initial values of the binary decision variables.",
         a_IS_ENABLED_PRINT);
 
-    for (auto &&proxy : a_model->variable_proxies()) {
+    for (auto &&proxy : a_model_ptr->variable_proxies()) {
         for (auto &&variable : proxy.flat_indexed_variables()) {
             if (variable.sense() == model::VariableSense::Binary) {
                 if (variable.value() != 0 && variable.value() != 1) {
@@ -248,7 +248,7 @@ constexpr void verify_and_correct_binary_variables_initial_values(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 constexpr void verify_and_correct_integer_variables_initial_values(
-    model::Model<T_Variable, T_Expression> *a_model,                 //
+    model::Model<T_Variable, T_Expression> *a_model_ptr,             //
     const bool                              a_IS_ENABLED_CORRECTON,  //
     const bool                              a_IS_ENABLED_PRINT) {
     utility::print_single_line(a_IS_ENABLED_PRINT);
@@ -256,7 +256,7 @@ constexpr void verify_and_correct_integer_variables_initial_values(
         "Verifying the initial values of the integer decision variables.",
         a_IS_ENABLED_PRINT);
 
-    for (auto &&proxy : a_model->variable_proxies()) {
+    for (auto &&proxy : a_model_ptr->variable_proxies()) {
         for (auto &&variable : proxy.flat_indexed_variables()) {
             if (variable.sense() == model::VariableSense::Integer &&
                 (variable.value() < variable.lower_bound() ||

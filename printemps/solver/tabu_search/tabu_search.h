@@ -25,7 +25,7 @@ namespace tabu_search {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 TabuSearchResult<T_Variable, T_Expression> solve(
-    model::Model<T_Variable, T_Expression>* a_model,         //
+    model::Model<T_Variable, T_Expression>* a_model_ptr,     //
     const Option&                           a_OPTION,        //
     const std::vector<multi_array::ValueProxy<T_Variable>>&  //
         a_INITIAL_VARIABLE_VALUE_PROXIES,                    //
@@ -49,9 +49,9 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     /**
      * Copy arguments as local variables.
      */
-    Model_T* model  = a_model;
-    Option   option = a_OPTION;
-    Memory   memory = a_MEMORY;
+    Model_T* model_ptr = a_model_ptr;
+    Option   option    = a_OPTION;
+    Memory   memory    = a_MEMORY;
 
     IncumbentHolder_T incumbent_holder = a_INCUMBENT_HOLDER;
 
@@ -68,14 +68,14 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     /**
      * Initialize the solution and update the model.
      */
-    model->import_variable_values(a_INITIAL_VARIABLE_VALUE_PROXIES);
-    model->update();
+    model_ptr->import_variable_values(a_INITIAL_VARIABLE_VALUE_PROXIES);
+    model_ptr->update();
 
-    solution::SolutionScore current_solution_score = model->evaluate({});
+    solution::SolutionScore current_solution_score = model_ptr->evaluate({});
     solution::SolutionScore previous_solution_score;
 
-    int update_status =
-        incumbent_holder.try_update_incumbent(model, current_solution_score);
+    int update_status = incumbent_holder.try_update_incumbent(
+        model_ptr, current_solution_score);
     int total_update_status = IncumbentHolderConstant::STATUS_NO_UPDATED;
 
     /**
@@ -86,9 +86,10 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     /**
      * Set up the tabu tenure and related parameters.
      */
-    int original_tabu_tenure = std::min(option.tabu_search.initial_tabu_tenure,
-                                        model->number_of_mutable_variables());
-    int tabu_tenure          = original_tabu_tenure;
+    int original_tabu_tenure =
+        std::min(option.tabu_search.initial_tabu_tenure,
+                 model_ptr->number_of_mutable_variables());
+    int tabu_tenure = original_tabu_tenure;
 
     double bias_previous       = 0.0;
     double bias_current        = 0.0;
@@ -106,8 +107,8 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     /**
      * Reset the variable improvability.
      */
-    model->reset_variable_objective_improvability();
-    model->reset_variable_feasibility_improvability();
+    model_ptr->reset_variable_objective_improvability();
+    model_ptr->reset_variable_feasibility_improvability();
 
     /**
      * Prepare other local variables.
@@ -154,7 +155,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                            option.verbose >= Verbose::Full);
 
     print_table_header(option.verbose >= Verbose::Full);
-    print_table_initial(model,                   //
+    print_table_initial(model_ptr,               //
                         current_solution_score,  //
                         incumbent_holder,        //
                         option.verbose >= Verbose::Full);
@@ -207,7 +208,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
         bool accept_objective_improvable   = true;
         bool accept_feasibility_improvable = true;
 
-        if (model->is_linear() && is_enabled_improvability_screening) {
+        if (model_ptr->is_linear() && is_enabled_improvability_screening) {
             /**
              * If the option improvability_screening_mode is not None,
              * only improvable moves will be generated.
@@ -218,21 +219,21 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                 utility::to_vector(current_move.related_constraint_ptrs);
 
             if (iteration == 0) {
-                model->update_variable_objective_improvability();
+                model_ptr->update_variable_objective_improvability();
             } else {
-                model->update_variable_objective_improvability(
+                model_ptr->update_variable_objective_improvability(
                     changed_variable_ptrs);
             }
 
             switch (option.improvability_screening_mode) {
                 case ImprovabilityScreeningMode::Soft: {
-                    if (model->is_feasible()) {
+                    if (model_ptr->is_feasible()) {
                         accept_all                    = false;
                         accept_objective_improvable   = true;
                         accept_feasibility_improvable = false;
                     } else {
-                        model->reset_variable_feasibility_improvability();
-                        model->update_variable_feasibility_improvability();
+                        model_ptr->reset_variable_feasibility_improvability();
+                        model_ptr->update_variable_feasibility_improvability();
 
                         accept_all                    = false;
                         accept_objective_improvable   = true;
@@ -242,13 +243,13 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                     break;
                 }
                 case ImprovabilityScreeningMode::Aggressive: {
-                    if (model->is_feasible()) {
+                    if (model_ptr->is_feasible()) {
                         accept_all                    = false;
                         accept_objective_improvable   = true;
                         accept_feasibility_improvable = false;
                     } else {
-                        model->reset_variable_feasibility_improvability();
-                        model->update_variable_feasibility_improvability();
+                        model_ptr->reset_variable_feasibility_improvability();
+                        model_ptr->update_variable_feasibility_improvability();
 
                         accept_all                    = false;
                         accept_objective_improvable   = false;
@@ -257,19 +258,22 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                     break;
                 }
                 case ImprovabilityScreeningMode::Intensive: {
-                    if (model->is_feasible()) {
+                    if (model_ptr->is_feasible()) {
                         accept_all                    = false;
                         accept_objective_improvable   = true;
                         accept_feasibility_improvable = false;
                     } else {
                         if (iteration == 0) {
-                            model->reset_variable_feasibility_improvability();
-                            model->update_variable_feasibility_improvability();
+                            model_ptr
+                                ->reset_variable_feasibility_improvability();
+                            model_ptr
+                                ->update_variable_feasibility_improvability();
                         } else {
-                            model->reset_variable_feasibility_improvability(
+                            model_ptr->reset_variable_feasibility_improvability(
                                 changed_constraint_ptrs);
-                            model->update_variable_feasibility_improvability(
-                                changed_constraint_ptrs);
+                            model_ptr
+                                ->update_variable_feasibility_improvability(
+                                    changed_constraint_ptrs);
                         }
 
                         accept_all                    = false;
@@ -286,17 +290,17 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                 }
             }
         }
-        model->neighborhood().update_moves(
+        model_ptr->neighborhood().update_moves(
             accept_all,                     //
             accept_objective_improvable,    //
             accept_feasibility_improvable,  //
             option.is_enabled_parallel_neighborhood_update);
 
         if (option.tabu_search.is_enabled_shuffle) {
-            model->neighborhood().shuffle_moves(&get_rand_mt);
+            model_ptr->neighborhood().shuffle_moves(&get_rand_mt);
         }
 
-        const auto& trial_move_ptrs = model->neighborhood().move_ptrs();
+        const auto& trial_move_ptrs = model_ptr->neighborhood().move_ptrs();
         int         number_of_moves = trial_move_ptrs.size();
 
         if (option.tabu_search.is_enabled_move_curtail) {
@@ -309,7 +313,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
          * be terminated.
          */
         if (number_of_moves == 0) {
-            if (model->is_linear() && model->is_feasible()) {
+            if (model_ptr->is_linear() && model_ptr->is_feasible()) {
                 /**
                  * If the current solution is feasible and there is no
                  * improvable solution, the solution should be an optimum.
@@ -317,7 +321,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                  */
                 termination_status = TabuSearchTerminationStatus::OPTIMAL;
                 for (const auto& variable_ptr :
-                     model->variable_reference().variable_ptrs) {
+                     model_ptr->variable_reference().variable_ptrs) {
                     if (variable_ptr->is_objective_improvable()) {
                         termination_status =
                             TabuSearchTerminationStatus::NO_MOVE;
@@ -356,15 +360,15 @@ TabuSearchResult<T_Variable, T_Expression> solve(
              * or ordinary(slow) evaluation methods.
              */
 #ifndef _MPS_SOLVER
-            if (model->is_enabled_fast_evaluation()) {
+            if (model_ptr->is_enabled_fast_evaluation()) {
 #endif
-                model->evaluate(&trial_solution_scores[i],  //
-                                *trial_move_ptrs[i],        //
-                                current_solution_score);
+                model_ptr->evaluate(&trial_solution_scores[i],  //
+                                    *trial_move_ptrs[i],        //
+                                    current_solution_score);
 #ifndef _MPS_SOLVER
             } else {
-                model->evaluate(&trial_solution_scores[i],  //
-                                *trial_move_ptrs[i]);
+                model_ptr->evaluate(&trial_solution_scores[i],  //
+                                    *trial_move_ptrs[i]);
             }
 #endif
             evaluate_move(&trial_move_scores[i], *trial_move_ptrs[i],  //
@@ -455,7 +459,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
          * Update the model by the selected move.
          */
         Move_T* move_ptr = trial_move_ptrs[selected_index];
-        model->update(*move_ptr);
+        model_ptr->update(*move_ptr);
 
         /**
          * Update the current solution score and move.
@@ -476,7 +480,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
          * Update the status.
          */
         update_status = incumbent_holder.try_update_incumbent(
-            model, current_solution_score);
+            model_ptr, current_solution_score);
         total_update_status = update_status | total_update_status;
 
         if (current_solution_score.is_feasible) {
@@ -489,7 +493,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
         if (option.is_enabled_collect_historical_data &&
             current_solution_score.is_feasible) {
             historical_feasible_solutions.push_back(
-                model->export_plain_solution());
+                model_ptr->export_plain_solution());
         }
 
         /**
@@ -597,8 +601,8 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                     for (auto&& alteration : back_chain_move.alterations) {
                         alteration.second = 1 - alteration.second;
                     }
-                    model->neighborhood().chain().register_move(chain_move);
-                    model->neighborhood().chain().register_move(
+                    model_ptr->neighborhood().chain().register_move(chain_move);
+                    model_ptr->neighborhood().chain().register_move(
                         back_chain_move);
                 }
             }
@@ -640,7 +644,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                         bias_increase_count = 0;
                         tabu_tenure =
                             std::min(tabu_tenure + 1,
-                                     model->number_of_mutable_variables());
+                                     model_ptr->number_of_mutable_variables());
                         last_tabu_tenure_updated_iteration = iteration;
                         utility::print_debug("Tabu tenure increased: " +
                                                  std::to_string(tabu_tenure) +
@@ -671,7 +675,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
          */
         if (iteration % std::max(option.tabu_search.log_interval, 1) == 0 ||
             update_status > 0) {
-            print_table_body(model,                                      //
+            print_table_body(model_ptr,                                  //
                              iteration,                                  //
                              current_move.is_special_neighborhood_move,  //
                              number_of_all_neighborhoods,                //
