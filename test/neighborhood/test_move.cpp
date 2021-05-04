@@ -24,6 +24,7 @@ TEST_F(TestMove, constructor) {
     EXPECT_FALSE(move.is_univariable_move);
     EXPECT_FALSE(move.is_special_neighborhood_move);
     EXPECT_TRUE(move.is_available);
+    EXPECT_EQ(0, static_cast<int>(move.hash));
     EXPECT_EQ(0.0, move.overlap_rate);
 }
 
@@ -157,6 +158,35 @@ TEST_F(TestMove, has_feasibility_improvable_variable) {
 }
 
 /*****************************************************************************/
+TEST_F(TestMove, has_feasibility_not_improvable_variable) {
+    auto variable_0 =
+        printemps::model::Variable<int, double>::create_instance();
+    auto variable_1 =
+        printemps::model::Variable<int, double>::create_instance();
+    variable_0.set_is_feasibility_improvable(false);
+    variable_1.set_is_feasibility_improvable(true);
+
+    /// The move does not have a feasibility improvable variable.
+    {
+        printemps::neighborhood::Move<int, double> move;
+        move.alterations.emplace_back(&variable_0, 1);
+        EXPECT_TRUE(
+            printemps::neighborhood::has_feasibility_not_improvable_variable(
+                move));
+    }
+
+    /// The move has a feasibility improvable variable.
+    {
+        printemps::neighborhood::Move<int, double> move;
+        move.alterations.emplace_back(&variable_0, 1);
+        move.alterations.emplace_back(&variable_1, 1);
+        EXPECT_TRUE(
+            printemps::neighborhood::has_feasibility_not_improvable_variable(
+                move));
+    }
+}
+
+/*****************************************************************************/
 TEST_F(TestMove, has_duplicate_variable) {
     auto variable_0 =
         printemps::model::Variable<int, double>::create_instance();
@@ -240,17 +270,20 @@ TEST_F(TestMove, compute_hash) {
     model.categorize_variables();
     model.categorize_constraints();
 
-    /**
-     * Check only that the computed hashes are less than 1.
-     */
     /// Case 1
     {
         printemps::neighborhood::Move<int, double> move;
         move.alterations.emplace_back(&x(0), 1);
         move.alterations.emplace_back(&x(1), 1);
-        double hash = printemps::neighborhood::compute_hash(move.alterations);
 
-        EXPECT_TRUE(hash < 1.0);
+        std::uint_fast64_t hash = 0;
+        for (const auto& alteration : move.alterations) {
+            hash =
+                hash ^ reinterpret_cast<std::uint_fast64_t>(alteration.first);
+        }
+
+        EXPECT_EQ(hash,
+                  printemps::neighborhood::compute_hash(move.alterations));
     }
 
     /// Case 2
@@ -259,9 +292,15 @@ TEST_F(TestMove, compute_hash) {
         move.alterations.emplace_back(&x(0), 1);
         move.alterations.emplace_back(&x(1), 1);
         move.alterations.emplace_back(&x(2), 1);
-        double hash = printemps::neighborhood::compute_hash(move.alterations);
 
-        EXPECT_TRUE(hash < 1.0);
+        std::uint_fast64_t hash = 0;
+        for (const auto& alteration : move.alterations) {
+            hash =
+                hash ^ reinterpret_cast<std::uint_fast64_t>(alteration.first);
+        }
+
+        EXPECT_EQ(hash,
+                  printemps::neighborhood::compute_hash(move.alterations));
     }
 
     /// Case 3
@@ -271,9 +310,15 @@ TEST_F(TestMove, compute_hash) {
         move.alterations.emplace_back(&x(1), 1);
         move.alterations.emplace_back(&x(2), 1);
         move.alterations.emplace_back(&x(3), 1);
-        double hash = printemps::neighborhood::compute_hash(move.alterations);
 
-        EXPECT_TRUE(hash < 1.0);
+        std::uint_fast64_t hash = 0;
+        for (const auto& alteration : move.alterations) {
+            hash =
+                hash ^ reinterpret_cast<std::uint_fast64_t>(alteration.first);
+        }
+
+        EXPECT_EQ(hash,
+                  printemps::neighborhood::compute_hash(move.alterations));
     }
 }
 

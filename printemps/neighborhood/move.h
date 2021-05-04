@@ -132,10 +132,10 @@ constexpr bool has_feasibility_not_improvable_variable(
     const Move<T_Variable, T_Expression> &a_MOVE) {
     for (const auto &alteration : a_MOVE.alterations) {
         if (!alteration.first->is_feasibility_improvable()) {
-            return false;
+            return true;
         }
     }
-    return true;
+    return false;
 };
 
 /*****************************************************************************/
