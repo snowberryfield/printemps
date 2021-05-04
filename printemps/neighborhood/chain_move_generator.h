@@ -109,7 +109,84 @@ class ChainMoveGenerator
     inline constexpr void sort_moves(void) {
         std::sort(this->m_moves.begin(), this->m_moves.end(),
                   [](const auto &a_LHS, const auto &a_RHS) {
-                      return a_LHS.overlap_rate > a_RHS.overlap_rate;
+                      /**
+                       * Firstly, compare the overlap rates.
+                       */
+                      auto overlap_difference =
+                          a_LHS.overlap_rate - a_RHS.overlap_rate;
+                      if (overlap_difference > constant::EPSILON_10) {
+                          return true;
+                      } else if (overlap_difference < -constant::EPSILON_10) {
+                          return false;
+                      }
+
+                      /**
+                       * Secondly, compare the hashes
+                       */
+                      if (a_LHS.hash > a_LHS.hash) {
+                          return true;
+                      } else if (a_LHS.hash < a_LHS.hash) {
+                          return false;
+                      }
+
+                      /**
+                       * Thirdly, compare the number of alterations.
+                       */
+                      int alterations_size_difference =
+                          a_LHS.alterations.size() - a_RHS.alterations.size();
+                      if (alterations_size_difference > 0) {
+                          return true;
+                      } else if (alterations_size_difference < 0) {
+                          return false;
+                      }
+
+                      /**
+                       * Fourthly, compare the number of related constraints.
+                       */
+                      int related_constraints_size_difference =
+                          a_LHS.related_constraint_ptrs.size() -
+                          a_RHS.related_constraint_ptrs.size();
+
+                      if (related_constraints_size_difference > 0) {
+                          return true;
+                      } else if (related_constraints_size_difference < 0) {
+                          return false;
+                      }
+
+                      /**
+                       * Fifthly, compare the addresses of variables.
+                       */
+                      const int ALTERATIONS_SIZE = a_LHS.alterations.size();
+
+                      for (auto i = 0; i < ALTERATIONS_SIZE; i++) {
+                          int address_difference  //
+                              = reinterpret_cast<std::uint_fast64_t>(
+                                    a_LHS.alterations[i].first) -
+                                reinterpret_cast<std::uint_fast64_t>(
+                                    a_RHS.alterations[i].first);
+                          if (address_difference > 0) {
+                              return true;
+                          } else if (address_difference < 0) {
+                              return false;
+                          }
+                      }
+
+                      /**
+                       * Finally, compare the values of variables.
+                       */
+
+                      for (auto i = 0; i < ALTERATIONS_SIZE; i++) {
+                          int value_difference  //
+                              = a_LHS.alterations[i].second -
+                                a_RHS.alterations[i].second;
+
+                          if (value_difference > 0) {
+                              return true;
+                          } else if (value_difference < 0) {
+                              return false;
+                          }
+                      }
+                      return false;
                   });
     }
 
