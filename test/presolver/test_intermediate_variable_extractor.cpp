@@ -144,81 +144,9 @@ TEST_F(TestIntermediateVariableExtractor, extract_intermediate_variables) {
         model.setup_variable_sensitivity();
 
         EXPECT_TRUE(f(0).is_intermediate());
-        EXPECT_FALSE(g(0).is_intermediate());
+        EXPECT_TRUE(g(0).is_intermediate());
 
         /// Extracting (Round 1)
-        {
-            printemps::presolver::
-                extract_independent_intermediate_variables(  //
-                    &model,                                  //
-                    false);
-
-            model.categorize_variables();
-            model.categorize_constraints();
-            model.setup_variable_related_constraints();
-            model.setup_variable_sensitivity();
-
-            EXPECT_EQ(printemps::model::VariableSense::Intermediate,
-                      z(0).sense());
-            EXPECT_FALSE(f.is_enabled());
-
-            /**
-             * The decision variable w will not be extracted as intermediate
-             * variable because the range of w is narrower than that of z.
-             */
-
-            EXPECT_EQ(printemps::model::VariableSense::Integer, w(0).sense());
-            EXPECT_TRUE(g.is_enabled());
-        }
-
-        /// Eliminating (Round 1-1)
-        {
-            printemps::presolver::
-                eliminate_independent_intermediate_variables(  //
-                    &model,                                    //
-                    false);
-
-            model.categorize_variables();
-            model.categorize_constraints();
-            model.setup_variable_related_constraints();
-            model.setup_variable_sensitivity();
-
-            auto& sensitivities_objective =
-                model.objective().expression().sensitivities();
-
-            EXPECT_EQ(1, sensitivities_objective.at(&w(0)));
-
-            auto& sensitivities_g = g(0).expression().sensitivities();
-
-            EXPECT_EQ(-13, sensitivities_g.at(&x(0)));
-            EXPECT_EQ(-9, sensitivities_g.at(&y(0)));
-        }
-
-        /// Eliminating (Round 1-2)
-        {
-            /// Same result as round 1-2 should be obtained.
-            printemps::presolver::
-                eliminate_independent_intermediate_variables(  //
-                    &model,                                    //
-                    false);
-
-            model.categorize_variables();
-            model.categorize_constraints();
-            model.setup_variable_related_constraints();
-            model.setup_variable_sensitivity();
-
-            auto& sensitivities_objective =
-                model.objective().expression().sensitivities();
-
-            EXPECT_EQ(1, sensitivities_objective.at(&w(0)));
-
-            auto& sensitivities_g = g(0).expression().sensitivities();
-
-            EXPECT_EQ(-13, sensitivities_g.at(&x(0)));
-            EXPECT_EQ(-9, sensitivities_g.at(&y(0)));
-        }
-
-        /// Extracting (Round 2)
         {
             printemps::presolver::
                 extract_independent_intermediate_variables(  //
@@ -237,9 +165,35 @@ TEST_F(TestIntermediateVariableExtractor, extract_intermediate_variables) {
             EXPECT_EQ(printemps::model::VariableSense::Intermediate,
                       w(0).sense());
             EXPECT_FALSE(g.is_enabled());
+
+            auto& constraint_proxies = model.constraint_proxies();
+            EXPECT_EQ(3, static_cast<int>(constraint_proxies.size()));
+            EXPECT_EQ(2, static_cast<int>(constraint_proxies.back()
+                                              .flat_indexed_constraints()
+                                              .size()));
+            {
+                auto& additional_sensitivities =
+                    constraint_proxies.back()
+                        .flat_indexed_constraints(0)
+                        .expression()
+                        .sensitivities();
+                EXPECT_EQ(3, additional_sensitivities.at(&x(0)));
+                EXPECT_EQ(4, additional_sensitivities.at(&y(0)));
+                EXPECT_EQ(5, additional_sensitivities.at(&z(0)));
+            }
+            {
+                auto& additional_sensitivities =
+                    constraint_proxies.back()
+                        .flat_indexed_constraints(1)
+                        .expression()
+                        .sensitivities();
+                EXPECT_EQ(3, additional_sensitivities.at(&x(0)));
+                EXPECT_EQ(4, additional_sensitivities.at(&y(0)));
+                EXPECT_EQ(5, additional_sensitivities.at(&z(0)));
+            }
         }
 
-        /// Eliminating (Round 2-1)
+        /// Eliminating (Round 1-1)
         {
             printemps::presolver::
                 eliminate_independent_intermediate_variables(  //
@@ -254,13 +208,34 @@ TEST_F(TestIntermediateVariableExtractor, extract_intermediate_variables) {
             auto& sensitivities_objective =
                 model.objective().expression().sensitivities();
 
-            EXPECT_EQ(13, sensitivities_objective.at(&x(0)));
-            EXPECT_EQ(9, sensitivities_objective.at(&y(0)));
+            EXPECT_EQ(3, sensitivities_objective.at(&x(0)));
+            EXPECT_EQ(4, sensitivities_objective.at(&y(0)));
+            EXPECT_EQ(5, sensitivities_objective.at(&z(0)));
 
             auto& sensitivities_g = g(0).expression().sensitivities();
 
             EXPECT_EQ(-13, sensitivities_g.at(&x(0)));
             EXPECT_EQ(-9, sensitivities_g.at(&y(0)));
+
+            auto& constraint_proxies = model.constraint_proxies();
+            {
+                auto& additional_sensitivities =
+                    constraint_proxies.back()
+                        .flat_indexed_constraints(0)
+                        .expression()
+                        .sensitivities();
+                EXPECT_EQ(13, additional_sensitivities.at(&x(0)));
+                EXPECT_EQ(9, additional_sensitivities.at(&y(0)));
+            }
+            {
+                auto& additional_sensitivities =
+                    constraint_proxies.back()
+                        .flat_indexed_constraints(1)
+                        .expression()
+                        .sensitivities();
+                EXPECT_EQ(13, additional_sensitivities.at(&x(0)));
+                EXPECT_EQ(9, additional_sensitivities.at(&y(0)));
+            }
         }
     }
 }

@@ -945,6 +945,7 @@ TEST_F(TestModel, setup_variable_related_constraints) {
 
     model.categorize_constraints();
     model.setup_variable_related_constraints();
+    model.setup_variable_related_zero_one_coefficient_constraints();
 
     for (auto i = 0; i < 10; i++) {
         EXPECT_TRUE(x(i).related_constraint_ptrs().find(&g(0)) !=
@@ -996,6 +997,11 @@ TEST_F(TestModel, setup_variable_related_constraints) {
     EXPECT_FALSE(
         x(0).related_zero_one_coefficient_constraint_ptrs().find(&g(2)) !=
         x(0).related_zero_one_coefficient_constraint_ptrs().end());
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, setup_variable_related_zero_one_coefficient_constraints) {
+    /// This method is tested in setup_variable_related_constraints().
 }
 
 /*****************************************************************************/

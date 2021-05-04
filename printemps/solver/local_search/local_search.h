@@ -23,7 +23,7 @@ namespace local_search {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 LocalSearchResult<T_Variable, T_Expression> solve(
-    model::Model<T_Variable, T_Expression>* a_model,         //
+    model::Model<T_Variable, T_Expression>* a_model_ptr,     //
     const Option&                           a_OPTION,        //
     const std::vector<multi_array::ValueProxy<T_Variable>>&  //
         a_INITIAL_VARIABLE_VALUE_PROXIES,                    //
@@ -46,9 +46,9 @@ LocalSearchResult<T_Variable, T_Expression> solve(
     /**
      * Copy arguments as local variables.
      */
-    Model_T* model  = a_model;
-    Option   option = a_OPTION;
-    Memory   memory = a_MEMORY;
+    Model_T* model_ptr = a_model_ptr;
+    Option   option    = a_OPTION;
+    Memory   memory    = a_MEMORY;
 
     IncumbentHolder_T incumbent_holder = a_INCUMBENT_HOLDER;
 
@@ -65,13 +65,13 @@ LocalSearchResult<T_Variable, T_Expression> solve(
     /**
      * Initialize the solution and update the model.
      */
-    model->import_variable_values(a_INITIAL_VARIABLE_VALUE_PROXIES);
-    model->update();
+    model_ptr->import_variable_values(a_INITIAL_VARIABLE_VALUE_PROXIES);
+    model_ptr->update();
 
-    solution::SolutionScore solution_score = model->evaluate({});
+    solution::SolutionScore solution_score = model_ptr->evaluate({});
 
     int update_status =
-        incumbent_holder.try_update_incumbent(model, solution_score);
+        incumbent_holder.try_update_incumbent(model_ptr, solution_score);
     int total_update_status = IncumbentHolderConstant::STATUS_NO_UPDATED;
 
     /**
@@ -88,8 +88,8 @@ LocalSearchResult<T_Variable, T_Expression> solve(
     /**
      * Reset the variable improvability.
      */
-    model->reset_variable_objective_improvability();
-    model->reset_variable_feasibility_improvability();
+    model_ptr->reset_variable_objective_improvability();
+    model_ptr->reset_variable_feasibility_improvability();
 
     /**
      * Prepare other local variables.
@@ -109,7 +109,7 @@ LocalSearchResult<T_Variable, T_Expression> solve(
     utility::print_message("Local search starts.",
                            option.verbose >= Verbose::Full);
     print_table_header(option.verbose >= Verbose::Full);
-    print_table_initial(model,             //
+    print_table_initial(model_ptr,         //
                         solution_score,    //
                         incumbent_holder,  //
                         option.verbose >= Verbose::Full);
@@ -149,43 +149,43 @@ LocalSearchResult<T_Variable, T_Expression> solve(
         bool accept_objective_improvable   = true;
         bool accept_feasibility_improvable = true;
 
-        if (model->is_linear()) {
+        if (model_ptr->is_linear()) {
             auto changed_variable_ptrs = utility::to_vector(
                 neighborhood::related_variable_ptrs(current_move));
             auto changed_constraint_ptrs =
                 utility::to_vector(current_move.related_constraint_ptrs);
 
             if (iteration == 0) {
-                model->update_variable_objective_improvability();
+                model_ptr->update_variable_objective_improvability();
             } else {
-                model->update_variable_objective_improvability(
+                model_ptr->update_variable_objective_improvability(
                     changed_variable_ptrs);
             }
 
-            if (model->is_feasible()) {
+            if (model_ptr->is_feasible()) {
                 accept_all                    = false;
                 accept_objective_improvable   = true;
                 accept_feasibility_improvable = false;
             } else {
-                model->reset_variable_feasibility_improvability();
-                model->update_variable_feasibility_improvability();
+                model_ptr->reset_variable_feasibility_improvability();
+                model_ptr->update_variable_feasibility_improvability();
 
                 accept_all                    = false;
                 accept_objective_improvable   = false;
                 accept_feasibility_improvable = true;
             }
         }
-        model->neighborhood().update_moves(
+        model_ptr->neighborhood().update_moves(
             accept_all,                     //
             accept_objective_improvable,    //
             accept_feasibility_improvable,  //
             option.is_enabled_parallel_neighborhood_update);
 
-        model->neighborhood().shuffle_moves(&get_rand_mt);
+        model_ptr->neighborhood().shuffle_moves(&get_rand_mt);
 
         bool is_found_improving_solution = false;
 
-        const auto& move_ptrs = model->neighborhood().move_ptrs();
+        const auto& move_ptrs = model_ptr->neighborhood().move_ptrs();
 
         int number_of_moves        = move_ptrs.size();
         int number_of_checked_move = 0;
@@ -206,13 +206,13 @@ LocalSearchResult<T_Variable, T_Expression> solve(
              * ordinary(slow) evaluation methods.
              */
 #ifndef _MPS_SOLVER
-            if (model->is_enabled_fast_evaluation()) {
+            if (model_ptr->is_enabled_fast_evaluation()) {
 #endif
-                model->evaluate(&trial_solution_score, *move_ptr,
-                                solution_score);
+                model_ptr->evaluate(&trial_solution_score, *move_ptr,
+                                    solution_score);
 #ifndef _MPS_SOLVER
             } else {
-                model->evaluate(&trial_solution_score, *move_ptr);
+                model_ptr->evaluate(&trial_solution_score, *move_ptr);
             }
 #endif
             /**
@@ -246,9 +246,9 @@ LocalSearchResult<T_Variable, T_Expression> solve(
          */
         Move_T* move_ptr = move_ptrs[number_of_checked_move];
 
-        model->update(*move_ptr);
+        model_ptr->update(*move_ptr);
         update_status =
-            incumbent_holder.try_update_incumbent(model, solution_score);
+            incumbent_holder.try_update_incumbent(model_ptr, solution_score);
         total_update_status = update_status || total_update_status;
 
         /**
@@ -256,7 +256,7 @@ LocalSearchResult<T_Variable, T_Expression> solve(
          */
         if (solution_score.is_feasible) {
             historical_feasible_solutions.push_back(
-                model->export_plain_solution());
+                model_ptr->export_plain_solution());
         }
 
         /**
@@ -269,7 +269,7 @@ LocalSearchResult<T_Variable, T_Expression> solve(
          */
         if (iteration % std::max(option.local_search.log_interval, 1) == 0 ||
             update_status > 1) {
-            print_table_body(model,                   //
+            print_table_body(model_ptr,               //
                              iteration,               //
                              number_of_moves,         //
                              number_of_checked_move,  //

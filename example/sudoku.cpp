@@ -139,8 +139,8 @@ int main(void) {
     /// Run solver
     /*************************************************************************/
     printemps::solver::Option option;
-    option.verbose                   = printemps::solver::Full;
-    option.tabu_search.iteration_max = 500;
+    option.verbose       = printemps::solver::Full;
+    option.iteration_max = 1000;
 
     auto result = printemps::solver::solve(&model, option);
 
