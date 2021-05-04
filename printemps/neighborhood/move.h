@@ -49,7 +49,8 @@ struct Move {
     /**
      * The following member is for Chain moves.
      */
-    double overlap_rate;
+    std::uint_fast64_t hash;
+    double             overlap_rate;
 
     /*************************************************************************/
     Move(void)
@@ -57,6 +58,7 @@ struct Move {
           is_univariable_move(false),
           is_special_neighborhood_move(false),
           is_available(true),
+          hash(0),
           overlap_rate(0.0) {
     }
 };
@@ -197,21 +199,14 @@ constexpr double compute_hash(
     /**
      * NOTE: Chain moves will be sorted in descending order by overlap_ratio to
      * apply std::unique()in Neighborhood.deduplicate_chain_move().A hash is
-     * calculated and added to the overlap_rate so that the same moves are
-     * sorted next to each other as much as possible (In the deduplication, it
-     * is not required completely uniqueness).
+     * calculated to check the necessary condition that two moves are identical.
      */
-    std::uint_fast64_t integer_hash = 0;
-    for (const auto &alteration : a_ALTERATIONS) {
-        integer_hash = integer_hash ^
-                       reinterpret_cast<std::uint_fast64_t>(alteration.first);
-    }
-    constexpr const int BUCKET_SIZE = 1 << 10;
 
-    /**
-     * Computed has will be normalized.
-     */
-    return static_cast<double>(integer_hash & (BUCKET_SIZE - 1)) / BUCKET_SIZE;
+    std::uint_fast64_t hash = 0;
+    for (const auto &alteration : a_ALTERATIONS) {
+        hash = hash ^ reinterpret_cast<std::uint_fast64_t>(alteration.first);
+    }
+    return hash;
 };
 
 /*****************************************************************************/
@@ -255,11 +250,8 @@ constexpr Move<T_Variable, T_Expression> operator+(
     result.is_available                 = false;
     result.is_special_neighborhood_move = true;
 
-    auto         overlap_rate = compute_overlap_rate(result.alterations);
-    auto         hash         = compute_hash(result.alterations);
-    const double HASH_WEIGHT  = 1E-4;
-
-    result.overlap_rate = overlap_rate + HASH_WEIGHT * hash;
+    result.overlap_rate = compute_overlap_rate(result.alterations);
+    result.hash         = compute_hash(result.alterations);
 
     return result;
 };
@@ -282,6 +274,13 @@ constexpr bool operator==(const Move<T_Variable, T_Expression> &a_MOVE_FIRST,
      */
     if (a_MOVE_FIRST.related_constraint_ptrs.size() !=
         a_MOVE_SECOND.related_constraint_ptrs.size()) {
+        return false;
+    }
+
+    /**
+     * If the hashes of two moves are different, they must be different.
+     */
+    if (a_MOVE_FIRST.hash != a_MOVE_SECOND.hash) {
         return false;
     }
 
