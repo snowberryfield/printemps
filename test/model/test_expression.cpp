@@ -402,12 +402,14 @@ TEST_F(TestExpression, mutable_variable_sensitivities) {
     auto negative_mutable_variable_sensitivities =
         expression.negative_mutable_variable_sensitivities();
 
-    EXPECT_EQ(3, mutable_variable_sensitivities.size());
-    EXPECT_EQ(1, positive_mutable_variable_sensitivities.size());
+    EXPECT_EQ(3, static_cast<int>(mutable_variable_sensitivities.size()));
+    EXPECT_EQ(1,
+              static_cast<int>(positive_mutable_variable_sensitivities.size()));
     EXPECT_TRUE(positive_mutable_variable_sensitivities.find(&variable_0) !=
                 positive_mutable_variable_sensitivities.end());
 
-    EXPECT_EQ(2, negative_mutable_variable_sensitivities.size());
+    EXPECT_EQ(2,
+              static_cast<int>(negative_mutable_variable_sensitivities.size()));
     EXPECT_TRUE(negative_mutable_variable_sensitivities.find(&variable_1) !=
                 negative_mutable_variable_sensitivities.end());
     EXPECT_TRUE(negative_mutable_variable_sensitivities.find(&variable_2) !=
