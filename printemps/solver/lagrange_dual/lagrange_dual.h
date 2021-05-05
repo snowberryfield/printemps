@@ -23,9 +23,9 @@ namespace lagrange_dual {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 void bound_dual(
-    model::Model<T_Variable, T_Expression>*       a_model,
+    model::Model<T_Variable, T_Expression>*       a_model_ptr,
     std::vector<multi_array::ValueProxy<double>>* a_dual_value_proxies) {
-    for (auto&& proxy : a_model->constraint_proxies()) {
+    for (auto&& proxy : a_model_ptr->constraint_proxies()) {
         for (auto&& constraint : proxy.flat_indexed_constraints()) {
             int proxy_index = constraint.proxy_index();
             int flat_index  = constraint.flat_index();
@@ -58,7 +58,7 @@ void bound_dual(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 LagrangeDualResult<T_Variable, T_Expression> solve(
-    model::Model<T_Variable, T_Expression>* a_model,         //
+    model::Model<T_Variable, T_Expression>* a_model_ptr,     //
     const Option&                           a_OPTION,        //
     const std::vector<multi_array::ValueProxy<T_Variable>>&  //
         a_INITIAL_VARIABLE_VALUE_PROXIES,                    //
@@ -79,8 +79,8 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
     /**
      * Copy arguments as local variables.
      */
-    Model_T* model  = a_model;
-    Option   option = a_OPTION;
+    Model_T* model_ptr = a_model_ptr;
+    Option   option    = a_OPTION;
 
     IncumbentHolder_T incumbent_holder = a_INCUMBENT_HOLDER;
 
@@ -89,29 +89,29 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
      */
     incumbent_holder.reset_local_augmented_incumbent();
 
-    model->import_variable_values(a_INITIAL_VARIABLE_VALUE_PROXIES);
-    model->update();
+    model_ptr->import_variable_values(a_INITIAL_VARIABLE_VALUE_PROXIES);
+    model_ptr->update();
 
     /**
      * Initialize the solution and update the model.
      */
-    solution::SolutionScore solution_score = model->evaluate({});
+    solution::SolutionScore solution_score = model_ptr->evaluate({});
 
     int update_status =
-        incumbent_holder.try_update_incumbent(model, solution_score);
+        incumbent_holder.try_update_incumbent(model_ptr, solution_score);
     int total_update_status = 0;
 
     /**
      * Prepare the primal solution.
      */
-    auto primal_incumbent = model->export_solution();
+    auto primal_incumbent = model_ptr->export_solution();
 
     /**
      * Prepare the dual solution as lagrange multipliers.
      */
     std::vector<multi_array::ValueProxy<double>> dual_value_proxies =
-        model->generate_constraint_parameter_proxies(0.0);
-    bound_dual(model, &dual_value_proxies);
+        model_ptr->generate_constraint_parameter_proxies(0.0);
+    bound_dual(model_ptr, &dual_value_proxies);
 
     auto dual_value_proxies_incumbent = dual_value_proxies;
 
@@ -125,7 +125,7 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
     /**
      * Prepare the step size for subgradient algorithm.
      */
-    double step_size = 1.0 / model->number_of_variables();
+    double step_size = 1.0 / model_ptr->number_of_variables();
 
     /**
      * Prepare historical solutions holder.
@@ -147,7 +147,7 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
     utility::print_message("Lagrange dual starts.",
                            option.verbose >= Verbose::Full);
     print_table_header(option.verbose >= Verbose::Full);
-    print_table_initial(model,             //
+    print_table_initial(model_ptr,         //
                         -HUGE_VALF,        //
                         step_size,         //
                         solution_score,    //
@@ -159,8 +159,8 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
      */
     int iteration = 0;
 
-    auto variable_ptrs   = model->variable_reference().variable_ptrs;
-    auto constraint_ptrs = model->constraint_reference().constraint_ptrs;
+    auto variable_ptrs   = model_ptr->variable_reference().variable_ptrs;
+    auto constraint_ptrs = model_ptr->constraint_reference().constraint_ptrs;
 
     while (true) {
         /**
@@ -205,7 +205,7 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
         /**
          * Bound the values of dual solution.
          */
-        bound_dual(model, &dual_value_proxies);
+        bound_dual(model_ptr, &dual_value_proxies);
 
         /**
          * Update the primal optimal solution so that it minimizes lagrangian
@@ -232,11 +232,11 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
                 coefficient +=
                     dual_value_proxies[proxy_index].flat_indexed_values(
                         flat_index) *
-                    sensitivity * model->sign();
+                    sensitivity * model_ptr->sign();
             }
 
             if (coefficient > 0) {
-                if (model->is_minimization()) {
+                if (model_ptr->is_minimization()) {
                     variable_ptrs[i]->set_value_if_mutable(
                         variable_ptrs[i]->lower_bound());
                 } else {
@@ -245,7 +245,7 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
                 }
 
             } else {
-                if (model->is_minimization()) {
+                if (model_ptr->is_minimization()) {
                     variable_ptrs[i]->set_value_if_mutable(
                         variable_ptrs[i]->upper_bound());
                 } else {
@@ -258,11 +258,11 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
         /**
          * Update the model.
          */
-        model->update();
-        solution_score = model->evaluate({});
+        model_ptr->update();
+        solution_score = model_ptr->evaluate({});
 
         update_status =
-            incumbent_holder.try_update_incumbent(model, solution_score);
+            incumbent_holder.try_update_incumbent(model_ptr, solution_score);
         total_update_status = update_status || total_update_status;
 
         /**
@@ -270,21 +270,21 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
          */
         if (solution_score.is_feasible) {
             historical_feasible_solutions.push_back(
-                model->export_plain_solution());
+                model_ptr->export_plain_solution());
         }
 
         /**
          * Compute the lagrangian value.
          */
-        double lagrangian =
-            model->compute_lagrangian(dual_value_proxies) * model->sign();
+        double lagrangian = model_ptr->compute_lagrangian(dual_value_proxies) *
+                            model_ptr->sign();
 
         /**
          * Update the lagrangian incumbent.
          */
         if (lagrangian > lagrangian_incumbent) {
             lagrangian_incumbent         = lagrangian;
-            auto primal_incumbent        = model->export_solution();
+            auto primal_incumbent        = model_ptr->export_solution();
             dual_value_proxies_incumbent = dual_value_proxies;
         }
 
@@ -312,7 +312,7 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
          */
         if (iteration % std::max(option.lagrange_dual.log_interval, 1) == 0 ||
             update_status > 1) {
-            print_table_body(model,             //
+            print_table_body(model_ptr,         //
                              iteration,         //
                              lagrangian,        //
                              step_size,         //

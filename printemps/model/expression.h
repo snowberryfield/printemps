@@ -256,11 +256,113 @@ class Expression : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
+    inline constexpr void erase(
+        Variable<T_Variable, T_Expression> *a_variable_ptr) {
+        m_sensitivities.erase(a_variable_ptr);
+    }
+
+    /*************************************************************************/
     inline constexpr void substitute(
         Variable<T_Variable, T_Expression> *        a_variable_ptr,
         const Expression<T_Variable, T_Expression> &a_EXPRESSION) {
         *this += m_sensitivities[a_variable_ptr] * a_EXPRESSION;
         m_sensitivities.erase(a_variable_ptr);
+    }
+
+    /*************************************************************************/
+    inline constexpr T_Expression lower_bound(void) {
+        T_Expression lower_bound = m_constant_value;
+        for (const auto &item : m_sensitivities) {
+            if (item.first->is_fixed()) {
+                lower_bound += item.second * item.first->value();
+            } else {
+                if (item.second > 0) {
+                    lower_bound += item.second * item.first->lower_bound();
+                } else {
+                    lower_bound += item.second * item.first->upper_bound();
+                }
+            }
+        }
+        return lower_bound;
+    }
+
+    /*************************************************************************/
+    inline constexpr T_Expression upper_bound(void) {
+        T_Expression upper_bound = m_constant_value;
+        for (const auto &item : m_sensitivities) {
+            if (item.first->is_fixed()) {
+                upper_bound += item.second * item.first->value();
+            } else {
+                if (item.second > 0) {
+                    upper_bound += item.second * item.first->upper_bound();
+                } else {
+                    upper_bound += item.second * item.first->lower_bound();
+                }
+            }
+        }
+        return upper_bound;
+    }
+
+    /*************************************************************************/
+    inline constexpr T_Expression fixed_term_value(void) {
+        int fixed_term_value = 0;
+        for (const auto &item : m_sensitivities) {
+            if (item.first->is_fixed()) {
+                fixed_term_value += item.second * item.first->value();
+            }
+        }
+        return fixed_term_value;
+    }
+
+    /*************************************************************************/
+    inline std::unordered_map<model::Variable<T_Variable, T_Expression> *,
+                              T_Expression>
+    mutable_variable_sensitivities(void) const {
+        std::unordered_map<model::Variable<T_Variable, T_Expression> *,
+                           T_Expression>
+            mutable_variable_sensitivities;
+
+        for (const auto &sensitivity : m_sensitivities) {
+            if (!sensitivity.first->is_fixed()) {
+                mutable_variable_sensitivities[sensitivity.first] =
+                    sensitivity.second;
+            }
+        }
+        return mutable_variable_sensitivities;
+    }
+
+    /*************************************************************************/
+    inline std::unordered_map<model::Variable<T_Variable, T_Expression> *,
+                              T_Expression>
+    positive_mutable_variable_sensitivities(void) const {
+        std::unordered_map<model::Variable<T_Variable, T_Expression> *,
+                           T_Expression>
+            positive_mutable_variable_sensitivities;
+
+        for (const auto &sensitivity : m_sensitivities) {
+            if (!sensitivity.first->is_fixed() && sensitivity.second > 0) {
+                positive_mutable_variable_sensitivities[sensitivity.first] =
+                    sensitivity.second;
+            }
+        }
+        return positive_mutable_variable_sensitivities;
+    }
+
+    /*************************************************************************/
+    inline std::unordered_map<model::Variable<T_Variable, T_Expression> *,
+                              T_Expression>
+    negative_mutable_variable_sensitivities(void) const {
+        std::unordered_map<model::Variable<T_Variable, T_Expression> *,
+                           T_Expression>
+            negative_mutable_variable_sensitivities;
+
+        for (const auto &sensitivity : m_sensitivities) {
+            if (!sensitivity.first->is_fixed() && sensitivity.second < 0) {
+                negative_mutable_variable_sensitivities[sensitivity.first] =
+                    sensitivity.second;
+            }
+        }
+        return negative_mutable_variable_sensitivities;
     }
 
     /*************************************************************************/
