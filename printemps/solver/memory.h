@@ -29,8 +29,8 @@ class Memory {
 
     /*************************************************************************/
     template <class T_Variable, class T_Expression>
-    Memory(model::Model<T_Variable, T_Expression> *a_model) {
-        this->setup(a_model);
+    Memory(model::Model<T_Variable, T_Expression> *a_model_ptr) {
+        this->setup(a_model_ptr);
     }
 
     /*************************************************************************/
@@ -49,7 +49,7 @@ class Memory {
     /*************************************************************************/
     template <class T_Variable, class T_Expression>
     inline constexpr void setup(
-        model::Model<T_Variable, T_Expression> *a_model) {
+        model::Model<T_Variable, T_Expression> *a_model_ptr) {
         this->initialize();
         /**
          * Short-term memory:
@@ -60,16 +60,17 @@ class Memory {
          * last_update_iterations[proxy_index][index] in
          * tabu_search_move_score.h can return finite integer value.
          */
-        m_last_update_iterations = a_model->generate_variable_parameter_proxies(
-            MemoryConstant::INITIAL_LAST_UPDATE_ITERATION);
+        m_last_update_iterations =
+            a_model_ptr->generate_variable_parameter_proxies(
+                MemoryConstant::INITIAL_LAST_UPDATE_ITERATION);
 
         /* Long-term memory:
          * The Long-term memory records the number of times which each variable
          * has been updated. The initial value of the long-term memory is 0.
          */
-        m_update_counts = a_model->generate_variable_parameter_proxies(0);
+        m_update_counts = a_model_ptr->generate_variable_parameter_proxies(0);
 
-        m_variable_names = a_model->variable_names();
+        m_variable_names = a_model_ptr->variable_names();
     }
 
     /*************************************************************************/
@@ -191,6 +192,18 @@ class Memory {
         for (auto &&proxy : m_last_update_iterations) {
             for (auto &&value : proxy.flat_indexed_values()) {
                 value = MemoryConstant::INITIAL_LAST_UPDATE_ITERATION;
+            }
+        }
+    }
+    /*************************************************************************/
+    inline void revert_last_update_iterations(const int a_ITERATION) {
+        /// This method cannot be constexpr.
+        for (auto &&proxy : m_last_update_iterations) {
+            for (auto &&value : proxy.flat_indexed_values()) {
+                if (value > a_ITERATION) {
+                    value = MemoryConstant::INITIAL_LAST_UPDATE_ITERATION;
+                }
+                value -= (a_ITERATION + 1);
             }
         }
     }

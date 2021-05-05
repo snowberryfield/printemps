@@ -298,6 +298,24 @@ TEST_F(TestExpression, disable) {
 }
 
 /*****************************************************************************/
+TEST_F(TestExpression, erase) {
+    auto expression =
+        printemps::model::Expression<int, double>::create_instance();
+
+    auto variable_0 =
+        printemps::model::Variable<int, double>::create_instance();
+    auto variable_1 =
+        printemps::model::Variable<int, double>::create_instance();
+
+    expression = variable_0 + 2 * variable_1 + 4;
+    expression.erase(&variable_0);
+
+    EXPECT_EQ(2, expression.sensitivities().at(&variable_1));
+    EXPECT_TRUE(expression.sensitivities().find(&variable_0) ==
+                expression.sensitivities().end());
+}
+
+/*****************************************************************************/
 TEST_F(TestExpression, substitute) {
     auto expression_0 =
         printemps::model::Expression<int, double>::create_instance();
@@ -317,6 +335,95 @@ TEST_F(TestExpression, substitute) {
     EXPECT_EQ(18, expression_0.constant_value());
     EXPECT_TRUE(expression_0.sensitivities().find(&variable_1) ==
                 expression_0.sensitivities().end());
+}
+
+/*****************************************************************************/
+TEST_F(TestExpression, lower_bound) {
+    auto expression =
+        printemps::model::Expression<int, double>::create_instance();
+
+    auto variable_0 =
+        printemps::model::Variable<int, double>::create_instance();
+    auto variable_1 =
+        printemps::model::Variable<int, double>::create_instance();
+    auto variable_2 =
+        printemps::model::Variable<int, double>::create_instance();
+
+    variable_0.set_bound(-10, 20);
+    variable_1.set_bound(-100, 200);
+    variable_2.fix_by(30);
+    expression = variable_0 - 2 * variable_1 + variable_2 + 4;
+
+    EXPECT_EQ(-376, expression.lower_bound());
+    EXPECT_EQ(254, expression.upper_bound());
+    EXPECT_EQ(30, expression.fixed_term_value());
+}
+
+/*****************************************************************************/
+TEST_F(TestExpression, upper_bound) {
+    /// This method is tested in lower_bound().
+}
+
+/*****************************************************************************/
+TEST_F(TestExpression, fixed_term_value) {
+    /// This method is tested in lower_bound().
+}
+
+/*****************************************************************************/
+TEST_F(TestExpression, mutable_variable_sensitivities) {
+    auto expression =
+        printemps::model::Expression<int, double>::create_instance();
+
+    auto variable_0 =
+        printemps::model::Variable<int, double>::create_instance();
+    auto variable_1 =
+        printemps::model::Variable<int, double>::create_instance();
+    auto variable_2 =
+        printemps::model::Variable<int, double>::create_instance();
+    auto variable_3 =
+        printemps::model::Variable<int, double>::create_instance();
+    auto variable_4 =
+        printemps::model::Variable<int, double>::create_instance();
+    auto variable_5 =
+        printemps::model::Variable<int, double>::create_instance();
+
+    expression = variable_0 - variable_1 - variable_2 + variable_3 +
+                 variable_4 + variable_5;
+    variable_3.fix_by(1);
+    variable_4.fix_by(1);
+    variable_5.fix_by(1);
+
+    auto mutable_variable_sensitivities =
+        expression.mutable_variable_sensitivities();
+
+    auto positive_mutable_variable_sensitivities =
+        expression.positive_mutable_variable_sensitivities();
+
+    auto negative_mutable_variable_sensitivities =
+        expression.negative_mutable_variable_sensitivities();
+
+    EXPECT_EQ(3, static_cast<int>(mutable_variable_sensitivities.size()));
+    EXPECT_EQ(1,
+              static_cast<int>(positive_mutable_variable_sensitivities.size()));
+    EXPECT_TRUE(positive_mutable_variable_sensitivities.find(&variable_0) !=
+                positive_mutable_variable_sensitivities.end());
+
+    EXPECT_EQ(2,
+              static_cast<int>(negative_mutable_variable_sensitivities.size()));
+    EXPECT_TRUE(negative_mutable_variable_sensitivities.find(&variable_1) !=
+                negative_mutable_variable_sensitivities.end());
+    EXPECT_TRUE(negative_mutable_variable_sensitivities.find(&variable_2) !=
+                negative_mutable_variable_sensitivities.end());
+}
+
+/*****************************************************************************/
+TEST_F(TestExpression, positive_mutable_variable_sensitivities) {
+    /// This method is tested in mutable_variable_sensitivities().
+}
+
+/*****************************************************************************/
+TEST_F(TestExpression, negative_mutable_variable_sensitivities) {
+    /// This method is tested in mutable_variable_sensitivities().
 }
 
 /*****************************************************************************/
