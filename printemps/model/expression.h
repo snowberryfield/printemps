@@ -71,6 +71,11 @@ class Expression : public multi_array::AbstractMultiArrayElement {
                               T_Expression>
         m_fixed_sensitivities;
 
+    std::uint64_t m_plus_one_coefficient_mask;
+    std::uint64_t m_minus_one_coefficient_mask;
+    bool          m_has_effective_plus_one_coefficient_mask;
+    bool          m_has_effective_minus_one_coefficient_mask;
+
     /*************************************************************************/
     /// Default constructor
     Expression(void) {
@@ -144,6 +149,11 @@ class Expression : public multi_array::AbstractMultiArrayElement {
         m_is_enabled     = true;
         m_sensitivities.clear();
         m_fixed_sensitivities.initialize();
+
+        m_plus_one_coefficient_mask                = 0;
+        m_minus_one_coefficient_mask               = 0;
+        m_has_effective_plus_one_coefficient_mask  = false;
+        m_has_effective_minus_one_coefficient_mask = false;
     }
 
     /*************************************************************************/
@@ -180,6 +190,51 @@ class Expression : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
+    inline constexpr void setup_mask(void) {
+        std::uint64_t plus_one_coefficient_mask  = 0;
+        std::uint64_t minus_one_coefficient_mask = 0;
+
+        bool has_plus_one_coefficient_variable = false;
+        for (const auto &sensitivity : m_sensitivities) {
+            if (fabs(sensitivity.second - 1.0) < constant::EPSILON_10) {
+                has_plus_one_coefficient_variable = true;
+            } else {
+                plus_one_coefficient_mask =
+                    plus_one_coefficient_mask |
+                    reinterpret_cast<std::uint64_t>(sensitivity.first);
+            }
+        }
+
+        bool has_minus_one_coefficient_variable = false;
+        for (const auto &sensitivity : m_sensitivities) {
+            if (fabs(sensitivity.second + 1.0) < constant::EPSILON_10) {
+                has_minus_one_coefficient_variable = true;
+            } else {
+                minus_one_coefficient_mask =
+                    minus_one_coefficient_mask |
+                    reinterpret_cast<std::uint64_t>(sensitivity.first);
+            }
+        }
+
+        m_plus_one_coefficient_mask  = ~plus_one_coefficient_mask;
+        m_minus_one_coefficient_mask = ~minus_one_coefficient_mask;
+
+        if (has_plus_one_coefficient_variable &&
+            m_plus_one_coefficient_mask > 0) {
+            m_has_effective_plus_one_coefficient_mask = true;
+        } else {
+            m_has_effective_plus_one_coefficient_mask = false;
+        }
+
+        if (has_minus_one_coefficient_variable &&
+            m_minus_one_coefficient_mask > 0) {
+            m_has_effective_minus_one_coefficient_mask = true;
+        } else {
+            m_has_effective_minus_one_coefficient_mask = false;
+        }
+    }
+
+    /*************************************************************************/
     inline constexpr T_Expression constant_value(void) const {
         return m_constant_value;
     }
@@ -196,8 +251,8 @@ class Expression : public multi_array::AbstractMultiArrayElement {
 
     /*************************************************************************/
     inline constexpr T_Expression evaluate(
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
-        const noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
+        noexcept {
         /// The following code is required for nonlinear objective functions.
 #ifndef _MPS_SOLVER
         if (a_MOVE.alterations.size() == 0) {
@@ -211,6 +266,25 @@ class Expression : public multi_array::AbstractMultiArrayElement {
                          (alteration.second - alteration.first->value());
         }
         return new_value;
+    }
+
+    /*************************************************************************/
+    inline constexpr T_Expression evaluate_with_mask(
+        model::Variable<T_Variable, T_Expression> *a_variable_ptr,
+        const T_Variable a_TARGET_VALUE) const noexcept {
+        if (m_has_effective_plus_one_coefficient_mask &&
+            reinterpret_cast<std::uint64_t>(a_variable_ptr) &
+                m_plus_one_coefficient_mask) {
+            return m_value + (a_TARGET_VALUE - a_variable_ptr->value());
+        }
+        if (m_has_effective_minus_one_coefficient_mask &&
+            reinterpret_cast<std::uint64_t>(a_variable_ptr) &
+                m_minus_one_coefficient_mask) {
+            return m_value - (a_TARGET_VALUE - a_variable_ptr->value());
+        }
+
+        return m_value + m_fixed_sensitivities.at(a_variable_ptr) *
+                             (a_TARGET_VALUE - a_variable_ptr->value());
     }
 
     /*************************************************************************/
@@ -363,6 +437,30 @@ class Expression : public multi_array::AbstractMultiArrayElement {
             }
         }
         return negative_mutable_variable_sensitivities;
+    }
+
+    /*************************************************************************/
+    inline constexpr std::uint64_t plus_one_coefficient_mask(void) const
+        noexcept {
+        return m_plus_one_coefficient_mask;
+    }
+
+    /*************************************************************************/
+    inline constexpr std::uint64_t minus_one_coefficient_mask(void) const
+        noexcept {
+        return m_minus_one_coefficient_mask;
+    }
+
+    /*************************************************************************/
+    inline constexpr bool has_effective_plus_one_coefficient_mask(void) const
+        noexcept {
+        return m_has_effective_plus_one_coefficient_mask;
+    }
+
+    /*************************************************************************/
+    inline constexpr bool has_effective_minus_one_coefficient_mask(void) const
+        noexcept {
+        return m_has_effective_minus_one_coefficient_mask;
     }
 
     /*************************************************************************/

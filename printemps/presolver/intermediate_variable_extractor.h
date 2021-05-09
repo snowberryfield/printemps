@@ -125,7 +125,7 @@ constexpr int eliminate_independent_intermediate_variables(
 
     /// Objective
     {
-        auto sensitivities =
+        auto &sensitivities =
             a_model_ptr->objective().expression().sensitivities();
 
         for (auto &&variable_ptr :
@@ -133,10 +133,11 @@ constexpr int eliminate_independent_intermediate_variables(
             if (sensitivities.find(variable_ptr) != sensitivities.end()) {
                 auto dependent_constraint_ptr =
                     variable_ptr->dependent_constraint_ptr();
-                auto &sensitivities =
+                auto &constraint_sensitivities =
                     dependent_constraint_ptr->expression().sensitivities();
 
-                double sign = sensitivities.at(variable_ptr) > 0 ? -1.0 : 1.0;
+                double sign =
+                    constraint_sensitivities.at(variable_ptr) > 0 ? -1.0 : 1.0;
 
                 a_model_ptr->objective().expression().substitute(
                     variable_ptr,

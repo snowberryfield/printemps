@@ -764,6 +764,11 @@ class Model {
          * Setup the fixed sensitivities for fast evaluation.
          */
         this->setup_fixed_sensitivities(a_IS_ENABLED_PRINT);
+        for (auto &&proxy : m_constraint_proxies) {
+            for (auto &&constraint : proxy.flat_indexed_constraints()) {
+                constraint.expression().setup_mask();
+            }
+        }
     }
 
     /*************************************************************************/
@@ -1725,51 +1730,44 @@ class Model {
                 constraint_ptr->expression().sensitivities();
             const auto &constraint_value = constraint_ptr->constraint_value();
 
-            if (constraint_value > constant::EPSILON) {
-                if (constraint_ptr->is_less_or_equal()) {
-                    for (const auto &sensitivity : sensitivities) {
-                        const auto &variable_ptr = sensitivity.first;
-                        const auto &coefficient  = sensitivity.second;
+            if (constraint_value > constant::EPSILON &&
+                constraint_ptr->is_less_or_equal()) {
+                for (const auto &sensitivity : sensitivities) {
+                    const auto &variable_ptr = sensitivity.first;
+                    const auto &coefficient  = sensitivity.second;
 
-                        if (variable_ptr->is_feasibility_improvable()) {
-                            continue;
-                        }
+                    if (variable_ptr->is_feasibility_improvable() ||
+                        variable_ptr->is_fixed()) {
+                        continue;
+                    }
 
-                        if (variable_ptr->is_fixed()) {
-                            continue;
-                        }
+                    if (coefficient > 0 &&
+                        variable_ptr->has_lower_bound_margin()) {
+                        variable_ptr->set_is_feasibility_improvable(true);
 
-                        if (coefficient > 0 &&
-                            variable_ptr->has_lower_bound_margin()) {
-                            variable_ptr->set_is_feasibility_improvable(true);
-
-                        } else if (coefficient < 0 &&
-                                   variable_ptr->has_upper_bound_margin()) {
-                            variable_ptr->set_is_feasibility_improvable(true);
-                        }
+                    } else if (coefficient < 0 &&
+                               variable_ptr->has_upper_bound_margin()) {
+                        variable_ptr->set_is_feasibility_improvable(true);
                     }
                 }
-            } else if (constraint_value < -constant::EPSILON) {
-                if (constraint_ptr->is_greater_or_equal()) {
-                    for (const auto &sensitivity : sensitivities) {
-                        const auto &variable_ptr = sensitivity.first;
-                        const auto &coefficient  = sensitivity.second;
 
-                        if (variable_ptr->is_feasibility_improvable()) {
-                            continue;
-                        }
+            } else if (constraint_value < -constant::EPSILON &&
+                       constraint_ptr->is_greater_or_equal()) {
+                for (const auto &sensitivity : sensitivities) {
+                    const auto &variable_ptr = sensitivity.first;
+                    const auto &coefficient  = sensitivity.second;
 
-                        if (variable_ptr->is_fixed()) {
-                            continue;
-                        }
+                    if (variable_ptr->is_feasibility_improvable() ||
+                        variable_ptr->is_fixed()) {
+                        continue;
+                    }
 
-                        if (coefficient > 0 &&
-                            variable_ptr->has_upper_bound_margin()) {
-                            variable_ptr->set_is_feasibility_improvable(true);
-                        } else if (coefficient < 0 &&
-                                   variable_ptr->has_lower_bound_margin()) {
-                            variable_ptr->set_is_feasibility_improvable(true);
-                        }
+                    if (coefficient > 0 &&
+                        variable_ptr->has_upper_bound_margin()) {
+                        variable_ptr->set_is_feasibility_improvable(true);
+                    } else if (coefficient < 0 &&
+                               variable_ptr->has_lower_bound_margin()) {
+                        variable_ptr->set_is_feasibility_improvable(true);
                     }
                 }
             }
@@ -1791,8 +1789,8 @@ class Model {
 
     /*************************************************************************/
     inline solution::SolutionScore evaluate(
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
-        const noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
+        noexcept {
         solution::SolutionScore score;
         this->evaluate(&score, a_MOVE);
         return score;
@@ -1808,9 +1806,10 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void evaluate(solution::SolutionScore *a_score_ptr,  //
-                            const neighborhood::Move<T_Variable, T_Expression>
-                                &a_MOVE) const noexcept {
+    constexpr void evaluate(
+        solution::SolutionScore *                           a_score_ptr,  //
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
+        noexcept {
         double total_violation = 0.0;
         double local_penalty   = 0.0;
         double global_penalty  = 0.0;
@@ -1898,19 +1897,24 @@ class Model {
                 continue;
             }
 
-            if (constraint_ptr->is_zero_one_coefficient() &&
-                a_MOVE.sense == neighborhood::MoveSense::Binary) {
-                constraint_value = constraint_ptr->constraint_value() +
-                                   a_MOVE.alterations.front().second -
-                                   a_MOVE.alterations.front().first->value();
-            } else if (a_MOVE.is_univariable_move &&
-                       a_MOVE.alterations.front()
-                           .first->has_unique_sensitivity()) {
-                auto &alteration = a_MOVE.alterations.front();
-                constraint_value =
-                    constraint_ptr->constraint_value() +
-                    alteration.first->unique_sensitivity() *
-                        (alteration.second - alteration.first->value());
+            if (a_MOVE.is_univariable_move) {
+                auto variable_ptr          = a_MOVE.alterations.front().first;
+                auto variable_value_target = a_MOVE.alterations.front().second;
+
+                if (constraint_ptr->is_zero_one_coefficient()) {
+                    constraint_value = constraint_ptr->constraint_value() +
+                                       variable_value_target -
+                                       variable_ptr->value();
+                } else if (variable_ptr->has_unique_sensitivity()) {
+                    constraint_value =
+                        constraint_ptr->constraint_value() +
+                        variable_ptr->unique_sensitivity() *
+                            (variable_value_target - variable_ptr->value());
+                } else {
+                    constraint_value =
+                        constraint_ptr->evaluate_constraint_with_mask(
+                            variable_ptr, variable_value_target);
+                }
             } else {
                 constraint_value = constraint_ptr->evaluate_constraint(a_MOVE);
             }
@@ -1923,9 +1927,8 @@ class Model {
                     positive_part - constraint_ptr->positive_part();
                 total_violation += violation_diff;
 
-                if (violation_diff < -constant::EPSILON) {
-                    is_feasibility_improvable = true;
-                }
+                is_feasibility_improvable |=
+                    violation_diff < -constant::EPSILON;
 
                 local_penalty +=
                     violation_diff *
@@ -1938,9 +1941,8 @@ class Model {
                     negative_part - constraint_ptr->negative_part();
                 total_violation += violation_diff;
 
-                if (violation_diff < -constant::EPSILON) {
-                    is_feasibility_improvable = true;
-                }
+                is_feasibility_improvable |=
+                    violation_diff < -constant::EPSILON;
 
                 local_penalty +=
                     violation_diff *
