@@ -45,8 +45,14 @@ TEST_F(TestExpression, initialize) {
     /// Check the initial values of the derived class members.
     EXPECT_EQ(0, expression.constant_value());
     EXPECT_EQ(0, expression.value());
-    EXPECT_TRUE(expression.sensitivities().empty());
+
     EXPECT_TRUE(expression.is_enabled());
+    EXPECT_TRUE(expression.sensitivities().empty());
+
+    EXPECT_EQ(0, expression.plus_one_coefficient_mask());
+    EXPECT_EQ(0, expression.minus_one_coefficient_mask());
+    EXPECT_FALSE(expression.has_effective_plus_one_coefficient_mask());
+    EXPECT_FALSE(expression.has_effective_minus_one_coefficient_mask());
 }
 
 /*****************************************************************************/
@@ -82,6 +88,89 @@ TEST_F(TestExpression, sensitivities) {
 /*****************************************************************************/
 TEST_F(TestExpression, setup_fixed_sensitivities) {
     /// This method is tested in test_fixed_size_hash_map().
+}
+
+/*****************************************************************************/
+TEST_F(TestExpression, setup_mask) {
+    {
+        auto expression =
+            printemps::model::Expression<int, double>::create_instance();
+        auto variable_0 =
+            printemps::model::Variable<int, double>::create_instance();
+        auto variable_1 =
+            printemps::model::Variable<int, double>::create_instance();
+        expression = variable_0 + variable_1;
+        expression.setup_mask();
+
+        EXPECT_TRUE(expression.has_effective_plus_one_coefficient_mask());
+        EXPECT_FALSE(expression.has_effective_minus_one_coefficient_mask());
+
+        EXPECT_FALSE(reinterpret_cast<std::uint64_t>(&variable_0) &
+                     expression.minus_one_coefficient_mask());
+        EXPECT_FALSE(reinterpret_cast<std::uint64_t>(&variable_1) &
+                     expression.minus_one_coefficient_mask());
+    }
+
+    {
+        auto expression =
+            printemps::model::Expression<int, double>::create_instance();
+        auto variable_0 =
+            printemps::model::Variable<int, double>::create_instance();
+        auto variable_1 =
+            printemps::model::Variable<int, double>::create_instance();
+        expression = -variable_0 - variable_1;
+        expression.setup_mask();
+
+        EXPECT_FALSE(expression.has_effective_plus_one_coefficient_mask());
+        EXPECT_TRUE(expression.has_effective_minus_one_coefficient_mask());
+
+        EXPECT_FALSE(reinterpret_cast<std::uint64_t>(&variable_0) &
+                     expression.plus_one_coefficient_mask());
+        EXPECT_FALSE(reinterpret_cast<std::uint64_t>(&variable_1) &
+                     expression.plus_one_coefficient_mask());
+    }
+
+    {
+        auto expression =
+            printemps::model::Expression<int, double>::create_instance();
+        auto variable_0 =
+            printemps::model::Variable<int, double>::create_instance();
+        auto variable_1 =
+            printemps::model::Variable<int, double>::create_instance();
+        expression = variable_0 - variable_1;
+        expression.setup_mask();
+
+        EXPECT_TRUE(expression.has_effective_plus_one_coefficient_mask());
+        EXPECT_TRUE(expression.has_effective_minus_one_coefficient_mask());
+
+        EXPECT_FALSE(reinterpret_cast<std::uint64_t>(&variable_1) &
+                     expression.plus_one_coefficient_mask());
+        EXPECT_FALSE(reinterpret_cast<std::uint64_t>(&variable_0) &
+                     expression.minus_one_coefficient_mask());
+    }
+
+    {
+        auto expression =
+            printemps::model::Expression<int, double>::create_instance();
+        auto variable_0 =
+            printemps::model::Variable<int, double>::create_instance();
+        auto variable_1 =
+            printemps::model::Variable<int, double>::create_instance();
+        expression = 2 * variable_0 - 2 * variable_1;
+        expression.setup_mask();
+
+        EXPECT_FALSE(expression.has_effective_plus_one_coefficient_mask());
+        EXPECT_FALSE(expression.has_effective_minus_one_coefficient_mask());
+
+        EXPECT_FALSE(reinterpret_cast<std::uint64_t>(&variable_0) &
+                     expression.plus_one_coefficient_mask());
+        EXPECT_FALSE(reinterpret_cast<std::uint64_t>(&variable_1) &
+                     expression.plus_one_coefficient_mask());
+        EXPECT_FALSE(reinterpret_cast<std::uint64_t>(&variable_0) &
+                     expression.minus_one_coefficient_mask());
+        EXPECT_FALSE(reinterpret_cast<std::uint64_t>(&variable_1) &
+                     expression.minus_one_coefficient_mask());
+    }
 }
 
 /*****************************************************************************/
@@ -164,6 +253,34 @@ TEST_F(TestExpression, evaluate_arg_move) {
         sensitivity_0 * v_value_0 + sensitivity_1 * v_value_1 + constant;
 
     EXPECT_EQ(expected_result, expression.evaluate(move));
+}
+
+/*****************************************************************************/
+TEST_F(TestExpression, evaluate_with_mask) {
+    auto expression =
+        printemps::model::Expression<int, double>::create_instance();
+
+    auto variable_0 =
+        printemps::model::Variable<int, double>::create_instance();
+    auto variable_1 =
+        printemps::model::Variable<int, double>::create_instance();
+    auto variable_2 =
+        printemps::model::Variable<int, double>::create_instance();
+
+    expression = variable_0 - variable_1 + 2 * variable_2 + 3;
+
+    expression.setup_fixed_sensitivities();
+    expression.setup_mask();
+
+    variable_0 = 0;
+    variable_1 = 0;
+    variable_2 = 0;
+
+    expression.update();
+
+    EXPECT_EQ(4, expression.evaluate_with_mask(&variable_0, 1));
+    EXPECT_EQ(2, expression.evaluate_with_mask(&variable_1, 1));
+    EXPECT_EQ(5, expression.evaluate_with_mask(&variable_2, 1));
 }
 
 /*****************************************************************************/
@@ -424,6 +541,26 @@ TEST_F(TestExpression, positive_mutable_variable_sensitivities) {
 /*****************************************************************************/
 TEST_F(TestExpression, negative_mutable_variable_sensitivities) {
     /// This method is tested in mutable_variable_sensitivities().
+}
+
+/*****************************************************************************/
+TEST_F(TestExpression, plus_one_coefficient_mask) {
+    /// This method is tested in setup_mask().
+}
+
+/*****************************************************************************/
+TEST_F(TestExpression, minus_one_coefficient_mask) {
+    /// This method is tested in setup_mask().
+}
+
+/*****************************************************************************/
+TEST_F(TestExpression, has_effective_plus_one_coefficient_mask) {
+    /// This method is tested in setup_mask().
+}
+
+/*****************************************************************************/
+TEST_F(TestExpression, has_effective_minus_one_coefficient_mask) {
+    /// This method is tested in setup_mask().
 }
 
 /*****************************************************************************/
