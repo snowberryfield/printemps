@@ -634,13 +634,20 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
 
     /*************************************************************************/
     inline constexpr T_Expression evaluate_constraint(
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
-        const noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
+        noexcept {
 #ifdef _MPS_SOLVER
         return m_expression.evaluate(a_MOVE);
 #else
         return m_constraint_function(a_MOVE);
 #endif
+    }
+
+    /*************************************************************************/
+    inline constexpr T_Expression evaluate_constraint_with_mask(
+        model::Variable<T_Variable, T_Expression> *a_variable_ptr,
+        const T_Variable a_TARGET_VALUE) const noexcept {
+        return m_expression.evaluate_with_mask(a_variable_ptr, a_TARGET_VALUE);
     }
 
     /*************************************************************************/
@@ -650,15 +657,15 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
 
     /*************************************************************************/
     inline constexpr T_Expression evaluate_violation(
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
-        const noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
+        noexcept {
         return m_violation_function(a_MOVE);
     }
 
     /*************************************************************************/
     inline constexpr T_Expression evaluate_violation_diff(
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
-        const noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
+        noexcept {
         return m_violation_function(a_MOVE) - m_violation_value;
     }
 
@@ -748,8 +755,8 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr double local_penalty_coefficient_less(
-        void) const noexcept {
+    inline constexpr double local_penalty_coefficient_less(void) const
+        noexcept {
         return m_local_penalty_coefficient_less;
     }
 
@@ -758,8 +765,8 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         return m_local_penalty_coefficient_greater;
     }
     /*************************************************************************/
-    inline constexpr double local_penalty_coefficient_greater(
-        void) const noexcept {
+    inline constexpr double local_penalty_coefficient_greater(void) const
+        noexcept {
         return m_local_penalty_coefficient_greater;
     }
 
