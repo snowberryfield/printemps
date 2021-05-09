@@ -328,16 +328,6 @@ Result<T_Variable, T_Expression> solve(
                     result.incumbent_holder.global_augmented_incumbent_score());
 
                 /**
-                 * Update the feasible incumbent solution if it was improved by
-                 * the Lagrange dual search
-                 */
-                if (result.incumbent_holder.is_found_feasible_solution()) {
-                    update_status = incumbent_holder.try_update_incumbent(
-                        result.incumbent_holder.feasible_incumbent_solution(),
-                        result.incumbent_holder.feasible_incumbent_score());
-                }
-
-                /**
                  * Preserve the number of iterations for solving the Lagrange
                  * dual problem.
                  */
@@ -454,16 +444,6 @@ Result<T_Variable, T_Expression> solve(
             update_status = incumbent_holder.try_update_incumbent(
                 result.incumbent_holder.global_augmented_incumbent_solution(),
                 result.incumbent_holder.global_augmented_incumbent_score());
-
-            /**
-             * Update the feasible incumbent solution if it was improved by the
-             * local search.
-             */
-            if (result.incumbent_holder.is_found_feasible_solution()) {
-                update_status = incumbent_holder.try_update_incumbent(
-                    result.incumbent_holder.feasible_incumbent_solution(),
-                    result.incumbent_holder.feasible_incumbent_score());
-            }
 
             /**
              * Update the memory.
@@ -625,16 +605,6 @@ Result<T_Variable, T_Expression> solve(
         update_status = incumbent_holder.try_update_incumbent(
             result.incumbent_holder.global_augmented_incumbent_solution(),
             result.incumbent_holder.global_augmented_incumbent_score());
-
-        /**
-         * Update the feasible incumbent solution if it was improved by the tabu
-         * search.
-         */
-        if (result.incumbent_holder.is_found_feasible_solution()) {
-            update_status = incumbent_holder.try_update_incumbent(
-                result.incumbent_holder.feasible_incumbent_solution(),
-                result.incumbent_holder.feasible_incumbent_score());
-        }
 
         /**
          * Update the memory.
