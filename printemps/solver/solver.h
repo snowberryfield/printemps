@@ -801,10 +801,6 @@ Result<T_Variable, T_Expression> solve(
                 iteration_consecutive_no_update = 0;
 
                 double gap_tolerance = constant::EPSILON;
-                if (!incumbent_holder.is_found_feasible_solution()) {
-                    //      gap_tolerance =
-                    //        master_option.initial_penalty_coefficient * 1E-2;
-                }
 
                 if (gap < gap_tolerance) {
                     /**

@@ -194,22 +194,13 @@ class Expression : public multi_array::AbstractMultiArrayElement {
         std::uint64_t plus_one_coefficient_mask  = 0;
         std::uint64_t minus_one_coefficient_mask = 0;
 
-        bool has_plus_one_coefficient_variable = false;
         for (const auto &sensitivity : m_sensitivities) {
-            if (fabs(sensitivity.second - 1.0) < constant::EPSILON_10) {
-                has_plus_one_coefficient_variable = true;
-            } else {
+            if (!(fabs(sensitivity.second - 1.0) < constant::EPSILON_10)) {
                 plus_one_coefficient_mask =
                     plus_one_coefficient_mask |
                     reinterpret_cast<std::uint64_t>(sensitivity.first);
             }
-        }
-
-        bool has_minus_one_coefficient_variable = false;
-        for (const auto &sensitivity : m_sensitivities) {
-            if (fabs(sensitivity.second + 1.0) < constant::EPSILON_10) {
-                has_minus_one_coefficient_variable = true;
-            } else {
+            if (!(fabs(sensitivity.second + 1.0) < constant::EPSILON_10)) {
                 minus_one_coefficient_mask =
                     minus_one_coefficient_mask |
                     reinterpret_cast<std::uint64_t>(sensitivity.first);
@@ -219,15 +210,33 @@ class Expression : public multi_array::AbstractMultiArrayElement {
         m_plus_one_coefficient_mask  = ~plus_one_coefficient_mask;
         m_minus_one_coefficient_mask = ~minus_one_coefficient_mask;
 
-        if (has_plus_one_coefficient_variable &&
-            m_plus_one_coefficient_mask > 0) {
+        int number_of_fast_computable_plus_one_coefficients  = 0;
+        int number_of_fast_computable_minus_one_coefficients = 0;
+        for (const auto &sensitivity : m_sensitivities) {
+            if (fabs(sensitivity.second - 1.0) < constant::EPSILON_10) {
+                if (reinterpret_cast<std::uint64_t>(sensitivity.first) &
+                    m_plus_one_coefficient_mask) {
+                    number_of_fast_computable_plus_one_coefficients++;
+                }
+            }
+            if (fabs(sensitivity.second + 1.0) < constant::EPSILON_10) {
+                if (reinterpret_cast<std::uint64_t>(sensitivity.first) &
+                    m_minus_one_coefficient_mask) {
+                    number_of_fast_computable_minus_one_coefficients++;
+                }
+            }
+        }
+
+        int number_of_variables = m_sensitivities.size();
+        if (2 * number_of_fast_computable_plus_one_coefficients >=
+            number_of_variables) {
             m_has_effective_plus_one_coefficient_mask = true;
         } else {
             m_has_effective_plus_one_coefficient_mask = false;
         }
 
-        if (has_minus_one_coefficient_variable &&
-            m_minus_one_coefficient_mask > 0) {
+        if (2 * number_of_fast_computable_minus_one_coefficients >=
+            number_of_variables) {
             m_has_effective_minus_one_coefficient_mask = true;
         } else {
             m_has_effective_minus_one_coefficient_mask = false;
