@@ -49,8 +49,10 @@ TEST_F(TestExpression, initialize) {
     EXPECT_TRUE(expression.is_enabled());
     EXPECT_TRUE(expression.sensitivities().empty());
 
-    EXPECT_EQ(0, expression.plus_one_coefficient_mask());
-    EXPECT_EQ(0, expression.minus_one_coefficient_mask());
+    EXPECT_EQ(static_cast<std::uint64_t>(0),
+              expression.plus_one_coefficient_mask());
+    EXPECT_EQ(static_cast<std::uint64_t>(0),
+              expression.minus_one_coefficient_mask());
     EXPECT_FALSE(expression.has_effective_plus_one_coefficient_mask());
     EXPECT_FALSE(expression.has_effective_minus_one_coefficient_mask());
 }
@@ -140,8 +142,13 @@ TEST_F(TestExpression, setup_mask) {
         expression = variable_0 - variable_1;
         expression.setup_mask();
 
-        EXPECT_TRUE(expression.has_effective_plus_one_coefficient_mask());
-        EXPECT_TRUE(expression.has_effective_minus_one_coefficient_mask());
+        EXPECT_EQ((reinterpret_cast<std::uint64_t>(&variable_0) &
+                   expression.plus_one_coefficient_mask()) > 0,
+                  expression.has_effective_plus_one_coefficient_mask());
+
+        EXPECT_EQ((reinterpret_cast<std::uint64_t>(&variable_1) &
+                   expression.minus_one_coefficient_mask()) > 0,
+                  expression.has_effective_minus_one_coefficient_mask());
 
         EXPECT_FALSE(reinterpret_cast<std::uint64_t>(&variable_1) &
                      expression.plus_one_coefficient_mask());
