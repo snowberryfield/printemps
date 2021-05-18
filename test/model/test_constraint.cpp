@@ -1118,6 +1118,34 @@ TEST_F(TestConstraint, evaluate_expression_arg_move) {
 }
 
 /*****************************************************************************/
+TEST_F(TestConstraint, evaluate_constraint_with_mask) {
+    auto constraint =
+        printemps::model::Constraint<int, double>::create_instance();
+
+    auto variable_0 =
+        printemps::model::Variable<int, double>::create_instance();
+    auto variable_1 =
+        printemps::model::Variable<int, double>::create_instance();
+    auto variable_2 =
+        printemps::model::Variable<int, double>::create_instance();
+
+    constraint = variable_0 - variable_1 + 2 * variable_2 + 3 == 0;
+
+    constraint.expression().setup_fixed_sensitivities();
+    constraint.expression().setup_mask();
+
+    variable_0 = 0;
+    variable_1 = 0;
+    variable_2 = 0;
+
+    constraint.update();
+
+    EXPECT_EQ(4, constraint.evaluate_constraint_with_mask(&variable_0, 1));
+    EXPECT_EQ(2, constraint.evaluate_constraint_with_mask(&variable_1, 1));
+    EXPECT_EQ(5, constraint.evaluate_constraint_with_mask(&variable_2, 1));
+}
+
+/*****************************************************************************/
 TEST_F(TestConstraint, evaluate_violation_function_arg_void) {
     auto expression =
         printemps::model::Expression<int, double>::create_instance();
