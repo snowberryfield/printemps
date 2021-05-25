@@ -13,9 +13,9 @@ The following results were obtained by the solver detailed in [Standalone Solver
 | [1](./results/v1.6.2/0001/benchmark_result.md) | May 25, 2021 | v1.6.2 |  600sec   | [Benchmark Set](https://miplib.zib.de/tag_benchmark.html) <br />(89 instances) | Ubuntu 20.04 |    g++ 7.5.0     | Intel(R) Xeon(R) CPU E3-1270 v5 @ 3.60GHz | 16GB |     |
 | [2](./results/v1.6.2/0002/benchmark_result.md) | May 25, 2021 | v1.6.2 |  600sec   | [Collection Set](https://miplib.zib.de/tag_collection.html) <br />(63 "open" instances) | Ubuntu 20.04 |    g++ 7.5.0     | Intel(R) Xeon(R) CPU E3-1270 v5 @ 3.60GHz | 16GB |     |
 | [3](./results/v1.6.2/0003/benchmark_result.md) | May 25, 2021 | v1.6.2 |  3600sec   | [Benchmark Set](https://miplib.zib.de/tag_benchmark.html) <br />(89 instances) | Ubuntu 20.04 |    g++ 7.5.0     | Intel(R) Xeon(R) CPU E3-1270 v5 @ 3.60GHz | 16GB |     |
-| [4](./results/v1.6.2/0004/benchmark_result.md) | May 25, 2021 | v1.6.2 |  3600sec   | [Collection Set](https://miplib.zib.de/tag_collection.html) <br />(62 "open" instances) | Ubuntu 20.04 |    g++ 7.5.0     | Intel(R) Xeon(R) CPU E3-1270 v5 @ 3.60GHz | 16GB |     |
+| [4](./results/v1.6.2/0004/benchmark_result.md) | May 25, 2021 | v1.6.2 |  3600sec   | [Collection Set](https://miplib.zib.de/tag_collection.html) <br />(61 "open" instances(*)) | Ubuntu 20.04 |    g++ 7.5.0     | Intel(R) Xeon(R) CPU E3-1270 v5 @ 3.60GHz | 16GB |     |
 
-The number of open instances was reduced because an open instance [v150d30-2hopcds](https://miplib.zib.de/instance_details_v150d30-2hopcds.html) was solved (the difficulty of the instance moves to "hard"). 
+(*) The number of open instances was reduced because open instances [v150d30-2hopcds](https://miplib.zib.de/instance_details_v150d30-2hopcds.html) and [neos-3237086-abava](https://miplib.zib.de/instance_details_neos-3237086-abava.html) were solved (the difficulty of the instance moves to "hard"). 
 
 ## v1.6.1
 
