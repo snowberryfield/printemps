@@ -19,9 +19,8 @@ __PRINTEMPS__ is a C++ metaheuristics modeler/solver library for general integer
 ## News
 |     Date     | Update                                                                                            |
 |:------------:|:--------------------------------------------------------------------------------------------------|
-| May 15, 2021 | New benchmark results were added.                                                                 |
-| May 8, 2021  | New benchmark results were added.                                                                 |
-| May 8, 2021  | [PRINTEMPS v1.6.1](https://github.com/snowberryfield/printemps/releases/tag/v1.6.1) was released. |
+| May 25, 2021 | New benchmark results were added.                                                                 |
+| May 18, 2021 | [PRINTEMPS v1.6.2](https://github.com/snowberryfield/printemps/releases/tag/v1.6.2) was released. |
 
 ## Algorithm
 PRINTEMPS can compute approximate solutions for __linear and nonlinear integer optimization problems__. It employs __Tabu Search__ [1], a metaheuristics technique, to solve problems. In solving, it replaces constraints with penalty functions which return violations to the corresponding constraints, and the penalty functions multiplied by positive penalty coefficients are added to the objective function. The penalty coefficients are updated iteratively and automatically in a method similar (not exact same) to the one proposed in paper [2].

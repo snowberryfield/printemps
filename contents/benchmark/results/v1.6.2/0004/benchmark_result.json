@@ -1,0 +1,1344 @@
+[
+    {
+        "instance": {
+            "name": "tokyometro",
+            "number_of_variables": 4537,
+            "number_of_binary_variables": 2496,
+            "number_of_integer_variables": 2041,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 7719,
+            "is_feasible": true,
+            "known_best": 8329.4
+        },
+        "computed": {
+            "is_found_feasible_solution": true,
+            "objective": 10415.1,
+            "total_violation": 0.0,
+            "elapsed_time": 3600.004631,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 4874429,
+            "number_of_tabu_search_loops": 24691
+        }
+    },
+    {
+        "instance": {
+            "name": "ex1010-pi",
+            "number_of_variables": 25200,
+            "number_of_binary_variables": 25200,
+            "number_of_integer_variables": 0,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 1468,
+            "is_feasible": true,
+            "known_best": 235.0
+        },
+        "computed": {
+            "is_found_feasible_solution": true,
+            "objective": 248.0,
+            "total_violation": 0.0,
+            "elapsed_time": 3600.011315,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 5000844,
+            "number_of_tabu_search_loops": 25107
+        }
+    },
+    {
+        "instance": {
+            "name": "d20200",
+            "number_of_variables": 4000,
+            "number_of_binary_variables": 4000,
+            "number_of_integer_variables": 0,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 1502,
+            "is_feasible": true,
+            "known_best": 12240.0
+        },
+        "computed": {
+            "is_found_feasible_solution": true,
+            "objective": 12719.0,
+            "total_violation": 0.0,
+            "elapsed_time": 3600.00821,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 408976,
+            "number_of_tabu_search_loops": 2108
+        }
+    },
+    {
+        "instance": {
+            "name": "ivu06-big",
+            "number_of_variables": 2277736,
+            "number_of_binary_variables": 2277736,
+            "number_of_integer_variables": 0,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 1177,
+            "is_feasible": true,
+            "known_best": 140.74
+        },
+        "computed": {
+            "is_found_feasible_solution": true,
+            "objective": 185.40166806,
+            "total_violation": 0.0,
+            "elapsed_time": 3600.857566,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 41538,
+            "number_of_tabu_search_loops": 255
+        }
+    },
+    {
+        "instance": {
+            "name": "comp12-2idx",
+            "number_of_variables": 11863,
+            "number_of_binary_variables": 11820,
+            "number_of_integer_variables": 43,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 16803,
+            "is_feasible": true,
+            "known_best": 291.0
+        },
+        "computed": {
+            "is_found_feasible_solution": true,
+            "objective": 406.0,
+            "total_violation": 0.0,
+            "elapsed_time": 3600.037048,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 1059854,
+            "number_of_tabu_search_loops": 5442
+        }
+    },
+    {
+        "instance": {
+            "name": "rmine21",
+            "number_of_variables": 162547,
+            "number_of_binary_variables": 162547,
+            "number_of_integer_variables": 0,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 1441651,
+            "is_feasible": true,
+            "known_best": -10617.615401999996
+        },
+        "computed": {
+            "is_found_feasible_solution": true,
+            "objective": -1400.206584,
+            "total_violation": 0.0,
+            "elapsed_time": 3601.927046,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 4316,
+            "number_of_tabu_search_loops": 128
+        }
+    },
+    {
+        "instance": {
+            "name": "ivu06",
+            "number_of_variables": 787239,
+            "number_of_binary_variables": 787239,
+            "number_of_integer_variables": 0,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 1177,
+            "is_feasible": true,
+            "known_best": 142.86
+        },
+        "computed": {
+            "is_found_feasible_solution": true,
+            "objective": 184.71166896,
+            "total_violation": 0.0,
+            "elapsed_time": 3600.239123,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 115500,
+            "number_of_tabu_search_loops": 638
+        }
+    },
+    {
+        "instance": {
+            "name": "bley_xs1noM",
+            "number_of_variables": 3243,
+            "number_of_binary_variables": 2360,
+            "number_of_integer_variables": 883,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 3290,
+            "is_feasible": true,
+            "known_best": 3874310.51
+        },
+        "computed": {
+            "is_found_feasible_solution": true,
+            "objective": 4242906.34,
+            "total_violation": 0.0,
+            "elapsed_time": 3600.002328,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 14935486,
+            "number_of_tabu_search_loops": 75442
+        }
+    },
+    {
+        "instance": {
+            "name": "bley_xs1",
+            "number_of_variables": 3243,
+            "number_of_binary_variables": 2360,
+            "number_of_integer_variables": 883,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 3290,
+            "is_feasible": true,
+            "known_best": 3940855.47
+        },
+        "computed": {
+            "is_found_feasible_solution": true,
+            "objective": 4100855.69,
+            "total_violation": 0.0,
+            "elapsed_time": 3600.00235,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 16252428,
+            "number_of_tabu_search_loops": 82193
+        }
+    },
+    {
+        "instance": {
+            "name": "rococoC12-010001",
+            "number_of_variables": 16741,
+            "number_of_binary_variables": 16554,
+            "number_of_integer_variables": 187,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 4636,
+            "is_feasible": true,
+            "known_best": 34270.0
+        },
+        "computed": {
+            "is_found_feasible_solution": true,
+            "objective": 37738.0,
+            "total_violation": 0.0,
+            "elapsed_time": 3600.009936,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 7373410,
+            "number_of_tabu_search_loops": 38472
+        }
+    },
+    {
+        "instance": {
+            "name": "ivu59",
+            "number_of_variables": 2569996,
+            "number_of_binary_variables": 2569996,
+            "number_of_integer_variables": 0,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 3436,
+            "is_feasible": true,
+            "known_best": 931.0
+        },
+        "computed": {
+            "is_found_feasible_solution": "N/A",
+            "objective": "N/A",
+            "total_violation": "N/A",
+            "elapsed_time": "N/A",
+            "number_of_lagrange_dual_iterations": "N/A",
+            "number_of_local_search_iterations": "N/A",
+            "number_of_tabu_search_iterations": "N/A",
+            "number_of_tabu_search_loops": "N/A"
+        }
+    },
+    {
+        "instance": {
+            "name": "usafa",
+            "number_of_variables": 228648,
+            "number_of_binary_variables": 216357,
+            "number_of_integer_variables": 12291,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 1377561,
+            "is_feasible": true,
+            "known_best": 160.1671357657
+        },
+        "computed": {
+            "is_found_feasible_solution": false,
+            "objective": 7777.5,
+            "total_violation": 10461.0,
+            "elapsed_time": 3601.130456,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 5245,
+            "number_of_tabu_search_loops": 30
+        }
+    },
+    {
+        "instance": {
+            "name": "pb-market-split8-70-4",
+            "number_of_variables": 71,
+            "number_of_binary_variables": 71,
+            "number_of_integer_variables": 0,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 17,
+            "is_feasible": null,
+            "known_best": null
+        },
+        "computed": {
+            "is_found_feasible_solution": false,
+            "objective": 0.0,
+            "total_violation": 18.0,
+            "elapsed_time": 3600.000059,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 149612370,
+            "number_of_tabu_search_loops": 748082
+        }
+    },
+    {
+        "instance": {
+            "name": "pb-gfrd-pnc",
+            "number_of_variables": 27888,
+            "number_of_binary_variables": 27888,
+            "number_of_integer_variables": 0,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 874,
+            "is_feasible": true,
+            "known_best": 8890.0
+        },
+        "computed": {
+            "is_found_feasible_solution": false,
+            "objective": 8211.0,
+            "total_violation": 8282.0,
+            "elapsed_time": 3600.007831,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 909345,
+            "number_of_tabu_search_loops": 4606
+        }
+    },
+    {
+        "instance": {
+            "name": "pb-grow22",
+            "number_of_variables": 25124,
+            "number_of_binary_variables": 25124,
+            "number_of_integer_variables": 0,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 1320,
+            "is_feasible": true,
+            "known_best": -372049.0
+        },
+        "computed": {
+            "is_found_feasible_solution": true,
+            "objective": 0.0,
+            "total_violation": 0.0,
+            "elapsed_time": 3600.008551,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 1166160,
+            "number_of_tabu_search_loops": 5835
+        }
+    },
+    {
+        "instance": {
+            "name": "t1722",
+            "number_of_variables": 36630,
+            "number_of_binary_variables": 36630,
+            "number_of_integer_variables": 0,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 338,
+            "is_feasible": true,
+            "known_best": 109137.0
+        },
+        "computed": {
+            "is_found_feasible_solution": true,
+            "objective": 120340.0,
+            "total_violation": 0.0,
+            "elapsed_time": 3600.013553,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 5302713,
+            "number_of_tabu_search_loops": 26664
+        }
+    },
+    {
+        "instance": {
+            "name": "datt256",
+            "number_of_variables": 262144,
+            "number_of_binary_variables": 262144,
+            "number_of_integer_variables": 0,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 11077,
+            "is_feasible": null,
+            "known_best": null
+        },
+        "computed": {
+            "is_found_feasible_solution": false,
+            "objective": 256.0,
+            "total_violation": 126.0,
+            "elapsed_time": 3600.093355,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 386684,
+            "number_of_tabu_search_loops": 1936
+        }
+    },
+    {
+        "instance": {
+            "name": "sorrell7",
+            "number_of_variables": 2048,
+            "number_of_binary_variables": 2048,
+            "number_of_integer_variables": 0,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 78848,
+            "is_feasible": true,
+            "known_best": -196.0
+        },
+        "computed": {
+            "is_found_feasible_solution": true,
+            "objective": -190.0,
+            "total_violation": 0.0,
+            "elapsed_time": 3600.030248,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 650961,
+            "number_of_tabu_search_loops": 3282
+        }
+    },
+    {
+        "instance": {
+            "name": "sorrell4",
+            "number_of_variables": 2048,
+            "number_of_binary_variables": 2048,
+            "number_of_integer_variables": 0,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 504451,
+            "is_feasible": true,
+            "known_best": -24.0
+        },
+        "computed": {
+            "is_found_feasible_solution": true,
+            "objective": -23.0,
+            "total_violation": 0.0,
+            "elapsed_time": 3600.183233,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 138868,
+            "number_of_tabu_search_loops": 707
+        }
+    },
+    {
+        "instance": {
+            "name": "t1717",
+            "number_of_variables": 73885,
+            "number_of_binary_variables": 73885,
+            "number_of_integer_variables": 0,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 551,
+            "is_feasible": true,
+            "known_best": 158260.0
+        },
+        "computed": {
+            "is_found_feasible_solution": true,
+            "objective": 211157.0,
+            "total_violation": 0.0,
+            "elapsed_time": 3600.026281,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 2485973,
+            "number_of_tabu_search_loops": 12580
+        }
+    },
+    {
+        "instance": {
+            "name": "ns1828997",
+            "number_of_variables": 27275,
+            "number_of_binary_variables": 27275,
+            "number_of_integer_variables": 0,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 81725,
+            "is_feasible": true,
+            "known_best": 9.0
+        },
+        "computed": {
+            "is_found_feasible_solution": true,
+            "objective": 26.0,
+            "total_violation": 0.0,
+            "elapsed_time": 3600.045629,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 359121,
+            "number_of_tabu_search_loops": 1869
+        }
+    },
+    {
+        "instance": {
+            "name": "neos-3594536-henty",
+            "number_of_variables": 22924,
+            "number_of_binary_variables": 0,
+            "number_of_integer_variables": 22924,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 21280,
+            "is_feasible": true,
+            "known_best": 401382.0
+        },
+        "computed": {
+            "is_found_feasible_solution": true,
+            "objective": 582716.0,
+            "total_violation": 0.0,
+            "elapsed_time": 3600.012286,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 1615724,
+            "number_of_tabu_search_loops": 8420
+        }
+    },
+    {
+        "instance": {
+            "name": "neos-4531126-vouga",
+            "number_of_variables": 169996,
+            "number_of_binary_variables": 169996,
+            "number_of_integer_variables": 0,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 7694,
+            "is_feasible": true,
+            "known_best": 525053.6089188
+        },
+        "computed": {
+            "is_found_feasible_solution": false,
+            "objective": 1901681.3109,
+            "total_violation": 7.117976775,
+            "elapsed_time": 3600.229628,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 6307,
+            "number_of_tabu_search_loops": 52
+        }
+    },
+    {
+        "instance": {
+            "name": "neos-3603137-hoteo",
+            "number_of_variables": 4003,
+            "number_of_binary_variables": 3913,
+            "number_of_integer_variables": 90,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 10510,
+            "is_feasible": null,
+            "known_best": null
+        },
+        "computed": {
+            "is_found_feasible_solution": false,
+            "objective": 0.0,
+            "total_violation": 4.0,
+            "elapsed_time": 3600.005787,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 10245731,
+            "number_of_tabu_search_loops": 51256
+        }
+    },
+    {
+        "instance": {
+            "name": "neos-3355323-arnon",
+            "number_of_variables": 10248,
+            "number_of_binary_variables": 10104,
+            "number_of_integer_variables": 144,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 21216,
+            "is_feasible": null,
+            "known_best": null
+        },
+        "computed": {
+            "is_found_feasible_solution": false,
+            "objective": 0.0,
+            "total_violation": 23.0,
+            "elapsed_time": 3600.011532,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 1913745,
+            "number_of_tabu_search_loops": 9589
+        }
+    },
+    {
+        "instance": {
+            "name": "neos-2974461-ibar",
+            "number_of_variables": 214730,
+            "number_of_binary_variables": 200352,
+            "number_of_integer_variables": 14378,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 214107,
+            "is_feasible": true,
+            "known_best": 468906174.771
+        },
+        "computed": {
+            "is_found_feasible_solution": true,
+            "objective": 637327600.0,
+            "total_violation": 0.0,
+            "elapsed_time": 3600.158335,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 91172,
+            "number_of_tabu_search_loops": 457
+        }
+    },
+    {
+        "instance": {
+            "name": "neos-3426085-ticino",
+            "number_of_variables": 4688,
+            "number_of_binary_variables": 879,
+            "number_of_integer_variables": 3809,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 308,
+            "is_feasible": true,
+            "known_best": 225.0
+        },
+        "computed": {
+            "is_found_feasible_solution": true,
+            "objective": 229.0,
+            "total_violation": 0.0,
+            "elapsed_time": 3600.001297,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 14694689,
+            "number_of_tabu_search_loops": 76373
+        }
+    },
+    {
+        "instance": {
+            "name": "neos-3068746-nene",
+            "number_of_variables": 4890,
+            "number_of_binary_variables": 3815,
+            "number_of_integer_variables": 1075,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 4664,
+            "is_feasible": true,
+            "known_best": 61910283.68795
+        },
+        "computed": {
+            "is_found_feasible_solution": true,
+            "objective": 71018395.421,
+            "total_violation": 0.0,
+            "elapsed_time": 3600.003187,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 7643419,
+            "number_of_tabu_search_loops": 38315
+        }
+    },
+    {
+        "instance": {
+            "name": "neos-3426132-dieze",
+            "number_of_variables": 11550,
+            "number_of_binary_variables": 2750,
+            "number_of_integer_variables": 8800,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 570,
+            "is_feasible": true,
+            "known_best": 407.0
+        },
+        "computed": {
+            "is_found_feasible_solution": true,
+            "objective": 422.0,
+            "total_violation": 0.0,
+            "elapsed_time": 3600.003265,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 6369766,
+            "number_of_tabu_search_loops": 33286
+        }
+    },
+    {
+        "instance": {
+            "name": "neos-3322547-alsek",
+            "number_of_variables": 1001000,
+            "number_of_binary_variables": 1001000,
+            "number_of_integer_variables": 0,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 2000,
+            "is_feasible": true,
+            "known_best": 400.0
+        },
+        "computed": {
+            "is_found_feasible_solution": "N/A",
+            "objective": "N/A",
+            "total_violation": "N/A",
+            "elapsed_time": "N/A",
+            "number_of_lagrange_dual_iterations": "N/A",
+            "number_of_local_search_iterations": "N/A",
+            "number_of_tabu_search_iterations": "N/A",
+            "number_of_tabu_search_loops": "N/A"
+        }
+    },
+    {
+        "instance": {
+            "name": "z26",
+            "number_of_variables": 17937,
+            "number_of_binary_variables": 17937,
+            "number_of_integer_variables": 0,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 850513,
+            "is_feasible": true,
+            "known_best": -1192.0
+        },
+        "computed": {
+            "is_found_feasible_solution": true,
+            "objective": -1101.0,
+            "total_violation": 0.0,
+            "elapsed_time": 3600.382692,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 31148,
+            "number_of_tabu_search_loops": 293
+        }
+    },
+    {
+        "instance": {
+            "name": "rmine25",
+            "number_of_variables": 326599,
+            "number_of_binary_variables": 326599,
+            "number_of_integer_variables": 0,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 2953849,
+            "is_feasible": true,
+            "known_best": -15536.55450900004
+        },
+        "computed": {
+            "is_found_feasible_solution": true,
+            "objective": -696.243782,
+            "total_violation": 0.0,
+            "elapsed_time": 3604.100691,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 1792,
+            "number_of_tabu_search_loops": 118
+        }
+    },
+    {
+        "instance": {
+            "name": "bab3",
+            "number_of_variables": 393800,
+            "number_of_binary_variables": 393800,
+            "number_of_integer_variables": 0,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 23069,
+            "is_feasible": true,
+            "known_best": -656214.9542
+        },
+        "computed": {
+            "is_found_feasible_solution": false,
+            "objective": -31937.7584,
+            "total_violation": 68.0,
+            "elapsed_time": 3600.104748,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 275449,
+            "number_of_tabu_search_loops": 1421
+        }
+    },
+    {
+        "instance": {
+            "name": "graph40-40-1rand",
+            "number_of_variables": 102600,
+            "number_of_binary_variables": 102600,
+            "number_of_integer_variables": 0,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 360900,
+            "is_feasible": true,
+            "known_best": -9.0
+        },
+        "computed": {
+            "is_found_feasible_solution": true,
+            "objective": -8.0,
+            "total_violation": 0.0,
+            "elapsed_time": 3600.560611,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 119970,
+            "number_of_tabu_search_loops": 614
+        }
+    },
+    {
+        "instance": {
+            "name": "graph40-20-1rand",
+            "number_of_variables": 31243,
+            "number_of_binary_variables": 31243,
+            "number_of_integer_variables": 0,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 99067,
+            "is_feasible": true,
+            "known_best": -15.0
+        },
+        "computed": {
+            "is_found_feasible_solution": true,
+            "objective": -13.0,
+            "total_violation": 0.0,
+            "elapsed_time": 3600.034045,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 705814,
+            "number_of_tabu_search_loops": 3555
+        }
+    },
+    {
+        "instance": {
+            "name": "graph40-80-1rand",
+            "number_of_variables": 283648,
+            "number_of_binary_variables": 283648,
+            "number_of_integer_variables": 0,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 1050112,
+            "is_feasible": true,
+            "known_best": -7.0
+        },
+        "computed": {
+            "is_found_feasible_solution": true,
+            "objective": -5.0,
+            "total_violation": 0.0,
+            "elapsed_time": 3601.837391,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 43527,
+            "number_of_tabu_search_loops": 240
+        }
+    },
+    {
+        "instance": {
+            "name": "kottenpark09",
+            "number_of_variables": 2893026,
+            "number_of_binary_variables": 2892333,
+            "number_of_integer_variables": 693,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 325547,
+            "is_feasible": true,
+            "known_best": 1715.0
+        },
+        "computed": {
+            "is_found_feasible_solution": false,
+            "objective": 1295240.0,
+            "total_violation": 8351.0,
+            "elapsed_time": 7078.755014,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 0,
+            "number_of_tabu_search_loops": 0
+        }
+    },
+    {
+        "instance": {
+            "name": "kosova1",
+            "number_of_variables": 614253,
+            "number_of_binary_variables": 609591,
+            "number_of_integer_variables": 4662,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 304931,
+            "is_feasible": true,
+            "known_best": 293.0
+        },
+        "computed": {
+            "is_found_feasible_solution": false,
+            "objective": 0.0,
+            "total_violation": 5166.0,
+            "elapsed_time": 3600.950107,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 7566,
+            "number_of_tabu_search_loops": 38
+        }
+    },
+    {
+        "instance": {
+            "name": "supportcase30",
+            "number_of_variables": 1024,
+            "number_of_binary_variables": 1024,
+            "number_of_integer_variables": 0,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 1028,
+            "is_feasible": null,
+            "known_best": null
+        },
+        "computed": {
+            "is_found_feasible_solution": false,
+            "objective": 0.0,
+            "total_violation": 6.0,
+            "elapsed_time": 3600.003963,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 12358427,
+            "number_of_tabu_search_loops": 61798
+        }
+    },
+    {
+        "instance": {
+            "name": "ds-big",
+            "number_of_variables": 174997,
+            "number_of_binary_variables": 174997,
+            "number_of_integer_variables": 0,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 1042,
+            "is_feasible": true,
+            "known_best": 195.498997075249
+        },
+        "computed": {
+            "is_found_feasible_solution": true,
+            "objective": 1230.4201707,
+            "total_violation": 0.0,
+            "elapsed_time": 3600.046586,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 362751,
+            "number_of_tabu_search_loops": 1894
+        }
+    },
+    {
+        "instance": {
+            "name": "scpk4",
+            "number_of_variables": 100000,
+            "number_of_binary_variables": 100000,
+            "number_of_integer_variables": 0,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 2000,
+            "is_feasible": true,
+            "known_best": 321.0
+        },
+        "computed": {
+            "is_found_feasible_solution": true,
+            "objective": 324.0,
+            "total_violation": 0.0,
+            "elapsed_time": 3600.031773,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 766077,
+            "number_of_tabu_search_loops": 3922
+        }
+    },
+    {
+        "instance": {
+            "name": "scpm1",
+            "number_of_variables": 500000,
+            "number_of_binary_variables": 500000,
+            "number_of_integer_variables": 0,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 5000,
+            "is_feasible": true,
+            "known_best": 554.0
+        },
+        "computed": {
+            "is_found_feasible_solution": true,
+            "objective": 584.0,
+            "total_violation": 0.0,
+            "elapsed_time": 3600.154504,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 159188,
+            "number_of_tabu_search_loops": 894
+        }
+    },
+    {
+        "instance": {
+            "name": "scpn2",
+            "number_of_variables": 1000000,
+            "number_of_binary_variables": 1000000,
+            "number_of_integer_variables": 0,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 5000,
+            "is_feasible": true,
+            "known_best": 528.0
+        },
+        "computed": {
+            "is_found_feasible_solution": true,
+            "objective": 551.0,
+            "total_violation": 0.0,
+            "elapsed_time": 3600.295156,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 45392,
+            "number_of_tabu_search_loops": 289
+        }
+    },
+    {
+        "instance": {
+            "name": "scpj4scip",
+            "number_of_variables": 99947,
+            "number_of_binary_variables": 99947,
+            "number_of_integer_variables": 0,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 1000,
+            "is_feasible": true,
+            "known_best": 129.0
+        },
+        "computed": {
+            "is_found_feasible_solution": true,
+            "objective": 130.0,
+            "total_violation": 0.0,
+            "elapsed_time": 3600.03329,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 875251,
+            "number_of_tabu_search_loops": 4418
+        }
+    },
+    {
+        "instance": {
+            "name": "scpl4",
+            "number_of_variables": 200000,
+            "number_of_binary_variables": 200000,
+            "number_of_integer_variables": 0,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 2000,
+            "is_feasible": true,
+            "known_best": 263.0
+        },
+        "computed": {
+            "is_found_feasible_solution": true,
+            "objective": 270.0,
+            "total_violation": 0.0,
+            "elapsed_time": 3600.067085,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 466394,
+            "number_of_tabu_search_loops": 2431
+        }
+    },
+    {
+        "instance": {
+            "name": "rmine11",
+            "number_of_variables": 12292,
+            "number_of_binary_variables": 12292,
+            "number_of_integer_variables": 0,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 97389,
+            "is_feasible": true,
+            "known_best": -2508.404144
+        },
+        "computed": {
+            "is_found_feasible_solution": true,
+            "objective": -2473.85744,
+            "total_violation": 0.0,
+            "elapsed_time": 3600.0923,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 517639,
+            "number_of_tabu_search_loops": 2748
+        }
+    },
+    {
+        "instance": {
+            "name": "supportcase2",
+            "number_of_variables": 2912,
+            "number_of_binary_variables": 2912,
+            "number_of_integer_variables": 0,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 597385,
+            "is_feasible": true,
+            "known_best": 109137.0
+        },
+        "computed": {
+            "is_found_feasible_solution": false,
+            "objective": 0.0,
+            "total_violation": 1.0,
+            "elapsed_time": 3600.18229,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 232118,
+            "number_of_tabu_search_loops": 1162
+        }
+    },
+    {
+        "instance": {
+            "name": "ramos3",
+            "number_of_variables": 2187,
+            "number_of_binary_variables": 2187,
+            "number_of_integer_variables": 0,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 2187,
+            "is_feasible": true,
+            "known_best": 192.0
+        },
+        "computed": {
+            "is_found_feasible_solution": true,
+            "objective": 194.0,
+            "total_violation": 0.0,
+            "elapsed_time": 3600.001482,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 33140502,
+            "number_of_tabu_search_loops": 165783
+        }
+    },
+    {
+        "instance": {
+            "name": "rmine13",
+            "number_of_variables": 23980,
+            "number_of_binary_variables": 23980,
+            "number_of_integer_variables": 0,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 197155,
+            "is_feasible": true,
+            "known_best": -3495.3706624382535
+        },
+        "computed": {
+            "is_found_feasible_solution": true,
+            "objective": -3426.342469,
+            "total_violation": 0.0,
+            "elapsed_time": 3600.22384,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 128441,
+            "number_of_tabu_search_loops": 796
+        }
+    },
+    {
+        "instance": {
+            "name": "neos-4360552-sangro",
+            "number_of_variables": 10272,
+            "number_of_binary_variables": 9696,
+            "number_of_integer_variables": 576,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 46012,
+            "is_feasible": true,
+            "known_best": -7.0
+        },
+        "computed": {
+            "is_found_feasible_solution": false,
+            "objective": -6.0,
+            "total_violation": 9.0,
+            "elapsed_time": 3600.026107,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 3317021,
+            "number_of_tabu_search_loops": 16597
+        }
+    },
+    {
+        "instance": {
+            "name": "neos-3355120-tarago",
+            "number_of_variables": 7800,
+            "number_of_binary_variables": 4700,
+            "number_of_integer_variables": 3100,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 86633,
+            "is_feasible": true,
+            "known_best": -11115860.311503928
+        },
+        "computed": {
+            "is_found_feasible_solution": false,
+            "objective": -31093052.019,
+            "total_violation": 640979.39,
+            "elapsed_time": 3600.083581,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 72700,
+            "number_of_tabu_search_loops": 721
+        }
+    },
+    {
+        "instance": {
+            "name": "neos-3682128-sandon",
+            "number_of_variables": 7880,
+            "number_of_binary_variables": 7870,
+            "number_of_integer_variables": 10,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 14920,
+            "is_feasible": true,
+            "known_best": 34666770.0
+        },
+        "computed": {
+            "is_found_feasible_solution": true,
+            "objective": 35251960.0,
+            "total_violation": 0.0,
+            "elapsed_time": 3600.009852,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 4486146,
+            "number_of_tabu_search_loops": 22519
+        }
+    },
+    {
+        "instance": {
+            "name": "f2000",
+            "number_of_variables": 4000,
+            "number_of_binary_variables": 4000,
+            "number_of_integer_variables": 0,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 10500,
+            "is_feasible": true,
+            "known_best": 1810.0
+        },
+        "computed": {
+            "is_found_feasible_solution": false,
+            "objective": 2005.0,
+            "total_violation": 9.0,
+            "elapsed_time": 3600.004814,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 12920427,
+            "number_of_tabu_search_loops": 64614
+        }
+    },
+    {
+        "instance": {
+            "name": "proteindesign121hz512p19",
+            "number_of_variables": 2589931,
+            "number_of_binary_variables": 2589840,
+            "number_of_integer_variables": 91,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 301,
+            "is_feasible": true,
+            "known_best": 3382.0
+        },
+        "computed": {
+            "is_found_feasible_solution": true,
+            "objective": 3534.0,
+            "total_violation": 0.0,
+            "elapsed_time": 3602.681898,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 617,
+            "number_of_tabu_search_loops": 6
+        }
+    },
+    {
+        "instance": {
+            "name": "circ10-3",
+            "number_of_variables": 2700,
+            "number_of_binary_variables": 2700,
+            "number_of_integer_variables": 0,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 42620,
+            "is_feasible": true,
+            "known_best": 284.0
+        },
+        "computed": {
+            "is_found_feasible_solution": true,
+            "objective": 342.0,
+            "total_violation": 0.0,
+            "elapsed_time": 3600.028744,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 1479877,
+            "number_of_tabu_search_loops": 7438
+        }
+    },
+    {
+        "instance": {
+            "name": "pythago7825",
+            "number_of_variables": 3745,
+            "number_of_binary_variables": 3745,
+            "number_of_integer_variables": 0,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 14672,
+            "is_feasible": null,
+            "known_best": null
+        },
+        "computed": {
+            "is_found_feasible_solution": false,
+            "objective": 0.0,
+            "total_violation": 13.0,
+            "elapsed_time": 3600.004824,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 6249066,
+            "number_of_tabu_search_loops": 31249
+        }
+    },
+    {
+        "instance": {
+            "name": "cdc7-4-3-2",
+            "number_of_variables": 11811,
+            "number_of_binary_variables": 11811,
+            "number_of_integer_variables": 0,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 14478,
+            "is_feasible": true,
+            "known_best": -289.0
+        },
+        "computed": {
+            "is_found_feasible_solution": true,
+            "objective": -288.0,
+            "total_violation": 0.0,
+            "elapsed_time": 3600.013143,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 1396554,
+            "number_of_tabu_search_loops": 7019
+        }
+    },
+    {
+        "instance": {
+            "name": "rmine15",
+            "number_of_variables": 42438,
+            "number_of_binary_variables": 42438,
+            "number_of_integer_variables": 0,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 358395,
+            "is_feasible": true,
+            "known_best": -5018.819990999996
+        },
+        "computed": {
+            "is_found_feasible_solution": true,
+            "objective": -2780.088976,
+            "total_violation": 0.0,
+            "elapsed_time": 3600.391516,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 31456,
+            "number_of_tabu_search_loops": 296
+        }
+    },
+    {
+        "instance": {
+            "name": "pizza78i",
+            "number_of_variables": 385067,
+            "number_of_binary_variables": 143886,
+            "number_of_integer_variables": 241181,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 443776,
+            "is_feasible": true,
+            "known_best": 564039.0
+        },
+        "computed": {
+            "is_found_feasible_solution": "N/A",
+            "objective": "N/A",
+            "total_violation": "N/A",
+            "elapsed_time": "N/A",
+            "number_of_lagrange_dual_iterations": "N/A",
+            "number_of_local_search_iterations": "N/A",
+            "number_of_tabu_search_iterations": "N/A",
+            "number_of_tabu_search_loops": "N/A"
+        }
+    },
+    {
+        "instance": {
+            "name": "pizza27i",
+            "number_of_variables": 311316,
+            "number_of_binary_variables": 115831,
+            "number_of_integer_variables": 195485,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 359835,
+            "is_feasible": true,
+            "known_best": 701882.0
+        },
+        "computed": {
+            "is_found_feasible_solution": "N/A",
+            "objective": "N/A",
+            "total_violation": "N/A",
+            "elapsed_time": "N/A",
+            "number_of_lagrange_dual_iterations": "N/A",
+            "number_of_local_search_iterations": "N/A",
+            "number_of_tabu_search_iterations": "N/A",
+            "number_of_tabu_search_loops": "N/A"
+        }
+    },
+    {
+        "instance": {
+            "name": "a2864-99blp",
+            "number_of_variables": 200787,
+            "number_of_binary_variables": 200787,
+            "number_of_integer_variables": 0,
+            "number_of_continuous_variables": 0,
+            "number_of_constraints": 22117,
+            "is_feasible": true,
+            "known_best": -257.0
+        },
+        "computed": {
+            "is_found_feasible_solution": true,
+            "objective": -257.0,
+            "total_violation": 0.0,
+            "elapsed_time": 3600.0817,
+            "number_of_lagrange_dual_iterations": 0,
+            "number_of_local_search_iterations": 0,
+            "number_of_tabu_search_iterations": 287621,
+            "number_of_tabu_search_loops": 1463
+        }
+    }
+]
