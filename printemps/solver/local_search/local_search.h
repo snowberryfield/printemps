@@ -13,30 +13,27 @@
 namespace printemps {
 namespace solver {
 /*****************************************************************************/
-template <class T_Variable, class T_Expression>
-class IncumbentHolder;
-
-/*****************************************************************************/
 struct Option;
 
 namespace local_search {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 LocalSearchResult<T_Variable, T_Expression> solve(
-    model::Model<T_Variable, T_Expression>* a_model_ptr,     //
-    const Option&                           a_OPTION,        //
-    const std::vector<multi_array::ValueProxy<T_Variable>>&  //
-        a_INITIAL_VARIABLE_VALUE_PROXIES,                    //
-    const IncumbentHolder<T_Variable, T_Expression>&         //
-                  a_INCUMBENT_HOLDER,                        //
+    model::Model<T_Variable, T_Expression>* a_model_ptr,        //
+    const Option&                           a_OPTION,           //
+    const std::vector<multi_array::ValueProxy<T_Variable>>&     //
+        a_INITIAL_VARIABLE_VALUE_PROXIES,                       //
+    const solution::IncumbentHolder<T_Variable, T_Expression>&  //
+                  a_INCUMBENT_HOLDER,                           //
     const Memory& a_MEMORY) {
     /**
      * Define type aliases.
      */
-    using Model_T           = model::Model<T_Variable, T_Expression>;
-    using Result_T          = LocalSearchResult<T_Variable, T_Expression>;
-    using IncumbentHolder_T = IncumbentHolder<T_Variable, T_Expression>;
-    using Move_T            = neighborhood::Move<T_Variable, T_Expression>;
+    using Model_T  = model::Model<T_Variable, T_Expression>;
+    using Result_T = LocalSearchResult<T_Variable, T_Expression>;
+    using IncumbentHolder_T =
+        solution::IncumbentHolder<T_Variable, T_Expression>;
+    using Move_T = neighborhood::Move<T_Variable, T_Expression>;
 
     /**
      * Start to measure computational time.
@@ -72,7 +69,8 @@ LocalSearchResult<T_Variable, T_Expression> solve(
 
     int update_status =
         incumbent_holder.try_update_incumbent(model_ptr, solution_score);
-    int total_update_status = IncumbentHolderConstant::STATUS_NO_UPDATED;
+    int total_update_status =
+        solution::IncumbentHolderConstant::STATUS_NO_UPDATED;
 
     /**
      * Reset the last update iterations.

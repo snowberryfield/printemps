@@ -35,6 +35,7 @@
 #include "../solution/named_solution.h"
 #include "../solution/plain_solution.h"
 #include "../solution/solution_score.h"
+#include "../solution/incumbent_holder.h"
 
 namespace printemps {
 namespace model {

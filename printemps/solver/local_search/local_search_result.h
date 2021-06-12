@@ -8,10 +8,6 @@
 
 namespace printemps {
 namespace solver {
-/*****************************************************************************/
-template <class T_Variable, class T_Expression>
-class IncumbentHolder;
-
 namespace local_search {
 /*****************************************************************************/
 enum class LocalSearchTerminationStatus {
@@ -25,8 +21,8 @@ enum class LocalSearchTerminationStatus {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 struct LocalSearchResult {
-    IncumbentHolder<T_Variable, T_Expression> incumbent_holder;
-    Memory                                    memory;
+    solution::IncumbentHolder<T_Variable, T_Expression> incumbent_holder;
+    Memory                                              memory;
 
     int total_update_status;
     int number_of_iterations;

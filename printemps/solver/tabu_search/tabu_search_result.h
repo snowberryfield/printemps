@@ -8,10 +8,6 @@
 
 namespace printemps {
 namespace solver {
-/*****************************************************************************/
-template <class T_Variable, class T_Expression>
-class IncumbentHolder;
-
 namespace tabu_search {
 /*****************************************************************************/
 enum class TabuSearchTerminationStatus {
@@ -26,8 +22,8 @@ enum class TabuSearchTerminationStatus {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 struct TabuSearchResult {
-    IncumbentHolder<T_Variable, T_Expression> incumbent_holder;
-    Memory                                    memory;
+    solution::IncumbentHolder<T_Variable, T_Expression> incumbent_holder;
+    Memory                                              memory;
 
     int tabu_tenure;
     int total_update_status;
