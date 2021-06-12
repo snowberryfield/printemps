@@ -15,31 +15,28 @@
 namespace printemps {
 namespace solver {
 /*****************************************************************************/
-template <class T_Variable, class T_Expression>
-class IncumbentHolder;
-
-/*****************************************************************************/
 struct Option;
 
 namespace tabu_search {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 TabuSearchResult<T_Variable, T_Expression> solve(
-    model::Model<T_Variable, T_Expression>* a_model_ptr,     //
-    const Option&                           a_OPTION,        //
-    const std::vector<multi_array::ValueProxy<T_Variable>>&  //
-        a_INITIAL_VARIABLE_VALUE_PROXIES,                    //
-    const IncumbentHolder<T_Variable, T_Expression>&         //
-                 a_INCUMBENT_HOLDER,                         //
+    model::Model<T_Variable, T_Expression>* a_model_ptr,        //
+    const Option&                           a_OPTION,           //
+    const std::vector<multi_array::ValueProxy<T_Variable>>&     //
+        a_INITIAL_VARIABLE_VALUE_PROXIES,                       //
+    const solution::IncumbentHolder<T_Variable, T_Expression>&  //
+                 a_INCUMBENT_HOLDER,                            //
     const Memory a_MEMORY) {
     /**
      * Define type aliases.
      */
-    using Model_T           = model::Model<T_Variable, T_Expression>;
-    using Result_T          = TabuSearchResult<T_Variable, T_Expression>;
-    using IncumbentHolder_T = IncumbentHolder<T_Variable, T_Expression>;
-    using Move_T            = neighborhood::Move<T_Variable, T_Expression>;
-    using MoveScore         = TabuSearchMoveScore;
+    using Model_T  = model::Model<T_Variable, T_Expression>;
+    using Result_T = TabuSearchResult<T_Variable, T_Expression>;
+    using IncumbentHolder_T =
+        solution::IncumbentHolder<T_Variable, T_Expression>;
+    using Move_T    = neighborhood::Move<T_Variable, T_Expression>;
+    using MoveScore = TabuSearchMoveScore;
 
     /**
      * Start to measure computational time.
@@ -76,7 +73,8 @@ TabuSearchResult<T_Variable, T_Expression> solve(
 
     int update_status = incumbent_holder.try_update_incumbent(
         model_ptr, current_solution_score);
-    int total_update_status = IncumbentHolderConstant::STATUS_NO_UPDATED;
+    int total_update_status =
+        solution::IncumbentHolderConstant::STATUS_NO_UPDATED;
 
     /**
      * Reset the last update iterations.
@@ -517,18 +515,18 @@ TabuSearchResult<T_Variable, T_Expression> solve(
         /**
          * Calculate various statistics for logging.
          */
-        if (update_status &
-            IncumbentHolderConstant::STATUS_LOCAL_AUGMENTED_INCUMBENT_UPDATE) {
+        if (update_status & solution::IncumbentHolderConstant::
+                                STATUS_LOCAL_AUGMENTED_INCUMBENT_UPDATE) {
             last_local_augmented_incumbent_update_iteration = iteration;
         }
 
-        if (update_status &
-            IncumbentHolderConstant::STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
+        if (update_status & solution::IncumbentHolderConstant::
+                                STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
             last_global_augmented_incumbent_update_iteration = iteration;
         }
 
-        if (update_status &
-            IncumbentHolderConstant::STATUS_FEASIBLE_INCUMBENT_UPDATE) {
+        if (update_status & solution::IncumbentHolderConstant::
+                                STATUS_FEASIBLE_INCUMBENT_UPDATE) {
             last_feasible_incumbent_update_iteration = iteration;
         }
 
@@ -536,11 +534,11 @@ TabuSearchResult<T_Variable, T_Expression> solve(
          * For pruning, count updating of the local augmented incumbent without
          * global augmented incumbent improvement.
          */
-        if (update_status ==
-            IncumbentHolderConstant::STATUS_LOCAL_AUGMENTED_INCUMBENT_UPDATE) {
+        if (update_status == solution::IncumbentHolderConstant::
+                                 STATUS_LOCAL_AUGMENTED_INCUMBENT_UPDATE) {
             local_augmented_incumbent_update_count++;
         } else if (update_status &
-                   IncumbentHolderConstant::
+                   solution::IncumbentHolderConstant::
                        STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
             local_augmented_incumbent_update_count = 0;
         }
@@ -610,7 +608,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
 
         if (option.tabu_search.is_enabled_automatic_tabu_tenure_adjustment) {
             if ((update_status &
-                 IncumbentHolderConstant::
+                 solution::IncumbentHolderConstant::
                      STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) &&
                 tabu_tenure > original_tabu_tenure) {
                 /**

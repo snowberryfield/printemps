@@ -9,8 +9,6 @@
 #include "../model/model.h"
 #include "../utility/utility.h"
 #include "../solution/solution_archive.h"
-
-#include "incumbent_holder.h"
 #include "option.h"
 #include "status.h"
 #include "result.h"
@@ -63,9 +61,10 @@ Result<T_Variable, T_Expression> solve(
     /**
      * Define type aliases.
      */
-    using Model_T           = model::Model<T_Variable, T_Expression>;
-    using Solution_T        = solution::Solution<T_Variable, T_Expression>;
-    using IncumbentHolder_T = IncumbentHolder<T_Variable, T_Expression>;
+    using Model_T    = model::Model<T_Variable, T_Expression>;
+    using Solution_T = solution::Solution<T_Variable, T_Expression>;
+    using IncumbentHolder_T =
+        solution::IncumbentHolder<T_Variable, T_Expression>;
 
     /**
      * Copy arguments as local variables.
@@ -625,7 +624,7 @@ Result<T_Variable, T_Expression> solve(
          * Reset the penalty coefficients if the incumbent solution was not
          * updated for specified count of loops.
          */
-        if ((update_status & (IncumbentHolderConstant::
+        if ((update_status & (solution::IncumbentHolderConstant::
                                   STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE))) {
             /**
              * Reset the count of loops with no-update if the incumbent solution
@@ -694,7 +693,7 @@ Result<T_Variable, T_Expression> solve(
                 tabu_search::TabuSearchTerminationStatus::NO_MOVE) {
                 improvability_screening_mode = ImprovabilityScreeningMode::Soft;
             } else if (result.total_update_status &
-                       IncumbentHolderConstant::
+                       solution::IncumbentHolderConstant::
                            STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
                 /**
                  * If the incumbent solution was updated in the last loop, the
@@ -752,7 +751,8 @@ Result<T_Variable, T_Expression> solve(
                      result_local_augmented_incumbent_objective;
 
         if (result.total_update_status &
-            IncumbentHolderConstant::STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
+            solution::IncumbentHolderConstant::
+                STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
             /**
              * If the global incumbent solution was updated in the last loop,
              * the global incumbent is employed as the initial solution for the
@@ -769,7 +769,7 @@ Result<T_Variable, T_Expression> solve(
             iteration_consecutive_no_update = 0;
         } else {
             if (result.total_update_status ==
-                IncumbentHolderConstant::STATUS_NO_UPDATED) {
+                solution::IncumbentHolderConstant::STATUS_NO_UPDATED) {
                 /**
                  * If the last loop failed to find any local/global incumbent
                  * solution, the global incumbent solution is employed as
@@ -1085,13 +1085,13 @@ Result<T_Variable, T_Expression> solve(
         if (master_option.tabu_search
                 .is_enabled_automatic_tabu_tenure_adjustment) {
             if (result.total_update_status &
-                IncumbentHolderConstant::
+                solution::IncumbentHolderConstant::
                     STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
                 inital_tabu_tenure =
                     std::min(master_option.tabu_search.initial_tabu_tenure,
                              model_ptr->number_of_mutable_variables());
             } else if (result.total_update_status ==
-                       IncumbentHolderConstant::STATUS_NO_UPDATED) {
+                       solution::IncumbentHolderConstant::STATUS_NO_UPDATED) {
                 inital_tabu_tenure = std::max(
                     option.tabu_search.initial_tabu_tenure - 1,
                     std::min(master_option.tabu_search.initial_tabu_tenure,
@@ -1115,11 +1115,11 @@ Result<T_Variable, T_Expression> solve(
         /**
          * Update the number of initial modification for the next loop.
          */
-        if (result.total_update_status &
-            IncumbentHolderConstant::STATUS_FEASIBLE_INCUMBENT_UPDATE) {
+        if (result.total_update_status & solution::IncumbentHolderConstant::
+                                             STATUS_FEASIBLE_INCUMBENT_UPDATE) {
             number_of_initial_modification = 0;
         } else if (result.total_update_status &
-                   IncumbentHolderConstant::
+                   solution::IncumbentHolderConstant::
                        STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
             number_of_initial_modification = 0;
         } else {
@@ -1160,7 +1160,7 @@ Result<T_Variable, T_Expression> solve(
             result.number_of_iterations == option.tabu_search.iteration_max) {
             int iteration_max_temp = 0;
             if (result.total_update_status &
-                IncumbentHolderConstant::
+                solution::IncumbentHolderConstant::
                     STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
                 iteration_max_temp  //
                     = static_cast<int>(ceil(
@@ -1190,7 +1190,8 @@ Result<T_Variable, T_Expression> solve(
          * Reset chain moves if the global augmented objective was updated.
          */
         if (result.total_update_status &
-            IncumbentHolderConstant::STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
+            solution::IncumbentHolderConstant::
+                STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
             if (option.is_enabled_chain_move) {
                 model_ptr->neighborhood().chain().clear_moves();
             }
@@ -1203,7 +1204,8 @@ Result<T_Variable, T_Expression> solve(
         bool is_deactivated_special_neighborhood_move = false;
 
         if (result.total_update_status &
-            IncumbentHolderConstant::STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
+            solution::IncumbentHolderConstant::
+                STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
             /**
              * Disable the special neighborhood moves if the incumbent was
              * updated.
@@ -1368,13 +1370,13 @@ Result<T_Variable, T_Expression> solve(
         /**
          * Print the optimization status of the previous tabu search loop.
          */
-        if (result.total_update_status &
-            IncumbentHolderConstant::STATUS_FEASIBLE_INCUMBENT_UPDATE) {
+        if (result.total_update_status & solution::IncumbentHolderConstant::
+                                             STATUS_FEASIBLE_INCUMBENT_UPDATE) {
             utility::print_message("Feasible incumbent objective was updated. ",
                                    master_option.verbose >= Verbose::Outer);
 
         } else if (result.total_update_status &
-                   IncumbentHolderConstant::
+                   solution::IncumbentHolderConstant::
                        STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
             utility::print_message("Global incumbent objective was updated. ",
                                    master_option.verbose >= Verbose::Outer);
