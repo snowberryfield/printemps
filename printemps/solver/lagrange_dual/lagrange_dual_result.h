@@ -8,15 +8,7 @@
 
 namespace printemps {
 namespace solver {
-/*****************************************************************************/
 namespace lagrange_dual {
-enum class LagrangeDualTerminationStatus {
-    TIME_OVER,
-    ITERATION_OVER,
-    CONVERGE,
-    REACH_TARGET
-};
-
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 struct LagrangeDualResult {

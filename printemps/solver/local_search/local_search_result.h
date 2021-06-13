@@ -10,15 +10,6 @@ namespace printemps {
 namespace solver {
 namespace local_search {
 /*****************************************************************************/
-enum class LocalSearchTerminationStatus {
-    TIME_OVER,
-    ITERATION_OVER,
-    NO_MOVE,
-    REACH_TARGET,
-    LOCAL_OPTIMAL
-};
-
-/*****************************************************************************/
 template <class T_Variable, class T_Expression>
 struct LocalSearchResult {
     solution::IncumbentHolder<T_Variable, T_Expression> incumbent_holder;

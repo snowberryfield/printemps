@@ -48,15 +48,16 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         m_violation_function;
 
     Expression<T_Variable, T_Expression> m_expression;
-    ConstraintSense                      m_sense;
-    T_Expression                         m_constraint_value;
-    T_Expression                         m_violation_value;
-    T_Expression                         m_positive_part;
-    T_Expression                         m_negative_part;
-    bool                                 m_is_linear;
-    bool                                 m_is_enabled;
-    bool                                 m_is_less_or_equal;     /// <= or ==
-    bool                                 m_is_greater_or_equal;  /// >= or ==
+
+    ConstraintSense m_sense;
+    T_Expression    m_constraint_value;
+    T_Expression    m_violation_value;
+    T_Expression    m_positive_part;
+    T_Expression    m_negative_part;
+    bool            m_is_linear;
+    bool            m_is_enabled;
+    bool            m_is_less_or_equal;     /// <= or ==
+    bool            m_is_greater_or_equal;  /// >= or ==
 
     double m_local_penalty_coefficient_less;
     double m_local_penalty_coefficient_greater;

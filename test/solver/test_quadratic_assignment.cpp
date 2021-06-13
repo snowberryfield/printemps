@@ -141,7 +141,7 @@ TEST_F(TestQuadracitAssignment, quadratic_assignment) {
         p(n) = n;
     }
     /// solve
-    printemps::solver::Option option;
+    printemps::option::Option option;
 
     option.iteration_max                           = 50;
     option.is_enabled_grouping_penalty_coefficient = true;
@@ -158,11 +158,10 @@ TEST_F(TestQuadracitAssignment, quadratic_assignment) {
     option.is_enabled_chain_move                   = true;
     option.is_enabled_user_defined_move            = true;
     option.target_objective_value                  = -1E100;
-    option.verbose                                 = printemps::solver::None;
-    option.tabu_search.iteration_max               = 100;
-    option.tabu_search.initial_tabu_tenure         = 10;
-    option.tabu_search.tabu_mode =
-        printemps::solver::tabu_search::TabuMode::All;
+    option.verbose                         = printemps::option::verbose::None;
+    option.tabu_search.iteration_max       = 100;
+    option.tabu_search.initial_tabu_tenure = 10;
+    option.tabu_search.tabu_mode           = printemps::option::tabu_mode::All;
 
     option.tabu_search.is_enabled_shuffle                          = true;
     option.tabu_search.is_enabled_move_curtail                     = true;

@@ -10,16 +10,6 @@ namespace printemps {
 namespace solver {
 namespace tabu_search {
 /*****************************************************************************/
-enum class TabuSearchTerminationStatus {
-    TIME_OVER,
-    ITERATION_OVER,
-    NO_MOVE,
-    REACH_TARGET,
-    EARLY_STOP,
-    OPTIMAL
-};
-
-/*****************************************************************************/
 template <class T_Variable, class T_Expression>
 struct TabuSearchResult {
     solution::IncumbentHolder<T_Variable, T_Expression> incumbent_holder;

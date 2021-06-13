@@ -3,18 +3,11 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_SOLVER_TABU_SEARCH_TABU_SEARCH_OPTION_H__
-#define PRINTEMPS_SOLVER_TABU_SEARCH_TABU_SEARCH_OPTION_H__
+#ifndef PRINTEMPS_OPTION_TABU_SEARCH_OPTION_H__
+#define PRINTEMPS_OPTION_TABU_SEARCH_OPTION_H__
 
 namespace printemps {
-namespace solver {
-namespace tabu_search {
-/*****************************************************************************/
-enum TabuMode : int {
-    All,
-    Any,
-};
-
+namespace option {
 /*****************************************************************************/
 struct TabuSearchOptionConstant {
     static constexpr int    DEFAULT_ITERATION_MAX                       = 200;
@@ -48,31 +41,31 @@ struct TabuSearchOptionConstant {
 
 /*****************************************************************************/
 struct TabuSearchOption {
-    int      iteration_max;
-    double   time_max;
-    double   time_offset;  // hidden
-    int      log_interval;
-    int      initial_tabu_tenure;
-    double   tabu_tenure_randomize_rate;
-    double   initial_modification_fixed_rate;      // hidden
-    double   initial_modification_randomize_rate;  // hidden
-    TabuMode tabu_mode;
-    double   move_preserve_rate;                           // hidden
-    double   frequency_penalty_coefficient;                // hidden
-    double   pruning_rate_threshold;                       // hidden
-    bool     is_enabled_shuffle;                           // hidden
-    bool     is_enabled_move_curtail;                      // hidden
-    bool     is_enabled_automatic_break;                   // hidden
-    bool     is_enabled_automatic_tabu_tenure_adjustment;  // hidden
-    bool     is_enabled_automatic_iteration_adjustment;    // hidden
-    bool     is_enabled_initial_modification;              // hidden
-    int      bias_increase_count_threshold;                // hidden
-    int      bias_decrease_count_threshold;                // hidden
-    double   iteration_increase_rate;                      // hidden
-    double   iteration_decrease_rate;                      // hidden
-    bool     ignore_tabu_if_global_incumbent;              // hidden
-    int      number_of_initial_modification;               // hidden
-    int      seed;                                         // hidden
+    int                 iteration_max;
+    double              time_max;
+    double              time_offset;  // hidden
+    int                 log_interval;
+    int                 initial_tabu_tenure;
+    double              tabu_tenure_randomize_rate;
+    double              initial_modification_fixed_rate;      // hidden
+    double              initial_modification_randomize_rate;  // hidden
+    tabu_mode::TabuMode tabu_mode;
+    double              move_preserve_rate;                           // hidden
+    double              frequency_penalty_coefficient;                // hidden
+    double              pruning_rate_threshold;                       // hidden
+    bool                is_enabled_shuffle;                           // hidden
+    bool                is_enabled_move_curtail;                      // hidden
+    bool                is_enabled_automatic_break;                   // hidden
+    bool                is_enabled_automatic_tabu_tenure_adjustment;  // hidden
+    bool                is_enabled_automatic_iteration_adjustment;    // hidden
+    bool                is_enabled_initial_modification;              // hidden
+    int                 bias_increase_count_threshold;                // hidden
+    int                 bias_decrease_count_threshold;                // hidden
+    double              iteration_increase_rate;                      // hidden
+    double              iteration_decrease_rate;                      // hidden
+    bool                ignore_tabu_if_global_incumbent;              // hidden
+    int                 number_of_initial_modification;               // hidden
+    int                 seed;                                         // hidden
 
     /*************************************************************************/
     TabuSearchOption(void) {
@@ -98,7 +91,7 @@ struct TabuSearchOption {
             TabuSearchOptionConstant::DEFAULT_INITIAL_MODIFICATION_FIXED_RATE;
         this->initial_modification_randomize_rate = TabuSearchOptionConstant::
             DEFAULT_INITIAL_MODIFICATION_RANDOMIZE_RATE;
-        this->tabu_mode = TabuMode::All;
+        this->tabu_mode = tabu_mode::All;
         this->move_preserve_rate =
             TabuSearchOptionConstant::DEFAULT_MOVE_PRESERVE_RATE;
         this->frequency_penalty_coefficient =
@@ -134,8 +127,7 @@ struct TabuSearchOption {
         this->seed = TabuSearchOptionConstant::DEFAULT_SEED;
     }
 };
-}  // namespace tabu_search
-}  // namespace solver
+}  // namespace option
 }  // namespace printemps
 
 #endif

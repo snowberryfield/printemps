@@ -131,8 +131,8 @@ int main(void) {
     /*************************************************************************/
     /// Run solver
     /*************************************************************************/
-    printemps::solver::Option option;
-    option.selection_mode        = printemps::model::SelectionMode::Defined;
+    printemps::option::Option option;
+    option.selection_mode        = printemps::option::selection_mode::Defined;
     option.tabu_search.tabu_mode = printemps::solver::tabu_search::Any;
     option.verbose               = printemps::solver::Full;
 

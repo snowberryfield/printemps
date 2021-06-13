@@ -3,135 +3,16 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_UTILITY_MPS_UTILITY_H__
-#define PRINTEMPS_UTILITY_MPS_UTILITY_H__
+#ifndef PRINTEMPS_MPS_MPS_H__
+#define PRINTEMPS_MPS_MPS_H__
 
-#include <iostream>
-#include <cmath>
-#include <vector>
-#include <string>
-#include <sstream>
-#include <fstream>
-#include <unordered_map>
-
-#ifdef _OPENMP
-#include <omp.h>
-#endif
-
-#include <printemps.h>
+#include "mps_variable.h"
+#include "mps_constraint.h"
+#include "mps_objective.h"
+#include "mps_read_mode.h"
 
 namespace printemps {
-namespace utility {
-/*****************************************************************************/
-enum class MPSVariableSense { Integer, Continuous };
-
-/*****************************************************************************/
-enum class MPSConstraintSense { Less, Equal, Greater };
-
-/*****************************************************************************/
-enum class MPSObjectiveSense { Minimize, Maximize };
-
-/*****************************************************************************/
-enum class MPSReadMode {
-    Initial,
-    Name,
-    Rows,
-    Columns,
-    Rhs,
-    Ranges,
-    Bounds,
-    Endata
-};
-
-/*****************************************************************************/
-struct MPSVariable {
-    MPSVariableSense sense;
-    std::string      name;
-    int              integer_lower_bound;
-    int              integer_upper_bound;
-    int              integer_fixed_value;
-    double           continuous_lower_bound;
-    double           continuous_upper_bound;
-    double           continuous_fixed_value;
-    bool             is_bounded;
-    bool             is_bound_defined;
-    bool             is_fixed;
-
-    /*************************************************************************/
-    MPSVariable(void) {
-        this->initialize();
-    }
-
-    /*************************************************************************/
-    ~MPSVariable(void) {
-        /// nothing to do
-    }
-
-    /*************************************************************************/
-    void initialize(void) {
-        sense                  = MPSVariableSense::Continuous;
-        name                   = "";
-        integer_lower_bound    = 0;
-        integer_upper_bound    = constant::INT_HALF_MAX;
-        integer_fixed_value    = 0;
-        continuous_lower_bound = 0;
-        continuous_upper_bound = HUGE_VAL;
-        continuous_fixed_value = 0;
-        is_bound_defined       = false;
-        is_fixed               = false;
-    }
-};
-
-/*****************************************************************************/
-struct MPSConstraint {
-    MPSConstraintSense                      sense;
-    std::string                             name;
-    std::unordered_map<std::string, double> sensitivities;
-    double                                  rhs;
-
-    /*************************************************************************/
-    MPSConstraint(void) {
-        this->initialize();
-    }
-
-    /*************************************************************************/
-    ~MPSConstraint(void) {
-        /// nothing to do
-    }
-
-    /*************************************************************************/
-    void initialize(void) {
-        sense = MPSConstraintSense::Less;
-        name  = "";
-        sensitivities.clear();
-        rhs = 0.0;
-    }
-};
-
-/*****************************************************************************/
-struct MPSObjective {
-    MPSObjectiveSense                       sense;
-    std::string                             name;
-    std::unordered_map<std::string, double> sensitivities;
-
-    /*************************************************************************/
-    MPSObjective(void) {
-        this->initialize();
-    }
-
-    /*************************************************************************/
-    ~MPSObjective(void) {
-        /// nothing to do
-    }
-
-    /*************************************************************************/
-    void initialize(void) {
-        sense = MPSObjectiveSense::Minimize;
-        name  = "";
-        sensitivities.clear();
-    }
-};
-
+namespace mps {
 /*****************************************************************************/
 struct MPS {
     std::string                                    name;
@@ -154,23 +35,23 @@ struct MPS {
 
     /*************************************************************************/
     void initialize(void) {
-        name = "";
-        variables.clear();
-        constraints.clear();
-        objective.initialize();
+        this->name = "";
+        this->variables.clear();
+        this->constraints.clear();
+        this->objective.initialize();
 
-        variable_names.clear();
-        constraint_names.clear();
+        this->variable_names.clear();
+        this->constraint_names.clear();
 
-        number_of_variables         = 0;
-        number_of_lower_constraints = 0;
-        number_of_equal_constraints = 0;
-        number_of_upper_constraints = 0;
+        this->number_of_variables         = 0;
+        this->number_of_lower_constraints = 0;
+        this->number_of_equal_constraints = 0;
+        this->number_of_upper_constraints = 0;
     }
 };
 
 /*****************************************************************************/
-MPS read_mps(const std::string &a_FILE_NAME) {
+inline MPS read_mps(const std::string &a_FILE_NAME) {
     MPS mps;
 
     bool is_valid = false;
@@ -525,227 +406,7 @@ MPS read_mps(const std::string &a_FILE_NAME) {
 
     return mps;
 }
-
-/*****************************************************************************/
-class MPSReader {
-   private:
-    model::IPModel m_model;
-
-   public:
-    /*************************************************************************/
-    MPSReader(void) {
-        this->initialize();
-    }
-
-    /*************************************************************************/
-    ~MPSReader(void) {
-        /// nothing to do
-    }
-
-    /*************************************************************************/
-    void initialize(void) {
-        m_model.initialize();
-    }
-
-    /*************************************************************************/
-    model::IPModel &create_model_from_mps(const std::string &a_FILE_NAME,
-                                          const bool a_ACCEPT_CONTINUOUS) {
-        MPS mps = read_mps(a_FILE_NAME);
-        std::unordered_map<std::string, model::IPVariable *> variable_ptrs;
-
-        auto &variable_proxy =
-            m_model.create_variables("variables", mps.variables.size());
-
-        /**
-         * Set up the decision variables.
-         */
-        int number_of_variables = mps.variable_names.size();
-
-        for (auto i = 0; i < number_of_variables; i++) {
-            auto &name     = mps.variable_names[i];
-            auto &variable = mps.variables[name];
-
-            if (variable.sense == MPSVariableSense::Continuous) {
-                if (a_ACCEPT_CONTINUOUS) {
-                    utility::print_warning(
-                        "The continuous variable " + name +
-                            " will be regarded as an integer variable.",
-                        true);
-                } else {
-                    throw std::logic_error(utility::format_error_location(
-                        __FILE__, __LINE__, __func__,
-                        "The MPS file includes continuous variables."));
-                }
-            }
-
-            variable_proxy(i).set_bound(variable.integer_lower_bound,
-                                        variable.integer_upper_bound);
-
-            if (variable.is_fixed) {
-                variable_proxy(i).fix_by(variable.integer_fixed_value);
-            }
-
-            variable_proxy(i).set_name(name);
-            variable_ptrs[name] = &variable_proxy(i);
-        }
-
-        /**
-         * Set up the constraints.
-         */
-        int              number_of_constraints = mps.constraint_names.size();
-        std::vector<int> offsets(number_of_constraints);
-
-        auto &constraint_proxy =
-            m_model.create_constraints("constraints", number_of_constraints);
-
-#ifdef _OPENMP
-#pragma omp parallel for schedule(static)
-#endif
-        for (auto i = 0; i < number_of_constraints; i++) {
-            auto &name       = mps.constraint_names[i];
-            auto &constraint = mps.constraints[name];
-            auto  expression = model::IPExpression::create_instance();
-
-            std::unordered_map<model::IPVariable *, double>
-                expression_sensitivities;
-            for (const auto &sensitivity : constraint.sensitivities) {
-                std::string variable_name = sensitivity.first;
-                double      coefficient   = sensitivity.second;
-                expression_sensitivities[variable_ptrs[variable_name]] =
-                    coefficient;
-            }
-            expression.set_sensitivities(expression_sensitivities);
-
-            switch (constraint.sense) {
-                case MPSConstraintSense::Less: {
-                    constraint_proxy(i) = (expression <= constraint.rhs);
-                    break;
-                }
-
-                case MPSConstraintSense::Equal: {
-                    constraint_proxy(i) = (expression == constraint.rhs);
-                    break;
-                }
-
-                case MPSConstraintSense::Greater: {
-                    constraint_proxy(i) = (expression >= constraint.rhs);
-                    break;
-                }
-            }
-            constraint_proxy(i).set_name(name);
-        }
-
-        /**
-         * Set up the objective function.
-         */
-        auto objective = model::IPExpression::create_instance();
-        std::unordered_map<model::IPVariable *, double> objective_sensitivities;
-        for (const auto &sensitivity : mps.objective.sensitivities) {
-            std::string variable_name = sensitivity.first;
-            double      coefficient   = sensitivity.second;
-            objective_sensitivities[variable_ptrs[variable_name]] = coefficient;
-        }
-        objective.set_sensitivities(objective_sensitivities);
-        m_model.minimize(objective);
-
-        return m_model;
-    }
-};
-
-/*****************************************************************************/
-std::unordered_map<std::string, int> read_solution(
-    const std::string &a_FILE_NAME) {
-    std::unordered_map<std::string, int> solution;
-
-    std::vector<std::string> lines;
-    std::string              item;
-
-    /**
-     * Read and store entire part of the solution file.
-     */
-    {
-        std::ifstream ifs;
-        std::string   buffer;
-
-        ifs.open(a_FILE_NAME.c_str());
-        if (ifs.fail()) {
-            throw std::logic_error(utility::format_error_location(
-                __FILE__, __LINE__, __func__,
-                "Cannot open the specified solution file: " + a_FILE_NAME));
-        }
-        while (std::getline(ifs, buffer)) {
-            lines.push_back(buffer);
-        }
-        ifs.close();
-    }
-
-    /**
-     * Parse the solution file.
-     */
-    for (const auto &line : lines) {
-        std::stringstream        stream(line);
-        std::vector<std::string> items;
-        while (stream >> item) {
-            items.push_back(item);
-        }
-        int ITEMS_SIZE = items.size();
-
-        if (ITEMS_SIZE != 2) {
-            continue;
-        }
-        solution[items[0]] =
-            static_cast<int>(floor(0.5 + atof(items[1].c_str())));
-    }
-
-    return solution;
-}
-
-/*****************************************************************************/
-std::unordered_set<std::string> read_variable_names(
-    const std::string &a_FILE_NAME) {
-    std::unordered_set<std::string> variable_names;
-    std::vector<std::string>        lines;
-    std::string                     item;
-
-    /**
-     * Read and store entire part of the variable names file.
-     */
-    {
-        std::ifstream ifs;
-        std::string   buffer;
-
-        ifs.open(a_FILE_NAME.c_str());
-        if (ifs.fail()) {
-            throw std::logic_error(utility::format_error_location(
-                __FILE__, __LINE__, __func__,
-                "Cannot open the specified solution file: " + a_FILE_NAME));
-        }
-        while (std::getline(ifs, buffer)) {
-            lines.push_back(buffer);
-        }
-        ifs.close();
-    }
-
-    /**
-     * Parse the variable names file.
-     */
-    for (const auto &line : lines) {
-        std::stringstream        stream(line);
-        std::vector<std::string> items;
-        while (stream >> item) {
-            items.push_back(item);
-        }
-        int ITEMS_SIZE = items.size();
-
-        if (ITEMS_SIZE == 0) {
-            continue;
-        }
-        variable_names.insert(items[0]);
-    }
-
-    return variable_names;
-}
-}  // namespace utility
+}  // namespace mps
 }  // namespace printemps
 #endif
 /*****************************************************************************/

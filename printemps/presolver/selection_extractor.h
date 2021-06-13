@@ -252,31 +252,31 @@ constexpr void extract_independent_selections(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 constexpr void extract_selections(
-    model::Model<T_Variable, T_Expression> *a_model_ptr,  //
-    const model::SelectionMode &            a_SELECTION_MODE,
-    const bool                              a_IS_ENABLED_PRINT) {
+    model::Model<T_Variable, T_Expression> *     a_model_ptr,  //
+    const option::selection_mode::SelectionMode &a_SELECTION_MODE,
+    const bool                                   a_IS_ENABLED_PRINT) {
     switch (a_SELECTION_MODE) {
-        case model::SelectionMode::None: {
+        case option::selection_mode::None: {
             break;
         }
-        case model::SelectionMode::Defined: {
+        case option::selection_mode::Defined: {
             extract_selections_by_defined_order(a_model_ptr,  //
                                                 a_IS_ENABLED_PRINT);
             break;
         }
-        case model::SelectionMode::Smaller: {
+        case option::selection_mode::Smaller: {
             extract_selections_by_number_of_variables_order(a_model_ptr,  //
                                                             true,         //
                                                             a_IS_ENABLED_PRINT);
             break;
         }
-        case model::SelectionMode::Larger: {
+        case option::selection_mode::Larger: {
             extract_selections_by_number_of_variables_order(a_model_ptr,  //
                                                             false,        //
                                                             a_IS_ENABLED_PRINT);
             break;
         }
-        case model::SelectionMode::Independent: {
+        case option::selection_mode::Independent: {
             extract_independent_selections(a_model_ptr,  //
                                            a_IS_ENABLED_PRINT);
             break;

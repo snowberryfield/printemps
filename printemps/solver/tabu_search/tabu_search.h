@@ -8,21 +8,18 @@
 
 #include "../memory.h"
 #include "tabu_search_move_score.h"
-#include "tabu_search_option.h"
 #include "tabu_search_print.h"
+#include "tabu_search_termination_status.h"
 #include "tabu_search_result.h"
 
 namespace printemps {
 namespace solver {
-/*****************************************************************************/
-struct Option;
-
 namespace tabu_search {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 TabuSearchResult<T_Variable, T_Expression> solve(
     model::Model<T_Variable, T_Expression>* a_model_ptr,        //
-    const Option&                           a_OPTION,           //
+    const option::Option&                   a_OPTION,           //
     const std::vector<multi_array::ValueProxy<T_Variable>>&     //
         a_INITIAL_VARIABLE_VALUE_PROXIES,                       //
     const solution::IncumbentHolder<T_Variable, T_Expression>&  //
@@ -46,9 +43,9 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     /**
      * Copy arguments as local variables.
      */
-    Model_T* model_ptr = a_model_ptr;
-    Option   option    = a_OPTION;
-    Memory   memory    = a_MEMORY;
+    Model_T*       model_ptr = a_model_ptr;
+    option::Option option    = a_OPTION;
+    Memory         memory    = a_MEMORY;
 
     IncumbentHolder_T incumbent_holder = a_INCUMBENT_HOLDER;
 
@@ -148,15 +145,15 @@ TabuSearchResult<T_Variable, T_Expression> solve(
      * Print the header of optimization progress table and print the initial
      * solution status.
      */
-    utility::print_single_line(option.verbose >= Verbose::Full);
+    utility::print_single_line(option.verbose >= option::verbose::Full);
     utility::print_message("Tabu Search starts.",
-                           option.verbose >= Verbose::Full);
+                           option.verbose >= option::verbose::Full);
 
-    print_table_header(option.verbose >= Verbose::Full);
+    print_table_header(option.verbose >= option::verbose::Full);
     print_table_initial(model_ptr,               //
                         current_solution_score,  //
                         incumbent_holder,        //
-                        option.verbose >= Verbose::Full);
+                        option.verbose >= option::verbose::Full);
 
     /**
      * Iterations start.
@@ -200,7 +197,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
          */
         bool is_enabled_improvability_screening =
             (option.improvability_screening_mode !=
-             ImprovabilityScreeningMode::Off);
+             option::improvability_screening_mode::Off);
 
         bool accept_all                    = true;
         bool accept_objective_improvable   = true;
@@ -224,7 +221,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
             }
 
             switch (option.improvability_screening_mode) {
-                case ImprovabilityScreeningMode::Soft: {
+                case option::improvability_screening_mode::Soft: {
                     if (model_ptr->is_feasible()) {
                         accept_all                    = false;
                         accept_objective_improvable   = true;
@@ -240,7 +237,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
 
                     break;
                 }
-                case ImprovabilityScreeningMode::Aggressive: {
+                case option::improvability_screening_mode::Aggressive: {
                     if (model_ptr->is_feasible()) {
                         accept_all                    = false;
                         accept_objective_improvable   = true;
@@ -255,7 +252,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                     }
                     break;
                 }
-                case ImprovabilityScreeningMode::Intensive: {
+                case option::improvability_screening_mode::Intensive: {
                     if (model_ptr->is_feasible()) {
                         accept_all                    = false;
                         accept_objective_improvable   = true;
@@ -621,7 +618,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                 bias_increase_count                = 0;
                 utility::print_debug("Tabu tenure reverted: " +
                                          std::to_string(tabu_tenure) + ".",
-                                     option.verbose >= Verbose::Debug);
+                                     option.verbose >= option::verbose::Debug);
             } else if ((iteration - last_tabu_tenure_updated_iteration) %
                            (tabu_tenure + 1) ==
                        0) {
@@ -644,10 +641,10 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                             std::min(tabu_tenure + 1,
                                      model_ptr->number_of_mutable_variables());
                         last_tabu_tenure_updated_iteration = iteration;
-                        utility::print_debug("Tabu tenure increased: " +
-                                                 std::to_string(tabu_tenure) +
-                                                 ".",
-                                             option.verbose >= Verbose::Debug);
+                        utility::print_debug(
+                            "Tabu tenure increased: " +
+                                std::to_string(tabu_tenure) + ".",
+                            option.verbose >= option::verbose::Debug);
                     }
                 } else {
                     bias_decrease_count++;
@@ -659,10 +656,10 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                         tabu_tenure         = std::max(tabu_tenure - 1, 1);
                         last_tabu_tenure_updated_iteration = iteration;
 
-                        utility::print_debug("Tabu tenure decreased: " +
-                                                 std::to_string(tabu_tenure) +
-                                                 ".",
-                                             option.verbose >= Verbose::Debug);
+                        utility::print_debug(
+                            "Tabu tenure decreased: " +
+                                std::to_string(tabu_tenure) + ".",
+                            option.verbose >= option::verbose::Debug);
                     }
                 }
             }
@@ -684,7 +681,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                              update_status,                              //
                              incumbent_holder,                           //
                              is_aspirated,                               //
-                             option.verbose >= Verbose::Full);
+                             option.verbose >= option::verbose::Full);
         }
 
         if (option.tabu_search.is_enabled_automatic_break) {
@@ -726,7 +723,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     /**
      * Print the footer of the optimization progress table.
      */
-    print_table_footer(option.verbose >= Verbose::Full);
+    print_table_footer(option.verbose >= option::verbose::Full);
 
     /**
      * Prepare the result.

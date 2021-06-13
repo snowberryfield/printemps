@@ -6,8 +6,6 @@
 #ifndef PRINTEMPS_NEIGHBORHOOD_MOVE_H__
 #define PRINTEMPS_NEIGHBORHOOD_MOVE_H__
 
-#include "../utility/utility.h"
-
 namespace printemps {
 namespace model {
 /*****************************************************************************/

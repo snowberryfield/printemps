@@ -9,7 +9,6 @@
 #include "variable_sense.h"
 #include "constraint_sense.h"
 #include "range.h"
-#include "selection_mode.h"
 
 #include "variable_proxy.h"
 #include "expression_proxy.h"
@@ -26,15 +25,18 @@
 #include "constraint_type_reference.h"
 
 #include "../neighborhood/neighborhood.h"
+
 #include "../presolver/presolver.h"
 #include "../presolver/intermediate_variable_extractor.h"
 #include "../presolver/selection_extractor.h"
+
 #include "../verifier/verifier.h"
 
 #include "../solution/solution.h"
 #include "../solution/named_solution.h"
 #include "../solution/plain_solution.h"
 #include "../solution/solution_score.h"
+#include "../solution/solution_archive.h"
 #include "../solution/incumbent_holder.h"
 
 namespace printemps {
@@ -91,7 +93,9 @@ class Model {
         m_constraint_type_reference;
 
     neighborhood::Neighborhood<T_Variable, T_Expression> m_neighborhood;
-    std::function<void(void)>                            m_callback;
+    std::function<void(option::Option *,
+                       solution::IncumbentHolder<T_Variable, T_Expression> *)>
+        m_callback;
 
     /*************************************************************************/
     Model(const Model &) = default;
@@ -149,7 +153,9 @@ class Model {
         m_constraint_type_reference.initialize();
 
         m_neighborhood.initialize();
-        m_callback = [](void) {};
+        m_callback = [](option::Option *,
+                        solution::IncumbentHolder<T_Variable, T_Expression> *) {
+        };
     }
 
     /*************************************************************************/
@@ -626,15 +632,16 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void setup(const bool a_IS_ENABLED_PRESOLVE,                  //
-                         const bool a_IS_ENABLED_INITIAL_VALUE_CORRECTION,  //
-                         const bool a_IS_ENABLED_AGGREGATION_MOVE,          //
-                         const bool a_IS_ENABLED_PRECEDENCE_MOVE,           //
-                         const bool a_IS_ENABLED_VARIABLE_BOUND_MOVE,       //
-                         const bool a_IS_ENABLED_USER_DEFINED_MOVE,         //
-                         const bool a_IS_ENABLED_CHAIN_MOVE,                //
-                         const SelectionMode &a_SELECTION_MODE,             //
-                         const bool           a_IS_ENABLED_PRINT) {
+    constexpr void setup(
+        const bool a_IS_ENABLED_PRESOLVE,                               //
+        const bool a_IS_ENABLED_INITIAL_VALUE_CORRECTION,               //
+        const bool a_IS_ENABLED_AGGREGATION_MOVE,                       //
+        const bool a_IS_ENABLED_PRECEDENCE_MOVE,                        //
+        const bool a_IS_ENABLED_VARIABLE_BOUND_MOVE,                    //
+        const bool a_IS_ENABLED_USER_DEFINED_MOVE,                      //
+        const bool a_IS_ENABLED_CHAIN_MOVE,                             //
+        const option::selection_mode::SelectionMode &a_SELECTION_MODE,  //
+        const bool                                   a_IS_ENABLED_PRINT) {
         verifier::verify_problem(this, a_IS_ENABLED_PRINT);
 
         /**
@@ -717,7 +724,7 @@ class Model {
          * than that of decision variables, this process will be skipped because
          * it would affect computational efficiency.
          */
-        if (a_SELECTION_MODE != SelectionMode::None &&
+        if (a_SELECTION_MODE != option::selection_mode::None &&
             this->number_of_variables() > this->number_of_constraints()) {
             presolver::extract_selections(this,              //
                                           a_SELECTION_MODE,  //
@@ -1534,13 +1541,19 @@ class Model {
 
     /*************************************************************************/
     inline constexpr void set_callback(
-        const std::function<void(void)> &a_CALLBACK) {
+        const std::function<
+            void(option::Option *,
+                 solution::IncumbentHolder<T_Variable, T_Expression> *)>
+            &a_CALLBACK) {
         m_callback = a_CALLBACK;
     }
 
     /*************************************************************************/
-    inline constexpr void callback(void) {
-        m_callback();
+    inline constexpr void callback(
+        option::Option *a_option_ptr,
+        solution::IncumbentHolder<T_Variable, T_Expression>
+            *a_incumbent_holder_ptr) {
+        m_callback(a_option_ptr, a_incumbent_holder_ptr);
     }
 
     /*************************************************************************/
@@ -2263,6 +2276,107 @@ class Model {
                 }
             }
         }
+    }
+
+    /*********************************************************************/
+    constexpr void import_mps(const mps::MPS &a_MPS,
+                              const bool      a_ACCEPT_CONTINUOUS) {
+        std::unordered_map<std::string, model::IPVariable *> variable_ptrs;
+
+        auto &variable_proxy =
+            this->create_variables("variables", a_MPS.variables.size());
+
+        /**
+         * Set up the decision variables.
+         */
+        int number_of_variables = a_MPS.variable_names.size();
+
+        for (auto i = 0; i < number_of_variables; i++) {
+            auto &name     = a_MPS.variable_names[i];
+            auto &variable = a_MPS.variables.at(name);
+
+            if (variable.sense == mps::MPSVariableSense::Continuous) {
+                if (a_ACCEPT_CONTINUOUS) {
+                    utility::print_warning(
+                        "The continuous variable " + name +
+                            " will be regarded as an integer variable.",
+                        true);
+                } else {
+                    throw std::logic_error(utility::format_error_location(
+                        __FILE__, __LINE__, __func__,
+                        "The MPS file includes continuous variables."));
+                }
+            }
+
+            variable_proxy(i).set_bound(variable.integer_lower_bound,
+                                        variable.integer_upper_bound);
+
+            if (variable.is_fixed) {
+                variable_proxy(i).fix_by(variable.integer_fixed_value);
+            }
+
+            variable_proxy(i).set_name(name);
+            variable_ptrs[name] = &variable_proxy(i);
+        }
+
+        /**
+         * Set up the constraints.
+         */
+        int              number_of_constraints = a_MPS.constraint_names.size();
+        std::vector<int> offsets(number_of_constraints);
+
+        auto &constraint_proxy =
+            this->create_constraints("constraints", number_of_constraints);
+
+#ifdef _OPENMP
+#pragma omp parallel for schedule(static)
+#endif
+        for (auto i = 0; i < number_of_constraints; i++) {
+            auto &name       = a_MPS.constraint_names[i];
+            auto &constraint = a_MPS.constraints.at(name);
+            auto  expression = model::IPExpression::create_instance();
+
+            std::unordered_map<model::IPVariable *, double>
+                expression_sensitivities;
+            for (const auto &sensitivity : constraint.sensitivities) {
+                std::string variable_name = sensitivity.first;
+                double      coefficient   = sensitivity.second;
+                expression_sensitivities[variable_ptrs[variable_name]] =
+                    coefficient;
+            }
+            expression.set_sensitivities(expression_sensitivities);
+
+            switch (constraint.sense) {
+                case mps::MPSConstraintSense::Less: {
+                    constraint_proxy(i) = (expression <= constraint.rhs);
+                    break;
+                }
+
+                case mps::MPSConstraintSense::Equal: {
+                    constraint_proxy(i) = (expression == constraint.rhs);
+                    break;
+                }
+
+                case mps::MPSConstraintSense::Greater: {
+                    constraint_proxy(i) = (expression >= constraint.rhs);
+                    break;
+                }
+            }
+            constraint_proxy(i).set_name(name);
+        }
+
+        /**
+         * Set up the objective function.
+         */
+        auto objective = model::IPExpression::create_instance();
+        std::unordered_map<model::IPVariable *, double> objective_sensitivities;
+        for (const auto &sensitivity : a_MPS.objective.sensitivities) {
+            std::string variable_name = sensitivity.first;
+            double      coefficient   = sensitivity.second;
+            objective_sensitivities[variable_ptrs[variable_name]] = coefficient;
+        }
+        objective.set_sensitivities(objective_sensitivities);
+        this->minimize(objective);
     }
 
     /*************************************************************************/

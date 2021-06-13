@@ -3,12 +3,11 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_SOLVER_LOCAL_SEARCH_LOCAL_SEARCH_OPTION_H__
-#define PRINTEMPS_SOLVER_LOCAL_SEARCH_LOCAL_SEARCH_OPTION_H__
+#ifndef PRINTEMPS_OPTION_LOCAL_SEARCH_OPTION_H__
+#define PRINTEMPS_OPTION_LOCAL_SEARCH_OPTION_H__
 
 namespace printemps {
-namespace solver {
-namespace local_search {
+namespace option {
 /*****************************************************************************/
 struct LocalSearchOptionConstant {
     static constexpr int    DEFAULT_ITERATION_MAX = 10000;
@@ -45,8 +44,7 @@ struct LocalSearchOption {
         this->seed          = LocalSearchOptionConstant::DEFAULT_SEED;
     }
 };
-}  // namespace local_search
-}  // namespace solver
+}  // namespace option
 }  // namespace printemps
 
 #endif

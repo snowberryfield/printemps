@@ -6,8 +6,6 @@
 #ifndef PRINTEMPS_NEIGHBORHOOD_BINOMIAL_CONSTRAINT_H__
 #define PRINTEMPS_NEIGHBORHOOD_BINOMIAL_CONSTRAINT_H__
 
-#include "../utility/utility.h"
-
 namespace printemps {
 namespace model {
 /*****************************************************************************/

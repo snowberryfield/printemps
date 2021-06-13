@@ -3,11 +3,11 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_SOLVER_INCUMBENT_HOLDER_H__
-#define PRINTEMPS_SOLVER_INCUMBENT_HOLDER_H__
+#ifndef PRINTEMPS_SOLUTION_INCUMBENT_HOLDER_H__
+#define PRINTEMPS_SOLUTION_INCUMBENT_HOLDER_H__
 
 namespace printemps {
-namespace solver {
+namespace solution {
 /*****************************************************************************/
 struct IncumbentHolderConstant {
     static constexpr bool   DEFAULT_IS_FOUND_FEASIBLE_SOLUTION      = false;
@@ -24,12 +24,9 @@ class IncumbentHolder {
    private:
     bool m_is_found_feasible_solution;
 
-    solution::Solution<T_Variable, T_Expression>
-        m_local_augmented_incumbent_solution;
-    solution::Solution<T_Variable, T_Expression>
-        m_global_augmented_incumbent_solution;
-
-    solution::Solution<T_Variable, T_Expression> m_feasible_incumbent_solution;
+    Solution<T_Variable, T_Expression> m_local_augmented_incumbent_solution;
+    Solution<T_Variable, T_Expression> m_global_augmented_incumbent_solution;
+    Solution<T_Variable, T_Expression> m_feasible_incumbent_solution;
 
     /**
      * following double-type members contain incumbent objective values as
@@ -39,9 +36,9 @@ class IncumbentHolder {
     double m_global_augmented_incumbent_objective;
     double m_feasible_incumbent_objective;
 
-    solution::SolutionScore m_local_augmented_incumbent_score;
-    solution::SolutionScore m_global_augmented_incumbent_score;
-    solution::SolutionScore m_feasible_incumbent_score;
+    SolutionScore m_local_augmented_incumbent_score;
+    SolutionScore m_global_augmented_incumbent_score;
+    SolutionScore m_feasible_incumbent_score;
 
    public:
     /*************************************************************************/
@@ -71,8 +68,8 @@ class IncumbentHolder {
 
     /*************************************************************************/
     constexpr int try_update_incumbent(
-        const solution::Solution<T_Variable, T_Expression> &a_SOLUTION,
-        const solution::SolutionScore &                     a_SCORE) {
+        const Solution<T_Variable, T_Expression> &a_SOLUTION,
+        const SolutionScore &                     a_SCORE) {
         int status = IncumbentHolderConstant::STATUS_NO_UPDATED;
 
         /**
@@ -119,9 +116,9 @@ class IncumbentHolder {
     /*************************************************************************/
     constexpr int try_update_incumbent(
         model::Model<T_Variable, T_Expression> *a_model_ptr,
-        const solution::SolutionScore &         a_SCORE) {
+        const SolutionScore &                   a_SCORE) {
         /// solution here defined is not substituted when no improvement
-        solution::Solution<T_Variable, T_Expression> solution;
+        Solution<T_Variable, T_Expression> solution;
 
         bool is_solution_updated = false;
 
@@ -191,19 +188,19 @@ class IncumbentHolder {
     }
 
     /*************************************************************************/
-    inline constexpr const solution::Solution<T_Variable, T_Expression>
+    inline constexpr const Solution<T_Variable, T_Expression>
         &local_augmented_incumbent_solution(void) const {
         return m_local_augmented_incumbent_solution;
     }
 
     /*************************************************************************/
-    inline constexpr const solution::Solution<T_Variable, T_Expression>
+    inline constexpr const Solution<T_Variable, T_Expression>
         &global_augmented_incumbent_solution(void) const {
         return m_global_augmented_incumbent_solution;
     }
 
     /*************************************************************************/
-    inline constexpr const solution::Solution<T_Variable, T_Expression>
+    inline constexpr const Solution<T_Variable, T_Expression>
         &feasible_incumbent_solution(void) const {
         return m_feasible_incumbent_solution;
     }
@@ -239,26 +236,24 @@ class IncumbentHolder {
     }
 
     /*************************************************************************/
-    inline const solution::SolutionScore &local_augmented_incumbent_score(
-        void) const {
+    inline const SolutionScore &local_augmented_incumbent_score(void) const {
         /// cannot be constexpr by clang
         return m_local_augmented_incumbent_score;
     }
 
     /*************************************************************************/
-    inline const solution::SolutionScore &global_augmented_incumbent_score(
-        void) const {
+    inline const SolutionScore &global_augmented_incumbent_score(void) const {
         /// cannot be constexpr by clang
         return m_global_augmented_incumbent_score;
     }
 
     /*************************************************************************/
-    inline const solution::SolutionScore &feasible_incumbent_score(void) const {
+    inline const SolutionScore &feasible_incumbent_score(void) const {
         /// cannot be constexpr by clang
         return m_feasible_incumbent_score;
     }
 };
-}  // namespace solver
+}  // namespace solution
 }  // namespace printemps
 
 #endif
