@@ -21,11 +21,11 @@ constexpr bool compute_permissibility(
     const neighborhood::Move<T_Variable, T_Expression> &a_MOVE,       //
     const Memory &                                      a_MEMORY,     //
     const int                                           a_ITERATION,  //
-    const Option &                                      a_OPTION,     //
+    const option::Option &                              a_OPTION,     //
     const int                                           a_TABU_TENURE) {
     const auto &last_update_iterations = a_MEMORY.last_update_iterations();
 
-    if (a_OPTION.tabu_search.tabu_mode == TabuMode::All &&
+    if (a_OPTION.tabu_search.tabu_mode == option::tabu_mode::All &&
         a_MOVE.sense != neighborhood::MoveSense::Selection) {
         /**
          * "All" tabu mode
@@ -69,7 +69,7 @@ constexpr double compute_frequency_penalty(
     const neighborhood::Move<T_Variable, T_Expression> &a_MOVE,       //
     const int                                           a_ITERATION,  //
     const Memory &                                      a_MEMORY,     //
-    const Option &                                      a_OPTION) noexcept {
+    const option::Option &                              a_OPTION) noexcept {
     const auto &update_counts = a_MEMORY.update_counts();
 
     if (a_ITERATION == 0) {
@@ -93,7 +93,7 @@ constexpr void evaluate_move(
     const neighborhood::Move<T_Variable, T_Expression> &a_MOVE,       //
     const int                                           a_ITERATION,  //
     const Memory &                                      a_MEMORY,     //
-    const Option &                                      a_OPTION,     //
+    const option::Option &                              a_OPTION,     //
     const int a_TABU_TENURE) noexcept {
     /**
      * Check if the move is permissible or not.

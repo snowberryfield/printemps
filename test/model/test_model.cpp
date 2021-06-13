@@ -1197,12 +1197,17 @@ TEST_F(TestModel, setup_fixed_sensitivities) {
 
 /*****************************************************************************/
 TEST_F(TestModel, set_callback) {
-    printemps::model::Model<int, double> model;
+    printemps::model::Model<int, double>              model;
+    printemps::option::Option                         option;
+    printemps::solution::IncumbentHolder<int, double> incumbent_holder;
 
     int  v = 1;
-    auto f = [&v](void) { v++; };
+    auto f =
+        [&v]([[maybe_unused]] printemps::option::Option* a_option_ptr,
+             [[maybe_unused]] printemps::solution::IncumbentHolder<int, double>*
+                 a_incumbent_holder_ptr) { v++; };
     model.set_callback(f);
-    model.callback();
+    model.callback(&option, &incumbent_holder);
     EXPECT_EQ(2, v);
 }
 

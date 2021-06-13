@@ -138,7 +138,7 @@ int main(void) {
     /*************************************************************************/
     /// Run solver
     /*************************************************************************/
-    printemps::solver::Option option;
+    printemps::option::Option option;
     option.verbose       = printemps::solver::Full;
     option.iteration_max = 1000;
 

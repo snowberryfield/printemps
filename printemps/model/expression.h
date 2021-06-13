@@ -7,7 +7,6 @@
 #define PRINTEMPS_MODEL_EXPRESSION_H__
 
 #include "../multi_array/abstract_multi_array_element.h"
-#include "../utility/utility.h"
 
 namespace printemps {
 namespace neighborhood {

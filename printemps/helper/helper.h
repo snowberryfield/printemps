@@ -3,21 +3,12 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_PRINTEMPS_H__
-#define PRINTEMPS_PRINTEMPS_H__
+#ifndef PRINTEMPS_HELPER_HELPER_H__
+#define PRINTEMPS_HELPER_HELPER_H__
 
-#include "std.h"
-
-#include "constant/constant.h"
-#include "utility/utility.h"
-#include "helper/helper.h"
-#include "mps/mps.h"
-#include "option/option.h"
-#include "model/model.h"
-#include "solver/solver.h"
+#include "solution_file_reader.h"
 
 #endif
-
 /*****************************************************************************/
 // END
 /*****************************************************************************/

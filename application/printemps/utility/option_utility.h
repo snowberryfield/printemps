@@ -24,13 +24,13 @@ bool read_json(T *a_parameter, const std::string &a_NAME,
 }
 
 /******************************************************************************/
-printemps::solver::Option read_option(const std::string &a_FILE_NAME) {
+printemps::option::Option read_option(const std::string &a_FILE_NAME) {
     std::fstream   option_file(a_FILE_NAME);
     nlohmann::json option_object;
     option_file >> option_object;
     option_file.close();
 
-    printemps::solver::Option option;
+    printemps::option::Option option;
 
     /**************************************************************************/
     /// global

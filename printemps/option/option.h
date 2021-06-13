@@ -3,39 +3,17 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_SOLVER_OPTION_H__
-#define PRINTEMPS_SOLVER_OPTION_H__
+#ifndef PRINTEMPS_OPTION_OPTION_H__
+#define PRINTEMPS_OPTION_OPTION_H__
 
-#include "lagrange_dual/lagrange_dual_option.h"
-#include "local_search/local_search_option.h"
-#include "tabu_search/tabu_search_option.h"
+#include "enumerate/enumerate.h"
+
+#include "lagrange_dual_option.h"
+#include "local_search_option.h"
+#include "tabu_search_option.h"
 
 namespace printemps {
-namespace solver {
-/*****************************************************************************/
-enum Verbose : int {  //
-    None,
-    Warning,
-    Outer,
-    Full,
-    Debug
-};
-
-/*****************************************************************************/
-enum ImprovabilityScreeningMode : int {  //
-    Off,
-    Soft,
-    Aggressive,
-    Automatic,
-    Intensive
-};
-
-/*****************************************************************************/
-enum ChainMoveReduceMode : int {  //
-    OverlapRate,
-    Shuffle
-};
-
+namespace option {
 /*****************************************************************************/
 struct OptionConstant {
     static constexpr int    DEFAULT_ITERATION_MAX                       = 100;
@@ -63,19 +41,19 @@ struct OptionConstant {
     static constexpr bool DEFAULT_IS_ENABLED_CHAIN_MOVE          = false;
     static constexpr bool DEFAULT_IS_ENABLED_USER_DEFINED_MOVE   = false;
     static constexpr int  DEFAULT_CHAIN_MOVE_CAPACITY            = 10000;
-    static constexpr ChainMoveReduceMode DEFAULT_CHAIN_MOVE_REDUCE_MODE =
-        ChainMoveReduceMode::OverlapRate;
+    static constexpr chain_move_reduce_mode::ChainMoveReduceMode
+                            DEFAULT_CHAIN_MOVE_REDUCE_MODE = chain_move_reduce_mode::OverlapRate;
     static constexpr double DEFAULT_CHAIN_MOVE_OVERLAP_RATE_THRESHOLD = 0.2;
 
-    static constexpr model::SelectionMode DEFAULT_SELECTION_MODE =
-        model::SelectionMode::Independent;
-    static constexpr ImprovabilityScreeningMode
+    static constexpr selection_mode::SelectionMode DEFAULT_SELECTION_MODE =
+        selection_mode::Independent;
+    static constexpr improvability_screening_mode::ImprovabilityScreeningMode
         DEFAULT_IMPROVABILITY_SCREENING_MODE =
-            ImprovabilityScreeningMode::Automatic;
+            improvability_screening_mode::Automatic;
 
     static constexpr double DEFAULT_TARGET_OBJECTIVE = -1E100;
     static constexpr bool   DEFAULT_SEED             = 1;
-    static constexpr bool   DEFAULT_VERBOSE          = Verbose::None;
+    static constexpr bool   DEFAULT_VERBOSE          = verbose::None;
     static constexpr bool   DEFAULT_IS_ENABLED_COLLECT_HISTORICAL_DATA = false;
     static constexpr int    DEFAULT_HISTORICAL_DATA_CAPACITY           = 1000;
 };
@@ -106,12 +84,14 @@ struct Option {
     bool is_enabled_chain_move;
     bool is_enabled_user_defined_move;
 
-    int                 chain_move_capacity;                // hidden
-    ChainMoveReduceMode chain_move_reduce_mode;             // hidden
-    double              chain_move_overlap_rate_threshold;  // hidden
+    int chain_move_capacity;  // hidden
+    chain_move_reduce_mode::ChainMoveReduceMode
+           chain_move_reduce_mode;             // hidden
+    double chain_move_overlap_rate_threshold;  // hidden
 
-    model::SelectionMode       selection_mode;
-    ImprovabilityScreeningMode improvability_screening_mode;
+    selection_mode::SelectionMode selection_mode;
+    improvability_screening_mode::ImprovabilityScreeningMode
+        improvability_screening_mode;
 
     double target_objective_value;
     int    seed;  // hidden
@@ -119,9 +99,9 @@ struct Option {
     bool   is_enabled_collect_historical_data;  // hidden
     int    historical_data_capacity;            // hidden
 
-    tabu_search::TabuSearchOption     tabu_search;
-    local_search::LocalSearchOption   local_search;
-    lagrange_dual::LagrangeDualOption lagrange_dual;
+    TabuSearchOption   tabu_search;
+    LocalSearchOption  local_search;
+    LagrangeDualOption lagrange_dual;
 
     /*************************************************************************/
     Option(void) {
@@ -510,7 +490,7 @@ struct Option {
             + utility::to_string(this->tabu_search.seed, "%d"));
     }
 };
-}  // namespace solver
+}  // namespace option
 }  // namespace printemps
 
 #endif

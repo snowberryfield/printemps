@@ -7,8 +7,7 @@
 #define PRINTEMPS_SOLVER_LAGRANGE_DUAL_LAGRANGE_DUAL_OPTION_H__
 
 namespace printemps {
-namespace solver {
-namespace lagrange_dual {
+namespace option {
 /*****************************************************************************/
 struct LagrangeDualOptionConstant {
     static constexpr int    DEFAULT_ITERATION_MAX         = 10000;
@@ -56,8 +55,7 @@ struct LagrangeDualOption {
         this->log_interval = LagrangeDualOptionConstant::DEFAULT_LOG_INTERVAL;
     }
 };
-}  // namespace lagrange_dual
-}  // namespace solver
+}  // namespace option
 }  // namespace printemps
 
 #endif

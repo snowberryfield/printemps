@@ -6,7 +6,6 @@
 #ifndef PRINTEMPS_MODEL_VARIABLE_PROXY_H__
 #define PRINTEMPS_MODEL_VARIABLE_PROXY_H__
 
-#include "../utility/utility.h"
 #include "../multi_array/abstract_multi_array.h"
 #include "variable.h"
 
