@@ -109,11 +109,6 @@ struct Option {
     }
 
     /*************************************************************************/
-    virtual ~Option(void) {
-        /// nothing to do
-    }
-
-    /*************************************************************************/
     void initialize(void) {
         this->iteration_max = OptionConstant::DEFAULT_ITERATION_MAX;
         this->time_max      = OptionConstant::DEFAULT_TIME_MAX;

@@ -40,7 +40,6 @@ TEST_F(TestUnorderedMapUtility, to_vector_pair) {
     EXPECT_EQ(3, static_cast<int>(vector_pair_str.first.size()));
     EXPECT_EQ(3, static_cast<int>(vector_pair_str.second.size()));
 }
-
 }  // namespace
 /*****************************************************************************/
 // END

@@ -53,7 +53,8 @@ TEST_F(TestBinpacking, bin_packing) {
         = model.create_expressions("total_volume", number_of_bins);
 
     for (auto m = 0; m < number_of_bins; m++) {
-        total_volume(m) = x.dot({printemps::model::All, m}, item_volumes);
+        total_volume(m) =
+            x.dot({printemps::model_component::Range::All, m}, item_volumes);
     }
 
     auto& number_of_used_bins =
@@ -65,7 +66,8 @@ TEST_F(TestBinpacking, bin_packing) {
     auto& constraint_selection =
         model.create_constraints("selection", number_of_items);
     for (auto n = 0; n < number_of_items; n++) {
-        constraint_selection(n) = x.selection({n, printemps::model::All});
+        constraint_selection(n) =
+            x.selection({n, printemps::model_component::Range::All});
     }
 
     auto& constraint_cut = model.create_constraints("cut", number_of_bins - 1);
@@ -140,7 +142,6 @@ TEST_F(TestBinpacking, bin_packing) {
 
     ASSERT_THROW(printemps::solver::solve(&model, option), std::logic_error);
 }
-/*****************************************************************************/
 }  // namespace
 /*****************************************************************************/
 // END

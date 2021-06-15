@@ -37,11 +37,6 @@ struct LagrangeDualOption {
     }
 
     /*************************************************************************/
-    virtual ~LagrangeDualOption(void) {
-        /// nothing to do
-    }
-
-    /*************************************************************************/
     void initialize(void) {
         this->iteration_max = LagrangeDualOptionConstant::DEFAULT_ITERATION_MAX;
         this->time_max      = LagrangeDualOptionConstant::DEFAULT_TIME_MAX;

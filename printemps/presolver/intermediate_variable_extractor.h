@@ -7,19 +7,6 @@
 #define PRINTEMPS_PRESOLVER_INTERMEDIATE_VARIABLE_EXTRACTOR_H__
 
 namespace printemps {
-namespace model {
-/*****************************************************************************/
-template <class T_Variable, class T_Expression>
-class Variable;
-
-/*****************************************************************************/
-template <class T_Variable, class T_Expression>
-class Constraint;
-
-}  // namespace model
-}  // namespace printemps
-
-namespace printemps {
 namespace presolver {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
@@ -31,7 +18,8 @@ constexpr int extract_independent_intermediate_variables(
                            a_IS_ENABLED_PRINT);
 
     int number_of_newly_extracted_independent_intermediate_vairables = 0;
-    std::unordered_map<model::Variable<T_Variable, T_Expression> *, int>
+    std::unordered_map<model_component::Variable<T_Variable, T_Expression> *,
+                       int>
         intermediate_variable_counts;
 
     for (auto &&constraint_ptr :
@@ -46,7 +34,7 @@ constexpr int extract_independent_intermediate_variables(
         }
     }
 
-    std::vector<model::Constraint<T_Variable, T_Expression>>
+    std::vector<model_component::Constraint<T_Variable, T_Expression>>
         additional_constraints;
 
     for (auto &&constraint_ptr :

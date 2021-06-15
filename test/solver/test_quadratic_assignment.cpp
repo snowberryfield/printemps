@@ -176,7 +176,6 @@ TEST_F(TestQuadracitAssignment, quadratic_assignment) {
 
     ASSERT_THROW(printemps::solver::solve(&model, option), std::logic_error);
 }
-/*****************************************************************************/
 }  // namespace
 /*****************************************************************************/
 // END

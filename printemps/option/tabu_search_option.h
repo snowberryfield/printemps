@@ -73,11 +73,6 @@ struct TabuSearchOption {
     }
 
     /*************************************************************************/
-    virtual ~TabuSearchOption(void) {
-        /// nothing to do
-    }
-
-    /*************************************************************************/
     void initialize(void) {
         this->iteration_max = TabuSearchOptionConstant::DEFAULT_ITERATION_MAX;
         this->time_max      = TabuSearchOptionConstant::DEFAULT_TIME_MAX;

@@ -87,7 +87,6 @@ TEST_F(TestSimple1, simple_1) {
 
     ASSERT_THROW(printemps::solver::solve(&model, option), std::logic_error);
 }
-/*****************************************************************************/
 }  // namespace
 /*****************************************************************************/
 // END
