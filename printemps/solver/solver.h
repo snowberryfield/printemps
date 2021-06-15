@@ -58,7 +58,7 @@ Result<T_Variable, T_Expression> solve(
      * Define type aliases.
      */
     using Model_T    = model::Model<T_Variable, T_Expression>;
-    using Solution_T = solution::Solution<T_Variable, T_Expression>;
+    using Solution_T = solution::DenseSolution<T_Variable, T_Expression>;
     using IncumbentHolder_T =
         solution::IncumbentHolder<T_Variable, T_Expression>;
 

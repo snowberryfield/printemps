@@ -7,33 +7,19 @@
 #define PRINTEMPS_NEIGHBORHOOD_MOVE_H__
 
 namespace printemps {
-namespace model {
-/*****************************************************************************/
-template <class T_Variable, class T_Expression>
-class Variable;
-
-/*****************************************************************************/
-template <class T_Variable, class T_Expression>
-class Constraint;
-
-/*****************************************************************************/
-enum class VariableSense;
-}  // namespace model
-}  // namespace printemps
-
-namespace printemps {
 namespace neighborhood {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 using Alteration =
-    std::pair<model::Variable<T_Variable, T_Expression> *, T_Variable>;
+    std::pair<model_component::Variable<T_Variable, T_Expression> *,
+              T_Variable>;
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 struct Move {
     std::vector<Alteration<T_Variable, T_Expression>> alterations;
     MoveSense                                         sense;
-    std::unordered_set<model::Constraint<T_Variable, T_Expression> *>
+    std::unordered_set<model_component::Constraint<T_Variable, T_Expression> *>
         related_constraint_ptrs;
 
     bool is_univariable_move;
@@ -78,7 +64,8 @@ template <class T_Variable, class T_Expression>
 constexpr bool has_selection_variable(
     const Move<T_Variable, T_Expression> &a_MOVE) {
     for (const auto &alteration : a_MOVE.alterations) {
-        if (alteration.first->sense() == model::VariableSense::Selection) {
+        if (alteration.first->sense() ==
+            model_component::VariableSense::Selection) {
             return true;
         }
     }
@@ -211,7 +198,8 @@ constexpr double compute_hash(
 template <class T_Variable, class T_Expression>
 constexpr bool is_binary_swap(const Move<T_Variable, T_Expression> &a_MOVE) {
     for (const auto &alteration : a_MOVE.alterations) {
-        if (alteration.first->sense() != model::VariableSense::Binary) {
+        if (alteration.first->sense() !=
+            model_component::VariableSense::Binary) {
             return false;
         }
     }
@@ -220,9 +208,11 @@ constexpr bool is_binary_swap(const Move<T_Variable, T_Expression> &a_MOVE) {
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-constexpr std::unordered_set<model::Variable<T_Variable, T_Expression> *>
+constexpr std::unordered_set<
+    model_component::Variable<T_Variable, T_Expression> *>
 related_variable_ptrs(const Move<T_Variable, T_Expression> &a_MOVE) {
-    std::unordered_set<model::Variable<T_Variable, T_Expression> *> result;
+    std::unordered_set<model_component::Variable<T_Variable, T_Expression> *>
+        result;
     for (const auto &alteration : a_MOVE.alterations) {
         result.insert(alteration.first);
     }

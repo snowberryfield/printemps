@@ -24,9 +24,11 @@ class IncumbentHolder {
    private:
     bool m_is_found_feasible_solution;
 
-    Solution<T_Variable, T_Expression> m_local_augmented_incumbent_solution;
-    Solution<T_Variable, T_Expression> m_global_augmented_incumbent_solution;
-    Solution<T_Variable, T_Expression> m_feasible_incumbent_solution;
+    DenseSolution<T_Variable, T_Expression>
+        m_local_augmented_incumbent_solution;
+    DenseSolution<T_Variable, T_Expression>
+                                            m_global_augmented_incumbent_solution;
+    DenseSolution<T_Variable, T_Expression> m_feasible_incumbent_solution;
 
     /**
      * following double-type members contain incumbent objective values as
@@ -68,8 +70,8 @@ class IncumbentHolder {
 
     /*************************************************************************/
     constexpr int try_update_incumbent(
-        const Solution<T_Variable, T_Expression> &a_SOLUTION,
-        const SolutionScore &                     a_SCORE) {
+        const DenseSolution<T_Variable, T_Expression> &a_SOLUTION,
+        const SolutionScore &                          a_SCORE) {
         int status = IncumbentHolderConstant::STATUS_NO_UPDATED;
 
         /**
@@ -118,7 +120,7 @@ class IncumbentHolder {
         model::Model<T_Variable, T_Expression> *a_model_ptr,
         const SolutionScore &                   a_SCORE) {
         /// solution here defined is not substituted when no improvement
-        Solution<T_Variable, T_Expression> solution;
+        DenseSolution<T_Variable, T_Expression> solution;
 
         bool is_solution_updated = false;
 
@@ -188,19 +190,19 @@ class IncumbentHolder {
     }
 
     /*************************************************************************/
-    inline constexpr const Solution<T_Variable, T_Expression>
+    inline constexpr const DenseSolution<T_Variable, T_Expression>
         &local_augmented_incumbent_solution(void) const {
         return m_local_augmented_incumbent_solution;
     }
 
     /*************************************************************************/
-    inline constexpr const Solution<T_Variable, T_Expression>
+    inline constexpr const DenseSolution<T_Variable, T_Expression>
         &global_augmented_incumbent_solution(void) const {
         return m_global_augmented_incumbent_solution;
     }
 
     /*************************************************************************/
-    inline constexpr const Solution<T_Variable, T_Expression>
+    inline constexpr const DenseSolution<T_Variable, T_Expression>
         &feasible_incumbent_solution(void) const {
         return m_feasible_incumbent_solution;
     }

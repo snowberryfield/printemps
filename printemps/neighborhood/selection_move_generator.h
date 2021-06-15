@@ -12,10 +12,6 @@ namespace printemps {
 namespace neighborhood {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-struct Move;
-
-/*****************************************************************************/
-template <class T_Variable, class T_Expression>
 class SelectionMoveGenerator
     : public AbstractMoveGenerator<T_Variable, T_Expression> {
    private:
@@ -32,7 +28,7 @@ class SelectionMoveGenerator
 
     /*************************************************************************/
     constexpr void setup(
-        std::vector<model::Variable<T_Variable, T_Expression> *>
+        std::vector<model_component::Variable<T_Variable, T_Expression> *>
             &a_VARIABLE_PTRS) {
         /**
          *  "Swap" move for binary variables in selection

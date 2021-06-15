@@ -31,11 +31,6 @@ struct LocalSearchOption {
     }
 
     /*************************************************************************/
-    virtual ~LocalSearchOption(void) {
-        /// nothing to do
-    }
-
-    /*************************************************************************/
     void initialize(void) {
         this->iteration_max = LocalSearchOptionConstant::DEFAULT_ITERATION_MAX;
         this->time_max      = LocalSearchOptionConstant::DEFAULT_TIME_MAX;

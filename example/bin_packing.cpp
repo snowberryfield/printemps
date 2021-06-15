@@ -58,7 +58,8 @@ int main(void) {
         = model.create_expressions("total_volume", number_of_bins);
 
     for (auto m = 0; m < number_of_bins; m++) {
-        total_volume(m) = x.dot({printemps::model::All, m}, item_volumes);
+        total_volume(m) =
+            x.dot({printemps::model_component::Range::All, m}, item_volumes);
     }
 
     auto& number_of_used_bins =
@@ -72,7 +73,8 @@ int main(void) {
     auto& constraint_selection =
         model.create_constraints("selection", number_of_items);
     for (auto n = 0; n < number_of_items; n++) {
-        constraint_selection(n) = x.selection({n, printemps::model::All});
+        constraint_selection(n) =
+            x.selection({n, printemps::model_component::Range::All});
     }
 
     /// sum_{n=1}^{N} v_{n} x_{n, m} <= C (m=1,...,M)

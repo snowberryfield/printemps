@@ -110,7 +110,6 @@ TEST_F(TestKnapsack, knapsack) {
 
     ASSERT_THROW(printemps::solver::solve(&model, option), std::logic_error);
 }
-/*****************************************************************************/
 }  // namespace
 /*****************************************************************************/
 // END

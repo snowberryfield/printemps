@@ -20,17 +20,12 @@ struct LocalSearchResult {
 
     LocalSearchTerminationStatus termination_status;
 
-    std::vector<solution::PlainSolution<T_Variable, T_Expression>>
+    std::vector<solution::SparseSolution<T_Variable, T_Expression>>
         historical_feasible_solutions;
 
     /*************************************************************************/
     LocalSearchResult(void) {
         this->initialize();
-    }
-
-    /*************************************************************************/
-    virtual ~LocalSearchResult(void) {
-        /// nothing to do
     }
 
     /*************************************************************************/

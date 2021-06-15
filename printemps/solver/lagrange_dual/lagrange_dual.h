@@ -28,15 +28,15 @@ void bound_dual(
                     flat_index);
 
             switch (constraint.sense()) {
-                case model::ConstraintSense::Less: {
+                case model_component::ConstraintSense::Less: {
                     lagrange_multiplier = std::max(lagrange_multiplier, 0.0);
                     break;
                 }
-                case model::ConstraintSense::Greater: {
+                case model_component::ConstraintSense::Greater: {
                     lagrange_multiplier = std::min(lagrange_multiplier, 0.0);
                     break;
                 }
-                case model::ConstraintSense::Equal: {
+                case model_component::ConstraintSense::Equal: {
                     /// nothing to do
                     break;
                 }
@@ -124,7 +124,7 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
     /**
      * Prepare historical solutions holder.
      */
-    std::vector<solution::PlainSolution<T_Variable, T_Expression>>
+    std::vector<solution::SparseSolution<T_Variable, T_Expression>>
         historical_feasible_solutions;
 
     /**

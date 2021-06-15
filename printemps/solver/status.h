@@ -35,11 +35,6 @@ struct Status {
     }
 
     /*************************************************************************/
-    virtual ~Status(void) {
-        /// nothing to do
-    }
-
-    /*************************************************************************/
     void initialize(void) {
         this->penalty_coefficients.clear();
         this->update_counts.clear();

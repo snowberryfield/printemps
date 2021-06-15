@@ -7,39 +7,22 @@
 #define PRINTEMPS_PRESOLVER_SELECTION_EXTRACTOR_H__
 
 namespace printemps {
-namespace model {
-/*****************************************************************************/
-template <class T_Variable, class T_Expression>
-class Variable;
-
-/*****************************************************************************/
-template <class T_Variable, class T_Expression>
-class Constraint;
-
-/*****************************************************************************/
-template <class T_Variable, class T_Expression>
-struct Selection;
-
-/*****************************************************************************/
-enum SelectionMode : int;
-}  // namespace model
-}  // namespace printemps
-
-namespace printemps {
 namespace presolver {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-constexpr std::vector<model::Selection<T_Variable, T_Expression>>
+constexpr std::vector<model_component::Selection<T_Variable, T_Expression>>
 convert_to_selections(
-    const std::vector<model::Constraint<T_Variable, T_Expression> *>
+    const std::vector<model_component::Constraint<T_Variable, T_Expression> *>
         &a_CONSTRAINT_PTRS) {
-    std::vector<model::Selection<T_Variable, T_Expression>> selections;
+    std::vector<model_component::Selection<T_Variable, T_Expression>>
+        selections;
     for (auto &&constraint_ptr : a_CONSTRAINT_PTRS) {
         if (!constraint_ptr->is_enabled()) {
             continue;
         }
 
-        model::Selection<T_Variable, T_Expression> selection(constraint_ptr);
+        model_component::Selection<T_Variable, T_Expression> selection(
+            constraint_ptr);
         selections.push_back(selection);
     }
     return selections;
@@ -54,12 +37,13 @@ constexpr void extract_selections_by_defined_order(
     utility::print_message("Extracting selection by defined order...",
                            a_IS_ENABLED_PRINT);
 
-    std::vector<model::Selection<T_Variable, T_Expression>> selections;
-    std::vector<model::Selection<T_Variable, T_Expression>> raw_selections =
-        convert_to_selections(
+    std::vector<model_component::Selection<T_Variable, T_Expression>>
+        selections;
+    std::vector<model_component::Selection<T_Variable, T_Expression>>
+        raw_selections = convert_to_selections(
             a_model_ptr->constraint_type_reference().set_partitioning_ptrs);
 
-    std::vector<model::Variable<T_Variable, T_Expression> *>
+    std::vector<model_component::Variable<T_Variable, T_Expression> *>
         extracted_variable_ptrs;
 
     for (auto &&selection : raw_selections) {
@@ -120,9 +104,10 @@ constexpr void extract_selections_by_number_of_variables_order(
             a_IS_ENABLED_PRINT);
     }
 
-    std::vector<model::Selection<T_Variable, T_Expression>> selections;
-    std::vector<model::Selection<T_Variable, T_Expression>> raw_selections =
-        convert_to_selections(
+    std::vector<model_component::Selection<T_Variable, T_Expression>>
+        selections;
+    std::vector<model_component::Selection<T_Variable, T_Expression>>
+        raw_selections = convert_to_selections(
             a_model_ptr->constraint_type_reference().set_partitioning_ptrs);
 
     if (a_IS_SMALLER_ORDER) {
@@ -139,7 +124,7 @@ constexpr void extract_selections_by_number_of_variables_order(
                   });
     }
 
-    std::vector<model::Variable<T_Variable, T_Expression> *>
+    std::vector<model_component::Variable<T_Variable, T_Expression> *>
         extracted_variable_ptrs;
 
     for (auto &&selection : raw_selections) {
@@ -192,12 +177,13 @@ constexpr void extract_independent_selections(
     utility::print_message("Extracting independent selection variables...",
                            a_IS_ENABLED_PRINT);
 
-    std::vector<model::Selection<T_Variable, T_Expression>> selections;
-    std::vector<model::Selection<T_Variable, T_Expression>> raw_selections =
-        convert_to_selections(
+    std::vector<model_component::Selection<T_Variable, T_Expression>>
+        selections;
+    std::vector<model_component::Selection<T_Variable, T_Expression>>
+        raw_selections = convert_to_selections(
             a_model_ptr->constraint_type_reference().set_partitioning_ptrs);
 
-    std::vector<model::Variable<T_Variable, T_Expression> *>
+    std::vector<model_component::Variable<T_Variable, T_Expression> *>
         extracted_variable_ptrs;
 
     const int RAW_SELECTIONS_SIZE = raw_selections.size();

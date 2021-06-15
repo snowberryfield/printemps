@@ -32,16 +32,17 @@ TEST_F(TestSelectionExtractor, extract_selections_by_defined_order) {
      * Selection constraint with 10 decision variables. The priority of this
      * constraint is the first.
      */
-    model.create_constraint("c_0",
-                            x_0.selection({0, printemps::model::Range::All}));
+    model.create_constraint(
+        "c_0", x_0.selection({0, printemps::model_component::Range::All}));
 
     /**
      * Selection constraint with 31 decision variables. The priority of this
      * constraint is the second.
      */
     model.create_constraint(
-        "c_1", (x_0.sum({0, printemps::model::Range::All}) +
-                x_1.sum({1, printemps::model::Range::All}) + x_2(0)) == 1);
+        "c_1",
+        (x_0.sum({0, printemps::model_component::Range::All}) +
+         x_1.sum({1, printemps::model_component::Range::All}) + x_2(0)) == 1);
 
     /**
      * Selection constraint with 400 decision variables. The priority of this
@@ -131,16 +132,17 @@ TEST_F(TestSelectionExtractor,
      * Selection constraint with 10 decision variables. The priority of this
      * constraint is the 1st.
      */
-    model.create_constraint("c_0",
-                            x_0.selection({0, printemps::model::Range::All}));
+    model.create_constraint(
+        "c_0", x_0.selection({0, printemps::model_component::Range::All}));
 
     /**
      * Selection constraint with 31 decision variables. The priority of this
      * constraint is the second.
      */
     model.create_constraint(
-        "c_1", (x_0.sum({1, printemps::model::Range::All}) +
-                x_1.sum({1, printemps::model::Range::All}) + x_2(0)) == 1);
+        "c_1",
+        (x_0.sum({1, printemps::model_component::Range::All}) +
+         x_1.sum({1, printemps::model_component::Range::All}) + x_2(0)) == 1);
 
     /**
      * Selection constraint with 400 decision variables. The priority of this
@@ -237,8 +239,8 @@ TEST_F(TestSelectionExtractor,
      * Selection constraint with 10 decision variables. The priority of this
      * constraint is the third.
      */
-    model.create_constraint("c_0",
-                            x_0.selection({0, printemps::model::Range::All}));
+    model.create_constraint(
+        "c_0", x_0.selection({0, printemps::model_component::Range::All}));
 
     /**
      * Selection constraint with 31 decision variables. The priority of this
@@ -246,8 +248,9 @@ TEST_F(TestSelectionExtractor,
      * because higher-priority constraint c_1 covers x_1.
      */
     model.create_constraint(
-        "c_1", (x_0.sum({1, printemps::model::Range::All}) +
-                x_1.sum({1, printemps::model::Range::All}) + x_2(0)) == 1);
+        "c_1",
+        (x_0.sum({1, printemps::model_component::Range::All}) +
+         x_1.sum({1, printemps::model_component::Range::All}) + x_2(0)) == 1);
 
     /**
      * Selection constraint with 400 decision variables. The priority of this
@@ -336,15 +339,16 @@ TEST_F(TestSelectionExtractor, extract_selections_independent) {
     /**
      * Selection constraint with 10 decision variables (no overlap).
      */
-    model.create_constraint("c_0",
-                            x_0.selection({0, printemps::model::Range::All}));
+    model.create_constraint(
+        "c_0", x_0.selection({0, printemps::model_component::Range::All}));
 
     /**
      * Selection constraint with 32 decision variables (overlap).
      */
     model.create_constraint(
-        "c_1", (x_0.sum({1, printemps::model::Range::All}) +
-                x_1.sum({1, printemps::model::Range::All}) + x_2(0)) == 1);
+        "c_1",
+        (x_0.sum({1, printemps::model_component::Range::All}) +
+         x_1.sum({1, printemps::model_component::Range::All}) + x_2(0)) == 1);
 
     /**
      * Selection constraint with 400 decision variables (overlap).
@@ -405,8 +409,6 @@ TEST_F(TestSelectionExtractor, extract_selections_independent) {
                   model.number_of_binary_variables());
     }
 }
-
-/*****************************************************************************/
 }  // namespace
 /*****************************************************************************/
 // END

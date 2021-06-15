@@ -10,9 +10,15 @@
 
 #include "constant/constant.h"
 #include "utility/utility.h"
+#include "multi_array/multi_array.h"
 #include "helper/helper.h"
 #include "mps/mps.h"
 #include "option/option.h"
+#include "model_component/model_component.h"
+#include "neighborhood/neighborhood.h"
+#include "verifier/verifier.h"
+#include "presolver/presolver.h"
+#include "solution/solution.h"
 #include "model/model.h"
 #include "solver/solver.h"
 

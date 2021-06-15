@@ -7,30 +7,7 @@
 #define PRINTEMPS_NEIGHBORHOOD_ABSTRACT_MOVE_GENERATOR_H__
 
 namespace printemps {
-namespace model {
-/*****************************************************************************/
-template <class T_Variable, class T_Expression>
-class Variable;
-
-/*****************************************************************************/
-template <class T_Variable, class T_Expression>
-class Constraint;
-
-/*****************************************************************************/
-enum class VariableSense;
-}  // namespace model
-}  // namespace printemps
-
-namespace printemps {
 namespace neighborhood {
-/*****************************************************************************/
-template <class T_Variable, class T_Expression>
-struct Move;
-
-/*****************************************************************************/
-template <class T_Variable, class T_Expression>
-struct BinomialConstraint;
-
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class AbstractMoveGenerator {
@@ -144,11 +121,11 @@ class AbstractMoveGenerator {
 };
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-constexpr std::vector<model::Variable<T_Variable, T_Expression> *>
+constexpr std::vector<model_component::Variable<T_Variable, T_Expression> *>
 extract_mutable_variable_ptrs(
-    const std::vector<model::Variable<T_Variable, T_Expression> *>
+    const std::vector<model_component::Variable<T_Variable, T_Expression> *>
         &a_RAW_VARIABLE_PTRS) {
-    std::vector<model::Variable<T_Variable, T_Expression> *> results;
+    std::vector<model_component::Variable<T_Variable, T_Expression> *> results;
     for (auto &&variable_ptr : a_RAW_VARIABLE_PTRS) {
         if (!variable_ptr->is_fixed()) {
             results.push_back(variable_ptr);
@@ -159,11 +136,12 @@ extract_mutable_variable_ptrs(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-constexpr std::vector<model::Constraint<T_Variable, T_Expression> *>
+constexpr std::vector<model_component::Constraint<T_Variable, T_Expression> *>
 extract_effective_constraint_ptrs(
-    const std::vector<model::Constraint<T_Variable, T_Expression> *>
+    const std::vector<model_component::Constraint<T_Variable, T_Expression> *>
         &a_RAW_CONSTRAINT_PTRS) {
-    std::vector<model::Constraint<T_Variable, T_Expression> *> results;
+    std::vector<model_component::Constraint<T_Variable, T_Expression> *>
+        results;
     for (const auto &constraint_ptr : a_RAW_CONSTRAINT_PTRS) {
         if (!constraint_ptr->is_enabled()) {
             continue;
@@ -173,7 +151,8 @@ extract_effective_constraint_ptrs(
         auto &expression                       = constraint_ptr->expression();
         for (const auto &sensitivity : expression.sensitivities()) {
             if (sensitivity.first->is_fixed() ||
-                sensitivity.first->sense() == model::VariableSense::Selection) {
+                sensitivity.first->sense() ==
+                    model_component::VariableSense::Selection) {
                 has_fixed_or_selection_variables = true;
                 break;
             }
@@ -190,7 +169,7 @@ extract_effective_constraint_ptrs(
 template <class T_Variable, class T_Expression>
 constexpr std::vector<BinomialConstraint<T_Variable, T_Expression>>
 convert_to_binomial_constraints(
-    const std::vector<model::Constraint<T_Variable, T_Expression> *>
+    const std::vector<model_component::Constraint<T_Variable, T_Expression> *>
         &a_CONSTRAINT_PTRS) {
     std::vector<BinomialConstraint<T_Variable, T_Expression>> results;
     for (const auto &constraint_ptr : a_CONSTRAINT_PTRS) {
