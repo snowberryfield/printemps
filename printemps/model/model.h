@@ -1722,9 +1722,7 @@ class Model {
     constexpr void update_variable_feasibility_improvability(
         const std::vector<model_component::Constraint<T_Variable, T_Expression>
                               *> &a_CONSTRAINT_PTRS) const noexcept {
-        const int CONSTRAINTS_SIZE = a_CONSTRAINT_PTRS.size();
-        for (auto i = 0; i < CONSTRAINTS_SIZE; i++) {
-            const auto constraint_ptr = a_CONSTRAINT_PTRS[i];
+        for (const auto &constraint_ptr : a_CONSTRAINT_PTRS) {
             if (constraint_ptr->violation_value() < constant::EPSILON) {
                 continue;
             }
@@ -2455,21 +2453,41 @@ class Model {
     /*************************************************************************/
     inline constexpr model_component::VariableReference<T_Variable,
                                                         T_Expression>
-    variable_reference(void) const {
+        &variable_reference(void) {
+        return m_variable_reference;
+    }
+
+    /*************************************************************************/
+    inline constexpr const model_component::VariableReference<T_Variable,
+                                                              T_Expression>
+        &variable_reference(void) const {
         return m_variable_reference;
     }
 
     /*************************************************************************/
     inline constexpr model_component::ConstraintReference<T_Variable,
                                                           T_Expression>
-    constraint_reference(void) const {
+        &constraint_reference(void) {
+        return m_constraint_reference;
+    }
+
+    /*************************************************************************/
+    inline constexpr const model_component::ConstraintReference<T_Variable,
+                                                                T_Expression>
+        &constraint_reference(void) const {
         return m_constraint_reference;
     }
 
     /*************************************************************************/
     inline constexpr model_component::ConstraintTypeReference<T_Variable,
                                                               T_Expression>
-    constraint_type_reference(void) const {
+        &constraint_type_reference(void) {
+        return m_constraint_type_reference;
+    }
+    /*************************************************************************/
+    inline constexpr const model_component::ConstraintTypeReference<
+        T_Variable, T_Expression>
+        &constraint_type_reference(void) const {
         return m_constraint_type_reference;
     }
 
