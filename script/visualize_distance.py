@@ -48,7 +48,7 @@ def visualize_distance(solution_object, output_file_name,
     number_of_variables = solution_object['number_of_variables']
     number_of_constraints = solution_object['number_of_constraints']
 
-    # Copy and sort raw solutions.
+    # Sort solutions.
     solutions = solution_object['solutions']
     if is_descending:
         solutions.sort(key=lambda x: -x['objective'])
