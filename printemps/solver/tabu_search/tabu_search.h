@@ -111,13 +111,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
 
     std::vector<solution::SolutionScore> trial_solution_scores;
     std::vector<MoveScore>               trial_move_scores;
-
-    std::vector<double> objective_improvements;
-    std::vector<double> local_penalties;
-
-    std::vector<double> local_augmented_objectives;
-    std::vector<double> global_augmented_objectives;
-    std::vector<double> total_scores;
+    std::vector<double>                  total_scores;
 
     int last_local_augmented_incumbent_update_iteration  = -1;
     int last_global_augmented_incumbent_update_iteration = -1;
@@ -210,8 +204,6 @@ TabuSearchResult<T_Variable, T_Expression> solve(
              */
             auto changed_variable_ptrs = utility::to_vector(
                 neighborhood::related_variable_ptrs(current_move));
-            auto changed_constraint_ptrs =
-                utility::to_vector(current_move.related_constraint_ptrs);
 
             if (iteration == 0) {
                 model_ptr->update_variable_objective_improvability();
@@ -258,6 +250,9 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                         accept_objective_improvable   = true;
                         accept_feasibility_improvable = false;
                     } else {
+                        auto changed_constraint_ptrs = utility::to_vector(
+                            current_move.related_constraint_ptrs);
+
                         if (iteration == 0) {
                             model_ptr
                                 ->reset_variable_feasibility_improvability();
@@ -337,12 +332,6 @@ TabuSearchResult<T_Variable, T_Expression> solve(
          */
         trial_solution_scores.resize(number_of_moves);
         trial_move_scores.resize(number_of_moves);
-
-        objective_improvements.resize(number_of_moves);
-        local_penalties.resize(number_of_moves);
-
-        local_augmented_objectives.resize(number_of_moves);
-        global_augmented_objectives.resize(number_of_moves);
         total_scores.resize(number_of_moves);
 
 #ifdef _OPENMP
@@ -366,21 +355,12 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                                     *trial_move_ptrs[i]);
             }
 #endif
-            evaluate_move(&trial_move_scores[i], *trial_move_ptrs[i],  //
-                          iteration,                                   //
-                          memory,                                      //
-                          option,                                      //
+            evaluate_move(&trial_move_scores[i],  //
+                          *trial_move_ptrs[i],    //
+                          iteration,              //
+                          memory,                 //
+                          option,                 //
                           tabu_tenure);
-
-            objective_improvements[i] =
-                trial_solution_scores[i].objective_improvement;
-
-            local_penalties[i] = trial_solution_scores[i].local_penalty;
-
-            local_augmented_objectives[i] =
-                trial_solution_scores[i].local_augmented_objective;
-            global_augmented_objectives[i] =
-                trial_solution_scores[i].global_augmented_objective;
 
             total_scores[i] =
                 trial_solution_scores[i].local_augmented_objective +
@@ -408,8 +388,14 @@ TabuSearchResult<T_Variable, T_Expression> solve(
         /**
          * Select moves for the next solution.
          */
-        int argmin_global_augmented_objective =
-            utility::argmin(global_augmented_objectives);
+        int argmin_global_augmented_objective = std::distance(
+            trial_solution_scores.begin(),
+            min_element(trial_solution_scores.begin(),
+                        trial_solution_scores.end(),
+                        [](const auto& a_FIRST, const auto& a_SECOND) {
+                            return a_FIRST.global_augmented_objective <
+                                   a_SECOND.global_augmented_objective;
+                        }));
 
         int  argmin_total_score = utility::argmin(total_scores);
         int  selected_index     = 0;
@@ -480,6 +466,16 @@ TabuSearchResult<T_Variable, T_Expression> solve(
 
         if (current_solution_score.is_feasible) {
             is_found_new_feasible_solution = true;
+        }
+
+        if (update_status == solution::IncumbentHolderConstant::
+                                 STATUS_LOCAL_AUGMENTED_INCUMBENT_UPDATE &&
+            current_solution_score.objective >
+                previous_solution_score.objective &&
+            current_solution_score.global_penalty >
+                previous_solution_score.global_penalty) {
+            termination_status = TabuSearchTerminationStatus::EARLY_STOP;
+            break;
         }
 
         /**
@@ -702,12 +698,20 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                 for (auto i = 0; i < number_of_all_neighborhoods; i++) {
                     if (!trial_solution_scores[i].is_feasible) {
                         infeasible_local_penalties[count++] =
-                            local_penalties[i];
+                            trial_solution_scores[i].local_penalty;
                     }
                 }
 
+                auto argmax_objective_sensitivity_score_ptr = std::max_element(
+                    trial_solution_scores.begin(), trial_solution_scores.end(),
+                    [](const auto& a_FIRST, const auto& a_SECOND) {
+                        return fabs(a_FIRST.objective_improvement) >
+                               fabs(a_SECOND.objective_improvement);
+                    });
                 double max_objective_sensitivity =
-                    utility::max_abs(objective_improvements);
+                    fabs(argmax_objective_sensitivity_score_ptr
+                             ->objective_improvement);
+
                 if (max_objective_sensitivity * MARGIN <
                     utility::min(infeasible_local_penalties)) {
                     termination_status =
