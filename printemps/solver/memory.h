@@ -19,7 +19,12 @@ class Memory {
     std::vector<std::string>                  m_variable_names;
     std::vector<multi_array::ValueProxy<int>> m_last_update_iterations;
     std::vector<multi_array::ValueProxy<int>> m_update_counts;
-    long                                      m_total_update_counts;
+    long                                      m_total_update_count;
+    double                                    m_total_update_count_reciprocal;
+
+    double m_bias_numerator;
+    double m_bias_denominator_reciprocal;
+    double m_bias;
 
    public:
     /*************************************************************************/
@@ -43,7 +48,12 @@ class Memory {
         m_variable_names.clear();
         m_last_update_iterations.clear();
         m_update_counts.clear();
-        m_total_update_counts = 0;
+        m_total_update_count            = 0;
+        m_total_update_count_reciprocal = 0.0;
+
+        m_bias_numerator              = 0.0;
+        m_bias_denominator_reciprocal = 0.0;
+        m_bias                        = 0.0;
     }
 
     /*************************************************************************/
@@ -96,13 +106,13 @@ class Memory {
         /// This method is for debug.
         const int VARIABLE_PROXIES_SIZE = m_variable_names.size();
         for (auto i = 0; i < VARIABLE_PROXIES_SIZE; i++) {
-            auto &            update_count = m_update_counts[i];
-            const std::string NAME         = m_variable_names[i];
-            const int NUMBER_OF_ELEMENTS   = update_count.number_of_elements();
+            auto &            update_counts = m_update_counts[i];
+            const std::string NAME          = m_variable_names[i];
+            const int NUMBER_OF_ELEMENTS = update_counts.number_of_elements();
             for (auto j = 0; j < NUMBER_OF_ELEMENTS; j++) {
                 utility::print(
-                    NAME + update_count.indices_label(j) + " = " +
-                    std::to_string(update_count.flat_indexed_values(j)));
+                    NAME + update_counts.indices_label(j) + " = " +
+                    std::to_string(update_counts.flat_indexed_values(j)));
             }
         }
     }
@@ -112,14 +122,14 @@ class Memory {
         /// This method is for debug.
         const int VARIABLE_PROXIES_SIZE = m_variable_names.size();
         for (auto i = 0; i < VARIABLE_PROXIES_SIZE; i++) {
-            auto &            update_count = m_update_counts[i];
-            const std::string NAME         = m_variable_names[i];
-            const int NUMBER_OF_ELEMENTS   = update_count.number_of_elements();
+            auto &            update_counts = m_update_counts[i];
+            const std::string NAME          = m_variable_names[i];
+            const int NUMBER_OF_ELEMENTS = update_counts.number_of_elements();
             for (auto j = 0; j < NUMBER_OF_ELEMENTS; j++) {
                 utility::print(
-                    NAME + update_count.indices_label(j) + " = " +
-                    std::to_string(update_count.flat_indexed_values(j) /
-                                   static_cast<double>(m_total_update_counts)));
+                    NAME + update_counts.indices_label(j) + " = " +
+                    std::to_string(update_counts.flat_indexed_values(j) *
+                                   m_total_update_count_reciprocal));
             }
         }
     }
@@ -127,24 +137,12 @@ class Memory {
     /*************************************************************************/
     void print_bias(void) {
         /// This method is for debug.
-        utility::print(std::to_string(this->bias()));
+        utility::print(std::to_string(m_bias));
     }
 
     /*************************************************************************/
-    double bias(void) const noexcept {
-        /// This method cannot be constexpr for m_variable_names.size().
-        double    result                = 0.0;
-        const int VARIABLE_PROXIES_SIZE = m_variable_names.size();
-        for (auto i = 0; i < VARIABLE_PROXIES_SIZE; i++) {
-            auto &    update_count       = m_update_counts[i];
-            const int NUMBER_OF_ELEMENTS = update_count.number_of_elements();
-            for (auto j = 0; j < NUMBER_OF_ELEMENTS; j++) {
-                double frequency = update_count.flat_indexed_values(j) /
-                                   static_cast<double>(m_total_update_counts);
-                result += frequency * frequency;
-            }
-        }
-        return result;
+    inline constexpr double bias(void) const noexcept {
+        return m_bias;
     }
 
     /*************************************************************************/
@@ -157,9 +155,16 @@ class Memory {
             int flat_index  = alteration.first->flat_index();
 
             m_last_update_iterations[proxy_index][flat_index] = a_ITERATION;
+            m_bias_numerator +=
+                2.0 * m_update_counts[proxy_index][flat_index] + 1;
             m_update_counts[proxy_index][flat_index]++;
-            m_total_update_counts++;
+            m_total_update_count++;
         }
+        m_total_update_count_reciprocal =
+            1.0 / static_cast<double>(m_total_update_count);
+        m_bias_denominator_reciprocal =
+            m_total_update_count_reciprocal * m_total_update_count_reciprocal;
+        m_bias = m_bias_numerator * m_bias_denominator_reciprocal;
     }
 
     /*************************************************************************/
@@ -180,9 +185,16 @@ class Memory {
 
                 m_last_update_iterations[proxy_index][flat_index] =
                     a_ITERATION + randomness;
+                m_bias_numerator +=
+                    2.0 * m_update_counts[proxy_index][flat_index] + 1;
                 m_update_counts[proxy_index][flat_index]++;
-                m_total_update_counts++;
+                m_total_update_count++;
             }
+            m_total_update_count_reciprocal =
+                1.0 / static_cast<double>(m_total_update_count);
+            m_bias_denominator_reciprocal = m_total_update_count_reciprocal *
+                                            m_total_update_count_reciprocal;
+            m_bias = m_bias_numerator * m_bias_denominator_reciprocal;
         }
     }
 
@@ -221,8 +233,13 @@ class Memory {
     }
 
     /*************************************************************************/
-    inline constexpr const long &total_update_counts(void) const {
-        return m_total_update_counts;
+    inline constexpr long total_update_count(void) const {
+        return m_total_update_count;
+    }
+
+    /*************************************************************************/
+    inline constexpr double total_update_count_reciprocal(void) const {
+        return m_total_update_count_reciprocal;
     }
 };  // namespace solver
 }  // namespace solver
