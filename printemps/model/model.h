@@ -2271,8 +2271,13 @@ class Model {
     /*********************************************************************/
     constexpr void import_mps(const mps::MPS &a_MPS,
                               const bool      a_ACCEPT_CONTINUOUS) {
-        std::unordered_map<std::string, model_component::IPVariable *>
-            variable_ptrs;
+        using VariableMap = std::unordered_map<
+            std::string, model_component::Variable<T_Variable, T_Expression> *>;
+        using Sensitivities = std::unordered_map<
+            model_component::Variable<T_Variable, T_Expression> *,
+            T_Expression>;
+
+        VariableMap variable_ptrs;
 
         auto &variable_proxy =
             this->create_variables("variables", a_MPS.variables.size());
@@ -2325,13 +2330,15 @@ class Model {
         for (auto i = 0; i < number_of_constraints; i++) {
             auto &name       = a_MPS.constraint_names[i];
             auto &constraint = a_MPS.constraints.at(name);
-            auto  expression = model_component::IPExpression::create_instance();
+            auto  expression =
+                model_component::Expression<T_Variable,
+                                            T_Expression>::create_instance();
 
-            std::unordered_map<model_component::IPVariable *, double>
-                expression_sensitivities;
+            Sensitivities expression_sensitivities;
             for (const auto &sensitivity : constraint.sensitivities) {
-                std::string variable_name = sensitivity.first;
-                double      coefficient   = sensitivity.second;
+                std::string  variable_name = sensitivity.first;
+                T_Expression coefficient =
+                    static_cast<T_Expression>(sensitivity.second);
                 expression_sensitivities[variable_ptrs[variable_name]] =
                     coefficient;
             }
@@ -2359,12 +2366,14 @@ class Model {
         /**
          * Set up the objective function.
          */
-        auto objective = model_component::IPExpression::create_instance();
-        std::unordered_map<model_component::IPVariable *, double>
-            objective_sensitivities;
+        auto objective =
+            model_component::Expression<T_Variable,
+                                        T_Expression>::create_instance();
+        Sensitivities objective_sensitivities;
         for (const auto &sensitivity : a_MPS.objective.sensitivities) {
-            std::string variable_name = sensitivity.first;
-            double      coefficient   = sensitivity.second;
+            std::string  variable_name = sensitivity.first;
+            T_Expression coefficient =
+                static_cast<T_Expression>(sensitivity.second);
             objective_sensitivities[variable_ptrs[variable_name]] = coefficient;
         }
         objective.set_sensitivities(objective_sensitivities);
