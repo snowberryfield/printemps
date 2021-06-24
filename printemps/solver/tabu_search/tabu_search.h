@@ -65,8 +65,8 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     model_ptr->import_variable_values(a_INITIAL_VARIABLE_VALUE_PROXIES);
     model_ptr->update();
 
-    solution::SolutionScore current_solution_score = model_ptr->evaluate({});
-    solution::SolutionScore previous_solution_score;
+    solution::SolutionScore current_solution_score  = model_ptr->evaluate({});
+    solution::SolutionScore previous_solution_score = current_solution_score;
 
     int update_status = incumbent_holder.try_update_incumbent(
         model_ptr, current_solution_score);
@@ -108,10 +108,15 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     /**
      * Prepare other local variables.
      */
+    int number_of_all_neighborhoods         = 0;
+    int number_of_feasible_neighborhoods    = 0;
+    int number_of_permissible_neighborhoods = 0;
+    int number_of_improvable_neighborhoods  = 0;
 
     std::vector<solution::SolutionScore> trial_solution_scores;
     std::vector<MoveScore>               trial_move_scores;
     std::vector<double>                  total_scores;
+    std::vector<double>                  infeasible_local_penalties;
 
     int last_local_augmented_incumbent_update_iteration  = -1;
     int last_global_augmented_incumbent_update_iteration = -1;
@@ -468,16 +473,6 @@ TabuSearchResult<T_Variable, T_Expression> solve(
             is_found_new_feasible_solution = true;
         }
 
-        if (update_status == solution::IncumbentHolderConstant::
-                                 STATUS_LOCAL_AUGMENTED_INCUMBENT_UPDATE &&
-            current_solution_score.objective >
-                previous_solution_score.objective &&
-            current_solution_score.global_penalty >
-                previous_solution_score.global_penalty) {
-            termination_status = TabuSearchTerminationStatus::EARLY_STOP;
-            break;
-        }
-
         /**
          * Push the current solution to historical data.
          */
@@ -539,32 +534,43 @@ TabuSearchResult<T_Variable, T_Expression> solve(
         /**
          * Calculate the number of moves for each type.
          */
-        int number_of_all_neighborhoods         = number_of_moves;
-        int number_of_feasible_neighborhoods    = 0;
-        int number_of_infeasible_neighborhood   = 0;
-        int number_of_permissible_neighborhoods = 0;
-        int number_of_improvable_neighborhoods  = 0;
+        number_of_all_neighborhoods = number_of_moves;
+        if (iteration % std::max(option.tabu_search.log_interval, 1) == 0 ||
+            update_status > 0) {
+            number_of_feasible_neighborhoods    = 0;
+            number_of_permissible_neighborhoods = 0;
+            number_of_improvable_neighborhoods  = 0;
 
-        for (const auto& score : trial_solution_scores) {
-            if (score.is_feasible) {
-                number_of_feasible_neighborhoods++;
+            for (const auto& score : trial_solution_scores) {
+                if (score.is_feasible) {
+                    number_of_feasible_neighborhoods++;
+                }
+                if (score.is_objective_improvable ||
+                    score.is_feasibility_improvable) {
+                    number_of_improvable_neighborhoods++;
+                }
             }
-            if (score.is_objective_improvable ||
-                score.is_feasibility_improvable) {
-                number_of_improvable_neighborhoods++;
-            }
-        }
 
-        for (const auto& score : trial_move_scores) {
-            if (score.is_permissible) {
-                number_of_permissible_neighborhoods++;
+            for (const auto& score : trial_move_scores) {
+                if (score.is_permissible) {
+                    number_of_permissible_neighborhoods++;
+                }
             }
-        }
-        number_of_infeasible_neighborhood =
-            number_of_all_neighborhoods - number_of_feasible_neighborhoods;
 
-        if (number_of_permissible_neighborhoods == 0) {
-            is_few_permissible_neighborhood = true;
+            if (number_of_permissible_neighborhoods == 0) {
+                is_few_permissible_neighborhood = true;
+            }
+        } else {
+            bool is_few_permissible_neighborhood_temp = true;
+            for (const auto& score : trial_move_scores) {
+                if (score.is_permissible) {
+                    is_few_permissible_neighborhood_temp = false;
+                    break;
+                }
+            }
+            if (is_few_permissible_neighborhood_temp) {
+                is_few_permissible_neighborhood = true;
+            }
         }
 
         /**
@@ -686,37 +692,40 @@ TabuSearchResult<T_Variable, T_Expression> solve(
              * sensitivity, the current loop will be terminated and the
              * local penalty coefficients will be adjusted.
              */
-            const int    ITERATION_MIN = 10;
-            const double MARGIN        = 100.0;
+            constexpr int    ITERATION_MIN = 10;
+            constexpr double MARGIN        = 100.0;
 
-            if (iteration > ITERATION_MIN              //
-                && current_solution_score.is_feasible  //
-                && number_of_infeasible_neighborhood > 0) {
-                std::vector<double> infeasible_local_penalties(
-                    number_of_infeasible_neighborhood);
-                int count = 0;
-                for (auto i = 0; i < number_of_all_neighborhoods; i++) {
-                    if (!trial_solution_scores[i].is_feasible) {
-                        infeasible_local_penalties[count++] =
-                            trial_solution_scores[i].local_penalty;
+            if (iteration > ITERATION_MIN &&
+                current_solution_score.is_feasible) {
+                infeasible_local_penalties.clear();
+                for (const auto& score : trial_solution_scores) {
+                    if (!score.is_feasible) {
+                        infeasible_local_penalties.push_back(
+                            score.local_penalty);
                     }
                 }
+                if (infeasible_local_penalties.size() > 0) {
+                    auto argminmax_objective_sensitivity_score_ptr =
+                        std::minmax_element(
+                            trial_solution_scores.begin(),
+                            trial_solution_scores.end(),
+                            [](const auto& a_FIRST, const auto& a_SECOND) {
+                                return a_FIRST.objective_improvement <
+                                       a_SECOND.objective_improvement;
+                            });
 
-                auto argmax_objective_sensitivity_score_ptr = std::max_element(
-                    trial_solution_scores.begin(), trial_solution_scores.end(),
-                    [](const auto& a_FIRST, const auto& a_SECOND) {
-                        return fabs(a_FIRST.objective_improvement) >
-                               fabs(a_SECOND.objective_improvement);
-                    });
-                double max_objective_sensitivity =
-                    fabs(argmax_objective_sensitivity_score_ptr
-                             ->objective_improvement);
+                    double max_objective_sensitivity =
+                        std::max(argminmax_objective_sensitivity_score_ptr
+                                     .second->objective_improvement,
+                                 -argminmax_objective_sensitivity_score_ptr
+                                      .first->objective_improvement);
 
-                if (max_objective_sensitivity * MARGIN <
-                    utility::min(infeasible_local_penalties)) {
-                    termination_status =
-                        TabuSearchTerminationStatus::EARLY_STOP;
-                    break;
+                    if (max_objective_sensitivity * MARGIN <
+                        utility::min(infeasible_local_penalties)) {
+                        termination_status =
+                            TabuSearchTerminationStatus::EARLY_STOP;
+                        break;
+                    }
                 }
             }
         }

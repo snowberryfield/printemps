@@ -81,9 +81,8 @@ constexpr double compute_frequency_penalty(
         move_update_count += update_counts[alteration.first->proxy_index()]
                                           [alteration.first->flat_index()];
     }
-    return move_update_count *
-           a_OPTION.tabu_search.frequency_penalty_coefficient /
-           static_cast<double>(a_MEMORY.total_update_counts());
+    return move_update_count * a_MEMORY.total_update_count_reciprocal() *
+           a_OPTION.tabu_search.frequency_penalty_coefficient;
 }
 
 /*****************************************************************************/
