@@ -450,15 +450,15 @@ struct Option {
             utility::to_string(
                 this->tabu_search.is_enabled_initial_modification, "%d"));
 
-        utility::print(                                          //
-            " -- tabu_search.bias_increase_count_threshold: " +  //
-            utility::to_string(this->tabu_search.bias_increase_count_threshold,
-                               "%d"));
+        utility::print(                                               //
+            " -- tabu_search.intensity_increase_count_threshold: " +  //
+            utility::to_string(
+                this->tabu_search.intensity_increase_count_threshold, "%d"));
 
-        utility::print(                                          //
-            " -- tabu_search.bias_decrease_count_threshold: " +  //
-            utility::to_string(this->tabu_search.bias_decrease_count_threshold,
-                               "%d"));
+        utility::print(                                               //
+            " -- tabu_search.intensity_decrease_count_threshold: " +  //
+            utility::to_string(
+                this->tabu_search.intensity_decrease_count_threshold, "%d"));
 
         utility::print(                                    //
             " -- tabu_search.iteration_increase_rate: " +  //

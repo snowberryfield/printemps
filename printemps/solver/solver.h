@@ -14,13 +14,6 @@
 
 namespace printemps {
 namespace solver {
-/*****************************************************************************/
-template <class T_Variable, class T_Expression>
-Result<T_Variable, T_Expression> solve(
-    model::Model<T_Variable, T_Expression>* a_model_ptr) {
-    option::Option option;
-    return solve(a_model_ptr, option);
-}
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
@@ -511,9 +504,9 @@ Result<T_Variable, T_Expression> solve(
     int number_of_initial_modification = 0;
     int iteration_max = master_option.tabu_search.iteration_max;
 
-    double bias                            = memory.bias();
-    double current_bias_before_relaxation  = 1.0;
-    double previous_bias_before_relaxation = 1.0;
+    double intensity                            = memory.intensity();
+    double current_intensity_before_relaxation  = 1.0;
+    double previous_intensity_before_relaxation = 1.0;
 
     double penalty_coefficient_relaxing_rate =
         master_option.penalty_coefficient_relaxing_rate;
@@ -616,9 +609,9 @@ Result<T_Variable, T_Expression> solve(
         memory = result.memory;
 
         /**
-         * Update the bias.
+         * Update the intensity.
          */
-        bias = memory.bias();
+        intensity = memory.intensity();
 
         /**
          * Update the termination status.
@@ -686,7 +679,7 @@ Result<T_Variable, T_Expression> solve(
         bool is_enabled_penalty_coefficient_relaxing   = false;
         bool is_enabled_forcibly_initial_modification  = false;
 
-        const int INFEASIBLE_STAGNATION_THRESHOLD = 50;
+        constexpr int INFEASIBLE_STAGNATION_THRESHOLD = 50;
 
         /**
          * If the improvability_screening_mode was set to "Automatic", determine
@@ -909,11 +902,12 @@ Result<T_Variable, T_Expression> solve(
             iteration_after_relaxation = 0;
             relaxation_count++;
 
-            previous_bias_before_relaxation = current_bias_before_relaxation;
-            current_bias_before_relaxation  = bias;
+            previous_intensity_before_relaxation =
+                current_intensity_before_relaxation;
+            current_intensity_before_relaxation = intensity;
 
-            if (current_bias_before_relaxation >
-                    previous_bias_before_relaxation &&
+            if (current_intensity_before_relaxation >
+                    previous_intensity_before_relaxation &&
                 !incumbent_holder.is_found_feasible_solution() &&
                 iteration_after_global_augmented_incumbent_update >
                     INFEASIBLE_STAGNATION_THRESHOLD) {
@@ -1055,7 +1049,7 @@ Result<T_Variable, T_Expression> solve(
 
             if (result.objective_constraint_rate > constant::EPSILON) {
                 if (result_local_augmented_incumbent_score.is_feasible) {
-                    const double MARGIN = 1.0;
+                    constexpr double MARGIN = 1.0;
                     corrected_penalty_coefficient_relaxing_rate =
                         std::min(penalty_coefficient_relaxing_rate,
                                  result.objective_constraint_rate * MARGIN);
@@ -1397,10 +1391,10 @@ Result<T_Variable, T_Expression> solve(
         }
 
         /**
-         * Print the search bias.
+         * Print the search intensity.
          */
         utility::print_message(
-            "Historical search bias is " + std::to_string(bias) + ".",
+            "Historical search intensity is " + std::to_string(intensity) + ".",
             master_option.verbose >= option::verbose::Outer);
 
         /**
@@ -1414,7 +1408,7 @@ Result<T_Variable, T_Expression> solve(
              * this problem, the maximum number of violations to be printed
              * is 20.
              */
-            const int MAX_NUMBER_OF_PRINT_ITEMS = 20;
+            constexpr int MAX_NUMBER_OF_PRINT_ITEMS = 20;
 
             utility::print_message(
                 "The current solution does not satisfy the following "
@@ -1677,6 +1671,14 @@ Result<T_Variable, T_Expression> solve(
     result.solution_archive                   = solution_archive;
 
     return result;
+}
+
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+Result<T_Variable, T_Expression> solve(
+    model::Model<T_Variable, T_Expression>* a_model_ptr) {
+    option::Option option;
+    return solve(a_model_ptr, option);
 }
 }  // namespace solver
 }  // namespace printemps
