@@ -2269,8 +2269,7 @@ class Model {
     }
 
     /*********************************************************************/
-    constexpr void import_mps(const mps::MPS &a_MPS,
-                              const bool      a_ACCEPT_CONTINUOUS) {
+    void import_mps(const mps::MPS &a_MPS, const bool a_ACCEPT_CONTINUOUS) {
         using VariableMap = std::unordered_map<
             std::string, model_component::Variable<T_Variable, T_Expression> *>;
         using Sensitivities = std::unordered_map<
