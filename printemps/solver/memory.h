@@ -22,9 +22,9 @@ class Memory {
     long                                      m_total_update_count;
     double                                    m_total_update_count_reciprocal;
 
-    double m_bias_numerator;
-    double m_bias_denominator_reciprocal;
-    double m_bias;
+    double m_intensity_numerator;
+    double m_intensity_denominator_reciprocal;
+    double m_intensity;
 
    public:
     /*************************************************************************/
@@ -51,9 +51,9 @@ class Memory {
         m_total_update_count            = 0;
         m_total_update_count_reciprocal = 0.0;
 
-        m_bias_numerator              = 0.0;
-        m_bias_denominator_reciprocal = 0.0;
-        m_bias                        = 0.0;
+        m_intensity_numerator              = 0.0;
+        m_intensity_denominator_reciprocal = 0.0;
+        m_intensity                        = 0.0;
     }
 
     /*************************************************************************/
@@ -135,14 +135,14 @@ class Memory {
     }
 
     /*************************************************************************/
-    void print_bias(void) {
+    void print_intensity(void) {
         /// This method is for debug.
-        utility::print(std::to_string(m_bias));
+        utility::print(std::to_string(m_intensity));
     }
 
     /*************************************************************************/
-    inline constexpr double bias(void) const noexcept {
-        return m_bias;
+    inline constexpr double intensity(void) const noexcept {
+        return m_intensity;
     }
 
     /*************************************************************************/
@@ -155,16 +155,17 @@ class Memory {
             int flat_index  = alteration.first->flat_index();
 
             m_last_update_iterations[proxy_index][flat_index] = a_ITERATION;
-            m_bias_numerator +=
+            m_intensity_numerator +=
                 2.0 * m_update_counts[proxy_index][flat_index] + 1;
             m_update_counts[proxy_index][flat_index]++;
             m_total_update_count++;
         }
         m_total_update_count_reciprocal =
             1.0 / static_cast<double>(m_total_update_count);
-        m_bias_denominator_reciprocal =
+        m_intensity_denominator_reciprocal =
             m_total_update_count_reciprocal * m_total_update_count_reciprocal;
-        m_bias = m_bias_numerator * m_bias_denominator_reciprocal;
+        m_intensity =
+            m_intensity_numerator * m_intensity_denominator_reciprocal;
     }
 
     /*************************************************************************/
@@ -185,16 +186,18 @@ class Memory {
 
                 m_last_update_iterations[proxy_index][flat_index] =
                     a_ITERATION + randomness;
-                m_bias_numerator +=
+                m_intensity_numerator +=
                     2.0 * m_update_counts[proxy_index][flat_index] + 1;
                 m_update_counts[proxy_index][flat_index]++;
                 m_total_update_count++;
             }
             m_total_update_count_reciprocal =
                 1.0 / static_cast<double>(m_total_update_count);
-            m_bias_denominator_reciprocal = m_total_update_count_reciprocal *
-                                            m_total_update_count_reciprocal;
-            m_bias = m_bias_numerator * m_bias_denominator_reciprocal;
+            m_intensity_denominator_reciprocal =
+                m_total_update_count_reciprocal *
+                m_total_update_count_reciprocal;
+            m_intensity =
+                m_intensity_numerator * m_intensity_denominator_reciprocal;
         }
     }
 

@@ -86,10 +86,10 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                  model_ptr->number_of_mutable_variables());
     int tabu_tenure = original_tabu_tenure;
 
-    double bias_previous       = 0.0;
-    double bias_current        = 0.0;
-    int    bias_increase_count = 0;
-    int    bias_decrease_count = 0;
+    double intensity_previous       = 0.0;
+    double intensity_current        = 0.0;
+    int    intensity_increase_count = 0;
+    int    intensity_decrease_count = 0;
 
     int last_tabu_tenure_updated_iteration = 0;
 
@@ -616,8 +616,8 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                  */
                 tabu_tenure                        = original_tabu_tenure;
                 last_tabu_tenure_updated_iteration = iteration;
-                bias_decrease_count                = 0;
-                bias_increase_count                = 0;
+                intensity_decrease_count           = 0;
+                intensity_increase_count           = 0;
                 utility::print_debug("Tabu tenure reverted: " +
                                          std::to_string(tabu_tenure) + ".",
                                      option.verbose >= option::verbose::Debug);
@@ -625,20 +625,21 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                            (tabu_tenure + 1) ==
                        0) {
                 /**
-                 * The bias of searching will be computed with the interval of
-                 * tabu_tenure+1. The tabu tenure will be increased if the bias
-                 * has grown up, and decreased if the bias has been reduced.
+                 * The intensity of searching will be computed with the interval
+                 * of tabu_tenure+1. The tabu tenure will be increased if the
+                 * intensity has grown up, and decreased if the intensity has
+                 * been reduced.
                  */
-                bias_previous = bias_current;
-                bias_current  = memory.bias();
+                intensity_previous = intensity_current;
+                intensity_current  = memory.intensity();
 
-                if (bias_current > bias_previous) {
-                    bias_increase_count++;
-                    bias_decrease_count = 0;
+                if (intensity_current > intensity_previous) {
+                    intensity_increase_count++;
+                    intensity_decrease_count = 0;
 
-                    if (bias_increase_count >
-                        option.tabu_search.bias_increase_count_threshold) {
-                        bias_increase_count = 0;
+                    if (intensity_increase_count >
+                        option.tabu_search.intensity_increase_count_threshold) {
+                        intensity_increase_count = 0;
                         tabu_tenure =
                             std::min(tabu_tenure + 1,
                                      model_ptr->number_of_mutable_variables());
@@ -649,13 +650,13 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                             option.verbose >= option::verbose::Debug);
                     }
                 } else {
-                    bias_decrease_count++;
-                    bias_increase_count = 0;
+                    intensity_decrease_count++;
+                    intensity_increase_count = 0;
 
-                    if (bias_decrease_count >
-                        option.tabu_search.bias_decrease_count_threshold) {
-                        bias_decrease_count = 0;
-                        tabu_tenure         = std::max(tabu_tenure - 1, 1);
+                    if (intensity_decrease_count >
+                        option.tabu_search.intensity_decrease_count_threshold) {
+                        intensity_decrease_count = 0;
+                        tabu_tenure              = std::max(tabu_tenure - 1, 1);
                         last_tabu_tenure_updated_iteration = iteration;
 
                         utility::print_debug(
