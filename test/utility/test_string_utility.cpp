@@ -88,7 +88,6 @@ TEST_F(TestStringUtility, base_name) {
     EXPECT_EQ("hogehoge",
               printemps::utility::base_name("path\\to\\hogehoge.txt"));
 }
-
 }  // namespace
 /*****************************************************************************/
 // END

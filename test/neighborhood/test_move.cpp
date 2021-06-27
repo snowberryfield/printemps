@@ -31,9 +31,9 @@ TEST_F(TestMove, constructor) {
 /*****************************************************************************/
 TEST_F(TestMove, has_fixed_variable) {
     auto variable_0 =
-        printemps::model::Variable<int, double>::create_instance();
+        printemps::model_component::Variable<int, double>::create_instance();
     auto variable_1 =
-        printemps::model::Variable<int, double>::create_instance();
+        printemps::model_component::Variable<int, double>::create_instance();
     variable_1.fix();
 
     /// The move does not have a fixed variable.
@@ -55,11 +55,11 @@ TEST_F(TestMove, has_fixed_variable) {
 /*****************************************************************************/
 TEST_F(TestMove, has_selection_variable) {
     auto variable_0 =
-        printemps::model::Variable<int, double>::create_instance();
+        printemps::model_component::Variable<int, double>::create_instance();
     auto variable_1 =
-        printemps::model::Variable<int, double>::create_instance();
+        printemps::model_component::Variable<int, double>::create_instance();
 
-    printemps::model::Selection<int, double> selection;
+    printemps::model_component::Selection<int, double> selection;
     variable_1.set_selection_ptr(&selection);
 
     /// The move does not have a selection variable.
@@ -81,9 +81,9 @@ TEST_F(TestMove, has_selection_variable) {
 /*****************************************************************************/
 TEST_F(TestMove, has_bound_violation) {
     auto variable_0 =
-        printemps::model::Variable<int, double>::create_instance();
+        printemps::model_component::Variable<int, double>::create_instance();
     auto variable_1 =
-        printemps::model::Variable<int, double>::create_instance();
+        printemps::model_component::Variable<int, double>::create_instance();
     variable_0.set_bound(0, 10);
     variable_1.set_bound(0, 10);
 
@@ -106,9 +106,9 @@ TEST_F(TestMove, has_bound_violation) {
 /*****************************************************************************/
 TEST_F(TestMove, has_objective_improvable_variable) {
     auto variable_0 =
-        printemps::model::Variable<int, double>::create_instance();
+        printemps::model_component::Variable<int, double>::create_instance();
     auto variable_1 =
-        printemps::model::Variable<int, double>::create_instance();
+        printemps::model_component::Variable<int, double>::create_instance();
     variable_0.set_is_objective_improvable(false);
     variable_1.set_is_objective_improvable(true);
 
@@ -133,9 +133,9 @@ TEST_F(TestMove, has_objective_improvable_variable) {
 /*****************************************************************************/
 TEST_F(TestMove, has_feasibility_improvable_variable) {
     auto variable_0 =
-        printemps::model::Variable<int, double>::create_instance();
+        printemps::model_component::Variable<int, double>::create_instance();
     auto variable_1 =
-        printemps::model::Variable<int, double>::create_instance();
+        printemps::model_component::Variable<int, double>::create_instance();
     variable_0.set_is_feasibility_improvable(false);
     variable_1.set_is_feasibility_improvable(true);
 
@@ -160,9 +160,9 @@ TEST_F(TestMove, has_feasibility_improvable_variable) {
 /*****************************************************************************/
 TEST_F(TestMove, has_feasibility_not_improvable_variable) {
     auto variable_0 =
-        printemps::model::Variable<int, double>::create_instance();
+        printemps::model_component::Variable<int, double>::create_instance();
     auto variable_1 =
-        printemps::model::Variable<int, double>::create_instance();
+        printemps::model_component::Variable<int, double>::create_instance();
     variable_0.set_is_feasibility_improvable(false);
     variable_1.set_is_feasibility_improvable(true);
 
@@ -189,9 +189,9 @@ TEST_F(TestMove, has_feasibility_not_improvable_variable) {
 /*****************************************************************************/
 TEST_F(TestMove, has_duplicate_variable) {
     auto variable_0 =
-        printemps::model::Variable<int, double>::create_instance();
+        printemps::model_component::Variable<int, double>::create_instance();
     auto variable_1 =
-        printemps::model::Variable<int, double>::create_instance();
+        printemps::model_component::Variable<int, double>::create_instance();
 
     /// The move does not have a duplicated variable.
     {
@@ -410,12 +410,12 @@ TEST_F(TestMove, operator_plus) {
 /*****************************************************************************/
 TEST_F(TestMove, operator_equal) {
     auto variable_0 =
-        printemps::model::Variable<int, double>::create_instance();
+        printemps::model_component::Variable<int, double>::create_instance();
     auto variable_1 =
-        printemps::model::Variable<int, double>::create_instance();
+        printemps::model_component::Variable<int, double>::create_instance();
 
     auto constraint =
-        printemps::model::Constraint<int, double>::create_instance();
+        printemps::model_component::Constraint<int, double>::create_instance();
 
     /// Not equal: The number of alterations are different.
     {
@@ -521,7 +521,6 @@ TEST_F(TestMove, operator_equal) {
         EXPECT_FALSE(move_0 != move_1);
     }
 }
-/*****************************************************************************/
 }  // namespace
 /*****************************************************************************/
 // END

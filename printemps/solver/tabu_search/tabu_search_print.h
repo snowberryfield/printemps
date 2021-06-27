@@ -8,10 +8,6 @@
 
 namespace printemps {
 namespace solver {
-/*****************************************************************************/
-template <class T_Variable, class T_Expression>
-class IncumbentHolder;
-
 namespace tabu_search {
 /*****************************************************************************/
 struct TabuSearchMoveScore;
@@ -42,10 +38,11 @@ inline void print_table_header(const bool a_IS_ENABLED_PRINT) {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 inline void print_table_initial(
-    const model::Model<T_Variable, T_Expression> *   a_MODEL,
-    const solution::SolutionScore &                  a_CURRENT_SOLUTION_SCORE,
-    const IncumbentHolder<T_Variable, T_Expression> &a_INCUMBENT_HOLDER,
-    const bool                                       a_IS_ENABLED_PRINT) {
+    const model::Model<T_Variable, T_Expression> *a_MODEL,
+    const solution::SolutionScore &               a_CURRENT_SOLUTION_SCORE,
+    const solution::IncumbentHolder<T_Variable, T_Expression>
+        &      a_INCUMBENT_HOLDER,
+    const bool a_IS_ENABLED_PRINT) {
     if (!a_IS_ENABLED_PRINT) {
         return;
     }
@@ -73,9 +70,10 @@ inline void print_table_body(
     const int                      a_NUMBER_OF_IMPROVABLE_NEIGHBORHOOD,   //
     const solution::SolutionScore &a_CURRENT_SOLUTION_SCORE,              //
     const int                      a_STATUS,                              //
-    const IncumbentHolder<T_Variable, T_Expression> &a_INCUMBENT_HOLDER,  //
-    const bool                                       a_IS_ASPIRATED,      //
-    const bool                                       a_IS_ENABLED_PRINT) {
+    const solution::IncumbentHolder<T_Variable, T_Expression>
+        &      a_INCUMBENT_HOLDER,  //
+    const bool a_IS_ASPIRATED,      //
+    const bool a_IS_ENABLED_PRINT) {
     if (!a_IS_ENABLED_PRINT) {
         return;
     }
@@ -89,13 +87,13 @@ inline void print_table_body(
         mark_special_neighborhood_move = 's';
     }
 
-    if (a_STATUS &
-        IncumbentHolderConstant::STATUS_LOCAL_AUGMENTED_INCUMBENT_UPDATE) {
+    if (a_STATUS & solution::IncumbentHolderConstant::
+                       STATUS_LOCAL_AUGMENTED_INCUMBENT_UPDATE) {
         mark_current = '!';
     }
 
-    if (a_STATUS &
-        IncumbentHolderConstant::STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
+    if (a_STATUS & solution::IncumbentHolderConstant::
+                       STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
         mark_current                    = '#';
         mark_global_augmented_incumbent = '#';
         if (a_IS_ASPIRATED) {
@@ -104,7 +102,8 @@ inline void print_table_body(
         }
     }
 
-    if (a_STATUS & IncumbentHolderConstant::STATUS_FEASIBLE_INCUMBENT_UPDATE) {
+    if (a_STATUS &
+        solution::IncumbentHolderConstant::STATUS_FEASIBLE_INCUMBENT_UPDATE) {
         mark_current                    = '*';
         mark_global_augmented_incumbent = '*';
         mark_feasible_incumbent         = '*';

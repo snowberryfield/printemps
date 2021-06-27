@@ -7,6 +7,7 @@ CC = gcc
 
 .PHOBY: test
 test: build
+	$(BUILD_DIR)/test_model_component; \
 	$(BUILD_DIR)/test_model; \
 	$(BUILD_DIR)/test_presolver; \
 	$(BUILD_DIR)/test_verifier; \
