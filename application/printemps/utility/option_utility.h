@@ -24,13 +24,13 @@ bool read_json(T *a_parameter, const std::string &a_NAME,
 }
 
 /******************************************************************************/
-printemps::solver::Option read_option(const std::string &a_FILE_NAME) {
+printemps::option::Option read_option(const std::string &a_FILE_NAME) {
     std::fstream   option_file(a_FILE_NAME);
     nlohmann::json option_object;
     option_file >> option_object;
     option_file.close();
 
-    printemps::solver::Option option;
+    printemps::option::Option option;
 
     /**************************************************************************/
     /// global
@@ -447,15 +447,15 @@ printemps::solver::Option read_option(const std::string &a_FILE_NAME) {
                   option_object_tabu_search);
 
         /**********************************************************************/
-        /// tabu_search.bias_increase_count_threshold
-        read_json(&option.tabu_search.bias_increase_count_threshold,  //
-                  "bias_increase_count_threshold",                    //
+        /// tabu_search.intensity_increase_count_threshold
+        read_json(&option.tabu_search.intensity_increase_count_threshold,  //
+                  "intensity_increase_count_threshold",                    //
                   option_object_tabu_search);
 
         /**********************************************************************/
-        /// tabu_search.bias_decrease_count_threshold
-        read_json(&option.tabu_search.bias_decrease_count_threshold,  //
-                  "bias_decrease_count_threshold",                    //
+        /// tabu_search.intensity_decrease_count_threshold
+        read_json(&option.tabu_search.intensity_decrease_count_threshold,  //
+                  "intensity_decrease_count_threshold",                    //
                   option_object_tabu_search);
 
         /**********************************************************************/

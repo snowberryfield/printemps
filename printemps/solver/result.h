@@ -9,9 +9,6 @@
 namespace printemps {
 namespace solver {
 /*****************************************************************************/
-struct Status;
-
-/*****************************************************************************/
 template <class T_Variable, class T_Expression>
 struct Result {
     solution::NamedSolution<T_Variable, T_Expression>   solution;
@@ -21,11 +18,6 @@ struct Result {
     /*************************************************************************/
     Result(void) {
         this->initialize();
-    }
-
-    /*************************************************************************/
-    virtual ~Result(void) {
-        /// nothing to do
     }
 
     /*************************************************************************/

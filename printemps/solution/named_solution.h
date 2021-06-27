@@ -7,14 +7,6 @@
 #define PRINTEMPS_SOLUTION_NAMED_SOLUTION_H__
 
 namespace printemps {
-namespace multi_array {
-/*****************************************************************************/
-template <class T_Value>
-class ValueProxy;
-}  // namespace multi_array
-}  // namespace printemps
-
-namespace printemps {
 namespace solution {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>

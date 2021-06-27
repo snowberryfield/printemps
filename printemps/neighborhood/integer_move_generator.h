@@ -12,10 +12,6 @@ namespace printemps {
 namespace neighborhood {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-struct Move;
-
-/*****************************************************************************/
-template <class T_Variable, class T_Expression>
 class IntegerMoveGenerator
     : public AbstractMoveGenerator<T_Variable, T_Expression> {
    private:
@@ -31,8 +27,9 @@ class IntegerMoveGenerator
     }
 
     /*************************************************************************/
-    void setup(const std::vector<model::Variable<T_Variable, T_Expression> *>
-                   &a_RAW_VARIABLE_PTRS) {
+    void setup(
+        const std::vector<model_component::Variable<T_Variable, T_Expression> *>
+            &a_RAW_VARIABLE_PTRS) {
         /**
          *  "Shift" move for integer variables:
          *  e.g) integer variable 0 <= x <= 10 (x \in Z)

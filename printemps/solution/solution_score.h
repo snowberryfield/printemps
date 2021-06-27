@@ -6,8 +6,6 @@
 #ifndef PRINTEMPS_SOLUTION_SOLUTION_SCORE_H__
 #define PRINTEMPS_SOLUTION_SOLUTION_SCORE_H__
 
-#include "../utility/utility.h"
-
 namespace printemps {
 namespace solution {
 /*****************************************************************************/

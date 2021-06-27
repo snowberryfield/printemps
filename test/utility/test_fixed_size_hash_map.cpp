@@ -34,7 +34,7 @@ class TestFixedSizeHashMap : public ::testing::Test {
 /*****************************************************************************/
 TEST_F(TestFixedSizeHashMap, initialize) {
     printemps::utility::FixedSizeHashMap<
-        printemps::model::Variable<int, double>*, double>
+        printemps::model_component::Variable<int, double>*, double>
         fixed_size_hash_map;
 
     /// static const variable seems not to be allowed in EXPECT_EQ().
@@ -48,7 +48,7 @@ TEST_F(TestFixedSizeHashMap, initialize) {
 /*****************************************************************************/
 TEST_F(TestFixedSizeHashMap, setup) {
     printemps::utility::FixedSizeHashMap<
-        printemps::model::Variable<int, double>*, double>
+        printemps::model_component::Variable<int, double>*, double>
         fixed_size_hash_map;
 
     printemps::model::Model<int, double> model;
@@ -56,7 +56,8 @@ TEST_F(TestFixedSizeHashMap, setup) {
     auto& x = model.create_variables("x", {10, 20});
     auto& y = model.create_variables("y", {20, 30, 40});
 
-    std::unordered_map<printemps::model::Variable<int, double>*, double>
+    std::unordered_map<printemps::model_component::Variable<int, double>*,
+                       double>
         unordered_map;
 
     for (auto i = 0; i < 10; i++) {
@@ -72,16 +73,17 @@ TEST_F(TestFixedSizeHashMap, setup) {
             }
         }
     }
-    fixed_size_hash_map.setup(unordered_map,
-                              sizeof(printemps::model::Variable<int, double>));
+    fixed_size_hash_map.setup(
+        unordered_map,
+        sizeof(printemps::model_component::Variable<int, double>));
 
-    EXPECT_EQ(
-        (unsigned int)log2(sizeof(printemps::model::Variable<int, double>)),
-        fixed_size_hash_map.shift_size());
+    EXPECT_EQ((unsigned int)log2(
+                  sizeof(printemps::model_component::Variable<int, double>)),
+              fixed_size_hash_map.shift_size());
 
     /// 10 * 20 + 20 * 30 * 40 = 200 + 24000
-    /// 262144 < 24000 * 10(LOAD_MARGIN) < 262144
-    std::size_t expected_bucket_size = 262144;
+    /// 262144 < 24000 * 5(LOAD_FACTOR_MULTIPLIER) < 131072
+    std::size_t expected_bucket_size = 131072;
     EXPECT_EQ(expected_bucket_size, fixed_size_hash_map.bucket_size());
 
     for (const auto& element : unordered_map) {
@@ -103,8 +105,6 @@ TEST_F(TestFixedSizeHashMap, shift_size) {
 TEST_F(TestFixedSizeHashMap, bucket_size) {
     /// This method is tested in initialize() and setup().
 }
-
-/*****************************************************************************/
 }  // namespace
 /*****************************************************************************/
 // END

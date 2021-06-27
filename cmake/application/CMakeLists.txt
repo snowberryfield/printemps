@@ -48,18 +48,6 @@ target_include_directories(
     PRIVATE ${TOP_DIR}/external/include/
 )
 
-#qap_solver
-add_executable(
-    qap_solver.exe ${TOP_DIR}/application/qap_solver/main.cpp
-)
-
-target_include_directories(
-    qap_solver.exe
-    PRIVATE ${TOP_DIR}/printemps/
-    PRIVATE ${TOP_DIR}/external/include/
-)
-
-
 ###############################################################################
 # END
 ###############################################################################

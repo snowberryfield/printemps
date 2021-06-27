@@ -9,7 +9,6 @@
 #include <string>
 #include <iostream>
 
-#include "../printemps/utility/mps_utility.h"
 #include "../printemps/utility/option_utility.h"
 
 int main([[maybe_unused]] int argc, char *argv[]) {
@@ -18,9 +17,11 @@ int main([[maybe_unused]] int argc, char *argv[]) {
      * exits.
      */
     if (argv[1] == nullptr) {
-        std::cout << "Usage: ./mps_solver.exe [-p OPTION_FILE_NAME] [-i "
-                     "INITIAL_SOLUTION_FILE_NAME] [--separate] mps_file"
-                  << std::endl;
+        std::cout << "Usage: ./mps_solver.exe "
+                  << "[-p OPTION_FILE_NAME] "
+                  << "[-i INITIAL_SOLUTION_FILE_NAME] "
+                  << "[--separate] "
+                  << "mps_file" << std::endl;
         std::cout << std::endl;
         std::cout  //
             << "  -p OPTION_FILE_NAME: Specify option file name." << std::endl;
@@ -87,17 +88,19 @@ int main([[maybe_unused]] int argc, char *argv[]) {
     /**
      * Read the specified MPS file and convert to the model.
      */
-    printemps::utility::MPSReader mps_reader;
+    printemps::model::IPModel model;
+    {
+        printemps::mps::MPS mps(mps_file_name);
+        model.import_mps(mps, accept_continuous_variables);
+    }
 
-    auto &model = mps_reader.create_model_from_mps(mps_file_name,
-                                                   accept_continuous_variables);
     model.set_name(printemps::utility::base_name(mps_file_name));
 
     /**
      * If the option file is given, the option values specified in the file will
      * be used for the calculation. Otherwise, the default values will be used.
      */
-    printemps::solver::Option option;
+    printemps::option::Option option;
     if (!option_file_name.empty()) {
         option = printemps::utility::read_option(option_file_name);
     }
@@ -108,7 +111,7 @@ int main([[maybe_unused]] int argc, char *argv[]) {
      */
     if (!mutable_variable_file_name.empty()) {
         auto mutable_variable_names =
-            printemps::utility::read_variable_names(mutable_variable_file_name);
+            printemps::helper::read_variable_names(mutable_variable_file_name);
         model.unfix_variables(mutable_variable_names);
     }
 
@@ -117,8 +120,8 @@ int main([[maybe_unused]] int argc, char *argv[]) {
      * variables will be fixed by the specified values.
      */
     if (!fixed_variable_file_name.empty()) {
-        auto solution =
-            printemps::utility::read_solution(fixed_variable_file_name);
+        auto solution = printemps::helper::read_variable_names_and_values(
+            fixed_variable_file_name);
         model.fix_variables(solution);
     }
 
@@ -128,8 +131,8 @@ int main([[maybe_unused]] int argc, char *argv[]) {
      * default values will be used.
      */
     if (!initial_solution_file_name.empty()) {
-        auto solution =
-            printemps::utility::read_solution(initial_solution_file_name);
+        auto solution = printemps::helper::read_variable_names_and_values(
+            initial_solution_file_name);
         model.import_solution(solution);
     }
 
@@ -143,15 +146,15 @@ int main([[maybe_unused]] int argc, char *argv[]) {
      */
     printemps::utility::print_info(
         "status: " + std::to_string(result.solution.is_feasible()),
-        option.verbose >= printemps::solver::Verbose::Warning);
+        option.verbose >= printemps::option::verbose::Warning);
 
     printemps::utility::print_info(
         "objective: " + std::to_string(result.solution.objective()),
-        option.verbose >= printemps::solver::Verbose::Warning);
+        option.verbose >= printemps::option::verbose::Warning);
 
     printemps::utility::print_info(
         "total violation: " + std::to_string(result.solution.total_violation()),
-        option.verbose >= printemps::solver::Verbose::Warning);
+        option.verbose >= printemps::option::verbose::Warning);
 
     result.solution.write_json_by_name("incumbent.json");
     result.solution.write_solution("incumbent.sol");

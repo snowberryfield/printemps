@@ -62,7 +62,6 @@ TEST_F(TestPrecedenceMoveGenerator, setup) {
                 moves[1].related_constraint_ptrs.end());
 }  // namespace
 
-/*****************************************************************************/
 }  // namespace
 /*****************************************************************************/
 // END

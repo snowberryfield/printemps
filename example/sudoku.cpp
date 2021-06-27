@@ -86,7 +86,7 @@ int main(void) {
     for (auto n = 0; n < N; n++) {
         for (auto m = 0; m < N; m++) {
             constraint_number(n, m) =
-                x.selection({n, m, printemps::model::All});
+                x.selection({n, m, printemps::model_component::Range::All});
         }
     }
 
@@ -94,7 +94,8 @@ int main(void) {
     auto& constraint_row = model.create_constraints("constraint_row", {N, N});
     for (auto m = 0; m < N; m++) {
         for (auto k = 0; k < N; k++) {
-            constraint_row(m, k) = x.selection({printemps::model::All, m, k});
+            constraint_row(m, k) =
+                x.selection({printemps::model_component::Range::All, m, k});
         }
     }
 
@@ -104,7 +105,7 @@ int main(void) {
     for (auto n = 0; n < N; n++) {
         for (auto k = 0; k < N; k++) {
             constraint_column(n, k) =
-                x.selection({n, printemps::model::All, k});
+                x.selection({n, printemps::model_component::Range::All, k});
         }
     }
 
@@ -138,8 +139,8 @@ int main(void) {
     /*************************************************************************/
     /// Run solver
     /*************************************************************************/
-    printemps::solver::Option option;
-    option.verbose       = printemps::solver::Full;
+    printemps::option::Option option;
+    option.verbose       = printemps::option::verbose::Full;
     option.iteration_max = 1000;
 
     auto result = printemps::solver::solve(&model, option);

@@ -10,8 +10,8 @@ namespace printemps {
 namespace utility {
 /*****************************************************************************/
 struct FixedSizeHashMapConstant {
-    static constexpr std::uint_fast32_t DEFAULT_BUCKET_SIZE = 1;
-    static constexpr int                LOAD_MARGIN         = 10;
+    static constexpr std::uint_fast32_t DEFAULT_BUCKET_SIZE    = 1;
+    static constexpr int                LOAD_FACTOR_MULTIPLIER = 5;
 };
 
 /*****************************************************************************/
@@ -28,8 +28,8 @@ class FixedSizeHashMap {
     bool *   m_is_occupied;
 
     /*************************************************************************/
-    inline constexpr std::uint_fast32_t compute_hash(
-        const T_Key a_KEY) const noexcept {
+    inline constexpr std::uint_fast32_t compute_hash(const T_Key a_KEY) const
+        noexcept {
         return reinterpret_cast<std::uint_fast64_t>(a_KEY) >> m_shift_size;
     }
 
@@ -94,7 +94,8 @@ class FixedSizeHashMap {
         m_shift_size = floor(log2(a_KEY_SIZE));
 
         std::uint_fast32_t minimum_bucket_size =
-            a_UNORDERED_MAP.size() * FixedSizeHashMapConstant::LOAD_MARGIN;
+            a_UNORDERED_MAP.size() *
+            FixedSizeHashMapConstant::LOAD_FACTOR_MULTIPLIER;
         std::uint_fast32_t bucket_size = 1;
         while (bucket_size < minimum_bucket_size) {
             bucket_size <<= 1;

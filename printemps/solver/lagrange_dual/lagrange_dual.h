@@ -6,19 +6,12 @@
 #ifndef PRINTEMPS_SOLVER_LAGRANGE_DUAL_LAGRANGE_DUAL_H__
 #define PRINTEMPS_SOLVER_LAGRANGE_DUAL_LAGRANGE_DUAL_H__
 
-#include "lagrange_dual_option.h"
 #include "lagrange_dual_print.h"
+#include "lagrange_dual_termination_status.h"
 #include "lagrange_dual_result.h"
 
 namespace printemps {
 namespace solver {
-/*****************************************************************************/
-template <class T_Variable, class T_Expression>
-class IncumbentHolder;
-
-/*****************************************************************************/
-struct Option;
-
 namespace lagrange_dual {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
@@ -35,15 +28,15 @@ void bound_dual(
                     flat_index);
 
             switch (constraint.sense()) {
-                case model::ConstraintSense::Less: {
+                case model_component::ConstraintSense::Less: {
                     lagrange_multiplier = std::max(lagrange_multiplier, 0.0);
                     break;
                 }
-                case model::ConstraintSense::Greater: {
+                case model_component::ConstraintSense::Greater: {
                     lagrange_multiplier = std::min(lagrange_multiplier, 0.0);
                     break;
                 }
-                case model::ConstraintSense::Equal: {
+                case model_component::ConstraintSense::Equal: {
                     /// nothing to do
                     break;
                 }
@@ -58,18 +51,19 @@ void bound_dual(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 LagrangeDualResult<T_Variable, T_Expression> solve(
-    model::Model<T_Variable, T_Expression>* a_model_ptr,     //
-    const Option&                           a_OPTION,        //
-    const std::vector<multi_array::ValueProxy<T_Variable>>&  //
-        a_INITIAL_VARIABLE_VALUE_PROXIES,                    //
-    const IncumbentHolder<T_Variable, T_Expression>&         //
+    model::Model<T_Variable, T_Expression>* a_model_ptr,        //
+    const option::Option&                   a_OPTION,           //
+    const std::vector<multi_array::ValueProxy<T_Variable>>&     //
+        a_INITIAL_VARIABLE_VALUE_PROXIES,                       //
+    const solution::IncumbentHolder<T_Variable, T_Expression>&  //
         a_INCUMBENT_HOLDER) {
     /**
      * Define type aliases.
      */
-    using Model_T           = model::Model<T_Variable, T_Expression>;
-    using Result_T          = LagrangeDualResult<T_Variable, T_Expression>;
-    using IncumbentHolder_T = IncumbentHolder<T_Variable, T_Expression>;
+    using Model_T  = model::Model<T_Variable, T_Expression>;
+    using Result_T = LagrangeDualResult<T_Variable, T_Expression>;
+    using IncumbentHolder_T =
+        solution::IncumbentHolder<T_Variable, T_Expression>;
 
     /**
      * Start to measure computational time.
@@ -79,8 +73,8 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
     /**
      * Copy arguments as local variables.
      */
-    Model_T* model_ptr = a_model_ptr;
-    Option   option    = a_OPTION;
+    Model_T*       model_ptr = a_model_ptr;
+    option::Option option    = a_OPTION;
 
     IncumbentHolder_T incumbent_holder = a_INCUMBENT_HOLDER;
 
@@ -130,7 +124,7 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
     /**
      * Prepare historical solutions holder.
      */
-    std::vector<solution::PlainSolution<T_Variable, T_Expression>>
+    std::vector<solution::SparseSolution<T_Variable, T_Expression>>
         historical_feasible_solutions;
 
     /**
@@ -143,16 +137,16 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
      * Print the header of optimization progress table and print the
      * initial solution status.
      */
-    utility::print_single_line(option.verbose >= Verbose::Full);
+    utility::print_single_line(option.verbose >= option::verbose::Full);
     utility::print_message("Lagrange dual starts.",
-                           option.verbose >= Verbose::Full);
-    print_table_header(option.verbose >= Verbose::Full);
+                           option.verbose >= option::verbose::Full);
+    print_table_header(option.verbose >= option::verbose::Full);
     print_table_initial(model_ptr,         //
                         -HUGE_VALF,        //
                         step_size,         //
                         solution_score,    //
                         incumbent_holder,  //
-                        option.verbose >= Verbose::Full);
+                        option.verbose >= option::verbose::Full);
 
     /**
      * Iterations start.
@@ -319,7 +313,7 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
                              solution_score,    //
                              update_status,     //
                              incumbent_holder,  //
-                             option.verbose >= Verbose::Full);
+                             option.verbose >= option::verbose::Full);
         }
 
         /**
@@ -339,7 +333,7 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
     /**
      * Print the footer of the optimization progress table.
      */
-    print_table_footer(option.verbose >= Verbose::Full);
+    print_table_footer(option.verbose >= option::verbose::Full);
 
     /**
      * Prepare the result.

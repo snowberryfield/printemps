@@ -127,7 +127,6 @@ TEST_F(TestChainMoveGenerator, reduce_moves) {
               static_cast<int>(model.neighborhood().chain().flags().size()));
 }
 
-/*****************************************************************************/
 }  // namespace
 /*****************************************************************************/
 // END

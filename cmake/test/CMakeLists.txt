@@ -35,6 +35,7 @@ link_directories(
     ${TOP_DIR}/external/lib
 )
 
+include(test_model_component.cmake)
 include(test_model.cmake)
 include(test_neighborhood.cmake)
 include(test_presolver.cmake)

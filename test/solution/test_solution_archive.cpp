@@ -61,35 +61,35 @@ TEST_F(TestSolutionArchive, setup) {
 
 /*****************************************************************************/
 TEST_F(TestSolutionArchive, push) {
-    printemps::solution::PlainSolution<int, double> solution_0;
+    printemps::solution::SparseSolution<int, double> solution_0;
     solution_0.objective        = 10;
     solution_0.variables["x_0"] = 0;
     solution_0.variables["x_1"] = 0;
     solution_0.variables["x_2"] = 0;
     solution_0.variables["x_3"] = 0;
 
-    printemps::solution::PlainSolution<int, double> solution_1;
+    printemps::solution::SparseSolution<int, double> solution_1;
     solution_1.objective        = 10;
     solution_1.variables["x_0"] = 0;
     solution_1.variables["x_1"] = 0;
     solution_1.variables["x_2"] = 0;
     solution_1.variables["x_3"] = 0;
 
-    printemps::solution::PlainSolution<int, double> solution_2;
+    printemps::solution::SparseSolution<int, double> solution_2;
     solution_2.objective        = 5;
     solution_2.variables["x_0"] = 0;
     solution_2.variables["x_1"] = 0;
     solution_2.variables["x_2"] = 1;
     solution_2.variables["x_3"] = 1;
 
-    printemps::solution::PlainSolution<int, double> solution_3;
+    printemps::solution::SparseSolution<int, double> solution_3;
     solution_3.objective        = 1;
     solution_3.variables["x_0"] = 1;
     solution_3.variables["x_1"] = 1;
     solution_3.variables["x_2"] = 1;
     solution_3.variables["x_3"] = 1;
 
-    std::vector<printemps::solution::PlainSolution<int, double>> solutions = {
+    std::vector<printemps::solution::SparseSolution<int, double>> solutions = {
         solution_0, solution_1, solution_2, solution_3};
 
     {
@@ -156,8 +156,6 @@ TEST_F(TestSolutionArchive, number_of_variables) {
 TEST_F(TestSolutionArchive, number_of_constraints) {
     /// This method is tested in push().
 }
-
-/*****************************************************************************/
 }  // namespace
 /*****************************************************************************/
 // END

@@ -7,6 +7,14 @@
 #define PRINTEMPS_VERIFIER_VERIFIER_H__
 
 namespace printemps {
+namespace model {
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+class Model;
+}  // namespace model
+}  // namespace printemps
+
+namespace printemps {
 namespace verifier {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
@@ -43,13 +51,13 @@ constexpr void verify_and_correct_selection_variables_initial_values(
         a_IS_ENABLED_PRINT);
 
     for (auto &&selection : a_model_ptr->selections()) {
-        std::vector<model::Variable<T_Variable, T_Expression> *>
+        std::vector<model_component::Variable<T_Variable, T_Expression> *>
             fixed_selected_variable_ptrs;
-        std::vector<model::Variable<T_Variable, T_Expression> *>
+        std::vector<model_component::Variable<T_Variable, T_Expression> *>
             selected_variable_ptrs;
-        std::vector<model::Variable<T_Variable, T_Expression> *>
+        std::vector<model_component::Variable<T_Variable, T_Expression> *>
             fixed_invalid_variable_ptrs;
-        std::vector<model::Variable<T_Variable, T_Expression> *>
+        std::vector<model_component::Variable<T_Variable, T_Expression> *>
             invalid_variable_ptrs;
 
         for (auto &&variable_ptr : selection.variable_ptrs) {
@@ -120,7 +128,7 @@ constexpr void verify_and_correct_selection_variables_initial_values(
          */
         if (selected_variable_ptrs.size() > 1) {
             if (a_IS_ENABLED_CORRECTON) {
-                model::Variable<T_Variable, T_Expression>
+                model_component::Variable<T_Variable, T_Expression>
                     *selected_variable_ptr = nullptr;
                 if (fixed_selected_variable_ptrs.size() == 1) {
                     selected_variable_ptr =
@@ -208,7 +216,7 @@ constexpr void verify_and_correct_binary_variables_initial_values(
 
     for (auto &&proxy : a_model_ptr->variable_proxies()) {
         for (auto &&variable : proxy.flat_indexed_variables()) {
-            if (variable.sense() == model::VariableSense::Binary) {
+            if (variable.sense() == model_component::VariableSense::Binary) {
                 if (variable.value() != 0 && variable.value() != 1) {
                     if (variable.is_fixed()) {
                         throw std::logic_error(utility::format_error_location(
@@ -258,7 +266,7 @@ constexpr void verify_and_correct_integer_variables_initial_values(
 
     for (auto &&proxy : a_model_ptr->variable_proxies()) {
         for (auto &&variable : proxy.flat_indexed_variables()) {
-            if (variable.sense() == model::VariableSense::Integer &&
+            if (variable.sense() == model_component::VariableSense::Integer &&
                 (variable.value() < variable.lower_bound() ||
                  variable.value() > variable.upper_bound())) {
                 if (variable.is_fixed()) {
