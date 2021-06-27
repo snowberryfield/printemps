@@ -36,7 +36,7 @@ struct MPS {
     /*************************************************************************/
     MPS(const std::string &a_FILE_NAME) {
         this->initialize();
-        this->read(a_FILE_NAME);
+        this->read_mps(a_FILE_NAME);
     }
 
     /*************************************************************************/
@@ -56,7 +56,7 @@ struct MPS {
     }
 
     /*************************************************************************/
-    inline void read(const std::string &a_FILE_NAME) {
+    inline void read_mps(const std::string &a_FILE_NAME) {
         bool is_valid = false;
 
         std::vector<std::string> lines;
