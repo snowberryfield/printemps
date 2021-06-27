@@ -9,24 +9,7 @@
 #include "abstract_move_generator.h"
 
 namespace printemps {
-namespace model {
-/*****************************************************************************/
-template <class T_Variable, class T_Expression>
-class Variable;
-
-/*****************************************************************************/
-template <class T_Variable, class T_Expression>
-class Constraint;
-
-}  // namespace model
-}  // namespace printemps
-
-namespace printemps {
 namespace neighborhood {
-/*****************************************************************************/
-template <class T_Variable, class T_Expression>
-struct Move;
-
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class BinaryMoveGenerator
@@ -44,8 +27,9 @@ class BinaryMoveGenerator
     }
 
     /*************************************************************************/
-    void setup(const std::vector<model::Variable<T_Variable, T_Expression> *>
-                   &a_RAW_VARIABLE_PTRS) {
+    void setup(
+        const std::vector<model_component::Variable<T_Variable, T_Expression> *>
+            &a_RAW_VARIABLE_PTRS) {
         /**
          * "Flip" move for binary variables:
          * e.g) binary variable x \in {0, 1}

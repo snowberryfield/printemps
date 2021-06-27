@@ -12,10 +12,6 @@ namespace printemps {
 namespace neighborhood {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-struct Move;
-
-/*****************************************************************************/
-template <class T_Variable, class T_Expression>
 class ChainMoveGenerator
     : public AbstractMoveGenerator<T_Variable, T_Expression> {
    private:

@@ -60,15 +60,15 @@ TEST_F(TestIntermediateVariableExtractor, extract_intermediate_variables) {
             model.setup_variable_related_constraints();
             model.setup_variable_sensitivity();
 
-            EXPECT_EQ(printemps::model::VariableSense::Intermediate,
+            EXPECT_EQ(printemps::model_component::VariableSense::Intermediate,
                       z(0).sense());
             EXPECT_FALSE(f.is_enabled());
 
-            EXPECT_EQ(printemps::model::VariableSense::Intermediate,
+            EXPECT_EQ(printemps::model_component::VariableSense::Intermediate,
                       w(0).sense());
             EXPECT_FALSE(g.is_enabled());
 
-            EXPECT_EQ(printemps::model::VariableSense::Intermediate,
+            EXPECT_EQ(printemps::model_component::VariableSense::Intermediate,
                       v(0).sense());
             EXPECT_FALSE(h.is_enabled());
         }
@@ -158,11 +158,11 @@ TEST_F(TestIntermediateVariableExtractor, extract_intermediate_variables) {
             model.setup_variable_related_constraints();
             model.setup_variable_sensitivity();
 
-            EXPECT_EQ(printemps::model::VariableSense::Intermediate,
+            EXPECT_EQ(printemps::model_component::VariableSense::Intermediate,
                       z(0).sense());
             EXPECT_FALSE(f.is_enabled());
 
-            EXPECT_EQ(printemps::model::VariableSense::Intermediate,
+            EXPECT_EQ(printemps::model_component::VariableSense::Intermediate,
                       w(0).sense());
             EXPECT_FALSE(g.is_enabled());
 
@@ -244,8 +244,6 @@ TEST_F(TestIntermediateVariableExtractor, extract_intermediate_variables) {
 TEST_F(TestIntermediateVariableExtractor, eliminate_intermediate_variables) {
     /// This method is tested in extract_intermediate_variables().
 }
-
-/*****************************************************************************/
 }  // namespace
 /*****************************************************************************/
 // END

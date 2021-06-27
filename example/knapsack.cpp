@@ -88,8 +88,8 @@ int main(void) {
     /*************************************************************************/
     /// Run solver
     /*************************************************************************/
-    printemps::solver::Option option;
-    option.verbose = printemps::solver::Full;
+    printemps::option::Option option;
+    option.verbose = printemps::option::verbose::Full;
 
     auto result = printemps::solver::solve(&model, option);
 
