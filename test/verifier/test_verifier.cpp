@@ -545,7 +545,6 @@ TEST_F(TestVerifier, verify_and_correct_integer_variables_initial_values) {
             std::logic_error);
     }
 }
-/*****************************************************************************/
 }  // namespace
 /*****************************************************************************/
 // END

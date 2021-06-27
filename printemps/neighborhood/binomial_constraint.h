@@ -6,43 +6,26 @@
 #ifndef PRINTEMPS_NEIGHBORHOOD_BINOMIAL_CONSTRAINT_H__
 #define PRINTEMPS_NEIGHBORHOOD_BINOMIAL_CONSTRAINT_H__
 
-#include "../utility/utility.h"
-
-namespace printemps {
-namespace model {
-/*****************************************************************************/
-template <class T_Variable, class T_Expression>
-class Variable;
-
-/*****************************************************************************/
-template <class T_Variable, class T_Expression>
-class Constraint;
-
-/*****************************************************************************/
-enum class ConstraintSense;
-}  // namespace model
-}  // namespace printemps
-
 namespace printemps {
 namespace neighborhood {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 struct BinomialConstraint {
-    model::Variable<T_Variable, T_Expression>* variable_ptr_first;
-    model::Variable<T_Variable, T_Expression>* variable_ptr_second;
+    model_component::Variable<T_Variable, T_Expression>* variable_ptr_first;
+    model_component::Variable<T_Variable, T_Expression>* variable_ptr_second;
 
     T_Expression sensitivity_first;
     T_Expression sensitivity_second;
     T_Expression constant_value;
 
-    model::ConstraintSense sense;
+    model_component::ConstraintSense sense;
     /*************************************************************************/
     BinomialConstraint(void)
         : variable_ptr_first(nullptr),
           variable_ptr_second(nullptr),
           sensitivity_first(0),
           sensitivity_second(0),
-          sense(model::ConstraintSense::Equal) {
+          sense(model_component::ConstraintSense::Equal) {
         /// nothing to do
     }
 };

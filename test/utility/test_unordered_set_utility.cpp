@@ -161,7 +161,6 @@ TEST_F(TestUnorderedSetUtility, to_vector) {
     EXPECT_TRUE(std::find(vector_string.begin(), vector_string.end(), "e") !=
                 vector_string.end());
 }
-
 }  // namespace
 /*****************************************************************************/
 // END

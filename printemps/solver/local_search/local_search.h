@@ -6,37 +6,31 @@
 #ifndef PRINTEMPS_SOLVER_LOCAL_SEARCH_LOCAL_SEARCH_H__
 #define PRINTEMPS_SOLVER_LOCAL_SEARCH_LOCAL_SEARCH_H__
 
-#include "local_search_option.h"
 #include "local_search_print.h"
+#include "local_search_termination_status.h"
 #include "local_search_result.h"
 
 namespace printemps {
 namespace solver {
-/*****************************************************************************/
-template <class T_Variable, class T_Expression>
-class IncumbentHolder;
-
-/*****************************************************************************/
-struct Option;
-
 namespace local_search {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 LocalSearchResult<T_Variable, T_Expression> solve(
-    model::Model<T_Variable, T_Expression>* a_model_ptr,     //
-    const Option&                           a_OPTION,        //
-    const std::vector<multi_array::ValueProxy<T_Variable>>&  //
-        a_INITIAL_VARIABLE_VALUE_PROXIES,                    //
-    const IncumbentHolder<T_Variable, T_Expression>&         //
-                  a_INCUMBENT_HOLDER,                        //
+    model::Model<T_Variable, T_Expression>* a_model_ptr,        //
+    const option::Option&                   a_OPTION,           //
+    const std::vector<multi_array::ValueProxy<T_Variable>>&     //
+        a_INITIAL_VARIABLE_VALUE_PROXIES,                       //
+    const solution::IncumbentHolder<T_Variable, T_Expression>&  //
+                  a_INCUMBENT_HOLDER,                           //
     const Memory& a_MEMORY) {
     /**
      * Define type aliases.
      */
-    using Model_T           = model::Model<T_Variable, T_Expression>;
-    using Result_T          = LocalSearchResult<T_Variable, T_Expression>;
-    using IncumbentHolder_T = IncumbentHolder<T_Variable, T_Expression>;
-    using Move_T            = neighborhood::Move<T_Variable, T_Expression>;
+    using Model_T  = model::Model<T_Variable, T_Expression>;
+    using Result_T = LocalSearchResult<T_Variable, T_Expression>;
+    using IncumbentHolder_T =
+        solution::IncumbentHolder<T_Variable, T_Expression>;
+    using Move_T = neighborhood::Move<T_Variable, T_Expression>;
 
     /**
      * Start to measure computational time.
@@ -46,9 +40,9 @@ LocalSearchResult<T_Variable, T_Expression> solve(
     /**
      * Copy arguments as local variables.
      */
-    Model_T* model_ptr = a_model_ptr;
-    Option   option    = a_OPTION;
-    Memory   memory    = a_MEMORY;
+    Model_T*       model_ptr = a_model_ptr;
+    option::Option option    = a_OPTION;
+    Memory         memory    = a_MEMORY;
 
     IncumbentHolder_T incumbent_holder = a_INCUMBENT_HOLDER;
 
@@ -72,7 +66,8 @@ LocalSearchResult<T_Variable, T_Expression> solve(
 
     int update_status =
         incumbent_holder.try_update_incumbent(model_ptr, solution_score);
-    int total_update_status = IncumbentHolderConstant::STATUS_NO_UPDATED;
+    int total_update_status =
+        solution::IncumbentHolderConstant::STATUS_NO_UPDATED;
 
     /**
      * Reset the last update iterations.
@@ -82,7 +77,7 @@ LocalSearchResult<T_Variable, T_Expression> solve(
     /**
      * Prepare historical solutions holder.
      */
-    std::vector<solution::PlainSolution<T_Variable, T_Expression>>
+    std::vector<solution::SparseSolution<T_Variable, T_Expression>>
         historical_feasible_solutions;
 
     /**
@@ -105,14 +100,14 @@ LocalSearchResult<T_Variable, T_Expression> solve(
      * Print the header of optimization progress table and print the initial
      * solution status.
      */
-    utility::print_single_line(option.verbose >= Verbose::Full);
+    utility::print_single_line(option.verbose >= option::verbose::Full);
     utility::print_message("Local search starts.",
-                           option.verbose >= Verbose::Full);
-    print_table_header(option.verbose >= Verbose::Full);
+                           option.verbose >= option::verbose::Full);
+    print_table_header(option.verbose >= option::verbose::Full);
     print_table_initial(model_ptr,         //
                         solution_score,    //
                         incumbent_holder,  //
-                        option.verbose >= Verbose::Full);
+                        option.verbose >= option::verbose::Full);
 
     /**
      * Iterations start.
@@ -276,7 +271,7 @@ LocalSearchResult<T_Variable, T_Expression> solve(
                              solution_score,          //
                              update_status,           //
                              incumbent_holder,        //
-                             option.verbose >= Verbose::Full);
+                             option.verbose >= option::verbose::Full);
         }
         iteration++;
     }
@@ -284,7 +279,7 @@ LocalSearchResult<T_Variable, T_Expression> solve(
     /**
      * Print the footer of the optimization progress table.
      */
-    print_table_footer(option.verbose >= Verbose::Full);
+    print_table_footer(option.verbose >= option::verbose::Full);
 
     /**
      * Prepare the result.

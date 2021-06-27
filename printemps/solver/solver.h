@@ -6,12 +6,6 @@
 #ifndef PRINTEMPS_SOLVER_H__
 #define PRINTEMPS_SOLVER_H__
 
-#include "../model/model.h"
-#include "../utility/utility.h"
-#include "../solution/solution_archive.h"
-
-#include "incumbent_holder.h"
-#include "option.h"
 #include "status.h"
 #include "result.h"
 #include "tabu_search/tabu_search.h"
@@ -20,19 +14,12 @@
 
 namespace printemps {
 namespace solver {
-/*****************************************************************************/
-template <class T_Variable, class T_Expression>
-Result<T_Variable, T_Expression> solve(
-    model::Model<T_Variable, T_Expression>* a_model_ptr) {
-    Option option;
-    return solve(a_model_ptr, option);
-}
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 Result<T_Variable, T_Expression> solve(
     model::Model<T_Variable, T_Expression>* a_model_ptr,  //
-    const Option&                           a_OPTION) {
+    const option::Option&                   a_OPTION) {
     /**
      * Start to measure computational time and get the starting time.
      */
@@ -42,12 +29,12 @@ Result<T_Variable, T_Expression> solve(
     /**
      * Print the program name, the project url, and the starting time.
      */
-    utility::print_single_line(a_OPTION.verbose >= Verbose::Outer);
+    utility::print_single_line(a_OPTION.verbose >= option::verbose::Outer);
     utility::print(
         "PRINTEMPS " + constant::VERSION + " (" + constant::PROJECT_URL + ")",
-        a_OPTION.verbose >= Verbose::Outer);
+        a_OPTION.verbose >= option::verbose::Outer);
     utility::print("running from " + start_date_time,
-                   a_OPTION.verbose >= Verbose::Outer);
+                   a_OPTION.verbose >= option::verbose::Outer);
 
     /**
      * The model can be solved only once.
@@ -63,15 +50,16 @@ Result<T_Variable, T_Expression> solve(
     /**
      * Define type aliases.
      */
-    using Model_T           = model::Model<T_Variable, T_Expression>;
-    using Solution_T        = solution::Solution<T_Variable, T_Expression>;
-    using IncumbentHolder_T = IncumbentHolder<T_Variable, T_Expression>;
+    using Model_T    = model::Model<T_Variable, T_Expression>;
+    using Solution_T = solution::DenseSolution<T_Variable, T_Expression>;
+    using IncumbentHolder_T =
+        solution::IncumbentHolder<T_Variable, T_Expression>;
 
     /**
      * Copy arguments as local variables.
      */
-    Model_T* model_ptr     = a_model_ptr;
-    Option   master_option = a_OPTION;
+    Model_T*       model_ptr     = a_model_ptr;
+    option::Option master_option = a_OPTION;
 
     /**
      * Set default target objective value if it is not defined by the user.
@@ -83,7 +71,7 @@ Result<T_Variable, T_Expression> solve(
      */
     auto target_objective_changed_rate =
         master_option.target_objective_value /
-            OptionConstant::DEFAULT_TARGET_OBJECTIVE -
+            option::OptionConstant::DEFAULT_TARGET_OBJECTIVE -
         1.0;
 
     if (fabs(target_objective_changed_rate) > constant::EPSILON) {
@@ -99,7 +87,7 @@ Result<T_Variable, T_Expression> solve(
     /**
      * Print the option value.
      */
-    if (master_option.verbose >= Verbose::Outer) {
+    if (master_option.verbose >= option::verbose::Outer) {
         master_option.print();
     }
 
@@ -114,12 +102,12 @@ Result<T_Variable, T_Expression> solve(
                      master_option.is_enabled_user_defined_move,
                      master_option.is_enabled_chain_move,
                      master_option.selection_mode,
-                     master_option.verbose >= Verbose::Outer);
+                     master_option.verbose >= option::verbose::Outer);
 
     /**
      * Print the problem size.
      */
-    if (master_option.verbose >= Verbose::Outer) {
+    if (master_option.verbose >= option::verbose::Outer) {
         model_ptr->print_number_of_variables();
         model_ptr->print_number_of_constraints();
     }
@@ -137,7 +125,7 @@ Result<T_Variable, T_Expression> solve(
             "zero-one coefficient constraints (set "
             "partitioning/packing/covering, cardinality, and invariant "
             "knapsack).",
-            master_option.verbose >= Verbose::Warning);
+            master_option.verbose >= option::verbose::Warning);
     }
 
     /**
@@ -156,7 +144,7 @@ Result<T_Variable, T_Expression> solve(
         model_ptr->neighborhood().user_defined().enable();
     }
 
-    if (master_option.selection_mode != model::SelectionMode::None) {
+    if (master_option.selection_mode != option::selection_mode::None) {
         model_ptr->neighborhood().selection().enable();
     }
 
@@ -233,28 +221,30 @@ Result<T_Variable, T_Expression> solve(
      * Start optimization.
      */
     utility::print_single_line(  //
-        master_option.verbose >= Verbose::Outer);
+        master_option.verbose >= option::verbose::Outer);
 
     utility::print_message(  //
-        "Optimization starts.", master_option.verbose >= Verbose::Outer);
+        "Optimization starts.",
+        master_option.verbose >= option::verbose::Outer);
 
     /**
-     * Solve Lagrange dual to obtain a better initial solution ß(Optional).
+     * Solve Lagrange dual to obtain a better initial solution (Optional).
      */
     if (master_option.is_enabled_lagrange_dual && !is_terminated) {
-        utility::print_single_line(master_option.verbose == Verbose::Outer);
+        utility::print_single_line(master_option.verbose ==
+                                   option::verbose::Outer);
         if (!model_ptr->is_linear()) {
             utility::print_warning(
                 "Solving lagrange dual was skipped because the problem is "
                 "nonlinear.",
-                master_option.verbose >= Verbose::Warning);
+                master_option.verbose >= option::verbose::Warning);
         } else if (model_ptr->number_of_selection_variables() > 0 ||
                    model_ptr->number_of_intermediate_variables() > 0) {
             utility::print_warning(
                 "Solving lagrange dual was skipped because it not "
                 "applicable to problems which include selection variables or "
                 "intermediate variables.",
-                master_option.verbose >= Verbose::Warning);
+                master_option.verbose >= option::verbose::Warning);
         } else {
             double elapsed_time = time_keeper.clock();
 
@@ -266,21 +256,21 @@ Result<T_Variable, T_Expression> solve(
                 utility::print_message(
                     "Outer loop was terminated because of time-over (" +
                         utility::to_string(elapsed_time, "%.3f") + "sec).",
-                    master_option.verbose >= Verbose::Outer);
+                    master_option.verbose >= option::verbose::Outer);
             } else if (incumbent_holder.feasible_incumbent_objective() <=
                        master_option.target_objective_value) {
                 is_terminated = true;
                 utility::print_message(
                     "Outer loop was terminated because of feasible objective "
                     "reaches the target limit.",
-                    master_option.verbose >= Verbose::Outer);
+                    master_option.verbose >= option::verbose::Outer);
             }
 
             if (!is_terminated) {
                 /**
                  *  Prepare an option object for local search.
                  */
-                Option option                    = master_option;
+                option::Option option            = master_option;
                 option.lagrange_dual.time_offset = elapsed_time;
 
                 /**
@@ -342,13 +332,14 @@ Result<T_Variable, T_Expression> solve(
                 /**
                  * Print the search summary.
                  */
-                utility::print_message("Solving Lagrange dual finished. ",
-                                       master_option.verbose >= Verbose::Outer);
+                utility::print_message(
+                    "Solving Lagrange dual finished. ",
+                    master_option.verbose >= option::verbose::Outer);
 
                 utility::print_info(  //
                     " -- Total elapsed time: " +
                         utility::to_string(elapsed_time, "%.3f") + "sec",
-                    master_option.verbose >= Verbose::Outer);
+                    master_option.verbose >= option::verbose::Outer);
 
                 utility::print_info(
                     " -- Global augmented incumbent objective: " +
@@ -357,7 +348,7 @@ Result<T_Variable, T_Expression> solve(
                                     .global_augmented_incumbent_objective() *
                                 model_ptr->sign(),
                             "%.3f"),
-                    master_option.verbose >= Verbose::Outer);
+                    master_option.verbose >= option::verbose::Outer);
 
                 utility::print_info(
                     " -- Feasible incumbent objective: " +
@@ -365,7 +356,7 @@ Result<T_Variable, T_Expression> solve(
                             incumbent_holder.feasible_incumbent_objective() *
                                 model_ptr->sign(),
                             "%.3f"),
-                    master_option.verbose >= Verbose::Outer);
+                    master_option.verbose >= option::verbose::Outer);
             }
         }
     }
@@ -375,7 +366,8 @@ Result<T_Variable, T_Expression> solve(
      */
     if (master_option.is_enabled_local_search && !is_terminated) {
         double elapsed_time = time_keeper.clock();
-        utility::print_single_line(master_option.verbose == Verbose::Outer);
+        utility::print_single_line(master_option.verbose ==
+                                   option::verbose::Outer);
         /**
          *  Check the terminating condition.
          */
@@ -384,21 +376,21 @@ Result<T_Variable, T_Expression> solve(
             utility::print_message(
                 "Outer loop was terminated because of time-over (" +
                     utility::to_string(elapsed_time, "%.3f") + "sec).",
-                master_option.verbose >= Verbose::Outer);
+                master_option.verbose >= option::verbose::Outer);
         } else if (incumbent_holder.feasible_incumbent_objective() <=
                    master_option.target_objective_value) {
             is_terminated = true;
             utility::print_message(
                 "Outer loop was terminated because of feasible objective "
                 "reaches the target limit.",
-                master_option.verbose >= Verbose::Outer);
+                master_option.verbose >= option::verbose::Outer);
         }
 
         if (!is_terminated) {
             /**
              *  Prepare an option object for local search.
              */
-            Option option                   = master_option;
+            option::Option option           = master_option;
             option.local_search.time_offset = elapsed_time;
 
             /**
@@ -463,13 +455,14 @@ Result<T_Variable, T_Expression> solve(
             /**
              * Print the search summary.
              */
-            utility::print_message("Local search finished.",
-                                   master_option.verbose >= Verbose::Outer);
+            utility::print_message(
+                "Local search finished.",
+                master_option.verbose >= option::verbose::Outer);
 
             utility::print_info(  //
                 " -- Total elapsed time: " +
                     utility::to_string(elapsed_time, "%.3f") + "sec",
-                master_option.verbose >= Verbose::Outer);
+                master_option.verbose >= option::verbose::Outer);
 
             utility::print_info(
                 " -- Global augmented incumbent objective: " +
@@ -478,7 +471,7 @@ Result<T_Variable, T_Expression> solve(
                                 .global_augmented_incumbent_objective() *
                             model_ptr->sign(),
                         "%.3f"),
-                master_option.verbose >= Verbose::Outer);
+                master_option.verbose >= option::verbose::Outer);
 
             utility::print_info(
                 " -- Feasible incumbent objective: " +
@@ -486,7 +479,7 @@ Result<T_Variable, T_Expression> solve(
                         incumbent_holder.feasible_incumbent_objective() *
                             model_ptr->sign(),
                         "%.3f"),
-                master_option.verbose >= Verbose::Outer);
+                master_option.verbose >= option::verbose::Outer);
         }
     }
 
@@ -511,21 +504,25 @@ Result<T_Variable, T_Expression> solve(
     int number_of_initial_modification = 0;
     int iteration_max = master_option.tabu_search.iteration_max;
 
-    double bias                            = memory.bias();
-    double current_bias_before_relaxation  = 1.0;
-    double previous_bias_before_relaxation = 1.0;
+    double intensity                            = memory.intensity();
+    double current_intensity_before_relaxation  = 1.0;
+    double previous_intensity_before_relaxation = 1.0;
 
     double penalty_coefficient_relaxing_rate =
         master_option.penalty_coefficient_relaxing_rate;
 
-    ImprovabilityScreeningMode improvability_screening_mode =
-        master_option.improvability_screening_mode;
-    if (improvability_screening_mode == ImprovabilityScreeningMode::Automatic) {
-        improvability_screening_mode = ImprovabilityScreeningMode::Intensive;
+    option::improvability_screening_mode::ImprovabilityScreeningMode
+        improvability_screening_mode =
+            master_option.improvability_screening_mode;
+    if (improvability_screening_mode ==
+        option::improvability_screening_mode::Automatic) {
+        improvability_screening_mode =
+            option::improvability_screening_mode::Intensive;
     }
 
     while (!is_terminated) {
-        utility::print_single_line(master_option.verbose == Verbose::Outer);
+        utility::print_single_line(master_option.verbose ==
+                                   option::verbose::Outer);
         /**
          *  Check the terminating condition.
          */
@@ -534,13 +531,13 @@ Result<T_Variable, T_Expression> solve(
             utility::print_message(
                 "Outer loop was terminated because of time-over (" +
                     utility::to_string(elapsed_time, "%.3f") + "sec).",
-                master_option.verbose >= Verbose::Outer);
+                master_option.verbose >= option::verbose::Outer);
             is_terminated = true;
         } else if (iteration >= master_option.iteration_max) {
             utility::print_message(
                 "Outer loop was terminated because of iteration limit (" +
                     utility::to_string(iteration, "%d") + " iterations).",
-                master_option.verbose >= Verbose::Outer);
+                master_option.verbose >= option::verbose::Outer);
             is_terminated = true;
         } else if (incumbent_holder.feasible_incumbent_objective() <=
                    master_option.target_objective_value) {
@@ -548,7 +545,7 @@ Result<T_Variable, T_Expression> solve(
                 "Outer loop was terminated because of feasible objective "
                 "reaches the target limit (" +
                     utility::to_string(iteration, "%d") + " iterations).",
-                master_option.verbose >= Verbose::Outer);
+                master_option.verbose >= option::verbose::Outer);
             is_terminated = true;
         } else if (iteration > 0 &&
                    termination_status ==
@@ -556,7 +553,7 @@ Result<T_Variable, T_Expression> solve(
             utility::print_message(
                 "Outer loop was terminated because an optimal solution was "
                 "found.",
-                master_option.verbose >= Verbose::Outer);
+                master_option.verbose >= option::verbose::Outer);
             is_terminated = true;
         }
 
@@ -567,7 +564,7 @@ Result<T_Variable, T_Expression> solve(
         /**
          *  Prepare an option object for tabu search.
          */
-        Option option = master_option;
+        option::Option option = master_option;
 
         option.improvability_screening_mode = improvability_screening_mode;
 
@@ -612,9 +609,9 @@ Result<T_Variable, T_Expression> solve(
         memory = result.memory;
 
         /**
-         * Update the bias.
+         * Update the intensity.
          */
-        bias = memory.bias();
+        intensity = memory.intensity();
 
         /**
          * Update the termination status.
@@ -625,7 +622,7 @@ Result<T_Variable, T_Expression> solve(
          * Reset the penalty coefficients if the incumbent solution was not
          * updated for specified count of loops.
          */
-        if ((update_status & (IncumbentHolderConstant::
+        if ((update_status & (solution::IncumbentHolderConstant::
                                   STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE))) {
             /**
              * Reset the count of loops with no-update if the incumbent solution
@@ -682,19 +679,20 @@ Result<T_Variable, T_Expression> solve(
         bool is_enabled_penalty_coefficient_relaxing   = false;
         bool is_enabled_forcibly_initial_modification  = false;
 
-        const int INFEASIBLE_STAGNATION_THRESHOLD = 50;
+        constexpr int INFEASIBLE_STAGNATION_THRESHOLD = 50;
 
         /**
          * If the improvability_screening_mode was set to "Automatic", determine
          * the mode according to the search status so far.
          */
         if (master_option.improvability_screening_mode ==
-            ImprovabilityScreeningMode::Automatic) {
+            option::improvability_screening_mode::Automatic) {
             if (result.termination_status ==
                 tabu_search::TabuSearchTerminationStatus::NO_MOVE) {
-                improvability_screening_mode = ImprovabilityScreeningMode::Soft;
+                improvability_screening_mode =
+                    option::improvability_screening_mode::Soft;
             } else if (result.total_update_status &
-                       IncumbentHolderConstant::
+                       solution::IncumbentHolderConstant::
                            STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
                 /**
                  * If the incumbent solution was updated in the last loop, the
@@ -702,14 +700,15 @@ Result<T_Variable, T_Expression> solve(
                  * better solutions by intensive search.
                  */
                 improvability_screening_mode =
-                    ImprovabilityScreeningMode::Intensive;
+                    option::improvability_screening_mode::Intensive;
             } else if (result.is_few_permissible_neighborhood) {
                 /**
                  * If the last loop encountered a situation where there is no
                  * permissible solution, the improvability screening mode is set
                  * to "Soft" for search diversity.
                  */
-                improvability_screening_mode = ImprovabilityScreeningMode::Soft;
+                improvability_screening_mode =
+                    option::improvability_screening_mode::Soft;
             } else if (!result.is_found_new_feasible_solution) {
                 /**
                  * If the last loop failed to find any feasible solution, the
@@ -722,21 +721,22 @@ Result<T_Variable, T_Expression> solve(
                         INFEASIBLE_STAGNATION_THRESHOLD) {
                     if (relaxation_count % 2 == 0) {
                         improvability_screening_mode =
-                            ImprovabilityScreeningMode::Intensive;
+                            option::improvability_screening_mode::Intensive;
                     } else {
                         improvability_screening_mode =
-                            ImprovabilityScreeningMode::Aggressive;
+                            option::improvability_screening_mode::Aggressive;
                     }
                 } else {
                     improvability_screening_mode =
-                        ImprovabilityScreeningMode::Aggressive;
+                        option::improvability_screening_mode::Aggressive;
                 }
             } else {
                 /**
                  * Otherwise, the improvability screening mode is set to "Soft"
                  * for search diversity.
                  */
-                improvability_screening_mode = ImprovabilityScreeningMode::Soft;
+                improvability_screening_mode =
+                    option::improvability_screening_mode::Soft;
             }
         }
 
@@ -752,7 +752,8 @@ Result<T_Variable, T_Expression> solve(
                      result_local_augmented_incumbent_objective;
 
         if (result.total_update_status &
-            IncumbentHolderConstant::STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
+            solution::IncumbentHolderConstant::
+                STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
             /**
              * If the global incumbent solution was updated in the last loop,
              * the global incumbent is employed as the initial solution for the
@@ -769,7 +770,7 @@ Result<T_Variable, T_Expression> solve(
             iteration_consecutive_no_update = 0;
         } else {
             if (result.total_update_status ==
-                IncumbentHolderConstant::STATUS_NO_UPDATED) {
+                solution::IncumbentHolderConstant::STATUS_NO_UPDATED) {
                 /**
                  * If the last loop failed to find any local/global incumbent
                  * solution, the global incumbent solution is employed as
@@ -901,11 +902,12 @@ Result<T_Variable, T_Expression> solve(
             iteration_after_relaxation = 0;
             relaxation_count++;
 
-            previous_bias_before_relaxation = current_bias_before_relaxation;
-            current_bias_before_relaxation  = bias;
+            previous_intensity_before_relaxation =
+                current_intensity_before_relaxation;
+            current_intensity_before_relaxation = intensity;
 
-            if (current_bias_before_relaxation >
-                    previous_bias_before_relaxation &&
+            if (current_intensity_before_relaxation >
+                    previous_intensity_before_relaxation &&
                 !incumbent_holder.is_found_feasible_solution() &&
                 iteration_after_global_augmented_incumbent_update >
                     INFEASIBLE_STAGNATION_THRESHOLD) {
@@ -1047,7 +1049,7 @@ Result<T_Variable, T_Expression> solve(
 
             if (result.objective_constraint_rate > constant::EPSILON) {
                 if (result_local_augmented_incumbent_score.is_feasible) {
-                    const double MARGIN = 1.0;
+                    constexpr double MARGIN = 1.0;
                     corrected_penalty_coefficient_relaxing_rate =
                         std::min(penalty_coefficient_relaxing_rate,
                                  result.objective_constraint_rate * MARGIN);
@@ -1085,13 +1087,13 @@ Result<T_Variable, T_Expression> solve(
         if (master_option.tabu_search
                 .is_enabled_automatic_tabu_tenure_adjustment) {
             if (result.total_update_status &
-                IncumbentHolderConstant::
+                solution::IncumbentHolderConstant::
                     STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
                 inital_tabu_tenure =
                     std::min(master_option.tabu_search.initial_tabu_tenure,
                              model_ptr->number_of_mutable_variables());
             } else if (result.total_update_status ==
-                       IncumbentHolderConstant::STATUS_NO_UPDATED) {
+                       solution::IncumbentHolderConstant::STATUS_NO_UPDATED) {
                 inital_tabu_tenure = std::max(
                     option.tabu_search.initial_tabu_tenure - 1,
                     std::min(master_option.tabu_search.initial_tabu_tenure,
@@ -1115,11 +1117,11 @@ Result<T_Variable, T_Expression> solve(
         /**
          * Update the number of initial modification for the next loop.
          */
-        if (result.total_update_status &
-            IncumbentHolderConstant::STATUS_FEASIBLE_INCUMBENT_UPDATE) {
+        if (result.total_update_status & solution::IncumbentHolderConstant::
+                                             STATUS_FEASIBLE_INCUMBENT_UPDATE) {
             number_of_initial_modification = 0;
         } else if (result.total_update_status &
-                   IncumbentHolderConstant::
+                   solution::IncumbentHolderConstant::
                        STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
             number_of_initial_modification = 0;
         } else {
@@ -1160,7 +1162,7 @@ Result<T_Variable, T_Expression> solve(
             result.number_of_iterations == option.tabu_search.iteration_max) {
             int iteration_max_temp = 0;
             if (result.total_update_status &
-                IncumbentHolderConstant::
+                solution::IncumbentHolderConstant::
                     STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
                 iteration_max_temp  //
                     = static_cast<int>(ceil(
@@ -1190,7 +1192,8 @@ Result<T_Variable, T_Expression> solve(
          * Reset chain moves if the global augmented objective was updated.
          */
         if (result.total_update_status &
-            IncumbentHolderConstant::STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
+            solution::IncumbentHolderConstant::
+                STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
             if (option.is_enabled_chain_move) {
                 model_ptr->neighborhood().chain().clear_moves();
             }
@@ -1203,7 +1206,8 @@ Result<T_Variable, T_Expression> solve(
         bool is_deactivated_special_neighborhood_move = false;
 
         if (result.total_update_status &
-            IncumbentHolderConstant::STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
+            solution::IncumbentHolderConstant::
+                STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
             /**
              * Disable the special neighborhood moves if the incumbent was
              * updated.
@@ -1298,12 +1302,12 @@ Result<T_Variable, T_Expression> solve(
         if (static_cast<int>(model_ptr->neighborhood().chain().moves().size()) >
             master_option.chain_move_capacity) {
             switch (master_option.chain_move_reduce_mode) {
-                case ChainMoveReduceMode::OverlapRate: {
+                case option::chain_move_reduce_mode::OverlapRate: {
                     model_ptr->neighborhood().chain().reduce_moves(
                         master_option.chain_move_capacity);
                     break;
                 }
-                case ChainMoveReduceMode::Shuffle: {
+                case option::chain_move_reduce_mode::Shuffle: {
                     model_ptr->neighborhood().chain().shuffle_moves(
                         &get_rand_mt);
                     model_ptr->neighborhood().chain().reduce_moves(
@@ -1343,12 +1347,12 @@ Result<T_Variable, T_Expression> solve(
         utility::print_message(
             "Tabu search loop (" + std::to_string(iteration + 1) + "/" +
                 std::to_string(master_option.iteration_max) + ") finished.",
-            master_option.verbose >= Verbose::Outer);
+            master_option.verbose >= option::verbose::Outer);
 
         utility::print_info(  //
             " -- Total elapsed time: " +
                 utility::to_string(elapsed_time, "%.3f") + "sec",
-            master_option.verbose >= Verbose::Outer);
+            master_option.verbose >= option::verbose::Outer);
 
         utility::print_info(
             " -- Global augmented incumbent objective: " +
@@ -1356,39 +1360,42 @@ Result<T_Variable, T_Expression> solve(
                     incumbent_holder.global_augmented_incumbent_objective() *
                         model_ptr->sign(),
                     "%.3f"),
-            master_option.verbose >= Verbose::Outer);
+            master_option.verbose >= option::verbose::Outer);
         utility::print_info(
             " -- Feasible incumbent objective: " +
                 utility::to_string(
                     incumbent_holder.feasible_incumbent_objective() *
                         model_ptr->sign(),
                     "%.3f"),
-            master_option.verbose >= Verbose::Outer);
+            master_option.verbose >= option::verbose::Outer);
 
         /**
          * Print the optimization status of the previous tabu search loop.
          */
-        if (result.total_update_status &
-            IncumbentHolderConstant::STATUS_FEASIBLE_INCUMBENT_UPDATE) {
-            utility::print_message("Feasible incumbent objective was updated. ",
-                                   master_option.verbose >= Verbose::Outer);
+        if (result.total_update_status & solution::IncumbentHolderConstant::
+                                             STATUS_FEASIBLE_INCUMBENT_UPDATE) {
+            utility::print_message(
+                "Feasible incumbent objective was updated. ",
+                master_option.verbose >= option::verbose::Outer);
 
         } else if (result.total_update_status &
-                   IncumbentHolderConstant::
+                   solution::IncumbentHolderConstant::
                        STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
-            utility::print_message("Global incumbent objective was updated. ",
-                                   master_option.verbose >= Verbose::Outer);
+            utility::print_message(
+                "Global incumbent objective was updated. ",
+                master_option.verbose >= option::verbose::Outer);
         } else {
-            utility::print_message("Incumbent objective was not updated.",
-                                   master_option.verbose >= Verbose::Outer);
+            utility::print_message(
+                "Incumbent objective was not updated.",
+                master_option.verbose >= option::verbose::Outer);
         }
 
         /**
-         * Print the search bias.
+         * Print the search intensity.
          */
         utility::print_message(
-            "Historical search bias is " + std::to_string(bias) + ".",
-            master_option.verbose >= Verbose::Outer);
+            "Historical search intensity is " + std::to_string(intensity) + ".",
+            master_option.verbose >= option::verbose::Outer);
 
         /**
          * Print the number of violative constraints.
@@ -1401,12 +1408,12 @@ Result<T_Variable, T_Expression> solve(
              * this problem, the maximum number of violations to be printed
              * is 20.
              */
-            const int MAX_NUMBER_OF_PRINT_ITEMS = 20;
+            constexpr int MAX_NUMBER_OF_PRINT_ITEMS = 20;
 
             utility::print_message(
                 "The current solution does not satisfy the following "
                 "constraints:",
-                master_option.verbose >= Verbose::Outer);
+                master_option.verbose >= option::verbose::Outer);
 
             for (const auto& proxy : current_solution.violation_value_proxies) {
                 const auto& values      = proxy.flat_indexed_values();
@@ -1421,20 +1428,22 @@ Result<T_Variable, T_Expression> solve(
                             utility::print_info(
                                 " -- " + names[i] + " (violation: " +
                                     std::to_string(values[i]) + ")",
-                                master_option.verbose >= Verbose::Outer);
+                                master_option.verbose >=
+                                    option::verbose::Outer);
                         }
                     }
                 }
             }
             if (number_of_violative_constraints > MAX_NUMBER_OF_PRINT_ITEMS) {
-                utility::print_info("and much more...",
-                                    master_option.verbose >= Verbose::Outer);
+                utility::print_info(
+                    "and much more...",
+                    master_option.verbose >= option::verbose::Outer);
             }
 
             utility::print_message(
                 "There are " + std::to_string(number_of_violative_constraints) +
                     " violative constraints.",
-                master_option.verbose >= Verbose::Outer);
+                master_option.verbose >= option::verbose::Outer);
         }
 
         /**
@@ -1444,15 +1453,15 @@ Result<T_Variable, T_Expression> solve(
             utility::print_message(
                 "The penalty coefficients were reset due to search "
                 "stagnation.",
-                master_option.verbose >= Verbose::Outer);
+                master_option.verbose >= option::verbose::Outer);
         } else if (is_enabled_penalty_coefficient_relaxing) {
             utility::print_message(  //
                 "The penalty coefficients were relaxed.",
-                master_option.verbose >= Verbose::Outer);
+                master_option.verbose >= option::verbose::Outer);
         } else if (is_enabled_penalty_coefficient_tightening) {
             utility::print_message(  //
                 "The penalty coefficients were tightened.",
-                master_option.verbose >= Verbose::Outer);
+                master_option.verbose >= option::verbose::Outer);
         }
 
         /**
@@ -1460,38 +1469,38 @@ Result<T_Variable, T_Expression> solve(
          */
         utility::print_message("The tabu tenure for the next loop was set to " +
                                    std::to_string(inital_tabu_tenure) + ".",
-                               master_option.verbose >= Verbose::Outer);
+                               master_option.verbose >= option::verbose::Outer);
 
         /**
          * Print the improvability screening_mode
          */
         switch (improvability_screening_mode) {
-            case ImprovabilityScreeningMode::Off: {
+            case option::improvability_screening_mode::Off: {
                 utility::print_message(
                     "No improvability screening will be applied for the next "
                     "loop.",
-                    master_option.verbose >= Verbose::Outer);
+                    master_option.verbose >= option::verbose::Outer);
                 break;
             }
-            case ImprovabilityScreeningMode::Soft: {
+            case option::improvability_screening_mode::Soft: {
                 utility::print_message(
                     "The soft improvability screening will be applied in the "
                     "next loop.",
-                    master_option.verbose >= Verbose::Outer);
+                    master_option.verbose >= option::verbose::Outer);
                 break;
             }
-            case ImprovabilityScreeningMode::Aggressive: {
+            case option::improvability_screening_mode::Aggressive: {
                 utility::print_message(
                     "The aggressive improvability screening will be applied in "
                     "the next loop.",
-                    master_option.verbose >= Verbose::Outer);
+                    master_option.verbose >= option::verbose::Outer);
                 break;
             }
-            case ImprovabilityScreeningMode::Intensive: {
+            case option::improvability_screening_mode::Intensive: {
                 utility::print_message(
                     "The intensive improvability screening will be applied in "
                     "the next loop.",
-                    master_option.verbose >= Verbose::Outer);
+                    master_option.verbose >= option::verbose::Outer);
                 break;
             }
             default: {
@@ -1508,17 +1517,17 @@ Result<T_Variable, T_Expression> solve(
             utility::print_message(
                 "The next loop will be start from the global incumbent "
                 "solution.",
-                master_option.verbose >= Verbose::Outer);
+                master_option.verbose >= option::verbose::Outer);
         } else if (employing_local_augmented_solution_flag) {
             utility::print_message(
                 "The next loop will be start from the local incumbent solution "
                 "found in the previous loop.",
-                master_option.verbose >= Verbose::Outer);
+                master_option.verbose >= option::verbose::Outer);
         } else if (employing_previous_solution_flag) {
             utility::print_message(
                 "The next loop will be start from the same initial solution of "
                 "the previous loop.",
-                master_option.verbose >= Verbose::Outer);
+                master_option.verbose >= option::verbose::Outer);
         }
 
         /**
@@ -1531,7 +1540,7 @@ Result<T_Variable, T_Expression> solve(
                     std::to_string(number_of_initial_modification) +
                     " iterations in the next loop, the solution will be "
                     "randomly updated to escape from the local optimum.",
-                master_option.verbose >= Verbose::Outer);
+                master_option.verbose >= option::verbose::Outer);
         }
 
         /**
@@ -1543,7 +1552,7 @@ Result<T_Variable, T_Expression> solve(
                 "The maximum number of iterations for the next loop was set "
                 "to " +
                     std::to_string(iteration_max) + ".",
-                master_option.verbose >= Verbose::Outer);
+                master_option.verbose >= option::verbose::Outer);
         }
 
         /**
@@ -1552,14 +1561,16 @@ Result<T_Variable, T_Expression> solve(
          */
         if (is_deactivated_special_neighborhood_move &&
             has_special_neighborhood_moves) {
-            utility::print_message("Special neighborhood moves were disabled.",
-                                   master_option.verbose >= Verbose::Outer);
+            utility::print_message(
+                "Special neighborhood moves were disabled.",
+                master_option.verbose >= option::verbose::Outer);
         }
 
         if (is_activated_special_neighborhood_move &&
             has_special_neighborhood_moves) {
-            utility::print_message("Special neighborhood moves were enabled.",
-                                   master_option.verbose >= Verbose::Outer);
+            utility::print_message(
+                "Special neighborhood moves were enabled.",
+                master_option.verbose >= option::verbose::Outer);
         }
 
         /**
@@ -1571,10 +1582,10 @@ Result<T_Variable, T_Expression> solve(
                     std::to_string(
                         model_ptr->neighborhood().chain().moves().size()) +
                     " stored chain moves.",
-                master_option.verbose >= Verbose::Outer);
+                master_option.verbose >= option::verbose::Outer);
         }
 
-        model_ptr->callback();
+        model_ptr->callback(&option, &incumbent_holder);
         iteration++;
     }
 
@@ -1660,6 +1671,14 @@ Result<T_Variable, T_Expression> solve(
     result.solution_archive                   = solution_archive;
 
     return result;
+}
+
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+Result<T_Variable, T_Expression> solve(
+    model::Model<T_Variable, T_Expression>* a_model_ptr) {
+    option::Option option;
+    return solve(a_model_ptr, option);
 }
 }  // namespace solver
 }  // namespace printemps

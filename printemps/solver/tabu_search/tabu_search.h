@@ -8,38 +8,32 @@
 
 #include "../memory.h"
 #include "tabu_search_move_score.h"
-#include "tabu_search_option.h"
 #include "tabu_search_print.h"
+#include "tabu_search_termination_status.h"
 #include "tabu_search_result.h"
 
 namespace printemps {
 namespace solver {
-/*****************************************************************************/
-template <class T_Variable, class T_Expression>
-class IncumbentHolder;
-
-/*****************************************************************************/
-struct Option;
-
 namespace tabu_search {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 TabuSearchResult<T_Variable, T_Expression> solve(
-    model::Model<T_Variable, T_Expression>* a_model_ptr,     //
-    const Option&                           a_OPTION,        //
-    const std::vector<multi_array::ValueProxy<T_Variable>>&  //
-        a_INITIAL_VARIABLE_VALUE_PROXIES,                    //
-    const IncumbentHolder<T_Variable, T_Expression>&         //
-                 a_INCUMBENT_HOLDER,                         //
+    model::Model<T_Variable, T_Expression>* a_model_ptr,        //
+    const option::Option&                   a_OPTION,           //
+    const std::vector<multi_array::ValueProxy<T_Variable>>&     //
+        a_INITIAL_VARIABLE_VALUE_PROXIES,                       //
+    const solution::IncumbentHolder<T_Variable, T_Expression>&  //
+                 a_INCUMBENT_HOLDER,                            //
     const Memory a_MEMORY) {
     /**
      * Define type aliases.
      */
-    using Model_T           = model::Model<T_Variable, T_Expression>;
-    using Result_T          = TabuSearchResult<T_Variable, T_Expression>;
-    using IncumbentHolder_T = IncumbentHolder<T_Variable, T_Expression>;
-    using Move_T            = neighborhood::Move<T_Variable, T_Expression>;
-    using MoveScore         = TabuSearchMoveScore;
+    using Model_T  = model::Model<T_Variable, T_Expression>;
+    using Result_T = TabuSearchResult<T_Variable, T_Expression>;
+    using IncumbentHolder_T =
+        solution::IncumbentHolder<T_Variable, T_Expression>;
+    using Move_T    = neighborhood::Move<T_Variable, T_Expression>;
+    using MoveScore = TabuSearchMoveScore;
 
     /**
      * Start to measure computational time.
@@ -49,9 +43,9 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     /**
      * Copy arguments as local variables.
      */
-    Model_T* model_ptr = a_model_ptr;
-    Option   option    = a_OPTION;
-    Memory   memory    = a_MEMORY;
+    Model_T*       model_ptr = a_model_ptr;
+    option::Option option    = a_OPTION;
+    Memory         memory    = a_MEMORY;
 
     IncumbentHolder_T incumbent_holder = a_INCUMBENT_HOLDER;
 
@@ -71,12 +65,13 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     model_ptr->import_variable_values(a_INITIAL_VARIABLE_VALUE_PROXIES);
     model_ptr->update();
 
-    solution::SolutionScore current_solution_score = model_ptr->evaluate({});
-    solution::SolutionScore previous_solution_score;
+    solution::SolutionScore current_solution_score  = model_ptr->evaluate({});
+    solution::SolutionScore previous_solution_score = current_solution_score;
 
     int update_status = incumbent_holder.try_update_incumbent(
         model_ptr, current_solution_score);
-    int total_update_status = IncumbentHolderConstant::STATUS_NO_UPDATED;
+    int total_update_status =
+        solution::IncumbentHolderConstant::STATUS_NO_UPDATED;
 
     /**
      * Reset the last update iterations.
@@ -91,17 +86,17 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                  model_ptr->number_of_mutable_variables());
     int tabu_tenure = original_tabu_tenure;
 
-    double bias_previous       = 0.0;
-    double bias_current        = 0.0;
-    int    bias_increase_count = 0;
-    int    bias_decrease_count = 0;
+    double intensity_previous       = 0.0;
+    double intensity_current        = 0.0;
+    int    intensity_increase_count = 0;
+    int    intensity_decrease_count = 0;
 
     int last_tabu_tenure_updated_iteration = 0;
 
     /**
      * Prepare historical solutions holder.
      */
-    std::vector<solution::PlainSolution<T_Variable, T_Expression>>
+    std::vector<solution::SparseSolution<T_Variable, T_Expression>>
         historical_feasible_solutions;
 
     /**
@@ -113,16 +108,15 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     /**
      * Prepare other local variables.
      */
+    int number_of_all_neighborhoods         = 0;
+    int number_of_feasible_neighborhoods    = 0;
+    int number_of_permissible_neighborhoods = 0;
+    int number_of_improvable_neighborhoods  = 0;
 
     std::vector<solution::SolutionScore> trial_solution_scores;
     std::vector<MoveScore>               trial_move_scores;
-
-    std::vector<double> objective_improvements;
-    std::vector<double> local_penalties;
-
-    std::vector<double> local_augmented_objectives;
-    std::vector<double> global_augmented_objectives;
-    std::vector<double> total_scores;
+    std::vector<double>                  total_scores;
+    std::vector<double>                  infeasible_local_penalties;
 
     int last_local_augmented_incumbent_update_iteration  = -1;
     int last_global_augmented_incumbent_update_iteration = -1;
@@ -150,15 +144,15 @@ TabuSearchResult<T_Variable, T_Expression> solve(
      * Print the header of optimization progress table and print the initial
      * solution status.
      */
-    utility::print_single_line(option.verbose >= Verbose::Full);
+    utility::print_single_line(option.verbose >= option::verbose::Full);
     utility::print_message("Tabu Search starts.",
-                           option.verbose >= Verbose::Full);
+                           option.verbose >= option::verbose::Full);
 
-    print_table_header(option.verbose >= Verbose::Full);
+    print_table_header(option.verbose >= option::verbose::Full);
     print_table_initial(model_ptr,               //
                         current_solution_score,  //
                         incumbent_holder,        //
-                        option.verbose >= Verbose::Full);
+                        option.verbose >= option::verbose::Full);
 
     /**
      * Iterations start.
@@ -202,7 +196,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
          */
         bool is_enabled_improvability_screening =
             (option.improvability_screening_mode !=
-             ImprovabilityScreeningMode::Off);
+             option::improvability_screening_mode::Off);
 
         bool accept_all                    = true;
         bool accept_objective_improvable   = true;
@@ -215,8 +209,6 @@ TabuSearchResult<T_Variable, T_Expression> solve(
              */
             auto changed_variable_ptrs = utility::to_vector(
                 neighborhood::related_variable_ptrs(current_move));
-            auto changed_constraint_ptrs =
-                utility::to_vector(current_move.related_constraint_ptrs);
 
             if (iteration == 0) {
                 model_ptr->update_variable_objective_improvability();
@@ -226,7 +218,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
             }
 
             switch (option.improvability_screening_mode) {
-                case ImprovabilityScreeningMode::Soft: {
+                case option::improvability_screening_mode::Soft: {
                     if (model_ptr->is_feasible()) {
                         accept_all                    = false;
                         accept_objective_improvable   = true;
@@ -242,7 +234,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
 
                     break;
                 }
-                case ImprovabilityScreeningMode::Aggressive: {
+                case option::improvability_screening_mode::Aggressive: {
                     if (model_ptr->is_feasible()) {
                         accept_all                    = false;
                         accept_objective_improvable   = true;
@@ -257,12 +249,15 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                     }
                     break;
                 }
-                case ImprovabilityScreeningMode::Intensive: {
+                case option::improvability_screening_mode::Intensive: {
                     if (model_ptr->is_feasible()) {
                         accept_all                    = false;
                         accept_objective_improvable   = true;
                         accept_feasibility_improvable = false;
                     } else {
+                        auto changed_constraint_ptrs = utility::to_vector(
+                            current_move.related_constraint_ptrs);
+
                         if (iteration == 0) {
                             model_ptr
                                 ->reset_variable_feasibility_improvability();
@@ -342,12 +337,6 @@ TabuSearchResult<T_Variable, T_Expression> solve(
          */
         trial_solution_scores.resize(number_of_moves);
         trial_move_scores.resize(number_of_moves);
-
-        objective_improvements.resize(number_of_moves);
-        local_penalties.resize(number_of_moves);
-
-        local_augmented_objectives.resize(number_of_moves);
-        global_augmented_objectives.resize(number_of_moves);
         total_scores.resize(number_of_moves);
 
 #ifdef _OPENMP
@@ -371,21 +360,12 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                                     *trial_move_ptrs[i]);
             }
 #endif
-            evaluate_move(&trial_move_scores[i], *trial_move_ptrs[i],  //
-                          iteration,                                   //
-                          memory,                                      //
-                          option,                                      //
+            evaluate_move(&trial_move_scores[i],  //
+                          *trial_move_ptrs[i],    //
+                          iteration,              //
+                          memory,                 //
+                          option,                 //
                           tabu_tenure);
-
-            objective_improvements[i] =
-                trial_solution_scores[i].objective_improvement;
-
-            local_penalties[i] = trial_solution_scores[i].local_penalty;
-
-            local_augmented_objectives[i] =
-                trial_solution_scores[i].local_augmented_objective;
-            global_augmented_objectives[i] =
-                trial_solution_scores[i].global_augmented_objective;
 
             total_scores[i] =
                 trial_solution_scores[i].local_augmented_objective +
@@ -413,8 +393,14 @@ TabuSearchResult<T_Variable, T_Expression> solve(
         /**
          * Select moves for the next solution.
          */
-        int argmin_global_augmented_objective =
-            utility::argmin(global_augmented_objectives);
+        int argmin_global_augmented_objective = std::distance(
+            trial_solution_scores.begin(),
+            min_element(trial_solution_scores.begin(),
+                        trial_solution_scores.end(),
+                        [](const auto& a_FIRST, const auto& a_SECOND) {
+                            return a_FIRST.global_augmented_objective <
+                                   a_SECOND.global_augmented_objective;
+                        }));
 
         int  argmin_total_score = utility::argmin(total_scores);
         int  selected_index     = 0;
@@ -517,18 +503,18 @@ TabuSearchResult<T_Variable, T_Expression> solve(
         /**
          * Calculate various statistics for logging.
          */
-        if (update_status &
-            IncumbentHolderConstant::STATUS_LOCAL_AUGMENTED_INCUMBENT_UPDATE) {
+        if (update_status & solution::IncumbentHolderConstant::
+                                STATUS_LOCAL_AUGMENTED_INCUMBENT_UPDATE) {
             last_local_augmented_incumbent_update_iteration = iteration;
         }
 
-        if (update_status &
-            IncumbentHolderConstant::STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
+        if (update_status & solution::IncumbentHolderConstant::
+                                STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
             last_global_augmented_incumbent_update_iteration = iteration;
         }
 
-        if (update_status &
-            IncumbentHolderConstant::STATUS_FEASIBLE_INCUMBENT_UPDATE) {
+        if (update_status & solution::IncumbentHolderConstant::
+                                STATUS_FEASIBLE_INCUMBENT_UPDATE) {
             last_feasible_incumbent_update_iteration = iteration;
         }
 
@@ -536,11 +522,11 @@ TabuSearchResult<T_Variable, T_Expression> solve(
          * For pruning, count updating of the local augmented incumbent without
          * global augmented incumbent improvement.
          */
-        if (update_status ==
-            IncumbentHolderConstant::STATUS_LOCAL_AUGMENTED_INCUMBENT_UPDATE) {
+        if (update_status == solution::IncumbentHolderConstant::
+                                 STATUS_LOCAL_AUGMENTED_INCUMBENT_UPDATE) {
             local_augmented_incumbent_update_count++;
         } else if (update_status &
-                   IncumbentHolderConstant::
+                   solution::IncumbentHolderConstant::
                        STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
             local_augmented_incumbent_update_count = 0;
         }
@@ -548,32 +534,43 @@ TabuSearchResult<T_Variable, T_Expression> solve(
         /**
          * Calculate the number of moves for each type.
          */
-        int number_of_all_neighborhoods         = number_of_moves;
-        int number_of_feasible_neighborhoods    = 0;
-        int number_of_infeasible_neighborhood   = 0;
-        int number_of_permissible_neighborhoods = 0;
-        int number_of_improvable_neighborhoods  = 0;
+        number_of_all_neighborhoods = number_of_moves;
+        if (iteration % std::max(option.tabu_search.log_interval, 1) == 0 ||
+            update_status > 0) {
+            number_of_feasible_neighborhoods    = 0;
+            number_of_permissible_neighborhoods = 0;
+            number_of_improvable_neighborhoods  = 0;
 
-        for (const auto& score : trial_solution_scores) {
-            if (score.is_feasible) {
-                number_of_feasible_neighborhoods++;
+            for (const auto& score : trial_solution_scores) {
+                if (score.is_feasible) {
+                    number_of_feasible_neighborhoods++;
+                }
+                if (score.is_objective_improvable ||
+                    score.is_feasibility_improvable) {
+                    number_of_improvable_neighborhoods++;
+                }
             }
-            if (score.is_objective_improvable ||
-                score.is_feasibility_improvable) {
-                number_of_improvable_neighborhoods++;
-            }
-        }
 
-        for (const auto& score : trial_move_scores) {
-            if (score.is_permissible) {
-                number_of_permissible_neighborhoods++;
+            for (const auto& score : trial_move_scores) {
+                if (score.is_permissible) {
+                    number_of_permissible_neighborhoods++;
+                }
             }
-        }
-        number_of_infeasible_neighborhood =
-            number_of_all_neighborhoods - number_of_feasible_neighborhoods;
 
-        if (number_of_permissible_neighborhoods == 0) {
-            is_few_permissible_neighborhood = true;
+            if (number_of_permissible_neighborhoods == 0) {
+                is_few_permissible_neighborhood = true;
+            }
+        } else {
+            bool is_few_permissible_neighborhood_temp = true;
+            for (const auto& score : trial_move_scores) {
+                if (score.is_permissible) {
+                    is_few_permissible_neighborhood_temp = false;
+                    break;
+                }
+            }
+            if (is_few_permissible_neighborhood_temp) {
+                is_few_permissible_neighborhood = true;
+            }
         }
 
         /**
@@ -610,7 +607,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
 
         if (option.tabu_search.is_enabled_automatic_tabu_tenure_adjustment) {
             if ((update_status &
-                 IncumbentHolderConstant::
+                 solution::IncumbentHolderConstant::
                      STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) &&
                 tabu_tenure > original_tabu_tenure) {
                 /**
@@ -619,52 +616,53 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                  */
                 tabu_tenure                        = original_tabu_tenure;
                 last_tabu_tenure_updated_iteration = iteration;
-                bias_decrease_count                = 0;
-                bias_increase_count                = 0;
+                intensity_decrease_count           = 0;
+                intensity_increase_count           = 0;
                 utility::print_debug("Tabu tenure reverted: " +
                                          std::to_string(tabu_tenure) + ".",
-                                     option.verbose >= Verbose::Debug);
+                                     option.verbose >= option::verbose::Debug);
             } else if ((iteration - last_tabu_tenure_updated_iteration) %
                            (tabu_tenure + 1) ==
                        0) {
                 /**
-                 * The bias of searching will be computed with the interval of
-                 * tabu_tenure+1. The tabu tenure will be increased if the bias
-                 * has grown up, and decreased if the bias has been reduced.
+                 * The intensity of searching will be computed with the interval
+                 * of tabu_tenure+1. The tabu tenure will be increased if the
+                 * intensity has grown up, and decreased if the intensity has
+                 * been reduced.
                  */
-                bias_previous = bias_current;
-                bias_current  = memory.bias();
+                intensity_previous = intensity_current;
+                intensity_current  = memory.intensity();
 
-                if (bias_current > bias_previous) {
-                    bias_increase_count++;
-                    bias_decrease_count = 0;
+                if (intensity_current > intensity_previous) {
+                    intensity_increase_count++;
+                    intensity_decrease_count = 0;
 
-                    if (bias_increase_count >
-                        option.tabu_search.bias_increase_count_threshold) {
-                        bias_increase_count = 0;
+                    if (intensity_increase_count >
+                        option.tabu_search.intensity_increase_count_threshold) {
+                        intensity_increase_count = 0;
                         tabu_tenure =
                             std::min(tabu_tenure + 1,
                                      model_ptr->number_of_mutable_variables());
                         last_tabu_tenure_updated_iteration = iteration;
-                        utility::print_debug("Tabu tenure increased: " +
-                                                 std::to_string(tabu_tenure) +
-                                                 ".",
-                                             option.verbose >= Verbose::Debug);
+                        utility::print_debug(
+                            "Tabu tenure increased: " +
+                                std::to_string(tabu_tenure) + ".",
+                            option.verbose >= option::verbose::Debug);
                     }
                 } else {
-                    bias_decrease_count++;
-                    bias_increase_count = 0;
+                    intensity_decrease_count++;
+                    intensity_increase_count = 0;
 
-                    if (bias_decrease_count >
-                        option.tabu_search.bias_decrease_count_threshold) {
-                        bias_decrease_count = 0;
-                        tabu_tenure         = std::max(tabu_tenure - 1, 1);
+                    if (intensity_decrease_count >
+                        option.tabu_search.intensity_decrease_count_threshold) {
+                        intensity_decrease_count = 0;
+                        tabu_tenure              = std::max(tabu_tenure - 1, 1);
                         last_tabu_tenure_updated_iteration = iteration;
 
-                        utility::print_debug("Tabu tenure decreased: " +
-                                                 std::to_string(tabu_tenure) +
-                                                 ".",
-                                             option.verbose >= Verbose::Debug);
+                        utility::print_debug(
+                            "Tabu tenure decreased: " +
+                                std::to_string(tabu_tenure) + ".",
+                            option.verbose >= option::verbose::Debug);
                     }
                 }
             }
@@ -686,7 +684,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                              update_status,                              //
                              incumbent_holder,                           //
                              is_aspirated,                               //
-                             option.verbose >= Verbose::Full);
+                             option.verbose >= option::verbose::Full);
         }
 
         if (option.tabu_search.is_enabled_automatic_break) {
@@ -695,29 +693,40 @@ TabuSearchResult<T_Variable, T_Expression> solve(
              * sensitivity, the current loop will be terminated and the
              * local penalty coefficients will be adjusted.
              */
-            const int    ITERATION_MIN = 10;
-            const double MARGIN        = 100.0;
+            constexpr int    ITERATION_MIN = 10;
+            constexpr double MARGIN        = 100.0;
 
-            if (iteration > ITERATION_MIN              //
-                && current_solution_score.is_feasible  //
-                && number_of_infeasible_neighborhood > 0) {
-                std::vector<double> infeasible_local_penalties(
-                    number_of_infeasible_neighborhood);
-                int count = 0;
-                for (auto i = 0; i < number_of_all_neighborhoods; i++) {
-                    if (!trial_solution_scores[i].is_feasible) {
-                        infeasible_local_penalties[count++] =
-                            local_penalties[i];
+            if (iteration > ITERATION_MIN &&
+                current_solution_score.is_feasible) {
+                infeasible_local_penalties.clear();
+                for (const auto& score : trial_solution_scores) {
+                    if (!score.is_feasible) {
+                        infeasible_local_penalties.push_back(
+                            score.local_penalty);
                     }
                 }
+                if (infeasible_local_penalties.size() > 0) {
+                    auto argminmax_objective_sensitivity_score_ptr =
+                        std::minmax_element(
+                            trial_solution_scores.begin(),
+                            trial_solution_scores.end(),
+                            [](const auto& a_FIRST, const auto& a_SECOND) {
+                                return a_FIRST.objective_improvement <
+                                       a_SECOND.objective_improvement;
+                            });
 
-                double max_objective_sensitivity =
-                    utility::max_abs(objective_improvements);
-                if (max_objective_sensitivity * MARGIN <
-                    utility::min(infeasible_local_penalties)) {
-                    termination_status =
-                        TabuSearchTerminationStatus::EARLY_STOP;
-                    break;
+                    double max_objective_sensitivity =
+                        std::max(argminmax_objective_sensitivity_score_ptr
+                                     .second->objective_improvement,
+                                 -argminmax_objective_sensitivity_score_ptr
+                                      .first->objective_improvement);
+
+                    if (max_objective_sensitivity * MARGIN <
+                        utility::min(infeasible_local_penalties)) {
+                        termination_status =
+                            TabuSearchTerminationStatus::EARLY_STOP;
+                        break;
+                    }
                 }
             }
         }
@@ -728,7 +737,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     /**
      * Print the footer of the optimization progress table.
      */
-    print_table_footer(option.verbose >= Verbose::Full);
+    print_table_footer(option.verbose >= option::verbose::Full);
 
     /**
      * Prepare the result.

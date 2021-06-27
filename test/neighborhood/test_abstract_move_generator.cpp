@@ -93,7 +93,6 @@ TEST_F(TestAbstractMoveGenerator, reset_availability) {
         EXPECT_TRUE(move.is_available);
     }
 }
-/*****************************************************************************/
 }  // namespace
 /*****************************************************************************/
 // END
