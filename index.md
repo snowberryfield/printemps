@@ -17,8 +17,9 @@ __PRINTEMPS__ is a C++ metaheuristics modeler/solver library for general integer
 - __Flexibility to define neighborhood.__ It automatically detects the neighborhood structure of the problem. In addition to this, PRINTEMPS also accepts user-defined neighborhood.
 
 ## News
-|     Date     | Update                                                                                            |
-|:------------:|:--------------------------------------------------------------------------------------------------|
+|     Date      | Update                                                                                            |
+|:-------------:|:--------------------------------------------------------------------------------------------------|
+| Jun. 29, 2021 | New benchmark results were added.                                                                 |
 | Jun. 26, 2021 | [PRINTEMPS v1.6.3](https://github.com/snowberryfield/printemps/releases/tag/v1.6.2) was released. |
 
 ## Algorithm
