@@ -19,6 +19,7 @@ __PRINTEMPS__ is a C++ metaheuristics modeler/solver library for general integer
 ## News
 |     Date      | Update                                                                                            |
 |:-------------:|:--------------------------------------------------------------------------------------------------|
+| Jul. 5, 2021  | New benchmark results were added.                                                                 |
 | Jun. 29, 2021 | New benchmark results were added.                                                                 |
 | Jun. 26, 2021 | [PRINTEMPS v1.6.3](https://github.com/snowberryfield/printemps/releases/tag/v1.6.2) was released. |
 
