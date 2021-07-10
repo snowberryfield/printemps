@@ -51,9 +51,10 @@ struct OptionConstant {
         DEFAULT_IMPROVABILITY_SCREENING_MODE =
             improvability_screening_mode::Automatic;
 
-    static constexpr double DEFAULT_TARGET_OBJECTIVE = -1E100;
-    static constexpr bool   DEFAULT_SEED             = 1;
-    static constexpr bool   DEFAULT_VERBOSE          = verbose::None;
+    static constexpr double DEFAULT_TARGET_OBJECTIVE       = -1E100;
+    static constexpr bool   DEFAULT_SEED                   = 1;
+    static constexpr bool   DEFAULT_VERBOSE                = verbose::None;
+    static constexpr bool   DEFAULT_IS_ENABLED_WRITE_TREND = true;
     static constexpr bool   DEFAULT_IS_ENABLED_COLLECT_HISTORICAL_DATA = false;
     static constexpr int    DEFAULT_HISTORICAL_DATA_CAPACITY           = 1000;
 };
@@ -96,6 +97,7 @@ struct Option {
     double target_objective_value;
     int    seed;  // hidden
     int    verbose;
+    bool   is_enabled_write_trend;              // hidden
     bool   is_enabled_collect_historical_data;  // hidden
     int    historical_data_capacity;            // hidden
 
@@ -163,6 +165,8 @@ struct Option {
         this->target_objective_value = OptionConstant::DEFAULT_TARGET_OBJECTIVE;
         this->seed                   = OptionConstant::DEFAULT_SEED;
         this->verbose                = OptionConstant::DEFAULT_VERBOSE;
+        this->is_enabled_write_trend =
+            OptionConstant::DEFAULT_IS_ENABLED_WRITE_TREND;
         this->is_enabled_collect_historical_data =
             OptionConstant::DEFAULT_IS_ENABLED_COLLECT_HISTORICAL_DATA;
         this->historical_data_capacity =
@@ -283,7 +287,7 @@ struct Option {
 
         utility::print(                                  //
             " -- chain_move_overlap_rate_threshold: " +  //
-            utility::to_string(this->chain_move_overlap_rate_threshold, "%d"));
+            utility::to_string(this->chain_move_overlap_rate_threshold, "%f"));
 
         utility::print(               //
             " -- selection_mode: " +  //
@@ -304,6 +308,10 @@ struct Option {
         utility::print(        //
             " -- verbose: " +  //
             utility::to_string(this->verbose, "%d"));
+
+        utility::print(                       //
+            " -- is_enabled_write_trend: " +  //
+            utility::to_string(this->is_enabled_write_trend, "%d"));
 
         utility::print(                                   //
             " -- is_enabled_collect_historical_data: " +  //
