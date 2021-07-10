@@ -12,7 +12,7 @@ layout: sub
 | PRINTEMPS Version  | 1.6.3                                                                                                                                              |
 | Computational Time | 600sec for each instance                                                                                                                           |
 | Instance Set       | Pure integer "open" instances of [MIPLIB 2017 Collection Set](https://miplib.zib.de/tag_collection.html) (61 instances)                            |
-| Operating System   | Ubuntu 20.04                                                                                                                                       |
+| Operating System   | Ubuntu 18.04                                                                                                                                       |
 | Compiler           | g++ 7.5.0                                                                                                                                          |
 | CPU                | Intel(R) Xeon(R) CPU E3-1270 v5 @ 3.60GHz                                                                                                          |
 | RAM                | 16GB                                                                                                                                               |

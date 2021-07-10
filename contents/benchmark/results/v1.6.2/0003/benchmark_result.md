@@ -12,7 +12,7 @@ layout: sub
 | PRINTEMPS Version  | 1.6.2                                                                                                                                              |
 | Computational Time | 3600sec for each instance                                                                                                                          |
 | Instance Set       | Pure integer instances of [MIPLIB 2017 Benchmark Set](https://miplib.zib.de/tag_benchmark.html) (89 instances)                                     |
-| Operating System   | Ubuntu 20.04                                                                                                                                       |
+| Operating System   | Ubuntu 18.04                                                                                                                                       |
 | Compiler           | g++ 7.5.0                                                                                                                                          |
 | CPU                | Intel(R) Xeon(R) CPU E3-1270 v5 @ 3.60GHz                                                                                                          |
 | RAM                | 16GB                                                                                                                                               |

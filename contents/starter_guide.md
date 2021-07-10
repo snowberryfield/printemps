@@ -448,8 +448,8 @@ auto& u = model.create_expression("u");
 auto& v = model.create_expressions("v", 10);
 for (auto i = 0; i < 10; i++) {
     // OK. This code is identical to the following code:
-    // u(i) = z.sum({i, printemps::model::All}) == 1;
-    v(i) = z.selection({i, printemps::model::All});
+    // u(i) = z.sum({i, printemps::model_component::All}) == 1;
+    v(i) = z.selection({i, printemps::model_component::All});
 }
 ```
 
@@ -516,7 +516,7 @@ for (auto i = 0; i < 10; i++) {
 ```
 
 Partial sums of components of indexed decision variables or expressions can be obtained by specifying indices for fixed and those for summation. 
-Summation is calculated for an index of which value is specified by the constant `printemps::model::All`.
+Summation is calculated for an index of which value is specified by the constant `printemps::model_component::All`.
 The code
 
 ```c++
@@ -528,7 +528,7 @@ auto& x = model.create_variables("x", {10, 20});
 // Create and define expressions.
 auto& p = model.create_expressions("p", 10);
 for (auto i = 0; i < 10; i++) {
-    p(i) += x.sum({i, printemps::model::All});
+    p(i) += x.sum({i, printemps::model_component::All});
 }
 ```
 
@@ -603,7 +603,7 @@ auto& p = model.create_expressions("p", 10);
 //    }
 // }
 for (auto i = 0; i < 10; i++) {
-    p[i] = x.dot(a, {i, printemps::model::All});
+    p[i] = x.dot(a, {i, printemps::model_component::All});
 }
 
 auto& q = model.create_expressions("q", 10);
@@ -614,13 +614,13 @@ auto& q = model.create_expressions("q", 10);
 //    }
 // }
 for (auto i = 0; i < 10; i++) {
-    q[i] = x.dot(a, {printemps::model::All, i});
+    q[i] = x.dot(a, {printemps::model_component::All, i});
 }
 
 auto& r = model.create_expressions("r", 10);
 // NG. The number of indices for summation must be one.
 // for(auto i=0; i<10; i++){
-//     r[i] = x.dot(a, {printemps::model::All, printemps::model::All});
+//     r[i] = x.dot(a, {printemps::model_component::All, printemps::model_component::All});
 // }
 ```
 
@@ -669,7 +669,7 @@ auto& x = model.create_variables("x", {10, 20}, 0, 1);
 auto& g = model.create_constraints("g", 10);
 
 for (auto i = 0; i < 10; i++) {
-    g(i) += x.selection({i, printemps::model::All});
+    g(i) += x.selection({i, printemps::model_component::All});
 }
 ```
 
