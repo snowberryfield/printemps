@@ -50,8 +50,8 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     bool       m_is_feasibility_improvable;
     bool       m_has_lower_bound_margin;
     bool       m_has_upper_bound_margin;
-    bool       m_has_unique_sensitivity;
-    T_Variable m_unique_sensitivity;
+    bool       m_has_uniform_sensitivity;
+    T_Variable m_uniform_sensitivity;
 
     VariableSense m_sense;
 
@@ -125,8 +125,8 @@ class Variable : public multi_array::AbstractMultiArrayElement {
         m_has_lower_bound_margin = true;
         m_has_upper_bound_margin = true;
 
-        m_has_unique_sensitivity = false;
-        m_unique_sensitivity     = 0;
+        m_has_uniform_sensitivity = false;
+        m_uniform_sensitivity     = 0;
 
         m_sense         = VariableSense::Integer;
         m_selection_ptr = nullptr;
@@ -396,8 +396,8 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     /*************************************************************************/
     inline constexpr void reset_constraint_sensitivities(void) {
         m_constraint_sensitivities.clear();
-        m_has_unique_sensitivity = false;
-        m_unique_sensitivity     = 0.0;
+        m_has_uniform_sensitivity = false;
+        m_uniform_sensitivity     = 0.0;
     }
 
     /*************************************************************************/
@@ -415,28 +415,28 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr void setup_unique_sensitivity(void) {
+    inline constexpr void setup_uniform_sensitivity(void) {
         std::unordered_set<T_Expression> coefficients;
         for (const auto &sensitivity : m_constraint_sensitivities) {
             coefficients.insert(sensitivity.second);
         }
         if (coefficients.size() == 1) {
-            m_has_unique_sensitivity = true;
-            m_unique_sensitivity     = *(coefficients.begin());
+            m_has_uniform_sensitivity = true;
+            m_uniform_sensitivity     = *(coefficients.begin());
         } else {
-            m_has_unique_sensitivity = false;
-            m_unique_sensitivity     = 0.0;
+            m_has_uniform_sensitivity = false;
+            m_uniform_sensitivity     = 0.0;
         }
     }
 
     /*************************************************************************/
-    inline constexpr bool has_unique_sensitivity(void) const noexcept {
-        return m_has_unique_sensitivity;
+    inline constexpr bool has_uniform_sensitivity(void) const noexcept {
+        return m_has_uniform_sensitivity;
     }
 
     /*************************************************************************/
-    inline constexpr T_Expression unique_sensitivity(void) const noexcept {
-        return m_unique_sensitivity;
+    inline constexpr T_Expression uniform_sensitivity(void) const noexcept {
+        return m_uniform_sensitivity;
     }
 
     /*************************************************************************/

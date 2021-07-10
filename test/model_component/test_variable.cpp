@@ -52,8 +52,8 @@ TEST_F(TestVariable, initialize) {
     EXPECT_FALSE(variable.is_feasibility_improvable());
     EXPECT_TRUE(variable.has_lower_bound_margin());
     EXPECT_TRUE(variable.has_upper_bound_margin());
-    EXPECT_FALSE(variable.has_unique_sensitivity());
-    EXPECT_EQ(0.0, variable.unique_sensitivity());
+    EXPECT_FALSE(variable.has_uniform_sensitivity());
+    EXPECT_EQ(0.0, variable.uniform_sensitivity());
     EXPECT_EQ(printemps::model_component::VariableSense::Integer,
               variable.sense());
     EXPECT_EQ(nullptr, variable.selection_ptr());
@@ -519,7 +519,7 @@ TEST_F(TestVariable, constraint_sensitivities) {
 }
 
 /*****************************************************************************/
-TEST_F(TestVariable, setup_unique_sensitivity) {
+TEST_F(TestVariable, setup_uniform_sensitivity) {
     {
         auto variable =
             printemps::model_component::Variable<int,
@@ -533,8 +533,8 @@ TEST_F(TestVariable, setup_unique_sensitivity) {
 
         variable.register_constraint_sensitivity(&constraint_0, 10);
         variable.register_constraint_sensitivity(&constraint_1, 20);
-        variable.setup_unique_sensitivity();
-        EXPECT_FALSE(variable.has_unique_sensitivity());
+        variable.setup_uniform_sensitivity();
+        EXPECT_FALSE(variable.has_uniform_sensitivity());
     }
 
     {
@@ -550,23 +550,23 @@ TEST_F(TestVariable, setup_unique_sensitivity) {
 
         variable.register_constraint_sensitivity(&constraint_0, 10);
         variable.register_constraint_sensitivity(&constraint_1, 10);
-        variable.setup_unique_sensitivity();
-        EXPECT_TRUE(variable.has_unique_sensitivity());
-        EXPECT_EQ(10.0, variable.unique_sensitivity());
+        variable.setup_uniform_sensitivity();
+        EXPECT_TRUE(variable.has_uniform_sensitivity());
+        EXPECT_EQ(10.0, variable.uniform_sensitivity());
         variable.reset_constraint_sensitivities();
-        EXPECT_FALSE(variable.has_unique_sensitivity());
-        EXPECT_EQ(0.0, variable.unique_sensitivity());
+        EXPECT_FALSE(variable.has_uniform_sensitivity());
+        EXPECT_EQ(0.0, variable.uniform_sensitivity());
     }
 }
 
 /*****************************************************************************/
-TEST_F(TestVariable, has_unique_sensitivity) {
-    /// This method is tested in setup_unique_sensitivity().
+TEST_F(TestVariable, has_uniform_sensitivity) {
+    /// This method is tested in setup_uniform_sensitivity().
 }
 
 /*****************************************************************************/
-TEST_F(TestVariable, unique_sensitivity) {
-    /// This method is tested in setup_unique_sensitivity().
+TEST_F(TestVariable, uniform_sensitivity) {
+    /// This method is tested in setup_uniform_sensitivity().
 }
 
 /*****************************************************************************/
@@ -594,12 +594,12 @@ TEST_F(TestVariable, set_dependent_constraint_ptr) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, reset_dependent_constraint_ptr) {
-    /// This method is tested in setup_unique_sensitivity().
+    /// This method is tested in setup_uniform_sensitivity().
 }
 
 /*****************************************************************************/
 TEST_F(TestVariable, dependent_constraint_ptr) {
-    /// This method is tested in setup_unique_sensitivity().
+    /// This method is tested in setup_uniform_sensitivity().
 }
 
 /*****************************************************************************/
