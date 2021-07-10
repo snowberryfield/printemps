@@ -882,7 +882,7 @@ class Model {
 
         for (auto &&proxy : m_variable_proxies) {
             for (auto &&variable : proxy.flat_indexed_variables()) {
-                variable.setup_unique_sensitivity();
+                variable.setup_uniform_sensitivity();
             }
         }
 
@@ -1905,10 +1905,10 @@ class Model {
                     constraint_value = constraint_ptr->constraint_value() +
                                        variable_value_target -
                                        variable_ptr->value();
-                } else if (variable_ptr->has_unique_sensitivity()) {
+                } else if (variable_ptr->has_uniform_sensitivity()) {
                     constraint_value =
                         constraint_ptr->constraint_value() +
-                        variable_ptr->unique_sensitivity() *
+                        variable_ptr->uniform_sensitivity() *
                             (variable_value_target - variable_ptr->value());
                 } else {
                     constraint_value =
