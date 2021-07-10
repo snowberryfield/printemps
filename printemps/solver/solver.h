@@ -6,6 +6,7 @@
 #ifndef PRINTEMPS_SOLVER_H__
 #define PRINTEMPS_SOLVER_H__
 
+#include "tabu_search_trend_logger.h"
 #include "status.h"
 #include "result.h"
 #include "tabu_search/tabu_search.h"
@@ -14,7 +15,6 @@
 
 namespace printemps {
 namespace solver {
-
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 Result<T_Variable, T_Expression> solve(
@@ -510,6 +510,16 @@ Result<T_Variable, T_Expression> solve(
 
     double penalty_coefficient_relaxing_rate =
         master_option.penalty_coefficient_relaxing_rate;
+
+    TabuSearchTrendLogger logger;
+
+    if (master_option.is_enabled_write_trend) {
+        logger.setup("trend.txt");
+        logger.write_instance_info(model_ptr->name(),
+                                   model_ptr->number_of_variables(),
+                                   model_ptr->number_of_constraints());
+        logger.write_header();
+    }
 
     option::improvability_screening_mode::ImprovabilityScreeningMode
         improvability_screening_mode =
@@ -1583,6 +1593,33 @@ Result<T_Variable, T_Expression> solve(
                         model_ptr->neighborhood().chain().moves().size()) +
                     " stored chain moves.",
                 master_option.verbose >= option::verbose::Outer);
+        }
+
+        /**
+         * Logging.
+         */
+        if (master_option.is_enabled_write_trend) {
+            auto& global_incumbent =
+                incumbent_holder.global_augmented_incumbent_score();
+            auto& local_incumbent =
+                result.incumbent_holder.local_augmented_incumbent_score();
+            logger.write_log(                                       //
+                iteration,                                          //
+                elapsed_time,                                       //
+                local_incumbent.objective,                          //
+                local_incumbent.total_violation,                    //
+                global_incumbent.objective,                         //
+                global_incumbent.total_violation,                   //
+                intensity,                                          //
+                update_status,                                      //
+                employing_local_augmented_solution_flag,            //
+                employing_global_augmented_solution_flag,           //
+                employing_previous_solution_flag,                   //
+                is_enabled_penalty_coefficient_tightening,          //
+                is_enabled_penalty_coefficient_relaxing,            //
+                is_enabled_forcibly_initial_modification,           //
+                option.tabu_search.number_of_initial_modification,  //
+                option.tabu_search.initial_tabu_tenure);
         }
 
         model_ptr->callback(&option, &incumbent_holder);
