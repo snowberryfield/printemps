@@ -489,7 +489,7 @@ Result<T_Variable, T_Expression> solve(
     int iteration                                         = 0;
     int iteration_after_relaxation                        = 0;
     int iteration_after_global_augmented_incumbent_update = 0;
-    int iteration_consecutive_no_update                   = 0;
+    int iteration_after_local_augmented_incumbent_update  = 0;
 
     int relaxation_count = 0;
 
@@ -773,11 +773,11 @@ Result<T_Variable, T_Expression> solve(
             is_enabled_penalty_coefficient_relaxing  = true;
 
             /**
-             * The variable iteration_consecutive_no_update is a count that the
-             * result.total_update_status consecutively has taken the value of
-             * IncumbentHolderConstant::NO_UPDATE.
+             * The variable iteration_after_local_augmented_incumbent_update is
+             * a count that the result.total_update_status consecutively has
+             * taken the value of IncumbentHolderConstant::NO_UPDATE.
              */
-            iteration_consecutive_no_update = 0;
+            iteration_after_local_augmented_incumbent_update = 0;
         } else {
             if (result.total_update_status ==
                 solution::IncumbentHolderConstant::STATUS_NO_UPDATED) {
@@ -792,14 +792,14 @@ Result<T_Variable, T_Expression> solve(
                 is_enabled_forcibly_initial_modification = true;
 
                 if (result_local_augmented_incumbent_score.is_feasible) {
-                    is_enabled_penalty_coefficient_relaxing = true;
-                    iteration_consecutive_no_update         = 0;
+                    is_enabled_penalty_coefficient_relaxing          = true;
+                    iteration_after_local_augmented_incumbent_update = 0;
                 } else {
-                    if (iteration_consecutive_no_update < 1) {
-                        iteration_consecutive_no_update++;
+                    if (iteration_after_local_augmented_incumbent_update < 1) {
+                        iteration_after_local_augmented_incumbent_update++;
                     } else {
-                        is_enabled_penalty_coefficient_relaxing = true;
-                        iteration_consecutive_no_update         = 0;
+                        is_enabled_penalty_coefficient_relaxing          = true;
+                        iteration_after_local_augmented_incumbent_update = 0;
                     }
                 }
             } else {
@@ -809,7 +809,7 @@ Result<T_Variable, T_Expression> solve(
                  * relax the penalty coefficients will be determined by
                  * complexed rules below.
                  */
-                iteration_consecutive_no_update = 0;
+                iteration_after_local_augmented_incumbent_update = 0;
 
                 double gap_tolerance = constant::EPSILON;
 
