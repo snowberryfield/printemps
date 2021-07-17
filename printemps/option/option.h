@@ -54,7 +54,7 @@ struct OptionConstant {
     static constexpr double DEFAULT_TARGET_OBJECTIVE       = -1E100;
     static constexpr bool   DEFAULT_SEED                   = 1;
     static constexpr bool   DEFAULT_VERBOSE                = verbose::None;
-    static constexpr bool   DEFAULT_IS_ENABLED_WRITE_TREND = true;
+    static constexpr bool   DEFAULT_IS_ENABLED_WRITE_TREND = false;
     static constexpr bool   DEFAULT_IS_ENABLED_COLLECT_HISTORICAL_DATA = false;
     static constexpr int    DEFAULT_HISTORICAL_DATA_CAPACITY           = 1000;
 };

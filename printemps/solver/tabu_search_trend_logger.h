@@ -89,7 +89,7 @@ class TabuSearchTrendLogger {
                    const bool   a_IS_ENABLED_PENALTY_COEFFICIENT_TIGHTING,
                    const bool   a_IS_ENABLED_PENALTY_COEFFICIENT_RELAXING,
                    const bool   a_IS_ENABLED_FORCIBLY_INITIAL_MODIFICATION,
-                   const bool   a_NUMBER_OF_INITIAL_MODIFICATION,
+                   const int    a_NUMBER_OF_INITIAL_MODIFICATION,
                    const int    a_INITIAL_TABU_TENURE) {
         if (!m_ofstream.is_open()) {
             throw std::logic_error(utility::format_error_location(
