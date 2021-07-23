@@ -94,7 +94,7 @@ TEST_F(TestVariableFixer, fix_implicit_fixed_variables) {
 }
 
 /*****************************************************************************/
-TEST_F(TestVariableFixer, fix_redundant_variables) {
+TEST_F(TestVariableFixer, fix_redundant_set_variables) {
     {
         printemps::model::Model<int, double> model;
 
@@ -121,7 +121,7 @@ TEST_F(TestVariableFixer, fix_redundant_variables) {
         model.setup_variable_related_constraints();
         model.setup_variable_sensitivity();
 
-        printemps::presolver::fix_redundant_variables(&model, false);
+        printemps::presolver::fix_redundant_set_variables(&model, false);
 
         EXPECT_TRUE(x(3).is_fixed());
         EXPECT_TRUE(x(4).is_fixed());
@@ -153,7 +153,7 @@ TEST_F(TestVariableFixer, fix_redundant_variables) {
         model.categorize_constraints();
         model.setup_variable_related_constraints();
         model.setup_variable_sensitivity();
-        printemps::presolver::fix_redundant_variables(&model, false);
+        printemps::presolver::fix_redundant_set_variables(&model, false);
 
         EXPECT_TRUE(x(4).is_fixed());
         EXPECT_TRUE(x(5).is_fixed());
