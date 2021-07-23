@@ -10,45 +10,52 @@ namespace printemps {
 namespace presolver {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-constexpr int extract_independent_intermediate_variables(
+constexpr int extract_dependent_intermediate_variables(
     model::Model<T_Variable, T_Expression> *a_model_ptr,  //
     const bool                              a_IS_ENABLED_PRINT) {
     utility::print_single_line(a_IS_ENABLED_PRINT);
-    utility::print_message("Extracting independent intermediate variables...",
+    utility::print_message("Extracting dependent intermediate variables...",
                            a_IS_ENABLED_PRINT);
 
-    int number_of_newly_extracted_independent_intermediate_vairables = 0;
-    std::unordered_map<model_component::Variable<T_Variable, T_Expression> *,
-                       int>
-        intermediate_variable_counts;
+    int number_of_newly_extracted_dependent_intermediate_vairables = 0;
 
-    for (auto &&constraint_ptr :
-         a_model_ptr->constraint_type_reference().intermediate_ptrs) {
+    auto &intermediate_ptrs =
+        a_model_ptr->constraint_type_reference().intermediate_ptrs;
+
+    int intermediates_size = intermediate_ptrs.size();
+
+    std::vector<bool> has_dependent_intermediate_variable_flags(
+        intermediates_size, true);
+
+    std::unordered_set<model_component::Variable<T_Variable, T_Expression> *>
+        intermediate_variables;
+
+    for (auto i = 0; i < intermediates_size; i++) {
         auto intermediate_variable_ptr =
-            constraint_ptr->intermediate_variable_ptr();
-        if (intermediate_variable_counts.find(intermediate_variable_ptr) !=
-            intermediate_variable_counts.end()) {
-            intermediate_variable_counts[intermediate_variable_ptr]++;
+            intermediate_ptrs[i]->intermediate_variable_ptr();
+        if (intermediate_variables.find(intermediate_variable_ptr) ==
+            intermediate_variables.end()) {
+            intermediate_variables.insert(intermediate_variable_ptr);
         } else {
-            intermediate_variable_counts[intermediate_variable_ptr] = 1;
+            has_dependent_intermediate_variable_flags[i] = false;
         }
     }
 
     std::vector<model_component::Constraint<T_Variable, T_Expression>>
         additional_constraints;
 
-    for (auto &&constraint_ptr :
-         a_model_ptr->constraint_type_reference().intermediate_ptrs) {
+    for (auto i = 0; i < intermediates_size; i++) {
+        auto constraint_ptr = intermediate_ptrs[i];
         if (!constraint_ptr->is_enabled()) {
             continue;
         }
         auto intermediate_variable_ptr =
             constraint_ptr->intermediate_variable_ptr();
-        if (intermediate_variable_counts[intermediate_variable_ptr] == 1) {
+        if (has_dependent_intermediate_variable_flags[i]) {
             utility::print_message(
                 "The decision variable " + intermediate_variable_ptr->name() +
                     " in the constraint " + constraint_ptr->name() +
-                    " was extracted as an independent intermediate variable. ",
+                    " was extracted as a dependent intermediate variable. ",
                 a_IS_ENABLED_PRINT);
 
             constraint_ptr->disable();
@@ -78,7 +85,7 @@ constexpr int extract_independent_intermediate_variables(
                 additional_constraints.back().set_name(constraint_ptr->name() +
                                                        "_less");
             }
-            number_of_newly_extracted_independent_intermediate_vairables++;
+            number_of_newly_extracted_dependent_intermediate_vairables++;
         }
     }
 
@@ -97,19 +104,19 @@ constexpr int extract_independent_intermediate_variables(
     }
 
     utility::print_message("Done.", a_IS_ENABLED_PRINT);
-    return number_of_newly_extracted_independent_intermediate_vairables;
+    return number_of_newly_extracted_dependent_intermediate_vairables;
 }
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-constexpr int eliminate_independent_intermediate_variables(
+constexpr int eliminate_dependent_intermediate_variables(
     model::Model<T_Variable, T_Expression> *a_model_ptr,  //
     const bool                              a_IS_ENABLED_PRINT) {
     utility::print_single_line(a_IS_ENABLED_PRINT);
-    utility::print_message("Eliminating independent intermediate variables...",
+    utility::print_message("Eliminating dependent intermediate variables...",
                            a_IS_ENABLED_PRINT);
 
-    int number_of_newly_eliminated_independent_intermediate_vairables = 0;
+    int number_of_newly_eliminated_dependent_intermediate_vairables = 0;
 
     /// Objective
     {
@@ -130,10 +137,10 @@ constexpr int eliminate_independent_intermediate_variables(
                 a_model_ptr->objective().expression().substitute(
                     variable_ptr,
                     sign * dependent_constraint_ptr->expression());
-                number_of_newly_eliminated_independent_intermediate_vairables++;
+                number_of_newly_eliminated_dependent_intermediate_vairables++;
 
                 utility::print_message(
-                    "The independent intermediate variable " +
+                    "The dependent intermediate variable " +
                         variable_ptr->name() +
                         " in the objective function was eliminated. ",
                     a_IS_ENABLED_PRINT);
@@ -142,40 +149,35 @@ constexpr int eliminate_independent_intermediate_variables(
     }
 
     /// Constraint
-    for (auto &&constrinat_ptr :
-         a_model_ptr->constraint_reference().constraint_ptrs) {
-        auto sensitivities = constrinat_ptr->expression().sensitivities();
-
-        for (auto &&variable_ptr :
-             a_model_ptr->variable_reference().intermediate_variable_ptrs) {
+    for (auto &&variable_ptr :
+         a_model_ptr->variable_reference().intermediate_variable_ptrs) {
+        for (auto &&constrinat_ptr : variable_ptr->related_constraint_ptrs()) {
             if (constrinat_ptr == variable_ptr->dependent_constraint_ptr()) {
                 continue;
             }
-            if (sensitivities.find(variable_ptr) != sensitivities.end()) {
-                auto dependent_constraint_ptr =
-                    variable_ptr->dependent_constraint_ptr();
-                auto &sensitivities =
-                    dependent_constraint_ptr->expression().sensitivities();
 
-                double sign = sensitivities.at(variable_ptr) > 0 ? -1.0 : 1.0;
+            auto dependent_constraint_ptr =
+                variable_ptr->dependent_constraint_ptr();
+            auto &sensitivities =
+                dependent_constraint_ptr->expression().sensitivities();
 
-                constrinat_ptr->expression().substitute(
-                    variable_ptr,
-                    sign * dependent_constraint_ptr->expression());
+            double sign = sensitivities.at(variable_ptr) > 0 ? -1.0 : 1.0;
 
-                number_of_newly_eliminated_independent_intermediate_vairables++;
+            constrinat_ptr->expression().substitute(
+                variable_ptr, sign * dependent_constraint_ptr->expression());
 
-                utility::print_message(
-                    "The independent intermediate variable " +
-                        variable_ptr->name() + " in the constraint " +
-                        constrinat_ptr->name() + " was eliminated. ",
-                    a_IS_ENABLED_PRINT);
-            }
+            number_of_newly_eliminated_dependent_intermediate_vairables++;
+
+            utility::print_message(
+                "The dependent intermediate variable " + variable_ptr->name() +
+                    " in the constraint " + constrinat_ptr->name() +
+                    " was eliminated. ",
+                a_IS_ENABLED_PRINT);
         }
     }
 
     utility::print_message("Done.", a_IS_ENABLED_PRINT);
-    return number_of_newly_eliminated_independent_intermediate_vairables;
+    return number_of_newly_eliminated_dependent_intermediate_vairables;
 }
 
 }  // namespace presolver

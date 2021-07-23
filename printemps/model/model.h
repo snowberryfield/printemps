@@ -677,7 +677,7 @@ class Model {
                 this->setup_variable_related_zero_one_coefficient_constraints();
                 this->setup_variable_related_constraints();
                 this->setup_variable_sensitivity();
-                if (presolver::extract_independent_intermediate_variables(
+                if (presolver::extract_dependent_intermediate_variables(
                         this,  //
                         a_IS_ENABLED_PRINT) == 0) {
                     break;
@@ -689,7 +689,7 @@ class Model {
                     this->setup_variable_related_zero_one_coefficient_constraints();
                     this->setup_variable_related_constraints();
                     this->setup_variable_sensitivity();
-                    if (presolver::eliminate_independent_intermediate_variables(
+                    if (presolver::eliminate_dependent_intermediate_variables(
                             this,  //
                             a_IS_ENABLED_PRINT) == 0) {
                         break;
@@ -1211,7 +1211,7 @@ class Model {
             true);
 
         utility::print_info(  //
-            " -- Independent Intermediate: " +
+            " -- Dependent Intermediate: " +
                 utility::to_string(  //
                     compute_number_of_variables(
                         original.intermediate_variable_ptrs),
@@ -1901,7 +1901,7 @@ class Model {
                 auto variable_ptr          = a_MOVE.alterations.front().first;
                 auto variable_value_target = a_MOVE.alterations.front().second;
 
-                if (constraint_ptr->is_zero_one_coefficient()) {
+                if (constraint_ptr->is_binary()) {
                     constraint_value = constraint_ptr->constraint_value() +
                                        variable_value_target -
                                        variable_ptr->value();
