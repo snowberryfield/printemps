@@ -78,7 +78,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     bool m_is_max_min;
     bool m_is_intermediate;
     bool m_is_general_linear;
-    bool m_is_zero_one_coefficient;
+    bool m_is_binary;
 
     bool m_has_intermediate_lower_bound;
     bool m_has_intermediate_upper_bound;
@@ -219,24 +219,24 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
 
     /*************************************************************************/
     inline constexpr void clear_constraint_type(void) {
-        m_is_singleton            = false;
-        m_is_aggregation          = false;
-        m_is_precedence           = false;
-        m_is_variable_bound       = false;
-        m_is_set_partitioning     = false;
-        m_is_set_packing          = false;
-        m_is_set_covering         = false;
-        m_is_cardinality          = false;
-        m_is_invariant_knapsack   = false;
-        m_is_equation_knapsack    = false;
-        m_is_bin_packing          = false;
-        m_is_knapsack             = false;
-        m_is_integer_knapsack     = false;
-        m_is_min_max              = false;
-        m_is_max_min              = false;
-        m_is_intermediate         = false;
-        m_is_general_linear       = false;
-        m_is_zero_one_coefficient = false;
+        m_is_singleton          = false;
+        m_is_aggregation        = false;
+        m_is_precedence         = false;
+        m_is_variable_bound     = false;
+        m_is_set_partitioning   = false;
+        m_is_set_packing        = false;
+        m_is_set_covering       = false;
+        m_is_cardinality        = false;
+        m_is_invariant_knapsack = false;
+        m_is_equation_knapsack  = false;
+        m_is_bin_packing        = false;
+        m_is_knapsack           = false;
+        m_is_integer_knapsack   = false;
+        m_is_min_max            = false;
+        m_is_max_min            = false;
+        m_is_intermediate       = false;
+        m_is_general_linear     = false;
+        m_is_binary             = false;
 
         m_has_intermediate_lower_bound = false;
         m_has_intermediate_upper_bound = false;
@@ -377,10 +377,26 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
             return;
         }
 
-        /// Aggregation
+        /// Aggregation (and Set Partitioning)
         if (m_expression.sensitivities().size() == 2 &&
             m_sense == ConstraintSense::Equal) {
             m_is_aggregation = true;
+            bool is_binary   = true;
+            for (const auto &sensitivity : m_expression.sensitivities()) {
+                if ((sensitivity.first->sense() != VariableSense::Binary) &&
+                    (sensitivity.first->sense() != VariableSense::Selection)) {
+                    is_binary = false;
+                    break;
+                }
+                if (sensitivity.second != 1) {
+                    is_binary = false;
+                    break;
+                }
+            }
+
+            if (is_binary && m_expression.constant_value() == -1) {
+                m_is_set_partitioning = true;
+            }
             return;
         }
 
@@ -417,20 +433,20 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         /// Set Partitioning or Set Packing, Set Covering, Cardinality,
         /// Invariant Knapsack.
         {
-            bool is_zero_one_coefficient_constraint = true;
+            bool is_binary = true;
             for (const auto &sensitivity : m_expression.sensitivities()) {
                 if ((sensitivity.first->sense() != VariableSense::Binary) &&
                     (sensitivity.first->sense() != VariableSense::Selection)) {
-                    is_zero_one_coefficient_constraint = false;
+                    is_binary = false;
                     break;
                 }
                 if (sensitivity.second != 1) {
-                    is_zero_one_coefficient_constraint = false;
+                    is_binary = false;
                     break;
                 }
             }
-            if (is_zero_one_coefficient_constraint) {
-                m_is_zero_one_coefficient = true;
+            if (is_binary) {
+                m_is_binary = true;
                 /// Set Partitioning
                 if (m_expression.constant_value() == -1 &&
                     m_sense == ConstraintSense::Equal) {
@@ -466,7 +482,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
                     return;
                 }
             } else {
-                m_is_zero_one_coefficient = false;
+                m_is_binary = false;
             }
         }
 
@@ -876,8 +892,8 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr bool is_zero_one_coefficient(void) const noexcept {
-        return m_is_zero_one_coefficient;
+    inline constexpr bool is_binary(void) const noexcept {
+        return m_is_binary;
     }
 
     /*************************************************************************/
@@ -921,7 +937,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         return const_cast<Variable<T_Variable, T_Expression> *>(
             m_intermediate_variable_ptr);
     }
-};
+};  // namespace model_component
 using IPConstraint = Constraint<int, double>;
 }  // namespace model_component
 }  // namespace printemps
