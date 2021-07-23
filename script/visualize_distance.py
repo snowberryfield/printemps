@@ -54,7 +54,7 @@ def visualize_distance(solution_object, output_file_name,
     else:
         solutions.sort(key=lambda x: x['objective'])
 
-    number_of_solutions = len(solutions)
+    number_of_solutions = min(len(solutions), max_number_of_solutions)
 
     # Compute Manhattan distance for each solutions pair.
     distances = np.zeros(
@@ -113,7 +113,7 @@ def visualize_distance(solution_object, output_file_name,
 
         for i in range(number_of_solutions):
             color = cm.summer(
-                np.sqrt(objectives[i] - min_objective) / np.sqrt(max_objective - min_objective))
+                np.log(objectives[i] - min_objective+1) / np.log(max_objective - min_objective+1))
             red = int(np.floor(color[0] * 255))
             green = int(np.floor(color[1] * 255))
             blue = int(np.floor(color[2] * 255))
@@ -130,8 +130,6 @@ def visualize_distance(solution_object, output_file_name,
             mst.edges[i, j]['penwidth'] = 0.3
 
         nx.drawing.nx_agraph.write_dot(mst, 'distance.dot')
-        # nx.nx_agraph.view_pygraphviz(mst, prog='sfdp')
-
 
 ###############################################################################
 
@@ -149,7 +147,7 @@ def main():
     parser.add_argument('-s', '--size',
                         help='specify the maximum number of solutions for plot.',
                         type=int,
-                        default=5000)
+                        default=1000000)
     parser.add_argument('--descending',
                         help='sort solutions in descending order',
                         action='store_true')
@@ -161,6 +159,7 @@ def main():
     solution_file_name = args.input_file_name
     with open(solution_file_name, 'r') as f:
         solution_object = json.load(f)
+        f.close()
 
     visualize_distance(solution_object,
                        output_file_name=args.output,

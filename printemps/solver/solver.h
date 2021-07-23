@@ -6,6 +6,7 @@
 #ifndef PRINTEMPS_SOLVER_H__
 #define PRINTEMPS_SOLVER_H__
 
+#include "tabu_search_trend_logger.h"
 #include "status.h"
 #include "result.h"
 #include "tabu_search/tabu_search.h"
@@ -14,7 +15,6 @@
 
 namespace printemps {
 namespace solver {
-
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 Result<T_Variable, T_Expression> solve(
@@ -489,7 +489,7 @@ Result<T_Variable, T_Expression> solve(
     int iteration                                         = 0;
     int iteration_after_relaxation                        = 0;
     int iteration_after_global_augmented_incumbent_update = 0;
-    int iteration_consecutive_no_update                   = 0;
+    int iteration_after_local_augmented_incumbent_update  = 0;
 
     int relaxation_count = 0;
 
@@ -510,6 +510,16 @@ Result<T_Variable, T_Expression> solve(
 
     double penalty_coefficient_relaxing_rate =
         master_option.penalty_coefficient_relaxing_rate;
+
+    TabuSearchTrendLogger logger;
+
+    if (master_option.is_enabled_write_trend) {
+        logger.setup("trend.txt");
+        logger.write_instance_info(model_ptr->name(),
+                                   model_ptr->number_of_variables(),
+                                   model_ptr->number_of_constraints());
+        logger.write_header();
+    }
 
     option::improvability_screening_mode::ImprovabilityScreeningMode
         improvability_screening_mode =
@@ -763,11 +773,11 @@ Result<T_Variable, T_Expression> solve(
             is_enabled_penalty_coefficient_relaxing  = true;
 
             /**
-             * The variable iteration_consecutive_no_update is a count that the
-             * result.total_update_status consecutively has taken the value of
-             * IncumbentHolderConstant::NO_UPDATE.
+             * The variable iteration_after_local_augmented_incumbent_update is
+             * a count that the result.total_update_status consecutively has
+             * taken the value of IncumbentHolderConstant::NO_UPDATE.
              */
-            iteration_consecutive_no_update = 0;
+            iteration_after_local_augmented_incumbent_update = 0;
         } else {
             if (result.total_update_status ==
                 solution::IncumbentHolderConstant::STATUS_NO_UPDATED) {
@@ -782,14 +792,14 @@ Result<T_Variable, T_Expression> solve(
                 is_enabled_forcibly_initial_modification = true;
 
                 if (result_local_augmented_incumbent_score.is_feasible) {
-                    is_enabled_penalty_coefficient_relaxing = true;
-                    iteration_consecutive_no_update         = 0;
+                    is_enabled_penalty_coefficient_relaxing          = true;
+                    iteration_after_local_augmented_incumbent_update = 0;
                 } else {
-                    if (iteration_consecutive_no_update < 1) {
-                        iteration_consecutive_no_update++;
+                    if (iteration_after_local_augmented_incumbent_update < 1) {
+                        iteration_after_local_augmented_incumbent_update++;
                     } else {
-                        is_enabled_penalty_coefficient_relaxing = true;
-                        iteration_consecutive_no_update         = 0;
+                        is_enabled_penalty_coefficient_relaxing          = true;
+                        iteration_after_local_augmented_incumbent_update = 0;
                     }
                 }
             } else {
@@ -799,7 +809,7 @@ Result<T_Variable, T_Expression> solve(
                  * relax the penalty coefficients will be determined by
                  * complexed rules below.
                  */
-                iteration_consecutive_no_update = 0;
+                iteration_after_local_augmented_incumbent_update = 0;
 
                 double gap_tolerance = constant::EPSILON;
 
@@ -1583,6 +1593,33 @@ Result<T_Variable, T_Expression> solve(
                         model_ptr->neighborhood().chain().moves().size()) +
                     " stored chain moves.",
                 master_option.verbose >= option::verbose::Outer);
+        }
+
+        /**
+         * Logging.
+         */
+        if (master_option.is_enabled_write_trend) {
+            auto& global_incumbent =
+                incumbent_holder.global_augmented_incumbent_score();
+            auto& local_incumbent =
+                result.incumbent_holder.local_augmented_incumbent_score();
+            logger.write_log(                                       //
+                iteration,                                          //
+                elapsed_time,                                       //
+                local_incumbent.objective,                          //
+                local_incumbent.total_violation,                    //
+                global_incumbent.objective,                         //
+                global_incumbent.total_violation,                   //
+                intensity,                                          //
+                update_status,                                      //
+                employing_local_augmented_solution_flag,            //
+                employing_global_augmented_solution_flag,           //
+                employing_previous_solution_flag,                   //
+                is_enabled_penalty_coefficient_tightening,          //
+                is_enabled_penalty_coefficient_relaxing,            //
+                is_enabled_forcibly_initial_modification,           //
+                option.tabu_search.number_of_initial_modification,  //
+                option.tabu_search.initial_tabu_tenure);
         }
 
         model_ptr->callback(&option, &incumbent_holder);

@@ -215,6 +215,12 @@ printemps::option::Option read_option(const std::string &a_FILE_NAME) {
               option_object);
 
     /**************************************************************************/
+    /// verbose
+    read_json(&option.is_enabled_write_trend,  //
+              "is_enabled_write_trend",        //
+              option_object);
+
+    /**************************************************************************/
     /// is_enabled_collect_historical_data
     read_json(&option.is_enabled_collect_historical_data,  //
               "is_enabled_collect_historical_data",        //
