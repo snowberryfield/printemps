@@ -166,7 +166,7 @@ constexpr int fix_implicit_fixed_variables(
 }
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-constexpr int fix_redundant_variables(
+constexpr int fix_redundant_set_variables(
     model::Model<T_Variable, T_Expression> *a_model_ptr,  //
     const bool                              a_IS_ENABLED_PRINT) {
     int number_of_set_partitionings =
