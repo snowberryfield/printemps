@@ -691,6 +691,17 @@ Result<T_Variable, T_Expression> solve(
 
         constexpr int INFEASIBLE_STAGNATION_THRESHOLD = 50;
 
+        bool is_infeasible_stagnation =
+            !incumbent_holder.is_found_feasible_solution() &&
+            (iteration_after_global_augmented_incumbent_update >
+             INFEASIBLE_STAGNATION_THRESHOLD);
+
+        bool is_improved =
+            (result_local_augmented_incumbent_score.objective <
+             previous_solution_score.objective) ||
+            (result_local_augmented_incumbent_score.global_penalty <
+             previous_solution_score.global_penalty);
+
         /**
          * If the improvability_screening_mode was set to "Automatic", determine
          * the mode according to the search status so far.
@@ -725,10 +736,7 @@ Result<T_Variable, T_Expression> solve(
                  * improvability screening mode is set to "Aggressive" or
                  * "Intensive" to prioritize the search for feasible solutions.
                  */
-
-                if (!incumbent_holder.is_found_feasible_solution() &&
-                    iteration_after_global_augmented_incumbent_update >
-                        INFEASIBLE_STAGNATION_THRESHOLD) {
+                if (is_infeasible_stagnation) {
                     if (relaxation_count % 2 == 0) {
                         improvability_screening_mode =
                             option::improvability_screening_mode::Intensive;
@@ -869,14 +877,8 @@ Result<T_Variable, T_Expression> solve(
                          * tightened.
                          */
                         if (incumbent_holder.is_found_feasible_solution()) {
-                            if ((result_local_augmented_incumbent_score
-                                     .objective <
-                                 previous_solution_score.objective) ||
-                                (result_local_augmented_incumbent_score
-                                     .global_penalty <
-                                 previous_solution_score.global_penalty)) {
+                            if (is_improved) {
                                 employing_local_augmented_solution_flag = true;
-
                             } else {
                                 employing_previous_solution_flag = true;
                             }
@@ -918,9 +920,7 @@ Result<T_Variable, T_Expression> solve(
 
             if (current_intensity_before_relaxation >
                     previous_intensity_before_relaxation &&
-                !incumbent_holder.is_found_feasible_solution() &&
-                iteration_after_global_augmented_incumbent_update >
-                    INFEASIBLE_STAGNATION_THRESHOLD) {
+                is_infeasible_stagnation) {
                 penalty_coefficient_relaxing_rate =
                     std::max(0.1, penalty_coefficient_relaxing_rate * 0.5);
             } else {
