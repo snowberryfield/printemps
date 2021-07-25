@@ -288,6 +288,90 @@ constexpr int remove_redundant_constraints_with_tightening_variable_bounds(
     return number_of_newly_disabled_constraints;
 }
 
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+constexpr std::pair<int, int> remove_redundant_set_constraints(
+    model::Model<T_Variable, T_Expression> *a_model_ptr,  //
+    const bool                              a_IS_ENABLED_PRINT) {
+    /**
+     * NOTE: This function is preliminarily  implemented and not incorporated in
+     * the algorithm.
+     */
+    utility::print_single_line(a_IS_ENABLED_PRINT);
+    utility::print_message(
+        "Removing redundant set patritioning constraints and included decision "
+        "variables...",
+        a_IS_ENABLED_PRINT);
+
+    auto set_partitioning_ptrs =
+        a_model_ptr->constraint_type_reference().set_partitioning_ptrs;
+
+    int number_of_newly_disabled_constraints = 0;
+    int number_of_newly_fixed_variables      = 0;
+
+    const int SET_PARTITIONINGS_SIZE = set_partitioning_ptrs.size();
+
+    std::sort(set_partitioning_ptrs.begin(), set_partitioning_ptrs.end(),
+              [](const auto &a_LHS, const auto &a_RHS) {
+                  return a_LHS->expression().sensitivities().size() >
+                         a_RHS->expression().sensitivities().size();
+              });
+
+    std::vector<std::unordered_set<
+        model_component::Variable<T_Variable, T_Expression> *>>
+        variable_ptr_sets(SET_PARTITIONINGS_SIZE);
+
+    for (auto i = 0; i < SET_PARTITIONINGS_SIZE; i++) {
+        for (const auto &sensitivity :
+             set_partitioning_ptrs[i]->expression().sensitivities()) {
+            variable_ptr_sets[i].insert(sensitivity.first);
+        }
+    }
+
+    for (auto i = 0; i < SET_PARTITIONINGS_SIZE - 1; i++) {
+        for (auto j = i + 1; j < SET_PARTITIONINGS_SIZE; j++) {
+            bool is_included = true;
+            for (const auto &variable_ptr : variable_ptr_sets[j]) {
+                if (variable_ptr_sets[i].find(variable_ptr) ==
+                    variable_ptr_sets[i].end()) {
+                    is_included = false;
+                    break;
+                }
+            }
+
+            if (is_included) {
+                set_partitioning_ptrs[i]->disable();
+                utility::print_message(  //
+                    "The redundant set partitioning constraint " +
+                        set_partitioning_ptrs[i]->name() + " was removed.",
+                    a_IS_ENABLED_PRINT);
+
+                for (const auto &variable_ptr : variable_ptr_sets[i]) {
+                    if (variable_ptr_sets[j].find(variable_ptr) ==
+                        variable_ptr_sets[j].end()) {
+                        variable_ptr->fix_by(0);
+                        utility::print_message(  //
+                            "The value of redundant decision variable " +
+                                variable_ptr->name() +
+                                " in partitioning constraint " +
+                                set_partitioning_ptrs[i]->name() +
+                                " was fixed by 0.",
+                            a_IS_ENABLED_PRINT);
+                        number_of_newly_fixed_variables++;
+                    }
+                }
+
+                number_of_newly_disabled_constraints++;
+                break;
+            }
+        }
+    }
+
+    utility::print_message("Done.", a_IS_ENABLED_PRINT);
+    return std::make_pair(number_of_newly_disabled_constraints,
+                          number_of_newly_fixed_variables);
+}  // namespace presolver
+
 }  // namespace presolver
 }  // namespace printemps
 #endif
