@@ -10,9 +10,12 @@ namespace printemps {
 namespace presolver {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-constexpr int extract_dependent_intermediate_variables(
+int extract_dependent_intermediate_variables(
     model::Model<T_Variable, T_Expression> *a_model_ptr,  //
     const bool                              a_IS_ENABLED_PRINT) {
+    /**
+     * NOTE: This function cannot be constexpr with clang for std::vector<bool>.
+     */
     utility::print_single_line(a_IS_ENABLED_PRINT);
     utility::print_message("Extracting dependent intermediate variables...",
                            a_IS_ENABLED_PRINT);
