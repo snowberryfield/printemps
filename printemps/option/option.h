@@ -22,7 +22,6 @@ struct OptionConstant {
     static constexpr double DEFAULT_PENALTY_COEFFICIENT_RELAXING_RATE   = 0.9;
     static constexpr double DEFAULT_PENALTY_COEFFICIENT_TIGHTENING_RATE = 1.0;
     static constexpr double DEFAULT_PENALTY_COEFFICIENT_UPDATING_BALANCE = 0.0;
-    static constexpr int DEFAULT_PENALTY_COEFFICIENT_RESET_COUNT_THRESHOLD = -1;
     static constexpr double DEFAULT_INITIAL_PENALTY_COEFFICIENT = 1E7;
     static constexpr bool   DEFAULT_IS_ENABLED_LAGRANGE_DUAL    = false;
     static constexpr bool   DEFAULT_IS_ENABLED_LOCAL_SEARCH     = false;
@@ -67,7 +66,6 @@ struct Option {
     double penalty_coefficient_relaxing_rate;
     double penalty_coefficient_tightening_rate;
     double penalty_coefficient_updating_balance;       // hidden
-    int    penalty_coefficient_reset_count_threshold;  // hidden
     double initial_penalty_coefficient;
     bool   is_enabled_lagrange_dual;
     bool   is_enabled_local_search;
@@ -121,8 +119,6 @@ struct Option {
             OptionConstant::DEFAULT_PENALTY_COEFFICIENT_TIGHTENING_RATE;
         this->penalty_coefficient_updating_balance =
             OptionConstant::DEFAULT_PENALTY_COEFFICIENT_UPDATING_BALANCE;
-        this->penalty_coefficient_reset_count_threshold =
-            OptionConstant::DEFAULT_PENALTY_COEFFICIENT_RESET_COUNT_THRESHOLD;
         this->initial_penalty_coefficient =
             OptionConstant::DEFAULT_INITIAL_PENALTY_COEFFICIENT;
         this->is_enabled_lagrange_dual =
@@ -208,11 +204,6 @@ struct Option {
             " -- penalty_coefficient_updating_balance: " +  //
             utility::to_string(this->penalty_coefficient_updating_balance,
                                "%f"));
-
-        utility::print(                                          //
-            " -- penalty_coefficient_reset_count_threshold: " +  //
-            utility::to_string(this->penalty_coefficient_reset_count_threshold,
-                               "%d"));
 
         utility::print(                            //
             " -- initial_penalty_coefficient: " +  //
