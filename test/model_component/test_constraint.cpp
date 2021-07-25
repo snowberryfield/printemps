@@ -500,13 +500,27 @@ TEST_F(TestConstraint, setup_constraint_type_variable_bound) {
 /*****************************************************************************/
 TEST_F(TestConstraint, setup_constraint_type_set_partitioning) {
     printemps::model::Model<int, double> model;
-    auto& x = model.create_variables("x", 10, 0, 1);
-    auto  constraint =
-        printemps::model_component::Constraint<int, double>::create_instance();
-    constraint.setup(x.sum() - 1,
-                     printemps::model_component::ConstraintSense::Equal);
-    constraint.setup_constraint_type();
-    EXPECT_TRUE(constraint.is_set_partitioning());
+    {
+        auto& x = model.create_variables("x", 10, 0, 1);
+        auto  constraint =
+            printemps::model_component::Constraint<int,
+                                                   double>::create_instance();
+        constraint.setup(x.sum() - 1,
+                         printemps::model_component::ConstraintSense::Equal);
+        constraint.setup_constraint_type();
+        EXPECT_TRUE(constraint.is_set_partitioning());
+    }
+
+    {
+        auto& y = model.create_variables("y", 2, 0, 1);
+        auto  constraint =
+            printemps::model_component::Constraint<int,
+                                                   double>::create_instance();
+        constraint.setup(y.sum() - 1,
+                         printemps::model_component::ConstraintSense::Equal);
+        constraint.setup_constraint_type();
+        EXPECT_TRUE(constraint.is_set_partitioning());
+    }
 }
 
 /*****************************************************************************/

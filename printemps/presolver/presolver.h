@@ -24,7 +24,7 @@ namespace presolver {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 constexpr bool presolve(model::Model<T_Variable, T_Expression> *a_model_ptr,  //
-                        const bool a_IS_ENABLED_FIX_REDUNDANT_VARIABLES,
+                        const bool a_IS_ENABLED_PAIRWISE_PRESOLVE,
                         const bool a_IS_ENABLED_PRINT) {
     utility::print_single_line(a_IS_ENABLED_PRINT);
     utility::print_message("Presolving...", a_IS_ENABLED_PRINT);
@@ -54,23 +54,19 @@ constexpr bool presolve(model::Model<T_Variable, T_Expression> *a_model_ptr,  //
         }
     }
 
-    /**
-     * Since fix_redundant_variables() is expensive, it will be enabled if the
-     * number of decision variables is equal to or less than the constant
-     * MAX_CONSIDERABLE_NUMBER_OF_VARIABLES.
-     */
-    const int MAX_CONSIDERABLE_NUMBER_OF_VARIABLES = 100000;
-    if (a_model_ptr->is_linear() && a_IS_ENABLED_FIX_REDUNDANT_VARIABLES &&
-        a_model_ptr->number_of_variables() <=
+    if (a_model_ptr->is_linear() && a_IS_ENABLED_PAIRWISE_PRESOLVE) {
+        const int MAX_CONSIDERABLE_NUMBER_OF_VARIABLES = 100000;
+        if (a_model_ptr->number_of_variables() <=
             MAX_CONSIDERABLE_NUMBER_OF_VARIABLES) {
-        number_of_fixed_variables +=
-            fix_redundant_variables(a_model_ptr, a_IS_ENABLED_PRINT);
+            number_of_fixed_variables +=
+                fix_redundant_set_variables(a_model_ptr, a_IS_ENABLED_PRINT);
+        }
     }
     utility::print_message("Done.", a_IS_ENABLED_PRINT);
 
     return (number_of_disabled_constaints > 0) ||
            (number_of_fixed_variables > 0);
-}
+}  // namespace presolver
 
 }  // namespace presolver
 }  // namespace printemps

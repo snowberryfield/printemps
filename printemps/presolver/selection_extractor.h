@@ -38,7 +38,7 @@ constexpr void extract_selections_by_defined_order(
                            a_IS_ENABLED_PRINT);
 
     std::vector<model_component::Selection<T_Variable, T_Expression>>
-        selections;
+        included_selections;
     std::vector<model_component::Selection<T_Variable, T_Expression>>
         raw_selections = convert_to_selections(
             a_model_ptr->constraint_type_reference().set_partitioning_ptrs);
@@ -63,18 +63,18 @@ constexpr void extract_selections_by_defined_order(
                 "The constraint " + selection.constraint_ptr->name() +
                     " was detected as selection constraint.",
                 a_IS_ENABLED_PRINT);
-            selections.push_back(selection);
+            included_selections.push_back(selection);
             extracted_variable_ptrs.insert(extracted_variable_ptrs.end(),
                                            selection.variable_ptrs.begin(),
                                            selection.variable_ptrs.end());
         }
     }
 
-    for (auto &&selection : selections) {
+    for (auto &&selection : included_selections) {
         selection.constraint_ptr->disable();
     }
 
-    for (auto &&selection : selections) {
+    for (auto &&selection : included_selections) {
         for (auto &variable_ptr : selection.variable_ptrs) {
             auto &constraint_ptrs = variable_ptr->related_constraint_ptrs();
             selection.related_constraint_ptrs.insert(constraint_ptrs.begin(),
@@ -82,7 +82,7 @@ constexpr void extract_selections_by_defined_order(
         }
     }
 
-    a_model_ptr->set_selections(selections);
+    a_model_ptr->set_selections(included_selections);
 
     utility::print_message("Done.", a_IS_ENABLED_PRINT);
 }
@@ -105,7 +105,7 @@ constexpr void extract_selections_by_number_of_variables_order(
     }
 
     std::vector<model_component::Selection<T_Variable, T_Expression>>
-        selections;
+        included_selections;
     std::vector<model_component::Selection<T_Variable, T_Expression>>
         raw_selections = convert_to_selections(
             a_model_ptr->constraint_type_reference().set_partitioning_ptrs);
@@ -144,18 +144,18 @@ constexpr void extract_selections_by_number_of_variables_order(
                 "The constraint " + selection.constraint_ptr->name() +
                     " was detected as selection constraint.",
                 a_IS_ENABLED_PRINT);
-            selections.push_back(selection);
+            included_selections.push_back(selection);
             extracted_variable_ptrs.insert(extracted_variable_ptrs.end(),
                                            selection.variable_ptrs.begin(),
                                            selection.variable_ptrs.end());
         }
     }
 
-    for (auto &&selection : selections) {
+    for (auto &&selection : included_selections) {
         selection.constraint_ptr->disable();
     }
 
-    for (auto &&selection : selections) {
+    for (auto &&selection : included_selections) {
         for (auto &variable_ptr : selection.variable_ptrs) {
             auto &constraint_ptrs = variable_ptr->related_constraint_ptrs();
             selection.related_constraint_ptrs.insert(constraint_ptrs.begin(),
@@ -163,7 +163,7 @@ constexpr void extract_selections_by_number_of_variables_order(
         }
     }
 
-    a_model_ptr->set_selections(selections);
+    a_model_ptr->set_selections(included_selections);
 
     utility::print_message("Done.", a_IS_ENABLED_PRINT);
 }
@@ -178,7 +178,7 @@ constexpr void extract_independent_selections(
                            a_IS_ENABLED_PRINT);
 
     std::vector<model_component::Selection<T_Variable, T_Expression>>
-        selections;
+        included_selections;
     std::vector<model_component::Selection<T_Variable, T_Expression>>
         raw_selections = convert_to_selections(
             a_model_ptr->constraint_type_reference().set_partitioning_ptrs);
@@ -210,7 +210,7 @@ constexpr void extract_independent_selections(
                 "The constraint " + raw_selections[i].constraint_ptr->name() +
                     " was detected as selection constraint.",
                 a_IS_ENABLED_PRINT);
-            selections.push_back(raw_selections[i]);
+            included_selections.push_back(raw_selections[i]);
             extracted_variable_ptrs.insert(
                 extracted_variable_ptrs.end(),
                 raw_selections[i].variable_ptrs.begin(),
@@ -218,11 +218,11 @@ constexpr void extract_independent_selections(
         }
     }
 
-    for (auto &&selection : selections) {
+    for (auto &&selection : included_selections) {
         selection.constraint_ptr->disable();
     }
 
-    for (auto &&selection : selections) {
+    for (auto &&selection : included_selections) {
         for (auto &variable_ptr : selection.variable_ptrs) {
             auto &constraint_ptrs = variable_ptr->related_constraint_ptrs();
             selection.related_constraint_ptrs.insert(constraint_ptrs.begin(),
@@ -230,7 +230,7 @@ constexpr void extract_independent_selections(
         }
     }
 
-    a_model_ptr->set_selections(selections);
+    a_model_ptr->set_selections(included_selections);
 
     utility::print_message("Done.", a_IS_ENABLED_PRINT);
 }

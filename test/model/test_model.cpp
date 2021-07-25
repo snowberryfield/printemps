@@ -1071,8 +1071,8 @@ TEST_F(TestModel, categorize_variables) {
 
     model.categorize_variables();
     model.categorize_constraints();
-    printemps::presolver::extract_independent_intermediate_variables(&model,
-                                                                     false);
+    printemps::presolver::extract_dependent_intermediate_variables(&model,
+                                                                   false);
     printemps::presolver::extract_independent_selections(&model, false);
 
     model.categorize_variables();
