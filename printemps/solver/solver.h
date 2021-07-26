@@ -513,6 +513,10 @@ Result<T_Variable, T_Expression> solve(
     double penalty_coefficient_tightening_rate =
         master_option.penalty_coefficient_tightening_rate;
 
+    int employing_local_augmented_solution_count  = 0;
+    int employing_global_augmented_solution_count = 0;
+    int employing_previous_solution_count         = 0;
+
     TabuSearchTrendLogger logger;
 
     if (master_option.is_enabled_write_trend) {
@@ -669,7 +673,8 @@ Result<T_Variable, T_Expression> solve(
         bool is_enabled_penalty_coefficient_relaxing   = false;
         bool is_enabled_forcibly_initial_modification  = false;
 
-        bool penalty_coefficient_reset_flag = false;
+        bool penalty_coefficient_forcibly_relaxing_flag = false;
+        bool penalty_coefficient_reset_flag             = false;
 
         constexpr int INFEASIBLE_STAGNATION_THRESHOLD = 200;
 
@@ -833,13 +838,32 @@ Result<T_Variable, T_Expression> solve(
                         is_enabled_penalty_coefficient_tightening = true;
                     }
                 } else {
-                    /**
-                     * If the gap is positive and the local incumbent solution
-                     * is feasible, the local incumbent solution is employed as
-                     * the initial solution for the next loop. The penalty
-                     * coefficients are to be relaxed.
-                     */
-                    if (result_local_augmented_incumbent_score.is_feasible) {
+                    constexpr int    ITERATION_AFTER_RELAXATION_MIN = 50;
+                    constexpr double GAP_THRESHOLD_RATE             = 1E-3;
+                    if (!incumbent_holder.is_found_feasible_solution() &&
+                        iteration_after_relaxation >
+                            ITERATION_AFTER_RELAXATION_MIN &&
+                        gap < master_option.initial_penalty_coefficient *
+                                  GAP_THRESHOLD_RATE) {
+                        /**
+                         * If the gap is sufficiently small after long iteration
+                         * from penalty coefficients relaxation and no feasible
+                         * solution is found, the penalty coefficients are
+                         * forcibly to be relaxed.
+                         */
+                        employing_global_augmented_solution_flag = true;
+                        is_enabled_forcibly_initial_modification = true;
+                        is_enabled_penalty_coefficient_relaxing  = true;
+
+                        penalty_coefficient_forcibly_relaxing_flag = true;
+                    } else if (result_local_augmented_incumbent_score
+                                   .is_feasible) {
+                        /**
+                         * If the gap is positive and the local incumbent
+                         * solution is feasible, the local incumbent solution is
+                         * employed as the initial solution for the next loop.
+                         * The penalty coefficients are to be relaxed.
+                         */
                         employing_local_augmented_solution_flag = true;
                         is_enabled_penalty_coefficient_relaxing = true;
 
@@ -890,12 +914,15 @@ Result<T_Variable, T_Expression> solve(
         if (employing_global_augmented_solution_flag) {
             current_solution       = result_global_augmented_incumbent_solution;
             current_solution_score = result_global_augmented_incumbent_score;
+            employing_global_augmented_solution_count++;
         } else if (employing_local_augmented_solution_flag) {
             current_solution       = result_local_augmented_incumbent_solution;
             current_solution_score = result_local_augmented_incumbent_score;
+            employing_local_augmented_solution_count++;
         } else if (employing_previous_solution_flag) {
             current_solution       = previous_solution;
             current_solution_score = previous_solution_score;
+            employing_previous_solution_count++;
         } else {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -903,23 +930,49 @@ Result<T_Variable, T_Expression> solve(
         }
 
         /**
-         * Additional processes for cases if the penalty coefficients are
-         * relaxed: Descrease penalty coefficient relaxing rate if lack of
-         * diversification is detected.
+         * Additional processes for cases when the penalty coefficients are
+         * relaxed.
          */
         if (is_enabled_penalty_coefficient_relaxing) {
             previous_intensity_before_relaxation =
                 current_intensity_before_relaxation;
             current_intensity_before_relaxation = intensity;
 
+            constexpr double PENALTY_COEFFICIENT_RELAXING_RATE_MAX = 1.0 - 1E-4;
+            constexpr double PENALTY_COEFFICIENT_RELAXING_RATE_MIN = 0.1;
+
             if (current_intensity_before_relaxation >
                     previous_intensity_before_relaxation &&
-                is_infeasible_stagnation) {
+                penalty_coefficient_forcibly_relaxing_flag) {
+                /**
+                 * Descrease penalty coefficient relaxing rate if lack of
+                 * diversification is detected.
+                 */
                 penalty_coefficient_relaxing_rate =
-                    std::max(0.1, penalty_coefficient_relaxing_rate * 0.5);
+                    std::max(PENALTY_COEFFICIENT_RELAXING_RATE_MIN,
+                             penalty_coefficient_relaxing_rate * 0.5);
+            } else if (employing_previous_solution_count >
+                       std::max(employing_global_augmented_solution_count,
+                                employing_local_augmented_solution_count)) {
+                /**
+                 * Increase penalty coefficient relaxing rate if previous
+                 * solutions are most frequently employed as initial solutions,
+                 * which indicates overrelaxation.
+                 */
+
+                penalty_coefficient_relaxing_rate =
+                    std::min(PENALTY_COEFFICIENT_RELAXING_RATE_MAX,
+                             sqrt(penalty_coefficient_relaxing_rate));
             } else {
-                penalty_coefficient_relaxing_rate =
-                    master_option.penalty_coefficient_relaxing_rate;
+                /**
+                 * Otherwise, draw back the penalty coefficient relaxing rate to
+                 * the original value.
+                 */
+                constexpr double LEARNING_RATE = 1E-2;
+                penalty_coefficient_relaxing_rate +=
+                    LEARNING_RATE *
+                    (master_option.penalty_coefficient_relaxing_rate -
+                     penalty_coefficient_relaxing_rate);
             }
 
             penalty_coefficient_tightening_rate =
@@ -932,7 +985,7 @@ Result<T_Variable, T_Expression> solve(
         }
 
         /**
-         * Additional processes for cases if the penalty coefficients are
+         * Additional processes for cases when the penalty coefficients are
          * tightened: Reset penalty coefficients if stagnation is detected.
          */
         if (is_enabled_penalty_coefficient_tightening) {
@@ -1485,6 +1538,14 @@ Result<T_Variable, T_Expression> solve(
                 "The penalty coefficients were tightened.",
                 master_option.verbose >= option::verbose::Outer);
         }
+        utility::print_message(  //
+            "The penalty coefficients relaxing rate is " +
+                std::to_string(penalty_coefficient_relaxing_rate) + ".",
+            master_option.verbose >= option::verbose::Outer);
+        utility::print_message(  //
+            "The penalty coefficients tightening rate is " +
+                std::to_string(penalty_coefficient_tightening_rate) + ".",
+            master_option.verbose >= option::verbose::Outer);
 
         /**
          * Print the initial tabu tenure for the next loop.
@@ -1627,9 +1688,11 @@ Result<T_Variable, T_Expression> solve(
                 employing_local_augmented_solution_flag,            //
                 employing_global_augmented_solution_flag,           //
                 employing_previous_solution_flag,                   //
-                is_enabled_penalty_coefficient_tightening,          //
                 is_enabled_penalty_coefficient_relaxing,            //
+                is_enabled_penalty_coefficient_tightening,          //
                 is_enabled_forcibly_initial_modification,           //
+                penalty_coefficient_relaxing_rate,                  //
+                penalty_coefficient_tightening_rate,                //
                 option.tabu_search.number_of_initial_modification,  //
                 option.tabu_search.initial_tabu_tenure);
         }
