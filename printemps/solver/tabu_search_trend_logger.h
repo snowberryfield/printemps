@@ -67,9 +67,11 @@ class TabuSearchTrendLogger {
             << "employing_local_augmented_solution_flag "
             << "employing_global_augmented_solution_flag "
             << "employing_previous_solution_flag "
-            << "is_enabled_penalty_coefficient_tightening "
             << "is_enabled_penalty_coefficient_relaxing "
+            << "is_enabled_penalty_coefficient_tightening "
             << "is_enabled_forcibly_initial_modification "
+            << "penalty_coefficient_relaxing_rate "
+            << "penalty_coefficient_tightening_rate "
             << "number_of_initial_modification "
             << "initial_tabu_tenure" << std::endl;
     }
@@ -86,9 +88,11 @@ class TabuSearchTrendLogger {
                    const bool   a_EMPLOYING_LOCAL_AUGMENTED_SOLUTION_FLAG,
                    const bool   a_EMPLOYING_GLOBAL_AUGMENTED_SOLUTION_FLAG,
                    const bool   a_EMPLOYING_PREVIOUS_SOLUTION_FLAG,
-                   const bool   a_IS_ENABLED_PENALTY_COEFFICIENT_TIGHTING,
                    const bool   a_IS_ENABLED_PENALTY_COEFFICIENT_RELAXING,
+                   const bool   a_IS_ENABLED_PENALTY_COEFFICIENT_TIGHTING,
                    const bool   a_IS_ENABLED_FORCIBLY_INITIAL_MODIFICATION,
+                   const double a_PENALTY_COEFFICIENT_RELAXING_RATE,
+                   const double a_PENALTY_COEFFICIENT_TIGHTENING_RATE,
                    const int    a_NUMBER_OF_INITIAL_MODIFICATION,
                    const int    a_INITIAL_TABU_TENURE) {
         if (!m_ofstream.is_open()) {
@@ -108,9 +112,11 @@ class TabuSearchTrendLogger {
                 << a_EMPLOYING_LOCAL_AUGMENTED_SOLUTION_FLAG << " "   //
                 << a_EMPLOYING_GLOBAL_AUGMENTED_SOLUTION_FLAG << " "  //
                 << a_EMPLOYING_PREVIOUS_SOLUTION_FLAG << " "          //
-                << a_IS_ENABLED_PENALTY_COEFFICIENT_TIGHTING << " "   //
                 << a_IS_ENABLED_PENALTY_COEFFICIENT_RELAXING << " "   //
+                << a_IS_ENABLED_PENALTY_COEFFICIENT_TIGHTING << " "   //
                 << a_IS_ENABLED_FORCIBLY_INITIAL_MODIFICATION << " "  //
+                << a_PENALTY_COEFFICIENT_RELAXING_RATE << " "         //
+                << a_PENALTY_COEFFICIENT_TIGHTENING_RATE << " "       //
                 << a_NUMBER_OF_INITIAL_MODIFICATION << " "            //
                 << a_INITIAL_TABU_TENURE << std::endl;
         }
