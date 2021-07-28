@@ -486,12 +486,10 @@ Result<T_Variable, T_Expression> solve(
     /**
      * Run tabu searches to find better solutions.
      */
-    int iteration                                              = 0;
-    int iteration_after_relaxation                             = 0;
-    int iteration_after_global_augmented_incumbent_update      = 0;
-    int iteration_after_local_augmented_incumbent_update       = 0;
-    int iteration_last_global_augmented_incumbent_update       = 0;
-    int max_interval_between_global_augmented_incumbent_update = 0;
+    int iteration                                         = 0;
+    int iteration_after_global_augmented_incumbent_update = 0;
+    int iteration_after_no_update                         = 0;
+    int iteration_after_relaxation                        = 0;
 
     int relaxation_count = 0;
 
@@ -512,6 +510,8 @@ Result<T_Variable, T_Expression> solve(
         master_option.penalty_coefficient_relaxing_rate;
     double penalty_coefficient_tightening_rate =
         master_option.penalty_coefficient_tightening_rate;
+
+    bool is_penalty_coefficient_exceed_initial_value = false;
 
     int employing_local_augmented_solution_count  = 0;
     int employing_global_augmented_solution_count = 0;
@@ -619,12 +619,18 @@ Result<T_Variable, T_Expression> solve(
             result.incumbent_holder.global_augmented_incumbent_solution(),
             result.incumbent_holder.global_augmented_incumbent_score());
 
-        if ((update_status & (solution::IncumbentHolderConstant::
-                                  STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE))) {
-            max_interval_between_global_augmented_incumbent_update = std::max(
-                max_interval_between_global_augmented_incumbent_update,
-                iteration - iteration_last_global_augmented_incumbent_update);
-            iteration_last_global_augmented_incumbent_update = iteration;
+        /**
+         * Update the iteration after global augmented incumbent update.
+         */
+        if (update_status & solution::IncumbentHolderConstant::
+                                STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
+            /**
+             * NOTE: This case includes feasible incumbent and (not
+             * feasible) global augmented incumbent update.
+             */
+            iteration_after_global_augmented_incumbent_update = 0;
+        } else {
+            iteration_after_global_augmented_incumbent_update++;
         }
 
         /**
@@ -650,6 +656,10 @@ Result<T_Variable, T_Expression> solve(
         previous_solution       = current_solution;
         previous_solution_score = current_solution_score;
 
+        /**
+         * Prepare variables for control initial solution, penalty coefficients,
+         * initial modification, etc.
+         */
         auto result_local_augmented_incumbent_solution =
             result.incumbent_holder.local_augmented_incumbent_solution();
         auto result_global_augmented_incumbent_solution =
@@ -673,26 +683,27 @@ Result<T_Variable, T_Expression> solve(
         bool is_enabled_penalty_coefficient_relaxing   = false;
         bool is_enabled_forcibly_initial_modification  = false;
 
-        bool penalty_coefficient_forcibly_relaxing_flag = false;
-        bool penalty_coefficient_reset_flag             = false;
-
-        constexpr int INFEASIBLE_STAGNATION_THRESHOLD = 200;
+        bool penalty_coefficient_reset_flag = false;
 
         /**
-         * It is called infeasible stagnation, when the following conditions are
-         * met:
-         * - No feasible solution has been found,
-         * - iteration > 2 *
-         * max_interval_between_global_augmented_incumbent_update,
-         * - iteration > INFEASIBLE_STAGNATION_THRESHOLD.
+         * "Infeasible stagnation" refers to when all of the following
+         * conditions are satisfied:
+         * - No feasible solution has been found.
+         * - Iteration is greater than INFEASIBLE_STAGNATION_THRESHOLD.
          */
+        constexpr int INFEASIBLE_STAGNATION_THRESHOLD = 80;
+
         bool is_infeasible_stagnation =
             !incumbent_holder.is_found_feasible_solution() &&
-            (iteration_after_global_augmented_incumbent_update >
-             2 * max_interval_between_global_augmented_incumbent_update) &&
             iteration_after_global_augmented_incumbent_update >
                 INFEASIBLE_STAGNATION_THRESHOLD;
 
+        /**
+         * "Improved" refers to when any of the following conditions are
+         * satisfied:
+         * - Objective function value is improved from the previous one.
+         * - Total penalty is decreased from the previous one.
+         */
         bool is_improved =
             (result_local_augmented_incumbent_score.objective <
              previous_solution_score.objective) ||
@@ -777,12 +788,7 @@ Result<T_Variable, T_Expression> solve(
             employing_global_augmented_solution_flag = true;
             is_enabled_penalty_coefficient_relaxing  = true;
 
-            /**
-             * The variable iteration_after_local_augmented_incumbent_update is
-             * a count that the result.total_update_status consecutively has
-             * taken the value of IncumbentHolderConstant::NO_UPDATE.
-             */
-            iteration_after_local_augmented_incumbent_update = 0;
+            iteration_after_no_update = 0;
         } else {
             if (result.total_update_status ==
                 solution::IncumbentHolderConstant::STATUS_NO_UPDATED) {
@@ -797,14 +803,14 @@ Result<T_Variable, T_Expression> solve(
                 is_enabled_forcibly_initial_modification = true;
 
                 if (result_local_augmented_incumbent_score.is_feasible) {
-                    is_enabled_penalty_coefficient_relaxing          = true;
-                    iteration_after_local_augmented_incumbent_update = 0;
+                    is_enabled_penalty_coefficient_relaxing = true;
+                    iteration_after_no_update               = 0;
                 } else {
-                    if (iteration_after_local_augmented_incumbent_update < 1) {
-                        iteration_after_local_augmented_incumbent_update++;
+                    if (iteration_after_no_update < 1) {
+                        iteration_after_no_update++;
                     } else {
-                        is_enabled_penalty_coefficient_relaxing          = true;
-                        iteration_after_local_augmented_incumbent_update = 0;
+                        is_enabled_penalty_coefficient_relaxing = true;
+                        iteration_after_no_update               = 0;
                     }
                 }
             } else {
@@ -814,7 +820,7 @@ Result<T_Variable, T_Expression> solve(
                  * relax the penalty coefficients will be determined by
                  * complexed rules below.
                  */
-                iteration_after_local_augmented_incumbent_update = 0;
+                iteration_after_no_update = 0;
 
                 double gap_tolerance = constant::EPSILON;
 
@@ -838,26 +844,7 @@ Result<T_Variable, T_Expression> solve(
                         is_enabled_penalty_coefficient_tightening = true;
                     }
                 } else {
-                    constexpr int    ITERATION_AFTER_RELAXATION_MIN = 50;
-                    constexpr double GAP_THRESHOLD_RATE             = 1E-3;
-                    if (!incumbent_holder.is_found_feasible_solution() &&
-                        iteration_after_relaxation >
-                            ITERATION_AFTER_RELAXATION_MIN &&
-                        gap < master_option.initial_penalty_coefficient *
-                                  GAP_THRESHOLD_RATE) {
-                        /**
-                         * If the gap is sufficiently small after long iteration
-                         * from penalty coefficients relaxation and no feasible
-                         * solution is found, the penalty coefficients are
-                         * forcibly to be relaxed.
-                         */
-                        employing_global_augmented_solution_flag = true;
-                        is_enabled_forcibly_initial_modification = true;
-                        is_enabled_penalty_coefficient_relaxing  = true;
-
-                        penalty_coefficient_forcibly_relaxing_flag = true;
-                    } else if (result_local_augmented_incumbent_score
-                                   .is_feasible) {
+                    if (result_local_augmented_incumbent_score.is_feasible) {
                         /**
                          * If the gap is positive and the local incumbent
                          * solution is feasible, the local incumbent solution is
@@ -939,11 +926,11 @@ Result<T_Variable, T_Expression> solve(
             current_intensity_before_relaxation = intensity;
 
             constexpr double PENALTY_COEFFICIENT_RELAXING_RATE_MAX = 1.0 - 1E-4;
-            constexpr double PENALTY_COEFFICIENT_RELAXING_RATE_MIN = 0.1;
+            constexpr double PENALTY_COEFFICIENT_RELAXING_RATE_MIN = 0.3;
 
             if (current_intensity_before_relaxation >
                     previous_intensity_before_relaxation &&
-                penalty_coefficient_forcibly_relaxing_flag) {
+                is_infeasible_stagnation) {
                 /**
                  * Descrease penalty coefficient relaxing rate if lack of
                  * diversification is detected.
@@ -968,15 +955,12 @@ Result<T_Variable, T_Expression> solve(
                  * Otherwise, draw back the penalty coefficient relaxing rate to
                  * the original value.
                  */
-                constexpr double LEARNING_RATE = 1E-2;
+                constexpr double LEARNING_RATE = 5E-2;
                 penalty_coefficient_relaxing_rate +=
                     LEARNING_RATE *
                     (master_option.penalty_coefficient_relaxing_rate -
                      penalty_coefficient_relaxing_rate);
             }
-
-            penalty_coefficient_tightening_rate =
-                master_option.penalty_coefficient_tightening_rate;
 
             iteration_after_relaxation = 0;
             relaxation_count++;
@@ -989,10 +973,14 @@ Result<T_Variable, T_Expression> solve(
          * tightened: Reset penalty coefficients if stagnation is detected.
          */
         if (is_enabled_penalty_coefficient_tightening) {
-            const int INTERVAL = 50;
+            constexpr int ITERATION_AFTER_RELAXATION_MAX = 30;
             if (is_infeasible_stagnation &&
-                ((iteration_after_relaxation + 1) % INTERVAL == 0)) {
-                penalty_coefficient_reset_flag = true;
+                is_penalty_coefficient_exceed_initial_value &&
+                ((iteration_after_relaxation + 1) %
+                     ITERATION_AFTER_RELAXATION_MAX ==
+                 0)) {
+                penalty_coefficient_reset_flag           = true;
+                is_enabled_forcibly_initial_modification = true;
             }
         }
 
@@ -1023,6 +1011,11 @@ Result<T_Variable, T_Expression> solve(
                     constraint.reset_local_penalty_coefficient();
                 }
             }
+            /**
+             * In cases the penalty coefficients are reset, they are within
+             * their initial values.
+             */
+            is_penalty_coefficient_exceed_initial_value = false;
         } else if (is_enabled_penalty_coefficient_tightening) {
             /**
              * Tighten the local penalty coefficients.
@@ -1106,6 +1099,25 @@ Result<T_Variable, T_Expression> solve(
                  * coefficient specified in option.
                  */
                 for (auto&& constraint : proxy.flat_indexed_constraints()) {
+                    constexpr double THRESHOLD_WITH_MARGIN = 1.0 + 1E-4;
+                    /**
+                     * NOTE: In cases where a value of the penalty coefficient
+                     * is larger than its initial value, the adjustment of the
+                     * penalty coefficient in subsequent iterations will not
+                     * work properly. If such a situation is detected, the
+                     * penalty coefficients will be reset based on an
+                     * appropriate rule.
+                     */
+                    is_penalty_coefficient_exceed_initial_value |=
+                        constraint.local_penalty_coefficient_less() >
+                        master_option.initial_penalty_coefficient *
+                            THRESHOLD_WITH_MARGIN;
+
+                    is_penalty_coefficient_exceed_initial_value |=
+                        constraint.local_penalty_coefficient_greater() >
+                        master_option.initial_penalty_coefficient *
+                            THRESHOLD_WITH_MARGIN;
+
                     constraint.local_penalty_coefficient_less() =
                         std::min(constraint.local_penalty_coefficient_less(),
                                  master_option.initial_penalty_coefficient);
@@ -1154,6 +1166,11 @@ Result<T_Variable, T_Expression> solve(
                     }
                 }
             }
+            /**
+             * In cases the penalty coefficients are reset, they are within
+             * their initial values.
+             */
+            is_penalty_coefficient_exceed_initial_value = false;
         }
 
         /**
@@ -1677,24 +1694,25 @@ Result<T_Variable, T_Expression> solve(
             auto& local_incumbent =
                 result.incumbent_holder.local_augmented_incumbent_score();
             logger.write_log(                                       //
-                iteration,                                          //
-                elapsed_time,                                       //
-                local_incumbent.objective,                          //
-                local_incumbent.total_violation,                    //
-                global_incumbent.objective,                         //
-                global_incumbent.total_violation,                   //
-                intensity,                                          //
-                update_status,                                      //
-                employing_local_augmented_solution_flag,            //
-                employing_global_augmented_solution_flag,           //
-                employing_previous_solution_flag,                   //
-                is_enabled_penalty_coefficient_relaxing,            //
-                is_enabled_penalty_coefficient_tightening,          //
-                is_enabled_forcibly_initial_modification,           //
-                penalty_coefficient_relaxing_rate,                  //
-                penalty_coefficient_tightening_rate,                //
-                option.tabu_search.number_of_initial_modification,  //
-                option.tabu_search.initial_tabu_tenure);
+                iteration,                                          // 0
+                elapsed_time,                                       // 1
+                local_incumbent.objective,                          // 2
+                local_incumbent.total_violation,                    // 3
+                global_incumbent.objective,                         // 4
+                global_incumbent.total_violation,                   // 5
+                intensity,                                          // 6
+                update_status,                                      // 7
+                employing_local_augmented_solution_flag,            // 8
+                employing_global_augmented_solution_flag,           // 9
+                employing_previous_solution_flag,                   // 10
+                is_enabled_penalty_coefficient_relaxing,            // 11
+                is_enabled_penalty_coefficient_tightening,          // 12
+                penalty_coefficient_reset_flag,                     // 13
+                penalty_coefficient_relaxing_rate,                  // 14
+                penalty_coefficient_tightening_rate,                // 15
+                is_enabled_forcibly_initial_modification,           // 16
+                option.tabu_search.number_of_initial_modification,  // 17
+                option.tabu_search.initial_tabu_tenure);            // 18
         }
 
         model_ptr->callback(&option, &incumbent_holder);

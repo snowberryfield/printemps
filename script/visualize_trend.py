@@ -196,6 +196,26 @@ def visualize_trend(trend_data, instance_name, output_file_name):
     new_legend = fig_penalty_coefficient_rate_control.legend[0]
     fig_penalty_coefficient_rate_control.add_layout(new_legend, 'below')
 
+    # Penalty Coefficient Reset Control
+    fig_penalty_coefficient_reset_control = bokeh.plotting.figure(
+        tooltips=TOOLTIPS,
+        title='Penalty Coefficient Reset Control',
+        x_axis_label='Iteration',
+        y_axis_label='Ratio',
+        x_range=bokeh.models.DataRange1d(start=0),
+        y_range=bokeh.models.DataRange1d(start=0.0, end=1.1),
+        plot_width=500,
+        plot_height=300)
+
+    fig_penalty_coefficient_reset_control.line(
+        x=trend_data[:, 0],
+        y=np.cumsum(trend_data[:, 13]) / (trend_data[:, 0]+1),
+        legend='',
+        width=3,
+        color=colors[0])
+
+    fig_penalty_coefficient_reset_control.legend.visible = False
+
     # Initial Solution Control
     fig_initial_solution_control = bokeh.plotting.figure(
         tooltips=TOOLTIPS,
@@ -247,7 +267,7 @@ def visualize_trend(trend_data, instance_name, output_file_name):
 
     fig_initial_modification_control.line(
         x=trend_data[:, 0],
-        y=np.cumsum(trend_data[:, 13]) / (trend_data[:, 0]+1),
+        y=np.cumsum(trend_data[:, 16]) / (trend_data[:, 0]+1),
         legend='',
         width=3,
         color=colors[0])
@@ -267,7 +287,7 @@ def visualize_trend(trend_data, instance_name, output_file_name):
 
     fig_initial_tabu_tenure.line(
         x=trend_data[:, 0],
-        y=trend_data[:, 17],
+        y=trend_data[:, 18],
         legend='',
         width=3,
         color=colors[0])
@@ -281,8 +301,8 @@ def visualize_trend(trend_data, instance_name, output_file_name):
         [[fig_elapsed_time, fig_intensity],
          [fig_objective, fig_violation],
          [fig_penalty_coefficient_control, fig_penalty_coefficient_rate_control],
-         [fig_initial_solution_control,fig_initial_modification_control],
-         [fig_initial_tabu_tenure, None]])
+         [fig_penalty_coefficient_reset_control, fig_initial_solution_control],
+         [fig_initial_modification_control, fig_initial_tabu_tenure]])
 
     bokeh.plotting.output_file(
         output_file_name,
