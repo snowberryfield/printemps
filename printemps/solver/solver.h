@@ -241,9 +241,9 @@ Result<T_Variable, T_Expression> solve(
         } else if (model_ptr->number_of_selection_variables() > 0 ||
                    model_ptr->number_of_intermediate_variables() > 0) {
             utility::print_warning(
-                "Solving lagrange dual was skipped because it not "
-                "applicable to problems which include selection variables or "
-                "intermediate variables.",
+                "Solving lagrange dual was skipped because it not applicable "
+                "to problems which include selection variables or intermediate "
+                "variables.",
                 master_option.verbose >= option::verbose::Warning);
         } else {
             double elapsed_time = time_keeper.clock();
@@ -686,17 +686,15 @@ Result<T_Variable, T_Expression> solve(
         bool penalty_coefficient_reset_flag = false;
 
         /**
-         * "Infeasible stagnation" refers to when all of the following
-         * conditions are satisfied:
-         * - No feasible solution has been found.
-         * - Iteration is greater than INFEASIBLE_STAGNATION_THRESHOLD.
+         * "Stagnation" refers to when the iteration after global augmented
+         * incumbent update is not less than the constant STAGNATION_THRESHOLD.
          */
-        constexpr int INFEASIBLE_STAGNATION_THRESHOLD = 80;
+        constexpr int STAGNATION_THRESHOLD = 80;
 
         bool is_infeasible_stagnation =
             !incumbent_holder.is_found_feasible_solution() &&
-            iteration_after_global_augmented_incumbent_update >
-                INFEASIBLE_STAGNATION_THRESHOLD;
+            iteration_after_global_augmented_incumbent_update >=
+                STAGNATION_THRESHOLD;
 
         /**
          * "Improved" refers to when any of the following conditions are
@@ -925,15 +923,19 @@ Result<T_Variable, T_Expression> solve(
                 current_intensity_before_relaxation;
             current_intensity_before_relaxation = intensity;
 
-            constexpr double PENALTY_COEFFICIENT_RELAXING_RATE_MAX = 1.0 - 1E-4;
             constexpr double PENALTY_COEFFICIENT_RELAXING_RATE_MIN = 0.3;
+            constexpr double PENALTY_COEFFICIENT_RELAXING_RATE_MAX = 1.0 - 1E-4;
 
-            if (current_intensity_before_relaxation >
-                    previous_intensity_before_relaxation &&
-                is_infeasible_stagnation) {
+            /**
+             * Adjust the penalty coefficient relaxing rate.
+             */
+            if (is_infeasible_stagnation &&
+                current_intensity_before_relaxation >
+                    previous_intensity_before_relaxation) {
                 /**
-                 * Descrease penalty coefficient relaxing rate if lack of
-                 * diversification is detected.
+                 * If no feasible solution has been found, descrease penalty
+                 * coefficient relaxing rate if lack of diversification is
+                 * detected.
                  */
                 penalty_coefficient_relaxing_rate =
                     std::max(PENALTY_COEFFICIENT_RELAXING_RATE_MIN,
@@ -946,7 +948,6 @@ Result<T_Variable, T_Expression> solve(
                  * solutions are most frequently employed as initial solutions,
                  * which indicates overrelaxation.
                  */
-
                 penalty_coefficient_relaxing_rate =
                     std::min(PENALTY_COEFFICIENT_RELAXING_RATE_MAX,
                              sqrt(penalty_coefficient_relaxing_rate));
@@ -974,6 +975,7 @@ Result<T_Variable, T_Expression> solve(
          */
         if (is_enabled_penalty_coefficient_tightening) {
             constexpr int ITERATION_AFTER_RELAXATION_MAX = 30;
+
             if (is_infeasible_stagnation &&
                 is_penalty_coefficient_exceed_initial_value &&
                 ((iteration_after_relaxation + 1) %
