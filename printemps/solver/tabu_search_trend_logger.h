@@ -55,64 +55,75 @@ class TabuSearchTrendLogger {
 
     /*************************************************************************/
     void write_header(void) {
-        m_ofstream  //
-            << "#iteration "
-            << "elapsed_time "
-            << "local_objective "
-            << "local_violation "
-            << "global_objective "
-            << "global_violation "
-            << "intensity "
-            << "update_status "
-            << "employing_local_augmented_solution_flag "
-            << "employing_global_augmented_solution_flag "
-            << "employing_previous_solution_flag "
-            << "is_enabled_penalty_coefficient_tightening "
-            << "is_enabled_penalty_coefficient_relaxing "
-            << "is_enabled_forcibly_initial_modification "
-            << "number_of_initial_modification "
-            << "initial_tabu_tenure" << std::endl;
+        m_ofstream                                           //
+            << "#iteration "                                 // 0
+            << "elapsed_time "                               // 1
+            << "local_objective "                            // 2
+            << "local_violation "                            // 3
+            << "global_objective "                           // 4
+            << "global_violation "                           // 5
+            << "intensity "                                  // 6
+            << "update_status "                              // 7
+            << "employing_local_augmented_solution_flag "    // 8
+            << "employing_global_augmented_solution_flag "   // 9
+            << "employing_previous_solution_flag "           // 10
+            << "is_enabled_penalty_coefficient_relaxing "    // 11
+            << "is_enabled_penalty_coefficient_tightening "  // 12
+            << "penalty_coefficient_reset_flag"              // 13
+            << "penalty_coefficient_relaxing_rate "          // 14
+            << "penalty_coefficient_tightening_rate "        // 15
+            << "is_enabled_forcibly_initial_modification "   // 16
+            << "number_of_initial_modification "             // 17
+            << "initial_tabu_tenure" << std::endl;           // 18
     }
 
     /*************************************************************************/
-    void write_log(const int    a_ITERATION,         //
-                   const double a_ELAPSED_TIME,      //
-                   const double a_LOCAL_OBJECTIVE,   //
-                   const double a_LOCAL_VIOLATION,   //
-                   const double a_GLOBAL_OBJECTIVE,  //
-                   const double a_GLOBAL_VIOLATION,  //
-                   const double a_INTENSITY,         //
-                   const int    a_UPDATE_STATUS,
-                   const bool   a_EMPLOYING_LOCAL_AUGMENTED_SOLUTION_FLAG,
-                   const bool   a_EMPLOYING_GLOBAL_AUGMENTED_SOLUTION_FLAG,
-                   const bool   a_EMPLOYING_PREVIOUS_SOLUTION_FLAG,
-                   const bool   a_IS_ENABLED_PENALTY_COEFFICIENT_TIGHTING,
-                   const bool   a_IS_ENABLED_PENALTY_COEFFICIENT_RELAXING,
-                   const bool   a_IS_ENABLED_FORCIBLY_INITIAL_MODIFICATION,
-                   const int    a_NUMBER_OF_INITIAL_MODIFICATION,
-                   const int    a_INITIAL_TABU_TENURE) {
+    void write_log(const int    a_ITERATION,                                // 0
+                   const double a_ELAPSED_TIME,                             // 1
+                   const double a_LOCAL_OBJECTIVE,                          // 2
+                   const double a_LOCAL_VIOLATION,                          // 3
+                   const double a_GLOBAL_OBJECTIVE,                         // 4
+                   const double a_GLOBAL_VIOLATION,                         // 5
+                   const double a_INTENSITY,                                // 6
+                   const int    a_UPDATE_STATUS,                            // 7
+                   const bool   a_EMPLOYING_LOCAL_AUGMENTED_SOLUTION_FLAG,  // 8
+                   const bool a_EMPLOYING_GLOBAL_AUGMENTED_SOLUTION_FLAG,   // 9
+                   const bool a_EMPLOYING_PREVIOUS_SOLUTION_FLAG,          // 10
+                   const bool a_IS_ENABLED_PENALTY_COEFFICIENT_RELAXING,   // 11
+                   const bool a_IS_ENABLED_PENALTY_COEFFICIENT_TIGHTING,   // 12
+                   const bool a_PENALTY_COEFFICIENT_RESET_FLAG,            // 13
+                   const double a_PENALTY_COEFFICIENT_RELAXING_RATE,       // 14
+                   const double a_PENALTY_COEFFICIENT_TIGHTENING_RATE,     // 15
+                   const bool a_IS_ENABLED_FORCIBLY_INITIAL_MODIFICATION,  // 16
+                   const int  a_NUMBER_OF_INITIAL_MODIFICATION,            // 17
+                   const int  a_INITIAL_TABU_TENURE                        // 18
+    ) {
         if (!m_ofstream.is_open()) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "This log file " + m_file_name + " is not opened."));
         } else {
             m_ofstream                                                //
-                << a_ITERATION << " "                                 //
-                << a_ELAPSED_TIME << " "                              //
-                << a_LOCAL_OBJECTIVE << " "                           //
-                << a_LOCAL_VIOLATION << " "                           //
-                << a_GLOBAL_OBJECTIVE << " "                          //
-                << a_GLOBAL_VIOLATION << " "                          //
-                << a_INTENSITY << " "                                 //
-                << a_UPDATE_STATUS << " "                             //
-                << a_EMPLOYING_LOCAL_AUGMENTED_SOLUTION_FLAG << " "   //
-                << a_EMPLOYING_GLOBAL_AUGMENTED_SOLUTION_FLAG << " "  //
-                << a_EMPLOYING_PREVIOUS_SOLUTION_FLAG << " "          //
-                << a_IS_ENABLED_PENALTY_COEFFICIENT_TIGHTING << " "   //
-                << a_IS_ENABLED_PENALTY_COEFFICIENT_RELAXING << " "   //
-                << a_IS_ENABLED_FORCIBLY_INITIAL_MODIFICATION << " "  //
-                << a_NUMBER_OF_INITIAL_MODIFICATION << " "            //
-                << a_INITIAL_TABU_TENURE << std::endl;
+                << a_ITERATION << " "                                 // 0
+                << a_ELAPSED_TIME << " "                              // 1
+                << a_LOCAL_OBJECTIVE << " "                           // 2
+                << a_LOCAL_VIOLATION << " "                           // 3
+                << a_GLOBAL_OBJECTIVE << " "                          // 4
+                << a_GLOBAL_VIOLATION << " "                          // 5
+                << a_INTENSITY << " "                                 // 6
+                << a_UPDATE_STATUS << " "                             // 7
+                << a_EMPLOYING_LOCAL_AUGMENTED_SOLUTION_FLAG << " "   // 8
+                << a_EMPLOYING_GLOBAL_AUGMENTED_SOLUTION_FLAG << " "  // 9
+                << a_EMPLOYING_PREVIOUS_SOLUTION_FLAG << " "          // 10
+                << a_IS_ENABLED_PENALTY_COEFFICIENT_RELAXING << " "   // 11
+                << a_IS_ENABLED_PENALTY_COEFFICIENT_TIGHTING << " "   // 12
+                << a_PENALTY_COEFFICIENT_RESET_FLAG << " "            // 13
+                << a_PENALTY_COEFFICIENT_RELAXING_RATE << " "         // 14
+                << a_PENALTY_COEFFICIENT_TIGHTENING_RATE << " "       // 15
+                << a_IS_ENABLED_FORCIBLY_INITIAL_MODIFICATION << " "  // 16
+                << a_NUMBER_OF_INITIAL_MODIFICATION << " "            // 17
+                << a_INITIAL_TABU_TENURE                              // 18
+                << std::endl;
         }
     }
 };
