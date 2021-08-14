@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020 Yuji KOGUMA
+// Copyright (c) 2020-2021 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -257,8 +257,8 @@ class Expression : public multi_array::AbstractMultiArrayElement {
 
     /*************************************************************************/
     inline constexpr T_Expression evaluate(
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
-        noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
+        const noexcept {
         /// The following code is required for nonlinear objective functions.
 #ifndef _MPS_SOLVER
         if (a_MOVE.alterations.size() == 0) {
@@ -447,26 +447,26 @@ class Expression : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr std::uint64_t plus_one_coefficient_mask(void) const
-        noexcept {
+    inline constexpr std::uint64_t plus_one_coefficient_mask(
+        void) const noexcept {
         return m_plus_one_coefficient_mask;
     }
 
     /*************************************************************************/
-    inline constexpr std::uint64_t minus_one_coefficient_mask(void) const
-        noexcept {
+    inline constexpr std::uint64_t minus_one_coefficient_mask(
+        void) const noexcept {
         return m_minus_one_coefficient_mask;
     }
 
     /*************************************************************************/
-    inline constexpr bool has_effective_plus_one_coefficient_mask(void) const
-        noexcept {
+    inline constexpr bool has_effective_plus_one_coefficient_mask(
+        void) const noexcept {
         return m_has_effective_plus_one_coefficient_mask;
     }
 
     /*************************************************************************/
-    inline constexpr bool has_effective_minus_one_coefficient_mask(void) const
-        noexcept {
+    inline constexpr bool has_effective_minus_one_coefficient_mask(
+        void) const noexcept {
         return m_has_effective_minus_one_coefficient_mask;
     }
 
