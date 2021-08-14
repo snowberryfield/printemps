@@ -663,7 +663,7 @@ class Model {
          * decision variables implicitly fixed.
          */
         if (a_IS_ENABLED_PRESOLVE) {
-            presolver::presolve(this, true, a_IS_ENABLED_PRINT);
+            presolver::reduce_problem_size(this, true, a_IS_ENABLED_PRINT);
         }
 
         /**
@@ -696,7 +696,7 @@ class Model {
                     }
                 }
 
-                presolver::presolve(this, false, a_IS_ENABLED_PRINT);
+                presolver::reduce_problem_size(this, false, a_IS_ENABLED_PRINT);
             }
         }
 
@@ -748,6 +748,21 @@ class Model {
             this,                                   //
             a_IS_ENABLED_INITIAL_VALUE_CORRECTION,  //
             a_IS_ENABLED_PRINT);
+
+        /**
+         * Solve GF(2) equations if needed.
+         */
+        if (a_IS_ENABLED_PRESOLVE &&
+            m_constraint_type_reference.gf2_ptrs.size() > 0) {
+            auto is_solved = presolver::solve_gf2(this, a_IS_ENABLED_PRINT);
+
+            /**
+             * Update fixed decision varialbes.
+             */
+            if (is_solved) {
+                this->categorize_variables();
+            }
+        }
 
         /**
          * Setup the fixed sensitivities for fast evaluation.
@@ -1807,8 +1822,8 @@ class Model {
 
     /*************************************************************************/
     inline solution::SolutionScore evaluate(
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
-        noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
+        const noexcept {
         solution::SolutionScore score;
         this->evaluate(&score, a_MOVE);
         return score;
@@ -1824,10 +1839,9 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void evaluate(
-        solution::SolutionScore *                           a_score_ptr,  //
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
-        noexcept {
+    constexpr void evaluate(solution::SolutionScore *a_score_ptr,  //
+                            const neighborhood::Move<T_Variable, T_Expression>
+                                &a_MOVE) const noexcept {
         double total_violation = 0.0;
         double local_penalty   = 0.0;
         double global_penalty  = 0.0;
