@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020 Yuji KOGUMA
+// Copyright (c) 2020-2021 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -35,7 +35,7 @@ int extract_dependent_intermediate_variables(
 
     for (auto i = 0; i < intermediates_size; i++) {
         auto intermediate_variable_ptr =
-            intermediate_ptrs[i]->intermediate_variable_ptr();
+            intermediate_ptrs[i]->aux_variable_ptr();
         if (intermediate_variables.find(intermediate_variable_ptr) ==
             intermediate_variables.end()) {
             intermediate_variables.insert(intermediate_variable_ptr);
@@ -52,8 +52,7 @@ int extract_dependent_intermediate_variables(
         if (!constraint_ptr->is_enabled()) {
             continue;
         }
-        auto intermediate_variable_ptr =
-            constraint_ptr->intermediate_variable_ptr();
+        auto intermediate_variable_ptr = constraint_ptr->aux_variable_ptr();
         if (has_dependent_intermediate_variable_flags[i]) {
             utility::print_message(
                 "The decision variable " + intermediate_variable_ptr->name() +
@@ -73,7 +72,7 @@ int extract_dependent_intermediate_variables(
             modified_expression.sensitivities().erase(
                 intermediate_variable_ptr);
 
-            if (constraint_ptr->has_intermediate_lower_bound()) {
+            if (constraint_ptr->has_aux_lower_bound()) {
                 additional_constraints.emplace_back(
                     sign * modified_expression >=
                     intermediate_variable_ptr->lower_bound());
@@ -81,7 +80,7 @@ int extract_dependent_intermediate_variables(
                                                        "_greater");
             }
 
-            if (constraint_ptr->has_intermediate_upper_bound()) {
+            if (constraint_ptr->has_aux_upper_bound()) {
                 additional_constraints.emplace_back(
                     sign * modified_expression <=
                     intermediate_variable_ptr->upper_bound());

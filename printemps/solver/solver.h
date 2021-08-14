@@ -1,17 +1,19 @@
 /*****************************************************************************/
-// Copyright (c) 2020 Yuji KOGUMA
+// Copyright (c) 2020-2021 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
 #ifndef PRINTEMPS_SOLVER_H__
 #define PRINTEMPS_SOLVER_H__
 
-#include "tabu_search_trend_logger.h"
+#include "memory.h"
 #include "status.h"
 #include "result.h"
-#include "tabu_search/tabu_search.h"
-#include "local_search/local_search.h"
+#include "tabu_search_trend_logger.h"
+
 #include "lagrange_dual/lagrange_dual.h"
+#include "local_search/local_search.h"
+#include "tabu_search/tabu_search.h"
 
 namespace printemps {
 namespace solver {

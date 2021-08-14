@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020 Yuji KOGUMA
+// Copyright (c) 2020-2021 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -28,10 +28,11 @@ struct ConstraintTypeReference {
     std::vector<Constraint<T_Variable, T_Expression> *> bin_packing_ptrs;
     std::vector<Constraint<T_Variable, T_Expression> *> knapsack_ptrs;
     std::vector<Constraint<T_Variable, T_Expression> *> integer_knapsack_ptrs;
-    std::vector<Constraint<T_Variable, T_Expression> *> general_linear_ptrs;
     std::vector<Constraint<T_Variable, T_Expression> *> min_max_ptrs;
     std::vector<Constraint<T_Variable, T_Expression> *> max_min_ptrs;
     std::vector<Constraint<T_Variable, T_Expression> *> intermediate_ptrs;
+    std::vector<Constraint<T_Variable, T_Expression> *> gf2_ptrs;
+    std::vector<Constraint<T_Variable, T_Expression> *> general_linear_ptrs;
     std::vector<Constraint<T_Variable, T_Expression> *> nonlinear_ptrs;
 
     /*************************************************************************/
@@ -54,10 +55,11 @@ struct ConstraintTypeReference {
         this->bin_packing_ptrs.clear();
         this->knapsack_ptrs.clear();
         this->integer_knapsack_ptrs.clear();
-        this->general_linear_ptrs.clear();
         this->min_max_ptrs.clear();
         this->max_min_ptrs.clear();
         this->intermediate_ptrs.clear();
+        this->gf2_ptrs.clear();
+        this->general_linear_ptrs.clear();
         this->nonlinear_ptrs.clear();
     }
 };
