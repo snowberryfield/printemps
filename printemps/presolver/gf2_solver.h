@@ -10,9 +10,8 @@ namespace printemps {
 namespace presolver {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-constexpr bool solve_gf2(
-    model::Model<T_Variable, T_Expression> *a_model_ptr,  //
-    const bool                              a_IS_ENABLED_PRINT) {
+bool solve_gf2(model::Model<T_Variable, T_Expression> *a_model_ptr,  //
+               const bool                              a_IS_ENABLED_PRINT) {
     utility::print_single_line(a_IS_ENABLED_PRINT);
     utility::print_message("Attempting to solve GF(2) equations...",
                            a_IS_ENABLED_PRINT);
@@ -20,8 +19,8 @@ constexpr bool solve_gf2(
     /**
      * Set up number of GF(2) equations.
      */
-    auto gf2s      = a_model_ptr->constraint_type_reference().gf2_ptrs;
-    int  gf2s_size = gf2s.size();
+    auto &gf2s      = a_model_ptr->constraint_type_reference().gf2_ptrs;
+    int   gf2s_size = gf2s.size();
 
     /**
      * Set up binary/auxiliary decision variables sets.
