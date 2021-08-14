@@ -1032,6 +1032,10 @@ class Model {
                         constraint_type_reference.intermediate_ptrs.push_back(
                             &constraint);
                     }
+                    if (constraint.is_gf2()) {
+                        constraint_type_reference.gf2_ptrs.push_back(
+                            &constraint);
+                    }
                     if (constraint.is_general_linear()) {
                         constraint_type_reference.general_linear_ptrs.push_back(
                             &constraint);
@@ -1489,6 +1493,20 @@ class Model {
                     utility::to_string(                         //
                         compute_number_of_enabled_constraints(  //
                             presolved.intermediate_ptrs),
+                        "%d") +
+                    ")",
+                true);
+
+            utility::print_info(                        //
+                " -- GF(2): " +                         //
+                    utility::to_string(                 //
+                        compute_number_of_constraints(  //
+                            original.gf2_ptrs),
+                        "%d") +
+                    " (" +
+                    utility::to_string(                         //
+                        compute_number_of_enabled_constraints(  //
+                            presolved.gf2_ptrs),
                         "%d") +
                     ")",
                 true);
