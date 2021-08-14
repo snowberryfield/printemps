@@ -17,6 +17,7 @@
 #include "fixed_size_hash_map.h"
 #include "fixed_size_queue.h"
 #include "bidirectional_map.h"
+#include "gf2.h"
 
 #endif
 /*****************************************************************************/
