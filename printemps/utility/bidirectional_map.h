@@ -3,48 +3,54 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_UTILITY_RANDOM_UTILITY_H__
-#define PRINTEMPS_UTILITY_RANDOM_UTILITY_H__
+#ifndef PRINTEMPS_UTILITY_BIDIRECTIONAL_MAP_H__
+#define PRINTEMPS_UTILITY_BIDIRECTIONAL_MAP_H__
 
 namespace printemps {
 namespace utility {
 /*****************************************************************************/
-class IntegerUniformRandom {
+template <class T1, class T2>
+class BidirectionalMap {
    private:
-    std::mt19937                     m_engine;
-    std::uniform_int_distribution<> *m_distribution;
+    std::unordered_map<T1, T2> m_forward;
+    std::unordered_map<T2, T1> m_reverse;
 
    public:
     /*************************************************************************/
-    IntegerUniformRandom(void) {
-        /// nothing to do
+    BidirectionalMap(void) {
+        this->initialize();
     }
 
     /*************************************************************************/
-    IntegerUniformRandom(const int a_MIN, const int a_MAX,
-                         const unsigned int a_SEED) {
-        this->setup(a_MIN, a_MAX, a_SEED);
+    inline void initialize(void) {
+        m_forward.clear();
+        m_reverse.clear();
     }
 
     /*************************************************************************/
-    virtual ~IntegerUniformRandom(void) {
-        delete m_distribution;
+    inline constexpr int size(void) const {
+        return m_forward.size();
     }
 
     /*************************************************************************/
-    void setup(const int a_MIN, const int a_MAX, const unsigned int a_SEED) {
-        m_distribution = new std::uniform_int_distribution<>(a_MIN, a_MAX);
-        m_engine.seed(a_SEED);
+    inline constexpr bool empty(void) const {
+        return m_forward.empty() && m_reverse.empty();
     }
 
     /*************************************************************************/
-    inline void seed(const unsigned int a_SEED) {
-        m_engine.seed(a_SEED);
+    inline constexpr void insert(const T1 &a_FIRST, const T2 &a_SECOND) {
+        m_forward[a_FIRST]  = a_SECOND;
+        m_reverse[a_SECOND] = a_FIRST;
     }
 
     /*************************************************************************/
-    inline int generate_random() {
-        return (*m_distribution)(m_engine);
+    inline constexpr T2 &operator[](const T1 a_KEY) {
+        return m_forward[a_KEY];
+    }
+
+    /*************************************************************************/
+    inline constexpr T1 &operator[](const T2 a_KEY) {
+        return m_reverse[a_KEY];
     }
 };
 }  // namespace utility

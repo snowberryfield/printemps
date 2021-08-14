@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020 Yuji KOGUMA
+// Copyright (c) 2020-2021 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -77,13 +77,14 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     bool m_is_min_max;
     bool m_is_max_min;
     bool m_is_intermediate;
+    bool m_is_gf2;
     bool m_is_general_linear;
     bool m_is_binary;
 
-    bool m_has_intermediate_lower_bound;
-    bool m_has_intermediate_upper_bound;
+    bool m_has_aux_lower_bound;
+    bool m_has_aux_upper_bound;
 
-    Variable<T_Variable, T_Expression> *m_intermediate_variable_ptr;
+    Variable<T_Variable, T_Expression> *m_aux_variable_ptr;
 
     /*************************************************************************/
     /// Default constructor
@@ -235,13 +236,15 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         m_is_min_max            = false;
         m_is_max_min            = false;
         m_is_intermediate       = false;
+        m_is_gf2                = false;
         m_is_general_linear     = false;
-        m_is_binary             = false;
 
-        m_has_intermediate_lower_bound = false;
-        m_has_intermediate_upper_bound = false;
+        m_is_binary = false;
 
-        m_intermediate_variable_ptr = nullptr;
+        m_has_aux_lower_bound = false;
+        m_has_aux_upper_bound = false;
+
+        m_aux_variable_ptr = nullptr;
     }
 
     /*************************************************************************/
@@ -542,95 +545,177 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
 
         /// Min-Max, Max-Min, Intermediate
         {
-            int number_of_mono_integer_variables = 0;
+            bool is_valid                                         = true;
+            int  number_of_integer_variables_with_coefficient_one = 0;
 
-            Variable<T_Variable, T_Expression> *intermediate_variable_ptr =
-                nullptr;
-            T_Expression intermediate_variable_coefficient = 0;
+            Variable<T_Variable, T_Expression> *aux_variable_ptr = nullptr;
+            T_Expression                        aux_variable_coefficient = 0;
 
             auto is_integer = [](const T_Expression a_VALUE) {
                 return fabs(a_VALUE - floor(a_VALUE)) < constant::EPSILON_10;
             };
 
             auto constant_value = m_expression.constant_value();
-            if (is_integer(constant_value)) {
-                bool is_valid = true;
-                for (const auto &item : m_expression.sensitivities()) {
-                    if (!is_integer(item.second)) {
+            if (!is_integer(constant_value)) {
+                is_valid = false;
+            }
+
+            if (is_valid) {
+                for (const auto &sensitivity : m_expression.sensitivities()) {
+                    auto variable_ptr = sensitivity.first;
+                    auto coefficient  = sensitivity.second;
+
+                    if (!is_integer(coefficient)) {
                         is_valid = false;
                         break;
                     }
-                    if ((item.first->sense() == VariableSense::Integer ||
-                         item.first->sense() == VariableSense::Intermediate) &&
-                        abs(item.second) == 1 && !item.first->is_fixed()) {
-                        intermediate_variable_ptr         = item.first;
-                        intermediate_variable_coefficient = item.second;
-                        number_of_mono_integer_variables++;
+                    if ((variable_ptr->sense() == VariableSense::Integer ||
+                         variable_ptr->sense() ==
+                             VariableSense::Intermediate) &&
+                        abs(coefficient) == 1 && !variable_ptr->is_fixed()) {
+                        aux_variable_ptr         = variable_ptr;
+                        aux_variable_coefficient = coefficient;
+                        number_of_integer_variables_with_coefficient_one++;
                     }
-                    if (number_of_mono_integer_variables > 1) {
+                }
+            }
+
+            if (number_of_integer_variables_with_coefficient_one != 1) {
+                is_valid = false;
+            }
+
+            if (is_valid) {
+                auto rest_part_expression = m_expression.copy();
+                rest_part_expression.erase(aux_variable_ptr);
+                T_Expression rest_part_lower_bound =
+                    rest_part_expression.lower_bound();
+                T_Expression rest_part_upper_bound =
+                    rest_part_expression.upper_bound();
+
+                if (aux_variable_coefficient > 0) {
+                    std::swap(rest_part_lower_bound, rest_part_upper_bound);
+                    rest_part_lower_bound *= -1.0;
+                    rest_part_upper_bound *= -1.0;
+                }
+
+                if (aux_variable_ptr->lower_bound() != constant::INT_HALF_MIN &&
+                    aux_variable_ptr->lower_bound() > rest_part_lower_bound) {
+                    m_has_aux_lower_bound = true;
+                } else {
+                    m_has_aux_lower_bound = false;
+                }
+
+                if (aux_variable_ptr->upper_bound() != constant::INT_HALF_MAX &&
+                    aux_variable_ptr->upper_bound() < rest_part_upper_bound) {
+                    m_has_aux_upper_bound = true;
+                } else {
+                    m_has_aux_upper_bound = false;
+                }
+
+                if ((m_sense == ConstraintSense::Less &&
+                     aux_variable_coefficient < 0) ||
+                    (m_sense == ConstraintSense::Greater &&
+                     aux_variable_coefficient > 0)) {
+                    m_is_min_max       = true;
+                    m_aux_variable_ptr = aux_variable_ptr;
+                    return;
+                }
+
+                if ((m_sense == ConstraintSense::Greater &&
+                     aux_variable_coefficient < 0) ||
+                    (m_sense == ConstraintSense::Less &&
+                     aux_variable_coefficient > 0)) {
+                    m_is_max_min       = true;
+                    m_aux_variable_ptr = aux_variable_ptr;
+                    return;
+                }
+
+                if (m_sense == ConstraintSense::Equal) {
+                    m_is_intermediate  = true;
+                    m_aux_variable_ptr = aux_variable_ptr;
+                    return;
+                }
+            }
+        }
+
+        /// GF2
+        {
+            bool is_valid                                         = true;
+            int  number_of_integer_variables_with_coefficient_two = 0;
+
+            Variable<T_Variable, T_Expression> *aux_variable_ptr = nullptr;
+            T_Expression                        aux_variable_coefficient = 0;
+
+            auto constant_value = m_expression.constant_value();
+            if (constant_value != 0 && abs(constant_value) != 1) {
+                is_valid = false;
+            }
+
+            if (m_sense != ConstraintSense::Equal) {
+                is_valid = false;
+            }
+
+            if (is_valid) {
+                for (const auto &sensitivity : m_expression.sensitivities()) {
+                    auto variable_ptr = sensitivity.first;
+                    auto coefficient  = sensitivity.second;
+
+                    if (variable_ptr->is_fixed()) {
+                        is_valid = false;
+                        break;
+                    }
+
+                    if ((variable_ptr->sense() == VariableSense::Integer ||
+                         variable_ptr->sense() == VariableSense::Binary) &&
+                        abs(coefficient) == 2) {
+                        aux_variable_ptr         = variable_ptr;
+                        aux_variable_coefficient = coefficient;
+                        number_of_integer_variables_with_coefficient_two++;
+                    } else if (variable_ptr->sense() != VariableSense::Binary ||
+                               abs(coefficient) != 1) {
                         is_valid = false;
                         break;
                     }
                 }
+            }
 
-                if (number_of_mono_integer_variables != 1) {
+            if (number_of_integer_variables_with_coefficient_two != 1) {
+                is_valid = false;
+            }
+
+            if (is_valid) {
+                auto rest_part_expression = m_expression.copy();
+                rest_part_expression.erase(aux_variable_ptr);
+                T_Expression rest_part_lower_bound =
+                    rest_part_expression.lower_bound();
+                T_Expression rest_part_upper_bound =
+                    rest_part_expression.upper_bound();
+
+                if (aux_variable_coefficient > 0) {
+                    std::swap(rest_part_lower_bound, rest_part_upper_bound);
+                    rest_part_lower_bound *= -1.0;
+                    rest_part_upper_bound *= -1.0;
+                }
+
+                if (aux_variable_ptr->lower_bound() != constant::INT_HALF_MIN &&
+                    aux_variable_ptr->lower_bound() >
+                        static_cast<int>(
+                            std::ceil(rest_part_lower_bound * 0.5))) {
                     is_valid = false;
                 }
 
-                if (is_valid) {
-                    auto rest_part_expression = m_expression.copy();
-                    rest_part_expression.erase(intermediate_variable_ptr);
-                    T_Expression rest_part_lower_bound =
-                        rest_part_expression.lower_bound();
-                    T_Expression rest_part_upper_bound =
-                        rest_part_expression.upper_bound();
-
-                    if (intermediate_variable_coefficient > 0) {
-                        std::swap(rest_part_lower_bound, rest_part_upper_bound);
-                        rest_part_lower_bound *= -1.0;
-                        rest_part_upper_bound *= -1.0;
-                    }
-
-                    if (intermediate_variable_ptr->lower_bound() !=
-                            constant::INT_HALF_MIN &&
-                        intermediate_variable_ptr->lower_bound() >
-                            rest_part_lower_bound) {
-                        m_has_intermediate_lower_bound = true;
-                    } else {
-                        m_has_intermediate_lower_bound = false;
-                    }
-
-                    if (intermediate_variable_ptr->upper_bound() !=
-                            constant::INT_HALF_MAX &&
-                        intermediate_variable_ptr->upper_bound() <
-                            rest_part_upper_bound) {
-                        m_has_intermediate_upper_bound = true;
-                    } else {
-                        m_has_intermediate_upper_bound = false;
-                    }
-
-                    if ((m_sense == ConstraintSense::Less &&
-                         intermediate_variable_coefficient < 0) ||
-                        (m_sense == ConstraintSense::Greater &&
-                         intermediate_variable_coefficient > 0)) {
-                        m_is_min_max = true;
-                        return;
-                    }
-
-                    if ((m_sense == ConstraintSense::Greater &&
-                         intermediate_variable_coefficient < 0) ||
-                        (m_sense == ConstraintSense::Less &&
-                         intermediate_variable_coefficient > 0)) {
-                        m_is_max_min = true;
-                        return;
-                    }
-
-                    if (m_sense == ConstraintSense::Equal) {
-                        m_is_intermediate           = true;
-                        m_intermediate_variable_ptr = intermediate_variable_ptr;
-                        return;
-                    }
+                if (aux_variable_ptr->upper_bound() != constant::INT_HALF_MAX &&
+                    aux_variable_ptr->upper_bound() <
+                        static_cast<int>(
+                            std::floor(rest_part_upper_bound * 0.5))) {
+                    is_valid = false;
                 }
+            }
+
+            if (is_valid) {
+                m_is_gf2           = true;
+                m_aux_variable_ptr = aux_variable_ptr;
+                return;
             }
         }
 
@@ -649,8 +734,8 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
 
     /*************************************************************************/
     inline constexpr T_Expression evaluate_constraint(
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
-        noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
+        const noexcept {
 #ifdef _MPS_SOLVER
         return m_expression.evaluate(a_MOVE);
 #else
@@ -672,15 +757,15 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
 
     /*************************************************************************/
     inline constexpr T_Expression evaluate_violation(
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
-        noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
+        const noexcept {
         return m_violation_function(a_MOVE);
     }
 
     /*************************************************************************/
     inline constexpr T_Expression evaluate_violation_diff(
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
-        noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
+        const noexcept {
         return m_violation_function(a_MOVE) - m_violation_value;
     }
 
@@ -770,8 +855,8 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr double local_penalty_coefficient_less(void) const
-        noexcept {
+    inline constexpr double local_penalty_coefficient_less(
+        void) const noexcept {
         return m_local_penalty_coefficient_less;
     }
 
@@ -780,8 +865,8 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         return m_local_penalty_coefficient_greater;
     }
     /*************************************************************************/
-    inline constexpr double local_penalty_coefficient_greater(void) const
-        noexcept {
+    inline constexpr double local_penalty_coefficient_greater(
+        void) const noexcept {
         return m_local_penalty_coefficient_greater;
     }
 
@@ -872,11 +957,6 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr bool is_general_linear(void) const noexcept {
-        return m_is_general_linear;
-    }
-
-    /*************************************************************************/
     inline constexpr bool is_min_max(void) const noexcept {
         return m_is_min_max;
     }
@@ -889,6 +969,16 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     /*************************************************************************/
     inline constexpr bool is_intermediate(void) const noexcept {
         return m_is_intermediate;
+    }
+
+    /*************************************************************************/
+    inline constexpr bool is_gf2(void) const noexcept {
+        return m_is_gf2;
+    }
+
+    /*************************************************************************/
+    inline constexpr bool is_general_linear(void) const noexcept {
+        return m_is_general_linear;
     }
 
     /*************************************************************************/
@@ -922,20 +1012,20 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr bool has_intermediate_lower_bound(void) const noexcept {
-        return m_has_intermediate_lower_bound;
+    inline constexpr bool has_aux_lower_bound(void) const noexcept {
+        return m_has_aux_lower_bound;
     }
 
     /*************************************************************************/
-    inline constexpr bool has_intermediate_upper_bound(void) const noexcept {
-        return m_has_intermediate_upper_bound;
+    inline constexpr bool has_aux_upper_bound(void) const noexcept {
+        return m_has_aux_upper_bound;
     }
 
     /*************************************************************************/
-    inline constexpr Variable<T_Variable, T_Expression>
-        *intermediate_variable_ptr(void) const {
+    inline constexpr Variable<T_Variable, T_Expression> *aux_variable_ptr(
+        void) const {
         return const_cast<Variable<T_Variable, T_Expression> *>(
-            m_intermediate_variable_ptr);
+            m_aux_variable_ptr);
     }
 };  // namespace model_component
 using IPConstraint = Constraint<int, double>;

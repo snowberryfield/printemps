@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020 Yuji KOGUMA
+// Copyright (c) 2020-2021 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -80,7 +80,7 @@ TEST_F(TestConstraint, initialize) {
     EXPECT_FALSE(constraint.is_max_min());
     EXPECT_FALSE(constraint.is_intermediate());
     EXPECT_FALSE(constraint.is_general_linear());
-    EXPECT_EQ(nullptr, constraint.intermediate_variable_ptr());
+    EXPECT_EQ(nullptr, constraint.aux_variable_ptr());
 }
 
 /*****************************************************************************/
@@ -682,8 +682,8 @@ TEST_F(TestConstraint, setup_constraint_type_min_max) {
                          printemps::model_component::ConstraintSense::Less);
         constraint.setup_constraint_type();
         EXPECT_TRUE(constraint.is_min_max());
-        EXPECT_FALSE(constraint.has_intermediate_lower_bound());
-        EXPECT_FALSE(constraint.has_intermediate_upper_bound());
+        EXPECT_FALSE(constraint.has_aux_lower_bound());
+        EXPECT_FALSE(constraint.has_aux_upper_bound());
     }
 
     {
@@ -694,8 +694,8 @@ TEST_F(TestConstraint, setup_constraint_type_min_max) {
                          printemps::model_component::ConstraintSense::Greater);
         constraint.setup_constraint_type();
         EXPECT_TRUE(constraint.is_min_max());
-        EXPECT_FALSE(constraint.has_intermediate_lower_bound());
-        EXPECT_FALSE(constraint.has_intermediate_upper_bound());
+        EXPECT_FALSE(constraint.has_aux_lower_bound());
+        EXPECT_FALSE(constraint.has_aux_upper_bound());
     }
 
     {
@@ -706,8 +706,8 @@ TEST_F(TestConstraint, setup_constraint_type_min_max) {
                          printemps::model_component::ConstraintSense::Less);
         constraint.setup_constraint_type();
         EXPECT_TRUE(constraint.is_min_max());
-        EXPECT_FALSE(constraint.has_intermediate_lower_bound());
-        EXPECT_TRUE(constraint.has_intermediate_upper_bound());
+        EXPECT_FALSE(constraint.has_aux_lower_bound());
+        EXPECT_TRUE(constraint.has_aux_upper_bound());
     }
 
     {
@@ -718,8 +718,8 @@ TEST_F(TestConstraint, setup_constraint_type_min_max) {
                          printemps::model_component::ConstraintSense::Less);
         constraint.setup_constraint_type();
         EXPECT_TRUE(constraint.is_min_max());
-        EXPECT_TRUE(constraint.has_intermediate_lower_bound());
-        EXPECT_FALSE(constraint.has_intermediate_upper_bound());
+        EXPECT_TRUE(constraint.has_aux_lower_bound());
+        EXPECT_FALSE(constraint.has_aux_upper_bound());
     }
 
     {
@@ -730,8 +730,8 @@ TEST_F(TestConstraint, setup_constraint_type_min_max) {
                          printemps::model_component::ConstraintSense::Less);
         constraint.setup_constraint_type();
         EXPECT_TRUE(constraint.is_min_max());
-        EXPECT_TRUE(constraint.has_intermediate_lower_bound());
-        EXPECT_TRUE(constraint.has_intermediate_upper_bound());
+        EXPECT_TRUE(constraint.has_aux_lower_bound());
+        EXPECT_TRUE(constraint.has_aux_upper_bound());
     }
 
     {
@@ -742,8 +742,8 @@ TEST_F(TestConstraint, setup_constraint_type_min_max) {
                          printemps::model_component::ConstraintSense::Greater);
         constraint.setup_constraint_type();
         EXPECT_TRUE(constraint.is_min_max());
-        EXPECT_TRUE(constraint.has_intermediate_lower_bound());
-        EXPECT_TRUE(constraint.has_intermediate_upper_bound());
+        EXPECT_TRUE(constraint.has_aux_lower_bound());
+        EXPECT_TRUE(constraint.has_aux_upper_bound());
     }
 
     {
@@ -754,8 +754,8 @@ TEST_F(TestConstraint, setup_constraint_type_min_max) {
                          printemps::model_component::ConstraintSense::Less);
         constraint.setup_constraint_type();
         EXPECT_FALSE(constraint.is_min_max());
-        EXPECT_FALSE(constraint.has_intermediate_lower_bound());
-        EXPECT_FALSE(constraint.has_intermediate_upper_bound());
+        EXPECT_FALSE(constraint.has_aux_lower_bound());
+        EXPECT_FALSE(constraint.has_aux_upper_bound());
     }
 
     {
@@ -766,8 +766,8 @@ TEST_F(TestConstraint, setup_constraint_type_min_max) {
                          printemps::model_component::ConstraintSense::Less);
         constraint.setup_constraint_type();
         EXPECT_FALSE(constraint.is_min_max());
-        EXPECT_FALSE(constraint.has_intermediate_lower_bound());
-        EXPECT_FALSE(constraint.has_intermediate_upper_bound());
+        EXPECT_FALSE(constraint.has_aux_lower_bound());
+        EXPECT_FALSE(constraint.has_aux_upper_bound());
     }
 
     {
@@ -778,8 +778,8 @@ TEST_F(TestConstraint, setup_constraint_type_min_max) {
                          printemps::model_component::ConstraintSense::Less);
         constraint.setup_constraint_type();
         EXPECT_FALSE(constraint.is_min_max());
-        EXPECT_FALSE(constraint.has_intermediate_lower_bound());
-        EXPECT_FALSE(constraint.has_intermediate_upper_bound());
+        EXPECT_FALSE(constraint.has_aux_lower_bound());
+        EXPECT_FALSE(constraint.has_aux_upper_bound());
     }
 }
 
@@ -798,8 +798,8 @@ TEST_F(TestConstraint, setup_constraint_type_max_min) {
                          printemps::model_component::ConstraintSense::Greater);
         constraint.setup_constraint_type();
         EXPECT_TRUE(constraint.is_max_min());
-        EXPECT_FALSE(constraint.has_intermediate_lower_bound());
-        EXPECT_FALSE(constraint.has_intermediate_upper_bound());
+        EXPECT_FALSE(constraint.has_aux_lower_bound());
+        EXPECT_FALSE(constraint.has_aux_upper_bound());
     }
 
     {
@@ -810,8 +810,8 @@ TEST_F(TestConstraint, setup_constraint_type_max_min) {
                          printemps::model_component::ConstraintSense::Less);
         constraint.setup_constraint_type();
         EXPECT_TRUE(constraint.is_max_min());
-        EXPECT_FALSE(constraint.has_intermediate_lower_bound());
-        EXPECT_FALSE(constraint.has_intermediate_upper_bound());
+        EXPECT_FALSE(constraint.has_aux_lower_bound());
+        EXPECT_FALSE(constraint.has_aux_upper_bound());
     }
 
     {
@@ -822,8 +822,8 @@ TEST_F(TestConstraint, setup_constraint_type_max_min) {
                          printemps::model_component::ConstraintSense::Greater);
         constraint.setup_constraint_type();
         EXPECT_TRUE(constraint.is_max_min());
-        EXPECT_FALSE(constraint.has_intermediate_lower_bound());
-        EXPECT_TRUE(constraint.has_intermediate_upper_bound());
+        EXPECT_FALSE(constraint.has_aux_lower_bound());
+        EXPECT_TRUE(constraint.has_aux_upper_bound());
     }
 
     {
@@ -834,8 +834,8 @@ TEST_F(TestConstraint, setup_constraint_type_max_min) {
                          printemps::model_component::ConstraintSense::Greater);
         constraint.setup_constraint_type();
         EXPECT_TRUE(constraint.is_max_min());
-        EXPECT_TRUE(constraint.has_intermediate_lower_bound());
-        EXPECT_FALSE(constraint.has_intermediate_upper_bound());
+        EXPECT_TRUE(constraint.has_aux_lower_bound());
+        EXPECT_FALSE(constraint.has_aux_upper_bound());
     }
 
     {
@@ -846,8 +846,8 @@ TEST_F(TestConstraint, setup_constraint_type_max_min) {
                          printemps::model_component::ConstraintSense::Greater);
         constraint.setup_constraint_type();
         EXPECT_TRUE(constraint.is_max_min());
-        EXPECT_TRUE(constraint.has_intermediate_lower_bound());
-        EXPECT_TRUE(constraint.has_intermediate_upper_bound());
+        EXPECT_TRUE(constraint.has_aux_lower_bound());
+        EXPECT_TRUE(constraint.has_aux_upper_bound());
     }
 
     {
@@ -858,8 +858,8 @@ TEST_F(TestConstraint, setup_constraint_type_max_min) {
                          printemps::model_component::ConstraintSense::Less);
         constraint.setup_constraint_type();
         EXPECT_TRUE(constraint.is_max_min());
-        EXPECT_TRUE(constraint.has_intermediate_lower_bound());
-        EXPECT_TRUE(constraint.has_intermediate_upper_bound());
+        EXPECT_TRUE(constraint.has_aux_lower_bound());
+        EXPECT_TRUE(constraint.has_aux_upper_bound());
     }
 
     {
@@ -870,8 +870,8 @@ TEST_F(TestConstraint, setup_constraint_type_max_min) {
                          printemps::model_component::ConstraintSense::Greater);
         constraint.setup_constraint_type();
         EXPECT_FALSE(constraint.is_max_min());
-        EXPECT_FALSE(constraint.has_intermediate_lower_bound());
-        EXPECT_FALSE(constraint.has_intermediate_upper_bound());
+        EXPECT_FALSE(constraint.has_aux_lower_bound());
+        EXPECT_FALSE(constraint.has_aux_upper_bound());
     }
 
     {
@@ -882,8 +882,8 @@ TEST_F(TestConstraint, setup_constraint_type_max_min) {
                          printemps::model_component::ConstraintSense::Greater);
         constraint.setup_constraint_type();
         EXPECT_FALSE(constraint.is_max_min());
-        EXPECT_FALSE(constraint.has_intermediate_lower_bound());
-        EXPECT_FALSE(constraint.has_intermediate_upper_bound());
+        EXPECT_FALSE(constraint.has_aux_lower_bound());
+        EXPECT_FALSE(constraint.has_aux_upper_bound());
     }
 
     {
@@ -894,8 +894,8 @@ TEST_F(TestConstraint, setup_constraint_type_max_min) {
                          printemps::model_component::ConstraintSense::Greater);
         constraint.setup_constraint_type();
         EXPECT_FALSE(constraint.is_max_min());
-        EXPECT_FALSE(constraint.has_intermediate_lower_bound());
-        EXPECT_FALSE(constraint.has_intermediate_upper_bound());
+        EXPECT_FALSE(constraint.has_aux_lower_bound());
+        EXPECT_FALSE(constraint.has_aux_upper_bound());
     }
 }
 
@@ -915,9 +915,9 @@ TEST_F(TestConstraint, setup_constraint_type_intermediate) {
                          printemps::model_component::ConstraintSense::Equal);
         constraint.setup_constraint_type();
         EXPECT_TRUE(constraint.is_intermediate());
-        EXPECT_FALSE(constraint.has_intermediate_lower_bound());
-        EXPECT_FALSE(constraint.has_intermediate_upper_bound());
-        EXPECT_EQ(&x(0), constraint.intermediate_variable_ptr());
+        EXPECT_FALSE(constraint.has_aux_lower_bound());
+        EXPECT_FALSE(constraint.has_aux_upper_bound());
+        EXPECT_EQ(&x(0), constraint.aux_variable_ptr());
     }
 
     {
@@ -928,9 +928,9 @@ TEST_F(TestConstraint, setup_constraint_type_intermediate) {
                          printemps::model_component::ConstraintSense::Equal);
         constraint.setup_constraint_type();
         EXPECT_TRUE(constraint.is_intermediate());
-        EXPECT_FALSE(constraint.has_intermediate_lower_bound());
-        EXPECT_FALSE(constraint.has_intermediate_upper_bound());
-        EXPECT_EQ(&x(0), constraint.intermediate_variable_ptr());
+        EXPECT_FALSE(constraint.has_aux_lower_bound());
+        EXPECT_FALSE(constraint.has_aux_upper_bound());
+        EXPECT_EQ(&x(0), constraint.aux_variable_ptr());
     }
 
     {
@@ -941,9 +941,9 @@ TEST_F(TestConstraint, setup_constraint_type_intermediate) {
                          printemps::model_component::ConstraintSense::Equal);
         constraint.setup_constraint_type();
         EXPECT_TRUE(constraint.is_intermediate());
-        EXPECT_TRUE(constraint.has_intermediate_lower_bound());
-        EXPECT_FALSE(constraint.has_intermediate_upper_bound());
-        EXPECT_EQ(&x(0), constraint.intermediate_variable_ptr());
+        EXPECT_TRUE(constraint.has_aux_lower_bound());
+        EXPECT_FALSE(constraint.has_aux_upper_bound());
+        EXPECT_EQ(&x(0), constraint.aux_variable_ptr());
     }
 
     {
@@ -954,9 +954,9 @@ TEST_F(TestConstraint, setup_constraint_type_intermediate) {
                          printemps::model_component::ConstraintSense::Equal);
         constraint.setup_constraint_type();
         EXPECT_TRUE(constraint.is_intermediate());
-        EXPECT_TRUE(constraint.has_intermediate_lower_bound());
-        EXPECT_TRUE(constraint.has_intermediate_upper_bound());
-        EXPECT_EQ(&x(0), constraint.intermediate_variable_ptr());
+        EXPECT_TRUE(constraint.has_aux_lower_bound());
+        EXPECT_TRUE(constraint.has_aux_upper_bound());
+        EXPECT_EQ(&x(0), constraint.aux_variable_ptr());
     }
 
     {
@@ -967,9 +967,9 @@ TEST_F(TestConstraint, setup_constraint_type_intermediate) {
                          printemps::model_component::ConstraintSense::Equal);
         constraint.setup_constraint_type();
         EXPECT_FALSE(constraint.is_intermediate());
-        EXPECT_FALSE(constraint.has_intermediate_lower_bound());
-        EXPECT_FALSE(constraint.has_intermediate_upper_bound());
-        EXPECT_EQ(nullptr, constraint.intermediate_variable_ptr());
+        EXPECT_FALSE(constraint.has_aux_lower_bound());
+        EXPECT_FALSE(constraint.has_aux_upper_bound());
+        EXPECT_EQ(nullptr, constraint.aux_variable_ptr());
     }
 
     {
@@ -980,9 +980,9 @@ TEST_F(TestConstraint, setup_constraint_type_intermediate) {
                          printemps::model_component::ConstraintSense::Equal);
         constraint.setup_constraint_type();
         EXPECT_FALSE(constraint.is_intermediate());
-        EXPECT_FALSE(constraint.has_intermediate_lower_bound());
-        EXPECT_FALSE(constraint.has_intermediate_upper_bound());
-        EXPECT_EQ(nullptr, constraint.intermediate_variable_ptr());
+        EXPECT_FALSE(constraint.has_aux_lower_bound());
+        EXPECT_FALSE(constraint.has_aux_upper_bound());
+        EXPECT_EQ(nullptr, constraint.aux_variable_ptr());
     }
 
     {
@@ -993,9 +993,9 @@ TEST_F(TestConstraint, setup_constraint_type_intermediate) {
                          printemps::model_component::ConstraintSense::Equal);
         constraint.setup_constraint_type();
         EXPECT_FALSE(constraint.is_intermediate());
-        EXPECT_FALSE(constraint.has_intermediate_lower_bound());
-        EXPECT_FALSE(constraint.has_intermediate_upper_bound());
-        EXPECT_EQ(nullptr, constraint.intermediate_variable_ptr());
+        EXPECT_FALSE(constraint.has_aux_lower_bound());
+        EXPECT_FALSE(constraint.has_aux_upper_bound());
+        EXPECT_EQ(nullptr, constraint.aux_variable_ptr());
     }
 
     {
@@ -1006,9 +1006,125 @@ TEST_F(TestConstraint, setup_constraint_type_intermediate) {
                          printemps::model_component::ConstraintSense::Equal);
         constraint.setup_constraint_type();
         EXPECT_FALSE(constraint.is_intermediate());
-        EXPECT_FALSE(constraint.has_intermediate_lower_bound());
-        EXPECT_FALSE(constraint.has_intermediate_upper_bound());
-        EXPECT_EQ(nullptr, constraint.intermediate_variable_ptr());
+        EXPECT_FALSE(constraint.has_aux_lower_bound());
+        EXPECT_FALSE(constraint.has_aux_upper_bound());
+        EXPECT_EQ(nullptr, constraint.aux_variable_ptr());
+    }
+}
+
+/*****************************************************************************/
+TEST_F(TestConstraint, setup_constraint_type_gf2) {
+    printemps::model::Model<int, double> model;
+
+    auto& x = model.create_variables("x", 10, 0, 1);
+    auto& y = model.create_variable("y", 0, 5);
+
+    {
+        auto constraint =
+            printemps::model_component::Constraint<int,
+                                                   double>::create_instance();
+        constraint.setup(x.sum() - 2 * y,
+                         printemps::model_component::ConstraintSense::Equal);
+
+        constraint.setup_constraint_type();
+        EXPECT_TRUE(constraint.is_gf2());
+        EXPECT_EQ(&y(0), constraint.aux_variable_ptr());
+    }
+
+    {
+        auto constraint =
+            printemps::model_component::Constraint<int,
+                                                   double>::create_instance();
+        constraint.setup(-x.sum() + 2 * y,
+                         printemps::model_component::ConstraintSense::Equal);
+
+        constraint.setup_constraint_type();
+        EXPECT_TRUE(constraint.is_gf2());
+        EXPECT_EQ(&y(0), constraint.aux_variable_ptr());
+    }
+
+    {
+        auto constraint =
+            printemps::model_component::Constraint<int,
+                                                   double>::create_instance();
+        constraint.setup(x.sum() + 1 - 2 * y,
+                         printemps::model_component::ConstraintSense::Equal);
+        constraint.setup_constraint_type();
+        EXPECT_TRUE(constraint.is_gf2());
+        EXPECT_EQ(&y(0), constraint.aux_variable_ptr());
+    }
+
+    {
+        auto constraint =
+            printemps::model_component::Constraint<int,
+                                                   double>::create_instance();
+        constraint.setup(-x.sum() - 1 + 2 * y,
+                         printemps::model_component::ConstraintSense::Equal);
+        constraint.setup_constraint_type();
+        EXPECT_TRUE(constraint.is_gf2());
+        EXPECT_EQ(&y(0), constraint.aux_variable_ptr());
+    }
+
+    {
+        auto constraint =
+            printemps::model_component::Constraint<int,
+                                                   double>::create_instance();
+        constraint.setup(x.sum() - 1 - 2 * y,
+                         printemps::model_component::ConstraintSense::Equal);
+        constraint.setup_constraint_type();
+        EXPECT_TRUE(constraint.is_gf2());
+        EXPECT_EQ(&y(0), constraint.aux_variable_ptr());
+    }
+
+    {
+        auto constraint =
+            printemps::model_component::Constraint<int,
+                                                   double>::create_instance();
+        constraint.setup(-x.sum() + 1 + 2 * y,
+                         printemps::model_component::ConstraintSense::Equal);
+        constraint.setup_constraint_type();
+        EXPECT_TRUE(constraint.is_gf2());
+        EXPECT_EQ(&y(0), constraint.aux_variable_ptr());
+    }
+
+    {
+        auto constraint =
+            printemps::model_component::Constraint<int,
+                                                   double>::create_instance();
+        constraint.setup(x.sum() + 2 - 2 * y,
+                         printemps::model_component::ConstraintSense::Equal);
+        constraint.setup_constraint_type();
+        EXPECT_FALSE(constraint.is_gf2());
+    }
+
+    {
+        auto constraint =
+            printemps::model_component::Constraint<int,
+                                                   double>::create_instance();
+        constraint.setup(-x.sum() - 2 + 2 * y,
+                         printemps::model_component::ConstraintSense::Equal);
+        constraint.setup_constraint_type();
+        EXPECT_FALSE(constraint.is_gf2());
+    }
+
+    {
+        auto constraint =
+            printemps::model_component::Constraint<int,
+                                                   double>::create_instance();
+        constraint.setup(x.sum() - 2 - 2 * y,
+                         printemps::model_component::ConstraintSense::Equal);
+        constraint.setup_constraint_type();
+        EXPECT_FALSE(constraint.is_gf2());
+    }
+
+    {
+        auto constraint =
+            printemps::model_component::Constraint<int,
+                                                   double>::create_instance();
+        constraint.setup(-x.sum() + 2 + 2 * y,
+                         printemps::model_component::ConstraintSense::Equal);
+        constraint.setup_constraint_type();
+        EXPECT_FALSE(constraint.is_gf2());
     }
 }
 
@@ -1815,13 +1931,18 @@ TEST_F(TestConstraint, is_intermediate) {
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraint, intermediate_variable_ptr) {
-    /// This method is tested in setup_constraint_type_intermediate().
+TEST_F(TestConstraint, is_gf2) {
+    /// This method is tested in setup_constraint_type_gf2().
 }
 
 /*****************************************************************************/
 TEST_F(TestConstraint, is_general_linear) {
     /// This method is tested in setup_constraint_type_general_linear().
+}
+
+/*****************************************************************************/
+TEST_F(TestConstraint, aux_variable_ptr) {
+    /// This method is tested in setup_constraint_type_intermediate().
 }
 
 /*****************************************************************************/
