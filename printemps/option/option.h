@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020 Yuji KOGUMA
+// Copyright (c) 2020-2021 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -22,9 +22,9 @@ struct OptionConstant {
     static constexpr double DEFAULT_PENALTY_COEFFICIENT_RELAXING_RATE   = 0.9;
     static constexpr double DEFAULT_PENALTY_COEFFICIENT_TIGHTENING_RATE = 1.0;
     static constexpr double DEFAULT_PENALTY_COEFFICIENT_UPDATING_BALANCE = 0.0;
-    static constexpr double DEFAULT_INITIAL_PENALTY_COEFFICIENT = 1E7;
-    static constexpr bool   DEFAULT_IS_ENABLED_LAGRANGE_DUAL    = false;
-    static constexpr bool   DEFAULT_IS_ENABLED_LOCAL_SEARCH     = false;
+    static constexpr double DEFAULT_INITIAL_PENALTY_COEFFICIENT          = 1E7;
+    static constexpr bool   DEFAULT_IS_ENABLED_LAGRANGE_DUAL = false;
+    static constexpr bool   DEFAULT_IS_ENABLED_LOCAL_SEARCH  = false;
     static constexpr bool   DEFAULT_IS_ENABLED_GROUPING_PENALTY_COEFFICIENT =
         false;
     static constexpr bool DEFAULT_IS_ENABLED_PRESOLVE                 = true;
@@ -65,7 +65,7 @@ struct Option {
     double time_max;
     double penalty_coefficient_relaxing_rate;
     double penalty_coefficient_tightening_rate;
-    double penalty_coefficient_updating_balance;       // hidden
+    double penalty_coefficient_updating_balance;  // hidden
     double initial_penalty_coefficient;
     bool   is_enabled_lagrange_dual;
     bool   is_enabled_local_search;

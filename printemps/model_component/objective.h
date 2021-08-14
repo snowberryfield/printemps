@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020 Yuji KOGUMA
+// Copyright (c) 2020-2021 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -179,8 +179,8 @@ class Objective {
 
     /*************************************************************************/
     inline constexpr T_Expression evaluate(
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
-        noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
+        const noexcept {
 #ifdef _MPS_SOLVER
         return m_expression.evaluate(a_MOVE);
 #else
