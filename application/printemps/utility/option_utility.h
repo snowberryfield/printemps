@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020 Yuji KOGUMA
+// Copyright (c) 2020-2021 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -68,12 +68,6 @@ printemps::option::Option read_option(const std::string &a_FILE_NAME) {
     /// penalty_coefficient_updating_balance
     read_json(&option.penalty_coefficient_updating_balance,  //
               "penalty_coefficient_updating_balance",        //
-              option_object);
-
-    /**************************************************************************/
-    /// penalty_coefficient_reset_count_threshold
-    read_json(&option.penalty_coefficient_reset_count_threshold,  //
-              "penalty_coefficient_reset_count_threshold",        //
               option_object);
 
     /**************************************************************************/
@@ -212,6 +206,12 @@ printemps::option::Option read_option(const std::string &a_FILE_NAME) {
     /// verbose
     read_json(&option.verbose,  //
               "verbose",        //
+              option_object);
+
+    /**************************************************************************/
+    /// verbose
+    read_json(&option.is_enabled_write_trend,  //
+              "is_enabled_write_trend",        //
               option_object);
 
     /**************************************************************************/

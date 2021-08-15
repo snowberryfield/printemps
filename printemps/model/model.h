@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020 Yuji KOGUMA
+// Copyright (c) 2020-2021 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -663,7 +663,7 @@ class Model {
          * decision variables implicitly fixed.
          */
         if (a_IS_ENABLED_PRESOLVE) {
-            presolver::presolve(this, true, a_IS_ENABLED_PRINT);
+            presolver::reduce_problem_size(this, true, a_IS_ENABLED_PRINT);
         }
 
         /**
@@ -677,7 +677,7 @@ class Model {
                 this->setup_variable_related_zero_one_coefficient_constraints();
                 this->setup_variable_related_constraints();
                 this->setup_variable_sensitivity();
-                if (presolver::extract_independent_intermediate_variables(
+                if (presolver::extract_dependent_intermediate_variables(
                         this,  //
                         a_IS_ENABLED_PRINT) == 0) {
                     break;
@@ -689,14 +689,14 @@ class Model {
                     this->setup_variable_related_zero_one_coefficient_constraints();
                     this->setup_variable_related_constraints();
                     this->setup_variable_sensitivity();
-                    if (presolver::eliminate_independent_intermediate_variables(
+                    if (presolver::eliminate_dependent_intermediate_variables(
                             this,  //
                             a_IS_ENABLED_PRINT) == 0) {
                         break;
                     }
                 }
 
-                presolver::presolve(this, false, a_IS_ENABLED_PRINT);
+                presolver::reduce_problem_size(this, false, a_IS_ENABLED_PRINT);
             }
         }
 
@@ -748,6 +748,21 @@ class Model {
             this,                                   //
             a_IS_ENABLED_INITIAL_VALUE_CORRECTION,  //
             a_IS_ENABLED_PRINT);
+
+        /**
+         * Solve GF(2) equations if needed.
+         */
+        if (a_IS_ENABLED_PRESOLVE &&
+            m_constraint_type_reference.gf2_ptrs.size() > 0) {
+            auto is_solved = presolver::solve_gf2(this, a_IS_ENABLED_PRINT);
+
+            /**
+             * Update fixed decision varialbes.
+             */
+            if (is_solved) {
+                this->categorize_variables();
+            }
+        }
 
         /**
          * Setup the fixed sensitivities for fast evaluation.
@@ -882,7 +897,7 @@ class Model {
 
         for (auto &&proxy : m_variable_proxies) {
             for (auto &&variable : proxy.flat_indexed_variables()) {
-                variable.setup_unique_sensitivity();
+                variable.setup_uniform_sensitivity();
             }
         }
 
@@ -1030,6 +1045,10 @@ class Model {
                     }
                     if (constraint.is_intermediate()) {
                         constraint_type_reference.intermediate_ptrs.push_back(
+                            &constraint);
+                    }
+                    if (constraint.is_gf2()) {
+                        constraint_type_reference.gf2_ptrs.push_back(
                             &constraint);
                     }
                     if (constraint.is_general_linear()) {
@@ -1211,7 +1230,7 @@ class Model {
             true);
 
         utility::print_info(  //
-            " -- Independent Intermediate: " +
+            " -- Dependent Intermediate: " +
                 utility::to_string(  //
                     compute_number_of_variables(
                         original.intermediate_variable_ptrs),
@@ -1489,6 +1508,20 @@ class Model {
                     utility::to_string(                         //
                         compute_number_of_enabled_constraints(  //
                             presolved.intermediate_ptrs),
+                        "%d") +
+                    ")",
+                true);
+
+            utility::print_info(                        //
+                " -- GF(2): " +                         //
+                    utility::to_string(                 //
+                        compute_number_of_constraints(  //
+                            original.gf2_ptrs),
+                        "%d") +
+                    " (" +
+                    utility::to_string(                         //
+                        compute_number_of_enabled_constraints(  //
+                            presolved.gf2_ptrs),
                         "%d") +
                     ")",
                 true);
@@ -1789,8 +1822,8 @@ class Model {
 
     /*************************************************************************/
     inline solution::SolutionScore evaluate(
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
-        noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
+        const noexcept {
         solution::SolutionScore score;
         this->evaluate(&score, a_MOVE);
         return score;
@@ -1806,10 +1839,9 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void evaluate(
-        solution::SolutionScore *                           a_score_ptr,  //
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
-        noexcept {
+    constexpr void evaluate(solution::SolutionScore *a_score_ptr,  //
+                            const neighborhood::Move<T_Variable, T_Expression>
+                                &a_MOVE) const noexcept {
         double total_violation = 0.0;
         double local_penalty   = 0.0;
         double global_penalty  = 0.0;
@@ -1901,14 +1933,14 @@ class Model {
                 auto variable_ptr          = a_MOVE.alterations.front().first;
                 auto variable_value_target = a_MOVE.alterations.front().second;
 
-                if (constraint_ptr->is_zero_one_coefficient()) {
+                if (constraint_ptr->is_binary()) {
                     constraint_value = constraint_ptr->constraint_value() +
                                        variable_value_target -
                                        variable_ptr->value();
-                } else if (variable_ptr->has_unique_sensitivity()) {
+                } else if (variable_ptr->has_uniform_sensitivity()) {
                     constraint_value =
                         constraint_ptr->constraint_value() +
-                        variable_ptr->unique_sensitivity() *
+                        variable_ptr->uniform_sensitivity() *
                             (variable_value_target - variable_ptr->value());
                 } else {
                     constraint_value =

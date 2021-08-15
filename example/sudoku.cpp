@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020 Yuji KOGUMA
+// Copyright (c) 2020-2021 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -140,8 +140,9 @@ int main(void) {
     /// Run solver
     /*************************************************************************/
     printemps::option::Option option;
-    option.verbose       = printemps::option::verbose::Full;
-    option.iteration_max = 1000;
+    option.verbose                         = printemps::option::verbose::Full;
+    option.tabu_search.initial_tabu_tenure = 5;
+    option.iteration_max                   = 1000;
 
     auto result = printemps::solver::solve(&model, option);
 

@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020 Yuji KOGUMA
+// Copyright (c) 2020-2021 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -1071,8 +1071,8 @@ TEST_F(TestModel, categorize_variables) {
 
     model.categorize_variables();
     model.categorize_constraints();
-    printemps::presolver::extract_independent_intermediate_variables(&model,
-                                                                     false);
+    printemps::presolver::extract_dependent_intermediate_variables(&model,
+                                                                   false);
     printemps::presolver::extract_independent_selections(&model, false);
 
     model.categorize_variables();

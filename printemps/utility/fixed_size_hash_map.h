@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020 Yuji KOGUMA
+// Copyright (c) 2020-2021 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -28,8 +28,8 @@ class FixedSizeHashMap {
     bool *   m_is_occupied;
 
     /*************************************************************************/
-    inline constexpr std::uint_fast32_t compute_hash(const T_Key a_KEY) const
-        noexcept {
+    inline constexpr std::uint_fast32_t compute_hash(
+        const T_Key a_KEY) const noexcept {
         return reinterpret_cast<std::uint_fast64_t>(a_KEY) >> m_shift_size;
     }
 
