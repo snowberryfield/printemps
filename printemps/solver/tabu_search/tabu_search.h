@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020 Yuji KOGUMA
+// Copyright (c) 2020-2021 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -656,7 +656,9 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                     if (intensity_decrease_count >
                         option.tabu_search.intensity_decrease_count_threshold) {
                         intensity_decrease_count = 0;
-                        tabu_tenure              = std::max(tabu_tenure - 1, 1);
+                        tabu_tenure =
+                            std::max(tabu_tenure - 1,
+                                     std::max(1, original_tabu_tenure / 2));
                         last_tabu_tenure_updated_iteration = iteration;
 
                         utility::print_debug(

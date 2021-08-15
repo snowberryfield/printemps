@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 ###############################################################################
-# Copyright (c) 2020 Yuji KOGUMA
+# Copyright (c) 2020-2021 Yuji KOGUMA
 # Released under the MIT license
 # https://opensource.org/licenses/mit-license.php
 ###############################################################################
@@ -30,24 +30,38 @@ def run_batch(executable, mps_list, option_file_name):
 
         with open('status.json', 'r') as f:
             status = json.load(f)
+            f.close()
+
         with open('incumbent.json', 'r') as f:
             incumbent = json.load(f)
+            f.close()
 
         result = {
             'instance': {
-                'name': status['name'],
-                'number_of_variables': status['number_of_variables'],
-                'number_of_constraints': status['number_of_constraints']
+                'name':
+                    status['name'],
+                'number_of_variables':
+                    status['number_of_variables'],
+                'number_of_constraints':
+                    status['number_of_constraints']
             },
             'computed': {
-                'is_found_feasible_solution': status['is_found_feasible_solution'],
-                'objective': incumbent['objective'],
-                'total_violation': incumbent['total_violation'],
-                'elapsed_time': status['elapsed_time'],
-                'number_of_lagrange_dual_iterations': status['number_of_lagrange_dual_iterations'],
-                'number_of_local_search_iterations': status['number_of_local_search_iterations'],
-                'number_of_tabu_search_iterations': status['number_of_tabu_search_iterations'],
-                'number_of_tabu_search_loops': status['number_of_tabu_search_loops']
+                'is_found_feasible_solution':
+                    status['is_found_feasible_solution'],
+                'objective':
+                    incumbent['objective'],
+                'total_violation':
+                    incumbent['total_violation'],
+                'elapsed_time':
+                    status['elapsed_time'],
+                'number_of_lagrange_dual_iterations':
+                    status['number_of_lagrange_dual_iterations'],
+                'number_of_local_search_iterations':
+                    status['number_of_local_search_iterations'],
+                'number_of_tabu_search_iterations':
+                    status['number_of_tabu_search_iterations'],
+                'number_of_tabu_search_loops':
+                    status['number_of_tabu_search_loops']
             }
         }
         results.append(result)

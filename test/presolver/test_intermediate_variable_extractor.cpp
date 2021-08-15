@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020 Yuji KOGUMA
+// Copyright (c) 2020-2021 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -50,10 +50,9 @@ TEST_F(TestIntermediateVariableExtractor, extract_intermediate_variables) {
 
         /// Extracting (Round 1)
         {
-            printemps::presolver::
-                extract_independent_intermediate_variables(  //
-                    &model,                                  //
-                    false);
+            printemps::presolver::extract_dependent_intermediate_variables(  //
+                &model,                                                      //
+                false);
 
             model.categorize_variables();
             model.categorize_constraints();
@@ -76,8 +75,8 @@ TEST_F(TestIntermediateVariableExtractor, extract_intermediate_variables) {
         /// Eliminating (Round 1-1)
         {
             printemps::presolver::
-                eliminate_independent_intermediate_variables(  //
-                    &model,                                    //
+                eliminate_dependent_intermediate_variables(  //
+                    &model,                                  //
                     false);
 
             model.categorize_variables();
@@ -96,8 +95,8 @@ TEST_F(TestIntermediateVariableExtractor, extract_intermediate_variables) {
         /// Eliminating (Round 1-2)
         {
             printemps::presolver::
-                eliminate_independent_intermediate_variables(  //
-                    &model,                                    //
+                eliminate_dependent_intermediate_variables(  //
+                    &model,                                  //
                     false);
 
             model.categorize_variables();
@@ -148,10 +147,9 @@ TEST_F(TestIntermediateVariableExtractor, extract_intermediate_variables) {
 
         /// Extracting (Round 1)
         {
-            printemps::presolver::
-                extract_independent_intermediate_variables(  //
-                    &model,                                  //
-                    false);
+            printemps::presolver::extract_dependent_intermediate_variables(  //
+                &model,                                                      //
+                false);
 
             model.categorize_variables();
             model.categorize_constraints();
@@ -196,8 +194,8 @@ TEST_F(TestIntermediateVariableExtractor, extract_intermediate_variables) {
         /// Eliminating (Round 1-1)
         {
             printemps::presolver::
-                eliminate_independent_intermediate_variables(  //
-                    &model,                                    //
+                eliminate_dependent_intermediate_variables(  //
+                    &model,                                  //
                     false);
 
             model.categorize_variables();

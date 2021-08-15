@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020 Yuji KOGUMA
+// Copyright (c) 2020-2021 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -257,8 +257,8 @@ class Expression : public multi_array::AbstractMultiArrayElement {
 
     /*************************************************************************/
     inline constexpr T_Expression evaluate(
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
-        noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
+        const noexcept {
         /// The following code is required for nonlinear objective functions.
 #ifndef _MPS_SOLVER
         if (a_MOVE.alterations.size() == 0) {
@@ -352,15 +352,15 @@ class Expression : public multi_array::AbstractMultiArrayElement {
     /*************************************************************************/
     inline constexpr T_Expression lower_bound(void) {
         T_Expression lower_bound = m_constant_value;
-        for (const auto &item : m_sensitivities) {
-            if (item.first->is_fixed()) {
-                lower_bound += item.second * item.first->value();
+        for (const auto &sensitivity : m_sensitivities) {
+            if (sensitivity.first->is_fixed()) {
+                lower_bound += sensitivity.second * sensitivity.first->value();
             } else {
-                if (item.second > 0) {
-                    lower_bound += item.second * item.first->lower_bound();
-                } else {
-                    lower_bound += item.second * item.first->upper_bound();
-                }
+                auto value = (sensitivity.second > 0)
+                                 ? sensitivity.first->lower_bound()
+                                 : sensitivity.first->upper_bound();
+
+                lower_bound += sensitivity.second * value;
             }
         }
         return lower_bound;
@@ -369,15 +369,15 @@ class Expression : public multi_array::AbstractMultiArrayElement {
     /*************************************************************************/
     inline constexpr T_Expression upper_bound(void) {
         T_Expression upper_bound = m_constant_value;
-        for (const auto &item : m_sensitivities) {
-            if (item.first->is_fixed()) {
-                upper_bound += item.second * item.first->value();
+        for (const auto &sensitivity : m_sensitivities) {
+            if (sensitivity.first->is_fixed()) {
+                upper_bound += sensitivity.second * sensitivity.first->value();
             } else {
-                if (item.second > 0) {
-                    upper_bound += item.second * item.first->upper_bound();
-                } else {
-                    upper_bound += item.second * item.first->lower_bound();
-                }
+                auto value = (sensitivity.second > 0)
+                                 ? sensitivity.first->upper_bound()
+                                 : sensitivity.first->lower_bound();
+
+                upper_bound += sensitivity.second * value;
             }
         }
         return upper_bound;
@@ -386,9 +386,10 @@ class Expression : public multi_array::AbstractMultiArrayElement {
     /*************************************************************************/
     inline constexpr T_Expression fixed_term_value(void) {
         int fixed_term_value = 0;
-        for (const auto &item : m_sensitivities) {
-            if (item.first->is_fixed()) {
-                fixed_term_value += item.second * item.first->value();
+        for (const auto &sensitivity : m_sensitivities) {
+            if (sensitivity.first->is_fixed()) {
+                fixed_term_value +=
+                    sensitivity.second * sensitivity.first->value();
             }
         }
         return fixed_term_value;
@@ -446,26 +447,26 @@ class Expression : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr std::uint64_t plus_one_coefficient_mask(void) const
-        noexcept {
+    inline constexpr std::uint64_t plus_one_coefficient_mask(
+        void) const noexcept {
         return m_plus_one_coefficient_mask;
     }
 
     /*************************************************************************/
-    inline constexpr std::uint64_t minus_one_coefficient_mask(void) const
-        noexcept {
+    inline constexpr std::uint64_t minus_one_coefficient_mask(
+        void) const noexcept {
         return m_minus_one_coefficient_mask;
     }
 
     /*************************************************************************/
-    inline constexpr bool has_effective_plus_one_coefficient_mask(void) const
-        noexcept {
+    inline constexpr bool has_effective_plus_one_coefficient_mask(
+        void) const noexcept {
         return m_has_effective_plus_one_coefficient_mask;
     }
 
     /*************************************************************************/
-    inline constexpr bool has_effective_minus_one_coefficient_mask(void) const
-        noexcept {
+    inline constexpr bool has_effective_minus_one_coefficient_mask(
+        void) const noexcept {
         return m_has_effective_minus_one_coefficient_mask;
     }
 
