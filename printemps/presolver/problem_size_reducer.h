@@ -685,7 +685,7 @@ constexpr bool reduce_problem_size(
     model::Model<T_Variable, T_Expression> *a_model_ptr,  //
     const bool a_IS_ENABLED_PAIRWISE_PRESOLVE, const bool a_IS_ENABLED_PRINT) {
     utility::print_single_line(a_IS_ENABLED_PRINT);
-    utility::print_message("Presolving...", a_IS_ENABLED_PRINT);
+    utility::print_message("Reducing problem size...", a_IS_ENABLED_PRINT);
 
     int number_of_disabled_constaints = 0;
     int number_of_fixed_variables     = 0;
