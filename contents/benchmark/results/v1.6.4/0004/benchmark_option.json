@@ -1,0 +1,16 @@
+{
+    "iteration_max": 10000000,
+    "time_max": 3600.0,
+    "penalty_coefficient_relaxing_rate": 0.9,
+    "penalty_coefficient_tightening_rate": 1.0,
+    "is_enabled_aggregation_move": true,
+    "is_enabled_precedence_move": false,
+    "is_enabled_variable_bound_move": false,
+    "is_enabled_chain_move": true,
+    "verbose": 0,
+    "is_enabled_write_trend": true,
+    "tabu_search": {
+        "iteration_max": 200,
+        "time_max": 120
+    }
+}
