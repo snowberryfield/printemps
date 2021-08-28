@@ -203,26 +203,22 @@ constexpr int fix_redundant_set_variables(
     if (a_model_ptr->is_minimization()) {
         std::sort(variable_ptrs.begin(), variable_ptrs.end(),
                   [](const auto &a_LHS, const auto &a_RHS) {
-                      if (a_LHS->related_constraint_ptrs() ==
-                          a_RHS->related_constraint_ptrs()) {
-                          return a_LHS->objective_sensitivity() >
-                                 a_RHS->objective_sensitivity();
-                      } else {
-                          return a_LHS->related_constraint_ptrs().size() <
-                                 a_RHS->related_constraint_ptrs().size();
-                      }
+                      return (a_LHS->related_constraint_ptrs() ==
+                              a_RHS->related_constraint_ptrs())
+                                 ? (a_LHS->objective_sensitivity() >
+                                    a_RHS->objective_sensitivity())
+                                 : (a_LHS->related_constraint_ptrs().size() <
+                                    a_RHS->related_constraint_ptrs().size());
                   });
     } else {
         std::sort(variable_ptrs.begin(), variable_ptrs.end(),
                   [](const auto &a_LHS, const auto &a_RHS) {
-                      if (a_LHS->related_constraint_ptrs() ==
-                          a_RHS->related_constraint_ptrs()) {
-                          return a_LHS->objective_sensitivity() <
-                                 a_RHS->objective_sensitivity();
-                      } else {
-                          return a_LHS->related_constraint_ptrs().size() <
-                                 a_RHS->related_constraint_ptrs().size();
-                      }
+                      return (a_LHS->related_constraint_ptrs() ==
+                              a_RHS->related_constraint_ptrs())
+                                 ? (a_LHS->objective_sensitivity() <
+                                    a_RHS->objective_sensitivity())
+                                 : (a_LHS->related_constraint_ptrs().size() <
+                                    a_RHS->related_constraint_ptrs().size());
                   });
     }
 
