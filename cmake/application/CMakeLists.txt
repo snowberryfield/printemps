@@ -25,7 +25,7 @@ if(${CMAKE_BUILD_TYPE} STREQUAL "Release")
     )
 else() # Debug
     add_compile_options(
-        -std=c++17
+        -std=c++14
         -Wall
         -Wextra
         -Wno-error=missing-field-initializers
