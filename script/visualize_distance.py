@@ -5,14 +5,20 @@
 # https://opensource.org/licenses/mit-license.php
 ###############################################################################
 
+import copy
 import json
 import argparse
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 import matplotlib.cm as cm
+from mpl_toolkits.mplot3d import Axes3D
 import networkx as nx
+from sklearn.manifold import MDS
 
 ###############################################################################
+
+np.random.seed(1)
 
 
 def compute_distance(first, second):
@@ -37,81 +43,146 @@ def compute_distance(first, second):
 ###############################################################################
 
 
-def visualize_distance(solution_object, output_file_name,
-                       max_number_of_solutions, is_descending, is_enabled_create_mst):
-    '''
-    Visualize Manhattan distance for each solutions pair as a heatmap.
-    '''
-    # Summary
-    name = solution_object['name']
-    number_of_variables = solution_object['number_of_variables']
-    number_of_constraints = solution_object['number_of_constraints']
+class Visualizer:
+    def __init__(self,
+                 solution_object,
+                 max_number_of_solutions,
+                 is_enabled_shuffle,
+                 is_descending):
+        self.solutions = copy.deepcopy(solution_object['solutions'])
+        self.name = solution_object['name']
+        self.number_of_variables = solution_object['number_of_variables']
+        self.number_of_constraints = solution_object['number_of_constraints']
 
-    # Sort solutions.
-    solutions = solution_object['solutions']
-    if is_descending:
-        solutions.sort(key=lambda x: -x['objective'])
-    else:
-        solutions.sort(key=lambda x: x['objective'])
+        self.max_number_of_solutions = max_number_of_solutions
+        self.is_descending = is_descending
+        self.number_of_solutions = min(
+            len(self.solutions), self.max_number_of_solutions)
 
-    number_of_solutions = min(len(solutions), max_number_of_solutions)
+        if is_enabled_shuffle:
+            np.random.shuffle(self.solutions)
+            self.solutions = self.solutions[0:self.number_of_solutions]
 
-    # Compute Manhattan distance for each solutions pair.
-    distances = np.zeros(
-        (number_of_solutions, number_of_solutions))
+        if self.is_descending:
+            self.solutions.sort(key=lambda x: -x['objective'])
+        else:
+            self.solutions.sort(key=lambda x: x['objective'])
+        self.solutions = self.solutions[0:self.number_of_solutions]
 
-    for i in range(number_of_solutions):
-        for j in range(i+1, number_of_solutions):
-            distance = compute_distance(
-                solutions[i]['variables'],
-                solutions[j]['variables'])
-            distances[i, j] = distance
-            distances[j, i] = distance
+        self.__setup_distance_matrix()
 
-    # Plot the Manhattan distances as a heatmap.
-    title = 'Manhattan distance between 2 solutions \n (Instance: %s, #Var.: %d, #Cons.: %d)' \
-        % (name, number_of_variables, number_of_constraints)
-    if is_descending:
-        footnote_text = '* The solutions are sorted in descending order of objective function value.'
-    else:
-        footnote_text = '* The solutions are sorted in ascending order of objective function value.'
+    ###########################################################################
+    def __setup_distance_matrix(self):
+        # Compute Manhattan distance for each solutions pair.
+        distance_matrix = np.zeros(
+            (self.number_of_solutions, self.number_of_solutions))
 
-    plt.title(title)
-    plt.imshow(distances)
-    plt.xlabel('Solution No.')
-    plt.ylabel('Solution No.')
-    plt.text(-0.1 * number_of_solutions,
-             1.19 * number_of_solutions,
-             footnote_text)
+        for i in range(self.number_of_solutions):
+            for j in range(i+1, self.number_of_solutions):
+                distance = compute_distance(
+                    self.solutions[i]['variables'],
+                    self.solutions[j]['variables'])
+                distance_matrix[i, j] = distance
+                distance_matrix[j, i] = distance
+        self.distance_matrix = distance_matrix
 
-    plt.grid(False)
-    plt.colorbar()
-    plt.subplots_adjust(bottom=0.15)
-    plt.savefig(output_file_name)
+    ###########################################################################
+    def plot_heatmap(self,
+                     output_file_name='heatmap.png',
+                     is_enabled_write_title=False):
+        # Plot the Manhattan distance_matrix as a heatmap.
+        title = 'Manhattan distance between 2 solutions \n (Instance: %s, #Var.: %d, #Cons.: %d)' \
+            % (self.name, self.number_of_variables, self.number_of_constraints)
+        if self.is_descending:
+            footnote_text = '* The solutions are sorted in descending order of objective function value.'
+        else:
+            footnote_text = '* The solutions are sorted in ascending order of objective function value.'
 
-    # Create the minimum spanning tree (Optional)
-    if is_enabled_create_mst:
+        if is_enabled_write_title:
+            plt.title(title)
+        plt.imshow(self.distance_matrix)
+        plt.xlabel('Solution No.')
+        plt.ylabel('Solution No.')
+        plt.text(-0.1 * self.number_of_solutions,
+                 1.19 * self.number_of_solutions,
+                 footnote_text)
+
+        plt.grid(False)
+        plt.colorbar()
+        plt.subplots_adjust(bottom=0.15)
+        plt.savefig(output_file_name)
+
+    ###########################################################################
+    def plot_projected(self,
+                       output_file_name='projected.png',
+                       is_enabled_write_title=False):
+        # Plot the 2D-projected solution coordinates and objective function values.
+        title = '2D-projected solution coordinates and objective function values\n (Instance: %s, #Var.: %d, #Cons.: %d)' \
+            % (self.name, self.number_of_variables, self.number_of_constraints)
+
+        mds = MDS(
+            n_components=2, dissimilarity="precomputed", random_state=0)
+        coordinates = mds.fit_transform(self.distance_matrix)
+
+        objectives = [self.solutions[i]['objective']
+                      for i in range(self.number_of_solutions)]
+
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        if is_enabled_write_title:
+            ax.set_title(title)
+        ax.set_xlabel('coordinate 1')
+        ax.set_ylabel('coordinate 2')
+        ax.set_zlabel('Objective')
+
+        def fmt(x, pos):
+            a, b = '{:.2e}'.format(x).split('e')
+            b = int(b)
+            return r'${} \times 10^{{{}}}$'.format(a, b)
+
+        ax.zaxis.set_major_formatter(ticker.FuncFormatter(fmt))
+        # ax.
+        #ticklabel_format(style='sci', axis='z', scilimits=(-4, 4))
+
+        scatter = ax.scatter(coordinates[:, 0],
+                             coordinates[:, 1],
+                             objectives,
+                             vmin=np.min(objectives),
+                             vmax=np.max(objectives),
+                             c=objectives,
+                             cmap=plt.get_cmap('hsv'),
+                             marker=".")
+
+        cbar = fig.colorbar(scatter, ax=ax, shrink=0.5,
+                            aspect=8, pad=0.18, format=ticker.FuncFormatter(fmt))
+ #       cbar.ax.ticklabel_format()
+        ax.zaxis.labelpad = 15
+        plt.savefig(output_file_name)
+
+    ###########################################################################
+    def write_minimum_spanning_tree_dot(self, output_file_name='mst.dot'):
+        # Create the minimum spanning tree and write as a dot file.
         graph = nx.Graph()
         label = 'Solution network: The minimum spanning tree of a complete graph where nodes denote solutions. \\n' \
             + 'An edge connecting 2 nodes is weighted by Manhattan distance between the solutions. \\n' \
             + '(Instance: %s, #Var.: %d, #Cons.: %d)' \
-            % (name, number_of_variables, number_of_constraints)
+            % (self.name, self.number_of_variables, self.number_of_constraints)
         graph.graph['graph'] = {
             'label': label,
             'labelloc': 't'}
         edges = []
-        for i in range(number_of_solutions):
-            for j in range(i+1, number_of_solutions):
-                edges.append((i, j, distances[i, j]))
+        for i in range(self.number_of_solutions):
+            for j in range(i+1, self.number_of_solutions):
+                edges.append((i, j, self.distance_matrix[i, j]))
 
         graph.add_weighted_edges_from(edges)
         mst = nx.minimum_spanning_tree(graph)
 
-        objectives = [solution['objective'] for solution in solutions]
+        objectives = [solution['objective'] for solution in self.solutions]
         min_objective = np.min(objectives)
         max_objective = np.max(objectives)
 
-        for i in range(number_of_solutions):
+        for i in range(self.number_of_solutions):
             color = cm.summer(
                 np.log(objectives[i] - min_objective+1) / np.log(max_objective - min_objective+1))
             red = int(np.floor(color[0] * 255))
@@ -129,7 +200,7 @@ def visualize_distance(solution_object, output_file_name,
         for (i, j) in mst.edges:
             mst.edges[i, j]['penwidth'] = 0.3
 
-        nx.drawing.nx_agraph.write_dot(mst, 'distance.dot')
+        nx.drawing.nx_agraph.write_dot(mst, output_file_name)
 
 ###############################################################################
 
@@ -140,19 +211,24 @@ def main():
     parser.add_argument('input_file_name',
                         help='specify the input file name.',
                         type=str)
-    parser.add_argument('-o', '--output',
-                        help='specify the output file name.',
-                        type=str,
-                        default='distance.png')
-    parser.add_argument('-s', '--size',
+    parser.add_argument('-n', '--number_of_solutions',
                         help='specify the maximum number of solutions for plot.',
                         type=int,
                         default=1000000)
+    parser.add_argument('-s', '--shuffle',
+                        help='Extract solutions with shuffling if -n option is enabled.',
+                        action='store_true')
     parser.add_argument('--descending',
-                        help='sort solutions in descending order',
+                        help='sort solutions in descending order.',
+                        action='store_true')
+    parser.add_argument('--projected',
+                        help='enable generating plots of 2D-projected solution coordinates and objective function values.',
                         action='store_true')
     parser.add_argument('--dot',
-                        help='enable generating the minimum spanning tree dot file',
+                        help='enable generating the minimum spanning tree dot file.',
+                        action='store_true')
+    parser.add_argument('--title',
+                        help='add title to figures.',
                         action='store_true')
     args = parser.parse_args()
 
@@ -161,11 +237,18 @@ def main():
         solution_object = json.load(f)
         f.close()
 
-    visualize_distance(solution_object,
-                       output_file_name=args.output,
-                       max_number_of_solutions=args.size,
-                       is_descending=args.descending,
-                       is_enabled_create_mst=args.dot)
+    visualizer = Visualizer(solution_object,
+                            max_number_of_solutions=args.number_of_solutions,
+                            is_enabled_shuffle=args.shuffle,
+                            is_descending=args.descending)
+
+    visualizer.plot_heatmap(is_enabled_write_title=args.title)
+
+    if args.projected:
+        visualizer.plot_projected(is_enabled_write_title=args.title)
+
+    if args.dot:
+        visualizer.write_minimum_spanning_tree_dot()
 
 ###############################################################################
 
