@@ -1822,8 +1822,8 @@ class Model {
 
     /*************************************************************************/
     inline solution::SolutionScore evaluate(
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
-        const noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
+        noexcept {
         solution::SolutionScore score;
         this->evaluate(&score, a_MOVE);
         return score;
@@ -1839,9 +1839,10 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void evaluate(solution::SolutionScore *a_score_ptr,  //
-                            const neighborhood::Move<T_Variable, T_Expression>
-                                &a_MOVE) const noexcept {
+    constexpr void evaluate(
+        solution::SolutionScore *                           a_score_ptr,  //
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
+        noexcept {
         double total_violation = 0.0;
         double local_penalty   = 0.0;
         double global_penalty  = 0.0;
@@ -2409,6 +2410,150 @@ class Model {
         }
         objective.set_sensitivities(objective_sensitivities);
         this->minimize(objective);
+    }
+
+    /*********************************************************************/
+    void write_mps(const std::string &a_FILE_NAME) {
+        std::ofstream ofs(a_FILE_NAME);
+        /**
+         * Determine unique name of decision variables and constraints.
+         */
+        this->setup_unique_name();
+
+        /**
+         * Determine the linearity.
+         */
+        this->setup_is_linear();
+
+        if (!m_is_linear) {
+            throw std::logic_error(utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "Nonlinear model cannot be written in MPS format."));
+        }
+        /**
+         * Determine the constraint sensitivities.
+         */
+        this->setup_variable_related_constraints();
+        this->setup_variable_sensitivity();
+
+        /**
+         * Write instance name.
+         */
+        if (m_name.empty()) {
+            ofs << "NAME untitled" << std::endl;
+        } else {
+            ofs << "NAME " << utility::delete_space(m_name) << std::endl;
+        }
+        /**
+         * Write ROWS section.
+         */
+        ofs << "ROWS" << std::endl;
+        ofs << " N    obj" << std::endl;
+        for (const auto &proxy : m_constraint_proxies) {
+            for (const auto &constraint : proxy.flat_indexed_constraints()) {
+                switch (constraint.sense()) {
+                    case model_component::ConstraintSense::Equal: {
+                        ofs << " E    "
+                            << utility::delete_space(constraint.name())
+                            << std::endl;
+                        break;
+                    }
+                    case model_component::ConstraintSense::Less: {
+                        ofs << " L    "
+                            << utility::delete_space(constraint.name())
+                            << std::endl;
+                        break;
+                    }
+                    case model_component::ConstraintSense::Greater: {
+                        ofs << " G    "
+                            << utility::delete_space(constraint.name())
+                            << std::endl;
+                        break;
+                    }
+                    default: {
+                    }
+                }
+            }
+        }
+
+        /**
+         * Write COLUMNS section.
+         */
+        ofs << "COLUMNS" << std::endl;
+        ofs << "    MARK0000    'MARKER'    'INTORG'" << std::endl;
+
+        for (const auto &proxy : m_variable_proxies) {
+            for (const auto &variable : proxy.flat_indexed_variables()) {
+                auto variable_name = utility::delete_space(variable.name());
+                /// Objective
+                if (fabs(variable.objective_sensitivity()) >
+                    constant::EPSILON_10) {
+                    if (m_is_minimization) {
+                        ofs << "    " << variable_name << "     obj    "
+                            << variable.objective_sensitivity() << std::endl;
+                    } else {
+                        ofs << "    " << variable_name << "     obj    "
+                            << -variable.objective_sensitivity() << std::endl;
+                    }
+                }
+                /// Constraints
+                for (const auto &sensitivity :
+                     variable.constraint_sensitivities()) {
+                    auto constraint_name =
+                        utility::delete_space(sensitivity.first->name());
+                    auto coefficient = sensitivity.second;
+                    ofs << "    " << variable_name << "    " << constraint_name
+                        << "    " << coefficient << std::endl;
+                }
+            }
+        }
+        ofs << "    MARK0001    'MARKER'    'INTEND'" << std::endl;
+
+        /**
+         * Write RHS section.
+         */
+        ofs << "RHS" << std::endl;
+        for (const auto &proxy : m_constraint_proxies) {
+            for (const auto &constraint : proxy.flat_indexed_constraints()) {
+                auto constraint_name = utility::delete_space(constraint.name());
+                auto &expression     = constraint.expression();
+                ofs << "    rhs    " << constraint_name << "    "
+                    << -expression.constant_value() << std::endl;
+            }
+        }
+
+        /**
+         * Write Bounds section.
+         */
+        ofs << "BOUNDS" << std::endl;
+        for (const auto &proxy : m_variable_proxies) {
+            for (const auto &variable : proxy.flat_indexed_variables()) {
+                auto variable_name = utility::delete_space(variable.name());
+                if (variable.is_fixed()) {
+                    ofs << "    FX    bnd    " << variable_name << "     "
+                        << variable.value() << std::endl;
+                } else {
+                    if (variable.lower_bound() != constant::INT_HALF_MIN) {
+                        if (variable.lower_bound() != 0) {
+                            ofs << "    LO    bnd    " << variable_name
+                                << "    " << variable.lower_bound()
+                                << std::endl;
+                        }
+                    }
+                    if (variable.upper_bound() != constant::INT_HALF_MAX) {
+                        ofs << "    UP    bnd    " << variable_name << "    "
+                            << variable.upper_bound() << std::endl;
+                    }
+                }
+            }
+        }
+
+        /**
+         * Write END section.
+         */
+        ofs << "ENDATA" << std::endl;
+
+        ofs.close();
     }
 
     /*************************************************************************/
