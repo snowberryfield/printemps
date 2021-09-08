@@ -15,6 +15,7 @@ import matplotlib.cm as cm
 from mpl_toolkits.mplot3d import Axes3D
 import networkx as nx
 from sklearn.manifold import MDS
+from sklearn.manifold import TSNE
 
 ###############################################################################
 
@@ -113,15 +114,57 @@ class Visualizer:
         plt.savefig(output_file_name)
 
     ###########################################################################
-    def plot_projected(self,
-                       output_file_name='projected.png',
-                       is_enabled_write_title=False):
-        # Plot the 2D-projected solution coordinates and objective function values.
-        title = '2D-projected solution coordinates and objective function values\n (Instance: %s, #Var.: %d, #Cons.: %d)' \
+    def plot_tsne(self,
+                  output_file_name='tsne.png',
+                  is_enabled_write_title=False):
+        # Plot the 2D solution coordinates mapped by t-SNE and objective function values.
+        title = '2D solution coordinates mapped into 2D with t-SNE and objective function values\n (Instance: %s, #Var.: %d, #Cons.: %d)' \
             % (self.name, self.number_of_variables, self.number_of_constraints)
 
-        mds = MDS(
-            n_components=2, dissimilarity="precomputed", random_state=0)
+        tsne = TSNE(
+            n_components=2, random_state=0)
+        coordinates = tsne.fit_transform(self.distance_matrix)
+
+        objectives = [self.solutions[i]['objective']
+                      for i in range(self.number_of_solutions)]
+
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        if is_enabled_write_title:
+            ax.set_title(title)
+        ax.set_xlabel('t-SNE 1')
+        ax.set_ylabel('t-SNE 2')
+        ax.set_zlabel('Objective')
+
+        def fmt(x, pos):
+            a, b = '{:.2e}'.format(x).split('e')
+            b = int(b)
+            return r'${} \times 10^{{{}}}$'.format(a, b)
+
+        ax.zaxis.set_major_formatter(ticker.FuncFormatter(fmt))
+        scatter = ax.scatter(coordinates[:, 0],
+                             coordinates[:, 1],
+                             objectives,
+                             vmin=np.min(objectives),
+                             vmax=np.max(objectives),
+                             c=objectives,
+                             cmap=plt.get_cmap('hsv'),
+                             marker='.')
+
+        fig.colorbar(scatter, ax=ax, shrink=0.5,
+                     aspect=8, pad=0.18, format=ticker.FuncFormatter(fmt))
+        ax.zaxis.labelpad = 15
+        plt.savefig(output_file_name)
+
+    ###########################################################################
+    def plot_mds(self,
+                 output_file_name='mds.png',
+                 is_enabled_write_title=False):
+        # Plot the 2D solution coordinates mapped by MDS and objective function values.
+        title = '2D solution coordinates mapped by MDS and objective function values\n (Instance: %s, #Var.: %d, #Cons.: %d)' \
+            % (self.name, self.number_of_variables, self.number_of_constraints)
+
+        mds = MDS(n_components=2, random_state=0, dissimilarity='precomputed')
         coordinates = mds.fit_transform(self.distance_matrix)
 
         objectives = [self.solutions[i]['objective']
@@ -131,8 +174,8 @@ class Visualizer:
         ax = fig.add_subplot(111, projection='3d')
         if is_enabled_write_title:
             ax.set_title(title)
-        ax.set_xlabel('coordinate 1')
-        ax.set_ylabel('coordinate 2')
+        ax.set_xlabel('MDS 1')
+        ax.set_ylabel('MDS 2')
         ax.set_zlabel('Objective')
 
         def fmt(x, pos):
@@ -141,9 +184,6 @@ class Visualizer:
             return r'${} \times 10^{{{}}}$'.format(a, b)
 
         ax.zaxis.set_major_formatter(ticker.FuncFormatter(fmt))
-        # ax.
-        #ticklabel_format(style='sci', axis='z', scilimits=(-4, 4))
-
         scatter = ax.scatter(coordinates[:, 0],
                              coordinates[:, 1],
                              objectives,
@@ -151,11 +191,10 @@ class Visualizer:
                              vmax=np.max(objectives),
                              c=objectives,
                              cmap=plt.get_cmap('hsv'),
-                             marker=".")
+                             marker='.')
 
-        cbar = fig.colorbar(scatter, ax=ax, shrink=0.5,
-                            aspect=8, pad=0.18, format=ticker.FuncFormatter(fmt))
- #       cbar.ax.ticklabel_format()
+        fig.colorbar(scatter, ax=ax, shrink=0.5,
+                     aspect=8, pad=0.18, format=ticker.FuncFormatter(fmt))
         ax.zaxis.labelpad = 15
         plt.savefig(output_file_name)
 
@@ -221,8 +260,11 @@ def main():
     parser.add_argument('--descending',
                         help='sort solutions in descending order.',
                         action='store_true')
-    parser.add_argument('--projected',
-                        help='enable generating plots of 2D-projected solution coordinates and objective function values.',
+    parser.add_argument('--tsne',
+                        help='enable generating plots of 2D solution coordinates mapped by t-SNE and objective function values.',
+                        action='store_true')
+    parser.add_argument('--mds',
+                        help='enable generating plots of 2D solution coordinates mapped by MDS and objective function values.',
                         action='store_true')
     parser.add_argument('--dot',
                         help='enable generating the minimum spanning tree dot file.',
@@ -244,8 +286,11 @@ def main():
 
     visualizer.plot_heatmap(is_enabled_write_title=args.title)
 
-    if args.projected:
-        visualizer.plot_projected(is_enabled_write_title=args.title)
+    if args.tsne:
+        visualizer.plot_tsne(is_enabled_write_title=args.title)
+
+    if args.mds:
+        visualizer.plot_mds(is_enabled_write_title=args.title)
 
     if args.dot:
         visualizer.write_minimum_spanning_tree_dot()
@@ -253,7 +298,7 @@ def main():
 ###############################################################################
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
 
 ###############################################################################
