@@ -215,15 +215,15 @@ printemps::option::Option read_option(const std::string &a_FILE_NAME) {
               option_object);
 
     /**************************************************************************/
-    /// is_enabled_collect_historical_data
-    read_json(&option.is_enabled_collect_historical_data,  //
-              "is_enabled_collect_historical_data",        //
+    /// is_enabled_store_feasible_solutions
+    read_json(&option.is_enabled_store_feasible_solutions,  //
+              "is_enabled_store_feasible_solutions",        //
               option_object);
 
     /**************************************************************************/
-    /// historical_data_capacity
-    read_json(&option.historical_data_capacity,  //
-              "historical_data_capacity",        //
+    /// feasible_solutions_capacity
+    read_json(&option.feasible_solutions_capacity,  //
+              "feasible_solutions_capacity",        //
               option_object);
 
     /**************************************************************************/
