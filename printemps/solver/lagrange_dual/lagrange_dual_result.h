@@ -21,7 +21,7 @@ struct LagrangeDualResult {
     LagrangeDualTerminationStatus                       termination_status;
 
     std::vector<solution::SparseSolution<T_Variable, T_Expression>>
-        historical_feasible_solutions;
+        feasible_solutions;
 
     /*************************************************************************/
     LagrangeDualResult(void) {
@@ -38,7 +38,7 @@ struct LagrangeDualResult {
         this->number_of_iterations = 0;
         this->termination_status =
             LagrangeDualTerminationStatus::ITERATION_OVER;
-        this->historical_feasible_solutions.clear();
+        this->feasible_solutions.clear();
     }
 };
 }  // namespace lagrange_dual
