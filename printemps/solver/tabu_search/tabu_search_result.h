@@ -31,7 +31,7 @@ struct TabuSearchResult {
     TabuSearchTerminationStatus termination_status;
 
     std::vector<solution::SparseSolution<T_Variable, T_Expression>>
-        historical_feasible_solutions;
+        feasible_solutions;
 
     /*************************************************************************/
     TabuSearchResult(void) {
@@ -58,7 +58,7 @@ struct TabuSearchResult {
 
         this->termination_status = TabuSearchTerminationStatus::ITERATION_OVER;
 
-        this->historical_feasible_solutions.clear();
+        this->feasible_solutions.clear();
     }
 };
 }  // namespace tabu_search

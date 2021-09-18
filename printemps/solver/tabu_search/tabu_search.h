@@ -94,10 +94,10 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     int last_tabu_tenure_updated_iteration = 0;
 
     /**
-     * Prepare historical solutions holder.
+     * Prepare feasible solutions holder.
      */
     std::vector<solution::SparseSolution<T_Variable, T_Expression>>
-        historical_feasible_solutions;
+        feasible_solutions;
 
     /**
      * Reset the variable improvability.
@@ -474,12 +474,11 @@ TabuSearchResult<T_Variable, T_Expression> solve(
         }
 
         /**
-         * Push the current solution to historical data.
+         * Store the current feasible solution.
          */
-        if (option.is_enabled_collect_historical_data &&
+        if (option.is_enabled_store_feasible_solutions &&
             current_solution_score.is_feasible) {
-            historical_feasible_solutions.push_back(
-                model_ptr->export_plain_solution());
+            feasible_solutions.push_back(model_ptr->export_plain_solution());
         }
 
         /**
@@ -768,8 +767,8 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                                max_objective - min_objective)) /
         std::max(1.0, min_local_penalty);
 
-    result.termination_status            = termination_status;
-    result.historical_feasible_solutions = historical_feasible_solutions;
+    result.termination_status = termination_status;
+    result.feasible_solutions = feasible_solutions;
 
     return result;
 }

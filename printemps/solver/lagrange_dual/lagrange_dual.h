@@ -122,10 +122,10 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
     double step_size = 1.0 / model_ptr->number_of_variables();
 
     /**
-     * Prepare historical solutions holder.
+     * Prepare feasible solutions holder.
      */
     std::vector<solution::SparseSolution<T_Variable, T_Expression>>
-        historical_feasible_solutions;
+        feasible_solutions;
 
     /**
      * Prepare other local variables.
@@ -260,11 +260,10 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
         total_update_status = update_status || total_update_status;
 
         /**
-         * Push the current solution to historical data.
+         * Store the current feasible solution.
          */
         if (solution_score.is_feasible) {
-            historical_feasible_solutions.push_back(
-                model_ptr->export_plain_solution());
+            feasible_solutions.push_back(model_ptr->export_plain_solution());
         }
 
         /**
@@ -339,14 +338,14 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
      * Prepare the result.
      */
     Result_T result;
-    result.lagrangian                    = lagrangian_incumbent;
-    result.primal_solution               = primal_incumbent;
-    result.dual_value_proxies            = dual_value_proxies_incumbent;
-    result.incumbent_holder              = incumbent_holder;
-    result.total_update_status           = total_update_status;
-    result.number_of_iterations          = iteration;
-    result.termination_status            = termination_status;
-    result.historical_feasible_solutions = historical_feasible_solutions;
+    result.lagrangian           = lagrangian_incumbent;
+    result.primal_solution      = primal_incumbent;
+    result.dual_value_proxies   = dual_value_proxies_incumbent;
+    result.incumbent_holder     = incumbent_holder;
+    result.total_update_status  = total_update_status;
+    result.number_of_iterations = iteration;
+    result.termination_status   = termination_status;
+    result.feasible_solutions   = feasible_solutions;
 
     return result;
 }

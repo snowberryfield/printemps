@@ -54,8 +54,8 @@ struct OptionConstant {
     static constexpr bool   DEFAULT_SEED                   = 1;
     static constexpr bool   DEFAULT_VERBOSE                = verbose::None;
     static constexpr bool   DEFAULT_IS_ENABLED_WRITE_TREND = false;
-    static constexpr bool   DEFAULT_IS_ENABLED_COLLECT_HISTORICAL_DATA = false;
-    static constexpr int    DEFAULT_HISTORICAL_DATA_CAPACITY           = 1000;
+    static constexpr bool   DEFAULT_IS_ENABLED_STORE_FEASIBLE_SOLUTIONS = false;
+    static constexpr int    DEFAULT_FEASIBLE_SOLUTIONS_CAPACITY         = 1000;
 };
 
 /*****************************************************************************/
@@ -95,9 +95,9 @@ struct Option {
     double target_objective_value;
     int    seed;  // hidden
     int    verbose;
-    bool   is_enabled_write_trend;              // hidden
-    bool   is_enabled_collect_historical_data;  // hidden
-    int    historical_data_capacity;            // hidden
+    bool   is_enabled_write_trend;               // hidden
+    bool   is_enabled_store_feasible_solutions;  // hidden
+    int    feasible_solutions_capacity;          // hidden
 
     TabuSearchOption   tabu_search;
     LocalSearchOption  local_search;
@@ -163,10 +163,10 @@ struct Option {
         this->verbose                = OptionConstant::DEFAULT_VERBOSE;
         this->is_enabled_write_trend =
             OptionConstant::DEFAULT_IS_ENABLED_WRITE_TREND;
-        this->is_enabled_collect_historical_data =
-            OptionConstant::DEFAULT_IS_ENABLED_COLLECT_HISTORICAL_DATA;
-        this->historical_data_capacity =
-            OptionConstant::DEFAULT_HISTORICAL_DATA_CAPACITY;
+        this->is_enabled_store_feasible_solutions =
+            OptionConstant::DEFAULT_IS_ENABLED_STORE_FEASIBLE_SOLUTIONS;
+        this->feasible_solutions_capacity =
+            OptionConstant::DEFAULT_FEASIBLE_SOLUTIONS_CAPACITY;
 
         this->lagrange_dual.initialize();
         this->local_search.initialize();
@@ -304,13 +304,14 @@ struct Option {
             " -- is_enabled_write_trend: " +  //
             utility::to_string(this->is_enabled_write_trend, "%d"));
 
-        utility::print(                                   //
-            " -- is_enabled_collect_historical_data: " +  //
-            utility::to_string(this->is_enabled_collect_historical_data, "%d"));
+        utility::print(                                    //
+            " -- is_enabled_store_feasible_solutions: " +  //
+            utility::to_string(this->is_enabled_store_feasible_solutions,
+                               "%d"));
 
-        utility::print(                         //
-            " -- historical_data_capacity: " +  //
-            utility::to_string(this->historical_data_capacity, "%d"));
+        utility::print(                            //
+            " -- feasible_solutions_capacity: " +  //
+            utility::to_string(this->feasible_solutions_capacity, "%d"));
 
         utility::print(                            //
             " -- lagrange_dual.iteration_max: " +  //
