@@ -13,9 +13,16 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import matplotlib.cm as cm
 from mpl_toolkits.mplot3d import Axes3D
+
 import networkx as nx
+
 from sklearn.manifold import MDS
 from sklearn.manifold import TSNE
+
+import pandas as pd
+
+import plotly
+import plotly.express as px
 
 ###############################################################################
 
@@ -91,8 +98,8 @@ class Visualizer:
     def plot_heatmap(self,
                      output_file_name='heatmap.png',
                      is_enabled_write_title=False):
-        # Plot the Manhattan distance_matrix as a heatmap.
-        title = 'Manhattan distance between 2 solutions \n (Instance: %s, #Var.: %d, #Cons.: %d)' \
+        # plot the Manhattan distance_matrix as a heatmap.
+        title = 'Manhattan distance between 2 solutions \n (Instance: %s, #Variable: %d, #Constraint: %d)' \
             % (self.name, self.number_of_variables, self.number_of_constraints)
         if self.is_descending:
             footnote_text = '* The solutions are sorted in descending order of objective function value.'
@@ -118,7 +125,7 @@ class Visualizer:
                   output_file_name='tsne.png',
                   is_enabled_write_title=False):
         # Plot the 2D solution coordinates mapped by t-SNE and objective function values.
-        title = '2D solution coordinates mapped into 2D with t-SNE and objective function values\n (Instance: %s, #Var.: %d, #Cons.: %d)' \
+        title = '2D solution coordinates mapped into 2D with t-SNE and objective function values\n (Instance: %s, #Variable: %d, #Constraint: %d)' \
             % (self.name, self.number_of_variables, self.number_of_constraints)
 
         tsne = TSNE(
@@ -161,7 +168,7 @@ class Visualizer:
                  output_file_name='mds.png',
                  is_enabled_write_title=False):
         # Plot the 2D solution coordinates mapped by MDS and objective function values.
-        title = '2D solution coordinates mapped by MDS and objective function values\n (Instance: %s, #Var.: %d, #Cons.: %d)' \
+        title = '2D solution coordinates mapped by MDS and objective function values\n (Instance: %s, #Variable: %d, #Constraint: %d)' \
             % (self.name, self.number_of_variables, self.number_of_constraints)
 
         mds = MDS(n_components=2, random_state=0, dissimilarity='precomputed')
@@ -199,12 +206,58 @@ class Visualizer:
         plt.savefig(output_file_name)
 
     ###########################################################################
+    def plot_contribution(self,
+                          output_file_name='contribution.html',
+                          is_enabled_write_title=False):
+        # Plot the variable contributions to objective function values.
+        title = 'Variable contributions to objective function values\n (Instance: %s, #Variable: %d, #Constraint: %d)' \
+            % (self.name, self.number_of_variables, self.number_of_constraints)
+
+        objective_distribution_dict = {}
+
+        for solution in self.solutions:
+            for variable_name in solution['variables'].keys():
+                if objective_distribution_dict.get(variable_name):
+                    objective_distribution_dict[variable_name].append(
+                        solution['objective'])
+                else:
+                    objective_distribution_dict[variable_name] = [
+                        solution['objective']]
+
+        objective_distributions = [
+            {"variable": key, "objectives": value}
+            for (key, value) in objective_distribution_dict.items()]
+
+        objective_distributions.sort(key=lambda x: min(x['objectives']))
+
+        cols = ['variable', 'objective']
+        df = pd.DataFrame(index=[], columns=cols)
+        for objective_distribution in objective_distributions:
+            for objective in objective_distribution['objectives']:
+                record = pd.Series(
+                    [objective_distribution['variable'], objective], index=df.columns)
+                df = df.append(record, ignore_index=True)
+
+        fig = px.scatter(df,
+                         x='objective',
+                         y='variable',
+                         orientation='h')
+
+        fig.update_layout(
+            title=title if is_enabled_write_title else '',
+            autosize=True
+        )
+
+        plotly.offline.plot(fig, filename=output_file_name)
+
+    ###########################################################################
+
     def write_minimum_spanning_tree_dot(self, output_file_name='mst.dot'):
         # Create the minimum spanning tree and write as a dot file.
         graph = nx.Graph()
         label = 'Solution network: The minimum spanning tree of a complete graph where nodes denote solutions. \\n' \
             + 'An edge connecting 2 nodes is weighted by Manhattan distance between the solutions. \\n' \
-            + '(Instance: %s, #Var.: %d, #Cons.: %d)' \
+            + '(Instance: %s, #Variable: %d, #Constraint: %d)' \
             % (self.name, self.number_of_variables, self.number_of_constraints)
         graph.graph['graph'] = {
             'label': label,
@@ -241,12 +294,13 @@ class Visualizer:
 
         nx.drawing.nx_agraph.write_dot(mst, output_file_name)
 
+
 ###############################################################################
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description='A script for visualizing distance for each solutions pair.')
+        description='A script for visualizing feasible solutions.')
     parser.add_argument('input_file_name',
                         help='specify the input file name.',
                         type=str)
@@ -261,10 +315,13 @@ def main():
                         help='sort solutions in descending order.',
                         action='store_true')
     parser.add_argument('--tsne',
-                        help='enable generating plots of 2D solution coordinates mapped by t-SNE and objective function values.',
+                        help='enable generating 3D plot of 2D solution coordinates mapped by t-SNE and objective function values.',
                         action='store_true')
     parser.add_argument('--mds',
-                        help='enable generating plots of 2D solution coordinates mapped by MDS and objective function values.',
+                        help='enable generating 3D plot of 2D solution coordinates mapped by MDS and objective function values.',
+                        action='store_true')
+    parser.add_argument('--contribution',
+                        help='enable generating 2D plots of variable contributions to objective function values.',
                         action='store_true')
     parser.add_argument('--dot',
                         help='enable generating the minimum spanning tree dot file.',
@@ -292,11 +349,14 @@ def main():
     if args.mds:
         visualizer.plot_mds(is_enabled_write_title=args.title)
 
+    if args.contribution:
+        visualizer.plot_contribution(is_enabled_write_title=args.title)
+
     if args.dot:
         visualizer.write_minimum_spanning_tree_dot()
 
-###############################################################################
 
+###############################################################################
 
 if __name__ == '__main__':
     main()
