@@ -186,11 +186,11 @@ Result<T_Variable, T_Expression> solve(
     /**
      * Prepare feasible solutions archive.
      */
-    solution::SolutionArchive<T_Variable, T_Expression>           //
-        solution_archive(master_option.historical_data_capacity,  //
-                         model_ptr->is_minimization(),            //
-                         model_ptr->name(),                       //
-                         model_ptr->number_of_variables(),        //
+    solution::SolutionArchive<T_Variable, T_Expression>              //
+        solution_archive(master_option.feasible_solutions_capacity,  //
+                         model_ptr->is_minimization(),               //
+                         model_ptr->name(),                          //
+                         model_ptr->number_of_variables(),           //
                          model_ptr->number_of_constraints());
 
     /**
@@ -303,11 +303,11 @@ Result<T_Variable, T_Expression> solve(
                     result.incumbent_holder.global_augmented_incumbent_score();
 
                 /**
-                 * Update the historical data.
+                 * Update the feasible solutions archive.
                  */
-                if (master_option.is_enabled_collect_historical_data &&
-                    result.historical_feasible_solutions.size() > 0) {
-                    solution_archive.push(result.historical_feasible_solutions);
+                if (master_option.is_enabled_store_feasible_solutions &&
+                    result.feasible_solutions.size() > 0) {
+                    solution_archive.push(result.feasible_solutions);
                 }
 
                 /**
@@ -424,11 +424,11 @@ Result<T_Variable, T_Expression> solve(
                 result.incumbent_holder.global_augmented_incumbent_score();
 
             /**
-             * Update the historical data.
+             * Update the feasible solutions archive.
              */
-            if (master_option.is_enabled_collect_historical_data &&
-                result.historical_feasible_solutions.size() > 0) {
-                solution_archive.push(result.historical_feasible_solutions);
+            if (master_option.is_enabled_store_feasible_solutions &&
+                result.feasible_solutions.size() > 0) {
+                solution_archive.push(result.feasible_solutions);
             }
 
             /**
@@ -995,11 +995,11 @@ Result<T_Variable, T_Expression> solve(
                           previous_solution.variable_value_proxies;
 
         /**
-         * Update the historical data.
+         * Update the feasible solutions archive.
          */
-        if (master_option.is_enabled_collect_historical_data &&
-            result.historical_feasible_solutions.size() > 0) {
-            solution_archive.push(result.historical_feasible_solutions);
+        if (master_option.is_enabled_store_feasible_solutions &&
+            result.feasible_solutions.size() > 0) {
+            solution_archive.push(result.feasible_solutions);
         }
 
         /**
@@ -1492,6 +1492,16 @@ Result<T_Variable, T_Expression> solve(
         utility::print_message(
             "Historical search intensity is " + std::to_string(intensity) + ".",
             master_option.verbose >= option::verbose::Outer);
+
+        /**
+         * Print the number of found feasible solutions.
+         */
+        if (master_option.is_enabled_store_feasible_solutions) {
+            utility::print_message(
+                "The number of feasible solutions found so far is " +
+                    std::to_string(solution_archive.solutions().size()) + ".",
+                master_option.verbose >= option::verbose::Outer);
+        }
 
         /**
          * Print the number of violative constraints.

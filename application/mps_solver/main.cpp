@@ -160,7 +160,7 @@ int main([[maybe_unused]] int argc, char *argv[]) {
     result.solution.write_solution("incumbent.sol");
     result.status.write_json_by_name("status.json");
 
-    if (option.is_enabled_collect_historical_data) {
+    if (option.is_enabled_store_feasible_solutions) {
         result.solution_archive.write_solutions_json("feasible.json");
     }
 

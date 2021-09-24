@@ -226,17 +226,18 @@ class NamedSolution {
         if (m_is_feasible) {
             ofs << "=obj= " << utility::to_string(m_objective, "%.10e")
                 << std::endl;
-            for (const auto& item : m_variable_value_proxies) {
-                const auto& proxy              = item.second;
-                int         number_of_elements = proxy.number_of_elements();
-                for (auto i = 0; i < number_of_elements; i++) {
-                    ofs << proxy.flat_indexed_names(i) << " "
-                        << proxy.flat_indexed_values(i) << std::endl;
-                }
-            }
         } else {
             ofs << "=infeas=" << std::endl;
         }
+        for (const auto& item : m_variable_value_proxies) {
+            const auto& proxy              = item.second;
+            int         number_of_elements = proxy.number_of_elements();
+            for (auto i = 0; i < number_of_elements; i++) {
+                ofs << proxy.flat_indexed_names(i) << " "
+                    << proxy.flat_indexed_values(i) << std::endl;
+            }
+        }
+
         ofs.close();
     }
 
