@@ -67,6 +67,14 @@ class Visualizer:
         self.number_of_solutions = min(
             len(self.solutions), self.max_number_of_solutions)
 
+        print(' instance name: {}'.format(self.name))
+        print(' number of variables: {}'.format(self.number_of_variables))
+        print(' number of constraints: {}'.format(self.number_of_constraints))
+        print(' original number of feasible solutions: {}'.format(
+            len(self.solutions)))
+        print(' reduced number of feasible solutions: {}'.format(
+            self.number_of_solutions))
+
         if is_enabled_shuffle:
             np.random.shuffle(self.solutions)
             self.solutions = self.solutions[0:self.number_of_solutions]
@@ -252,7 +260,9 @@ class Visualizer:
 
     ###########################################################################
 
-    def write_minimum_spanning_tree_dot(self, output_file_name='mst.dot'):
+    def write_minimum_spanning_tree_dot(self,
+                                        output_file_name='mst.dot',
+                                        is_enabled_write_title=False):
         # Create the minimum spanning tree and write as a dot file.
         graph = nx.Graph()
         label = 'Solution network: The minimum spanning tree of a complete graph where nodes denote solutions. \\n' \
@@ -260,7 +270,7 @@ class Visualizer:
             + '(Instance: %s, #Variable: %d, #Constraint: %d)' \
             % (self.name, self.number_of_variables, self.number_of_constraints)
         graph.graph['graph'] = {
-            'label': label,
+            'label': label if is_enabled_write_title else '',
             'labelloc': 't'}
         edges = []
         for i in range(self.number_of_solutions):
