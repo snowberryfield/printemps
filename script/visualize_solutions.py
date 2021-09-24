@@ -53,13 +53,14 @@ class Visualizer:
                  max_number_of_solutions,
                  is_enabled_shuffle,
                  is_descending):
-        '''
-        Args:
-            solution_object dict:
-            max_number_of_solutions int:
-            is_enabled_shuffle bool:
-            is_descending bool:
-        '''
+        """
+        Parameters
+        ----------
+            solution_object : dict
+            max_number_of_solutions : int
+            is_enabled_shuffle : bool
+            is_descending : bool
+        """
         self.solutions = copy.deepcopy(solution_object['solutions'])
         self.name = solution_object['name']
         self.number_of_variables = solution_object['number_of_variables']
