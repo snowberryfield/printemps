@@ -24,7 +24,7 @@ template <class T_Variable, class T_Expression, class T_Value,
 constexpr auto operator+(
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE,
     const T_Value                                     a_VALUE)  //
-    -> decltype(a_EXPRESSION_LIKE.to_expression()) {
+    -> decltype(a_EXPRESSION_LIKE.to_expression() + a_VALUE) {
     return a_EXPRESSION_LIKE.to_expression() + a_VALUE;
 }
 
@@ -34,7 +34,7 @@ template <class T_Variable, class T_Expression, class T_Value,
 constexpr auto operator+(
     const T_Value                                     a_VALUE,
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE)
-    -> decltype(a_EXPRESSION_LIKE.to_expression()) {
+    -> decltype(a_VALUE + a_EXPRESSION_LIKE.to_expression()) {
     return a_VALUE + a_EXPRESSION_LIKE.to_expression();
 }
 
@@ -46,7 +46,8 @@ constexpr auto operator+(const T_ExpressionLikeLeft<T_Variable, T_Expression>
                              &a_EXPRESSION_LIKE_LEFT,
                          const T_ExpressionLikeRight<T_Variable, T_Expression>
                              &a_EXPRESSION_LIKE_RIGHT)
-    -> decltype(a_EXPRESSION_LIKE_LEFT.to_expression()) {
+    -> decltype(a_EXPRESSION_LIKE_LEFT.to_expression() +
+                a_EXPRESSION_LIKE_RIGHT.to_expression()) {
     return a_EXPRESSION_LIKE_LEFT.to_expression() +
            a_EXPRESSION_LIKE_RIGHT.to_expression();
 }
@@ -57,7 +58,7 @@ template <class T_Variable, class T_Expression, class T_Value,
 auto operator-(
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE,
     const T_Value                                     a_VALUE)  //
-    -> decltype(a_EXPRESSION_LIKE.to_expression()) {
+    -> decltype(a_EXPRESSION_LIKE.to_expression() - a_VALUE) {
     return a_EXPRESSION_LIKE.to_expression() - a_VALUE;
 }
 
@@ -67,7 +68,7 @@ template <class T_Variable, class T_Expression, class T_Value,
 constexpr auto operator-(
     const T_Value                                     a_VALUE,
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE)
-    -> decltype(a_EXPRESSION_LIKE.to_expression()) {
+    -> decltype(a_VALUE - a_EXPRESSION_LIKE.to_expression()) {
     return a_VALUE - a_EXPRESSION_LIKE.to_expression();
 }
 
@@ -79,7 +80,8 @@ constexpr auto operator-(const T_ExpressionLikeLeft<T_Variable, T_Expression>
                              &a_EXPRESSION_LIKE_LEFT,
                          const T_ExpressionLikeRight<T_Variable, T_Expression>
                              &a_EXPRESSION_LIKE_RIGHT)
-    -> decltype(a_EXPRESSION_LIKE_LEFT.to_expression()) {
+    -> decltype(a_EXPRESSION_LIKE_LEFT.to_expression() -
+                a_EXPRESSION_LIKE_RIGHT.to_expression()) {
     return a_EXPRESSION_LIKE_LEFT.to_expression() -
            a_EXPRESSION_LIKE_RIGHT.to_expression();
 }
@@ -90,7 +92,7 @@ template <class T_Variable, class T_Expression, class T_Value,
 auto operator*(
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE,
     const T_Value                                     a_VALUE)  //
-    -> decltype(a_EXPRESSION_LIKE.to_expression()) {
+    -> decltype(a_EXPRESSION_LIKE.to_expression() * a_VALUE) {
     return a_EXPRESSION_LIKE.to_expression() * a_VALUE;
 }
 
@@ -100,7 +102,7 @@ template <class T_Variable, class T_Expression, class T_Value,
 auto operator*(
     const T_Value                                     a_VALUE,
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE)
-    -> decltype(a_EXPRESSION_LIKE.to_expression()) {
+    -> decltype(a_VALUE * a_EXPRESSION_LIKE.to_expression()) {
     return a_VALUE * a_EXPRESSION_LIKE.to_expression();
 }
 
@@ -110,7 +112,7 @@ template <class T_Variable, class T_Expression, class T_Value,
 constexpr auto operator/(
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE,
     const T_Value                                     a_VALUE)  //
-    -> decltype(a_EXPRESSION_LIKE.to_expression()) {
+    -> decltype(a_EXPRESSION_LIKE.to_expression() / a_VALUE) {
     return a_EXPRESSION_LIKE.to_expression() / a_VALUE;
 }
 
@@ -122,7 +124,7 @@ template <class T_Variable, class T_Expression,
 constexpr auto operator+(
     const Expression<T_Variable, T_Expression> &      a_EXPRESSION,
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE)
-    -> decltype(a_EXPRESSION.copy()) {
+    -> decltype(a_EXPRESSION.copy() + a_EXPRESSION_LIKE.to_expression()) {
     return a_EXPRESSION.copy() + a_EXPRESSION_LIKE.to_expression();
 }
 
@@ -132,7 +134,7 @@ template <class T_Variable, class T_Expression,
 constexpr auto operator+(
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE,
     const Expression<T_Variable, T_Expression> &      a_EXPRESSION)
-    -> decltype(a_EXPRESSION.copy()) {
+    -> decltype(a_EXPRESSION_LIKE.to_expression() + a_EXPRESSION.copy()) {
     return a_EXPRESSION_LIKE.to_expression() + a_EXPRESSION.copy();
 }
 
@@ -142,7 +144,7 @@ template <class T_Variable, class T_Expression,
 constexpr auto operator-(
     const Expression<T_Variable, T_Expression> &      a_EXPRESSION,
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE)
-    -> decltype(a_EXPRESSION.copy()) {
+    -> decltype(a_EXPRESSION.copy() - a_EXPRESSION_LIKE.to_expression()) {
     return a_EXPRESSION.copy() - a_EXPRESSION_LIKE.to_expression();
 }
 
@@ -152,7 +154,7 @@ template <class T_Variable, class T_Expression,
 constexpr auto operator-(
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE,
     const Expression<T_Variable, T_Expression> &      a_EXPRESSION)
-    -> decltype(a_EXPRESSION.copy()) {
+    -> decltype(a_EXPRESSION_LIKE.to_expression() - a_EXPRESSION.copy()) {
     return a_EXPRESSION_LIKE.to_expression() - a_EXPRESSION.copy();
 }
 
@@ -167,6 +169,7 @@ constexpr Expression<T_Variable, T_Expression> operator+(
     result += a_VALUE;
     return result;
 }
+
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value>
 constexpr Expression<T_Variable, T_Expression> operator+(

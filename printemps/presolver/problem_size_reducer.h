@@ -21,7 +21,7 @@ constexpr bool remove_independent_variable(
         if (fabs(sensitivity) < constant::EPSILON_10) {
             utility::print_message(
                 "The value of decision variable " + a_variable_ptr->name() +
-                    " was fixed by " + std::to_string(0) +
+                    " was fixed as " + std::to_string(0) +
                     " because it does not have sensitivity to any constraint "
                     "or objective function.",
                 a_IS_ENABLED_PRINT);
@@ -34,7 +34,7 @@ constexpr bool remove_independent_variable(
                     utility::print_message(
                         "The value of decision variable " +
                             a_variable_ptr->name() +
-                            " was fixed by its lower bound " +
+                            " was fixed as its lower bound " +
                             std::to_string(fix_value) +
                             " because it does not have sensitivity to any "
                             "constraint, and the sensitivity to the objective "
@@ -47,7 +47,7 @@ constexpr bool remove_independent_variable(
                     utility::print_message(
                         "The value of decision variable " +
                             a_variable_ptr->name() +
-                            " was fixed by its upper bound " +
+                            " was fixed as its upper bound " +
                             std::to_string(fix_value) +
                             " because it does not have sensitivity to any "
                             "constraint, and the sensitivity to the objective "
@@ -62,7 +62,7 @@ constexpr bool remove_independent_variable(
                     utility::print_message(
                         "The value of decision variable " +
                             a_variable_ptr->name() +
-                            " was fixed by its upper bound " +
+                            " was fixed as its upper bound " +
                             std::to_string(fix_value) +
                             " because it does not have sensitivity to any "
                             "constraint, and the sensitivity to the objective "
@@ -75,7 +75,7 @@ constexpr bool remove_independent_variable(
                     utility::print_message(
                         "The value of decision variable " +
                             a_variable_ptr->name() +
-                            " was fixed by its lower bound " +
+                            " was fixed as its lower bound " +
                             std::to_string(fix_value) +
                             " because it does not have sensitivity to any "
                             "constraint, and the sensitivity to the objective "
@@ -105,7 +105,7 @@ constexpr bool fix_implicit_fixed_variable(
 
         utility::print_message(
             "The value of decision variable " + a_variable_ptr->name() +
-                " was fixed by " + std::to_string(fixed_value) +
+                " was fixed as " + std::to_string(fixed_value) +
                 " because the lower bound " + std::to_string(lower_bound) +
                 " and the upper_bound " + std::to_string(upper_bound) +
                 " implicitly fix the value.",
@@ -203,26 +203,22 @@ constexpr int fix_redundant_set_variables(
     if (a_model_ptr->is_minimization()) {
         std::sort(variable_ptrs.begin(), variable_ptrs.end(),
                   [](const auto &a_LHS, const auto &a_RHS) {
-                      if (a_LHS->related_constraint_ptrs() ==
-                          a_RHS->related_constraint_ptrs()) {
-                          return a_LHS->objective_sensitivity() >
-                                 a_RHS->objective_sensitivity();
-                      } else {
-                          return a_LHS->related_constraint_ptrs().size() <
-                                 a_RHS->related_constraint_ptrs().size();
-                      }
+                      return (a_LHS->related_constraint_ptrs() ==
+                              a_RHS->related_constraint_ptrs())
+                                 ? (a_LHS->objective_sensitivity() >
+                                    a_RHS->objective_sensitivity())
+                                 : (a_LHS->related_constraint_ptrs().size() <
+                                    a_RHS->related_constraint_ptrs().size());
                   });
     } else {
         std::sort(variable_ptrs.begin(), variable_ptrs.end(),
                   [](const auto &a_LHS, const auto &a_RHS) {
-                      if (a_LHS->related_constraint_ptrs() ==
-                          a_RHS->related_constraint_ptrs()) {
-                          return a_LHS->objective_sensitivity() <
-                                 a_RHS->objective_sensitivity();
-                      } else {
-                          return a_LHS->related_constraint_ptrs().size() <
-                                 a_RHS->related_constraint_ptrs().size();
-                      }
+                      return (a_LHS->related_constraint_ptrs() ==
+                              a_RHS->related_constraint_ptrs())
+                                 ? (a_LHS->objective_sensitivity() <
+                                    a_RHS->objective_sensitivity())
+                                 : (a_LHS->related_constraint_ptrs().size() <
+                                    a_RHS->related_constraint_ptrs().size());
                   });
     }
 
@@ -253,7 +249,7 @@ constexpr int fix_redundant_set_variables(
             }
 
             /**
-             * If x_{j} is fixed by 0, the following procedure can be skipped.
+             * If x_{j} is fixed as 0, the following procedure can be skipped.
              */
             if (variable_ptrs[j]->is_fixed() &&
                 variable_ptrs[j]->value() == 0) {
@@ -271,7 +267,7 @@ constexpr int fix_redundant_set_variables(
 
             /**
              * If x_{j} has superior objective coefficient than that of x_{i},
-             * the value of x_{i} will be fixed by 0 and break.
+             * the value of x_{i} will be fixed as 0 and break.
              */
             if ((a_model_ptr->is_minimization() &&
                  (variable_ptrs[i]->objective_sensitivity() >=
@@ -282,7 +278,7 @@ constexpr int fix_redundant_set_variables(
                 variable_ptrs[i]->fix_by(0);
                 utility::print_message(
                     "The value of redundant decision variable " +
-                        variable_ptrs[i]->name() + " was fixed by " +
+                        variable_ptrs[i]->name() + " was fixed as " +
                         std::to_string(0) + ".",
                     a_IS_ENABLED_PRINT);
 
@@ -292,7 +288,7 @@ constexpr int fix_redundant_set_variables(
             }
             /**
              * If x_{j} does not have superior objective coefficient than that
-             * of x_{i}, the value of x_{j} will be fixed by 0.
+             * of x_{i}, the value of x_{j} will be fixed as 0.
              */
             else if ((a_model_ptr->is_minimization() &&
                       (variable_ptrs[i]->objective_sensitivity() <
@@ -303,7 +299,7 @@ constexpr int fix_redundant_set_variables(
                 variable_ptrs[j]->fix_by(0);
                 utility::print_message(
                     "The value of redundant decision variable " +
-                        variable_ptrs[j]->name() + " was fixed by " +
+                        variable_ptrs[j]->name() + " was fixed as " +
                         std::to_string(0) + ".",
                     a_IS_ENABLED_PRINT);
 
@@ -388,7 +384,7 @@ constexpr bool remove_redundant_constraints_with_tightening_variable_bound(
             model_component::ConstraintSense::Equal) {
             /**
              * If the singleton constraint is defined by an equality as ax+b=0,
-             * the value of the decision variable x will be fixed by -b/a.
+             * the value of the decision variable x will be fixed as -b/a.
              */
             utility::print_message(  //
                 "The constraint " + a_constraint_ptr->name() +
@@ -662,7 +658,7 @@ constexpr std::pair<int, int> remove_redundant_set_constraints(
                                 variable_ptr->name() +
                                 " in partitioning constraint " +
                                 set_partitioning_ptrs[i]->name() +
-                                " was fixed by 0.",
+                                " was fixed as 0.",
                             a_IS_ENABLED_PRINT);
                         number_of_newly_fixed_variables++;
                     }
