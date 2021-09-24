@@ -12,8 +12,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import matplotlib.cm as cm
-from mpl_toolkits.mplot3d import Axes3D
-
 import networkx as nx
 
 from sklearn.manifold import MDS
@@ -30,9 +28,7 @@ np.random.seed(1)
 
 
 def compute_distance(first, second):
-    '''
-    Compute the Manhattan distance between solutions first and second.
-    '''
+    # Compute the Manhattan distance between solutions first and second.
     first_set = set(first.keys())
     second_set = set(second.keys())
     only_first = first_set - second_set
@@ -57,6 +53,13 @@ class Visualizer:
                  max_number_of_solutions,
                  is_enabled_shuffle,
                  is_descending):
+        '''
+        Args:
+            solution_object dict:
+            max_number_of_solutions int:
+            is_enabled_shuffle bool:
+            is_descending bool:
+        '''
         self.solutions = copy.deepcopy(solution_object['solutions'])
         self.name = solution_object['name']
         self.number_of_variables = solution_object['number_of_variables']
