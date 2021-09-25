@@ -19,9 +19,7 @@ __PRINTEMPS__ is a C++ metaheuristics modeler/solver library for general integer
 ## News
 |     Date      | Update                                                                                            |
 |:-------------:|:--------------------------------------------------------------------------------------------------|
-| Aug. 28, 2021 | New benchmark results were added.                                                                 |
-| Aug. 17, 2021 | New benchmark results were added.                                                                 |
-| Aug. 17, 2021 | [PRINTEMPS v1.6.4](https://github.com/snowberryfield/printemps/releases/tag/v1.6.4) was released. |
+| Sep. 25, 2021 | [PRINTEMPS v1.6.5](https://github.com/snowberryfield/printemps/releases/tag/v1.6.5) was released. |
 
 ## Algorithm
 PRINTEMPS can compute approximate solutions for __linear and nonlinear integer optimization problems__. It employs __Tabu Search__ [1], a metaheuristics technique, to solve problems. In solving, it replaces constraints with penalty functions which return violations to the corresponding constraints, and the penalty functions multiplied by positive penalty coefficients are added to the objective function. The penalty coefficients are updated iteratively and automatically in a method similar (not exact same) to the one proposed in paper [2].
@@ -95,12 +93,12 @@ The option `-fopenmp` is required to activate parallel computation. See [Solver 
 
 Following combinations of operating systems and compilers are confirmed compilation possible:
 
-|   Operating System   |        Compiler (version)        |
-|:--------------------:|:--------------------------------:|
-|  macOS Mojave 10.14  |       gcc (9.3.0 Homebrew)       |
-| macOS Catalina 10.15 |       gcc (9.3.0 Homebrew)       |
-|     Ubuntu 16.04     | gcc (9.2.1) <br /> clang (9.0.1) |
-|     Ubuntu 18.04     | gcc (9.2.1) <br /> clang (9.0.0) |
+|   Operating System   |                                       Compiler (version)                                        |
+|:--------------------:|:-----------------------------------------------------------------------------------------------:|
+|  macOS Mojave 10.14  |                                      gcc (9.3.0 Homebrew)                                       |
+| macOS Catalina 10.15 |                                      gcc (9.3.0 Homebrew)                                       |
+|     Ubuntu 18.04     |                                gcc (9.2.1) <br /> clang (9.0.0)                                 |
+|     Ubuntu 20.04     | gcc (9.3.0) <br /> gcc (10.3.0) <br /> clang (10.0.0)<br /> clang (11.0.0)<br /> clang (12.0.0) |
 
 
 ## Standalone Solver
