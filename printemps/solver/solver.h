@@ -636,6 +636,16 @@ Result<T_Variable, T_Expression> solve(
         }
 
         /**
+         * Update variable bounds.
+         */
+        if (update_status & solution::IncumbentHolderConstant::
+                                STATUS_FEASIBLE_INCUMBENT_UPDATE) {
+            model_ptr->update_variable_bound(
+                result.incumbent_holder.feasible_incumbent_solution().objective,
+                master_option.verbose >= option::verbose::Outer);
+        }
+
+        /**
          * Update the memory.
          */
         memory = result.memory;

@@ -752,7 +752,7 @@ TEST_F(TestModel, setup) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModel, setup_unique_name) {
+TEST_F(TestModel, setup_unique_names) {
     printemps::model::Model<int, double> model;
 
     auto& x = model.create_variable("x");
@@ -764,7 +764,7 @@ TEST_F(TestModel, setup_unique_name) {
     p(9).set_name("_p_9");
     g(0, 0).set_name("_g_0_0");
     g(19, 29).set_name("_g_19_29");
-    model.setup_unique_name();
+    model.setup_unique_names();
 
     EXPECT_EQ("_x", x.name());
     EXPECT_EQ("_p_0", p(0).name());
@@ -1039,7 +1039,7 @@ TEST_F(TestModel, setup_variable_sensitivity) {
 
     model.minimize(2 * x.sum() + 5 * y.sum());
 
-    model.setup_variable_sensitivity();
+    model.setup_variable_sensitivities();
 
     for (auto i = 0; i < 10; i++) {
         EXPECT_EQ(i + 1, x(i).constraint_sensitivities().at(&g(0)));
@@ -1461,7 +1461,7 @@ TEST_F(TestModel, update_variable_improvability) {
         model.minimize(-x + y);
         model.categorize_variables();
         model.categorize_constraints();
-        model.setup_variable_sensitivity();
+        model.setup_variable_sensitivities();
         model.setup_fixed_sensitivities(false);
 
         x = -10;
@@ -1505,7 +1505,7 @@ TEST_F(TestModel, update_variable_improvability) {
         model.minimize(-x + y);
         model.categorize_variables();
         model.categorize_constraints();
-        model.setup_variable_sensitivity();
+        model.setup_variable_sensitivities();
         model.setup_fixed_sensitivities(false);
 
         x = -10;
@@ -1549,7 +1549,7 @@ TEST_F(TestModel, update_variable_improvability) {
         model.minimize(-x + y);
         model.categorize_variables();
         model.categorize_constraints();
-        model.setup_variable_sensitivity();
+        model.setup_variable_sensitivities();
         model.setup_fixed_sensitivities(false);
 
         x = -10;
@@ -1593,7 +1593,7 @@ TEST_F(TestModel, update_variable_improvability) {
         model.maximize(-x + y);
         model.categorize_variables();
         model.categorize_constraints();
-        model.setup_variable_sensitivity();
+        model.setup_variable_sensitivities();
         model.setup_fixed_sensitivities(false);
 
         x = -10;
@@ -1638,7 +1638,7 @@ TEST_F(TestModel, update_variable_improvability) {
         model.maximize(-x + y);
         model.categorize_variables();
         model.categorize_constraints();
-        model.setup_variable_sensitivity();
+        model.setup_variable_sensitivities();
         model.setup_fixed_sensitivities(false);
 
         x = -10;
@@ -1683,7 +1683,7 @@ TEST_F(TestModel, update_variable_improvability) {
         model.maximize(-x + y);
         model.categorize_variables();
         model.categorize_constraints();
-        model.setup_variable_sensitivity();
+        model.setup_variable_sensitivities();
         model.setup_fixed_sensitivities(false);
 
         x = -10;
@@ -2076,7 +2076,7 @@ TEST_F(TestModel, generate_variable_parameter_proxies) {
     auto& z = model.create_variables("z", {10, 10});
 
     int fill_value = random_integer();
-    model.setup_unique_name();
+    model.setup_unique_names();
 
     auto parameter_proxies =
         model.generate_variable_parameter_proxies(fill_value);
@@ -2117,7 +2117,7 @@ TEST_F(TestModel, generate_expression_parameter_proxies) {
     auto& r = model.create_expressions("r", {10, 10});
 
     int fill_value = random_integer();
-    model.setup_unique_name();
+    model.setup_unique_names();
 
     auto parameter_proxies =
         model.generate_expression_parameter_proxies(fill_value);
@@ -2158,7 +2158,7 @@ TEST_F(TestModel, generate_constraint_parameter_proxies) {
     auto& v = model.create_constraints("v", {10, 10});
 
     int fill_value = random_integer();
-    model.setup_unique_name();
+    model.setup_unique_names();
 
     auto parameter_proxies =
         model.generate_constraint_parameter_proxies(fill_value);
@@ -2489,7 +2489,7 @@ TEST_F(TestModel, export_plain_solution) {
 
     model.minimize(random_integer() * x.sum() + random_integer() * y.sum() +
                    random_integer() * z.sum());
-    model.setup_unique_name();
+    model.setup_unique_names();
 
     x = 10;
     for (auto i = 0; i < 10; i++) {
@@ -2538,7 +2538,7 @@ TEST_F(TestModel, convert_to_plain_solution) {
     }
     model.minimize(random_integer() * p + random_integer() * q.sum() +
                    random_integer() * r.sum());
-    model.setup_unique_name();
+    model.setup_unique_names();
 
     x = 10;
     for (auto i = 0; i < 10; i++) {
@@ -2576,7 +2576,7 @@ TEST_F(TestModel, import_solution) {
     auto& y = model.create_variables("y", 10);
     auto& z = model.create_variables("z", {20, 30});
 
-    model.setup_unique_name();
+    model.setup_unique_names();
 
     std::unordered_map<std::string, int> solution;
     solution["x"]         = 1;
@@ -2601,7 +2601,7 @@ TEST_F(TestModel, fix_variables) {
     auto& y = model.create_variables("y", 10);
     auto& z = model.create_variables("z", {20, 30});
 
-    model.setup_unique_name();
+    model.setup_unique_names();
 
     std::unordered_map<std::string, int> solution;
     solution["x"]         = 1;
@@ -2632,7 +2632,7 @@ TEST_F(TestModel, unfix_variables) {
     auto& y = model.create_variables("y", 10);
     auto& z = model.create_variables("z", {20, 30});
 
-    model.setup_unique_name();
+    model.setup_unique_names();
 
     std::unordered_set<std::string> mutable_variable_names;
     mutable_variable_names.insert("x");

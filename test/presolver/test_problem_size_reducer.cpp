@@ -38,7 +38,7 @@ TEST_F(TestVariableFixer, remove_independent_variables) {
 
         auto& x = model.create_variables("x", 10, 0, 1);
         model.minimize(x.sum());
-        model.setup_variable_sensitivity();
+        model.setup_variable_sensitivities();
 
         printemps::presolver::remove_independent_variables(&model, false);
 
@@ -52,7 +52,7 @@ TEST_F(TestVariableFixer, remove_independent_variables) {
 
         auto& x = model.create_variables("x", 10, 0, 1);
         model.maximize(x.sum());
-        model.setup_variable_sensitivity();
+        model.setup_variable_sensitivities();
 
         printemps::presolver::remove_independent_variables(&model, false);
         for (auto i = 0; i < 10; i++) {
@@ -65,7 +65,7 @@ TEST_F(TestVariableFixer, remove_independent_variables) {
 
         auto& x = model.create_variables("x", 10, 0, 1);
         model.minimize(-x.sum());
-        model.setup_variable_sensitivity();
+        model.setup_variable_sensitivities();
 
         printemps::presolver::remove_independent_variables(&model, false);
         for (auto i = 0; i < 10; i++) {
@@ -78,7 +78,7 @@ TEST_F(TestVariableFixer, remove_independent_variables) {
 
         auto& x = model.create_variables("x", 10, 0, 1);
         model.maximize(-x.sum());
-        model.setup_variable_sensitivity();
+        model.setup_variable_sensitivities();
 
         printemps::presolver::remove_independent_variables(&model, false);
         for (auto i = 0; i < 10; i++) {
@@ -130,7 +130,7 @@ TEST_F(TestVariableFixer, fix_redundant_set_variables) {
         model.categorize_variables();
         model.categorize_constraints();
         model.setup_variable_related_constraints();
-        model.setup_variable_sensitivity();
+        model.setup_variable_sensitivities();
 
         printemps::presolver::fix_redundant_set_variables(&model, false);
 
@@ -163,7 +163,7 @@ TEST_F(TestVariableFixer, fix_redundant_set_variables) {
         model.categorize_variables();
         model.categorize_constraints();
         model.setup_variable_related_constraints();
-        model.setup_variable_sensitivity();
+        model.setup_variable_sensitivities();
         printemps::presolver::fix_redundant_set_variables(&model, false);
 
         EXPECT_TRUE(x(4).is_fixed());
@@ -513,7 +513,7 @@ TEST_F(TestProblemSizeReducer, reduce_problem_size) {
     model.categorize_variables();
     model.categorize_constraints();
     model.setup_variable_related_constraints();
-    model.setup_variable_sensitivity();
+    model.setup_variable_sensitivities();
 
     printemps::presolver::reduce_problem_size(&model, true, false);
     model.categorize_variables();

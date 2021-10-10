@@ -628,7 +628,7 @@ class Model {
         /**
          * Determine unique name of decision variables and constraints.
          */
-        this->setup_unique_name();
+        this->setup_unique_names();
 
         /**
          * Determine the linearity.
@@ -647,7 +647,7 @@ class Model {
         this->categorize_constraints();
         this->setup_variable_related_zero_one_coefficient_constraints();
         this->setup_variable_related_constraints();
-        this->setup_variable_sensitivity();
+        this->setup_variable_sensitivities();
 
         /**
          * Store original categorization results. The final categorization would
@@ -676,7 +676,7 @@ class Model {
                 this->categorize_constraints();
                 this->setup_variable_related_zero_one_coefficient_constraints();
                 this->setup_variable_related_constraints();
-                this->setup_variable_sensitivity();
+                this->setup_variable_sensitivities();
                 if (presolver::extract_dependent_intermediate_variables(
                         this,  //
                         a_IS_ENABLED_PRINT) == 0) {
@@ -688,7 +688,7 @@ class Model {
                     this->categorize_constraints();
                     this->setup_variable_related_zero_one_coefficient_constraints();
                     this->setup_variable_related_constraints();
-                    this->setup_variable_sensitivity();
+                    this->setup_variable_sensitivities();
                     if (presolver::eliminate_dependent_intermediate_variables(
                             this,  //
                             a_IS_ENABLED_PRINT) == 0) {
@@ -717,9 +717,10 @@ class Model {
          */
         this->categorize_variables();
         this->categorize_constraints();
+
         this->setup_variable_related_zero_one_coefficient_constraints();
         this->setup_variable_related_constraints();
-        this->setup_variable_sensitivity();
+        this->setup_variable_sensitivities();
 
         /**
          * Setup the neighborhood generators.
@@ -776,7 +777,7 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void setup_unique_name(void) {
+    constexpr void setup_unique_names(void) {
         const int VARIABLE_PROXIES_SIZE   = m_variable_proxies.size();
         const int EXPRESSION_PROXIES_SIZE = m_expression_proxies.size();
         const int CONSTRAINT_PROXIES_SIZE = m_constraint_proxies.size();
@@ -879,7 +880,7 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void setup_variable_sensitivity(void) {
+    constexpr void setup_variable_sensitivities(void) {
         for (auto &&proxy : m_variable_proxies) {
             for (auto &&variable : proxy.flat_indexed_variables()) {
                 variable.reset_constraint_sensitivities();
@@ -1150,6 +1151,37 @@ class Model {
                  */
                 variable_ptr->set_selection_ptr(&selection);
             }
+        }
+    }
+
+    /*************************************************************************/
+    constexpr void update_variable_bound(const double a_OBJECTIVE,
+                                         const bool   a_IS_ENABLED_PRINT) {
+        model_component::Constraint<T_Variable, T_Expression> constraint;
+        if (m_is_minimization) {
+            constraint = m_objective.expression() <= a_OBJECTIVE;
+        } else {
+            constraint = m_objective.expression() >= a_OBJECTIVE;
+        }
+        bool is_bound_tightened = presolver::
+            remove_redundant_constraint_with_tightening_variable_bound(
+                &constraint, a_IS_ENABLED_PRINT);
+        if (!is_bound_tightened) {
+            return;
+        }
+
+        int number_of_newly_fixed_variables  //
+            = presolver::fix_implicit_fixed_variables(this, a_IS_ENABLED_PRINT);
+
+        if (number_of_newly_fixed_variables > 0) {
+            this->categorize_variables();
+            this->categorize_constraints();
+
+            m_neighborhood.binary().setup(
+                m_variable_reference.binary_variable_ptrs);
+
+            m_neighborhood.integer().setup(
+                m_variable_reference.integer_variable_ptrs);
         }
     }
 
@@ -1822,8 +1854,8 @@ class Model {
 
     /*************************************************************************/
     inline solution::SolutionScore evaluate(
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
-        noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
+        const noexcept {
         solution::SolutionScore score;
         this->evaluate(&score, a_MOVE);
         return score;
@@ -1839,10 +1871,9 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void evaluate(
-        solution::SolutionScore *                           a_score_ptr,  //
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
-        noexcept {
+    constexpr void evaluate(solution::SolutionScore *a_score_ptr,  //
+                            const neighborhood::Move<T_Variable, T_Expression>
+                                &a_MOVE) const noexcept {
         double total_violation = 0.0;
         double local_penalty   = 0.0;
         double global_penalty  = 0.0;
@@ -2418,7 +2449,7 @@ class Model {
         /**
          * Determine unique name of decision variables and constraints.
          */
-        this->setup_unique_name();
+        this->setup_unique_names();
 
         /**
          * Determine the linearity.
@@ -2434,7 +2465,7 @@ class Model {
          * Determine the constraint sensitivities.
          */
         this->setup_variable_related_constraints();
-        this->setup_variable_sensitivity();
+        this->setup_variable_sensitivities();
 
         /**
          * Write instance name.
