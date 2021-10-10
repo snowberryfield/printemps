@@ -1629,17 +1629,17 @@ Result<T_Variable, T_Expression> solve(
          */
         if (employing_global_augmented_solution_flag) {
             utility::print_message(
-                "The next loop will be start from the global incumbent "
+                "The next loop will start from the global incumbent "
                 "solution.",
                 master_option.verbose >= option::verbose::Outer);
         } else if (employing_local_augmented_solution_flag) {
             utility::print_message(
-                "The next loop will be start from the local incumbent solution "
+                "The next loop will start from the local incumbent solution "
                 "found in the previous loop.",
                 master_option.verbose >= option::verbose::Outer);
         } else if (employing_previous_solution_flag) {
             utility::print_message(
-                "The next loop will be start from the same initial solution of "
+                "The next loop will start from the same initial solution of "
                 "the previous loop.",
                 master_option.verbose >= option::verbose::Outer);
         }
