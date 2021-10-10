@@ -313,7 +313,7 @@ constexpr int fix_redundant_set_variables(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-constexpr bool remove_redundant_constraints_with_tightening_variable_bound(
+constexpr bool remove_redundant_constraint_with_tightening_variable_bound(
     model_component::Constraint<T_Variable, T_Expression> *a_constraint_ptr,  //
     const bool                                             a_IS_ENABLED_PRINT) {
     const int BOUND_LIMIT = 100000;
@@ -581,7 +581,7 @@ constexpr int remove_redundant_constraints_with_tightening_variable_bounds(
                 continue;
             }
 
-            if (remove_redundant_constraints_with_tightening_variable_bound(
+            if (remove_redundant_constraint_with_tightening_variable_bound(
                     &constraint,  //
                     a_IS_ENABLED_PRINT)) {
                 number_of_newly_disabled_constraints++;
