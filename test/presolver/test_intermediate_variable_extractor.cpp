@@ -37,12 +37,12 @@ TEST_F(TestIntermediateVariableExtractor, extract_intermediate_variables) {
         auto& h = model.create_constraint("h", v == 6 * z + 7 * w);
         model.minimize(w);
 
-        model.setup_unique_name();
+        model.setup_unique_names();
 
         model.categorize_variables();
         model.categorize_constraints();
         model.setup_variable_related_constraints();
-        model.setup_variable_sensitivity();
+        model.setup_variable_sensitivities();
 
         EXPECT_TRUE(f(0).is_intermediate());
         EXPECT_TRUE(g(0).is_intermediate());
@@ -57,7 +57,7 @@ TEST_F(TestIntermediateVariableExtractor, extract_intermediate_variables) {
             model.categorize_variables();
             model.categorize_constraints();
             model.setup_variable_related_constraints();
-            model.setup_variable_sensitivity();
+            model.setup_variable_sensitivities();
 
             EXPECT_EQ(printemps::model_component::VariableSense::Intermediate,
                       z(0).sense());
@@ -82,7 +82,7 @@ TEST_F(TestIntermediateVariableExtractor, extract_intermediate_variables) {
             model.categorize_variables();
             model.categorize_constraints();
             model.setup_variable_related_constraints();
-            model.setup_variable_sensitivity();
+            model.setup_variable_sensitivities();
 
             auto& sensitivities_objective =
                 model.objective().expression().sensitivities();
@@ -102,7 +102,7 @@ TEST_F(TestIntermediateVariableExtractor, extract_intermediate_variables) {
             model.categorize_variables();
             model.categorize_constraints();
             model.setup_variable_related_constraints();
-            model.setup_variable_sensitivity();
+            model.setup_variable_sensitivities();
 
             auto& sensitivities_objective =
                 model.objective().expression().sensitivities();
@@ -135,12 +135,12 @@ TEST_F(TestIntermediateVariableExtractor, extract_intermediate_variables) {
         auto& g = model.create_constraint("g", w == 3 * x + 4 * y + 5 * z);
         model.minimize(w);
 
-        model.setup_unique_name();
+        model.setup_unique_names();
 
         model.categorize_variables();
         model.categorize_constraints();
         model.setup_variable_related_constraints();
-        model.setup_variable_sensitivity();
+        model.setup_variable_sensitivities();
 
         EXPECT_TRUE(f(0).is_intermediate());
         EXPECT_TRUE(g(0).is_intermediate());
@@ -154,7 +154,7 @@ TEST_F(TestIntermediateVariableExtractor, extract_intermediate_variables) {
             model.categorize_variables();
             model.categorize_constraints();
             model.setup_variable_related_constraints();
-            model.setup_variable_sensitivity();
+            model.setup_variable_sensitivities();
 
             EXPECT_EQ(printemps::model_component::VariableSense::Intermediate,
                       z(0).sense());
@@ -201,7 +201,7 @@ TEST_F(TestIntermediateVariableExtractor, extract_intermediate_variables) {
             model.categorize_variables();
             model.categorize_constraints();
             model.setup_variable_related_constraints();
-            model.setup_variable_sensitivity();
+            model.setup_variable_sensitivities();
 
             auto& sensitivities_objective =
                 model.objective().expression().sensitivities();
