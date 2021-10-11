@@ -1208,6 +1208,91 @@ TEST_F(TestModel, setup_fixed_sensitivities) {
 }
 
 /*****************************************************************************/
+TEST_F(TestModel, set_selections) {
+    printemps::model::Model<int, double> model;
+    auto& x = model.create_variables("x", 10, 0, 1);
+    auto& y = model.create_variables("y", 5, 0, 1);
+    std::vector<printemps::model_component::Selection<int, double>> selections;
+
+    {
+        printemps::model_component::Selection<int, double> selection;
+        for (auto i = 0; i < 10; i++) {
+            selection.variable_ptrs.push_back(&(x(i)));
+        }
+        selections.push_back(selection);
+    }
+
+    {
+        printemps::model_component::Selection<int, double> selection;
+        for (auto i = 0; i < 5; i++) {
+            selection.variable_ptrs.push_back(&(y(i)));
+        }
+        selections.push_back(selection);
+    }
+
+    model.set_selections(selections);
+
+    for (auto i = 0; i < 10; i++) {
+        EXPECT_EQ(&(model.selections()[0]), x(i).selection_ptr());
+    }
+
+    for (auto i = 0; i < 5; i++) {
+        EXPECT_EQ(&(model.selections()[1]), y(i).selection_ptr());
+    }
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, update_variable_bounds) {
+    {
+        printemps::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x", 0, 200);
+        auto& y = model.create_variable("y", 0, 200);
+        model.minimize(x + 3 * y);
+        model.update_variable_bounds(100, false);
+
+        EXPECT_EQ(100, x(0).upper_bound());
+        EXPECT_EQ(33, y(0).upper_bound());
+    }
+
+    {
+        printemps::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x", 0, 200);
+        auto& y = model.create_variable("y", 0, 200);
+        model.minimize(x - 3 * y);
+        model.update_variable_bounds(100, false);
+
+        EXPECT_EQ(200, x(0).upper_bound());
+        EXPECT_EQ(200, y(0).upper_bound());
+    }
+
+    {
+        printemps::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x", 0, 200);
+        auto& y = model.create_variable("y", 0, 200);
+        model.maximize(x + 3 * y);
+        model.update_variable_bounds(100, false);
+
+        EXPECT_EQ(0, x(0).lower_bound());
+        EXPECT_EQ(0, y(0).lower_bound());
+    }
+
+    {
+        printemps::model::Model<int, double> model;
+
+        auto& x = model.create_variable("x", 0, 200);
+        auto& y = model.create_variable("y", 0, 200);
+        model.maximize(x - 3 * y);
+        model.update_variable_bounds(100, false);
+
+        EXPECT_EQ(100, x(0).lower_bound());
+        EXPECT_EQ(0, y(0).lower_bound());
+    }
+}
+
+/*****************************************************************************/
 TEST_F(TestModel, set_callback) {
     printemps::model::Model<int, double>              model;
     printemps::option::Option                         option;
@@ -1323,7 +1408,7 @@ TEST_F(TestModel, update_arg_move) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModel, reset_variable_objective_improvability_arg_void) {
+TEST_F(TestModel, reset_variable_objective_improvabilities_arg_void) {
     printemps::model::Model<int, double> model;
 
     auto& x = model.create_variable("x", 0, 1);
@@ -1336,7 +1421,7 @@ TEST_F(TestModel, reset_variable_objective_improvability_arg_void) {
         y(i).set_is_objective_improvable(true);
         EXPECT_TRUE(y(i).is_objective_improvable());
     }
-    model.reset_variable_objective_improvability();
+    model.reset_variable_objective_improvabilities();
 
     EXPECT_FALSE(x(0).is_objective_improvable());
     for (auto i = 0; i < 10; i++) {
@@ -1345,7 +1430,7 @@ TEST_F(TestModel, reset_variable_objective_improvability_arg_void) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModel, reset_variable_objective_improvability_arg_variable_ptrs) {
+TEST_F(TestModel, reset_variable_objective_improvabilities_arg_variable_ptrs) {
     printemps::model::Model<int, double> model;
 
     auto& x = model.create_variable("x", 0, 1);
@@ -1358,7 +1443,7 @@ TEST_F(TestModel, reset_variable_objective_improvability_arg_variable_ptrs) {
         y(i).set_is_objective_improvable(true);
         EXPECT_TRUE(y(i).is_objective_improvable());
     }
-    model.reset_variable_objective_improvability({&x(0), &y(0), &y(9)});
+    model.reset_variable_objective_improvabilities({&x(0), &y(0), &y(9)});
 
     EXPECT_FALSE(x(0).is_objective_improvable());
     EXPECT_FALSE(y(0).is_objective_improvable());
@@ -1369,7 +1454,7 @@ TEST_F(TestModel, reset_variable_objective_improvability_arg_variable_ptrs) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModel, reset_variable_feasibility_improvability_arg_void) {
+TEST_F(TestModel, reset_variable_feasibility_improvabilities_arg_void) {
     printemps::model::Model<int, double> model;
 
     auto& x = model.create_variable("x", 0, 1);
@@ -1382,7 +1467,7 @@ TEST_F(TestModel, reset_variable_feasibility_improvability_arg_void) {
         y(i).set_is_feasibility_improvable(true);
         EXPECT_TRUE(y(i).is_feasibility_improvable());
     }
-    model.reset_variable_feasibility_improvability();
+    model.reset_variable_feasibility_improvabilities();
 
     EXPECT_FALSE(x(0).is_feasibility_improvable());
     for (auto i = 0; i < 10; i++) {
@@ -1391,7 +1476,8 @@ TEST_F(TestModel, reset_variable_feasibility_improvability_arg_void) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModel, reset_variable_feasibility_improvability_arg_variable_ptrs) {
+TEST_F(TestModel,
+       reset_variable_feasibility_improvabilities_arg_variable_ptrs) {
     printemps::model::Model<int, double> model;
 
     auto& x = model.create_variable("x", 0, 1);
@@ -1404,7 +1490,7 @@ TEST_F(TestModel, reset_variable_feasibility_improvability_arg_variable_ptrs) {
         y(i).set_is_feasibility_improvable(true);
         EXPECT_TRUE(y(i).is_feasibility_improvable());
     }
-    model.reset_variable_feasibility_improvability({&x(0), &y(0), &y(9)});
+    model.reset_variable_feasibility_improvabilities({&x(0), &y(0), &y(9)});
 
     EXPECT_FALSE(x(0).is_feasibility_improvable());
     EXPECT_FALSE(y(0).is_feasibility_improvable());
@@ -1416,7 +1502,7 @@ TEST_F(TestModel, reset_variable_feasibility_improvability_arg_variable_ptrs) {
 
 /*****************************************************************************/
 TEST_F(TestModel,
-       reset_variable_feasibility_improvability_arg_constraint_ptrs) {
+       reset_variable_feasibility_improvabilities_arg_constraint_ptrs) {
     printemps::model::Model<int, double> model;
 
     auto& x = model.create_variable("x", 0, 1);
@@ -1437,7 +1523,7 @@ TEST_F(TestModel,
     }
     std::vector<printemps::model_component::Constraint<int, double>*>
         constraint_ptrs = {&g(0), &g(1)};
-    model.reset_variable_feasibility_improvability(constraint_ptrs);
+    model.reset_variable_feasibility_improvabilities(constraint_ptrs);
 
     EXPECT_FALSE(x(0).is_feasibility_improvable());
     EXPECT_FALSE(y(0).is_feasibility_improvable());
@@ -1467,8 +1553,8 @@ TEST_F(TestModel, update_variable_improvability) {
         x = -10;
         y = -10;
         model.update();
-        model.update_variable_objective_improvability();
-        model.update_variable_feasibility_improvability();
+        model.update_variable_objective_improvabilities();
+        model.update_variable_feasibility_improvabilities();
         EXPECT_TRUE(x(0).is_objective_improvable());
         EXPECT_FALSE(y(0).is_objective_improvable());
         EXPECT_FALSE(x(0).is_feasibility_improvable());
@@ -1477,8 +1563,8 @@ TEST_F(TestModel, update_variable_improvability) {
         x = 10;
         y = 10;
         model.update();
-        model.update_variable_objective_improvability();
-        model.update_variable_feasibility_improvability();
+        model.update_variable_objective_improvabilities();
+        model.update_variable_feasibility_improvabilities();
         EXPECT_FALSE(x(0).is_objective_improvable());
         EXPECT_TRUE(y(0).is_objective_improvable());
         EXPECT_FALSE(x(0).is_feasibility_improvable());
@@ -1487,8 +1573,8 @@ TEST_F(TestModel, update_variable_improvability) {
         x = 10;
         y = -10;
         model.update();
-        model.update_variable_objective_improvability();
-        model.update_variable_feasibility_improvability();
+        model.update_variable_objective_improvabilities();
+        model.update_variable_feasibility_improvabilities();
         EXPECT_FALSE(x(0).is_objective_improvable());
         EXPECT_FALSE(y(0).is_objective_improvable());
         EXPECT_TRUE(x(0).is_feasibility_improvable());
@@ -1511,8 +1597,8 @@ TEST_F(TestModel, update_variable_improvability) {
         x = -10;
         y = -10;
         model.update();
-        model.update_variable_objective_improvability();
-        model.update_variable_feasibility_improvability();
+        model.update_variable_objective_improvabilities();
+        model.update_variable_feasibility_improvabilities();
         EXPECT_TRUE(x(0).is_objective_improvable());
         EXPECT_FALSE(y(0).is_objective_improvable());
         EXPECT_FALSE(x(0).is_feasibility_improvable());
@@ -1521,8 +1607,8 @@ TEST_F(TestModel, update_variable_improvability) {
         x = 10;
         y = 10;
         model.update();
-        model.update_variable_objective_improvability();
-        model.update_variable_feasibility_improvability();
+        model.update_variable_objective_improvabilities();
+        model.update_variable_feasibility_improvabilities();
         EXPECT_FALSE(x(0).is_objective_improvable());
         EXPECT_TRUE(y(0).is_objective_improvable());
         EXPECT_FALSE(x(0).is_feasibility_improvable());
@@ -1531,8 +1617,8 @@ TEST_F(TestModel, update_variable_improvability) {
         x = 10;
         y = -10;
         model.update();
-        model.update_variable_objective_improvability();
-        model.update_variable_feasibility_improvability();
+        model.update_variable_objective_improvabilities();
+        model.update_variable_feasibility_improvabilities();
         EXPECT_FALSE(x(0).is_objective_improvable());
         EXPECT_FALSE(y(0).is_objective_improvable());
         EXPECT_TRUE(x(0).is_feasibility_improvable());
@@ -1555,8 +1641,8 @@ TEST_F(TestModel, update_variable_improvability) {
         x = -10;
         y = -10;
         model.update();
-        model.update_variable_objective_improvability();
-        model.update_variable_feasibility_improvability();
+        model.update_variable_objective_improvabilities();
+        model.update_variable_feasibility_improvabilities();
         EXPECT_TRUE(x(0).is_objective_improvable());
         EXPECT_FALSE(y(0).is_objective_improvable());
         EXPECT_FALSE(x(0).is_feasibility_improvable());
@@ -1565,8 +1651,8 @@ TEST_F(TestModel, update_variable_improvability) {
         x = 10;
         y = 10;
         model.update();
-        model.update_variable_objective_improvability();
-        model.update_variable_feasibility_improvability();
+        model.update_variable_objective_improvabilities();
+        model.update_variable_feasibility_improvabilities();
         EXPECT_FALSE(x(0).is_objective_improvable());
         EXPECT_TRUE(y(0).is_objective_improvable());
         EXPECT_FALSE(x(0).is_feasibility_improvable());
@@ -1575,8 +1661,8 @@ TEST_F(TestModel, update_variable_improvability) {
         x = -10;
         y = 10;
         model.update();
-        model.update_variable_objective_improvability();
-        model.update_variable_feasibility_improvability();
+        model.update_variable_objective_improvabilities();
+        model.update_variable_feasibility_improvabilities();
         EXPECT_TRUE(x(0).is_objective_improvable());
         EXPECT_TRUE(y(0).is_objective_improvable());
         EXPECT_TRUE(x(0).is_feasibility_improvable());
@@ -1600,8 +1686,8 @@ TEST_F(TestModel, update_variable_improvability) {
         y = -10;
 
         model.update();
-        model.update_variable_objective_improvability();
-        model.update_variable_feasibility_improvability();
+        model.update_variable_objective_improvabilities();
+        model.update_variable_feasibility_improvabilities();
         EXPECT_FALSE(x(0).is_objective_improvable());
         EXPECT_TRUE(y(0).is_objective_improvable());
         EXPECT_FALSE(x(0).is_feasibility_improvable());
@@ -1610,8 +1696,8 @@ TEST_F(TestModel, update_variable_improvability) {
         x = 10;
         y = 10;
         model.update();
-        model.update_variable_objective_improvability();
-        model.update_variable_feasibility_improvability();
+        model.update_variable_objective_improvabilities();
+        model.update_variable_feasibility_improvabilities();
         EXPECT_TRUE(x(0).is_objective_improvable());
         EXPECT_FALSE(y(0).is_objective_improvable());
         EXPECT_FALSE(x(0).is_feasibility_improvable());
@@ -1620,8 +1706,8 @@ TEST_F(TestModel, update_variable_improvability) {
         x = 10;
         y = -10;
         model.update();
-        model.update_variable_objective_improvability();
-        model.update_variable_feasibility_improvability();
+        model.update_variable_objective_improvabilities();
+        model.update_variable_feasibility_improvabilities();
         EXPECT_TRUE(x(0).is_objective_improvable());
         EXPECT_TRUE(y(0).is_objective_improvable());
         EXPECT_TRUE(x(0).is_feasibility_improvable());
@@ -1645,8 +1731,8 @@ TEST_F(TestModel, update_variable_improvability) {
         y = -10;
 
         model.update();
-        model.update_variable_objective_improvability();
-        model.update_variable_feasibility_improvability();
+        model.update_variable_objective_improvabilities();
+        model.update_variable_feasibility_improvabilities();
         EXPECT_FALSE(x(0).is_objective_improvable());
         EXPECT_TRUE(y(0).is_objective_improvable());
         EXPECT_FALSE(x(0).is_feasibility_improvable());
@@ -1655,8 +1741,8 @@ TEST_F(TestModel, update_variable_improvability) {
         x = 10;
         y = 10;
         model.update();
-        model.update_variable_objective_improvability();
-        model.update_variable_feasibility_improvability();
+        model.update_variable_objective_improvabilities();
+        model.update_variable_feasibility_improvabilities();
         EXPECT_TRUE(x(0).is_objective_improvable());
         EXPECT_FALSE(y(0).is_objective_improvable());
         EXPECT_FALSE(x(0).is_feasibility_improvable());
@@ -1665,8 +1751,8 @@ TEST_F(TestModel, update_variable_improvability) {
         x = 10;
         y = -10;
         model.update();
-        model.update_variable_objective_improvability();
-        model.update_variable_feasibility_improvability();
+        model.update_variable_objective_improvabilities();
+        model.update_variable_feasibility_improvabilities();
         EXPECT_TRUE(x(0).is_objective_improvable());
         EXPECT_TRUE(y(0).is_objective_improvable());
         EXPECT_TRUE(x(0).is_feasibility_improvable());
@@ -1690,8 +1776,8 @@ TEST_F(TestModel, update_variable_improvability) {
         y = -10;
 
         model.update();
-        model.update_variable_objective_improvability();
-        model.update_variable_feasibility_improvability();
+        model.update_variable_objective_improvabilities();
+        model.update_variable_feasibility_improvabilities();
         EXPECT_FALSE(x(0).is_objective_improvable());
         EXPECT_TRUE(y(0).is_objective_improvable());
         EXPECT_FALSE(x(0).is_feasibility_improvable());
@@ -1700,8 +1786,8 @@ TEST_F(TestModel, update_variable_improvability) {
         x = 10;
         y = 10;
         model.update();
-        model.update_variable_objective_improvability();
-        model.update_variable_feasibility_improvability();
+        model.update_variable_objective_improvabilities();
+        model.update_variable_feasibility_improvabilities();
         EXPECT_TRUE(x(0).is_objective_improvable());
         EXPECT_FALSE(y(0).is_objective_improvable());
         EXPECT_FALSE(x(0).is_feasibility_improvable());
@@ -1710,8 +1796,8 @@ TEST_F(TestModel, update_variable_improvability) {
         x = -10;
         y = 10;
         model.update();
-        model.update_variable_objective_improvability();
-        model.update_variable_feasibility_improvability();
+        model.update_variable_objective_improvabilities();
+        model.update_variable_feasibility_improvabilities();
         EXPECT_FALSE(x(0).is_objective_improvable());
         EXPECT_FALSE(y(0).is_objective_improvable());
         EXPECT_TRUE(x(0).is_feasibility_improvable());
