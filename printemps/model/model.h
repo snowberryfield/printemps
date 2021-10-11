@@ -1155,7 +1155,7 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void update_variable_bound(const double a_OBJECTIVE,
+    constexpr int update_variable_bounds(const double a_OBJECTIVE,
                                          const bool   a_IS_ENABLED_PRINT) {
         model_component::Constraint<T_Variable, T_Expression> constraint;
         if (m_is_minimization) {
@@ -1166,23 +1166,13 @@ class Model {
         bool is_bound_tightened = presolver::
             remove_redundant_constraint_with_tightening_variable_bound(
                 &constraint, a_IS_ENABLED_PRINT);
-        if (!is_bound_tightened) {
-            return;
+
+        int number_of_newly_fixed_variables = 0;
+        if (is_bound_tightened) {
+            presolver::fix_implicit_fixed_variables(this, a_IS_ENABLED_PRINT);
         }
 
-        int number_of_newly_fixed_variables  //
-            = presolver::fix_implicit_fixed_variables(this, a_IS_ENABLED_PRINT);
-
-        if (number_of_newly_fixed_variables > 0) {
-            this->categorize_variables();
-            this->categorize_constraints();
-
-            m_neighborhood.binary().setup(
-                m_variable_reference.binary_variable_ptrs);
-
-            m_neighborhood.integer().setup(
-                m_variable_reference.integer_variable_ptrs);
-        }
+        return number_of_newly_fixed_variables;
     }
 
     /*************************************************************************/
@@ -1709,7 +1699,7 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void reset_variable_objective_improvability(
+    inline constexpr void reset_variable_objective_improvabilities(
         const std::vector<model_component::Variable<T_Variable, T_Expression> *>
             &a_VARIABLE_PTRS) {
         for (auto &&variable_ptr : a_VARIABLE_PTRS) {
@@ -1718,13 +1708,13 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void reset_variable_objective_improvability(void) {
-        this->reset_variable_objective_improvability(
+    inline constexpr void reset_variable_objective_improvabilities(void) {
+        this->reset_variable_objective_improvabilities(
             this->variable_reference().variable_ptrs);
     }
 
     /*************************************************************************/
-    inline constexpr void reset_variable_feasibility_improvability(
+    inline constexpr void reset_variable_feasibility_improvabilities(
         const std::vector<model_component::Variable<T_Variable, T_Expression> *>
             &a_VARIABLE_PTRS) const noexcept {
         for (auto &&variable_ptr : a_VARIABLE_PTRS) {
@@ -1733,7 +1723,7 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void reset_variable_feasibility_improvability(
+    inline constexpr void reset_variable_feasibility_improvabilities(
         const std::vector<model_component::Constraint<T_Variable, T_Expression>
                               *> &a_CONSTRAINT_PTRS) const noexcept {
         for (const auto &constraint_ptr : a_CONSTRAINT_PTRS) {
@@ -1748,19 +1738,19 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void reset_variable_feasibility_improvability(void) {
-        this->reset_variable_feasibility_improvability(
+    inline constexpr void reset_variable_feasibility_improvabilities(void) {
+        this->reset_variable_feasibility_improvabilities(
             this->variable_reference().variable_ptrs);
     }
 
     /*************************************************************************/
-    inline constexpr void update_variable_objective_improvability(void) {
-        this->update_variable_objective_improvability(
+    inline constexpr void update_variable_objective_improvabilities(void) {
+        this->update_variable_objective_improvabilities(
             this->variable_reference().mutable_variable_ptrs);
     }
 
     /*************************************************************************/
-    constexpr void update_variable_objective_improvability(
+    constexpr void update_variable_objective_improvabilities(
         const std::vector<model_component::Variable<T_Variable, T_Expression> *>
             &a_VARIABLE_PTRS) const noexcept {
         for (const auto &variable_ptr : a_VARIABLE_PTRS) {
@@ -1778,13 +1768,13 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void update_variable_feasibility_improvability(void) {
-        this->update_variable_feasibility_improvability(
+    inline constexpr void update_variable_feasibility_improvabilities(void) {
+        this->update_variable_feasibility_improvabilities(
             this->constraint_reference().enabled_constraint_ptrs);
     }
 
     /*************************************************************************/
-    constexpr void update_variable_feasibility_improvability(
+    constexpr void update_variable_feasibility_improvabilities(
         const std::vector<model_component::Constraint<T_Variable, T_Expression>
                               *> &a_CONSTRAINT_PTRS) const noexcept {
         for (const auto &constraint_ptr : a_CONSTRAINT_PTRS) {
@@ -1854,8 +1844,8 @@ class Model {
 
     /*************************************************************************/
     inline solution::SolutionScore evaluate(
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
-        const noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
+        noexcept {
         solution::SolutionScore score;
         this->evaluate(&score, a_MOVE);
         return score;
@@ -1871,9 +1861,10 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void evaluate(solution::SolutionScore *a_score_ptr,  //
-                            const neighborhood::Move<T_Variable, T_Expression>
-                                &a_MOVE) const noexcept {
+    constexpr void evaluate(
+        solution::SolutionScore *                           a_score_ptr,  //
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
+        noexcept {
         double total_violation = 0.0;
         double local_penalty   = 0.0;
         double global_penalty  = 0.0;

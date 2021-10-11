@@ -102,8 +102,8 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     /**
      * Reset the variable improvability.
      */
-    model_ptr->reset_variable_objective_improvability();
-    model_ptr->reset_variable_feasibility_improvability();
+    model_ptr->reset_variable_objective_improvabilities();
+    model_ptr->reset_variable_feasibility_improvabilities();
 
     /**
      * Prepare other local variables.
@@ -211,9 +211,9 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                 neighborhood::related_variable_ptrs(current_move));
 
             if (iteration == 0) {
-                model_ptr->update_variable_objective_improvability();
+                model_ptr->update_variable_objective_improvabilities();
             } else {
-                model_ptr->update_variable_objective_improvability(
+                model_ptr->update_variable_objective_improvabilities(
                     changed_variable_ptrs);
             }
 
@@ -224,8 +224,9 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                         accept_objective_improvable   = true;
                         accept_feasibility_improvable = false;
                     } else {
-                        model_ptr->reset_variable_feasibility_improvability();
-                        model_ptr->update_variable_feasibility_improvability();
+                        model_ptr->reset_variable_feasibility_improvabilities();
+                        model_ptr
+                            ->update_variable_feasibility_improvabilities();
 
                         accept_all                    = false;
                         accept_objective_improvable   = true;
@@ -240,8 +241,9 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                         accept_objective_improvable   = true;
                         accept_feasibility_improvable = false;
                     } else {
-                        model_ptr->reset_variable_feasibility_improvability();
-                        model_ptr->update_variable_feasibility_improvability();
+                        model_ptr->reset_variable_feasibility_improvabilities();
+                        model_ptr
+                            ->update_variable_feasibility_improvabilities();
 
                         accept_all                    = false;
                         accept_objective_improvable   = false;
@@ -260,14 +262,15 @@ TabuSearchResult<T_Variable, T_Expression> solve(
 
                         if (iteration == 0) {
                             model_ptr
-                                ->reset_variable_feasibility_improvability();
+                                ->reset_variable_feasibility_improvabilities();
                             model_ptr
-                                ->update_variable_feasibility_improvability();
+                                ->update_variable_feasibility_improvabilities();
                         } else {
-                            model_ptr->reset_variable_feasibility_improvability(
-                                changed_constraint_ptrs);
                             model_ptr
-                                ->update_variable_feasibility_improvability(
+                                ->reset_variable_feasibility_improvabilities(
+                                    changed_constraint_ptrs);
+                            model_ptr
+                                ->update_variable_feasibility_improvabilities(
                                     changed_constraint_ptrs);
                         }
 

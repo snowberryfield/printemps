@@ -638,11 +638,26 @@ Result<T_Variable, T_Expression> solve(
         /**
          * Update variable bounds.
          */
-        if (update_status & solution::IncumbentHolderConstant::
-                                STATUS_FEASIBLE_INCUMBENT_UPDATE) {
-            model_ptr->update_variable_bound(
-                result.incumbent_holder.feasible_incumbent_solution().objective,
-                master_option.verbose >= option::verbose::Outer);
+        if (master_option.is_enabled_presolve &&
+            (update_status & solution::IncumbentHolderConstant::
+                                 STATUS_FEASIBLE_INCUMBENT_UPDATE)) {
+            auto objective =
+                result.incumbent_holder.feasible_incumbent_solution().objective;
+            auto number_of_newly_fixed_variables =
+                model_ptr->update_variable_bounds(
+                    objective, master_option.verbose >= option::verbose::Outer);
+
+            /**
+             * If there is new fixed variable, setup the variable category and
+             * the binary/integer neighborhood again.
+             */
+            if (number_of_newly_fixed_variables > 0) {
+                model_ptr->categorize_variables();
+                model_ptr->neighborhood().binary().setup(
+                    model_ptr->variable_reference().binary_variable_ptrs);
+                model_ptr->neighborhood().integer().setup(
+                    model_ptr->variable_reference().integer_variable_ptrs);
+            }
         }
 
         /**
