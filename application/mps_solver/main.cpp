@@ -20,7 +20,9 @@ int main([[maybe_unused]] int argc, char *argv[]) {
         std::cout << "Usage: ./mps_solver.exe "
                   << "[-p OPTION_FILE_NAME] "
                   << "[-i INITIAL_SOLUTION_FILE_NAME] "
-                  << "[--separate] "
+                  << "[-m MUTABLE_VARIABLE_FILE_NAME] "
+                  << "[-f FIXED_VARIABLE_FILE_NAME] "
+                  << "[--accept-continuous] "
                   << "mps_file" << std::endl;
         std::cout << std::endl;
         std::cout  //
