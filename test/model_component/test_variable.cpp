@@ -560,6 +560,36 @@ TEST_F(TestVariable, setup_uniform_sensitivity) {
 }
 
 /*****************************************************************************/
+TEST_F(TestVariable, setup_hash) {
+    printemps::model::Model<int, double> model;
+
+    auto& x = model.create_variables("x", 2, 0, 1);
+    auto& g = model.create_constraints("g", 2);
+
+    g(0) = x(0) + x(1) == 1;
+    g(1) = x(0) == 1;
+
+    model.setup_is_linear();
+    model.categorize_variables();
+    model.categorize_constraints();
+    model.setup_variable_related_constraints();
+    model.setup_variable_sensitivities();
+
+    {
+        x(0).setup_hash();
+        std::uint64_t hash = reinterpret_cast<std::uint64_t>(&g(0)) +
+                             reinterpret_cast<std::uint64_t>(&g(1));
+        EXPECT_EQ(hash, x(0).hash());
+    }
+
+    {
+        x(1).setup_hash();
+        std::uint64_t hash = reinterpret_cast<std::uint64_t>(&g(0));
+        EXPECT_EQ(hash, x(1).hash());
+    }
+}
+
+/*****************************************************************************/
 TEST_F(TestVariable, has_uniform_sensitivity) {
     /// This method is tested in setup_uniform_sensitivity().
 }
@@ -616,6 +646,10 @@ TEST_F(TestVariable, objective_sensitivity) {
     /// This method is tested in set_objective_sensitivity().
 }
 
+/*****************************************************************************/
+TEST_F(TestVariable, hash) {
+    /// This method is tested in setup_hash().
+}
 /*****************************************************************************/
 TEST_F(TestVariable, update_margin) {
     auto variable =

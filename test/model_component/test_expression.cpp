@@ -192,6 +192,7 @@ TEST_F(TestExpression, setup_mask) {
                      expression.minus_one_coefficient_mask());
     }
 }
+
 /*****************************************************************************/
 TEST_F(TestExpression, setup_hash) {
     auto expression =

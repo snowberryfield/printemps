@@ -21,7 +21,7 @@ constexpr bool remove_independent_variable(
         if (fabs(sensitivity) < constant::EPSILON_10) {
             utility::print_message(
                 "The value of the decision variable " + a_variable_ptr->name() +
-                    " was fixed as " + std::to_string(0) +
+                    " was fixed at " + std::to_string(0) +
                     " because it does not have sensitivity to any constraint "
                     "or objective function.",
                 a_IS_ENABLED_PRINT);
@@ -34,7 +34,7 @@ constexpr bool remove_independent_variable(
                     utility::print_message(
                         "The value of the decision variable " +
                             a_variable_ptr->name() +
-                            " was fixed as its lower bound " +
+                            " was fixed at its lower bound " +
                             std::to_string(fix_value) +
                             " because it does not have sensitivity to any "
                             "constraint, and the sensitivity to the objective "
@@ -47,7 +47,7 @@ constexpr bool remove_independent_variable(
                     utility::print_message(
                         "The value of the decision variable " +
                             a_variable_ptr->name() +
-                            " was fixed as its upper bound " +
+                            " was fixed at its upper bound " +
                             std::to_string(fix_value) +
                             " because it does not have sensitivity to any "
                             "constraint, and the sensitivity to the objective "
@@ -62,7 +62,7 @@ constexpr bool remove_independent_variable(
                     utility::print_message(
                         "The value of the decision variable " +
                             a_variable_ptr->name() +
-                            " was fixed as its upper bound " +
+                            " was fixed at its upper bound " +
                             std::to_string(fix_value) +
                             " because it does not have sensitivity to any "
                             "constraint, and the sensitivity to the objective "
@@ -75,7 +75,7 @@ constexpr bool remove_independent_variable(
                     utility::print_message(
                         "The value of the decision variable " +
                             a_variable_ptr->name() +
-                            " was fixed as its lower bound " +
+                            " was fixed at its lower bound " +
                             std::to_string(fix_value) +
                             " because it does not have sensitivity to any "
                             "constraint, and the sensitivity to the objective "
@@ -93,7 +93,7 @@ constexpr bool remove_independent_variable(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-constexpr bool fix_implicit_fixed_variable(
+constexpr bool remove_implicit_fixed_variable(
     model_component::Variable<T_Variable, T_Expression> *a_variable_ptr,  //
     const bool                                           a_IS_ENABLED_PRINT) {
     bool is_removed = false;
@@ -105,7 +105,7 @@ constexpr bool fix_implicit_fixed_variable(
 
         utility::print_message(
             "The value of the decision variable " + a_variable_ptr->name() +
-                " was fixed as " + std::to_string(fixed_value) +
+                " was fixed at " + std::to_string(fixed_value) +
                 " because the lower bound " + std::to_string(lower_bound) +
                 " and the upper_bound " + std::to_string(upper_bound) +
                 " implicitly fix the value.",
@@ -143,7 +143,7 @@ constexpr int remove_independent_variables(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-constexpr int fix_implicit_fixed_variables(
+constexpr int remove_implicit_fixed_variables(
     model::Model<T_Variable, T_Expression> *a_model_ptr,  //
     const bool                              a_IS_ENABLED_PRINT) {
     int number_of_newly_fixed_variables = 0;
@@ -157,7 +157,7 @@ constexpr int fix_implicit_fixed_variables(
                 continue;
             }
 
-            if (fix_implicit_fixed_variable(&variable, a_IS_ENABLED_PRINT)) {
+            if (remove_implicit_fixed_variable(&variable, a_IS_ENABLED_PRINT)) {
                 number_of_newly_fixed_variables++;
             }
         }
@@ -166,9 +166,12 @@ constexpr int fix_implicit_fixed_variables(
 }
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-constexpr int fix_redundant_set_variables(
+constexpr int remove_redundant_set_variables(
     model::Model<T_Variable, T_Expression> *a_model_ptr,  //
     const bool                              a_IS_ENABLED_PRINT) {
+    /**
+     * NOTE: This function must be called after extracting selection variables.
+     */
     int number_of_set_partitionings =
         a_model_ptr->constraint_type_reference().set_partitioning_ptrs.size();
     int number_of_set_coverings =
@@ -176,12 +179,14 @@ constexpr int fix_redundant_set_variables(
     int number_of_set_packings =
         a_model_ptr->constraint_type_reference().set_packing_ptrs.size();
 
+    int number_of_newly_fixed_variables = 0;
+
     /**
      * If the problem is unconstrained, the following procedures will be
      * skipped.
      */
     if (a_model_ptr->number_of_constraints() == 0) {
-        return 0;
+        return number_of_newly_fixed_variables;
     }
 
     /**
@@ -191,10 +196,18 @@ constexpr int fix_redundant_set_variables(
     if (a_model_ptr->number_of_constraints() !=
         (number_of_set_partitionings + number_of_set_coverings +
          number_of_set_packings)) {
-        return 0;
+        return number_of_newly_fixed_variables;
     }
-    int  number_of_newly_fixed_variables = 0;
-    auto variable_ptrs = a_model_ptr->variable_reference().variable_ptrs;
+
+    auto      variable_ptrs  = a_model_ptr->variable_reference().variable_ptrs;
+    const int VARIABLES_SIZE = variable_ptrs.size();
+
+    /**
+     * Compute a hash for each variable.
+     */
+    for (auto &&variable_ptr : variable_ptrs) {
+        variable_ptr->setup_hash();
+    }
 
     /**
      * Pre-sort the decision variables pointers for efficient subsequent
@@ -203,108 +216,72 @@ constexpr int fix_redundant_set_variables(
     if (a_model_ptr->is_minimization()) {
         std::sort(variable_ptrs.begin(), variable_ptrs.end(),
                   [](const auto &a_LHS, const auto &a_RHS) {
-                      return (a_LHS->related_constraint_ptrs() ==
-                              a_RHS->related_constraint_ptrs())
-                                 ? (a_LHS->objective_sensitivity() >
+                      return (a_LHS->hash() == a_RHS->hash())
+                                 ? (a_LHS->objective_sensitivity() <
                                     a_RHS->objective_sensitivity())
-                                 : (a_LHS->related_constraint_ptrs().size() <
-                                    a_RHS->related_constraint_ptrs().size());
+                                 : (a_LHS->hash() < a_RHS->hash());
                   });
     } else {
         std::sort(variable_ptrs.begin(), variable_ptrs.end(),
                   [](const auto &a_LHS, const auto &a_RHS) {
-                      return (a_LHS->related_constraint_ptrs() ==
-                              a_RHS->related_constraint_ptrs())
-                                 ? (a_LHS->objective_sensitivity() <
+                      return (a_LHS->hash() == a_RHS->hash())
+                                 ? (a_LHS->objective_sensitivity() >
                                     a_RHS->objective_sensitivity())
-                                 : (a_LHS->related_constraint_ptrs().size() <
-                                    a_RHS->related_constraint_ptrs().size());
+                                 : (a_LHS->hash() < a_RHS->hash());
                   });
     }
 
-    for (auto i = 0; i < a_model_ptr->number_of_variables(); i++) {
+    int i = 0;
+
+    while (i < VARIABLES_SIZE) {
         /**
          * If the decision variable has already been fixed, the
          * following procedures will be skipped.
          */
         if (variable_ptrs[i]->is_fixed()) {
+            i++;
             continue;
         }
 
-        /**
-         * Fix the value of x_{i} by 0 if there exists a decision variable x_{j}
-         * which has same constraint coefficient patterns as x_{i} and not
-         * inferior objective coefficient than that of x_{i}.
-         */
-        for (auto j = i + 1; j < a_model_ptr->number_of_variables(); j++) {
+        int j = i + 1;
+        while (j < VARIABLES_SIZE) {
             /**
-             * If the number of non-zero coefficients of x_{j} is larger than
-             * that of x_{i}, the inner loop can be terminated because the all
-             * the following decision variables also have larger number of
-             * non-zero coefficients, by the pre-sort.
+             * If the hashes of decision variables i and j are different, the
+             * inner loop can be terminated.
              */
-            if (variable_ptrs[i]->related_constraint_ptrs().size() <
-                variable_ptrs[j]->related_constraint_ptrs().size()) {
+            if (variable_ptrs[i]->hash() != variable_ptrs[j]->hash()) {
+                i++;
                 break;
             }
 
             /**
-             * If x_{j} is fixed as 0, the following procedure can be skipped.
+             * If the decision variable j is fixed at 0, the following procedure
+             * can be skipped.
              */
             if (variable_ptrs[j]->is_fixed() &&
                 variable_ptrs[j]->value() == 0) {
+                j++;
                 continue;
             }
 
             /**
-             * If the constraint coefficient pattern of x_{j} differs from that
-             * of x_{i}, the following procedure can be skipped.
+             * If the constraint coefficient pattern of the decision variables i
+             * and j is same, fix the value of the decision variable j at 0.
              */
-            if (variable_ptrs[i]->constraint_sensitivities() !=
-                variable_ptrs[j]->constraint_sensitivities()) {
-                continue;
-            }
-
-            /**
-             * If x_{j} has superior objective coefficient than that of x_{i},
-             * the value of x_{i} will be fixed as 0 and break.
-             */
-            if ((a_model_ptr->is_minimization() &&
-                 (variable_ptrs[i]->objective_sensitivity() >=
-                  variable_ptrs[j]->objective_sensitivity())) ||
-                (!a_model_ptr->is_minimization() &&
-                 (variable_ptrs[i]->objective_sensitivity() <=
-                  variable_ptrs[j]->objective_sensitivity()))) {
-                variable_ptrs[i]->fix_by(0);
-                utility::print_message(
-                    "The value of redundant decision variable " +
-                        variable_ptrs[i]->name() + " was fixed as " +
-                        std::to_string(0) + ".",
-                    a_IS_ENABLED_PRINT);
-
-                number_of_newly_fixed_variables++;
-                break;
-
-            }
-            /**
-             * If x_{j} does not have superior objective coefficient than that
-             * of x_{i}, the value of x_{j} will be fixed as 0.
-             */
-            else if ((a_model_ptr->is_minimization() &&
-                      (variable_ptrs[i]->objective_sensitivity() <
-                       variable_ptrs[j]->objective_sensitivity())) ||
-                     (!a_model_ptr->is_minimization() &&
-                      (variable_ptrs[i]->objective_sensitivity() >
-                       variable_ptrs[j]->objective_sensitivity()))) {
+            if (variable_ptrs[i]->related_constraint_ptrs() ==
+                variable_ptrs[j]->related_constraint_ptrs()) {
                 variable_ptrs[j]->fix_by(0);
                 utility::print_message(
                     "The value of redundant decision variable " +
-                        variable_ptrs[j]->name() + " was fixed as " +
+                        variable_ptrs[j]->name() + " was fixed at " +
                         std::to_string(0) + ".",
                     a_IS_ENABLED_PRINT);
-
                 number_of_newly_fixed_variables++;
             }
+            j++;
+        }
+        if (j == VARIABLES_SIZE) {
+            break;
         }
     }
 
@@ -384,7 +361,7 @@ constexpr bool remove_redundant_constraint_with_tightening_variable_bound(
             model_component::ConstraintSense::Equal) {
             /**
              * If the singleton constraint is defined by an equality as ax+b=0,
-             * the value of the decision variable x will be fixed as -b/a.
+             * the value of the decision variable x will be fixed at -b/a.
              */
             utility::print_message(  //
                 "The constraint " + a_constraint_ptr->name() +
@@ -623,8 +600,8 @@ constexpr int remove_duplicated_constraints(
         constraint_ptr->expression().setup_hash();
     }
 
-    auto constraint_ptrs  = a_constraint_ptrs;
-    int  constraints_size = constraint_ptrs.size();
+    auto      constraint_ptrs  = a_constraint_ptrs;
+    const int CONSTRAINTS_SIZE = constraint_ptrs.size();
 
     std::sort(constraint_ptrs.begin(), constraint_ptrs.end(),
               [](const auto &a_FIRST, const auto &a_SECOND) {
@@ -633,22 +610,36 @@ constexpr int remove_duplicated_constraints(
               });
 
     int i = 0;
-    while (i < constraints_size) {
+    while (i < CONSTRAINTS_SIZE) {
         if (!constraint_ptrs[i]->is_enabled()) {
             i++;
             continue;
         }
         int j = i + 1;
-        while (j < constraints_size) {
-            if (!constraint_ptrs[j]->is_enabled()) {
-                j++;
-                continue;
-            }
+        while (j < CONSTRAINTS_SIZE) {
+            /**
+             * If the hashes of constraint i and j are different, the inner loop
+             * can be terminated.
+             */
             if (constraint_ptrs[i]->expression().hash() !=
                 constraint_ptrs[j]->expression().hash()) {
                 i = j;
                 break;
             }
+
+            /**
+             * If the constraint j is disabled, the following procedure
+             * can be skipped.
+             */
+            if (!constraint_ptrs[j]->is_enabled()) {
+                j++;
+                continue;
+            }
+
+            /**
+             * If the variable coefficient pattern of the constraints i and j is
+             * same, disable constraint j.
+             */
             if (constraint_ptrs[i]->expression().equal(
                     constraint_ptrs[j]->expression())) {
                 constraint_ptrs[j]->disable();
@@ -660,10 +651,9 @@ constexpr int remove_duplicated_constraints(
             }
             j++;
         }
-        if (j == constraints_size) {
+        if (j == CONSTRAINTS_SIZE) {
             break;
         }
-        i++;
     }
     return number_of_newly_disabled_constraints;
 }
@@ -799,7 +789,7 @@ constexpr std::pair<int, int> remove_redundant_set_constraints(
                                 variable_ptr->name() +
                                 " in partitioning constraint " +
                                 set_partitioning_ptrs[i]->name() +
-                                " was fixed as 0.",
+                                " was fixed at 0.",
                             a_IS_ENABLED_PRINT);
                         number_of_newly_fixed_variables++;
                     }
@@ -820,7 +810,7 @@ constexpr std::pair<int, int> remove_redundant_set_constraints(
 template <class T_Variable, class T_Expression>
 constexpr bool reduce_problem_size(
     model::Model<T_Variable, T_Expression> *a_model_ptr,  //
-    const bool a_IS_ENABLED_PAIRWISE_PRESOLVE, const bool a_IS_ENABLED_PRINT) {
+    const bool                              a_IS_ENABLED_PRINT) {
     utility::print_single_line(a_IS_ENABLED_PRINT);
     utility::print_message("Reducing problem size...", a_IS_ENABLED_PRINT);
 
@@ -838,7 +828,7 @@ constexpr bool reduce_problem_size(
                 a_model_ptr, a_IS_ENABLED_PRINT);
 
         int number_of_newly_fixed_variables  //
-            = fix_implicit_fixed_variables(a_model_ptr, a_IS_ENABLED_PRINT);
+            = remove_implicit_fixed_variables(a_model_ptr, a_IS_ENABLED_PRINT);
 
         number_of_disabled_constaints += number_of_newly_disabled_constaints;
         number_of_fixed_variables += number_of_newly_fixed_variables;
@@ -849,14 +839,6 @@ constexpr bool reduce_problem_size(
         }
     }
 
-    if (a_model_ptr->is_linear() && a_IS_ENABLED_PAIRWISE_PRESOLVE) {
-        const int MAX_CONSIDERABLE_NUMBER_OF_VARIABLES = 100000;
-        if (a_model_ptr->number_of_variables() <=
-            MAX_CONSIDERABLE_NUMBER_OF_VARIABLES) {
-            number_of_fixed_variables +=
-                fix_redundant_set_variables(a_model_ptr, a_IS_ENABLED_PRINT);
-        }
-    }
     utility::print_message("Done.", a_IS_ENABLED_PRINT);
 
     return (number_of_disabled_constaints > 0) ||

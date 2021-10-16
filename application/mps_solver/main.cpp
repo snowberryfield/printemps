@@ -119,7 +119,7 @@ int main([[maybe_unused]] int argc, char *argv[]) {
 
     /**
      * If the fixe variable file is given, the values of the decision
-     * variables will be fixed by the specified values.
+     * variables will be fixed at the specified values.
      */
     if (!fixed_variable_file_name.empty()) {
         auto solution = printemps::helper::read_variable_names_and_values(
