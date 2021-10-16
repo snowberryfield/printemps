@@ -499,6 +499,27 @@ TEST_F(TestProblemSizeReducer,
 }
 
 /*****************************************************************************/
+TEST_F(TestProblemSizeReducer, remove_duplicated_constraints) {
+    printemps::model::Model<int, double> model;
+    auto& x = model.create_variables("x", 10, -10, 10);
+    model.minimize(x.sum());
+    model.create_constraint("g_0", 2 * x(0) + x(1) == 10);
+    model.create_constraint("g_1", 2 * x(0) + x(1) == 10);
+    model.create_constraint("g_2", 2 * x(0) + x(1) <= 10);
+    model.create_constraint("g_2", 2 * x(0) + x(1) == 20);
+
+    model.setup_is_linear();
+    model.categorize_variables();
+    model.categorize_constraints();
+    model.setup_variable_related_constraints();
+    model.setup_variable_sensitivities();
+
+    auto number_of_newly_disabled_constraints =
+        printemps::presolver::remove_duplicated_constraints(&model, false);
+    EXPECT_EQ(1, number_of_newly_disabled_constraints);
+}
+
+/*****************************************************************************/
 TEST_F(TestProblemSizeReducer, reduce_problem_size) {
     printemps::model::Model<int, double> model;
 

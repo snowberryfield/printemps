@@ -73,6 +73,8 @@ class Expression : public multi_array::AbstractMultiArrayElement {
     bool          m_has_effective_plus_one_coefficient_mask;
     bool          m_has_effective_minus_one_coefficient_mask;
 
+    std::uint64_t m_hash;
+
     /*************************************************************************/
     /// Default constructor
     Expression(void) {
@@ -151,6 +153,8 @@ class Expression : public multi_array::AbstractMultiArrayElement {
         m_minus_one_coefficient_mask               = 0;
         m_has_effective_plus_one_coefficient_mask  = false;
         m_has_effective_minus_one_coefficient_mask = false;
+
+        m_hash = 0;
     }
 
     /*************************************************************************/
@@ -241,6 +245,15 @@ class Expression : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
+    inline constexpr void setup_hash(void) {
+        std::uint64_t hash = 0;
+        for (const auto &sensitivity : m_sensitivities) {
+            hash += reinterpret_cast<std::uint64_t>(sensitivity.first);
+        }
+        m_hash = hash;
+    }
+
+    /*************************************************************************/
     inline constexpr T_Expression constant_value(void) const {
         return m_constant_value;
     }
@@ -257,8 +270,8 @@ class Expression : public multi_array::AbstractMultiArrayElement {
 
     /*************************************************************************/
     inline constexpr T_Expression evaluate(
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
-        const noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
+        noexcept {
         /// The following code is required for nonlinear objective functions.
 #ifndef _MPS_SOLVER
         if (a_MOVE.alterations.size() == 0) {
@@ -447,29 +460,57 @@ class Expression : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr std::uint64_t plus_one_coefficient_mask(
-        void) const noexcept {
+    inline constexpr std::uint64_t plus_one_coefficient_mask(void) const
+        noexcept {
         return m_plus_one_coefficient_mask;
     }
 
     /*************************************************************************/
-    inline constexpr std::uint64_t minus_one_coefficient_mask(
-        void) const noexcept {
+    inline constexpr std::uint64_t minus_one_coefficient_mask(void) const
+        noexcept {
         return m_minus_one_coefficient_mask;
     }
 
     /*************************************************************************/
-    inline constexpr bool has_effective_plus_one_coefficient_mask(
-        void) const noexcept {
+    inline constexpr bool has_effective_plus_one_coefficient_mask(void) const
+        noexcept {
         return m_has_effective_plus_one_coefficient_mask;
     }
 
     /*************************************************************************/
-    inline constexpr bool has_effective_minus_one_coefficient_mask(
-        void) const noexcept {
+    inline constexpr bool has_effective_minus_one_coefficient_mask(void) const
+        noexcept {
         return m_has_effective_minus_one_coefficient_mask;
     }
 
+    /*************************************************************************/
+    inline constexpr std::uint64_t hash(void) const noexcept {
+        return m_hash;
+    }
+
+    /*************************************************************************/
+    inline constexpr bool equal(
+        const Expression<T_Variable, T_Expression> &a_EXPRESSION) noexcept {
+        if (m_hash != a_EXPRESSION.hash()) {
+            return false;
+        }
+
+        if (m_sensitivities.size() != a_EXPRESSION.sensitivities().size()) {
+            return false;
+        }
+
+        if (m_constant_value != a_EXPRESSION.constant_value()) {
+            return false;
+        }
+
+        return m_sensitivities == a_EXPRESSION.sensitivities();
+    }
+
+    /*********************************************************************/
+    inline constexpr bool not_equal(
+        const Expression<T_Variable, T_Expression> &a_EXPRESSION) noexcept {
+        return !this->equal(a_EXPRESSION);
+    }
     /*************************************************************************/
     inline constexpr Expression<T_Variable, T_Expression> operator+(
         void) const {
@@ -592,6 +633,7 @@ class Expression : public multi_array::AbstractMultiArrayElement {
         return *this;
     }
 };
+
 using IPExpression = Expression<int, double>;
 }  // namespace model_component
 }  // namespace printemps

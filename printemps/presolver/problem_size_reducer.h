@@ -609,6 +609,131 @@ constexpr int remove_redundant_constraints_with_tightening_variable_bounds(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
+constexpr int remove_duplicated_constraints(
+    std::vector<model_component::Constraint<T_Variable, T_Expression> *>
+               a_constraint_ptrs,  //
+    const bool a_IS_ENABLED_PRINT) {
+    int number_of_newly_disabled_constraints = 0;
+
+    if (a_constraint_ptrs.size() <= 1) {
+        return number_of_newly_disabled_constraints;
+    }
+
+    for (auto constraint_ptr : a_constraint_ptrs) {
+        constraint_ptr->expression().setup_hash();
+    }
+
+    auto constraint_ptrs  = a_constraint_ptrs;
+    int  constraints_size = constraint_ptrs.size();
+
+    std::sort(constraint_ptrs.begin(), constraint_ptrs.end(),
+              [](const auto &a_FIRST, const auto &a_SECOND) {
+                  return a_FIRST->expression().hash() <
+                         a_SECOND->expression().hash();
+              });
+
+    int i = 0;
+    while (i < constraints_size) {
+        if (!constraint_ptrs[i]->is_enabled()) {
+            i++;
+            continue;
+        }
+        int j = i + 1;
+        while (j < constraints_size) {
+            if (!constraint_ptrs[j]->is_enabled()) {
+                j++;
+                continue;
+            }
+            if (constraint_ptrs[i]->expression().hash() !=
+                constraint_ptrs[j]->expression().hash()) {
+                i = j;
+                break;
+            }
+            if (constraint_ptrs[i]->expression().equal(
+                    constraint_ptrs[j]->expression())) {
+                constraint_ptrs[j]->disable();
+                utility::print_message(  //
+                    "The duplicated constraint " + constraint_ptrs[j]->name() +
+                        " was removed.",
+                    a_IS_ENABLED_PRINT);
+                number_of_newly_disabled_constraints++;
+            }
+            j++;
+        }
+        if (j == constraints_size) {
+            break;
+        }
+        i++;
+    }
+    return number_of_newly_disabled_constraints;
+}
+
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+constexpr int remove_duplicated_constraints(
+    model::Model<T_Variable, T_Expression> *a_model_ptr,  //
+    const bool                              a_IS_ENABLED_PRINT) {
+    utility::print_single_line(a_IS_ENABLED_PRINT);
+    utility::print_message("Removing deduplicate constraints...",
+                           a_IS_ENABLED_PRINT);
+
+    auto &reference = a_model_ptr->constraint_type_reference();
+    int   number_of_newly_disabled_constraints = 0;
+
+    number_of_newly_disabled_constraints += remove_duplicated_constraints(  //
+        reference.singleton_ptrs, a_IS_ENABLED_PRINT);
+
+    number_of_newly_disabled_constraints += remove_duplicated_constraints(  //
+        reference.aggregation_ptrs, a_IS_ENABLED_PRINT);
+
+    number_of_newly_disabled_constraints += remove_duplicated_constraints(  //
+        reference.precedence_ptrs, a_IS_ENABLED_PRINT);
+
+    number_of_newly_disabled_constraints += remove_duplicated_constraints(  //
+        reference.variable_bound_ptrs, a_IS_ENABLED_PRINT);
+
+    number_of_newly_disabled_constraints += remove_duplicated_constraints(  //
+        reference.set_partitioning_ptrs, a_IS_ENABLED_PRINT);
+
+    number_of_newly_disabled_constraints += remove_duplicated_constraints(  //
+        reference.set_packing_ptrs, a_IS_ENABLED_PRINT);
+
+    number_of_newly_disabled_constraints += remove_duplicated_constraints(  //
+        reference.set_covering_ptrs, a_IS_ENABLED_PRINT);
+
+    number_of_newly_disabled_constraints += remove_duplicated_constraints(  //
+        reference.cardinality_ptrs, a_IS_ENABLED_PRINT);
+
+    number_of_newly_disabled_constraints += remove_duplicated_constraints(  //
+        reference.invariant_knapsack_ptrs, a_IS_ENABLED_PRINT);
+
+    number_of_newly_disabled_constraints += remove_duplicated_constraints(  //
+        reference.equation_knapsack_ptrs, a_IS_ENABLED_PRINT);
+
+    number_of_newly_disabled_constraints += remove_duplicated_constraints(  //
+        reference.bin_packing_ptrs, a_IS_ENABLED_PRINT);
+
+    number_of_newly_disabled_constraints += remove_duplicated_constraints(  //
+        reference.integer_knapsack_ptrs, a_IS_ENABLED_PRINT);
+
+    number_of_newly_disabled_constraints += remove_duplicated_constraints(  //
+        reference.min_max_ptrs, a_IS_ENABLED_PRINT);
+
+    number_of_newly_disabled_constraints += remove_duplicated_constraints(  //
+        reference.max_min_ptrs, a_IS_ENABLED_PRINT);
+
+    number_of_newly_disabled_constraints += remove_duplicated_constraints(  //
+        reference.intermediate_ptrs, a_IS_ENABLED_PRINT);
+
+    number_of_newly_disabled_constraints += remove_duplicated_constraints(  //
+        reference.gf2_ptrs, a_IS_ENABLED_PRINT);
+
+    utility::print_message("Done.", a_IS_ENABLED_PRINT);
+    return number_of_newly_disabled_constraints;
+}
+
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
 constexpr std::pair<int, int> remove_redundant_set_constraints(
     model::Model<T_Variable, T_Expression> *a_model_ptr,  //
     const bool                              a_IS_ENABLED_PRINT) {
