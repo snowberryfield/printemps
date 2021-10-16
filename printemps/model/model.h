@@ -713,6 +713,11 @@ class Model {
         }
 
         /**
+         * Deduplicate constraints.
+         */
+        presolver::remove_duplicated_constraints(this, a_IS_ENABLED_PRINT);
+
+        /**
          * Final categorization.
          */
         this->categorize_variables();
