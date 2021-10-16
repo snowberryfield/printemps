@@ -136,14 +136,14 @@ bool solve_gf2(model::Model<T_Variable, T_Expression> *a_model_ptr,  //
 
     for (const auto &variable_ptr : binary_variable_ptrs) {
         utility::print_message("The value of decision variable " +
-                                   variable_ptr->name() + " was fixed by " +
+                                   variable_ptr->name() + " was fixed at " +
                                    std::to_string(variable_ptr->value()) + ".",
                                a_IS_ENABLED_PRINT);
     }
 
     for (const auto &variable_ptr : aux_variable_ptrs) {
         utility::print_message("The value of decision variable " +
-                                   variable_ptr->name() + " was fixed by " +
+                                   variable_ptr->name() + " was fixed at " +
                                    std::to_string(variable_ptr->value()) + ".",
                                a_IS_ENABLED_PRINT);
     }

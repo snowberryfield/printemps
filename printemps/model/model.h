@@ -663,7 +663,7 @@ class Model {
          * decision variables implicitly fixed.
          */
         if (a_IS_ENABLED_PRESOLVE) {
-            presolver::reduce_problem_size(this, true, a_IS_ENABLED_PRINT);
+            presolver::reduce_problem_size(this, a_IS_ENABLED_PRINT);
         }
 
         /**
@@ -696,8 +696,41 @@ class Model {
                     }
                 }
 
-                presolver::reduce_problem_size(this, false, a_IS_ENABLED_PRINT);
+                presolver::reduce_problem_size(this, a_IS_ENABLED_PRINT);
             }
+        }
+
+        /**
+         * Remove redundant set decision variables.
+         */
+        int number_of_removed_variables = 0;
+        if (a_IS_ENABLED_PRESOLVE && m_is_linear) {
+            number_of_removed_variables =
+                presolver::remove_redundant_set_variables(this,
+                                                          a_IS_ENABLED_PRINT);
+        }
+
+        /**
+         * Remove duplicated constraints.
+         */
+        int number_of_removed_constraints = 0;
+        if (a_IS_ENABLED_PRESOLVE) {
+            number_of_removed_constraints =
+                presolver::remove_duplicated_constraints(this,
+                                                         a_IS_ENABLED_PRINT);
+        }
+
+        /**
+         * Categorize decision variables and constraints again if there are new
+         * removed(disabled) decision variables or constraints.
+         */
+        if (number_of_removed_variables > 0 ||
+            number_of_removed_constraints > 0) {
+            this->categorize_variables();
+            this->categorize_constraints();
+            this->setup_variable_related_zero_one_coefficient_constraints();
+            this->setup_variable_related_constraints();
+            this->setup_variable_sensitivities();
         }
 
         /**
@@ -713,16 +746,10 @@ class Model {
         }
 
         /**
-         * Deduplicate constraints.
-         */
-        presolver::remove_duplicated_constraints(this, a_IS_ENABLED_PRINT);
-
-        /**
          * Final categorization.
          */
         this->categorize_variables();
         this->categorize_constraints();
-
         this->setup_variable_related_zero_one_coefficient_constraints();
         this->setup_variable_related_constraints();
         this->setup_variable_sensitivities();
@@ -1174,7 +1201,8 @@ class Model {
 
         int number_of_newly_fixed_variables = 0;
         if (is_bound_tightened) {
-            presolver::fix_implicit_fixed_variables(this, a_IS_ENABLED_PRINT);
+            presolver::remove_implicit_fixed_variables(this,
+                                                       a_IS_ENABLED_PRINT);
         }
 
         return number_of_newly_fixed_variables;
