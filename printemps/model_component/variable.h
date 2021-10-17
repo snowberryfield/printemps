@@ -113,7 +113,7 @@ class Variable : public multi_array::AbstractMultiArrayElement {
         m_value    = 0;
 
         /**
-         * The default lower and upper bounds of a decision variable are set by
+         * The default lower and upper bounds of a variable are set by
          * sufficiently large negative and positive integer, respectively. The
          * default bounds have margin to avoid overflows in calculating moves.
          */

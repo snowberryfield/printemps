@@ -23,11 +23,11 @@ int main(void) {
      *
      * where N and M denote the number of items and bins, respectively. The
      * symbol x_{n, m} (n=1,...,N, m=1,...,M) and y_{m} (m=1,...,M) denotes a
-     * binary decision variable of which value takes 1 if and only if the item n
-     * is included in bin m. The symbol y_{m} (m=1,...,M) also detnotes a binary
-     * decision variable of which value takes 1 if the bin m is used. The symbol
-     * v_{n} (n=1,...,N) denotes the volume of the item n, and the symbol C
-     * denotes the capacity of a bin.
+     * binary variable of which value takes 1 if and only if the item n is
+     * included in bin m. The symbol y_{m} (m=1,...,M) also detnotes a binary
+     * variable of which value takes 1 if the bin m is used. The symbol v_{n}
+     * (n=1,...,N) denotes the volume of the item n, and the symbol C denotes
+     * the capacity of a bin.
      */
     int number_of_items = 100;
     int number_of_bins  = 30;

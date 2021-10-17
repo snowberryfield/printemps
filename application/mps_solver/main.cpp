@@ -108,8 +108,8 @@ int main([[maybe_unused]] int argc, char *argv[]) {
     }
 
     /**
-     * If the mutable variable file is given, only the decision variables listed
-     * in the file can be changed.
+     * If the mutable variable file is given, only the variables listed in the
+     * file can be changed.
      */
     if (!mutable_variable_file_name.empty()) {
         auto mutable_variable_names =
@@ -118,8 +118,8 @@ int main([[maybe_unused]] int argc, char *argv[]) {
     }
 
     /**
-     * If the fixe variable file is given, the values of the decision
-     * variables will be fixed at the specified values.
+     * If the fixe variable file is given, the values of the variables will be
+     * fixed at the specified values.
      */
     if (!fixed_variable_file_name.empty()) {
         auto solution = printemps::helper::read_variable_names_and_values(
@@ -128,9 +128,9 @@ int main([[maybe_unused]] int argc, char *argv[]) {
     }
 
     /**
-     * If the initial solution file is given, the values of the decision
-     * variables in the file will be used as the initial values. Otherwise, the
-     * default values will be used.
+     * If the initial solution file is given, the values of the variables in the
+     * file will be used as the initial values. Otherwise, the default values
+     * will be used.
      */
     if (!initial_solution_file_name.empty()) {
         auto solution = printemps::helper::read_variable_names_and_values(

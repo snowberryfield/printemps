@@ -23,7 +23,7 @@ bool solve_gf2(model::Model<T_Variable, T_Expression> *a_model_ptr,  //
     int   gf2s_size = gf2s.size();
 
     /**
-     * Set up binary/auxiliary decision variables sets.
+     * Set up binary/auxiliary variables sets.
      */
     std::unordered_set<model_component::Variable<T_Variable, T_Expression> *>
         binary_variable_ptrs;
@@ -43,8 +43,8 @@ bool solve_gf2(model::Model<T_Variable, T_Expression> *a_model_ptr,  //
     }
 
     /**
-     * If the number of binary/auxiliary decision variables do not match the
-     * that of the GF(2) equations, skip the following processes.
+     * If the number of binary/auxiliary variables do not match the that of the
+     * GF(2) equations, skip the following processes.
      */
     if (static_cast<int>(binary_variable_ptrs.size()) != gf2s_size) {
         utility::print_message("Failed.", a_IS_ENABLED_PRINT);
@@ -57,8 +57,7 @@ bool solve_gf2(model::Model<T_Variable, T_Expression> *a_model_ptr,  //
     }
 
     /**
-     * Set up the bidirectional maps between decision variable pointers and
-     * indices.
+     * Set up the bidirectional maps between variable pointers and indices.
      */
     utility::BidirectionalMap<
         model_component::Variable<T_Variable, T_Expression> *, int>
@@ -111,8 +110,7 @@ bool solve_gf2(model::Model<T_Variable, T_Expression> *a_model_ptr,  //
     }
 
     /**
-     * Fix the values of decision variables in GF(2) equations based on the
-     * result above.
+     * Fix the values of variables in GF(2) equations based on the result above.
      */
     auto solution = inverse.dot(constant_values);
 
@@ -135,15 +133,15 @@ bool solve_gf2(model::Model<T_Variable, T_Expression> *a_model_ptr,  //
     }
 
     for (const auto &variable_ptr : binary_variable_ptrs) {
-        utility::print_message("The value of decision variable " +
-                                   variable_ptr->name() + " was fixed at " +
+        utility::print_message("The value of variable " + variable_ptr->name() +
+                                   " was fixed at " +
                                    std::to_string(variable_ptr->value()) + ".",
                                a_IS_ENABLED_PRINT);
     }
 
     for (const auto &variable_ptr : aux_variable_ptrs) {
-        utility::print_message("The value of decision variable " +
-                                   variable_ptr->name() + " was fixed at " +
+        utility::print_message("The value of variable " + variable_ptr->name() +
+                                   " was fixed at " +
                                    std::to_string(variable_ptr->value()) + ".",
                                a_IS_ENABLED_PRINT);
     }

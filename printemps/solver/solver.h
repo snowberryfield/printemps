@@ -179,7 +179,7 @@ Result<T_Variable, T_Expression> solve(
     }
 
     /**
-     * Create memory which stores updating count for each decision variable.
+     * Create memory which stores updating count for each variable.
      */
     Memory memory(model_ptr);
 

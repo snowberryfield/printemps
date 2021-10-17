@@ -145,7 +145,7 @@ class Model {
         if (utility::has_space(a_NAME)) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
-                "The name of decision variable must not contain spaces."));
+                "The name of variable must not contain spaces."));
         }
 
         int proxy_index = m_variable_proxies.size();
@@ -153,8 +153,8 @@ class Model {
         if (proxy_index >= ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
-                "The number of decision variable definitions must be equal to "
-                "or less than " +
+                "The number of variable definitions must be equal to or less "
+                "than " +
                     std::to_string(
                         ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES) +
                     "."));
@@ -186,7 +186,7 @@ class Model {
         if (utility::has_space(a_NAME)) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
-                "The name of decision variable must not contain spaces."));
+                "The name of variable must not contain spaces."));
         }
 
         int proxy_index = m_variable_proxies.size();
@@ -194,8 +194,8 @@ class Model {
         if (proxy_index >= ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
-                "The number of decision variable definitions must be equal to "
-                "or less than " +
+                "The number of variable definitions must be equal to or less "
+                "than " +
                     std::to_string(
                         ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES) +
                     "."));
@@ -228,7 +228,7 @@ class Model {
         if (utility::has_space(a_NAME)) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
-                "The name of decision variable must not contain spaces."));
+                "The name of variable must not contain spaces."));
         }
 
         int proxy_index = m_variable_proxies.size();
@@ -236,8 +236,8 @@ class Model {
         if (proxy_index >= ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
-                "The number of decision variable definitions must be equal to "
-                "or less than " +
+                "The number of variable definitions must be equal to or less "
+                "than " +
                     std::to_string(
                         ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES) +
                     "."));
@@ -626,7 +626,7 @@ class Model {
         verifier::verify_problem(this, a_IS_ENABLED_PRINT);
 
         /**
-         * Determine unique name of decision variables and constraints.
+         * Determine unique name of variables and constraints.
          */
         this->setup_unique_names();
 
@@ -660,7 +660,7 @@ class Model {
 
         /**
          * Presolve the problem by removing redundant constraints and fixing
-         * decision variables implicitly fixed.
+         * variables implicitly fixed.
          */
         if (a_IS_ENABLED_PRESOLVE) {
             presolver::reduce_problem_size(this, a_IS_ENABLED_PRINT);
@@ -701,7 +701,7 @@ class Model {
         }
 
         /**
-         * Remove redundant set decision variables.
+         * Remove redundant set variables.
          */
         int number_of_removed_variables = 0;
         if (a_IS_ENABLED_PRESOLVE && m_is_linear) {
@@ -721,8 +721,8 @@ class Model {
         }
 
         /**
-         * Categorize decision variables and constraints again if there are new
-         * removed(disabled) decision variables or constraints.
+         * Categorize variables and constraints again if there are new
+         * removed(disabled) variables or constraints.
          */
         if (number_of_removed_variables > 0 ||
             number_of_removed_constraints > 0) {
@@ -735,8 +735,8 @@ class Model {
 
         /**
          * Extract selection constraints. If the number of constraints is bigger
-         * than that of decision variables, this process will be skipped because
-         * it would affect computational efficiency.
+         * than that of variables, this process will be skipped because it would
+         * affect computational efficiency.
          */
         if (a_SELECTION_MODE != option::selection_mode::None &&
             this->number_of_variables() > this->number_of_constraints()) {
@@ -790,7 +790,7 @@ class Model {
             auto is_solved = presolver::solve_gf2(this, a_IS_ENABLED_PRINT);
 
             /**
-             * Update fixed decision varialbes.
+             * Update fixed variables.
              */
             if (is_solved) {
                 this->categorize_variables();
@@ -1229,7 +1229,7 @@ class Model {
             };
 
         utility::print_info(  //
-            "The number of decision variables: " +
+            "The number of variables: " +
                 utility::to_string(               //
                     compute_number_of_variables(  //
                         original.variable_ptrs),
@@ -2380,7 +2380,7 @@ class Model {
             this->create_variables("variables", a_MPS.variables.size());
 
         /**
-         * Set up the decision variables.
+         * Set up the variables.
          */
         int number_of_variables = a_MPS.variable_names.size();
 
@@ -2481,7 +2481,7 @@ class Model {
     void write_mps(const std::string &a_FILE_NAME) {
         std::ofstream ofs(a_FILE_NAME);
         /**
-         * Determine unique name of decision variables and constraints.
+         * Determine unique name of variables and constraints.
          */
         this->setup_unique_names();
 

@@ -26,8 +26,7 @@ constexpr void verify_problem(
 
     if (a_model_ptr->variable_proxies().size() == 0) {
         throw std::logic_error(utility::format_error_location(
-            __FILE__, __LINE__, __func__,
-            "No decision variables are defined."));
+            __FILE__, __LINE__, __func__, "No variables are defined."));
     }
     if (a_model_ptr->constraint_proxies().size() == 0 &&
         !a_model_ptr->is_defined_objective()) {
@@ -46,8 +45,8 @@ constexpr void verify_and_correct_selection_variables_initial_values(
     const bool                              a_IS_ENABLED_PRINT) {
     utility::print_single_line(a_IS_ENABLED_PRINT);
     utility::print_message(
-        "Verifying the initial values of the binary decision　variables "
-        "included in the selection constraints...",
+        "Verifying the initial values of the binary included in the selection "
+        "constraints...",
         a_IS_ENABLED_PRINT);
 
     for (auto &&selection : a_model_ptr->selections()) {
@@ -211,7 +210,7 @@ constexpr void verify_and_correct_binary_variables_initial_values(
     const bool                              a_IS_ENABLED_PRINT) {
     utility::print_single_line(a_IS_ENABLED_PRINT);
     utility::print_message(
-        "Verifying the initial values of the binary decision variables.",
+        "Verifying the initial values of the binary variables.",
         a_IS_ENABLED_PRINT);
 
     for (auto &&proxy : a_model_ptr->variable_proxies()) {
@@ -261,7 +260,7 @@ constexpr void verify_and_correct_integer_variables_initial_values(
     const bool                              a_IS_ENABLED_PRINT) {
     utility::print_single_line(a_IS_ENABLED_PRINT);
     utility::print_message(
-        "Verifying the initial values of the integer decision variables.",
+        "Verifying the initial values of the integer variables.",
         a_IS_ENABLED_PRINT);
 
     for (auto &&proxy : a_model_ptr->variable_proxies()) {
