@@ -70,6 +70,7 @@ class Expression : public multi_array::AbstractMultiArrayElement {
 
     std::uint64_t m_plus_one_coefficient_mask;
     std::uint64_t m_minus_one_coefficient_mask;
+    std::uint64_t m_mask;
     bool          m_has_effective_plus_one_coefficient_mask;
     bool          m_has_effective_minus_one_coefficient_mask;
 
@@ -151,10 +152,10 @@ class Expression : public multi_array::AbstractMultiArrayElement {
 
         m_plus_one_coefficient_mask                = 0;
         m_minus_one_coefficient_mask               = 0;
+        m_mask                                     = 0;
         m_has_effective_plus_one_coefficient_mask  = false;
         m_has_effective_minus_one_coefficient_mask = false;
-
-        m_hash = 0;
+        m_hash                                     = 0;
     }
 
     /*************************************************************************/
@@ -194,20 +195,21 @@ class Expression : public multi_array::AbstractMultiArrayElement {
     inline constexpr void setup_mask(void) {
         std::uint64_t plus_one_coefficient_mask  = 0;
         std::uint64_t minus_one_coefficient_mask = 0;
+        std::uint64_t mask                       = 0;
 
         for (const auto &sensitivity : m_sensitivities) {
+            mask |= reinterpret_cast<std::uint64_t>(sensitivity.first);
             if (!(fabs(sensitivity.second - 1.0) < constant::EPSILON_10)) {
-                plus_one_coefficient_mask =
-                    plus_one_coefficient_mask |
+                plus_one_coefficient_mask |=
                     reinterpret_cast<std::uint64_t>(sensitivity.first);
             }
             if (!(fabs(sensitivity.second + 1.0) < constant::EPSILON_10)) {
-                minus_one_coefficient_mask =
-                    minus_one_coefficient_mask |
+                minus_one_coefficient_mask |=
                     reinterpret_cast<std::uint64_t>(sensitivity.first);
             }
         }
 
+        m_mask                       = ~mask;
         m_plus_one_coefficient_mask  = ~plus_one_coefficient_mask;
         m_minus_one_coefficient_mask = ~minus_one_coefficient_mask;
 
@@ -473,6 +475,11 @@ class Expression : public multi_array::AbstractMultiArrayElement {
     inline constexpr std::uint64_t minus_one_coefficient_mask(void) const
         noexcept {
         return m_minus_one_coefficient_mask;
+    }
+
+    /*************************************************************************/
+    inline constexpr std::uint64_t mask(void) const noexcept {
+        return m_mask;
     }
 
     /*************************************************************************/
