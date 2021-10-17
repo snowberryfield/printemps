@@ -2004,6 +2004,16 @@ class Model {
                             variable_ptr, variable_value_target);
                 }
             } else {
+                if (a_MOVE.is_selection_move) {
+                    auto &        alterations = a_MOVE.alterations;
+                    std::uint64_t pattern =
+                        reinterpret_cast<std::uint64_t>(alterations[0].first) &
+                        reinterpret_cast<std::uint64_t>(alterations[1].first);
+
+                    if (pattern & constraint_ptr->expression().mask()) {
+                        continue;
+                    }
+                }
                 constraint_value = constraint_ptr->evaluate_constraint(a_MOVE);
             }
 
