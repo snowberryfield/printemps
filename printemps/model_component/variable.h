@@ -68,6 +68,8 @@ class Variable : public multi_array::AbstractMultiArrayElement {
                  m_constraint_sensitivities;
     T_Expression m_objective_sensitivity;
 
+    std::uint64_t m_hash;
+
     /*************************************************************************/
     /// Default constructor
     Variable(void) {
@@ -111,7 +113,7 @@ class Variable : public multi_array::AbstractMultiArrayElement {
         m_value    = 0;
 
         /**
-         * The default lower and upper bounds of a decision variable are set by
+         * The default lower and upper bounds of a variable are set by
          * sufficiently large negative and positive integer, respectively. The
          * default bounds have margin to avoid overflows in calculating moves.
          */
@@ -135,6 +137,8 @@ class Variable : public multi_array::AbstractMultiArrayElement {
         m_dependent_constraint_ptr = nullptr;
         m_constraint_sensitivities.clear();
         m_objective_sensitivity = 0.0;
+
+        m_hash = 0;
     }
 
     /*************************************************************************/
@@ -174,8 +178,8 @@ class Variable : public multi_array::AbstractMultiArrayElement {
 
     /*************************************************************************/
     inline constexpr T_Expression evaluate(
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
-        const noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
+        noexcept {
         if (a_MOVE.alterations.size() == 0) {
             return this->value();
         }
@@ -430,6 +434,19 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
+    inline constexpr void setup_hash(void) {
+        /**
+         * NOTE: This method is called in
+         * presolver::remove_redundant_set_variables().
+         */
+        std::uint64_t hash = 0;
+        for (const auto &sensitivity : m_constraint_sensitivities) {
+            hash += reinterpret_cast<std::uint64_t>(sensitivity.first);
+        }
+        m_hash = hash;
+    }
+
+    /*************************************************************************/
     inline constexpr bool has_uniform_sensitivity(void) const noexcept {
         return m_has_uniform_sensitivity;
     }
@@ -468,6 +485,11 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     /*************************************************************************/
     inline constexpr T_Expression objective_sensitivity(void) const noexcept {
         return m_objective_sensitivity;
+    }
+
+    /*************************************************************************/
+    inline constexpr std::uint64_t hash(void) const noexcept {
+        return m_hash;
     }
 
     /*************************************************************************/
