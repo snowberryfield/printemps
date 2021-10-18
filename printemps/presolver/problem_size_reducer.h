@@ -657,6 +657,15 @@ constexpr int remove_duplicated_constraints(
             }
 
             /**
+             * If the senses of constraint i and j are different, the following
+             * procedure can be skipped.
+             */
+            if (constraint_ptrs[i]->sense() != constraint_ptrs[j]->sense()) {
+                j++;
+                continue;
+            }
+
+            /**
              * If the variable coefficient pattern of the constraints i and j is
              * same, disable constraint j.
              */
