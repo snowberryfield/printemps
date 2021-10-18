@@ -318,8 +318,8 @@ struct MPS {
                     if (this->variables.find(name) == this->variables.end()) {
                         throw std::logic_error(utility::format_error_location(
                             __FILE__, __LINE__, __func__,
-                            "An undefined decision variable name is specified "
-                            "in RHS section."));
+                            "An undefined variable name is specified in RHS "
+                            "section."));
                     }
                     if (ITEMS_SIZE == 3) {
                         if (category == "FR") {
@@ -420,8 +420,8 @@ struct MPS {
         }
 
         /**
-         * The default lower and upper bounds for integer decision variable is 0
-         * and 1, respectively.
+         * The default lower and upper bounds for integer variable is 0 and 1,
+         * respectively.
          * http://webpages.iust.ac.ir/yaghini/Courses/RTP_882/ILOG_CPLEX_03.pdf
          */
         for (auto &&variable : this->variables) {

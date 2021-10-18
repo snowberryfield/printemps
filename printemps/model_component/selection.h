@@ -38,10 +38,10 @@ struct Selection {
 
     /*************************************************************************/
     void initialize(void) {
-        variable_ptrs.clear();
-        selected_variable_ptr = nullptr;
-        constraint_ptr        = nullptr;
-        related_constraint_ptrs.clear();
+        this->variable_ptrs.clear();
+        this->selected_variable_ptr = nullptr;
+        this->constraint_ptr        = nullptr;
+        this->related_constraint_ptrs.clear();
     }
     /*************************************************************************/
     void setup(Constraint<T_Variable, T_Expression> *a_constraint_ptr) {
@@ -52,8 +52,17 @@ struct Selection {
              constraint_ptr->expression().sensitivities()) {
             this->variable_ptrs.push_back(sensitivity.first);
         }
+
+        for (auto &&variable_ptr : this->variable_ptrs) {
+            for (auto &&constraint_ptr :
+                 variable_ptr->related_constraint_ptrs()) {
+                if (constraint_ptr != this->constraint_ptr) {
+                    this->related_constraint_ptrs.insert(constraint_ptr);
+                }
+            }
+        }
     }
-};
+};  // namespace model_component
 }  // namespace model_component
 }  // namespace printemps
 #endif
