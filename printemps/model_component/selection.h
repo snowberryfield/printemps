@@ -51,10 +51,15 @@ struct Selection {
         for (const auto &sensitivity :
              constraint_ptr->expression().sensitivities()) {
             this->variable_ptrs.push_back(sensitivity.first);
-            auto &constraint_ptrs =
-                sensitivity.first->related_constraint_ptrs();
-            this->related_constraint_ptrs.insert(constraint_ptrs.begin(),
-                                                 constraint_ptrs.end());
+        }
+
+        for (auto &&variable_ptr : this->variable_ptrs) {
+            for (auto &&constraint_ptr :
+                 variable_ptr->related_constraint_ptrs()) {
+                if (constraint_ptr != this->constraint_ptr) {
+                    this->related_constraint_ptrs.insert(constraint_ptr);
+                }
+            }
         }
     }
 };  // namespace model_component
