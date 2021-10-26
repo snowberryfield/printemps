@@ -52,13 +52,18 @@ struct Selection {
              constraint_ptr->expression().sensitivities()) {
             this->variable_ptrs.push_back(sensitivity.first);
         }
-
+    }
+    /*************************************************************************/
+    void setup_related_constraint_ptrs(void) {
+        /**
+         * NOTE: The following procedure is intentionally excluded from setup().
+         * It is expensive and should be called only when necessary.
+         */
+        this->related_constraint_ptrs.clear();
         for (auto &&variable_ptr : this->variable_ptrs) {
             for (auto &&constraint_ptr :
                  variable_ptr->related_constraint_ptrs()) {
-                if (constraint_ptr != this->constraint_ptr) {
-                    this->related_constraint_ptrs.insert(constraint_ptr);
-                }
+                this->related_constraint_ptrs.insert(constraint_ptr);
             }
         }
     }

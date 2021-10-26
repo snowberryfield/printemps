@@ -75,6 +75,7 @@ constexpr void extract_selections_by_defined_order(
 
     for (auto &&selection : included_selections) {
         selection.constraint_ptr->disable();
+        selection.setup_related_constraint_ptrs();
     }
 
     a_model_ptr->set_selections(included_selections);
@@ -151,6 +152,7 @@ constexpr void extract_selections_by_number_of_variables_order(
 
     for (auto &&selection : included_selections) {
         selection.constraint_ptr->disable();
+        selection.setup_related_constraint_ptrs();
     }
 
     a_model_ptr->set_selections(included_selections);
@@ -213,6 +215,7 @@ constexpr void extract_independent_selections(
 
     for (auto &&selection : included_selections) {
         selection.constraint_ptr->disable();
+        selection.setup_related_constraint_ptrs();
     }
 
     a_model_ptr->set_selections(included_selections);
