@@ -179,7 +179,7 @@ Result<T_Variable, T_Expression> solve(
     }
 
     /**
-     * Create memory which stores updating count for each decision variable.
+     * Create memory which stores updating count for each variable.
      */
     Memory memory(model_ptr);
 
@@ -633,6 +633,31 @@ Result<T_Variable, T_Expression> solve(
             iteration_after_global_augmented_incumbent_update = 0;
         } else {
             iteration_after_global_augmented_incumbent_update++;
+        }
+
+        /**
+         * Update variable bounds.
+         */
+        if (master_option.is_enabled_presolve &&
+            (update_status & solution::IncumbentHolderConstant::
+                                 STATUS_FEASIBLE_INCUMBENT_UPDATE)) {
+            auto objective =
+                result.incumbent_holder.feasible_incumbent_solution().objective;
+            auto number_of_newly_fixed_variables =
+                model_ptr->update_variable_bounds(
+                    objective, master_option.verbose >= option::verbose::Outer);
+
+            /**
+             * If there is new fixed variable, setup the variable category and
+             * the binary/integer neighborhood again.
+             */
+            if (number_of_newly_fixed_variables > 0) {
+                model_ptr->categorize_variables();
+                model_ptr->neighborhood().binary().setup(
+                    model_ptr->variable_reference().binary_variable_ptrs);
+                model_ptr->neighborhood().integer().setup(
+                    model_ptr->variable_reference().integer_variable_ptrs);
+            }
         }
 
         /**
@@ -1629,17 +1654,17 @@ Result<T_Variable, T_Expression> solve(
          */
         if (employing_global_augmented_solution_flag) {
             utility::print_message(
-                "The next loop will be start from the global incumbent "
+                "The next loop will start from the global incumbent "
                 "solution.",
                 master_option.verbose >= option::verbose::Outer);
         } else if (employing_local_augmented_solution_flag) {
             utility::print_message(
-                "The next loop will be start from the local incumbent solution "
+                "The next loop will start from the local incumbent solution "
                 "found in the previous loop.",
                 master_option.verbose >= option::verbose::Outer);
         } else if (employing_previous_solution_flag) {
             utility::print_message(
-                "The next loop will be start from the same initial solution of "
+                "The next loop will start from the same initial solution of "
                 "the previous loop.",
                 master_option.verbose >= option::verbose::Outer);
         }

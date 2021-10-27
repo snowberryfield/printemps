@@ -55,7 +55,7 @@ int extract_dependent_intermediate_variables(
         auto intermediate_variable_ptr = constraint_ptr->aux_variable_ptr();
         if (has_dependent_intermediate_variable_flags[i]) {
             utility::print_message(
-                "The decision variable " + intermediate_variable_ptr->name() +
+                "The variable " + intermediate_variable_ptr->name() +
                     " in the constraint " + constraint_ptr->name() +
                     " was extracted as a dependent intermediate variable. ",
                 a_IS_ENABLED_PRINT);

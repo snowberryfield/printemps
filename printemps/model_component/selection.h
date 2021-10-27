@@ -38,10 +38,10 @@ struct Selection {
 
     /*************************************************************************/
     void initialize(void) {
-        variable_ptrs.clear();
-        selected_variable_ptr = nullptr;
-        constraint_ptr        = nullptr;
-        related_constraint_ptrs.clear();
+        this->variable_ptrs.clear();
+        this->selected_variable_ptr = nullptr;
+        this->constraint_ptr        = nullptr;
+        this->related_constraint_ptrs.clear();
     }
     /*************************************************************************/
     void setup(Constraint<T_Variable, T_Expression> *a_constraint_ptr) {
@@ -53,7 +53,21 @@ struct Selection {
             this->variable_ptrs.push_back(sensitivity.first);
         }
     }
-};
+    /*************************************************************************/
+    void setup_related_constraint_ptrs(void) {
+        /**
+         * NOTE: The following procedure is intentionally excluded from setup().
+         * It is expensive and should be called only when necessary.
+         */
+        this->related_constraint_ptrs.clear();
+        for (auto &&variable_ptr : this->variable_ptrs) {
+            for (auto &&constraint_ptr :
+                 variable_ptr->related_constraint_ptrs()) {
+                this->related_constraint_ptrs.insert(constraint_ptr);
+            }
+        }
+    }
+};  // namespace model_component
 }  // namespace model_component
 }  // namespace printemps
 #endif

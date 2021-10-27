@@ -194,6 +194,22 @@ TEST_F(TestExpression, setup_mask) {
 }
 
 /*****************************************************************************/
+TEST_F(TestExpression, setup_hash) {
+    auto expression =
+        printemps::model_component::Expression<int, double>::create_instance();
+    auto variable_0 =
+        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable_1 =
+        printemps::model_component::Variable<int, double>::create_instance();
+    expression = variable_0 + variable_1;
+    expression.setup_hash();
+
+    std::uint64_t hash = reinterpret_cast<std::uint64_t>(&variable_0) +
+                         reinterpret_cast<std::uint64_t>(&variable_1);
+    EXPECT_EQ(hash, expression.hash());
+}
+
+/*****************************************************************************/
 TEST_F(TestExpression, constant_value) {
     auto expression =
         printemps::model_component::Expression<int, double>::create_instance();
@@ -586,6 +602,11 @@ TEST_F(TestExpression, has_effective_plus_one_coefficient_mask) {
 /*****************************************************************************/
 TEST_F(TestExpression, has_effective_minus_one_coefficient_mask) {
     /// This method is tested in setup_mask().
+}
+
+/*****************************************************************************/
+TEST_F(TestExpression, hash) {
+    /// This method is tested in setup_hash().
 }
 
 /*****************************************************************************/
