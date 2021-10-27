@@ -23,6 +23,7 @@ struct Move {
         related_constraint_ptrs;
 
     bool is_univariable_move;
+    bool is_selection_move;
 
     /**
      * The following members are for special neighborhood moves.
@@ -40,6 +41,7 @@ struct Move {
     Move(void)
         : sense(MoveSense::General),
           is_univariable_move(false),
+          is_selection_move(false),
           is_special_neighborhood_move(false),
           is_available(true),
           hash(0),

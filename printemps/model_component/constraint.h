@@ -424,10 +424,10 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
 
             /// Variable Bound
             /**
-             * At least one decision variables of the two must be binary
-             * according to the definition of Variable Bound proposed by MIPLIB
-             * 2017. But for convenience of the neighborhood definition, both of
-             * them can be integer(non-binary) variable.
+             * At least one variables of the two must be binary according to the
+             * definition of Variable Bound proposed by MIPLIB 2017. But for
+             * convenience of the neighborhood definition, both of them can be
+             * integer(non-binary) variable.
              */
             m_is_variable_bound = true;
             return;
@@ -734,8 +734,8 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
 
     /*************************************************************************/
     inline constexpr T_Expression evaluate_constraint(
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
-        const noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
+        noexcept {
 #ifdef _MPS_SOLVER
         return m_expression.evaluate(a_MOVE);
 #else
@@ -757,15 +757,15 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
 
     /*************************************************************************/
     inline constexpr T_Expression evaluate_violation(
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
-        const noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
+        noexcept {
         return m_violation_function(a_MOVE);
     }
 
     /*************************************************************************/
     inline constexpr T_Expression evaluate_violation_diff(
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
-        const noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
+        noexcept {
         return m_violation_function(a_MOVE) - m_violation_value;
     }
 
@@ -855,8 +855,8 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr double local_penalty_coefficient_less(
-        void) const noexcept {
+    inline constexpr double local_penalty_coefficient_less(void) const
+        noexcept {
         return m_local_penalty_coefficient_less;
     }
 
@@ -865,8 +865,8 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         return m_local_penalty_coefficient_greater;
     }
     /*************************************************************************/
-    inline constexpr double local_penalty_coefficient_greater(
-        void) const noexcept {
+    inline constexpr double local_penalty_coefficient_greater(void) const
+        noexcept {
         return m_local_penalty_coefficient_greater;
     }
 

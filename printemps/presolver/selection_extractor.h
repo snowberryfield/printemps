@@ -33,6 +33,9 @@ template <class T_Variable, class T_Expression>
 constexpr void extract_selections_by_defined_order(
     model::Model<T_Variable, T_Expression> *a_model_ptr,
     const bool                              a_IS_ENABLED_PRINT) {
+    /**
+     * NOTE: This function should be called from extract_selections().
+     */
     utility::print_single_line(a_IS_ENABLED_PRINT);
     utility::print_message("Extracting selection by defined order...",
                            a_IS_ENABLED_PRINT);
@@ -72,14 +75,7 @@ constexpr void extract_selections_by_defined_order(
 
     for (auto &&selection : included_selections) {
         selection.constraint_ptr->disable();
-    }
-
-    for (auto &&selection : included_selections) {
-        for (auto &variable_ptr : selection.variable_ptrs) {
-            auto &constraint_ptrs = variable_ptr->related_constraint_ptrs();
-            selection.related_constraint_ptrs.insert(constraint_ptrs.begin(),
-                                                     constraint_ptrs.end());
-        }
+        selection.setup_related_constraint_ptrs();
     }
 
     a_model_ptr->set_selections(included_selections);
@@ -93,6 +89,9 @@ constexpr void extract_selections_by_number_of_variables_order(
     model::Model<T_Variable, T_Expression> *a_model_ptr,         //
     const bool                              a_IS_SMALLER_ORDER,  //
     const bool                              a_IS_ENABLED_PRINT) {
+    /**
+     * NOTE: This function should be called from extract_selections().
+     */
     utility::print_single_line(a_IS_ENABLED_PRINT);
     if (a_IS_SMALLER_ORDER) {
         utility::print_message(
@@ -153,14 +152,7 @@ constexpr void extract_selections_by_number_of_variables_order(
 
     for (auto &&selection : included_selections) {
         selection.constraint_ptr->disable();
-    }
-
-    for (auto &&selection : included_selections) {
-        for (auto &variable_ptr : selection.variable_ptrs) {
-            auto &constraint_ptrs = variable_ptr->related_constraint_ptrs();
-            selection.related_constraint_ptrs.insert(constraint_ptrs.begin(),
-                                                     constraint_ptrs.end());
-        }
+        selection.setup_related_constraint_ptrs();
     }
 
     a_model_ptr->set_selections(included_selections);
@@ -173,6 +165,9 @@ template <class T_Variable, class T_Expression>
 constexpr void extract_independent_selections(
     model::Model<T_Variable, T_Expression> *a_model_ptr,
     const bool                              a_IS_ENABLED_PRINT) {
+    /**
+     * NOTE: This function should be called from extract_selections().
+     */
     utility::print_single_line(a_IS_ENABLED_PRINT);
     utility::print_message("Extracting independent selection variables...",
                            a_IS_ENABLED_PRINT);
@@ -220,14 +215,7 @@ constexpr void extract_independent_selections(
 
     for (auto &&selection : included_selections) {
         selection.constraint_ptr->disable();
-    }
-
-    for (auto &&selection : included_selections) {
-        for (auto &variable_ptr : selection.variable_ptrs) {
-            auto &constraint_ptrs = variable_ptr->related_constraint_ptrs();
-            selection.related_constraint_ptrs.insert(constraint_ptrs.begin(),
-                                                     constraint_ptrs.end());
-        }
+        selection.setup_related_constraint_ptrs();
     }
 
     a_model_ptr->set_selections(included_selections);

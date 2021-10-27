@@ -83,8 +83,8 @@ LocalSearchResult<T_Variable, T_Expression> solve(
     /**
      * Reset the variable improvability.
      */
-    model_ptr->reset_variable_objective_improvability();
-    model_ptr->reset_variable_feasibility_improvability();
+    model_ptr->reset_variable_objective_improvabilities();
+    model_ptr->reset_variable_feasibility_improvabilities();
 
     /**
      * Prepare other local variables.
@@ -151,9 +151,9 @@ LocalSearchResult<T_Variable, T_Expression> solve(
                 utility::to_vector(current_move.related_constraint_ptrs);
 
             if (iteration == 0) {
-                model_ptr->update_variable_objective_improvability();
+                model_ptr->update_variable_objective_improvabilities();
             } else {
-                model_ptr->update_variable_objective_improvability(
+                model_ptr->update_variable_objective_improvabilities(
                     changed_variable_ptrs);
             }
 
@@ -162,8 +162,8 @@ LocalSearchResult<T_Variable, T_Expression> solve(
                 accept_objective_improvable   = true;
                 accept_feasibility_improvable = false;
             } else {
-                model_ptr->reset_variable_feasibility_improvability();
-                model_ptr->update_variable_feasibility_improvability();
+                model_ptr->reset_variable_feasibility_improvabilities();
+                model_ptr->update_variable_feasibility_improvabilities();
 
                 accept_all                    = false;
                 accept_objective_improvable   = false;

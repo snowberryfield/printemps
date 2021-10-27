@@ -49,6 +49,7 @@ class SelectionMoveGenerator
             this->m_moves[i].related_constraint_ptrs =
                 a_VARIABLE_PTRS[i]->selection_ptr()->related_constraint_ptrs;
             this->m_moves[i].is_univariable_move          = false;
+            this->m_moves[i].is_selection_move            = true;
             this->m_moves[i].is_special_neighborhood_move = false;
             this->m_moves[i].is_available                 = true;
             this->m_moves[i].overlap_rate                 = 0.0;

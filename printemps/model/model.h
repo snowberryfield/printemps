@@ -145,7 +145,7 @@ class Model {
         if (utility::has_space(a_NAME)) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
-                "The name of decision variable must not contain spaces."));
+                "The name of variable must not contain spaces."));
         }
 
         int proxy_index = m_variable_proxies.size();
@@ -153,8 +153,8 @@ class Model {
         if (proxy_index >= ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
-                "The number of decision variable definitions must be equal to "
-                "or less than " +
+                "The number of variable definitions must be equal to or less "
+                "than " +
                     std::to_string(
                         ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES) +
                     "."));
@@ -186,7 +186,7 @@ class Model {
         if (utility::has_space(a_NAME)) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
-                "The name of decision variable must not contain spaces."));
+                "The name of variable must not contain spaces."));
         }
 
         int proxy_index = m_variable_proxies.size();
@@ -194,8 +194,8 @@ class Model {
         if (proxy_index >= ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
-                "The number of decision variable definitions must be equal to "
-                "or less than " +
+                "The number of variable definitions must be equal to or less "
+                "than " +
                     std::to_string(
                         ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES) +
                     "."));
@@ -228,7 +228,7 @@ class Model {
         if (utility::has_space(a_NAME)) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
-                "The name of decision variable must not contain spaces."));
+                "The name of variable must not contain spaces."));
         }
 
         int proxy_index = m_variable_proxies.size();
@@ -236,8 +236,8 @@ class Model {
         if (proxy_index >= ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
-                "The number of decision variable definitions must be equal to "
-                "or less than " +
+                "The number of variable definitions must be equal to or less "
+                "than " +
                     std::to_string(
                         ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES) +
                     "."));
@@ -626,9 +626,9 @@ class Model {
         verifier::verify_problem(this, a_IS_ENABLED_PRINT);
 
         /**
-         * Determine unique name of decision variables and constraints.
+         * Determine unique name of variables and constraints.
          */
-        this->setup_unique_name();
+        this->setup_unique_names();
 
         /**
          * Determine the linearity.
@@ -647,7 +647,7 @@ class Model {
         this->categorize_constraints();
         this->setup_variable_related_zero_one_coefficient_constraints();
         this->setup_variable_related_constraints();
-        this->setup_variable_sensitivity();
+        this->setup_variable_sensitivities();
 
         /**
          * Store original categorization results. The final categorization would
@@ -660,10 +660,10 @@ class Model {
 
         /**
          * Presolve the problem by removing redundant constraints and fixing
-         * decision variables implicitly fixed.
+         * variables implicitly fixed.
          */
         if (a_IS_ENABLED_PRESOLVE) {
-            presolver::reduce_problem_size(this, true, a_IS_ENABLED_PRINT);
+            presolver::reduce_problem_size(this, a_IS_ENABLED_PRINT);
         }
 
         /**
@@ -676,7 +676,7 @@ class Model {
                 this->categorize_constraints();
                 this->setup_variable_related_zero_one_coefficient_constraints();
                 this->setup_variable_related_constraints();
-                this->setup_variable_sensitivity();
+                this->setup_variable_sensitivities();
                 if (presolver::extract_dependent_intermediate_variables(
                         this,  //
                         a_IS_ENABLED_PRINT) == 0) {
@@ -688,7 +688,7 @@ class Model {
                     this->categorize_constraints();
                     this->setup_variable_related_zero_one_coefficient_constraints();
                     this->setup_variable_related_constraints();
-                    this->setup_variable_sensitivity();
+                    this->setup_variable_sensitivities();
                     if (presolver::eliminate_dependent_intermediate_variables(
                             this,  //
                             a_IS_ENABLED_PRINT) == 0) {
@@ -696,14 +696,47 @@ class Model {
                     }
                 }
 
-                presolver::reduce_problem_size(this, false, a_IS_ENABLED_PRINT);
+                presolver::reduce_problem_size(this, a_IS_ENABLED_PRINT);
             }
         }
 
         /**
+         * Remove redundant set variables.
+         */
+        int number_of_removed_variables = 0;
+        if (a_IS_ENABLED_PRESOLVE && m_is_linear) {
+            number_of_removed_variables =
+                presolver::remove_redundant_set_variables(this,
+                                                          a_IS_ENABLED_PRINT);
+        }
+
+        /**
+         * Remove duplicated constraints.
+         */
+        int number_of_removed_constraints = 0;
+        if (a_IS_ENABLED_PRESOLVE) {
+            number_of_removed_constraints =
+                presolver::remove_duplicated_constraints(this,
+                                                         a_IS_ENABLED_PRINT);
+        }
+
+        /**
+         * Categorize variables and constraints again if there are new
+         * removed(disabled) variables or constraints.
+         */
+        if (number_of_removed_variables > 0 ||
+            number_of_removed_constraints > 0) {
+            this->categorize_variables();
+            this->categorize_constraints();
+            this->setup_variable_related_zero_one_coefficient_constraints();
+            this->setup_variable_related_constraints();
+            this->setup_variable_sensitivities();
+        }
+
+        /**
          * Extract selection constraints. If the number of constraints is bigger
-         * than that of decision variables, this process will be skipped because
-         * it would affect computational efficiency.
+         * than that of variables, this process will be skipped because it would
+         * affect computational efficiency.
          */
         if (a_SELECTION_MODE != option::selection_mode::None &&
             this->number_of_variables() > this->number_of_constraints()) {
@@ -719,7 +752,7 @@ class Model {
         this->categorize_constraints();
         this->setup_variable_related_zero_one_coefficient_constraints();
         this->setup_variable_related_constraints();
-        this->setup_variable_sensitivity();
+        this->setup_variable_sensitivities();
 
         /**
          * Setup the neighborhood generators.
@@ -757,7 +790,7 @@ class Model {
             auto is_solved = presolver::solve_gf2(this, a_IS_ENABLED_PRINT);
 
             /**
-             * Update fixed decision varialbes.
+             * Update fixed variables.
              */
             if (is_solved) {
                 this->categorize_variables();
@@ -776,7 +809,7 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void setup_unique_name(void) {
+    constexpr void setup_unique_names(void) {
         const int VARIABLE_PROXIES_SIZE   = m_variable_proxies.size();
         const int EXPRESSION_PROXIES_SIZE = m_expression_proxies.size();
         const int CONSTRAINT_PROXIES_SIZE = m_constraint_proxies.size();
@@ -879,7 +912,7 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void setup_variable_sensitivity(void) {
+    constexpr void setup_variable_sensitivities(void) {
         for (auto &&proxy : m_variable_proxies) {
             for (auto &&variable : proxy.flat_indexed_variables()) {
                 variable.reset_constraint_sensitivities();
@@ -1154,6 +1187,28 @@ class Model {
     }
 
     /*************************************************************************/
+    constexpr int update_variable_bounds(const double a_OBJECTIVE,
+                                         const bool   a_IS_ENABLED_PRINT) {
+        model_component::Constraint<T_Variable, T_Expression> constraint;
+        if (m_is_minimization) {
+            constraint = m_objective.expression() <= a_OBJECTIVE;
+        } else {
+            constraint = m_objective.expression() >= a_OBJECTIVE;
+        }
+        bool is_bound_tightened = presolver::
+            remove_redundant_constraint_with_tightening_variable_bound(
+                &constraint, a_IS_ENABLED_PRINT);
+
+        int number_of_newly_fixed_variables = 0;
+        if (is_bound_tightened) {
+            presolver::remove_implicit_fixed_variables(this,
+                                                       a_IS_ENABLED_PRINT);
+        }
+
+        return number_of_newly_fixed_variables;
+    }
+
+    /*************************************************************************/
     constexpr void print_number_of_variables(void) const {
         utility::print_single_line(true);
 
@@ -1174,7 +1229,7 @@ class Model {
             };
 
         utility::print_info(  //
-            "The number of decision variables: " +
+            "The number of variables: " +
                 utility::to_string(               //
                     compute_number_of_variables(  //
                         original.variable_ptrs),
@@ -1677,7 +1732,7 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void reset_variable_objective_improvability(
+    inline constexpr void reset_variable_objective_improvabilities(
         const std::vector<model_component::Variable<T_Variable, T_Expression> *>
             &a_VARIABLE_PTRS) {
         for (auto &&variable_ptr : a_VARIABLE_PTRS) {
@@ -1686,13 +1741,13 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void reset_variable_objective_improvability(void) {
-        this->reset_variable_objective_improvability(
+    inline constexpr void reset_variable_objective_improvabilities(void) {
+        this->reset_variable_objective_improvabilities(
             this->variable_reference().variable_ptrs);
     }
 
     /*************************************************************************/
-    inline constexpr void reset_variable_feasibility_improvability(
+    inline constexpr void reset_variable_feasibility_improvabilities(
         const std::vector<model_component::Variable<T_Variable, T_Expression> *>
             &a_VARIABLE_PTRS) const noexcept {
         for (auto &&variable_ptr : a_VARIABLE_PTRS) {
@@ -1701,7 +1756,7 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void reset_variable_feasibility_improvability(
+    inline constexpr void reset_variable_feasibility_improvabilities(
         const std::vector<model_component::Constraint<T_Variable, T_Expression>
                               *> &a_CONSTRAINT_PTRS) const noexcept {
         for (const auto &constraint_ptr : a_CONSTRAINT_PTRS) {
@@ -1716,19 +1771,19 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void reset_variable_feasibility_improvability(void) {
-        this->reset_variable_feasibility_improvability(
+    inline constexpr void reset_variable_feasibility_improvabilities(void) {
+        this->reset_variable_feasibility_improvabilities(
             this->variable_reference().variable_ptrs);
     }
 
     /*************************************************************************/
-    inline constexpr void update_variable_objective_improvability(void) {
-        this->update_variable_objective_improvability(
+    inline constexpr void update_variable_objective_improvabilities(void) {
+        this->update_variable_objective_improvabilities(
             this->variable_reference().mutable_variable_ptrs);
     }
 
     /*************************************************************************/
-    constexpr void update_variable_objective_improvability(
+    constexpr void update_variable_objective_improvabilities(
         const std::vector<model_component::Variable<T_Variable, T_Expression> *>
             &a_VARIABLE_PTRS) const noexcept {
         for (const auto &variable_ptr : a_VARIABLE_PTRS) {
@@ -1746,13 +1801,13 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void update_variable_feasibility_improvability(void) {
-        this->update_variable_feasibility_improvability(
+    inline constexpr void update_variable_feasibility_improvabilities(void) {
+        this->update_variable_feasibility_improvabilities(
             this->constraint_reference().enabled_constraint_ptrs);
     }
 
     /*************************************************************************/
-    constexpr void update_variable_feasibility_improvability(
+    constexpr void update_variable_feasibility_improvabilities(
         const std::vector<model_component::Constraint<T_Variable, T_Expression>
                               *> &a_CONSTRAINT_PTRS) const noexcept {
         for (const auto &constraint_ptr : a_CONSTRAINT_PTRS) {
@@ -1949,6 +2004,16 @@ class Model {
                             variable_ptr, variable_value_target);
                 }
             } else {
+                if (a_MOVE.is_selection_move) {
+                    auto &        alterations = a_MOVE.alterations;
+                    std::uint64_t pattern =
+                        reinterpret_cast<std::uint64_t>(alterations[0].first) &
+                        reinterpret_cast<std::uint64_t>(alterations[1].first);
+
+                    if (pattern & constraint_ptr->expression().mask()) {
+                        continue;
+                    }
+                }
                 constraint_value = constraint_ptr->evaluate_constraint(a_MOVE);
             }
 
@@ -2315,7 +2380,7 @@ class Model {
             this->create_variables("variables", a_MPS.variables.size());
 
         /**
-         * Set up the decision variables.
+         * Set up the variables.
          */
         int number_of_variables = a_MPS.variable_names.size();
 
@@ -2416,9 +2481,9 @@ class Model {
     void write_mps(const std::string &a_FILE_NAME) {
         std::ofstream ofs(a_FILE_NAME);
         /**
-         * Determine unique name of decision variables and constraints.
+         * Determine unique name of variables and constraints.
          */
-        this->setup_unique_name();
+        this->setup_unique_names();
 
         /**
          * Determine the linearity.
@@ -2434,7 +2499,7 @@ class Model {
          * Determine the constraint sensitivities.
          */
         this->setup_variable_related_constraints();
-        this->setup_variable_sensitivity();
+        this->setup_variable_sensitivities();
 
         /**
          * Write instance name.
