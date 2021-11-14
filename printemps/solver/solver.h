@@ -120,7 +120,7 @@ Result<T_Variable, T_Expression> solve(
      * and invariant knapsack).
      */
     if (master_option.is_enabled_chain_move &&
-        !model_ptr->has_zero_one_coefficient_constraints()) {
+        !model_ptr->has_chain_move_effective_constraints()) {
         master_option.is_enabled_chain_move = false;
         utility::print_warning(
             "Chain move was disabled because the problem does not include any "
