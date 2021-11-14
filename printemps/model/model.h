@@ -1052,6 +1052,18 @@ class Model {
                         constraint_type_reference.invariant_knapsack_ptrs
                             .push_back(&constraint);
                     }
+                    if (constraint.is_multiple_cover()) {
+                        constraint_type_reference.multiple_cover_ptrs.push_back(
+                            &constraint);
+                    }
+                    if (constraint.is_binary_flow()) {
+                        constraint_type_reference.binary_flow_ptrs.push_back(
+                            &constraint);
+                    }
+                    if (constraint.is_integer_flow()) {
+                        constraint_type_reference.integer_flow_ptrs.push_back(
+                            &constraint);
+                    }
                     if (constraint.is_equation_knapsack()) {
                         constraint_type_reference.equation_knapsack_ptrs
                             .push_back(&constraint);
@@ -1465,6 +1477,48 @@ class Model {
                     utility::to_string(                         //
                         compute_number_of_enabled_constraints(  //
                             presolved.invariant_knapsack_ptrs),
+                        "%d") +
+                    ")",
+                true);
+
+            utility::print_info(                        //
+                " -- Multiple Cover: " +                //
+                    utility::to_string(                 //
+                        compute_number_of_constraints(  //
+                            original.multiple_cover_ptrs),
+                        "%d") +
+                    " (" +
+                    utility::to_string(                         //
+                        compute_number_of_enabled_constraints(  //
+                            presolved.multiple_cover_ptrs),
+                        "%d") +
+                    ")",
+                true);
+
+            utility::print_info(                        //
+                " -- Binary Flow: " +                   //
+                    utility::to_string(                 //
+                        compute_number_of_constraints(  //
+                            original.binary_flow_ptrs),
+                        "%d") +
+                    " (" +
+                    utility::to_string(                         //
+                        compute_number_of_enabled_constraints(  //
+                            presolved.binary_flow_ptrs),
+                        "%d") +
+                    ")",
+                true);
+
+            utility::print_info(                        //
+                " -- Integer Flow: " +                  //
+                    utility::to_string(                 //
+                        compute_number_of_constraints(  //
+                            original.integer_flow_ptrs),
+                        "%d") +
+                    " (" +
+                    utility::to_string(                         //
+                        compute_number_of_enabled_constraints(  //
+                            presolved.integer_flow_ptrs),
                         "%d") +
                     ")",
                 true);
@@ -1989,7 +2043,7 @@ class Model {
                 auto variable_ptr          = a_MOVE.alterations.front().first;
                 auto variable_value_target = a_MOVE.alterations.front().second;
 
-                if (constraint_ptr->is_binary()) {
+                if (constraint_ptr->has_only_binary_coefficient()) {
                     constraint_value = constraint_ptr->constraint_value() +
                                        variable_value_target -
                                        variable_ptr->value();
@@ -2852,7 +2906,7 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr bool has_zero_one_coefficient_constraints(void) const {
+    inline constexpr bool has_chain_move_effective_constraints(void) const {
         if (m_constraint_type_reference.set_partitioning_ptrs.size() > 0) {
             return true;
         }
@@ -2866,6 +2920,12 @@ class Model {
             return true;
         }
         if (m_constraint_type_reference.invariant_knapsack_ptrs.size() > 0) {
+            return true;
+        }
+        if (m_constraint_type_reference.multiple_cover_ptrs.size() > 0) {
+            return true;
+        }
+        if (m_constraint_type_reference.binary_flow_ptrs.size() > 0) {
             return true;
         }
         return false;
