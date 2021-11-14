@@ -415,6 +415,11 @@ struct Option {
             utility::to_string(this->tabu_search.frequency_penalty_coefficient,
                                "%f"));
 
+        utility::print(                                           //
+            " -- tabu_search.lagrangian_penalty_coefficient: " +  //
+            utility::to_string(this->tabu_search.lagrangian_penalty_coefficient,
+                               "%f"));
+
         utility::print(                                   //
             " -- tabu_search.pruning_rate_threshold: " +  //
             utility::to_string(this->tabu_search.pruning_rate_threshold, "%f"));

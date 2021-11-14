@@ -403,6 +403,12 @@ printemps::option::Option read_option(const std::string &a_FILE_NAME) {
                   option_object_tabu_search);
 
         /**********************************************************************/
+        /// tabu_search.lagrangian_penalty_coefficient
+        read_json(&option.tabu_search.lagrangian_penalty_coefficient,  //
+                  "lagrangian_penalty_coefficient",                    //
+                  option_object_tabu_search);
+
+        /**********************************************************************/
         /// tabu_search.pruning_rate_threshold
         read_json(&option.tabu_search.pruning_rate_threshold,  //
                   "pruning_rate_threshold",                    //

@@ -372,7 +372,8 @@ TabuSearchResult<T_Variable, T_Expression> solve(
 
             total_scores[i] =
                 trial_solution_scores[i].local_augmented_objective +
-                trial_move_scores[i].frequency_penalty;
+                trial_move_scores[i].frequency_penalty +
+                trial_move_scores[i].lagrangian_penalty;
 
             /**
              * If the move is "tabu", it will be set lower priorities in
