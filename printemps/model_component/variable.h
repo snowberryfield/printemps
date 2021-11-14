@@ -46,6 +46,9 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     T_Variable m_lower_bound;
     T_Variable m_upper_bound;
     bool       m_has_bounds;
+
+    double m_lagrangian_coefficient;
+
     bool       m_is_objective_improvable;
     bool       m_is_feasibility_improvable;
     bool       m_has_lower_bound_margin;
@@ -120,6 +123,8 @@ class Variable : public multi_array::AbstractMultiArrayElement {
         m_lower_bound = constant::INT_HALF_MIN;
         m_upper_bound = constant::INT_HALF_MAX;
         m_has_bounds  = false;
+
+        m_lagrangian_coefficient = 0.0;
 
         m_is_objective_improvable   = false;
         m_is_feasibility_improvable = false;
@@ -256,6 +261,17 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     /*************************************************************************/
     inline constexpr bool has_bounds(void) const {
         return m_has_bounds;
+    }
+
+    /*************************************************************************/
+    inline constexpr void set_lagrangian_coefficient(
+        const double a_LAGRANGIAN_COEFFICIENT) {
+        m_lagrangian_coefficient = a_LAGRANGIAN_COEFFICIENT;
+    }
+
+    /*************************************************************************/
+    inline constexpr double lagrangian_coefficient(void) const noexcept {
+        return m_lagrangian_coefficient;
     }
 
     /*************************************************************************/
