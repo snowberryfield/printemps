@@ -48,6 +48,7 @@ TEST_F(TestVariable, initialize) {
     EXPECT_EQ(printemps::constant::INT_HALF_MIN, variable.lower_bound());
     EXPECT_EQ(printemps::constant::INT_HALF_MAX, variable.upper_bound());
     EXPECT_FALSE(variable.has_bounds());
+    EXPECT_EQ(0.0, variable.lagrangian_coefficient());
     EXPECT_FALSE(variable.is_objective_improvable());
     EXPECT_FALSE(variable.is_feasibility_improvable());
     EXPECT_TRUE(variable.has_lower_bound_margin());
@@ -254,6 +255,18 @@ TEST_F(TestVariable, upper_bound) {
 /*****************************************************************************/
 TEST_F(TestVariable, has_bounds) {
     /// This method is tested in set_bound().
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, set_lagrangian_coefficient) {
+    auto variable =
+        printemps::model_component::Variable<int, double>::create_instance();
+    variable.set_lagrangian_coefficient(10.0);
+    EXPECT_FALSE(variable.has_bounds());
+}
+/*****************************************************************************/
+TEST_F(TestVariable, lagrangian_coefficient) {
+    /// This method is tested in lagrangian_coefficient().
 }
 
 /*****************************************************************************/

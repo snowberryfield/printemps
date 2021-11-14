@@ -13,6 +13,7 @@ namespace tabu_search {
 struct TabuSearchMoveScore {
     bool   is_permissible;
     double frequency_penalty;
+    double lagrangian_penalty;
 };
 
 /*****************************************************************************/
@@ -87,6 +88,20 @@ constexpr double compute_frequency_penalty(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
+constexpr double compute_lagrangian_penalty(
+    const neighborhood::Move<T_Variable, T_Expression> &a_MOVE,  //
+    const option::Option &                              a_OPTION) noexcept {
+    double lagrangian_penalty = 0.0;
+    for (const auto &alteration : a_MOVE.alterations) {
+        lagrangian_penalty +=
+            alteration.first->lagrangian_coefficient() * alteration.second;
+    }
+    return lagrangian_penalty *
+           a_OPTION.tabu_search.lagrangian_penalty_coefficient;
+}
+
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
 constexpr void evaluate_move(
     TabuSearchMoveScore *                               a_score_ptr,  //
     const neighborhood::Move<T_Variable, T_Expression> &a_MOVE,       //
@@ -105,13 +120,23 @@ constexpr void evaluate_move(
                                  a_TABU_TENURE);
 
     /**
-     * Compute the frequency pnalty of the move.
+     * Compute the frequency penalty of the move.
      */
     a_score_ptr->frequency_penalty                //
         = compute_frequency_penalty(a_MOVE,       //
                                     a_ITERATION,  //
                                     a_MEMORY,     //
                                     a_OPTION);
+
+    /**
+     * Compute the lagrangian penalty of the move.
+     */
+    a_score_ptr->lagrangian_penalty = 0;
+    if (a_OPTION.is_enabled_lagrange_dual) {
+        a_score_ptr->lagrangian_penalty           //
+            = compute_lagrangian_penalty(a_MOVE,  //
+                                         a_OPTION);
+    }
 }
 }  // namespace tabu_search
 }  // namespace solver

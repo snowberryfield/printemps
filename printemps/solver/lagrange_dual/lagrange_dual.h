@@ -229,6 +229,8 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
                     sensitivity * model_ptr->sign();
             }
 
+            variable_ptrs[i]->set_lagrangian_coefficient(coefficient);
+
             if (coefficient > 0) {
                 if (model_ptr->is_minimization()) {
                     variable_ptrs[i]->set_value_if_mutable(

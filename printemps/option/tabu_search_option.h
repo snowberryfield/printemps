@@ -20,6 +20,7 @@ struct TabuSearchOptionConstant {
     static constexpr double DEFAULT_INITIAL_MODIFICATION_RANDOMIZE_RATE = 0.5;
     static constexpr double DEFAULT_MOVE_PRESERVE_RATE                  = 1.0;
     static constexpr double DEFAULT_FREQUENCY_PENALTY_COEFFICIENT       = 1E-5;
+    static constexpr double DEFAULT_LAGRANGIAN_PENALTY_COEFFICIENT      = 1.0;
     static constexpr double DEFAULT_PRUNING_RATE_THRESHOLD              = 1.0;
 
     static constexpr double DEFAULT_IS_ENABLED_SHUFFLE         = true;
@@ -30,8 +31,8 @@ struct TabuSearchOptionConstant {
     static constexpr bool DEFAULT_IS_ENABLED_AUTOMATIC_ITERATION_ADJUSTMENT =
         true;
     static constexpr bool   DEFAULT_IS_ENABLED_INITIAL_MODIFICATION    = true;
-    static constexpr int    DEFAULT_intensity_INCREASE_COUNT_THRESHOLD = 10;
-    static constexpr int    DEFAULT_intensity_DECREASE_COUNT_THRESHOLD = 10;
+    static constexpr int    DEFAULT_INTENSITY_INCREASE_COUNT_THRESHOLD = 10;
+    static constexpr int    DEFAULT_INTENSITY_DECREASE_COUNT_THRESHOLD = 10;
     static constexpr double DEFAULT_ITERATION_INCREASE_RATE            = 1.5;
     static constexpr double DEFAULT_ITERATION_DEREASE_RATE             = 0.9;
     static constexpr double DEFAULT_IGNORE_TABU_IF_GLOBAL_INCUMBENT    = true;
@@ -52,6 +53,7 @@ struct TabuSearchOption {
     tabu_mode::TabuMode tabu_mode;
     double              move_preserve_rate;                           // hidden
     double              frequency_penalty_coefficient;                // hidden
+    double              lagrangian_penalty_coefficient;               // hidden
     double              pruning_rate_threshold;                       // hidden
     bool                is_enabled_shuffle;                           // hidden
     bool                is_enabled_move_curtail;                      // hidden
@@ -91,6 +93,8 @@ struct TabuSearchOption {
             TabuSearchOptionConstant::DEFAULT_MOVE_PRESERVE_RATE;
         this->frequency_penalty_coefficient =
             TabuSearchOptionConstant::DEFAULT_FREQUENCY_PENALTY_COEFFICIENT;
+        this->lagrangian_penalty_coefficient =
+            TabuSearchOptionConstant::DEFAULT_LAGRANGIAN_PENALTY_COEFFICIENT;
         this->pruning_rate_threshold =
             TabuSearchOptionConstant::DEFAULT_PRUNING_RATE_THRESHOLD;
         this->is_enabled_shuffle =
@@ -108,9 +112,9 @@ struct TabuSearchOption {
         this->is_enabled_initial_modification =
             TabuSearchOptionConstant::DEFAULT_IS_ENABLED_INITIAL_MODIFICATION;
         this->intensity_increase_count_threshold = TabuSearchOptionConstant::
-            DEFAULT_intensity_INCREASE_COUNT_THRESHOLD;
+            DEFAULT_INTENSITY_INCREASE_COUNT_THRESHOLD;
         this->intensity_decrease_count_threshold = TabuSearchOptionConstant::
-            DEFAULT_intensity_DECREASE_COUNT_THRESHOLD;
+            DEFAULT_INTENSITY_DECREASE_COUNT_THRESHOLD;
         this->iteration_increase_rate =
             TabuSearchOptionConstant::DEFAULT_ITERATION_INCREASE_RATE;
         this->iteration_decrease_rate =
