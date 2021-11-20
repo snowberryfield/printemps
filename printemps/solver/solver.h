@@ -125,8 +125,8 @@ Result<T_Variable, T_Expression> solve(
         utility::print_warning(
             "Chain move was disabled because the problem does not include any "
             "zero-one coefficient constraints (set "
-            "partitioning/packing/covering, cardinality, and invariant "
-            "knapsack).",
+            "partitioning/packing/covering, cardinality, invariant knapsack, "
+            "and multiple cover).",
             master_option.verbose >= option::verbose::Warning);
     }
 
@@ -504,7 +504,9 @@ Result<T_Variable, T_Expression> solve(
     int number_of_initial_modification = 0;
     int iteration_max = master_option.tabu_search.iteration_max;
 
-    double intensity                            = memory.intensity();
+    double                  current_intensity  = memory.intensity();
+    [[maybe_unused]] double previous_intensity = 0.0;
+
     double current_intensity_before_relaxation  = 1.0;
     double previous_intensity_before_relaxation = 1.0;
 
@@ -668,7 +670,8 @@ Result<T_Variable, T_Expression> solve(
         /**
          * Update the intensity.
          */
-        intensity = memory.intensity();
+        previous_intensity = current_intensity;
+        current_intensity  = memory.intensity();
 
         /**
          * Update the termination status.
@@ -948,7 +951,7 @@ Result<T_Variable, T_Expression> solve(
         if (is_enabled_penalty_coefficient_relaxing) {
             previous_intensity_before_relaxation =
                 current_intensity_before_relaxation;
-            current_intensity_before_relaxation = intensity;
+            current_intensity_before_relaxation = current_intensity;
 
             constexpr double PENALTY_COEFFICIENT_RELAXING_RATE_MIN = 0.3;
             constexpr double PENALTY_COEFFICIENT_RELAXING_RATE_MAX = 1.0 - 1E-4;
@@ -1514,9 +1517,9 @@ Result<T_Variable, T_Expression> solve(
         /**
          * Print the search intensity.
          */
-        utility::print_message(
-            "Historical search intensity is " + std::to_string(intensity) + ".",
-            master_option.verbose >= option::verbose::Outer);
+        utility::print_message("Historical search intensity is " +
+                                   std::to_string(current_intensity) + ".",
+                               master_option.verbose >= option::verbose::Outer);
 
         /**
          * Print the number of found feasible solutions.
@@ -1739,7 +1742,7 @@ Result<T_Variable, T_Expression> solve(
                 local_incumbent.total_violation,                    // 3
                 global_incumbent.objective,                         // 4
                 global_incumbent.total_violation,                   // 5
-                intensity,                                          // 6
+                current_intensity,                                  // 6
                 update_status,                                      // 7
                 employing_local_augmented_solution_flag,            // 8
                 employing_global_augmented_solution_flag,           // 9
