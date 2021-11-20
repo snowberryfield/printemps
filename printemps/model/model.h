@@ -2925,9 +2925,6 @@ class Model {
         if (m_constraint_type_reference.multiple_cover_ptrs.size() > 0) {
             return true;
         }
-        if (m_constraint_type_reference.binary_flow_ptrs.size() > 0) {
-            return true;
-        }
         return false;
     }
 
