@@ -36,6 +36,7 @@ LocalSearchResult<T_Variable, T_Expression> solve(
      * Start to measure computational time.
      */
     utility::TimeKeeper time_keeper;
+    time_keeper.set_start_time();
 
     /**
      * Copy arguments as local variables.
@@ -90,8 +91,7 @@ LocalSearchResult<T_Variable, T_Expression> solve(
      * Prepare other local variables.
      */
 
-    LocalSearchTerminationStatus termination_status =
-        LocalSearchTerminationStatus::ITERATION_OVER;
+    auto termination_status = LocalSearchTerminationStatus::ITERATION_OVER;
 
     neighborhood::Move<T_Variable, T_Expression> previous_move;
     neighborhood::Move<T_Variable, T_Expression> current_move;
