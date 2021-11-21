@@ -2984,19 +2984,6 @@ TEST_F(TestModel, has_chain_move_effective_constraints) {
         model.categorize_constraints();
         EXPECT_TRUE(model.has_chain_move_effective_constraints());
     }
-
-    /// Binary Flow
-    {
-        printemps::model::Model<int, double> model;
-
-        auto&                  x = model.create_variables("x", 10, 0, 1);
-        [[maybe_unused]] auto& f =
-            model.create_constraint("f", x(0) + x(1) == x(2) + x(3));
-
-        model.categorize_variables();
-        model.categorize_constraints();
-        EXPECT_TRUE(model.has_chain_move_effective_constraints());
-    }
 }
 
 /*****************************************************************************/

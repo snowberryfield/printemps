@@ -39,6 +39,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
      * Start to measure computational time.
      */
     utility::TimeKeeper time_keeper;
+    time_keeper.set_start_time();
 
     /**
      * Copy arguments as local variables.
@@ -124,8 +125,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
 
     int local_augmented_incumbent_update_count = 0;
 
-    TabuSearchTerminationStatus termination_status =
-        TabuSearchTerminationStatus::ITERATION_OVER;
+    auto termination_status = TabuSearchTerminationStatus::ITERATION_OVER;
 
     neighborhood::Move<T_Variable, T_Expression> previous_move;
     neighborhood::Move<T_Variable, T_Expression> current_move;
