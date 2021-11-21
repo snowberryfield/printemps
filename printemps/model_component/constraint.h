@@ -70,7 +70,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     bool m_is_set_covering;
     bool m_is_cardinality;
     bool m_is_invariant_knapsack;
-    bool m_is_multiple_cover;
+    bool m_is_multiple_covering;
     bool m_is_equation_knapsack;
     bool m_is_binary_flow;
     bool m_is_integer_flow;
@@ -232,7 +232,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         m_is_set_covering       = false;
         m_is_cardinality        = false;
         m_is_invariant_knapsack = false;
-        m_is_multiple_cover     = false;
+        m_is_multiple_covering  = false;
         m_is_equation_knapsack  = false;
         m_is_binary_flow        = false;
         m_is_integer_flow       = false;
@@ -493,10 +493,10 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
                     return;
                 }
 
-                /// Multiple Cover
+                /// Multiple Covering
                 if (m_expression.constant_value() <= -2 &&
                     m_sense == ConstraintSense::Greater) {
-                    m_is_multiple_cover = true;
+                    m_is_multiple_covering = true;
                     return;
                 }
             } else {
@@ -779,8 +779,8 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
 
     /*************************************************************************/
     inline constexpr T_Expression evaluate_constraint(
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
-        noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
+        const noexcept {
 #ifdef _MPS_SOLVER
         return m_expression.evaluate(a_MOVE);
 #else
@@ -802,15 +802,15 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
 
     /*************************************************************************/
     inline constexpr T_Expression evaluate_violation(
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
-        noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
+        const noexcept {
         return m_violation_function(a_MOVE);
     }
 
     /*************************************************************************/
     inline constexpr T_Expression evaluate_violation_diff(
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
-        noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
+        const noexcept {
         return m_violation_function(a_MOVE) - m_violation_value;
     }
 
@@ -900,8 +900,8 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr double local_penalty_coefficient_less(void) const
-        noexcept {
+    inline constexpr double local_penalty_coefficient_less(
+        void) const noexcept {
         return m_local_penalty_coefficient_less;
     }
 
@@ -910,8 +910,8 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         return m_local_penalty_coefficient_greater;
     }
     /*************************************************************************/
-    inline constexpr double local_penalty_coefficient_greater(void) const
-        noexcept {
+    inline constexpr double local_penalty_coefficient_greater(
+        void) const noexcept {
         return m_local_penalty_coefficient_greater;
     }
 
@@ -982,8 +982,8 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr bool is_multiple_cover(void) const noexcept {
-        return m_is_multiple_cover;
+    inline constexpr bool is_multiple_covering(void) const noexcept {
+        return m_is_multiple_covering;
     }
 
     /*************************************************************************/

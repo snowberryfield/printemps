@@ -193,7 +193,7 @@ class Solver {
                 "Chain move was disabled because the problem does not include "
                 "any zero-one coefficient constraints (set "
                 "partitioning/packing/covering, cardinality, invariant "
-                "knapsack, and multiple cover).",
+                "knapsack, and multiple covering).",
                 m_master_option.verbose >= option::verbose::Warning);
         }
 
@@ -1936,11 +1936,31 @@ class Solver {
 
         return result;
     }
+
+    /*************************************************************************/
+    inline std::vector<
+        presolver::FlippableVariablePair<T_Variable, T_Expression>>
+    extract_flippable_variable_pairs(const int a_MINIMUM_COMMON_ELEMENT) {
+        /**
+         * Preprocessing; setup the model and the solver.
+         */
+        this->preprocess();
+
+        /**
+         * Extract flippable variable pairs
+         */
+        auto flippable_variable_pairs =
+            presolver::extract_flippable_variable_pairs(
+                m_model_ptr->constraint_reference().enabled_constraint_ptrs,
+                a_MINIMUM_COMMON_ELEMENT,
+                m_master_option.verbose >= option::verbose::Outer);
+        return flippable_variable_pairs;
+    }
 };
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-Result<T_Variable, T_Expression> solve(
+inline Result<T_Variable, T_Expression> solve(
     model::Model<T_Variable, T_Expression>* a_model_ptr,  //
     const option::Option&                   a_OPTION) {
     Solver<T_Variable, T_Expression> solver(a_model_ptr, a_OPTION);
@@ -1951,11 +1971,26 @@ Result<T_Variable, T_Expression> solve(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-Result<T_Variable, T_Expression> solve(
+inline Result<T_Variable, T_Expression> solve(
     model::Model<T_Variable, T_Expression>* a_model_ptr) {
     option::Option option;
     return solve(a_model_ptr, option);
 }
+
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+inline std::vector<presolver::FlippableVariablePair<T_Variable, T_Expression>>
+extract_flippable_variable_pairs(
+    model::Model<T_Variable, T_Expression>* a_model_ptr,  //
+    const option::Option& a_OPTION, const int a_MINIMUM_COMMON_ELEMENT) {
+    Solver<T_Variable, T_Expression> solver(a_model_ptr, a_OPTION);
+
+    auto flippable_variable_pairs =
+        solver.extract_flippable_variable_pairs(a_MINIMUM_COMMON_ELEMENT);
+
+    return flippable_variable_pairs;
+}
+
 }  // namespace solver
 }  // namespace printemps
 

@@ -603,8 +603,8 @@ constexpr int remove_redundant_constraints_with_tightening_variable_bounds(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 constexpr int remove_duplicated_constraints(
-    std::vector<model_component::Constraint<T_Variable, T_Expression> *>
-               a_constraint_ptrs,  //
+    const std::vector<model_component::Constraint<T_Variable, T_Expression> *>
+        &      a_CONSTRAINT_PTRS,  //
     const bool a_IS_ENABLED_PRINT) {
     /**
      * NOTE: This function should be called from
@@ -612,15 +612,15 @@ constexpr int remove_duplicated_constraints(
      */
     int number_of_newly_disabled_constraints = 0;
 
-    if (a_constraint_ptrs.size() <= 1) {
+    auto constraint_ptrs = a_CONSTRAINT_PTRS;
+    if (constraint_ptrs.size() <= 1) {
         return number_of_newly_disabled_constraints;
     }
 
-    for (auto constraint_ptr : a_constraint_ptrs) {
+    for (auto constraint_ptr : constraint_ptrs) {
         constraint_ptr->expression().setup_hash();
     }
 
-    auto      constraint_ptrs  = a_constraint_ptrs;
     const int CONSTRAINTS_SIZE = constraint_ptrs.size();
 
     std::sort(constraint_ptrs.begin(), constraint_ptrs.end(),
