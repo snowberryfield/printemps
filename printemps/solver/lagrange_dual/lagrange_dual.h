@@ -69,6 +69,7 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
      * Start to measure computational time.
      */
     utility::TimeKeeper time_keeper;
+    time_keeper.set_start_time();
 
     /**
      * Copy arguments as local variables.
@@ -103,7 +104,7 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
     /**
      * Prepare the dual solution as lagrange multipliers.
      */
-    std::vector<multi_array::ValueProxy<double>> dual_value_proxies =
+    auto dual_value_proxies =
         model_ptr->generate_constraint_parameter_proxies(0.0);
     bound_dual(model_ptr, &dual_value_proxies);
 
@@ -130,8 +131,7 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
     /**
      * Prepare other local variables.
      */
-    LagrangeDualTerminationStatus termination_status =
-        LagrangeDualTerminationStatus::ITERATION_OVER;
+    auto termination_status = LagrangeDualTerminationStatus::ITERATION_OVER;
 
     /**
      * Print the header of optimization progress table and print the
