@@ -18,6 +18,7 @@ class Model;
 #include "selection_extractor.h"
 #include "intermediate_variable_extractor.h"
 #include "gf2_solver.h"
+#include "flippable_variable_pair_extractor.h"
 
 #endif
 /*****************************************************************************/

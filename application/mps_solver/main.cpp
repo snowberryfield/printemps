@@ -23,6 +23,8 @@ int main([[maybe_unused]] int argc, char *argv[]) {
                   << "[-m MUTABLE_VARIABLE_FILE_NAME] "
                   << "[-f FIXED_VARIABLE_FILE_NAME] "
                   << "[--accept-continuous] "
+                  << "[--extract-flippable-variable-pairs] "
+                  << "[-s MINIMUM_COMMON_ELEMENT]"
                   << "mps_file" << std::endl;
         std::cout << std::endl;
         std::cout  //
@@ -43,6 +45,15 @@ int main([[maybe_unused]] int argc, char *argv[]) {
             << "  --accept-continuous: Accept continuous variables as integer "
                "variables."
             << std::endl;
+        std::cout  //
+            << "  --extract-flippable-variable-pairs: Extract 2-flippable "
+               "variable pairs."
+            << std::endl;
+        std::cout  //
+            << "  --s MINIMUM_COMMON_ELEMENT: minimum common element between "
+               "two constraints, which is used as the threshold for extracting "
+               "flippable variable pairs. (default: 5)"
+            << std::endl;
         exit(1);
     }
 
@@ -54,7 +65,9 @@ int main([[maybe_unused]] int argc, char *argv[]) {
     std::string initial_solution_file_name;
     std::string mutable_variable_file_name;
     std::string fixed_variable_file_name;
-    bool        accept_continuous_variables = false;
+    bool        accept_continuous_variables      = false;
+    bool        extract_flippable_variable_pairs = false;
+    int         minimum_common_element           = 5;
 
     std::vector<std::string> args(argv, argv + argc);
     int                      i = 1;
@@ -71,8 +84,14 @@ int main([[maybe_unused]] int argc, char *argv[]) {
         } else if (args[i] == "-f") {
             fixed_variable_file_name = args[i + 1];
             i += 2;
+        } else if (args[i] == "-s") {
+            minimum_common_element = atoi(args[i + 1].c_str());
+            i += 2;
         } else if (args[i] == "--accept-continuous") {
             accept_continuous_variables = true;
+            i++;
+        } else if (args[i] == "--extract-flippable-variable-pairs") {
+            extract_flippable_variable_pairs = true;
             i++;
         } else {
             mps_file_name = args[i];
@@ -138,32 +157,44 @@ int main([[maybe_unused]] int argc, char *argv[]) {
         model.import_solution(solution);
     }
 
-    /**
-     * Run the solver.
-     */
-    auto result = printemps::solver::solve(&model, option);
+    if (!extract_flippable_variable_pairs) {
+        /**
+         * Run the solver.
+         */
+        auto result = printemps::solver::solve(&model, option);
 
-    /**
-     * Print the result summary.
-     */
-    printemps::utility::print_info(
-        "status: " + std::to_string(result.solution.is_feasible()),
-        option.verbose >= printemps::option::verbose::Warning);
+        /**
+         * Print the result summary.
+         */
+        printemps::utility::print_info(
+            "status: " + std::to_string(result.solution.is_feasible()),
+            option.verbose >= printemps::option::verbose::Warning);
 
-    printemps::utility::print_info(
-        "objective: " + std::to_string(result.solution.objective()),
-        option.verbose >= printemps::option::verbose::Warning);
+        printemps::utility::print_info(
+            "objective: " + std::to_string(result.solution.objective()),
+            option.verbose >= printemps::option::verbose::Warning);
 
-    printemps::utility::print_info(
-        "total violation: " + std::to_string(result.solution.total_violation()),
-        option.verbose >= printemps::option::verbose::Warning);
+        printemps::utility::print_info(
+            "total violation: " +
+                std::to_string(result.solution.total_violation()),
+            option.verbose >= printemps::option::verbose::Warning);
 
-    result.solution.write_json_by_name("incumbent.json");
-    result.solution.write_solution("incumbent.sol");
-    result.status.write_json_by_name("status.json");
+        result.solution.write_json_by_name("incumbent.json");
+        result.solution.write_solution("incumbent.sol");
+        result.status.write_json_by_name("status.json");
 
-    if (option.is_enabled_store_feasible_solutions) {
-        result.solution_archive.write_solutions_json("feasible.json");
+        if (option.is_enabled_store_feasible_solutions) {
+            result.solution_archive.write_solutions_json("feasible.json");
+        }
+    } else {
+        /**
+         * Extract flippable variable pairs.
+         */
+        auto flippable_variable_pairs =
+            printemps::solver::extract_flippable_variable_pairs(
+                &model, option, minimum_common_element);
+        printemps::presolver::write_flippable_variable_pairs(
+            flippable_variable_pairs, "flip.txt");
     }
 
     return 0;

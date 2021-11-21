@@ -1052,9 +1052,9 @@ class Model {
                         constraint_type_reference.invariant_knapsack_ptrs
                             .push_back(&constraint);
                     }
-                    if (constraint.is_multiple_cover()) {
-                        constraint_type_reference.multiple_cover_ptrs.push_back(
-                            &constraint);
+                    if (constraint.is_multiple_covering()) {
+                        constraint_type_reference.multiple_covering_ptrs
+                            .push_back(&constraint);
                     }
                     if (constraint.is_binary_flow()) {
                         constraint_type_reference.binary_flow_ptrs.push_back(
@@ -1482,15 +1482,15 @@ class Model {
                 true);
 
             utility::print_info(                        //
-                " -- Multiple Cover: " +                //
+                " -- Multiple Covering: " +             //
                     utility::to_string(                 //
                         compute_number_of_constraints(  //
-                            original.multiple_cover_ptrs),
+                            original.multiple_covering_ptrs),
                         "%d") +
                     " (" +
                     utility::to_string(                         //
                         compute_number_of_enabled_constraints(  //
-                            presolved.multiple_cover_ptrs),
+                            presolved.multiple_covering_ptrs),
                         "%d") +
                     ")",
                 true);
@@ -1931,8 +1931,8 @@ class Model {
 
     /*************************************************************************/
     inline solution::SolutionScore evaluate(
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
-        noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
+        const noexcept {
         solution::SolutionScore score;
         this->evaluate(&score, a_MOVE);
         return score;
@@ -1948,10 +1948,9 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void evaluate(
-        solution::SolutionScore *                           a_score_ptr,  //
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
-        noexcept {
+    constexpr void evaluate(solution::SolutionScore *a_score_ptr,  //
+                            const neighborhood::Move<T_Variable, T_Expression>
+                                &a_MOVE) const noexcept {
         double total_violation = 0.0;
         double local_penalty   = 0.0;
         double global_penalty  = 0.0;
@@ -2922,7 +2921,7 @@ class Model {
         if (m_constraint_type_reference.invariant_knapsack_ptrs.size() > 0) {
             return true;
         }
-        if (m_constraint_type_reference.multiple_cover_ptrs.size() > 0) {
+        if (m_constraint_type_reference.multiple_covering_ptrs.size() > 0) {
             return true;
         }
         return false;
