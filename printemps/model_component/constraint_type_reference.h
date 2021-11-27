@@ -24,7 +24,7 @@ struct ConstraintTypeReference {
     std::vector<Constraint<T_Variable, T_Expression> *> set_covering_ptrs;
     std::vector<Constraint<T_Variable, T_Expression> *> cardinality_ptrs;
     std::vector<Constraint<T_Variable, T_Expression> *> invariant_knapsack_ptrs;
-    std::vector<Constraint<T_Variable, T_Expression> *> multiple_cover_ptrs;
+    std::vector<Constraint<T_Variable, T_Expression> *> multiple_covering_ptrs;
     std::vector<Constraint<T_Variable, T_Expression> *> binary_flow_ptrs;
     std::vector<Constraint<T_Variable, T_Expression> *> integer_flow_ptrs;
     std::vector<Constraint<T_Variable, T_Expression> *> equation_knapsack_ptrs;
@@ -54,7 +54,7 @@ struct ConstraintTypeReference {
         this->set_covering_ptrs.clear();
         this->cardinality_ptrs.clear();
         this->invariant_knapsack_ptrs.clear();
-        this->multiple_cover_ptrs.clear();
+        this->multiple_covering_ptrs.clear();
         this->binary_flow_ptrs.clear();
         this->integer_flow_ptrs.clear();
         this->equation_knapsack_ptrs.clear();

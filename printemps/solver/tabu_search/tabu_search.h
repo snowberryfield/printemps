@@ -585,7 +585,9 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                  previous_move.alterations.front().second !=
                      current_move.alterations.front().second) ||
                 (previous_move.sense == neighborhood::MoveSense::Chain &&
-                 current_move.sense == neighborhood::MoveSense::Chain)) {
+                 current_move.sense == neighborhood::MoveSense::Chain) ||
+                (previous_move.sense == neighborhood::MoveSense::TwoFlip &&
+                 current_move.sense == neighborhood::MoveSense::TwoFlip)) {
                 Move_T chain_move;
                 if (previous_move.alterations.front().first <
                     current_move.alterations.front().first)

@@ -572,7 +572,7 @@ TEST_F(TestConstraint, setup_constraint_type_invariant_knapsack) {
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraint, setup_constraint_type_multiple_cover) {
+TEST_F(TestConstraint, setup_constraint_type_multiple_covering) {
     printemps::model::Model<int, double> model;
     auto& x = model.create_variables("x", 10, 0, 1);
     auto  constraint =
@@ -580,7 +580,7 @@ TEST_F(TestConstraint, setup_constraint_type_multiple_cover) {
     constraint.setup(x.sum() - 5,
                      printemps::model_component::ConstraintSense::Greater);
     constraint.setup_constraint_type();
-    EXPECT_TRUE(constraint.is_multiple_cover());
+    EXPECT_TRUE(constraint.is_multiple_covering());
 }
 
 /*****************************************************************************/
@@ -1932,8 +1932,8 @@ TEST_F(TestConstraint, is_invariant_knapsack) {
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraint, is_multiple_cover) {
-    /// This method is tested in setup_constraint_type_multiple_cover().
+TEST_F(TestConstraint, is_multiple_covering) {
+    /// This method is tested in setup_constraint_type_multiple_covering().
 }
 
 /*****************************************************************************/
