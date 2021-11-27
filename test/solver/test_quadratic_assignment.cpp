@@ -96,16 +96,17 @@ TEST_F(TestQuadracitAssignment, quadratic_assignment) {
     /*************************************************************************/
     std::function<void(std::vector<printemps::neighborhood::IPMove>*)>
         move_updater =
-            [&qap, &p](std::vector<printemps::neighborhood::IPMove>* a_moves) {
-                a_moves->resize(qap.N * (qap.N - 1) / 2 +
-                                qap.N * (qap.N - 1) * (qap.N - 2) / 3);
+            [&qap,
+             &p](std::vector<printemps::neighborhood::IPMove>* a_moves_ptr) {
+                a_moves_ptr->resize(qap.N * (qap.N - 1) / 2 +
+                                    qap.N * (qap.N - 1) * (qap.N - 2) / 3);
                 auto count = 0;
                 for (auto n = 0; n < qap.N; n++) {
                     for (auto m = n + 1; m < qap.N; m++) {
-                        (*a_moves)[count].alterations.clear();
-                        (*a_moves)[count].alterations.emplace_back(
+                        (*a_moves_ptr)[count].alterations.clear();
+                        (*a_moves_ptr)[count].alterations.emplace_back(
                             &p(n), p(m).value());
-                        (*a_moves)[count].alterations.emplace_back(
+                        (*a_moves_ptr)[count].alterations.emplace_back(
                             &p(m), p(n).value());
                         count++;
                     }
@@ -113,21 +114,21 @@ TEST_F(TestQuadracitAssignment, quadratic_assignment) {
                 for (auto n = 0; n < qap.N; n++) {
                     for (auto m = n + 1; m < qap.N; m++) {
                         for (auto k = m + 1; k < qap.N; k++) {
-                            (*a_moves)[count].alterations.clear();
-                            (*a_moves)[count].alterations.emplace_back(
+                            (*a_moves_ptr)[count].alterations.clear();
+                            (*a_moves_ptr)[count].alterations.emplace_back(
                                 &p(n), p(m).value());
-                            (*a_moves)[count].alterations.emplace_back(
+                            (*a_moves_ptr)[count].alterations.emplace_back(
                                 &p(m), p(k).value());
-                            (*a_moves)[count].alterations.emplace_back(
+                            (*a_moves_ptr)[count].alterations.emplace_back(
                                 &p(k), p(n).value());
                             count++;
 
-                            (*a_moves)[count].alterations.clear();
-                            (*a_moves)[count].alterations.emplace_back(
+                            (*a_moves_ptr)[count].alterations.clear();
+                            (*a_moves_ptr)[count].alterations.emplace_back(
                                 &p(n), p(k).value());
-                            (*a_moves)[count].alterations.emplace_back(
+                            (*a_moves_ptr)[count].alterations.emplace_back(
                                 &p(m), p(n).value());
-                            (*a_moves)[count].alterations.emplace_back(
+                            (*a_moves_ptr)[count].alterations.emplace_back(
                                 &p(k), p(m).value());
                             count++;
                         }

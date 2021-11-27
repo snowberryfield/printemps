@@ -52,17 +52,21 @@ class IntegerMoveGenerator
         this->m_flags.resize(4 * VARIABLES_SIZE);
 
         for (auto i = 0; i < VARIABLES_SIZE; i++) {
-            for (auto j = 0; j < 4; j++) {
-                this->m_moves[4 * i + j].sense = MoveSense::Integer;
-                this->m_moves[4 * i + j].related_constraint_ptrs =
-                    mutable_variable_ptrs[i]->related_constraint_ptrs();
-                this->m_moves[4 * i + j].alterations.emplace_back(
-                    mutable_variable_ptrs[i], 0);
-                this->m_moves[4 * i + j].is_univariable_move          = true;
-                this->m_moves[4 * i + j].is_special_neighborhood_move = false;
-                this->m_moves[4 * i + j].is_available                 = true;
-                this->m_moves[4 * i + j].overlap_rate                 = 0.0;
-            }
+            auto &move = this->m_moves[4 * i];
+
+            move.sense = MoveSense::Integer;
+            move.related_constraint_ptrs =
+                mutable_variable_ptrs[i]->related_constraint_ptrs();
+            move.alterations.emplace_back(mutable_variable_ptrs[i], 0);
+            move.is_univariable_move          = true;
+            move.is_selection_move            = false;
+            move.is_special_neighborhood_move = false;
+            move.is_available                 = true;
+            move.overlap_rate                 = 0.0;
+
+            this->m_moves[4 * i + 1] = move;
+            this->m_moves[4 * i + 2] = move;
+            this->m_moves[4 * i + 3] = move;
         }
 
         /**
@@ -70,7 +74,7 @@ class IntegerMoveGenerator
          */
         auto move_updater =  //
             [this, mutable_variable_ptrs, VARIABLES_SIZE](
-                auto *                      a_moves,                          //
+                auto *                      a_moves_ptr,                      //
                 auto *                      a_flags,                          //
                 const bool                  a_ACCEPT_ALL,                     //
                 const bool                  a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
@@ -96,7 +100,7 @@ class IntegerMoveGenerator
                         if (value == upper_bound) {
                             (*a_flags)[4 * i] = 0;
                         } else {
-                            (*a_moves)[4 * i].alterations.front().second =
+                            (*a_moves_ptr)[4 * i].alterations.front().second =
                                 value + 1;
                             (*a_flags)[4 * i] = 1;
                         }
@@ -104,8 +108,9 @@ class IntegerMoveGenerator
                         if (value == lower_bound) {
                             (*a_flags)[4 * i + 1] = 0;
                         } else {
-                            (*a_moves)[4 * i + 1].alterations.front().second =
-                                value - 1;
+                            (*a_moves_ptr)[4 * i + 1]
+                                .alterations.front()
+                                .second           = value - 1;
                             (*a_flags)[4 * i + 1] = 1;
                         }
 
@@ -115,8 +120,9 @@ class IntegerMoveGenerator
                         } else {
                             const auto delta =
                                 std::min(DELTA_MAX, (upper_bound - value) / 2);
-                            (*a_moves)[4 * i + 2].alterations.front().second =
-                                value + delta;
+                            (*a_moves_ptr)[4 * i + 2]
+                                .alterations.front()
+                                .second           = value + delta;
                             (*a_flags)[4 * i + 2] = 1;
                         }
 
@@ -126,8 +132,9 @@ class IntegerMoveGenerator
                         } else {
                             const auto delta =
                                 std::max(-DELTA_MAX, (lower_bound - value) / 2);
-                            (*a_moves)[4 * i + 3].alterations.front().second =
-                                value + delta;
+                            (*a_moves_ptr)[4 * i + 3]
+                                .alterations.front()
+                                .second           = value + delta;
                             (*a_flags)[4 * i + 3] = 1;
                         }
                     } else {
