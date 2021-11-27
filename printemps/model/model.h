@@ -626,8 +626,9 @@ class Model {
         const bool a_IS_ENABLED_AGGREGATION_MOVE,                       //
         const bool a_IS_ENABLED_PRECEDENCE_MOVE,                        //
         const bool a_IS_ENABLED_VARIABLE_BOUND_MOVE,                    //
-        const bool a_IS_ENABLED_USER_DEFINED_MOVE,                      //
         const bool a_IS_ENABLED_CHAIN_MOVE,                             //
+        const bool a_IS_ENABLED_TWO_FLIP_MOVE,                          //
+        const bool a_IS_ENABLED_USER_DEFINED_MOVE,                      //
         const option::selection_mode::SelectionMode &a_SELECTION_MODE,  //
         const bool                                   a_IS_ENABLED_PRINT) {
         verifier::verify_problem(this, a_IS_ENABLED_PRINT);
@@ -767,8 +768,9 @@ class Model {
         this->setup_neighborhood(a_IS_ENABLED_AGGREGATION_MOVE,     //
                                  a_IS_ENABLED_PRECEDENCE_MOVE,      //
                                  a_IS_ENABLED_VARIABLE_BOUND_MOVE,  //
-                                 a_IS_ENABLED_USER_DEFINED_MOVE,    //
                                  a_IS_ENABLED_CHAIN_MOVE,           //
+                                 a_IS_ENABLED_TWO_FLIP_MOVE,        //
+                                 a_IS_ENABLED_USER_DEFINED_MOVE,    //
                                  a_IS_ENABLED_PRINT);
 
         /**
@@ -1119,8 +1121,9 @@ class Model {
         const bool a_IS_ENABLED_AGGREGATION_MOVE,     //
         const bool a_IS_ENABLED_PRECEDENCE_MOVE,      //
         const bool a_IS_ENABLED_VARIABLE_BOUND_MOVE,  //
-        const bool a_IS_ENABLED_USER_DEFINED_MOVE,    //
         const bool a_IS_ENABLED_CHAIN_MOVE,           //
+        const bool a_IS_ENABLED_TWO_FLIP_MOVE,        //
+        const bool a_IS_ENABLED_USER_DEFINED_MOVE,    //
         const bool a_IS_ENABLED_PRINT) {
         utility::print_single_line(a_IS_ENABLED_PRINT);
         utility::print_message("Detecting the neighborhood structure...",
@@ -1154,11 +1157,11 @@ class Model {
             m_neighborhood.chain().setup();
         }
 
-#ifdef _MPS_SOLVER
-        if (m_flippable_variable_ptr_pairs.size() > 0) {
+        if (a_IS_ENABLED_TWO_FLIP_MOVE &&
+            m_flippable_variable_ptr_pairs.size() > 0) {
             m_neighborhood.two_flip().setup(m_flippable_variable_ptr_pairs);
         }
-#endif
+
         if (a_IS_ENABLED_USER_DEFINED_MOVE) {
             m_neighborhood.user_defined().setup();
         }
