@@ -70,7 +70,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     bool m_is_set_covering;
     bool m_is_cardinality;
     bool m_is_invariant_knapsack;
-    bool m_is_multiple_cover;
+    bool m_is_multiple_covering;
     bool m_is_equation_knapsack;
     bool m_is_binary_flow;
     bool m_is_integer_flow;
@@ -232,7 +232,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         m_is_set_covering       = false;
         m_is_cardinality        = false;
         m_is_invariant_knapsack = false;
-        m_is_multiple_cover     = false;
+        m_is_multiple_covering  = false;
         m_is_equation_knapsack  = false;
         m_is_binary_flow        = false;
         m_is_integer_flow       = false;
@@ -493,10 +493,10 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
                     return;
                 }
 
-                /// Multiple Cover
+                /// Multiple Covering
                 if (m_expression.constant_value() <= -2 &&
                     m_sense == ConstraintSense::Greater) {
-                    m_is_multiple_cover = true;
+                    m_is_multiple_covering = true;
                     return;
                 }
             } else {
@@ -506,30 +506,34 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
 
         /// Binary Flow and Integer Flow
         {
-            bool is_plus_or_minus_one_coefficient = true;
-            for (const auto &sensitivity : m_expression.sensitivities()) {
-                if (abs(sensitivity.second) != 1) {
-                    is_plus_or_minus_one_coefficient = false;
-                    break;
-                }
-            }
-
-            if (is_plus_or_minus_one_coefficient) {
-                bool has_only_binary_variables = true;
+            if (m_sense == ConstraintSense::Equal) {
+                bool is_plus_or_minus_one_coefficient = true;
                 for (const auto &sensitivity : m_expression.sensitivities()) {
-                    if ((sensitivity.first->sense() != VariableSense::Binary) &&
-                        (sensitivity.first->sense() !=
-                         VariableSense::Selection)) {
-                        has_only_binary_variables = false;
+                    if (abs(sensitivity.second) != 1) {
+                        is_plus_or_minus_one_coefficient = false;
                         break;
                     }
                 }
-                if (has_only_binary_variables) {
-                    m_is_binary_flow = true;
-                    return;
-                } else {
-                    m_is_integer_flow = true;
-                    return;
+
+                if (is_plus_or_minus_one_coefficient) {
+                    bool has_only_binary_variables = true;
+                    for (const auto &sensitivity :
+                         m_expression.sensitivities()) {
+                        if ((sensitivity.first->sense() !=
+                             VariableSense::Binary) &&
+                            (sensitivity.first->sense() !=
+                             VariableSense::Selection)) {
+                            has_only_binary_variables = false;
+                            break;
+                        }
+                    }
+                    if (has_only_binary_variables) {
+                        m_is_binary_flow = true;
+                        return;
+                    } else {
+                        m_is_integer_flow = true;
+                        return;
+                    }
                 }
             }
         }
@@ -982,8 +986,8 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr bool is_multiple_cover(void) const noexcept {
-        return m_is_multiple_cover;
+    inline constexpr bool is_multiple_covering(void) const noexcept {
+        return m_is_multiple_covering;
     }
 
     /*************************************************************************/

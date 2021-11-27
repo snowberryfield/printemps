@@ -3,8 +3,8 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_SOLVER_GF2_H__
-#define PRINTEMPS_SOLVER_GF2_H__
+#ifndef PRINTEMPS_PRESOLVER_GF2_H__
+#define PRINTEMPS_PRESOLVER_GF2_H__
 
 namespace printemps {
 namespace presolver {

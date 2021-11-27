@@ -1129,8 +1129,8 @@ TEST_F(TestModel, categorize_constraints) {
     auto& invariant_knapsack = model.create_constraint("invariant_knapsack");
     invariant_knapsack       = z.sum() <= 5;
 
-    auto& multiple_cover = model.create_constraint("multiple_cover");
-    multiple_cover       = z.sum() >= 5;
+    auto& multiple_covering = model.create_constraint("multiple_covering");
+    multiple_covering       = z.sum() >= 5;
 
     auto& binary_flow = model.create_constraint("binary_flow");
     binary_flow       = z(0) + z(1) + z(2) == z(3) + z(4) + z(5);
@@ -1195,7 +1195,7 @@ TEST_F(TestModel, categorize_constraints) {
     EXPECT_EQ(1, static_cast<int>(reference.set_packing_ptrs.size()));
     EXPECT_EQ(1, static_cast<int>(reference.set_covering_ptrs.size()));
     EXPECT_EQ(1, static_cast<int>(reference.invariant_knapsack_ptrs.size()));
-    EXPECT_EQ(1, static_cast<int>(reference.multiple_cover_ptrs.size()));
+    EXPECT_EQ(1, static_cast<int>(reference.multiple_covering_ptrs.size()));
     EXPECT_EQ(1, static_cast<int>(reference.binary_flow_ptrs.size()));
     EXPECT_EQ(1, static_cast<int>(reference.integer_flow_ptrs.size()));
     EXPECT_EQ(1, static_cast<int>(reference.equation_knapsack_ptrs.size()));
@@ -2973,7 +2973,7 @@ TEST_F(TestModel, has_chain_move_effective_constraints) {
         EXPECT_TRUE(model.has_chain_move_effective_constraints());
     }
 
-    /// Multiple Cover
+    /// Multiple Covering
     {
         printemps::model::Model<int, double> model;
 

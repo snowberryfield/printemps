@@ -22,7 +22,10 @@ int main([[maybe_unused]] int argc, char *argv[]) {
                   << "[-i INITIAL_SOLUTION_FILE_NAME] "
                   << "[-m MUTABLE_VARIABLE_FILE_NAME] "
                   << "[-f FIXED_VARIABLE_FILE_NAME] "
+                  << "[-x FLIPPABLE_VARIABLE_PAIR_FILE_NAME]"
                   << "[--accept-continuous] "
+                  << "[--extract-flippable-variable-pairs] "
+                  << "[-s MINIMUM_COMMON_ELEMENT]"
                   << "mps_file" << std::endl;
         std::cout << std::endl;
         std::cout  //
@@ -40,8 +43,21 @@ int main([[maybe_unused]] int argc, char *argv[]) {
                "name."
             << std::endl;
         std::cout  //
+            << "  -x FLIP_VARIABLE_PAIR_FILE_NAME: Specify flippable variable "
+               "pair file name."
+            << std::endl;
+        std::cout  //
             << "  --accept-continuous: Accept continuous variables as integer "
                "variables."
+            << std::endl;
+        std::cout  //
+            << "  --extract-flippable-variable-pairs: Extract 2-flippable "
+               "variable pairs."
+            << std::endl;
+        std::cout  //
+            << "  --s MINIMUM_COMMON_ELEMENT: minimum common element between "
+               "two constraints, which is used as the threshold for extracting "
+               "flippable variable pairs. (default: 5)"
             << std::endl;
         exit(1);
     }
@@ -54,7 +70,10 @@ int main([[maybe_unused]] int argc, char *argv[]) {
     std::string initial_solution_file_name;
     std::string mutable_variable_file_name;
     std::string fixed_variable_file_name;
-    bool        accept_continuous_variables = false;
+    std::string flippable_variable_pair_file_name;
+    bool        accept_continuous_variables      = false;
+    bool        extract_flippable_variable_pairs = false;
+    int         minimum_common_element           = 5;
 
     std::vector<std::string> args(argv, argv + argc);
     int                      i = 1;
@@ -71,8 +90,17 @@ int main([[maybe_unused]] int argc, char *argv[]) {
         } else if (args[i] == "-f") {
             fixed_variable_file_name = args[i + 1];
             i += 2;
+        } else if (args[i] == "-x") {
+            flippable_variable_pair_file_name = args[i + 1];
+            i += 2;
+        } else if (args[i] == "-s") {
+            minimum_common_element = atoi(args[i + 1].c_str());
+            i += 2;
         } else if (args[i] == "--accept-continuous") {
             accept_continuous_variables = true;
+            i++;
+        } else if (args[i] == "--extract-flippable-variable-pairs") {
+            extract_flippable_variable_pairs = true;
             i++;
         } else {
             mps_file_name = args[i];
@@ -128,6 +156,17 @@ int main([[maybe_unused]] int argc, char *argv[]) {
     }
 
     /**
+     * If the flippable variable pair file is given, register 2-flip moves as
+     * user-defined neighborhood moves.
+     */
+    if (!flippable_variable_pair_file_name.empty()) {
+        auto variable_name_pairs = printemps::helper::read_variable_name_pairs(
+            flippable_variable_pair_file_name);
+        option.is_enabled_user_defined_move = true;
+        model.setup_flippable_variable_ptr_pairs(variable_name_pairs);
+    }
+
+    /**
      * If the initial solution file is given, the values of the variables in the
      * file will be used as the initial values. Otherwise, the default values
      * will be used.
@@ -138,32 +177,44 @@ int main([[maybe_unused]] int argc, char *argv[]) {
         model.import_solution(solution);
     }
 
-    /**
-     * Run the solver.
-     */
-    auto result = printemps::solver::solve(&model, option);
+    if (!extract_flippable_variable_pairs) {
+        /**
+         * Run the solver.
+         */
+        auto result = printemps::solver::solve(&model, option);
 
-    /**
-     * Print the result summary.
-     */
-    printemps::utility::print_info(
-        "status: " + std::to_string(result.solution.is_feasible()),
-        option.verbose >= printemps::option::verbose::Warning);
+        /**
+         * Print the result summary.
+         */
+        printemps::utility::print_info(
+            "status: " + std::to_string(result.solution.is_feasible()),
+            option.verbose >= printemps::option::verbose::Warning);
 
-    printemps::utility::print_info(
-        "objective: " + std::to_string(result.solution.objective()),
-        option.verbose >= printemps::option::verbose::Warning);
+        printemps::utility::print_info(
+            "objective: " + std::to_string(result.solution.objective()),
+            option.verbose >= printemps::option::verbose::Warning);
 
-    printemps::utility::print_info(
-        "total violation: " + std::to_string(result.solution.total_violation()),
-        option.verbose >= printemps::option::verbose::Warning);
+        printemps::utility::print_info(
+            "total violation: " +
+                std::to_string(result.solution.total_violation()),
+            option.verbose >= printemps::option::verbose::Warning);
 
-    result.solution.write_json_by_name("incumbent.json");
-    result.solution.write_solution("incumbent.sol");
-    result.status.write_json_by_name("status.json");
+        result.solution.write_json_by_name("incumbent.json");
+        result.solution.write_solution("incumbent.sol");
+        result.status.write_json_by_name("status.json");
 
-    if (option.is_enabled_store_feasible_solutions) {
-        result.solution_archive.write_solutions_json("feasible.json");
+        if (option.is_enabled_store_feasible_solutions) {
+            result.solution_archive.write_solutions_json("feasible.json");
+        }
+    } else {
+        /**
+         * Extract flippable variable pairs.
+         */
+        auto flippable_variable_pairs =
+            printemps::solver::extract_flippable_variable_pairs(
+                &model, option, minimum_common_element);
+        printemps::presolver::write_flippable_variable_pairs(
+            flippable_variable_pairs, "flip.txt");
     }
 
     return 0;

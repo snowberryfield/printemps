@@ -101,6 +101,53 @@ inline std::unordered_set<std::string> read_variable_names(
 
     return variable_names;
 }
+
+/*****************************************************************************/
+inline std::vector<std::pair<std::string, std::string>>
+read_variable_name_pairs(const std::string &a_FILE_NAME) {
+    std::vector<std::pair<std::string, std::string>> variable_name_pairs;
+
+    std::vector<std::string> lines;
+    std::string              item;
+
+    /**
+     * Read and store entire part of the variable pairs file.
+     */
+    {
+        std::ifstream ifs;
+        std::string   buffer;
+
+        ifs.open(a_FILE_NAME.c_str());
+        if (ifs.fail()) {
+            throw std::logic_error(utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "Cannot open the specified solution file: " + a_FILE_NAME));
+        }
+        while (std::getline(ifs, buffer)) {
+            lines.push_back(buffer);
+        }
+        ifs.close();
+    }
+
+    /**
+     * Parse the variable name pairs file.
+     */
+    for (const auto &line : lines) {
+        std::stringstream        stream(line);
+        std::vector<std::string> items;
+        while (stream >> item) {
+            items.push_back(item);
+        }
+        int ITEMS_SIZE = items.size();
+
+        if (ITEMS_SIZE < 2) {
+            continue;
+        }
+        variable_name_pairs.emplace_back(items[0], items[1]);
+    }
+
+    return variable_name_pairs;
+}
 }  // namespace helper
 }  // namespace printemps
 #endif
