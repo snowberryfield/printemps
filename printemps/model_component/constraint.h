@@ -506,30 +506,34 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
 
         /// Binary Flow and Integer Flow
         {
-            bool is_plus_or_minus_one_coefficient = true;
-            for (const auto &sensitivity : m_expression.sensitivities()) {
-                if (abs(sensitivity.second) != 1) {
-                    is_plus_or_minus_one_coefficient = false;
-                    break;
-                }
-            }
-
-            if (is_plus_or_minus_one_coefficient) {
-                bool has_only_binary_variables = true;
+            if (m_sense == ConstraintSense::Equal) {
+                bool is_plus_or_minus_one_coefficient = true;
                 for (const auto &sensitivity : m_expression.sensitivities()) {
-                    if ((sensitivity.first->sense() != VariableSense::Binary) &&
-                        (sensitivity.first->sense() !=
-                         VariableSense::Selection)) {
-                        has_only_binary_variables = false;
+                    if (abs(sensitivity.second) != 1) {
+                        is_plus_or_minus_one_coefficient = false;
                         break;
                     }
                 }
-                if (has_only_binary_variables) {
-                    m_is_binary_flow = true;
-                    return;
-                } else {
-                    m_is_integer_flow = true;
-                    return;
+
+                if (is_plus_or_minus_one_coefficient) {
+                    bool has_only_binary_variables = true;
+                    for (const auto &sensitivity :
+                         m_expression.sensitivities()) {
+                        if ((sensitivity.first->sense() !=
+                             VariableSense::Binary) &&
+                            (sensitivity.first->sense() !=
+                             VariableSense::Selection)) {
+                            has_only_binary_variables = false;
+                            break;
+                        }
+                    }
+                    if (has_only_binary_variables) {
+                        m_is_binary_flow = true;
+                        return;
+                    } else {
+                        m_is_integer_flow = true;
+                        return;
+                    }
                 }
             }
         }
@@ -779,8 +783,8 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
 
     /*************************************************************************/
     inline constexpr T_Expression evaluate_constraint(
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
-        const noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
+        noexcept {
 #ifdef _MPS_SOLVER
         return m_expression.evaluate(a_MOVE);
 #else
@@ -802,15 +806,15 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
 
     /*************************************************************************/
     inline constexpr T_Expression evaluate_violation(
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
-        const noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
+        noexcept {
         return m_violation_function(a_MOVE);
     }
 
     /*************************************************************************/
     inline constexpr T_Expression evaluate_violation_diff(
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
-        const noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
+        noexcept {
         return m_violation_function(a_MOVE) - m_violation_value;
     }
 
@@ -900,8 +904,8 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr double local_penalty_coefficient_less(
-        void) const noexcept {
+    inline constexpr double local_penalty_coefficient_less(void) const
+        noexcept {
         return m_local_penalty_coefficient_less;
     }
 
@@ -910,8 +914,8 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         return m_local_penalty_coefficient_greater;
     }
     /*************************************************************************/
-    inline constexpr double local_penalty_coefficient_greater(
-        void) const noexcept {
+    inline constexpr double local_penalty_coefficient_greater(void) const
+        noexcept {
         return m_local_penalty_coefficient_greater;
     }
 

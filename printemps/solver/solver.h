@@ -213,6 +213,12 @@ class Solver {
             m_model_ptr->neighborhood().user_defined().enable();
         }
 
+#ifdef _MPS_SOLVER
+        if (m_model_ptr->flippable_variable_ptr_pairs().size() > 0) {
+            m_model_ptr->neighborhood().two_flip().enable();
+        }
+#endif
+
         if (m_master_option.selection_mode != option::selection_mode::None) {
             m_model_ptr->neighborhood().selection().enable();
         }
@@ -1493,6 +1499,14 @@ class Solver {
                     }
                 }
 
+                /// Two Flip
+#ifdef _MPS_SOLVER
+                if (m_model_ptr->flippable_variable_ptr_pairs().size() > 0) {
+                    m_model_ptr->neighborhood().two_flip().disable();
+                    is_deactivated_special_neighborhood_move = true;
+                }
+#endif
+
             } else {
                 /**
                  * Enable the special neighborhood moves if the incumbent was
@@ -1539,6 +1553,18 @@ class Solver {
                             is_activated_special_neighborhood_move = true;
                         }
                     }
+
+#ifdef _MPS_SOLVER
+                    if (m_model_ptr->flippable_variable_ptr_pairs().size() >
+                        0) {
+                        if (!m_model_ptr->neighborhood()
+                                 .two_flip()
+                                 .is_enabled()) {
+                            m_model_ptr->neighborhood().two_flip().enable();
+                            is_activated_special_neighborhood_move = true;
+                        }
+                    }
+#endif
                 }
             }
 
