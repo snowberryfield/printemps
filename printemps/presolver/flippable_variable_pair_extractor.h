@@ -68,6 +68,10 @@ extract_flippable_variable_pairs(
              constraint_ptr->expression().sensitivities()) {
             auto variable_ptr = sensitivity.first;
             if (!variable_ptr->is_fixed() &&
+                (variable_ptr->sense() ==
+                     model_component::VariableSense::Binary ||
+                 variable_ptr->sense() ==
+                     model_component::VariableSense::Selection) &&
                 static_cast<int>(
                     variable_ptr->related_constraint_ptrs().size()) >=
                     a_MINIMUM_COMMON_ELEMENT) {

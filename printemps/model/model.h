@@ -63,6 +63,11 @@ class Model {
     model_component::ConstraintTypeReference<T_Variable, T_Expression>  //
         m_constraint_type_reference;
 
+    std::vector<
+        std::pair<model_component::Variable<T_Variable, T_Expression> *,
+                  model_component::Variable<T_Variable, T_Expression> *>>
+        m_flippable_variable_ptr_pairs;
+
     neighborhood::Neighborhood<T_Variable, T_Expression> m_neighborhood;
     std::function<void(option::Option *,
                        solution::IncumbentHolder<T_Variable, T_Expression> *)>
@@ -122,6 +127,8 @@ class Model {
         m_variable_reference.initialize();
         m_constraint_reference.initialize();
         m_constraint_type_reference.initialize();
+
+        m_flippable_variable_ptr_pairs.clear();
 
         m_neighborhood.initialize();
         m_callback = [](option::Option *,
@@ -1147,6 +1154,11 @@ class Model {
             m_neighborhood.chain().setup();
         }
 
+#ifdef _MPS_SOLVER
+        if (m_flippable_variable_ptr_pairs.size() > 0) {
+            m_neighborhood.two_flip().setup(m_flippable_variable_ptr_pairs);
+        }
+#endif
         if (a_IS_ENABLED_USER_DEFINED_MOVE) {
             m_neighborhood.user_defined().setup();
         }
@@ -1931,8 +1943,8 @@ class Model {
 
     /*************************************************************************/
     inline solution::SolutionScore evaluate(
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
-        const noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
+        noexcept {
         solution::SolutionScore score;
         this->evaluate(&score, a_MOVE);
         return score;
@@ -1948,9 +1960,10 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void evaluate(solution::SolutionScore *a_score_ptr,  //
-                            const neighborhood::Move<T_Variable, T_Expression>
-                                &a_MOVE) const noexcept {
+    constexpr void evaluate(
+        solution::SolutionScore *                           a_score_ptr,  //
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
+        noexcept {
         double total_violation = 0.0;
         double local_penalty   = 0.0;
         double global_penalty  = 0.0;
@@ -2417,6 +2430,37 @@ class Model {
                 }
             }
         }
+    }
+
+    /*************************************************************************/
+    constexpr void setup_flippable_variable_ptr_pairs(
+        const std::vector<std::pair<std::string, std::string>>
+            &a_VARIABLE_NAME_PAIRS) {
+        std::unordered_map<
+            std::string, model_component::Variable<T_Variable, T_Expression> *>
+            variable_ptrs;
+
+        for (auto &&proxy : m_variable_proxies) {
+            for (auto &&variable : proxy.flat_indexed_variables()) {
+                variable_ptrs[variable.name()] = &variable;
+            }
+        }
+
+        std::vector<
+            std::pair<model_component::Variable<T_Variable, T_Expression> *,
+                      model_component::Variable<T_Variable, T_Expression> *>>
+            flippable_variable_ptr_pairs;
+
+        for (const auto &pair : a_VARIABLE_NAME_PAIRS) {
+            if (variable_ptrs.find(pair.first) != variable_ptrs.end() &&
+                variable_ptrs.find(pair.second) != variable_ptrs.end()) {
+                flippable_variable_ptr_pairs.emplace_back(
+                    variable_ptrs[pair.first],  //
+                    variable_ptrs[pair.second]);
+            }
+        }
+
+        m_flippable_variable_ptr_pairs = flippable_variable_ptr_pairs;
     }
 
     /*********************************************************************/
@@ -2925,6 +2969,14 @@ class Model {
             return true;
         }
         return false;
+    }
+
+    /*************************************************************************/
+    inline constexpr std::vector<
+        std::pair<model_component::Variable<T_Variable, T_Expression> *,
+                  model_component::Variable<T_Variable, T_Expression> *>>
+        &flippable_variable_ptr_pairs(void) {
+        return m_flippable_variable_ptr_pairs;
     }
 
     /*************************************************************************/

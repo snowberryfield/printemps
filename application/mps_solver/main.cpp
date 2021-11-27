@@ -22,6 +22,7 @@ int main([[maybe_unused]] int argc, char *argv[]) {
                   << "[-i INITIAL_SOLUTION_FILE_NAME] "
                   << "[-m MUTABLE_VARIABLE_FILE_NAME] "
                   << "[-f FIXED_VARIABLE_FILE_NAME] "
+                  << "[-x FLIPPABLE_VARIABLE_PAIR_FILE_NAME]"
                   << "[--accept-continuous] "
                   << "[--extract-flippable-variable-pairs] "
                   << "[-s MINIMUM_COMMON_ELEMENT]"
@@ -40,6 +41,10 @@ int main([[maybe_unused]] int argc, char *argv[]) {
         std::cout  //
             << "  -f FIXED_VARIABLE_FILE_NAME: Specify fixed variable file "
                "name."
+            << std::endl;
+        std::cout  //
+            << "  -x FLIP_VARIABLE_PAIR_FILE_NAME: Specify flippable variable "
+               "pair file name."
             << std::endl;
         std::cout  //
             << "  --accept-continuous: Accept continuous variables as integer "
@@ -65,6 +70,7 @@ int main([[maybe_unused]] int argc, char *argv[]) {
     std::string initial_solution_file_name;
     std::string mutable_variable_file_name;
     std::string fixed_variable_file_name;
+    std::string flippable_variable_pair_file_name;
     bool        accept_continuous_variables      = false;
     bool        extract_flippable_variable_pairs = false;
     int         minimum_common_element           = 5;
@@ -83,6 +89,9 @@ int main([[maybe_unused]] int argc, char *argv[]) {
             i += 2;
         } else if (args[i] == "-f") {
             fixed_variable_file_name = args[i + 1];
+            i += 2;
+        } else if (args[i] == "-x") {
+            flippable_variable_pair_file_name = args[i + 1];
             i += 2;
         } else if (args[i] == "-s") {
             minimum_common_element = atoi(args[i + 1].c_str());
@@ -144,6 +153,17 @@ int main([[maybe_unused]] int argc, char *argv[]) {
         auto solution = printemps::helper::read_variable_names_and_values(
             fixed_variable_file_name);
         model.fix_variables(solution);
+    }
+
+    /**
+     * If the flippable variable pair file is given, register 2-flip moves as
+     * user-defined neighborhood moves.
+     */
+    if (!flippable_variable_pair_file_name.empty()) {
+        auto variable_name_pairs = printemps::helper::read_variable_name_pairs(
+            flippable_variable_pair_file_name);
+        option.is_enabled_user_defined_move = true;
+        model.setup_flippable_variable_ptr_pairs(variable_name_pairs);
     }
 
     /**
