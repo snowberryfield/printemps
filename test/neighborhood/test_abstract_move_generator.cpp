@@ -48,7 +48,7 @@ TEST_F(TestAbstractMoveGenerator, set_moves) {
 /*****************************************************************************/
 TEST_F(TestAbstractMoveGenerator, flags) {
     printemps::neighborhood::AbstractMoveGenerator<int, double> move_generator;
-    std::vector<int>                                            flags(10);
+    std::vector<short>                                          flags(10);
     move_generator.set_flags(flags);
     EXPECT_EQ(10, static_cast<int>(move_generator.flags().size()));
 }

@@ -168,8 +168,9 @@ class Solver {
                            m_master_option.is_enabled_aggregation_move,
                            m_master_option.is_enabled_precedence_move,
                            m_master_option.is_enabled_variable_bound_move,
-                           m_master_option.is_enabled_user_defined_move,
                            m_master_option.is_enabled_chain_move,
+                           m_master_option.is_enabled_two_flip_move,
+                           m_master_option.is_enabled_user_defined_move,
                            m_master_option.selection_mode,
                            m_master_option.verbose >= option::verbose::Outer);
 
@@ -213,12 +214,6 @@ class Solver {
             m_model_ptr->neighborhood().user_defined().enable();
         }
 
-#ifdef _MPS_SOLVER
-        if (m_model_ptr->flippable_variable_ptr_pairs().size() > 0) {
-            m_model_ptr->neighborhood().two_flip().enable();
-        }
-#endif
-
         if (m_master_option.selection_mode != option::selection_mode::None) {
             m_model_ptr->neighborhood().selection().enable();
         }
@@ -229,7 +224,8 @@ class Solver {
         m_state.has_special_neighborhood_moves =
             (m_model_ptr->neighborhood().aggregation().moves().size() +
              m_model_ptr->neighborhood().precedence().moves().size() +
-             m_model_ptr->neighborhood().variable_bound().moves().size()) > 0;
+             m_model_ptr->neighborhood().variable_bound().moves().size() +
+             m_model_ptr->neighborhood().two_flip().moves().size()) > 0;
 
         if (m_master_option.is_enabled_chain_move) {
             m_state.has_special_neighborhood_moves = true;
@@ -1500,13 +1496,11 @@ class Solver {
                 }
 
                 /// Two Flip
-#ifdef _MPS_SOLVER
-                if (m_model_ptr->flippable_variable_ptr_pairs().size() > 0) {
+                if (m_master_option.is_enabled_two_flip_move &&
+                    m_model_ptr->flippable_variable_ptr_pairs().size() > 0) {
                     m_model_ptr->neighborhood().two_flip().disable();
                     is_deactivated_special_neighborhood_move = true;
                 }
-#endif
-
             } else {
                 /**
                  * Enable the special neighborhood moves if the incumbent was
@@ -1554,9 +1548,10 @@ class Solver {
                         }
                     }
 
-#ifdef _MPS_SOLVER
-                    if (m_model_ptr->flippable_variable_ptr_pairs().size() >
-                        0) {
+                    /// Two Flip
+                    if (m_master_option.is_enabled_two_flip_move &&
+                        m_model_ptr->flippable_variable_ptr_pairs().size() >
+                            0) {
                         if (!m_model_ptr->neighborhood()
                                  .two_flip()
                                  .is_enabled()) {
@@ -1564,7 +1559,6 @@ class Solver {
                             is_activated_special_neighborhood_move = true;
                         }
                     }
-#endif
                 }
             }
 

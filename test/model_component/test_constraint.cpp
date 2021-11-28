@@ -590,7 +590,7 @@ TEST_F(TestConstraint, setup_constraint_type_binary_flow) {
     auto  constraint =
         printemps::model_component::Constraint<int, double>::create_instance();
     constraint.setup(x(0) + x(1) + x(2) - x(3) - x(4) - x(5),
-                     printemps::model_component::ConstraintSense::Greater);
+                     printemps::model_component::ConstraintSense::Equal);
     constraint.setup_constraint_type();
     EXPECT_TRUE(constraint.is_binary_flow());
 }
@@ -602,7 +602,7 @@ TEST_F(TestConstraint, setup_constraint_type_integer_flow) {
     auto  constraint =
         printemps::model_component::Constraint<int, double>::create_instance();
     constraint.setup(x(0) + x(1) + x(2) - x(3) - x(4) - x(5),
-                     printemps::model_component::ConstraintSense::Greater);
+                     printemps::model_component::ConstraintSense::Equal);
     constraint.setup_constraint_type();
     EXPECT_TRUE(constraint.is_integer_flow());
 }
