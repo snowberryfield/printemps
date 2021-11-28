@@ -1856,16 +1856,13 @@ class Model {
         const std::vector<model_component::Variable<T_Variable, T_Expression> *>
             &a_VARIABLE_PTRS) const noexcept {
         for (const auto &variable_ptr : a_VARIABLE_PTRS) {
-            auto coefficient =
+            const auto coefficient =
                 variable_ptr->objective_sensitivity() * this->sign();
-            if (coefficient > 0 && variable_ptr->has_lower_bound_margin()) {
-                variable_ptr->set_is_objective_improvable(true);
-            } else if (coefficient < 0 &&
-                       variable_ptr->has_upper_bound_margin()) {
-                variable_ptr->set_is_objective_improvable(true);
-            } else {
-                variable_ptr->set_is_objective_improvable(false);
-            }
+            const auto is_objective_improvable =
+                (coefficient > 0 && variable_ptr->has_lower_bound_margin()) ||
+                (coefficient < 0 && variable_ptr->has_upper_bound_margin());
+
+            variable_ptr->set_is_objective_improvable(is_objective_improvable);
         }
     }
 
@@ -1883,49 +1880,25 @@ class Model {
             if (constraint_ptr->violation_value() < constant::EPSILON) {
                 continue;
             }
-            const auto &sensitivities =
-                constraint_ptr->expression().sensitivities();
-            const auto &constraint_value = constraint_ptr->constraint_value();
 
-            if (constraint_value > constant::EPSILON &&
-                constraint_ptr->is_less_or_equal()) {
-                for (const auto &sensitivity : sensitivities) {
-                    const auto &variable_ptr = sensitivity.first;
-                    const auto &coefficient  = sensitivity.second;
-
-                    if (variable_ptr->is_feasibility_improvable() ||
-                        variable_ptr->is_fixed()) {
-                        continue;
-                    }
-
-                    if (coefficient > 0 &&
-                        variable_ptr->has_lower_bound_margin()) {
-                        variable_ptr->set_is_feasibility_improvable(true);
-
-                    } else if (coefficient < 0 &&
-                               variable_ptr->has_upper_bound_margin()) {
-                        variable_ptr->set_is_feasibility_improvable(true);
-                    }
+            for (const auto &sensitivity :
+                 constraint_ptr->expression().sensitivities()) {
+                if (sensitivity.first->is_feasibility_improvable() ||
+                    sensitivity.first->is_fixed()) {
+                    continue;
                 }
 
-            } else if (constraint_value < -constant::EPSILON &&
-                       constraint_ptr->is_greater_or_equal()) {
-                for (const auto &sensitivity : sensitivities) {
-                    const auto &variable_ptr = sensitivity.first;
-                    const auto &coefficient  = sensitivity.second;
+                const auto coefficient =
+                    (constraint_ptr->constraint_value() > constant::EPSILON &&
+                     constraint_ptr->is_less_or_equal())
+                        ? sensitivity.second
+                        : -sensitivity.second;
 
-                    if (variable_ptr->is_feasibility_improvable() ||
-                        variable_ptr->is_fixed()) {
-                        continue;
-                    }
-
-                    if (coefficient > 0 &&
-                        variable_ptr->has_upper_bound_margin()) {
-                        variable_ptr->set_is_feasibility_improvable(true);
-                    } else if (coefficient < 0 &&
-                               variable_ptr->has_lower_bound_margin()) {
-                        variable_ptr->set_is_feasibility_improvable(true);
-                    }
+                if ((coefficient > 0 &&
+                     sensitivity.first->has_lower_bound_margin()) ||
+                    (coefficient < 0 &&
+                     sensitivity.first->has_upper_bound_margin())) {
+                    sensitivity.first->set_is_feasibility_improvable_or(true);
                 }
             }
         }
