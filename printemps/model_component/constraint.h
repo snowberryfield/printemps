@@ -516,7 +516,8 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
                 }
 
                 if (is_plus_or_minus_one_coefficient) {
-                    bool has_only_binary_variables = true;
+                    bool has_only_binary_variables  = true;
+                    bool has_only_integer_variables = true;
                     for (const auto &sensitivity :
                          m_expression.sensitivities()) {
                         if ((sensitivity.first->sense() !=
@@ -524,13 +525,20 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
                             (sensitivity.first->sense() !=
                              VariableSense::Selection)) {
                             has_only_binary_variables = false;
+                        }
+                        if (sensitivity.first->sense() !=
+                            VariableSense::Integer) {
+                            has_only_integer_variables = false;
+                        }
+                        if (!has_only_binary_variables &&
+                            !has_only_integer_variables) {
                             break;
                         }
                     }
                     if (has_only_binary_variables) {
                         m_is_binary_flow = true;
                         return;
-                    } else {
+                    } else if (has_only_integer_variables) {
                         m_is_integer_flow = true;
                         return;
                     }
