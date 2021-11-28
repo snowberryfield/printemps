@@ -281,9 +281,33 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
+    inline constexpr void set_is_objective_improvable_or(
+        const bool a_IS_OBJECTIVE_IMPROVABLE) noexcept {
+        m_is_objective_improvable |= a_IS_OBJECTIVE_IMPROVABLE;
+    }
+
+    /*************************************************************************/
+    inline constexpr void set_is_objective_improvable_and(
+        const bool a_IS_OBJECTIVE_IMPROVABLE) noexcept {
+        m_is_objective_improvable &= a_IS_OBJECTIVE_IMPROVABLE;
+    }
+
+    /*************************************************************************/
     inline constexpr void set_is_feasibility_improvable(
         const bool a_IS_FEASIBILITY_IMPROVABLE) noexcept {
         m_is_feasibility_improvable = a_IS_FEASIBILITY_IMPROVABLE;
+    }
+
+    /*************************************************************************/
+    inline constexpr void set_is_feasibility_improvable_or(
+        const bool a_IS_FEASIBILITY_IMPROVABLE) noexcept {
+        m_is_feasibility_improvable |= a_IS_FEASIBILITY_IMPROVABLE;
+    }
+
+    /*************************************************************************/
+    inline constexpr void set_is_feasibility_improvable_and(
+        const bool a_IS_FEASIBILITY_IMPROVABLE) noexcept {
+        m_is_feasibility_improvable &= a_IS_FEASIBILITY_IMPROVABLE;
     }
 
     /*************************************************************************/

@@ -29,27 +29,28 @@ class ChainMoveGenerator
     /*************************************************************************/
     void setup(void) {
         auto move_updater =                                     //
-            [this](auto *     a_moves,                          //
+            [this](auto *     a_moves_ptr,                      //
                    auto *     a_flags,                          //
                    const bool a_ACCEPT_ALL,                     //
                    const bool a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
                    const bool a_ACCEPT_FEASIBILITY_IMPROVABLE,  //
                    [[maybe_unused]] const bool a_IS_ENABLED_PARALLEL) {
-                const int MOVES_SIZE = a_moves->size();
+                const int MOVES_SIZE = a_moves_ptr->size();
 #ifdef _OPENMP
 #pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
 #endif
                 for (auto i = 0; i < MOVES_SIZE; i++) {
                     (*a_flags)[i] = 1;
-                    if (!(*a_moves)[i].is_available) {
+                    if (!(*a_moves_ptr)[i].is_available) {
                         (*a_flags)[i] = 0;
                         continue;
                     }
-                    if (neighborhood::has_fixed_variable((*a_moves)[i])) {
+                    if (neighborhood::has_fixed_variable((*a_moves_ptr)[i])) {
                         (*a_flags)[i] = 0;
                         continue;
                     }
-                    for (const auto &alteration : (*a_moves)[i].alterations) {
+                    for (const auto &alteration :
+                         (*a_moves_ptr)[i].alterations) {
                         if (alteration.first->value() == alteration.second) {
                             (*a_flags)[i] = 0;
                             break;
@@ -64,13 +65,13 @@ class ChainMoveGenerator
                     } else {
                         if (a_ACCEPT_OBJECTIVE_IMPROVABLE &&
                             neighborhood::has_objective_improvable_variable(
-                                (*a_moves)[i])) {
+                                (*a_moves_ptr)[i])) {
                             continue;
                         }
 
                         if (a_ACCEPT_FEASIBILITY_IMPROVABLE &&
                             neighborhood::has_feasibility_improvable_variable(
-                                (*a_moves)[i])) {
+                                (*a_moves_ptr)[i])) {
                             continue;
                         }
                         (*a_flags)[i] = 0;
