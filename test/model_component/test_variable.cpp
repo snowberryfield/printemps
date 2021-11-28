@@ -281,6 +281,28 @@ TEST_F(TestVariable, set_is_objective_improvable) {
 }
 
 /*****************************************************************************/
+TEST_F(TestVariable, set_is_objective_improvable_or) {
+    auto variable =
+        printemps::model_component::Variable<int, double>::create_instance();
+    EXPECT_FALSE(variable.is_objective_improvable());
+    variable.set_is_objective_improvable_or(true);
+    EXPECT_TRUE(variable.is_objective_improvable());
+    variable.set_is_objective_improvable_or(false);
+    EXPECT_TRUE(variable.is_objective_improvable());
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, set_is_objective_improvable_and) {
+    auto variable =
+        printemps::model_component::Variable<int, double>::create_instance();
+    EXPECT_FALSE(variable.is_objective_improvable());
+    variable.set_is_objective_improvable(true);
+    EXPECT_TRUE(variable.is_objective_improvable());
+    variable.set_is_objective_improvable_and(false);
+    EXPECT_FALSE(variable.is_objective_improvable());
+}
+
+/*****************************************************************************/
 TEST_F(TestVariable, is_objective_improvable) {
     /// This method is tested in set_is_objective_improvable().
 }
@@ -293,6 +315,28 @@ TEST_F(TestVariable, set_is_feasibility_improvable) {
     variable.set_is_feasibility_improvable(true);
     EXPECT_TRUE(variable.is_feasibility_improvable());
     variable.set_is_feasibility_improvable(false);
+    EXPECT_FALSE(variable.is_feasibility_improvable());
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, set_is_feasibility_improvable_or) {
+    auto variable =
+        printemps::model_component::Variable<int, double>::create_instance();
+    EXPECT_FALSE(variable.is_feasibility_improvable());
+    variable.set_is_feasibility_improvable_or(true);
+    EXPECT_TRUE(variable.is_feasibility_improvable());
+    variable.set_is_feasibility_improvable_or(false);
+    EXPECT_TRUE(variable.is_feasibility_improvable());
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, set_is_feasibility_improvable_and) {
+    auto variable =
+        printemps::model_component::Variable<int, double>::create_instance();
+    EXPECT_FALSE(variable.is_feasibility_improvable());
+    variable.set_is_feasibility_improvable(true);
+    EXPECT_TRUE(variable.is_feasibility_improvable());
+    variable.set_is_feasibility_improvable_and(false);
     EXPECT_FALSE(variable.is_feasibility_improvable());
 }
 
