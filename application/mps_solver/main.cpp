@@ -25,7 +25,7 @@ int main([[maybe_unused]] int argc, char *argv[]) {
                   << "[-x FLIPPABLE_VARIABLE_PAIR_FILE_NAME]"
                   << "[--accept-continuous] "
                   << "[--extract-flippable-variable-pairs] "
-                  << "[-s MINIMUM_COMMON_ELEMENT]"
+                  << "[-s MINIMUM_COMMON_ELEMENT] "
                   << "mps_file" << std::endl;
         std::cout << std::endl;
         std::cout  //
@@ -55,9 +55,9 @@ int main([[maybe_unused]] int argc, char *argv[]) {
                "variable pairs."
             << std::endl;
         std::cout  //
-            << "  --s MINIMUM_COMMON_ELEMENT: minimum common element between "
-               "two constraints, which is used as the threshold for extracting "
-               "flippable variable pairs. (default: 5)"
+            << "  --s MINIMUM_COMMON_ELEMENT: Specify the number of minimum "
+               "common element between two constraints, which is used as the "
+               "threshold for extracting flippable variable pairs. (default: 5)"
             << std::endl;
         exit(1);
     }
