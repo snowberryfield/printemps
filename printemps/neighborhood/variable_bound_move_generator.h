@@ -49,28 +49,28 @@ class VariableBoundMoveGenerator
         this->m_flags.resize(4 * BINOMIALS_SIZE);
 
         for (auto i = 0; i < BINOMIALS_SIZE; i++) {
-            this->m_moves[4 * i].sense = MoveSense::VariableBound;
-            this->m_moves[4 * i].alterations.emplace_back(
-                binomials[i].variable_ptr_first, 0);
-            this->m_moves[4 * i].alterations.emplace_back(
-                binomials[i].variable_ptr_second, 0);
-            this->m_moves[4 * i].is_univariable_move = false;
+            auto &move = this->m_moves[4 * i];
+            move.sense = MoveSense::VariableBound;
+            move.alterations.emplace_back(binomials[i].variable_ptr_first, 0);
+            move.alterations.emplace_back(binomials[i].variable_ptr_second, 0);
+            move.is_univariable_move = false;
+            move.is_selection_move   = false;
 
             utility::update_union_set(
-                &(this->m_moves[4 * i].related_constraint_ptrs),
+                &(move.related_constraint_ptrs),
                 binomials[i].variable_ptr_first->related_constraint_ptrs());
 
             utility::update_union_set(
-                &(this->m_moves[4 * i].related_constraint_ptrs),
+                &(move.related_constraint_ptrs),
                 binomials[i].variable_ptr_second->related_constraint_ptrs());
 
-            this->m_moves[4 * i].is_special_neighborhood_move = true;
-            this->m_moves[4 * i].is_available                 = true;
-            this->m_moves[4 * i].overlap_rate                 = 0.0;
+            move.is_special_neighborhood_move = true;
+            move.is_available                 = true;
+            move.overlap_rate                 = 0.0;
 
-            this->m_moves[4 * i + 1] = this->m_moves[4 * i];
-            this->m_moves[4 * i + 2] = this->m_moves[4 * i];
-            this->m_moves[4 * i + 3] = this->m_moves[4 * i];
+            this->m_moves[4 * i + 1] = move;
+            this->m_moves[4 * i + 2] = move;
+            this->m_moves[4 * i + 3] = move;
         }
 
         /**
@@ -78,7 +78,7 @@ class VariableBoundMoveGenerator
          */
         auto move_updater =  //
             [this, binomials, BINOMIALS_SIZE](
-                auto *                      a_moves,                          //
+                auto *                      a_moves_ptr,                      //
                 auto *                      a_flags,                          //
                 const bool                  a_ACCEPT_ALL,                     //
                 const bool                  a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
@@ -90,7 +90,7 @@ class VariableBoundMoveGenerator
                 for (auto i = 0; i < BINOMIALS_SIZE; i++) {
                     {
                         auto  index       = 4 * i;
-                        auto &alterations = (*a_moves)[index].alterations;
+                        auto &alterations = (*a_moves_ptr)[index].alterations;
 
                         T_Variable target = 0;
                         double     target_temp =
@@ -121,7 +121,7 @@ class VariableBoundMoveGenerator
 
                     {
                         auto  index       = 4 * i + 1;
-                        auto &alterations = (*a_moves)[index].alterations;
+                        auto &alterations = (*a_moves_ptr)[index].alterations;
 
                         T_Variable target = 0;
                         double     target_temp =
@@ -152,7 +152,7 @@ class VariableBoundMoveGenerator
 
                     {
                         auto  index       = 4 * i + 2;
-                        auto &alterations = (*a_moves)[index].alterations;
+                        auto &alterations = (*a_moves_ptr)[index].alterations;
 
                         T_Variable target = 0;
                         double     target_temp =
@@ -183,7 +183,7 @@ class VariableBoundMoveGenerator
 
                     {
                         auto  index       = 4 * i + 3;
-                        auto &alterations = (*a_moves)[index].alterations;
+                        auto &alterations = (*a_moves_ptr)[index].alterations;
 
                         T_Variable target = 0;
                         double     target_temp =
@@ -213,21 +213,21 @@ class VariableBoundMoveGenerator
                     }
                 }
 
-                const int MOVES_SIZE = a_moves->size();
+                const int MOVES_SIZE = a_moves_ptr->size();
 #ifdef _OPENMP
 #pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
 #endif
                 for (auto i = 0; i < MOVES_SIZE; i++) {
                     (*a_flags)[i] = 1;
-                    if (!(*a_moves)[i].is_available) {
+                    if (!(*a_moves_ptr)[i].is_available) {
                         (*a_flags)[i] = 0;
                         continue;
                     }
-                    if (neighborhood::has_fixed_variable((*a_moves)[i])) {
+                    if (neighborhood::has_fixed_variable((*a_moves_ptr)[i])) {
                         (*a_flags)[i] = 0;
                         continue;
                     }
-                    if (neighborhood::has_bound_violation((*a_moves)[i])) {
+                    if (neighborhood::has_bound_violation((*a_moves_ptr)[i])) {
                         (*a_flags)[i] = 0;
                         continue;
                     }
@@ -236,13 +236,13 @@ class VariableBoundMoveGenerator
                     } else {
                         if (a_ACCEPT_OBJECTIVE_IMPROVABLE &&
                             neighborhood::has_objective_improvable_variable(
-                                (*a_moves)[i])) {
+                                (*a_moves_ptr)[i])) {
                             continue;
                         }
 
                         if (a_ACCEPT_FEASIBILITY_IMPROVABLE &&
                             neighborhood::has_feasibility_improvable_variable(
-                                (*a_moves)[i])) {
+                                (*a_moves_ptr)[i])) {
                             continue;
                         }
                         (*a_flags)[i] = 0;

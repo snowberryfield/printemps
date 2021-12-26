@@ -70,7 +70,10 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     bool m_is_set_covering;
     bool m_is_cardinality;
     bool m_is_invariant_knapsack;
+    bool m_is_multiple_covering;
     bool m_is_equation_knapsack;
+    bool m_is_binary_flow;
+    bool m_is_integer_flow;
     bool m_is_bin_packing;
     bool m_is_knapsack;
     bool m_is_integer_knapsack;
@@ -79,7 +82,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     bool m_is_intermediate;
     bool m_is_gf2;
     bool m_is_general_linear;
-    bool m_is_binary;
+    bool m_has_only_binary_coefficient;
 
     bool m_has_aux_lower_bound;
     bool m_has_aux_upper_bound;
@@ -229,7 +232,10 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         m_is_set_covering       = false;
         m_is_cardinality        = false;
         m_is_invariant_knapsack = false;
+        m_is_multiple_covering  = false;
         m_is_equation_knapsack  = false;
+        m_is_binary_flow        = false;
+        m_is_integer_flow       = false;
         m_is_bin_packing        = false;
         m_is_knapsack           = false;
         m_is_integer_knapsack   = false;
@@ -239,7 +245,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         m_is_gf2                = false;
         m_is_general_linear     = false;
 
-        m_is_binary = false;
+        m_has_only_binary_coefficient = false;
 
         m_has_aux_lower_bound = false;
         m_has_aux_upper_bound = false;
@@ -383,22 +389,24 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         /// Aggregation (and Set Partitioning)
         if (m_expression.sensitivities().size() == 2 &&
             m_sense == ConstraintSense::Equal) {
-            m_is_aggregation = true;
-            bool is_binary   = true;
+            m_is_aggregation                 = true;
+            bool has_only_binary_coefficient = true;
             for (const auto &sensitivity : m_expression.sensitivities()) {
                 if ((sensitivity.first->sense() != VariableSense::Binary) &&
                     (sensitivity.first->sense() != VariableSense::Selection)) {
-                    is_binary = false;
+                    has_only_binary_coefficient = false;
                     break;
                 }
                 if (sensitivity.second != 1) {
-                    is_binary = false;
+                    has_only_binary_coefficient = false;
                     break;
                 }
             }
 
-            if (is_binary && m_expression.constant_value() == -1) {
-                m_is_set_partitioning = true;
+            if (has_only_binary_coefficient &&
+                m_expression.constant_value() == -1) {
+                m_has_only_binary_coefficient = true;
+                m_is_set_partitioning         = true;
             }
             return;
         }
@@ -436,20 +444,20 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         /// Set Partitioning or Set Packing, Set Covering, Cardinality,
         /// Invariant Knapsack.
         {
-            bool is_binary = true;
+            bool has_only_binary_coefficient = true;
             for (const auto &sensitivity : m_expression.sensitivities()) {
                 if ((sensitivity.first->sense() != VariableSense::Binary) &&
                     (sensitivity.first->sense() != VariableSense::Selection)) {
-                    is_binary = false;
+                    has_only_binary_coefficient = false;
                     break;
                 }
                 if (sensitivity.second != 1) {
-                    is_binary = false;
+                    has_only_binary_coefficient = false;
                     break;
                 }
             }
-            if (is_binary) {
-                m_is_binary = true;
+            if (has_only_binary_coefficient) {
+                m_has_only_binary_coefficient = true;
                 /// Set Partitioning
                 if (m_expression.constant_value() == -1 &&
                     m_sense == ConstraintSense::Equal) {
@@ -484,8 +492,57 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
                     m_is_invariant_knapsack = true;
                     return;
                 }
+
+                /// Multiple Covering
+                if (m_expression.constant_value() <= -2 &&
+                    m_sense == ConstraintSense::Greater) {
+                    m_is_multiple_covering = true;
+                    return;
+                }
             } else {
-                m_is_binary = false;
+                m_has_only_binary_coefficient = false;
+            }
+        }
+
+        /// Binary Flow and Integer Flow
+        {
+            if (m_sense == ConstraintSense::Equal) {
+                bool is_plus_or_minus_one_coefficient = true;
+                for (const auto &sensitivity : m_expression.sensitivities()) {
+                    if (abs(sensitivity.second) != 1) {
+                        is_plus_or_minus_one_coefficient = false;
+                        break;
+                    }
+                }
+
+                if (is_plus_or_minus_one_coefficient) {
+                    bool has_only_binary_variables  = true;
+                    bool has_only_integer_variables = true;
+                    for (const auto &sensitivity :
+                         m_expression.sensitivities()) {
+                        if ((sensitivity.first->sense() !=
+                             VariableSense::Binary) &&
+                            (sensitivity.first->sense() !=
+                             VariableSense::Selection)) {
+                            has_only_binary_variables = false;
+                        }
+                        if (sensitivity.first->sense() !=
+                            VariableSense::Integer) {
+                            has_only_integer_variables = false;
+                        }
+                        if (!has_only_binary_variables &&
+                            !has_only_integer_variables) {
+                            break;
+                        }
+                    }
+                    if (has_only_binary_variables) {
+                        m_is_binary_flow = true;
+                        return;
+                    } else if (has_only_integer_variables) {
+                        m_is_integer_flow = true;
+                        return;
+                    }
+                }
             }
         }
 
@@ -937,6 +994,21 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
+    inline constexpr bool is_multiple_covering(void) const noexcept {
+        return m_is_multiple_covering;
+    }
+
+    /*************************************************************************/
+    inline constexpr bool is_binary_flow(void) const noexcept {
+        return m_is_binary_flow;
+    }
+
+    /*************************************************************************/
+    inline constexpr bool is_integer_flow(void) const noexcept {
+        return m_is_integer_flow;
+    }
+
+    /*************************************************************************/
     inline constexpr bool is_equation_knapsack(void) const noexcept {
         return m_is_equation_knapsack;
     }
@@ -982,8 +1054,8 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr bool is_binary(void) const noexcept {
-        return m_is_binary;
+    inline constexpr bool has_only_binary_coefficient(void) const noexcept {
+        return m_has_only_binary_coefficient;
     }
 
     /*************************************************************************/

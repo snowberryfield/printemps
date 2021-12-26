@@ -572,6 +572,42 @@ TEST_F(TestConstraint, setup_constraint_type_invariant_knapsack) {
 }
 
 /*****************************************************************************/
+TEST_F(TestConstraint, setup_constraint_type_multiple_covering) {
+    printemps::model::Model<int, double> model;
+    auto& x = model.create_variables("x", 10, 0, 1);
+    auto  constraint =
+        printemps::model_component::Constraint<int, double>::create_instance();
+    constraint.setup(x.sum() - 5,
+                     printemps::model_component::ConstraintSense::Greater);
+    constraint.setup_constraint_type();
+    EXPECT_TRUE(constraint.is_multiple_covering());
+}
+
+/*****************************************************************************/
+TEST_F(TestConstraint, setup_constraint_type_binary_flow) {
+    printemps::model::Model<int, double> model;
+    auto& x = model.create_variables("x", 10, 0, 1);
+    auto  constraint =
+        printemps::model_component::Constraint<int, double>::create_instance();
+    constraint.setup(x(0) + x(1) + x(2) - x(3) - x(4) - x(5),
+                     printemps::model_component::ConstraintSense::Equal);
+    constraint.setup_constraint_type();
+    EXPECT_TRUE(constraint.is_binary_flow());
+}
+
+/*****************************************************************************/
+TEST_F(TestConstraint, setup_constraint_type_integer_flow) {
+    printemps::model::Model<int, double> model;
+    auto& x = model.create_variables("x", 10, 0, 10);
+    auto  constraint =
+        printemps::model_component::Constraint<int, double>::create_instance();
+    constraint.setup(x(0) + x(1) + x(2) - x(3) - x(4) - x(5),
+                     printemps::model_component::ConstraintSense::Equal);
+    constraint.setup_constraint_type();
+    EXPECT_TRUE(constraint.is_integer_flow());
+}
+
+/*****************************************************************************/
 TEST_F(TestConstraint, setup_constraint_type_equation_knapsack) {
     printemps::model::Model<int, double> model;
     auto coefficients = printemps::utility::sequence(10);
@@ -1138,7 +1174,7 @@ TEST_F(TestConstraint, setup_constraint_type_general_linear) {
 
     auto constraint =
         printemps::model_component::Constraint<int, double>::create_instance();
-    constraint.setup(x + y.sum() - 50,
+    constraint.setup(2 * x + y.sum() - 50,
                      printemps::model_component::ConstraintSense::Equal);
     constraint.setup_constraint_type();
     EXPECT_TRUE(constraint.is_general_linear());
@@ -1893,6 +1929,21 @@ TEST_F(TestConstraint, is_cardinality) {
 /*****************************************************************************/
 TEST_F(TestConstraint, is_invariant_knapsack) {
     /// This method is tested in setup_constraint_type_invariant_knapsack().
+}
+
+/*****************************************************************************/
+TEST_F(TestConstraint, is_multiple_covering) {
+    /// This method is tested in setup_constraint_type_multiple_covering().
+}
+
+/*****************************************************************************/
+TEST_F(TestConstraint, is_binary_flow) {
+    /// This method is tested in setup_constraint_type_binary_flow().
+}
+
+/*****************************************************************************/
+TEST_F(TestConstraint, is_integer_flow) {
+    /// This method is tested in setup_constraint_type_integer_flow().
 }
 
 /*****************************************************************************/

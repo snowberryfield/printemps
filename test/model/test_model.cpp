@@ -933,7 +933,9 @@ TEST_F(TestModel, setup_is_enabled_fast_evaluation) {
 
         auto move_updater =
             [&x]([[maybe_unused]] std::vector<
-                 printemps::neighborhood::Move<int, double>>* a_moves) { ; };
+                 printemps::neighborhood::Move<int, double>>* a_moves_ptr) {
+                ;
+            };
 
         model.neighborhood().user_defined().set_move_updater(move_updater);
         model.neighborhood().user_defined().enable();
@@ -1129,6 +1131,15 @@ TEST_F(TestModel, categorize_constraints) {
     auto& invariant_knapsack = model.create_constraint("invariant_knapsack");
     invariant_knapsack       = z.sum() <= 5;
 
+    auto& multiple_covering = model.create_constraint("multiple_covering");
+    multiple_covering       = z.sum() >= 5;
+
+    auto& binary_flow = model.create_constraint("binary_flow");
+    binary_flow       = z(0) + z(1) + z(2) == z(3) + z(4) + z(5);
+
+    auto& integer_flow = model.create_constraint("integer_flow");
+    integer_flow       = r(0) + r(1) + r(2) == r(3) + r(4) + r(5);
+
     auto& equation_knapsack = model.create_constraint("equation_knapsack");
     equation_knapsack       = z.dot(coefficients) == 30;
 
@@ -1154,7 +1165,7 @@ TEST_F(TestModel, categorize_constraints) {
     intermediate       = 2 * z(0) + 3 * z(1) == x;
 
     auto& general_liner = model.create_constraint("general_liner");
-    general_liner       = x + r.sum() == 50;
+    general_liner       = 2 * x + r.sum() == 50;
 
     auto& nonlinear = model.create_constraint("nonlinear");
     std::function<double(const printemps::neighborhood::Move<int, double>&)> f =
@@ -1172,9 +1183,9 @@ TEST_F(TestModel, categorize_constraints) {
     model.categorize_variables();
     model.categorize_constraints();
 
-    EXPECT_EQ(25, model.number_of_constraints());
+    EXPECT_EQ(28, model.number_of_constraints());
     EXPECT_EQ(1, model.number_of_selection_constraints());
-    EXPECT_EQ(23, model.number_of_enabled_constraints());
+    EXPECT_EQ(26, model.number_of_enabled_constraints());
     EXPECT_EQ(2, model.number_of_disabled_constraints());
 
     auto reference = model.constraint_type_reference();
@@ -1186,6 +1197,9 @@ TEST_F(TestModel, categorize_constraints) {
     EXPECT_EQ(1, static_cast<int>(reference.set_packing_ptrs.size()));
     EXPECT_EQ(1, static_cast<int>(reference.set_covering_ptrs.size()));
     EXPECT_EQ(1, static_cast<int>(reference.invariant_knapsack_ptrs.size()));
+    EXPECT_EQ(1, static_cast<int>(reference.multiple_covering_ptrs.size()));
+    EXPECT_EQ(1, static_cast<int>(reference.binary_flow_ptrs.size()));
+    EXPECT_EQ(1, static_cast<int>(reference.integer_flow_ptrs.size()));
     EXPECT_EQ(1, static_cast<int>(reference.equation_knapsack_ptrs.size()));
     EXPECT_EQ(2, static_cast<int>(reference.bin_packing_ptrs.size()));
     EXPECT_EQ(2, static_cast<int>(reference.knapsack_ptrs.size()));
@@ -2887,6 +2901,91 @@ TEST_F(TestModel, number_of_enabled_constraints) {
 /*****************************************************************************/
 TEST_F(TestModel, number_of_disabled_constraints) {
     /// This method is tested in categorize_constraints().
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, has_chain_move_effective_constraints) {
+    /// None
+    {
+        printemps::model::Model<int, double> model;
+
+        [[maybe_unused]] auto& x = model.create_variables("x", 10, 0, 1);
+        model.categorize_variables();
+        model.categorize_constraints();
+        EXPECT_FALSE(model.has_chain_move_effective_constraints());
+    }
+
+    /// Set Partitioning
+    {
+        printemps::model::Model<int, double> model;
+
+        auto&                  x = model.create_variables("x", 10, 0, 1);
+        [[maybe_unused]] auto& f = model.create_constraint("f", x.sum() == 1);
+
+        model.categorize_variables();
+        model.categorize_constraints();
+        EXPECT_TRUE(model.has_chain_move_effective_constraints());
+    }
+
+    /// Set Packing
+    {
+        printemps::model::Model<int, double> model;
+
+        auto&                  x = model.create_variables("x", 10, 0, 1);
+        [[maybe_unused]] auto& f = model.create_constraint("f", x.sum() <= 1);
+
+        model.categorize_variables();
+        model.categorize_constraints();
+        EXPECT_TRUE(model.has_chain_move_effective_constraints());
+    }
+
+    /// Set Covering
+    {
+        printemps::model::Model<int, double> model;
+
+        auto&                  x = model.create_variables("x", 10, 0, 1);
+        [[maybe_unused]] auto& f = model.create_constraint("f", x.sum() >= 1);
+
+        model.categorize_variables();
+        model.categorize_constraints();
+        EXPECT_TRUE(model.has_chain_move_effective_constraints());
+    }
+
+    /// Cardinality
+    {
+        printemps::model::Model<int, double> model;
+
+        auto&                  x = model.create_variables("x", 10, 0, 1);
+        [[maybe_unused]] auto& f = model.create_constraint("f", x.sum() == 5);
+
+        model.categorize_variables();
+        model.categorize_constraints();
+        EXPECT_TRUE(model.has_chain_move_effective_constraints());
+    }
+
+    /// Invariant Knapsack
+    {
+        printemps::model::Model<int, double> model;
+
+        auto&                  x = model.create_variables("x", 10, 0, 1);
+        [[maybe_unused]] auto& f = model.create_constraint("f", x.sum() <= 5);
+
+        model.categorize_variables();
+        model.categorize_constraints();
+        EXPECT_TRUE(model.has_chain_move_effective_constraints());
+    }
+
+    /// Multiple Covering
+    {
+        printemps::model::Model<int, double> model;
+
+        auto&                  x = model.create_variables("x", 10, 0, 1);
+        [[maybe_unused]] auto& f = model.create_constraint("f", x.sum() >= 5);
+
+        model.categorize_variables();
+        model.categorize_constraints();
+        EXPECT_TRUE(model.has_chain_move_effective_constraints());
+    }
 }
 
 /*****************************************************************************/

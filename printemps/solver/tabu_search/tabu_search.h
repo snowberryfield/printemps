@@ -39,6 +39,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
      * Start to measure computational time.
      */
     utility::TimeKeeper time_keeper;
+    time_keeper.set_start_time();
 
     /**
      * Copy arguments as local variables.
@@ -124,8 +125,7 @@ TabuSearchResult<T_Variable, T_Expression> solve(
 
     int local_augmented_incumbent_update_count = 0;
 
-    TabuSearchTerminationStatus termination_status =
-        TabuSearchTerminationStatus::ITERATION_OVER;
+    auto termination_status = TabuSearchTerminationStatus::ITERATION_OVER;
 
     neighborhood::Move<T_Variable, T_Expression> previous_move;
     neighborhood::Move<T_Variable, T_Expression> current_move;
@@ -372,7 +372,8 @@ TabuSearchResult<T_Variable, T_Expression> solve(
 
             total_scores[i] =
                 trial_solution_scores[i].local_augmented_objective +
-                trial_move_scores[i].frequency_penalty;
+                trial_move_scores[i].frequency_penalty +
+                trial_move_scores[i].lagrangian_penalty;
 
             /**
              * If the move is "tabu", it will be set lower priorities in
@@ -584,7 +585,9 @@ TabuSearchResult<T_Variable, T_Expression> solve(
                  previous_move.alterations.front().second !=
                      current_move.alterations.front().second) ||
                 (previous_move.sense == neighborhood::MoveSense::Chain &&
-                 current_move.sense == neighborhood::MoveSense::Chain)) {
+                 current_move.sense == neighborhood::MoveSense::Chain) ||
+                (previous_move.sense == neighborhood::MoveSense::TwoFlip &&
+                 current_move.sense == neighborhood::MoveSense::TwoFlip)) {
                 Move_T chain_move;
                 if (previous_move.alterations.front().first <
                     current_move.alterations.front().first)

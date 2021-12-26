@@ -17,6 +17,7 @@ enum class MoveSense {
     Precedence,     //
     VariableBound,  //
     Chain,          //
+    TwoFlip,        //
     UserDefined,    //
     General
 };

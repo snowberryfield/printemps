@@ -13,12 +13,12 @@ template <class T_Variable, class T_Expression>
 class AbstractMoveGenerator {
    protected:
     std::function<void(std::vector<Move<T_Variable, T_Expression>> *,
-                       std::vector<int> *, const bool, const bool, const bool,
+                       std::vector<short> *, const bool, const bool, const bool,
                        const bool)>
         m_move_updater;
 
     std::vector<Move<T_Variable, T_Expression>> m_moves;
-    std::vector<int>                            m_flags;
+    std::vector<short>                          m_flags;
     bool                                        m_is_enabled;
 
    public:
@@ -35,7 +35,7 @@ class AbstractMoveGenerator {
     /*************************************************************************/
     void initialize(void) {
         m_move_updater = [](std::vector<Move<T_Variable, T_Expression>> *,  //
-                            std::vector<int> *,                             //
+                            std::vector<short> *,                           //
                             const bool,                                     //
                             const bool,                                     //
                             const bool,                                     //
@@ -80,17 +80,17 @@ class AbstractMoveGenerator {
     }
 
     /*************************************************************************/
-    inline constexpr std::vector<int> &flags(void) {
+    inline constexpr std::vector<short> &flags(void) {
         return m_flags;
     }
 
     /*************************************************************************/
-    inline constexpr const std::vector<int> &flags(void) const {
+    inline constexpr const std::vector<short> &flags(void) const {
         return m_flags;
     }
 
     /*************************************************************************/
-    inline constexpr void set_flags(const std::vector<int> &a_FLAGS) {
+    inline constexpr void set_flags(const std::vector<short> &a_FLAGS) {
         /**
          * NOTE: This method is for test.
          */

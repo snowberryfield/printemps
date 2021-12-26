@@ -51,15 +51,16 @@ class BinaryMoveGenerator
         this->m_flags.resize(VARIABLES_SIZE);
 
         for (auto i = 0; i < VARIABLES_SIZE; i++) {
-            this->m_moves[i].sense = MoveSense::Binary;
-            this->m_moves[i].related_constraint_ptrs =
+            auto &move = this->m_moves[i];
+            move.sense = MoveSense::Binary;
+            move.related_constraint_ptrs =
                 mutable_variable_ptrs[i]->related_constraint_ptrs();
-            this->m_moves[i].alterations.emplace_back(mutable_variable_ptrs[i],
-                                                      0);
-            this->m_moves[i].is_univariable_move          = true;
-            this->m_moves[i].is_special_neighborhood_move = false;
-            this->m_moves[i].is_available                 = true;
-            this->m_moves[i].overlap_rate                 = 0.0;
+            move.alterations.emplace_back(mutable_variable_ptrs[i], 0);
+            move.is_univariable_move          = true;
+            move.is_selection_move            = false;
+            move.is_special_neighborhood_move = false;
+            move.is_available                 = true;
+            move.overlap_rate                 = 0.0;
         }
 
         /**
@@ -67,7 +68,7 @@ class BinaryMoveGenerator
          */
         auto move_updater =  //
             [this, mutable_variable_ptrs, VARIABLES_SIZE](
-                auto *                      a_moves,                          //
+                auto *                      a_moves_ptr,                      //
                 auto *                      a_flags,                          //
                 const bool                  a_ACCEPT_ALL,                     //
                 const bool                  a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
@@ -83,7 +84,7 @@ class BinaryMoveGenerator
                         (a_ACCEPT_FEASIBILITY_IMPROVABLE &&
                          mutable_variable_ptrs[i]
                              ->is_feasibility_improvable())) {
-                        (*a_moves)[i].alterations.front().second =
+                        (*a_moves_ptr)[i].alterations.front().second =
                             1 - mutable_variable_ptrs[i]->value();
                         (*a_flags)[i] = 1;
                     } else {
