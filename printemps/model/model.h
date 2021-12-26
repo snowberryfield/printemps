@@ -63,6 +63,11 @@ class Model {
     model_component::ConstraintTypeReference<T_Variable, T_Expression>  //
         m_constraint_type_reference;
 
+    std::vector<
+        std::pair<model_component::Variable<T_Variable, T_Expression> *,
+                  model_component::Variable<T_Variable, T_Expression> *>>
+        m_flippable_variable_ptr_pairs;
+
     neighborhood::Neighborhood<T_Variable, T_Expression> m_neighborhood;
     std::function<void(option::Option *,
                        solution::IncumbentHolder<T_Variable, T_Expression> *)>
@@ -122,6 +127,8 @@ class Model {
         m_variable_reference.initialize();
         m_constraint_reference.initialize();
         m_constraint_type_reference.initialize();
+
+        m_flippable_variable_ptr_pairs.clear();
 
         m_neighborhood.initialize();
         m_callback = [](option::Option *,
@@ -619,8 +626,9 @@ class Model {
         const bool a_IS_ENABLED_AGGREGATION_MOVE,                       //
         const bool a_IS_ENABLED_PRECEDENCE_MOVE,                        //
         const bool a_IS_ENABLED_VARIABLE_BOUND_MOVE,                    //
-        const bool a_IS_ENABLED_USER_DEFINED_MOVE,                      //
         const bool a_IS_ENABLED_CHAIN_MOVE,                             //
+        const bool a_IS_ENABLED_TWO_FLIP_MOVE,                          //
+        const bool a_IS_ENABLED_USER_DEFINED_MOVE,                      //
         const option::selection_mode::SelectionMode &a_SELECTION_MODE,  //
         const bool                                   a_IS_ENABLED_PRINT) {
         verifier::verify_problem(this, a_IS_ENABLED_PRINT);
@@ -760,8 +768,9 @@ class Model {
         this->setup_neighborhood(a_IS_ENABLED_AGGREGATION_MOVE,     //
                                  a_IS_ENABLED_PRECEDENCE_MOVE,      //
                                  a_IS_ENABLED_VARIABLE_BOUND_MOVE,  //
-                                 a_IS_ENABLED_USER_DEFINED_MOVE,    //
                                  a_IS_ENABLED_CHAIN_MOVE,           //
+                                 a_IS_ENABLED_TWO_FLIP_MOVE,        //
+                                 a_IS_ENABLED_USER_DEFINED_MOVE,    //
                                  a_IS_ENABLED_PRINT);
 
         /**
@@ -1052,6 +1061,18 @@ class Model {
                         constraint_type_reference.invariant_knapsack_ptrs
                             .push_back(&constraint);
                     }
+                    if (constraint.is_multiple_covering()) {
+                        constraint_type_reference.multiple_covering_ptrs
+                            .push_back(&constraint);
+                    }
+                    if (constraint.is_binary_flow()) {
+                        constraint_type_reference.binary_flow_ptrs.push_back(
+                            &constraint);
+                    }
+                    if (constraint.is_integer_flow()) {
+                        constraint_type_reference.integer_flow_ptrs.push_back(
+                            &constraint);
+                    }
                     if (constraint.is_equation_knapsack()) {
                         constraint_type_reference.equation_knapsack_ptrs
                             .push_back(&constraint);
@@ -1100,8 +1121,9 @@ class Model {
         const bool a_IS_ENABLED_AGGREGATION_MOVE,     //
         const bool a_IS_ENABLED_PRECEDENCE_MOVE,      //
         const bool a_IS_ENABLED_VARIABLE_BOUND_MOVE,  //
-        const bool a_IS_ENABLED_USER_DEFINED_MOVE,    //
         const bool a_IS_ENABLED_CHAIN_MOVE,           //
+        const bool a_IS_ENABLED_TWO_FLIP_MOVE,        //
+        const bool a_IS_ENABLED_USER_DEFINED_MOVE,    //
         const bool a_IS_ENABLED_PRINT) {
         utility::print_single_line(a_IS_ENABLED_PRINT);
         utility::print_message("Detecting the neighborhood structure...",
@@ -1133,6 +1155,11 @@ class Model {
 
         if (a_IS_ENABLED_CHAIN_MOVE) {
             m_neighborhood.chain().setup();
+        }
+
+        if (a_IS_ENABLED_TWO_FLIP_MOVE &&
+            m_flippable_variable_ptr_pairs.size() > 0) {
+            m_neighborhood.two_flip().setup(m_flippable_variable_ptr_pairs);
         }
 
         if (a_IS_ENABLED_USER_DEFINED_MOVE) {
@@ -1470,6 +1497,48 @@ class Model {
                 true);
 
             utility::print_info(                        //
+                " -- Multiple Covering: " +             //
+                    utility::to_string(                 //
+                        compute_number_of_constraints(  //
+                            original.multiple_covering_ptrs),
+                        "%d") +
+                    " (" +
+                    utility::to_string(                         //
+                        compute_number_of_enabled_constraints(  //
+                            presolved.multiple_covering_ptrs),
+                        "%d") +
+                    ")",
+                true);
+
+            utility::print_info(                        //
+                " -- Binary Flow: " +                   //
+                    utility::to_string(                 //
+                        compute_number_of_constraints(  //
+                            original.binary_flow_ptrs),
+                        "%d") +
+                    " (" +
+                    utility::to_string(                         //
+                        compute_number_of_enabled_constraints(  //
+                            presolved.binary_flow_ptrs),
+                        "%d") +
+                    ")",
+                true);
+
+            utility::print_info(                        //
+                " -- Integer Flow: " +                  //
+                    utility::to_string(                 //
+                        compute_number_of_constraints(  //
+                            original.integer_flow_ptrs),
+                        "%d") +
+                    " (" +
+                    utility::to_string(                         //
+                        compute_number_of_enabled_constraints(  //
+                            presolved.integer_flow_ptrs),
+                        "%d") +
+                    ")",
+                true);
+
+            utility::print_info(                        //
                 " -- Equation Knapsack: " +             //
                     utility::to_string(                 //
                         compute_number_of_constraints(  //
@@ -1787,16 +1856,13 @@ class Model {
         const std::vector<model_component::Variable<T_Variable, T_Expression> *>
             &a_VARIABLE_PTRS) const noexcept {
         for (const auto &variable_ptr : a_VARIABLE_PTRS) {
-            auto coefficient =
+            const auto coefficient =
                 variable_ptr->objective_sensitivity() * this->sign();
-            if (coefficient > 0 && variable_ptr->has_lower_bound_margin()) {
-                variable_ptr->set_is_objective_improvable(true);
-            } else if (coefficient < 0 &&
-                       variable_ptr->has_upper_bound_margin()) {
-                variable_ptr->set_is_objective_improvable(true);
-            } else {
-                variable_ptr->set_is_objective_improvable(false);
-            }
+            const auto is_objective_improvable =
+                (coefficient > 0 && variable_ptr->has_lower_bound_margin()) ||
+                (coefficient < 0 && variable_ptr->has_upper_bound_margin());
+
+            variable_ptr->set_is_objective_improvable(is_objective_improvable);
         }
     }
 
@@ -1814,49 +1880,25 @@ class Model {
             if (constraint_ptr->violation_value() < constant::EPSILON) {
                 continue;
             }
-            const auto &sensitivities =
-                constraint_ptr->expression().sensitivities();
-            const auto &constraint_value = constraint_ptr->constraint_value();
 
-            if (constraint_value > constant::EPSILON &&
-                constraint_ptr->is_less_or_equal()) {
-                for (const auto &sensitivity : sensitivities) {
-                    const auto &variable_ptr = sensitivity.first;
-                    const auto &coefficient  = sensitivity.second;
-
-                    if (variable_ptr->is_feasibility_improvable() ||
-                        variable_ptr->is_fixed()) {
-                        continue;
-                    }
-
-                    if (coefficient > 0 &&
-                        variable_ptr->has_lower_bound_margin()) {
-                        variable_ptr->set_is_feasibility_improvable(true);
-
-                    } else if (coefficient < 0 &&
-                               variable_ptr->has_upper_bound_margin()) {
-                        variable_ptr->set_is_feasibility_improvable(true);
-                    }
+            for (const auto &sensitivity :
+                 constraint_ptr->expression().sensitivities()) {
+                if (sensitivity.first->is_feasibility_improvable() ||
+                    sensitivity.first->is_fixed()) {
+                    continue;
                 }
 
-            } else if (constraint_value < -constant::EPSILON &&
-                       constraint_ptr->is_greater_or_equal()) {
-                for (const auto &sensitivity : sensitivities) {
-                    const auto &variable_ptr = sensitivity.first;
-                    const auto &coefficient  = sensitivity.second;
+                const auto coefficient =
+                    (constraint_ptr->constraint_value() > constant::EPSILON &&
+                     constraint_ptr->is_less_or_equal())
+                        ? sensitivity.second
+                        : -sensitivity.second;
 
-                    if (variable_ptr->is_feasibility_improvable() ||
-                        variable_ptr->is_fixed()) {
-                        continue;
-                    }
-
-                    if (coefficient > 0 &&
-                        variable_ptr->has_upper_bound_margin()) {
-                        variable_ptr->set_is_feasibility_improvable(true);
-                    } else if (coefficient < 0 &&
-                               variable_ptr->has_lower_bound_margin()) {
-                        variable_ptr->set_is_feasibility_improvable(true);
-                    }
+                if ((coefficient > 0 &&
+                     sensitivity.first->has_lower_bound_margin()) ||
+                    (coefficient < 0 &&
+                     sensitivity.first->has_upper_bound_margin())) {
+                    sensitivity.first->set_is_feasibility_improvable_or(true);
                 }
             }
         }
@@ -1989,7 +2031,7 @@ class Model {
                 auto variable_ptr          = a_MOVE.alterations.front().first;
                 auto variable_value_target = a_MOVE.alterations.front().second;
 
-                if (constraint_ptr->is_binary()) {
+                if (constraint_ptr->has_only_binary_coefficient()) {
                     constraint_value = constraint_ptr->constraint_value() +
                                        variable_value_target -
                                        variable_ptr->value();
@@ -2364,6 +2406,37 @@ class Model {
                 }
             }
         }
+    }
+
+    /*************************************************************************/
+    constexpr void setup_flippable_variable_ptr_pairs(
+        const std::vector<std::pair<std::string, std::string>>
+            &a_VARIABLE_NAME_PAIRS) {
+        std::unordered_map<
+            std::string, model_component::Variable<T_Variable, T_Expression> *>
+            variable_ptrs;
+
+        for (auto &&proxy : m_variable_proxies) {
+            for (auto &&variable : proxy.flat_indexed_variables()) {
+                variable_ptrs[variable.name()] = &variable;
+            }
+        }
+
+        std::vector<
+            std::pair<model_component::Variable<T_Variable, T_Expression> *,
+                      model_component::Variable<T_Variable, T_Expression> *>>
+            flippable_variable_ptr_pairs;
+
+        for (const auto &pair : a_VARIABLE_NAME_PAIRS) {
+            if (variable_ptrs.find(pair.first) != variable_ptrs.end() &&
+                variable_ptrs.find(pair.second) != variable_ptrs.end()) {
+                flippable_variable_ptr_pairs.emplace_back(
+                    variable_ptrs[pair.first],  //
+                    variable_ptrs[pair.second]);
+            }
+        }
+
+        m_flippable_variable_ptr_pairs = flippable_variable_ptr_pairs;
     }
 
     /*********************************************************************/
@@ -2852,7 +2925,7 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr bool has_zero_one_coefficient_constraints(void) const {
+    inline constexpr bool has_chain_move_effective_constraints(void) const {
         if (m_constraint_type_reference.set_partitioning_ptrs.size() > 0) {
             return true;
         }
@@ -2868,7 +2941,18 @@ class Model {
         if (m_constraint_type_reference.invariant_knapsack_ptrs.size() > 0) {
             return true;
         }
+        if (m_constraint_type_reference.multiple_covering_ptrs.size() > 0) {
+            return true;
+        }
         return false;
+    }
+
+    /*************************************************************************/
+    inline constexpr std::vector<
+        std::pair<model_component::Variable<T_Variable, T_Expression> *,
+                  model_component::Variable<T_Variable, T_Expression> *>>
+        &flippable_variable_ptr_pairs(void) {
+        return m_flippable_variable_ptr_pairs;
     }
 
     /*************************************************************************/

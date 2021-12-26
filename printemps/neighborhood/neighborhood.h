@@ -17,6 +17,7 @@
 #include "variable_bound_move_generator.h"
 #include "selection_move_generator.h"
 #include "chain_move_generator.h"
+#include "two_flip_move_generator.h"
 #include "user_defined_move_generator.h"
 
 namespace printemps {
@@ -32,6 +33,7 @@ class Neighborhood {
     VariableBoundMoveGenerator<T_Variable, T_Expression> m_variable_bound;
     SelectionMoveGenerator<T_Variable, T_Expression>     m_selection;
     ChainMoveGenerator<T_Variable, T_Expression>         m_chain;
+    TwoFlipMoveGenerator<T_Variable, T_Expression>       m_two_flip;
     UserDefinedMoveGenerator<T_Variable, T_Expression>   m_user_defined;
 
     std::vector<AbstractMoveGenerator<T_Variable, T_Expression> *>
@@ -58,6 +60,7 @@ class Neighborhood {
         m_variable_bound.initialize();
         m_selection.initialize();
         m_chain.initialize();
+        m_two_flip.initialize();
         m_user_defined.initialize();
 
         m_move_generator_ptrs = {&m_binary,          //
@@ -67,6 +70,7 @@ class Neighborhood {
                                  &m_variable_bound,  //
                                  &m_selection,       //
                                  &m_chain,           //
+                                 &m_two_flip,        //
                                  &m_user_defined};
 
         m_move_ptrs.clear();
@@ -136,7 +140,7 @@ class Neighborhood {
         m_precedence.reset_availability();
         m_variable_bound.reset_availability();
         m_chain.reset_availability();
-        m_precedence.reset_availability();
+        m_two_flip.reset_availability();
     }
 
     /*************************************************************************/
@@ -154,6 +158,10 @@ class Neighborhood {
         }
 
         if (m_chain.is_enabled()) {
+            return true;
+        }
+
+        if (m_two_flip.is_enabled()) {
             return true;
         }
 
@@ -242,6 +250,18 @@ class Neighborhood {
     inline constexpr const ChainMoveGenerator<T_Variable, T_Expression>  //
         &chain(void) const noexcept {
         return m_chain;
+    }
+
+    /*************************************************************************/
+    inline constexpr TwoFlipMoveGenerator<T_Variable, T_Expression>  //
+        &two_flip(void) noexcept {
+        return m_two_flip;
+    }
+
+    /*************************************************************************/
+    inline constexpr const TwoFlipMoveGenerator<T_Variable, T_Expression>  //
+        &two_flip(void) const noexcept {
+        return m_two_flip;
     }
 
     /*************************************************************************/

@@ -32,14 +32,15 @@ TEST_F(TestUserDefinedMoveGenerator, setup) {
     }
 
     auto move_updater =
-        [&x,
-         N](std::vector<printemps::neighborhood::Move<int, double>>* a_moves) {
-            a_moves->resize(N);
+        [&x, N](std::vector<printemps::neighborhood::Move<int, double>>*
+                    a_moves_ptr) {
+            a_moves_ptr->resize(N);
             for (auto i = 0; i < N; i++) {
-                (*a_moves)[i].sense =
+                (*a_moves_ptr)[i].sense =
                     printemps::neighborhood::MoveSense::UserDefined;
-                (*a_moves)[i].alterations.clear();
-                (*a_moves)[i].alterations.emplace_back(&x(i), 1 - x(i).value());
+                (*a_moves_ptr)[i].alterations.clear();
+                (*a_moves_ptr)[i].alterations.emplace_back(&x(i),
+                                                           1 - x(i).value());
             }
         };
 

@@ -3,30 +3,20 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_UTILITY_Q_LEARNING_ACTION_H__
-#define PRINTEMPS_UTILITY_Q_LEARNING_ACTION_H__
+#ifndef PRINTEMPS_UTILITY_UCB1_ACTION_H__
+#define PRINTEMPS_UTILITY_UCB1_ACTION_H__
 
 namespace printemps {
 namespace utility {
-namespace q_learning {
+namespace ucb1 {
 /*****************************************************************************/
-template <class T_StateBody, class T_ActionBody>
-struct Learner;
-
-/*****************************************************************************/
-template <class T_StateBody, class T_ActionBody>
-struct State;
-
-/*****************************************************************************/
-template <class T_StateBody, class T_ActionBody>
-struct Action;
-
-/*****************************************************************************/
-template <class T_StateBody, class T_ActionBody>
+template <class T_ActionBody>
 struct Action {
-    State<T_StateBody, T_ActionBody> *state_ptr;
-    T_ActionBody                      body;
-    double                            q_value;
+    T_ActionBody body;
+    long         number_of_samples;
+    double       total_score;
+    double       mean;
+    double       confidence;
 
     /*************************************************************************/
     Action(void) {
@@ -41,12 +31,13 @@ struct Action {
 
     /*************************************************************************/
     inline void initialize(void) {
-        state_ptr = nullptr;
-        q_value   = 0.0;
+        this->number_of_samples = 0;
+        this->total_score       = 0.0;
+        this->mean              = 0.0;
+        this->confidence        = 0.0;
     }
 };
-
-}  // namespace q_learning
+}  // namespace ucb1
 }  // namespace utility
 }  // namespace printemps
 

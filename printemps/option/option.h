@@ -38,6 +38,7 @@ struct OptionConstant {
     static constexpr bool DEFAULT_IS_ENABLED_PRECEDENCE_MOVE     = false;
     static constexpr bool DEFAULT_IS_ENABLED_VARIABLE_BOUND_MOVE = false;
     static constexpr bool DEFAULT_IS_ENABLED_CHAIN_MOVE          = false;
+    static constexpr bool DEFAULT_IS_ENABLED_TWO_FLIP_MOVE       = false;
     static constexpr bool DEFAULT_IS_ENABLED_USER_DEFINED_MOVE   = false;
     static constexpr int  DEFAULT_CHAIN_MOVE_CAPACITY            = 10000;
     static constexpr chain_move_reduce_mode::ChainMoveReduceMode
@@ -81,6 +82,7 @@ struct Option {
     bool is_enabled_precedence_move;
     bool is_enabled_variable_bound_move;
     bool is_enabled_chain_move;
+    bool is_enabled_two_flip_move;  // hidden
     bool is_enabled_user_defined_move;
 
     int chain_move_capacity;  // hidden
@@ -146,6 +148,8 @@ struct Option {
             OptionConstant::DEFAULT_IS_ENABLED_VARIABLE_BOUND_MOVE;
         this->is_enabled_chain_move =
             OptionConstant::DEFAULT_IS_ENABLED_CHAIN_MOVE;
+        this->is_enabled_two_flip_move =
+            OptionConstant::DEFAULT_IS_ENABLED_TWO_FLIP_MOVE;
         this->is_enabled_user_defined_move =
             OptionConstant::DEFAULT_IS_ENABLED_USER_DEFINED_MOVE;
         this->chain_move_capacity = OptionConstant::DEFAULT_CHAIN_MOVE_CAPACITY;
@@ -263,6 +267,10 @@ struct Option {
         utility::print(                      //
             " -- is_enabled_chain_move: " +  //
             utility::to_string(this->is_enabled_chain_move, "%d"));
+
+        utility::print(                         //
+            " -- is_enabled_two_flip_move: " +  //
+            utility::to_string(this->is_enabled_two_flip_move, "%d"));
 
         utility::print(                             //
             " -- is_enabled_user_defined_move: " +  //
@@ -413,6 +421,11 @@ struct Option {
         utility::print(                                          //
             " -- tabu_search.frequency_penalty_coefficient: " +  //
             utility::to_string(this->tabu_search.frequency_penalty_coefficient,
+                               "%f"));
+
+        utility::print(                                           //
+            " -- tabu_search.lagrangian_penalty_coefficient: " +  //
+            utility::to_string(this->tabu_search.lagrangian_penalty_coefficient,
                                "%f"));
 
         utility::print(                                   //

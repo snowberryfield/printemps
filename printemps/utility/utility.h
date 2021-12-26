@@ -19,6 +19,7 @@
 #include "bidirectional_map.h"
 #include "gf2.h"
 #include "q_learning/q_learning.h"
+#include "ucb1/ucb1.h"
 
 #endif
 /*****************************************************************************/

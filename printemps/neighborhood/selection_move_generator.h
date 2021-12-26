@@ -45,14 +45,15 @@ class SelectionMoveGenerator
         this->m_flags.resize(VARIABLES_SIZE);
 
         for (auto i = 0; i < VARIABLES_SIZE; i++) {
-            this->m_moves[i].sense = MoveSense::Selection;
-            this->m_moves[i].related_constraint_ptrs =
+            auto &move = this->m_moves[i];
+            move.sense = MoveSense::Selection;
+            move.related_constraint_ptrs =
                 a_VARIABLE_PTRS[i]->selection_ptr()->related_constraint_ptrs;
-            this->m_moves[i].is_univariable_move          = false;
-            this->m_moves[i].is_selection_move            = true;
-            this->m_moves[i].is_special_neighborhood_move = false;
-            this->m_moves[i].is_available                 = true;
-            this->m_moves[i].overlap_rate                 = 0.0;
+            move.is_univariable_move          = false;
+            move.is_selection_move            = true;
+            move.is_special_neighborhood_move = false;
+            move.is_available                 = true;
+            move.overlap_rate                 = 0.0;
         }
 
         /**
@@ -60,7 +61,7 @@ class SelectionMoveGenerator
          */
         auto move_updater =  //
             [this, a_VARIABLE_PTRS, VARIABLES_SIZE](
-                auto *                      a_moves,                          //
+                auto *                      a_moves_ptr,                      //
                 auto *                      a_flags,                          //
                 const bool                  a_ACCEPT_ALL,                     //
                 const bool                  a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
@@ -70,30 +71,30 @@ class SelectionMoveGenerator
 #pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
 #endif
                 for (auto i = 0; i < VARIABLES_SIZE; i++) {
-                    (*a_moves)[i].alterations.clear();
-                    (*a_moves)[i].alterations.emplace_back(
+                    (*a_moves_ptr)[i].alterations.clear();
+                    (*a_moves_ptr)[i].alterations.emplace_back(
                         a_VARIABLE_PTRS[i]
                             ->selection_ptr()
                             ->selected_variable_ptr,
                         0);
 
-                    (*a_moves)[i].alterations.emplace_back(a_VARIABLE_PTRS[i],
-                                                           1);
+                    (*a_moves_ptr)[i].alterations.emplace_back(
+                        a_VARIABLE_PTRS[i], 1);
                 }
 
-                const int MOVES_SIZE = a_moves->size();
+                const int MOVES_SIZE = a_moves_ptr->size();
 
 #ifdef _OPENMP
 #pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
 #endif
                 for (auto i = 0; i < MOVES_SIZE; i++) {
                     (*a_flags)[i] = 1;
-                    if (neighborhood::has_fixed_variable((*a_moves)[i])) {
+                    if (neighborhood::has_fixed_variable((*a_moves_ptr)[i])) {
                         (*a_flags)[i] = 0;
                         continue;
                     }
-                    if ((*a_moves)[i].alterations[0].first ==
-                        (*a_moves)[i].alterations[1].first) {
+                    if ((*a_moves_ptr)[i].alterations[0].first ==
+                        (*a_moves_ptr)[i].alterations[1].first) {
                         (*a_flags)[i] = 0;
                         continue;
                     }
@@ -103,13 +104,13 @@ class SelectionMoveGenerator
                     } else {
                         if (a_ACCEPT_OBJECTIVE_IMPROVABLE &&
                             neighborhood::has_objective_improvable_variable(
-                                (*a_moves)[i])) {
+                                (*a_moves_ptr)[i])) {
                             continue;
                         }
 
                         if (a_ACCEPT_FEASIBILITY_IMPROVABLE &&
                             neighborhood::has_feasibility_improvable_variable(
-                                (*a_moves)[i])) {
+                                (*a_moves_ptr)[i])) {
                             continue;
                         }
                         (*a_flags)[i] = 0;
