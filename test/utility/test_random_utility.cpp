@@ -22,8 +22,10 @@ class TestRandomUtility : public ::testing::Test {
 
 /*****************************************************************************/
 TEST_F(TestRandomUtility, generate_random) {
-    printemps::utility::IntegerUniformRandom random_integer_generator;
-    printemps::utility::IntegerUniformRandom random_positive_integer_generator;
+    printemps::utility::UniformRandom<std::uniform_int_distribution<>, int>
+        random_integer_generator;
+    printemps::utility::UniformRandom<std::uniform_int_distribution<>, int>
+        random_positive_integer_generator;
 
     random_integer_generator.setup(-100, 100, 0);
     random_positive_integer_generator.setup(1, 100, 0);
@@ -46,8 +48,10 @@ TEST_F(TestRandomUtility, generate_random) {
 
 /*****************************************************************************/
 TEST_F(TestRandomUtility, seed) {
-    printemps::utility::IntegerUniformRandom random_integer_generator_1;
-    printemps::utility::IntegerUniformRandom random_integer_generator_2;
+    printemps::utility::UniformRandom<std::uniform_int_distribution<>, int>
+        random_integer_generator_1;
+    printemps::utility::UniformRandom<std::uniform_int_distribution<>, int>
+        random_integer_generator_2;
 
     random_integer_generator_1.setup(-100, 100, 0);
     random_integer_generator_2.setup(-100, 100, 0);

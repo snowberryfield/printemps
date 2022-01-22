@@ -801,13 +801,6 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr T_Expression evaluate_constraint_with_mask(
-        model_component::Variable<T_Variable, T_Expression> *a_variable_ptr,
-        const T_Variable a_TARGET_VALUE) const noexcept {
-        return m_expression.evaluate_with_mask(a_variable_ptr, a_TARGET_VALUE);
-    }
-
-    /*************************************************************************/
     inline constexpr T_Expression evaluate_violation(void) const noexcept {
         return m_violation_function({});
     }

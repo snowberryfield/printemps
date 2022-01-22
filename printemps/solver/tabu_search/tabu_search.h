@@ -354,9 +354,16 @@ TabuSearchResult<T_Variable, T_Expression> solve(
 #ifndef _MPS_SOLVER
             if (model_ptr->is_enabled_fast_evaluation()) {
 #endif
-                model_ptr->evaluate(&trial_solution_scores[i],  //
-                                    *trial_move_ptrs[i],        //
-                                    current_solution_score);
+                if (trial_move_ptrs[i]->is_univariable_move) {
+                    model_ptr->evaluate_single(&trial_solution_scores[i],  //
+                                               *trial_move_ptrs[i],        //
+                                               current_solution_score);
+                } else {
+                    model_ptr->evaluate_multi(&trial_solution_scores[i],  //
+                                              *trial_move_ptrs[i],        //
+                                              current_solution_score);
+                }
+
 #ifndef _MPS_SOLVER
             } else {
                 model_ptr->evaluate(&trial_solution_scores[i],  //

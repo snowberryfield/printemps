@@ -12,8 +12,10 @@ namespace {
 /*****************************************************************************/
 class TestVariable : public ::testing::Test {
    protected:
-    printemps::utility::IntegerUniformRandom m_random_integer;
-    printemps::utility::IntegerUniformRandom m_random_positive_integer;
+    printemps::utility::UniformRandom<std::uniform_int_distribution<>, int>
+        m_random_integer;
+    printemps::utility::UniformRandom<std::uniform_int_distribution<>, int>
+        m_random_positive_integer;
 
     virtual void SetUp(void) {
         m_random_integer.setup(-1000, 1000, 0);
@@ -53,8 +55,6 @@ TEST_F(TestVariable, initialize) {
     EXPECT_FALSE(variable.is_feasibility_improvable());
     EXPECT_TRUE(variable.has_lower_bound_margin());
     EXPECT_TRUE(variable.has_upper_bound_margin());
-    EXPECT_FALSE(variable.has_uniform_sensitivity());
-    EXPECT_EQ(0.0, variable.uniform_sensitivity());
     EXPECT_EQ(printemps::model_component::VariableSense::Integer,
               variable.sense());
     EXPECT_EQ(nullptr, variable.selection_ptr());
@@ -555,11 +555,11 @@ TEST_F(TestVariable, register_constraint_sensitivity) {
 
     variable.register_constraint_sensitivity(&constraint_0, 10);
     EXPECT_EQ(1, static_cast<int>(variable.constraint_sensitivities().size()));
-    EXPECT_EQ(10, variable.constraint_sensitivities().at(&constraint_0));
+    EXPECT_EQ(10, variable.constraint_sensitivities().back().second);
 
     variable.register_constraint_sensitivity(&constraint_1, 20);
     EXPECT_EQ(2, static_cast<int>(variable.constraint_sensitivities().size()));
-    EXPECT_EQ(20, variable.constraint_sensitivities().at(&constraint_1));
+    EXPECT_EQ(20, variable.constraint_sensitivities().back().second);
 
     variable.reset_constraint_sensitivities();
     EXPECT_TRUE(variable.constraint_sensitivities().empty());
@@ -576,47 +576,6 @@ TEST_F(TestVariable, constraint_sensitivities) {
 }
 
 /*****************************************************************************/
-TEST_F(TestVariable, setup_uniform_sensitivity) {
-    {
-        auto variable =
-            printemps::model_component::Variable<int,
-                                                 double>::create_instance();
-        auto constraint_0 =
-            printemps::model_component::Constraint<int,
-                                                   double>::create_instance();
-        auto constraint_1 =
-            printemps::model_component::Constraint<int,
-                                                   double>::create_instance();
-
-        variable.register_constraint_sensitivity(&constraint_0, 10);
-        variable.register_constraint_sensitivity(&constraint_1, 20);
-        variable.setup_uniform_sensitivity();
-        EXPECT_FALSE(variable.has_uniform_sensitivity());
-    }
-
-    {
-        auto variable =
-            printemps::model_component::Variable<int,
-                                                 double>::create_instance();
-        auto constraint_0 =
-            printemps::model_component::Constraint<int,
-                                                   double>::create_instance();
-        auto constraint_1 =
-            printemps::model_component::Constraint<int,
-                                                   double>::create_instance();
-
-        variable.register_constraint_sensitivity(&constraint_0, 10);
-        variable.register_constraint_sensitivity(&constraint_1, 10);
-        variable.setup_uniform_sensitivity();
-        EXPECT_TRUE(variable.has_uniform_sensitivity());
-        EXPECT_EQ(10.0, variable.uniform_sensitivity());
-        variable.reset_constraint_sensitivities();
-        EXPECT_FALSE(variable.has_uniform_sensitivity());
-        EXPECT_EQ(0.0, variable.uniform_sensitivity());
-    }
-}
-
-/*****************************************************************************/
 TEST_F(TestVariable, setup_hash) {
     printemps::model::Model<int, double> model;
 
@@ -627,11 +586,7 @@ TEST_F(TestVariable, setup_hash) {
     g(1) = x(0) == 1;
 
     model.setup_is_linear();
-    model.categorize_variables();
-    model.categorize_constraints();
-    model.setup_variable_related_constraints();
-    model.setup_variable_sensitivities();
-
+    model.setup_structure();
     {
         x(0).setup_hash();
         std::uint64_t hash = reinterpret_cast<std::uint64_t>(&g(0)) +
@@ -644,16 +599,6 @@ TEST_F(TestVariable, setup_hash) {
         std::uint64_t hash = reinterpret_cast<std::uint64_t>(&g(0));
         EXPECT_EQ(hash, x(1).hash());
     }
-}
-
-/*****************************************************************************/
-TEST_F(TestVariable, has_uniform_sensitivity) {
-    /// This method is tested in setup_uniform_sensitivity().
-}
-
-/*****************************************************************************/
-TEST_F(TestVariable, uniform_sensitivity) {
-    /// This method is tested in setup_uniform_sensitivity().
 }
 
 /*****************************************************************************/

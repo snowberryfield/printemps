@@ -25,9 +25,7 @@ TEST_F(TestPrecedenceMoveGenerator, setup) {
     auto& x = model.create_variables("x", 2, -10, 10);
     auto& c = model.create_constraint("c", x[0] <= x[1]);
 
-    model.categorize_variables();
-    model.categorize_constraints();
-    model.setup_variable_related_constraints();
+    model.setup_structure();
 
     auto precedence_ptrs = model.constraint_type_reference().precedence_ptrs;
 

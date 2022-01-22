@@ -172,6 +172,7 @@ class Solver {
                            m_master_option.is_enabled_two_flip_move,
                            m_master_option.is_enabled_user_defined_move,
                            m_master_option.selection_mode,
+                           m_master_option.initial_penalty_coefficient,
                            m_master_option.verbose >= option::verbose::Outer);
 
         /**
@@ -242,7 +243,7 @@ class Solver {
         for (auto&& proxy : m_model_ptr->constraint_proxies()) {
             for (auto&& constraint : proxy.flat_indexed_constraints()) {
                 constraint.global_penalty_coefficient() =
-                    m_master_option.initial_penalty_coefficient;
+                    m_model_ptr->global_penalty_coefficient();
                 constraint.reset_local_penalty_coefficient();
             }
         }

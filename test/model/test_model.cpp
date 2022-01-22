@@ -12,8 +12,10 @@ namespace {
 /*****************************************************************************/
 class TestModel : public ::testing::Test {
    protected:
-    printemps::utility::IntegerUniformRandom m_random_integer;
-    printemps::utility::IntegerUniformRandom m_random_positive_integer;
+    printemps::utility::UniformRandom<std::uniform_int_distribution<>, int>
+        m_random_integer;
+    printemps::utility::UniformRandom<std::uniform_int_distribution<>, int>
+        m_random_positive_integer;
 
     virtual void SetUp(void) {
         m_random_integer.setup(-1000, 1000, 0);
@@ -64,6 +66,7 @@ TEST_F(TestModel, initialize) {
     EXPECT_EQ(1.0, model.sign());
     EXPECT_FALSE(model.is_solved());
     EXPECT_FALSE(model.is_feasible());
+    EXPECT_EQ(0.0, model.global_penalty_coefficient());
 
     /// Variable Reference
     EXPECT_EQ(  //
@@ -752,6 +755,11 @@ TEST_F(TestModel, setup) {
 }
 
 /*****************************************************************************/
+TEST_F(TestModel, setup_structure) {
+    /// This method is tested in the following submethods.
+}
+
+/*****************************************************************************/
 TEST_F(TestModel, setup_unique_names) {
     printemps::model::Model<int, double> model;
 
@@ -1019,14 +1027,34 @@ TEST_F(TestModel, setup_variable_related_zero_one_coefficient_constraints) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModel, setup_variable_sensitivity) {
+TEST_F(TestModel, setup_variable_objective_sensitivities) {
     printemps::model::Model<int, double> model;
 
     auto& x = model.create_variables("x", 10, 0, 1);
     auto& y = model.create_variables("y", {20, 30}, 0, 1);
-    auto& g = model.create_constraints("g", 3);
 
-    auto& p = model.create_expressions("p", 3);
+    model.minimize(2 * x.sum() + 5 * y.sum());
+    model.setup_variable_objective_sensitivities();
+
+    for (auto i = 0; i < 10; i++) {
+        EXPECT_EQ(2, x(i).objective_sensitivity());
+    }
+
+    for (auto i = 0; i < 20; i++) {
+        for (auto j = 0; j < 30; j++) {
+            EXPECT_EQ(5, y(i, j).objective_sensitivity());
+        }
+    }
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, setup_variable_constraint_sensitivities) {
+    printemps::model::Model<int, double> model;
+
+    auto& x = model.create_variables("x", 10, 0, 1);
+    auto& y = model.create_variables("y", {20, 30}, 0, 1);
+    auto& g = model.create_constraints("g", 2);
+    auto& p = model.create_expressions("p", 2);
     for (auto i = 0; i < 10; i++) {
         p(0) += (i + 1) * x(i);
     }
@@ -1039,19 +1067,23 @@ TEST_F(TestModel, setup_variable_sensitivity) {
     g(0) = p(0) <= 10000;
     g(1) = p(1) <= 10000;
 
-    model.minimize(2 * x.sum() + 5 * y.sum());
-
-    model.setup_variable_sensitivities();
+    model.setup_variable_constraint_sensitivities();
 
     for (auto i = 0; i < 10; i++) {
-        EXPECT_EQ(i + 1, x(i).constraint_sensitivities().at(&g(0)));
-        EXPECT_EQ(2, x(i).objective_sensitivity());
+        for (auto&& sensitivity : x(i).constraint_sensitivities()) {
+            if (sensitivity.first == &g(0)) {
+                EXPECT_EQ(i + 1, sensitivity.second);
+            }
+        }
     }
 
     for (auto i = 0; i < 20; i++) {
         for (auto j = 0; j < 30; j++) {
-            EXPECT_EQ(i + j + 1, y(i, j).constraint_sensitivities().at(&g(1)));
-            EXPECT_EQ(5, y(i, j).objective_sensitivity());
+            for (auto&& sensitivity : y(i, j).constraint_sensitivities()) {
+                if (sensitivity.first == &g(1)) {
+                    EXPECT_EQ(i + j + 1, sensitivity.second);
+                }
+            }
         }
     }
 }
@@ -1176,12 +1208,9 @@ TEST_F(TestModel, categorize_constraints) {
 
     singleton.disable();
 
-    model.categorize_variables();
-    model.categorize_constraints();
-
+    model.setup_structure();
     printemps::presolver::extract_selections_by_defined_order(&model, false);
-    model.categorize_variables();
-    model.categorize_constraints();
+    model.setup_structure();
 
     EXPECT_EQ(28, model.number_of_constraints());
     EXPECT_EQ(1, model.number_of_selection_constraints());
@@ -1307,6 +1336,18 @@ TEST_F(TestModel, update_variable_bounds) {
 }
 
 /*****************************************************************************/
+TEST_F(TestModel, set_global_penalty_coefficient) {
+    printemps::model::Model<int, double> model;
+    model.set_global_penalty_coefficient(1E7);
+    EXPECT_FLOAT_EQ(1E7, model.global_penalty_coefficient());
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, global_penalty_coefficient) {
+    /// This method is tested in set_global_penalty_coefficient().
+}
+
+/*****************************************************************************/
 TEST_F(TestModel, set_callback) {
     printemps::model::Model<int, double>              model;
     printemps::option::Option                         option;
@@ -1324,7 +1365,7 @@ TEST_F(TestModel, set_callback) {
 
 /*****************************************************************************/
 TEST_F(TestModel, callback) {
-    /// This method is tested in set_callback.
+    /// This method is tested in set_callback().
 }
 
 /*****************************************************************************/
@@ -1401,8 +1442,7 @@ TEST_F(TestModel, update_arg_move) {
     x(0) = 1;
 
     model.minimize(p);
-    model.categorize_variables();
-    model.categorize_constraints();
+    model.setup_structure();
     printemps::presolver::extract_independent_selections(&model, false);
     model.setup_fixed_sensitivities(false);
 
@@ -1427,7 +1467,7 @@ TEST_F(TestModel, reset_variable_objective_improvabilities_arg_void) {
 
     auto& x = model.create_variable("x", 0, 1);
     auto& y = model.create_variables("y", 10, 0, 1);
-    model.categorize_variables();
+    model.setup_structure();
 
     x(0).set_is_objective_improvable(true);
     EXPECT_TRUE(x(0).is_objective_improvable());
@@ -1449,7 +1489,7 @@ TEST_F(TestModel, reset_variable_objective_improvabilities_arg_variable_ptrs) {
 
     auto& x = model.create_variable("x", 0, 1);
     auto& y = model.create_variables("y", 10, 0, 1);
-    model.categorize_variables();
+    model.setup_structure();
 
     x(0).set_is_objective_improvable(true);
     EXPECT_TRUE(x(0).is_objective_improvable());
@@ -1473,7 +1513,7 @@ TEST_F(TestModel, reset_variable_feasibility_improvabilities_arg_void) {
 
     auto& x = model.create_variable("x", 0, 1);
     auto& y = model.create_variables("y", 10, 0, 1);
-    model.categorize_variables();
+    model.setup_structure();
 
     x(0).set_is_feasibility_improvable(true);
     EXPECT_TRUE(x(0).is_feasibility_improvable());
@@ -1496,7 +1536,7 @@ TEST_F(TestModel,
 
     auto& x = model.create_variable("x", 0, 1);
     auto& y = model.create_variables("y", 10, 0, 1);
-    model.categorize_variables();
+    model.setup_structure();
 
     x(0).set_is_feasibility_improvable(true);
     EXPECT_TRUE(x(0).is_feasibility_improvable());
@@ -1526,8 +1566,7 @@ TEST_F(TestModel,
     g(0) = x <= y(0);
     g(1) = y(1) == y(9);
 
-    model.categorize_variables();
-    model.categorize_constraints();
+    model.setup_structure();
 
     x(0).set_is_feasibility_improvable(true);
     EXPECT_TRUE(x(0).is_feasibility_improvable());
@@ -1559,9 +1598,7 @@ TEST_F(TestModel, update_variable_improvability) {
         [[maybe_unused]] auto& g = model.create_constraint("g", x - y <= 0);
 
         model.minimize(-x + y);
-        model.categorize_variables();
-        model.categorize_constraints();
-        model.setup_variable_sensitivities();
+        model.setup_structure();
         model.setup_fixed_sensitivities(false);
 
         x = -10;
@@ -1603,9 +1640,7 @@ TEST_F(TestModel, update_variable_improvability) {
         [[maybe_unused]] auto& g = model.create_constraint("g", x - y == 0);
 
         model.minimize(-x + y);
-        model.categorize_variables();
-        model.categorize_constraints();
-        model.setup_variable_sensitivities();
+        model.setup_structure();
         model.setup_fixed_sensitivities(false);
 
         x = -10;
@@ -1647,9 +1682,7 @@ TEST_F(TestModel, update_variable_improvability) {
         [[maybe_unused]] auto& g = model.create_constraint("g", x - y >= 0);
 
         model.minimize(-x + y);
-        model.categorize_variables();
-        model.categorize_constraints();
-        model.setup_variable_sensitivities();
+        model.setup_structure();
         model.setup_fixed_sensitivities(false);
 
         x = -10;
@@ -1691,9 +1724,7 @@ TEST_F(TestModel, update_variable_improvability) {
         [[maybe_unused]] auto& g = model.create_constraint("g", x - y <= 0);
 
         model.maximize(-x + y);
-        model.categorize_variables();
-        model.categorize_constraints();
-        model.setup_variable_sensitivities();
+        model.setup_structure();
         model.setup_fixed_sensitivities(false);
 
         x = -10;
@@ -1736,9 +1767,7 @@ TEST_F(TestModel, update_variable_improvability) {
         [[maybe_unused]] auto& g = model.create_constraint("g", x - y == 0);
 
         model.maximize(-x + y);
-        model.categorize_variables();
-        model.categorize_constraints();
-        model.setup_variable_sensitivities();
+        model.setup_structure();
         model.setup_fixed_sensitivities(false);
 
         x = -10;
@@ -1781,9 +1810,7 @@ TEST_F(TestModel, update_variable_improvability) {
         [[maybe_unused]] auto& g = model.create_constraint("g", x - y >= 0);
 
         model.maximize(-x + y);
-        model.categorize_variables();
-        model.categorize_constraints();
-        model.setup_variable_sensitivities();
+        model.setup_structure();
         model.setup_fixed_sensitivities(false);
 
         x = -10;
@@ -1856,14 +1883,10 @@ TEST_F(TestModel, evaluate) {
         g(0).local_penalty_coefficient_less() = 100;
         h(0).local_penalty_coefficient_less() = 100;
 
-        g(0).global_penalty_coefficient() = 10000;
-        h(0).global_penalty_coefficient() = 10000;
-
         model.minimize(p);
+        model.set_global_penalty_coefficient(10000);
 
-        model.setup_variable_related_constraints();
-        model.categorize_variables();
-        model.categorize_constraints();
+        model.setup_structure();
         printemps::presolver::extract_independent_selections(&model, false);
         model.setup_fixed_sensitivities(false);
 
@@ -1987,6 +2010,39 @@ TEST_F(TestModel, evaluate) {
             model.update(move);
             score_before = score_after_1;
         }
+
+        {
+            /// Single
+            printemps::neighborhood::Move<int, double> move;
+            move.alterations.emplace_back(&x(1), 0);
+            move.related_constraint_ptrs = x(1).related_constraint_ptrs();
+
+            auto score_after_0 = model.evaluate(move);
+            auto score_after_1 = model.evaluate(move, score_before);
+
+            EXPECT_EQ(10, score_after_0.objective);
+            EXPECT_EQ(0, score_after_0.total_violation);
+            EXPECT_EQ(0, score_after_0.local_penalty);
+            EXPECT_EQ(0, score_after_0.global_penalty);
+            EXPECT_EQ(10, score_after_0.local_augmented_objective);
+            EXPECT_EQ(10, score_after_0.global_augmented_objective);
+            EXPECT_TRUE(score_after_0.is_objective_improvable);
+            EXPECT_TRUE(score_after_0.is_feasibility_improvable);
+            EXPECT_TRUE(score_after_0.is_feasible);
+
+            EXPECT_EQ(10, score_after_1.objective);
+            EXPECT_EQ(0, score_after_1.total_violation);
+            EXPECT_EQ(0, score_after_1.local_penalty);
+            EXPECT_EQ(0, score_after_1.global_penalty);
+            EXPECT_EQ(10, score_after_1.local_augmented_objective);
+            EXPECT_EQ(10, score_after_1.global_augmented_objective);
+            EXPECT_TRUE(score_after_1.is_objective_improvable);
+            EXPECT_TRUE(score_after_1.is_feasibility_improvable);
+            EXPECT_TRUE(score_after_1.is_feasible);
+
+            model.update(move);
+            score_before = score_after_1;
+        }
     }
 
     /// maximize
@@ -2004,14 +2060,10 @@ TEST_F(TestModel, evaluate) {
         g(0).local_penalty_coefficient_less() = 100;
         h(0).local_penalty_coefficient_less() = 100;
 
-        g(0).global_penalty_coefficient() = 10000;
-        h(0).global_penalty_coefficient() = 10000;
-
         model.maximize(p);
+        model.set_global_penalty_coefficient(10000);
 
-        model.setup_variable_related_constraints();
-        model.categorize_variables();
-        model.categorize_constraints();
+        model.setup_structure();
         printemps::presolver::extract_independent_selections(&model, false);
         model.setup_fixed_sensitivities(false);
 
@@ -2133,6 +2185,39 @@ TEST_F(TestModel, evaluate) {
             model.update(move);
             score_before = score_after_1;
         }
+
+        {
+            /// Single
+            printemps::neighborhood::Move<int, double> move;
+            move.alterations.emplace_back(&x(1), 0);
+            move.related_constraint_ptrs = x(1).related_constraint_ptrs();
+
+            auto score_after_0 = model.evaluate(move);
+            auto score_after_1 = model.evaluate(move, score_before);
+
+            EXPECT_EQ(-10, score_after_0.objective);
+            EXPECT_EQ(0, score_after_0.total_violation);
+            EXPECT_EQ(0, score_after_0.local_penalty);
+            EXPECT_EQ(0, score_after_0.global_penalty);
+            EXPECT_EQ(-10, score_after_0.local_augmented_objective);
+            EXPECT_EQ(-10, score_after_0.global_augmented_objective);
+            EXPECT_FALSE(score_after_0.is_objective_improvable);
+            EXPECT_TRUE(score_after_0.is_feasibility_improvable);
+            EXPECT_TRUE(score_after_0.is_feasible);
+
+            EXPECT_EQ(-10, score_after_1.objective);
+            EXPECT_EQ(0, score_after_1.total_violation);
+            EXPECT_EQ(0, score_after_1.local_penalty);
+            EXPECT_EQ(0, score_after_1.global_penalty);
+            EXPECT_EQ(-10, score_after_1.local_augmented_objective);
+            EXPECT_EQ(-10, score_after_1.global_augmented_objective);
+            EXPECT_FALSE(score_after_1.is_objective_improvable);
+            EXPECT_TRUE(score_after_1.is_feasibility_improvable);
+            EXPECT_TRUE(score_after_1.is_feasible);
+
+            model.update(move);
+            score_before = score_after_1;
+        }
     }
 }
 
@@ -2148,8 +2233,7 @@ TEST_F(TestModel, compute_lagrangian) {
     [[maybe_unused]] auto& h = model.create_constraint("h", x(0) + x(1) <= 1);
 
     model.minimize(p);
-    model.categorize_variables();
-    model.categorize_constraints();
+    model.setup_structure();
 
     printemps::multi_array::ValueProxy<double> dual_value_proxy(1);
     dual_value_proxy.value() = 100;
@@ -2459,8 +2543,7 @@ TEST_F(TestModel, export_named_solution) {
     }
 
     model.set_name("name");
-    model.categorize_variables();
-    model.categorize_constraints();
+    model.setup_structure();
     model.update();
     double total_violation = 0.0;
     for (auto i = 0; i < 20; i++) {
@@ -2910,8 +2993,7 @@ TEST_F(TestModel, has_chain_move_effective_constraints) {
         printemps::model::Model<int, double> model;
 
         [[maybe_unused]] auto& x = model.create_variables("x", 10, 0, 1);
-        model.categorize_variables();
-        model.categorize_constraints();
+        model.setup_structure();
         EXPECT_FALSE(model.has_chain_move_effective_constraints());
     }
 
@@ -2922,8 +3004,7 @@ TEST_F(TestModel, has_chain_move_effective_constraints) {
         auto&                  x = model.create_variables("x", 10, 0, 1);
         [[maybe_unused]] auto& f = model.create_constraint("f", x.sum() == 1);
 
-        model.categorize_variables();
-        model.categorize_constraints();
+        model.setup_structure();
         EXPECT_TRUE(model.has_chain_move_effective_constraints());
     }
 
@@ -2934,8 +3015,7 @@ TEST_F(TestModel, has_chain_move_effective_constraints) {
         auto&                  x = model.create_variables("x", 10, 0, 1);
         [[maybe_unused]] auto& f = model.create_constraint("f", x.sum() <= 1);
 
-        model.categorize_variables();
-        model.categorize_constraints();
+        model.setup_structure();
         EXPECT_TRUE(model.has_chain_move_effective_constraints());
     }
 
@@ -2946,8 +3026,7 @@ TEST_F(TestModel, has_chain_move_effective_constraints) {
         auto&                  x = model.create_variables("x", 10, 0, 1);
         [[maybe_unused]] auto& f = model.create_constraint("f", x.sum() >= 1);
 
-        model.categorize_variables();
-        model.categorize_constraints();
+        model.setup_structure();
         EXPECT_TRUE(model.has_chain_move_effective_constraints());
     }
 
@@ -2958,8 +3037,7 @@ TEST_F(TestModel, has_chain_move_effective_constraints) {
         auto&                  x = model.create_variables("x", 10, 0, 1);
         [[maybe_unused]] auto& f = model.create_constraint("f", x.sum() == 5);
 
-        model.categorize_variables();
-        model.categorize_constraints();
+        model.setup_structure();
         EXPECT_TRUE(model.has_chain_move_effective_constraints());
     }
 
@@ -2970,8 +3048,7 @@ TEST_F(TestModel, has_chain_move_effective_constraints) {
         auto&                  x = model.create_variables("x", 10, 0, 1);
         [[maybe_unused]] auto& f = model.create_constraint("f", x.sum() <= 5);
 
-        model.categorize_variables();
-        model.categorize_constraints();
+        model.setup_structure();
         EXPECT_TRUE(model.has_chain_move_effective_constraints());
     }
 
@@ -2982,8 +3059,7 @@ TEST_F(TestModel, has_chain_move_effective_constraints) {
         auto&                  x = model.create_variables("x", 10, 0, 1);
         [[maybe_unused]] auto& f = model.create_constraint("f", x.sum() >= 5);
 
-        model.categorize_variables();
-        model.categorize_constraints();
+        model.setup_structure();
         EXPECT_TRUE(model.has_chain_move_effective_constraints());
     }
 }

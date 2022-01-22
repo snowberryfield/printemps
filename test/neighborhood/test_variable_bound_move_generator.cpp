@@ -27,9 +27,7 @@ TEST_F(TestVariableBoundMoveGenerator, setup) {
         auto& x = model.create_variables("x", 2, -10, 10);
         auto& c = model.create_constraint("c", 2 * x[0] + 3 * x[1] <= 10);
 
-        model.categorize_variables();
-        model.categorize_constraints();
-        model.setup_variable_related_constraints();
+        model.setup_structure();
 
         auto variable_bound_ptrs =
             model.constraint_type_reference().variable_bound_ptrs;
@@ -95,9 +93,7 @@ TEST_F(TestVariableBoundMoveGenerator, setup) {
         auto& x = model.create_variables("x", 2, -10, 10);
         auto& c = model.create_constraint("c", 2 * x[0] + 3 * x[1] >= 10);
 
-        model.categorize_variables();
-        model.categorize_constraints();
-        model.setup_variable_related_constraints();
+        model.setup_structure();
 
         auto variable_bound_ptrs =
             model.constraint_type_reference().variable_bound_ptrs;
