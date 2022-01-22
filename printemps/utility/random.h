@@ -3,37 +3,39 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_UTILITY_RANDOM_UTILITY_H__
-#define PRINTEMPS_UTILITY_RANDOM_UTILITY_H__
+#ifndef PRINTEMPS_UTILITY_RANDOM_H__
+#define PRINTEMPS_UTILITY_RANDOM_H__
 
 namespace printemps {
 namespace utility {
 /*****************************************************************************/
-class IntegerUniformRandom {
+template <class T_Generator, class T_Value>
+class UniformRandom {
    private:
-    std::mt19937                     m_engine;
-    std::uniform_int_distribution<> *m_distribution;
+    std::mt19937 m_engine;
+    T_Generator  m_distribution;
 
    public:
     /*************************************************************************/
-    IntegerUniformRandom(void) {
+    UniformRandom(void) {
         /// nothing to do
     }
 
     /*************************************************************************/
-    IntegerUniformRandom(const int a_MIN, const int a_MAX,
-                         const unsigned int a_SEED) {
+    UniformRandom(const T_Value a_MIN, const T_Value a_MAX,
+                  const unsigned int a_SEED) {
         this->setup(a_MIN, a_MAX, a_SEED);
     }
 
     /*************************************************************************/
-    virtual ~IntegerUniformRandom(void) {
-        delete m_distribution;
+    virtual ~UniformRandom(void) {
+        /// nothing to do
     }
 
     /*************************************************************************/
-    void setup(const int a_MIN, const int a_MAX, const unsigned int a_SEED) {
-        m_distribution = new std::uniform_int_distribution<>(a_MIN, a_MAX);
+    void setup(const T_Value a_MIN, const T_Value a_MAX,
+               const unsigned int a_SEED) {
+        m_distribution = T_Generator(a_MIN, a_MAX);
         m_engine.seed(a_SEED);
     }
 
@@ -43,8 +45,8 @@ class IntegerUniformRandom {
     }
 
     /*************************************************************************/
-    inline int generate_random() {
-        return (*m_distribution)(m_engine);
+    inline T_Value generate_random() {
+        return m_distribution(m_engine);
     }
 };
 }  // namespace utility

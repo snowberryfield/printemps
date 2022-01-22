@@ -12,8 +12,10 @@ namespace {
 /*****************************************************************************/
 class TestVerifier : public ::testing::Test {
    protected:
-    printemps::utility::IntegerUniformRandom m_random_integer;
-    printemps::utility::IntegerUniformRandom m_random_positive_integer;
+    printemps::utility::UniformRandom<std::uniform_int_distribution<>, int>
+        m_random_integer;
+    printemps::utility::UniformRandom<std::uniform_int_distribution<>, int>
+        m_random_positive_integer;
 
     virtual void SetUp(void) {
         m_random_integer.setup(-1000, 1000, 0);
@@ -79,8 +81,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model.create_constraint("g", x.selection());
         x(0).fix_by(2);
 
-        model.categorize_variables();
-        model.categorize_constraints();
+        model.setup_structure();
         printemps::presolver::extract_selections_by_defined_order(&model,
                                                                   false);
 
@@ -99,8 +100,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model.create_constraint("g", x.selection());
         x(0).fix_by(2);
 
-        model.categorize_variables();
-        model.categorize_constraints();
+        model.setup_structure();
         printemps::presolver::extract_selections_by_defined_order(&model,
                                                                   false);
 
@@ -119,8 +119,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model.create_constraint("g", x.selection());
         x(0).fix_by(1);
 
-        model.categorize_variables();
-        model.categorize_constraints();
+        model.setup_structure();
         printemps::presolver::extract_selections_by_defined_order(&model,
                                                                   false);
 
@@ -138,8 +137,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model.create_constraint("g", x.selection());
         x(0).fix_by(1);
 
-        model.categorize_variables();
-        model.categorize_constraints();
+        model.setup_structure();
         printemps::presolver::extract_selections_by_defined_order(&model,
                                                                   false);
 
@@ -158,8 +156,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         x(0).fix_by(1);
         x(1).fix_by(1);
 
-        model.categorize_variables();
-        model.categorize_constraints();
+        model.setup_structure();
         printemps::presolver::extract_selections_by_defined_order(&model,
                                                                   false);
 
@@ -179,8 +176,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         x(0).fix_by(1);
         x(1).fix_by(1);
 
-        model.categorize_variables();
-        model.categorize_constraints();
+        model.setup_structure();
         printemps::presolver::extract_selections_by_defined_order(&model,
                                                                   false);
 
@@ -199,8 +195,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model.create_constraint("g", x.selection());
         x(0) = 2;
         x(1) = 3;
-        model.categorize_variables();
-        model.categorize_constraints();
+        model.setup_structure();
         printemps::presolver::extract_selections_by_defined_order(&model,
                                                                   false);
 
@@ -221,8 +216,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         x(0) = 2;
         x(1) = 3;
 
-        model.categorize_variables();
-        model.categorize_constraints();
+        model.setup_structure();
         printemps::presolver::extract_selections_by_defined_order(&model,
                                                                   false);
 
@@ -240,8 +234,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         auto& x = model.create_variables("x", 10, 0, 1);
         model.create_constraint("g", x.selection());
 
-        model.categorize_variables();
-        model.categorize_constraints();
+        model.setup_structure();
         printemps::presolver::extract_selections_by_defined_order(&model,
                                                                   false);
 
@@ -262,8 +255,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         auto& x = model.create_variables("x", 10, 0, 1);
         model.create_constraint("g", x.selection());
 
-        model.categorize_variables();
-        model.categorize_constraints();
+        model.setup_structure();
         printemps::presolver::extract_selections_by_defined_order(&model,
                                                                   false);
 
@@ -282,8 +274,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model.create_constraint("g", x.selection());
         x(0) = 1;
 
-        model.categorize_variables();
-        model.categorize_constraints();
+        model.setup_structure();
         printemps::presolver::extract_selections_by_defined_order(&model,
                                                                   false);
 
@@ -302,8 +293,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model.create_constraint("g", x.selection());
         x(0) = 1;
 
-        model.categorize_variables();
-        model.categorize_constraints();
+        model.setup_structure();
         printemps::presolver::extract_selections_by_defined_order(&model,
                                                                   false);
 
@@ -323,8 +313,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         x(0) = 1;
         x(1) = 1;
 
-        model.categorize_variables();
-        model.categorize_constraints();
+        model.setup_structure();
         printemps::presolver::extract_selections_by_defined_order(&model,
                                                                   false);
 
@@ -345,8 +334,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         x(0) = 1;
         x(1) = 1;
 
-        model.categorize_variables();
-        model.categorize_constraints();
+        model.setup_structure();
         printemps::presolver::extract_selections_by_defined_order(&model,
                                                                   false);
 
@@ -366,8 +354,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         x(0) = 1;
         x(1).fix_by(1);
 
-        model.categorize_variables();
-        model.categorize_constraints();
+        model.setup_structure();
         printemps::presolver::extract_selections_by_defined_order(&model,
                                                                   false);
         printemps::verifier::
@@ -387,8 +374,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         x(0) = 1;
         x(1).fix_by(1);
 
-        model.categorize_variables();
-        model.categorize_constraints();
+        model.setup_structure();
         printemps::presolver::extract_selections_by_defined_order(&model,
                                                                   false);
 
@@ -409,8 +395,7 @@ TEST_F(TestVerifier, verify_and_correct_binary_variables_initial_values) {
         auto& x = model.create_variables("x", 10, 0, 1);
         x(0).fix_by(2);
 
-        model.categorize_variables();
-        model.categorize_constraints();
+        model.setup_structure();
 
         ASSERT_THROW(  //
             printemps::verifier::
@@ -426,8 +411,7 @@ TEST_F(TestVerifier, verify_and_correct_binary_variables_initial_values) {
         auto& x = model.create_variables("x", 10, 0, 1);
         x(0).fix_by(-1);
 
-        model.categorize_variables();
-        model.categorize_constraints();
+        model.setup_structure();
 
         ASSERT_THROW(  //
             printemps::verifier::
@@ -444,8 +428,7 @@ TEST_F(TestVerifier, verify_and_correct_binary_variables_initial_values) {
         x(0)    = 2;
         x(1)    = -1;
 
-        model.categorize_variables();
-        model.categorize_constraints();
+        model.setup_structure();
 
         printemps::verifier::
             verify_and_correct_binary_variables_initial_values(  //
@@ -462,8 +445,7 @@ TEST_F(TestVerifier, verify_and_correct_binary_variables_initial_values) {
         x(0)    = 2;
         x(1)    = -1;
 
-        model.categorize_variables();
-        model.categorize_constraints();
+        model.setup_structure();
 
         ASSERT_THROW(  //
             printemps::verifier::
@@ -482,8 +464,7 @@ TEST_F(TestVerifier, verify_and_correct_integer_variables_initial_values) {
         auto& x = model.create_variables("x", 10, -10, 10);
         x(0).fix_by(11);
 
-        model.categorize_variables();
-        model.categorize_constraints();
+        model.setup_structure();
 
         ASSERT_THROW(  //
             printemps::verifier::
@@ -499,8 +480,7 @@ TEST_F(TestVerifier, verify_and_correct_integer_variables_initial_values) {
         auto& x = model.create_variables("x", 10, -10, 10);
         x(0).fix_by(-11);
 
-        model.categorize_variables();
-        model.categorize_constraints();
+        model.setup_structure();
 
         ASSERT_THROW(  //
             printemps::verifier::
@@ -517,8 +497,7 @@ TEST_F(TestVerifier, verify_and_correct_integer_variables_initial_values) {
         x(0)    = 11;
         x(1)    = -11;
 
-        model.categorize_variables();
-        model.categorize_constraints();
+        model.setup_structure();
 
         printemps::verifier::
             verify_and_correct_integer_variables_initial_values(  //
@@ -535,8 +514,7 @@ TEST_F(TestVerifier, verify_and_correct_integer_variables_initial_values) {
         x(0)    = 11;
         x(1)    = -11;
 
-        model.categorize_variables();
-        model.categorize_constraints();
+        model.setup_structure();
 
         ASSERT_THROW(  //
             printemps::verifier::

@@ -22,30 +22,30 @@ struct Move {
     std::unordered_set<model_component::Constraint<T_Variable, T_Expression> *>
         related_constraint_ptrs;
 
-    bool is_univariable_move;
-    bool is_selection_move;
-
     /**
-     * The following members are for special neighborhood moves.
-     */
-    bool is_special_neighborhood_move;
-    bool is_available;
-
-    /**
-     * The following member is for Chain moves.
+     * The following two members are for Chain moves.
      */
     std::uint_fast64_t hash;
     double             overlap_rate;
 
+    bool is_univariable_move;
+    bool is_selection_move;
+
+    /**
+     * The following two members are for special neighborhood moves.
+     */
+    bool is_special_neighborhood_move;
+    bool is_available;
+
     /*************************************************************************/
     Move(void)
         : sense(MoveSense::General),
+          hash(0),
+          overlap_rate(0.0),
           is_univariable_move(false),
           is_selection_move(false),
           is_special_neighborhood_move(false),
-          is_available(true),
-          hash(0),
-          overlap_rate(0.0) {
+          is_available(true) {
     }
 };
 

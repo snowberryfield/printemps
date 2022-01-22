@@ -203,8 +203,15 @@ LocalSearchResult<T_Variable, T_Expression> solve(
 #ifndef _MPS_SOLVER
             if (model_ptr->is_enabled_fast_evaluation()) {
 #endif
-                model_ptr->evaluate(&trial_solution_score, *move_ptr,
-                                    solution_score);
+                if (move_ptr->is_univariable_move) {
+                    model_ptr->evaluate_single(&trial_solution_score,  //
+                                               *move_ptr,              //
+                                               solution_score);
+                } else {
+                    model_ptr->evaluate_multi(&trial_solution_score,  //
+                                              *move_ptr,              //
+                                              solution_score);
+                }
 #ifndef _MPS_SOLVER
             } else {
                 model_ptr->evaluate(&trial_solution_score, *move_ptr);

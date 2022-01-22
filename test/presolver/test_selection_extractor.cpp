@@ -55,12 +55,9 @@ TEST_F(TestSelectionExtractor, extract_selections_by_defined_order) {
      */
     model.create_constraint("c_3", x_2.selection());
 
-    model.categorize_variables();
-    model.categorize_constraints();
-
+    model.setup_structure();
     printemps::presolver::extract_selections_by_defined_order(&model, false);
-    model.categorize_variables();
-    model.categorize_constraints();
+    model.setup_structure();
 
     EXPECT_EQ(3, model.number_of_selection_constraints());
     EXPECT_EQ(3, static_cast<int>(model.selections().size()));
@@ -170,13 +167,10 @@ TEST_F(TestSelectionExtractor,
      */
     model.create_constraint("c_3", x_2.selection());
 
-    model.categorize_variables();
-    model.categorize_constraints();
-
+    model.setup_structure();
     printemps::presolver::extract_selections_by_number_of_variables_order(
         &model, true, false);
-    model.categorize_variables();
-    model.categorize_constraints();
+    model.setup_structure();
 
     EXPECT_EQ(3, model.number_of_selection_constraints());
     EXPECT_EQ(3, static_cast<int>(model.selections().size()));
@@ -287,13 +281,10 @@ TEST_F(TestSelectionExtractor,
      */
     model.create_constraint("c_3", x_2.selection());
 
-    model.categorize_variables();
-    model.categorize_constraints();
-
+    model.setup_structure();
     printemps::presolver::extract_selections_by_number_of_variables_order(
         &model, false, false);
-    model.categorize_variables();
-    model.categorize_constraints();
+    model.setup_structure();
 
     EXPECT_EQ(3, model.number_of_selection_constraints());
     EXPECT_EQ(3, static_cast<int>(model.selections().size()));
@@ -398,12 +389,9 @@ TEST_F(TestSelectionExtractor, extract_selections_independent) {
      */
     model.create_constraint("c_3", x_2.selection());
 
-    model.categorize_variables();
-    model.categorize_constraints();
-
+    model.setup_structure();
     printemps::presolver::extract_independent_selections(&model, false);
-    model.categorize_variables();
-    model.categorize_constraints();
+    model.setup_structure();
 
     EXPECT_EQ(1, model.number_of_selection_constraints());
     EXPECT_EQ(1, static_cast<int>(model.selections().size()));
