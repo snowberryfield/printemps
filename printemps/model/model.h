@@ -2037,39 +2037,29 @@ class Model {
         solution::SolutionScore *                           a_score_ptr,  //
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE,
         const solution::SolutionScore &a_CURRENT_SCORE) const noexcept {
-        bool is_feasibility_improvable = false;
-
         double total_violation  = a_CURRENT_SCORE.total_violation;
         double local_penalty    = a_CURRENT_SCORE.local_penalty;
         double constraint_value = 0.0;
-        double positive_part    = 0.0;
-        double negative_part    = 0.0;
         double violation_diff   = 0.0;
 
-        auto &     variable_ptr = a_MOVE.alterations.front().first;
-        const auto variable_value_diff =
+        const auto &variable_ptr = a_MOVE.alterations.front().first;
+        const auto  variable_value_diff =
             a_MOVE.alterations.front().second - variable_ptr->value();
-        auto &constraint_sensitivities =
+        const auto &constraint_sensitivities =
             variable_ptr->constraint_sensitivities();
 
         for (const auto &sensitivity : constraint_sensitivities) {
-            auto &constraint_ptr = sensitivity.first;
+            const auto &constraint_ptr = sensitivity.first;
             if (!constraint_ptr->is_enabled()) {
                 continue;
             }
             constraint_value = constraint_ptr->constraint_value() +
                                sensitivity.second * variable_value_diff;
 
-            positive_part = std::max(constraint_value, 0.0);
-            negative_part = std::max(-constraint_value, 0.0);
-
             if (constraint_ptr->is_less_or_equal()) {
-                violation_diff =
-                    positive_part - constraint_ptr->positive_part();
+                violation_diff = std::max(constraint_value, 0.0) -
+                                 constraint_ptr->positive_part();
                 total_violation += violation_diff;
-
-                is_feasibility_improvable |=
-                    violation_diff < -constant::EPSILON;
 
                 local_penalty +=
                     violation_diff *
@@ -2077,12 +2067,9 @@ class Model {
             }
 
             if (constraint_ptr->is_greater_or_equal()) {
-                violation_diff =
-                    negative_part - constraint_ptr->negative_part();
+                violation_diff = std::max(-constraint_value, 0.0) -
+                                 constraint_ptr->negative_part();
                 total_violation += violation_diff;
-
-                is_feasibility_improvable |=
-                    violation_diff < -constant::EPSILON;
 
                 local_penalty +=
                     violation_diff *
@@ -2102,7 +2089,8 @@ class Model {
                 m_objective.value() * this->sign() - objective;
         }
 
-        double global_penalty = total_violation * m_global_penalty_coefficient;
+        const double global_penalty =
+            total_violation * m_global_penalty_coefficient;
 
         a_score_ptr->objective                  = objective;
         a_score_ptr->objective_improvement      = objective_improvement;
@@ -2114,7 +2102,7 @@ class Model {
         a_score_ptr->is_feasible = !(total_violation > constant::EPSILON);
         a_score_ptr->is_objective_improvable =
             objective_improvement > constant::EPSILON;
-        a_score_ptr->is_feasibility_improvable = is_feasibility_improvable;
+        a_score_ptr->is_feasibility_improvable = true;  /// do not care.
     }
 
     /*************************************************************************/
@@ -2127,8 +2115,6 @@ class Model {
         double total_violation  = a_CURRENT_SCORE.total_violation;
         double local_penalty    = a_CURRENT_SCORE.local_penalty;
         double constraint_value = 0.0;
-        double positive_part    = 0.0;
-        double negative_part    = 0.0;
         double violation_diff   = 0.0;
 
         for (const auto &constraint_ptr : a_MOVE.related_constraint_ptrs) {
@@ -2137,23 +2123,16 @@ class Model {
             }
 
             if (a_MOVE.is_selection_move) {
-                auto &        alterations = a_MOVE.alterations;
-                std::uint64_t pattern =
-                    reinterpret_cast<std::uint64_t>(alterations[0].first) &
-                    reinterpret_cast<std::uint64_t>(alterations[1].first);
-
-                if (pattern & constraint_ptr->expression().selection_mask()) {
+                if (a_MOVE.hash &
+                    constraint_ptr->expression().selection_mask()) {
                     continue;
                 }
             }
             constraint_value = constraint_ptr->evaluate_constraint(a_MOVE);
 
-            positive_part = std::max(constraint_value, 0.0);
-            negative_part = std::max(-constraint_value, 0.0);
-
             if (constraint_ptr->is_less_or_equal()) {
-                violation_diff =
-                    positive_part - constraint_ptr->positive_part();
+                violation_diff = std::max(constraint_value, 0.0) -
+                                 constraint_ptr->positive_part();
                 total_violation += violation_diff;
 
                 is_feasibility_improvable |=
@@ -2165,8 +2144,8 @@ class Model {
             }
 
             if (constraint_ptr->is_greater_or_equal()) {
-                violation_diff =
-                    negative_part - constraint_ptr->negative_part();
+                violation_diff = std::max(-constraint_value, 0.0) -
+                                 constraint_ptr->negative_part();
                 total_violation += violation_diff;
 
                 is_feasibility_improvable |=
@@ -2187,7 +2166,8 @@ class Model {
                 m_objective.value() * this->sign() - objective;
         }
 
-        double global_penalty = total_violation * m_global_penalty_coefficient;
+        const double global_penalty =
+            total_violation * m_global_penalty_coefficient;
 
         a_score_ptr->objective                  = objective;
         a_score_ptr->objective_improvement      = objective_improvement;
