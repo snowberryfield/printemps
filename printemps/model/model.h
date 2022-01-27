@@ -1080,6 +1080,10 @@ class Model {
                         constraint_type_reference.integer_flow_ptrs.push_back(
                             &constraint);
                     }
+                    if (constraint.is_soft_selection()) {
+                        constraint_type_reference.soft_selection_ptrs.push_back(
+                            &constraint);
+                    }
                     if (constraint.is_equation_knapsack()) {
                         constraint_type_reference.equation_knapsack_ptrs
                             .push_back(&constraint);
@@ -1552,6 +1556,20 @@ class Model {
                     utility::to_string(                         //
                         compute_number_of_enabled_constraints(  //
                             presolved.integer_flow_ptrs),
+                        "%d") +
+                    ")",
+                true);
+
+            utility::print_info(                        //
+                " -- Soft Selection: " +                //
+                    utility::to_string(                 //
+                        compute_number_of_constraints(  //
+                            original.soft_selection_ptrs),
+                        "%d") +
+                    " (" +
+                    utility::to_string(                         //
+                        compute_number_of_enabled_constraints(  //
+                            presolved.soft_selection_ptrs),
                         "%d") +
                     ")",
                 true);
