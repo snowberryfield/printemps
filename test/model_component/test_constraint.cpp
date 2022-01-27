@@ -610,6 +610,18 @@ TEST_F(TestConstraint, setup_constraint_type_integer_flow) {
 }
 
 /*****************************************************************************/
+TEST_F(TestConstraint, setup_constraint_type_soft_selection) {
+    printemps::model::Model<int, double> model;
+    auto& x = model.create_variables("x", 10, 0, 1);
+    auto  constraint =
+        printemps::model_component::Constraint<int, double>::create_instance();
+    constraint.setup(x(0) + x(1) + x(2) + x(3) + x(4) - x(5),
+                     printemps::model_component::ConstraintSense::Equal);
+    constraint.setup_constraint_type();
+    EXPECT_TRUE(constraint.is_soft_selection());
+}
+
+/*****************************************************************************/
 TEST_F(TestConstraint, setup_constraint_type_equation_knapsack) {
     printemps::model::Model<int, double> model;
     auto coefficients = printemps::utility::sequence(10);
@@ -1918,6 +1930,12 @@ TEST_F(TestConstraint, is_binary_flow) {
 /*****************************************************************************/
 TEST_F(TestConstraint, is_integer_flow) {
     /// This method is tested in setup_constraint_type_integer_flow().
+}
+
+/*****************************************************************************/
+TEST_F(TestConstraint, is_soft_selection) {
+    /// This method is tested in
+    /// setup_constraint_type_soft_selection().
 }
 
 /*****************************************************************************/
