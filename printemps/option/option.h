@@ -37,6 +37,7 @@ struct OptionConstant {
     static constexpr bool DEFAULT_IS_ENABLED_AGGREGATION_MOVE    = true;
     static constexpr bool DEFAULT_IS_ENABLED_PRECEDENCE_MOVE     = false;
     static constexpr bool DEFAULT_IS_ENABLED_VARIABLE_BOUND_MOVE = false;
+    static constexpr bool DEFAULT_IS_ENABLED_SOFT_SELECTION_MOVE = false;
     static constexpr bool DEFAULT_IS_ENABLED_CHAIN_MOVE          = false;
     static constexpr bool DEFAULT_IS_ENABLED_TWO_FLIP_MOVE       = false;
     static constexpr bool DEFAULT_IS_ENABLED_USER_DEFINED_MOVE   = false;
@@ -81,6 +82,7 @@ struct Option {
     bool is_enabled_aggregation_move;
     bool is_enabled_precedence_move;
     bool is_enabled_variable_bound_move;
+    bool is_enabled_soft_selection_move;  // hidden
     bool is_enabled_chain_move;
     bool is_enabled_two_flip_move;  // hidden
     bool is_enabled_user_defined_move;
@@ -146,6 +148,8 @@ struct Option {
             OptionConstant::DEFAULT_IS_ENABLED_PRECEDENCE_MOVE;
         this->is_enabled_variable_bound_move =
             OptionConstant::DEFAULT_IS_ENABLED_VARIABLE_BOUND_MOVE;
+        this->is_enabled_soft_selection_move =
+            OptionConstant::DEFAULT_IS_ENABLED_SOFT_SELECTION_MOVE;
         this->is_enabled_chain_move =
             OptionConstant::DEFAULT_IS_ENABLED_CHAIN_MOVE;
         this->is_enabled_two_flip_move =
@@ -263,6 +267,10 @@ struct Option {
         utility::print(                               //
             " -- is_enabled_variable_bound_move: " +  //
             utility::to_string(this->is_enabled_variable_bound_move, "%d"));
+
+        utility::print(                               //
+            " -- is_enabled_soft_selection_move: " +  //
+            utility::to_string(this->is_enabled_soft_selection_move, "%d"));
 
         utility::print(                      //
             " -- is_enabled_chain_move: " +  //

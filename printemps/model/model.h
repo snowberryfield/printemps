@@ -630,6 +630,7 @@ class Model {
         const bool a_IS_ENABLED_AGGREGATION_MOVE,                       //
         const bool a_IS_ENABLED_PRECEDENCE_MOVE,                        //
         const bool a_IS_ENABLED_VARIABLE_BOUND_MOVE,                    //
+        const bool a_IS_ENABLED_SOFT_SELECTION_MOVE,                    //
         const bool a_IS_ENABLED_CHAIN_MOVE,                             //
         const bool a_IS_ENABLED_TWO_FLIP_MOVE,                          //
         const bool a_IS_ENABLED_USER_DEFINED_MOVE,                      //
@@ -753,6 +754,7 @@ class Model {
         this->setup_neighborhood(a_IS_ENABLED_AGGREGATION_MOVE,     //
                                  a_IS_ENABLED_PRECEDENCE_MOVE,      //
                                  a_IS_ENABLED_VARIABLE_BOUND_MOVE,  //
+                                 a_IS_ENABLED_SOFT_SELECTION_MOVE,  //
                                  a_IS_ENABLED_CHAIN_MOVE,           //
                                  a_IS_ENABLED_TWO_FLIP_MOVE,        //
                                  a_IS_ENABLED_USER_DEFINED_MOVE,    //
@@ -1132,6 +1134,7 @@ class Model {
         const bool a_IS_ENABLED_AGGREGATION_MOVE,     //
         const bool a_IS_ENABLED_PRECEDENCE_MOVE,      //
         const bool a_IS_ENABLED_VARIABLE_BOUND_MOVE,  //
+        const bool a_IS_ENABLED_SOFT_SELECTION_MOVE,  //
         const bool a_IS_ENABLED_CHAIN_MOVE,           //
         const bool a_IS_ENABLED_TWO_FLIP_MOVE,        //
         const bool a_IS_ENABLED_USER_DEFINED_MOVE,    //
@@ -1162,6 +1165,11 @@ class Model {
         if (a_IS_ENABLED_VARIABLE_BOUND_MOVE) {
             m_neighborhood.variable_bound().setup(
                 m_constraint_type_reference.variable_bound_ptrs);
+        }
+
+        if (a_IS_ENABLED_SOFT_SELECTION_MOVE) {
+            m_neighborhood.soft_selection().setup(
+                m_constraint_type_reference.soft_selection_ptrs);
         }
 
         if (a_IS_ENABLED_CHAIN_MOVE) {

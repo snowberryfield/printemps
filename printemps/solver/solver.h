@@ -168,6 +168,7 @@ class Solver {
                            m_master_option.is_enabled_aggregation_move,
                            m_master_option.is_enabled_precedence_move,
                            m_master_option.is_enabled_variable_bound_move,
+                           m_master_option.is_enabled_soft_selection_move,
                            m_master_option.is_enabled_chain_move,
                            m_master_option.is_enabled_two_flip_move,
                            m_master_option.is_enabled_user_defined_move,
@@ -1488,6 +1489,16 @@ class Solver {
                     }
                 }
 
+                /// Soft Selection
+                if (m_master_option.is_enabled_soft_selection_move) {
+                    if (m_model_ptr->neighborhood()
+                            .soft_selection()
+                            .is_enabled()) {
+                        m_model_ptr->neighborhood().soft_selection().disable();
+                        is_deactivated_special_neighborhood_move = true;
+                    }
+                }
+
                 /// Chain
                 if (m_master_option.is_enabled_chain_move) {
                     if (m_model_ptr->neighborhood().chain().is_enabled()) {
@@ -1536,6 +1547,18 @@ class Solver {
                                  .is_enabled()) {
                             m_model_ptr->neighborhood()
                                 .variable_bound()
+                                .enable();
+                            is_activated_special_neighborhood_move = true;
+                        }
+                    }
+
+                    /// Soft Selection
+                    if (m_master_option.is_enabled_soft_selection_move) {
+                        if (!m_model_ptr->neighborhood()
+                                 .soft_selection()
+                                 .is_enabled()) {
+                            m_model_ptr->neighborhood()
+                                .soft_selection()
                                 .enable();
                             is_activated_special_neighborhood_move = true;
                         }
