@@ -2138,10 +2138,12 @@ class Model {
         const solution::SolutionScore &a_CURRENT_SCORE) const noexcept {
         bool is_feasibility_improvable = false;
 
-        double total_violation  = a_CURRENT_SCORE.total_violation;
-        double local_penalty    = a_CURRENT_SCORE.local_penalty;
-        double constraint_value = 0.0;
-        double violation_diff   = 0.0;
+        double total_violation         = a_CURRENT_SCORE.total_violation;
+        double local_penalty           = a_CURRENT_SCORE.local_penalty;
+        double constraint_value        = 0.0;
+        double violation_diff_negative = 0.0;
+        double violation_diff_positive = 0.0;
+        double violation_diff          = 0.0;
 
         for (const auto &constraint_ptr : a_MOVE.related_constraint_ptrs) {
             if (!constraint_ptr->is_enabled()) {
@@ -2156,31 +2158,28 @@ class Model {
             }
             constraint_value = constraint_ptr->evaluate_constraint(a_MOVE);
 
+            violation_diff_negative = 0.0;
+            violation_diff_positive = 0.0;
+
             if (constraint_ptr->is_less_or_equal()) {
-                violation_diff = std::max(constraint_value, 0.0) -
-                                 constraint_ptr->positive_part();
-                total_violation += violation_diff;
-
-                is_feasibility_improvable |=
-                    violation_diff < -constant::EPSILON;
-
-                local_penalty +=
-                    violation_diff *
-                    constraint_ptr->local_penalty_coefficient_less();
+                violation_diff_positive = std::max(constraint_value, 0.0) -
+                                          constraint_ptr->positive_part();
             }
 
             if (constraint_ptr->is_greater_or_equal()) {
-                violation_diff = std::max(-constraint_value, 0.0) -
-                                 constraint_ptr->negative_part();
-                total_violation += violation_diff;
-
-                is_feasibility_improvable |=
-                    violation_diff < -constant::EPSILON;
-
-                local_penalty +=
-                    violation_diff *
-                    constraint_ptr->local_penalty_coefficient_greater();
+                violation_diff_negative = std::max(-constraint_value, 0.0) -
+                                          constraint_ptr->negative_part();
             }
+
+            violation_diff = violation_diff_positive + violation_diff_negative;
+            local_penalty +=
+                violation_diff_positive *
+                    constraint_ptr->local_penalty_coefficient_less() +
+                violation_diff_negative *
+                    constraint_ptr->local_penalty_coefficient_greater();
+
+            total_violation += violation_diff;
+            is_feasibility_improvable |= violation_diff < -constant::EPSILON;
         }
 
         double objective             = 0.0;
