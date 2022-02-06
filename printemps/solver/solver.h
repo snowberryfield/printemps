@@ -1348,7 +1348,10 @@ class Solver {
                     inital_tabu_tenure =
                         std::min(option.tabu_search.initial_tabu_tenure + 1,
                                  m_model_ptr->number_of_mutable_variables());
-
+                } else if (result.tabu_tenure ==
+                               option.tabu_search.initial_tabu_tenure &&
+                           current_intensity > previous_intensity) {
+                    inital_tabu_tenure = option.tabu_search.initial_tabu_tenure;
                 } else {
                     inital_tabu_tenure = std::max(
                         option.tabu_search.initial_tabu_tenure - 1,
