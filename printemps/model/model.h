@@ -823,7 +823,7 @@ class Model {
     constexpr void setup_structure(void) {
         this->categorize_variables();
         this->categorize_constraints();
-        this->setup_variable_related_zero_one_coefficient_constraints();
+        this->setup_variable_related_binary_coefficient_constraints();
         this->setup_variable_related_constraints();
         this->setup_variable_objective_sensitivities();
         this->setup_variable_constraint_sensitivities();
@@ -958,12 +958,11 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void setup_variable_related_zero_one_coefficient_constraints(
-        void) {
+    constexpr void setup_variable_related_binary_coefficient_constraints(void) {
         for (auto &&proxy : m_variable_proxies) {
             for (auto &&variable : proxy.flat_indexed_variables()) {
-                variable.reset_related_zero_one_coefficient_constraint_ptrs();
-                variable.setup_related_zero_one_coefficient_constraint_ptrs();
+                variable.reset_related_binary_coefficient_constraint_ptrs();
+                variable.setup_related_binary_coefficient_constraint_ptrs();
             }
         }
     }

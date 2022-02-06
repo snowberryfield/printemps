@@ -967,7 +967,7 @@ TEST_F(TestModel, setup_variable_related_constraints) {
 
     model.categorize_constraints();
     model.setup_variable_related_constraints();
-    model.setup_variable_related_zero_one_coefficient_constraints();
+    model.setup_variable_related_binary_coefficient_constraints();
 
     for (auto i = 0; i < 10; i++) {
         EXPECT_TRUE(x(i).related_constraint_ptrs().find(&g(0)) !=
@@ -993,36 +993,36 @@ TEST_F(TestModel, setup_variable_related_constraints) {
 
     for (auto i = 0; i < 10; i++) {
         EXPECT_TRUE(
-            x(i).related_zero_one_coefficient_constraint_ptrs().find(&g(0)) !=
-            x(i).related_zero_one_coefficient_constraint_ptrs().end());
+            x(i).related_binary_coefficient_constraint_ptrs().find(&g(0)) !=
+            x(i).related_binary_coefficient_constraint_ptrs().end());
         EXPECT_FALSE(
-            x(i).related_zero_one_coefficient_constraint_ptrs().find(&g(1)) !=
-            x(i).related_zero_one_coefficient_constraint_ptrs().end());
+            x(i).related_binary_coefficient_constraint_ptrs().find(&g(1)) !=
+            x(i).related_binary_coefficient_constraint_ptrs().end());
     }
 
     for (auto i = 0; i < 20; i++) {
         for (auto j = 0; j < 30; j++) {
             EXPECT_FALSE(
-                y(i, j).related_zero_one_coefficient_constraint_ptrs().find(
+                y(i, j).related_binary_coefficient_constraint_ptrs().find(
                     &g(0)) !=
-                y(i, j).related_zero_one_coefficient_constraint_ptrs().end());
+                y(i, j).related_binary_coefficient_constraint_ptrs().end());
             EXPECT_TRUE(
-                y(i, j).related_zero_one_coefficient_constraint_ptrs().find(
+                y(i, j).related_binary_coefficient_constraint_ptrs().find(
                     &g(1)) !=
-                y(i, j).related_zero_one_coefficient_constraint_ptrs().end());
+                y(i, j).related_binary_coefficient_constraint_ptrs().end());
             EXPECT_FALSE(
-                y(i, j).related_zero_one_coefficient_constraint_ptrs().find(
+                y(i, j).related_binary_coefficient_constraint_ptrs().find(
                     &g(2)) !=
-                y(i, j).related_zero_one_coefficient_constraint_ptrs().end());
+                y(i, j).related_binary_coefficient_constraint_ptrs().end());
         }
     }
     EXPECT_FALSE(
-        x(0).related_zero_one_coefficient_constraint_ptrs().find(&g(2)) !=
-        x(0).related_zero_one_coefficient_constraint_ptrs().end());
+        x(0).related_binary_coefficient_constraint_ptrs().find(&g(2)) !=
+        x(0).related_binary_coefficient_constraint_ptrs().end());
 }
 
 /*****************************************************************************/
-TEST_F(TestModel, setup_variable_related_zero_one_coefficient_constraints) {
+TEST_F(TestModel, setup_variable_related_binary_coefficient_constraints) {
     /// This method is tested in setup_variable_related_constraints().
 }
 
@@ -1880,8 +1880,10 @@ TEST_F(TestModel, evaluate) {
         [[maybe_unused]] auto& h =
             model.create_constraint("h", x(0) + x(1) <= 1);
 
-        g(0).local_penalty_coefficient_less() = 100;
-        h(0).local_penalty_coefficient_less() = 100;
+        g(0).local_penalty_coefficient_less()    = 100;
+        g(0).local_penalty_coefficient_greater() = 100;
+        h(0).local_penalty_coefficient_less()    = 100;
+        h(0).local_penalty_coefficient_greater() = 100;
 
         model.minimize(p);
         model.set_global_penalty_coefficient(10000);
@@ -2057,8 +2059,10 @@ TEST_F(TestModel, evaluate) {
         [[maybe_unused]] auto& h =
             model.create_constraint("h", x(0) + x(1) <= 1);
 
-        g(0).local_penalty_coefficient_less() = 100;
-        h(0).local_penalty_coefficient_less() = 100;
+        g(0).local_penalty_coefficient_less()    = 100;
+        g(0).local_penalty_coefficient_greater() = 100;
+        h(0).local_penalty_coefficient_less()    = 100;
+        h(0).local_penalty_coefficient_greater() = 100;
 
         model.maximize(p);
         model.set_global_penalty_coefficient(10000);
