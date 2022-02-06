@@ -59,8 +59,7 @@ TEST_F(TestVariable, initialize) {
               variable.sense());
     EXPECT_EQ(nullptr, variable.selection_ptr());
     EXPECT_TRUE(variable.related_constraint_ptrs().empty());
-    EXPECT_TRUE(
-        variable.related_zero_one_coefficient_constraint_ptrs().empty());
+    EXPECT_TRUE(variable.related_binary_coefficient_constraint_ptrs().empty());
     EXPECT_EQ(nullptr, variable.dependent_constraint_ptr());
     EXPECT_TRUE(variable.constraint_sensitivities().empty());
     EXPECT_EQ(0.0, variable.objective_sensitivity());
@@ -525,21 +524,21 @@ TEST_F(TestVariable, related_constraint_ptrs) {
 }
 
 /*****************************************************************************/
-TEST_F(TestVariable, setup_related_zero_one_coefficient_constraint_ptrs) {
+TEST_F(TestVariable, setup_related_binary_coefficient_constraint_ptrs) {
     /// This method is tested in
-    /// Model.setup_variable_related_zero_one_coefficient_constraint_ptrs().
+    /// Model.setup_variable_related_binary_coefficient_constraint_ptrs().
 }
 
 /*****************************************************************************/
-TEST_F(TestVariable, reset_setup_zero_one_coefficient_constraint_ptrs) {
+TEST_F(TestVariable, reset_setup_binary_coefficient_constraint_ptrs) {
     /// This method is tested in
-    /// Model.setup_variable_related_zero_one_coefficient_constraint_ptrs().
+    /// Model.setup_variable_related_binary_coefficient_constraint_ptrs().
 }
 
 /*****************************************************************************/
-TEST_F(TestVariable, related_zero_one_coefficient_constraint_ptrs) {
+TEST_F(TestVariable, related_binary_coefficient_constraint_ptrs) {
     /// This method is tested in
-    /// Model.setup_variable_related_zero_one_coefficient_constraint_ptrs().
+    /// Model.setup_variable_related_binary_coefficient_constraint_ptrs().
 }
 
 /*****************************************************************************/

@@ -61,7 +61,7 @@ class Variable : public multi_array::AbstractMultiArrayElement {
         m_related_constraint_ptrs;
 
     std::unordered_set<Constraint<T_Variable, T_Expression> *>
-        m_related_zero_one_coefficient_constraint_ptrs;
+        m_related_binary_coefficient_constraint_ptrs;
 
     Constraint<T_Variable, T_Expression> *m_dependent_constraint_ptr;
 
@@ -389,7 +389,7 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr void setup_related_zero_one_coefficient_constraint_ptrs(
+    inline constexpr void setup_related_binary_coefficient_constraint_ptrs(
         void) {
         /**
          * NOTE: This method must be called after constraint categorization.
@@ -400,29 +400,29 @@ class Variable : public multi_array::AbstractMultiArrayElement {
                 constraint_ptr->is_set_covering() ||
                 constraint_ptr->is_cardinality() ||
                 constraint_ptr->is_invariant_knapsack()) {
-                m_related_zero_one_coefficient_constraint_ptrs.insert(
+                m_related_binary_coefficient_constraint_ptrs.insert(
                     constraint_ptr);
             }
         }
     }
 
     /*************************************************************************/
-    inline constexpr void reset_related_zero_one_coefficient_constraint_ptrs(
+    inline constexpr void reset_related_binary_coefficient_constraint_ptrs(
         void) {
-        m_related_zero_one_coefficient_constraint_ptrs.clear();
+        m_related_binary_coefficient_constraint_ptrs.clear();
     }
 
     /*************************************************************************/
     inline constexpr std::unordered_set<Constraint<T_Variable, T_Expression> *>
-        &related_zero_one_coefficient_constraint_ptrs(void) {
-        return m_related_zero_one_coefficient_constraint_ptrs;
+        &related_binary_coefficient_constraint_ptrs(void) {
+        return m_related_binary_coefficient_constraint_ptrs;
     }
 
     /*************************************************************************/
     inline constexpr const std::unordered_set<
         Constraint<T_Variable, T_Expression> *>
-        &related_zero_one_coefficient_constraint_ptrs(void) const {
-        return m_related_zero_one_coefficient_constraint_ptrs;
+        &related_binary_coefficient_constraint_ptrs(void) const {
+        return m_related_binary_coefficient_constraint_ptrs;
     }
 
     /*************************************************************************/
