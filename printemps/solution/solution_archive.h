@@ -169,7 +169,7 @@ class SolutionArchive {
             << std::endl;
 
         indent_level++;
-        auto&     solutions      = this->m_solutions;
+        auto&     solutions      = m_solutions;
         const int SOLUTIONS_SIZE = solutions.size();
         for (auto i = 0; i < SOLUTIONS_SIZE; i++) {
             ofs << utility::indent_spaces(indent_level) << "{" << std::endl;

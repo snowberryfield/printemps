@@ -30,8 +30,7 @@ TEST_F(TestIntegerMoveGenerator, setup) {
     x(0).fix();
     x(9).fix();
 
-    model.categorize_variables();
-    model.categorize_constraints();
+    model.setup_structure();
 
     auto integer_variable_ptrs =
         model.variable_reference().integer_variable_ptrs;

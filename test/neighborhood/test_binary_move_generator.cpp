@@ -25,8 +25,7 @@ TEST_F(TestBinaryMoveGenerator, setup) {
     auto& x = model.create_variables("x", 10, 0, 1);
     x(0).fix_by(0);
 
-    model.categorize_variables();
-    model.categorize_constraints();
+    model.setup_structure();
 
     auto binary_variable_ptrs = model.variable_reference().binary_variable_ptrs;
 

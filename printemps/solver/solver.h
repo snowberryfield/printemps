@@ -168,10 +168,12 @@ class Solver {
                            m_master_option.is_enabled_aggregation_move,
                            m_master_option.is_enabled_precedence_move,
                            m_master_option.is_enabled_variable_bound_move,
+                           m_master_option.is_enabled_soft_selection_move,
                            m_master_option.is_enabled_chain_move,
                            m_master_option.is_enabled_two_flip_move,
                            m_master_option.is_enabled_user_defined_move,
                            m_master_option.selection_mode,
+                           m_master_option.initial_penalty_coefficient,
                            m_master_option.verbose >= option::verbose::Outer);
 
         /**
@@ -242,7 +244,7 @@ class Solver {
         for (auto&& proxy : m_model_ptr->constraint_proxies()) {
             for (auto&& constraint : proxy.flat_indexed_constraints()) {
                 constraint.global_penalty_coefficient() =
-                    m_master_option.initial_penalty_coefficient;
+                    m_model_ptr->global_penalty_coefficient();
                 constraint.reset_local_penalty_coefficient();
             }
         }
@@ -608,9 +610,9 @@ class Solver {
 
         bool is_penalty_coefficient_exceed_initial_value = false;
 
-        int employing_local_augmented_solution_count  = 0;
-        int employing_global_augmented_solution_count = 0;
-        int employing_previous_solution_count         = 0;
+        int employing_local_augmented_solution_count_after_relaxation  = 0;
+        int employing_global_augmented_solution_count_after_relaxation = 0;
+        int employing_previous_solution_count_after_relaxation         = 0;
 
         TabuSearchTrendLogger logger;
 
@@ -1029,18 +1031,18 @@ class Solver {
                     result_global_augmented_incumbent_solution;
                 m_state.current_solution_score =
                     result_global_augmented_incumbent_score;
-                employing_global_augmented_solution_count++;
+                employing_global_augmented_solution_count_after_relaxation++;
             } else if (employing_local_augmented_solution_flag) {
                 m_state.current_solution =
                     result_local_augmented_incumbent_solution;
                 m_state.current_solution_score =
                     result_local_augmented_incumbent_score;
-                employing_local_augmented_solution_count++;
+                employing_local_augmented_solution_count_after_relaxation++;
             } else if (employing_previous_solution_flag) {
                 m_state.current_solution = m_state.previous_solution;
                 m_state.current_solution_score =
                     m_state.previous_solution_score;
-                employing_previous_solution_count++;
+                employing_previous_solution_count_after_relaxation++;
             } else {
                 throw std::logic_error(utility::format_error_location(
                     __FILE__, __LINE__, __func__,
@@ -1075,9 +1077,11 @@ class Solver {
                     penalty_coefficient_relaxing_rate =
                         std::max(PENALTY_COEFFICIENT_RELAXING_RATE_MIN,
                                  penalty_coefficient_relaxing_rate * 0.5);
-                } else if (employing_previous_solution_count >
-                           std::max(employing_global_augmented_solution_count,
-                                    employing_local_augmented_solution_count)) {
+                } else if (
+                    employing_previous_solution_count_after_relaxation >
+                    std::max(
+                        employing_global_augmented_solution_count_after_relaxation,
+                        employing_local_augmented_solution_count_after_relaxation)) {
                     /**
                      * Increase penalty coefficient relaxing rate if previous
                      * solutions are most frequently employed as initial
@@ -1098,7 +1102,10 @@ class Solver {
                          penalty_coefficient_relaxing_rate);
                 }
 
-                iteration_after_relaxation = 0;
+                iteration_after_relaxation                                 = 0;
+                employing_previous_solution_count_after_relaxation         = 0;
+                employing_global_augmented_solution_count_after_relaxation = 0;
+                employing_local_augmented_solution_count_after_relaxation  = 0;
                 relaxation_count++;
             } else {
                 iteration_after_relaxation++;
@@ -1341,7 +1348,10 @@ class Solver {
                     inital_tabu_tenure =
                         std::min(option.tabu_search.initial_tabu_tenure + 1,
                                  m_model_ptr->number_of_mutable_variables());
-
+                } else if (result.tabu_tenure ==
+                               option.tabu_search.initial_tabu_tenure &&
+                           current_intensity > previous_intensity) {
+                    inital_tabu_tenure = option.tabu_search.initial_tabu_tenure;
                 } else {
                     inital_tabu_tenure = std::max(
                         option.tabu_search.initial_tabu_tenure - 1,
@@ -1487,6 +1497,16 @@ class Solver {
                     }
                 }
 
+                /// Soft Selection
+                if (m_master_option.is_enabled_soft_selection_move) {
+                    if (m_model_ptr->neighborhood()
+                            .soft_selection()
+                            .is_enabled()) {
+                        m_model_ptr->neighborhood().soft_selection().disable();
+                        is_deactivated_special_neighborhood_move = true;
+                    }
+                }
+
                 /// Chain
                 if (m_master_option.is_enabled_chain_move) {
                     if (m_model_ptr->neighborhood().chain().is_enabled()) {
@@ -1535,6 +1555,18 @@ class Solver {
                                  .is_enabled()) {
                             m_model_ptr->neighborhood()
                                 .variable_bound()
+                                .enable();
+                            is_activated_special_neighborhood_move = true;
+                        }
+                    }
+
+                    /// Soft Selection
+                    if (m_master_option.is_enabled_soft_selection_move) {
+                        if (!m_model_ptr->neighborhood()
+                                 .soft_selection()
+                                 .is_enabled()) {
+                            m_model_ptr->neighborhood()
+                                .soft_selection()
                                 .enable();
                             is_activated_special_neighborhood_move = true;
                         }

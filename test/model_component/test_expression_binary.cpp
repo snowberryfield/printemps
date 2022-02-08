@@ -12,8 +12,10 @@ namespace {
 /*****************************************************************************/
 class TestExpressionBinary : public ::testing::Test {
    protected:
-    printemps::utility::IntegerUniformRandom m_random_integer;
-    printemps::utility::IntegerUniformRandom m_random_positive_integer;
+    printemps::utility::UniformRandom<std::uniform_int_distribution<>, int>
+        m_random_integer;
+    printemps::utility::UniformRandom<std::uniform_int_distribution<>, int>
+        m_random_positive_integer;
 
     virtual void SetUp(void) {
         m_random_integer.setup(-1000, 1000, 0);

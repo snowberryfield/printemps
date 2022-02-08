@@ -27,6 +27,7 @@ struct ConstraintTypeReference {
     std::vector<Constraint<T_Variable, T_Expression> *> multiple_covering_ptrs;
     std::vector<Constraint<T_Variable, T_Expression> *> binary_flow_ptrs;
     std::vector<Constraint<T_Variable, T_Expression> *> integer_flow_ptrs;
+    std::vector<Constraint<T_Variable, T_Expression> *> soft_selection_ptrs;
     std::vector<Constraint<T_Variable, T_Expression> *> equation_knapsack_ptrs;
     std::vector<Constraint<T_Variable, T_Expression> *> bin_packing_ptrs;
     std::vector<Constraint<T_Variable, T_Expression> *> knapsack_ptrs;
@@ -57,6 +58,7 @@ struct ConstraintTypeReference {
         this->multiple_covering_ptrs.clear();
         this->binary_flow_ptrs.clear();
         this->integer_flow_ptrs.clear();
+        this->soft_selection_ptrs.clear();
         this->equation_knapsack_ptrs.clear();
         this->bin_packing_ptrs.clear();
         this->knapsack_ptrs.clear();
