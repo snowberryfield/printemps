@@ -971,6 +971,14 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
+    inline constexpr void limit_local_penalty_coefficient(void) noexcept {
+        m_local_penalty_coefficient_less = std::min(
+            m_local_penalty_coefficient_less, m_global_penalty_coefficient);
+        m_local_penalty_coefficient_greater = std::min(
+            m_local_penalty_coefficient_greater, m_global_penalty_coefficient);
+    }
+
+    /*************************************************************************/
     inline constexpr bool is_linear(void) const noexcept {
         return m_is_linear;
     }
