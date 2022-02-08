@@ -8,7 +8,7 @@
 
 namespace {
 /*****************************************************************************/
-class TestPrecedenceMoveGenerator : public ::testing::Test {
+class TestSoftSelectionMoveGenerator : public ::testing::Test {
    protected:
     virtual void SetUp(void) {
         /// nothing to do
@@ -19,45 +19,51 @@ class TestPrecedenceMoveGenerator : public ::testing::Test {
 };
 
 /*****************************************************************************/
-TEST_F(TestPrecedenceMoveGenerator, setup) {
+TEST_F(TestSoftSelectionMoveGenerator, setup) {
     printemps::model::Model<int, double> model;
 
-    auto& x = model.create_variables("x", 2, -10, 10);
-    auto& c = model.create_constraint("c", x[0] <= x[1]);
+    auto& x = model.create_variables("x", 10, 0, 1);
+    auto& y = model.create_variable("y", 0, 1);
+    auto& c = model.create_constraint("c", -x.sum() == -y);
 
     model.setup_structure();
 
-    auto precedence_ptrs = model.constraint_type_reference().precedence_ptrs;
+    auto soft_selection_ptrs =
+        model.constraint_type_reference().soft_selection_ptrs;
 
-    model.neighborhood().precedence().setup(precedence_ptrs);
-    model.neighborhood().precedence().update_moves(true, false, false, false);
+    model.neighborhood().soft_selection().setup(soft_selection_ptrs);
 
-    auto& moves = model.neighborhood().precedence().moves();
-    auto& flags = model.neighborhood().precedence().flags();
-    EXPECT_EQ(2, static_cast<int>(moves.size()));
-    EXPECT_EQ(2, static_cast<int>(flags.size()));
+    auto& moves = model.neighborhood().soft_selection().moves();
+    auto& flags = model.neighborhood().soft_selection().flags();
+    EXPECT_EQ(20, static_cast<int>(moves.size()));
+    EXPECT_EQ(20, static_cast<int>(flags.size()));
 
-    /// (x,y) = (0,0) -> (1,1)
+    /// (x_0,y) = (0,0) -> (1,1)
+    EXPECT_FALSE(moves[0].is_univariable_move);
     EXPECT_TRUE(moves[0].is_special_neighborhood_move);
     EXPECT_EQ(0, moves[0].overlap_rate);
     EXPECT_EQ(2, static_cast<int>(moves[0].alterations.size()));
-    EXPECT_EQ(1, moves[0].alterations[0].second);
-    EXPECT_EQ(1, moves[0].alterations[1].second);
-    EXPECT_FALSE(moves[0].is_univariable_move);
-    EXPECT_EQ(printemps::neighborhood::MoveSense::Precedence, moves[0].sense);
+    EXPECT_EQ(&(y[0]), moves[0].alterations[1].first);
+    EXPECT_EQ(0, moves[0].alterations[0].second);
+    EXPECT_EQ(0, moves[0].alterations[1].second);
+    EXPECT_EQ(printemps::neighborhood::MoveSense::SoftSelection,
+              moves[0].sense);
     EXPECT_TRUE(moves[0].related_constraint_ptrs.find(&c[0]) !=
                 moves[0].related_constraint_ptrs.end());
 
-    /// (x,y) = (0,0) -> (-1,-1)
+    /// (x_0,y) = (1,1) -> (0,0)
+    EXPECT_FALSE(moves[1].is_univariable_move);
     EXPECT_TRUE(moves[1].is_special_neighborhood_move);
     EXPECT_EQ(0, moves[1].overlap_rate);
     EXPECT_EQ(2, static_cast<int>(moves[1].alterations.size()));
-    EXPECT_EQ(-1, moves[1].alterations[0].second);
-    EXPECT_EQ(-1, moves[1].alterations[1].second);
-    EXPECT_FALSE(moves[1].is_univariable_move);
-    EXPECT_EQ(printemps::neighborhood::MoveSense::Precedence, moves[1].sense);
+    EXPECT_EQ(&(y[0]), moves[1].alterations[1].first);
+    EXPECT_EQ(1, moves[1].alterations[0].second);
+    EXPECT_EQ(1, moves[1].alterations[1].second);
+    EXPECT_EQ(printemps::neighborhood::MoveSense::SoftSelection,
+              moves[1].sense);
     EXPECT_TRUE(moves[1].related_constraint_ptrs.find(&c[0]) !=
                 moves[1].related_constraint_ptrs.end());
+
 }  // namespace
 
 }  // namespace

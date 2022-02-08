@@ -12,8 +12,10 @@ namespace {
 /*****************************************************************************/
 class TestConstraint : public ::testing::Test {
    protected:
-    printemps::utility::IntegerUniformRandom m_random_integer;
-    printemps::utility::IntegerUniformRandom m_random_positive_integer;
+    printemps::utility::UniformRandom<std::uniform_int_distribution<>, int>
+        m_random_integer;
+    printemps::utility::UniformRandom<std::uniform_int_distribution<>, int>
+        m_random_positive_integer;
 
     virtual void SetUp(void) {
         m_random_integer.setup(-1000, 1000, 0);
@@ -605,6 +607,18 @@ TEST_F(TestConstraint, setup_constraint_type_integer_flow) {
                      printemps::model_component::ConstraintSense::Equal);
     constraint.setup_constraint_type();
     EXPECT_TRUE(constraint.is_integer_flow());
+}
+
+/*****************************************************************************/
+TEST_F(TestConstraint, setup_constraint_type_soft_selection) {
+    printemps::model::Model<int, double> model;
+    auto& x = model.create_variables("x", 10, 0, 1);
+    auto  constraint =
+        printemps::model_component::Constraint<int, double>::create_instance();
+    constraint.setup(x(0) + x(1) + x(2) + x(3) + x(4) - x(5),
+                     printemps::model_component::ConstraintSense::Equal);
+    constraint.setup_constraint_type();
+    EXPECT_TRUE(constraint.is_soft_selection());
 }
 
 /*****************************************************************************/
@@ -1355,34 +1369,6 @@ TEST_F(TestConstraint, evaluate_expression_arg_move) {
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraint, evaluate_constraint_with_mask) {
-    auto constraint =
-        printemps::model_component::Constraint<int, double>::create_instance();
-
-    auto variable_0 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto variable_1 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto variable_2 =
-        printemps::model_component::Variable<int, double>::create_instance();
-
-    constraint = variable_0 - variable_1 + 2 * variable_2 + 3 == 0;
-
-    constraint.expression().setup_fixed_sensitivities();
-    constraint.expression().setup_mask();
-
-    variable_0 = 0;
-    variable_1 = 0;
-    variable_2 = 0;
-
-    constraint.update();
-
-    EXPECT_EQ(4, constraint.evaluate_constraint_with_mask(&variable_0, 1));
-    EXPECT_EQ(2, constraint.evaluate_constraint_with_mask(&variable_1, 1));
-    EXPECT_EQ(5, constraint.evaluate_constraint_with_mask(&variable_2, 1));
-}
-
-/*****************************************************************************/
 TEST_F(TestConstraint, evaluate_violation_function_arg_void) {
     auto expression =
         printemps::model_component::Expression<int, double>::create_instance();
@@ -1944,6 +1930,12 @@ TEST_F(TestConstraint, is_binary_flow) {
 /*****************************************************************************/
 TEST_F(TestConstraint, is_integer_flow) {
     /// This method is tested in setup_constraint_type_integer_flow().
+}
+
+/*****************************************************************************/
+TEST_F(TestConstraint, is_soft_selection) {
+    /// This method is tested in
+    /// setup_constraint_type_soft_selection().
 }
 
 /*****************************************************************************/

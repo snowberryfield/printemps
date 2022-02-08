@@ -46,6 +46,8 @@ class Model {
     bool m_is_solved;
     bool m_is_feasible;
 
+    double m_global_penalty_coefficient;
+
     std::vector<model_component::Selection<T_Variable, T_Expression>>
         m_selections;
 
@@ -118,6 +120,8 @@ class Model {
         m_is_minimization            = true;
         m_is_solved                  = false;
         m_is_feasible                = false;
+
+        m_global_penalty_coefficient = 0.0;
 
         m_selections.clear();
         m_variable_reference_original.initialize();
@@ -626,11 +630,13 @@ class Model {
         const bool a_IS_ENABLED_AGGREGATION_MOVE,                       //
         const bool a_IS_ENABLED_PRECEDENCE_MOVE,                        //
         const bool a_IS_ENABLED_VARIABLE_BOUND_MOVE,                    //
+        const bool a_IS_ENABLED_SOFT_SELECTION_MOVE,                    //
         const bool a_IS_ENABLED_CHAIN_MOVE,                             //
         const bool a_IS_ENABLED_TWO_FLIP_MOVE,                          //
         const bool a_IS_ENABLED_USER_DEFINED_MOVE,                      //
         const option::selection_mode::SelectionMode &a_SELECTION_MODE,  //
-        const bool                                   a_IS_ENABLED_PRINT) {
+        const double a_GLOBAL_PENALTY_COEFFICIENT,                      //
+        const bool   a_IS_ENABLED_PRINT) {
         verifier::verify_problem(this, a_IS_ENABLED_PRINT);
 
         /**
@@ -649,13 +655,9 @@ class Model {
         this->setup_is_enabled_fast_evaluation();
 
         /**
-         * Initial categorization.
+         * Initial structure analysis.
          */
-        this->categorize_variables();
-        this->categorize_constraints();
-        this->setup_variable_related_zero_one_coefficient_constraints();
-        this->setup_variable_related_constraints();
-        this->setup_variable_sensitivities();
+        this->setup_structure();
 
         /**
          * Store original categorization results. The final categorization would
@@ -680,11 +682,7 @@ class Model {
         if (a_IS_ENABLED_PRESOLVE && m_is_linear &&
             m_constraint_type_reference.intermediate_ptrs.size() > 0) {
             while (true) {
-                this->categorize_variables();
-                this->categorize_constraints();
-                this->setup_variable_related_zero_one_coefficient_constraints();
-                this->setup_variable_related_constraints();
-                this->setup_variable_sensitivities();
+                this->setup_structure();
                 if (presolver::extract_dependent_intermediate_variables(
                         this,  //
                         a_IS_ENABLED_PRINT) == 0) {
@@ -692,11 +690,7 @@ class Model {
                 }
 
                 while (true) {
-                    this->categorize_variables();
-                    this->categorize_constraints();
-                    this->setup_variable_related_zero_one_coefficient_constraints();
-                    this->setup_variable_related_constraints();
-                    this->setup_variable_sensitivities();
+                    this->setup_structure();
                     if (presolver::eliminate_dependent_intermediate_variables(
                             this,  //
                             a_IS_ENABLED_PRINT) == 0) {
@@ -729,16 +723,12 @@ class Model {
         }
 
         /**
-         * Categorize variables and constraints again if there are new
-         * removed(disabled) variables or constraints.
+         * Perform setup_structure again if there are new removed(disabled)
+         * variables or constraints.
          */
         if (number_of_removed_variables > 0 ||
             number_of_removed_constraints > 0) {
-            this->categorize_variables();
-            this->categorize_constraints();
-            this->setup_variable_related_zero_one_coefficient_constraints();
-            this->setup_variable_related_constraints();
-            this->setup_variable_sensitivities();
+            this->setup_structure();
         }
 
         /**
@@ -754,13 +744,9 @@ class Model {
         }
 
         /**
-         * Final categorization.
+         * Final structure analysis.
          */
-        this->categorize_variables();
-        this->categorize_constraints();
-        this->setup_variable_related_zero_one_coefficient_constraints();
-        this->setup_variable_related_constraints();
-        this->setup_variable_sensitivities();
+        this->setup_structure();
 
         /**
          * Setup the neighborhood generators.
@@ -768,6 +754,7 @@ class Model {
         this->setup_neighborhood(a_IS_ENABLED_AGGREGATION_MOVE,     //
                                  a_IS_ENABLED_PRECEDENCE_MOVE,      //
                                  a_IS_ENABLED_VARIABLE_BOUND_MOVE,  //
+                                 a_IS_ENABLED_SOFT_SELECTION_MOVE,  //
                                  a_IS_ENABLED_CHAIN_MOVE,           //
                                  a_IS_ENABLED_TWO_FLIP_MOVE,        //
                                  a_IS_ENABLED_USER_DEFINED_MOVE,    //
@@ -810,11 +797,36 @@ class Model {
          * Setup the fixed sensitivities for fast evaluation.
          */
         this->setup_fixed_sensitivities(a_IS_ENABLED_PRINT);
+
+        /**
+         * Setup the bitmask for computational efficiency of evaluating
+         * neighborhood solutions with selection moves.
+         */
         for (auto &&proxy : m_constraint_proxies) {
             for (auto &&constraint : proxy.flat_indexed_constraints()) {
-                constraint.expression().setup_mask();
+                constraint.expression().setup_selection_mask();
             }
         }
+
+        /**
+         * Setup the constraint sensitivities of variables.
+         */
+        this->setup_variable_constraint_sensitivities();
+
+        /**
+         * Store the global penalty coefficient for evaluation.
+         */
+        m_global_penalty_coefficient = a_GLOBAL_PENALTY_COEFFICIENT;
+    }
+
+    /*************************************************************************/
+    constexpr void setup_structure(void) {
+        this->categorize_variables();
+        this->categorize_constraints();
+        this->setup_variable_related_binary_coefficient_constraints();
+        this->setup_variable_related_constraints();
+        this->setup_variable_objective_sensitivities();
+        this->setup_variable_constraint_sensitivities();
     }
 
     /*************************************************************************/
@@ -921,7 +933,14 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void setup_variable_sensitivities(void) {
+    constexpr void setup_variable_objective_sensitivities(void) {
+        for (auto &&sensitivity : m_objective.expression().sensitivities()) {
+            sensitivity.first->set_objective_sensitivity(sensitivity.second);
+        }
+    }
+
+    /*************************************************************************/
+    constexpr void setup_variable_constraint_sensitivities(void) {
         for (auto &&proxy : m_variable_proxies) {
             for (auto &&variable : proxy.flat_indexed_variables()) {
                 variable.reset_constraint_sensitivities();
@@ -936,25 +955,14 @@ class Model {
                 }
             }
         }
-
-        for (auto &&proxy : m_variable_proxies) {
-            for (auto &&variable : proxy.flat_indexed_variables()) {
-                variable.setup_uniform_sensitivity();
-            }
-        }
-
-        for (auto &&sensitivity : m_objective.expression().sensitivities()) {
-            sensitivity.first->set_objective_sensitivity(sensitivity.second);
-        }
     }
 
     /*************************************************************************/
-    constexpr void setup_variable_related_zero_one_coefficient_constraints(
-        void) {
+    constexpr void setup_variable_related_binary_coefficient_constraints(void) {
         for (auto &&proxy : m_variable_proxies) {
             for (auto &&variable : proxy.flat_indexed_variables()) {
-                variable.reset_related_zero_one_coefficient_constraint_ptrs();
-                variable.setup_related_zero_one_coefficient_constraint_ptrs();
+                variable.reset_related_binary_coefficient_constraint_ptrs();
+                variable.setup_related_binary_coefficient_constraint_ptrs();
             }
         }
     }
@@ -1073,6 +1081,10 @@ class Model {
                         constraint_type_reference.integer_flow_ptrs.push_back(
                             &constraint);
                     }
+                    if (constraint.is_soft_selection()) {
+                        constraint_type_reference.soft_selection_ptrs.push_back(
+                            &constraint);
+                    }
                     if (constraint.is_equation_knapsack()) {
                         constraint_type_reference.equation_knapsack_ptrs
                             .push_back(&constraint);
@@ -1121,6 +1133,7 @@ class Model {
         const bool a_IS_ENABLED_AGGREGATION_MOVE,     //
         const bool a_IS_ENABLED_PRECEDENCE_MOVE,      //
         const bool a_IS_ENABLED_VARIABLE_BOUND_MOVE,  //
+        const bool a_IS_ENABLED_SOFT_SELECTION_MOVE,  //
         const bool a_IS_ENABLED_CHAIN_MOVE,           //
         const bool a_IS_ENABLED_TWO_FLIP_MOVE,        //
         const bool a_IS_ENABLED_USER_DEFINED_MOVE,    //
@@ -1151,6 +1164,11 @@ class Model {
         if (a_IS_ENABLED_VARIABLE_BOUND_MOVE) {
             m_neighborhood.variable_bound().setup(
                 m_constraint_type_reference.variable_bound_ptrs);
+        }
+
+        if (a_IS_ENABLED_SOFT_SELECTION_MOVE) {
+            m_neighborhood.soft_selection().setup(
+                m_constraint_type_reference.soft_selection_ptrs);
         }
 
         if (a_IS_ENABLED_CHAIN_MOVE) {
@@ -1233,6 +1251,17 @@ class Model {
         }
 
         return number_of_newly_fixed_variables;
+    }
+
+    /*************************************************************************/
+    inline constexpr void set_global_penalty_coefficient(
+        const double a_GLOBAL_PENALTY_COEFFICIENT) {
+        m_global_penalty_coefficient = a_GLOBAL_PENALTY_COEFFICIENT;
+    }
+
+    /*************************************************************************/
+    inline constexpr double global_penalty_coefficient(void) const noexcept {
+        return m_global_penalty_coefficient;
     }
 
     /*************************************************************************/
@@ -1534,6 +1563,20 @@ class Model {
                     utility::to_string(                         //
                         compute_number_of_enabled_constraints(  //
                             presolved.integer_flow_ptrs),
+                        "%d") +
+                    ")",
+                true);
+
+            utility::print_info(                        //
+                " -- Soft Selection: " +                //
+                    utility::to_string(                 //
+                        compute_number_of_constraints(  //
+                            original.soft_selection_ptrs),
+                        "%d") +
+                    " (" +
+                    utility::to_string(                         //
+                        compute_number_of_enabled_constraints(  //
+                            presolved.soft_selection_ptrs),
                         "%d") +
                     ")",
                 true);
@@ -1931,7 +1974,11 @@ class Model {
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE,
         const solution::SolutionScore &a_CURRENT_SCORE) const noexcept {
         solution::SolutionScore score;
-        this->evaluate(&score, a_MOVE, a_CURRENT_SCORE);
+        if (a_MOVE.alterations.size() == 1) {
+            this->evaluate_single(&score, a_MOVE, a_CURRENT_SCORE);
+        } else {
+            this->evaluate_multi(&score, a_MOVE, a_CURRENT_SCORE);
+        }
         return score;
     }
 
@@ -1942,7 +1989,6 @@ class Model {
         noexcept {
         double total_violation = 0.0;
         double local_penalty   = 0.0;
-        double global_penalty  = 0.0;
 
         const int CONSTRAINT_PROXIES_SIZE   = m_constraint_proxies.size();
         bool      is_feasibility_improvable = false;
@@ -1961,28 +2007,30 @@ class Model {
                 double positive_part = std::max(constraint_value, 0.0);
                 double negative_part = std::max(-constraint_value, 0.0);
                 double violation     = 0.0;
-                double local_penalty_coefficient = 0.0;
 
-                if (constraints[j].is_less_or_equal() && positive_part > 0) {
+                if (constraints[j].is_less_or_equal()) {
                     violation = positive_part;
-                    local_penalty_coefficient =
+                    total_violation += violation;
+                    if (violation + constant::EPSILON <
+                        constraints[j].positive_part()) {
+                        is_feasibility_improvable = true;
+                    }
+                    local_penalty +=
+                        violation *
                         constraints[j].local_penalty_coefficient_less();
-                } else if (constraints[j].is_greater_or_equal() &&
-                           negative_part > 0) {
+                }
+
+                if (constraints[j].is_greater_or_equal()) {
                     violation = negative_part;
-                    local_penalty_coefficient =
+                    total_violation += violation;
+                    if (violation + constant::EPSILON <
+                        constraints[j].negative_part()) {
+                        is_feasibility_improvable = true;
+                    }
+                    local_penalty +=
+                        violation *
                         constraints[j].local_penalty_coefficient_greater();
                 }
-
-                if (violation + constant::EPSILON <
-                    constraints[j].violation_value()) {
-                    is_feasibility_improvable = true;
-                }
-
-                total_violation += violation;
-                local_penalty += violation * local_penalty_coefficient;
-                global_penalty +=
-                    violation * constraints[j].global_penalty_coefficient();
             }
         }
 
@@ -1993,6 +2041,8 @@ class Model {
             objective_improvement =
                 m_objective.value() * this->sign() - objective;
         }
+
+        double global_penalty = total_violation * m_global_penalty_coefficient;
 
         a_score_ptr->objective                  = objective;
         a_score_ptr->objective_improvement      = objective_improvement;
@@ -2008,88 +2058,127 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void evaluate(
+    constexpr void evaluate_single(
+        solution::SolutionScore *                           a_score_ptr,  //
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE,
+        const solution::SolutionScore &a_CURRENT_SCORE) const noexcept {
+        double total_violation  = a_CURRENT_SCORE.total_violation;
+        double local_penalty    = a_CURRENT_SCORE.local_penalty;
+        double constraint_value = 0.0;
+        double violation_diff   = 0.0;
+
+        const auto &variable_ptr = a_MOVE.alterations.front().first;
+        const auto  variable_value_diff =
+            a_MOVE.alterations.front().second - variable_ptr->value();
+        const auto &constraint_sensitivities =
+            variable_ptr->constraint_sensitivities();
+
+        for (const auto &sensitivity : constraint_sensitivities) {
+            const auto &constraint_ptr = sensitivity.first;
+            if (!constraint_ptr->is_enabled()) {
+                continue;
+            }
+            constraint_value = constraint_ptr->constraint_value() +
+                               sensitivity.second * variable_value_diff;
+
+            if (constraint_ptr->is_less_or_equal()) {
+                violation_diff = std::max(constraint_value, 0.0) -
+                                 constraint_ptr->positive_part();
+                total_violation += violation_diff;
+
+                local_penalty +=
+                    violation_diff *
+                    constraint_ptr->local_penalty_coefficient_less();
+            }
+
+            if (constraint_ptr->is_greater_or_equal()) {
+                violation_diff = std::max(-constraint_value, 0.0) -
+                                 constraint_ptr->negative_part();
+                total_violation += violation_diff;
+
+                local_penalty +=
+                    violation_diff *
+                    constraint_ptr->local_penalty_coefficient_greater();
+            }
+        }
+
+        double objective             = 0.0;
+        double objective_improvement = 0.0;
+
+        if (m_is_defined_objective) {
+            objective =
+                (m_objective.value() +
+                 variable_value_diff * variable_ptr->objective_sensitivity()) *
+                this->sign();
+            objective_improvement =
+                m_objective.value() * this->sign() - objective;
+        }
+
+        const double global_penalty =
+            total_violation * m_global_penalty_coefficient;
+
+        a_score_ptr->objective                  = objective;
+        a_score_ptr->objective_improvement      = objective_improvement;
+        a_score_ptr->total_violation            = total_violation;
+        a_score_ptr->local_penalty              = local_penalty;
+        a_score_ptr->global_penalty             = global_penalty;
+        a_score_ptr->local_augmented_objective  = objective + local_penalty;
+        a_score_ptr->global_augmented_objective = objective + global_penalty;
+        a_score_ptr->is_feasible = !(total_violation > constant::EPSILON);
+        a_score_ptr->is_objective_improvable =
+            objective_improvement > constant::EPSILON;
+        a_score_ptr->is_feasibility_improvable = true;  /// do not care.
+    }
+
+    /*************************************************************************/
+    constexpr void evaluate_multi(
         solution::SolutionScore *                           a_score_ptr,  //
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE,
         const solution::SolutionScore &a_CURRENT_SCORE) const noexcept {
         bool is_feasibility_improvable = false;
 
-        double total_violation  = a_CURRENT_SCORE.total_violation;
-        double local_penalty    = a_CURRENT_SCORE.local_penalty;
-        double global_penalty   = a_CURRENT_SCORE.global_penalty;
-        double constraint_value = 0.0;
-        double positive_part    = 0.0;
-        double negative_part    = 0.0;
-        double violation_diff   = 0.0;
+        double total_violation         = a_CURRENT_SCORE.total_violation;
+        double local_penalty           = a_CURRENT_SCORE.local_penalty;
+        double constraint_value        = 0.0;
+        double violation_diff_negative = 0.0;
+        double violation_diff_positive = 0.0;
+        double violation_diff          = 0.0;
 
         for (const auto &constraint_ptr : a_MOVE.related_constraint_ptrs) {
             if (!constraint_ptr->is_enabled()) {
                 continue;
             }
 
-            if (a_MOVE.is_univariable_move) {
-                auto variable_ptr          = a_MOVE.alterations.front().first;
-                auto variable_value_target = a_MOVE.alterations.front().second;
-
-                if (constraint_ptr->has_only_binary_coefficient()) {
-                    constraint_value = constraint_ptr->constraint_value() +
-                                       variable_value_target -
-                                       variable_ptr->value();
-                } else if (variable_ptr->has_uniform_sensitivity()) {
-                    constraint_value =
-                        constraint_ptr->constraint_value() +
-                        variable_ptr->uniform_sensitivity() *
-                            (variable_value_target - variable_ptr->value());
-                } else {
-                    constraint_value =
-                        constraint_ptr->evaluate_constraint_with_mask(
-                            variable_ptr, variable_value_target);
+            if (a_MOVE.is_selection_move) {
+                if (a_MOVE.hash &
+                    constraint_ptr->expression().selection_mask()) {
+                    continue;
                 }
-            } else {
-                if (a_MOVE.is_selection_move) {
-                    auto &        alterations = a_MOVE.alterations;
-                    std::uint64_t pattern =
-                        reinterpret_cast<std::uint64_t>(alterations[0].first) &
-                        reinterpret_cast<std::uint64_t>(alterations[1].first);
-
-                    if (pattern & constraint_ptr->expression().mask()) {
-                        continue;
-                    }
-                }
-                constraint_value = constraint_ptr->evaluate_constraint(a_MOVE);
             }
+            constraint_value = constraint_ptr->evaluate_constraint(a_MOVE);
 
-            positive_part = std::max(constraint_value, 0.0);
-            negative_part = std::max(-constraint_value, 0.0);
+            violation_diff_negative = 0.0;
+            violation_diff_positive = 0.0;
 
             if (constraint_ptr->is_less_or_equal()) {
-                violation_diff =
-                    positive_part - constraint_ptr->positive_part();
-                total_violation += violation_diff;
-
-                is_feasibility_improvable |=
-                    violation_diff < -constant::EPSILON;
-
-                local_penalty +=
-                    violation_diff *
-                    constraint_ptr->local_penalty_coefficient_less();
-                global_penalty += violation_diff *
-                                  constraint_ptr->global_penalty_coefficient();
+                violation_diff_positive = std::max(constraint_value, 0.0) -
+                                          constraint_ptr->positive_part();
             }
+
             if (constraint_ptr->is_greater_or_equal()) {
-                violation_diff =
-                    negative_part - constraint_ptr->negative_part();
-                total_violation += violation_diff;
-
-                is_feasibility_improvable |=
-                    violation_diff < -constant::EPSILON;
-
-                local_penalty +=
-                    violation_diff *
-                    constraint_ptr->local_penalty_coefficient_greater();
-                global_penalty += violation_diff *
-                                  constraint_ptr->global_penalty_coefficient();
+                violation_diff_negative = std::max(-constraint_value, 0.0) -
+                                          constraint_ptr->negative_part();
             }
+
+            violation_diff = violation_diff_positive + violation_diff_negative;
+            local_penalty +=
+                violation_diff_positive *
+                    constraint_ptr->local_penalty_coefficient_less() +
+                violation_diff_negative *
+                    constraint_ptr->local_penalty_coefficient_greater();
+
+            total_violation += violation_diff;
+            is_feasibility_improvable |= violation_diff < -constant::EPSILON;
         }
 
         double objective             = 0.0;
@@ -2100,6 +2189,9 @@ class Model {
             objective_improvement =
                 m_objective.value() * this->sign() - objective;
         }
+
+        const double global_penalty =
+            total_violation * m_global_penalty_coefficient;
 
         a_score_ptr->objective                  = objective;
         a_score_ptr->objective_improvement      = objective_improvement;

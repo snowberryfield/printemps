@@ -222,7 +222,7 @@ TEST_F(TestMove, compute_overlap_rate) {
 
     model.categorize_constraints();
     model.setup_variable_related_constraints();
-    model.setup_variable_related_zero_one_coefficient_constraints();
+    model.setup_variable_related_binary_coefficient_constraints();
 
     /// x(0) and x(1) have two common constraints.
     {
@@ -266,9 +266,7 @@ TEST_F(TestMove, compute_hash) {
     printemps::model::Model<int, double> model;
     auto& x = model.create_variables("x", 4, 0, 1);
 
-    model.setup_variable_related_constraints();
-    model.categorize_variables();
-    model.categorize_constraints();
+    model.setup_structure();
 
     /// Case 1
     {
@@ -334,9 +332,7 @@ TEST_F(TestMove, operator_plus) {
     [[maybe_unused]] auto& h = model.create_constraint("h", y + z <= 10);
     [[maybe_unused]] auto& v = model.create_constraint("v", x + z <= 10);
 
-    model.setup_variable_related_constraints();
-    model.categorize_variables();
-    model.categorize_constraints();
+    model.setup_structure();
 
     auto variable_ptrs = model.variable_reference().variable_ptrs;
 

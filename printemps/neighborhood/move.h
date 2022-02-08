@@ -22,30 +22,30 @@ struct Move {
     std::unordered_set<model_component::Constraint<T_Variable, T_Expression> *>
         related_constraint_ptrs;
 
-    bool is_univariable_move;
-    bool is_selection_move;
-
     /**
-     * The following members are for special neighborhood moves.
-     */
-    bool is_special_neighborhood_move;
-    bool is_available;
-
-    /**
-     * The following member is for Chain moves.
+     * The following two members are for Chain moves.
      */
     std::uint_fast64_t hash;
     double             overlap_rate;
 
+    bool is_univariable_move;
+    bool is_selection_move;
+
+    /**
+     * The following two members are for special neighborhood moves.
+     */
+    bool is_special_neighborhood_move;
+    bool is_available;
+
     /*************************************************************************/
     Move(void)
         : sense(MoveSense::General),
+          hash(0),
+          overlap_rate(0.0),
           is_univariable_move(false),
           is_selection_move(false),
           is_special_neighborhood_move(false),
-          is_available(true),
-          hash(0),
-          overlap_rate(0.0) {
+          is_available(true) {
     }
 };
 
@@ -145,28 +145,27 @@ constexpr bool has_duplicate_variable(
 template <class T_Variable, class T_Expression>
 constexpr double compute_overlap_rate(
     const std::vector<Alteration<T_Variable, T_Expression>> &a_ALTERATIONS) {
-    auto union_ptrs =
-        a_ALTERATIONS.front()
-            .first->related_zero_one_coefficient_constraint_ptrs();
+    auto union_ptrs = a_ALTERATIONS.front()
+                          .first->related_binary_coefficient_constraint_ptrs();
     if (union_ptrs.size() == 0) {
         return 0.0;
     }
 
     auto intersection_ptrs =
         a_ALTERATIONS.front()
-            .first->related_zero_one_coefficient_constraint_ptrs();
+            .first->related_binary_coefficient_constraint_ptrs();
 
     const int ALTERATIONS_SIZE = a_ALTERATIONS.size();
     for (auto i = 1; i < ALTERATIONS_SIZE; i++) {
         utility::update_union_set(  //
             &union_ptrs,            //
             a_ALTERATIONS[i]
-                .first->related_zero_one_coefficient_constraint_ptrs());
+                .first->related_binary_coefficient_constraint_ptrs());
 
         utility::update_intersection_set(
             &intersection_ptrs,  //
             a_ALTERATIONS[i]
-                .first->related_zero_one_coefficient_constraint_ptrs());
+                .first->related_binary_coefficient_constraint_ptrs());
     }
 
     /**

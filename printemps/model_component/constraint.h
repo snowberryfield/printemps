@@ -74,6 +74,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     bool m_is_equation_knapsack;
     bool m_is_binary_flow;
     bool m_is_integer_flow;
+    bool m_is_soft_selection;
     bool m_is_bin_packing;
     bool m_is_knapsack;
     bool m_is_integer_knapsack;
@@ -88,6 +89,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     bool m_has_aux_upper_bound;
 
     Variable<T_Variable, T_Expression> *m_aux_variable_ptr;
+    T_Expression                        m_aux_variable_coefficient;
 
     /*************************************************************************/
     /// Default constructor
@@ -236,6 +238,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         m_is_equation_knapsack  = false;
         m_is_binary_flow        = false;
         m_is_integer_flow       = false;
+        m_is_soft_selection     = false;
         m_is_bin_packing        = false;
         m_is_knapsack           = false;
         m_is_integer_knapsack   = false;
@@ -250,7 +253,8 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         m_has_aux_lower_bound = false;
         m_has_aux_upper_bound = false;
 
-        m_aux_variable_ptr = nullptr;
+        m_aux_variable_ptr         = nullptr;
+        m_aux_variable_coefficient = 0;
     }
 
     /*************************************************************************/
@@ -504,14 +508,26 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
             }
         }
 
-        /// Binary Flow and Integer Flow
+        /// Binary Flow, Integer Flow, Soft Selection
         {
             if (m_sense == ConstraintSense::Equal) {
+                std::vector<Variable<T_Variable, T_Expression> *>
+                    plus_one_coefficient_variable_ptrs;
+                std::vector<Variable<T_Variable, T_Expression> *>
+                    minus_one_coefficient_variable_ptrs;
+
                 bool is_plus_or_minus_one_coefficient = true;
                 for (const auto &sensitivity : m_expression.sensitivities()) {
                     if (abs(sensitivity.second) != 1) {
                         is_plus_or_minus_one_coefficient = false;
                         break;
+                    }
+                    if (sensitivity.second == 1) {
+                        plus_one_coefficient_variable_ptrs.push_back(
+                            sensitivity.first);
+                    } else {
+                        minus_one_coefficient_variable_ptrs.push_back(
+                            sensitivity.first);
                     }
                 }
 
@@ -536,7 +552,25 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
                         }
                     }
                     if (has_only_binary_variables) {
-                        m_is_binary_flow = true;
+                        if (plus_one_coefficient_variable_ptrs.size() == 1 &&
+                            minus_one_coefficient_variable_ptrs.size() > 0 &&
+                            m_expression.constant_value() == 0) {
+                            m_is_soft_selection = true;
+                            m_aux_variable_ptr =
+                                plus_one_coefficient_variable_ptrs.front();
+                            m_aux_variable_coefficient = 1.0;
+                        } else if  //
+                            (plus_one_coefficient_variable_ptrs.size() > 0 &&
+                             minus_one_coefficient_variable_ptrs.size() == 1 &&
+                             m_expression.constant_value() == 0) {
+                            m_is_soft_selection = true;
+                            m_aux_variable_ptr =
+                                minus_one_coefficient_variable_ptrs.front();
+                            m_aux_variable_coefficient = -1.0;
+                        } else {
+                            m_is_binary_flow = true;
+                        }
+
                         return;
                     } else if (has_only_integer_variables) {
                         m_is_integer_flow = true;
@@ -572,18 +606,18 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
 
                 /// Bin Packing
                 if (has_bin_packing_variable &&
-                    ((m_expression.constant_value() <= -2 &&
+                    ((m_expression.constant_value() <= -1 &&
                       m_sense == ConstraintSense::Less) ||
-                     (m_expression.constant_value() >= 2 &&
+                     (m_expression.constant_value() >= 1 &&
                       m_sense == ConstraintSense::Greater))) {
                     m_is_bin_packing = true;
                     return;
                 }
 
                 /// Knapsack
-                if ((m_expression.constant_value() <= -2 &&
+                if ((m_expression.constant_value() <= -1 &&
                      m_sense == ConstraintSense::Less) ||
-                    (m_expression.constant_value() >= 2 &&
+                    (m_expression.constant_value() >= 1 &&
                      m_sense == ConstraintSense::Greater)) {
                     m_is_knapsack = true;
                     return;
@@ -801,13 +835,6 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr T_Expression evaluate_constraint_with_mask(
-        model_component::Variable<T_Variable, T_Expression> *a_variable_ptr,
-        const T_Variable a_TARGET_VALUE) const noexcept {
-        return m_expression.evaluate_with_mask(a_variable_ptr, a_TARGET_VALUE);
-    }
-
-    /*************************************************************************/
     inline constexpr T_Expression evaluate_violation(void) const noexcept {
         return m_violation_function({});
     }
@@ -944,6 +971,14 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
+    inline constexpr void limit_local_penalty_coefficient(void) noexcept {
+        m_local_penalty_coefficient_less = std::min(
+            m_local_penalty_coefficient_less, m_global_penalty_coefficient);
+        m_local_penalty_coefficient_greater = std::min(
+            m_local_penalty_coefficient_greater, m_global_penalty_coefficient);
+    }
+
+    /*************************************************************************/
     inline constexpr bool is_linear(void) const noexcept {
         return m_is_linear;
     }
@@ -1006,6 +1041,11 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     /*************************************************************************/
     inline constexpr bool is_integer_flow(void) const noexcept {
         return m_is_integer_flow;
+    }
+
+    /*************************************************************************/
+    inline constexpr bool is_soft_selection(void) const noexcept {
+        return m_is_soft_selection;
     }
 
     /*************************************************************************/
@@ -1098,6 +1138,12 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         void) const {
         return const_cast<Variable<T_Variable, T_Expression> *>(
             m_aux_variable_ptr);
+    }
+
+    /*************************************************************************/
+    inline constexpr T_Expression aux_variable_coefficient(void) const
+        noexcept {
+        return m_aux_variable_coefficient;
     }
 };  // namespace model_component
 using IPConstraint = Constraint<int, double>;
