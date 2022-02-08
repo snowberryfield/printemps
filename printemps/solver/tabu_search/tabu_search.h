@@ -133,9 +133,15 @@ TabuSearchResult<T_Variable, T_Expression> solve(
     bool is_few_permissible_neighborhood = false;
     bool is_found_new_feasible_solution  = false;
 
-    double min_objective     = current_solution_score.objective;
-    double max_objective     = current_solution_score.objective;
+    double min_objective = current_solution_score.objective;
+    double max_objective = current_solution_score.objective;
+
+    double min_local_augmented_objective =
+        current_solution_score.local_augmented_objective;
+    double max_local_augmented_objective =
+        current_solution_score.local_augmented_objective;
     double min_local_penalty = HUGE_VALF;
+
     if (!current_solution_score.is_feasible) {
         min_local_penalty = current_solution_score.local_penalty;
     }
@@ -467,7 +473,14 @@ TabuSearchResult<T_Variable, T_Expression> solve(
         min_objective =
             std::min(min_objective, current_solution_score.objective);
         max_objective =
-            std::min(max_objective, current_solution_score.objective);
+            std::max(max_objective, current_solution_score.objective);
+        min_local_augmented_objective =
+            std::min(min_local_augmented_objective,
+                     current_solution_score.local_augmented_objective);
+        max_local_augmented_objective =
+            std::max(max_local_augmented_objective,
+                     current_solution_score.local_augmented_objective);
+
         if (!current_solution_score.is_feasible) {
             min_local_penalty = std::min(min_local_penalty,
                                          current_solution_score.local_penalty);
@@ -779,6 +792,8 @@ TabuSearchResult<T_Variable, T_Expression> solve(
         std::max(1.0, std::max(abs_max_objective,  //
                                max_objective - min_objective)) /
         std::max(1.0, min_local_penalty);
+    result.local_augmented_objective_range =
+        max_local_augmented_objective - min_local_augmented_objective;
 
     result.termination_status = termination_status;
     result.feasible_solutions = feasible_solutions;
