@@ -934,6 +934,11 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
+    inline constexpr bool is_feasible(void) const noexcept {
+        return m_violation_value < constant::EPSILON;
+    }
+
+    /*************************************************************************/
     inline constexpr double &local_penalty_coefficient_less(void) noexcept {
         return m_local_penalty_coefficient_less;
     }

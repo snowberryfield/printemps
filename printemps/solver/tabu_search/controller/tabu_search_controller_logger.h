@@ -89,19 +89,20 @@ class TabuSearchControllerLogger {
             << "local_violation "                            // 3
             << "global_objective "                           // 4
             << "global_violation "                           // 5
-            << "intensity "                                  // 6
-            << "update_status "                              // 7
-            << "employing_local_augmented_solution_flag "    // 8
-            << "employing_global_augmented_solution_flag "   // 9
-            << "employing_previous_solution_flag "           // 10
-            << "is_enabled_penalty_coefficient_relaxing "    // 11
-            << "is_enabled_penalty_coefficient_tightening "  // 12
-            << "penalty_coefficient_reset_flag"              // 13
-            << "penalty_coefficient_relaxing_rate "          // 14
-            << "penalty_coefficient_tightening_rate "        // 15
-            << "is_enabled_forcibly_initial_modification "   // 16
-            << "number_of_initial_modification "             // 17
-            << "initial_tabu_tenure" << std::endl;           // 18
+            << "primal_intensity "                           // 6
+            << "dual_intensity "                             // 7
+            << "update_status "                              // 8
+            << "employing_local_augmented_solution_flag "    // 9
+            << "employing_global_augmented_solution_flag "   // 10
+            << "employing_previous_solution_flag "           // 11
+            << "is_enabled_penalty_coefficient_relaxing "    // 12
+            << "is_enabled_penalty_coefficient_tightening "  // 13
+            << "penalty_coefficient_reset_flag"              // 14
+            << "penalty_coefficient_relaxing_rate "          // 15
+            << "penalty_coefficient_tightening_rate "        // 16
+            << "is_enabled_forcibly_initial_modification "   // 17
+            << "number_of_initial_modification "             // 18
+            << "initial_tabu_tenure" << std::endl;           // 19
     }
 
     /*************************************************************************/
@@ -126,19 +127,20 @@ class TabuSearchControllerLogger {
             << local_incumbent.total_violation << " "              // 3
             << global_incumbent.objective << " "                   // 4
             << global_incumbent.total_violation << " "             // 5
-            << s.current_intensity << " "                          // 6
-            << s.tabu_search_result.total_update_status << " "     // 7
-            << p.employing_local_augmented_solution_flag << " "    // 8
-            << p.employing_global_augmented_solution_flag << " "   // 9
-            << p.employing_previous_solution_flag << " "           // 10
-            << p.is_enabled_penalty_coefficient_relaxing << " "    // 11
-            << p.is_enabled_penalty_coefficient_tightening << " "  // 12
-            << p.penalty_coefficient_reset_flag << " "             // 13
-            << p.penalty_coefficient_relaxing_rate << " "          // 14
-            << p.penalty_coefficient_tightening_rate << " "        // 15
-            << p.is_enabled_forcibly_initial_modification << " "   // 16
-            << p.number_of_initial_modification << " "             // 17
-            << p.initial_tabu_tenure                               // 18
+            << s.current_primal_intensity << " "                   // 6
+            << s.current_dual_intensity << " "                     // 7
+            << s.tabu_search_result.total_update_status << " "     // 8
+            << p.employing_local_augmented_solution_flag << " "    // 9
+            << p.employing_global_augmented_solution_flag << " "   // 10
+            << p.employing_previous_solution_flag << " "           // 11
+            << p.is_enabled_penalty_coefficient_relaxing << " "    // 12
+            << p.is_enabled_penalty_coefficient_tightening << " "  // 13
+            << p.penalty_coefficient_reset_flag << " "             // 14
+            << p.penalty_coefficient_relaxing_rate << " "          // 15
+            << p.penalty_coefficient_tightening_rate << " "        // 16
+            << p.is_enabled_forcibly_initial_modification << " "   // 17
+            << p.number_of_initial_modification << " "             // 18
+            << p.initial_tabu_tenure                               // 19
             << std::endl;
     }
 };

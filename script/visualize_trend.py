@@ -57,11 +57,18 @@ def visualize_trend(trend_data, instance_name, output_file_name):
     fig_intensity.line(
         x=trend_data[:, 0],
         y=trend_data[:, 6],
-        legend='',
+        legend='primal',
         width=3,
         color=colors[0])
 
-    fig_intensity.legend.visible = False
+    fig_intensity.line(
+        x=trend_data[:, 0],
+        y=trend_data[:, 7],
+        legend='dual',
+        width=3,
+        color=colors[1])
+
+    fig_intensity.legend.visible = True
 
     # objective
     fig_objective = bokeh.plotting.figure(
@@ -139,22 +146,22 @@ def visualize_trend(trend_data, instance_name, output_file_name):
 
     fig_penalty_coefficient_control.line(
         x=trend_data[:, 0],
-        y=np.cumsum(trend_data[:, 11]) / (trend_data[:, 0]+1),
+        y=np.cumsum(trend_data[:, 12]) / (trend_data[:, 0]+1),
         legend='Relaxing',
         width=3,
         color=colors[1])
 
     fig_penalty_coefficient_control.line(
         x=trend_data[:, 0],
-        y=np.cumsum(trend_data[:, 12]) / (trend_data[:, 0]+1),
+        y=np.cumsum(trend_data[:, 13]) / (trend_data[:, 0]+1),
         legend='Tightening',
         width=3,
         color=colors[0])
 
     fig_penalty_coefficient_control.line(
         x=trend_data[:, 0],
-        y=1.0 - np.cumsum(trend_data[:, 11] +
-                          trend_data[:, 12]) / (trend_data[:, 0]+1),
+        y=1.0 - np.cumsum(trend_data[:, 12] +
+                          trend_data[:, 13]) / (trend_data[:, 0]+1),
         legend='No Updating',
         width=3,
         color=colors[2])
@@ -178,14 +185,14 @@ def visualize_trend(trend_data, instance_name, output_file_name):
 
     fig_penalty_coefficient_rate_control.line(
         x=trend_data[:, 0],
-        y=trend_data[:, 14],
+        y=trend_data[:, 15],
         legend='Relaxing',
         width=3,
         color=colors[1])
 
     fig_penalty_coefficient_rate_control.line(
         x=trend_data[:, 0],
-        y=trend_data[:, 15],
+        y=trend_data[:, 16],
         legend='Tightening',
         width=3,
         color=colors[0])
@@ -209,7 +216,7 @@ def visualize_trend(trend_data, instance_name, output_file_name):
 
     fig_penalty_coefficient_reset_control.line(
         x=trend_data[:, 0],
-        y=np.cumsum(trend_data[:, 13]) / (trend_data[:, 0]+1),
+        y=np.cumsum(trend_data[:, 14]) / (trend_data[:, 0]+1),
         legend='',
         width=3,
         color=colors[0])
@@ -229,21 +236,21 @@ def visualize_trend(trend_data, instance_name, output_file_name):
 
     fig_initial_solution_control.line(
         x=trend_data[:, 0],
-        y=np.cumsum(trend_data[:, 8]) / (trend_data[:, 0]+1),
+        y=np.cumsum(trend_data[:, 9]) / (trend_data[:, 0]+1),
         legend='Local Incumbent',
         width=3,
         color=colors[1])
 
     fig_initial_solution_control.line(
         x=trend_data[:, 0],
-        y=np.cumsum(trend_data[:, 9]) / (trend_data[:, 0] + 1),
+        y=np.cumsum(trend_data[:, 10]) / (trend_data[:, 0] + 1),
         legend='Global Incumbent',
         width=3,
         color=colors[0])
 
     fig_initial_solution_control.line(
         x=trend_data[:, 0],
-        y=np.cumsum(trend_data[:, 10]) / (trend_data[:, 0] + 1),
+        y=np.cumsum(trend_data[:, 11]) / (trend_data[:, 0] + 1),
         legend='Same as Previous',
         width=3,
         color=colors[2])
@@ -267,7 +274,7 @@ def visualize_trend(trend_data, instance_name, output_file_name):
 
     fig_initial_modification_control.line(
         x=trend_data[:, 0],
-        y=np.cumsum(trend_data[:, 16]) / (trend_data[:, 0]+1),
+        y=np.cumsum(trend_data[:, 17]) / (trend_data[:, 0]+1),
         legend='',
         width=3,
         color=colors[0])
@@ -287,7 +294,7 @@ def visualize_trend(trend_data, instance_name, output_file_name):
 
     fig_initial_tabu_tenure.line(
         x=trend_data[:, 0],
-        y=trend_data[:, 18],
+        y=trend_data[:, 19],
         legend='',
         width=3,
         color=colors[0])

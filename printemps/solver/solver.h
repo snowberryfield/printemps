@@ -23,7 +23,7 @@ class Solver {
     model::Model<T_Variable, T_Expression>*             m_model_ptr;
     solution::IncumbentHolder<T_Variable, T_Expression> m_incumbent_holder;
     solution::DenseSolution<T_Variable, T_Expression>   m_current_solution;
-    Memory                                              m_memory;
+    Memory<T_Variable, T_Expression>                    m_memory;
     utility::TimeKeeper                                 m_time_keeper;
     option::Option                                      m_master_option;
 
@@ -257,7 +257,8 @@ class Solver {
                       m_tabu_search_controller.result().number_of_iterations,
                       m_tabu_search_controller.result().number_of_loops,
                       this->export_named_penalty_coefficients(),  //
-                      this->export_named_variable_update_counts());
+                      this->export_named_update_counts(),
+                      this->export_named_violation_counts());
 
         Result<T_Variable, T_Expression> result(  //
             named_solution, status, m_solution_archive);
@@ -286,17 +287,30 @@ class Solver {
 
     /*************************************************************************/
     inline std::unordered_map<std::string, multi_array::ValueProxy<int>>
-    export_named_variable_update_counts(void) {
+    export_named_update_counts(void) {
         std::unordered_map<std::string, multi_array::ValueProxy<int>>
-                  named_variable_update_counts;
-        const int VARIABLE_PROXIES_SIZE =
-            m_model_ptr->variable_proxies().size();
+                    named_update_counts;
+        const int   PROXIES_SIZE   = m_model_ptr->variable_proxies().size();
         const auto& VARIABLE_NAMES = m_model_ptr->variable_names();
-        const auto& UPDATE_COUNTS  = m_memory.update_counts();
-        for (auto i = 0; i < VARIABLE_PROXIES_SIZE; i++) {
-            named_variable_update_counts[VARIABLE_NAMES[i]] = UPDATE_COUNTS[i];
+        const auto& COUNTS         = m_memory.update_counts();
+        for (auto i = 0; i < PROXIES_SIZE; i++) {
+            named_update_counts[VARIABLE_NAMES[i]] = COUNTS[i];
         }
-        return named_variable_update_counts;
+        return named_update_counts;
+    }
+
+    /*************************************************************************/
+    inline std::unordered_map<std::string, multi_array::ValueProxy<int>>
+    export_named_violation_counts(void) {
+        std::unordered_map<std::string, multi_array::ValueProxy<int>>
+                    named_violation_counts;
+        const int   PROXIES_SIZE     = m_model_ptr->constraint_proxies().size();
+        const auto& CONSTRAINT_NAMES = m_model_ptr->constraint_names();
+        const auto& COUNTS           = m_memory.violation_counts();
+        for (auto i = 0; i < PROXIES_SIZE; i++) {
+            named_violation_counts[CONSTRAINT_NAMES[i]] = COUNTS[i];
+        }
+        return named_violation_counts;
     }
 
     /*************************************************************************/

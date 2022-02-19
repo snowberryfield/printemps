@@ -19,7 +19,7 @@ template <class T_Variable, class T_Expression>
 LocalSearchResult solve(
     model::Model<T_Variable, T_Expression>*              a_model_ptr,         //
     solution::IncumbentHolder<T_Variable, T_Expression>* a_incumbent_holder,  //
-    Memory*                                              a_memory_ptr,        //
+    Memory<T_Variable, T_Expression>*                    a_memory_ptr,        //
     std::vector<solution::SparseSolution<T_Variable, T_Expression>>*
                           a_feasible_solutions_ptr,          //
     const option::Option& a_OPTION,                          //
@@ -42,10 +42,10 @@ LocalSearchResult solve(
     /**
      * Copy arguments as local variables.
      */
-    Model_T*           model_ptr            = a_model_ptr;
-    Memory*            memory_ptr           = a_memory_ptr;
-    IncumbentHolder_T* incumbent_holder_ptr = a_incumbent_holder;
-    option::Option     option               = a_OPTION;
+    Model_T*                          model_ptr            = a_model_ptr;
+    Memory<T_Variable, T_Expression>* memory_ptr           = a_memory_ptr;
+    IncumbentHolder_T*                incumbent_holder_ptr = a_incumbent_holder;
+    option::Option                    option               = a_OPTION;
 
     /**
      * Reset the local augmented incumbent.

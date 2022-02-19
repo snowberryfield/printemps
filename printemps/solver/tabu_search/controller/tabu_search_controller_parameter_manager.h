@@ -26,7 +26,7 @@ class TabuSearchControllerParameterManager {
     TabuSearchControllerParameter                        m_parameter;
     model::Model<T_Variable, T_Expression>*              m_model_ptr;
     solution::IncumbentHolder<T_Variable, T_Expression>* m_incumbent_holder_ptr;
-    Memory*                                              m_memory_ptr;
+    Memory<T_Variable, T_Expression>*                    m_memory_ptr;
     option::Option                                       m_master_option;
 
    public:
@@ -34,9 +34,9 @@ class TabuSearchControllerParameterManager {
     TabuSearchControllerParameterManager(
         model::Model<T_Variable, T_Expression>* a_model_ptr,
         solution::IncumbentHolder<T_Variable, T_Expression>*
-                              a_incumbent_holder_ptr,  //
-        Memory*               a_memory_ptr,            //
-        const option::Option& a_MASTER_OPTION) {
+                                          a_incumbent_holder_ptr,  //
+        Memory<T_Variable, T_Expression>* a_memory_ptr,            //
+        const option::Option&             a_MASTER_OPTION) {
         this->setup(a_model_ptr,             //
                     a_incumbent_holder_ptr,  //
                     a_memory_ptr,            //
@@ -60,9 +60,9 @@ class TabuSearchControllerParameterManager {
     /*************************************************************************/
     inline void setup(model::Model<T_Variable, T_Expression>* a_model_ptr,
                       solution::IncumbentHolder<T_Variable, T_Expression>*
-                                            a_incumbent_holder_ptr,  //
-                      Memory*               a_memory_ptr,            //
-                      const option::Option& a_MASTER_OPTION) {
+                                                        a_incumbent_holder_ptr,  //
+                      Memory<T_Variable, T_Expression>* a_memory_ptr,  //
+                      const option::Option&             a_MASTER_OPTION) {
         this->initialize();
         m_model_ptr            = a_model_ptr;
         m_incumbent_holder_ptr = a_incumbent_holder_ptr;
@@ -451,8 +451,8 @@ class TabuSearchControllerParameterManager {
          * solution has been found.
          */
         if (a_STATE.is_infeasible_stagnation &&
-            a_STATE.current_intensity >
-                a_STATE.current_intensity_before_relaxation) {
+            a_STATE.current_primal_intensity >
+                a_STATE.current_primal_intensity_before_relaxation) {
             m_parameter.penalty_coefficient_relaxing_rate =
                 std::max(TabuSearchControllerParameterManagerConstant::
                              PENALTY_COEFFICIENT_RELAXING_RATE_MIN,
@@ -680,7 +680,8 @@ class TabuSearchControllerParameterManager {
         }
 
         if ((LAST_TABU_TENURE == m_parameter.initial_tabu_tenure) &&
-            (a_STATE.current_intensity > a_STATE.previous_intensity)) {
+            (a_STATE.current_primal_intensity >
+             a_STATE.previous_primal_intensity)) {
             return;
         }
 

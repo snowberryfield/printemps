@@ -21,11 +21,11 @@ struct TabuSearchMoveScore {
 template <class T_Variable, class T_Expression>
 constexpr bool compute_permissibility(
     const neighborhood::Move<T_Variable, T_Expression> &a_MOVE,        //
-    Memory *                                            a_memory_ptr,  //
+    const Memory<T_Variable, T_Expression> *            a_MEMORY_PTR,  //
     const int                                           a_ITERATION,   //
     const option::Option &                              a_OPTION,      //
     const int                                           a_TABU_TENURE) {
-    const auto &last_update_iterations = a_memory_ptr->last_update_iterations();
+    const auto &last_update_iterations = a_MEMORY_PTR->last_update_iterations();
 
     if (a_OPTION.tabu_search.tabu_mode == option::tabu_mode::All &&
         a_MOVE.sense != neighborhood::MoveSense::Selection) {
@@ -70,9 +70,9 @@ template <class T_Variable, class T_Expression>
 constexpr double compute_frequency_penalty(
     const neighborhood::Move<T_Variable, T_Expression> &a_MOVE,        //
     const int                                           a_ITERATION,   //
-    Memory *                                            a_memory_ptr,  //
+    const Memory<T_Variable, T_Expression> *            a_MEMORY_PTR,  //
     const option::Option &                              a_OPTION) noexcept {
-    const auto &update_counts = a_memory_ptr->update_counts();
+    const auto &update_counts = a_MEMORY_PTR->update_counts();
 
     if (a_ITERATION == 0) {
         return 0.0;
@@ -83,7 +83,7 @@ constexpr double compute_frequency_penalty(
         move_update_count += update_counts[alteration.first->proxy_index()]
                                           [alteration.first->flat_index()];
     }
-    return move_update_count * a_memory_ptr->total_update_count_reciprocal() *
+    return move_update_count * a_MEMORY_PTR->total_update_count_reciprocal() *
            a_OPTION.tabu_search.frequency_penalty_coefficient;
 }
 
@@ -107,7 +107,7 @@ constexpr void evaluate_move(
     TabuSearchMoveScore *                               a_score_ptr,   //
     const neighborhood::Move<T_Variable, T_Expression> &a_MOVE,        //
     const int                                           a_ITERATION,   //
-    Memory *                                            a_memory_ptr,  //
+    const Memory<T_Variable, T_Expression> *            a_MEMORY_PTR,  //
     const option::Option &                              a_OPTION,      //
     const int a_TABU_TENURE) noexcept {
     /**
@@ -115,7 +115,7 @@ constexpr void evaluate_move(
      */
     a_score_ptr->is_permissible                 //
         = compute_permissibility(a_MOVE,        //
-                                 a_memory_ptr,  //
+                                 a_MEMORY_PTR,  //
                                  a_ITERATION,   //
                                  a_OPTION,      //
                                  a_TABU_TENURE);
@@ -126,7 +126,7 @@ constexpr void evaluate_move(
     a_score_ptr->frequency_penalty                 //
         = compute_frequency_penalty(a_MOVE,        //
                                     a_ITERATION,   //
-                                    a_memory_ptr,  //
+                                    a_MEMORY_PTR,  //
                                     a_OPTION);
 
     /**
