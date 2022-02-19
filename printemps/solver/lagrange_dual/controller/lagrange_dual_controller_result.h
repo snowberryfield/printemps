@@ -3,42 +3,40 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_SOLVER_LOCAL_SEARCH_LOCAL_SEARCH_RESULT_H__
-#define PRINTEMPS_SOLVER_LOCAL_SEARCH_LOCAL_SEARCH_RESULT_H__
+#ifndef PRINTEMPS_SOLVER_LAGRANGE_DUAL_CONTROLLER_LAGRANGE_DUAL_CONTROLLER_RESULT_H__
+#define PRINTEMPS_SOLVER_LAGRANGE_DUAL_CONTROLLER_LAGRANGE_DUAL_CONTROLLER_RESULT_H__
 
 namespace printemps {
 namespace solver {
-namespace local_search {
+namespace lagrange_dual {
+namespace controller {
 /*****************************************************************************/
-template <class T_Variable, class T_Expression>
-struct LocalSearchResult {
-    solution::IncumbentHolder<T_Variable, T_Expression> incumbent_holder;
-    Memory                                              memory;
-
-    int total_update_status;
+struct LagrangeDualControllerResult {
     int number_of_iterations;
-
-    LocalSearchTerminationStatus termination_status;
-
-    std::vector<solution::SparseSolution<T_Variable, T_Expression>>
-        feasible_solutions;
+    int update_status;
 
     /*************************************************************************/
-    LocalSearchResult(void) {
+    LagrangeDualControllerResult(void) {
         this->initialize();
     }
 
     /*************************************************************************/
-    void initialize(void) {
-        this->incumbent_holder.initialize();
-        this->memory.initialize();
-        this->total_update_status  = 0;
+    LagrangeDualControllerResult(const int a_NUMBER_OF_ITERATIONS,
+                                 const int a_UPDATE_STATUS)
+        : number_of_iterations(a_NUMBER_OF_ITERATIONS),
+          update_status(a_UPDATE_STATUS) {
+        /// nothing to do
+    }
+
+    /*************************************************************************/
+    inline void initialize(void) {
         this->number_of_iterations = 0;
-        this->termination_status = LocalSearchTerminationStatus::ITERATION_OVER;
-        this->feasible_solutions.clear();
+        this->update_status =
+            solution::IncumbentHolderConstant::STATUS_NO_UPDATED;
     }
 };
-}  // namespace local_search
+}  // namespace controller
+}  // namespace lagrange_dual
 }  // namespace solver
 }  // namespace printemps
 

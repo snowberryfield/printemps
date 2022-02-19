@@ -74,7 +74,8 @@ class Memory {
             a_model_ptr->generate_variable_parameter_proxies(
                 MemoryConstant::INITIAL_LAST_UPDATE_ITERATION);
 
-        /* Long-term memory:
+        /**
+         * Long-term memory:
          * The Long-term memory records the number of times which each variable
          * has been updated. The initial value of the long-term memory is 0.
          */

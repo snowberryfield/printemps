@@ -16,6 +16,17 @@ struct Result {
     solution::SolutionArchive<T_Variable, T_Expression> solution_archive;
 
     /*************************************************************************/
+    Result(
+        solution::NamedSolution<T_Variable, T_Expression> &  a_SOLUTION,
+        Status &                                             a_STATUS,
+        solution::SolutionArchive<T_Variable, T_Expression> &a_SOLUTION_ARCHIVE)
+        : solution(a_SOLUTION),
+          status(a_STATUS),
+          solution_archive(a_SOLUTION_ARCHIVE) {
+        /// nothing to do
+    }
+
+    /*************************************************************************/
     Result(void) {
         this->initialize();
     }
