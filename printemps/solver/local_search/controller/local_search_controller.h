@@ -33,8 +33,8 @@ class LocalSearchController
         const solution::DenseSolution<T_Variable, T_Expression>&
             a_CURRENT_SOLUTION,  //
         solution::IncumbentHolder<T_Variable, T_Expression>*
-                a_incumbent_holder_ptr,
-        Memory* a_memory_ptr,  //
+                                          a_incumbent_holder_ptr,
+        Memory<T_Variable, T_Expression>* a_memory_ptr,  //
         solution::SolutionArchive<T_Variable, T_Expression>*
                                    a_solution_archive_ptr,  //
         const utility::TimeKeeper& a_TIME_KEEPER,           //

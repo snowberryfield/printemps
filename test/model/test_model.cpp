@@ -1847,23 +1847,28 @@ TEST_F(TestModel, update_variable_improvability) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModel, update_feasibility) {
+TEST_F(TestModel, update_violative_constraint_ptrs_and_feasibility) {
     printemps::model::Model<int, double> model;
 
     auto&                  x = model.create_variable("x", 0, 10);
     [[maybe_unused]] auto& g = model.create_constraint("g", x <= 5);
 
+    model.setup_structure();
+
     x = 4;
     model.update();  // include update_feasibility()
     EXPECT_TRUE(model.is_feasible());
+    EXPECT_TRUE(model.violative_constraint_ptrs().empty());
 
     x = 5;
     model.update();
     EXPECT_TRUE(model.is_feasible());
+    EXPECT_TRUE(model.violative_constraint_ptrs().empty());
 
     x = 6;
     model.update();
     EXPECT_FALSE(model.is_feasible());
+    EXPECT_EQ(1, static_cast<int>(model.violative_constraint_ptrs().size()));
 }
 
 /*****************************************************************************/

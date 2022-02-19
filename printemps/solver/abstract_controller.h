@@ -19,7 +19,7 @@ class AbstractController {
     model::Model<T_Variable, T_Expression>*              m_model_ptr;
     solution::DenseSolution<T_Variable, T_Expression>    m_current_solution;
     solution::IncumbentHolder<T_Variable, T_Expression>* m_incumbent_holder_ptr;
-    Memory*                                              m_memory_ptr;
+    Memory<T_Variable, T_Expression>*                    m_memory_ptr;
     solution::SolutionArchive<T_Variable, T_Expression>* m_solution_archive_ptr;
     utility::TimeKeeper                                  m_time_keeper;
     option::Option                                       m_master_option;
@@ -87,8 +87,8 @@ class AbstractController {
         const solution::DenseSolution<T_Variable, T_Expression>&
             a_CURRENT_SOLUTION,  //
         solution::IncumbentHolder<T_Variable, T_Expression>*
-                a_incumbent_holder_ptr,
-        Memory* a_memory_ptr,  //
+                                          a_incumbent_holder_ptr,
+        Memory<T_Variable, T_Expression>* a_memory_ptr,  //
         solution::SolutionArchive<T_Variable, T_Expression>*
                                    a_solution_archive_ptr,  //
         const utility::TimeKeeper& a_TIME_KEEPER,           //
@@ -126,8 +126,8 @@ class AbstractController {
         const solution::DenseSolution<T_Variable, T_Expression>&
             a_CURRENT_SOLUTION,  //
         solution::IncumbentHolder<T_Variable, T_Expression>*
-                a_incumbent_holder_ptr,
-        Memory* a_memory_ptr,  //
+                                          a_incumbent_holder_ptr,
+        Memory<T_Variable, T_Expression>* a_memory_ptr,  //
         solution::SolutionArchive<T_Variable, T_Expression>*
                                    a_solution_archive_ptr,  //
         const utility::TimeKeeper& a_TIME_KEEPER,           //
@@ -162,7 +162,7 @@ class AbstractController {
     }
 
     /*************************************************************************/
-    inline constexpr Memory* memory_ptr(void) {
+    inline constexpr Memory<T_Variable, T_Expression>* memory_ptr(void) {
         return m_memory_ptr;
     }
 

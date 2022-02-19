@@ -27,7 +27,7 @@ class TabuSearchControllerStateManager {
     TabuSearchControllerState<T_Variable, T_Expression>  m_state;
     model::Model<T_Variable, T_Expression>*              m_model_ptr;
     solution::IncumbentHolder<T_Variable, T_Expression>* m_incumbent_holder_ptr;
-    Memory*                                              m_memory_ptr;
+    Memory<T_Variable, T_Expression>*                    m_memory_ptr;
     option::Option                                       m_master_option;
 
    public:
@@ -35,9 +35,9 @@ class TabuSearchControllerStateManager {
     TabuSearchControllerStateManager(
         model::Model<T_Variable, T_Expression>* a_model_ptr,
         solution::IncumbentHolder<T_Variable, T_Expression>*
-                              a_incumbent_holder_ptr,  //
-        Memory*               a_memory_ptr,            //
-        const option::Option& a_MASTER_OPTION) {
+                                          a_incumbent_holder_ptr,  //
+        Memory<T_Variable, T_Expression>* a_memory_ptr,            //
+        const option::Option&             a_MASTER_OPTION) {
         this->setup(a_model_ptr,             //
                     a_incumbent_holder_ptr,  //
                     a_memory_ptr,            //
@@ -61,17 +61,20 @@ class TabuSearchControllerStateManager {
     /*************************************************************************/
     inline void setup(model::Model<T_Variable, T_Expression>* a_model_ptr,
                       solution::IncumbentHolder<T_Variable, T_Expression>*
-                                            a_incumbent_holder_ptr,  //
-                      Memory*               a_memory_ptr,            //
-                      const option::Option& a_MASTER_OPTION) {
+                                                        a_incumbent_holder_ptr,  //
+                      Memory<T_Variable, T_Expression>* a_memory_ptr,  //
+                      const option::Option&             a_MASTER_OPTION) {
         this->initialize();
         m_model_ptr            = a_model_ptr;
         m_incumbent_holder_ptr = a_incumbent_holder_ptr;
         m_memory_ptr           = a_memory_ptr;
         m_master_option        = a_MASTER_OPTION;
 
-        m_state.current_intensity  = m_memory_ptr->intensity();
-        m_state.previous_intensity = 0.0;
+        m_state.current_primal_intensity  = m_memory_ptr->primal_intensity();
+        m_state.previous_primal_intensity = 0.0;
+
+        m_state.current_dual_intensity  = m_memory_ptr->dual_intensity();
+        m_state.previous_dual_intensity = 0.0;
     }
 
     /*************************************************************************/
@@ -160,8 +163,11 @@ class TabuSearchControllerStateManager {
 
     /*************************************************************************/
     inline constexpr void update_intensity(void) {
-        m_state.previous_intensity = m_state.current_intensity;
-        m_state.current_intensity  = m_memory_ptr->intensity();
+        m_state.previous_primal_intensity = m_state.current_primal_intensity;
+        m_state.current_primal_intensity  = m_memory_ptr->primal_intensity();
+
+        m_state.previous_dual_intensity = m_state.current_dual_intensity;
+        m_state.current_dual_intensity  = m_memory_ptr->dual_intensity();
     }
 
     /*************************************************************************/
@@ -230,10 +236,15 @@ class TabuSearchControllerStateManager {
     inline constexpr void update_relaxation_status(
         const TabuSearchControllerParameter& a_PARAMETER) {
         if (a_PARAMETER.is_enabled_penalty_coefficient_relaxing) {
-            m_state.previous_intensity_before_relaxation =
-                m_state.current_intensity_before_relaxation;
-            m_state.current_intensity_before_relaxation =
-                m_state.current_intensity;
+            m_state.previous_primal_intensity_before_relaxation =
+                m_state.current_primal_intensity_before_relaxation;
+            m_state.current_primal_intensity_before_relaxation =
+                m_state.current_primal_intensity;
+
+            m_state.previous_dual_intensity_before_relaxation =
+                m_state.current_dual_intensity_before_relaxation;
+            m_state.current_dual_intensity_before_relaxation =
+                m_state.current_dual_intensity;
 
             m_state.iteration_after_relaxation                         = 0;
             m_state.employing_previous_solution_count_after_relaxation = 0;

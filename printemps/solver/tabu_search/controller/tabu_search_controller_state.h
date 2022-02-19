@@ -25,10 +25,15 @@ struct TabuSearchControllerState {
     solution::SolutionScore current_solution_score;
     solution::SolutionScore previous_solution_score;
 
-    double current_intensity;
-    double previous_intensity;
-    double current_intensity_before_relaxation;
-    double previous_intensity_before_relaxation;
+    double current_primal_intensity;
+    double previous_primal_intensity;
+    double current_primal_intensity_before_relaxation;
+    double previous_primal_intensity_before_relaxation;
+
+    double current_dual_intensity;
+    double previous_dual_intensity;
+    double current_dual_intensity_before_relaxation;
+    double previous_dual_intensity_before_relaxation;
 
     int employing_local_augmented_solution_count_after_relaxation;
     int employing_global_augmented_solution_count_after_relaxation;
@@ -58,10 +63,15 @@ struct TabuSearchControllerState {
         this->current_solution.initialize();
         this->previous_solution.initialize();
 
-        this->current_intensity                    = 0.0;
-        this->previous_intensity                   = 0.0;
-        this->current_intensity_before_relaxation  = 0.0;
-        this->previous_intensity_before_relaxation = 0.0;
+        this->current_primal_intensity                    = 0.0;
+        this->previous_primal_intensity                   = 0.0;
+        this->current_primal_intensity_before_relaxation  = 0.0;
+        this->previous_primal_intensity_before_relaxation = 0.0;
+
+        this->current_dual_intensity                    = 0.0;
+        this->previous_dual_intensity                   = 0.0;
+        this->current_dual_intensity_before_relaxation  = 0.0;
+        this->previous_dual_intensity_before_relaxation = 0.0;
 
         this->employing_local_augmented_solution_count_after_relaxation  = 0;
         this->employing_global_augmented_solution_count_after_relaxation = 0;

@@ -65,6 +65,9 @@ class Model {
     model_component::ConstraintTypeReference<T_Variable, T_Expression>  //
         m_constraint_type_reference;
 
+    std::vector<model_component::Constraint<T_Variable, T_Expression> *>
+        m_violative_constraint_ptrs;
+
     std::vector<
         std::pair<model_component::Variable<T_Variable, T_Expression> *,
                   model_component::Variable<T_Variable, T_Expression> *>>
@@ -132,6 +135,7 @@ class Model {
         m_constraint_reference.initialize();
         m_constraint_type_reference.initialize();
 
+        m_violative_constraint_ptrs.clear();
         m_flippable_variable_ptr_pairs.clear();
 
         m_neighborhood.initialize();
@@ -1796,7 +1800,7 @@ class Model {
             variable_ptr->dependent_constraint_ptr()->update();
         }
 
-        this->update_feasibility();
+        this->update_violative_constraint_ptrs_and_feasibility();
     }
 
     /*************************************************************************/
@@ -1846,7 +1850,7 @@ class Model {
             variable_ptr->dependent_constraint_ptr()->update();
         }
 
-        this->update_feasibility();
+        this->update_violative_constraint_ptrs_and_feasibility();
     }
 
     /*************************************************************************/
@@ -1954,16 +1958,16 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void update_feasibility(void) {
-        for (const auto &proxy : m_constraint_proxies) {
-            for (const auto &constraint : proxy.flat_indexed_constraints()) {
-                if (constraint.violation_value() > constant::EPSILON) {
-                    m_is_feasible = false;
-                    return;
-                }
+    inline constexpr void update_violative_constraint_ptrs_and_feasibility(
+        void) {
+        m_violative_constraint_ptrs.clear();
+        for (auto &&constraint_ptr :
+             m_constraint_reference.enabled_constraint_ptrs) {
+            if (!constraint_ptr->is_feasible()) {
+                m_violative_constraint_ptrs.push_back(constraint_ptr);
             }
         }
-        m_is_feasible = true;
+        m_is_feasible = (m_violative_constraint_ptrs.size() == 0);
     }
 
     /*************************************************************************/
@@ -2950,6 +2954,13 @@ class Model {
     /*************************************************************************/
     inline constexpr bool is_solved(void) const {
         return m_is_solved;
+    }
+
+    /*************************************************************************/
+    inline constexpr const std::vector<
+        model_component::Constraint<T_Variable, T_Expression> *>
+        &violative_constraint_ptrs(void) const {
+        return m_violative_constraint_ptrs;
     }
 
     /*************************************************************************/

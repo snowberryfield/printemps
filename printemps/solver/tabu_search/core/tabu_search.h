@@ -21,7 +21,7 @@ template <class T_Variable, class T_Expression>
 TabuSearchResult solve(
     model::Model<T_Variable, T_Expression>*              a_model_ptr,         //
     solution::IncumbentHolder<T_Variable, T_Expression>* a_incumbent_holder,  //
-    Memory*                                              a_memory_ptr,        //
+    Memory<T_Variable, T_Expression>*                    a_memory_ptr,        //
     std::vector<solution::SparseSolution<T_Variable, T_Expression>>*
                           a_feasible_solutions_ptr,          //
     const option::Option& a_OPTION,                          //
@@ -45,10 +45,10 @@ TabuSearchResult solve(
     /**
      * Copy arguments as local variables.
      */
-    Model_T*           model_ptr            = a_model_ptr;
-    Memory*            memory_ptr           = a_memory_ptr;
-    IncumbentHolder_T* incumbent_holder_ptr = a_incumbent_holder;
-    option::Option     option               = a_OPTION;
+    Model_T*                          model_ptr            = a_model_ptr;
+    Memory<T_Variable, T_Expression>* memory_ptr           = a_memory_ptr;
+    IncumbentHolder_T*                incumbent_holder_ptr = a_incumbent_holder;
+    option::Option                    option               = a_OPTION;
 
     /**
      * Reset the local augmented incumbent.
@@ -92,10 +92,10 @@ TabuSearchResult solve(
                  model_ptr->number_of_mutable_variables());
     int tabu_tenure = original_tabu_tenure;
 
-    double intensity_previous       = 0.0;
-    double intensity_current        = 0.0;
-    int    intensity_increase_count = 0;
-    int    intensity_decrease_count = 0;
+    double previous_primal_intensity = 0.0;
+    double current_primal_intensity  = 0.0;
+    int    intensity_increase_count  = 0;
+    int    intensity_decrease_count  = 0;
 
     int last_tabu_tenure_updated_iteration = 0;
 
@@ -657,10 +657,10 @@ TabuSearchResult solve(
                  * intensity has grown up, and decreased if the intensity has
                  * been reduced.
                  */
-                intensity_previous = intensity_current;
-                intensity_current  = memory_ptr->intensity();
+                previous_primal_intensity = current_primal_intensity;
+                current_primal_intensity  = memory_ptr->primal_intensity();
 
-                if (intensity_current > intensity_previous) {
+                if (current_primal_intensity > previous_primal_intensity) {
                     intensity_increase_count++;
                     intensity_decrease_count = 0;
 
