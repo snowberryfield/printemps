@@ -10,11 +10,6 @@ namespace printemps {
 namespace solver {
 /*****************************************************************************/
 struct Status {
-    std::unordered_map<std::string, multi_array::ValueProxy<double>>
-        penalty_coefficients;
-
-    std::unordered_map<std::string, multi_array::ValueProxy<int>> update_counts;
-
     bool is_found_feasible_solution;
 
     std::string start_date_time;
@@ -29,6 +24,46 @@ struct Status {
     int         number_of_tabu_search_iterations;
     int         number_of_tabu_search_loops;
 
+    std::unordered_map<std::string, multi_array::ValueProxy<double>>
+        penalty_coefficients;
+
+    std::unordered_map<std::string, multi_array::ValueProxy<int>> update_counts;
+
+    /*************************************************************************/
+    Status(
+        const bool         a_IS_FOUND_FEASIBLE_SOLUTION,          //
+        const std::string& a_START_DATE_TIME,                     //
+        const std::string& a_FINISH_DATE_TIME,                    //
+        const std::string& a_NAME,                                //
+        const int          a_NUMBER_OF_VARIABLES,                 //
+        const int          a_NUMBER_OF_CONSTRAINTS,               //
+        const double       a_ELAPSED_TIME,                        //
+        const int          a_NUMBER_OF_LAGRANGE_DUAL_ITERATIONS,  //
+        const int          a_NUMBER_OF_LOCAL_SEARCH_ITERATIONS,   //
+        const int          a_NUMBER_OF_TABU_SEARCH_ITERATIONS,    //
+        const int          a_NUMBER_OF_TABU_SEARCH_LOOPS,         //
+        const std::unordered_map<std::string, multi_array::ValueProxy<double>>&
+            a_PENALTY_COEFFICIENTS,  //
+        const std::unordered_map<std::string, multi_array::ValueProxy<int>>&
+            a_UPDATE_COUNTS)
+        : is_found_feasible_solution(a_IS_FOUND_FEASIBLE_SOLUTION),
+          start_date_time(a_START_DATE_TIME),
+          finish_date_time(a_FINISH_DATE_TIME),
+          name(a_NAME),
+          number_of_variables(a_NUMBER_OF_VARIABLES),
+          number_of_constraints(a_NUMBER_OF_CONSTRAINTS),
+          elapsed_time(a_ELAPSED_TIME),
+          number_of_lagrange_dual_iterations(
+              a_NUMBER_OF_LAGRANGE_DUAL_ITERATIONS),
+          number_of_local_search_iterations(
+              a_NUMBER_OF_LOCAL_SEARCH_ITERATIONS),
+          number_of_tabu_search_iterations(a_NUMBER_OF_TABU_SEARCH_ITERATIONS),
+          number_of_tabu_search_loops(a_NUMBER_OF_TABU_SEARCH_LOOPS),
+          penalty_coefficients(a_PENALTY_COEFFICIENTS),
+          update_counts(a_UPDATE_COUNTS) {
+        /// nothing to do
+    }
+
     /*************************************************************************/
     Status(void) {
         this->initialize();
@@ -36,8 +71,6 @@ struct Status {
 
     /*************************************************************************/
     void initialize(void) {
-        this->penalty_coefficients.clear();
-        this->update_counts.clear();
         this->is_found_feasible_solution = false;
         this->start_date_time.clear();
         this->finish_date_time.clear();
@@ -49,6 +82,8 @@ struct Status {
         this->number_of_lagrange_dual_iterations = 0;
         this->number_of_tabu_search_iterations   = 0;
         this->number_of_tabu_search_loops        = 0;
+        this->penalty_coefficients.clear();
+        this->update_counts.clear();
     }
 
     /*************************************************************************/

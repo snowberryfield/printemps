@@ -3,8 +3,8 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_SOLVER_LAGRANGE_DUAL_LAGRANGE_DUAL_H__
-#define PRINTEMPS_SOLVER_LAGRANGE_DUAL_LAGRANGE_DUAL_H__
+#ifndef PRINTEMPS_SOLVER_LAGRANGE_DUAL_CORE_LAGRANGE_DUAL_H__
+#define PRINTEMPS_SOLVER_LAGRANGE_DUAL_CORE_LAGRANGE_DUAL_H__
 
 #include "lagrange_dual_print.h"
 #include "lagrange_dual_termination_status.h"
@@ -13,6 +13,7 @@
 namespace printemps {
 namespace solver {
 namespace lagrange_dual {
+namespace core {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 void bound_dual(
@@ -51,12 +52,14 @@ void bound_dual(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 LagrangeDualResult<T_Variable, T_Expression> solve(
-    model::Model<T_Variable, T_Expression>* a_model_ptr,        //
-    const option::Option&                   a_OPTION,           //
-    const std::vector<multi_array::ValueProxy<T_Variable>>&     //
-        a_INITIAL_VARIABLE_VALUE_PROXIES,                       //
-    const solution::IncumbentHolder<T_Variable, T_Expression>&  //
-        a_INCUMBENT_HOLDER) {
+    model::Model<T_Variable, T_Expression>* a_model_ptr,  //
+    solution::IncumbentHolder<T_Variable, T_Expression>*
+        a_incumbent_holder_ptr,  //
+    std::vector<solution::SparseSolution<T_Variable, T_Expression>>*
+                          a_feasible_solutions_ptr,          //
+    const option::Option& a_OPTION,                          //
+    const std::vector<multi_array::ValueProxy<T_Variable>>&  //
+        a_INITIAL_VARIABLE_VALUE_PROXIES) {
     /**
      * Define type aliases.
      */
@@ -74,15 +77,19 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
     /**
      * Copy arguments as local variables.
      */
-    Model_T*       model_ptr = a_model_ptr;
-    option::Option option    = a_OPTION;
-
-    IncumbentHolder_T incumbent_holder = a_INCUMBENT_HOLDER;
+    Model_T*           model_ptr            = a_model_ptr;
+    option::Option     option               = a_OPTION;
+    IncumbentHolder_T* incumbent_holder_ptr = a_incumbent_holder_ptr;
 
     /**
      * Reset the local augmented incumbent.
      */
-    incumbent_holder.reset_local_augmented_incumbent();
+    incumbent_holder_ptr->reset_local_augmented_incumbent();
+
+    /**
+     * Reset the feasible solutions storage.
+     */
+    a_feasible_solutions_ptr->clear();
 
     model_ptr->import_variable_values(a_INITIAL_VARIABLE_VALUE_PROXIES);
     model_ptr->update();
@@ -93,7 +100,7 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
     solution::SolutionScore solution_score = model_ptr->evaluate({});
 
     int update_status =
-        incumbent_holder.try_update_incumbent(model_ptr, solution_score);
+        incumbent_holder_ptr->try_update_incumbent(model_ptr, solution_score);
     int total_update_status = 0;
 
     /**
@@ -123,12 +130,6 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
     double step_size = 1.0 / model_ptr->number_of_variables();
 
     /**
-     * Prepare feasible solutions holder.
-     */
-    std::vector<solution::SparseSolution<T_Variable, T_Expression>>
-        feasible_solutions;
-
-    /**
      * Prepare other local variables.
      */
     auto termination_status = LagrangeDualTerminationStatus::ITERATION_OVER;
@@ -141,11 +142,11 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
     utility::print_message("Lagrange dual starts.",
                            option.verbose >= option::verbose::Full);
     print_table_header(option.verbose >= option::verbose::Full);
-    print_table_initial(model_ptr,         //
-                        -HUGE_VALF,        //
-                        step_size,         //
-                        solution_score,    //
-                        incumbent_holder,  //
+    print_table_initial(model_ptr,             //
+                        -HUGE_VALF,            //
+                        step_size,             //
+                        solution_score,        //
+                        incumbent_holder_ptr,  //
                         option.verbose >= option::verbose::Full);
 
     /**
@@ -173,7 +174,7 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
             termination_status = LagrangeDualTerminationStatus::ITERATION_OVER;
             break;
         }
-        if (incumbent_holder.feasible_incumbent_objective() <=
+        if (incumbent_holder_ptr->feasible_incumbent_objective() <=
             option.target_objective_value) {
             termination_status = LagrangeDualTerminationStatus::REACH_TARGET;
             break;
@@ -257,15 +258,16 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
         model_ptr->update();
         solution_score = model_ptr->evaluate({});
 
-        update_status =
-            incumbent_holder.try_update_incumbent(model_ptr, solution_score);
+        update_status = incumbent_holder_ptr->try_update_incumbent(
+            model_ptr, solution_score);
         total_update_status = update_status || total_update_status;
 
         /**
          * Store the current feasible solution.
          */
         if (solution_score.is_feasible) {
-            feasible_solutions.push_back(model_ptr->export_plain_solution());
+            a_feasible_solutions_ptr->push_back(
+                model_ptr->export_plain_solution());
         }
 
         /**
@@ -307,13 +309,13 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
          */
         if (iteration % std::max(option.lagrange_dual.log_interval, 1) == 0 ||
             update_status > 1) {
-            print_table_body(model_ptr,         //
-                             iteration,         //
-                             lagrangian,        //
-                             step_size,         //
-                             solution_score,    //
-                             update_status,     //
-                             incumbent_holder,  //
+            print_table_body(model_ptr,             //
+                             iteration,             //
+                             lagrangian,            //
+                             step_size,             //
+                             solution_score,        //
+                             update_status,         //
+                             incumbent_holder_ptr,  //
                              option.verbose >= option::verbose::Full);
         }
 
@@ -343,14 +345,13 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
     result.lagrangian           = lagrangian_incumbent;
     result.primal_solution      = primal_incumbent;
     result.dual_value_proxies   = dual_value_proxies_incumbent;
-    result.incumbent_holder     = incumbent_holder;
     result.total_update_status  = total_update_status;
     result.number_of_iterations = iteration;
     result.termination_status   = termination_status;
-    result.feasible_solutions   = feasible_solutions;
 
     return result;
 }
+}  // namespace core
 }  // namespace lagrange_dual
 }  // namespace solver
 }  // namespace printemps
