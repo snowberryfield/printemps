@@ -3,8 +3,8 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_SOLVER_LOCAL_SEARCH_LOCAL_SEARCH_H__
-#define PRINTEMPS_SOLVER_LOCAL_SEARCH_LOCAL_SEARCH_H__
+#ifndef PRINTEMPS_SOLVER_LOCAL_SEARCH_CORE_LOCAL_SEARCH_H__
+#define PRINTEMPS_SOLVER_LOCAL_SEARCH_CORE_LOCAL_SEARCH_H__
 
 #include "local_search_print.h"
 #include "local_search_termination_status.h"
@@ -13,21 +13,22 @@
 namespace printemps {
 namespace solver {
 namespace local_search {
+namespace core {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-LocalSearchResult<T_Variable, T_Expression> solve(
-    model::Model<T_Variable, T_Expression>* a_model_ptr,        //
-    const option::Option&                   a_OPTION,           //
-    const std::vector<multi_array::ValueProxy<T_Variable>>&     //
-        a_INITIAL_VARIABLE_VALUE_PROXIES,                       //
-    const solution::IncumbentHolder<T_Variable, T_Expression>&  //
-                  a_INCUMBENT_HOLDER,                           //
-    const Memory& a_MEMORY) {
+LocalSearchResult solve(
+    model::Model<T_Variable, T_Expression>*              a_model_ptr,         //
+    solution::IncumbentHolder<T_Variable, T_Expression>* a_incumbent_holder,  //
+    Memory*                                              a_memory_ptr,        //
+    std::vector<solution::SparseSolution<T_Variable, T_Expression>>*
+                          a_feasible_solutions_ptr,          //
+    const option::Option& a_OPTION,                          //
+    const std::vector<multi_array::ValueProxy<T_Variable>>&  //
+        a_INITIAL_VARIABLE_VALUE_PROXIES) {
     /**
      * Define type aliases.
      */
-    using Model_T  = model::Model<T_Variable, T_Expression>;
-    using Result_T = LocalSearchResult<T_Variable, T_Expression>;
+    using Model_T = model::Model<T_Variable, T_Expression>;
     using IncumbentHolder_T =
         solution::IncumbentHolder<T_Variable, T_Expression>;
     using Move_T = neighborhood::Move<T_Variable, T_Expression>;
@@ -41,16 +42,20 @@ LocalSearchResult<T_Variable, T_Expression> solve(
     /**
      * Copy arguments as local variables.
      */
-    Model_T*       model_ptr = a_model_ptr;
-    option::Option option    = a_OPTION;
-    Memory         memory    = a_MEMORY;
-
-    IncumbentHolder_T incumbent_holder = a_INCUMBENT_HOLDER;
+    Model_T*           model_ptr            = a_model_ptr;
+    Memory*            memory_ptr           = a_memory_ptr;
+    IncumbentHolder_T* incumbent_holder_ptr = a_incumbent_holder;
+    option::Option     option               = a_OPTION;
 
     /**
      * Reset the local augmented incumbent.
      */
-    incumbent_holder.reset_local_augmented_incumbent();
+    incumbent_holder_ptr->reset_local_augmented_incumbent();
+
+    /**
+     * Reset the feasible solutions storage.
+     */
+    a_feasible_solutions_ptr->clear();
 
     /**
      * Prepare a random generator, which is used for shuffling moves.
@@ -66,20 +71,14 @@ LocalSearchResult<T_Variable, T_Expression> solve(
     solution::SolutionScore solution_score = model_ptr->evaluate({});
 
     int update_status =
-        incumbent_holder.try_update_incumbent(model_ptr, solution_score);
+        incumbent_holder_ptr->try_update_incumbent(model_ptr, solution_score);
     int total_update_status =
         solution::IncumbentHolderConstant::STATUS_NO_UPDATED;
 
     /**
      * Reset the last update iterations.
      */
-    memory.reset_last_update_iterations();
-
-    /**
-     * Prepare feasible solutions holder.
-     */
-    std::vector<solution::SparseSolution<T_Variable, T_Expression>>
-        feasible_solutions;
+    memory_ptr->reset_last_update_iterations();
 
     /**
      * Reset the variable improvability.
@@ -104,9 +103,9 @@ LocalSearchResult<T_Variable, T_Expression> solve(
     utility::print_message("Local search starts.",
                            option.verbose >= option::verbose::Full);
     print_table_header(option.verbose >= option::verbose::Full);
-    print_table_initial(model_ptr,         //
-                        solution_score,    //
-                        incumbent_holder,  //
+    print_table_initial(model_ptr,             //
+                        solution_score,        //
+                        incumbent_holder_ptr,  //
                         option.verbose >= option::verbose::Full);
 
     /**
@@ -131,7 +130,7 @@ LocalSearchResult<T_Variable, T_Expression> solve(
             termination_status = LocalSearchTerminationStatus::ITERATION_OVER;
             break;
         }
-        if (incumbent_holder.feasible_incumbent_objective() <=
+        if (incumbent_holder_ptr->feasible_incumbent_objective() <=
             option.target_objective_value) {
             termination_status = LocalSearchTerminationStatus::REACH_TARGET;
             break;
@@ -222,7 +221,7 @@ LocalSearchResult<T_Variable, T_Expression> solve(
              */
             if (trial_solution_score.local_augmented_objective +
                     constant::EPSILON <
-                incumbent_holder.local_augmented_incumbent_objective()) {
+                incumbent_holder_ptr->local_augmented_incumbent_objective()) {
                 solution_score              = trial_solution_score;
                 is_found_improving_solution = true;
 
@@ -249,21 +248,22 @@ LocalSearchResult<T_Variable, T_Expression> solve(
         Move_T* move_ptr = move_ptrs[number_of_checked_move];
 
         model_ptr->update(*move_ptr);
-        update_status =
-            incumbent_holder.try_update_incumbent(model_ptr, solution_score);
+        update_status = incumbent_holder_ptr->try_update_incumbent(
+            model_ptr, solution_score);
         total_update_status = update_status || total_update_status;
 
         /**
          * Store the current feasible solution.
          */
         if (solution_score.is_feasible) {
-            feasible_solutions.push_back(model_ptr->export_plain_solution());
+            a_feasible_solutions_ptr->push_back(
+                model_ptr->export_plain_solution());
         }
 
         /**
-         * Update the memory.
+         * Update the memory_ptr.
          */
-        memory.update(*move_ptr, iteration);
+        memory_ptr->update(*move_ptr, iteration);
 
         /**
          * Print the optimization progress.
@@ -276,7 +276,7 @@ LocalSearchResult<T_Variable, T_Expression> solve(
                              number_of_checked_move,  //
                              solution_score,          //
                              update_status,           //
-                             incumbent_holder,        //
+                             incumbent_holder_ptr,    //
                              option.verbose >= option::verbose::Full);
         }
         iteration++;
@@ -290,16 +290,13 @@ LocalSearchResult<T_Variable, T_Expression> solve(
     /**
      * Prepare the result.
      */
-    Result_T result;
-    result.incumbent_holder     = incumbent_holder;
-    result.memory               = memory;
-    result.total_update_status  = total_update_status;
-    result.number_of_iterations = iteration;
-    result.termination_status   = termination_status;
-    result.feasible_solutions   = feasible_solutions;
+    LocalSearchResult result(total_update_status,  //
+                             iteration,            //
+                             termination_status);
 
     return result;
 }
+}  // namespace core
 }  // namespace local_search
 }  // namespace solver
 }  // namespace printemps

@@ -3,12 +3,13 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_SOLVER_LAGRANGE_DUAL_LAGRANGE_DUAL_PRINT_H__
-#define PRINTEMPS_SOLVER_LAGRANGE_DUAL_LAGRANGE_DUAL_PRINT_H__
+#ifndef PRINTEMPS_SOLVER_LOCAL_SEARCH_CORE_LOCAL_SEARCH_PRINT_H__
+#define PRINTEMPS_SOLVER_LOCAL_SEARCH_CORE_LOCAL_SEARCH_PRINT_H__
 
 namespace printemps {
 namespace solver {
-namespace lagrange_dual {
+namespace local_search {
+namespace core {
 /*****************************************************************************/
 inline void print_table_header(const bool a_IS_ENABLED_PRINT) {
     if (!a_IS_ENABLED_PRINT) {
@@ -16,58 +17,57 @@ inline void print_table_header(const bool a_IS_ENABLED_PRINT) {
     }
 
     utility::print(
-        "---------+------------+-----------+----------------------+-----------"
+        "---------+------------------------+----------------------+-----------"
         "-----------",
         true);
     utility::print(
-        "Iteration| Lagrangian | Step Size |   Current Solution   |"
+        "Iteration| Number of Neighborhoods|   Current Solution   |"
         "  Incumbent Solution ",
         true);
     utility::print(
-        "         |            |           |   Aug.Obj.(Penalty)  | "
+        "         |      All       checked |   Aug.Obj.(Penalty)  | "
         "  Aug.Obj.  Feas.Obj ",
         true);
     utility::print(
-        "---------+------------+-----------+----------------------+-----------"
+        "---------+------------------------+----------------------+-----------"
         "-----------",
         true);
 }
+
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 inline void print_table_initial(
     const model::Model<T_Variable, T_Expression> *a_MODEL,
-    const double a_LAGRANGIAN, const double a_STEP_SIZE,
-    const solution::SolutionScore &a_CURRENT_SOLUTION_SCORE,
-    const solution::IncumbentHolder<T_Variable, T_Expression>
-        &      a_INCUMBENT_HOLDER,
-    const bool a_IS_ENABLED_PRINT) {
+    const solution::SolutionScore &               a_CURRENT_SOLUTION_SCORE,
+    solution::IncumbentHolder<T_Variable, T_Expression> *a_incumbent_holder_ptr,
+    const bool                                           a_IS_ENABLED_PRINT) {
     if (!a_IS_ENABLED_PRINT) {
         return;
     }
 
     std::printf(
-        " INITIAL |  %9.2e | %9.2e | %9.2e(%9.2e) | %9.2e  %9.2e\n",
-        a_LAGRANGIAN * a_MODEL->sign(), a_STEP_SIZE,
+        " INITIAL |          -           - | %9.2e(%9.2e) | %9.2e  %9.2e\n",
         a_CURRENT_SOLUTION_SCORE.local_augmented_objective * a_MODEL->sign(),
         a_CURRENT_SOLUTION_SCORE.is_feasible
             ? 0.0
             : a_CURRENT_SOLUTION_SCORE.local_penalty,  //
-        a_INCUMBENT_HOLDER.global_augmented_incumbent_objective() *
+        a_incumbent_holder_ptr->global_augmented_incumbent_objective() *
             a_MODEL->sign(),
-        a_INCUMBENT_HOLDER.feasible_incumbent_objective() * a_MODEL->sign());
+        a_incumbent_holder_ptr->feasible_incumbent_objective() *
+            a_MODEL->sign());
 }
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 inline void print_table_body(
-    const model::Model<T_Variable, T_Expression> *a_MODEL,                   //
-    const int                                     a_ITERATION,               //
-    const double                                  a_LAGRANGIAN,              //
-    const double                                  a_STEP_SIZE,               //
-    const solution::SolutionScore &               a_CURRENT_SOLUTION_SCORE,  //
-    const int                                     a_STATUS,                  //
+    const model::Model<T_Variable, T_Expression> *a_MODEL_PTR,                //
+    const int                                     a_ITERATION,                //
+    const int                                     a_NUMBER_OF_MOVES,          //
+    const int                                     a_NUMBER_OF_CHECKED_MOVES,  //
+    const solution::SolutionScore &               a_CURRENT_SOLUTION_SCORE,   //
+    const int                                     a_STATUS,                   //
     const solution::IncumbentHolder<T_Variable, T_Expression>
-        &      a_INCUMBENT_HOLDER,
+        *      a_INCUMBENT_HOLDER_PTR,
     const bool a_IS_ENABLED_PRINT) {
     if (!a_IS_ENABLED_PRINT) {
         return;
@@ -95,22 +95,23 @@ inline void print_table_body(
         mark_feasible_incumbent         = '*';
     }
 
-    std::printf(
-        "%8d |  %9.2e | %9.2e |%c%9.2e(%9.2e) |%c%9.2e %c%9.2e\n",
-        a_ITERATION,                     //
-        a_LAGRANGIAN * a_MODEL->sign(),  //
-        a_STEP_SIZE,                     //
-        mark_current,                    //
+    std::printf(  //
+        "%8d |      %5d       %5d |%c%9.2e(%9.2e) |%c%9.2e %c%9.2e\n",
+        a_ITERATION,                //
+        a_NUMBER_OF_MOVES,          //
+        a_NUMBER_OF_CHECKED_MOVES,  //
+        mark_current,               //
         a_CURRENT_SOLUTION_SCORE.local_augmented_objective *
-            a_MODEL->sign(),  //
+            a_MODEL_PTR->sign(),  //
         a_CURRENT_SOLUTION_SCORE.is_feasible
             ? 0.0
             : a_CURRENT_SOLUTION_SCORE.local_penalty,  //
         mark_global_augmented_incumbent,               //
-        a_INCUMBENT_HOLDER.global_augmented_incumbent_objective() *
-            a_MODEL->sign(),      //
+        a_INCUMBENT_HOLDER_PTR->global_augmented_incumbent_objective() *
+            a_MODEL_PTR->sign(),  //
         mark_feasible_incumbent,  //
-        a_INCUMBENT_HOLDER.feasible_incumbent_objective() * a_MODEL->sign());
+        a_INCUMBENT_HOLDER_PTR->feasible_incumbent_objective() *
+            a_MODEL_PTR->sign());
 }
 /*****************************************************************************/
 inline void print_table_footer(const bool a_IS_ENABLED_PRINT) {
@@ -118,11 +119,12 @@ inline void print_table_footer(const bool a_IS_ENABLED_PRINT) {
         return;
     }
     utility::print(
-        "---------+------------+-----------+----------------------+-----------"
+        "---------+------------------------+----------------------+-----------"
         "-----------",
         true);
 }
-}  // namespace lagrange_dual
+}  // namespace core
+}  // namespace local_search
 }  // namespace solver
 }  // namespace printemps
 
