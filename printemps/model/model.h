@@ -817,6 +817,12 @@ class Model {
          * Store the global penalty coefficient for evaluation.
          */
         m_global_penalty_coefficient = a_GLOBAL_PENALTY_COEFFICIENT;
+        for (auto &&proxy : m_constraint_proxies) {
+            for (auto &&constraint : proxy.flat_indexed_constraints()) {
+                constraint.global_penalty_coefficient() =
+                    m_global_penalty_coefficient;
+            }
+        }
     }
 
     /*************************************************************************/

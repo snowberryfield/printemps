@@ -3,12 +3,13 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_SOLVER_TABU_SEARCH_TABU_SEARCH_PRINT_H__
-#define PRINTEMPS_SOLVER_TABU_SEARCH_TABU_SEARCH_PRINT_H__
+#ifndef PRINTEMPS_SOLVER_TABU_SEARCH_CORE_TABU_SEARCH_PRINT_H__
+#define PRINTEMPS_SOLVER_TABU_SEARCH_CORE_TABU_SEARCH_PRINT_H__
 
 namespace printemps {
 namespace solver {
 namespace tabu_search {
+namespace core {
 /*****************************************************************************/
 struct TabuSearchMoveScore;
 
@@ -38,10 +39,10 @@ inline void print_table_header(const bool a_IS_ENABLED_PRINT) {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 inline void print_table_initial(
-    const model::Model<T_Variable, T_Expression> *a_MODEL,
+    const model::Model<T_Variable, T_Expression> *a_MODEL_PTR,
     const solution::SolutionScore &               a_CURRENT_SOLUTION_SCORE,
     const solution::IncumbentHolder<T_Variable, T_Expression>
-        &      a_INCUMBENT_HOLDER,
+        *      a_INCUMBENT_HOLDER_PTR,
     const bool a_IS_ENABLED_PRINT) {
     if (!a_IS_ENABLED_PRINT) {
         return;
@@ -49,19 +50,21 @@ inline void print_table_initial(
 
     std::printf(
         " INITIAL |    -     -     -     - | %9.2e(%9.2e) | %9.2e  %9.2e\n",
-        a_CURRENT_SOLUTION_SCORE.local_augmented_objective * a_MODEL->sign(),
+        a_CURRENT_SOLUTION_SCORE.local_augmented_objective *
+            a_MODEL_PTR->sign(),
         a_CURRENT_SOLUTION_SCORE.is_feasible
             ? 0.0
             : a_CURRENT_SOLUTION_SCORE.local_penalty,  //
-        a_INCUMBENT_HOLDER.global_augmented_incumbent_objective() *
-            a_MODEL->sign(),
-        a_INCUMBENT_HOLDER.feasible_incumbent_objective() * a_MODEL->sign());
+        a_INCUMBENT_HOLDER_PTR->global_augmented_incumbent_objective() *
+            a_MODEL_PTR->sign(),
+        a_INCUMBENT_HOLDER_PTR->feasible_incumbent_objective() *
+            a_MODEL_PTR->sign());
 }
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 inline void print_table_body(
-    const model::Model<T_Variable, T_Expression> *a_MODEL,                //
+    const model::Model<T_Variable, T_Expression> *a_MODEL_PTR,            //
     const int                                     a_ITERATION,            //
     const bool                     a_IS_SPECIAL_NEIGHBORHOOD_MOVE,        //
     const int                      a_NUMBER_OF_ALL_NEIGHBORHOODS,         //
@@ -71,8 +74,8 @@ inline void print_table_body(
     const solution::SolutionScore &a_CURRENT_SOLUTION_SCORE,              //
     const int                      a_STATUS,                              //
     const solution::IncumbentHolder<T_Variable, T_Expression>
-        &      a_INCUMBENT_HOLDER,  //
-    const bool a_IS_ASPIRATED,      //
+        *      a_INCUMBENT_HOLDER_PTR,
+    const bool a_IS_ASPIRATED,  //
     const bool a_IS_ENABLED_PRINT) {
     if (!a_IS_ENABLED_PRINT) {
         return;
@@ -122,7 +125,7 @@ inline void print_table_body(
         }
     };
 
-    std::printf(
+    std::printf(  //
         "%8d%c|%s %s %s %s |%c%9.2e(%9.2e) |%c%9.2e %c%9.2e\n",
         a_ITERATION,                                               //
         mark_special_neighborhood_move,                            //
@@ -132,15 +135,16 @@ inline void print_table_body(
         int_format(a_NUMBER_OF_IMPROVABLE_NEIGHBORHOOD).c_str(),   //
         mark_current,                                              //
         a_CURRENT_SOLUTION_SCORE.local_augmented_objective *
-            a_MODEL->sign(),  //
+            a_MODEL_PTR->sign(),  //
         a_CURRENT_SOLUTION_SCORE.is_feasible
             ? 0.0
             : a_CURRENT_SOLUTION_SCORE.local_penalty,  //
         mark_global_augmented_incumbent,               //
-        a_INCUMBENT_HOLDER.global_augmented_incumbent_objective() *
-            a_MODEL->sign(),      //
+        a_INCUMBENT_HOLDER_PTR->global_augmented_incumbent_objective() *
+            a_MODEL_PTR->sign(),  //
         mark_feasible_incumbent,  //
-        a_INCUMBENT_HOLDER.feasible_incumbent_objective() * a_MODEL->sign());
+        a_INCUMBENT_HOLDER_PTR->feasible_incumbent_objective() *
+            a_MODEL_PTR->sign());
 }
 /*****************************************************************************/
 inline void print_table_footer(const bool a_IS_ENABLED_PRINT) {
@@ -152,6 +156,7 @@ inline void print_table_footer(const bool a_IS_ENABLED_PRINT) {
         "---------+------------------------+----------------------+------------"
         "----------");
 }
+}  // namespace core
 }  // namespace tabu_search
 }  // namespace solver
 }  // namespace printemps

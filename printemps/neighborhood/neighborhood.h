@@ -297,6 +297,14 @@ class Neighborhood {
         &user_defined(void) const noexcept {
         return m_user_defined;
     }
+
+    /*************************************************************************/
+    inline constexpr int number_of_special_neighborhood_moves(void) const {
+        return m_aggregation.moves().size() + m_precedence.moves().size() +
+               m_variable_bound.moves().size() +
+               m_soft_selection.moves().size() + m_chain.moves().size() +
+               m_two_flip.moves().size();
+    }
 };
 }  // namespace neighborhood
 }  // namespace printemps

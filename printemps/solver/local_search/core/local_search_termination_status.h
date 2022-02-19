@@ -3,20 +3,23 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_SOLVER_LAGRANGE_DUAL_LAGRANGE_DUAL_TERMINATION_STATUS_H__
-#define PRINTEMPS_SOLVER_LAGRANGE_DUAL_LAGRANGE_DUAL_TERMINATION_STATUS_H__
+#ifndef PRINTEMPS_SOLVER_LOCAL_SEARCH_CORE_LOCAL_SEARCH_TERMINATION_STATUS_H__
+#define PRINTEMPS_SOLVER_LOCAL_SEARCH_CORE_LOCAL_SEARCH_TERMINATION_STATUS_H__
 
 namespace printemps {
 namespace solver {
-namespace lagrange_dual {
+namespace local_search {
+namespace core {
 /*****************************************************************************/
-enum class LagrangeDualTerminationStatus {
+enum class LocalSearchTerminationStatus {
     TIME_OVER,
     ITERATION_OVER,
-    CONVERGE,
-    REACH_TARGET
+    NO_MOVE,
+    REACH_TARGET,
+    LOCAL_OPTIMAL
 };
-}  // namespace lagrange_dual
+}  // namespace core
+}  // namespace local_search
 }  // namespace solver
 }  // namespace printemps
 
