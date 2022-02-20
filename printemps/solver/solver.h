@@ -251,7 +251,7 @@ class Solver {
                       m_model_ptr->name(),                   //
                       m_model_ptr->number_of_variables(),    //
                       m_model_ptr->number_of_constraints(),  //
-                      m_time_keeper.elapsed_time(),          //
+                      m_time_keeper.clock(),                 //
                       m_lagrange_dual_controller.result().number_of_iterations,
                       m_local_search_controller.result().number_of_iterations,
                       m_tabu_search_controller.result().number_of_iterations,
