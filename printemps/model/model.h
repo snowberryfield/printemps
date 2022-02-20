@@ -709,9 +709,9 @@ class Model {
         /**
          * Remove redundant set variables.
          */
-        int number_of_removed_variables = 0;
+        int number_of_fixed_variables = 0;
         if (a_IS_ENABLED_PRESOLVE && m_is_linear) {
-            number_of_removed_variables =
+            number_of_fixed_variables =
                 presolver::remove_redundant_set_variables(this,
                                                           a_IS_ENABLED_PRINT);
         }
@@ -730,7 +730,7 @@ class Model {
          * Perform setup_structure again if there are new removed(disabled)
          * variables or constraints.
          */
-        if (number_of_removed_variables > 0 ||
+        if (number_of_fixed_variables > 0 ||
             number_of_removed_constraints > 0) {
             this->setup_structure();
         }
