@@ -16,7 +16,9 @@ struct TabuSearchControllerParameterManagerConstant {
     static constexpr double PENALTY_COEFFICIENT_RELAXING_RATE_MIN = 0.3;
     static constexpr double PENALTY_COEFFICIENT_RELAXING_RATE_MAX = 1.0 - 1E-4;
     static constexpr double PENALTY_COEFFICIENT_RELAXING_RATE_STEP_SIZE = 5E-1;
+    static constexpr double VIOLATION_COUNT_RATE_PENALTY_COEFFICIENT    = 1E-5;
     static constexpr int    ITERATION_AFTER_RELAXATION_MAX              = 30;
+    static constexpr double GAP_TOLERANCE = constant::EPSILON;
 };
 
 /*****************************************************************************/
@@ -313,7 +315,7 @@ class TabuSearchControllerParameterManager {
          * Prepare variables for control initial solution, penalty coefficients,
          * initial modification, etc.
          */
-        auto& result_local_augmented_incumbent_score =
+        const auto& RESULT_LOCAL_AUGMENTED_INCUMBENT_SCORE =
             m_incumbent_holder_ptr->local_augmented_incumbent_score();
 
         /**
@@ -324,10 +326,10 @@ class TabuSearchControllerParameterManager {
         /**
          *  NOTE: The gap can takes both of positive and negative value.
          */
-        double gap =
+        const double GAP =
             m_incumbent_holder_ptr->global_augmented_incumbent_objective() -
             m_incumbent_holder_ptr->local_augmented_incumbent_objective();
-        double relative_range =
+        const double RELATIVE_RANGE =
             a_STATE.tabu_search_result.local_augmented_objective_range /
             std::max(1.0, fabs(m_incumbent_holder_ptr
                                    ->global_augmented_incumbent_objective()));
@@ -354,7 +356,7 @@ class TabuSearchControllerParameterManager {
             m_parameter.employing_global_augmented_solution_flag = true;
             m_parameter.is_enabled_forcibly_initial_modification = true;
 
-            if (result_local_augmented_incumbent_score.is_feasible) {
+            if (RESULT_LOCAL_AUGMENTED_INCUMBENT_SCORE.is_feasible) {
                 m_parameter.is_enabled_penalty_coefficient_relaxing = true;
             } else {
                 if (a_STATE.iteration_after_no_update > 0) {
@@ -369,10 +371,7 @@ class TabuSearchControllerParameterManager {
          * solution for the next loop and flags to tighten or relax the penalty
          * coefficients will be determined by complexed rules below.
          */
-
-        double gap_tolerance = constant::EPSILON;
-
-        if (gap < gap_tolerance) {
+        if (GAP < TabuSearchControllerParameterManagerConstant::GAP_TOLERANCE) {
             /**
              * The fact that the gap is negative implies that the obtained local
              * incumbent solution is worse than the global incumbent solution.
@@ -384,7 +383,7 @@ class TabuSearchControllerParameterManager {
             m_parameter.employing_global_augmented_solution_flag = true;
             m_parameter.is_enabled_forcibly_initial_modification = true;
 
-            if (result_local_augmented_incumbent_score.is_feasible) {
+            if (RESULT_LOCAL_AUGMENTED_INCUMBENT_SCORE.is_feasible) {
                 m_parameter.is_enabled_penalty_coefficient_relaxing = true;
             } else {
                 m_parameter.is_enabled_penalty_coefficient_tightening = true;
@@ -392,7 +391,7 @@ class TabuSearchControllerParameterManager {
             return;
         }
 
-        if (result_local_augmented_incumbent_score.is_feasible) {
+        if (RESULT_LOCAL_AUGMENTED_INCUMBENT_SCORE.is_feasible) {
             /**
              * If the gap is positive and the local incumbent solution is
              * feasible, the local incumbent solution is employed as the initial
@@ -404,7 +403,7 @@ class TabuSearchControllerParameterManager {
             return;
         }
 
-        if (relative_range < TabuSearchControllerParameterManagerConstant::
+        if (RELATIVE_RANGE < TabuSearchControllerParameterManagerConstant::
                                  RELATIVE_RANGE_THRESHOLD) {
             m_parameter.employing_global_augmented_solution_flag = true;
             m_parameter.is_enabled_forcibly_initial_modification = true;
@@ -451,8 +450,10 @@ class TabuSearchControllerParameterManager {
          * solution has been found.
          */
         if (a_STATE.is_infeasible_stagnation &&
-            a_STATE.current_primal_intensity >
-                a_STATE.current_primal_intensity_before_relaxation) {
+            ((a_STATE.current_primal_intensity >
+              a_STATE.current_primal_intensity_before_relaxation) ||
+             (a_STATE.current_dual_intensity >
+              a_STATE.current_dual_intensity_before_relaxation))) {
             m_parameter.penalty_coefficient_relaxing_rate =
                 std::max(TabuSearchControllerParameterManagerConstant::
                              PENALTY_COEFFICIENT_RELAXING_RATE_MIN,
@@ -474,7 +475,12 @@ class TabuSearchControllerParameterManager {
          * Increase penalty coefficient relaxing rate if previous solutions are
          * employed as initial solutions, which indicates overrelaxation.
          */
-        if (a_STATE.employing_previous_solution_count_after_relaxation > 0) {
+        if (a_STATE.employing_previous_solution_count_after_relaxation >
+            std::max(
+                a_STATE
+                    .employing_local_augmented_solution_count_after_relaxation,
+                a_STATE
+                    .employing_global_augmented_solution_count_after_relaxation)) {
             m_parameter.penalty_coefficient_relaxing_rate =
                 std::min(TabuSearchControllerParameterManagerConstant::
                              PENALTY_COEFFICIENT_RELAXING_RATE_MAX,
@@ -520,60 +526,74 @@ class TabuSearchControllerParameterManager {
         double total_violation         = 0.0;
         double total_squared_violation = 0.0;
 
-        auto& local_augmented_incumbent_solution =
+        const auto& LOCAL_AUGMENTED_INCUMBENT_SOLUTION =
             m_incumbent_holder_ptr->local_augmented_incumbent_solution();
+        const auto& CONSTRAINT_VALUE_PROXIES =
+            LOCAL_AUGMENTED_INCUMBENT_SOLUTION.constraint_value_proxies;
+        const auto& VIOLATION_VALUE_PROXIES =
+            LOCAL_AUGMENTED_INCUMBENT_SOLUTION.violation_value_proxies;
+        const auto& VIOLATION_COUNT_RATE_PROXIES =
+            m_memory_ptr->violation_count_rates();
 
-        for (const auto& proxy :
-             local_augmented_incumbent_solution.violation_value_proxies) {
-            for (const auto& element : proxy.flat_indexed_values()) {
-                total_violation += element;
-                total_squared_violation += element * element;
+        for (auto&& proxy : this->m_model_ptr->constraint_proxies()) {
+            for (auto&& constraint : proxy.flat_indexed_constraints()) {
+                const double VIOLATION =
+                    VIOLATION_VALUE_PROXIES[proxy.index()]
+                                           [constraint.flat_index()];
+                double VIOLATION_COUNT_RATE =
+                    VIOLATION_COUNT_RATE_PROXIES[proxy.index()]
+                                                [constraint.flat_index()];
+                const double ELEMENT =
+                    VIOLATION *
+                    (1.0 + TabuSearchControllerParameterManagerConstant::
+                                   VIOLATION_COUNT_RATE_PENALTY_COEFFICIENT *
+                               VIOLATION_COUNT_RATE);
+                total_violation += ELEMENT;
+                total_squared_violation += ELEMENT * ELEMENT;
             }
         }
 
-        double balance = m_master_option.penalty_coefficient_updating_balance;
-        double gap =
+        const double BALANCE =
+            m_master_option.penalty_coefficient_updating_balance;
+        const double GAP =
             m_incumbent_holder_ptr->global_augmented_incumbent_objective() -
             m_incumbent_holder_ptr->local_augmented_incumbent_objective();
 
         for (auto&& proxy : this->m_model_ptr->constraint_proxies()) {
-            const auto& constraint_values =
-                local_augmented_incumbent_solution
-                    .constraint_value_proxies[proxy.index()]
-                    .flat_indexed_values();
-
-            const auto& violation_values =
-                local_augmented_incumbent_solution
-                    .violation_value_proxies[proxy.index()]
-                    .flat_indexed_values();
-
             for (auto&& constraint : proxy.flat_indexed_constraints()) {
-                double constraint_value =
-                    constraint_values[constraint.flat_index()];
-                double violation_value =
-                    violation_values[constraint.flat_index()];
-                double delta_penalty_coefficient_constant =
-                    std::max(0.0, gap) / total_violation;
-                double delta_penalty_coefficient_proportional =
-                    std::max(0.0, gap) / total_squared_violation *
-                    violation_value;
+                const double CONSTRAINT_VALUE = CONSTRAINT_VALUE_PROXIES  //
+                    [proxy.index()][constraint.flat_index()];
+                const double VIOLATION_VALUE = VIOLATION_VALUE_PROXIES  //
+                    [proxy.index()][constraint.flat_index()];
+                const double VIOLATION_COUNT_RATE =
+                    VIOLATION_COUNT_RATE_PROXIES  //
+                        [proxy.index()][constraint.flat_index()];
 
-                double positive_part = std::max(constraint_value, 0.0);
-                double negative_part = std::max(-constraint_value, 0.0);
-                double delta_penalty_coefficient =
-                    (balance * delta_penalty_coefficient_constant +
-                     (1.0 - balance) * delta_penalty_coefficient_proportional);
+                const double DELTA_PENALTY_COEFFICIENT_CONSTANT =
+                    std::max(0.0, GAP) / total_violation;
+                const double DELTA_PENALTY_COEFFICIENT_PROPORTIONAL =
+                    std::max(0.0, GAP) / total_squared_violation *
+                    VIOLATION_VALUE *
+                    (1.0 + TabuSearchControllerParameterManagerConstant::
+                                   VIOLATION_COUNT_RATE_PENALTY_COEFFICIENT *
+                               VIOLATION_COUNT_RATE);
+
+                const double POSITIVE_PART = std::max(CONSTRAINT_VALUE, 0.0);
+                const double NEGATIVE_PART = std::max(-CONSTRAINT_VALUE, 0.0);
+                const double DELTA_PENALTY_COEFFICIENT =
+                    (BALANCE * DELTA_PENALTY_COEFFICIENT_CONSTANT +
+                     (1.0 - BALANCE) * DELTA_PENALTY_COEFFICIENT_PROPORTIONAL);
 
                 if (constraint.is_less_or_equal() &&
-                    positive_part > constant::EPSILON) {
+                    POSITIVE_PART > constant::EPSILON) {
                     constraint.local_penalty_coefficient_less() +=
                         m_parameter.penalty_coefficient_tightening_rate *
-                        delta_penalty_coefficient;
+                        DELTA_PENALTY_COEFFICIENT;
                 } else if (constraint.is_greater_or_equal() &&
-                           negative_part > constant::EPSILON) {
+                           NEGATIVE_PART > constant::EPSILON) {
                     constraint.local_penalty_coefficient_greater() +=
                         m_parameter.penalty_coefficient_tightening_rate *
-                        delta_penalty_coefficient;
+                        DELTA_PENALTY_COEFFICIENT;
                 }
             }
 
@@ -616,36 +636,36 @@ class TabuSearchControllerParameterManager {
         double corrected_penalty_coefficient_relaxing_rate =
             m_parameter.penalty_coefficient_relaxing_rate;
 
-        auto& result = a_STATE.tabu_search_result;
-        if (result.objective_constraint_rate > constant::EPSILON) {
+        const auto& RESULT = a_STATE.tabu_search_result;
+        if (RESULT.objective_constraint_rate > constant::EPSILON) {
             if (m_incumbent_holder_ptr->local_augmented_incumbent_score()
                     .is_feasible) {
                 constexpr double MARGIN = 1.0;
                 corrected_penalty_coefficient_relaxing_rate =
                     std::min(m_parameter.penalty_coefficient_relaxing_rate,
-                             result.objective_constraint_rate * MARGIN);
+                             RESULT.objective_constraint_rate * MARGIN);
             }
         }
 
         for (auto&& proxy : m_model_ptr->constraint_proxies()) {
-            const auto& constraint_values =
+            const auto& CONSTRAINT_VALUES =
                 m_incumbent_holder_ptr->local_augmented_incumbent_solution()
                     .constraint_value_proxies[proxy.index()]
                     .flat_indexed_values();
 
             for (auto&& constraint : proxy.flat_indexed_constraints()) {
-                double constraint_value =
-                    constraint_values[constraint.flat_index()];
-                double positive_part = std::max(constraint_value, 0.0);
-                double negative_part = std::max(-constraint_value, 0.0);
+                const double CONSTRAINT_VALUE =
+                    CONSTRAINT_VALUES[constraint.flat_index()];
+                const double POSITIVE_PART = std::max(CONSTRAINT_VALUE, 0.0);
+                const double NEGATIVE_PART = std::max(-CONSTRAINT_VALUE, 0.0);
 
                 if (constraint.is_less_or_equal() &&
-                    positive_part < constant::EPSILON) {
+                    POSITIVE_PART < constant::EPSILON) {
                     constraint.local_penalty_coefficient_less() *=
                         corrected_penalty_coefficient_relaxing_rate;
                 }
                 if (constraint.is_greater_or_equal() &&
-                    negative_part < constant::EPSILON) {
+                    NEGATIVE_PART < constant::EPSILON) {
                     constraint.local_penalty_coefficient_greater() *=
                         corrected_penalty_coefficient_relaxing_rate;
                 }
@@ -680,8 +700,10 @@ class TabuSearchControllerParameterManager {
         }
 
         if ((LAST_TABU_TENURE == m_parameter.initial_tabu_tenure) &&
-            (a_STATE.current_primal_intensity >
-             a_STATE.previous_primal_intensity)) {
+            ((a_STATE.current_primal_intensity >
+              a_STATE.previous_primal_intensity) ||
+             (a_STATE.current_dual_intensity >
+              a_STATE.previous_dual_intensity))) {
             return;
         }
 
@@ -710,13 +732,13 @@ class TabuSearchControllerParameterManager {
                 m_master_option.tabu_search.initial_modification_fixed_rate *
                 m_parameter.initial_tabu_tenure));
 
-        int random_width = static_cast<int>(
+        const int RANDOM_WIDTH = static_cast<int>(
             m_master_option.tabu_search.initial_modification_randomize_rate *
             number_of_initial_modification);
 
-        if (random_width > 0) {
+        if (RANDOM_WIDTH > 0) {
             number_of_initial_modification +=
-                (*a_mt19937_ptr)() % (2 * random_width) - random_width;
+                (*a_mt19937_ptr)() % (2 * RANDOM_WIDTH) - RANDOM_WIDTH;
         }
 
         number_of_initial_modification =
