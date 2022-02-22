@@ -138,9 +138,9 @@ class TabuSearchControllerStateManager {
              solution::IncumbentHolderConstant::
                  STATUS_FEASIBLE_INCUMBENT_UPDATE);
 
-        m_state.is_no_updated =
+        m_state.is_not_updated =
             (m_state.tabu_search_result.total_update_status ==
-             solution::IncumbentHolderConstant::STATUS_NO_UPDATED);
+             solution::IncumbentHolderConstant::STATUS_NOT_UPDATED);
 
         /**
          * Update the iteration after global augmented incumbent update.
@@ -154,7 +154,7 @@ class TabuSearchControllerStateManager {
         /**
          * Update the consecutive iteration with no update.
          */
-        if (m_state.is_no_updated) {
+        if (m_state.is_not_updated) {
             m_state.iteration_after_no_update++;
         } else {
             m_state.iteration_after_no_update = 0;

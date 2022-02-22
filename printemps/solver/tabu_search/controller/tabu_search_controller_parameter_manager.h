@@ -195,7 +195,7 @@ class TabuSearchControllerParameterManager {
              * updated.
              */
             this->disable_special_neighborhod_moves();
-            m_parameter.is_disabled_special_neighborhood_move = true;
+
         } else {
             /**
              * Enable the special neighborhood moves if the incumbent was
@@ -204,7 +204,6 @@ class TabuSearchControllerParameterManager {
             if (a_STATE.tabu_search_result.number_of_iterations ==
                 m_master_option.tabu_search.iteration_max) {
                 this->enable_special_neighborhod_moves();
-                m_parameter.is_enabled_special_neighborhood_move = true;
             }
         }
 
@@ -330,7 +329,7 @@ class TabuSearchControllerParameterManager {
             m_incumbent_holder_ptr->global_augmented_incumbent_objective() -
             m_incumbent_holder_ptr->local_augmented_incumbent_objective();
         const double RELATIVE_RANGE =
-            a_STATE.tabu_search_result.local_augmented_objective_range /
+            a_STATE.tabu_search_result.global_augmented_objective_range /
             std::max(1.0, fabs(m_incumbent_holder_ptr
                                    ->global_augmented_incumbent_objective()));
 
@@ -345,7 +344,7 @@ class TabuSearchControllerParameterManager {
             return;
         }
 
-        if (a_STATE.is_no_updated) {
+        if (a_STATE.is_not_updated) {
             /**
              * If the last loop failed to find any local/global incumbent
              * solution, the global incumbent solution is employed as the
@@ -683,7 +682,7 @@ class TabuSearchControllerParameterManager {
             return;
         }
 
-        if (a_STATE.is_no_updated) {
+        if (a_STATE.is_not_updated) {
             m_parameter.initial_tabu_tenure = std::max(
                 m_parameter.initial_tabu_tenure - 1,
                 std::min(m_master_option.tabu_search.initial_tabu_tenure,
@@ -816,6 +815,7 @@ class TabuSearchControllerParameterManager {
             m_model_ptr->flippable_variable_ptr_pairs().size() > 0) {
             m_model_ptr->neighborhood().two_flip().disable();
         }
+        m_parameter.is_disabled_special_neighborhood_move = true;
     }
 
     /*************************************************************************/
@@ -859,6 +859,7 @@ class TabuSearchControllerParameterManager {
             m_model_ptr->neighborhood()
                 .reset_special_neighborhood_moves_availability();
         }
+        m_parameter.is_enabled_special_neighborhood_move = true;
     }
 
     /*************************************************************************/

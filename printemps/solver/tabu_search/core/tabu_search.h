@@ -77,7 +77,7 @@ TabuSearchResult solve(
     int update_status = incumbent_holder_ptr->try_update_incumbent(
         model_ptr, current_solution_score);
     int total_update_status =
-        solution::IncumbentHolderConstant::STATUS_NO_UPDATED;
+        solution::IncumbentHolderConstant::STATUS_NOT_UPDATED;
 
     /**
      * Reset the last update iterations.
@@ -135,10 +135,10 @@ TabuSearchResult solve(
     double min_objective = current_solution_score.objective;
     double max_objective = current_solution_score.objective;
 
-    double min_local_augmented_objective =
-        current_solution_score.local_augmented_objective;
-    double max_local_augmented_objective =
-        current_solution_score.local_augmented_objective;
+    double min_global_augmented_objective =
+        current_solution_score.global_augmented_objective;
+    double max_global_augmented_objective =
+        current_solution_score.global_augmented_objective;
     double min_local_penalty = HUGE_VALF;
 
     if (!current_solution_score.is_feasible) {
@@ -475,12 +475,12 @@ TabuSearchResult solve(
         max_objective =
             std::max(max_objective, current_solution_score.objective);
 
-        min_local_augmented_objective =
-            std::min(min_local_augmented_objective,
-                     current_solution_score.local_augmented_objective);
-        max_local_augmented_objective =
-            std::max(max_local_augmented_objective,
-                     current_solution_score.local_augmented_objective);
+        min_global_augmented_objective =
+            std::min(min_global_augmented_objective,
+                     current_solution_score.global_augmented_objective);
+        max_global_augmented_objective =
+            std::max(max_global_augmented_objective,
+                     current_solution_score.global_augmented_objective);
 
         if (!current_solution_score.is_feasible) {
             min_local_penalty = std::min(min_local_penalty,
@@ -776,8 +776,8 @@ TabuSearchResult solve(
         std::max(1.0, std::max(abs_max_objective,  //
                                max_objective - min_objective)) /
         std::max(1.0, min_local_penalty);
-    auto local_augmented_objective_range = std::max(
-        0.0, max_local_augmented_objective - min_local_augmented_objective);
+    auto global_augmented_objective_range = std::max(
+        0.0, max_global_augmented_objective - min_global_augmented_objective);
 
     TabuSearchResult result(
         total_update_status,                               //
@@ -790,7 +790,7 @@ TabuSearchResult solve(
         is_few_permissible_neighborhood,                   //
         is_found_new_feasible_solution,                    //
         objective_constraint_rate,                         //
-        local_augmented_objective_range);
+        global_augmented_objective_range);
 
     return result;
 }
