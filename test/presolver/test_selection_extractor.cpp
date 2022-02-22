@@ -21,7 +21,7 @@ class TestSelectionExtractor : public ::testing::Test {
 };
 
 /*****************************************************************************/
-TEST_F(TestSelectionExtractor, extract_selections_by_defined_order) {
+TEST_F(TestSelectionExtractor, extract_by_defined_order) {
     printemps::model::Model<int, double> model;
 
     auto& x_0 = model.create_variables("x_0", {10, 10}, 0, 1);
@@ -58,7 +58,7 @@ TEST_F(TestSelectionExtractor, extract_selections_by_defined_order) {
     model.setup_structure();
     printemps::presolver::SelectionExtractor<int, double> selection_extractor(
         &model);
-    selection_extractor.extract_selections_by_defined_order(false);
+    selection_extractor.extract_by_defined_order(false);
     model.setup_structure();
 
     EXPECT_EQ(3, model.number_of_selection_constraints());
@@ -133,8 +133,7 @@ TEST_F(TestSelectionExtractor, extract_selections_by_defined_order) {
 }
 
 /*****************************************************************************/
-TEST_F(TestSelectionExtractor,
-       extract_selections_by_number_of_variables_smaller_order) {
+TEST_F(TestSelectionExtractor, extract_by_number_of_variables_smaller_order) {
     printemps::model::Model<int, double> model;
 
     auto& x_0 = model.create_variables("x_0", {10, 10}, 0, 1);
@@ -173,8 +172,7 @@ TEST_F(TestSelectionExtractor,
 
     printemps::presolver::SelectionExtractor<int, double> selection_extractor(
         &model);
-    selection_extractor.extract_selections_by_number_of_variables_order(true,
-                                                                        false);
+    selection_extractor.extract_by_number_of_variables_order(true, false);
     model.setup_structure();
 
     EXPECT_EQ(3, model.number_of_selection_constraints());
@@ -289,8 +287,7 @@ TEST_F(TestSelectionExtractor,
     model.setup_structure();
     printemps::presolver::SelectionExtractor<int, double> selection_extractor(
         &model);
-    selection_extractor.extract_selections_by_number_of_variables_order(false,
-                                                                        false);
+    selection_extractor.extract_by_number_of_variables_order(false, false);
     model.setup_structure();
 
     model.setup_structure();
@@ -401,7 +398,7 @@ TEST_F(TestSelectionExtractor, extract_selections_independent) {
     model.setup_structure();
     printemps::presolver::SelectionExtractor<int, double> selection_extractor(
         &model);
-    selection_extractor.extract_independent_selections(false);
+    selection_extractor.extract_independent(false);
     model.setup_structure();
 
     EXPECT_EQ(1, model.number_of_selection_constraints());

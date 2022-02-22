@@ -134,9 +134,8 @@ constexpr void evaluate_move(
      */
     a_score_ptr->lagrangian_penalty = 0;
     if (a_OPTION.is_enabled_lagrange_dual) {
-        a_score_ptr->lagrangian_penalty           //
-            = compute_lagrangian_penalty(a_MOVE,  //
-                                         a_OPTION);
+        a_score_ptr->lagrangian_penalty  //
+            = compute_lagrangian_penalty(a_MOVE, a_OPTION);
     }
 }
 }  // namespace core

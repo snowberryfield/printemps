@@ -10,7 +10,7 @@
 
 namespace {
 /*****************************************************************************/
-class TestIntermediateVariableExtractor : public ::testing::Test {
+class TestDependentIntermediateVariableExtractor : public ::testing::Test {
    protected:
     virtual void SetUp(void) {
         /// nothing to do
@@ -21,7 +21,8 @@ class TestIntermediateVariableExtractor : public ::testing::Test {
 };
 
 /*****************************************************************************/
-TEST_F(TestIntermediateVariableExtractor, extract_intermediate_variables) {
+TEST_F(TestDependentIntermediateVariableExtractor,
+       extract_intermediate_variables) {
     /// case 01
     {
         printemps::model::Model<int, double> model;
@@ -42,11 +43,13 @@ TEST_F(TestIntermediateVariableExtractor, extract_intermediate_variables) {
         EXPECT_TRUE(g(0).is_intermediate());
         EXPECT_TRUE(h(0).is_intermediate());
 
+        printemps::presolver::DependentIntermediateVariableExtractor<int,
+                                                                     double>
+            dependent_intermediate_variable_extractor(&model);
+
         /// Extracting (Round 1)
         {
-            printemps::presolver::extract_dependent_intermediate_variables(  //
-                &model,                                                      //
-                false);
+            dependent_intermediate_variable_extractor.extract(false);
 
             model.setup_structure();
 
@@ -65,10 +68,7 @@ TEST_F(TestIntermediateVariableExtractor, extract_intermediate_variables) {
 
         /// Eliminating (Round 1-1)
         {
-            printemps::presolver::
-                eliminate_dependent_intermediate_variables(  //
-                    &model,                                  //
-                    false);
+            dependent_intermediate_variable_extractor.eliminate(false);
 
             model.setup_structure();
 
@@ -82,10 +82,7 @@ TEST_F(TestIntermediateVariableExtractor, extract_intermediate_variables) {
 
         /// Eliminating (Round 1-2)
         {
-            printemps::presolver::
-                eliminate_dependent_intermediate_variables(  //
-                    &model,                                  //
-                    false);
+            dependent_intermediate_variable_extractor.eliminate(false);
 
             model.setup_structure();
 
@@ -124,11 +121,13 @@ TEST_F(TestIntermediateVariableExtractor, extract_intermediate_variables) {
         EXPECT_TRUE(f(0).is_intermediate());
         EXPECT_TRUE(g(0).is_intermediate());
 
+        printemps::presolver::DependentIntermediateVariableExtractor<int,
+                                                                     double>
+            dependent_intermediate_variable_extractor(&model);
+
         /// Extracting (Round 1)
         {
-            printemps::presolver::extract_dependent_intermediate_variables(  //
-                &model,                                                      //
-                false);
+            dependent_intermediate_variable_extractor.extract(false);
 
             model.setup_structure();
 
@@ -169,10 +168,7 @@ TEST_F(TestIntermediateVariableExtractor, extract_intermediate_variables) {
 
         /// Eliminating (Round 1-1)
         {
-            printemps::presolver::
-                eliminate_dependent_intermediate_variables(  //
-                    &model,                                  //
-                    false);
+            dependent_intermediate_variable_extractor.eliminate(false);
 
             model.setup_structure();
 
@@ -212,7 +208,8 @@ TEST_F(TestIntermediateVariableExtractor, extract_intermediate_variables) {
 }
 
 /*****************************************************************************/
-TEST_F(TestIntermediateVariableExtractor, eliminate_intermediate_variables) {
+TEST_F(TestDependentIntermediateVariableExtractor,
+       eliminate_intermediate_variables) {
     /// This method is tested in extract_intermediate_variables().
 }
 }  // namespace
