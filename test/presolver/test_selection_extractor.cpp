@@ -56,7 +56,9 @@ TEST_F(TestSelectionExtractor, extract_selections_by_defined_order) {
     model.create_constraint("c_3", x_2.selection());
 
     model.setup_structure();
-    printemps::presolver::extract_selections_by_defined_order(&model, false);
+    printemps::presolver::SelectionExtractor<int, double> selection_extractor(
+        &model);
+    selection_extractor.extract_selections_by_defined_order(false);
     model.setup_structure();
 
     EXPECT_EQ(3, model.number_of_selection_constraints());
@@ -168,8 +170,11 @@ TEST_F(TestSelectionExtractor,
     model.create_constraint("c_3", x_2.selection());
 
     model.setup_structure();
-    printemps::presolver::extract_selections_by_number_of_variables_order(
-        &model, true, false);
+
+    printemps::presolver::SelectionExtractor<int, double> selection_extractor(
+        &model);
+    selection_extractor.extract_selections_by_number_of_variables_order(true,
+                                                                        false);
     model.setup_structure();
 
     EXPECT_EQ(3, model.number_of_selection_constraints());
@@ -282,8 +287,12 @@ TEST_F(TestSelectionExtractor,
     model.create_constraint("c_3", x_2.selection());
 
     model.setup_structure();
-    printemps::presolver::extract_selections_by_number_of_variables_order(
-        &model, false, false);
+    printemps::presolver::SelectionExtractor<int, double> selection_extractor(
+        &model);
+    selection_extractor.extract_selections_by_number_of_variables_order(false,
+                                                                        false);
+    model.setup_structure();
+
     model.setup_structure();
 
     EXPECT_EQ(3, model.number_of_selection_constraints());
@@ -390,7 +399,9 @@ TEST_F(TestSelectionExtractor, extract_selections_independent) {
     model.create_constraint("c_3", x_2.selection());
 
     model.setup_structure();
-    printemps::presolver::extract_independent_selections(&model, false);
+    printemps::presolver::SelectionExtractor<int, double> selection_extractor(
+        &model);
+    selection_extractor.extract_independent_selections(false);
     model.setup_structure();
 
     EXPECT_EQ(1, model.number_of_selection_constraints());
