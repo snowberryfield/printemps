@@ -40,124 +40,6 @@ class Solver {
         m_tabu_search_controller;
 
     /*************************************************************************/
-    inline void preprocess(void) {
-        /**
-         * Start to measure computational time and get the starting time.
-         */
-        m_time_keeper.set_start_time();
-        m_start_date_time = utility::date_time();
-
-        /**
-         * Print the program name, the project url, and the starting time.
-         */
-        this->print_program_info(  //
-            m_master_option.verbose >= option::verbose::Outer);
-
-        /**
-         * The model can be solved only once.
-         */
-        if (m_model_ptr->is_solved()) {
-            throw std::logic_error(utility::format_error_location(
-                __FILE__, __LINE__, __func__,
-                "This model has already been solved."));
-        } else {
-            m_model_ptr->set_is_solved(true);
-        }
-
-        this->setup_target_objective();
-
-        /**
-         * Print the option value.
-         */
-        if (m_master_option.verbose >= option::verbose::Outer) {
-            m_master_option.print();
-        }
-
-        /**
-         * Setup the model.
-         */
-        m_model_ptr->setup(m_master_option.is_enabled_presolve,
-                           m_master_option.is_enabled_initial_value_correction,
-                           m_master_option.is_enabled_aggregation_move,
-                           m_master_option.is_enabled_precedence_move,
-                           m_master_option.is_enabled_variable_bound_move,
-                           m_master_option.is_enabled_soft_selection_move,
-                           m_master_option.is_enabled_chain_move,
-                           m_master_option.is_enabled_two_flip_move,
-                           m_master_option.is_enabled_user_defined_move,
-                           m_master_option.selection_mode,
-                           m_master_option.initial_penalty_coefficient,
-                           m_master_option.verbose >= option::verbose::Outer);
-
-        /**
-         * Print the problem size.
-         */
-        if (m_master_option.verbose >= option::verbose::Outer) {
-            m_model_ptr->print_number_of_variables();
-            m_model_ptr->print_number_of_constraints();
-        }
-
-        /**
-         * Disable the Chain move for the problem with no zero one_coefficient
-         * constraints (set partitioning, set packing, set covering,
-         * cardinality, and invariant knapsack).
-         */
-        if (m_master_option.is_enabled_chain_move &&
-            !m_model_ptr->has_chain_move_effective_constraints()) {
-            m_master_option.is_enabled_chain_move = false;
-            utility::print_warning(
-                "Chain move was disabled because the problem does not include "
-                "any zero-one coefficient constraints (set "
-                "partitioning/packing/covering, cardinality, invariant "
-                "knapsack, and multiple covering).",
-                m_master_option.verbose >= option::verbose::Warning);
-        }
-
-        /**
-         * Enables the default neighborhood moves. Special neighborhood moves
-         * will be enabled when optimization stagnates.
-         */
-        this->enable_default_neighborhood();
-
-        /**
-         * Set local and global penalty coefficient for each constraint.
-         */
-        for (auto&& proxy : m_model_ptr->constraint_proxies()) {
-            for (auto&& constraint : proxy.flat_indexed_constraints()) {
-                constraint.reset_local_penalty_coefficient();
-            }
-        }
-
-        /**
-         * Create memory which stores updating count for each variable.
-         */
-        m_memory.setup(m_model_ptr);
-
-        /**
-         * Prepare feasible solutions archive.
-         */
-        m_solution_archive.setup(
-            m_master_option.feasible_solutions_capacity,  //
-            m_model_ptr->is_minimization(),               //
-            m_model_ptr->name(),                          //
-            m_model_ptr->number_of_variables(),           //
-            m_model_ptr->number_of_constraints());
-
-        /**
-         * Compute the values of expressions, constraints, and the objective
-         * function according to the initial solution.
-         */
-        m_model_ptr->update();
-
-        /**
-         * Update the state.
-         */
-        m_current_solution = m_model_ptr->export_solution();
-        m_incumbent_holder.try_update_incumbent(m_current_solution,
-                                                m_model_ptr->evaluate({}));
-    }
-
-    /*************************************************************************/
     inline void print_program_info(const bool a_IS_ENABLED_PRINT) {
         utility::print_single_line(m_master_option.verbose >=
                                    option::verbose::Outer);
@@ -399,6 +281,124 @@ class Solver {
     }
 
     /*************************************************************************/
+    inline void preprocess(void) {
+        /**
+         * Start to measure computational time and get the starting time.
+         */
+        m_time_keeper.set_start_time();
+        m_start_date_time = utility::date_time();
+
+        /**
+         * Print the program name, the project url, and the starting time.
+         */
+        this->print_program_info(  //
+            m_master_option.verbose >= option::verbose::Outer);
+
+        /**
+         * The model can be solved only once.
+         */
+        if (m_model_ptr->is_solved()) {
+            throw std::logic_error(utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "This model has already been solved."));
+        } else {
+            m_model_ptr->set_is_solved(true);
+        }
+
+        this->setup_target_objective();
+
+        /**
+         * Print the option value.
+         */
+        if (m_master_option.verbose >= option::verbose::Outer) {
+            m_master_option.print();
+        }
+
+        /**
+         * Setup the model.
+         */
+        m_model_ptr->setup(m_master_option.is_enabled_presolve,
+                           m_master_option.is_enabled_initial_value_correction,
+                           m_master_option.is_enabled_aggregation_move,
+                           m_master_option.is_enabled_precedence_move,
+                           m_master_option.is_enabled_variable_bound_move,
+                           m_master_option.is_enabled_soft_selection_move,
+                           m_master_option.is_enabled_chain_move,
+                           m_master_option.is_enabled_two_flip_move,
+                           m_master_option.is_enabled_user_defined_move,
+                           m_master_option.selection_mode,
+                           m_master_option.initial_penalty_coefficient,
+                           m_master_option.verbose >= option::verbose::Outer);
+
+        /**
+         * Print the problem size.
+         */
+        if (m_master_option.verbose >= option::verbose::Outer) {
+            m_model_ptr->print_number_of_variables();
+            m_model_ptr->print_number_of_constraints();
+        }
+
+        /**
+         * Disable the Chain move for the problem with no zero one_coefficient
+         * constraints (set partitioning, set packing, set covering,
+         * cardinality, and invariant knapsack).
+         */
+        if (m_master_option.is_enabled_chain_move &&
+            !m_model_ptr->has_chain_move_effective_constraints()) {
+            m_master_option.is_enabled_chain_move = false;
+            utility::print_warning(
+                "Chain move was disabled because the problem does not include "
+                "any zero-one coefficient constraints (set "
+                "partitioning/packing/covering, cardinality, invariant "
+                "knapsack, and multiple covering).",
+                m_master_option.verbose >= option::verbose::Warning);
+        }
+
+        /**
+         * Enables the default neighborhood moves. Special neighborhood moves
+         * will be enabled when optimization stagnates.
+         */
+        this->enable_default_neighborhood();
+
+        /**
+         * Set local and global penalty coefficient for each constraint.
+         */
+        for (auto&& proxy : m_model_ptr->constraint_proxies()) {
+            for (auto&& constraint : proxy.flat_indexed_constraints()) {
+                constraint.reset_local_penalty_coefficient();
+            }
+        }
+
+        /**
+         * Create memory which stores updating count for each variable.
+         */
+        m_memory.setup(m_model_ptr);
+
+        /**
+         * Prepare feasible solutions archive.
+         */
+        m_solution_archive.setup(
+            m_master_option.feasible_solutions_capacity,  //
+            m_model_ptr->is_minimization(),               //
+            m_model_ptr->name(),                          //
+            m_model_ptr->number_of_variables(),           //
+            m_model_ptr->number_of_constraints());
+
+        /**
+         * Compute the values of expressions, constraints, and the objective
+         * function according to the initial solution.
+         */
+        m_model_ptr->update();
+
+        /**
+         * Update the state.
+         */
+        m_current_solution = m_model_ptr->export_solution();
+        m_incumbent_holder.try_update_incumbent(m_current_solution,
+                                                m_model_ptr->evaluate({}));
+    }
+
+    /*************************************************************************/
     inline Result<T_Variable, T_Expression> solve(void) {
         /**
          * Preprocessing; setup the model and the solver.
@@ -443,23 +443,8 @@ class Solver {
     }
 
     /*************************************************************************/
-    inline std::vector<
-        presolver::FlippableVariablePair<T_Variable, T_Expression>>
-    extract_flippable_variable_pairs(const int a_MINIMUM_COMMON_ELEMENT) {
-        /**
-         * Preprocessing; setup the model and the solver.
-         */
-        this->preprocess();
-
-        /**
-         * Extract flippable variable pairs
-         */
-        auto flippable_variable_pairs =
-            presolver::extract_flippable_variable_pairs(
-                m_model_ptr->constraint_reference().enabled_constraint_ptrs,
-                a_MINIMUM_COMMON_ELEMENT,
-                m_master_option.verbose >= option::verbose::Outer);
-        return flippable_variable_pairs;
+    inline model::Model<T_Variable, T_Expression>* model_ptr(void) {
+        return m_model_ptr;
     }
 };
 
@@ -469,9 +454,7 @@ inline Result<T_Variable, T_Expression> solve(
     model::Model<T_Variable, T_Expression>* a_model_ptr,  //
     const option::Option&                   a_OPTION) {
     Solver<T_Variable, T_Expression> solver(a_model_ptr, a_OPTION);
-    auto                             result = solver.solve();
-
-    return result;
+    return solver.solve();
 }
 
 /*****************************************************************************/
@@ -481,21 +464,7 @@ inline Result<T_Variable, T_Expression> solve(
     option::Option option;
     return solve(a_model_ptr, option);
 }
-
-/*****************************************************************************/
-template <class T_Variable, class T_Expression>
-inline std::vector<presolver::FlippableVariablePair<T_Variable, T_Expression>>
-extract_flippable_variable_pairs(
-    model::Model<T_Variable, T_Expression>* a_model_ptr,  //
-    const option::Option& a_OPTION, const int a_MINIMUM_COMMON_ELEMENT) {
-    Solver<T_Variable, T_Expression> solver(a_model_ptr, a_OPTION);
-
-    auto flippable_variable_pairs =
-        solver.extract_flippable_variable_pairs(a_MINIMUM_COMMON_ELEMENT);
-
-    return flippable_variable_pairs;
-}
-
+using IPSolver = Solver<int, double>;
 }  // namespace solver
 }  // namespace printemps
 
