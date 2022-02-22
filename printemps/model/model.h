@@ -685,18 +685,19 @@ class Model {
          */
         if (a_IS_ENABLED_PRESOLVE && m_is_linear &&
             m_constraint_type_reference.intermediate_ptrs.size() > 0) {
+            presolver::DependentIntermediateVariableExtractor<T_Variable,
+                                                              T_Expression>
+                dependent_intermediate_variable_extractor(this);
             while (true) {
                 this->setup_structure();
-                if (presolver::extract_dependent_intermediate_variables(
-                        this,  //
+                if (dependent_intermediate_variable_extractor.extract(
                         a_IS_ENABLED_PRINT) == 0) {
                     break;
                 }
 
                 while (true) {
                     this->setup_structure();
-                    if (presolver::eliminate_dependent_intermediate_variables(
-                            this,  //
+                    if (dependent_intermediate_variable_extractor.eliminate(
                             a_IS_ENABLED_PRINT) == 0) {
                         break;
                     }

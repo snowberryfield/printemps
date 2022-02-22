@@ -16,7 +16,7 @@ class Model;
 
 #include "problem_size_reducer.h"
 #include "selection_extractor.h"
-#include "intermediate_variable_extractor.h"
+#include "dependent_intermediate_variable_extractor.h"
 #include "gf2_solver.h"
 #include "flippable_variable_pair_extractor.h"
 

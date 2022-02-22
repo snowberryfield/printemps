@@ -84,7 +84,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model.setup_structure();
         printemps::presolver::SelectionExtractor<int, double>
             selection_extractor(&model);
-        selection_extractor.extract_selections_by_defined_order(false);
+        selection_extractor.extract_by_defined_order(false);
 
         ASSERT_THROW(
             printemps::verifier::
@@ -104,7 +104,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model.setup_structure();
         printemps::presolver::SelectionExtractor<int, double>
             selection_extractor(&model);
-        selection_extractor.extract_selections_by_defined_order(false);
+        selection_extractor.extract_by_defined_order(false);
 
         ASSERT_THROW(
             printemps::verifier::
@@ -124,7 +124,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model.setup_structure();
         printemps::presolver::SelectionExtractor<int, double>
             selection_extractor(&model);
-        selection_extractor.extract_selections_by_defined_order(false);
+        selection_extractor.extract_by_defined_order(false);
 
         printemps::verifier::
             verify_and_correct_selection_variables_initial_values(  //
@@ -143,7 +143,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model.setup_structure();
         printemps::presolver::SelectionExtractor<int, double>
             selection_extractor(&model);
-        selection_extractor.extract_selections_by_defined_order(false);
+        selection_extractor.extract_by_defined_order(false);
 
         printemps::verifier::
             verify_and_correct_selection_variables_initial_values(  //
@@ -163,7 +163,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model.setup_structure();
         printemps::presolver::SelectionExtractor<int, double>
             selection_extractor(&model);
-        selection_extractor.extract_selections_by_defined_order(false);
+        selection_extractor.extract_by_defined_order(false);
 
         ASSERT_THROW(
             printemps::verifier::
@@ -184,7 +184,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model.setup_structure();
         printemps::presolver::SelectionExtractor<int, double>
             selection_extractor(&model);
-        selection_extractor.extract_selections_by_defined_order(false);
+        selection_extractor.extract_by_defined_order(false);
 
         ASSERT_THROW(
             printemps::verifier::
@@ -204,7 +204,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model.setup_structure();
         printemps::presolver::SelectionExtractor<int, double>
             selection_extractor(&model);
-        selection_extractor.extract_selections_by_defined_order(false);
+        selection_extractor.extract_by_defined_order(false);
 
         printemps::verifier::
             verify_and_correct_selection_variables_initial_values(  //
@@ -226,7 +226,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model.setup_structure();
         printemps::presolver::SelectionExtractor<int, double>
             selection_extractor(&model);
-        selection_extractor.extract_selections_by_defined_order(false);
+        selection_extractor.extract_by_defined_order(false);
 
         ASSERT_THROW(
             printemps::verifier::
@@ -245,7 +245,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model.setup_structure();
         printemps::presolver::SelectionExtractor<int, double>
             selection_extractor(&model);
-        selection_extractor.extract_selections_by_defined_order(false);
+        selection_extractor.extract_by_defined_order(false);
 
         printemps::verifier::
             verify_and_correct_selection_variables_initial_values(  //
@@ -267,7 +267,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model.setup_structure();
         printemps::presolver::SelectionExtractor<int, double>
             selection_extractor(&model);
-        selection_extractor.extract_selections_by_defined_order(false);
+        selection_extractor.extract_by_defined_order(false);
 
         ASSERT_THROW(
             printemps::verifier::
@@ -287,7 +287,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model.setup_structure();
         printemps::presolver::SelectionExtractor<int, double>
             selection_extractor(&model);
-        selection_extractor.extract_selections_by_defined_order(false);
+        selection_extractor.extract_by_defined_order(false);
 
         printemps::verifier::
             verify_and_correct_selection_variables_initial_values(  //
@@ -307,7 +307,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model.setup_structure();
         printemps::presolver::SelectionExtractor<int, double>
             selection_extractor(&model);
-        selection_extractor.extract_selections_by_defined_order(false);
+        selection_extractor.extract_by_defined_order(false);
 
         printemps::verifier::
             verify_and_correct_selection_variables_initial_values(  //
@@ -328,7 +328,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model.setup_structure();
         printemps::presolver::SelectionExtractor<int, double>
             selection_extractor(&model);
-        selection_extractor.extract_selections_by_defined_order(false);
+        selection_extractor.extract_by_defined_order(false);
 
         printemps::verifier::
             verify_and_correct_selection_variables_initial_values(  //
@@ -350,7 +350,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model.setup_structure();
         printemps::presolver::SelectionExtractor<int, double>
             selection_extractor(&model);
-        selection_extractor.extract_selections_by_defined_order(false);
+        selection_extractor.extract_by_defined_order(false);
 
         ASSERT_THROW(
             printemps::verifier::
@@ -371,7 +371,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model.setup_structure();
         printemps::presolver::SelectionExtractor<int, double>
             selection_extractor(&model);
-        selection_extractor.extract_selections_by_defined_order(false);
+        selection_extractor.extract_by_defined_order(false);
 
         printemps::verifier::
             verify_and_correct_selection_variables_initial_values(  //
@@ -393,7 +393,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model.setup_structure();
         printemps::presolver::SelectionExtractor<int, double>
             selection_extractor(&model);
-        selection_extractor.extract_selections_by_defined_order(false);
+        selection_extractor.extract_by_defined_order(false);
 
         ASSERT_THROW(
             printemps::verifier::
