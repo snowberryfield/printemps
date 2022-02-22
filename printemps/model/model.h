@@ -742,9 +742,9 @@ class Model {
          */
         if (a_SELECTION_MODE != option::selection_mode::None &&
             this->number_of_variables() > this->number_of_constraints()) {
-            presolver::extract_selections(this,              //
-                                          a_SELECTION_MODE,  //
-                                          a_IS_ENABLED_PRINT);
+            presolver::SelectionExtractor<T_Variable, T_Expression>
+                selection_extractor(this);
+            selection_extractor.extract(a_SELECTION_MODE, a_IS_ENABLED_PRINT);
         }
 
         /**
