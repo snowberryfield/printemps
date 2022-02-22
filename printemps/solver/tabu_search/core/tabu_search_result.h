@@ -25,7 +25,7 @@ struct TabuSearchResult {
     bool is_found_new_feasible_solution;
 
     double objective_constraint_rate;
-    double local_augmented_objective_range;
+    double global_augmented_objective_range;
 
     /*************************************************************************/
     TabuSearchResult(void) {
@@ -44,7 +44,7 @@ struct TabuSearchResult {
         const bool   a_IS_FEW_PERMISSIBLE_NEIGHBORHOOD,                   //
         const bool   a_IS_FOUND_NEW_FEASIBLE_SOLUTION,                    //
         const double a_OBJECTIVE_CONSTRAINT_RATE,                         //
-        const double a_LOCAL_AUGMENTED_OBJECTIVE_RANGE)
+        const double a_GLOBAL_AUGMENTED_OBJECTIVE_RANGE)
         : total_update_status(a_TOTAL_UPDATE_STATUS),
           number_of_iterations(a_NUMBER_OF_ITERATIONS),
           termination_status(a_TERMINATION_STATUS),
@@ -58,7 +58,7 @@ struct TabuSearchResult {
           is_few_permissible_neighborhood(a_IS_FEW_PERMISSIBLE_NEIGHBORHOOD),
           is_found_new_feasible_solution(a_IS_FOUND_NEW_FEASIBLE_SOLUTION),
           objective_constraint_rate(a_OBJECTIVE_CONSTRAINT_RATE),
-          local_augmented_objective_range(a_LOCAL_AUGMENTED_OBJECTIVE_RANGE) {
+          global_augmented_objective_range(a_GLOBAL_AUGMENTED_OBJECTIVE_RANGE) {
         /// nothing to do
     }
 
@@ -76,8 +76,8 @@ struct TabuSearchResult {
         this->is_few_permissible_neighborhood = false;
         this->is_found_new_feasible_solution  = false;
 
-        this->objective_constraint_rate       = 1.0;
-        this->local_augmented_objective_range = 0.0;
+        this->objective_constraint_rate        = 1.0;
+        this->global_augmented_objective_range = 0.0;
     }
 };
 }  // namespace core

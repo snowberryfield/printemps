@@ -32,7 +32,7 @@ struct LagrangeDualControllerResult {
     inline void initialize(void) {
         this->number_of_iterations = 0;
         this->update_status =
-            solution::IncumbentHolderConstant::STATUS_NO_UPDATED;
+            solution::IncumbentHolderConstant::STATUS_NOT_UPDATED;
     }
 };
 }  // namespace controller

@@ -73,7 +73,7 @@ LocalSearchResult solve(
     int update_status =
         incumbent_holder_ptr->try_update_incumbent(model_ptr, solution_score);
     int total_update_status =
-        solution::IncumbentHolderConstant::STATUS_NO_UPDATED;
+        solution::IncumbentHolderConstant::STATUS_NOT_UPDATED;
 
     /**
      * Reset the last update iterations.

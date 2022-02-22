@@ -36,7 +36,7 @@ struct TabuSearchControllerResult {
         this->number_of_iterations = 0;
         this->number_of_loops      = 0;
         this->update_status =
-            solution::IncumbentHolderConstant::STATUS_NO_UPDATED;
+            solution::IncumbentHolderConstant::STATUS_NOT_UPDATED;
     }
 };
 }  // namespace controller
