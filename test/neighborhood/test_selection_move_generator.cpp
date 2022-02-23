@@ -29,7 +29,7 @@ TEST_F(TestSelectionMoveGenerator, setup) {
 
     model.setup_structure();
 
-    printemps::presolver::SelectionExtractor<int, double> selection_extractor(
+    printemps::preprocess::SelectionExtractor<int, double> selection_extractor(
         &model);
     selection_extractor.extract_by_number_of_variables_order(false, false);
     x(0).select();

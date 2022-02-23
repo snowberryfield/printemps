@@ -3,13 +3,13 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_PRESOLVER_FLIPPABLE_VARIABLE_PAIR_EXTRACTOR_H__
-#define PRINTEMPS_PRESOLVER_FLIPPABLE_VARIABLE_PAIR_EXTRACTOR_H__
+#ifndef PRINTEMPS_PREPROCESS_FLIPPABLE_VARIABLE_PAIR_EXTRACTOR_H__
+#define PRINTEMPS_PREPROCESS_FLIPPABLE_VARIABLE_PAIR_EXTRACTOR_H__
 
 #include "flippable_variable_pair.h"
 
 namespace printemps {
-namespace presolver {
+namespace preprocess {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class FlippableVariablePairExtractor {
@@ -142,7 +142,7 @@ class FlippableVariablePairExtractor {
 };
 using IPFlippableVariablePairExtractor =
     FlippableVariablePairExtractor<int, double>;
-}  // namespace presolver
+}  // namespace preprocess
 }  // namespace printemps
 #endif
 /*****************************************************************************/

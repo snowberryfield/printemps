@@ -56,7 +56,7 @@ TEST_F(TestSelectionExtractor, extract_by_defined_order) {
     model.create_constraint("c_3", x_2.selection());
 
     model.setup_structure();
-    printemps::presolver::SelectionExtractor<int, double> selection_extractor(
+    printemps::preprocess::SelectionExtractor<int, double> selection_extractor(
         &model);
     selection_extractor.extract_by_defined_order(false);
     model.setup_structure();
@@ -170,7 +170,7 @@ TEST_F(TestSelectionExtractor, extract_by_number_of_variables_smaller_order) {
 
     model.setup_structure();
 
-    printemps::presolver::SelectionExtractor<int, double> selection_extractor(
+    printemps::preprocess::SelectionExtractor<int, double> selection_extractor(
         &model);
     selection_extractor.extract_by_number_of_variables_order(true, false);
     model.setup_structure();
@@ -285,7 +285,7 @@ TEST_F(TestSelectionExtractor,
     model.create_constraint("c_3", x_2.selection());
 
     model.setup_structure();
-    printemps::presolver::SelectionExtractor<int, double> selection_extractor(
+    printemps::preprocess::SelectionExtractor<int, double> selection_extractor(
         &model);
     selection_extractor.extract_by_number_of_variables_order(false, false);
     model.setup_structure();
@@ -396,7 +396,7 @@ TEST_F(TestSelectionExtractor, extract_selections_independent) {
     model.create_constraint("c_3", x_2.selection());
 
     model.setup_structure();
-    printemps::presolver::SelectionExtractor<int, double> selection_extractor(
+    printemps::preprocess::SelectionExtractor<int, double> selection_extractor(
         &model);
     selection_extractor.extract_independent(false);
     model.setup_structure();

@@ -43,8 +43,8 @@ TEST_F(TestDependentIntermediateVariableExtractor,
         EXPECT_TRUE(g(0).is_intermediate());
         EXPECT_TRUE(h(0).is_intermediate());
 
-        printemps::presolver::DependentIntermediateVariableExtractor<int,
-                                                                     double>
+        printemps::preprocess::DependentIntermediateVariableExtractor<int,
+                                                                      double>
             dependent_intermediate_variable_extractor(&model);
 
         /// Extracting (Round 1)
@@ -121,8 +121,8 @@ TEST_F(TestDependentIntermediateVariableExtractor,
         EXPECT_TRUE(f(0).is_intermediate());
         EXPECT_TRUE(g(0).is_intermediate());
 
-        printemps::presolver::DependentIntermediateVariableExtractor<int,
-                                                                     double>
+        printemps::preprocess::DependentIntermediateVariableExtractor<int,
+                                                                      double>
             dependent_intermediate_variable_extractor(&model);
 
         /// Extracting (Round 1)

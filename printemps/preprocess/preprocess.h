@@ -3,8 +3,8 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_PRESOLVER_PRESOLVER_H__
-#define PRINTEMPS_PRESOLVER_PRESOLVER_H__
+#ifndef PRINTEMPS_PREPROCESS_PREPROCESS_H__
+#define PRINTEMPS_PREPROCESS_PREPROCESS_H__
 
 namespace printemps {
 namespace model {
@@ -19,6 +19,7 @@ class Model;
 #include "dependent_intermediate_variable_extractor.h"
 #include "gf2_solver.h"
 #include "flippable_variable_pair_extractor.h"
+#include "verifier.h"
 
 #endif
 /*****************************************************************************/

@@ -214,7 +214,7 @@ int main([[maybe_unused]] int argc, char *argv[]) {
         printemps::solver::IPSolver solver(&model, option);
         solver.preprocess();
 
-        printemps::presolver::IPFlippableVariablePairExtractor extractor(
+        printemps::preprocess::IPFlippableVariablePairExtractor extractor(
             solver.model_ptr());
         extractor.extract_pairs(
             minimum_common_element,
