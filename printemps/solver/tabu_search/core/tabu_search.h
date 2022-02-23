@@ -199,7 +199,7 @@ TabuSearchResult solve(
         /**
          * Update the moves.
          */
-        bool is_enabled_improvability_screening =
+        const bool IS_ENABLED_IMPROVABILITY_SCREENING =
             (option.improvability_screening_mode !=
              option::improvability_screening_mode::Off);
 
@@ -207,19 +207,19 @@ TabuSearchResult solve(
         bool accept_objective_improvable   = true;
         bool accept_feasibility_improvable = true;
 
-        if (model_ptr->is_linear() && is_enabled_improvability_screening) {
+        if (model_ptr->is_linear() && IS_ENABLED_IMPROVABILITY_SCREENING) {
             /**
              * If the option improvability_screening_mode is not None,
              * only improvable moves will be generated.
              */
-            auto changed_variable_ptrs = utility::to_vector(
+            const auto CHANGED_VARIABLE_PTRS = utility::to_vector(
                 neighborhood::related_variable_ptrs(current_move));
 
             if (iteration == 0) {
                 model_ptr->update_variable_objective_improvabilities();
             } else {
                 model_ptr->update_variable_objective_improvabilities(
-                    changed_variable_ptrs);
+                    CHANGED_VARIABLE_PTRS);
             }
 
             switch (option.improvability_screening_mode) {
@@ -262,7 +262,7 @@ TabuSearchResult solve(
                         accept_objective_improvable   = true;
                         accept_feasibility_improvable = false;
                     } else {
-                        auto changed_constraint_ptrs = utility::to_vector(
+                        const auto CHANGED_CONSTRAINT_PTRS = utility::to_vector(
                             current_move.related_constraint_ptrs);
 
                         if (iteration == 0) {
@@ -273,10 +273,10 @@ TabuSearchResult solve(
                         } else {
                             model_ptr
                                 ->reset_variable_feasibility_improvabilities(
-                                    changed_constraint_ptrs);
+                                    CHANGED_CONSTRAINT_PTRS);
                             model_ptr
                                 ->update_variable_feasibility_improvabilities(
-                                    changed_constraint_ptrs);
+                                    CHANGED_CONSTRAINT_PTRS);
                         }
 
                         accept_all                    = false;
@@ -303,8 +303,8 @@ TabuSearchResult solve(
             model_ptr->neighborhood().shuffle_moves(&get_rand_mt);
         }
 
-        const auto& trial_move_ptrs = model_ptr->neighborhood().move_ptrs();
-        int         number_of_moves = trial_move_ptrs.size();
+        const auto& TRIAL_MOVE_PTRS = model_ptr->neighborhood().move_ptrs();
+        int         number_of_moves = TRIAL_MOVE_PTRS.size();
 
         if (option.tabu_search.is_enabled_move_curtail) {
             number_of_moves = static_cast<int>(
@@ -359,24 +359,24 @@ TabuSearchResult solve(
 #ifndef _MPS_SOLVER
             if (model_ptr->is_enabled_fast_evaluation()) {
 #endif
-                if (trial_move_ptrs[i]->is_univariable_move) {
+                if (TRIAL_MOVE_PTRS[i]->is_univariable_move) {
                     model_ptr->evaluate_single(&trial_solution_scores[i],  //
-                                               *trial_move_ptrs[i],        //
+                                               *TRIAL_MOVE_PTRS[i],        //
                                                current_solution_score);
                 } else {
                     model_ptr->evaluate_multi(&trial_solution_scores[i],  //
-                                              *trial_move_ptrs[i],        //
+                                              *TRIAL_MOVE_PTRS[i],        //
                                               current_solution_score);
                 }
 
 #ifndef _MPS_SOLVER
             } else {
                 model_ptr->evaluate(&trial_solution_scores[i],  //
-                                    *trial_move_ptrs[i]);
+                                    *TRIAL_MOVE_PTRS[i]);
             }
 #endif
             evaluate_move(&trial_move_scores[i],  //
-                          *trial_move_ptrs[i],    //
+                          *TRIAL_MOVE_PTRS[i],    //
                           iteration,              //
                           memory_ptr,             //
                           option,                 //
@@ -399,7 +399,7 @@ TabuSearchResult solve(
              * If the move is special neighborhood moves, it must improves
              * objective or feasibility.
              */
-            if (trial_move_ptrs[i]->is_special_neighborhood_move &&
+            if (TRIAL_MOVE_PTRS[i]->is_special_neighborhood_move &&
                 !(trial_solution_scores[i].is_objective_improvable ||
                   trial_solution_scores[i].is_feasibility_improvable)) {
                 total_scores[i] += constant::LARGE_VALUE_100;
@@ -409,7 +409,7 @@ TabuSearchResult solve(
         /**
          * Select moves for the next solution.
          */
-        int argmin_global_augmented_objective = std::distance(
+        const int ARGMIN_GLOBAL_AUGMENTED_OBJECTIVE = std::distance(
             trial_solution_scores.begin(),
             min_element(trial_solution_scores.begin(),
                         trial_solution_scores.end(),
@@ -418,9 +418,9 @@ TabuSearchResult solve(
                                    a_SECOND.global_augmented_objective;
                         }));
 
-        int  argmin_total_score = utility::argmin(total_scores);
-        int  selected_index     = 0;
-        bool is_aspirated       = false;
+        const int ARGMIN_TOTAL_SCORE = utility::argmin(total_scores);
+        int       selected_index     = 0;
+        bool      is_aspirated       = false;
 
         if (iteration < option.tabu_search.number_of_initial_modification) {
             /**
@@ -433,19 +433,19 @@ TabuSearchResult solve(
              * The move for next solution will be determined by evaluations of
              * solutions and moves after the inital modifications.
              */
-            selected_index = argmin_total_score;
+            selected_index = ARGMIN_TOTAL_SCORE;
 
             /**
              * A move which improves the augmented incumbent solution can be
              * accepted (optional).
              */
             if (option.tabu_search.ignore_tabu_if_global_incumbent) {
-                if (trial_solution_scores[argmin_global_augmented_objective]
+                if (trial_solution_scores[ARGMIN_GLOBAL_AUGMENTED_OBJECTIVE]
                             .global_augmented_objective +
                         constant::EPSILON <
                     incumbent_holder_ptr
                         ->global_augmented_incumbent_objective()) {
-                    selected_index = argmin_global_augmented_objective;
+                    selected_index = ARGMIN_GLOBAL_AUGMENTED_OBJECTIVE;
                     if (!trial_move_scores[selected_index].is_permissible) {
                         is_aspirated = true;
                     }
@@ -461,7 +461,7 @@ TabuSearchResult solve(
         /**
          * Update the model by the selected move.
          */
-        Move_T* move_ptr = trial_move_ptrs[selected_index];
+        Move_T* move_ptr = TRIAL_MOVE_PTRS[selected_index];
         model_ptr->update(*move_ptr);
 
         /**
@@ -510,11 +510,11 @@ TabuSearchResult solve(
         /**
          * Update the memory.
          */
-        int random_width = static_cast<int>(
+        const int RANDOM_WIDTH = static_cast<int>(
             option.tabu_search.tabu_tenure_randomize_rate * tabu_tenure);
         memory_ptr->update(*move_ptr,     //
                            iteration,     //
-                           random_width,  //
+                           RANDOM_WIDTH,  //
                            &get_rand_mt);
 
         /**

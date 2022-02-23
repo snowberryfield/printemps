@@ -21,12 +21,12 @@ void bound_dual(
     std::vector<multi_array::ValueProxy<double>>* a_dual_value_proxies) {
     for (auto&& proxy : a_model_ptr->constraint_proxies()) {
         for (auto&& constraint : proxy.flat_indexed_constraints()) {
-            int proxy_index = constraint.proxy_index();
-            int flat_index  = constraint.flat_index();
+            const int PROXY_INDEX = constraint.proxy_index();
+            const int FLAT_INDEX  = constraint.flat_index();
 
             auto& lagrange_multiplier =
-                (*a_dual_value_proxies)[proxy_index].flat_indexed_values(
-                    flat_index);
+                (*a_dual_value_proxies)[PROXY_INDEX].flat_indexed_values(
+                    FLAT_INDEX);
 
             switch (constraint.sense()) {
                 case model_component::ConstraintSense::Less: {
@@ -153,8 +153,8 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
      */
     int iteration = 0;
 
-    auto variable_ptrs   = model_ptr->variable_reference().variable_ptrs;
-    auto constraint_ptrs = model_ptr->constraint_reference().constraint_ptrs;
+    auto& variable_ptrs   = model_ptr->variable_reference().variable_ptrs;
+    auto& constraint_ptrs = model_ptr->constraint_reference().constraint_ptrs;
 
     while (true) {
         /**
@@ -165,14 +165,17 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
             termination_status = LagrangeDualTerminationStatus::TIME_OVER;
             break;
         }
+
         if (elapsed_time + option.lagrange_dual.time_offset > option.time_max) {
             termination_status = LagrangeDualTerminationStatus::TIME_OVER;
             break;
         }
+
         if (iteration >= option.lagrange_dual.iteration_max) {
             termination_status = LagrangeDualTerminationStatus::ITERATION_OVER;
             break;
         }
+
         if (incumbent_holder_ptr->feasible_incumbent_objective() <=
             option.target_objective_value) {
             termination_status = LagrangeDualTerminationStatus::REACH_TARGET;
@@ -188,12 +191,13 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
     schedule(static)
 #endif
         for (auto i = 0; i < CONSTRAINTS_SIZE; i++) {
-            double constraint_value = constraint_ptrs[i]->constraint_value();
-            int    proxy_index      = constraint_ptrs[i]->proxy_index();
-            int    flat_index       = constraint_ptrs[i]->flat_index();
+            const double CONSTRAINT_VALUE =
+                constraint_ptrs[i]->constraint_value();
+            const int PROXY_INDEX = constraint_ptrs[i]->proxy_index();
+            const int FLAT_INDEX  = constraint_ptrs[i]->flat_index();
 
-            dual_value_proxies[proxy_index].flat_indexed_values(flat_index) +=
-                step_size * constraint_value;
+            dual_value_proxies[PROXY_INDEX].flat_indexed_values(FLAT_INDEX) +=
+                step_size * CONSTRAINT_VALUE;
         }
 
         /**
@@ -217,16 +221,16 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
             double coefficient = variable_ptrs[i]->objective_sensitivity();
 
             for (auto&& item : variable_ptrs[i]->constraint_sensitivities()) {
-                const auto& constraint_ptr = item.first;
-                double      sensitivity    = item.second;
+                const auto&  constraint_ptr = item.first;
+                const double SENSITIVITY    = item.second;
 
-                int proxy_index = constraint_ptr->proxy_index();
-                int flat_index  = constraint_ptr->flat_index();
+                const int PROXY_INDEX = constraint_ptr->proxy_index();
+                const int FLAT_INDEX  = constraint_ptr->flat_index();
 
                 coefficient +=
-                    dual_value_proxies[proxy_index].flat_indexed_values(
-                        flat_index) *
-                    sensitivity * model_ptr->sign();
+                    dual_value_proxies[PROXY_INDEX].flat_indexed_values(
+                        FLAT_INDEX) *
+                    SENSITIVITY * model_ptr->sign();
             }
 
             variable_ptrs[i]->set_lagrangian_coefficient(coefficient);
@@ -239,7 +243,6 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
                     variable_ptrs[i]->set_value_if_mutable(
                         variable_ptrs[i]->upper_bound());
                 }
-
             } else {
                 if (model_ptr->is_minimization()) {
                     variable_ptrs[i]->set_value_if_mutable(
@@ -272,14 +275,15 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
         /**
          * Compute the lagrangian value.
          */
-        double lagrangian = model_ptr->compute_lagrangian(dual_value_proxies) *
-                            model_ptr->sign();
+        const double LAGRANGIAN =
+            model_ptr->compute_lagrangian(dual_value_proxies) *
+            model_ptr->sign();
 
         /**
          * Update the lagrangian incumbent.
          */
-        if (lagrangian > lagrangian_incumbent) {
-            lagrangian_incumbent         = lagrangian;
+        if (LAGRANGIAN > lagrangian_incumbent) {
+            lagrangian_incumbent         = LAGRANGIAN;
             auto primal_incumbent        = model_ptr->export_solution();
             dual_value_proxies_incumbent = dual_value_proxies;
         }
@@ -287,18 +291,18 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
         /**
          * Update the lagrangian queue.
          */
-        queue.push(lagrangian);
-        double queue_average = queue.average();
-        double queue_max     = queue.max();
+        queue.push(LAGRANGIAN);
+        const double QUEUE_AVERAGE = queue.average();
+        const double QUEUE_MAX     = queue.max();
 
         /**
          * Adjust the step size.
          */
         if (queue.size() > 0) {
-            if (lagrangian > queue_average) {
+            if (LAGRANGIAN > QUEUE_AVERAGE) {
                 step_size *= option.lagrange_dual.step_size_extend_rate;
             }
-            if (lagrangian < queue_max) {
+            if (LAGRANGIAN < QUEUE_MAX) {
                 step_size *= option.lagrange_dual.step_size_reduce_rate;
             }
         }
@@ -310,7 +314,7 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
             update_status > 1) {
             print_table_body(model_ptr,             //
                              iteration,             //
-                             lagrangian,            //
+                             LAGRANGIAN,            //
                              step_size,             //
                              solution_score,        //
                              update_status,         //
@@ -322,8 +326,8 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
          * Terminate the loop if lagrangian converges.
          */
         if (queue.size() == option.lagrange_dual.queue_size &&
-            fabs(lagrangian - queue_average) <
-                std::max(1.0, fabs(queue_average)) *
+            fabs(LAGRANGIAN - QUEUE_AVERAGE) <
+                std::max(1.0, fabs(QUEUE_AVERAGE)) *
                     option.lagrange_dual.tolerance) {
             termination_status = LagrangeDualTerminationStatus::CONVERGE;
             break;
