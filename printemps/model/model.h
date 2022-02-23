@@ -793,12 +793,13 @@ class Model {
          */
         if (a_IS_ENABLED_PRESOLVE &&
             m_constraint_type_reference.gf2_ptrs.size() > 0) {
-            auto is_solved = presolver::solve_gf2(this, a_IS_ENABLED_PRINT);
+            presolver::GF2Solver<T_Variable, T_Expression> gf2_solver(this);
+            const auto IS_SOLVED = gf2_solver.solve(a_IS_ENABLED_PRINT);
 
             /**
              * Update fixed variables.
              */
-            if (is_solved) {
+            if (IS_SOLVED) {
                 this->categorize_variables();
             }
         }
