@@ -417,7 +417,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
         return result;
     }
 
-    /*****************************************************************************/
+    /*************************************************************************/
     template <class T_Array>
     inline constexpr Expression<T_Variable, T_Expression> dot(
         const T_Array &a_COEFFICIENTS) {
@@ -448,7 +448,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
         return result;
     }
 
-    /*****************************************************************************/
+    /*************************************************************************/
     template <class T_Array>
     inline constexpr Expression<T_Variable, T_Expression> dot(
         const std::vector<int> &a_MULTI_DIMENSIONAL_INDEX,
