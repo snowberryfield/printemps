@@ -37,7 +37,7 @@ class DependentIntermediateVariableExtractor {
         m_model_ptr = nullptr;
     }
 
-    /*****************************************************************************/
+    /*************************************************************************/
     inline int extract(const bool a_IS_ENABLED_PRINT) {
         /**
          * NOTE: This function cannot be constexpr with clang for
@@ -139,7 +139,7 @@ class DependentIntermediateVariableExtractor {
         return number_of_newly_extracted_dependent_intermediate_vairables;
     }
 
-    /*****************************************************************************/
+    /*************************************************************************/
     inline constexpr int eliminate(const bool a_IS_ENABLED_PRINT) {
         utility::print_single_line(a_IS_ENABLED_PRINT);
         utility::print_message(

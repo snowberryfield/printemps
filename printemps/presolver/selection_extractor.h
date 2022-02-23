@@ -60,7 +60,7 @@ class SelectionExtractor {
         m_selections.clear();
     }
 
-    /*****************************************************************************/
+    /*************************************************************************/
     inline constexpr void extract(
         const option::selection_mode::SelectionMode &a_SELECTION_MODE,
         const bool                                   a_IS_ENABLED_PRINT) {
@@ -92,7 +92,7 @@ class SelectionExtractor {
         }
     }
 
-    /*****************************************************************************/
+    /*************************************************************************/
     inline constexpr void extract_by_defined_order(
         const bool a_IS_ENABLED_PRINT) {
         utility::print_single_line(a_IS_ENABLED_PRINT);
@@ -141,7 +141,7 @@ class SelectionExtractor {
         utility::print_message("Done.", a_IS_ENABLED_PRINT);
     }
 
-    /*****************************************************************************/
+    /*************************************************************************/
     inline constexpr void extract_by_number_of_variables_order(
         const bool a_IS_SMALLER_ORDER, const bool a_IS_ENABLED_PRINT) {
         utility::print_single_line(a_IS_ENABLED_PRINT);
@@ -213,7 +213,7 @@ class SelectionExtractor {
         utility::print_message("Done.", a_IS_ENABLED_PRINT);
     }
 
-    /*****************************************************************************/
+    /*************************************************************************/
     inline constexpr void extract_independent(const bool a_IS_ENABLED_PRINT) {
         utility::print_single_line(a_IS_ENABLED_PRINT);
         utility::print_message("Extracting independent selection variables...",

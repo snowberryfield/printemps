@@ -74,6 +74,9 @@ class Model {
         m_flippable_variable_ptr_pairs;
 
     neighborhood::Neighborhood<T_Variable, T_Expression> m_neighborhood;
+    presolver::ProblemSizeReducer<T_Variable, T_Expression>
+        m_problem_size_reducer;
+
     std::function<void(option::Option *,
                        solution::IncumbentHolder<T_Variable, T_Expression> *)>
         m_callback;
@@ -139,6 +142,7 @@ class Model {
         m_flippable_variable_ptr_pairs.clear();
 
         m_neighborhood.initialize();
+        m_problem_size_reducer.initialize();
         m_callback = [](option::Option *,
                         solution::IncumbentHolder<T_Variable, T_Expression> *) {
         };
@@ -677,7 +681,8 @@ class Model {
          * variables implicitly fixed.
          */
         if (a_IS_ENABLED_PRESOLVE) {
-            presolver::reduce_problem_size(this, a_IS_ENABLED_PRINT);
+            m_problem_size_reducer.setup(this);
+            m_problem_size_reducer.reduce_problem_size(a_IS_ENABLED_PRINT);
         }
 
         /**
@@ -703,7 +708,7 @@ class Model {
                     }
                 }
 
-                presolver::reduce_problem_size(this, a_IS_ENABLED_PRINT);
+                m_problem_size_reducer.reduce_problem_size(a_IS_ENABLED_PRINT);
             }
         }
 
@@ -713,8 +718,8 @@ class Model {
         int number_of_fixed_variables = 0;
         if (a_IS_ENABLED_PRESOLVE && m_is_linear) {
             number_of_fixed_variables =
-                presolver::remove_redundant_set_variables(this,
-                                                          a_IS_ENABLED_PRINT);
+                m_problem_size_reducer.remove_redundant_set_variables(
+                    a_IS_ENABLED_PRINT);
         }
 
         /**
@@ -723,8 +728,8 @@ class Model {
         int number_of_removed_constraints = 0;
         if (a_IS_ENABLED_PRESOLVE) {
             number_of_removed_constraints =
-                presolver::remove_duplicated_constraints(this,
-                                                         a_IS_ENABLED_PRINT);
+                m_problem_size_reducer.remove_duplicated_constraints(
+                    a_IS_ENABLED_PRINT);
         }
 
         /**
@@ -1251,14 +1256,15 @@ class Model {
         } else {
             constraint = m_objective.expression() >= a_OBJECTIVE;
         }
-        bool is_bound_tightened = presolver::
-            remove_redundant_constraint_with_tightening_variable_bound(
-                &constraint, a_IS_ENABLED_PRINT);
+        bool is_bound_tightened =
+            m_problem_size_reducer
+                .remove_redundant_constraint_with_tightening_variable_bound(
+                    &constraint, a_IS_ENABLED_PRINT);
 
         int number_of_newly_fixed_variables = 0;
         if (is_bound_tightened) {
-            presolver::remove_implicit_fixed_variables(this,
-                                                       a_IS_ENABLED_PRINT);
+            m_problem_size_reducer.remove_implicit_fixed_variables(
+                a_IS_ENABLED_PRINT);
         }
 
         return number_of_newly_fixed_variables;
