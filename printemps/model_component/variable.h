@@ -456,7 +456,7 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     inline constexpr void setup_hash(void) {
         /**
          * NOTE: This method is called in
-         * presolver::remove_redundant_set_variables().
+         * preprocess::remove_redundant_set_variables().
          */
         std::uint64_t hash = 0;
         for (const auto &sensitivity : m_constraint_sensitivities) {

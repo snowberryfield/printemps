@@ -37,9 +37,9 @@ class TestVerifier : public ::testing::Test {
 TEST_F(TestVerifier, verify_problem) {
     /// No decision variables.
     {
-        printemps::model::Model<int, double> model;
-        ASSERT_THROW(printemps::verifier::verify_problem(&model, false),
-                     std::logic_error);
+        printemps::model::Model<int, double>         model;
+        printemps::preprocess::Verifier<int, double> verifier(&model);
+        ASSERT_THROW(verifier.verify_problem(false), std::logic_error);
     }
 
     /// No constraint functions.
@@ -48,7 +48,8 @@ TEST_F(TestVerifier, verify_problem) {
 
         auto& x = model.create_variable("x");
         model.minimize(x);
-        printemps::verifier::verify_problem(&model, false);
+        printemps::preprocess::Verifier<int, double> verifier(&model);
+        verifier.verify_problem(false);
     }
 
     /// No objective function.
@@ -57,7 +58,8 @@ TEST_F(TestVerifier, verify_problem) {
 
         auto& x = model.create_variable("x");
         model.create_constraint("g", x == 1);
-        printemps::verifier::verify_problem(&model, false);
+        printemps::preprocess::Verifier<int, double> verifier(&model);
+        verifier.verify_problem(false);
     }
 
     /// No constraint functions and no objective function
@@ -65,8 +67,8 @@ TEST_F(TestVerifier, verify_problem) {
         printemps::model::Model<int, double> model;
 
         [[maybe_unused]] auto& x = model.create_variable("x");
-        ASSERT_THROW(printemps::verifier::verify_problem(&model, false),
-                     std::logic_error);
+        printemps::preprocess::Verifier<int, double> verifier(&model);
+        ASSERT_THROW(verifier.verify_problem(false), std::logic_error);
     }
 }
 
@@ -82,14 +84,14 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         x(0).fix_by(2);
 
         model.setup_structure();
-        printemps::presolver::SelectionExtractor<int, double>
+        printemps::preprocess::SelectionExtractor<int, double>
             selection_extractor(&model);
         selection_extractor.extract_by_defined_order(false);
 
+        printemps::preprocess::Verifier<int, double> verifier(&model);
         ASSERT_THROW(
-            printemps::verifier::
-                verify_and_correct_selection_variables_initial_values(  //
-                    &model, true, false),
+            verifier.verify_and_correct_selection_variables_initial_values(
+                true, false),
             std::logic_error);
     }
 
@@ -102,14 +104,14 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         x(0).fix_by(2);
 
         model.setup_structure();
-        printemps::presolver::SelectionExtractor<int, double>
+        printemps::preprocess::SelectionExtractor<int, double>
             selection_extractor(&model);
         selection_extractor.extract_by_defined_order(false);
 
+        printemps::preprocess::Verifier<int, double> verifier(&model);
         ASSERT_THROW(
-            printemps::verifier::
-                verify_and_correct_selection_variables_initial_values(  //
-                    &model, false, false),
+            verifier.verify_and_correct_selection_variables_initial_values(
+                false, false),
             std::logic_error);
     }
 
@@ -122,13 +124,13 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         x(0).fix_by(1);
 
         model.setup_structure();
-        printemps::presolver::SelectionExtractor<int, double>
+        printemps::preprocess::SelectionExtractor<int, double>
             selection_extractor(&model);
         selection_extractor.extract_by_defined_order(false);
 
-        printemps::verifier::
-            verify_and_correct_selection_variables_initial_values(  //
-                &model, true, false);
+        printemps::preprocess::Verifier<int, double> verifier(&model);
+        verifier.verify_and_correct_selection_variables_initial_values(true,
+                                                                       false);
         EXPECT_EQ(1, x(0).value());
     }
 
@@ -141,13 +143,13 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         x(0).fix_by(1);
 
         model.setup_structure();
-        printemps::presolver::SelectionExtractor<int, double>
+        printemps::preprocess::SelectionExtractor<int, double>
             selection_extractor(&model);
         selection_extractor.extract_by_defined_order(false);
 
-        printemps::verifier::
-            verify_and_correct_selection_variables_initial_values(  //
-                &model, false, false);
+        printemps::preprocess::Verifier<int, double> verifier(&model);
+        verifier.verify_and_correct_selection_variables_initial_values(false,
+                                                                       false);
         EXPECT_EQ(1, x(0).value());
     }
 
@@ -161,14 +163,14 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         x(1).fix_by(1);
 
         model.setup_structure();
-        printemps::presolver::SelectionExtractor<int, double>
+        printemps::preprocess::SelectionExtractor<int, double>
             selection_extractor(&model);
         selection_extractor.extract_by_defined_order(false);
 
+        printemps::preprocess::Verifier<int, double> verifier(&model);
         ASSERT_THROW(
-            printemps::verifier::
-                verify_and_correct_selection_variables_initial_values(  //
-                    &model, true, false),
+            verifier.verify_and_correct_selection_variables_initial_values(
+                true, false),
             std::logic_error);
     }
 
@@ -182,14 +184,14 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         x(1).fix_by(1);
 
         model.setup_structure();
-        printemps::presolver::SelectionExtractor<int, double>
+        printemps::preprocess::SelectionExtractor<int, double>
             selection_extractor(&model);
         selection_extractor.extract_by_defined_order(false);
 
+        printemps::preprocess::Verifier<int, double> verifier(&model);
         ASSERT_THROW(
-            printemps::verifier::
-                verify_and_correct_selection_variables_initial_values(  //
-                    &model, false, false),
+            verifier.verify_and_correct_selection_variables_initial_values(
+                false, false),
             std::logic_error);
     }
 
@@ -202,13 +204,13 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         x(0) = 2;
         x(1) = 3;
         model.setup_structure();
-        printemps::presolver::SelectionExtractor<int, double>
+        printemps::preprocess::SelectionExtractor<int, double>
             selection_extractor(&model);
         selection_extractor.extract_by_defined_order(false);
 
-        printemps::verifier::
-            verify_and_correct_selection_variables_initial_values(  //
-                &model, true, false);
+        printemps::preprocess::Verifier<int, double> verifier(&model);
+        verifier.verify_and_correct_selection_variables_initial_values(true,
+                                                                       false);
 
         EXPECT_EQ(0, x(0).value());
         EXPECT_EQ(0, x(1).value());
@@ -224,14 +226,14 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         x(1) = 3;
 
         model.setup_structure();
-        printemps::presolver::SelectionExtractor<int, double>
+        printemps::preprocess::SelectionExtractor<int, double>
             selection_extractor(&model);
         selection_extractor.extract_by_defined_order(false);
 
+        printemps::preprocess::Verifier<int, double> verifier(&model);
         ASSERT_THROW(
-            printemps::verifier::
-                verify_and_correct_selection_variables_initial_values(  //
-                    &model, false, false),
+            verifier.verify_and_correct_selection_variables_initial_values(
+                false, false),
             std::logic_error);
     }
 
@@ -243,13 +245,13 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model.create_constraint("g", x.selection());
 
         model.setup_structure();
-        printemps::presolver::SelectionExtractor<int, double>
+        printemps::preprocess::SelectionExtractor<int, double>
             selection_extractor(&model);
         selection_extractor.extract_by_defined_order(false);
 
-        printemps::verifier::
-            verify_and_correct_selection_variables_initial_values(  //
-                &model, true, false);
+        printemps::preprocess::Verifier<int, double> verifier(&model);
+        verifier.verify_and_correct_selection_variables_initial_values(true,
+                                                                       false);
 
         /// selected_variable_ptr is not always &x(0).
         auto selected_variable_ptr =
@@ -265,14 +267,15 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model.create_constraint("g", x.selection());
 
         model.setup_structure();
-        printemps::presolver::SelectionExtractor<int, double>
+        printemps::preprocess::SelectionExtractor<int, double>
             selection_extractor(&model);
         selection_extractor.extract_by_defined_order(false);
 
+        printemps::preprocess::Verifier<int, double> verifier(&model);
+
         ASSERT_THROW(
-            printemps::verifier::
-                verify_and_correct_selection_variables_initial_values(  //
-                    &model, false, false),
+            verifier.verify_and_correct_selection_variables_initial_values(
+                false, false),
             std::logic_error);
     }
 
@@ -285,13 +288,13 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         x(0) = 1;
 
         model.setup_structure();
-        printemps::presolver::SelectionExtractor<int, double>
+        printemps::preprocess::SelectionExtractor<int, double>
             selection_extractor(&model);
         selection_extractor.extract_by_defined_order(false);
 
-        printemps::verifier::
-            verify_and_correct_selection_variables_initial_values(  //
-                &model, true, false);
+        printemps::preprocess::Verifier<int, double> verifier(&model);
+        verifier.verify_and_correct_selection_variables_initial_values(true,
+                                                                       false);
 
         EXPECT_EQ(1, x(0).value());
     }
@@ -305,13 +308,13 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         x(0) = 1;
 
         model.setup_structure();
-        printemps::presolver::SelectionExtractor<int, double>
+        printemps::preprocess::SelectionExtractor<int, double>
             selection_extractor(&model);
         selection_extractor.extract_by_defined_order(false);
 
-        printemps::verifier::
-            verify_and_correct_selection_variables_initial_values(  //
-                &model, false, false);
+        printemps::preprocess::Verifier<int, double> verifier(&model);
+        verifier.verify_and_correct_selection_variables_initial_values(false,
+                                                                       false);
 
         EXPECT_EQ(1, x(0).value());
     }
@@ -326,13 +329,13 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         x(1) = 1;
 
         model.setup_structure();
-        printemps::presolver::SelectionExtractor<int, double>
+        printemps::preprocess::SelectionExtractor<int, double>
             selection_extractor(&model);
         selection_extractor.extract_by_defined_order(false);
 
-        printemps::verifier::
-            verify_and_correct_selection_variables_initial_values(  //
-                &model, true, false);
+        printemps::preprocess::Verifier<int, double> verifier(&model);
+        verifier.verify_and_correct_selection_variables_initial_values(true,
+                                                                       false);
 
         /// selected_variable is not always x(0).
         EXPECT_EQ(1, x(0).value() + x(1).value());
@@ -348,14 +351,14 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         x(1) = 1;
 
         model.setup_structure();
-        printemps::presolver::SelectionExtractor<int, double>
+        printemps::preprocess::SelectionExtractor<int, double>
             selection_extractor(&model);
         selection_extractor.extract_by_defined_order(false);
 
+        printemps::preprocess::Verifier<int, double> verifier(&model);
         ASSERT_THROW(
-            printemps::verifier::
-                verify_and_correct_selection_variables_initial_values(  //
-                    &model, false, false),
+            verifier.verify_and_correct_selection_variables_initial_values(
+                false, false),
             std::logic_error);
     }
 
@@ -369,13 +372,13 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         x(1).fix_by(1);
 
         model.setup_structure();
-        printemps::presolver::SelectionExtractor<int, double>
+        printemps::preprocess::SelectionExtractor<int, double>
             selection_extractor(&model);
         selection_extractor.extract_by_defined_order(false);
 
-        printemps::verifier::
-            verify_and_correct_selection_variables_initial_values(  //
-                &model, true, false);
+        printemps::preprocess::Verifier<int, double> verifier(&model);
+        verifier.verify_and_correct_selection_variables_initial_values(true,
+                                                                       false);
 
         EXPECT_EQ(0, x(0).value());
         EXPECT_EQ(1, x(1).value());
@@ -391,14 +394,14 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         x(1).fix_by(1);
 
         model.setup_structure();
-        printemps::presolver::SelectionExtractor<int, double>
+        printemps::preprocess::SelectionExtractor<int, double>
             selection_extractor(&model);
         selection_extractor.extract_by_defined_order(false);
 
+        printemps::preprocess::Verifier<int, double> verifier(&model);
         ASSERT_THROW(
-            printemps::verifier::
-                verify_and_correct_selection_variables_initial_values(  //
-                    &model, false, false),
+            verifier.verify_and_correct_selection_variables_initial_values(
+                false, false),
             std::logic_error);
     }
 }
@@ -414,10 +417,10 @@ TEST_F(TestVerifier, verify_and_correct_binary_variables_initial_values) {
 
         model.setup_structure();
 
-        ASSERT_THROW(  //
-            printemps::verifier::
-                verify_and_correct_binary_variables_initial_values(  //
-                    &model, true, false),
+        printemps::preprocess::Verifier<int, double> verifier(&model);
+        ASSERT_THROW(
+            verifier.verify_and_correct_binary_variables_initial_values(true,
+                                                                        false),
             std::logic_error);
     }
 
@@ -430,10 +433,10 @@ TEST_F(TestVerifier, verify_and_correct_binary_variables_initial_values) {
 
         model.setup_structure();
 
-        ASSERT_THROW(  //
-            printemps::verifier::
-                verify_and_correct_binary_variables_initial_values(  //
-                    &model, false, false),
+        printemps::preprocess::Verifier<int, double> verifier(&model);
+        ASSERT_THROW(
+            verifier.verify_and_correct_binary_variables_initial_values(false,
+                                                                        false),
             std::logic_error);
     }
 
@@ -447,9 +450,9 @@ TEST_F(TestVerifier, verify_and_correct_binary_variables_initial_values) {
 
         model.setup_structure();
 
-        printemps::verifier::
-            verify_and_correct_binary_variables_initial_values(  //
-                &model, true, false);
+        printemps::preprocess::Verifier<int, double> verifier(&model);
+        verifier.verify_and_correct_binary_variables_initial_values(true,
+                                                                    false);
         EXPECT_EQ(1, x(0).value());
         EXPECT_EQ(0, x(1).value());
     }
@@ -464,10 +467,10 @@ TEST_F(TestVerifier, verify_and_correct_binary_variables_initial_values) {
 
         model.setup_structure();
 
-        ASSERT_THROW(  //
-            printemps::verifier::
-                verify_and_correct_binary_variables_initial_values(  //
-                    &model, false, false),
+        printemps::preprocess::Verifier<int, double> verifier(&model);
+        ASSERT_THROW(
+            verifier.verify_and_correct_binary_variables_initial_values(false,
+                                                                        false),
             std::logic_error);
     }
 }
@@ -483,10 +486,10 @@ TEST_F(TestVerifier, verify_and_correct_integer_variables_initial_values) {
 
         model.setup_structure();
 
-        ASSERT_THROW(  //
-            printemps::verifier::
-                verify_and_correct_integer_variables_initial_values(  //
-                    &model, true, false),
+        printemps::preprocess::Verifier<int, double> verifier(&model);
+        ASSERT_THROW(
+            verifier.verify_and_correct_integer_variables_initial_values(true,
+                                                                         false),
             std::logic_error);
     }
 
@@ -499,10 +502,10 @@ TEST_F(TestVerifier, verify_and_correct_integer_variables_initial_values) {
 
         model.setup_structure();
 
-        ASSERT_THROW(  //
-            printemps::verifier::
-                verify_and_correct_integer_variables_initial_values(  //
-                    &model, false, false),
+        printemps::preprocess::Verifier<int, double> verifier(&model);
+        ASSERT_THROW(
+            verifier.verify_and_correct_integer_variables_initial_values(false,
+                                                                         false),
             std::logic_error);
     }
 
@@ -516,9 +519,10 @@ TEST_F(TestVerifier, verify_and_correct_integer_variables_initial_values) {
 
         model.setup_structure();
 
-        printemps::verifier::
-            verify_and_correct_integer_variables_initial_values(  //
-                &model, true, false);
+        printemps::preprocess::Verifier<int, double> verifier(&model);
+        verifier.verify_and_correct_integer_variables_initial_values(true,
+                                                                     false);
+
         EXPECT_EQ(10, x(0).value());
         EXPECT_EQ(-10, x(1).value());
     }
@@ -533,10 +537,10 @@ TEST_F(TestVerifier, verify_and_correct_integer_variables_initial_values) {
 
         model.setup_structure();
 
-        ASSERT_THROW(  //
-            printemps::verifier::
-                verify_and_correct_integer_variables_initial_values(  //
-                    &model, false, false),
+        printemps::preprocess::Verifier<int, double> verifier(&model);
+        ASSERT_THROW(
+            verifier.verify_and_correct_integer_variables_initial_values(false,
+                                                                         false),
             std::logic_error);
     }
 }

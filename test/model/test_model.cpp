@@ -1106,10 +1106,10 @@ TEST_F(TestModel, categorize_variables) {
     model.categorize_variables();
     model.categorize_constraints();
 
-    printemps::presolver::DependentIntermediateVariableExtractor<int, double>
+    printemps::preprocess::DependentIntermediateVariableExtractor<int, double>
         dependent_intermediate_variable_extractor(&model);
     dependent_intermediate_variable_extractor.extract(false);
-    printemps::presolver::SelectionExtractor<int, double> selection_extractor(
+    printemps::preprocess::SelectionExtractor<int, double> selection_extractor(
         &model);
     selection_extractor.extract_independent(false);
 
@@ -1213,7 +1213,7 @@ TEST_F(TestModel, categorize_constraints) {
     singleton.disable();
 
     model.setup_structure();
-    printemps::presolver::SelectionExtractor<int, double> selection_extractor(
+    printemps::preprocess::SelectionExtractor<int, double> selection_extractor(
         &model);
     selection_extractor.extract_by_defined_order(false);
     model.setup_structure();
@@ -1449,7 +1449,7 @@ TEST_F(TestModel, update_arg_move) {
 
     model.minimize(p);
     model.setup_structure();
-    printemps::presolver::SelectionExtractor<int, double> selection_extractor(
+    printemps::preprocess::SelectionExtractor<int, double> selection_extractor(
         &model);
     selection_extractor.extract_independent(false);
     model.setup_fixed_sensitivities(false);
@@ -1902,7 +1902,7 @@ TEST_F(TestModel, evaluate) {
         model.set_global_penalty_coefficient(10000);
 
         model.setup_structure();
-        printemps::presolver::SelectionExtractor<int, double>
+        printemps::preprocess::SelectionExtractor<int, double>
             selection_extractor(&model);
         selection_extractor.extract_independent(false);
         model.setup_fixed_sensitivities(false);
@@ -2083,7 +2083,7 @@ TEST_F(TestModel, evaluate) {
         model.set_global_penalty_coefficient(10000);
 
         model.setup_structure();
-        printemps::presolver::SelectionExtractor<int, double>
+        printemps::preprocess::SelectionExtractor<int, double>
             selection_extractor(&model);
         selection_extractor.extract_independent(false);
         model.setup_fixed_sensitivities(false);

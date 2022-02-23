@@ -74,7 +74,7 @@ class Model {
         m_flippable_variable_ptr_pairs;
 
     neighborhood::Neighborhood<T_Variable, T_Expression> m_neighborhood;
-    presolver::ProblemSizeReducer<T_Variable, T_Expression>
+    preprocess::ProblemSizeReducer<T_Variable, T_Expression>
         m_problem_size_reducer;
 
     std::function<void(option::Option *,
@@ -645,7 +645,11 @@ class Model {
         const option::selection_mode::SelectionMode &a_SELECTION_MODE,  //
         const double a_GLOBAL_PENALTY_COEFFICIENT,                      //
         const bool   a_IS_ENABLED_PRINT) {
-        verifier::verify_problem(this, a_IS_ENABLED_PRINT);
+        /**
+         * Verify the problem.
+         */
+        preprocess::Verifier<T_Variable, T_Expression> verifier(this);
+        verifier.verify_problem(a_IS_ENABLED_PRINT);
 
         /**
          * Determine unique name of variables and constraints.
@@ -690,8 +694,8 @@ class Model {
          */
         if (a_IS_ENABLED_PRESOLVE && m_is_linear &&
             m_constraint_type_reference.intermediate_ptrs.size() > 0) {
-            presolver::DependentIntermediateVariableExtractor<T_Variable,
-                                                              T_Expression>
+            preprocess::DependentIntermediateVariableExtractor<T_Variable,
+                                                               T_Expression>
                 dependent_intermediate_variable_extractor(this);
             while (true) {
                 this->setup_structure();
@@ -748,7 +752,7 @@ class Model {
          */
         if (a_SELECTION_MODE != option::selection_mode::None &&
             this->number_of_variables() > this->number_of_constraints()) {
-            presolver::SelectionExtractor<T_Variable, T_Expression>
+            preprocess::SelectionExtractor<T_Variable, T_Expression>
                 selection_extractor(this);
             selection_extractor.extract(a_SELECTION_MODE, a_IS_ENABLED_PRINT);
         }
@@ -773,27 +777,21 @@ class Model {
         /**
          * Verify and correct the initial values.
          */
-        verifier::verify_and_correct_selection_variables_initial_values(  //
-            this,                                                         //
-            a_IS_ENABLED_INITIAL_VALUE_CORRECTION,                        //
-            a_IS_ENABLED_PRINT);
+        verifier.verify_and_correct_selection_variables_initial_values(  //
+            a_IS_ENABLED_INITIAL_VALUE_CORRECTION, a_IS_ENABLED_PRINT);
 
-        verifier::verify_and_correct_binary_variables_initial_values(
-            this,                                   //
-            a_IS_ENABLED_INITIAL_VALUE_CORRECTION,  //
-            a_IS_ENABLED_PRINT);
+        verifier.verify_and_correct_binary_variables_initial_values(
+            a_IS_ENABLED_INITIAL_VALUE_CORRECTION, a_IS_ENABLED_PRINT);
 
-        verifier::verify_and_correct_integer_variables_initial_values(
-            this,                                   //
-            a_IS_ENABLED_INITIAL_VALUE_CORRECTION,  //
-            a_IS_ENABLED_PRINT);
+        verifier.verify_and_correct_integer_variables_initial_values(
+            a_IS_ENABLED_INITIAL_VALUE_CORRECTION, a_IS_ENABLED_PRINT);
 
         /**
          * Solve GF(2) equations if needed.
          */
         if (a_IS_ENABLED_PRESOLVE &&
             m_constraint_type_reference.gf2_ptrs.size() > 0) {
-            presolver::GF2Solver<T_Variable, T_Expression> gf2_solver(this);
+            preprocess::GF2Solver<T_Variable, T_Expression> gf2_solver(this);
             const auto IS_SOLVED = gf2_solver.solve(a_IS_ENABLED_PRINT);
 
             /**
@@ -1773,12 +1771,13 @@ class Model {
                     a_PROXIES[proxy_index].flat_indexed_values(flat_index));
             }
         }
-        verifier::verify_and_correct_selection_variables_initial_values(  //
-            this, false, false);
-        verifier::verify_and_correct_binary_variables_initial_values(  //
-            this, false, false);
-        verifier::verify_and_correct_integer_variables_initial_values(  //
-            this, false, false);
+        preprocess::Verifier<T_Variable, T_Expression> verifier(this);
+        verifier.verify_and_correct_selection_variables_initial_values(  //
+            false, false);
+        verifier.verify_and_correct_binary_variables_initial_values(  //
+            false, false);
+        verifier.verify_and_correct_integer_variables_initial_values(  //
+            false, false);
     }
 
     /*************************************************************************/

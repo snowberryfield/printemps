@@ -3,11 +3,11 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_PRESOLVER_PROBLEM_SIZE_REDUCER_H__
-#define PRINTEMPS_PRESOLVER_PROBLEM_SIZE_REDUCER_H__
+#ifndef PRINTEMPS_PREPROCESS_PROBLEM_SIZE_REDUCER_H__
+#define PRINTEMPS_PREPROCESS_PROBLEM_SIZE_REDUCER_H__
 
 namespace printemps {
-namespace presolver {
+namespace preprocess {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class ProblemSizeReducer {
@@ -912,7 +912,7 @@ class ProblemSizeReducer {
     }
 };
 
-}  // namespace presolver
+}  // namespace preprocess
 }  // namespace printemps
 #endif
 /*****************************************************************************/

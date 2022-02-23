@@ -3,11 +3,11 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_PRESOLVER_GF2_H__
-#define PRINTEMPS_PRESOLVER_GF2_H__
+#ifndef PRINTEMPS_PREPROCESS_GF2_H__
+#define PRINTEMPS_PREPROCESS_GF2_H__
 
 namespace printemps {
-namespace presolver {
+namespace preprocess {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class GF2Solver {
@@ -182,7 +182,7 @@ class GF2Solver {
         return true;
     }
 };
-}  // namespace presolver
+}  // namespace preprocess
 }  // namespace printemps
 
 #endif
