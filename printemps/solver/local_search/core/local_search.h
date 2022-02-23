@@ -122,14 +122,17 @@ LocalSearchResult solve(
             termination_status = LocalSearchTerminationStatus::TIME_OVER;
             break;
         }
+
         if (elapsed_time + option.local_search.time_offset > option.time_max) {
             termination_status = LocalSearchTerminationStatus::TIME_OVER;
             break;
         }
+
         if (iteration >= option.local_search.iteration_max) {
             termination_status = LocalSearchTerminationStatus::ITERATION_OVER;
             break;
         }
+
         if (incumbent_holder_ptr->feasible_incumbent_objective() <=
             option.target_objective_value) {
             termination_status = LocalSearchTerminationStatus::REACH_TARGET;
@@ -144,16 +147,14 @@ LocalSearchResult solve(
         bool accept_feasibility_improvable = true;
 
         if (model_ptr->is_linear()) {
-            auto changed_variable_ptrs = utility::to_vector(
+            const auto CHANGED_VARIABLE_PTRS = utility::to_vector(
                 neighborhood::related_variable_ptrs(current_move));
-            auto changed_constraint_ptrs =
-                utility::to_vector(current_move.related_constraint_ptrs);
 
             if (iteration == 0) {
                 model_ptr->update_variable_objective_improvabilities();
             } else {
                 model_ptr->update_variable_objective_improvabilities(
-                    changed_variable_ptrs);
+                    CHANGED_VARIABLE_PTRS);
             }
 
             if (model_ptr->is_feasible()) {
@@ -179,9 +180,9 @@ LocalSearchResult solve(
 
         bool is_found_improving_solution = false;
 
-        const auto& move_ptrs = model_ptr->neighborhood().move_ptrs();
+        const auto& MOVE_PTRS = model_ptr->neighborhood().move_ptrs();
 
-        int number_of_moves        = move_ptrs.size();
+        int number_of_moves        = MOVE_PTRS.size();
         int number_of_checked_move = 0;
 
         /**
@@ -193,7 +194,7 @@ LocalSearchResult solve(
             break;
         }
 
-        for (const auto& move_ptr : move_ptrs) {
+        for (const auto& move_ptr : MOVE_PTRS) {
             solution::SolutionScore trial_solution_score;
             /**
              * The neighborhood solutions are evaluated in sequential by fast or
@@ -245,7 +246,7 @@ LocalSearchResult solve(
         /**
          * Update the model by the selected move.
          */
-        Move_T* move_ptr = move_ptrs[number_of_checked_move];
+        Move_T* move_ptr = MOVE_PTRS[number_of_checked_move];
 
         model_ptr->update(*move_ptr);
         update_status = incumbent_holder_ptr->try_update_incumbent(

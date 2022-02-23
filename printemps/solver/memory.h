@@ -185,29 +185,29 @@ class Memory {
         const int                                           a_RANDOM_WIDTH,  //
         std::mt19937 *get_rand_mt) noexcept {
         for (const auto &alteration : a_MOVE.alterations) {
-            int proxy_index = alteration.first->proxy_index();
-            int flat_index  = alteration.first->flat_index();
-            int randomness  = 0;
+            const int PROXY_INDEX = alteration.first->proxy_index();
+            const int FLAT_INDEX  = alteration.first->flat_index();
+            int       randomness  = 0;
             if (a_RANDOM_WIDTH > 0) {
                 randomness =
                     (*get_rand_mt)() % (2 * a_RANDOM_WIDTH) - a_RANDOM_WIDTH;
             }
 
-            m_last_update_iterations[proxy_index][flat_index] =
+            m_last_update_iterations[PROXY_INDEX][FLAT_INDEX] =
                 a_ITERATION + randomness;
             m_primal_intensity_numerator +=
-                2.0 * m_update_counts[proxy_index][flat_index] + 1;
-            m_update_counts[proxy_index][flat_index]++;
+                2.0 * m_update_counts[PROXY_INDEX][FLAT_INDEX] + 1;
+            m_update_counts[PROXY_INDEX][FLAT_INDEX]++;
             m_total_update_count++;
         }
 
         for (const auto &constraint_ptr :
              m_model_ptr->violative_constraint_ptrs()) {
-            int proxy_index = constraint_ptr->proxy_index();
-            int flat_index  = constraint_ptr->flat_index();
+            const int PROXY_INDEX = constraint_ptr->proxy_index();
+            const int FLAT_INDEX  = constraint_ptr->flat_index();
             m_dual_intensity_numerator +=
-                2.0 * m_violation_counts[proxy_index][flat_index] + 1;
-            m_violation_counts[proxy_index][flat_index]++;
+                2.0 * m_violation_counts[PROXY_INDEX][FLAT_INDEX] + 1;
+            m_violation_counts[PROXY_INDEX][FLAT_INDEX]++;
             m_total_violation_count++;
         }
 
