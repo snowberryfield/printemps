@@ -66,9 +66,16 @@ class Memory {
         m_total_update_count            = 0;
         m_total_update_count_reciprocal = 0.0;
 
+        m_total_violation_count            = 0;
+        m_total_violation_count_reciprocal = 0.0;
+
         m_primal_intensity_numerator              = 0.0;
         m_primal_intensity_denominator_reciprocal = 0.0;
         m_primal_intensity                        = 0.0;
+
+        m_dual_intensity_numerator              = 0.0;
+        m_dual_intensity_denominator_reciprocal = 0.0;
+        m_dual_intensity                        = 0.0;
     }
 
     /*************************************************************************/
