@@ -91,18 +91,19 @@ class TabuSearchControllerLogger {
             << "global_violation "                           // 5
             << "primal_intensity "                           // 6
             << "dual_intensity "                             // 7
-            << "update_status "                              // 8
-            << "employing_local_augmented_solution_flag "    // 9
-            << "employing_global_augmented_solution_flag "   // 10
-            << "employing_previous_solution_flag "           // 11
-            << "is_enabled_penalty_coefficient_relaxing "    // 12
-            << "is_enabled_penalty_coefficient_tightening "  // 13
-            << "penalty_coefficient_reset_flag"              // 14
-            << "penalty_coefficient_relaxing_rate "          // 15
-            << "penalty_coefficient_tightening_rate "        // 16
-            << "is_enabled_forcibly_initial_modification "   // 17
-            << "number_of_initial_modification "             // 18
-            << "initial_tabu_tenure" << std::endl;           // 19
+            << "performance "                                // 8
+            << "update_status "                              // 9
+            << "employing_local_augmented_solution_flag "    // 10
+            << "employing_global_augmented_solution_flag "   // 11
+            << "employing_previous_solution_flag "           // 12
+            << "is_enabled_penalty_coefficient_relaxing "    // 13
+            << "is_enabled_penalty_coefficient_tightening "  // 14
+            << "penalty_coefficient_reset_flag"              // 15
+            << "penalty_coefficient_relaxing_rate "          // 16
+            << "penalty_coefficient_tightening_rate "        // 17
+            << "is_enabled_forcibly_initial_modification "   // 18
+            << "number_of_initial_modification "             // 19
+            << "initial_tabu_tenure" << std::endl;           // 20
     }
 
     /*************************************************************************/
@@ -129,18 +130,19 @@ class TabuSearchControllerLogger {
             << global_incumbent.total_violation << " "             // 5
             << s.current_primal_intensity << " "                   // 6
             << s.current_dual_intensity << " "                     // 7
-            << s.tabu_search_result.total_update_status << " "     // 8
-            << p.employing_local_augmented_solution_flag << " "    // 9
-            << p.employing_global_augmented_solution_flag << " "   // 10
-            << p.employing_previous_solution_flag << " "           // 11
-            << p.is_enabled_penalty_coefficient_relaxing << " "    // 12
-            << p.is_enabled_penalty_coefficient_tightening << " "  // 13
-            << p.penalty_coefficient_reset_flag << " "             // 14
-            << p.penalty_coefficient_relaxing_rate << " "          // 15
-            << p.penalty_coefficient_tightening_rate << " "        // 16
-            << p.is_enabled_forcibly_initial_modification << " "   // 17
-            << p.number_of_initial_modification << " "             // 18
-            << p.initial_tabu_tenure                               // 19
+            << s.tabu_search_result.performance << " "             // 8
+            << s.tabu_search_result.total_update_status << " "     // 9
+            << p.employing_local_augmented_solution_flag << " "    // 10
+            << p.employing_global_augmented_solution_flag << " "   // 11
+            << p.employing_previous_solution_flag << " "           // 12
+            << p.is_enabled_penalty_coefficient_relaxing << " "    // 13
+            << p.is_enabled_penalty_coefficient_tightening << " "  // 14
+            << p.penalty_coefficient_reset_flag << " "             // 15
+            << p.penalty_coefficient_relaxing_rate << " "          // 16
+            << p.penalty_coefficient_tightening_rate << " "        // 17
+            << p.is_enabled_forcibly_initial_modification << " "   // 18
+            << p.number_of_initial_modification << " "             // 19
+            << p.initial_tabu_tenure                               // 20
             << std::endl;
     }
 };
