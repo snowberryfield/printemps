@@ -132,6 +132,12 @@ class TabuSearchController
             a_IS_ENABLED_PRINT);
 
         /**
+         * Print the search performance.
+         */
+        this->print_performance(  //
+            a_STATE.tabu_search_result.performance, a_IS_ENABLED_PRINT);
+
+        /**
          * Print the number of found feasible solutions.
          */
         this->print_number_of_feasible_solutions(
@@ -237,6 +243,7 @@ class TabuSearchController
                                    a_IS_ENABLED_PRINT);
         }
     }
+
     /*************************************************************************/
     inline void print_number_of_feasible_solutions(
         const int  a_NUMBER_OF_FEASIBLE_SOLUTIONS,
@@ -258,6 +265,14 @@ class TabuSearchController
                 std::to_string(a_CURRENT_PRIMAL_INTENSITY) + " (primal) / " +
                 std::to_string(a_CURRENT_DUAL_INTENSITY) + " (dual).",
             a_IS_ENABLED_PRINT);
+    }
+
+    /*************************************************************************/
+    inline void print_performance(const double a_SEARCH_PERFORMANCE,
+                                  const bool   a_IS_ENABLED_PRINT) {
+        utility::print_message("Search performance in the previous loop is " +
+                                   std::to_string(a_SEARCH_PERFORMANCE) + ".",
+                               a_IS_ENABLED_PRINT);
     }
 
     /*************************************************************************/
