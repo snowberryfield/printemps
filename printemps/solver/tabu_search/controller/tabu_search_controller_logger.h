@@ -83,27 +83,27 @@ class TabuSearchControllerLogger {
     /*************************************************************************/
     void write_header(void) {
         m_ofstream                                           //
-            << "#iteration "                                 // 0
-            << "elapsed_time "                               // 1
-            << "local_objective "                            // 2
-            << "local_violation "                            // 3
-            << "global_objective "                           // 4
-            << "global_violation "                           // 5
-            << "primal_intensity "                           // 6
-            << "dual_intensity "                             // 7
-            << "performance "                                // 8
-            << "update_status "                              // 9
-            << "employing_local_augmented_solution_flag "    // 10
-            << "employing_global_augmented_solution_flag "   // 11
-            << "employing_previous_solution_flag "           // 12
-            << "is_enabled_penalty_coefficient_relaxing "    // 13
-            << "is_enabled_penalty_coefficient_tightening "  // 14
-            << "penalty_coefficient_reset_flag"              // 15
-            << "penalty_coefficient_relaxing_rate "          // 16
-            << "penalty_coefficient_tightening_rate "        // 17
-            << "is_enabled_forcibly_initial_modification "   // 18
-            << "number_of_initial_modification "             // 19
-            << "initial_tabu_tenure" << std::endl;           // 20
+            << "#iteration "                                 //
+            << "elapsed_time "                               //
+            << "local_objective "                            //
+            << "local_violation "                            //
+            << "global_objective "                           //
+            << "global_violation "                           //
+            << "primal_intensity "                           //
+            << "dual_intensity "                             //
+            << "performance "                                //
+            << "update_status "                              //
+            << "employing_local_augmented_solution_flag "    //
+            << "employing_global_augmented_solution_flag "   //
+            << "employing_previous_solution_flag "           //
+            << "is_enabled_penalty_coefficient_relaxing "    //
+            << "is_enabled_penalty_coefficient_tightening "  //
+            << "penalty_coefficient_reset_flag "             //
+            << "penalty_coefficient_relaxing_rate "          //
+            << "penalty_coefficient_tightening_rate "        //
+            << "is_enabled_forcibly_initial_modification "   //
+            << "number_of_initial_modification "             //
+            << "initial_tabu_tenure" << std::endl;           //
     }
 
     /*************************************************************************/
@@ -122,27 +122,27 @@ class TabuSearchControllerLogger {
         auto &p = *m_parameter_ptr;
 
         m_ofstream                                                 //
-            << s.iteration << " "                                  // 0
-            << m_controller_ptr->time_keeper().clock() << " "      // 1
-            << local_incumbent.objective << " "                    // 2
-            << local_incumbent.total_violation << " "              // 3
-            << global_incumbent.objective << " "                   // 4
-            << global_incumbent.total_violation << " "             // 5
-            << s.current_primal_intensity << " "                   // 6
-            << s.current_dual_intensity << " "                     // 7
-            << s.tabu_search_result.performance << " "             // 8
-            << s.tabu_search_result.total_update_status << " "     // 9
-            << p.employing_local_augmented_solution_flag << " "    // 10
-            << p.employing_global_augmented_solution_flag << " "   // 11
-            << p.employing_previous_solution_flag << " "           // 12
-            << p.is_enabled_penalty_coefficient_relaxing << " "    // 13
-            << p.is_enabled_penalty_coefficient_tightening << " "  // 14
-            << p.penalty_coefficient_reset_flag << " "             // 15
-            << p.penalty_coefficient_relaxing_rate << " "          // 16
-            << p.penalty_coefficient_tightening_rate << " "        // 17
-            << p.is_enabled_forcibly_initial_modification << " "   // 18
-            << p.number_of_initial_modification << " "             // 19
-            << p.initial_tabu_tenure                               // 20
+            << s.iteration << " "                                  //
+            << m_controller_ptr->time_keeper().clock() << " "      //
+            << local_incumbent.objective << " "                    //
+            << local_incumbent.total_violation << " "              //
+            << global_incumbent.objective << " "                   //
+            << global_incumbent.total_violation << " "             //
+            << s.current_primal_intensity << " "                   //
+            << s.current_dual_intensity << " "                     //
+            << s.tabu_search_result.performance << " "             //
+            << s.tabu_search_result.total_update_status << " "     //
+            << p.employing_local_augmented_solution_flag << " "    //
+            << p.employing_global_augmented_solution_flag << " "   //
+            << p.employing_previous_solution_flag << " "           //
+            << p.is_enabled_penalty_coefficient_relaxing << " "    //
+            << p.is_enabled_penalty_coefficient_tightening << " "  //
+            << p.penalty_coefficient_reset_flag << " "             //
+            << p.penalty_coefficient_relaxing_rate << " "          //
+            << p.penalty_coefficient_tightening_rate << " "        //
+            << p.is_enabled_forcibly_initial_modification << " "   //
+            << p.number_of_initial_modification << " "             //
+            << p.initial_tabu_tenure                               //
             << std::endl;
     }
 };
