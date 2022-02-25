@@ -22,6 +22,18 @@ class Verifier {
    private:
     model::Model<T_Variable, T_Expression> *m_model_ptr;
 
+    /*************************************************************************/
+    inline void print_correction(const std::string &a_VARIABLE_NAME,
+                                 const T_Variable   a_OLD_VALUE,
+                                 const T_Variable   a_NEW_VALUE,
+                                 const bool         a_IS_ENABLED_PRINT) {
+        utility::print_warning(  //
+            "The initial value " + a_VARIABLE_NAME + " = " +
+                std::to_string(a_OLD_VALUE) + " was corrected to " +
+                std::to_string(a_NEW_VALUE) + ".",
+            a_IS_ENABLED_PRINT);
+    }
+
    public:
     /*************************************************************************/
     Verifier(void) {
@@ -70,8 +82,7 @@ class Verifier {
         utility::print_single_line(a_IS_ENABLED_PRINT);
         utility::print_message(
             "Verifying the initial values of the binary included in the "
-            "selection "
-            "constraints...",
+            "selection constraints...",
             a_IS_ENABLED_PRINT);
 
         for (auto &&selection : m_model_ptr->selections()) {
@@ -131,13 +142,8 @@ class Verifier {
                         const T_Variable NEW_VALUE = 0;
 
                         variable_ptr->set_value_if_mutable(NEW_VALUE);
-
-                        utility::print_warning(
-                            "The initial value " + variable_ptr->name() +
-                                " = " + std::to_string(OLD_VALUE) +
-                                " was corrected to " +
-                                std::to_string(NEW_VALUE) + ".",
-                            a_IS_ENABLED_PRINT);
+                        this->print_correction(variable_ptr->name(), OLD_VALUE,
+                                               NEW_VALUE, a_IS_ENABLED_PRINT);
                     }
 
                 } else {
@@ -169,13 +175,9 @@ class Verifier {
                             const T_Variable NEW_VALUE = 0;
 
                             variable_ptr->set_value_if_mutable(NEW_VALUE);
-
-                            utility::print_warning(
-                                "The initial value " + variable_ptr->name() +
-                                    " = " + std::to_string(OLD_VALUE) +
-                                    " was corrected to " +
-                                    std::to_string(NEW_VALUE) + ".",
-                                a_IS_ENABLED_PRINT);
+                            this->print_correction(variable_ptr->name(),
+                                                   OLD_VALUE, NEW_VALUE,
+                                                   a_IS_ENABLED_PRINT);
                         }
                     }
 
@@ -201,13 +203,9 @@ class Verifier {
                     for (auto &&variable_ptr : selection.variable_ptrs) {
                         if (!variable_ptr->is_fixed()) {
                             variable_ptr->set_value_if_mutable(NEW_VALUE);
-
-                            utility::print_warning(
-                                "The initial value " + variable_ptr->name() +
-                                    " = " + std::to_string(OLD_VALUE) +
-                                    " was corrected to " +
-                                    std::to_string(NEW_VALUE) + ".",
-                                a_IS_ENABLED_PRINT);
+                            this->print_correction(variable_ptr->name(),
+                                                   OLD_VALUE, NEW_VALUE,
+                                                   a_IS_ENABLED_PRINT);
                             is_corrected = true;
                             break;
                         }
@@ -262,13 +260,9 @@ class Verifier {
                             }
 
                             variable.set_value_if_mutable(new_value);
-
-                            utility::print_warning(
-                                "The initial value " + variable.name() + " = " +
-                                    std::to_string(old_value) +
-                                    " was corrected to " +
-                                    std::to_string(new_value) + ".",
-                                a_IS_ENABLED_PRINT);
+                            this->print_correction(variable.name(), old_value,
+                                                   new_value,
+                                                   a_IS_ENABLED_PRINT);
                         } else {
                             throw std::logic_error(
                                 utility::format_error_location(
@@ -314,13 +308,8 @@ class Verifier {
                         }
 
                         variable.set_value_if_mutable(new_value);
-
-                        utility::print_warning(
-                            "The initial value " + variable.name() + " = " +
-                                std::to_string(old_value) +
-                                " was corrected to " +
-                                std::to_string(new_value) + ".",
-                            a_IS_ENABLED_PRINT);
+                        this->print_correction(variable.name(), old_value,
+                                               new_value, a_IS_ENABLED_PRINT);
                     } else {
                         throw std::logic_error(utility::format_error_location(
                             __FILE__, __LINE__, __func__,
