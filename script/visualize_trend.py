@@ -11,6 +11,7 @@ import bokeh.palettes
 
 import argparse
 import numpy as np
+import pandas as pd
 
 ###############################################################################
 
@@ -22,6 +23,8 @@ def visualize_trend(trend_data, instance_name, output_file_name):
         ("index", "$index"),
         ("(x,y)", "($x, $y)"),
     ]
+
+    iterations_update = trend_data['#iteration'][trend_data['update_status'] >= 3]
 
     # Elapsed Time
     fig_elapsed_time = bokeh.plotting.figure(
@@ -35,15 +38,17 @@ def visualize_trend(trend_data, instance_name, output_file_name):
         plot_height=300)
 
     fig_elapsed_time.line(
-        x=trend_data[:, 0],
-        y=trend_data[:, 1],
-        legend='Elapsed Time',
+        x=trend_data['#iteration'],
+        y=trend_data['elapsed_time'],
+        legend_label='Elapsed Time',
         width=3,
         color=colors[0])
 
     fig_elapsed_time.legend.visible = False
 
     # intensity
+    update_markers = trend_data['primal_intensity'][iterations_update]
+
     fig_intensity = bokeh.plotting.figure(
         tooltips=TOOLTIPS,
         title='Intensity',
@@ -55,18 +60,25 @@ def visualize_trend(trend_data, instance_name, output_file_name):
         plot_height=300)
 
     fig_intensity.line(
-        x=trend_data[:, 0],
-        y=trend_data[:, 6],
-        legend='primal',
+        x=trend_data['#iteration'],
+        y=trend_data['primal_intensity'],
+        legend_label='primal',
         width=3,
         color=colors[0])
 
     fig_intensity.line(
-        x=trend_data[:, 0],
-        y=trend_data[:, 7],
-        legend='dual',
+        x=trend_data['#iteration'],
+        y=trend_data['dual_intensity'],
+        legend_label='dual',
         width=3,
         color=colors[1])
+
+    fig_intensity.scatter(
+        x=iterations_update,
+        y=update_markers,
+        size=3,
+        color='red',
+        fill_alpha=0.8)
 
     fig_intensity.legend.visible = True
 
@@ -81,17 +93,17 @@ def visualize_trend(trend_data, instance_name, output_file_name):
         plot_height=300)
 
     fig_objective.circle(
-        x=trend_data[:, 0],
-        y=trend_data[:, 2],
-        legend='Local Incumbent',
+        x=trend_data['#iteration'],
+        y=trend_data['local_objective'],
+        legend_label='Local Incumbent',
         size=3,
         color=colors[1],
         fill_alpha=0.8)
 
     fig_objective.line(
-        x=trend_data[:, 0],
-        y=trend_data[:, 4],
-        legend='Global Incumbent',
+        x=trend_data['#iteration'],
+        y=trend_data['global_objective'],
+        legend_label='Global Incumbent',
         width=3,
         color=colors[0])
 
@@ -113,17 +125,17 @@ def visualize_trend(trend_data, instance_name, output_file_name):
         plot_height=300)
 
     fig_violation.circle(
-        x=trend_data[:, 0],
-        y=trend_data[:, 3],
-        legend='Local Incumbent',
+        x=trend_data['#iteration'],
+        y=trend_data['local_violation'],
+        legend_label='Local Incumbent',
         size=3,
         color=colors[1],
         fill_alpha=0.8)
 
     fig_violation.line(
-        x=trend_data[:, 0],
-        y=trend_data[:, 5],
-        legend='Global Incumbent',
+        x=trend_data['#iteration'],
+        y=trend_data['global_violation'],
+        legend_label='Global Incumbent',
         width=3,
         color=colors[0])
 
@@ -145,24 +157,29 @@ def visualize_trend(trend_data, instance_name, output_file_name):
         plot_height=300)
 
     fig_penalty_coefficient_control.line(
-        x=trend_data[:, 0],
-        y=np.cumsum(trend_data[:, 12]) / (trend_data[:, 0]+1),
-        legend='Relaxing',
+        x=trend_data['#iteration'],
+        y=np.cumsum(
+            trend_data['is_enabled_penalty_coefficient_relaxing']) /
+        (trend_data['#iteration']+1),
+        legend_label='Relaxing',
         width=3,
         color=colors[1])
 
     fig_penalty_coefficient_control.line(
-        x=trend_data[:, 0],
-        y=np.cumsum(trend_data[:, 13]) / (trend_data[:, 0]+1),
-        legend='Tightening',
+        x=trend_data['#iteration'],
+        y=np.cumsum(
+            trend_data['is_enabled_penalty_coefficient_tightening']) /
+        (trend_data['#iteration']+1),
+        legend_label='Tightening',
         width=3,
         color=colors[0])
 
     fig_penalty_coefficient_control.line(
-        x=trend_data[:, 0],
-        y=1.0 - np.cumsum(trend_data[:, 12] +
-                          trend_data[:, 13]) / (trend_data[:, 0]+1),
-        legend='No Updating',
+        x=trend_data['#iteration'],
+        y=1.0 - np.cumsum(trend_data['is_enabled_penalty_coefficient_relaxing'] +
+                          trend_data['is_enabled_penalty_coefficient_tightening'])
+        / (trend_data['#iteration']+1),
+        legend_label='No Updating',
         width=3,
         color=colors[2])
 
@@ -173,6 +190,11 @@ def visualize_trend(trend_data, instance_name, output_file_name):
     fig_penalty_coefficient_control.add_layout(new_legend, 'below')
 
     # Penalty Coefficient Relaxing/Tightening Rate Control
+    update_marker_relax = trend_data['penalty_coefficient_relaxing_rate'][
+        iterations_update[trend_data['is_enabled_penalty_coefficient_relaxing'] == 0]]
+    update_markers_tighten = trend_data['penalty_coefficient_tightening_rate'][
+        iterations_update[trend_data['is_enabled_penalty_coefficient_tightening'] == 0]]
+
     fig_penalty_coefficient_rate_control = bokeh.plotting.figure(
         tooltips=TOOLTIPS,
         title='Penalty Coefficient Relaxing/Tightening Rate Control',
@@ -184,18 +206,32 @@ def visualize_trend(trend_data, instance_name, output_file_name):
         plot_height=300)
 
     fig_penalty_coefficient_rate_control.line(
-        x=trend_data[:, 0],
-        y=trend_data[:, 15],
-        legend='Relaxing',
+        x=trend_data['#iteration'],
+        y=trend_data['penalty_coefficient_relaxing_rate'],
+        legend_label='Relaxing',
         width=3,
         color=colors[1])
 
     fig_penalty_coefficient_rate_control.line(
-        x=trend_data[:, 0],
-        y=trend_data[:, 16],
-        legend='Tightening',
+        x=trend_data['#iteration'],
+        y=trend_data['penalty_coefficient_tightening_rate'],
+        legend_label='Tightening',
         width=3,
         color=colors[0])
+
+    fig_penalty_coefficient_rate_control.scatter(
+        x=iterations_update[trend_data['is_enabled_penalty_coefficient_relaxing'] == 0],
+        y=update_marker_relax,
+        size=3,
+        color='red',
+        fill_alpha=0.8)
+
+    fig_penalty_coefficient_rate_control.scatter(
+        x=iterations_update[trend_data['is_enabled_penalty_coefficient_tightening'] == 0],
+        y=update_markers_tighten,
+        size=3,
+        color='red',
+        fill_alpha=0.8)
 
     fig_penalty_coefficient_rate_control.legend.visible = True
     fig_penalty_coefficient_rate_control.legend.location = "bottom_center"
@@ -215,9 +251,10 @@ def visualize_trend(trend_data, instance_name, output_file_name):
         plot_height=300)
 
     fig_penalty_coefficient_reset_control.line(
-        x=trend_data[:, 0],
-        y=np.cumsum(trend_data[:, 14]) / (trend_data[:, 0]+1),
-        legend='',
+        x=trend_data['#iteration'],
+        y=np.cumsum(trend_data['penalty_coefficient_reset_flag'])
+        / (trend_data['#iteration']+1),
+        legend_label='',
         width=3,
         color=colors[0])
 
@@ -235,23 +272,26 @@ def visualize_trend(trend_data, instance_name, output_file_name):
         plot_height=300)
 
     fig_initial_solution_control.line(
-        x=trend_data[:, 0],
-        y=np.cumsum(trend_data[:, 9]) / (trend_data[:, 0]+1),
-        legend='Local Incumbent',
+        x=trend_data['#iteration'],
+        y=np.cumsum(trend_data['employing_local_augmented_solution_flag']
+                    ) / (trend_data['#iteration'] + 1),
+        legend_label='Local Incumbent',
         width=3,
         color=colors[1])
 
     fig_initial_solution_control.line(
-        x=trend_data[:, 0],
-        y=np.cumsum(trend_data[:, 10]) / (trend_data[:, 0] + 1),
-        legend='Global Incumbent',
+        x=trend_data['#iteration'],
+        y=np.cumsum(trend_data['employing_global_augmented_solution_flag']
+                    ) / (trend_data['#iteration'] + 1),
+        legend_label='Global Incumbent',
         width=3,
         color=colors[0])
 
     fig_initial_solution_control.line(
-        x=trend_data[:, 0],
-        y=np.cumsum(trend_data[:, 11]) / (trend_data[:, 0] + 1),
-        legend='Same as Previous',
+        x=trend_data['#iteration'],
+        y=np.cumsum(trend_data['employing_previous_solution_flag']
+                    ) / (trend_data['#iteration'] + 1),
+        legend_label='Same as Previous',
         width=3,
         color=colors[2])
 
@@ -273,15 +313,18 @@ def visualize_trend(trend_data, instance_name, output_file_name):
         plot_height=300)
 
     fig_initial_modification_control.line(
-        x=trend_data[:, 0],
-        y=np.cumsum(trend_data[:, 17]) / (trend_data[:, 0]+1),
-        legend='',
+        x=trend_data['#iteration'],
+        y=np.cumsum(
+            trend_data['is_enabled_forcibly_initial_modification']) / (trend_data['#iteration']+1),
+        legend_label='',
         width=3,
         color=colors[0])
 
     fig_initial_modification_control.legend.visible = False
 
     # Initial Tabu Tenure Control
+    update_markers = trend_data['initial_tabu_tenure'][iterations_update]
+
     fig_initial_tabu_tenure = bokeh.plotting.figure(
         tooltips=TOOLTIPS,
         title='Initial Tabu Tenure Control',
@@ -293,9 +336,9 @@ def visualize_trend(trend_data, instance_name, output_file_name):
         plot_height=300)
 
     fig_initial_tabu_tenure.line(
-        x=trend_data[:, 0],
-        y=trend_data[:, 19],
-        legend='',
+        x=trend_data['#iteration'],
+        y=trend_data['initial_tabu_tenure'],
+        legend_label='',
         width=3,
         color=colors[0])
 
@@ -303,13 +346,50 @@ def visualize_trend(trend_data, instance_name, output_file_name):
     fig_initial_tabu_tenure.yaxis.ticker\
         = bokeh.models.tickers.SingleIntervalTicker(interval=10)
 
+    fig_initial_tabu_tenure.scatter(
+        x=iterations_update,
+        y=update_markers,
+        size=3,
+        color='red',
+        fill_alpha=0.8)
+
+    # Performance
+    update_markers = trend_data['performance'][iterations_update]
+
+    fig_performance = bokeh.plotting.figure(
+        tooltips=TOOLTIPS,
+        title='Performance',
+        x_axis_label='Iteration',
+        y_axis_label='Performance',
+        x_range=bokeh.models.DataRange1d(start=0),
+        y_range=bokeh.models.DataRange1d(start=0.0, end=1.1),
+        plot_width=500,
+        plot_height=300)
+
+    fig_performance.line(
+        x=trend_data['#iteration'],
+        y=trend_data['performance'],
+        legend_label='',
+        width=3,
+        color=colors[0])
+
+    fig_performance.scatter(
+        x=iterations_update,
+        y=update_markers,
+        size=3,
+        color='red',
+        fill_alpha=0.8)
+
+    fig_performance.legend.visible = False
+
     # plot
     grid = bokeh.layouts.gridplot(
         [[fig_elapsed_time, fig_intensity],
          [fig_objective, fig_violation],
          [fig_penalty_coefficient_control, fig_penalty_coefficient_rate_control],
          [fig_penalty_coefficient_reset_control, fig_initial_solution_control],
-         [fig_initial_modification_control, fig_initial_tabu_tenure]])
+         [fig_initial_modification_control, fig_initial_tabu_tenure],
+         [fig_performance]])
 
     bokeh.plotting.output_file(
         output_file_name,
@@ -331,7 +411,9 @@ def main():
     args = parser.parse_args()
 
     trend_file_name = args.input_file_name
-    trend_data = np.loadtxt(trend_file_name)
+
+    trend_data = pd.read_table(
+        trend_file_name, sep=' ', header=0, skiprows=(0, 1, 2))
 
     with open(trend_file_name, 'r') as f:
         instance_name = f.readline().split()[-1]
