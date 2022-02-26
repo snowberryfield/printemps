@@ -22,14 +22,14 @@ class DependentIntermediateVariableExtractor {
 
     /*************************************************************************/
     DependentIntermediateVariableExtractor(
-        model::Model<T_Variable, T_Expression> *m_model_ptr) {
-        this->setup(m_model_ptr);
+        model::Model<T_Variable, T_Expression> *a_model_ptr) {
+        this->setup(a_model_ptr);
     }
 
     /*************************************************************************/
-    inline void setup(model::Model<T_Variable, T_Expression> *m_model_ptr) {
+    inline void setup(model::Model<T_Variable, T_Expression> *a_model_ptr) {
         this->initialize();
-        this->m_model_ptr = m_model_ptr;
+        this->m_model_ptr = a_model_ptr;
     }
 
     /*************************************************************************/
