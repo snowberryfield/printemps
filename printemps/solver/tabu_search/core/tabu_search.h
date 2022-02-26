@@ -8,6 +8,7 @@
 
 #include "../../memory.h"
 #include "tabu_search_move_score.h"
+#include "tabu_search_move_evaluator.h"
 #include "tabu_search_print.h"
 #include "tabu_search_termination_status.h"
 #include "tabu_search_result.h"
@@ -104,6 +105,12 @@ TabuSearchResult solve(
      */
     model_ptr->reset_variable_objective_improvabilities();
     model_ptr->reset_variable_feasibility_improvabilities();
+
+    /**
+     * Prepare the move evaluator.
+     */
+    TabuSearchMoveEvaluator<T_Variable, T_Expression> move_evaluator(
+        model_ptr, memory_ptr, option);
 
     /**
      * Prepare other local variables.
@@ -249,9 +256,10 @@ TabuSearchResult solve(
                         accept_objective_improvable   = true;
                         accept_feasibility_improvable = false;
                     } else {
-                        model_ptr->reset_variable_feasibility_improvabilities();
-                        model_ptr
-                            ->update_variable_feasibility_improvabilities();
+                        model_ptr->reset_variable_feasibility_improvabilities(
+                            model_ptr->violative_constraint_ptrs());
+                        model_ptr->update_variable_feasibility_improvabilities(
+                            model_ptr->violative_constraint_ptrs());
 
                         accept_all                    = false;
                         accept_objective_improvable   = false;
@@ -378,12 +386,10 @@ TabuSearchResult solve(
                                     *TRIAL_MOVE_PTRS[i]);
             }
 #endif
-            evaluate_move(&trial_move_scores[i],  //
-                          *TRIAL_MOVE_PTRS[i],    //
-                          iteration,              //
-                          memory_ptr,             //
-                          option,                 //
-                          tabu_tenure);
+            move_evaluator.evaluate(&trial_move_scores[i],  //
+                                    *TRIAL_MOVE_PTRS[i],    //
+                                    iteration,              //
+                                    tabu_tenure);
 
             total_scores[i] =
                 trial_solution_scores[i].local_augmented_objective +
