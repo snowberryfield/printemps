@@ -122,7 +122,8 @@ class Learner {
         if (no_data_action_ptrs.size() > 0) {
             best_action_ptr = no_data_action_ptrs.front();
         } else {
-            double argmax_upper_confidence = std::numeric_limits<double>::min();
+            double argmax_upper_confidence =
+                std::numeric_limits<double>::lowest();
             for (auto &&action : m_actions) {
                 double upper_confidence = action.mean + action.confidence;
                 if (upper_confidence > argmax_upper_confidence) {

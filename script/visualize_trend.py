@@ -362,7 +362,7 @@ def visualize_trend(trend_data, instance_name, output_file_name):
         x_axis_label='Iteration',
         y_axis_label='Performance',
         x_range=bokeh.models.DataRange1d(start=0),
-        y_range=bokeh.models.DataRange1d(start=0.0, end=1.1),
+        y_range=bokeh.models.DataRange1d(start=0.0),
         plot_width=500,
         plot_height=300)
 
