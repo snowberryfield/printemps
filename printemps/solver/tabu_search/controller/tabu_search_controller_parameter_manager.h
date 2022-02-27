@@ -15,8 +15,9 @@ struct TabuSearchControllerParameterManagerConstant {
     static constexpr double RELATIVE_RANGE_THRESHOLD              = 1E-2;
     static constexpr double PENALTY_COEFFICIENT_RELAXING_RATE_MIN = 0.3;
     static constexpr double PENALTY_COEFFICIENT_RELAXING_RATE_MAX = 1.0 - 1E-4;
-    static constexpr double PENALTY_COEFFICIENT_RELAXING_RATE_STEP_SIZE = 5E-1;
-    static constexpr double VIOLATION_COUNT_RATE_PENALTY_COEFFICIENT    = 1E-5;
+    static constexpr double PENALTY_COEFFICIENT_RELAXING_RATE_DECREASE_RATE =
+        0.9;
+    static constexpr double PENALTY_COEFFICIENT_RELAXING_RATE_STEP_SIZE = 1E-1;
     static constexpr int    ITERATION_AFTER_RELAXATION_MAX              = 30;
     static constexpr double GAP_TOLERANCE = constant::EPSILON;
 };
@@ -450,13 +451,15 @@ class TabuSearchControllerParameterManager {
          */
         if (a_STATE.is_infeasible_stagnation &&
             ((a_STATE.current_primal_intensity >
-              a_STATE.current_primal_intensity_before_relaxation) ||
+              a_STATE.current_primal_intensity_before_relaxation) &&
              (a_STATE.current_dual_intensity >
               a_STATE.current_dual_intensity_before_relaxation))) {
-            m_parameter.penalty_coefficient_relaxing_rate =
-                std::max(TabuSearchControllerParameterManagerConstant::
-                             PENALTY_COEFFICIENT_RELAXING_RATE_MIN,
-                         m_parameter.penalty_coefficient_relaxing_rate * 0.5);
+            m_parameter.penalty_coefficient_relaxing_rate = std::max(
+                TabuSearchControllerParameterManagerConstant::
+                    PENALTY_COEFFICIENT_RELAXING_RATE_MIN,
+                m_parameter
+                    .penalty_coefficient_relaxing_rate* TabuSearchControllerParameterManagerConstant::
+                        PENALTY_COEFFICIENT_RELAXING_RATE_DECREASE_RATE =);
             return;
         }
 
@@ -531,24 +534,14 @@ class TabuSearchControllerParameterManager {
             LOCAL_AUGMENTED_INCUMBENT_SOLUTION.constraint_value_proxies;
         const auto& VIOLATION_VALUE_PROXIES =
             LOCAL_AUGMENTED_INCUMBENT_SOLUTION.violation_value_proxies;
-        const auto& VIOLATION_COUNT_RATE_PROXIES =
-            m_memory_ptr->violation_count_rates();
 
         for (auto&& proxy : this->m_model_ptr->constraint_proxies()) {
             for (auto&& constraint : proxy.flat_indexed_constraints()) {
                 const double VIOLATION =
                     VIOLATION_VALUE_PROXIES[proxy.index()]
                                            [constraint.flat_index()];
-                double VIOLATION_COUNT_RATE =
-                    VIOLATION_COUNT_RATE_PROXIES[proxy.index()]
-                                                [constraint.flat_index()];
-                const double ELEMENT =
-                    VIOLATION *
-                    (1.0 + TabuSearchControllerParameterManagerConstant::
-                                   VIOLATION_COUNT_RATE_PENALTY_COEFFICIENT *
-                               VIOLATION_COUNT_RATE);
-                total_violation += ELEMENT;
-                total_squared_violation += ELEMENT * ELEMENT;
+                total_violation += VIOLATION;
+                total_squared_violation += VIOLATION * VIOLATION;
             }
         }
 
@@ -564,18 +557,12 @@ class TabuSearchControllerParameterManager {
                     [proxy.index()][constraint.flat_index()];
                 const double VIOLATION_VALUE = VIOLATION_VALUE_PROXIES  //
                     [proxy.index()][constraint.flat_index()];
-                const double VIOLATION_COUNT_RATE =
-                    VIOLATION_COUNT_RATE_PROXIES  //
-                        [proxy.index()][constraint.flat_index()];
 
                 const double DELTA_PENALTY_COEFFICIENT_CONSTANT =
                     std::max(0.0, GAP) / total_violation;
                 const double DELTA_PENALTY_COEFFICIENT_PROPORTIONAL =
                     std::max(0.0, GAP) / total_squared_violation *
-                    VIOLATION_VALUE *
-                    (1.0 + TabuSearchControllerParameterManagerConstant::
-                                   VIOLATION_COUNT_RATE_PENALTY_COEFFICIENT *
-                               VIOLATION_COUNT_RATE);
+                    VIOLATION_VALUE;
 
                 const double POSITIVE_PART = std::max(CONSTRAINT_VALUE, 0.0);
                 const double NEGATIVE_PART = std::max(-CONSTRAINT_VALUE, 0.0);

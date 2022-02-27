@@ -1916,13 +1916,13 @@ class Model {
         const std::vector<model_component::Variable<T_Variable, T_Expression> *>
             &a_VARIABLE_PTRS) const noexcept {
         for (const auto &variable_ptr : a_VARIABLE_PTRS) {
-            const auto coefficient =
+            const auto COEFFICIENT =
                 variable_ptr->objective_sensitivity() * this->sign();
-            const auto is_objective_improvable =
-                (coefficient > 0 && variable_ptr->has_lower_bound_margin()) ||
-                (coefficient < 0 && variable_ptr->has_upper_bound_margin());
+            const auto IS_OBJECTIVE_IMPROVABLE =
+                (COEFFICIENT > 0 && variable_ptr->has_lower_bound_margin()) ||
+                (COEFFICIENT < 0 && variable_ptr->has_upper_bound_margin());
 
-            variable_ptr->set_is_objective_improvable(is_objective_improvable);
+            variable_ptr->set_is_objective_improvable(IS_OBJECTIVE_IMPROVABLE);
         }
     }
 
@@ -1937,7 +1937,7 @@ class Model {
         const std::vector<model_component::Constraint<T_Variable, T_Expression>
                               *> &a_CONSTRAINT_PTRS) const noexcept {
         for (const auto &constraint_ptr : a_CONSTRAINT_PTRS) {
-            if (constraint_ptr->violation_value() < constant::EPSILON) {
+            if (constraint_ptr->is_feasible()) {
                 continue;
             }
 
@@ -1948,15 +1948,15 @@ class Model {
                     continue;
                 }
 
-                const auto coefficient =
+                const auto COEFFICIENT =
                     (constraint_ptr->constraint_value() > constant::EPSILON &&
                      constraint_ptr->is_less_or_equal())
                         ? sensitivity.second
                         : -sensitivity.second;
 
-                if ((coefficient > 0 &&
+                if ((COEFFICIENT > 0 &&
                      sensitivity.first->has_lower_bound_margin()) ||
-                    (coefficient < 0 &&
+                    (COEFFICIENT < 0 &&
                      sensitivity.first->has_upper_bound_margin())) {
                     sensitivity.first->set_is_feasibility_improvable_or(true);
                 }
@@ -2123,10 +2123,7 @@ class Model {
         double objective_improvement = 0.0;
 
         if (m_is_defined_objective) {
-            objective =
-                (m_objective.value() +
-                 variable_value_diff * variable_ptr->objective_sensitivity()) *
-                this->sign();
+            objective = m_objective.evaluate(a_MOVE) * this->sign();
             objective_improvement =
                 m_objective.value() * this->sign() - objective;
         }
@@ -2314,9 +2311,9 @@ class Model {
             multi_array::ValueProxy<double> local_penalty_coefficient_proxy(
                 proxy.index(), proxy.shape());
 
-            int number_of_elements = proxy.number_of_elements();
+            const int NUMBER_OF_ELEMENTS = proxy.number_of_elements();
 
-            for (auto i = 0; i < number_of_elements; i++) {
+            for (auto i = 0; i < NUMBER_OF_ELEMENTS; i++) {
                 local_penalty_coefficient_proxy.flat_indexed_names(i) =
                     proxy.flat_indexed_constraints(i).name();
                 local_penalty_coefficient_proxy.flat_indexed_values(i) =
@@ -2385,9 +2382,9 @@ class Model {
         /// This method cannot be constexpr by clang.
         solution::NamedSolution<T_Variable, T_Expression> named_solution;
 
-        int VARIABLE_PROXIES_SIZE   = m_variable_proxies.size();
-        int EXPRESSION_PROXIES_SIZE = m_expression_proxies.size();
-        int CONSTRAINT_PROXIES_SIZE = m_constraint_proxies.size();
+        const int VARIABLE_PROXIES_SIZE   = m_variable_proxies.size();
+        const int EXPRESSION_PROXIES_SIZE = m_expression_proxies.size();
+        const int CONSTRAINT_PROXIES_SIZE = m_constraint_proxies.size();
 
         /// Decision variables
         for (auto i = 0; i < VARIABLE_PROXIES_SIZE; i++) {
@@ -2564,16 +2561,16 @@ class Model {
         /**
          * Set up the variables.
          */
-        int number_of_variables = a_MPS.variable_names.size();
+        const int NUMBER_OF_VARIABLES = a_MPS.variable_names.size();
 
-        for (auto i = 0; i < number_of_variables; i++) {
-            auto &name     = a_MPS.variable_names[i];
-            auto &variable = a_MPS.variables.at(name);
+        for (auto i = 0; i < NUMBER_OF_VARIABLES; i++) {
+            const auto &NAME     = a_MPS.variable_names[i];
+            const auto &VARIABLE = a_MPS.variables.at(NAME);
 
-            if (variable.sense == mps::MPSVariableSense::Continuous) {
+            if (VARIABLE.sense == mps::MPSVariableSense::Continuous) {
                 if (a_ACCEPT_CONTINUOUS) {
                     utility::print_warning(
-                        "The continuous variable " + name +
+                        "The continuous variable " + NAME +
                             " will be regarded as an integer variable.",
                         true);
                 } else {
@@ -2583,38 +2580,38 @@ class Model {
                 }
             }
 
-            variable_proxy(i).set_bound(variable.integer_lower_bound,
-                                        variable.integer_upper_bound);
+            variable_proxy(i).set_bound(VARIABLE.integer_lower_bound,
+                                        VARIABLE.integer_upper_bound);
 
-            if (variable.is_fixed) {
-                variable_proxy(i).fix_by(variable.integer_fixed_value);
+            if (VARIABLE.is_fixed) {
+                variable_proxy(i).fix_by(VARIABLE.integer_fixed_value);
             }
 
-            variable_proxy(i).set_name(name);
-            variable_ptrs[name] = &variable_proxy(i);
+            variable_proxy(i).set_name(NAME);
+            variable_ptrs[NAME] = &variable_proxy(i);
         }
 
         /**
          * Set up the constraints.
          */
-        int              number_of_constraints = a_MPS.constraint_names.size();
-        std::vector<int> offsets(number_of_constraints);
+        const int        NUMBER_OF_CONSTRAINTS = a_MPS.constraint_names.size();
+        std::vector<int> offsets(NUMBER_OF_CONSTRAINTS);
 
         auto &constraint_proxy =
-            this->create_constraints("constraints", number_of_constraints);
+            this->create_constraints("constraints", NUMBER_OF_CONSTRAINTS);
 
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static)
 #endif
-        for (auto i = 0; i < number_of_constraints; i++) {
-            auto &name       = a_MPS.constraint_names[i];
-            auto &constraint = a_MPS.constraints.at(name);
-            auto  expression =
+        for (auto i = 0; i < NUMBER_OF_CONSTRAINTS; i++) {
+            const auto &NAME       = a_MPS.constraint_names[i];
+            const auto &CONSTRAINT = a_MPS.constraints.at(NAME);
+            auto        expression =
                 model_component::Expression<T_Variable,
                                             T_Expression>::create_instance();
 
             Sensitivities expression_sensitivities;
-            for (const auto &sensitivity : constraint.sensitivities) {
+            for (const auto &sensitivity : CONSTRAINT.sensitivities) {
                 std::string  variable_name = sensitivity.first;
                 T_Expression coefficient =
                     static_cast<T_Expression>(sensitivity.second);
@@ -2623,23 +2620,23 @@ class Model {
             }
             expression.set_sensitivities(expression_sensitivities);
 
-            switch (constraint.sense) {
+            switch (CONSTRAINT.sense) {
                 case mps::MPSConstraintSense::Less: {
-                    constraint_proxy(i) = (expression <= constraint.rhs);
+                    constraint_proxy(i) = (expression <= CONSTRAINT.rhs);
                     break;
                 }
 
                 case mps::MPSConstraintSense::Equal: {
-                    constraint_proxy(i) = (expression == constraint.rhs);
+                    constraint_proxy(i) = (expression == CONSTRAINT.rhs);
                     break;
                 }
 
                 case mps::MPSConstraintSense::Greater: {
-                    constraint_proxy(i) = (expression >= constraint.rhs);
+                    constraint_proxy(i) = (expression >= CONSTRAINT.rhs);
                     break;
                 }
             }
-            constraint_proxy(i).set_name(name);
+            constraint_proxy(i).set_name(NAME);
         }
 
         /**
@@ -2650,10 +2647,10 @@ class Model {
                                         T_Expression>::create_instance();
         Sensitivities objective_sensitivities;
         for (const auto &sensitivity : a_MPS.objective.sensitivities) {
-            std::string  variable_name = sensitivity.first;
-            T_Expression coefficient =
+            const std::string  VARIABLE_NAME = sensitivity.first;
+            const T_Expression COEFFICIENT =
                 static_cast<T_Expression>(sensitivity.second);
-            objective_sensitivities[variable_ptrs[variable_name]] = coefficient;
+            objective_sensitivities[variable_ptrs[VARIABLE_NAME]] = COEFFICIENT;
         }
         objective.set_sensitivities(objective_sensitivities);
         this->minimize(objective);

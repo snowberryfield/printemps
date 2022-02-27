@@ -285,26 +285,6 @@ class Memory {
     }
 
     /*************************************************************************/
-    inline constexpr const std::vector<multi_array::ValueProxy<double>>
-    violation_count_rates(void) const {
-        auto violation_count_rates =
-            m_model_ptr->generate_constraint_parameter_proxies(0.0);
-        double min = HUGE_VALF;
-        for (auto &&proxy : violation_count_rates) {
-            const auto &COUNT_VALUES =
-                m_violation_counts[proxy.index()].flat_indexed_values();
-            auto &    count_rates = proxy.flat_indexed_values();
-            const int SIZE        = COUNT_VALUES.size();
-            for (auto i = 0; i < SIZE; i++) {
-                count_rates[i] =
-                    COUNT_VALUES[i] * m_total_violation_count_reciprocal * SIZE;
-                min = std::min(min, count_rates[i]);
-            }
-        }
-        return violation_count_rates;
-    }
-
-    /*************************************************************************/
     inline constexpr long total_violation_count(void) const {
         return m_total_violation_count;
     }

@@ -240,8 +240,8 @@ TabuSearchResult solve(
                         accept_feasibility_improvable = false;
                     } else {
                         model_ptr->reset_variable_feasibility_improvabilities();
-                        model_ptr
-                            ->update_variable_feasibility_improvabilities();
+                        model_ptr->update_variable_feasibility_improvabilities(
+                            model_ptr->violative_constraint_ptrs());
 
                         accept_all                    = false;
                         accept_objective_improvable   = true;
