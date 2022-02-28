@@ -7,7 +7,7 @@
 #define PRINTEMPS_SOLVER_LAGRANGE_DUAL_CONTROLLER_LAGRANGE_DUAL_CONTROLLER_H__
 
 #include "../../abstract_controller.h"
-#include "../core/lagrange_dual.h"
+#include "../core/lagrange_dual_core.h"
 #include "lagrange_dual_controller_result.h"
 
 namespace printemps {

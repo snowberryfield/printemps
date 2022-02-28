@@ -3,8 +3,8 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_SOLVER_TABU_SEARCH_CORE_TABU_SEARCH_MOVE_EVALUATOR_H__
-#define PRINTEMPS_SOLVER_TABU_SEARCH_CORE_TABU_SEARCH_MOVE_EVALUATOR_H__
+#ifndef PRINTEMPS_SOLVER_TABU_SEARCH_CORE_TABU_SEARCH_CORE_MOVE_EVALUATOR_H__
+#define PRINTEMPS_SOLVER_TABU_SEARCH_CORE_TABU_SEARCH_CORE_MOVE_EVALUATOR_H__
 
 namespace printemps {
 namespace solver {
@@ -12,7 +12,7 @@ namespace tabu_search {
 namespace core {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-class TabuSearchMoveEvaluator {
+class TabuSearchCoreMoveEvaluator {
    private:
     model::Model<T_Variable, T_Expression> *m_model_ptr;
     Memory<T_Variable, T_Expression> *      m_memory_ptr;
@@ -20,14 +20,15 @@ class TabuSearchMoveEvaluator {
 
    public:
     /*************************************************************************/
-    TabuSearchMoveEvaluator(void) {
+    TabuSearchCoreMoveEvaluator(void) {
         this->initialize();
     }
 
     /*************************************************************************/
-    TabuSearchMoveEvaluator(model::Model<T_Variable, T_Expression> *a_model_ptr,
-                            Memory<T_Variable, T_Expression> *a_memory_ptr,
-                            const option::Option &            a_option) {
+    TabuSearchCoreMoveEvaluator(
+        model::Model<T_Variable, T_Expression> *a_model_ptr,
+        Memory<T_Variable, T_Expression> *      a_memory_ptr,
+        const option::Option &                  a_option) {
         this->setup(a_model_ptr, a_memory_ptr, a_option);
     }
 
@@ -129,7 +130,7 @@ class TabuSearchMoveEvaluator {
 
     /*****************************************************************************/
     inline constexpr void evaluate(
-        TabuSearchMoveScore *                               a_score_ptr,  //
+        TabuSearchCoreMoveScore *                           a_score_ptr,  //
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE,       //
         const int                                           a_ITERATION,  //
         const int a_TABU_TENURE) const noexcept {

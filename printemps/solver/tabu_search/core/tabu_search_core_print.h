@@ -3,13 +3,16 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_SOLVER_LAGRANGE_DUAL_CORE_LAGRANGE_DUAL_PRINT_H__
-#define PRINTEMPS_SOLVER_LAGRANGE_DUAL_CORE_LAGRANGE_DUAL_PRINT_H__
+#ifndef PRINTEMPS_SOLVER_TABU_SEARCH_CORE_TABU_SEARCH_CORE_PRINT_H__
+#define PRINTEMPS_SOLVER_TABU_SEARCH_CORE_TABU_SEARCH_CORE_PRINT_H__
 
 namespace printemps {
 namespace solver {
-namespace lagrange_dual {
+namespace tabu_search {
 namespace core {
+/*****************************************************************************/
+struct TabuSearchCoreMoveScore;
+
 /*****************************************************************************/
 inline void print_table_header(const bool a_IS_ENABLED_PRINT) {
     if (!a_IS_ENABLED_PRINT) {
@@ -17,19 +20,19 @@ inline void print_table_header(const bool a_IS_ENABLED_PRINT) {
     }
 
     utility::print(
-        "---------+------------+-----------+----------------------+-----------"
+        "---------+------------------------+----------------------+-----------"
         "-----------",
         true);
     utility::print(
-        "Iteration| Lagrangian | Step Size |   Current Solution   |"
+        "Iteration| Number of Neighborhoods|   Current Solution   |"
         "  Incumbent Solution ",
         true);
     utility::print(
-        "         |            |           |   Aug.Obj.(Penalty)  | "
+        "         |  All Feas. Perm. Impr. |   Aug.Obj.(Penalty)  | "
         "  Aug.Obj.  Feas.Obj ",
         true);
     utility::print(
-        "---------+------------+-----------+----------------------+-----------"
+        "---------+------------------------+----------------------+-----------"
         "-----------",
         true);
 }
@@ -37,8 +40,7 @@ inline void print_table_header(const bool a_IS_ENABLED_PRINT) {
 template <class T_Variable, class T_Expression>
 inline void print_table_initial(
     const model::Model<T_Variable, T_Expression> *a_MODEL_PTR,
-    const double a_LAGRANGIAN, const double a_STEP_SIZE,
-    const solution::SolutionScore &a_CURRENT_SOLUTION_SCORE,
+    const solution::SolutionScore &               a_CURRENT_SOLUTION_SCORE,
     const solution::IncumbentHolder<T_Variable, T_Expression>
         *      a_INCUMBENT_HOLDER_PTR,
     const bool a_IS_ENABLED_PRINT) {
@@ -46,9 +48,8 @@ inline void print_table_initial(
         return;
     }
 
-    std::printf(  //
-        " INITIAL |  %9.2e | %9.2e | %9.2e(%9.2e) | %9.2e  %9.2e\n",
-        a_LAGRANGIAN * a_MODEL_PTR->sign(), a_STEP_SIZE,
+    std::printf(
+        " INITIAL |    -     -     -     - | %9.2e(%9.2e) | %9.2e  %9.2e\n",
         a_CURRENT_SOLUTION_SCORE.local_augmented_objective *
             a_MODEL_PTR->sign(),
         a_CURRENT_SOLUTION_SCORE.is_feasible
@@ -63,22 +64,31 @@ inline void print_table_initial(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 inline void print_table_body(
-    const model::Model<T_Variable, T_Expression> *a_MODEL_PTR,               //
-    const int                                     a_ITERATION,               //
-    const double                                  a_LAGRANGIAN,              //
-    const double                                  a_STEP_SIZE,               //
-    const solution::SolutionScore &               a_CURRENT_SOLUTION_SCORE,  //
-    const int                                     a_STATUS,                  //
+    const model::Model<T_Variable, T_Expression> *a_MODEL_PTR,            //
+    const int                                     a_ITERATION,            //
+    const bool                     a_IS_SPECIAL_NEIGHBORHOOD_MOVE,        //
+    const int                      a_NUMBER_OF_ALL_NEIGHBORHOODS,         //
+    const int                      a_NUMBER_OF_FEASIBLE_NEIGHBORHOODS,    //
+    const int                      a_NUMBER_OF_PERMISSIBLE_NEIGHBORHOOD,  //
+    const int                      a_NUMBER_OF_IMPROVABLE_NEIGHBORHOOD,   //
+    const solution::SolutionScore &a_CURRENT_SOLUTION_SCORE,              //
+    const int                      a_STATUS,                              //
     const solution::IncumbentHolder<T_Variable, T_Expression>
         *      a_INCUMBENT_HOLDER_PTR,
+    const bool a_IS_ASPIRATED,  //
     const bool a_IS_ENABLED_PRINT) {
     if (!a_IS_ENABLED_PRINT) {
         return;
     }
 
+    char mark_special_neighborhood_move  = ' ';
     char mark_current                    = ' ';
     char mark_global_augmented_incumbent = ' ';
     char mark_feasible_incumbent         = ' ';
+
+    if (a_IS_SPECIAL_NEIGHBORHOOD_MOVE) {
+        mark_special_neighborhood_move = 's';
+    }
 
     if (a_STATUS & solution::IncumbentHolderConstant::
                        STATUS_LOCAL_AUGMENTED_INCUMBENT_UPDATE) {
@@ -89,6 +99,10 @@ inline void print_table_body(
                        STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
         mark_current                    = '#';
         mark_global_augmented_incumbent = '#';
+        if (a_IS_ASPIRATED) {
+            mark_current                    = '@';
+            mark_global_augmented_incumbent = '@';
+        }
     }
 
     if (a_STATUS &
@@ -96,14 +110,30 @@ inline void print_table_body(
         mark_current                    = '*';
         mark_global_augmented_incumbent = '*';
         mark_feasible_incumbent         = '*';
+        if (a_IS_ASPIRATED) {
+            mark_current                    = '@';
+            mark_global_augmented_incumbent = '@';
+            mark_feasible_incumbent         = '@';
+        }
     }
 
+    auto int_format = [](const int a_VALUE) {
+        if (a_VALUE >= 100000) {
+            return utility::to_string(a_VALUE / 1000, "%4dk");
+        } else {
+            return utility::to_string(a_VALUE, "%5d");
+        }
+    };
+
     std::printf(  //
-        "%8d |  %9.2e | %9.2e |%c%9.2e(%9.2e) |%c%9.2e %c%9.2e\n",
-        a_ITERATION,                         //
-        a_LAGRANGIAN * a_MODEL_PTR->sign(),  //
-        a_STEP_SIZE,                         //
-        mark_current,                        //
+        "%8d%c|%s %s %s %s |%c%9.2e(%9.2e) |%c%9.2e %c%9.2e\n",
+        a_ITERATION,                                               //
+        mark_special_neighborhood_move,                            //
+        int_format(a_NUMBER_OF_ALL_NEIGHBORHOODS).c_str(),         //
+        int_format(a_NUMBER_OF_FEASIBLE_NEIGHBORHOODS).c_str(),    //
+        int_format(a_NUMBER_OF_PERMISSIBLE_NEIGHBORHOOD).c_str(),  //
+        int_format(a_NUMBER_OF_IMPROVABLE_NEIGHBORHOOD).c_str(),   //
+        mark_current,                                              //
         a_CURRENT_SOLUTION_SCORE.local_augmented_objective *
             a_MODEL_PTR->sign(),  //
         a_CURRENT_SOLUTION_SCORE.is_feasible
@@ -121,13 +151,13 @@ inline void print_table_footer(const bool a_IS_ENABLED_PRINT) {
     if (!a_IS_ENABLED_PRINT) {
         return;
     }
+
     utility::print(
-        "---------+------------+-----------+----------------------+-----------"
-        "-----------",
-        true);
+        "---------+------------------------+----------------------+------------"
+        "----------");
 }
 }  // namespace core
-}  // namespace lagrange_dual
+}  // namespace tabu_search
 }  // namespace solver
 }  // namespace printemps
 

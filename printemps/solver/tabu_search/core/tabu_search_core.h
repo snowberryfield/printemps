@@ -3,15 +3,15 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_SOLVER_TABU_SEARCH_CORE_TABU_SEARCH_H__
-#define PRINTEMPS_SOLVER_TABU_SEARCH_CORE_TABU_SEARCH_H__
+#ifndef PRINTEMPS_SOLVER_TABU_SEARCH_CORE_TABU_SEARCH_CORE_H__
+#define PRINTEMPS_SOLVER_TABU_SEARCH_CORE_TABU_SEARCH_CORE_H__
 
 #include "../../memory.h"
-#include "tabu_search_move_score.h"
-#include "tabu_search_move_evaluator.h"
-#include "tabu_search_print.h"
-#include "tabu_search_termination_status.h"
-#include "tabu_search_result.h"
+#include "tabu_search_core_move_score.h"
+#include "tabu_search_core_move_evaluator.h"
+#include "tabu_search_core_print.h"
+#include "tabu_search_core_termination_status.h"
+#include "tabu_search_core_result.h"
 
 namespace printemps {
 namespace solver {
@@ -19,7 +19,7 @@ namespace tabu_search {
 namespace core {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-TabuSearchResult solve(
+TabuSearchCoreResult solve(
     model::Model<T_Variable, T_Expression>*              a_model_ptr,         //
     solution::IncumbentHolder<T_Variable, T_Expression>* a_incumbent_holder,  //
     Memory<T_Variable, T_Expression>*                    a_memory_ptr,        //
@@ -35,7 +35,7 @@ TabuSearchResult solve(
     using IncumbentHolder_T =
         solution::IncumbentHolder<T_Variable, T_Expression>;
     using Move_T    = neighborhood::Move<T_Variable, T_Expression>;
-    using MoveScore = TabuSearchMoveScore;
+    using MoveScore = TabuSearchCoreMoveScore;
 
     /**
      * Start to measure computational time.
@@ -109,7 +109,7 @@ TabuSearchResult solve(
     /**
      * Prepare the move evaluator.
      */
-    TabuSearchMoveEvaluator<T_Variable, T_Expression> move_evaluator(
+    TabuSearchCoreMoveEvaluator<T_Variable, T_Expression> move_evaluator(
         model_ptr, memory_ptr, option);
 
     /**
@@ -131,7 +131,7 @@ TabuSearchResult solve(
 
     int local_augmented_incumbent_update_count = 0;
 
-    auto termination_status = TabuSearchTerminationStatus::ITERATION_OVER;
+    auto termination_status = TabuSearchCoreTerminationStatus::ITERATION_OVER;
 
     neighborhood::Move<T_Variable, T_Expression> previous_move;
     neighborhood::Move<T_Variable, T_Expression> current_move;
@@ -180,30 +180,31 @@ TabuSearchResult solve(
          */
         double elapsed_time = time_keeper.clock();
         if (elapsed_time > option.tabu_search.time_max) {
-            termination_status = TabuSearchTerminationStatus::TIME_OVER;
+            termination_status = TabuSearchCoreTerminationStatus::TIME_OVER;
             break;
         }
 
         if (elapsed_time + option.tabu_search.time_offset > option.time_max) {
-            termination_status = TabuSearchTerminationStatus::TIME_OVER;
+            termination_status = TabuSearchCoreTerminationStatus::TIME_OVER;
             break;
         }
 
         if (iteration >= option.tabu_search.iteration_max) {
-            termination_status = TabuSearchTerminationStatus::ITERATION_OVER;
+            termination_status =
+                TabuSearchCoreTerminationStatus::ITERATION_OVER;
             break;
         }
 
         if (incumbent_holder_ptr->feasible_incumbent_objective() <=
             option.target_objective_value) {
-            termination_status = TabuSearchTerminationStatus::REACH_TARGET;
+            termination_status = TabuSearchCoreTerminationStatus::REACH_TARGET;
             break;
         }
 
         if (local_augmented_incumbent_update_count >
             option.tabu_search.pruning_rate_threshold *
                 option.tabu_search.iteration_max) {
-            termination_status = TabuSearchTerminationStatus::EARLY_STOP;
+            termination_status = TabuSearchCoreTerminationStatus::EARLY_STOP;
             break;
         }
 
@@ -334,18 +335,18 @@ TabuSearchResult solve(
                  * improvable solution, the solution should be an optimum.
                  * It can happen for decomp2 instance in MIPLIB 2017.
                  */
-                termination_status = TabuSearchTerminationStatus::OPTIMAL;
+                termination_status = TabuSearchCoreTerminationStatus::OPTIMAL;
                 for (const auto& variable_ptr :
                      model_ptr->variable_reference().variable_ptrs) {
                     if (variable_ptr->is_objective_improvable()) {
                         termination_status =
-                            TabuSearchTerminationStatus::NO_MOVE;
+                            TabuSearchCoreTerminationStatus::NO_MOVE;
                         break;
                     }
                 }
                 break;
             } else {
-                termination_status = TabuSearchTerminationStatus::NO_MOVE;
+                termination_status = TabuSearchCoreTerminationStatus::NO_MOVE;
                 break;
             }
         }
@@ -767,7 +768,7 @@ TabuSearchResult solve(
                     if (max_objective_sensitivity * MARGIN <
                         utility::min(infeasible_local_penalties)) {
                         termination_status =
-                            TabuSearchTerminationStatus::EARLY_STOP;
+                            TabuSearchCoreTerminationStatus::EARLY_STOP;
                         break;
                     }
                 }
@@ -802,7 +803,7 @@ TabuSearchResult solve(
 
     auto performance = mean - sqrt(variance);
 
-    TabuSearchResult result(
+    TabuSearchCoreResult result(
         total_update_status,                               //
         iteration,                                         //
         termination_status,                                //
