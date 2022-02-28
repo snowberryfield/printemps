@@ -457,9 +457,9 @@ class TabuSearchControllerParameterManager {
             m_parameter.penalty_coefficient_relaxing_rate = std::max(
                 TabuSearchControllerParameterManagerConstant::
                     PENALTY_COEFFICIENT_RELAXING_RATE_MIN,
-                m_parameter
-                    .penalty_coefficient_relaxing_rate* TabuSearchControllerParameterManagerConstant::
-                        PENALTY_COEFFICIENT_RELAXING_RATE_DECREASE_RATE =);
+                m_parameter.penalty_coefficient_relaxing_rate *
+                    TabuSearchControllerParameterManagerConstant::
+                        PENALTY_COEFFICIENT_RELAXING_RATE_DECREASE_RATE);
             return;
         }
 

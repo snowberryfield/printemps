@@ -148,8 +148,9 @@ TabuSearchResult solve(
         current_solution_score.global_augmented_objective;
     double min_local_penalty = HUGE_VALF;
 
-    double performance_numerator   = 0.0;
-    double performance_denominator = 0.0;
+    double performance_1 = current_solution_score.global_augmented_objective;
+    double performance_2 = current_solution_score.global_augmented_objective *
+                           current_solution_score.global_augmented_objective;
 
     if (!current_solution_score.is_feasible) {
         min_local_penalty = current_solution_score.local_penalty;
@@ -491,11 +492,9 @@ TabuSearchResult solve(
             std::max(max_global_augmented_objective,
                      current_solution_score.global_augmented_objective);
 
-        performance_numerator +=
-            fabs(current_solution_score.global_augmented_objective -
-                 previous_solution_score.global_augmented_objective);
-        performance_denominator +=
-            current_solution_score.global_augmented_objective;
+        performance_1 = current_solution_score.global_augmented_objective;
+        performance_2 = current_solution_score.global_augmented_objective *
+                        current_solution_score.global_augmented_objective;
 
         if (!current_solution_score.is_feasible) {
             min_local_penalty = std::min(min_local_penalty,
@@ -794,11 +793,14 @@ TabuSearchResult solve(
     auto global_augmented_objective_range = std::max(
         0.0, max_global_augmented_objective - min_global_augmented_objective);
 
-    performance_denominator -=
-        iteration *
-        incumbent_holder_ptr->global_augmented_incumbent_objective();
-    auto performance =
-        performance_numerator / std::max(1.0, performance_denominator);
+    performance_1 /= (iteration + 1);
+    performance_2 /= (iteration + 1);
+
+    auto mean     = performance_1;
+    auto variance = std::max(performance_2 - performance_1 * performance_1,
+                             constant::EPSILON);
+
+    auto performance = mean - sqrt(variance);
 
     TabuSearchResult result(
         total_update_status,                               //
