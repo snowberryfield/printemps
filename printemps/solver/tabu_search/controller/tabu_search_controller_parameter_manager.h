@@ -252,7 +252,7 @@ class TabuSearchControllerParameterManager {
     inline constexpr void update_improvability_screening_mode(
         const TabuSearchControllerState<T_Variable, T_Expression>& a_STATE) {
         if (a_STATE.tabu_search_result.termination_status ==
-            tabu_search::core::TabuSearchTerminationStatus::NO_MOVE) {
+            tabu_search::core::TabuSearchCoreTerminationStatus::NO_MOVE) {
             m_parameter.improvability_screening_mode =
                 option::improvability_screening_mode::Soft;
             return;

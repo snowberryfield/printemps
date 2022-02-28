@@ -79,7 +79,7 @@ class TabuSearchControllerStateManager {
 
     /*************************************************************************/
     inline constexpr void update(
-        const tabu_search::core::TabuSearchResult& a_RESULT) {
+        const tabu_search::core::TabuSearchCoreResult& a_RESULT) {
         /**
          * Update the last tabu search update status.
          */
@@ -123,7 +123,7 @@ class TabuSearchControllerStateManager {
 
     /*************************************************************************/
     inline constexpr void update_last_tabu_search_result(
-        const tabu_search::core::TabuSearchResult& a_RESULT) {
+        const tabu_search::core::TabuSearchCoreResult& a_RESULT) {
         /**
          * Update the incumbent update flags.
          */

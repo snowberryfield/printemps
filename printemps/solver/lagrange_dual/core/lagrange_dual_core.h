@@ -3,12 +3,12 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_SOLVER_LAGRANGE_DUAL_CORE_LAGRANGE_DUAL_H__
-#define PRINTEMPS_SOLVER_LAGRANGE_DUAL_CORE_LAGRANGE_DUAL_H__
+#ifndef PRINTEMPS_SOLVER_LAGRANGE_DUAL_CORE_LAGRANGE_DUAL_CORE_H__
+#define PRINTEMPS_SOLVER_LAGRANGE_DUAL_CORE_LAGRANGE_DUAL_CORE_H__
 
-#include "lagrange_dual_print.h"
-#include "lagrange_dual_termination_status.h"
-#include "lagrange_dual_result.h"
+#include "lagrange_dual_core_print.h"
+#include "lagrange_dual_core_termination_status.h"
+#include "lagrange_dual_core_result.h"
 
 namespace printemps {
 namespace solver {
@@ -51,7 +51,7 @@ void bound_dual(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-LagrangeDualResult<T_Variable, T_Expression> solve(
+LagrangeDualCoreResult<T_Variable, T_Expression> solve(
     model::Model<T_Variable, T_Expression>* a_model_ptr,  //
     solution::IncumbentHolder<T_Variable, T_Expression>*
         a_incumbent_holder_ptr,  //
@@ -131,7 +131,7 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
     /**
      * Prepare other local variables.
      */
-    auto termination_status = LagrangeDualTerminationStatus::ITERATION_OVER;
+    auto termination_status = LagrangeDualCoreTerminationStatus::ITERATION_OVER;
 
     /**
      * Print the header of optimization progress table and print the
@@ -162,23 +162,25 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
          */
         double elapsed_time = time_keeper.clock();
         if (elapsed_time > option.lagrange_dual.time_max) {
-            termination_status = LagrangeDualTerminationStatus::TIME_OVER;
+            termination_status = LagrangeDualCoreTerminationStatus::TIME_OVER;
             break;
         }
 
         if (elapsed_time + option.lagrange_dual.time_offset > option.time_max) {
-            termination_status = LagrangeDualTerminationStatus::TIME_OVER;
+            termination_status = LagrangeDualCoreTerminationStatus::TIME_OVER;
             break;
         }
 
         if (iteration >= option.lagrange_dual.iteration_max) {
-            termination_status = LagrangeDualTerminationStatus::ITERATION_OVER;
+            termination_status =
+                LagrangeDualCoreTerminationStatus::ITERATION_OVER;
             break;
         }
 
         if (incumbent_holder_ptr->feasible_incumbent_objective() <=
             option.target_objective_value) {
-            termination_status = LagrangeDualTerminationStatus::REACH_TARGET;
+            termination_status =
+                LagrangeDualCoreTerminationStatus::REACH_TARGET;
             break;
         }
 
@@ -329,7 +331,7 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
             fabs(LAGRANGIAN - QUEUE_AVERAGE) <
                 std::max(1.0, fabs(QUEUE_AVERAGE)) *
                     option.lagrange_dual.tolerance) {
-            termination_status = LagrangeDualTerminationStatus::CONVERGE;
+            termination_status = LagrangeDualCoreTerminationStatus::CONVERGE;
             break;
         }
 
@@ -344,7 +346,7 @@ LagrangeDualResult<T_Variable, T_Expression> solve(
     /**
      * Prepare the result.
      */
-    LagrangeDualResult<T_Variable, T_Expression> result(
+    LagrangeDualCoreResult<T_Variable, T_Expression> result(
         total_update_status,   //
         iteration,             //
         termination_status,    //

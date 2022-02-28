@@ -3,12 +3,12 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_SOLVER_LOCAL_SEARCH_CORE_LOCAL_SEARCH_H__
-#define PRINTEMPS_SOLVER_LOCAL_SEARCH_CORE_LOCAL_SEARCH_H__
+#ifndef PRINTEMPS_SOLVER_LOCAL_SEARCH_CORE_LOCAL_SEARCH_CORE_H__
+#define PRINTEMPS_SOLVER_LOCAL_SEARCH_CORE_LOCAL_SEARCH_CORE_H__
 
-#include "local_search_print.h"
-#include "local_search_termination_status.h"
-#include "local_search_result.h"
+#include "local_search_core_print.h"
+#include "local_search_core_termination_status.h"
+#include "local_search_core_result.h"
 
 namespace printemps {
 namespace solver {
@@ -16,7 +16,7 @@ namespace local_search {
 namespace core {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-LocalSearchResult solve(
+LocalSearchCoreResult solve(
     model::Model<T_Variable, T_Expression>*              a_model_ptr,         //
     solution::IncumbentHolder<T_Variable, T_Expression>* a_incumbent_holder,  //
     Memory<T_Variable, T_Expression>*                    a_memory_ptr,        //
@@ -89,8 +89,9 @@ LocalSearchResult solve(
     /**
      * Prepare other local variables.
      */
+    solution::SolutionScore trial_solution_score;
 
-    auto termination_status = LocalSearchTerminationStatus::ITERATION_OVER;
+    auto termination_status = LocalSearchCoreTerminationStatus::ITERATION_OVER;
 
     neighborhood::Move<T_Variable, T_Expression> previous_move;
     neighborhood::Move<T_Variable, T_Expression> current_move;
@@ -119,23 +120,24 @@ LocalSearchResult solve(
          */
         double elapsed_time = time_keeper.clock();
         if (elapsed_time > option.local_search.time_max) {
-            termination_status = LocalSearchTerminationStatus::TIME_OVER;
+            termination_status = LocalSearchCoreTerminationStatus::TIME_OVER;
             break;
         }
 
         if (elapsed_time + option.local_search.time_offset > option.time_max) {
-            termination_status = LocalSearchTerminationStatus::TIME_OVER;
+            termination_status = LocalSearchCoreTerminationStatus::TIME_OVER;
             break;
         }
 
         if (iteration >= option.local_search.iteration_max) {
-            termination_status = LocalSearchTerminationStatus::ITERATION_OVER;
+            termination_status =
+                LocalSearchCoreTerminationStatus::ITERATION_OVER;
             break;
         }
 
         if (incumbent_holder_ptr->feasible_incumbent_objective() <=
             option.target_objective_value) {
-            termination_status = LocalSearchTerminationStatus::REACH_TARGET;
+            termination_status = LocalSearchCoreTerminationStatus::REACH_TARGET;
             break;
         }
 
@@ -190,12 +192,11 @@ LocalSearchResult solve(
          * be terminated.
          */
         if (number_of_moves == 0) {
-            termination_status = LocalSearchTerminationStatus::NO_MOVE;
+            termination_status = LocalSearchCoreTerminationStatus::NO_MOVE;
             break;
         }
 
         for (const auto& move_ptr : MOVE_PTRS) {
-            solution::SolutionScore trial_solution_score;
             /**
              * The neighborhood solutions are evaluated in sequential by fast or
              * ordinary(slow) evaluation methods.
@@ -239,7 +240,8 @@ LocalSearchResult solve(
          * in the checked neighborhood.
          */
         if (!is_found_improving_solution) {
-            termination_status = LocalSearchTerminationStatus::LOCAL_OPTIMAL;
+            termination_status =
+                LocalSearchCoreTerminationStatus::LOCAL_OPTIMAL;
             break;
         }
 
@@ -291,9 +293,9 @@ LocalSearchResult solve(
     /**
      * Prepare the result.
      */
-    LocalSearchResult result(total_update_status,  //
-                             iteration,            //
-                             termination_status);
+    LocalSearchCoreResult result(total_update_status,  //
+                                 iteration,            //
+                                 termination_status);
 
     return result;
 }

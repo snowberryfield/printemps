@@ -11,10 +11,10 @@ namespace solver {
 namespace tabu_search {
 namespace core {
 /*****************************************************************************/
-struct TabuSearchResult {
-    int                         total_update_status;
-    int                         number_of_iterations;
-    TabuSearchTerminationStatus termination_status;
+struct TabuSearchCoreResult {
+    int                             total_update_status;
+    int                             number_of_iterations;
+    TabuSearchCoreTerminationStatus termination_status;
 
     int tabu_tenure;
     int last_local_augmented_incumbent_update_iteration;
@@ -29,16 +29,16 @@ struct TabuSearchResult {
     double performance;
 
     /*************************************************************************/
-    TabuSearchResult(void) {
+    TabuSearchCoreResult(void) {
         this->initialize();
     }
 
     /*************************************************************************/
-    TabuSearchResult(
-        const int                         a_TOTAL_UPDATE_STATUS,          //
-        const int                         a_NUMBER_OF_ITERATIONS,         //
-        const TabuSearchTerminationStatus a_TERMINATION_STATUS,           //
-        const int                         a_TABU_TENURE,                  //
+    TabuSearchCoreResult(
+        const int                             a_TOTAL_UPDATE_STATUS,      //
+        const int                             a_NUMBER_OF_ITERATIONS,     //
+        const TabuSearchCoreTerminationStatus a_TERMINATION_STATUS,       //
+        const int                             a_TABU_TENURE,              //
         const int    a_LAST_LOCAL_AUGMENTED_INCUMBENT_UPDATE_ITERATION,   //
         const int    a_LAST_GLOBAL_AUGMENTED_INCUMBENT_UPDATE_ITERATION,  //
         const int    a_LAST_FEASIBLE_INCUMBENT_UPDATE_ITERATION,          //
@@ -69,7 +69,8 @@ struct TabuSearchResult {
     void initialize(void) {
         this->total_update_status  = 0;
         this->number_of_iterations = 0;
-        this->termination_status = TabuSearchTerminationStatus::ITERATION_OVER;
+        this->termination_status =
+            TabuSearchCoreTerminationStatus::ITERATION_OVER;
 
         this->tabu_tenure                                      = 0;
         this->last_local_augmented_incumbent_update_iteration  = -1;

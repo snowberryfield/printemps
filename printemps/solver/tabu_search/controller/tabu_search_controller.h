@@ -7,7 +7,7 @@
 #define PRINTEMPS_SOLVER_TABU_SEARCH_CONTROLLER_TABU_SEARCH_CONTROLLER_H__
 
 #include "../../abstract_controller.h"
-#include "../core/tabu_search.h"
+#include "../core/tabu_search_core.h"
 
 #include "tabu_search_controller_result.h"
 #include "tabu_search_controller_state.h"
@@ -544,7 +544,7 @@ class TabuSearchController
 
         if (a_STATE.iteration > 0 &&
             a_STATE.tabu_search_result.termination_status ==
-                tabu_search::core::TabuSearchTerminationStatus::OPTIMAL) {
+                tabu_search::core::TabuSearchCoreTerminationStatus::OPTIMAL) {
             utility::print_message(
                 "Outer loop was terminated because an optimal solution was "
                 "found.",

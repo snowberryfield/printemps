@@ -3,21 +3,22 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_SOLVER_TABU_SEARCH_CORE_TABU_SEARCH_MOVE_SCORE_H__
-#define PRINTEMPS_SOLVER_TABU_SEARCH_CORE_TABU_SEARCH_MOVE_SCORE_H__
+#ifndef PRINTEMPS_SOLVER_LAGRANGE_DUAL_CORE_LAGRANGE_DUAL_CORE_TERMINATION_STATUS_H__
+#define PRINTEMPS_SOLVER_LAGRANGE_DUAL_CORE_LAGRANGE_DUAL_CORE_TERMINATION_STATUS_H__
 
 namespace printemps {
 namespace solver {
-namespace tabu_search {
+namespace lagrange_dual {
 namespace core {
 /*****************************************************************************/
-struct TabuSearchMoveScore {
-    bool   is_permissible;
-    double frequency_penalty;
-    double lagrangian_penalty;
+enum class LagrangeDualCoreTerminationStatus {
+    TIME_OVER,
+    ITERATION_OVER,
+    CONVERGE,
+    REACH_TARGET
 };
 }  // namespace core
-}  // namespace tabu_search
+}  // namespace lagrange_dual
 }  // namespace solver
 }  // namespace printemps
 
