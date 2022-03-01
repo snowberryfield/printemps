@@ -51,7 +51,8 @@ class Learner {
     /*************************************************************************/
     void initialize(void) {
         m_states.clear();
-        m_current_state_ptr = nullptr;
+        m_current_state_ptr  = nullptr;
+        m_current_action_ptr = nullptr;
         m_get_rand_mt.seed(0);
     }
 
@@ -61,6 +62,15 @@ class Learner {
         m_states.emplace_back(a_STATE_BODY);
         m_states.back().learner_ptr = this;
         return m_states.back();
+    }
+
+    /*************************************************************************/
+    inline void add_states(
+        const std::vector<State<T_StateBody, T_ActionBody>> &a_STATES) {
+        for (const auto &state : a_STATES) {
+            m_states.push_back(state);
+            m_states.back().learner_ptr = this;
+        }
     }
 
     /*************************************************************************/
@@ -89,7 +99,8 @@ class Learner {
 
     /**************************************************************************/
     inline constexpr void setup(void) {
-        m_current_state_ptr = &(m_states.front());
+        m_current_state_ptr  = &(m_states.front());
+        m_current_action_ptr = &(m_current_state_ptr->actions.front());
         for (auto &&state : m_states) {
             state.update_best_action();
         }
