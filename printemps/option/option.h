@@ -38,7 +38,7 @@ struct OptionConstant {
     static constexpr bool DEFAULT_IS_ENABLED_PRECEDENCE_MOVE     = false;
     static constexpr bool DEFAULT_IS_ENABLED_VARIABLE_BOUND_MOVE = false;
     static constexpr bool DEFAULT_IS_ENABLED_SOFT_SELECTION_MOVE = false;
-    static constexpr bool DEFAULT_IS_ENABLED_CHAIN_MOVE          = false;
+    static constexpr bool DEFAULT_IS_ENABLED_CHAIN_MOVE          = true;
     static constexpr bool DEFAULT_IS_ENABLED_TWO_FLIP_MOVE       = false;
     static constexpr bool DEFAULT_IS_ENABLED_USER_DEFINED_MOVE   = false;
     static constexpr int  DEFAULT_CHAIN_MOVE_CAPACITY            = 10000;
