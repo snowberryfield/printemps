@@ -12,8 +12,10 @@ namespace tabu_search {
 namespace core {
 /*****************************************************************************/
 struct TabuSearchCoreResult {
-    int                             total_update_status;
-    int                             number_of_iterations;
+    int  total_update_status;
+    int  number_of_iterations;
+    long number_of_evaluated_moves;
+
     TabuSearchCoreTerminationStatus termination_status;
 
     int tabu_tenure;
@@ -35,20 +37,22 @@ struct TabuSearchCoreResult {
 
     /*************************************************************************/
     TabuSearchCoreResult(
-        const int                             a_TOTAL_UPDATE_STATUS,      //
-        const int                             a_NUMBER_OF_ITERATIONS,     //
-        const TabuSearchCoreTerminationStatus a_TERMINATION_STATUS,       //
-        const int                             a_TABU_TENURE,              //
-        const int    a_LAST_LOCAL_AUGMENTED_INCUMBENT_UPDATE_ITERATION,   //
-        const int    a_LAST_GLOBAL_AUGMENTED_INCUMBENT_UPDATE_ITERATION,  //
-        const int    a_LAST_FEASIBLE_INCUMBENT_UPDATE_ITERATION,          //
-        const bool   a_IS_FEW_PERMISSIBLE_NEIGHBORHOOD,                   //
-        const bool   a_IS_FOUND_NEW_FEASIBLE_SOLUTION,                    //
-        const double a_OBJECTIVE_CONSTRAINT_RATE,                         //
+        const int                             a_TOTAL_UPDATE_STATUS,        //
+        const int                             a_NUMBER_OF_ITERATIONS,       //
+        const long                            a_NUMBER_OF_EVALUATED_MOVES,  //
+        const TabuSearchCoreTerminationStatus a_TERMINATION_STATUS,         //
+        const int                             a_TABU_TENURE,                //
+        const int    a_LAST_LOCAL_AUGMENTED_INCUMBENT_UPDATE_ITERATION,     //
+        const int    a_LAST_GLOBAL_AUGMENTED_INCUMBENT_UPDATE_ITERATION,    //
+        const int    a_LAST_FEASIBLE_INCUMBENT_UPDATE_ITERATION,            //
+        const bool   a_IS_FEW_PERMISSIBLE_NEIGHBORHOOD,                     //
+        const bool   a_IS_FOUND_NEW_FEASIBLE_SOLUTION,                      //
+        const double a_OBJECTIVE_CONSTRAINT_RATE,                           //
         const double a_GLOBAL_AUGMENTED_OBJECTIVE_RANGE,
         const double a_PERFORMANCE)
         : total_update_status(a_TOTAL_UPDATE_STATUS),
           number_of_iterations(a_NUMBER_OF_ITERATIONS),
+          number_of_evaluated_moves(a_NUMBER_OF_EVALUATED_MOVES),
           termination_status(a_TERMINATION_STATUS),
           tabu_tenure(a_TABU_TENURE),
           last_local_augmented_incumbent_update_iteration(
@@ -67,8 +71,10 @@ struct TabuSearchCoreResult {
 
     /*************************************************************************/
     void initialize(void) {
-        this->total_update_status  = 0;
-        this->number_of_iterations = 0;
+        this->total_update_status       = 0;
+        this->number_of_iterations      = 0;
+        this->number_of_evaluated_moves = 0;
+
         this->termination_status =
             TabuSearchCoreTerminationStatus::ITERATION_OVER;
 
