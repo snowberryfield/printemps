@@ -139,8 +139,15 @@ TabuSearchCoreResult solve(
     bool is_few_permissible_neighborhood = false;
     bool is_found_new_feasible_solution  = false;
 
+    long number_of_evaluated_moves = 0;
+
     double min_objective = current_solution_score.objective;
     double max_objective = current_solution_score.objective;
+
+    double min_local_augmented_objective =
+        current_solution_score.local_augmented_objective;
+    double max_local_augmented_objective =
+        current_solution_score.local_augmented_objective;
 
     double min_global_augmented_objective =
         current_solution_score.global_augmented_objective;
@@ -148,9 +155,7 @@ TabuSearchCoreResult solve(
         current_solution_score.global_augmented_objective;
     double min_local_penalty = HUGE_VALF;
 
-    double performance_1 = current_solution_score.global_augmented_objective;
-    double performance_2 = current_solution_score.global_augmented_objective *
-                           current_solution_score.global_augmented_objective;
+    double oscillation = 0.0;
 
     if (!current_solution_score.is_feasible) {
         min_local_penalty = current_solution_score.local_penalty;
@@ -258,8 +263,7 @@ TabuSearchCoreResult solve(
                         accept_objective_improvable   = true;
                         accept_feasibility_improvable = false;
                     } else {
-                        model_ptr->reset_variable_feasibility_improvabilities(
-                            model_ptr->violative_constraint_ptrs());
+                        model_ptr->reset_variable_feasibility_improvabilities();
                         model_ptr->update_variable_feasibility_improvabilities(
                             model_ptr->violative_constraint_ptrs());
 
@@ -493,9 +497,17 @@ TabuSearchCoreResult solve(
             std::max(max_global_augmented_objective,
                      current_solution_score.global_augmented_objective);
 
-        performance_1 = current_solution_score.global_augmented_objective;
-        performance_2 = current_solution_score.global_augmented_objective *
-                        current_solution_score.global_augmented_objective;
+        min_local_augmented_objective =
+            std::min(min_local_augmented_objective,
+                     current_solution_score.local_augmented_objective);
+        max_local_augmented_objective =
+            std::max(max_local_augmented_objective,
+                     current_solution_score.local_augmented_objective);
+
+        oscillation += fabs(current_solution_score.local_augmented_objective -
+                            -previous_solution_score.local_augmented_objective);
+
+        number_of_evaluated_moves += number_of_moves;
 
         if (!current_solution_score.is_feasible) {
             min_local_penalty = std::min(min_local_penalty,
@@ -794,18 +806,14 @@ TabuSearchCoreResult solve(
     auto global_augmented_objective_range = std::max(
         0.0, max_global_augmented_objective - min_global_augmented_objective);
 
-    performance_1 /= (iteration + 1);
-    performance_2 /= (iteration + 1);
-
-    auto mean     = performance_1;
-    auto variance = std::max(performance_2 - performance_1 * performance_1,
-                             constant::EPSILON);
-
-    auto performance = mean - sqrt(variance);
+    auto performance = oscillation / iteration /
+                       std::max(1.0, max_local_augmented_objective -
+                                         min_local_augmented_objective);
 
     TabuSearchCoreResult result(
         total_update_status,                               //
         iteration,                                         //
+        number_of_evaluated_moves,                         //
         termination_status,                                //
         tabu_tenure,                                       //
         last_local_augmented_incumbent_update_iteration,   //
