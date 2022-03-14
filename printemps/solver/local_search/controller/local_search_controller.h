@@ -61,12 +61,12 @@ class LocalSearchController
     }
 
     /*************************************************************************/
-    inline bool satisfy_terminate_condition(const double a_ELAPSED_TIME,
+    inline bool satisfy_terminate_condition(const double a_TOTAL_ELAPSED_TIME,
                                             const bool   a_IS_ENABLED_PRINT) {
-        if (a_ELAPSED_TIME > this->m_master_option.time_max) {
+        if (a_TOTAL_ELAPSED_TIME > this->m_master_option.time_max) {
             utility::print_message(
                 "Outer loop was terminated because of time-over (" +
-                    utility::to_string(a_ELAPSED_TIME, "%.3f") + "sec).",
+                    utility::to_string(a_TOTAL_ELAPSED_TIME, "%.3f") + "sec).",
                 a_IS_ENABLED_PRINT);
             return true;
         }
@@ -87,10 +87,10 @@ class LocalSearchController
         /**
          * Check the terminate condition.
          */
-        const double ELAPSED_TIME = this->m_time_keeper.clock();
+        const double TOTAL_ELAPSED_TIME = this->m_time_keeper.clock();
 
         if (this->satisfy_terminate_condition(
-                ELAPSED_TIME,
+                TOTAL_ELAPSED_TIME,
                 this->m_master_option.verbose >= option::verbose::Outer)) {
             m_result.initialize();
             return;
@@ -100,7 +100,7 @@ class LocalSearchController
          * Prepare an option object for local search.
          */
         option::Option option           = this->m_master_option;
-        option.local_search.time_offset = ELAPSED_TIME;
+        option.local_search.time_offset = TOTAL_ELAPSED_TIME;
 
         /**
          * Prepare feasible solutions storage.
@@ -146,7 +146,7 @@ class LocalSearchController
             "Local search finished.",
             this->m_master_option.verbose >= option::verbose::Outer);
 
-        this->print_elapsed_time(  //
+        this->print_total_elapsed_time(  //
             this->m_time_keeper.clock(),
             this->m_master_option.verbose >= option::verbose::Outer);
 

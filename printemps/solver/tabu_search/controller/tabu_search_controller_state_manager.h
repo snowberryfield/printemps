@@ -78,6 +78,14 @@ class TabuSearchControllerStateManager {
     }
 
     /*************************************************************************/
+    inline constexpr void update_elapsed_time(
+        const double a_TOTAL_ELAPSED_TIME) {
+        m_state.total_elapsed_time = a_TOTAL_ELAPSED_TIME;
+        m_state.tabu_search_elapsed_time =
+            m_state.total_elapsed_time - m_state.tabu_search_start_time;
+    }
+
+    /*************************************************************************/
     inline constexpr void update(
         const tabu_search::core::TabuSearchCoreResult& a_RESULT) {
         /**
@@ -159,6 +167,22 @@ class TabuSearchControllerStateManager {
         } else {
             m_state.iteration_after_no_update = 0;
         }
+
+        /**
+         * Update the total inner number of iterations and evaluated moves.
+         */
+        m_state.total_number_of_inner_iterations +=
+            a_RESULT.number_of_iterations;
+        m_state.total_number_of_evaluated_moves +=
+            a_RESULT.number_of_evaluated_moves;
+
+        m_state.averaged_inner_iteration_speed =
+            m_state.total_number_of_inner_iterations /
+            m_state.tabu_search_elapsed_time;
+
+        m_state.averaged_move_evaluation_speed =
+            m_state.total_number_of_evaluated_moves /
+            m_state.tabu_search_elapsed_time;
     }
 
     /*************************************************************************/

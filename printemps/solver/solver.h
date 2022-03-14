@@ -127,20 +127,27 @@ class Solver {
         /**
          * Prepare the result object to return.
          */
-        Status status(named_solution.is_feasible(),          //
-                      m_start_date_time,                     //
-                      m_finish_date_time,                    //
-                      m_model_ptr->name(),                   //
-                      m_model_ptr->number_of_variables(),    //
-                      m_model_ptr->number_of_constraints(),  //
-                      m_time_keeper.clock(),                 //
-                      m_lagrange_dual_controller.result().number_of_iterations,
-                      m_local_search_controller.result().number_of_iterations,
-                      m_tabu_search_controller.result().number_of_iterations,
-                      m_tabu_search_controller.result().number_of_loops,
-                      this->export_named_penalty_coefficients(),  //
-                      this->export_named_update_counts(),
-                      this->export_named_violation_counts());
+        const auto& LAGRANGE_DUAL_RESULT = m_lagrange_dual_controller.result();
+        const auto& LOCAL_SEARCH_RESULT  = m_local_search_controller.result();
+        const auto& TABU_SEARCH_RESULT   = m_tabu_search_controller.result();
+        Status      status(
+            named_solution.is_feasible(),                               //
+            m_start_date_time,                                          //
+            m_finish_date_time,                                         //
+            m_model_ptr->name(),                                        //
+            m_model_ptr->number_of_variables(),                         //
+            m_model_ptr->number_of_constraints(),                       //
+            m_time_keeper.clock(),                                      //
+            LAGRANGE_DUAL_RESULT.number_of_iterations,                  //
+            LOCAL_SEARCH_RESULT.number_of_iterations,                   //
+            TABU_SEARCH_RESULT.state.total_number_of_inner_iterations,  //
+            TABU_SEARCH_RESULT.state.iteration,                         //
+            TABU_SEARCH_RESULT.state.total_number_of_evaluated_moves,   //
+            TABU_SEARCH_RESULT.state.averaged_inner_iteration_speed,    //
+            TABU_SEARCH_RESULT.state.averaged_move_evaluation_speed,    //
+            this->export_named_penalty_coefficients(),                  //
+            this->export_named_update_counts(),
+            this->export_named_violation_counts());
 
         Result<T_Variable, T_Expression> result(  //
             named_solution, status, m_solution_archive);

@@ -21,8 +21,11 @@ struct Status {
     double      elapsed_time;
     int         number_of_lagrange_dual_iterations;
     int         number_of_local_search_iterations;
-    int         number_of_tabu_search_iterations;
+    long        number_of_tabu_search_iterations;
     int         number_of_tabu_search_loops;
+    long        number_of_evaluated_moves;
+    double      averaged_inner_iteration_speed;
+    double      averaged_move_evaluation_speed;
 
     std::unordered_map<std::string, multi_array::ValueProxy<double>>
         penalty_coefficients;
@@ -42,8 +45,11 @@ struct Status {
         const double       a_ELAPSED_TIME,                        //
         const int          a_NUMBER_OF_LAGRANGE_DUAL_ITERATIONS,  //
         const int          a_NUMBER_OF_LOCAL_SEARCH_ITERATIONS,   //
-        const int          a_NUMBER_OF_TABU_SEARCH_ITERATIONS,    //
+        const long         a_NUMBER_OF_TABU_SEARCH_ITERATIONS,    //
         const int          a_NUMBER_OF_TABU_SEARCH_LOOPS,         //
+        const long         a_NUMBER_OF_EVALUATED_MOVES,           //
+        const double       a_AVERAGED_INNER_ITERATION_SPEED,      //
+        const double       a_AVERAGED_MOVE_EVALUATION_SPEED,      //
         const std::unordered_map<std::string, multi_array::ValueProxy<double>>&
             a_PENALTY_COEFFICIENTS,  //
         const std::unordered_map<std::string, multi_array::ValueProxy<int>>&
@@ -63,6 +69,9 @@ struct Status {
               a_NUMBER_OF_LOCAL_SEARCH_ITERATIONS),
           number_of_tabu_search_iterations(a_NUMBER_OF_TABU_SEARCH_ITERATIONS),
           number_of_tabu_search_loops(a_NUMBER_OF_TABU_SEARCH_LOOPS),
+          number_of_evaluated_moves(a_NUMBER_OF_EVALUATED_MOVES),
+          averaged_inner_iteration_speed(a_AVERAGED_INNER_ITERATION_SPEED),
+          averaged_move_evaluation_speed(a_AVERAGED_MOVE_EVALUATION_SPEED),
           penalty_coefficients(a_PENALTY_COEFFICIENTS),
           update_counts(a_UPDATE_COUNTS),
           violation_counts(a_VIOLATION_COUNTS) {
@@ -87,6 +96,9 @@ struct Status {
         this->number_of_lagrange_dual_iterations = 0;
         this->number_of_tabu_search_iterations   = 0;
         this->number_of_tabu_search_loops        = 0;
+        this->number_of_evaluated_moves          = 0;
+        this->averaged_inner_iteration_speed     = 0.0;
+        this->averaged_move_evaluation_speed     = 0.0;
         this->penalty_coefficients.clear();
         this->update_counts.clear();
         this->violation_counts.clear();
@@ -166,6 +178,21 @@ struct Status {
         ofs << utility::indent_spaces(indent_level)
             << "\"number_of_tabu_search_loops\" : " +
                    std::to_string(this->number_of_tabu_search_loops)
+            << "," << std::endl;
+
+        ofs << utility::indent_spaces(indent_level)
+            << "\"number_of_evaluated_moves\" : " +
+                   std::to_string(this->number_of_evaluated_moves)
+            << "," << std::endl;
+
+        ofs << utility::indent_spaces(indent_level)
+            << "\"averaged_inner_iteration_speed\" : " +
+                   std::to_string(this->averaged_inner_iteration_speed)
+            << "," << std::endl;
+
+        ofs << utility::indent_spaces(indent_level)
+            << "\"averaged_move_evaluation_speed\" : " +
+                   std::to_string(this->averaged_move_evaluation_speed)
             << "," << std::endl;
 
         /// Penalty coefficients
@@ -252,6 +279,21 @@ struct Status {
         ofs << utility::indent_spaces(indent_level)
             << "\"number_of_tabu_search_loops\" : " +
                    std::to_string(this->number_of_tabu_search_loops)
+            << "," << std::endl;
+
+        ofs << utility::indent_spaces(indent_level)
+            << "\"number_of_evaluated_moves\" : " +
+                   std::to_string(this->number_of_evaluated_moves)
+            << "," << std::endl;
+
+        ofs << utility::indent_spaces(indent_level)
+            << "\"averaged_inner_iteration_speed\" : " +
+                   std::to_string(this->averaged_inner_iteration_speed)
+            << "," << std::endl;
+
+        ofs << utility::indent_spaces(indent_level)
+            << "\"averaged_move_evaluation_speed\" : " +
+                   std::to_string(this->averaged_move_evaluation_speed)
             << "," << std::endl;
 
         /// Penalty coefficients
