@@ -9,12 +9,12 @@
 #include "../../abstract_controller.h"
 #include "../core/tabu_search_core.h"
 
-#include "tabu_search_controller_result.h"
 #include "tabu_search_controller_state.h"
 #include "tabu_search_controller_parameter.h"
 #include "tabu_search_controller_state_manager.h"
 #include "tabu_search_controller_parameter_manager.h"
 #include "tabu_search_controller_logger.h"
+#include "tabu_search_controller_result.h"
 
 namespace printemps {
 namespace solver {
@@ -29,7 +29,7 @@ class TabuSearchController
     TabuSearchControllerParameterManager<T_Variable, T_Expression>
                                                          m_parameter_manager;
     TabuSearchControllerLogger<T_Variable, T_Expression> m_logger;
-    TabuSearchControllerResult                           m_result;
+    TabuSearchControllerResult<T_Variable, T_Expression> m_result;
     std::mt19937                                         m_mt19937;
 
    public:
@@ -103,7 +103,6 @@ class TabuSearchController
 
     /*************************************************************************/
     inline void print_trend(
-        const double a_ELAPSED_TIME,
         const TabuSearchControllerState<T_Variable, T_Expression>& a_STATE,
         const TabuSearchControllerParameter&                       a_PARAMETER,
         const bool a_IS_ENABLED_PRINT) {
@@ -113,8 +112,8 @@ class TabuSearchController
         this->print_outer_loop_iteration(  //
             a_STATE.iteration, a_IS_ENABLED_PRINT);
 
-        this->print_elapsed_time(  //
-            a_ELAPSED_TIME, a_IS_ENABLED_PRINT);
+        this->print_total_elapsed_time(  //
+            a_STATE.total_elapsed_time, a_IS_ENABLED_PRINT);
 
         this->print_incumbent_summary(a_IS_ENABLED_PRINT);
 
@@ -136,6 +135,18 @@ class TabuSearchController
          */
         this->print_performance(  //
             a_STATE.tabu_search_result.performance, a_IS_ENABLED_PRINT);
+
+        /**
+         * Print the averaged inner iteration speed.
+         */
+        this->print_averaged_inner_iteration_speed(
+            a_STATE.averaged_inner_iteration_speed, a_IS_ENABLED_PRINT);
+
+        /**
+         * Print the averaged move evaluation speed.
+         */
+        this->print_averaged_move_evaluation_speed(
+            a_STATE.averaged_move_evaluation_speed, a_IS_ENABLED_PRINT);
 
         /**
          * Print the number of found feasible solutions.
@@ -250,7 +261,7 @@ class TabuSearchController
         const bool a_IS_ENABLED_PRINT) {
         if (this->m_master_option.is_enabled_store_feasible_solutions) {
             utility::print_message(
-                "The number of feasible solutions found so far is " +
+                "Number of feasible solutions found so far is " +
                     std::to_string(a_NUMBER_OF_FEASIBLE_SOLUTIONS) + ".",
                 a_IS_ENABLED_PRINT);
         }
@@ -276,11 +287,33 @@ class TabuSearchController
     }
 
     /*************************************************************************/
+    inline void print_averaged_inner_iteration_speed(
+        const double a_AVERAGED_INNER_ITERATION_SPEED,
+        const bool   a_IS_ENABLED_PRINT) {
+        utility::print_message(
+            "Averaged inner iteration speed is " +
+                std::to_string(a_AVERAGED_INNER_ITERATION_SPEED) +
+                " iterations/sec.",
+            a_IS_ENABLED_PRINT);
+    }
+
+    /*************************************************************************/
+    inline void print_averaged_move_evaluation_speed(
+        const double a_AVERAGED_MOVE_EVALUATION_SPEED,
+        const bool   a_IS_ENABLED_PRINT) {
+        utility::print_message(
+            "Averaged move evaluation speed is " +
+                std::to_string(a_AVERAGED_MOVE_EVALUATION_SPEED) +
+                " moves/sec.",
+            a_IS_ENABLED_PRINT);
+    }
+
+    /*************************************************************************/
     inline void print_penalty_coefficient_relaxing_rate(
         const double a_PENALTY_COEFFICIENT_RELAXING_RATE,
         const bool   a_IS_ENABLED_PRINT) {
         utility::print_message(  //
-            "The penalty coefficients relaxing rate is " +
+            "Penalty coefficients relaxing rate is " +
                 std::to_string(a_PENALTY_COEFFICIENT_RELAXING_RATE) + ".",
             a_IS_ENABLED_PRINT);
     }
@@ -290,7 +323,7 @@ class TabuSearchController
         const double a_PENALTY_COEFFICIENT_TIGHTENING_RATE,
         const bool   a_IS_ENABLED_PRINT) {
         utility::print_message(  //
-            "The penalty coefficients tightening rate is " +
+            "Penalty coefficients tightening rate is " +
                 std::to_string(a_PENALTY_COEFFICIENT_TIGHTENING_RATE) + ".",
             a_IS_ENABLED_PRINT);
     }
@@ -298,23 +331,23 @@ class TabuSearchController
     /*************************************************************************/
     inline void print_penalty_coefficient_reset(const bool a_IS_ENABLED_PRINT) {
         utility::print_message(
-            "The penalty coefficients were reset due to search stagnation.",
+            "Penalty coefficients were reset due to search stagnation.",
             a_IS_ENABLED_PRINT);
     }
 
     /*************************************************************************/
     inline void print_penalty_coefficient_relaxing(
         const bool a_IS_ENABLED_PRINT) {
-        utility::print_message(                        //
-            "The penalty coefficients were relaxed.",  //
+        utility::print_message(                    //
+            "Penalty coefficients were relaxed.",  //
             a_IS_ENABLED_PRINT);
     }
 
     /*************************************************************************/
     inline void print_penalty_coefficient_tightening(
         const bool a_IS_ENABLED_PRINT) {
-        utility::print_message(                          //
-            "The penalty coefficients were tightened.",  //
+        utility::print_message(                      //
+            "Penalty coefficients were tightened.",  //
             a_IS_ENABLED_PRINT);
     }
 
@@ -413,21 +446,21 @@ class TabuSearchController
             }
             case option::improvability_screening_mode::Soft: {
                 utility::print_message(
-                    "The soft improvability screening will be applied in the "
+                    "Soft improvability screening will be applied in the "
                     "next loop.",
                     a_IS_ENABLED_PRINT);
                 break;
             }
             case option::improvability_screening_mode::Aggressive: {
                 utility::print_message(
-                    "The aggressive improvability screening will be applied in "
+                    "Aggressive improvability screening will be applied in "
                     "the next loop.",
                     a_IS_ENABLED_PRINT);
                 break;
             }
             case option::improvability_screening_mode::Intensive: {
                 utility::print_message(
-                    "The intensive improvability screening will be applied in "
+                    "Intensive improvability screening will be applied in "
                     "the next loop.",
                     a_IS_ENABLED_PRINT);
                 break;
@@ -454,7 +487,7 @@ class TabuSearchController
     inline void print_initial_tabu_tenure(const int  a_INITIAL_TABU_TENURE,
                                           const bool a_IS_ENABLED_PRINT) {
         utility::print_message(  //
-            "The tabu tenure for the next loop was set to " +
+            "Tabu tenure for the next loop was set to " +
                 std::to_string(a_INITIAL_TABU_TENURE) + ".",
             a_IS_ENABLED_PRINT);
     }
@@ -511,13 +544,13 @@ class TabuSearchController
 
     /*************************************************************************/
     inline bool satisfy_terminate_condition(
-        const double a_ELAPSED_TIME,
+        const double a_TOTAL_ELAPSED_TIME,
         const TabuSearchControllerState<T_Variable, T_Expression>& a_STATE,
         const bool a_IS_ENABLED_PRINT) {
-        if (a_ELAPSED_TIME > this->m_master_option.time_max) {
+        if (a_TOTAL_ELAPSED_TIME > this->m_master_option.time_max) {
             utility::print_message(
                 "Outer loop was terminated because of time-over (" +
-                    utility::to_string(a_ELAPSED_TIME, "%.3f") + "sec).",
+                    utility::to_string(a_TOTAL_ELAPSED_TIME, "%.3f") + "sec).",
                 a_IS_ENABLED_PRINT);
             return true;
         }
@@ -556,22 +589,22 @@ class TabuSearchController
 
     /*************************************************************************/
     inline void run(void) {
-        int total_number_of_inner_iterations = 0;
-        int total_update_status              = 0;
+        int total_update_status = 0;
 
         this->preprocess();
 
         auto& state     = m_state_manager.state();
         auto& parameter = m_parameter_manager.parameter();
 
+        state.tabu_search_start_time = this->m_time_keeper.clock();
         while (true) {
             /**
              * Check the terminating condition.
              */
-            double elapsed_time = this->m_time_keeper.clock();
+            const double TOTAL_ELAPSED_TIME = this->m_time_keeper.clock();
 
             if (this->satisfy_terminate_condition(
-                    elapsed_time, state,  //
+                    TOTAL_ELAPSED_TIME, state,  //
                     this->m_master_option.verbose >= option::verbose::Outer)) {
                 m_result.initialize();
                 break;
@@ -581,7 +614,7 @@ class TabuSearchController
              * Prepare an option object for tabu search.
              */
             auto option = m_parameter_manager.create_option(state.iteration,
-                                                            elapsed_time);
+                                                            TOTAL_ELAPSED_TIME);
 
             /**
              * Prepare feasible solutions storage.
@@ -605,6 +638,11 @@ class TabuSearchController
                                          &feasible_solutions,  //
                                          option,               //
                                          initial_variable_value_proxies);
+
+            /**
+             * Update the elapsed time.
+             */
+            m_state_manager.update_elapsed_time(this->m_time_keeper.clock());
 
             /**
              * Update the state by tabu search result.
@@ -642,15 +680,10 @@ class TabuSearchController
             }
 
             /**
-             * Update the elapsed time.
-             */
-            elapsed_time = this->m_time_keeper.clock();
-
-            /**
              * Print trend.
              */
             this->print_trend(
-                this->m_time_keeper.clock(), state, parameter,
+                state, parameter,
                 this->m_master_option.verbose >= option::verbose::Outer);
 
             /**
@@ -665,22 +698,16 @@ class TabuSearchController
              */
             this->m_model_ptr->callback(&option, this->m_incumbent_holder_ptr);
 
-            /**
-             * Preserve the number of iterations of the previous loop.
-             */
-            total_number_of_inner_iterations +=
-                tabu_search_result.number_of_iterations;
-
             state.iteration++;
         }
 
-        m_result = TabuSearchControllerResult(total_number_of_inner_iterations,
-                                              state.iteration,  //
-                                              total_update_status);
+        m_result = TabuSearchControllerResult<T_Variable, T_Expression>(
+            state, total_update_status);
     }
 
     /*************************************************************************/
-    inline constexpr const TabuSearchControllerResult& result(void) const {
+    inline constexpr const TabuSearchControllerResult<T_Variable, T_Expression>&
+    result(void) const {
         return m_result;
     }
 };

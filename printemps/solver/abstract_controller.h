@@ -27,11 +27,11 @@ class AbstractController {
     int m_number_of_iterations;
 
     /*************************************************************************/
-    inline void print_elapsed_time(const double a_ELAPSED_TIME,
-                                   const bool   a_IS_ENABLED_PRINT) {
+    inline void print_total_elapsed_time(const double a_TOTAL_ELAPSED_TIME,
+                                         const bool   a_IS_ENABLED_PRINT) {
         utility::print_info(  //
             " -- Total elapsed time: " +
-                utility::to_string(a_ELAPSED_TIME, "%.3f") + "sec",
+                utility::to_string(a_TOTAL_ELAPSED_TIME, "%.3f") + "sec",
             a_IS_ENABLED_PRINT);
     }
 

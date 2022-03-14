@@ -85,6 +85,8 @@ class TabuSearchControllerLogger {
         m_ofstream                                           //
             << "#iteration "                                 //
             << "elapsed_time "                               //
+            << "averaged_inner_iteration_speed "             //
+            << "averaged_move_evaluation_speed "             //
             << "local_objective "                            //
             << "local_violation "                            //
             << "global_objective "                           //
@@ -123,7 +125,9 @@ class TabuSearchControllerLogger {
 
         m_ofstream                                                 //
             << s.iteration << " "                                  //
-            << m_controller_ptr->time_keeper().clock() << " "      //
+            << s.total_elapsed_time << " "                         //
+            << s.averaged_inner_iteration_speed << " "             //
+            << s.averaged_move_evaluation_speed << " "             //
             << local_incumbent.objective << " "                    //
             << local_incumbent.total_violation << " "              //
             << global_incumbent.objective << " "                   //
