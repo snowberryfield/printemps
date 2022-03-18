@@ -6,7 +6,7 @@
 #ifndef PRINTEMPS_SOLVER_LAGRANGE_DUAL_CONTROLLER_LAGRANGE_DUAL_CONTROLLER_H__
 #define PRINTEMPS_SOLVER_LAGRANGE_DUAL_CONTROLLER_LAGRANGE_DUAL_CONTROLLER_H__
 
-#include "../../abstract_controller.h"
+#include "../../abstract_solver_controller.h"
 #include "../core/lagrange_dual_core.h"
 #include "lagrange_dual_controller_result.h"
 
@@ -17,7 +17,7 @@ namespace controller {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class LagrangeDualController
-    : public AbstractController<T_Variable, T_Expression> {
+    : public AbstractSolverController<T_Variable, T_Expression> {
    private:
     LagrangeDualControllerResult m_result;
 
@@ -31,7 +31,7 @@ class LagrangeDualController
     LagrangeDualController(
         model::Model<T_Variable, T_Expression>* a_model_ptr,  //
         const solution::DenseSolution<T_Variable, T_Expression>&
-            a_CURRENT_SOLUTION,  //
+            a_INITIAL_SOLUTION,  //
         solution::IncumbentHolder<T_Variable, T_Expression>*
                                           a_incumbent_holder_ptr,
         Memory<T_Variable, T_Expression>* a_memory_ptr,  //
@@ -41,7 +41,7 @@ class LagrangeDualController
         const option::Option&      a_OPTION) {
         this->initialize();
         this->setup(a_model_ptr,             //
-                    a_CURRENT_SOLUTION,      //
+                    a_INITIAL_SOLUTION,      //
                     a_incumbent_holder_ptr,  //
                     a_memory_ptr,            //
                     a_solution_archive_ptr,  //
@@ -56,7 +56,7 @@ class LagrangeDualController
 
     /*************************************************************************/
     inline void initialize(void) {
-        AbstractController<T_Variable, T_Expression>::initialize();
+        AbstractSolverController<T_Variable, T_Expression>::initialize();
         m_result.initialize();
     }
 
@@ -145,7 +145,7 @@ class LagrangeDualController
          * Prepare the initial variable values.
          */
         auto initial_variable_value_proxies =
-            this->m_current_solution.variable_value_proxies;
+            this->m_initial_solution.variable_value_proxies;
 
         /**
          * Run the lagrange dual search.

@@ -3,8 +3,8 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_SOLVER_ABSTRACT_CONTROLLER_H__
-#define PRINTEMPS_SOLVER_ABSTRACT_CONTROLLER_H__
+#ifndef PRINTEMPS_SOLVER_ABSTRACT_SOLVER_CONTROLLER_H__
+#define PRINTEMPS_SOLVER_ABSTRACT_SOLVER_CONTROLLER_H__
 
 #include "memory.h"
 #include "status.h"
@@ -14,17 +14,15 @@ namespace printemps {
 namespace solver {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-class AbstractController {
+class AbstractSolverController {
    protected:
     model::Model<T_Variable, T_Expression>*              m_model_ptr;
-    solution::DenseSolution<T_Variable, T_Expression>    m_current_solution;
+    solution::DenseSolution<T_Variable, T_Expression>    m_initial_solution;
     solution::IncumbentHolder<T_Variable, T_Expression>* m_incumbent_holder_ptr;
     Memory<T_Variable, T_Expression>*                    m_memory_ptr;
     solution::SolutionArchive<T_Variable, T_Expression>* m_solution_archive_ptr;
     utility::TimeKeeper                                  m_time_keeper;
     option::Option                                       m_master_option;
-
-    int m_number_of_iterations;
 
     /*************************************************************************/
     inline void print_total_elapsed_time(const double a_TOTAL_ELAPSED_TIME,
@@ -77,12 +75,12 @@ class AbstractController {
 
    public:
     /*************************************************************************/
-    AbstractController(void) {
+    AbstractSolverController(void) {
         this->initialize();
     }
 
     /*************************************************************************/
-    AbstractController(                                       //
+    AbstractSolverController(                                 //
         model::Model<T_Variable, T_Expression>* a_model_ptr,  //
         const solution::DenseSolution<T_Variable, T_Expression>&
             a_CURRENT_SOLUTION,  //
@@ -104,27 +102,26 @@ class AbstractController {
     }
 
     /*************************************************************************/
-    virtual ~AbstractController(void) {
+    virtual ~AbstractSolverController(void) {
         /// nothing to do
     }
 
     /*************************************************************************/
     inline void initialize(void) {
         m_model_ptr = nullptr;
-        m_current_solution.initialize();
+        m_initial_solution.initialize();
         m_incumbent_holder_ptr = nullptr;
         m_memory_ptr           = nullptr;
         m_solution_archive_ptr = nullptr;
         m_time_keeper.initialize();
         m_master_option.initialize();
-        m_number_of_iterations = 0;
     }
 
     /*************************************************************************/
     inline void setup(                                        //
         model::Model<T_Variable, T_Expression>* a_model_ptr,  //
         const solution::DenseSolution<T_Variable, T_Expression>&
-            a_CURRENT_SOLUTION,  //
+            a_INITIAL_SOLUTION,  //
         solution::IncumbentHolder<T_Variable, T_Expression>*
                                           a_incumbent_holder_ptr,
         Memory<T_Variable, T_Expression>* a_memory_ptr,  //
@@ -133,7 +130,7 @@ class AbstractController {
         const utility::TimeKeeper& a_TIME_KEEPER,           //
         const option::Option&      a_OPTION) {
         m_model_ptr            = a_model_ptr;
-        m_current_solution     = a_CURRENT_SOLUTION;
+        m_initial_solution     = a_INITIAL_SOLUTION;
         m_incumbent_holder_ptr = a_incumbent_holder_ptr;
         m_memory_ptr           = a_memory_ptr;
         m_solution_archive_ptr = a_solution_archive_ptr;
