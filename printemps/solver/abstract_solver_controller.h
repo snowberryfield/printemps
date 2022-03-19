@@ -7,8 +7,6 @@
 #define PRINTEMPS_SOLVER_ABSTRACT_SOLVER_CONTROLLER_H__
 
 #include "memory.h"
-#include "status.h"
-#include "result.h"
 
 namespace printemps {
 namespace solver {
@@ -91,7 +89,6 @@ class AbstractSolverController {
                                    a_solution_archive_ptr,  //
         const utility::TimeKeeper& a_TIME_KEEPER,           //
         const option::Option&      a_OPTION) {
-        this->initialize();
         this->setup(a_model_ptr,             //
                     a_CURRENT_SOLUTION,      //
                     a_incumbent_holder_ptr,  //

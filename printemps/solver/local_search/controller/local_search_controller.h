@@ -117,19 +117,22 @@ class LocalSearchController
         /**
          * Run the local search.
          */
-        auto local_search_result =
-            local_search::core::solve(this->m_model_ptr,             //
-                                      this->m_incumbent_holder_ptr,  //
-                                      this->m_memory_ptr,            //
-                                      &feasible_solutions,           //
-                                      option,                        //
-                                      initial_variable_value_proxies);
+        core::LocalSearchCore<T_Variable, T_Expression> local_search(
+            this->m_model_ptr,               //
+            initial_variable_value_proxies,  //
+            this->m_incumbent_holder_ptr,    //
+            this->m_memory_ptr,              //
+            option);
+
+        local_search.run();
+
+        auto local_search_result = local_search.result();
 
         /**
          * Update the feasible solutions archive.
          */
         if (this->m_master_option.is_enabled_store_feasible_solutions) {
-            this->update_archive(feasible_solutions);
+            this->update_archive(local_search.feasible_solutions());
         }
 
         /**
