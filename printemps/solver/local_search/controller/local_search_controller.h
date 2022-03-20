@@ -19,7 +19,7 @@ template <class T_Variable, class T_Expression>
 class LocalSearchController
     : public AbstractSolverController<T_Variable, T_Expression> {
    private:
-    LocalSearchControllerResult m_result;
+    LocalSearchControllerResult<T_Variable, T_Expression> m_result;
 
    public:
     /*************************************************************************/
@@ -103,25 +103,13 @@ class LocalSearchController
         option.local_search.time_offset = TOTAL_ELAPSED_TIME;
 
         /**
-         * Prepare feasible solutions storage.
-         */
-        std::vector<solution::SparseSolution<T_Variable, T_Expression>>
-            feasible_solutions;
-
-        /**
-         * Prepare the initial variable values.
-         */
-        auto initial_variable_value_proxies =
-            this->m_initial_solution.variable_value_proxies;
-
-        /**
          * Run the local search.
          */
         core::LocalSearchCore<T_Variable, T_Expression> local_search(
-            this->m_model_ptr,               //
-            initial_variable_value_proxies,  //
-            this->m_incumbent_holder_ptr,    //
-            this->m_memory_ptr,              //
+            this->m_model_ptr,                                //
+            this->m_initial_solution.variable_value_proxies,  //
+            this->m_incumbent_holder_ptr,                     //
+            this->m_memory_ptr,                               //
             option);
 
         local_search.run();
@@ -138,9 +126,8 @@ class LocalSearchController
         /**
          * Store the result.
          */
-        m_result = LocalSearchControllerResult(
-            local_search_result.number_of_iterations,
-            local_search_result.total_update_status);
+        m_result = LocalSearchControllerResult<T_Variable, T_Expression>(
+            local_search_result);
 
         /**
          * Print the search summary.
@@ -158,7 +145,9 @@ class LocalSearchController
     }
 
     /*************************************************************************/
-    inline constexpr const LocalSearchControllerResult& result(void) const {
+    inline constexpr const LocalSearchControllerResult<T_Variable,
+                                                       T_Expression>&
+    result(void) const {
         return m_result;
     }
 };

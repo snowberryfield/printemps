@@ -183,6 +183,11 @@ class TabuSearchControllerStateManager {
         m_state.averaged_move_evaluation_speed =
             m_state.total_number_of_evaluated_moves /
             m_state.tabu_search_elapsed_time;
+
+        /**
+         * Update the total update status.
+         */
+        m_state.total_update_status |= a_RESULT.total_update_status;
     }
 
     /*************************************************************************/

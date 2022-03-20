@@ -11,9 +11,13 @@ namespace solver {
 namespace lagrange_dual {
 namespace controller {
 /*****************************************************************************/
+template <class T_Variable, class T_Expression>
 struct LagrangeDualControllerResult {
-    int number_of_iterations;
     int update_status;
+    int number_of_iterations;
+
+    solution::DenseSolution<T_Variable, T_Expression> primal;
+    std::vector<multi_array::ValueProxy<double>>      dual;
 
     /*************************************************************************/
     LagrangeDualControllerResult(void) {
@@ -21,20 +25,22 @@ struct LagrangeDualControllerResult {
     }
 
     /*************************************************************************/
-    LagrangeDualControllerResult(const int a_NUMBER_OF_ITERATIONS,
-                                 const int a_UPDATE_STATUS)
-        : number_of_iterations(a_NUMBER_OF_ITERATIONS),
-          update_status(a_UPDATE_STATUS) {
+    LagrangeDualControllerResult(
+        const core::LagrangeDualCoreResult<T_Variable, T_Expression> &a_RESULT)
+        : update_status(a_RESULT.total_update_status),
+          number_of_iterations(a_RESULT.number_of_iterations),
+          primal(a_RESULT.primal),
+          dual(a_RESULT.dual) {
         /// nothing to do
     }
 
     /*************************************************************************/
     inline void initialize(void) {
-        this->number_of_iterations = 0;
         this->update_status =
             solution::IncumbentHolderConstant::STATUS_NOT_UPDATED;
+        this->number_of_iterations = 0;
     }
-};
+};  // namespace controller
 }  // namespace controller
 }  // namespace lagrange_dual
 }  // namespace solver

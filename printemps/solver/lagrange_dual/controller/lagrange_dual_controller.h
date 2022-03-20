@@ -19,7 +19,7 @@ template <class T_Variable, class T_Expression>
 class LagrangeDualController
     : public AbstractSolverController<T_Variable, T_Expression> {
    private:
-    LagrangeDualControllerResult m_result;
+    LagrangeDualControllerResult<T_Variable, T_Expression> m_result;
 
    public:
     /*************************************************************************/
@@ -136,40 +136,31 @@ class LagrangeDualController
         option.lagrange_dual.time_offset = TOTAL_ELAPSED_TIME;
 
         /**
-         * Prepare feasible solutions storage.
-         */
-        std::vector<solution::SparseSolution<T_Variable, T_Expression>>
-            feasible_solutions;
-
-        /**
-         * Prepare the initial variable values.
-         */
-        auto initial_variable_value_proxies =
-            this->m_initial_solution.variable_value_proxies;
-
-        /**
          * Run the lagrange dual search.
          */
-        auto lagrange_dual_result =
-            lagrange_dual::core::solve(this->m_model_ptr,             //
-                                       this->m_incumbent_holder_ptr,  //
-                                       &feasible_solutions,           //
-                                       option,                        //
-                                       initial_variable_value_proxies);
+        core::LagrangeDualCore<T_Variable, T_Expression> lagrange_dual(
+            this->m_model_ptr,                                //
+            this->m_initial_solution.variable_value_proxies,  //
+            this->m_incumbent_holder_ptr,                     //
+            this->m_memory_ptr,                               //
+            option);
+
+        lagrange_dual.run();
+
+        auto lagrange_dual_result = lagrange_dual.result();
 
         /**
          * Update the feasible solutions archive.
          */
         if (this->m_master_option.is_enabled_store_feasible_solutions) {
-            this->update_archive(feasible_solutions);
+            this->update_archive(lagrange_dual.feasible_solutions());
         }
 
         /**
          * Store the result.
          */
-        m_result = LagrangeDualControllerResult(
-            lagrange_dual_result.number_of_iterations,
-            lagrange_dual_result.total_update_status);
+        m_result = LagrangeDualControllerResult<T_Variable, T_Expression>(
+            lagrange_dual_result);
 
         /**
          * Print the search summary.
@@ -187,7 +178,9 @@ class LagrangeDualController
     }
 
     /*************************************************************************/
-    inline constexpr const LagrangeDualControllerResult& result(void) const {
+    inline constexpr const LagrangeDualControllerResult<T_Variable,
+                                                        T_Expression>&
+    result(void) const {
         return m_result;
     }
 };

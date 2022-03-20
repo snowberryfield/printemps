@@ -13,8 +13,9 @@ namespace controller {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 struct TabuSearchControllerResult {
+    int update_status;
+
     TabuSearchControllerState<T_Variable, T_Expression> state;
-    int                                                 update_status;
 
     /*************************************************************************/
     TabuSearchControllerResult(void) {
@@ -23,17 +24,16 @@ struct TabuSearchControllerResult {
 
     /*************************************************************************/
     TabuSearchControllerResult(
-        const TabuSearchControllerState<T_Variable, T_Expression> &a_STATE,
-        const int a_UPDATE_STATUS)
-        : state(a_STATE), update_status(a_UPDATE_STATUS) {
+        const TabuSearchControllerState<T_Variable, T_Expression> &a_STATE)
+        : update_status(a_STATE.total_update_status), state(a_STATE) {
         /// nothing to do
     }
 
     /*************************************************************************/
     inline void initialize(void) {
-        this->state.initialize();
         this->update_status =
             solution::IncumbentHolderConstant::STATUS_NOT_UPDATED;
+        this->state.initialize();
     }
 };
 }  // namespace controller

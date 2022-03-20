@@ -17,8 +17,8 @@ struct LagrangeDualCoreResult {
     int                                               number_of_iterations;
     LagrangeDualCoreTerminationStatus                 termination_status;
     double                                            lagrangian;
-    solution::DenseSolution<T_Variable, T_Expression> primal_solution;
-    std::vector<multi_array::ValueProxy<double>>      dual_value_proxies;
+    solution::DenseSolution<T_Variable, T_Expression> primal;
+    std::vector<multi_array::ValueProxy<double>>      dual;
 
     /*************************************************************************/
     LagrangeDualCoreResult(void) {
@@ -27,19 +27,13 @@ struct LagrangeDualCoreResult {
 
     /*************************************************************************/
     LagrangeDualCoreResult(
-        const int a_TOTAL_UPDATE_STATUS, const int a_NUMBER_OF_ITERATIONS,
-        const LagrangeDualCoreTerminationStatus a_TERMINATION_STATUS,
-        const double                            a_LAGRANGIAN,
-        const solution::DenseSolution<T_Variable, T_Expression>
-            &a_PRIMAL_SOLUTION,
-        const std::vector<multi_array::ValueProxy<double>>
-            &a_DUAL_VALUE_PROXIES)
-        : total_update_status(a_TOTAL_UPDATE_STATUS),
-          number_of_iterations(a_NUMBER_OF_ITERATIONS),
-          termination_status(a_TERMINATION_STATUS),
-          lagrangian(a_LAGRANGIAN),
-          primal_solution(a_PRIMAL_SOLUTION),
-          dual_value_proxies(a_DUAL_VALUE_PROXIES) {
+        const LagrangeDualCoreState<T_Variable, T_Expression> &a_STATE)
+        : total_update_status(a_STATE.total_update_status),
+          number_of_iterations(a_STATE.iteration),
+          termination_status(a_STATE.termination_status),
+          lagrangian(a_STATE.lagrangian),
+          primal(a_STATE.primal_incumbent),
+          dual(a_STATE.dual_incumbent) {
         /// nothing to do
     }
 
@@ -50,8 +44,8 @@ struct LagrangeDualCoreResult {
         this->termination_status =
             LagrangeDualCoreTerminationStatus::ITERATION_OVER;
         this->lagrangian = -HUGE_VALF;
-        this->primal_solution.initialize();
-        this->dual_value_proxies.clear();
+        this->primal.initialize();
+        this->dual.clear();
     }
 };
 }  // namespace core
