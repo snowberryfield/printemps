@@ -95,7 +95,7 @@ class TabuSearchCoreMoveEvaluator {
         return true;
     }
 
-    /*****************************************************************************/
+    /*************************************************************************/
     inline constexpr double compute_frequency_penalty(
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE,
         const int a_ITERATION) const noexcept {
@@ -115,7 +115,7 @@ class TabuSearchCoreMoveEvaluator {
                m_option.tabu_search.frequency_penalty_coefficient;
     }
 
-    /*****************************************************************************/
+    /*************************************************************************/
     inline constexpr double compute_lagrangian_penalty(
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
         noexcept {
@@ -128,7 +128,7 @@ class TabuSearchCoreMoveEvaluator {
                m_option.tabu_search.lagrangian_penalty_coefficient;
     }
 
-    /*****************************************************************************/
+    /*************************************************************************/
     inline constexpr void evaluate(
         TabuSearchCoreMoveScore *                           a_score_ptr,  //
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE,       //

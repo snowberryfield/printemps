@@ -19,9 +19,9 @@ namespace core {
 template <class T_Variable, class T_Expression>
 class LocalSearchCore : public AbstractSolverCore<T_Variable, T_Expression> {
    private:
-    LocalSearchCoreState  m_state;
-    LocalSearchCoreResult m_result;
-    std::mt19937          m_get_rand_mt;
+    LocalSearchCoreState<T_Variable, T_Expression>  m_state;
+    LocalSearchCoreResult<T_Variable, T_Expression> m_result;
+    std::mt19937                                    m_get_rand_mt;
 
     /*************************************************************************/
     inline void preprocess(void) {
@@ -53,6 +53,11 @@ class LocalSearchCore : public AbstractSolverCore<T_Variable, T_Expression> {
             this->m_initial_variable_value_proxies);
         this->m_model_ptr->update();
 
+        m_state.solution_score = this->m_model_ptr->evaluate({});
+        m_state.update_status =
+            this->m_incumbent_holder_ptr->try_update_incumbent(
+                this->m_model_ptr, m_state.solution_score);
+
         /**
          * Initialize the update status.
          */
@@ -62,7 +67,7 @@ class LocalSearchCore : public AbstractSolverCore<T_Variable, T_Expression> {
             LocalSearchCoreTerminationStatus::ITERATION_OVER;
 
         /**
-         * Prepare a random generator, which is used for shuffling moves.
+         * Initialize the random generator, which is used for shuffling moves.
          */
         m_get_rand_mt.seed(this->m_option.local_search.seed);
     }
@@ -72,9 +77,7 @@ class LocalSearchCore : public AbstractSolverCore<T_Variable, T_Expression> {
         /**
          * Prepare the result.
          */
-        m_result = LocalSearchCoreResult(m_state.total_update_status,  //
-                                         m_state.iteration,            //
-                                         m_state.termination_status);
+        m_result = LocalSearchCoreResult<T_Variable, T_Expression>(m_state);
     }
 
     /*************************************************************************/
@@ -147,7 +150,7 @@ class LocalSearchCore : public AbstractSolverCore<T_Variable, T_Expression> {
         this->m_model_ptr->neighborhood().shuffle_moves(&m_get_rand_mt);
     }
 
-    /*****************************************************************************/
+    /*************************************************************************/
     inline void print_table_header(const bool a_IS_ENABLED_PRINT) {
         if (!a_IS_ENABLED_PRINT) {
             return;
@@ -171,21 +174,19 @@ class LocalSearchCore : public AbstractSolverCore<T_Variable, T_Expression> {
             true);
     }
 
-    /*****************************************************************************/
-    inline void print_table_initial(
-        const solution::SolutionScore& a_CURRENT_SOLUTION_SCORE,
-        const bool                     a_IS_ENABLED_PRINT) {
+    /*************************************************************************/
+    inline void print_table_initial(const bool a_IS_ENABLED_PRINT) {
         if (!a_IS_ENABLED_PRINT) {
             return;
         }
 
         std::printf(
             " INITIAL |          -           - | %9.2e(%9.2e) | %9.2e  %9.2e\n",
-            a_CURRENT_SOLUTION_SCORE.local_augmented_objective *
+            m_state.solution_score.local_augmented_objective *
                 this->m_model_ptr->sign(),
-            a_CURRENT_SOLUTION_SCORE.is_feasible
+            m_state.solution_score.is_feasible
                 ? 0.0
-                : a_CURRENT_SOLUTION_SCORE.local_penalty,  //
+                : m_state.solution_score.local_penalty,  //
             this->m_incumbent_holder_ptr
                     ->global_augmented_incumbent_objective() *
                 this->m_model_ptr->sign(),
@@ -193,10 +194,8 @@ class LocalSearchCore : public AbstractSolverCore<T_Variable, T_Expression> {
                 this->m_model_ptr->sign());
     }
 
-    /*****************************************************************************/
-    inline void print_table_body(
-        const solution::SolutionScore& a_CURRENT_SOLUTION_SCORE,  //
-        const bool                     a_IS_ENABLED_PRINT) {
+    /*************************************************************************/
+    inline void print_table_body(const bool a_IS_ENABLED_PRINT) {
         if (!a_IS_ENABLED_PRINT) {
             return;
         }
@@ -232,12 +231,12 @@ class LocalSearchCore : public AbstractSolverCore<T_Variable, T_Expression> {
             m_state.number_of_moves,         //
             m_state.number_of_checked_move,  //
             mark_current,                    //
-            a_CURRENT_SOLUTION_SCORE.local_augmented_objective *
+            m_state.solution_score.local_augmented_objective *
                 this->m_model_ptr->sign(),  //
-            a_CURRENT_SOLUTION_SCORE.is_feasible
+            m_state.solution_score.is_feasible
                 ? 0.0
-                : a_CURRENT_SOLUTION_SCORE.local_penalty,  //
-            mark_global_augmented_incumbent,               //
+                : m_state.solution_score.local_penalty,  //
+            mark_global_augmented_incumbent,             //
             this->m_incumbent_holder_ptr
                     ->global_augmented_incumbent_objective() *
                 this->m_model_ptr->sign(),  //
@@ -246,7 +245,7 @@ class LocalSearchCore : public AbstractSolverCore<T_Variable, T_Expression> {
                 this->m_model_ptr->sign());
     }
 
-    /*****************************************************************************/
+    /*************************************************************************/
     inline void print_table_footer(const bool a_IS_ENABLED_PRINT) {
         if (!a_IS_ENABLED_PRINT) {
             return;
@@ -311,17 +310,10 @@ class LocalSearchCore : public AbstractSolverCore<T_Variable, T_Expression> {
         auto& feasible_solutions   = this->m_feasible_solutions;
         auto& state                = m_state;
 
-        solution::SolutionScore solution_score = model_ptr->evaluate({});
-        state.update_status = incumbent_holder_ptr->try_update_incumbent(
-            model_ptr, solution_score);
-
         /**
-         * Prepare other local variables.
+         * Preprocess.
          */
-        solution::SolutionScore trial_solution_score;
-
-        neighborhood::Move<T_Variable, T_Expression> previous_move;
-        neighborhood::Move<T_Variable, T_Expression> current_move;
+        this->preprocess();
 
         /**
          * Print the header of optimization progress table and print the initial
@@ -331,14 +323,13 @@ class LocalSearchCore : public AbstractSolverCore<T_Variable, T_Expression> {
         utility::print_message("Local search starts.",
                                option.verbose >= option::verbose::Full);
         this->print_table_header(option.verbose >= option::verbose::Full);
-        this->print_table_initial(solution_score,
-                                  option.verbose >= option::verbose::Full);
+        this->print_table_initial(option.verbose >= option::verbose::Full);
 
         /**
          * Iterations start.
          */
         state.iteration = 0;
-
+        solution::SolutionScore trial_solution_score;
         while (true) {
             /**
              *  Check the terminating condition.
@@ -351,7 +342,7 @@ class LocalSearchCore : public AbstractSolverCore<T_Variable, T_Expression> {
             /**
              * Update the moves.
              */
-            this->update_moves(current_move);
+            this->update_moves(state.current_move);
 
             const auto& MOVE_PTRS = model_ptr->neighborhood().move_ptrs();
             state.number_of_moves = MOVE_PTRS.size();
@@ -379,11 +370,11 @@ class LocalSearchCore : public AbstractSolverCore<T_Variable, T_Expression> {
                     if (move_ptr->is_univariable_move) {
                         model_ptr->evaluate_single(&trial_solution_score,  //
                                                    *move_ptr,              //
-                                                   solution_score);
+                                                   state.solution_score);
                     } else {
                         model_ptr->evaluate_multi(&trial_solution_score,  //
                                                   *move_ptr,              //
-                                                  solution_score);
+                                                  state.solution_score);
                     }
 #ifndef _MPS_SOLVER
                 } else {
@@ -397,11 +388,11 @@ class LocalSearchCore : public AbstractSolverCore<T_Variable, T_Expression> {
                         constant::EPSILON <
                     incumbent_holder_ptr
                         ->local_augmented_incumbent_objective()) {
-                    solution_score                    = trial_solution_score;
+                    state.solution_score              = trial_solution_score;
                     state.is_found_improving_solution = true;
 
-                    previous_move = current_move;
-                    current_move  = *move_ptr;
+                    state.previous_move = state.current_move;
+                    state.current_move  = *move_ptr;
                     break;
                 }
 
@@ -425,13 +416,13 @@ class LocalSearchCore : public AbstractSolverCore<T_Variable, T_Expression> {
 
             model_ptr->update(*move_ptr);
             state.update_status = incumbent_holder_ptr->try_update_incumbent(
-                model_ptr, solution_score);
+                model_ptr, state.solution_score);
             state.total_update_status |= state.update_status;
 
             /**
              * Store the current feasible solution.
              */
-            if (solution_score.is_feasible) {
+            if (state.solution_score.is_feasible) {
                 feasible_solutions.push_back(
                     model_ptr->export_plain_solution());
             }
@@ -448,8 +439,7 @@ class LocalSearchCore : public AbstractSolverCore<T_Variable, T_Expression> {
                         std::max(option.local_search.log_interval, 1) ==
                     0 ||
                 state.update_status > 1) {
-                this->print_table_body(solution_score,
-                                       option.verbose >= option::verbose::Full);
+                this->print_table_body(option.verbose >= option::verbose::Full);
             }
             state.iteration++;
         }
@@ -458,10 +448,16 @@ class LocalSearchCore : public AbstractSolverCore<T_Variable, T_Expression> {
          * Print the footer of the optimization progress table.
          */
         this->print_table_footer(option.verbose >= option::verbose::Full);
+
+        /**
+         * Postprocess.
+         */
+        this->postprocess();
     }
 
     /*************************************************************************/
-    inline constexpr const LocalSearchCoreResult& result(void) const {
+    inline constexpr const LocalSearchCoreResult<T_Variable, T_Expression>&
+    result(void) const {
         return m_result;
     }
 };

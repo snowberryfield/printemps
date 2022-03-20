@@ -2259,15 +2259,15 @@ TEST_F(TestModel, compute_lagrangian) {
     printemps::multi_array::ValueProxy<double> dual_value_proxy(1);
     dual_value_proxy.value() = 100;
 
-    std::vector<printemps::multi_array::ValueProxy<double>> dual_value_proxies =
-        {dual_value_proxy, dual_value_proxy};
+    std::vector<printemps::multi_array::ValueProxy<double>> dual = {
+        dual_value_proxy, dual_value_proxy};
 
     for (auto&& element : x.flat_indexed_variables()) {
         element = 1;
     }
 
     model.update();
-    auto lagrangian = model.compute_lagrangian(dual_value_proxies);
+    auto lagrangian = model.compute_lagrangian(dual);
 
     EXPECT_EQ(46 + 100 * (10 - 5) + 100 * (2 - 1), lagrangian);
 }

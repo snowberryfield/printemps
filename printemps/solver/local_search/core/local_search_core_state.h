@@ -11,6 +11,7 @@ namespace solver {
 namespace local_search {
 namespace core {
 /*****************************************************************************/
+template <class T_Variable, class T_Expression>
 struct LocalSearchCoreState {
     int  update_status;
     int  total_update_status;
@@ -18,6 +19,11 @@ struct LocalSearchCoreState {
     int  number_of_moves;
     int  number_of_checked_move;
     bool is_found_improving_solution;
+
+    solution::SolutionScore solution_score;
+
+    neighborhood::Move<T_Variable, T_Expression> previous_move;
+    neighborhood::Move<T_Variable, T_Expression> current_move;
 
     LocalSearchCoreTerminationStatus termination_status;
 

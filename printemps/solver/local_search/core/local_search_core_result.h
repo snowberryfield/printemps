@@ -11,6 +11,7 @@ namespace solver {
 namespace local_search {
 namespace core {
 /*****************************************************************************/
+template <class T_Variable, class T_Expression>
 struct LocalSearchCoreResult {
     int total_update_status;
     int number_of_iterations;
@@ -24,11 +25,10 @@ struct LocalSearchCoreResult {
 
     /*************************************************************************/
     LocalSearchCoreResult(
-        const int a_TOTAL_UPDATE_STATUS, const int a_NUMBER_OF_ITERATIONS,
-        const LocalSearchCoreTerminationStatus a_TERMINATION_STATUS)
-        : total_update_status(a_TOTAL_UPDATE_STATUS),
-          number_of_iterations(a_NUMBER_OF_ITERATIONS),
-          termination_status(a_TERMINATION_STATUS) {
+        const LocalSearchCoreState<T_Variable, T_Expression> &a_STATE)
+        : total_update_status(a_STATE.total_update_status),
+          number_of_iterations(a_STATE.iteration),
+          termination_status(a_STATE.termination_status) {
         /// nothing to do
     }
 
