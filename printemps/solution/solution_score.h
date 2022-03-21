@@ -22,6 +22,29 @@ struct SolutionScore {
     bool is_feasible;
     bool is_objective_improvable;
     bool is_feasibility_improvable;
+
+#if 0
+    /*************************************************************************/
+    SolutionScore(void) {
+        this->initialize();
+    }
+
+    /*************************************************************************/
+    void initialize(void) {
+        this->objective             = 0.0;
+        this->objective_improvement = 0.0;
+        this->total_violation       = 0.0;
+
+        this->local_penalty              = 0.0;
+        this->global_penalty             = 0.0;
+        this->local_augmented_objective  = 0.0;
+        this->global_augmented_objective = 0.0;
+
+        this->is_feasible               = 0.0;
+        this->is_objective_improvable   = 0.0;
+        this->is_feasibility_improvable = 0.0;
+    }
+#endif
 };
 
 /*****************************************************************************/

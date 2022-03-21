@@ -138,13 +138,13 @@ class TabuSearchCoreMoveEvaluator {
          * Check if the move is permissible or not.
          */
         a_score_ptr->is_permissible  //
-            = compute_permissibility(a_MOVE, a_ITERATION, a_TABU_TENURE);
+            = this->compute_permissibility(a_MOVE, a_ITERATION, a_TABU_TENURE);
 
         /**
          * Compute the frequency penalty of the move.
          */
         a_score_ptr->frequency_penalty  //
-            = compute_frequency_penalty(a_MOVE, a_ITERATION);
+            = this->compute_frequency_penalty(a_MOVE, a_ITERATION);
 
         /**
          * Compute the lagrangian penalty of the move.
@@ -152,7 +152,7 @@ class TabuSearchCoreMoveEvaluator {
         a_score_ptr->lagrangian_penalty = 0.0;
         if (m_option.is_enabled_lagrange_dual) {
             a_score_ptr->lagrangian_penalty  //
-                = compute_lagrangian_penalty(a_MOVE);
+                = this->compute_lagrangian_penalty(a_MOVE);
         }
     }
 };

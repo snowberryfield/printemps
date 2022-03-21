@@ -597,7 +597,9 @@ class TabuSearchController
         auto& state     = m_state_manager.state();
         auto& parameter = m_parameter_manager.parameter();
 
-        state.tabu_search_start_time = this->m_time_keeper.clock();
+        m_state_manager.set_tabu_search_start_time(this->m_time_keeper.clock());
+        m_state_manager.reset_iteration();
+
         while (true) {
             /**
              * Check the terminating condition.
@@ -607,7 +609,6 @@ class TabuSearchController
             if (this->satisfy_terminate_condition(
                     TOTAL_ELAPSED_TIME,
                     this->m_master_option.verbose >= option::verbose::Outer)) {
-                m_result.initialize();
                 break;
             }
 
@@ -618,27 +619,16 @@ class TabuSearchController
                                                             TOTAL_ELAPSED_TIME);
 
             /**
-             * Prepare feasible solutions storage.
-             */
-            std::vector<solution::SparseSolution<T_Variable, T_Expression>>
-                feasible_solutions;
-
-            /**
-             * Prepare the initial variable values.
-             */
-            auto initial_variable_value_proxies =
-                state.current_solution.variable_value_proxies;
-
-            /**
              * Run the tabu search.
              */
-            auto tabu_search_result =
-                tabu_search::core::solve(this->m_model_ptr,             //
-                                         this->m_incumbent_holder_ptr,  //
-                                         this->m_memory_ptr,
-                                         &feasible_solutions,  //
-                                         option,               //
-                                         initial_variable_value_proxies);
+            core::TabuSearchCore<T_Variable, T_Expression> tabu_search(
+                this->m_model_ptr,                              //
+                state.current_solution.variable_value_proxies,  //
+                this->m_incumbent_holder_ptr,                   //
+                this->m_memory_ptr,                             //
+                option);
+
+            tabu_search.run();
 
             /**
              * Update the elapsed time.
@@ -648,7 +638,7 @@ class TabuSearchController
             /**
              * Update the state by tabu search result.
              */
-            m_state_manager.update(tabu_search_result);
+            m_state_manager.update(tabu_search.result());
 
             /*
              * Update the parameters by the state.
@@ -675,7 +665,7 @@ class TabuSearchController
              * Update the feasible solutions archive.
              */
             if (this->m_master_option.is_enabled_store_feasible_solutions) {
-                this->update_archive(feasible_solutions);
+                this->update_archive(tabu_search.feasible_solutions());
             }
 
             /**
@@ -696,7 +686,7 @@ class TabuSearchController
              */
             this->m_model_ptr->callback(&option, this->m_incumbent_holder_ptr);
 
-            state.iteration++;
+            m_state_manager.next_iteration();
         }
 
         this->postprocess();
