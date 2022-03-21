@@ -62,7 +62,8 @@ struct TabuSearchControllerState {
     bool is_infeasible_stagnation;
     bool is_improved;
 
-    tabu_search::core::TabuSearchCoreResult tabu_search_result;
+    tabu_search::core::TabuSearchCoreResult<T_Variable, T_Expression>
+        tabu_search_result;
 
     /*************************************************************************/
     TabuSearchControllerState(void) {

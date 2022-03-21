@@ -87,7 +87,8 @@ class TabuSearchControllerStateManager {
 
     /*************************************************************************/
     inline constexpr void update(
-        const tabu_search::core::TabuSearchCoreResult& a_RESULT) {
+        const tabu_search::core::TabuSearchCoreResult<T_Variable, T_Expression>&
+            a_RESULT) {
         /**
          * Update the last tabu search update status.
          */
@@ -131,7 +132,8 @@ class TabuSearchControllerStateManager {
 
     /*************************************************************************/
     inline constexpr void update_last_tabu_search_result(
-        const tabu_search::core::TabuSearchCoreResult& a_RESULT) {
+        const tabu_search::core::TabuSearchCoreResult<T_Variable, T_Expression>&
+            a_RESULT) {
         /**
          * Update the incumbent update flags.
          */
@@ -285,6 +287,22 @@ class TabuSearchControllerStateManager {
         } else {
             m_state.iteration_after_relaxation++;
         }
+    }
+
+    /*************************************************************************/
+    inline constexpr void set_tabu_search_start_time(
+        const double a_START_TIME) {
+        m_state.tabu_search_start_time = a_START_TIME;
+    }
+
+    /*************************************************************************/
+    inline constexpr void reset_iteration(void) {
+        m_state.iteration = 0;
+    }
+
+    /*************************************************************************/
+    inline constexpr void next_iteration(void) {
+        m_state.iteration++;
     }
 
     /*************************************************************************/

@@ -435,9 +435,8 @@ class LocalSearchCore : public AbstractSolverCore<T_Variable, T_Expression> {
             /**
              * Print the optimization progress.
              */
-            if (state.iteration %
-                        std::max(option.local_search.log_interval, 1) ==
-                    0 ||
+            if ((state.iteration %
+                 std::max(option.local_search.log_interval, 1)) == 0 ||
                 state.update_status > 1) {
                 this->print_table_body(option.verbose >= option::verbose::Full);
             }
