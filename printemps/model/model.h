@@ -2421,15 +2421,15 @@ class Model {
     }
 
     /*************************************************************************/
-    solution::SparseSolution<T_Variable, T_Expression> export_plain_solution(
+    solution::SparseSolution<T_Variable, T_Expression> export_sparse_solution(
         void) const {
-        solution::SparseSolution<T_Variable, T_Expression> plain_solution;
+        solution::SparseSolution<T_Variable, T_Expression> sparse_solution;
 
         /// Decision variables
         for (const auto &proxy : m_variable_proxies) {
             for (const auto &variable : proxy.flat_indexed_variables()) {
                 if (variable.value() != 0) {
-                    plain_solution.variables[variable.name()] =
+                    sparse_solution.variables[variable.name()] =
                         variable.value();
                 }
             }
@@ -2443,35 +2443,35 @@ class Model {
             }
         }
 
-        plain_solution.objective       = m_objective.value();
-        plain_solution.total_violation = total_violation;
-        plain_solution.is_feasible     = this->is_feasible();
+        sparse_solution.objective       = m_objective.value();
+        sparse_solution.total_violation = total_violation;
+        sparse_solution.is_feasible     = this->is_feasible();
 
-        return plain_solution;
+        return sparse_solution;
     }
 
     /*************************************************************************/
     solution::SparseSolution<T_Variable, T_Expression>
-    convert_to_plain_solution(
+    convert_to_sparse_solution(
         const solution::DenseSolution<T_Variable, T_Expression> &a_SOLUTION)
         const {
-        solution::SparseSolution<T_Variable, T_Expression> plain_solution;
+        solution::SparseSolution<T_Variable, T_Expression> sparse_solution;
 
         /// Decision variables
         for (const auto &proxy : m_variable_proxies) {
             for (const auto &variable : proxy.flat_indexed_variables()) {
                 if (variable.value() != 0) {
-                    plain_solution.variables[variable.name()] =
+                    sparse_solution.variables[variable.name()] =
                         variable.value();
                 }
             }
         }
 
-        plain_solution.objective       = a_SOLUTION.objective;
-        plain_solution.total_violation = a_SOLUTION.total_violation;
-        plain_solution.is_feasible     = a_SOLUTION.is_feasible;
+        sparse_solution.objective       = a_SOLUTION.objective;
+        sparse_solution.total_violation = a_SOLUTION.total_violation;
+        sparse_solution.is_feasible     = a_SOLUTION.is_feasible;
 
-        return plain_solution;
+        return sparse_solution;
     }
 
     /*************************************************************************/

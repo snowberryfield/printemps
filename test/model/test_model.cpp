@@ -2684,7 +2684,7 @@ TEST_F(TestModel, convert_to_named_solution) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModel, export_plain_solution) {
+TEST_F(TestModel, export_sparse_solution) {
     printemps::model::Model<int, double> model;
 
     auto& x = model.create_variable("x");
@@ -2708,15 +2708,15 @@ TEST_F(TestModel, export_plain_solution) {
 
     model.update();
 
-    auto plain_solution = model.export_plain_solution();
-    EXPECT_EQ(model.objective().value(), plain_solution.objective);
-    EXPECT_EQ(model.is_feasible(), plain_solution.is_feasible);
+    auto sparse_solution = model.export_sparse_solution();
+    EXPECT_EQ(model.objective().value(), sparse_solution.objective);
+    EXPECT_EQ(model.is_feasible(), sparse_solution.is_feasible);
 
-    EXPECT_EQ(10, plain_solution.variables["x"]);
+    EXPECT_EQ(10, sparse_solution.variables["x"]);
 }
 
 /*****************************************************************************/
-TEST_F(TestModel, convert_to_plain_solution) {
+TEST_F(TestModel, convert_to_sparse_solution) {
     printemps::model::Model<int, double> model;
 
     auto& x = model.create_variable("x");
@@ -2763,13 +2763,13 @@ TEST_F(TestModel, convert_to_plain_solution) {
         }
     }
 
-    auto solution       = model.export_solution();
-    auto plain_solution = model.convert_to_plain_solution(solution);
-    EXPECT_EQ(model.objective().value(), plain_solution.objective);
-    EXPECT_EQ(total_violation, plain_solution.total_violation);
-    EXPECT_EQ(model.is_feasible(), plain_solution.is_feasible);
+    auto solution        = model.export_solution();
+    auto sparse_solution = model.convert_to_sparse_solution(solution);
+    EXPECT_EQ(model.objective().value(), sparse_solution.objective);
+    EXPECT_EQ(total_violation, sparse_solution.total_violation);
+    EXPECT_EQ(model.is_feasible(), sparse_solution.is_feasible);
 
-    EXPECT_EQ(10, plain_solution.variables["x"]);
+    EXPECT_EQ(10, sparse_solution.variables["x"]);
 }
 
 /*****************************************************************************/
