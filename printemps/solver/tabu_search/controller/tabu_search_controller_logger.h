@@ -22,7 +22,6 @@ class TabuSearchControllerLogger {
 
     TabuSearchController<T_Variable, T_Expression> *     m_controller_ptr;
     TabuSearchControllerState<T_Variable, T_Expression> *m_state_ptr;
-    TabuSearchControllerParameter *                      m_parameter_ptr;
 
     /*************************************************************************/
     TabuSearchControllerLogger(const TabuSearchControllerLogger &);
@@ -37,12 +36,8 @@ class TabuSearchControllerLogger {
     TabuSearchControllerLogger(
         const std::string &                                  a_FILE_NAME,
         TabuSearchController<T_Variable, T_Expression> *     a_controller_ptr,
-        TabuSearchControllerState<T_Variable, T_Expression> *a_state_ptr,
-        TabuSearchControllerParameter *                      a_parameter_ptr) {
-        this->setup(a_FILE_NAME,       //
-                    a_controller_ptr,  //
-                    a_state_ptr,       //
-                    a_parameter_ptr);
+        TabuSearchControllerState<T_Variable, T_Expression> *a_state_ptr) {
+        this->setup(a_FILE_NAME, a_controller_ptr, a_state_ptr);
     }
 
     /*************************************************************************/
@@ -53,21 +48,19 @@ class TabuSearchControllerLogger {
 
         m_controller_ptr = nullptr;
         m_state_ptr      = nullptr;
-        m_parameter_ptr  = nullptr;
     }
 
     /*************************************************************************/
-    void setup(const std::string &                             a_FILE_NAME,
-               TabuSearchController<T_Variable, T_Expression> *a_controller_ptr,
-               TabuSearchControllerState<T_Variable, T_Expression> *a_state_ptr,
-               TabuSearchControllerParameter *a_parameter_ptr) {
+    void setup(
+        const std::string &                                  a_FILE_NAME,
+        TabuSearchController<T_Variable, T_Expression> *     a_controller_ptr,
+        TabuSearchControllerState<T_Variable, T_Expression> *a_state_ptr) {
         this->initialize();
         m_file_name = a_FILE_NAME;
         m_ofstream.open(a_FILE_NAME);
 
         m_controller_ptr = a_controller_ptr;
         m_state_ptr      = a_state_ptr;
-        m_parameter_ptr  = a_parameter_ptr;
     }
 
     /*************************************************************************/
@@ -121,7 +114,6 @@ class TabuSearchControllerLogger {
                                     ->local_augmented_incumbent_score();
 
         auto &s = *m_state_ptr;
-        auto &p = *m_parameter_ptr;
 
         m_ofstream                                                 //
             << s.iteration << " "                                  //
@@ -136,17 +128,17 @@ class TabuSearchControllerLogger {
             << s.current_dual_intensity << " "                     //
             << s.tabu_search_result.performance << " "             //
             << s.tabu_search_result.total_update_status << " "     //
-            << p.employing_local_augmented_solution_flag << " "    //
-            << p.employing_global_augmented_solution_flag << " "   //
-            << p.employing_previous_solution_flag << " "           //
-            << p.is_enabled_penalty_coefficient_relaxing << " "    //
-            << p.is_enabled_penalty_coefficient_tightening << " "  //
-            << p.penalty_coefficient_reset_flag << " "             //
-            << p.penalty_coefficient_relaxing_rate << " "          //
-            << p.penalty_coefficient_tightening_rate << " "        //
-            << p.is_enabled_forcibly_initial_modification << " "   //
-            << p.number_of_initial_modification << " "             //
-            << p.initial_tabu_tenure                               //
+            << s.employing_local_augmented_solution_flag << " "    //
+            << s.employing_global_augmented_solution_flag << " "   //
+            << s.employing_previous_solution_flag << " "           //
+            << s.is_enabled_penalty_coefficient_relaxing << " "    //
+            << s.is_enabled_penalty_coefficient_tightening << " "  //
+            << s.penalty_coefficient_reset_flag << " "             //
+            << s.penalty_coefficient_relaxing_rate << " "          //
+            << s.penalty_coefficient_tightening_rate << " "        //
+            << s.is_enabled_forcibly_initial_modification << " "   //
+            << s.number_of_initial_modification << " "             //
+            << s.initial_tabu_tenure                               //
             << std::endl;
     }
 };

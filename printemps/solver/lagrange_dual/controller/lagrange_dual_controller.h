@@ -86,7 +86,7 @@ class LagrangeDualController
     /*************************************************************************/
     inline bool satisfy_terminate_condition(const double a_TOTAL_ELAPSED_TIME,
                                             const bool   a_IS_ENABLED_PRINT) {
-        if (a_TOTAL_ELAPSED_TIME > this->m_master_option.time_max) {
+        if (a_TOTAL_ELAPSED_TIME > this->m_option.time_max) {
             utility::print_message(
                 "Outer loop was terminated because of time-over (" +
                     utility::to_string(a_TOTAL_ELAPSED_TIME, "%.3f") + "sec).",
@@ -95,7 +95,7 @@ class LagrangeDualController
         }
 
         if (this->m_incumbent_holder_ptr->feasible_incumbent_objective() <=
-            this->m_master_option.target_objective_value) {
+            this->m_option.target_objective_value) {
             utility::print_message(
                 "Outer loop was terminated because of feasible objective "
                 "reaches the target limit.",
@@ -115,7 +115,7 @@ class LagrangeDualController
 
         if (this->satisfy_terminate_condition(
                 TOTAL_ELAPSED_TIME,
-                this->m_master_option.verbose >= option::verbose::Outer)) {
+                this->m_option.verbose >= option::verbose::Outer)) {
             m_result.initialize();
             return;
         }
@@ -124,7 +124,7 @@ class LagrangeDualController
          * Check the skip condition.
          */
         if (this->satisfy_skip_condition(  //
-                this->m_master_option.verbose >= option::verbose::Warning)) {
+                this->m_option.verbose >= option::verbose::Warning)) {
             m_result.initialize();
             return;
         }
@@ -132,7 +132,7 @@ class LagrangeDualController
         /**
          * Prepare an option object for lagrange dual search.
          */
-        option::Option option            = this->m_master_option;
+        option::Option option            = this->m_option;
         option.lagrange_dual.time_offset = TOTAL_ELAPSED_TIME;
 
         /**
@@ -152,7 +152,7 @@ class LagrangeDualController
         /**
          * Update the feasible solutions archive.
          */
-        if (this->m_master_option.is_enabled_store_feasible_solutions) {
+        if (this->m_option.is_enabled_store_feasible_solutions) {
             this->update_archive(lagrange_dual.feasible_solutions());
         }
 
@@ -167,14 +167,14 @@ class LagrangeDualController
          */
         utility::print_message(
             "Solving Lagrange dual finished. ",
-            this->m_master_option.verbose >= option::verbose::Outer);
+            this->m_option.verbose >= option::verbose::Outer);
 
         this->print_total_elapsed_time(
             this->m_time_keeper.clock(),
-            this->m_master_option.verbose >= option::verbose::Outer);
+            this->m_option.verbose >= option::verbose::Outer);
 
         this->print_incumbent_summary(  //
-            this->m_master_option.verbose >= option::verbose::Outer);
+            this->m_option.verbose >= option::verbose::Outer);
     }
 
     /*************************************************************************/

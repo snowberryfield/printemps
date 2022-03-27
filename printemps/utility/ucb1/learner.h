@@ -42,7 +42,7 @@ class Learner {
     inline void initialize(void) {
         m_actions.clear();
         m_min_score               = std::numeric_limits<double>::max();
-        m_max_score               = std::numeric_limits<double>::min();
+        m_max_score               = std::numeric_limits<double>::lowest();
         m_total_number_of_samples = 0;
     }
 

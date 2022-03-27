@@ -10,9 +10,7 @@
 #include "../core/tabu_search_core.h"
 
 #include "tabu_search_controller_state.h"
-#include "tabu_search_controller_parameter.h"
 #include "tabu_search_controller_state_manager.h"
-#include "tabu_search_controller_parameter_manager.h"
 #include "tabu_search_controller_logger.h"
 #include "tabu_search_controller_result.h"
 
@@ -26,8 +24,7 @@ class TabuSearchController
     : public AbstractSolverController<T_Variable, T_Expression> {
    private:
     TabuSearchControllerStateManager<T_Variable, T_Expression> m_state_manager;
-    TabuSearchControllerParameterManager<T_Variable, T_Expression>
-                                                         m_parameter_manager;
+
     TabuSearchControllerLogger<T_Variable, T_Expression> m_logger;
     TabuSearchControllerResult<T_Variable, T_Expression> m_result;
     std::mt19937                                         m_mt19937;
@@ -72,7 +69,6 @@ class TabuSearchController
         m_result.initialize();
         m_state_manager.initialize();
         m_logger.initialize();
-        m_parameter_manager.initialize();
     }
 
     /*************************************************************************/
@@ -80,22 +76,16 @@ class TabuSearchController
         m_state_manager.setup(this->m_model_ptr,             //
                               this->m_incumbent_holder_ptr,  //
                               this->m_memory_ptr,            //
-                              this->m_master_option);
+                              this->m_option);
 
-        m_parameter_manager.setup(this->m_model_ptr,             //
-                                  this->m_incumbent_holder_ptr,  //
-                                  this->m_memory_ptr,            //
-                                  this->m_master_option);
+        auto& state = m_state_manager.state();
 
-        auto& state     = m_state_manager.state();
-        auto& parameter = m_parameter_manager.parameter();
-
-        m_mt19937.seed(this->m_master_option.seed);
+        m_mt19937.seed(this->m_option.seed);
 
         state.current_solution = this->m_initial_solution;
 
-        if (this->m_master_option.is_enabled_write_trend) {
-            m_logger.setup("trend.txt", this, &state, &parameter);
+        if (this->m_option.is_enabled_write_trend) {
+            m_logger.setup("trend.txt", this, &state);
             m_logger.write_instance_info();
             m_logger.write_header();
         }
@@ -112,7 +102,7 @@ class TabuSearchController
                                             const bool   a_IS_ENABLED_PRINT) {
         const auto& STATE = m_state_manager.state();
 
-        if (a_TOTAL_ELAPSED_TIME > this->m_master_option.time_max) {
+        if (a_TOTAL_ELAPSED_TIME > this->m_option.time_max) {
             utility::print_message(
                 "Outer loop was terminated because of time-over (" +
                     utility::to_string(a_TOTAL_ELAPSED_TIME, "%.3f") + "sec).",
@@ -120,7 +110,7 @@ class TabuSearchController
             return true;
         }
 
-        if (STATE.iteration >= this->m_master_option.iteration_max) {
+        if (STATE.iteration >= this->m_option.iteration_max) {
             utility::print_message(
                 "Outer loop was terminated because of iteration limit (" +
                     utility::to_string(STATE.iteration, "%d") + " iterations).",
@@ -129,7 +119,7 @@ class TabuSearchController
         }
 
         if (this->m_incumbent_holder_ptr->feasible_incumbent_objective() <=
-            this->m_master_option.target_objective_value) {
+            this->m_option.target_objective_value) {
             utility::print_message(
                 "Outer loop was terminated because of feasible objective "
                 "reaches the target limit (" +
@@ -152,8 +142,7 @@ class TabuSearchController
 
     /*************************************************************************/
     inline void print_trend(const bool a_IS_ENABLED_PRINT) {
-        auto& STATE     = m_state_manager.state();
-        auto& PARAMETER = m_parameter_manager.parameter();
+        auto& STATE = m_state_manager.state();
 
         /**
          * Print the summary.
@@ -214,40 +203,40 @@ class TabuSearchController
         /**
          * Print message if the penalty coefficients were changed.
          */
-        if (PARAMETER.penalty_coefficient_reset_flag) {
+        if (STATE.penalty_coefficient_reset_flag) {
             this->print_penalty_coefficient_reset(a_IS_ENABLED_PRINT);
-        } else if (PARAMETER.is_enabled_penalty_coefficient_relaxing) {
+        } else if (STATE.is_enabled_penalty_coefficient_relaxing) {
             this->print_penalty_coefficient_relaxing(a_IS_ENABLED_PRINT);
-        } else if (PARAMETER.is_enabled_penalty_coefficient_tightening) {
+        } else if (STATE.is_enabled_penalty_coefficient_tightening) {
             this->print_penalty_coefficient_tightening(a_IS_ENABLED_PRINT);
         }
 
         this->print_penalty_coefficient_relaxing_rate(  //
-            PARAMETER.penalty_coefficient_relaxing_rate, a_IS_ENABLED_PRINT);
+            STATE.penalty_coefficient_relaxing_rate, a_IS_ENABLED_PRINT);
 
         this->print_penalty_coefficient_tightening_rate(  //
-            PARAMETER.penalty_coefficient_tightening_rate, a_IS_ENABLED_PRINT);
+            STATE.penalty_coefficient_tightening_rate, a_IS_ENABLED_PRINT);
 
         /**
          * Print the initial tabu tenure for the next loop.
          */
         this->print_initial_tabu_tenure(  //
-            PARAMETER.initial_tabu_tenure, a_IS_ENABLED_PRINT);
+            STATE.initial_tabu_tenure, a_IS_ENABLED_PRINT);
 
         /**
          * Print the improvability screening_mode
          */
         this->print_improvability_screening_mode(  //
-            PARAMETER.improvability_screening_mode, a_IS_ENABLED_PRINT);
+            STATE.improvability_screening_mode, a_IS_ENABLED_PRINT);
 
         /**
          * Print the initial solution for the next loop.
          */
-        if (PARAMETER.employing_global_augmented_solution_flag) {
+        if (STATE.employing_global_augmented_solution_flag) {
             this->print_employing_global_augmented_solution(a_IS_ENABLED_PRINT);
-        } else if (PARAMETER.employing_local_augmented_solution_flag) {
+        } else if (STATE.employing_local_augmented_solution_flag) {
             this->print_employing_local_augmented_solution(a_IS_ENABLED_PRINT);
-        } else if (PARAMETER.employing_previous_solution_flag) {
+        } else if (STATE.employing_previous_solution_flag) {
             this->print_employing_previous_solution(a_IS_ENABLED_PRINT);
         }
 
@@ -256,23 +245,23 @@ class TabuSearchController
          * loop.
          */
         this->print_number_of_initial_modification(  //
-            PARAMETER.number_of_initial_modification, a_IS_ENABLED_PRINT);
+            STATE.number_of_initial_modification, a_IS_ENABLED_PRINT);
 
         /**
          * Print the number of iterations for the next loop.
          */
         this->print_inner_iteration_max(  //
-            PARAMETER.iteration_max, a_IS_ENABLED_PRINT);
+            STATE.iteration_max, a_IS_ENABLED_PRINT);
 
         /**
          * Print a message of the special neighborhood moves
          * activation/deactivation.
          */
-        if (PARAMETER.is_disabled_special_neighborhood_move) {
+        if (STATE.is_disabled_special_neighborhood_move) {
             this->print_special_neighborhood_move_disabled(a_IS_ENABLED_PRINT);
         }
 
-        if (PARAMETER.is_enabled_special_neighborhood_move) {
+        if (STATE.is_enabled_special_neighborhood_move) {
             this->print_special_neighborhood_move_enabled(a_IS_ENABLED_PRINT);
         }
 
@@ -307,7 +296,7 @@ class TabuSearchController
     inline void print_number_of_feasible_solutions(
         const int  a_NUMBER_OF_FEASIBLE_SOLUTIONS,
         const bool a_IS_ENABLED_PRINT) {
-        if (this->m_master_option.is_enabled_store_feasible_solutions) {
+        if (this->m_option.is_enabled_store_feasible_solutions) {
             utility::print_message(
                 "Number of feasible solutions found so far is " +
                     std::to_string(a_NUMBER_OF_FEASIBLE_SOLUTIONS) + ".",
@@ -526,8 +515,7 @@ class TabuSearchController
                                            const bool a_IS_ENABLED_PRINT) {
         utility::print_message(
             "Tabu search loop (" + std::to_string(a_ITERATION + 1) + "/" +
-                std::to_string(this->m_master_option.iteration_max) +
-                ") finished.",
+                std::to_string(this->m_option.iteration_max) + ") finished.",
             a_IS_ENABLED_PRINT);
     }
 
@@ -594,8 +582,7 @@ class TabuSearchController
     inline void run(void) {
         this->preprocess();
 
-        auto& state     = m_state_manager.state();
-        auto& parameter = m_parameter_manager.parameter();
+        auto& state = m_state_manager.state();
 
         m_state_manager.set_tabu_search_start_time(this->m_time_keeper.clock());
         m_state_manager.reset_iteration();
@@ -608,15 +595,15 @@ class TabuSearchController
 
             if (this->satisfy_terminate_condition(
                     TOTAL_ELAPSED_TIME,
-                    this->m_master_option.verbose >= option::verbose::Outer)) {
+                    this->m_option.verbose >= option::verbose::Outer)) {
                 break;
             }
 
             /**
              * Prepare an option object for tabu search.
              */
-            auto option = m_parameter_manager.create_option(state.iteration,
-                                                            TOTAL_ELAPSED_TIME);
+            auto option = m_state_manager.create_option(state.iteration,
+                                                        TOTAL_ELAPSED_TIME);
 
             /**
              * Run the tabu search.
@@ -638,46 +625,35 @@ class TabuSearchController
             /**
              * Update the state by tabu search result.
              */
-            m_state_manager.update(tabu_search.result());
-
-            /*
-             * Update the parameters by the state.
-             */
-            m_parameter_manager.update(state, &m_mt19937);
-
-            /**
-             * Update the state again by the parameters.
-             */
-            m_state_manager.update(parameter);
+            m_state_manager.update(tabu_search.result(), &m_mt19937);
 
             /**
              * Update variable bounds.
              */
-            if (this->m_master_option.is_enabled_presolve &&
+            if (this->m_option.is_enabled_presolve &&
                 state.is_feasible_incumbent_updated) {
                 this->bound_variables(
                     this->m_incumbent_holder_ptr
                         ->feasible_incumbent_objective(),
-                    this->m_master_option.verbose >= option::verbose::Outer);
+                    this->m_option.verbose >= option::verbose::Outer);
             }
 
             /**
              * Update the feasible solutions archive.
              */
-            if (this->m_master_option.is_enabled_store_feasible_solutions) {
+            if (this->m_option.is_enabled_store_feasible_solutions) {
                 this->update_archive(tabu_search.feasible_solutions());
             }
 
             /**
              * Print trend.
              */
-            this->print_trend(this->m_master_option.verbose >=
-                              option::verbose::Outer);
+            this->print_trend(this->m_option.verbose >= option::verbose::Outer);
 
             /**
              * Logging.
              */
-            if (this->m_master_option.is_enabled_write_trend) {
+            if (this->m_option.is_enabled_write_trend) {
                 m_logger.write_log();
             }
 

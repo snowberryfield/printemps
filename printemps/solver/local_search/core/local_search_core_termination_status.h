@@ -16,6 +16,7 @@ enum class LocalSearchCoreTerminationStatus {
     ITERATION_OVER,
     NO_MOVE,
     REACH_TARGET,
+    OPTIMAL,
     LOCAL_OPTIMAL
 };
 }  // namespace core

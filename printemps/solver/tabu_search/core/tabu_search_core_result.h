@@ -83,26 +83,19 @@ struct TabuSearchCoreResult {
         this->is_found_new_feasible_solution =
             a_STATE.is_found_new_feasible_solution;
 
-        auto abs_max_objective =
-            std::max(fabs(a_STATE.max_objective), fabs(a_STATE.min_objective));
-        auto objective_constraint_rate =
-            std::max(1.0,
-                     std::max(abs_max_objective,  //
-                              a_STATE.max_objective - a_STATE.min_objective)) /
-            std::max(1.0, a_STATE.min_local_penalty);
-        auto global_augmented_objective_range =
-            std::max(0.0, a_STATE.max_global_augmented_objective -
-                              a_STATE.min_global_augmented_objective);
+        const double OBJECTIVE_CONSTRAINT_RATE =
+            std::max(1.0, std::max(a_STATE.objective_range.max_abs(),
+                                   a_STATE.objective_range.range())) /
+            std::max(1.0, a_STATE.local_penalty_range.min());
 
-        auto performance =
+        const double PERFORMANCE =
             a_STATE.oscillation / a_STATE.iteration /
-            std::max(1.0, a_STATE.max_local_augmented_objective -
-                              a_STATE.min_local_augmented_objective);
+            std::max(1.0, a_STATE.local_augmented_objective_range.range());
 
-        this->objective_constraint_rate = objective_constraint_rate;
+        this->objective_constraint_rate = OBJECTIVE_CONSTRAINT_RATE;
         this->global_augmented_objective_range =
-            global_augmented_objective_range;
-        this->performance = performance;
+            a_STATE.global_augmented_objective_range.range();
+        this->performance = PERFORMANCE;
 
         /// nothing to do
     }

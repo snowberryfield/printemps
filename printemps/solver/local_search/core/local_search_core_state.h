@@ -13,19 +13,22 @@ namespace core {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 struct LocalSearchCoreState {
-    int  update_status;
-    int  total_update_status;
-    int  iteration;
-    int  number_of_moves;
-    int  number_of_checked_move;
-    bool is_found_improving_solution;
+    int    update_status;
+    int    total_update_status;
+    int    iteration;
+    double elapsed_time;
 
-    solution::SolutionScore solution_score;
+    LocalSearchCoreTerminationStatus termination_status;
 
     neighborhood::Move<T_Variable, T_Expression> previous_move;
     neighborhood::Move<T_Variable, T_Expression> current_move;
 
-    LocalSearchCoreTerminationStatus termination_status;
+    solution::SolutionScore current_solution_score;
+    solution::SolutionScore previous_solution_score;
+
+    int  number_of_moves;
+    int  number_of_checked_moves;
+    bool is_found_improving_solution;
 
     /*************************************************************************/
     LocalSearchCoreState(void) {
@@ -34,14 +37,23 @@ struct LocalSearchCoreState {
 
     /*************************************************************************/
     void initialize(void) {
-        this->update_status               = 0;
-        this->total_update_status         = 0;
-        this->iteration                   = 0;
-        this->number_of_moves             = 0;
-        this->number_of_checked_move      = 0;
-        this->is_found_improving_solution = false;
+        this->update_status       = 0;
+        this->total_update_status = 0;
+        this->iteration           = 0;
+        this->elapsed_time        = 0.0;
+
         this->termination_status =
             LocalSearchCoreTerminationStatus::ITERATION_OVER;
+
+        this->current_move.initialize();
+        this->previous_move.initialize();
+
+        this->current_solution_score  = solution::SolutionScore();
+        this->previous_solution_score = solution::SolutionScore();
+
+        this->number_of_moves             = 0;
+        this->number_of_checked_moves     = 0;
+        this->is_found_improving_solution = false;
     }
 };
 }  // namespace core

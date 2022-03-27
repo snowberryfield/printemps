@@ -20,7 +20,7 @@ class AbstractSolverController {
     Memory<T_Variable, T_Expression>*                    m_memory_ptr;
     solution::SolutionArchive<T_Variable, T_Expression>* m_solution_archive_ptr;
     utility::TimeKeeper                                  m_time_keeper;
-    option::Option                                       m_master_option;
+    option::Option                                       m_option;
 
     /*************************************************************************/
     inline void print_total_elapsed_time(const double a_TOTAL_ELAPSED_TIME,
@@ -111,7 +111,7 @@ class AbstractSolverController {
         m_memory_ptr           = nullptr;
         m_solution_archive_ptr = nullptr;
         m_time_keeper.initialize();
-        m_master_option.initialize();
+        m_option.initialize();
     }
 
     /*************************************************************************/
@@ -132,7 +132,7 @@ class AbstractSolverController {
         m_memory_ptr           = a_memory_ptr;
         m_solution_archive_ptr = a_solution_archive_ptr;
         m_time_keeper          = a_TIME_KEEPER;
-        m_master_option        = a_OPTION;
+        m_option               = a_OPTION;
     }
 
     /*************************************************************************/

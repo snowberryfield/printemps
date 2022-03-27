@@ -16,11 +16,16 @@ struct LagrangeDualCoreState {
     int    update_status;
     int    total_update_status;
     int    iteration;
+    double elapsed_time;
+
+    LagrangeDualCoreTerminationStatus termination_status;
+
     double lagrangian;
     double lagrangian_incumbent;
     double step_size;
 
-    solution::SolutionScore solution_score;
+    solution::SolutionScore current_solution_score;
+    solution::SolutionScore previous_solution_score;
 
     solution::DenseSolution<T_Variable, T_Expression> primal;
     solution::DenseSolution<T_Variable, T_Expression> primal_incumbent;
@@ -28,7 +33,7 @@ struct LagrangeDualCoreState {
     std::vector<multi_array::ValueProxy<double>> dual;
     std::vector<multi_array::ValueProxy<double>> dual_incumbent;
 
-    LagrangeDualCoreTerminationStatus termination_status;
+    utility::FixedSizeQueue<double> queue;
 
     /*************************************************************************/
     LagrangeDualCoreState(void) {
@@ -37,9 +42,14 @@ struct LagrangeDualCoreState {
 
     /*************************************************************************/
     void initialize(void) {
-        this->update_status        = 0;
-        this->total_update_status  = 0;
-        this->iteration            = 0;
+        this->update_status       = 0;
+        this->total_update_status = 0;
+        this->iteration           = 0;
+        this->elapsed_time        = 0.0;
+
+        this->termination_status =
+            LagrangeDualCoreTerminationStatus::ITERATION_OVER;
+
         this->lagrangian           = 0.0;
         this->lagrangian_incumbent = 0.0;
         this->step_size            = 0.0;
@@ -47,9 +57,7 @@ struct LagrangeDualCoreState {
         this->primal_incumbent.initialize();
         this->dual.clear();
         this->dual_incumbent.clear();
-
-        this->termination_status =
-            LagrangeDualCoreTerminationStatus::ITERATION_OVER;
+        this->queue.initialize();
     }
 };
 }  // namespace core
