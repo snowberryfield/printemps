@@ -48,6 +48,7 @@ struct Move {
         this->related_constraint_ptrs.clear();
         this->sense                        = MoveSense::General;
         this->hash                         = 0;
+        this->overlap_rate                 = 0.0;
         this->is_univariable_move          = false;
         this->is_selection_move            = false;
         this->is_special_neighborhood_move = false;

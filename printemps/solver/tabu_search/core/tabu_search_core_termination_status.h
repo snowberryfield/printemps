@@ -17,7 +17,8 @@ enum class TabuSearchCoreTerminationStatus {
     NO_MOVE,
     REACH_TARGET,
     EARLY_STOP,
-    OPTIMAL
+    OPTIMAL,
+    PENALTY_COEFFICIENT_TOO_LARGE
 };
 }  // namespace core
 }  // namespace tabu_search

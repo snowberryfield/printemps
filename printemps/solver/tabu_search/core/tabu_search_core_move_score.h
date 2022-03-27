@@ -12,9 +12,9 @@ namespace tabu_search {
 namespace core {
 /*****************************************************************************/
 struct TabuSearchCoreMoveScore {
-    bool   is_permissible;
-    double frequency_penalty;
-    double lagrangian_penalty;
+    bool   is_permissible     = false;
+    double frequency_penalty  = 0.0;
+    double lagrangian_penalty = 0.0;
 };
 }  // namespace core
 }  // namespace tabu_search

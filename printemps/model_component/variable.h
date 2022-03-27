@@ -518,6 +518,11 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
+    inline constexpr void set_lower_or_upper_bound(const bool a_IS_LOWER) {
+        this->set_value_if_mutable(a_IS_LOWER ? m_lower_bound : m_upper_bound);
+    }
+
+    /*************************************************************************/
     inline constexpr Expression<T_Variable, T_Expression> to_expression(
         void) const {
         std::unordered_map<Variable<T_Variable, T_Expression> *, T_Expression>
