@@ -688,6 +688,17 @@ TEST_F(TestVariable, has_upper_bound_margin) {
 }
 
 /*****************************************************************************/
+TEST_F(TestVariable, set_lower_or_upper_bound) {
+    auto variable =
+        printemps::model_component::Variable<int, double>::create_instance();
+    variable.set_bound(-10, 10);
+    variable.set_lower_or_upper_bound(true);
+    EXPECT_EQ(-10, variable.value());
+    variable.set_lower_or_upper_bound(false);
+    EXPECT_EQ(10, variable.value());
+}
+
+/*****************************************************************************/
 TEST_F(TestVariable, to_expression) {
     auto variable =
         printemps::model_component::Variable<int, double>::create_instance();

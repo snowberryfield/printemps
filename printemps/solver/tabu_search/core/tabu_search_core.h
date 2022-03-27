@@ -854,7 +854,7 @@ class TabuSearchCore {
             if (m_option.is_enabled_store_feasible_solutions &&
                 STATE.current_solution_score.is_feasible) {
                 m_feasible_solutions.push_back(
-                    m_model_ptr->export_plain_solution());
+                    m_model_ptr->export_sparse_solution());
             }
 
             /**

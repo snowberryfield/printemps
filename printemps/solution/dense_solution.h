@@ -21,7 +21,7 @@ struct DenseSolution {
     bool         is_feasible;
 
     /*************************************************************************/
-    DenseSolution(void) : objective(0), total_violation(0), is_feasible(false) {
+    DenseSolution(void) {
         this->initialize();
     }
 

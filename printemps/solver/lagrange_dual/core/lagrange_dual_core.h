@@ -416,7 +416,7 @@ class LagrangeDualCore {
              */
             if (STATE.current_solution_score.is_feasible) {
                 m_feasible_solutions.push_back(
-                    m_model_ptr->export_plain_solution());
+                    m_model_ptr->export_sparse_solution());
             }
 
             /**

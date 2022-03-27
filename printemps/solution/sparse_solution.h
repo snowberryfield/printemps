@@ -19,8 +19,15 @@ struct SparseSolution {
     std::unordered_map<std::string, T_Variable> variables;
 
     /*************************************************************************/
-    SparseSolution(void)
-        : objective(0), total_violation(0), is_feasible(false) {
+    SparseSolution(void) {
+        this->initialize();
+    }
+
+    /*************************************************************************/
+    inline void initialize(void) {
+        this->objective       = 0;
+        this->total_violation = 0;
+        this->is_feasible     = false;
         this->variables.clear();
     }
 };
