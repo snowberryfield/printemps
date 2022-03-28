@@ -31,7 +31,10 @@ inline int argmax_index_objective_improvement(
     double    max         = a_SCORES[0].objective_improvement;
     const int SCORES_SIZE = a_SCORES.size();
     for (auto i = 1; i < SCORES_SIZE; i++) {
-        argmax = a_SCORES[i].objective_improvement > max ? i : argmax;
+        if (a_SCORES[i].objective_improvement > max) {
+            argmax = i;
+            max    = a_SCORES[i].objective_improvement;
+        }
     }
     return argmax;
 }
@@ -42,7 +45,10 @@ inline int argmin_index_objective(const std::vector<SolutionScore> &a_SCORES) {
     double    min         = a_SCORES[0].objective;
     const int SCORES_SIZE = a_SCORES.size();
     for (auto i = 1; i < SCORES_SIZE; i++) {
-        argmin = a_SCORES[i].objective < min ? i : argmin;
+        if (a_SCORES[i].objective < min) {
+            argmin = i;
+            min    = a_SCORES[i].objective;
+        }
     }
     return argmin;
 }
@@ -53,8 +59,12 @@ inline int argmin_index_local_penalty(
     int       argmin      = 0;
     double    min         = a_SCORES[0].local_penalty;
     const int SCORES_SIZE = a_SCORES.size();
+
     for (auto i = 1; i < SCORES_SIZE; i++) {
-        argmin = a_SCORES[i].local_penalty < min ? i : argmin;
+        if (a_SCORES[i].local_penalty < min) {
+            argmin = i;
+            min    = a_SCORES[i].local_penalty;
+        }
     }
     return argmin;
 }
@@ -66,7 +76,10 @@ inline int argmin_index_global_penalty(
     double    min         = a_SCORES[0].global_penalty;
     const int SCORES_SIZE = a_SCORES.size();
     for (auto i = 1; i < SCORES_SIZE; i++) {
-        argmin = a_SCORES[i].global_penalty < min ? i : argmin;
+        if (a_SCORES[i].global_penalty < min) {
+            argmin = i;
+            min    = a_SCORES[i].global_penalty;
+        }
     }
     return argmin;
 }
@@ -78,7 +91,10 @@ inline int argmin_index_local_augmented_objective(
     double    min         = a_SCORES[0].local_augmented_objective;
     const int SCORES_SIZE = a_SCORES.size();
     for (auto i = 1; i < SCORES_SIZE; i++) {
-        argmin = a_SCORES[i].local_augmented_objective < min ? i : argmin;
+        if (a_SCORES[i].local_augmented_objective < min) {
+            argmin = i;
+            min    = a_SCORES[i].local_augmented_objective;
+        }
     }
     return argmin;
 }
@@ -90,7 +106,10 @@ inline int argmin_index_global_augmented_objective(
     double    min         = a_SCORES[0].global_augmented_objective;
     const int SCORES_SIZE = a_SCORES.size();
     for (auto i = 1; i < SCORES_SIZE; i++) {
-        argmin = a_SCORES[i].global_augmented_objective < min ? i : argmin;
+        if (a_SCORES[i].global_augmented_objective < min) {
+            argmin = i;
+            min    = a_SCORES[i].global_augmented_objective;
+        }
     }
     return argmin;
 }
