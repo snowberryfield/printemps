@@ -134,7 +134,7 @@ class LocalSearchCore {
             return false;
         }
 
-        if (m_model_ptr->is_linear() && m_model_ptr->is_feasible()) {
+        if (m_model_ptr->is_feasible()) {
             /**
              * NOTE: If the current solution is feasible and there is no
              * improvable solution, the solution should be an optimum. It can
@@ -178,18 +178,6 @@ class LocalSearchCore {
         bool accept_all                    = true;
         bool accept_objective_improvable   = true;
         bool accept_feasibility_improvable = true;
-
-        if (m_model_ptr->is_linear()) {
-            m_model_ptr->neighborhood().update_moves(
-                accept_all,                     //
-                accept_objective_improvable,    //
-                accept_feasibility_improvable,  //
-                m_option.is_enabled_parallel_neighborhood_update);
-
-            m_state_manager.set_number_of_moves(
-                m_model_ptr->neighborhood().move_ptrs().size());
-            return;
-        }
 
         if (STATE.iteration == 0) {
             m_model_ptr->update_variable_objective_improvabilities();
@@ -244,7 +232,7 @@ class LocalSearchCore {
             "  Incumbent Solution ",
             true);
         utility::print(
-            "         |      All       checked |   Aug.Obj.(Penalty)  | "
+            "         |      All     Performed |   Aug.Obj.(Penalty)  | "
             "  Aug.Obj.  Feas.Obj ",
             true);
         utility::print(
@@ -311,7 +299,7 @@ class LocalSearchCore {
             "%8d |      %5d       %5d |%c%9.2e(%9.2e) |%c%9.2e %c%9.2e\n",
             STATE.iteration,                                                //
             STATE.number_of_moves,                                          //
-            STATE.number_of_checked_moves,                                  //
+            STATE.number_of_performed_moves,                                //
             mark_current,                                                   //
             STATE.current_solution_score.local_augmented_objective * SIGN,  //
             STATE.current_solution_score.is_feasible
@@ -409,6 +397,14 @@ class LocalSearchCore {
          */
         this->preprocess();
 
+        std::vector<solution::SolutionScore> trial_solution_scores;
+        std::vector<int>                     move_indices;
+        std::unordered_set<
+            model_component::Constraint<T_Variable, T_Expression>*>
+                                                     constraint_ptrs;
+        neighborhood::Move<T_Variable, T_Expression> move;
+        int number_of_performed_moves = 0;
+
         /**
          * Print the header of optimization progress table and print the initial
          * solution status.
@@ -423,7 +419,6 @@ class LocalSearchCore {
          * Iterations start.
          */
         m_state_manager.reset_iteration();
-        solution::SolutionScore trial_solution_score;
         while (true) {
             m_state_manager.set_elapsed_time(time_keeper.clock());
 
@@ -454,9 +449,6 @@ class LocalSearchCore {
              */
             this->update_moves();
 
-            const auto& MOVE_PTRS = m_model_ptr->neighborhood().move_ptrs();
-            m_state_manager.set_number_of_moves(MOVE_PTRS.size());
-
             /**
              *  Check the terminating condition (2).
              */
@@ -464,49 +456,90 @@ class LocalSearchCore {
                 break;
             }
 
-            int  number_of_checked_move      = 0;
-            bool is_found_improving_solution = false;
-            neighborhood::Move<T_Variable, T_Expression>* selected_move_ptr =
-                nullptr;
+            /**
+             * Reserve elements for vectors by the number of the moves.
+             */
+            const auto& TRIAL_MOVE_PTRS =
+                m_model_ptr->neighborhood().move_ptrs();
+            trial_solution_scores.resize(STATE.number_of_moves);
 
+            const auto NUMBER_OF_MOVES        = STATE.number_of_moves;
             const auto CURRENT_SOLUTION_SCORE = STATE.current_solution_score;
-            const auto CURRENT_LOCAL_AUGMENTED_OBJECTIVE =
-                CURRENT_SOLUTION_SCORE.local_augmented_objective;
-            for (const auto& move_ptr : MOVE_PTRS) {
+#ifdef _OPENMP
+#pragma omp parallel for if (m_option.is_enabled_parallel_evaluation) \
+    schedule(static)
+#endif
+            for (auto i = 0; i < NUMBER_OF_MOVES; i++) {
                 /**
-                 * The neighborhood solutions are evaluated in sequential by
+                 * The neighborhood solutions will be evaluated in parallel by
                  * fast or ordinary(slow) evaluation methods.
                  */
-#ifndef _MPS_SOLVER
-                if (m_model_ptr->is_enabled_fast_evaluation()) {
-#endif
-                    if (move_ptr->is_univariable_move) {
-                        m_model_ptr->evaluate_single(&trial_solution_score,  //
-                                                     *move_ptr,              //
-                                                     CURRENT_SOLUTION_SCORE);
-                    } else {
-                        m_model_ptr->evaluate_multi(&trial_solution_score,  //
-                                                    *move_ptr,              //
-                                                    CURRENT_SOLUTION_SCORE);
-                    }
-#ifndef _MPS_SOLVER
+                if (TRIAL_MOVE_PTRS[i]->is_univariable_move) {
+                    m_model_ptr->evaluate_single(&trial_solution_scores[i],  //
+                                                 *TRIAL_MOVE_PTRS[i],        //
+                                                 CURRENT_SOLUTION_SCORE);
                 } else {
-                    m_model_ptr->evaluate(&trial_solution_score, *move_ptr);
+                    m_model_ptr->evaluate_multi(    //
+                        &trial_solution_scores[i],  //
+                        *TRIAL_MOVE_PTRS[i],        //
+                        CURRENT_SOLUTION_SCORE);
                 }
-#endif
-                /**
-                 * Update the incumbent if the evaluated solution improves it.
-                 */
-                if (trial_solution_score.local_augmented_objective +
-                        constant::EPSILON <
-                    CURRENT_LOCAL_AUGMENTED_OBJECTIVE) {
-                    selected_move_ptr           = move_ptr;
-                    is_found_improving_solution = true;
-                    break;
+            }
+
+            move_indices = utility::sequence(STATE.number_of_moves);
+            std::sort(move_indices.begin(), move_indices.end(),
+                      [&trial_solution_scores](const auto a_FIRST,
+                                               const auto a_SECOND) {
+                          return trial_solution_scores[a_FIRST]
+                                     .global_augmented_objective <
+                                 trial_solution_scores[a_SECOND]
+                                     .global_augmented_objective;
+                      });
+
+            move.alterations.reserve(m_model_ptr->number_of_variables());
+            constraint_ptrs.clear();
+            number_of_performed_moves = 0;
+            move.initialize();
+            for (auto i = 0; i < NUMBER_OF_MOVES; i++) {
+                auto& score    = trial_solution_scores[move_indices[i]];
+                auto& move_ptr = TRIAL_MOVE_PTRS[move_indices[i]];
+                if (move_ptr->sense == neighborhood::MoveSense::Selection) {
+                    continue;
                 }
 
-                number_of_checked_move++;
+                if (score.global_augmented_objective >
+                    CURRENT_SOLUTION_SCORE.global_augmented_objective -
+                        constant::EPSILON) {
+                    break;
+                }
+                bool has_intersection = false;
+
+                for (const auto& constraint_ptr :
+                     move_ptr->related_constraint_ptrs) {
+                    if (!constraint_ptr->is_enabled()) {
+                        continue;
+                    }
+                    if (constraint_ptrs.find(constraint_ptr) !=
+                        constraint_ptrs.end()) {
+                        has_intersection = true;
+                        break;
+                    }
+                }
+                if (has_intersection) {
+                    continue;
+                }
+
+                move.alterations.insert(move.alterations.end(),
+                                        move_ptr->alterations.begin(),
+                                        move_ptr->alterations.end());
+                move.related_constraint_ptrs.insert(
+                    move_ptr->related_constraint_ptrs.begin(),
+                    move_ptr->related_constraint_ptrs.end());
+                constraint_ptrs = move.related_constraint_ptrs;
+                number_of_performed_moves++;
             }
+
+            bool is_found_improving_solution = move.alterations.size() > 0;
 
             /**
              * Terminate the loop if there is no improving solution in the
@@ -517,23 +550,29 @@ class LocalSearchCore {
                 break;
             }
 
+            solution::SolutionScore solution_score;
+            m_model_ptr->evaluate_multi(  //
+                &solution_score,          //
+                move,                     //
+                CURRENT_SOLUTION_SCORE);
+
             /**
              * Update the model by the selected move.
              */
-            m_model_ptr->update(*selected_move_ptr);
+            m_model_ptr->update(move);
 
             /**
              * Update the memory.
              */
-            this->update_memory(selected_move_ptr);
+            this->update_memory(&move);
 
             /**
              * Update the state.
              */
-            m_state_manager.update(selected_move_ptr,            //
-                                   number_of_checked_move,       //
+            m_state_manager.update(&move,                        //
+                                   number_of_performed_moves,    //
                                    is_found_improving_solution,  //
-                                   trial_solution_score);
+                                   solution_score);
 
             /**
              * Store the current feasible solution.

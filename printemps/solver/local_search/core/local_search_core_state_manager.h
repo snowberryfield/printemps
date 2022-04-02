@@ -81,7 +81,7 @@ class LocalSearchCoreStateManager {
     /*************************************************************************/
     inline constexpr void update(
         neighborhood::Move<T_Variable, T_Expression>* a_selected_move_ptr,
-        const int                                     a_NUMBER_OF_CHECKED_MOVES,
+        const int                      a_NUMBER_OF_PERFORMED_MOVES,
         const bool                     a_IS_FOUND_IMPROVING_SOLUTION,
         const solution::SolutionScore& a_SOLUTION_SCORE) {
         /**
@@ -100,9 +100,9 @@ class LocalSearchCoreStateManager {
         this->update_update_status();
 
         /**
-         * Update the number of checked moves.
+         * Update the number of performed moves.
          */
-        this->update_number_of_checked_moves(a_NUMBER_OF_CHECKED_MOVES);
+        this->update_number_of_performed_moves(a_NUMBER_OF_PERFORMED_MOVES);
 
         /**
          * Update the improving solution found flag.
@@ -138,9 +138,9 @@ class LocalSearchCoreStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void update_number_of_checked_moves(
-        const int a_NUMBER_OF_CHECKED_MOVES) {
-        m_state.number_of_checked_moves = a_NUMBER_OF_CHECKED_MOVES;
+    inline constexpr void update_number_of_performed_moves(
+        const int a_NUMBER_OF_PERFORMED_MOVES) {
+        m_state.number_of_performed_moves = a_NUMBER_OF_PERFORMED_MOVES;
     }
 
     /*************************************************************************/

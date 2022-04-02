@@ -63,6 +63,14 @@ class LocalSearchController
     /*************************************************************************/
     inline bool satisfy_terminate_condition(const double a_TOTAL_ELAPSED_TIME,
                                             const bool   a_IS_ENABLED_PRINT) {
+        if (!this->m_model_ptr->is_linear()) {
+            utility::print_warning(
+                "Solving lagrange dual was skipped because the problem is "
+                "nonlinear.",
+                a_IS_ENABLED_PRINT);
+            return true;
+        }
+
         if (a_TOTAL_ELAPSED_TIME > this->m_option.time_max) {
             utility::print_message(
                 "Outer loop was terminated because of time-over (" +
