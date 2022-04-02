@@ -5,7 +5,7 @@
     "penalty_coefficient_tightening_rate": 1.0,
     "initial_penalty_coefficient": 1E7,
     "is_enabled_lagrange_dual": false,
-    "is_enabled_local_search": false,
+    "is_enabled_local_search": true,
     "is_enabled_grouping_penalty_coefficient": false,
     "is_enabled_presolve": true,
     "is_enabled_initial_value_correction": true,
