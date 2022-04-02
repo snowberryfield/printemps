@@ -51,9 +51,8 @@ class TabuSearchCoreMoveEvaluator {
 
     /*************************************************************************/
     inline constexpr bool compute_permissibility(
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE,       //
-        const int                                           a_ITERATION,  //
-        const int a_TABU_TENURE) const noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE,  //
+        const int a_DURATION) const noexcept {
         const auto &LAST_UPDATE_ITERATIONS =
             m_memory_ptr->last_update_iterations();
 
@@ -68,7 +67,7 @@ class TabuSearchCoreMoveEvaluator {
                 const int &LAST_UPDATE_ITERATION =
                     LAST_UPDATE_ITERATIONS[alteration.first->proxy_index()]
                                           [alteration.first->flat_index()];
-                if (a_ITERATION - LAST_UPDATE_ITERATION >= a_TABU_TENURE) {
+                if (a_DURATION >= LAST_UPDATE_ITERATION) {
                     return true;
                 }
             }
@@ -83,7 +82,7 @@ class TabuSearchCoreMoveEvaluator {
                 const int &LAST_UPDATE_ITERATION =
                     LAST_UPDATE_ITERATIONS[alteration.first->proxy_index()]
                                           [alteration.first->flat_index()];
-                if (a_ITERATION - LAST_UPDATE_ITERATION < a_TABU_TENURE) {
+                if (a_DURATION < LAST_UPDATE_ITERATION) {
                     return false;
                 }
             }
@@ -133,12 +132,12 @@ class TabuSearchCoreMoveEvaluator {
         TabuSearchCoreMoveScore *                           a_score_ptr,  //
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE,       //
         const int                                           a_ITERATION,  //
-        const int a_TABU_TENURE) const noexcept {
+        const int a_DURATION) const noexcept {
         /**
          * Check if the move is permissible or not.
          */
         a_score_ptr->is_permissible  //
-            = this->compute_permissibility(a_MOVE, a_ITERATION, a_TABU_TENURE);
+            = this->compute_permissibility(a_MOVE, a_DURATION);
 
         /**
          * Compute the frequency penalty of the move.
