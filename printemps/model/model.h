@@ -2051,6 +2051,11 @@ class Model {
             }
         }
 
+#ifdef _MPS_SOLVER
+        double objective             = m_objective.evaluate(a_MOVE);
+        double objective_improvement = m_objective.value() - objective;
+
+#else
         double objective             = 0.0;
         double objective_improvement = 0.0;
         if (m_is_defined_objective) {
@@ -2058,16 +2063,18 @@ class Model {
             objective_improvement =
                 m_objective.value() * this->sign() - objective;
         }
+#endif
 
-        double global_penalty = total_violation * m_global_penalty_coefficient;
+        const double GLOBAL_PENALTY =
+            total_violation * m_global_penalty_coefficient;
 
         a_score_ptr->objective                  = objective;
         a_score_ptr->objective_improvement      = objective_improvement;
         a_score_ptr->total_violation            = total_violation;
         a_score_ptr->local_penalty              = local_penalty;
-        a_score_ptr->global_penalty             = global_penalty;
+        a_score_ptr->global_penalty             = GLOBAL_PENALTY;
         a_score_ptr->local_augmented_objective  = objective + local_penalty;
-        a_score_ptr->global_augmented_objective = objective + global_penalty;
+        a_score_ptr->global_augmented_objective = objective + GLOBAL_PENALTY;
         a_score_ptr->is_feasible = !(total_violation > constant::EPSILON);
         a_score_ptr->is_objective_improvable =
             objective_improvement > constant::EPSILON;
@@ -2119,14 +2126,19 @@ class Model {
             }
         }
 
+#ifdef _MPS_SOLVER
+        double objective             = m_objective.evaluate(a_MOVE);
+        double objective_improvement = m_objective.value() - objective;
+
+#else
         double objective             = 0.0;
         double objective_improvement = 0.0;
-
         if (m_is_defined_objective) {
             objective = m_objective.evaluate(a_MOVE) * this->sign();
             objective_improvement =
                 m_objective.value() * this->sign() - objective;
         }
+#endif
 
         const double GLOBAL_PENALTY =
             total_violation * m_global_penalty_coefficient;

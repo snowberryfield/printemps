@@ -746,6 +746,7 @@ class TabuSearchCore {
             const auto CURRENT_SOLUTION_SCORE = STATE.current_solution_score;
             const auto ITERATION              = STATE.iteration;
             const auto TABU_TENURE            = STATE.tabu_tenure;
+            const auto DURATION               = ITERATION - TABU_TENURE;
 #ifdef _OPENMP
 #pragma omp parallel for if (m_option.is_enabled_parallel_evaluation) \
     schedule(static)
@@ -779,7 +780,7 @@ class TabuSearchCore {
                 move_evaluator.evaluate(&trial_move_scores[i],  //
                                         *TRIAL_MOVE_PTRS[i],    //
                                         ITERATION,              //
-                                        TABU_TENURE);
+                                        DURATION);
 
                 total_scores[i] =
                     trial_solution_scores[i].local_augmented_objective +
