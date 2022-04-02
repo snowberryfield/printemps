@@ -27,7 +27,7 @@ struct LocalSearchCoreState {
     solution::SolutionScore previous_solution_score;
 
     int  number_of_moves;
-    int  number_of_checked_moves;
+    int  number_of_performed_moves;
     bool is_found_improving_solution;
 
     /*************************************************************************/
@@ -52,7 +52,7 @@ struct LocalSearchCoreState {
         this->previous_solution_score = solution::SolutionScore();
 
         this->number_of_moves             = 0;
-        this->number_of_checked_moves     = 0;
+        this->number_of_performed_moves   = 0;
         this->is_found_improving_solution = false;
     }
 };
