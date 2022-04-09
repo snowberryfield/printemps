@@ -61,28 +61,36 @@ class LocalSearchController
     }
 
     /*************************************************************************/
-    inline bool satisfy_terminate_condition(const double a_TOTAL_ELAPSED_TIME,
-                                            const bool   a_IS_ENABLED_PRINT) {
+    inline bool satisfy_not_linear_skip_condition(
+        const bool a_IS_ENABLED_PRINT) {
         if (!this->m_model_ptr->is_linear()) {
             utility::print_warning(
-                "Solving lagrange dual was skipped because the problem is "
-                "nonlinear.",
+                "Local search was skipped because the problem is not linear.",
                 a_IS_ENABLED_PRINT);
             return true;
         }
+        return false;
+    }
 
+    /*************************************************************************/
+    inline bool satisfy_time_over_skip_condition(
+        const double a_TOTAL_ELAPSED_TIME, const bool a_IS_ENABLED_PRINT) {
         if (a_TOTAL_ELAPSED_TIME > this->m_option.time_max) {
             utility::print_message(
-                "Outer loop was terminated because of time-over (" +
+                "Local search was skipped because of time-over (" +
                     utility::to_string(a_TOTAL_ELAPSED_TIME, "%.3f") + "sec).",
                 a_IS_ENABLED_PRINT);
             return true;
         }
-
+        return false;
+    }
+    /*************************************************************************/
+    inline bool satisfy_reach_target_skip_condition(
+        const bool a_IS_ENABLED_PRINT) {
         if (this->m_incumbent_holder_ptr->feasible_incumbent_objective() <=
             this->m_option.target_objective_value) {
             utility::print_message(
-                "Outer loop was terminated because of feasible objective "
+                "Local search was skipped because of feasible objective "
                 "reaches the target limit.",
                 a_IS_ENABLED_PRINT);
             return true;
@@ -92,13 +100,31 @@ class LocalSearchController
 
     /*************************************************************************/
     inline void run(void) {
-        /**
-         * Check the terminate condition.
-         */
         const double TOTAL_ELAPSED_TIME = this->m_time_keeper.clock();
+        /**
+         * Skip local search if the problem is not linear.
+         */
+        if (this->satisfy_not_linear_skip_condition(  //
+                this->m_option.verbose >= option::verbose::Outer)) {
+            m_result.initialize();
+            return;
+        }
 
-        if (this->satisfy_terminate_condition(
+        /**
+         * Skip local search if the time is over.
+         */
+        if (this->satisfy_time_over_skip_condition(
                 TOTAL_ELAPSED_TIME,
+                this->m_option.verbose >= option::verbose::Outer)) {
+            m_result.initialize();
+            return;
+        }
+
+        /**
+         * Skip local search if the objective value of the feasible
+         * incumbent reaches the target value.
+         */
+        if (this->satisfy_reach_target_skip_condition(  //
                 this->m_option.verbose >= option::verbose::Outer)) {
             m_result.initialize();
             return;

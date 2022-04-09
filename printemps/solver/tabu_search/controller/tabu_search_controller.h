@@ -98,18 +98,25 @@ class TabuSearchController
     }
 
     /*************************************************************************/
-    inline bool satisfy_terminate_condition(const double a_TOTAL_ELAPSED_TIME,
-                                            const bool   a_IS_ENABLED_PRINT) {
+    inline bool satisfy_time_over_terminate_condition(
+        const bool a_IS_ENABLED_PRINT) {
         const auto& STATE = m_state_manager.state();
 
-        if (a_TOTAL_ELAPSED_TIME > this->m_option.time_max) {
+        if (STATE.total_elapsed_time > this->m_option.time_max) {
             utility::print_message(
                 "Outer loop was terminated because of time-over (" +
-                    utility::to_string(a_TOTAL_ELAPSED_TIME, "%.3f") + "sec).",
+                    utility::to_string(STATE.total_elapsed_time, "%.3f") +
+                    "sec).",
                 a_IS_ENABLED_PRINT);
             return true;
         }
+        return false;
+    }
 
+    /*************************************************************************/
+    inline bool satisfy_iteration_over_terminate_condition(
+        const bool a_IS_ENABLED_PRINT) {
+        const auto& STATE = m_state_manager.state();
         if (STATE.iteration >= this->m_option.iteration_max) {
             utility::print_message(
                 "Outer loop was terminated because of iteration limit (" +
@@ -117,7 +124,13 @@ class TabuSearchController
                 a_IS_ENABLED_PRINT);
             return true;
         }
+        return false;
+    }
 
+    /*************************************************************************/
+    inline bool satisfy_reach_target_terminate_condition(
+        const bool a_IS_ENABLED_PRINT) {
+        const auto& STATE = m_state_manager.state();
         if (this->m_incumbent_holder_ptr->feasible_incumbent_objective() <=
             this->m_option.target_objective_value) {
             utility::print_message(
@@ -127,7 +140,13 @@ class TabuSearchController
                 a_IS_ENABLED_PRINT);
             return true;
         }
+        return false;
+    }
 
+    /*************************************************************************/
+    inline bool satisfy_optimal_terminate_condition(
+        const bool a_IS_ENABLED_PRINT) {
+        const auto& STATE = m_state_manager.state();
         if (STATE.iteration > 0 &&
             STATE.tabu_search_result.termination_status ==
                 tabu_search::core::TabuSearchCoreTerminationStatus::OPTIMAL) {
@@ -142,7 +161,7 @@ class TabuSearchController
 
     /*************************************************************************/
     inline void print_trend(const bool a_IS_ENABLED_PRINT) {
-        auto& STATE = m_state_manager.state();
+        const auto& STATE = m_state_manager.state();
 
         /**
          * Print the summary.
@@ -588,13 +607,36 @@ class TabuSearchController
         m_state_manager.reset_iteration();
 
         while (true) {
+            m_state_manager.set_total_elapsed_time(this->m_time_keeper.clock());
             /**
-             * Check the terminating condition.
+             * Terminate the loop if the time is over.
              */
-            const double TOTAL_ELAPSED_TIME = this->m_time_keeper.clock();
+            if (this->satisfy_time_over_terminate_condition(  //
+                    this->m_option.verbose >= option::verbose::Outer)) {
+                break;
+            }
 
-            if (this->satisfy_terminate_condition(
-                    TOTAL_ELAPSED_TIME,
+            /**
+             * Terminate the loop if the iteration is over.
+             */
+            if (this->satisfy_iteration_over_terminate_condition(  //
+                    this->m_option.verbose >= option::verbose::Outer)) {
+                break;
+            }
+
+            /**
+             * Terminate the loop if the objective value of the feasible
+             * incumbent reaches the target value.
+             */
+            if (this->satisfy_reach_target_terminate_condition(  //
+                    this->m_option.verbose >= option::verbose::Outer)) {
+                break;
+            }
+
+            /**
+             * Terminate the loop if the optimal solution is found.
+             */
+            if (this->satisfy_optimal_terminate_condition(  //
                     this->m_option.verbose >= option::verbose::Outer)) {
                 break;
             }
@@ -602,8 +644,7 @@ class TabuSearchController
             /**
              * Prepare an option object for tabu search.
              */
-            auto option = m_state_manager.create_option(state.iteration,
-                                                        TOTAL_ELAPSED_TIME);
+            auto option = m_state_manager.create_option();
 
             /**
              * Run the tabu search.
@@ -620,7 +661,7 @@ class TabuSearchController
             /**
              * Update the elapsed time.
              */
-            m_state_manager.update_elapsed_time(this->m_time_keeper.clock());
+            m_state_manager.set_total_elapsed_time(this->m_time_keeper.clock());
 
             /**
              * Update the state by tabu search result.
