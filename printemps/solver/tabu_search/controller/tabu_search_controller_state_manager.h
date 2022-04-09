@@ -105,15 +105,14 @@ class TabuSearchControllerStateManager {
     }
 
     /*************************************************************************/
-    inline option::Option create_option(const int    a_SEED,
-                                        const double a_ELAPSED_TIME) const {
+    inline option::Option create_option() const {
         option::Option option = m_option;
 
         option.improvability_screening_mode =
             m_state.improvability_screening_mode;
         option.tabu_search.iteration_max = m_state.iteration_max;
-        option.tabu_search.time_offset   = a_ELAPSED_TIME;
-        option.tabu_search.seed          = a_SEED;
+        option.tabu_search.time_offset   = m_state.total_elapsed_time;
+        option.tabu_search.seed          = m_state.iteration;
         option.tabu_search.number_of_initial_modification =
             m_state.number_of_initial_modification;
         option.tabu_search.initial_tabu_tenure = m_state.initial_tabu_tenure;
@@ -361,8 +360,7 @@ class TabuSearchControllerStateManager {
     inline constexpr void update_is_infeasible_stagnation(void) {
         /**
          * "Stagnation" refers to when the iteration after global augmented
-         * incumbent update is not less than the constant
-         * STAGNATION_THRESHOLD.
+         * incumbent update is not less than the constant STAGNATION_THRESHOLD.
          */
         m_state.is_infeasible_stagnation =
             !m_incumbent_holder_ptr->is_found_feasible_solution() &&
@@ -653,6 +651,7 @@ class TabuSearchControllerStateManager {
     /*************************************************************************/
     inline constexpr void update_penalty_coefficient_reset_flag(void) {
         if (m_state.is_infeasible_stagnation &&
+            m_state.is_exceeded_initial_penalty_coefficient &&
             m_state.iteration_after_relaxation >
                 TabuSearchControllerStateManagerConstant::
                     ITERATION_AFTER_RELAXATION_MAX) {
@@ -682,6 +681,8 @@ class TabuSearchControllerStateManager {
             LOCAL_AUGMENTED_INCUMBENT_SOLUTION.constraint_value_proxies;
         const auto& VIOLATION_VALUE_PROXIES =
             LOCAL_AUGMENTED_INCUMBENT_SOLUTION.violation_value_proxies;
+
+        m_state.is_exceeded_initial_penalty_coefficient = false;
 
         for (auto&& proxy : this->m_model_ptr->constraint_proxies()) {
             for (auto&& constraint : proxy.flat_indexed_constraints()) {
@@ -752,13 +753,22 @@ class TabuSearchControllerStateManager {
              * Penalty coefficients are bounded by the initial penalty
              * coefficient specified in option.
              */
+            const double INITIAL_PENALTY_COEFFICIENT =
+                this->m_option.initial_penalty_coefficient;
             for (auto&& constraint : proxy.flat_indexed_constraints()) {
-                constraint.local_penalty_coefficient_less() =
-                    std::min(constraint.local_penalty_coefficient_less(),
-                             this->m_option.initial_penalty_coefficient);
-                constraint.local_penalty_coefficient_greater() =
-                    std::min(constraint.local_penalty_coefficient_greater(),
-                             this->m_option.initial_penalty_coefficient);
+                if (constraint.local_penalty_coefficient_less() >
+                    INITIAL_PENALTY_COEFFICIENT) {
+                    m_state.is_exceeded_initial_penalty_coefficient = true;
+                    constraint.local_penalty_coefficient_less() =
+                        INITIAL_PENALTY_COEFFICIENT;
+                }
+
+                if (constraint.local_penalty_coefficient_greater() >
+                    INITIAL_PENALTY_COEFFICIENT) {
+                    m_state.is_exceeded_initial_penalty_coefficient = true;
+                    constraint.local_penalty_coefficient_greater() =
+                        INITIAL_PENALTY_COEFFICIENT;
+                }
             }
         }
     }
@@ -1077,7 +1087,7 @@ class TabuSearchControllerStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void update_elapsed_time(
+    inline constexpr void set_total_elapsed_time(
         const double a_TOTAL_ELAPSED_TIME) {
         m_state.total_elapsed_time = a_TOTAL_ELAPSED_TIME;
         m_state.tabu_search_elapsed_time =
