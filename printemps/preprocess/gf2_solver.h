@@ -37,7 +37,7 @@ class GF2Solver {
     }
 
     /*************************************************************************/
-    inline constexpr bool solve(const bool a_IS_ENABLED_PRINT) {
+    inline bool solve(const bool a_IS_ENABLED_PRINT) {
         utility::print_single_line(a_IS_ENABLED_PRINT);
         utility::print_message("Attempting to solve GF(2) equations...",
                                a_IS_ENABLED_PRINT);

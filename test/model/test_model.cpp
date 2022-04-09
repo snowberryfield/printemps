@@ -940,10 +940,8 @@ TEST_F(TestModel, setup_is_enabled_fast_evaluation) {
         model.minimize(x);
 
         auto move_updater =
-            [&x]([[maybe_unused]] std::vector<
-                 printemps::neighborhood::Move<int, double>>* a_moves_ptr) {
-                ;
-            };
+            []([[maybe_unused]] std::vector<
+                printemps::neighborhood::Move<int, double>>* a_moves_ptr) { ; };
 
         model.neighborhood().user_defined().set_move_updater(move_updater);
         model.neighborhood().user_defined().enable();
