@@ -42,7 +42,7 @@ class Learner {
     inline void initialize(void) {
         m_actions.clear();
         m_min_score               = std::numeric_limits<double>::max();
-        m_max_score               = std::numeric_limits<double>::min();
+        m_max_score               = std::numeric_limits<double>::lowest();
         m_total_number_of_samples = 0;
     }
 
@@ -122,7 +122,8 @@ class Learner {
         if (no_data_action_ptrs.size() > 0) {
             best_action_ptr = no_data_action_ptrs.front();
         } else {
-            double argmax_upper_confidence = std::numeric_limits<double>::min();
+            double argmax_upper_confidence =
+                std::numeric_limits<double>::lowest();
             for (auto &&action : m_actions) {
                 double upper_confidence = action.mean + action.confidence;
                 if (upper_confidence > argmax_upper_confidence) {

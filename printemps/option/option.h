@@ -24,7 +24,7 @@ struct OptionConstant {
     static constexpr double DEFAULT_PENALTY_COEFFICIENT_UPDATING_BALANCE = 0.0;
     static constexpr double DEFAULT_INITIAL_PENALTY_COEFFICIENT          = 1E7;
     static constexpr bool   DEFAULT_IS_ENABLED_LAGRANGE_DUAL = false;
-    static constexpr bool   DEFAULT_IS_ENABLED_LOCAL_SEARCH  = false;
+    static constexpr bool   DEFAULT_IS_ENABLED_LOCAL_SEARCH  = true;
     static constexpr bool   DEFAULT_IS_ENABLED_GROUPING_PENALTY_COEFFICIENT =
         false;
     static constexpr bool DEFAULT_IS_ENABLED_PRESOLVE                 = true;
@@ -38,7 +38,7 @@ struct OptionConstant {
     static constexpr bool DEFAULT_IS_ENABLED_PRECEDENCE_MOVE     = false;
     static constexpr bool DEFAULT_IS_ENABLED_VARIABLE_BOUND_MOVE = false;
     static constexpr bool DEFAULT_IS_ENABLED_SOFT_SELECTION_MOVE = false;
-    static constexpr bool DEFAULT_IS_ENABLED_CHAIN_MOVE          = false;
+    static constexpr bool DEFAULT_IS_ENABLED_CHAIN_MOVE          = true;
     static constexpr bool DEFAULT_IS_ENABLED_TWO_FLIP_MOVE       = false;
     static constexpr bool DEFAULT_IS_ENABLED_USER_DEFINED_MOVE   = false;
     static constexpr int  DEFAULT_CHAIN_MOVE_CAPACITY            = 10000;

@@ -12,7 +12,7 @@ namespace solution {
 struct IncumbentHolderConstant {
     static constexpr bool   DEFAULT_IS_FOUND_FEASIBLE_SOLUTION      = false;
     static constexpr double DEFAULT_OBJECTIVE                       = HUGE_VALF;
-    static constexpr int    STATUS_NO_UPDATED                       = 0;
+    static constexpr int    STATUS_NOT_UPDATED                      = 0;
     static constexpr int    STATUS_LOCAL_AUGMENTED_INCUMBENT_UPDATE = 1;
     static constexpr int    STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE = 2;
     static constexpr int    STATUS_FEASIBLE_INCUMBENT_UPDATE         = 4;
@@ -72,7 +72,7 @@ class IncumbentHolder {
     constexpr int try_update_incumbent(
         const DenseSolution<T_Variable, T_Expression> &a_SOLUTION,
         const SolutionScore &                          a_SCORE) {
-        int status = IncumbentHolderConstant::STATUS_NO_UPDATED;
+        int status = IncumbentHolderConstant::STATUS_NOT_UPDATED;
 
         /**
          * Following comparations must be based on SolutionScore objects
@@ -124,7 +124,7 @@ class IncumbentHolder {
 
         bool is_solution_updated = false;
 
-        int status = IncumbentHolderConstant::STATUS_NO_UPDATED;
+        int status = IncumbentHolderConstant::STATUS_NOT_UPDATED;
         if (a_SCORE.local_augmented_objective + constant::EPSILON <
             m_local_augmented_incumbent_objective) {
             status += IncumbentHolderConstant::

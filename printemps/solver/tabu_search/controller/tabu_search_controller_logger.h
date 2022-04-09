@@ -22,7 +22,6 @@ class TabuSearchControllerLogger {
 
     TabuSearchController<T_Variable, T_Expression> *     m_controller_ptr;
     TabuSearchControllerState<T_Variable, T_Expression> *m_state_ptr;
-    TabuSearchControllerParameter *                      m_parameter_ptr;
 
     /*************************************************************************/
     TabuSearchControllerLogger(const TabuSearchControllerLogger &);
@@ -37,12 +36,8 @@ class TabuSearchControllerLogger {
     TabuSearchControllerLogger(
         const std::string &                                  a_FILE_NAME,
         TabuSearchController<T_Variable, T_Expression> *     a_controller_ptr,
-        TabuSearchControllerState<T_Variable, T_Expression> *a_state_ptr,
-        TabuSearchControllerParameter *                      a_parameter_ptr) {
-        this->setup(a_FILE_NAME,       //
-                    a_controller_ptr,  //
-                    a_state_ptr,       //
-                    a_parameter_ptr);
+        TabuSearchControllerState<T_Variable, T_Expression> *a_state_ptr) {
+        this->setup(a_FILE_NAME, a_controller_ptr, a_state_ptr);
     }
 
     /*************************************************************************/
@@ -53,21 +48,19 @@ class TabuSearchControllerLogger {
 
         m_controller_ptr = nullptr;
         m_state_ptr      = nullptr;
-        m_parameter_ptr  = nullptr;
     }
 
     /*************************************************************************/
-    void setup(const std::string &                             a_FILE_NAME,
-               TabuSearchController<T_Variable, T_Expression> *a_controller_ptr,
-               TabuSearchControllerState<T_Variable, T_Expression> *a_state_ptr,
-               TabuSearchControllerParameter *a_parameter_ptr) {
+    void setup(
+        const std::string &                                  a_FILE_NAME,
+        TabuSearchController<T_Variable, T_Expression> *     a_controller_ptr,
+        TabuSearchControllerState<T_Variable, T_Expression> *a_state_ptr) {
         this->initialize();
         m_file_name = a_FILE_NAME;
         m_ofstream.open(a_FILE_NAME);
 
         m_controller_ptr = a_controller_ptr;
         m_state_ptr      = a_state_ptr;
-        m_parameter_ptr  = a_parameter_ptr;
     }
 
     /*************************************************************************/
@@ -83,25 +76,29 @@ class TabuSearchControllerLogger {
     /*************************************************************************/
     void write_header(void) {
         m_ofstream                                           //
-            << "#iteration "                                 // 0
-            << "elapsed_time "                               // 1
-            << "local_objective "                            // 2
-            << "local_violation "                            // 3
-            << "global_objective "                           // 4
-            << "global_violation "                           // 5
-            << "intensity "                                  // 6
-            << "update_status "                              // 7
-            << "employing_local_augmented_solution_flag "    // 8
-            << "employing_global_augmented_solution_flag "   // 9
-            << "employing_previous_solution_flag "           // 10
-            << "is_enabled_penalty_coefficient_relaxing "    // 11
-            << "is_enabled_penalty_coefficient_tightening "  // 12
-            << "penalty_coefficient_reset_flag"              // 13
-            << "penalty_coefficient_relaxing_rate "          // 14
-            << "penalty_coefficient_tightening_rate "        // 15
-            << "is_enabled_forcibly_initial_modification "   // 16
-            << "number_of_initial_modification "             // 17
-            << "initial_tabu_tenure" << std::endl;           // 18
+            << "#iteration "                                 //
+            << "elapsed_time "                               //
+            << "averaged_inner_iteration_speed "             //
+            << "averaged_move_evaluation_speed "             //
+            << "local_objective "                            //
+            << "local_violation "                            //
+            << "global_objective "                           //
+            << "global_violation "                           //
+            << "primal_intensity "                           //
+            << "dual_intensity "                             //
+            << "performance "                                //
+            << "update_status "                              //
+            << "employing_local_augmented_solution_flag "    //
+            << "employing_global_augmented_solution_flag "   //
+            << "employing_previous_solution_flag "           //
+            << "is_enabled_penalty_coefficient_relaxing "    //
+            << "is_enabled_penalty_coefficient_tightening "  //
+            << "penalty_coefficient_reset_flag "             //
+            << "penalty_coefficient_relaxing_rate "          //
+            << "penalty_coefficient_tightening_rate "        //
+            << "is_enabled_forcibly_initial_modification "   //
+            << "number_of_initial_modification "             //
+            << "initial_tabu_tenure" << std::endl;           //
     }
 
     /*************************************************************************/
@@ -117,28 +114,31 @@ class TabuSearchControllerLogger {
                                     ->local_augmented_incumbent_score();
 
         auto &s = *m_state_ptr;
-        auto &p = *m_parameter_ptr;
 
         m_ofstream                                                 //
-            << s.iteration << " "                                  // 0
-            << m_controller_ptr->time_keeper().clock() << " "      // 1
-            << local_incumbent.objective << " "                    // 2
-            << local_incumbent.total_violation << " "              // 3
-            << global_incumbent.objective << " "                   // 4
-            << global_incumbent.total_violation << " "             // 5
-            << s.current_intensity << " "                          // 6
-            << s.tabu_search_result.total_update_status << " "     // 7
-            << p.employing_local_augmented_solution_flag << " "    // 8
-            << p.employing_global_augmented_solution_flag << " "   // 9
-            << p.employing_previous_solution_flag << " "           // 10
-            << p.is_enabled_penalty_coefficient_relaxing << " "    // 11
-            << p.is_enabled_penalty_coefficient_tightening << " "  // 12
-            << p.penalty_coefficient_reset_flag << " "             // 13
-            << p.penalty_coefficient_relaxing_rate << " "          // 14
-            << p.penalty_coefficient_tightening_rate << " "        // 15
-            << p.is_enabled_forcibly_initial_modification << " "   // 16
-            << p.number_of_initial_modification << " "             // 17
-            << p.initial_tabu_tenure                               // 18
+            << s.iteration << " "                                  //
+            << s.total_elapsed_time << " "                         //
+            << s.averaged_inner_iteration_speed << " "             //
+            << s.averaged_move_evaluation_speed << " "             //
+            << local_incumbent.objective << " "                    //
+            << local_incumbent.total_violation << " "              //
+            << global_incumbent.objective << " "                   //
+            << global_incumbent.total_violation << " "             //
+            << s.current_primal_intensity << " "                   //
+            << s.current_dual_intensity << " "                     //
+            << s.tabu_search_result.performance << " "             //
+            << s.tabu_search_result.total_update_status << " "     //
+            << s.employing_local_augmented_solution_flag << " "    //
+            << s.employing_global_augmented_solution_flag << " "   //
+            << s.employing_previous_solution_flag << " "           //
+            << s.is_enabled_penalty_coefficient_relaxing << " "    //
+            << s.is_enabled_penalty_coefficient_tightening << " "  //
+            << s.penalty_coefficient_reset_flag << " "             //
+            << s.penalty_coefficient_relaxing_rate << " "          //
+            << s.penalty_coefficient_tightening_rate << " "        //
+            << s.is_enabled_forcibly_initial_modification << " "   //
+            << s.number_of_initial_modification << " "             //
+            << s.initial_tabu_tenure                               //
             << std::endl;
     }
 };

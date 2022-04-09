@@ -9,8 +9,7 @@ CC = gcc
 test: build
 	$(BUILD_DIR)/test_model_component; \
 	$(BUILD_DIR)/test_model; \
-	$(BUILD_DIR)/test_presolver; \
-	$(BUILD_DIR)/test_verifier; \
+	$(BUILD_DIR)/test_preprocess; \
 	$(BUILD_DIR)/test_neighborhood; \
 	$(BUILD_DIR)/test_solution; \
 	$(BUILD_DIR)/test_solver; \

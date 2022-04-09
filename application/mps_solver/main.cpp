@@ -181,7 +181,8 @@ int main([[maybe_unused]] int argc, char *argv[]) {
         /**
          * Run the solver.
          */
-        auto result = printemps::solver::solve(&model, option);
+        printemps::solver::IPSolver solver(&model, option);
+        auto                        result = solver.solve();
 
         /**
          * Print the result summary.
@@ -210,11 +211,15 @@ int main([[maybe_unused]] int argc, char *argv[]) {
         /**
          * Extract flippable variable pairs.
          */
-        auto flippable_variable_pairs =
-            printemps::solver::extract_flippable_variable_pairs(
-                &model, option, minimum_common_element);
-        printemps::presolver::write_flippable_variable_pairs(
-            flippable_variable_pairs, "flip.txt");
+        printemps::solver::IPSolver solver(&model, option);
+        solver.preprocess();
+
+        printemps::preprocess::IPFlippableVariablePairExtractor extractor(
+            solver.model_ptr());
+        extractor.extract_pairs(
+            minimum_common_element,
+            option.verbose >= printemps::option::verbose::Outer);
+        extractor.write_pairs("flip.txt");
     }
 
     return 0;

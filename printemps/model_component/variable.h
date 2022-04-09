@@ -456,7 +456,7 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     inline constexpr void setup_hash(void) {
         /**
          * NOTE: This method is called in
-         * presolver::remove_redundant_set_variables().
+         * preprocess::remove_redundant_set_variables().
          */
         std::uint64_t hash = 0;
         for (const auto &sensitivity : m_constraint_sensitivities) {
@@ -515,6 +515,11 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     /*************************************************************************/
     inline constexpr bool has_upper_bound_margin(void) const noexcept {
         return m_has_upper_bound_margin;
+    }
+
+    /*************************************************************************/
+    inline constexpr void set_lower_or_upper_bound(const bool a_IS_LOWER) {
+        this->set_value_if_mutable(a_IS_LOWER ? m_lower_bound : m_upper_bound);
     }
 
     /*************************************************************************/

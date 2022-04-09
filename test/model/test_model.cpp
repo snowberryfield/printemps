@@ -940,10 +940,8 @@ TEST_F(TestModel, setup_is_enabled_fast_evaluation) {
         model.minimize(x);
 
         auto move_updater =
-            [&x]([[maybe_unused]] std::vector<
-                 printemps::neighborhood::Move<int, double>>* a_moves_ptr) {
-                ;
-            };
+            []([[maybe_unused]] std::vector<
+                printemps::neighborhood::Move<int, double>>* a_moves_ptr) { ; };
 
         model.neighborhood().user_defined().set_move_updater(move_updater);
         model.neighborhood().user_defined().enable();
@@ -1105,9 +1103,13 @@ TEST_F(TestModel, categorize_variables) {
 
     model.categorize_variables();
     model.categorize_constraints();
-    printemps::presolver::extract_dependent_intermediate_variables(&model,
-                                                                   false);
-    printemps::presolver::extract_independent_selections(&model, false);
+
+    printemps::preprocess::DependentIntermediateVariableExtractor<int, double>
+        dependent_intermediate_variable_extractor(&model);
+    dependent_intermediate_variable_extractor.extract(false);
+    printemps::preprocess::SelectionExtractor<int, double> selection_extractor(
+        &model);
+    selection_extractor.extract_independent(false);
 
     model.categorize_variables();
     model.categorize_constraints();
@@ -1124,7 +1126,7 @@ TEST_F(TestModel, categorize_variables) {
 /*****************************************************************************/
 TEST_F(TestModel, categorize_constraints) {
     printemps::model::Model<int, double> model;
-    auto coefficients = printemps::utility::sequence(10);
+    auto coefficients = printemps::utility::sequence(10, 20);
 
     auto& x = model.create_variable("x", -10, 10);
     auto& y = model.create_variable("y", -10, 10);
@@ -1209,7 +1211,9 @@ TEST_F(TestModel, categorize_constraints) {
     singleton.disable();
 
     model.setup_structure();
-    printemps::presolver::extract_selections_by_defined_order(&model, false);
+    printemps::preprocess::SelectionExtractor<int, double> selection_extractor(
+        &model);
+    selection_extractor.extract_by_defined_order(false);
     model.setup_structure();
 
     EXPECT_EQ(28, model.number_of_constraints());
@@ -1443,7 +1447,9 @@ TEST_F(TestModel, update_arg_move) {
 
     model.minimize(p);
     model.setup_structure();
-    printemps::presolver::extract_independent_selections(&model, false);
+    printemps::preprocess::SelectionExtractor<int, double> selection_extractor(
+        &model);
+    selection_extractor.extract_independent(false);
     model.setup_fixed_sensitivities(false);
 
     model.update();
@@ -1847,23 +1853,28 @@ TEST_F(TestModel, update_variable_improvability) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModel, update_feasibility) {
+TEST_F(TestModel, update_violative_constraint_ptrs_and_feasibility) {
     printemps::model::Model<int, double> model;
 
     auto&                  x = model.create_variable("x", 0, 10);
     [[maybe_unused]] auto& g = model.create_constraint("g", x <= 5);
 
+    model.setup_structure();
+
     x = 4;
     model.update();  // include update_feasibility()
     EXPECT_TRUE(model.is_feasible());
+    EXPECT_TRUE(model.violative_constraint_ptrs().empty());
 
     x = 5;
     model.update();
     EXPECT_TRUE(model.is_feasible());
+    EXPECT_TRUE(model.violative_constraint_ptrs().empty());
 
     x = 6;
     model.update();
     EXPECT_FALSE(model.is_feasible());
+    EXPECT_EQ(1, static_cast<int>(model.violative_constraint_ptrs().size()));
 }
 
 /*****************************************************************************/
@@ -1889,7 +1900,9 @@ TEST_F(TestModel, evaluate) {
         model.set_global_penalty_coefficient(10000);
 
         model.setup_structure();
-        printemps::presolver::extract_independent_selections(&model, false);
+        printemps::preprocess::SelectionExtractor<int, double>
+            selection_extractor(&model);
+        selection_extractor.extract_independent(false);
         model.setup_fixed_sensitivities(false);
 
         for (auto&& element : x.flat_indexed_variables()) {
@@ -2068,7 +2081,9 @@ TEST_F(TestModel, evaluate) {
         model.set_global_penalty_coefficient(10000);
 
         model.setup_structure();
-        printemps::presolver::extract_independent_selections(&model, false);
+        printemps::preprocess::SelectionExtractor<int, double>
+            selection_extractor(&model);
+        selection_extractor.extract_independent(false);
         model.setup_fixed_sensitivities(false);
 
         for (auto&& element : x.flat_indexed_variables()) {
@@ -2242,15 +2257,15 @@ TEST_F(TestModel, compute_lagrangian) {
     printemps::multi_array::ValueProxy<double> dual_value_proxy(1);
     dual_value_proxy.value() = 100;
 
-    std::vector<printemps::multi_array::ValueProxy<double>> dual_value_proxies =
-        {dual_value_proxy, dual_value_proxy};
+    std::vector<printemps::multi_array::ValueProxy<double>> dual = {
+        dual_value_proxy, dual_value_proxy};
 
     for (auto&& element : x.flat_indexed_variables()) {
         element = 1;
     }
 
     model.update();
-    auto lagrangian = model.compute_lagrangian(dual_value_proxies);
+    auto lagrangian = model.compute_lagrangian(dual);
 
     EXPECT_EQ(46 + 100 * (10 - 5) + 100 * (2 - 1), lagrangian);
 }
@@ -2667,7 +2682,7 @@ TEST_F(TestModel, convert_to_named_solution) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModel, export_plain_solution) {
+TEST_F(TestModel, export_sparse_solution) {
     printemps::model::Model<int, double> model;
 
     auto& x = model.create_variable("x");
@@ -2691,15 +2706,15 @@ TEST_F(TestModel, export_plain_solution) {
 
     model.update();
 
-    auto plain_solution = model.export_plain_solution();
-    EXPECT_EQ(model.objective().value(), plain_solution.objective);
-    EXPECT_EQ(model.is_feasible(), plain_solution.is_feasible);
+    auto sparse_solution = model.export_sparse_solution();
+    EXPECT_EQ(model.objective().value(), sparse_solution.objective);
+    EXPECT_EQ(model.is_feasible(), sparse_solution.is_feasible);
 
-    EXPECT_EQ(10, plain_solution.variables["x"]);
+    EXPECT_EQ(10, sparse_solution.variables["x"]);
 }
 
 /*****************************************************************************/
-TEST_F(TestModel, convert_to_plain_solution) {
+TEST_F(TestModel, convert_to_sparse_solution) {
     printemps::model::Model<int, double> model;
 
     auto& x = model.create_variable("x");
@@ -2746,13 +2761,13 @@ TEST_F(TestModel, convert_to_plain_solution) {
         }
     }
 
-    auto solution       = model.export_solution();
-    auto plain_solution = model.convert_to_plain_solution(solution);
-    EXPECT_EQ(model.objective().value(), plain_solution.objective);
-    EXPECT_EQ(total_violation, plain_solution.total_violation);
-    EXPECT_EQ(model.is_feasible(), plain_solution.is_feasible);
+    auto solution        = model.export_solution();
+    auto sparse_solution = model.convert_to_sparse_solution(solution);
+    EXPECT_EQ(model.objective().value(), sparse_solution.objective);
+    EXPECT_EQ(total_violation, sparse_solution.total_violation);
+    EXPECT_EQ(model.is_feasible(), sparse_solution.is_feasible);
 
-    EXPECT_EQ(10, plain_solution.variables["x"]);
+    EXPECT_EQ(10, sparse_solution.variables["x"]);
 }
 
 /*****************************************************************************/
