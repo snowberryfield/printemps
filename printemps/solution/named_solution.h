@@ -48,9 +48,12 @@ class NamedSolution {
         m_constraint_value_proxies.clear();
         m_violation_value_proxies.clear();
 
-        m_objective       = 0;
-        m_total_violation = 0;
-        m_is_feasible     = false;
+        m_name                  = "";
+        m_number_of_variables   = 0;
+        m_number_of_constraints = 0;
+        m_objective             = 0;
+        m_total_violation       = 0;
+        m_is_feasible           = false;
     }
 
     /*************************************************************************/
@@ -291,6 +294,21 @@ class NamedSolution {
     inline constexpr const multi_array::ValueProxy<T_Expression>& violations(
         const std::string& a_NAME) const {
         return m_violation_value_proxies.at(a_NAME);
+    }
+
+    /*************************************************************************/
+    inline constexpr const std::string& name(void) const {
+        return m_name;
+    }
+
+    /*************************************************************************/
+    inline constexpr int number_of_variables(void) const {
+        return m_number_of_variables;
+    }
+
+    /*************************************************************************/
+    inline constexpr int number_of_constraints(void) const {
+        return m_number_of_constraints;
     }
 
     /*************************************************************************/

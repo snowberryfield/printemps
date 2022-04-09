@@ -10,89 +10,108 @@ namespace printemps {
 namespace solution {
 /*****************************************************************************/
 struct SolutionScore {
-    double objective;
-    double objective_improvement;
-    double total_violation;
+    double objective             = 0.0;
+    double objective_improvement = 0.0;
+    double total_violation       = 0.0;
 
-    double local_penalty;
-    double global_penalty;
-    double local_augmented_objective;
-    double global_augmented_objective;
+    double local_penalty              = 0.0;
+    double global_penalty             = 0.0;
+    double local_augmented_objective  = 0.0;
+    double global_augmented_objective = 0.0;
 
-    bool is_feasible;
-    bool is_objective_improvable;
-    bool is_feasibility_improvable;
+    bool is_feasible               = false;
+    bool is_objective_improvable   = false;
+    bool is_feasibility_improvable = false;
 };
 
 /*****************************************************************************/
 inline int argmax_index_objective_improvement(
     const std::vector<SolutionScore> &a_SCORES) {
-    std::vector<double> objective_improvements(a_SCORES.size());
-
+    int       argmax      = 0;
+    double    max         = a_SCORES[0].objective_improvement;
     const int SCORES_SIZE = a_SCORES.size();
-    for (auto i = 0; i < SCORES_SIZE; i++) {
-        objective_improvements[i] = a_SCORES[i].objective_improvement;
+    for (auto i = 1; i < SCORES_SIZE; i++) {
+        if (a_SCORES[i].objective_improvement > max) {
+            argmax = i;
+            max    = a_SCORES[i].objective_improvement;
+        }
     }
-    return utility::argmax(objective_improvements);
+    return argmax;
 }
 
 /*****************************************************************************/
 inline int argmin_index_objective(const std::vector<SolutionScore> &a_SCORES) {
-    std::vector<double> objectives(a_SCORES.size());
-
+    int       argmin      = 0;
+    double    min         = a_SCORES[0].objective;
     const int SCORES_SIZE = a_SCORES.size();
-    for (auto i = 0; i < SCORES_SIZE; i++) {
-        objectives[i] = a_SCORES[i].objective;
+    for (auto i = 1; i < SCORES_SIZE; i++) {
+        if (a_SCORES[i].objective < min) {
+            argmin = i;
+            min    = a_SCORES[i].objective;
+        }
     }
-    return utility::argmin(objectives);
+    return argmin;
 }
 
 /*****************************************************************************/
 inline int argmin_index_local_penalty(
     const std::vector<SolutionScore> &a_SCORES) {
-    std::vector<double> local_penalties(a_SCORES.size());
-
+    int       argmin      = 0;
+    double    min         = a_SCORES[0].local_penalty;
     const int SCORES_SIZE = a_SCORES.size();
-    for (auto i = 0; i < SCORES_SIZE; i++) {
-        local_penalties[i] = a_SCORES[i].local_penalty;
+
+    for (auto i = 1; i < SCORES_SIZE; i++) {
+        if (a_SCORES[i].local_penalty < min) {
+            argmin = i;
+            min    = a_SCORES[i].local_penalty;
+        }
     }
-    return utility::argmin(local_penalties);
+    return argmin;
 }
 
 /*****************************************************************************/
 inline int argmin_index_global_penalty(
     const std::vector<SolutionScore> &a_SCORES) {
-    std::vector<double> global_penalties(a_SCORES.size());
-
+    int       argmin      = 0;
+    double    min         = a_SCORES[0].global_penalty;
     const int SCORES_SIZE = a_SCORES.size();
-    for (auto i = 0; i < SCORES_SIZE; i++) {
-        global_penalties[i] = a_SCORES[i].global_penalty;
+    for (auto i = 1; i < SCORES_SIZE; i++) {
+        if (a_SCORES[i].global_penalty < min) {
+            argmin = i;
+            min    = a_SCORES[i].global_penalty;
+        }
     }
-    return utility::argmin(global_penalties);
+    return argmin;
 }
 
 /*****************************************************************************/
 inline int argmin_index_local_augmented_objective(
     const std::vector<SolutionScore> &a_SCORES) {
-    std::vector<double> local_augmented_objectives(a_SCORES.size());
-
+    int       argmin      = 0;
+    double    min         = a_SCORES[0].local_augmented_objective;
     const int SCORES_SIZE = a_SCORES.size();
-    for (auto i = 0; i < SCORES_SIZE; i++) {
-        local_augmented_objectives[i] = a_SCORES[i].local_augmented_objective;
+    for (auto i = 1; i < SCORES_SIZE; i++) {
+        if (a_SCORES[i].local_augmented_objective < min) {
+            argmin = i;
+            min    = a_SCORES[i].local_augmented_objective;
+        }
     }
-    return utility::argmin(local_augmented_objectives);
+    return argmin;
 }
 
 /*****************************************************************************/
 inline int argmin_index_global_augmented_objective(
     const std::vector<SolutionScore> &a_SCORES) {
-    std::vector<double> global_augmented_objectives(a_SCORES.size());
-
+    int       argmin      = 0;
+    double    min         = a_SCORES[0].global_augmented_objective;
     const int SCORES_SIZE = a_SCORES.size();
-    for (auto i = 0; i < SCORES_SIZE; i++) {
-        global_augmented_objectives[i] = a_SCORES[i].global_augmented_objective;
+    for (auto i = 1; i < SCORES_SIZE; i++) {
+        if (a_SCORES[i].global_augmented_objective < min) {
+            argmin = i;
+            min    = a_SCORES[i].global_augmented_objective;
+        }
     }
-    return utility::argmin(global_augmented_objectives);
+    return argmin;
 }
 
 }  // namespace solution

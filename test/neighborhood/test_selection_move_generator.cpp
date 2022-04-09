@@ -27,14 +27,14 @@ TEST_F(TestSelectionMoveGenerator, setup) {
     model.create_constraint("c", x.selection());
     x(0) = 1;
 
-    model.categorize_variables();
-    model.categorize_constraints();
+    model.setup_structure();
 
-    printemps::presolver::extract_selections_by_number_of_variables_order(
-        &model, false, false);
+    printemps::preprocess::SelectionExtractor<int, double> selection_extractor(
+        &model);
+    selection_extractor.extract_by_number_of_variables_order(false, false);
     x(0).select();
-    model.categorize_variables();
-    model.categorize_constraints();
+
+    model.setup_structure();
 
     auto selection_variable_ptrs =
         model.variable_reference().selection_variable_ptrs;

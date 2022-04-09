@@ -12,10 +12,11 @@
 
 #include "binary_move_generator.h"
 #include "integer_move_generator.h"
+#include "selection_move_generator.h"
 #include "aggregation_move_generator.h"
 #include "precedence_move_generator.h"
 #include "variable_bound_move_generator.h"
-#include "selection_move_generator.h"
+#include "soft_selection_move_generator.h"
 #include "chain_move_generator.h"
 #include "two_flip_move_generator.h"
 #include "user_defined_move_generator.h"
@@ -28,10 +29,11 @@ class Neighborhood {
    private:
     BinaryMoveGenerator<T_Variable, T_Expression>        m_binary;
     IntegerMoveGenerator<T_Variable, T_Expression>       m_integer;
+    SelectionMoveGenerator<T_Variable, T_Expression>     m_selection;
     AggregationMoveGenerator<T_Variable, T_Expression>   m_aggregation;
     PrecedenceMoveGenerator<T_Variable, T_Expression>    m_precedence;
     VariableBoundMoveGenerator<T_Variable, T_Expression> m_variable_bound;
-    SelectionMoveGenerator<T_Variable, T_Expression>     m_selection;
+    SoftSelectionMoveGenerator<T_Variable, T_Expression> m_soft_selection;
     ChainMoveGenerator<T_Variable, T_Expression>         m_chain;
     TwoFlipMoveGenerator<T_Variable, T_Expression>       m_two_flip;
     UserDefinedMoveGenerator<T_Variable, T_Expression>   m_user_defined;
@@ -55,20 +57,22 @@ class Neighborhood {
     void initialize(void) {
         m_binary.initialize();
         m_integer.initialize();
+        m_selection.initialize();
         m_precedence.initialize();
         m_aggregation.initialize();
         m_variable_bound.initialize();
-        m_selection.initialize();
+        m_soft_selection.initialize();
         m_chain.initialize();
         m_two_flip.initialize();
         m_user_defined.initialize();
 
         m_move_generator_ptrs = {&m_binary,          //
                                  &m_integer,         //
+                                 &m_selection,       //
                                  &m_aggregation,     //
                                  &m_precedence,      //
                                  &m_variable_bound,  //
-                                 &m_selection,       //
+                                 &m_soft_selection,  //
                                  &m_chain,           //
                                  &m_two_flip,        //
                                  &m_user_defined};
@@ -139,6 +143,7 @@ class Neighborhood {
         m_aggregation.reset_availability();
         m_precedence.reset_availability();
         m_variable_bound.reset_availability();
+        m_soft_selection.reset_availability();
         m_chain.reset_availability();
         m_two_flip.reset_availability();
     }
@@ -154,6 +159,10 @@ class Neighborhood {
         }
 
         if (m_variable_bound.is_enabled()) {
+            return true;
+        }
+
+        if (m_soft_selection.is_enabled()) {
             return true;
         }
 
@@ -193,6 +202,18 @@ class Neighborhood {
     }
 
     /*************************************************************************/
+    inline constexpr SelectionMoveGenerator<T_Variable, T_Expression>  //
+        &selection(void) noexcept {
+        return m_selection;
+    }
+
+    /*************************************************************************/
+    inline constexpr const SelectionMoveGenerator<T_Variable, T_Expression>  //
+        &selection(void) const noexcept {
+        return m_selection;
+    }
+
+    /*************************************************************************/
     inline constexpr AggregationMoveGenerator<T_Variable, T_Expression>  //
         &aggregation(void) noexcept {
         return m_aggregation;
@@ -229,15 +250,16 @@ class Neighborhood {
     }
 
     /*************************************************************************/
-    inline constexpr SelectionMoveGenerator<T_Variable, T_Expression>  //
-        &selection(void) noexcept {
-        return m_selection;
+    inline constexpr SoftSelectionMoveGenerator<T_Variable, T_Expression>  //
+        &soft_selection(void) noexcept {
+        return m_soft_selection;
     }
 
     /*************************************************************************/
-    inline constexpr const SelectionMoveGenerator<T_Variable, T_Expression>  //
-        &selection(void) const noexcept {
-        return m_selection;
+    inline constexpr const SoftSelectionMoveGenerator<T_Variable,
+                                                      T_Expression>  //
+        &soft_selection(void) const noexcept {
+        return m_soft_selection;
     }
 
     /*************************************************************************/
@@ -274,6 +296,14 @@ class Neighborhood {
     inline constexpr const UserDefinedMoveGenerator<T_Variable, T_Expression>
         &user_defined(void) const noexcept {
         return m_user_defined;
+    }
+
+    /*************************************************************************/
+    inline constexpr int number_of_special_neighborhood_moves(void) const {
+        return m_aggregation.moves().size() + m_precedence.moves().size() +
+               m_variable_bound.moves().size() +
+               m_soft_selection.moves().size() + m_chain.moves().size() +
+               m_two_flip.moves().size();
     }
 };
 }  // namespace neighborhood

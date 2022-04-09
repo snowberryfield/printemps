@@ -16,6 +16,7 @@ enum class MoveSense {
     Aggregation,    //
     Precedence,     //
     VariableBound,  //
+    SoftSelection,  //
     Chain,          //
     TwoFlip,        //
     UserDefined,    //
