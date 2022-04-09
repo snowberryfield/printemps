@@ -42,7 +42,6 @@ struct TabuSearchCoreState {
     bool is_few_permissible_neighborhood;
     bool is_found_new_feasible_solution;
     bool is_aspirated;
-    bool is_special_neighborhood_move;
 
     int last_local_augmented_incumbent_update_iteration;
     int last_global_augmented_incumbent_update_iteration;
@@ -108,7 +107,6 @@ struct TabuSearchCoreState {
         this->is_few_permissible_neighborhood = false;
         this->is_found_new_feasible_solution  = false;
         this->is_aspirated                    = false;
-        this->is_special_neighborhood_move    = false;
 
         this->last_local_augmented_incumbent_update_iteration  = 0;
         this->last_global_augmented_incumbent_update_iteration = 0;

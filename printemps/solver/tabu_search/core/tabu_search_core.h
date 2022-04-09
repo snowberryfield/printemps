@@ -504,7 +504,7 @@ class TabuSearchCore {
         char mark_global_augmented_incumbent = ' ';
         char mark_feasible_incumbent         = ' ';
 
-        if (STATE.is_special_neighborhood_move) {
+        if (STATE.current_move.is_special_neighborhood_move) {
             mark_special_neighborhood_move = 's';
         }
 
