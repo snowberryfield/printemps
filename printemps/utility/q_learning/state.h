@@ -11,7 +11,7 @@ namespace utility {
 namespace q_learning {
 /*****************************************************************************/
 template <class T_StateBody, class T_ActionBody>
-struct Learner;
+class Learner;
 
 /*****************************************************************************/
 template <class T_StateBody, class T_ActionBody>
@@ -60,8 +60,7 @@ struct State {
     inline void update_best_action(void) {
         Action<T_StateBody, T_ActionBody> *best_action_ptr =
             &(this->actions.front());
-        double q_value_max = 0.0;
-
+        double q_value_max = std::numeric_limits<double>::lowest();
         for (auto &&action : this->actions) {
             if (action.q_value > q_value_max) {
                 best_action_ptr = &action;
@@ -81,7 +80,6 @@ struct State {
             a_RATIO) {
             return this->best_action_ptr;
         }
-
         return &(this->actions[(*a_get_rand_mt)() % this->actions.size()]);
     }
 

@@ -68,12 +68,7 @@ class Expression : public multi_array::AbstractMultiArrayElement {
                               T_Expression>
         m_fixed_sensitivities;
 
-    std::uint64_t m_plus_one_coefficient_mask;
-    std::uint64_t m_minus_one_coefficient_mask;
-    std::uint64_t m_mask;
-    bool          m_has_effective_plus_one_coefficient_mask;
-    bool          m_has_effective_minus_one_coefficient_mask;
-
+    std::uint64_t m_selection_mask;
     std::uint64_t m_hash;
 
     /*************************************************************************/
@@ -150,12 +145,8 @@ class Expression : public multi_array::AbstractMultiArrayElement {
         m_sensitivities.clear();
         m_fixed_sensitivities.initialize();
 
-        m_plus_one_coefficient_mask                = 0;
-        m_minus_one_coefficient_mask               = 0;
-        m_mask                                     = 0;
-        m_has_effective_plus_one_coefficient_mask  = false;
-        m_has_effective_minus_one_coefficient_mask = false;
-        m_hash                                     = 0;
+        m_selection_mask = 0;
+        m_hash           = 0;
     }
 
     /*************************************************************************/
@@ -192,65 +183,21 @@ class Expression : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr void setup_mask(void) {
-        std::uint64_t plus_one_coefficient_mask  = 0;
-        std::uint64_t minus_one_coefficient_mask = 0;
-        std::uint64_t mask                       = 0;
-
+    inline constexpr void setup_selection_mask(void) {
+        std::uint64_t selection_mask = 0;
         for (const auto &sensitivity : m_sensitivities) {
-            mask |= reinterpret_cast<std::uint64_t>(sensitivity.first);
-            if (!(fabs(sensitivity.second - 1.0) < constant::EPSILON_10)) {
-                plus_one_coefficient_mask |=
-                    reinterpret_cast<std::uint64_t>(sensitivity.first);
-            }
-            if (!(fabs(sensitivity.second + 1.0) < constant::EPSILON_10)) {
-                minus_one_coefficient_mask |=
-                    reinterpret_cast<std::uint64_t>(sensitivity.first);
-            }
+            selection_mask |=
+                reinterpret_cast<std::uint64_t>(sensitivity.first);
         }
 
-        m_mask                       = ~mask;
-        m_plus_one_coefficient_mask  = ~plus_one_coefficient_mask;
-        m_minus_one_coefficient_mask = ~minus_one_coefficient_mask;
-
-        int number_of_fast_computable_plus_one_coefficients  = 0;
-        int number_of_fast_computable_minus_one_coefficients = 0;
-        for (const auto &sensitivity : m_sensitivities) {
-            if (fabs(sensitivity.second - 1.0) < constant::EPSILON_10) {
-                if (reinterpret_cast<std::uint64_t>(sensitivity.first) &
-                    m_plus_one_coefficient_mask) {
-                    number_of_fast_computable_plus_one_coefficients++;
-                }
-            }
-            if (fabs(sensitivity.second + 1.0) < constant::EPSILON_10) {
-                if (reinterpret_cast<std::uint64_t>(sensitivity.first) &
-                    m_minus_one_coefficient_mask) {
-                    number_of_fast_computable_minus_one_coefficients++;
-                }
-            }
-        }
-
-        int number_of_variables = m_sensitivities.size();
-        if (2 * number_of_fast_computable_plus_one_coefficients >=
-            number_of_variables) {
-            m_has_effective_plus_one_coefficient_mask = true;
-        } else {
-            m_has_effective_plus_one_coefficient_mask = false;
-        }
-
-        if (2 * number_of_fast_computable_minus_one_coefficients >=
-            number_of_variables) {
-            m_has_effective_minus_one_coefficient_mask = true;
-        } else {
-            m_has_effective_minus_one_coefficient_mask = false;
-        }
+        m_selection_mask = ~selection_mask;
     }
 
     /*************************************************************************/
     inline constexpr void setup_hash(void) {
         /**
          * NOTE: This method is called in
-         * presolver::remove_duplicated_constraints().
+         * preprocess::remove_duplicated_constraints().
          */
         std::uint64_t hash = 0;
         for (const auto &sensitivity : m_sensitivities) {
@@ -291,25 +238,6 @@ class Expression : public multi_array::AbstractMultiArrayElement {
                          (alteration.second - alteration.first->value());
         }
         return new_value;
-    }
-
-    /*************************************************************************/
-    inline constexpr T_Expression evaluate_with_mask(
-        model_component::Variable<T_Variable, T_Expression> *a_variable_ptr,
-        const T_Variable a_TARGET_VALUE) const noexcept {
-        if (m_has_effective_plus_one_coefficient_mask &&
-            reinterpret_cast<std::uint64_t>(a_variable_ptr) &
-                m_plus_one_coefficient_mask) {
-            return m_value + (a_TARGET_VALUE - a_variable_ptr->value());
-        }
-        if (m_has_effective_minus_one_coefficient_mask &&
-            reinterpret_cast<std::uint64_t>(a_variable_ptr) &
-                m_minus_one_coefficient_mask) {
-            return m_value - (a_TARGET_VALUE - a_variable_ptr->value());
-        }
-
-        return m_value + m_fixed_sensitivities.at(a_variable_ptr) *
-                             (a_TARGET_VALUE - a_variable_ptr->value());
     }
 
     /*************************************************************************/
@@ -466,32 +394,8 @@ class Expression : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr std::uint64_t plus_one_coefficient_mask(void) const
-        noexcept {
-        return m_plus_one_coefficient_mask;
-    }
-
-    /*************************************************************************/
-    inline constexpr std::uint64_t minus_one_coefficient_mask(void) const
-        noexcept {
-        return m_minus_one_coefficient_mask;
-    }
-
-    /*************************************************************************/
-    inline constexpr std::uint64_t mask(void) const noexcept {
-        return m_mask;
-    }
-
-    /*************************************************************************/
-    inline constexpr bool has_effective_plus_one_coefficient_mask(void) const
-        noexcept {
-        return m_has_effective_plus_one_coefficient_mask;
-    }
-
-    /*************************************************************************/
-    inline constexpr bool has_effective_minus_one_coefficient_mask(void) const
-        noexcept {
-        return m_has_effective_minus_one_coefficient_mask;
+    inline constexpr std::uint64_t selection_mask(void) const noexcept {
+        return m_selection_mask;
     }
 
     /*************************************************************************/

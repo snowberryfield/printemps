@@ -12,8 +12,10 @@ namespace {
 /*****************************************************************************/
 class TestConstraint : public ::testing::Test {
    protected:
-    printemps::utility::IntegerUniformRandom m_random_integer;
-    printemps::utility::IntegerUniformRandom m_random_positive_integer;
+    printemps::utility::UniformRandom<std::uniform_int_distribution<>, int>
+        m_random_integer;
+    printemps::utility::UniformRandom<std::uniform_int_distribution<>, int>
+        m_random_positive_integer;
 
     virtual void SetUp(void) {
         m_random_integer.setup(-1000, 1000, 0);
@@ -608,6 +610,18 @@ TEST_F(TestConstraint, setup_constraint_type_integer_flow) {
 }
 
 /*****************************************************************************/
+TEST_F(TestConstraint, setup_constraint_type_soft_selection) {
+    printemps::model::Model<int, double> model;
+    auto& x = model.create_variables("x", 10, 0, 1);
+    auto  constraint =
+        printemps::model_component::Constraint<int, double>::create_instance();
+    constraint.setup(x(0) + x(1) + x(2) + x(3) + x(4) - x(5),
+                     printemps::model_component::ConstraintSense::Equal);
+    constraint.setup_constraint_type();
+    EXPECT_TRUE(constraint.is_soft_selection());
+}
+
+/*****************************************************************************/
 TEST_F(TestConstraint, setup_constraint_type_equation_knapsack) {
     printemps::model::Model<int, double> model;
     auto coefficients = printemps::utility::sequence(10);
@@ -679,7 +693,7 @@ TEST_F(TestConstraint, setup_constraint_type_knapsack) {
 /*****************************************************************************/
 TEST_F(TestConstraint, setup_constraint_type_integer_knapsack) {
     printemps::model::Model<int, double> model;
-    auto coefficients = printemps::utility::sequence(10);
+    auto coefficients = printemps::utility::sequence(10, 20);
 
     auto& x = model.create_variables("x", 10, 0, 10);
     {
@@ -1002,10 +1016,10 @@ TEST_F(TestConstraint, setup_constraint_type_intermediate) {
         constraint.setup(-x + y + z + 5,
                          printemps::model_component::ConstraintSense::Equal);
         constraint.setup_constraint_type();
-        EXPECT_FALSE(constraint.is_intermediate());
+        EXPECT_TRUE(constraint.is_intermediate());
         EXPECT_FALSE(constraint.has_aux_lower_bound());
         EXPECT_FALSE(constraint.has_aux_upper_bound());
-        EXPECT_EQ(nullptr, constraint.aux_variable_ptr());
+        EXPECT_EQ(&x(0), constraint.aux_variable_ptr());
     }
 
     {
@@ -1352,34 +1366,6 @@ TEST_F(TestConstraint, evaluate_expression_arg_move) {
         EXPECT_EQ(std::max(expected_value, 0), constraint.positive_part());
         EXPECT_EQ(-std::min(expected_value, 0), constraint.negative_part());
     }
-}
-
-/*****************************************************************************/
-TEST_F(TestConstraint, evaluate_constraint_with_mask) {
-    auto constraint =
-        printemps::model_component::Constraint<int, double>::create_instance();
-
-    auto variable_0 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto variable_1 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto variable_2 =
-        printemps::model_component::Variable<int, double>::create_instance();
-
-    constraint = variable_0 - variable_1 + 2 * variable_2 + 3 == 0;
-
-    constraint.expression().setup_fixed_sensitivities();
-    constraint.expression().setup_mask();
-
-    variable_0 = 0;
-    variable_1 = 0;
-    variable_2 = 0;
-
-    constraint.update();
-
-    EXPECT_EQ(4, constraint.evaluate_constraint_with_mask(&variable_0, 1));
-    EXPECT_EQ(2, constraint.evaluate_constraint_with_mask(&variable_1, 1));
-    EXPECT_EQ(5, constraint.evaluate_constraint_with_mask(&variable_2, 1));
 }
 
 /*****************************************************************************/
@@ -1944,6 +1930,12 @@ TEST_F(TestConstraint, is_binary_flow) {
 /*****************************************************************************/
 TEST_F(TestConstraint, is_integer_flow) {
     /// This method is tested in setup_constraint_type_integer_flow().
+}
+
+/*****************************************************************************/
+TEST_F(TestConstraint, is_soft_selection) {
+    /// This method is tested in
+    /// setup_constraint_type_soft_selection().
 }
 
 /*****************************************************************************/
