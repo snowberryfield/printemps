@@ -197,7 +197,7 @@ class Expression : public multi_array::AbstractMultiArrayElement {
     inline constexpr void setup_hash(void) {
         /**
          * NOTE: This method is called in
-         * presolver::remove_duplicated_constraints().
+         * preprocess::remove_duplicated_constraints().
          */
         std::uint64_t hash = 0;
         for (const auto &sensitivity : m_sensitivities) {

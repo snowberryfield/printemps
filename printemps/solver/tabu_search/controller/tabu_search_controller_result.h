@@ -11,10 +11,11 @@ namespace solver {
 namespace tabu_search {
 namespace controller {
 /*****************************************************************************/
+template <class T_Variable, class T_Expression>
 struct TabuSearchControllerResult {
-    int number_of_iterations;
-    int number_of_loops;
     int update_status;
+
+    TabuSearchControllerState<T_Variable, T_Expression> state;
 
     /*************************************************************************/
     TabuSearchControllerResult(void) {
@@ -22,21 +23,17 @@ struct TabuSearchControllerResult {
     }
 
     /*************************************************************************/
-    TabuSearchControllerResult(const int a_NUMBER_OF_ITERATIONS,
-                               const int a_NUMBER_OF_LOOPS,
-                               const int a_UPDATE_STATUS)
-        : number_of_iterations(a_NUMBER_OF_ITERATIONS),
-          number_of_loops(a_NUMBER_OF_LOOPS),
-          update_status(a_UPDATE_STATUS) {
+    TabuSearchControllerResult(
+        const TabuSearchControllerState<T_Variable, T_Expression> &a_STATE)
+        : update_status(a_STATE.total_update_status), state(a_STATE) {
         /// nothing to do
     }
 
     /*************************************************************************/
     inline void initialize(void) {
-        this->number_of_iterations = 0;
-        this->number_of_loops      = 0;
         this->update_status =
-            solution::IncumbentHolderConstant::STATUS_NO_UPDATED;
+            solution::IncumbentHolderConstant::STATUS_NOT_UPDATED;
+        this->state.initialize();
     }
 };
 }  // namespace controller

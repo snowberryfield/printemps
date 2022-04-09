@@ -14,17 +14,31 @@ struct MemoryConstant {
 };
 
 /*****************************************************************************/
+template <class T_Variable, class T_Expression>
 class Memory {
    private:
-    std::vector<std::string>                  m_variable_names;
+    model::Model<T_Variable, T_Expression> *m_model_ptr;
+
+    std::vector<std::string> m_variable_names;
+    std::vector<std::string> m_constraint_names;
+
     std::vector<multi_array::ValueProxy<int>> m_last_update_iterations;
     std::vector<multi_array::ValueProxy<int>> m_update_counts;
-    long                                      m_total_update_count;
-    double                                    m_total_update_count_reciprocal;
+    std::vector<multi_array::ValueProxy<int>> m_violation_counts;
 
-    double m_intensity_numerator;
-    double m_intensity_denominator_reciprocal;
-    double m_intensity;
+    long   m_total_update_count;
+    double m_total_update_count_reciprocal;
+
+    long   m_total_violation_count;
+    double m_total_violation_count_reciprocal;
+
+    double m_primal_intensity_numerator;
+    double m_primal_intensity_denominator_reciprocal;
+    double m_primal_intensity;
+
+    double m_dual_intensity_numerator;
+    double m_dual_intensity_denominator_reciprocal;
+    double m_dual_intensity;
 
    public:
     /*************************************************************************/
@@ -33,7 +47,6 @@ class Memory {
     }
 
     /*************************************************************************/
-    template <class T_Variable, class T_Expression>
     Memory(model::Model<T_Variable, T_Expression> *a_model_ptr) {
         this->setup(a_model_ptr);
     }
@@ -45,22 +58,32 @@ class Memory {
 
     /*************************************************************************/
     void initialize(void) {
+        m_model_ptr = nullptr;
         m_variable_names.clear();
         m_last_update_iterations.clear();
         m_update_counts.clear();
+        m_violation_counts.clear();
         m_total_update_count            = 0;
         m_total_update_count_reciprocal = 0.0;
 
-        m_intensity_numerator              = 0.0;
-        m_intensity_denominator_reciprocal = 0.0;
-        m_intensity                        = 0.0;
+        m_total_violation_count            = 0;
+        m_total_violation_count_reciprocal = 0.0;
+
+        m_primal_intensity_numerator              = 0.0;
+        m_primal_intensity_denominator_reciprocal = 0.0;
+        m_primal_intensity                        = 0.0;
+
+        m_dual_intensity_numerator              = 0.0;
+        m_dual_intensity_denominator_reciprocal = 0.0;
+        m_dual_intensity                        = 0.0;
     }
 
     /*************************************************************************/
-    template <class T_Variable, class T_Expression>
     inline constexpr void setup(
         model::Model<T_Variable, T_Expression> *a_model_ptr) {
         this->initialize();
+        m_model_ptr = a_model_ptr;
+
         /**
          * Short-term memory:
          * The short-term memory records the iteration count at which each
@@ -81,7 +104,11 @@ class Memory {
          */
         m_update_counts = a_model_ptr->generate_variable_parameter_proxies(0);
 
-        m_variable_names = a_model_ptr->variable_names();
+        m_violation_counts =
+            a_model_ptr->generate_constraint_parameter_proxies(0);
+
+        m_variable_names   = m_model_ptr->variable_names();
+        m_constraint_names = m_model_ptr->constraint_names();
     }
 
     /*************************************************************************/
@@ -136,70 +163,75 @@ class Memory {
     }
 
     /*************************************************************************/
-    void print_intensity(void) {
+    void print_primal_intensity(void) {
         /// This method is for debug.
-        utility::print(std::to_string(m_intensity));
+        utility::print(std::to_string(m_primal_intensity));
     }
 
     /*************************************************************************/
-    inline constexpr double intensity(void) const noexcept {
-        return m_intensity;
+    inline constexpr double primal_intensity(void) const noexcept {
+        return m_primal_intensity;
     }
 
     /*************************************************************************/
-    template <class T_Variable, class T_Expression>
+    inline constexpr double dual_intensity(void) const noexcept {
+        return m_dual_intensity;
+    }
+
+    /*************************************************************************/
     constexpr void update(
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE,
         const int a_ITERATION) noexcept {
-        for (const auto &alteration : a_MOVE.alterations) {
-            int proxy_index = alteration.first->proxy_index();
-            int flat_index  = alteration.first->flat_index();
-
-            m_last_update_iterations[proxy_index][flat_index] = a_ITERATION;
-            m_intensity_numerator +=
-                2.0 * m_update_counts[proxy_index][flat_index] + 1;
-            m_update_counts[proxy_index][flat_index]++;
-            m_total_update_count++;
-        }
-        m_total_update_count_reciprocal =
-            1.0 / static_cast<double>(m_total_update_count);
-        m_intensity_denominator_reciprocal =
-            m_total_update_count_reciprocal * m_total_update_count_reciprocal;
-        m_intensity =
-            m_intensity_numerator * m_intensity_denominator_reciprocal;
+        this->update(a_MOVE, a_ITERATION, 0, nullptr);
     }
 
     /*************************************************************************/
-    template <class T_Variable, class T_Expression>
     constexpr void update(
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE,
         const int                                           a_ITERATION,     //
         const int                                           a_RANDOM_WIDTH,  //
         std::mt19937 *get_rand_mt) noexcept {
-        if (a_RANDOM_WIDTH == 0) {
-            this->update(a_MOVE, a_ITERATION);
-        } else {
-            for (const auto &alteration : a_MOVE.alterations) {
-                int proxy_index = alteration.first->proxy_index();
-                int flat_index  = alteration.first->flat_index();
-                int randomness =
+        for (const auto &alteration : a_MOVE.alterations) {
+            const int PROXY_INDEX = alteration.first->proxy_index();
+            const int FLAT_INDEX  = alteration.first->flat_index();
+            int       randomness  = 0;
+            if (a_RANDOM_WIDTH > 0) {
+                randomness =
                     (*get_rand_mt)() % (2 * a_RANDOM_WIDTH) - a_RANDOM_WIDTH;
-
-                m_last_update_iterations[proxy_index][flat_index] =
-                    a_ITERATION + randomness;
-                m_intensity_numerator +=
-                    2.0 * m_update_counts[proxy_index][flat_index] + 1;
-                m_update_counts[proxy_index][flat_index]++;
-                m_total_update_count++;
             }
-            m_total_update_count_reciprocal =
-                1.0 / static_cast<double>(m_total_update_count);
-            m_intensity_denominator_reciprocal =
-                m_total_update_count_reciprocal *
-                m_total_update_count_reciprocal;
-            m_intensity =
-                m_intensity_numerator * m_intensity_denominator_reciprocal;
+
+            m_last_update_iterations[PROXY_INDEX][FLAT_INDEX] =
+                a_ITERATION + randomness;
+            m_primal_intensity_numerator +=
+                2.0 * m_update_counts[PROXY_INDEX][FLAT_INDEX] + 1;
+            m_update_counts[PROXY_INDEX][FLAT_INDEX]++;
+            m_total_update_count++;
         }
+
+        for (const auto &constraint_ptr :
+             m_model_ptr->violative_constraint_ptrs()) {
+            const int PROXY_INDEX = constraint_ptr->proxy_index();
+            const int FLAT_INDEX  = constraint_ptr->flat_index();
+            m_dual_intensity_numerator +=
+                2.0 * m_violation_counts[PROXY_INDEX][FLAT_INDEX] + 1;
+            m_violation_counts[PROXY_INDEX][FLAT_INDEX]++;
+            m_total_violation_count++;
+        }
+
+        m_total_update_count_reciprocal =
+            1.0 / static_cast<double>(std::max(1L, m_total_update_count));
+        m_primal_intensity_denominator_reciprocal =
+            m_total_update_count_reciprocal * m_total_update_count_reciprocal;
+        m_primal_intensity = m_primal_intensity_numerator *
+                             m_primal_intensity_denominator_reciprocal;
+
+        m_total_violation_count_reciprocal =
+            1.0 / static_cast<double>(std::max(1L, m_total_violation_count));
+        m_dual_intensity_denominator_reciprocal =
+            m_total_violation_count_reciprocal *
+            m_total_violation_count_reciprocal;
+        m_dual_intensity = m_dual_intensity_numerator *
+                           m_dual_intensity_denominator_reciprocal;
     }
 
     /*************************************************************************/
@@ -244,6 +276,22 @@ class Memory {
     /*************************************************************************/
     inline constexpr double total_update_count_reciprocal(void) const {
         return m_total_update_count_reciprocal;
+    }
+
+    /*************************************************************************/
+    inline constexpr const std::vector<multi_array::ValueProxy<int>>
+        &violation_counts(void) const {
+        return m_violation_counts;
+    }
+
+    /*************************************************************************/
+    inline constexpr long total_violation_count(void) const {
+        return m_total_violation_count;
+    }
+
+    /*************************************************************************/
+    inline constexpr double total_violation_count_reciprocal(void) const {
+        return m_total_violation_count_reciprocal;
     }
 };  // namespace solver
 }  // namespace solver

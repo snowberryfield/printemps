@@ -693,7 +693,7 @@ TEST_F(TestConstraint, setup_constraint_type_knapsack) {
 /*****************************************************************************/
 TEST_F(TestConstraint, setup_constraint_type_integer_knapsack) {
     printemps::model::Model<int, double> model;
-    auto coefficients = printemps::utility::sequence(10);
+    auto coefficients = printemps::utility::sequence(10, 20);
 
     auto& x = model.create_variables("x", 10, 0, 10);
     {
@@ -1016,10 +1016,10 @@ TEST_F(TestConstraint, setup_constraint_type_intermediate) {
         constraint.setup(-x + y + z + 5,
                          printemps::model_component::ConstraintSense::Equal);
         constraint.setup_constraint_type();
-        EXPECT_FALSE(constraint.is_intermediate());
+        EXPECT_TRUE(constraint.is_intermediate());
         EXPECT_FALSE(constraint.has_aux_lower_bound());
         EXPECT_FALSE(constraint.has_aux_upper_bound());
-        EXPECT_EQ(nullptr, constraint.aux_variable_ptr());
+        EXPECT_EQ(&x(0), constraint.aux_variable_ptr());
     }
 
     {

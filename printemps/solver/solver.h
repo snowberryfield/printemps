@@ -23,9 +23,9 @@ class Solver {
     model::Model<T_Variable, T_Expression>*             m_model_ptr;
     solution::IncumbentHolder<T_Variable, T_Expression> m_incumbent_holder;
     solution::DenseSolution<T_Variable, T_Expression>   m_current_solution;
-    Memory                                              m_memory;
+    Memory<T_Variable, T_Expression>                    m_memory;
     utility::TimeKeeper                                 m_time_keeper;
-    option::Option                                      m_master_option;
+    option::Option                                      m_option;
 
     solution::SolutionArchive<T_Variable, T_Expression> m_solution_archive;
 
@@ -40,127 +40,8 @@ class Solver {
         m_tabu_search_controller;
 
     /*************************************************************************/
-    inline void preprocess(void) {
-        /**
-         * Start to measure computational time and get the starting time.
-         */
-        m_time_keeper.set_start_time();
-        m_start_date_time = utility::date_time();
-
-        /**
-         * Print the program name, the project url, and the starting time.
-         */
-        this->print_program_info(  //
-            m_master_option.verbose >= option::verbose::Outer);
-
-        /**
-         * The model can be solved only once.
-         */
-        if (m_model_ptr->is_solved()) {
-            throw std::logic_error(utility::format_error_location(
-                __FILE__, __LINE__, __func__,
-                "This model has already been solved."));
-        } else {
-            m_model_ptr->set_is_solved(true);
-        }
-
-        this->setup_target_objective();
-
-        /**
-         * Print the option value.
-         */
-        if (m_master_option.verbose >= option::verbose::Outer) {
-            m_master_option.print();
-        }
-
-        /**
-         * Setup the model.
-         */
-        m_model_ptr->setup(m_master_option.is_enabled_presolve,
-                           m_master_option.is_enabled_initial_value_correction,
-                           m_master_option.is_enabled_aggregation_move,
-                           m_master_option.is_enabled_precedence_move,
-                           m_master_option.is_enabled_variable_bound_move,
-                           m_master_option.is_enabled_soft_selection_move,
-                           m_master_option.is_enabled_chain_move,
-                           m_master_option.is_enabled_two_flip_move,
-                           m_master_option.is_enabled_user_defined_move,
-                           m_master_option.selection_mode,
-                           m_master_option.initial_penalty_coefficient,
-                           m_master_option.verbose >= option::verbose::Outer);
-
-        /**
-         * Print the problem size.
-         */
-        if (m_master_option.verbose >= option::verbose::Outer) {
-            m_model_ptr->print_number_of_variables();
-            m_model_ptr->print_number_of_constraints();
-        }
-
-        /**
-         * Disable the Chain move for the problem with no zero one_coefficient
-         * constraints (set partitioning, set packing, set covering,
-         * cardinality, and invariant knapsack).
-         */
-        if (m_master_option.is_enabled_chain_move &&
-            !m_model_ptr->has_chain_move_effective_constraints()) {
-            m_master_option.is_enabled_chain_move = false;
-            utility::print_warning(
-                "Chain move was disabled because the problem does not include "
-                "any zero-one coefficient constraints (set "
-                "partitioning/packing/covering, cardinality, invariant "
-                "knapsack, and multiple covering).",
-                m_master_option.verbose >= option::verbose::Warning);
-        }
-
-        /**
-         * Enables the default neighborhood moves. Special neighborhood moves
-         * will be enabled when optimization stagnates.
-         */
-        this->enable_default_neighborhood();
-
-        /**
-         * Set local and global penalty coefficient for each constraint.
-         */
-        for (auto&& proxy : m_model_ptr->constraint_proxies()) {
-            for (auto&& constraint : proxy.flat_indexed_constraints()) {
-                constraint.reset_local_penalty_coefficient();
-            }
-        }
-
-        /**
-         * Create memory which stores updating count for each variable.
-         */
-        m_memory.setup(m_model_ptr);
-
-        /**
-         * Prepare feasible solutions archive.
-         */
-        m_solution_archive.setup(
-            m_master_option.feasible_solutions_capacity,  //
-            m_model_ptr->is_minimization(),               //
-            m_model_ptr->name(),                          //
-            m_model_ptr->number_of_variables(),           //
-            m_model_ptr->number_of_constraints());
-
-        /**
-         * Compute the values of expressions, constraints, and the objective
-         * function according to the initial solution.
-         */
-        m_model_ptr->update();
-
-        /**
-         * Update the state.
-         */
-        m_current_solution = m_model_ptr->export_solution();
-        m_incumbent_holder.try_update_incumbent(m_current_solution,
-                                                m_model_ptr->evaluate({}));
-    }
-
-    /*************************************************************************/
     inline void print_program_info(const bool a_IS_ENABLED_PRINT) {
-        utility::print_single_line(m_master_option.verbose >=
-                                   option::verbose::Outer);
+        utility::print_single_line(m_option.verbose >= option::verbose::Outer);
         utility::print("PRINTEMPS " + constant::VERSION + " (" +
                            constant::PROJECT_URL + ")",
                        a_IS_ENABLED_PRINT);
@@ -178,36 +59,36 @@ class Solver {
          * solution is found.
          */
         auto target_objective_changed_rate =
-            m_master_option.target_objective_value /
+            m_option.target_objective_value /
                 option::OptionConstant::DEFAULT_TARGET_OBJECTIVE -
             1.0;
 
         if (fabs(target_objective_changed_rate) > constant::EPSILON) {
-            m_master_option.target_objective_value *= m_model_ptr->sign();
+            m_option.target_objective_value *= m_model_ptr->sign();
         }
 
         if (fabs(target_objective_changed_rate) < constant::EPSILON) {
             if (!m_model_ptr->is_defined_objective()) {
-                m_master_option.target_objective_value = 0.0;
+                m_option.target_objective_value = 0.0;
             }
         }
     }
 
     /*************************************************************************/
     inline void enable_default_neighborhood(void) {
-        if (m_master_option.is_enabled_binary_move) {
+        if (m_option.is_enabled_binary_move) {
             m_model_ptr->neighborhood().binary().enable();
         }
 
-        if (m_master_option.is_enabled_integer_move) {
+        if (m_option.is_enabled_integer_move) {
             m_model_ptr->neighborhood().integer().enable();
         }
 
-        if (m_master_option.is_enabled_user_defined_move) {
+        if (m_option.is_enabled_user_defined_move) {
             m_model_ptr->neighborhood().user_defined().enable();
         }
 
-        if (m_master_option.selection_mode != option::selection_mode::None) {
+        if (m_option.selection_mode != option::selection_mode::None) {
             m_model_ptr->neighborhood().selection().enable();
         }
     }
@@ -245,19 +126,27 @@ class Solver {
         /**
          * Prepare the result object to return.
          */
-        Status status(named_solution.is_feasible(),          //
-                      m_start_date_time,                     //
-                      m_finish_date_time,                    //
-                      m_model_ptr->name(),                   //
-                      m_model_ptr->number_of_variables(),    //
-                      m_model_ptr->number_of_constraints(),  //
-                      m_time_keeper.elapsed_time(),          //
-                      m_lagrange_dual_controller.result().number_of_iterations,
-                      m_local_search_controller.result().number_of_iterations,
-                      m_tabu_search_controller.result().number_of_iterations,
-                      m_tabu_search_controller.result().number_of_loops,
-                      this->export_named_penalty_coefficients(),  //
-                      this->export_named_variable_update_counts());
+        const auto& LAGRANGE_DUAL_RESULT = m_lagrange_dual_controller.result();
+        const auto& LOCAL_SEARCH_RESULT  = m_local_search_controller.result();
+        const auto& TABU_SEARCH_RESULT   = m_tabu_search_controller.result();
+        Status      status(
+            named_solution.is_feasible(),                               //
+            m_start_date_time,                                          //
+            m_finish_date_time,                                         //
+            m_model_ptr->name(),                                        //
+            m_model_ptr->number_of_variables(),                         //
+            m_model_ptr->number_of_constraints(),                       //
+            m_time_keeper.clock(),                                      //
+            LAGRANGE_DUAL_RESULT.number_of_iterations,                  //
+            LOCAL_SEARCH_RESULT.number_of_iterations,                   //
+            TABU_SEARCH_RESULT.state.total_number_of_inner_iterations,  //
+            TABU_SEARCH_RESULT.state.iteration,                         //
+            TABU_SEARCH_RESULT.state.total_number_of_evaluated_moves,   //
+            TABU_SEARCH_RESULT.state.averaged_inner_iteration_speed,    //
+            TABU_SEARCH_RESULT.state.averaged_move_evaluation_speed,    //
+            this->export_named_penalty_coefficients(),                  //
+            this->export_named_update_counts(),
+            this->export_named_violation_counts());
 
         Result<T_Variable, T_Expression> result(  //
             named_solution, status, m_solution_archive);
@@ -286,17 +175,30 @@ class Solver {
 
     /*************************************************************************/
     inline std::unordered_map<std::string, multi_array::ValueProxy<int>>
-    export_named_variable_update_counts(void) {
+    export_named_update_counts(void) {
         std::unordered_map<std::string, multi_array::ValueProxy<int>>
-                  named_variable_update_counts;
-        const int VARIABLE_PROXIES_SIZE =
-            m_model_ptr->variable_proxies().size();
+                    named_update_counts;
+        const int   PROXIES_SIZE   = m_model_ptr->variable_proxies().size();
         const auto& VARIABLE_NAMES = m_model_ptr->variable_names();
-        const auto& UPDATE_COUNTS  = m_memory.update_counts();
-        for (auto i = 0; i < VARIABLE_PROXIES_SIZE; i++) {
-            named_variable_update_counts[VARIABLE_NAMES[i]] = UPDATE_COUNTS[i];
+        const auto& COUNTS         = m_memory.update_counts();
+        for (auto i = 0; i < PROXIES_SIZE; i++) {
+            named_update_counts[VARIABLE_NAMES[i]] = COUNTS[i];
         }
-        return named_variable_update_counts;
+        return named_update_counts;
+    }
+
+    /*************************************************************************/
+    inline std::unordered_map<std::string, multi_array::ValueProxy<int>>
+    export_named_violation_counts(void) {
+        std::unordered_map<std::string, multi_array::ValueProxy<int>>
+                    named_violation_counts;
+        const int   PROXIES_SIZE     = m_model_ptr->constraint_proxies().size();
+        const auto& CONSTRAINT_NAMES = m_model_ptr->constraint_names();
+        const auto& COUNTS           = m_memory.violation_counts();
+        for (auto i = 0; i < PROXIES_SIZE; i++) {
+            named_violation_counts[CONSTRAINT_NAMES[i]] = COUNTS[i];
+        }
+        return named_violation_counts;
     }
 
     /*************************************************************************/
@@ -307,7 +209,7 @@ class Solver {
                                          &m_memory,            //
                                          &m_solution_archive,  //
                                          m_time_keeper,        //
-                                         m_master_option);
+                                         m_option);
         m_lagrange_dual_controller.run();
         m_current_solution =
             m_incumbent_holder.global_augmented_incumbent_solution();
@@ -321,7 +223,7 @@ class Solver {
                                         &m_memory,            //
                                         &m_solution_archive,  //
                                         m_time_keeper,        //
-                                        m_master_option);
+                                        m_option);
         m_local_search_controller.run();
         m_current_solution =
             m_incumbent_holder.global_augmented_incumbent_solution();
@@ -335,7 +237,7 @@ class Solver {
                                        &m_memory,            //
                                        &m_solution_archive,  //
                                        m_time_keeper,        //
-                                       m_master_option);
+                                       m_option);
         m_tabu_search_controller.run();
         m_current_solution =
             m_incumbent_holder.global_augmented_incumbent_solution();
@@ -365,7 +267,7 @@ class Solver {
         m_current_solution.initialize();
         m_memory.initialize();
         m_time_keeper.initialize();
-        m_master_option.initialize();
+        m_option.initialize();
         m_solution_archive.initialize();
 
         m_start_date_time.clear();
@@ -380,8 +282,124 @@ class Solver {
     inline void setup(model::Model<T_Variable, T_Expression>* a_model_ptr,  //
                       const option::Option&                   a_OPTION) {
         this->initialize();
-        m_model_ptr     = a_model_ptr;
-        m_master_option = a_OPTION;
+        m_model_ptr = a_model_ptr;
+        m_option    = a_OPTION;
+    }
+
+    /*************************************************************************/
+    inline void preprocess(void) {
+        /**
+         * Start to measure computational time and get the starting time.
+         */
+        m_time_keeper.set_start_time();
+        m_start_date_time = utility::date_time();
+
+        /**
+         * Print the program name, the project url, and the starting time.
+         */
+        this->print_program_info(  //
+            m_option.verbose >= option::verbose::Outer);
+
+        /**
+         * The model can be solved only once.
+         */
+        if (m_model_ptr->is_solved()) {
+            throw std::logic_error(utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "This model has already been solved."));
+        } else {
+            m_model_ptr->set_is_solved(true);
+        }
+
+        this->setup_target_objective();
+
+        /**
+         * Print the option value.
+         */
+        if (m_option.verbose >= option::verbose::Outer) {
+            m_option.print();
+        }
+
+        /**
+         * Setup the model.
+         */
+        m_model_ptr->setup(
+            m_option.is_enabled_presolve,
+            m_option.is_enabled_initial_value_correction,
+            m_option.is_enabled_aggregation_move,
+            m_option.is_enabled_precedence_move,
+            m_option.is_enabled_variable_bound_move,
+            m_option.is_enabled_soft_selection_move,
+            m_option.is_enabled_chain_move, m_option.is_enabled_two_flip_move,
+            m_option.is_enabled_user_defined_move, m_option.selection_mode,
+            m_option.initial_penalty_coefficient,
+            m_option.verbose >= option::verbose::Outer);
+
+        /**
+         * Print the problem size.
+         */
+        if (m_option.verbose >= option::verbose::Outer) {
+            m_model_ptr->print_number_of_variables();
+            m_model_ptr->print_number_of_constraints();
+        }
+
+        /**
+         * Disable the Chain move for the problem with no zero one_coefficient
+         * constraints (set partitioning, set packing, set covering,
+         * cardinality, and invariant knapsack).
+         */
+        if (m_option.is_enabled_chain_move &&
+            !m_model_ptr->has_chain_move_effective_constraints()) {
+            m_option.is_enabled_chain_move = false;
+            utility::print_warning(
+                "Chain move was disabled because the problem does not include "
+                "any zero-one coefficient constraints (set "
+                "partitioning/packing/covering, cardinality, invariant "
+                "knapsack, and multiple covering).",
+                m_option.verbose >= option::verbose::Warning);
+        }
+
+        /**
+         * Enables the default neighborhood moves. Special neighborhood moves
+         * will be enabled when optimization stagnates.
+         */
+        this->enable_default_neighborhood();
+
+        /**
+         * Set local and global penalty coefficient for each constraint.
+         */
+        for (auto&& proxy : m_model_ptr->constraint_proxies()) {
+            for (auto&& constraint : proxy.flat_indexed_constraints()) {
+                constraint.reset_local_penalty_coefficient();
+            }
+        }
+
+        /**
+         * Create memory which stores updating count for each variable.
+         */
+        m_memory.setup(m_model_ptr);
+
+        /**
+         * Prepare feasible solutions archive.
+         */
+        m_solution_archive.setup(m_option.feasible_solutions_capacity,  //
+                                 m_model_ptr->is_minimization(),        //
+                                 m_model_ptr->name(),                   //
+                                 m_model_ptr->number_of_variables(),    //
+                                 m_model_ptr->number_of_constraints());
+
+        /**
+         * Compute the values of expressions, constraints, and the objective
+         * function according to the initial solution.
+         */
+        m_model_ptr->update();
+
+        /**
+         * Update the state.
+         */
+        m_current_solution = m_model_ptr->export_solution();
+        m_incumbent_holder.try_update_incumbent(m_current_solution,
+                                                m_model_ptr->evaluate({}));
     }
 
     /*************************************************************************/
@@ -395,23 +413,22 @@ class Solver {
          * Start optimization.
          */
         utility::print_single_line(  //
-            m_master_option.verbose >= option::verbose::Outer);
+            m_option.verbose >= option::verbose::Outer);
 
         utility::print_message(  //
-            "Optimization starts.",
-            m_master_option.verbose >= option::verbose::Outer);
+            "Optimization starts.", m_option.verbose >= option::verbose::Outer);
 
         /**
          * Solve Lagrange dual to obtain a better initial solution (Optional).
          */
-        if (m_master_option.is_enabled_lagrange_dual) {
+        if (m_option.is_enabled_lagrange_dual) {
             this->run_lagrange_dual();
         }
 
         /**
          * Run a local search to improve the initial solution (optional).
          */
-        if (m_master_option.is_enabled_local_search) {
+        if (m_option.is_enabled_local_search) {
             this->run_local_search();
         }
 
@@ -429,23 +446,8 @@ class Solver {
     }
 
     /*************************************************************************/
-    inline std::vector<
-        presolver::FlippableVariablePair<T_Variable, T_Expression>>
-    extract_flippable_variable_pairs(const int a_MINIMUM_COMMON_ELEMENT) {
-        /**
-         * Preprocessing; setup the model and the solver.
-         */
-        this->preprocess();
-
-        /**
-         * Extract flippable variable pairs
-         */
-        auto flippable_variable_pairs =
-            presolver::extract_flippable_variable_pairs(
-                m_model_ptr->constraint_reference().enabled_constraint_ptrs,
-                a_MINIMUM_COMMON_ELEMENT,
-                m_master_option.verbose >= option::verbose::Outer);
-        return flippable_variable_pairs;
+    inline model::Model<T_Variable, T_Expression>* model_ptr(void) {
+        return m_model_ptr;
     }
 };
 
@@ -455,9 +457,7 @@ inline Result<T_Variable, T_Expression> solve(
     model::Model<T_Variable, T_Expression>* a_model_ptr,  //
     const option::Option&                   a_OPTION) {
     Solver<T_Variable, T_Expression> solver(a_model_ptr, a_OPTION);
-    auto                             result = solver.solve();
-
-    return result;
+    return solver.solve();
 }
 
 /*****************************************************************************/
@@ -467,21 +467,7 @@ inline Result<T_Variable, T_Expression> solve(
     option::Option option;
     return solve(a_model_ptr, option);
 }
-
-/*****************************************************************************/
-template <class T_Variable, class T_Expression>
-inline std::vector<presolver::FlippableVariablePair<T_Variable, T_Expression>>
-extract_flippable_variable_pairs(
-    model::Model<T_Variable, T_Expression>* a_model_ptr,  //
-    const option::Option& a_OPTION, const int a_MINIMUM_COMMON_ELEMENT) {
-    Solver<T_Variable, T_Expression> solver(a_model_ptr, a_OPTION);
-
-    auto flippable_variable_pairs =
-        solver.extract_flippable_variable_pairs(a_MINIMUM_COMMON_ELEMENT);
-
-    return flippable_variable_pairs;
-}
-
+using IPSolver = Solver<int, double>;
 }  // namespace solver
 }  // namespace printemps
 
