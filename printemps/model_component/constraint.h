@@ -508,6 +508,141 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
             }
         }
 
+        /// Min-Max, Max-Min, Intermediate
+        {
+            bool is_valid                                          = true;
+            int  number_of_integer_variables_coefficient_plus_one  = 0;
+            int  number_of_integer_variables_coefficient_minus_one = 0;
+            int  number_of_mutable_integer_variables               = 0;
+
+            Variable<T_Variable, T_Expression> *aux_variable_ptr      = nullptr;
+            Variable<T_Variable, T_Expression> *aux_variable_ptr_plus = nullptr;
+            Variable<T_Variable, T_Expression> *aux_variable_ptr_minus =
+                nullptr;
+            T_Expression aux_variable_coefficient = 0;
+
+            auto is_integer = [](const T_Expression a_VALUE) {
+                return fabs(a_VALUE - floor(a_VALUE)) < constant::EPSILON_10;
+            };
+
+            auto constant_value = m_expression.constant_value();
+            if (!is_integer(constant_value)) {
+                is_valid = false;
+            }
+
+            bool is_all_mutable_variable_with_plus_minus_one_coefficient = true;
+            if (is_valid) {
+                for (const auto &sensitivity : m_expression.sensitivities()) {
+                    auto variable_ptr = sensitivity.first;
+                    auto coefficient  = sensitivity.second;
+
+                    if (!is_integer(coefficient)) {
+                        is_valid = false;
+                        break;
+                    }
+                    if (fabs(coefficient) != 1) {
+                        is_all_mutable_variable_with_plus_minus_one_coefficient =
+                            false;
+                    }
+                    if ((variable_ptr->sense() == VariableSense::Integer ||
+                         variable_ptr->sense() ==
+                             VariableSense::Intermediate) &&
+                        !variable_ptr->is_fixed()) {
+                        number_of_mutable_integer_variables++;
+                        if (coefficient == 1) {
+                            aux_variable_ptr_plus = variable_ptr;
+                            number_of_integer_variables_coefficient_plus_one++;
+                        } else if (coefficient == -1) {
+                            aux_variable_ptr_minus = variable_ptr;
+                            number_of_integer_variables_coefficient_minus_one++;
+                        }
+                    }
+                }
+            }
+
+            if (is_valid) {
+                if (number_of_integer_variables_coefficient_minus_one == 1 &&
+                    (is_all_mutable_variable_with_plus_minus_one_coefficient ||
+                     number_of_integer_variables_coefficient_plus_one == 0)) {
+                    is_valid                 = true;
+                    aux_variable_ptr         = aux_variable_ptr_minus;
+                    aux_variable_coefficient = -1;
+                } else if (
+                    number_of_integer_variables_coefficient_plus_one == 1 &&
+                    (is_all_mutable_variable_with_plus_minus_one_coefficient ||
+                     number_of_integer_variables_coefficient_minus_one == 0)) {
+                    is_valid                 = true;
+                    aux_variable_ptr         = aux_variable_ptr_plus;
+                    aux_variable_coefficient = 1;
+                } else {
+                    is_valid = false;
+                }
+            }
+
+            if (is_valid) {
+                auto rest_part_expression = m_expression.copy();
+                rest_part_expression.erase(aux_variable_ptr);
+                T_Expression rest_part_lower_bound =
+                    rest_part_expression.lower_bound();
+                T_Expression rest_part_upper_bound =
+                    rest_part_expression.upper_bound();
+
+                if (aux_variable_coefficient > 0) {
+                    std::swap(rest_part_lower_bound, rest_part_upper_bound);
+                    rest_part_lower_bound *= -1.0;
+                    rest_part_upper_bound *= -1.0;
+                }
+
+                if (aux_variable_ptr->lower_bound() != constant::INT_HALF_MIN &&
+                    aux_variable_ptr->lower_bound() > rest_part_lower_bound) {
+                    m_has_aux_lower_bound = true;
+                } else {
+                    m_has_aux_lower_bound = false;
+                }
+
+                if (aux_variable_ptr->upper_bound() != constant::INT_HALF_MAX &&
+                    aux_variable_ptr->upper_bound() < rest_part_upper_bound) {
+                    m_has_aux_upper_bound = true;
+                } else {
+                    m_has_aux_upper_bound = false;
+                }
+
+                int NUMBER_OF_INTEGER_VARIABLES_COEFFICIENT_ONE =
+                    number_of_integer_variables_coefficient_plus_one +
+                    number_of_integer_variables_coefficient_minus_one;
+
+                if (NUMBER_OF_INTEGER_VARIABLES_COEFFICIENT_ONE == 1) {
+                    if ((m_sense == ConstraintSense::Less &&
+                         aux_variable_coefficient < 0) ||
+                        (m_sense == ConstraintSense::Greater &&
+                         aux_variable_coefficient > 0)) {
+                        m_is_min_max       = true;
+                        m_aux_variable_ptr = aux_variable_ptr;
+                        return;
+                    }
+
+                    if ((m_sense == ConstraintSense::Greater &&
+                         aux_variable_coefficient < 0) ||
+                        (m_sense == ConstraintSense::Less &&
+                         aux_variable_coefficient > 0)) {
+                        m_is_max_min       = true;
+                        m_aux_variable_ptr = aux_variable_ptr;
+                        return;
+                    }
+                }
+
+                if (m_sense == ConstraintSense::Equal) {
+                    m_is_intermediate  = true;
+                    m_aux_variable_ptr = aux_variable_ptr;
+                    return;
+                }
+
+                m_aux_variable_ptr    = nullptr;
+                m_has_aux_lower_bound = false;
+                m_has_aux_upper_bound = false;
+            }
+        }
+
         /// Binary Flow, Integer Flow, Soft Selection
         {
             if (m_sense == ConstraintSense::Equal) {
@@ -634,105 +769,10 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
             return;
         }
 
-        /// Min-Max, Max-Min, Intermediate
-        {
-            bool is_valid                                         = true;
-            int  number_of_integer_variables_with_coefficient_one = 0;
-
-            Variable<T_Variable, T_Expression> *aux_variable_ptr = nullptr;
-            T_Expression                        aux_variable_coefficient = 0;
-
-            auto is_integer = [](const T_Expression a_VALUE) {
-                return fabs(a_VALUE - floor(a_VALUE)) < constant::EPSILON_10;
-            };
-
-            auto constant_value = m_expression.constant_value();
-            if (!is_integer(constant_value)) {
-                is_valid = false;
-            }
-
-            if (is_valid) {
-                for (const auto &sensitivity : m_expression.sensitivities()) {
-                    auto variable_ptr = sensitivity.first;
-                    auto coefficient  = sensitivity.second;
-
-                    if (!is_integer(coefficient)) {
-                        is_valid = false;
-                        break;
-                    }
-                    if ((variable_ptr->sense() == VariableSense::Integer ||
-                         variable_ptr->sense() ==
-                             VariableSense::Intermediate) &&
-                        abs(coefficient) == 1 && !variable_ptr->is_fixed()) {
-                        aux_variable_ptr         = variable_ptr;
-                        aux_variable_coefficient = coefficient;
-                        number_of_integer_variables_with_coefficient_one++;
-                    }
-                }
-            }
-
-            if (number_of_integer_variables_with_coefficient_one != 1) {
-                is_valid = false;
-            }
-
-            if (is_valid) {
-                auto rest_part_expression = m_expression.copy();
-                rest_part_expression.erase(aux_variable_ptr);
-                T_Expression rest_part_lower_bound =
-                    rest_part_expression.lower_bound();
-                T_Expression rest_part_upper_bound =
-                    rest_part_expression.upper_bound();
-
-                if (aux_variable_coefficient > 0) {
-                    std::swap(rest_part_lower_bound, rest_part_upper_bound);
-                    rest_part_lower_bound *= -1.0;
-                    rest_part_upper_bound *= -1.0;
-                }
-
-                if (aux_variable_ptr->lower_bound() != constant::INT_HALF_MIN &&
-                    aux_variable_ptr->lower_bound() > rest_part_lower_bound) {
-                    m_has_aux_lower_bound = true;
-                } else {
-                    m_has_aux_lower_bound = false;
-                }
-
-                if (aux_variable_ptr->upper_bound() != constant::INT_HALF_MAX &&
-                    aux_variable_ptr->upper_bound() < rest_part_upper_bound) {
-                    m_has_aux_upper_bound = true;
-                } else {
-                    m_has_aux_upper_bound = false;
-                }
-
-                if ((m_sense == ConstraintSense::Less &&
-                     aux_variable_coefficient < 0) ||
-                    (m_sense == ConstraintSense::Greater &&
-                     aux_variable_coefficient > 0)) {
-                    m_is_min_max       = true;
-                    m_aux_variable_ptr = aux_variable_ptr;
-                    return;
-                }
-
-                if ((m_sense == ConstraintSense::Greater &&
-                     aux_variable_coefficient < 0) ||
-                    (m_sense == ConstraintSense::Less &&
-                     aux_variable_coefficient > 0)) {
-                    m_is_max_min       = true;
-                    m_aux_variable_ptr = aux_variable_ptr;
-                    return;
-                }
-
-                if (m_sense == ConstraintSense::Equal) {
-                    m_is_intermediate  = true;
-                    m_aux_variable_ptr = aux_variable_ptr;
-                    return;
-                }
-            }
-        }
-
         /// GF2
         {
-            bool is_valid                                         = true;
-            int  number_of_integer_variables_with_coefficient_two = 0;
+            bool is_valid                                    = true;
+            int  number_of_integer_variables_coefficient_two = 0;
 
             Variable<T_Variable, T_Expression> *aux_variable_ptr = nullptr;
             T_Expression                        aux_variable_coefficient = 0;
@@ -761,7 +801,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
                         abs(coefficient) == 2) {
                         aux_variable_ptr         = variable_ptr;
                         aux_variable_coefficient = coefficient;
-                        number_of_integer_variables_with_coefficient_two++;
+                        number_of_integer_variables_coefficient_two++;
                     } else if (variable_ptr->sense() != VariableSense::Binary ||
                                abs(coefficient) != 1) {
                         is_valid = false;
@@ -770,7 +810,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
                 }
             }
 
-            if (number_of_integer_variables_with_coefficient_two != 1) {
+            if (number_of_integer_variables_coefficient_two != 1) {
                 is_valid = false;
             }
 

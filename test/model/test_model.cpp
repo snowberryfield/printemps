@@ -1128,7 +1128,7 @@ TEST_F(TestModel, categorize_variables) {
 /*****************************************************************************/
 TEST_F(TestModel, categorize_constraints) {
     printemps::model::Model<int, double> model;
-    auto coefficients = printemps::utility::sequence(10);
+    auto coefficients = printemps::utility::sequence(10, 20);
 
     auto& x = model.create_variable("x", -10, 10);
     auto& y = model.create_variable("y", -10, 10);
