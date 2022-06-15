@@ -2116,11 +2116,11 @@ class Model {
             }
 
             if (constraint_ptr->is_greater_or_equal()) {
-                violation_diff = std::max(-constraint_value, 0.0) -
+                violation_diff = std::min(constraint_value, 0.0) +
                                  constraint_ptr->negative_part();
-                total_violation += violation_diff;
+                total_violation -= violation_diff;
 
-                local_penalty +=
+                local_penalty -=
                     violation_diff *
                     constraint_ptr->local_penalty_coefficient_greater();
             }
@@ -2207,15 +2207,19 @@ class Model {
             is_feasibility_improvable |= violation_diff < -constant::EPSILON;
         }
 
+#ifdef _MPS_SOLVER
+        double objective             = m_objective.evaluate(a_MOVE);
+        double objective_improvement = m_objective.value() - objective;
+
+#else
         double objective             = 0.0;
         double objective_improvement = 0.0;
-
         if (m_is_defined_objective) {
             objective = m_objective.evaluate(a_MOVE) * this->sign();
             objective_improvement =
                 m_objective.value() * this->sign() - objective;
         }
-
+#endif
         const double GLOBAL_PENALTY =
             total_violation * m_global_penalty_coefficient;
 
