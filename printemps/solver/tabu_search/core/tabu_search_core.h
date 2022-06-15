@@ -663,9 +663,9 @@ class TabuSearchCore {
          * Print the header of optimization progress table and print the initial
          * solution status.
          */
-        utility::print_single_line(m_option.verbose >= option::verbose::Full);
+        utility::print_single_line(m_option.verbose >= option::verbose::Outer);
         utility::print_message("Tabu Search starts.",
-                               m_option.verbose >= option::verbose::Full);
+                               m_option.verbose >= option::verbose::Outer);
 
         print_table_header(m_option.verbose >= option::verbose::Full);
         print_table_initial(m_option.verbose >= option::verbose::Full);
