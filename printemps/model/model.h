@@ -2531,6 +2531,19 @@ class Model {
     }
 
     /*************************************************************************/
+    constexpr void set_user_defined_selection_constraints(
+        const std::unordered_set<std::string> &a_CONSTRAINT_NAMES) {
+        for (auto &&proxy : m_constraint_proxies) {
+            for (auto &&constraint : proxy.flat_indexed_constraints()) {
+                if (a_CONSTRAINT_NAMES.find(constraint.name()) !=
+                    a_CONSTRAINT_NAMES.end()) {
+                    constraint.set_is_user_defined_selection(true);
+                }
+            }
+        }
+    }
+
+    /*************************************************************************/
     constexpr void setup_flippable_variable_ptr_pairs(
         const std::vector<std::pair<std::string, std::string>>
             &a_VARIABLE_NAME_PAIRS) {
@@ -2691,10 +2704,10 @@ class Model {
                 "Nonlinear model cannot be written in MPS format."));
         }
         /**
-         * Determine the constraint sensitivities.
+         * Determine the sensitivities.
          */
-        this->setup_variable_related_constraints();
-        this->setup_variable_sensitivities();
+        this->setup_variable_constraint_sensitivities();
+        this->setup_variable_objective_sensitivities();
 
         /**
          * Write instance name.

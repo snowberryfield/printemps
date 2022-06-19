@@ -204,7 +204,7 @@ TEST_F(TestSelectionExtractor, extract_by_number_of_variables_smaller_order) {
     }
 
     {
-        /// Constraint c_1
+        /// Constraint c_2
         auto variable_ptrs = model.selections()[2].variable_ptrs;
         EXPECT_EQ(400, static_cast<int>(variable_ptrs.size()));
 
@@ -224,7 +224,7 @@ TEST_F(TestSelectionExtractor, extract_by_number_of_variables_smaller_order) {
     /// Constraint c_0
     EXPECT_FALSE(model.selections()[1].constraint_ptr->is_enabled());
 
-    /// Constraint c_1
+    /// Constraint c_2
     EXPECT_FALSE(model.selections()[2].constraint_ptr->is_enabled());
 
     /**
@@ -247,8 +247,7 @@ TEST_F(TestSelectionExtractor, extract_by_number_of_variables_smaller_order) {
 }
 
 /*****************************************************************************/
-TEST_F(TestSelectionExtractor,
-       extract_selections_by_number_of_variables_larger_order) {
+TEST_F(TestSelectionExtractor, extract_by_number_of_variables_larger_order) {
     printemps::model::Model<int, double> model;
 
     auto& x_0 = model.create_variables("x_0", {10, 10}, 0, 1);
@@ -279,7 +278,7 @@ TEST_F(TestSelectionExtractor,
     model.create_constraint("c_2", x_1.selection());
 
     /**
-     * Selection constraint with 400 decision variables. The priority of this
+     * Selection constraint with 2 decision variables. The priority of this
      * constraint is the fourth.
      */
     model.create_constraint("c_3", x_2.selection());
@@ -364,7 +363,7 @@ TEST_F(TestSelectionExtractor,
 }
 
 /*****************************************************************************/
-TEST_F(TestSelectionExtractor, extract_selections_independent) {
+TEST_F(TestSelectionExtractor, extract_by_independent) {
     printemps::model::Model<int, double> model;
 
     auto& x_0 = model.create_variables("x_0", {10, 10}, 0, 1);
@@ -378,7 +377,7 @@ TEST_F(TestSelectionExtractor, extract_selections_independent) {
         "c_0", x_0.selection({0, printemps::model_component::Range::All}));
 
     /**
-     * Selection constraint with 32 decision variables (overlap).
+     * Selection constraint with 31 decision variables (overlap).
      */
     model.create_constraint(
         "c_1",
@@ -398,7 +397,7 @@ TEST_F(TestSelectionExtractor, extract_selections_independent) {
     model.setup_structure();
     printemps::preprocess::SelectionExtractor<int, double> selection_extractor(
         &model);
-    selection_extractor.extract_independent(false);
+    selection_extractor.extract_by_independent(false);
     model.setup_structure();
 
     EXPECT_EQ(1, model.number_of_selection_constraints());
@@ -440,6 +439,97 @@ TEST_F(TestSelectionExtractor, extract_selections_independent) {
     {
         auto variable_ptrs = model.variable_reference().binary_variable_ptrs;
         EXPECT_EQ(10 * 10 + 20 * 20 + 2 - 10,
+                  model.number_of_binary_variables());
+    }
+}
+
+/*****************************************************************************/
+TEST_F(TestSelectionExtractor, extract_by_user_defined) {
+    printemps::model::Model<int, double> model;
+
+    auto& x_0 = model.create_variables("x_0", {10, 10}, 0, 1);
+    auto& x_1 = model.create_variables("x_1", {20, 20}, 0, 1);
+    auto& x_2 = model.create_variables("x_2", 2, 0, 1);
+
+    /**
+     * Selection constraint with 10 decision variables.
+     */
+    model.create_constraint(
+        "c_0", x_0.selection({0, printemps::model_component::Range::All}));
+
+    /**
+     * Selection constraint with 31 decision variables.
+     */
+    auto& c_1 = model.create_constraint(
+        "c_1",
+        (x_0.sum({1, printemps::model_component::Range::All}) +
+         x_1.sum({1, printemps::model_component::Range::All}) + x_2(0)) == 1);
+
+    /**
+     * Selection constraint with 400 decision variables.
+     */
+    model.create_constraint("c_2", x_1.selection());
+
+    /**
+     * Selection constraint with 2 decision variables.
+     */
+    model.create_constraint("c_3", x_2.selection());
+
+    c_1[0].set_is_user_defined_selection(true);
+
+    model.setup_structure();
+    printemps::preprocess::SelectionExtractor<int, double> selection_extractor(
+        &model);
+    selection_extractor.extract_by_user_defined(false);
+    model.setup_structure();
+
+    EXPECT_EQ(1, model.number_of_selection_constraints());
+    EXPECT_EQ(1, static_cast<int>(model.selections().size()));
+
+    /**
+     * Check the numbers of covered variables and variable pointers.
+     */
+    {
+        /// Constraint c_1
+        auto variable_ptrs = model.selections()[0].variable_ptrs;
+        EXPECT_EQ(31, static_cast<int>(variable_ptrs.size()));
+
+        EXPECT_TRUE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                               &x_0(1, 0)) != variable_ptrs.end()));
+        EXPECT_TRUE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                               &x_0(1, 9)) != variable_ptrs.end()));
+
+        EXPECT_TRUE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                               &x_1(1, 0)) != variable_ptrs.end()));
+        EXPECT_TRUE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                               &x_1(1, 19)) != variable_ptrs.end()));
+
+        EXPECT_TRUE((std::find(variable_ptrs.begin(), variable_ptrs.end(),
+                               &x_2(0)) != variable_ptrs.end()));
+    }
+
+    /**
+     * Check whether the corresponding constraint is enabled or not.
+     */
+
+    /// Constraint c_1
+    EXPECT_FALSE(model.selections()[0].constraint_ptr->is_enabled());
+
+    /**
+     * Check the number of covered variables and variable pointers for each
+     * category.
+     */
+
+    /// Selection
+    {
+        auto variable_ptrs = model.variable_reference().selection_variable_ptrs;
+        EXPECT_EQ(31, model.number_of_selection_variables());
+    }
+
+    /// Binary
+    {
+        auto variable_ptrs = model.variable_reference().binary_variable_ptrs;
+        EXPECT_EQ(10 * 10 + 20 * 20 + 2 - 31,
                   model.number_of_binary_variables());
     }
 }
