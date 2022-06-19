@@ -15,7 +15,8 @@ enum SelectionMode : int {  //
     Defined,
     Smaller,
     Larger,
-    Independent
+    Independent,
+    UserDefined
 };
 }  // namespace selection_mode
 }  // namespace option

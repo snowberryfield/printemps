@@ -64,6 +64,7 @@ TEST_F(TestConstraint, initialize) {
     EXPECT_EQ(HUGE_VALF, constraint.local_penalty_coefficient_less());
     EXPECT_EQ(HUGE_VALF, constraint.local_penalty_coefficient_greater());
     EXPECT_EQ(HUGE_VALF, constraint.global_penalty_coefficient());
+    EXPECT_FALSE(constraint.is_user_defined_selection());
 
     EXPECT_FALSE(constraint.is_singleton());
     EXPECT_FALSE(constraint.is_aggregation());
@@ -1870,6 +1871,21 @@ TEST_F(TestConstraint, is_linear) {
     /// This method is tested in following tests:
     /// - constructor_arg_function()
     /// - constructor_arg_expression()
+}
+
+/*****************************************************************************/
+TEST_F(TestConstraint, set_is_user_defined_selection) {
+    auto constraint =
+        printemps::model_component::Constraint<int, double>::create_instance();
+    constraint.set_is_user_defined_selection(true);
+    EXPECT_TRUE(constraint.is_user_defined_selection());
+    constraint.set_is_user_defined_selection(false);
+    EXPECT_FALSE(constraint.is_user_defined_selection());
+}
+
+/*****************************************************************************/
+TEST_F(TestConstraint, is_user_defined_selection) {
+    /// This method is tested in set_is_user_defined_selection().
 }
 
 /*****************************************************************************/

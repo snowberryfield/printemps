@@ -61,6 +61,8 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     double m_local_penalty_coefficient_greater;
     double m_global_penalty_coefficient;
 
+    bool m_is_user_defined_selection;
+
     bool m_is_singleton;
     bool m_is_aggregation;
     bool m_is_precedence;
@@ -220,6 +222,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         m_local_penalty_coefficient_greater = HUGE_VALF;
         m_global_penalty_coefficient        = HUGE_VALF;
 
+        m_is_user_defined_selection = false;
         this->clear_constraint_type();
     }
 
@@ -1021,6 +1024,17 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
             m_local_penalty_coefficient_less, m_global_penalty_coefficient);
         m_local_penalty_coefficient_greater = std::min(
             m_local_penalty_coefficient_greater, m_global_penalty_coefficient);
+    }
+
+    /*************************************************************************/
+    inline constexpr bool is_user_defined_selection(void) const noexcept {
+        return m_is_user_defined_selection;
+    }
+
+    /*************************************************************************/
+    inline constexpr void set_is_user_defined_selection(
+        const bool a_IS_USER_DEFINED_SELECTION) noexcept {
+        m_is_user_defined_selection = a_IS_USER_DEFINED_SELECTION;
     }
 
     /*************************************************************************/
