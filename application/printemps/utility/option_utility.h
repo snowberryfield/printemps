@@ -8,16 +8,80 @@
 #define PRINTEMPS_UTILITY_OPTION_UTILITY_H__
 
 #include <printemps.h>
-#include <nlohmann/json.hpp>
 
 namespace printemps {
 namespace utility {
 /******************************************************************************/
+bool read_json(double *a_parameter, const std::string &a_NAME,
+               const utility::json::JsonObject &a_JSON) {
+    if (a_JSON.find(a_NAME)) {
+        if (a_JSON.at(a_NAME).type() == typeid(int)) {
+            *a_parameter = a_JSON.get<int>(a_NAME);
+        } else {
+            *a_parameter = a_JSON.get<double>(a_NAME);
+        }
+        return true;
+    }
+    return false;
+}
+
+/******************************************************************************/
+bool read_json(option::chain_move_reduce_mode::ChainMoveReduceMode *a_parameter,
+               const std::string &                                  a_NAME,
+               const utility::json::JsonObject &                    a_JSON) {
+    if (a_JSON.find(a_NAME)) {
+        *a_parameter =
+            static_cast<option::chain_move_reduce_mode::ChainMoveReduceMode>(
+                a_JSON.get<int>(a_NAME));
+        return true;
+    }
+    return false;
+}
+
+/******************************************************************************/
+bool read_json(option::selection_mode::SelectionMode *a_parameter,
+               const std::string &                    a_NAME,
+               const utility::json::JsonObject &      a_JSON) {
+    if (a_JSON.find(a_NAME)) {
+        *a_parameter = static_cast<option::selection_mode::SelectionMode>(
+            a_JSON.get<int>(a_NAME));
+        return true;
+    }
+    return false;
+}
+
+/******************************************************************************/
+bool read_json(option::improvability_screening_mode::ImprovabilityScreeningMode
+                   *                            a_parameter,
+               const std::string &              a_NAME,
+               const utility::json::JsonObject &a_JSON) {
+    if (a_JSON.find(a_NAME)) {
+        *a_parameter = static_cast<
+            option::improvability_screening_mode::ImprovabilityScreeningMode>(
+            a_JSON.get<int>(a_NAME));
+        return true;
+    }
+    return false;
+}
+
+/******************************************************************************/
+bool read_json(option::tabu_mode::TabuMode *    a_parameter,
+               const std::string &              a_NAME,
+               const utility::json::JsonObject &a_JSON) {
+    if (a_JSON.find(a_NAME)) {
+        *a_parameter =
+            static_cast<option::tabu_mode::TabuMode>(a_JSON.get<int>(a_NAME));
+        return true;
+    }
+    return false;
+}
+
+/******************************************************************************/
 template <class T>
 bool read_json(T *a_parameter, const std::string &a_NAME,
-               const nlohmann::json &a_JSON) {
-    if (a_JSON.find(a_NAME) != a_JSON.end()) {
-        *a_parameter = a_JSON.at(a_NAME).get<T>();
+               const utility::json::JsonObject &a_JSON) {
+    if (a_JSON.find(a_NAME)) {
+        *a_parameter = a_JSON.get<T>(a_NAME);
         return true;
     }
     return false;
@@ -25,11 +89,7 @@ bool read_json(T *a_parameter, const std::string &a_NAME,
 
 /******************************************************************************/
 printemps::option::Option read_option(const std::string &a_FILE_NAME) {
-    std::fstream   option_file(a_FILE_NAME);
-    nlohmann::json option_object;
-    option_file >> option_object;
-    option_file.close();
-
+    auto option_object = utility::json::read_json_object(a_FILE_NAME);
     printemps::option::Option option;
 
     /**************************************************************************/
@@ -99,7 +159,6 @@ printemps::option::Option read_option(const std::string &a_FILE_NAME) {
     read_json(&option.is_enabled_presolve,  //
               "is_enabled_presolve",        //
               option_object);
-
     /**************************************************************************/
     /// is_enabled_initial_value_correction
     read_json(&option.is_enabled_initial_value_correction,  //
@@ -213,13 +272,11 @@ printemps::option::Option read_option(const std::string &a_FILE_NAME) {
     read_json(&option.seed,  //
               "seed",        //
               option_object);
-
     /**************************************************************************/
     /// verbose
     read_json(&option.verbose,  //
               "verbose",        //
               option_object);
-
     /**************************************************************************/
     /// verbose
     read_json(&option.is_enabled_write_trend,  //
@@ -241,12 +298,11 @@ printemps::option::Option read_option(const std::string &a_FILE_NAME) {
     /**************************************************************************/
     /// lagrange dual
     /**************************************************************************/
-    nlohmann::json option_object_lagrange_dual;
+    utility::json::JsonObject option_object_lagrange_dual;
 
     bool has_lagrange_dual_option = read_json(&option_object_lagrange_dual,  //
                                               "lagrange_dual",               //
                                               option_object);
-
     if (has_lagrange_dual_option) {
         /**********************************************************************/
         /// lagrange_dual.iteration_max
@@ -300,12 +356,10 @@ printemps::option::Option read_option(const std::string &a_FILE_NAME) {
     /**************************************************************************/
     /// local search
     /**************************************************************************/
-    nlohmann::json option_object_local_search;
-
+    utility::json::JsonObject option_object_local_search;
     bool has_local_search_option = read_json(&option_object_local_search,  //
                                              "local_search",               //
                                              option_object);
-
     if (has_local_search_option) {
         /**********************************************************************/
         /// local_search.iteration_max
@@ -341,7 +395,7 @@ printemps::option::Option read_option(const std::string &a_FILE_NAME) {
     /**************************************************************************/
     /// tabu search
     /**************************************************************************/
-    nlohmann::json option_object_tabu_search;
+    utility::json::JsonObject option_object_tabu_search;
 
     bool has_tabu_search_option = read_json(&option_object_tabu_search,  //
                                             "tabu_search",               //
