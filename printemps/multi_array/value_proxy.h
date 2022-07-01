@@ -287,138 +287,69 @@ inline void print_values(
 
 /*****************************************************************************/
 template <class T_Value>
-void write_values_by_name(
-    std::ofstream *a_ofs,  //
+utility::json::JsonObject create_json_object(
     const std::unordered_map<std::string, ValueProxy<T_Value>>
-                       a_VALUE_PROXIES,  //
-    const std::string &a_CATEGORY,       //
-    const int          a_INDENT_LEVEL,   //
-    const std::string  a_FORMAT,         //
-    const bool         a_ADD_LAST_COMMA) {
-    int indent_level = a_INDENT_LEVEL;
+        &a_VALUE_PROXIES) {
+    utility::json::JsonObject object;
 
-    *a_ofs << utility::indent_spaces(indent_level)
-           << "\"" + a_CATEGORY + "\" : {" << std::endl;
-    indent_level++;
-
-    int       count              = 0;
-    const int VALUE_PROXIES_SIZE = a_VALUE_PROXIES.size();
     for (const auto &item : a_VALUE_PROXIES) {
         auto &    proxy              = item.second;
         const int NUMBER_OF_ELEMENTS = proxy.number_of_elements();
         for (auto i = 0; i < NUMBER_OF_ELEMENTS; i++) {
-            *a_ofs << utility::indent_spaces(indent_level)
-                   << "\"" +
-                          utility::delete_space(proxy.flat_indexed_names(i)) +
-                          "\" : " +
-                          utility::to_string(proxy.flat_indexed_values(i),
-                                             a_FORMAT);
-
-            if ((i == NUMBER_OF_ELEMENTS - 1) &&
-                (count == VALUE_PROXIES_SIZE - 1)) {
-                *a_ofs << std::endl;
-            } else {
-                *a_ofs << "," << std::endl;
-            }
+            object.emplace_back(proxy.flat_indexed_names(i),
+                                proxy.flat_indexed_values(i));
         }
-        count++;
     }
-    indent_level--;
-    if (a_ADD_LAST_COMMA) {
-        *a_ofs << utility::indent_spaces(indent_level) << "}," << std::endl;
-    } else {
-        *a_ofs << utility::indent_spaces(indent_level) << "}" << std::endl;
-    }
+    return object;
 }
 
 /*****************************************************************************/
 template <class T_Value>
-void write_values_by_array(
-    std::ofstream *a_ofs,  //
+utility::json::JsonObject create_json_array(
     const std::unordered_map<std::string, ValueProxy<T_Value>>
-                       a_VALUE_PROXIES,  //
-    const std::string &a_CATEGORY,       //
-    const int          a_INDENT_LEVEL,   //
-    const std::string &a_FORMAT,         //
-    const bool         a_ADD_LAST_COMMA) {
-    int indent_level = a_INDENT_LEVEL;
-
-    *a_ofs << utility::indent_spaces(indent_level)
-           << "\"" + a_CATEGORY + "\" : {" << std::endl;
-    indent_level++;
-
-    int count              = 0;
-    int VALUE_PROXIES_SIZE = a_VALUE_PROXIES.size();
+        &a_VALUE_PROXIES) {
+    /**
+     * NOTE: This method creates a JSON object that contains the values in
+     * a_VALUE_PROXY as arrays by following steps:
+     * (1) Create a JSON-like format string.
+     * (2) Parse the string with utility::json::parse_json_object().
+     * In step (1), generated string is not
+     * valid JSON, where the separators comma and colon are omitted.
+     */
+    std::string str = " { ";
     for (const auto &item : a_VALUE_PROXIES) {
         auto &    proxy                = item.second;
-        const int NUMBER_OF_DIMENSIONS = proxy.number_of_dimensions();
         const int NUMBER_OF_ELEMENTS   = proxy.number_of_elements();
-
-        *a_ofs << utility::indent_spaces(indent_level)
-               << "\"" + item.first + "\" : [" << std::endl;
-        indent_level++;
-
-        int current_dimension = 0;
+        const int NUMBER_OF_DIMENSIONS = proxy.number_of_dimensions();
+        int       dimension            = 0;
+        str += "\"" + item.first + "\" ";
+        str += "[ ";
         for (auto i = 0; i < NUMBER_OF_ELEMENTS; i++) {
-            std::vector<int> index = proxy.multi_dimensional_index(i);
-
-            for (auto j = current_dimension; j < NUMBER_OF_DIMENSIONS - 1;
-                 j++) {
-                if (index[j + 1] == 0) {
-                    *a_ofs << utility::indent_spaces(indent_level) << "["
-                           << std::endl;
-                    indent_level++;
-                    current_dimension++;
+            const auto INDEX = proxy.multi_dimensional_index(i);
+            for (auto j = dimension; j < NUMBER_OF_DIMENSIONS - 1; j++) {
+                if (INDEX[j + 1] == 0) {
+                    str += "[ ";
+                    dimension++;
                 } else {
                     break;
                 }
             }
-            if (index[current_dimension] ==
-                proxy.shape()[current_dimension] - 1) {
-                *a_ofs << utility::indent_spaces(indent_level)
-                       << utility::to_string(proxy.flat_indexed_values(i),
-                                             a_FORMAT)
-                       << std::endl;
-            } else {
-                *a_ofs << utility::indent_spaces(indent_level)
-                       << utility::to_string(proxy.flat_indexed_values(i),
-                                             a_FORMAT)
-                       << "," << std::endl;
-            }
 
-            for (auto j = current_dimension; j > 0; j--) {
-                if (index[j] == proxy.shape()[j] - 1) {
-                    indent_level--;
-                    current_dimension--;
-                    if (index[j - 1] == proxy.shape()[j - 1] - 1) {
-                        *a_ofs << utility::indent_spaces(indent_level) << "]"
-                               << std::endl;
-                    } else {
-                        *a_ofs << utility::indent_spaces(indent_level) << "],"
-                               << std::endl;
-                    }
+            str += std::to_string(proxy.flat_indexed_values(i)) + " ";
+
+            for (auto j = dimension; j > 0; j--) {
+                if (INDEX[j] == proxy.shape()[j] - 1) {
+                    str += "] ";
+                    dimension--;
                 } else {
                     break;
                 }
             }
         }
-
-        indent_level--;
-        count++;
-
-        if (count == VALUE_PROXIES_SIZE) {
-            *a_ofs << utility::indent_spaces(indent_level) << "]" << std::endl;
-        } else {
-            *a_ofs << utility::indent_spaces(indent_level) << "]," << std::endl;
-        }
+        str += "] ";
     }
-
-    indent_level--;
-    if (a_ADD_LAST_COMMA) {
-        *a_ofs << utility::indent_spaces(indent_level) << "}," << std::endl;
-    } else {
-        *a_ofs << utility::indent_spaces(indent_level) << "}" << std::endl;
-    }
+    str += "}";
+    return utility::json::parse_json_object(str);
 }
 }  // namespace multi_array
 }  // namespace printemps

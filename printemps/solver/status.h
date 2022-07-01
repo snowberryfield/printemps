@@ -122,206 +122,102 @@ struct Status {
 
     /*************************************************************************/
     void write_json_by_name(const std::string& a_FILE_NAME) const {
-        int indent_level = 0;
+        utility::json::JsonObject object;
 
-        std::ofstream ofs(a_FILE_NAME.c_str());
-        ofs << utility::indent_spaces(indent_level) << "{" << std::endl;
-        indent_level++;
+        // Summary
+        object.emplace_back("version", constant::VERSION);
+        object.emplace_back("name", this->name);
+        object.emplace_back("number_of_variables", this->number_of_variables);
+        object.emplace_back("number_of_constraints",
+                            this->number_of_constraints);
+        object.emplace_back("is_found_feasible_solution",
+                            this->is_found_feasible_solution);
 
-        /// Summary
-        ofs << utility::indent_spaces(indent_level) << "\"version\" : "
-            << "\"" << constant::VERSION << "\"," << std::endl;
+        object.emplace_back("start_date_time", this->start_date_time);
+        object.emplace_back("finish_date_time", this->finish_date_time);
+        object.emplace_back("elapsed_time", this->elapsed_time);
 
-        ofs << utility::indent_spaces(indent_level) << "\"name\" : "
-            << "\"" << this->name << "\"," << std::endl;
-
-        ofs << utility::indent_spaces(indent_level)
-            << "\"number_of_variables\" : " << this->number_of_variables << ","
-            << std::endl;
-
-        ofs << utility::indent_spaces(indent_level)
-            << "\"number_of_constraints\" : " << this->number_of_constraints
-            << "," << std::endl;
-
-        ofs << utility::indent_spaces(indent_level)
-            << "\"is_found_feasible_solution\" : "
-            << (this->is_found_feasible_solution ? "true," : "false,")
-            << std::endl;
-
-        ofs << utility::indent_spaces(indent_level)
-            << "\"start_date_time\" : \"" + this->start_date_time + "\""
-            << "," << std::endl;
-
-        ofs << utility::indent_spaces(indent_level)
-            << "\"finish_date_time\" : \"" + this->finish_date_time + "\""
-            << "," << std::endl;
-
-        ofs << utility::indent_spaces(indent_level)
-            << "\"elapsed_time\" : " + std::to_string(this->elapsed_time) << ","
-            << std::endl;
-
-        ofs << utility::indent_spaces(indent_level)
-            << "\"number_of_lagrange_dual_iterations\" : " +
-                   std::to_string(this->number_of_lagrange_dual_iterations)
-            << "," << std::endl;
-
-        ofs << utility::indent_spaces(indent_level)
-            << "\"number_of_local_search_iterations\" : " +
-                   std::to_string(this->number_of_local_search_iterations)
-            << "," << std::endl;
-
-        ofs << utility::indent_spaces(indent_level)
-            << "\"number_of_tabu_search_iterations\" : " +
-                   std::to_string(this->number_of_tabu_search_iterations)
-            << "," << std::endl;
-
-        ofs << utility::indent_spaces(indent_level)
-            << "\"number_of_tabu_search_loops\" : " +
-                   std::to_string(this->number_of_tabu_search_loops)
-            << "," << std::endl;
-
-        ofs << utility::indent_spaces(indent_level)
-            << "\"number_of_evaluated_moves\" : " +
-                   std::to_string(this->number_of_evaluated_moves)
-            << "," << std::endl;
-
-        ofs << utility::indent_spaces(indent_level)
-            << "\"averaged_inner_iteration_speed\" : " +
-                   std::to_string(this->averaged_inner_iteration_speed)
-            << "," << std::endl;
-
-        ofs << utility::indent_spaces(indent_level)
-            << "\"averaged_move_evaluation_speed\" : " +
-                   std::to_string(this->averaged_move_evaluation_speed)
-            << "," << std::endl;
+        object.emplace_back("number_of_lagrange_dual_iterations",
+                            this->number_of_lagrange_dual_iterations);
+        object.emplace_back("number_of_local_search_iterations",
+                            this->number_of_local_search_iterations);
+        object.emplace_back("number_of_tabu_search_iterations",
+                            this->number_of_tabu_search_iterations);
+        object.emplace_back("number_of_tabu_search_loops",
+                            this->number_of_tabu_search_loops);
+        object.emplace_back("number_of_evaluated_moves",
+                            this->number_of_evaluated_moves);
+        object.emplace_back("averaged_inner_iteration_speed",
+                            this->averaged_inner_iteration_speed);
+        object.emplace_back("averaged_move_evaluation_speed",
+                            this->averaged_move_evaluation_speed);
 
         /// Penalty coefficients
-        multi_array::write_values_by_name(&ofs,                        //
-                                          this->penalty_coefficients,  //
-                                          "penalty_coefficients",      //
-                                          indent_level,                //
-                                          "%.10e", true);
+        object.emplace_back(         //
+            "penalty_coefficients",  //
+            multi_array::create_json_object(penalty_coefficients));
 
         /// Update counts
-        multi_array::write_values_by_name(&ofs,                 //
-                                          this->update_counts,  //
-                                          "update_counts",      //
-                                          indent_level,         //
-                                          "%d", true);
+        object.emplace_back(  //
+            "update_counts",  //
+            multi_array::create_json_object(update_counts));
 
         /// Violation counts
-        multi_array::write_values_by_name(&ofs,                    //
-                                          this->violation_counts,  //
-                                          "violation_counts",      //
-                                          indent_level,            //
-                                          "%d", false);
+        object.emplace_back(     //
+            "violation_counts",  //
+            multi_array::create_json_object(violation_counts));
 
-        indent_level--;
-        ofs << utility::indent_spaces(indent_level) << "}" << std::endl;
-        ofs.close();
+        utility::json::write_json_object(object, a_FILE_NAME);
     }
 
     /*************************************************************************/
     void write_json_by_array(const std::string& a_FILE_NAME) const {
-        int indent_level = 0;
-
-        std::ofstream ofs(a_FILE_NAME.c_str());
-        ofs << utility::indent_spaces(indent_level) << "{" << std::endl;
-        indent_level++;
+        utility::json::JsonObject object;
 
         /// Summary
-        ofs << utility::indent_spaces(indent_level) << "\"version\" : "
-            << "\"" << constant::VERSION << "\"," << std::endl;
+        object.emplace_back("version", constant::VERSION);
+        object.emplace_back("name", this->name);
+        object.emplace_back("number_of_variables", this->number_of_variables);
+        object.emplace_back("number_of_constraints",
+                            this->number_of_constraints);
+        object.emplace_back("is_found_feasible_solution",
+                            this->is_found_feasible_solution);
 
-        ofs << utility::indent_spaces(indent_level) << "\"name\" : "
-            << "\"" << this->name << "\"," << std::endl;
+        object.emplace_back("start_date_time", this->start_date_time);
+        object.emplace_back("finish_date_time", this->finish_date_time);
+        object.emplace_back("elapsed_time", this->elapsed_time);
 
-        ofs << utility::indent_spaces(indent_level)
-            << "\"number_of_variables\" : " << this->number_of_variables << ","
-            << std::endl;
-
-        ofs << utility::indent_spaces(indent_level)
-            << "\"number_of_constraints\" : " << this->number_of_constraints
-            << "," << std::endl;
-
-        ofs << utility::indent_spaces(indent_level)
-            << "\"is_found_feasible_solution\" : "
-            << (this->is_found_feasible_solution ? "true," : "false,")
-            << std::endl;
-
-        ofs << utility::indent_spaces(indent_level)
-            << "\"start_date_time\" : \"" + this->start_date_time + "\""
-            << "," << std::endl;
-
-        ofs << utility::indent_spaces(indent_level)
-            << "\"finish_date_time\" : \"" + this->finish_date_time + "\""
-            << "," << std::endl;
-
-        ofs << utility::indent_spaces(indent_level)
-            << "\"elapsed_time\" : " + std::to_string(this->elapsed_time) << ","
-            << std::endl;
-
-        ofs << utility::indent_spaces(indent_level)
-            << "\"number_of_lagrange_dual_iterations\" : " +
-                   std::to_string(this->number_of_lagrange_dual_iterations)
-            << "," << std::endl;
-
-        ofs << utility::indent_spaces(indent_level)
-            << "\"number_of_local_search_iterations\" : " +
-                   std::to_string(this->number_of_local_search_iterations)
-            << "," << std::endl;
-
-        ofs << utility::indent_spaces(indent_level)
-            << "\"number_of_tabu_search_iterations\" : " +
-                   std::to_string(this->number_of_tabu_search_iterations)
-            << "," << std::endl;
-
-        ofs << utility::indent_spaces(indent_level)
-            << "\"number_of_tabu_search_loops\" : " +
-                   std::to_string(this->number_of_tabu_search_loops)
-            << "," << std::endl;
-
-        ofs << utility::indent_spaces(indent_level)
-            << "\"number_of_evaluated_moves\" : " +
-                   std::to_string(this->number_of_evaluated_moves)
-            << "," << std::endl;
-
-        ofs << utility::indent_spaces(indent_level)
-            << "\"averaged_inner_iteration_speed\" : " +
-                   std::to_string(this->averaged_inner_iteration_speed)
-            << "," << std::endl;
-
-        ofs << utility::indent_spaces(indent_level)
-            << "\"averaged_move_evaluation_speed\" : " +
-                   std::to_string(this->averaged_move_evaluation_speed)
-            << "," << std::endl;
+        object.emplace_back("number_of_lagrange_dual_iterations",
+                            this->number_of_lagrange_dual_iterations);
+        object.emplace_back("number_of_local_search_iterations",
+                            this->number_of_local_search_iterations);
+        object.emplace_back("number_of_tabu_search_iterations",
+                            this->number_of_tabu_search_iterations);
+        object.emplace_back("number_of_tabu_search_loops",
+                            this->number_of_tabu_search_loops);
+        object.emplace_back("number_of_evaluated_moves",
+                            this->number_of_evaluated_moves);
+        object.emplace_back("averaged_inner_iteration_speed",
+                            this->averaged_inner_iteration_speed);
+        object.emplace_back("averaged_move_evaluation_speed",
+                            this->averaged_move_evaluation_speed);
 
         /// Penalty coefficients
-        multi_array::write_values_by_array(&ofs,                        //
-                                           this->penalty_coefficients,  //
-                                           "penalty_coefficients",      //
-                                           indent_level,                //
-                                           "%.10e",                     //
-                                           true);
+        object.emplace_back(         //
+            "penalty_coefficients",  //
+            multi_array::create_json_array(penalty_coefficients));
 
         /// Update counts
-        multi_array::write_values_by_array(&ofs,                 //
-                                           this->update_counts,  //
-                                           "update_counts",      //
-                                           indent_level,         //
-                                           "%d",                 //
-                                           true);
+        object.emplace_back(  //
+            "update_counts",  //
+            multi_array::create_json_array(update_counts));
 
         /// Violation counts
-        multi_array::write_values_by_array(&ofs,                    //
-                                           this->violation_counts,  //
-                                           "violation_counts",      //
-                                           indent_level,            //
-                                           "%d", false);
+        object.emplace_back(     //
+            "violation_counts",  //
+            multi_array::create_json_array(violation_counts));
 
-        indent_level--;
-        ofs << utility::indent_spaces(indent_level) << "}" << std::endl;
-        ofs.close();
+        utility::json::write_json_object(object, a_FILE_NAME);
     }
 };
 }  // namespace solver
