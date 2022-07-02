@@ -4,7 +4,7 @@
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
 
-#define _MPS_SOLVER
+#define _PRINTEMPS_LINEAR
 
 #include <string>
 #include <iostream>

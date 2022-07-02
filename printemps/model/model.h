@@ -2051,7 +2051,7 @@ class Model {
             }
         }
 
-#ifdef _MPS_SOLVER
+#ifdef _PRINTEMPS_LINEAR
         double objective             = m_objective.evaluate(a_MOVE);
         double objective_improvement = m_objective.value() - objective;
 
@@ -2126,7 +2126,7 @@ class Model {
             }
         }
 
-#ifdef _MPS_SOLVER
+#ifdef _PRINTEMPS_LINEAR
         double objective             = m_objective.evaluate(a_MOVE);
         double objective_improvement = m_objective.value() - objective;
 
@@ -2207,7 +2207,7 @@ class Model {
             is_feasibility_improvable |= violation_diff < -constant::EPSILON;
         }
 
-#ifdef _MPS_SOLVER
+#ifdef _PRINTEMPS_LINEAR
         double objective             = m_objective.evaluate(a_MOVE);
         double objective_improvement = m_objective.value() - objective;
 
