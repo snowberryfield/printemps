@@ -5,11 +5,7 @@
 /*****************************************************************************/
 
 #define _PRINTEMPS_LINEAR
-
-#include <string>
-#include <iostream>
-
-#include "../printemps/utility/option_utility.h"
+#include <printemps.h>
 
 int main([[maybe_unused]] int argc, char *argv[]) {
     /**
@@ -141,7 +137,7 @@ int main([[maybe_unused]] int argc, char *argv[]) {
      */
     printemps::option::Option option;
     if (!option_file_name.empty()) {
-        option = printemps::utility::read_option(option_file_name);
+        option.read(option_file_name);
     }
 
     /**
