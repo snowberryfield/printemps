@@ -859,7 +859,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
 
     /*************************************************************************/
     inline constexpr T_Expression evaluate_constraint(void) const noexcept {
-#ifdef _MPS_SOLVER
+#ifdef _PRINTEMPS_LINEAR
         return m_expression.evaluate({});
 #else
         return m_constraint_function({});
@@ -870,7 +870,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     inline constexpr T_Expression evaluate_constraint(
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
         noexcept {
-#ifdef _MPS_SOLVER
+#ifdef _PRINTEMPS_LINEAR
         return m_expression.evaluate(a_MOVE);
 #else
         return m_constraint_function(a_MOVE);
@@ -901,7 +901,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         /**
          * m_expression must be updated at first.
          */
-#ifdef _MPS_SOLVER
+#ifdef _PRINTEMPS_LINEAR
         m_expression.update();
 #else
         if (m_is_linear) {
@@ -930,7 +930,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         m_negative_part =
             -std::min(m_constraint_value, static_cast<T_Expression>(0));
 
-#ifdef _MPS_SOLVER
+#ifdef _PRINTEMPS_LINEAR
         m_expression.update(a_MOVE);
 #else
         if (m_is_linear) {
