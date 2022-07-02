@@ -196,7 +196,8 @@ class LagrangeDualCoreStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void update_dual(void) {
+    inline void update_dual(void) {
+        /// Cannot be constexpr for clang.
         auto& constraint_ptrs =
             m_model_ptr->constraint_reference().constraint_ptrs;
         const int CONSTRAINTS_SIZE = constraint_ptrs.size();

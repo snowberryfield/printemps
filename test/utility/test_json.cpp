@@ -67,27 +67,6 @@ TEST_F(TestJson, add_string_item) {
 }
 
 /*****************************************************************************/
-TEST_F(TestJson, add_json_array_item) {
-    using JsonObject = printemps::utility::json::JsonObject;
-    using JsonArray  = printemps::utility::json::JsonArray;
-    JsonObject obj;
-    JsonArray  sub;
-    sub.emplace_back(0);
-    sub.emplace_back(3.14);
-    sub.emplace_back(std::string("value"));
-    obj.emplace_back("key", sub);
-
-    EXPECT_EQ(0, obj.get<JsonArray>("key").get<int>(0));
-    EXPECT_FLOAT_EQ(3.14, obj.get<JsonArray>("key").get<double>(1));
-    EXPECT_EQ("value", obj.get<JsonArray>("key").get<std::string>(2));
-
-    ASSERT_THROW(obj.get<int>("key"), std::logic_error);
-    ASSERT_THROW(obj.get<double>("key"), std::logic_error);
-    ASSERT_THROW(obj.get<std::string>("key"), std::logic_error);
-    ASSERT_THROW(obj.get<JsonObject>("key"), std::logic_error);
-}
-
-/*****************************************************************************/
 TEST_F(TestJson, add_json_object_item) {
     using JsonObject = printemps::utility::json::JsonObject;
     using JsonArray  = printemps::utility::json::JsonArray;
@@ -106,6 +85,27 @@ TEST_F(TestJson, add_json_object_item) {
     ASSERT_THROW(obj.get<double>("key"), std::logic_error);
     ASSERT_THROW(obj.get<std::string>("key"), std::logic_error);
     ASSERT_THROW(obj.get<JsonArray>("key"), std::logic_error);
+}
+
+/*****************************************************************************/
+TEST_F(TestJson, add_json_array_item) {
+    using JsonObject = printemps::utility::json::JsonObject;
+    using JsonArray  = printemps::utility::json::JsonArray;
+    JsonObject obj;
+    JsonArray  sub;
+    sub.emplace_back(0);
+    sub.emplace_back(3.14);
+    sub.emplace_back(std::string("value"));
+    obj.emplace_back("key", sub);
+
+    EXPECT_EQ(0, obj.get<JsonArray>("key").get<int>(0));
+    EXPECT_FLOAT_EQ(3.14, obj.get<JsonArray>("key").get<double>(1));
+    EXPECT_EQ("value", obj.get<JsonArray>("key").get<std::string>(2));
+
+    ASSERT_THROW(obj.get<int>("key"), std::logic_error);
+    ASSERT_THROW(obj.get<double>("key"), std::logic_error);
+    ASSERT_THROW(obj.get<std::string>("key"), std::logic_error);
+    ASSERT_THROW(obj.get<JsonObject>("key"), std::logic_error);
 }
 
 /*****************************************************************************/
@@ -161,25 +161,6 @@ TEST_F(TestJson, tokenize) {
 }
 
 /*****************************************************************************/
-TEST_F(TestJson, parse_json_array) {
-    using JsonObject = printemps::utility::json::JsonObject;
-    using JsonArray  = printemps::utility::json::JsonArray;
-
-    std::string str =
-        "[{\"key_0\":1},{\"key_1\":3.14},{\"key_2\":\"hoge "
-        "hoge\"},{\"key_3\":null},{\"key_4\":[1,2]}]";
-
-    auto array = printemps::utility::json::parse_json_array(str);
-
-    EXPECT_EQ(1, array.get<JsonObject>(0).get<int>("key_0"));
-    EXPECT_EQ(3.14, array.get<JsonObject>(1).get<double>("key_1"));
-    EXPECT_EQ("hoge hoge", array.get<JsonObject>(2).get<std::string>("key_2"));
-    EXPECT_EQ(nullptr, array.get<JsonObject>(3).get<std::nullptr_t>("key_3"));
-    EXPECT_EQ(1, array.get<JsonObject>(4).get<JsonArray>("key_4").get<int>(0));
-    EXPECT_EQ(2, array.get<JsonObject>(4).get<JsonArray>("key_4").get<int>(1));
-}
-
-/*****************************************************************************/
 TEST_F(TestJson, parse_json_object) {
     using JsonObject = printemps::utility::json::JsonObject;
     using JsonArray  = printemps::utility::json::JsonArray;
@@ -197,6 +178,25 @@ TEST_F(TestJson, parse_json_object) {
               obj.get<JsonObject>("key_3").get<std::nullptr_t>("key_3_1"));
     EXPECT_EQ(1, obj.get<JsonArray>("key_4").get<int>(0));
     EXPECT_EQ(2, obj.get<JsonArray>("key_4").get<int>(1));
+}
+
+/*****************************************************************************/
+TEST_F(TestJson, parse_json_array) {
+    using JsonObject = printemps::utility::json::JsonObject;
+    using JsonArray  = printemps::utility::json::JsonArray;
+
+    std::string str =
+        "[{\"key_0\":1},{\"key_1\":3.14},{\"key_2\":\"hoge "
+        "hoge\"},{\"key_3\":null},{\"key_4\":[1,2]}]";
+
+    auto array = printemps::utility::json::parse_json_array(str);
+
+    EXPECT_EQ(1, array.get<JsonObject>(0).get<int>("key_0"));
+    EXPECT_EQ(3.14, array.get<JsonObject>(1).get<double>("key_1"));
+    EXPECT_EQ("hoge hoge", array.get<JsonObject>(2).get<std::string>("key_2"));
+    EXPECT_EQ(nullptr, array.get<JsonObject>(3).get<std::nullptr_t>("key_3"));
+    EXPECT_EQ(1, array.get<JsonObject>(4).get<JsonArray>("key_4").get<int>(0));
+    EXPECT_EQ(2, array.get<JsonObject>(4).get<JsonArray>("key_4").get<int>(1));
 }
 
 }  // namespace
