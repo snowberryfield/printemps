@@ -6,7 +6,7 @@
 #ifndef PRINTEMPS_HELPER_HELPER_H__
 #define PRINTEMPS_HELPER_HELPER_H__
 
-#include "solution_file_reader.h"
+#include "auxiliary_file_reader.h"
 
 #endif
 /*****************************************************************************/

@@ -446,7 +446,7 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr std::vector<
+    inline constexpr const std::vector<
         std::pair<Constraint<T_Variable, T_Expression> *, T_Expression>>
         &constraint_sensitivities(void) const {
         return m_constraint_sensitivities;

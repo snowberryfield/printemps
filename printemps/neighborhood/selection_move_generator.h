@@ -60,7 +60,7 @@ class SelectionMoveGenerator
          * Setup move updater
          */
         auto move_updater =  //
-            [this, a_VARIABLE_PTRS, VARIABLES_SIZE](
+            [a_VARIABLE_PTRS, VARIABLES_SIZE](
                 auto *                      a_moves_ptr,                      //
                 auto *                      a_flags,                          //
                 const bool                  a_ACCEPT_ALL,                     //

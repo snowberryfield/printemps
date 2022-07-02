@@ -226,7 +226,7 @@ class Expression : public multi_array::AbstractMultiArrayElement {
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
         noexcept {
         /// The following code is required for nonlinear objective functions.
-#ifndef _MPS_SOLVER
+#ifndef _PRINTEMPS_LINEAR
         if (a_MOVE.alterations.size() == 0) {
             return this->evaluate();
         }

@@ -7,6 +7,8 @@
 #define PRINTEMPS_STD_H__
 
 #include <algorithm>
+#include <any>
+#include <cctype>
 #include <chrono>
 #include <cmath>
 #include <cstdlib>
@@ -19,6 +21,7 @@
 #include <limits>
 #include <numeric>
 #include <random>
+#include <regex>
 #include <set>
 #include <string>
 #include <sstream>

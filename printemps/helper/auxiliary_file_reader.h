@@ -3,21 +3,21 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_HELPER_SOLUTION_FILE_READER_H__
-#define PRINTEMPS_HELPER_SOLUTION_FILE_READER_H__
+#ifndef PRINTEMPS_HELPER_AUXILIARY_FILE_READER_H__
+#define PRINTEMPS_HELPER_AUXILIARY_FILE_READER_H__
 
 namespace printemps {
 namespace helper {
 /*****************************************************************************/
-inline std::unordered_map<std::string, int> read_variable_names_and_values(
+inline std::unordered_map<std::string, int> read_names_and_values(
     const std::string &a_FILE_NAME) {
-    std::unordered_map<std::string, int> variable_names_and_values;
+    std::unordered_map<std::string, int> names_and_values;
 
     std::vector<std::string> lines;
     std::string              item;
 
     /**
-     * Read and store entire part of the solution file.
+     * Read and store entire part of the file.
      */
     {
         std::ifstream ifs;
@@ -27,7 +27,7 @@ inline std::unordered_map<std::string, int> read_variable_names_and_values(
         if (ifs.fail()) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
-                "Cannot open the specified solution file: " + a_FILE_NAME));
+                "Cannot open the specified file: " + a_FILE_NAME));
         }
         while (std::getline(ifs, buffer)) {
             lines.push_back(buffer);
@@ -36,7 +36,7 @@ inline std::unordered_map<std::string, int> read_variable_names_and_values(
     }
 
     /**
-     * Parse the solution file.
+     * Extract the names and their corresponding values.
      */
     for (const auto &line : lines) {
         std::stringstream        stream(line);
@@ -49,22 +49,22 @@ inline std::unordered_map<std::string, int> read_variable_names_and_values(
         if (ITEMS_SIZE != 2) {
             continue;
         }
-        variable_names_and_values[items[0]] =
+        names_and_values[items[0]] =
             static_cast<int>(floor(0.5 + atof(items[1].c_str())));
     }
 
-    return variable_names_and_values;
+    return names_and_values;
 }
 
 /*****************************************************************************/
-inline std::unordered_set<std::string> read_variable_names(
+inline std::unordered_set<std::string> read_names(
     const std::string &a_FILE_NAME) {
-    std::unordered_set<std::string> variable_names;
+    std::unordered_set<std::string> names;
     std::vector<std::string>        lines;
     std::string                     item;
 
     /**
-     * Read and store entire part of the variable names file.
+     * Read and store entire part of the file.
      */
     {
         std::ifstream ifs;
@@ -74,7 +74,7 @@ inline std::unordered_set<std::string> read_variable_names(
         if (ifs.fail()) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
-                "Cannot open the specified solution file: " + a_FILE_NAME));
+                "Cannot open the specified file: " + a_FILE_NAME));
         }
         while (std::getline(ifs, buffer)) {
             lines.push_back(buffer);
@@ -83,7 +83,7 @@ inline std::unordered_set<std::string> read_variable_names(
     }
 
     /**
-     * Parse the variable names file.
+     * Extract the names.
      */
     for (const auto &line : lines) {
         std::stringstream        stream(line);
@@ -96,22 +96,22 @@ inline std::unordered_set<std::string> read_variable_names(
         if (ITEMS_SIZE == 0) {
             continue;
         }
-        variable_names.insert(items[0]);
+        names.insert(items[0]);
     }
 
-    return variable_names;
+    return names;
 }
 
 /*****************************************************************************/
-inline std::vector<std::pair<std::string, std::string>>
-read_variable_name_pairs(const std::string &a_FILE_NAME) {
-    std::vector<std::pair<std::string, std::string>> variable_name_pairs;
+inline std::vector<std::pair<std::string, std::string>> read_name_pairs(
+    const std::string &a_FILE_NAME) {
+    std::vector<std::pair<std::string, std::string>> name_pairs;
 
     std::vector<std::string> lines;
     std::string              item;
 
     /**
-     * Read and store entire part of the variable pairs file.
+     * Read and store entire part of file.
      */
     {
         std::ifstream ifs;
@@ -121,7 +121,7 @@ read_variable_name_pairs(const std::string &a_FILE_NAME) {
         if (ifs.fail()) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
-                "Cannot open the specified solution file: " + a_FILE_NAME));
+                "Cannot open the specified file: " + a_FILE_NAME));
         }
         while (std::getline(ifs, buffer)) {
             lines.push_back(buffer);
@@ -130,7 +130,7 @@ read_variable_name_pairs(const std::string &a_FILE_NAME) {
     }
 
     /**
-     * Parse the variable name pairs file.
+     * Extract the name pairs.
      */
     for (const auto &line : lines) {
         std::stringstream        stream(line);
@@ -143,10 +143,10 @@ read_variable_name_pairs(const std::string &a_FILE_NAME) {
         if (ITEMS_SIZE < 2) {
             continue;
         }
-        variable_name_pairs.emplace_back(items[0], items[1]);
+        name_pairs.emplace_back(items[0], items[1]);
     }
 
-    return variable_name_pairs;
+    return name_pairs;
 }
 }  // namespace helper
 }  // namespace printemps

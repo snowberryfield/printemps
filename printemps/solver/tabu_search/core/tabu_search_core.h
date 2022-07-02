@@ -663,9 +663,9 @@ class TabuSearchCore {
          * Print the header of optimization progress table and print the initial
          * solution status.
          */
-        utility::print_single_line(m_option.verbose >= option::verbose::Full);
+        utility::print_single_line(m_option.verbose >= option::verbose::Outer);
         utility::print_message("Tabu Search starts.",
-                               m_option.verbose >= option::verbose::Full);
+                               m_option.verbose >= option::verbose::Outer);
 
         print_table_header(m_option.verbose >= option::verbose::Full);
         print_table_initial(m_option.verbose >= option::verbose::Full);
@@ -756,7 +756,7 @@ class TabuSearchCore {
                  * The neighborhood solutions will be evaluated in parallel by
                  * fast or ordinary(slow) evaluation methods.
                  */
-#ifndef _MPS_SOLVER
+#ifndef _PRINTEMPS_LINEAR
                 if (m_model_ptr->is_enabled_fast_evaluation()) {
 #endif
                     if (TRIAL_MOVE_PTRS[i]->is_univariable_move) {
@@ -771,7 +771,7 @@ class TabuSearchCore {
                             CURRENT_SOLUTION_SCORE);
                     }
 
-#ifndef _MPS_SOLVER
+#ifndef _PRINTEMPS_LINEAR
                 } else {
                     m_model_ptr->evaluate(&trial_solution_scores[i],  //
                                           *TRIAL_MOVE_PTRS[i]);
