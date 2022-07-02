@@ -11,10 +11,6 @@ namespace utility {
 namespace q_learning {
 /*****************************************************************************/
 template <class T_StateBody, class T_ActionBody>
-struct Learner;
-
-/*****************************************************************************/
-template <class T_StateBody, class T_ActionBody>
 struct State;
 
 /*****************************************************************************/

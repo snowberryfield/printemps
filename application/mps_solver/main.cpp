@@ -4,12 +4,8 @@
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
 
-#define _MPS_SOLVER
-
-#include <string>
-#include <iostream>
-
-#include "../printemps/utility/option_utility.h"
+#define _PRINTEMPS_LINEAR
+#include <printemps.h>
 
 int main([[maybe_unused]] int argc, char *argv[]) {
     /**
@@ -22,10 +18,11 @@ int main([[maybe_unused]] int argc, char *argv[]) {
                   << "[-i INITIAL_SOLUTION_FILE_NAME] "
                   << "[-m MUTABLE_VARIABLE_FILE_NAME] "
                   << "[-f FIXED_VARIABLE_FILE_NAME] "
+                  << "[-s SELECTION_CONSTRAINT_FILE_NAME] "
                   << "[-x FLIPPABLE_VARIABLE_PAIR_FILE_NAME]"
                   << "[--accept-continuous] "
                   << "[--extract-flippable-variable-pairs] "
-                  << "[-s MINIMUM_COMMON_ELEMENT] "
+                  << "[-c MINIMUM_COMMON_ELEMENT] "
                   << "mps_file" << std::endl;
         std::cout << std::endl;
         std::cout  //
@@ -43,6 +40,10 @@ int main([[maybe_unused]] int argc, char *argv[]) {
                "name."
             << std::endl;
         std::cout  //
+            << "  -s SELECTION_CONSTRAINT_FILE_NAME: Specify user-defined "
+               "selection constraint file name."
+            << std::endl;
+        std::cout  //
             << "  -x FLIP_VARIABLE_PAIR_FILE_NAME: Specify flippable variable "
                "pair file name."
             << std::endl;
@@ -55,7 +56,7 @@ int main([[maybe_unused]] int argc, char *argv[]) {
                "variable pairs."
             << std::endl;
         std::cout  //
-            << "  --s MINIMUM_COMMON_ELEMENT: Specify the number of minimum "
+            << "  -c MINIMUM_COMMON_ELEMENT: Specify the number of minimum "
                "common element between two constraints, which is used as the "
                "threshold for extracting flippable variable pairs. (default: 5)"
             << std::endl;
@@ -70,6 +71,7 @@ int main([[maybe_unused]] int argc, char *argv[]) {
     std::string initial_solution_file_name;
     std::string mutable_variable_file_name;
     std::string fixed_variable_file_name;
+    std::string selection_constraint_file_name;
     std::string flippable_variable_pair_file_name;
     bool        accept_continuous_variables      = false;
     bool        extract_flippable_variable_pairs = false;
@@ -90,10 +92,13 @@ int main([[maybe_unused]] int argc, char *argv[]) {
         } else if (args[i] == "-f") {
             fixed_variable_file_name = args[i + 1];
             i += 2;
+        } else if (args[i] == "-s") {
+            selection_constraint_file_name = args[i + 1];
+            i += 2;
         } else if (args[i] == "-x") {
             flippable_variable_pair_file_name = args[i + 1];
             i += 2;
-        } else if (args[i] == "-s") {
+        } else if (args[i] == "-c") {
             minimum_common_element = atoi(args[i + 1].c_str());
             i += 2;
         } else if (args[i] == "--accept-continuous") {
@@ -132,7 +137,7 @@ int main([[maybe_unused]] int argc, char *argv[]) {
      */
     printemps::option::Option option;
     if (!option_file_name.empty()) {
-        option = printemps::utility::read_option(option_file_name);
+        option.read(option_file_name);
     }
 
     /**
@@ -141,18 +146,29 @@ int main([[maybe_unused]] int argc, char *argv[]) {
      */
     if (!mutable_variable_file_name.empty()) {
         auto mutable_variable_names =
-            printemps::helper::read_variable_names(mutable_variable_file_name);
+            printemps::helper::read_names(mutable_variable_file_name);
         model.unfix_variables(mutable_variable_names);
     }
 
     /**
-     * If the fixe variable file is given, the values of the variables will be
+     * If the fixed variable file is given, the values of the variables will be
      * fixed at the specified values.
      */
     if (!fixed_variable_file_name.empty()) {
-        auto solution = printemps::helper::read_variable_names_and_values(
-            fixed_variable_file_name);
+        auto solution =
+            printemps::helper::read_names_and_values(fixed_variable_file_name);
         model.fix_variables(solution);
+    }
+
+    /**
+     * If the selection constraint file is given, the constraints listed in the
+     * file will be regarded as user-defined selection constraints.
+     */
+    if (!selection_constraint_file_name.empty()) {
+        auto selection_constraint_names =
+            printemps::helper::read_names(selection_constraint_file_name);
+        model.set_user_defined_selection_constraints(
+            selection_constraint_names);
     }
 
     /**
@@ -160,7 +176,7 @@ int main([[maybe_unused]] int argc, char *argv[]) {
      * user-defined neighborhood moves.
      */
     if (!flippable_variable_pair_file_name.empty()) {
-        auto variable_name_pairs = printemps::helper::read_variable_name_pairs(
+        auto variable_name_pairs = printemps::helper::read_name_pairs(
             flippable_variable_pair_file_name);
         option.is_enabled_user_defined_move = true;
         model.setup_flippable_variable_ptr_pairs(variable_name_pairs);
@@ -172,7 +188,7 @@ int main([[maybe_unused]] int argc, char *argv[]) {
      * will be used.
      */
     if (!initial_solution_file_name.empty()) {
-        auto solution = printemps::helper::read_variable_names_and_values(
+        auto solution = printemps::helper::read_names_and_values(
             initial_solution_file_name);
         model.import_solution(solution);
     }

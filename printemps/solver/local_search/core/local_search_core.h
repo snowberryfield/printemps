@@ -296,7 +296,7 @@ class LocalSearchCore {
         }
 
         std::printf(  //
-            "%8d |      %5d       %5d |%c%9.2e(%9.2e) |%c%9.2e %c%9.2e\n",
+            "%8d | %10d  %10d |%c%9.2e(%9.2e) |%c%9.2e %c%9.2e\n",
             STATE.iteration,                                                //
             STATE.number_of_moves,                                          //
             STATE.number_of_performed_moves,                                //

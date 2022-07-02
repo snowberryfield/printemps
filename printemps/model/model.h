@@ -2051,7 +2051,7 @@ class Model {
             }
         }
 
-#ifdef _MPS_SOLVER
+#ifdef _PRINTEMPS_LINEAR
         double objective             = m_objective.evaluate(a_MOVE);
         double objective_improvement = m_objective.value() - objective;
 
@@ -2116,17 +2116,17 @@ class Model {
             }
 
             if (constraint_ptr->is_greater_or_equal()) {
-                violation_diff = std::max(-constraint_value, 0.0) -
+                violation_diff = std::min(constraint_value, 0.0) +
                                  constraint_ptr->negative_part();
-                total_violation += violation_diff;
+                total_violation -= violation_diff;
 
-                local_penalty +=
+                local_penalty -=
                     violation_diff *
                     constraint_ptr->local_penalty_coefficient_greater();
             }
         }
 
-#ifdef _MPS_SOLVER
+#ifdef _PRINTEMPS_LINEAR
         double objective             = m_objective.evaluate(a_MOVE);
         double objective_improvement = m_objective.value() - objective;
 
@@ -2207,15 +2207,19 @@ class Model {
             is_feasibility_improvable |= violation_diff < -constant::EPSILON;
         }
 
+#ifdef _PRINTEMPS_LINEAR
+        double objective             = m_objective.evaluate(a_MOVE);
+        double objective_improvement = m_objective.value() - objective;
+
+#else
         double objective             = 0.0;
         double objective_improvement = 0.0;
-
         if (m_is_defined_objective) {
             objective = m_objective.evaluate(a_MOVE) * this->sign();
             objective_improvement =
                 m_objective.value() * this->sign() - objective;
         }
-
+#endif
         const double GLOBAL_PENALTY =
             total_violation * m_global_penalty_coefficient;
 
@@ -2527,6 +2531,19 @@ class Model {
     }
 
     /*************************************************************************/
+    constexpr void set_user_defined_selection_constraints(
+        const std::unordered_set<std::string> &a_CONSTRAINT_NAMES) {
+        for (auto &&proxy : m_constraint_proxies) {
+            for (auto &&constraint : proxy.flat_indexed_constraints()) {
+                if (a_CONSTRAINT_NAMES.find(constraint.name()) !=
+                    a_CONSTRAINT_NAMES.end()) {
+                    constraint.set_is_user_defined_selection(true);
+                }
+            }
+        }
+    }
+
+    /*************************************************************************/
     constexpr void setup_flippable_variable_ptr_pairs(
         const std::vector<std::pair<std::string, std::string>>
             &a_VARIABLE_NAME_PAIRS) {
@@ -2687,10 +2704,10 @@ class Model {
                 "Nonlinear model cannot be written in MPS format."));
         }
         /**
-         * Determine the constraint sensitivities.
+         * Determine the sensitivities.
          */
-        this->setup_variable_related_constraints();
-        this->setup_variable_sensitivities();
+        this->setup_variable_constraint_sensitivities();
+        this->setup_variable_objective_sensitivities();
 
         /**
          * Write instance name.
@@ -2740,26 +2757,27 @@ class Model {
 
         for (const auto &proxy : m_variable_proxies) {
             for (const auto &variable : proxy.flat_indexed_variables()) {
-                auto variable_name = utility::delete_space(variable.name());
+                const auto VARIABLE_NAME =
+                    utility::delete_space(variable.name());
                 /// Objective
                 if (fabs(variable.objective_sensitivity()) >
                     constant::EPSILON_10) {
                     if (m_is_minimization) {
-                        ofs << "    " << variable_name << "     obj    "
+                        ofs << "    " << VARIABLE_NAME << "     obj    "
                             << variable.objective_sensitivity() << std::endl;
                     } else {
-                        ofs << "    " << variable_name << "     obj    "
+                        ofs << "    " << VARIABLE_NAME << "     obj    "
                             << -variable.objective_sensitivity() << std::endl;
                     }
                 }
                 /// Constraints
                 for (const auto &sensitivity :
                      variable.constraint_sensitivities()) {
-                    auto constraint_name =
+                    const auto CONSTRAINT_NAME =
                         utility::delete_space(sensitivity.first->name());
-                    auto coefficient = sensitivity.second;
-                    ofs << "    " << variable_name << "    " << constraint_name
-                        << "    " << coefficient << std::endl;
+                    const auto COEFFICIENT = sensitivity.second;
+                    ofs << "    " << VARIABLE_NAME << "    " << CONSTRAINT_NAME
+                        << "    " << COEFFICIENT << std::endl;
                 }
             }
         }
@@ -2771,10 +2789,11 @@ class Model {
         ofs << "RHS" << std::endl;
         for (const auto &proxy : m_constraint_proxies) {
             for (const auto &constraint : proxy.flat_indexed_constraints()) {
-                auto constraint_name = utility::delete_space(constraint.name());
-                auto &expression     = constraint.expression();
-                ofs << "    rhs    " << constraint_name << "    "
-                    << -expression.constant_value() << std::endl;
+                const auto CONSTRAINT_NAME =
+                    utility::delete_space(constraint.name());
+                const auto &EXPRESSION = constraint.expression();
+                ofs << "    rhs    " << CONSTRAINT_NAME << "    "
+                    << -EXPRESSION.constant_value() << std::endl;
             }
         }
 
@@ -2784,20 +2803,21 @@ class Model {
         ofs << "BOUNDS" << std::endl;
         for (const auto &proxy : m_variable_proxies) {
             for (const auto &variable : proxy.flat_indexed_variables()) {
-                auto variable_name = utility::delete_space(variable.name());
+                const auto VARIABLE_NAME =
+                    utility::delete_space(variable.name());
                 if (variable.is_fixed()) {
-                    ofs << "    FX    bnd    " << variable_name << "     "
+                    ofs << "    FX    bnd    " << VARIABLE_NAME << "     "
                         << variable.value() << std::endl;
                 } else {
                     if (variable.lower_bound() != constant::INT_HALF_MIN) {
                         if (variable.lower_bound() != 0) {
-                            ofs << "    LO    bnd    " << variable_name
+                            ofs << "    LO    bnd    " << VARIABLE_NAME
                                 << "    " << variable.lower_bound()
                                 << std::endl;
                         }
                     }
                     if (variable.upper_bound() != constant::INT_HALF_MAX) {
-                        ofs << "    UP    bnd    " << variable_name << "    "
+                        ofs << "    UP    bnd    " << VARIABLE_NAME << "    "
                             << variable.upper_bound() << std::endl;
                     }
                 }
@@ -2810,6 +2830,135 @@ class Model {
         ofs << "ENDATA" << std::endl;
 
         ofs.close();
+    }
+
+    /*********************************************************************/
+    void write_json(const std::string &a_FILE_NAME) {
+        /**
+         * Determine unique name of variables and constraints.
+         */
+        this->setup_unique_names();
+
+        /**
+         * Determine the linearity.
+         */
+        this->setup_is_linear();
+
+        if (!m_is_linear) {
+            throw std::logic_error(utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "Nonlinear model cannot be written in JSON format."));
+        }
+        /**
+         * Determine the sensitivities.
+         */
+        this->setup_variable_constraint_sensitivities();
+        this->setup_variable_objective_sensitivities();
+
+        utility::json::JsonObject object;
+
+        /**
+         * Instance name
+         */
+        if (m_name.empty()) {
+            object.emplace_back("name", "untitled");
+        } else {
+            object.emplace_back("name", utility::delete_space(m_name));
+        }
+
+        /**
+         * Minimization or not
+         */
+        object.emplace_back("is_minimization", m_is_minimization);
+
+        /**
+         * Variables
+         */
+        utility::json::JsonArray variable_array;
+        for (const auto &proxy : m_variable_proxies) {
+            for (const auto &variable : proxy.flat_indexed_variables()) {
+                utility::json::JsonObject v_object;
+                v_object.emplace_back("name", variable.name());
+                v_object.emplace_back("value", variable.value());
+                v_object.emplace_back("is_fixed", variable.is_fixed());
+                v_object.emplace_back("lower_bound", variable.lower_bound());
+                v_object.emplace_back("upper_bound", variable.upper_bound());
+                if (variable.sense() ==
+                    model_component::VariableSense::Binary) {
+                    v_object.emplace_back("sense", std::string("Binary"));
+                } else {
+                    v_object.emplace_back("sense", std::string("Integer"));
+                }
+                variable_array.emplace_back(v_object);
+            }
+        }
+        object.emplace_back("variables", variable_array);
+
+        /**
+         * Objective
+         */
+        utility::json::JsonObject objective_object;
+        utility::json::JsonArray  objective_sensitivity_array;
+        for (const auto &sensitivity :
+             m_objective.expression().sensitivities()) {
+            utility::json::JsonObject sensitivity_object;
+            sensitivity_object.emplace_back("variable",
+                                            sensitivity.first->name());
+            sensitivity_object.emplace_back("coefficient", sensitivity.second);
+            objective_sensitivity_array.emplace_back(sensitivity_object);
+        }
+        objective_object.emplace_back("sensitivities",
+                                      objective_sensitivity_array);
+        object.emplace_back("objective", objective_object);
+
+        /**
+         * Constraints
+         */
+        utility::json::JsonArray constraint_array;
+        for (const auto &proxy : m_constraint_proxies) {
+            for (const auto &constraint : proxy.flat_indexed_constraints()) {
+                utility::json::JsonObject c_object;
+
+                const auto &EXPRESSION    = constraint.expression();
+                const auto &SENSITIVITIES = EXPRESSION.sensitivities();
+                c_object.emplace_back("name", constraint.name());
+                c_object.emplace_back("is_enabled", constraint.is_enabled());
+                c_object.emplace_back("rhs", -EXPRESSION.constant_value());
+                switch (constraint.sense()) {
+                    case model_component::ConstraintSense::Equal: {
+                        c_object.emplace_back("sense", std::string("="));
+                        break;
+                    }
+                    case model_component::ConstraintSense::Less: {
+                        c_object.emplace_back("sense", std::string("<="));
+                        break;
+                    }
+                    case model_component::ConstraintSense::Greater: {
+                        c_object.emplace_back("sense", std::string(">="));
+                        break;
+                    }
+                    default: {
+                    }
+                }
+
+                utility::json::JsonArray constraint_sensitivity_array;
+                for (const auto &sensitivity : SENSITIVITIES) {
+                    utility::json::JsonObject sensitivity_object;
+                    sensitivity_object.emplace_back("variable",
+                                                    sensitivity.first->name());
+                    sensitivity_object.emplace_back("coefficient",
+                                                    sensitivity.second);
+                    constraint_sensitivity_array.emplace_back(
+                        sensitivity_object);
+                }
+                c_object.emplace_back("sensitivities",
+                                      constraint_sensitivity_array);
+                constraint_array.emplace_back(c_object);
+            }
+        }
+
+        object.emplace_back("constraints", constraint_array);
+        utility::json::write_json_object(object, a_FILE_NAME);
     }
 
     /*************************************************************************/

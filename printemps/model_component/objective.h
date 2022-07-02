@@ -166,7 +166,7 @@ class Objective {
 
     /*************************************************************************/
     inline constexpr T_Expression evaluate(void) const noexcept {
-#ifdef _MPS_SOLVER
+#ifdef _PRINTEMPS_LINEAR
         return m_expression.evaluate();
 #else
         if (m_is_linear) {
@@ -179,9 +179,9 @@ class Objective {
 
     /*************************************************************************/
     inline constexpr T_Expression evaluate(
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
-        const noexcept {
-#ifdef _MPS_SOLVER
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
+        noexcept {
+#ifdef _PRINTEMPS_LINEAR
         return m_expression.evaluate(a_MOVE);
 #else
         if (m_is_linear) {
@@ -194,7 +194,7 @@ class Objective {
 
     /*************************************************************************/
     inline constexpr void update(void) {
-#ifdef _MPS_SOLVER
+#ifdef _PRINTEMPS_LINEAR
         m_expression.update();
         m_value = m_expression.value();
 #else
@@ -210,7 +210,7 @@ class Objective {
     /*************************************************************************/
     inline constexpr void update(
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) {
-#ifdef _MPS_SOLVER
+#ifdef _PRINTEMPS_LINEAR
         m_expression.update(a_MOVE);
         m_value = m_expression.value();
 #else

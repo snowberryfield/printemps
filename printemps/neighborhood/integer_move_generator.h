@@ -73,7 +73,7 @@ class IntegerMoveGenerator
          * Setup move updater.
          */
         auto move_updater =  //
-            [this, mutable_variable_ptrs, VARIABLES_SIZE](
+            [mutable_variable_ptrs, VARIABLES_SIZE](
                 auto *                      a_moves_ptr,                      //
                 auto *                      a_flags,                          //
                 const bool                  a_ACCEPT_ALL,                     //

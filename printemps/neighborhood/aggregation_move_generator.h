@@ -77,7 +77,7 @@ class AggregationMoveGenerator
          * Setup move updater.
          */
         auto move_updater =  //
-            [this, binomials, BINOMIALS_SIZE](
+            [binomials, BINOMIALS_SIZE](
                 auto *                      a_moves_ptr,                      //
                 auto *                      a_flags,                          //
                 const bool                  a_ACCEPT_ALL,                     //

@@ -18,6 +18,7 @@
 #include "fixed_size_queue.h"
 #include "bidirectional_map.h"
 #include "range.h"
+#include "json/json.h"
 #include "gf2.h"
 #include "q_learning/q_learning.h"
 #include "ucb1/ucb1.h"
