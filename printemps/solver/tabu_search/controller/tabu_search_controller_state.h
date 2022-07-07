@@ -57,7 +57,8 @@ struct TabuSearchControllerState {
     int total_update_status;
 
     bool is_global_augmented_incumbent_updated;
-    bool is_feasible_incumbent_updated;
+    bool previous_is_feasible_incumbent_updated;
+    bool current_is_feasible_incumbent_updated;
     bool is_not_updated;
     bool is_infeasible_stagnation;
     bool is_improved;
@@ -129,7 +130,8 @@ struct TabuSearchControllerState {
         this->total_update_status = 0;
 
         this->is_global_augmented_incumbent_updated   = false;
-        this->is_feasible_incumbent_updated           = false;
+        this->previous_is_feasible_incumbent_updated  = false;
+        this->current_is_feasible_incumbent_updated   = false;
         this->is_not_updated                          = false;
         this->is_infeasible_stagnation                = false;
         this->is_improved                             = false;
