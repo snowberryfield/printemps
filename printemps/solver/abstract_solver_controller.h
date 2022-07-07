@@ -32,21 +32,17 @@ class AbstractSolverController {
 
     /*************************************************************************/
     inline void print_incumbent_summary(const bool a_IS_ENABLED_PRINT) {
+        const auto& GLOBAL_INCUMBENT_SOLUTION =
+            m_incumbent_holder_ptr->global_augmented_incumbent_solution();
         utility::print_info(
-            " -- Global augmented incumbent objective: " +
-                utility::to_string(
-                    m_incumbent_holder_ptr
-                            ->global_augmented_incumbent_objective() *
-                        m_model_ptr->sign(),
-                    "%.3f"),
+            " -- Incumbent objective: " +
+                utility::to_string(GLOBAL_INCUMBENT_SOLUTION.objective, "%.3f"),
             a_IS_ENABLED_PRINT);
 
         utility::print_info(
-            " -- Feasible incumbent objective: " +
-                utility::to_string(
-                    m_incumbent_holder_ptr->feasible_incumbent_objective() *
-                        m_model_ptr->sign(),
-                    "%.3f"),
+            " -- Incumbent total violation: " +
+                utility::to_string(GLOBAL_INCUMBENT_SOLUTION.total_violation,
+                                   "%.3f"),
             a_IS_ENABLED_PRINT);
     }
 
