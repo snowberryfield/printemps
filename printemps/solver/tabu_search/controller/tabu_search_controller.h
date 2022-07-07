@@ -669,7 +669,8 @@ class TabuSearchController
              * Update variable bounds.
              */
             if (this->m_option.is_enabled_presolve &&
-                state.is_feasible_incumbent_updated) {
+                state.current_is_feasible_incumbent_updated &&
+                !state.previous_is_feasible_incumbent_updated) {
                 this->bound_variables(
                     this->m_incumbent_holder_ptr
                         ->feasible_incumbent_objective(),

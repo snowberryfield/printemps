@@ -289,7 +289,9 @@ class TabuSearchControllerStateManager {
              solution::IncumbentHolderConstant::
                  STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE);
 
-        m_state.is_feasible_incumbent_updated =
+        m_state.previous_is_feasible_incumbent_updated =
+            m_state.current_is_feasible_incumbent_updated;
+        m_state.current_is_feasible_incumbent_updated =
             (m_state.tabu_search_result.total_update_status &
              solution::IncumbentHolderConstant::
                  STATUS_FEASIBLE_INCUMBENT_UPDATE);
@@ -611,7 +613,7 @@ class TabuSearchControllerStateManager {
          * Revert penalty coefficient relaxing rate if the feasible incumbent
          * solution is updated.
          */
-        if (m_state.is_feasible_incumbent_updated) {
+        if (m_state.current_is_feasible_incumbent_updated) {
             m_state.penalty_coefficient_relaxing_rate =
                 m_option.penalty_coefficient_relaxing_rate;
             return;

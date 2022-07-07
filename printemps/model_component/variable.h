@@ -225,6 +225,8 @@ class Variable : public multi_array::AbstractMultiArrayElement {
         m_lower_bound = a_LOWER_BOUND;
         m_upper_bound = a_UPPER_BOUND;
         m_has_bounds  = true;
+        m_value       = std::min(m_value, m_upper_bound);
+        m_value       = std::max(m_value, m_lower_bound);
 
         this->setup_sense_binary_or_integer();
         this->update_margin();
