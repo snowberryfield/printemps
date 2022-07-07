@@ -121,6 +121,15 @@ inline std::string base_name(const std::string &a_ORIGINAL) {
     return remove_path(remove_extension(a_ORIGINAL));
 }
 
+/*****************************************************************************/
+inline std::string bold(const std::string &a_ORIGINAL) {
+#ifdef _PRINTEMPS_STYLING
+    return "\e[1m" + a_ORIGINAL + "\e[0m";
+#else
+    return a_ORIGINAL;
+#endif
+}
+
 }  // namespace printemps::utility
 
 /******************************************************************************/

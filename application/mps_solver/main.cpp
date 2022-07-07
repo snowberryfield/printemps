@@ -5,6 +5,8 @@
 /*****************************************************************************/
 
 #define _PRINTEMPS_LINEAR_MINIMIZATION
+#define _PRINTEMPS_STYLING
+
 #include <printemps.h>
 
 int main([[maybe_unused]] int argc, char *argv[]) {

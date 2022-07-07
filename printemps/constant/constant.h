@@ -15,6 +15,16 @@ static constexpr auto LARGE_VALUE_50  = 1E50;
 static constexpr auto LARGE_VALUE_100 = 1E100;
 static std::string    VERSION         = "v1.7.0";
 static std::string PROJECT_URL = "https://snowberryfield.github.io/printemps/";
+
+static std::string NO_COLOR = "\e[0m";
+static std::string RED      = "\e[0;31m";
+static std::string GREEN    = "\e[0;32m";
+static std::string YELLOW   = "\e[0;33m";
+static std::string BlUE     = "\e[0;34m";
+static std::string PURPLE   = "\e[0;35m";
+static std::string CYAN     = "\e[0;36m";
+static std::string WHITE    = "\e[0;36m";
+
 }  // namespace printemps::constant
 
 #endif

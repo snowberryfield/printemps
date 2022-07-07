@@ -153,8 +153,8 @@ class LagrangeDualCore {
             "  Incumbent Solution ",
             true);
         utility::print(
-            "         |            |           |   Aug.Obj.(Penalty)  | "
-            "  Aug.Obj.  Feas.Obj ",
+            "         |            |           |   Objective (Viol.)  | "
+            "  Objective (Viol.)  ",
             true);
         utility::print(
             "---------+------------+-----------+----------------------+--------"
@@ -171,16 +171,41 @@ class LagrangeDualCore {
         const auto& STATE = m_state_manager.state();
         const auto  SIGN  = m_model_ptr->sign();
 
+        const auto& CURRENT_SOLUTION_SCORE = STATE.current_solution_score;
+        const auto& INCUMBENT_SOLUTION_SCORE =
+            m_incumbent_holder_ptr->global_augmented_incumbent_score();
+
+        std::string color_current_feasible_begin   = "";
+        std::string color_current_feasible_end     = "";
+        std::string color_incumbent_feasible_begin = "";
+        std::string color_incumbent_feasible_end   = "";
+
+#ifdef _PRINTEMPS_STYLING
+        if (CURRENT_SOLUTION_SCORE.is_feasible) {
+            color_current_feasible_begin = constant::CYAN;
+            color_current_feasible_end   = constant::NO_COLOR;
+        }
+
+        if (INCUMBENT_SOLUTION_SCORE.is_feasible) {
+            color_incumbent_feasible_begin = constant::CYAN;
+            color_incumbent_feasible_end   = constant::NO_COLOR;
+        }
+#endif
+
         std::printf(  //
-            " INITIAL |  %9.2e | %9.2e | %9.2e(%9.2e) | %9.2e  %9.2e\n",
+            " INITIAL |  %9.2e | %9.2e | %9.2e %s(%8.2e)%s | %9.2e "
+            "%s(%8.2e)%s\n",
             STATE.lagrangian * SIGN, STATE.step_size,
-            STATE.current_solution_score.local_augmented_objective * SIGN,
-            STATE.current_solution_score.is_feasible
+            CURRENT_SOLUTION_SCORE.objective * SIGN,
+            color_current_feasible_begin.c_str(),
+            CURRENT_SOLUTION_SCORE.is_feasible
                 ? 0.0
-                : STATE.current_solution_score.local_penalty,  //
-            m_incumbent_holder_ptr->global_augmented_incumbent_objective() *
-                SIGN,
-            m_incumbent_holder_ptr->feasible_incumbent_objective() * SIGN);
+                : CURRENT_SOLUTION_SCORE.total_violation,  //
+            color_current_feasible_end.c_str(),
+            INCUMBENT_SOLUTION_SCORE.objective * SIGN,
+            color_incumbent_feasible_begin.c_str(),
+            INCUMBENT_SOLUTION_SCORE.total_violation * SIGN,
+            color_incumbent_feasible_end.c_str());
     }
 
     /*************************************************************************/
@@ -192,14 +217,12 @@ class LagrangeDualCore {
         const auto& STATE = m_state_manager.state();
         const auto  SIGN  = m_model_ptr->sign();
 
+        const auto& CURRENT_SOLUTION_SCORE = STATE.current_solution_score;
+        const auto& INCUMBENT_SOLUTION_SCORE =
+            m_incumbent_holder_ptr->global_augmented_incumbent_score();
+
         char mark_current                    = ' ';
         char mark_global_augmented_incumbent = ' ';
-        char mark_feasible_incumbent         = ' ';
-
-        if (STATE.update_status & solution::IncumbentHolderConstant::
-                                      STATUS_LOCAL_AUGMENTED_INCUMBENT_UPDATE) {
-            mark_current = '!';
-        }
 
         if (STATE.update_status &
             solution::IncumbentHolderConstant::
@@ -208,29 +231,60 @@ class LagrangeDualCore {
             mark_global_augmented_incumbent = '#';
         }
 
-        if (STATE.update_status &  //
-            solution::IncumbentHolderConstant::
-                STATUS_FEASIBLE_INCUMBENT_UPDATE) {
-            mark_current                    = '*';
-            mark_global_augmented_incumbent = '*';
-            mark_feasible_incumbent         = '*';
+        std::string color_current_feasible_begin   = "";
+        std::string color_current_feasible_end     = "";
+        std::string color_incumbent_feasible_begin = "";
+        std::string color_incumbent_feasible_end   = "";
+        std::string color_incumbent_update_begin   = "";
+        std::string color_incumbent_update_end     = "";
+
+#ifdef _PRINTEMPS_STYLING
+        if (CURRENT_SOLUTION_SCORE.is_feasible) {
+            color_current_feasible_begin = constant::CYAN;
+            color_current_feasible_end   = constant::NO_COLOR;
         }
 
+        if (INCUMBENT_SOLUTION_SCORE.is_feasible) {
+            color_incumbent_feasible_begin = constant::CYAN;
+            color_incumbent_feasible_end   = constant::NO_COLOR;
+        }
+
+        if (STATE.update_status &  //
+            solution::IncumbentHolderConstant::
+                STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
+            color_current_feasible_begin = constant::YELLOW;
+            color_current_feasible_end   = constant::NO_COLOR;
+
+            color_incumbent_feasible_begin = constant::YELLOW;
+            color_incumbent_feasible_end   = constant::NO_COLOR;
+
+            color_incumbent_update_begin = constant::YELLOW;
+            color_incumbent_update_end   = constant::NO_COLOR;
+        }
+#endif
+
         std::printf(  //
-            "%8d |  %9.2e | %9.2e |%c%9.2e(%9.2e) |%c%9.2e %c%9.2e\n",
-            STATE.iteration,                                                //
-            STATE.lagrangian * SIGN,                                        //
-            STATE.step_size,                                                //
-            mark_current,                                                   //
-            STATE.current_solution_score.local_augmented_objective * SIGN,  //
-            STATE.current_solution_score.is_feasible
+            "%8d |  %9.2e | %9.2e |%s%c%9.2e%s %s(%8.2e)%s |%s%c%9.2e%s "
+            "%s(%8.2e)%s\n",
+            STATE.iteration,          //
+            STATE.lagrangian * SIGN,  //
+            STATE.step_size,          //
+            color_incumbent_update_begin.c_str(),
+            mark_current,  //
+            CURRENT_SOLUTION_SCORE.objective * SIGN,
+            color_incumbent_update_end.c_str(),
+            color_current_feasible_begin.c_str(),
+            CURRENT_SOLUTION_SCORE.is_feasible
                 ? 0.0
-                : STATE.current_solution_score.local_penalty,  //
-            mark_global_augmented_incumbent,                   //
-            m_incumbent_holder_ptr->global_augmented_incumbent_objective() *
-                SIGN,                 //
-            mark_feasible_incumbent,  //
-            m_incumbent_holder_ptr->feasible_incumbent_objective() * SIGN);
+                : CURRENT_SOLUTION_SCORE.total_violation,
+            color_current_feasible_end.c_str(),  //
+            color_incumbent_update_begin.c_str(),
+            mark_global_augmented_incumbent,
+            INCUMBENT_SOLUTION_SCORE.objective * SIGN,
+            color_incumbent_update_end.c_str(),
+            color_incumbent_feasible_begin.c_str(),
+            INCUMBENT_SOLUTION_SCORE.total_violation * SIGN,
+            color_incumbent_feasible_end.c_str());
     }
 
     /*************************************************************************/
