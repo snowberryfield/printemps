@@ -200,7 +200,7 @@ class LagrangeDualCoreStateManager {
         const int CONSTRAINTS_SIZE = constraint_ptrs.size();
 
 #ifdef _OPENMP
-#pragma omp parallel for if (m_option.is_enabled_parallel_evaluation) \
+#pragma omp parallel for if (m_option.parallel.is_enabled_parallel_evaluation) \
     schedule(static)
 #endif
         for (auto i = 0; i < CONSTRAINTS_SIZE; i++) {

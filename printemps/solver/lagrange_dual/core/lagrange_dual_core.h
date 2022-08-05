@@ -45,11 +45,6 @@ class LagrangeDualCore {
         m_feasible_solutions.clear();
 
         /**
-         * Prepare a random generator, which is used for shuffling moves.
-         */
-        m_get_rand_mt.seed(m_option.local_search.seed);
-
-        /**
          * Reset the last update iterations.
          */
         m_memory_ptr->reset_last_update_iterations();
@@ -80,14 +75,14 @@ class LagrangeDualCore {
         const auto& STATE    = m_state_manager.state();
         const auto& m_option = this->m_option;
 
-        if (STATE.elapsed_time > m_option.local_search.time_max) {
+        if (STATE.elapsed_time > m_option.lagrange_dual.time_max) {
             m_state_manager.set_termination_status(
                 LagrangeDualCoreTerminationStatus::TIME_OVER);
             return true;
         }
 
-        if (STATE.elapsed_time + m_option.local_search.time_offset >
-            m_option.time_max) {
+        if (STATE.elapsed_time + m_option.lagrange_dual.time_offset >
+            m_option.general.time_max) {
             m_state_manager.set_termination_status(
                 LagrangeDualCoreTerminationStatus::TIME_OVER);
             return true;
@@ -100,7 +95,7 @@ class LagrangeDualCore {
         const auto& STATE    = m_state_manager.state();
         const auto& m_option = this->m_option;
 
-        if (STATE.iteration >= m_option.local_search.iteration_max) {
+        if (STATE.iteration >= m_option.lagrange_dual.iteration_max) {
             m_state_manager.set_termination_status(
                 LagrangeDualCoreTerminationStatus::ITERATION_OVER);
             return true;
@@ -114,7 +109,7 @@ class LagrangeDualCore {
         const auto& m_option             = this->m_option;
 
         if (incumbent_holder_ptr->feasible_incumbent_objective() <=
-            m_option.target_objective_value) {
+            m_option.general.target_objective_value) {
             m_state_manager.set_termination_status(
                 LagrangeDualCoreTerminationStatus::REACH_TARGET);
             return true;
@@ -375,11 +370,13 @@ class LagrangeDualCore {
          * Print the header of optimization progress table and print the initial
          * solution status.
          */
-        utility::print_single_line(m_option.verbose >= option::verbose::Full);
-        utility::print_message("Lagrange dual starts.",
-                               m_option.verbose >= option::verbose::Full);
-        print_table_header(m_option.verbose >= option::verbose::Full);
-        print_table_initial(m_option.verbose >= option::verbose::Full);
+        utility::print_single_line(m_option.output.verbose >=
+                                   option::verbose::Full);
+        utility::print_message(
+            "Lagrange dual starts.",
+            m_option.output.verbose >= option::verbose::Full);
+        print_table_header(m_option.output.verbose >= option::verbose::Full);
+        print_table_initial(m_option.output.verbose >= option::verbose::Full);
 
         auto& variable_ptrs = m_model_ptr->variable_reference().variable_ptrs;
         const int VARIABLES_SIZE = variable_ptrs.size();
@@ -424,7 +421,7 @@ class LagrangeDualCore {
              */
             const double SIGN = m_model_ptr->sign();
 #ifdef _OPENMP
-#pragma omp parallel for if (m_option.is_enabled_parallel_evaluation) \
+#pragma omp parallel for if (m_option.parallel.is_enabled_parallel_evaluation) \
     schedule(static)
 #endif
             for (auto i = 0; i < VARIABLES_SIZE; i++) {
@@ -476,7 +473,8 @@ class LagrangeDualCore {
             if ((STATE.iteration %
                  std::max(m_option.lagrange_dual.log_interval, 1)) == 0 ||
                 STATE.update_status > 1) {
-                print_table_body(m_option.verbose >= option::verbose::Full);
+                print_table_body(m_option.output.verbose >=
+                                 option::verbose::Full);
             }
 
             /**
@@ -493,7 +491,7 @@ class LagrangeDualCore {
         /**
          * Print the footer of the optimization progress table.
          */
-        print_table_footer(m_option.verbose >= option::verbose::Full);
+        print_table_footer(m_option.output.verbose >= option::verbose::Full);
 
         /**
          * Postprocess.

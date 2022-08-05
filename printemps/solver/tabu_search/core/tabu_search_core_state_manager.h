@@ -399,9 +399,10 @@ class TabuSearchCoreStateManager {
             m_state.last_tabu_tenure_updated_iteration = m_state.iteration;
             m_state.intensity_decrease_count           = 0;
             m_state.intensity_increase_count           = 0;
-            utility::print_debug("Tabu tenure reverted: " +
-                                     std::to_string(m_state.tabu_tenure) + ".",
-                                 m_option.verbose >= option::verbose::Debug);
+            utility::print_debug(
+                "Tabu tenure reverted: " + std::to_string(m_state.tabu_tenure) +
+                    ".",
+                m_option.output.verbose >= option::verbose::Debug);
         } else if ((m_state.iteration -
                     m_state.last_tabu_tenure_updated_iteration) %
                        (m_state.tabu_tenure + 1) ==
@@ -432,7 +433,7 @@ class TabuSearchCoreStateManager {
                     utility::print_debug(
                         "Tabu tenure increased: " +
                             std::to_string(m_state.tabu_tenure) + ".",
-                        m_option.verbose >= option::verbose::Debug);
+                        m_option.output.verbose >= option::verbose::Debug);
                 }
             } else {
                 m_state.intensity_decrease_count++;
@@ -450,7 +451,7 @@ class TabuSearchCoreStateManager {
                     utility::print_debug(
                         "Tabu tenure decreased: " +
                             std::to_string(m_state.tabu_tenure) + ".",
-                        m_option.verbose >= option::verbose::Debug);
+                        m_option.output.verbose >= option::verbose::Debug);
                 }
             }
         }

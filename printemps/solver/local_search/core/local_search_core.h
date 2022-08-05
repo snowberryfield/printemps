@@ -92,7 +92,7 @@ class LocalSearchCore {
         }
 
         if (STATE.elapsed_time + m_option.local_search.time_offset >
-            m_option.time_max) {
+            m_option.general.time_max) {
             m_state_manager.set_termination_status(
                 LocalSearchCoreTerminationStatus::TIME_OVER);
             return true;
@@ -115,7 +115,7 @@ class LocalSearchCore {
     /*************************************************************************/
     inline bool satisfy_reach_target_terminate_condition(void) {
         if (m_incumbent_holder_ptr->feasible_incumbent_objective() <=
-            m_option.target_objective_value) {
+            m_option.general.target_objective_value) {
             m_state_manager.set_termination_status(
                 LocalSearchCoreTerminationStatus::REACH_TARGET);
             return true;
@@ -176,6 +176,11 @@ class LocalSearchCore {
         bool accept_objective_improvable   = true;
         bool accept_feasibility_improvable = true;
 
+        /**
+         * NOTE: Checking whether the model is linear or not in this process can
+         * be skipped because local search will be applied only for linear
+         * model.
+         */
         if (STATE.iteration == 0) {
             m_model_ptr->update_variable_objective_improvabilities();
         } else {
@@ -201,7 +206,7 @@ class LocalSearchCore {
             accept_all,                     //
             accept_objective_improvable,    //
             accept_feasibility_improvable,  //
-            m_option.is_enabled_parallel_neighborhood_update);
+            m_option.parallel.is_enabled_parallel_neighborhood_update);
 
         m_state_manager.set_number_of_moves(
             m_model_ptr->neighborhood().move_ptrs().size());
@@ -465,11 +470,15 @@ class LocalSearchCore {
          * Print the header of optimization progress table and print the initial
          * solution status.
          */
-        utility::print_single_line(m_option.verbose >= option::verbose::Full);
-        utility::print_message("Local search starts.",
-                               m_option.verbose >= option::verbose::Full);
-        this->print_table_header(m_option.verbose >= option::verbose::Full);
-        this->print_table_initial(m_option.verbose >= option::verbose::Full);
+        utility::print_single_line(m_option.output.verbose >=
+                                   option::verbose::Full);
+        utility::print_message(
+            "Local search starts.",
+            m_option.output.verbose >= option::verbose::Full);
+        this->print_table_header(m_option.output.verbose >=
+                                 option::verbose::Full);
+        this->print_table_initial(m_option.output.verbose >=
+                                  option::verbose::Full);
 
         /**
          * Iterations start.
@@ -522,7 +531,7 @@ class LocalSearchCore {
             const auto NUMBER_OF_MOVES        = STATE.number_of_moves;
             const auto CURRENT_SOLUTION_SCORE = STATE.current_solution_score;
 #ifdef _OPENMP
-#pragma omp parallel for if (m_option.is_enabled_parallel_evaluation) \
+#pragma omp parallel for if (m_option.parallel.is_enabled_parallel_evaluation) \
     schedule(static)
 #endif
             for (auto i = 0; i < NUMBER_OF_MOVES; i++) {
@@ -565,8 +574,8 @@ class LocalSearchCore {
 
                 if (score.is_feasible) {
                     if (!score.is_objective_improvable) {
-                    break;
-                }
+                        break;
+                    }
                 } else {
                     if (!(score.total_violation <
                           CURRENT_SOLUTION_SCORE.total_violation)) {
@@ -650,7 +659,7 @@ class LocalSearchCore {
             if ((STATE.iteration %
                  std::max(m_option.local_search.log_interval, 1)) == 0 ||
                 STATE.update_status > 1) {
-                this->print_table_body(m_option.verbose >=
+                this->print_table_body(m_option.output.verbose >=
                                        option::verbose::Full);
             }
 
@@ -660,7 +669,8 @@ class LocalSearchCore {
         /**
          * Print the footer of the optimization progress table.
          */
-        this->print_table_footer(m_option.verbose >= option::verbose::Full);
+        this->print_table_footer(m_option.output.verbose >=
+                                 option::verbose::Full);
 
         /**
          * Postprocess.

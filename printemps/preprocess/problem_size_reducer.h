@@ -663,6 +663,193 @@ class ProblemSizeReducer {
     }
 
     /*************************************************************************/
+    inline constexpr int remove_implicit_equality_constraints(
+        const bool a_IS_ENABLED_PRINT) {
+        utility::print_single_line(a_IS_ENABLED_PRINT);
+        utility::print_message("Removing implicit equality constraints...",
+                               a_IS_ENABLED_PRINT);
+
+        auto &reference = m_model_ptr->constraint_type_reference();
+        int   number_of_newly_disabled_constraints = 0;
+        std::vector<model_component::Constraint<T_Variable, T_Expression> *>
+            constraint_ptrs;
+
+        constraint_ptrs.insert(constraint_ptrs.end(),              //
+                               reference.precedence_ptrs.begin(),  //
+                               reference.precedence_ptrs.end());
+
+        constraint_ptrs.insert(constraint_ptrs.end(),                  //
+                               reference.variable_bound_ptrs.begin(),  //
+                               reference.variable_bound_ptrs.end());
+
+        constraint_ptrs.insert(constraint_ptrs.end(),               //
+                               reference.set_packing_ptrs.begin(),  //
+                               reference.set_packing_ptrs.end());
+
+        constraint_ptrs.insert(constraint_ptrs.end(),                //
+                               reference.set_covering_ptrs.begin(),  //
+                               reference.set_covering_ptrs.end());
+
+        constraint_ptrs.insert(constraint_ptrs.end(),                      //
+                               reference.invariant_knapsack_ptrs.begin(),  //
+                               reference.invariant_knapsack_ptrs.end());
+
+        constraint_ptrs.insert(constraint_ptrs.end(),                     //
+                               reference.multiple_covering_ptrs.begin(),  //
+                               reference.multiple_covering_ptrs.end());
+
+        constraint_ptrs.insert(constraint_ptrs.end(),           //
+                               reference.min_max_ptrs.begin(),  //
+                               reference.min_max_ptrs.end());
+
+        constraint_ptrs.insert(constraint_ptrs.end(),           //
+                               reference.max_min_ptrs.begin(),  //
+                               reference.max_min_ptrs.end());
+
+        constraint_ptrs.insert(constraint_ptrs.end(),               //
+                               reference.bin_packing_ptrs.begin(),  //
+                               reference.bin_packing_ptrs.end());
+
+        constraint_ptrs.insert(constraint_ptrs.end(),            //
+                               reference.knapsack_ptrs.begin(),  //
+                               reference.knapsack_ptrs.end());
+
+        /**
+         * NOTE: Do not append equality constraints.
+         */
+        for (auto &&constraint_ptr : reference.general_linear_ptrs) {
+            if (constraint_ptr->sense() !=
+                model_component::ConstraintSense::Equal) {
+                constraint_ptrs.push_back(constraint_ptr);
+            }
+        }
+
+        if (constraint_ptrs.size() <= 1) {
+            return number_of_newly_disabled_constraints;
+        }
+
+        for (auto constraint_ptr : constraint_ptrs) {
+            constraint_ptr->expression().setup_hash();
+        }
+
+        const int CONSTRAINTS_SIZE = constraint_ptrs.size();
+
+        std::sort(constraint_ptrs.begin(), constraint_ptrs.end(),
+                  [](const auto &a_FIRST, const auto &a_SECOND) {
+                      return a_FIRST->expression().hash() <
+                             a_SECOND->expression().hash();
+                  });
+
+        std::vector<model_component::Constraint<T_Variable, T_Expression>>
+            additional_constraints;
+
+        int i = 0;
+        while (i < CONSTRAINTS_SIZE) {
+            if (!constraint_ptrs[i]->is_enabled()) {
+                i++;
+                continue;
+            }
+            if (constraint_ptrs[i]->sense() ==
+                model_component::ConstraintSense::Equal) {
+                i++;
+                continue;
+            }
+            int j = i + 1;
+            while (j < CONSTRAINTS_SIZE) {
+                /**
+                 * If the hashes of constraint i and j are different, the inner
+                 * loop can be terminated.
+                 */
+                if (constraint_ptrs[i]->expression().hash() !=
+                    constraint_ptrs[j]->expression().hash()) {
+                    i = j;
+                    break;
+                }
+
+                /**
+                 * If the constraint j is disabled, the following procedure
+                 * can be skipped.
+                 */
+                if (!constraint_ptrs[j]->is_enabled()) {
+                    j++;
+                    continue;
+                }
+
+                /**
+                 * If the variable coefficient pattern of the constraints i and
+                 * j is same, disable both of constraints i and j instead of
+                 * adding a equality constraint that these implicitly imply.
+                 */
+                if (constraint_ptrs[i]->sense() !=
+                        constraint_ptrs[j]->sense() &&
+                    constraint_ptrs[i]->expression().equal(
+                        constraint_ptrs[j]->expression())) {
+                    constraint_ptrs[i]->disable();
+                    constraint_ptrs[j]->disable();
+                    utility::print_message(  //
+                        "The constraints " + constraint_ptrs[i]->name() +
+                            " and " + constraint_ptrs[j]->name() +
+                            " were removed instead of adding a equality "
+                            "constraint that these implicitly imply.",
+                        a_IS_ENABLED_PRINT);
+
+                    additional_constraints.emplace_back(
+                        constraint_ptrs[i]->expression() == 0);
+                    additional_constraints.back().set_name(
+                        constraint_ptrs[i]->name() + "_implicit_equality");
+
+                    number_of_newly_disabled_constraints++;
+                    i++;
+                    break;
+                }
+
+                auto expression_sign_inverted =
+                    -constraint_ptrs[j]->expression();
+                expression_sign_inverted.setup_hash();
+
+                if (constraint_ptrs[i]->sense() ==
+                        constraint_ptrs[j]->sense() &&
+                    constraint_ptrs[i]->expression().equal(
+                        expression_sign_inverted)) {
+                    constraint_ptrs[i]->disable();
+                    constraint_ptrs[j]->disable();
+                    utility::print_message(  //
+                        "The constraints " + constraint_ptrs[i]->name() +
+                            " and " + constraint_ptrs[j]->name() +
+                            " were removed instead of adding a equality "
+                            "constraint that these implicitly imply.",
+                        a_IS_ENABLED_PRINT);
+
+                    additional_constraints.emplace_back(
+                        constraint_ptrs[i]->expression() == 0);
+                    additional_constraints.back().set_name(
+                        constraint_ptrs[i]->name() + "_implicit_equality");
+
+                    number_of_newly_disabled_constraints++;
+                    i++;
+                    break;
+                }
+                j++;
+            }
+            if (j == CONSTRAINTS_SIZE) {
+                break;
+            }
+        }
+        if (number_of_newly_disabled_constraints > 0) {
+            auto &additional_constraint_proxy = m_model_ptr->create_constraints(
+                "additional", number_of_newly_disabled_constraints);
+            for (auto i = 0; i < number_of_newly_disabled_constraints; i++) {
+                additional_constraint_proxy(i) = additional_constraints[i];
+                additional_constraint_proxy(i).set_name(
+                    additional_constraints[i].name());
+            }
+        }
+
+        utility::print_message("Done.", a_IS_ENABLED_PRINT);
+        return number_of_newly_disabled_constraints;
+    }
+
+    /*************************************************************************/
     inline constexpr int remove_duplicated_constraints(
         const bool a_IS_ENABLED_PRINT) {
         utility::print_single_line(a_IS_ENABLED_PRINT);

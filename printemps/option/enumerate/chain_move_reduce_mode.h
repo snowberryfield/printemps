@@ -12,8 +12,20 @@ enum ChainMoveReduceMode : int {  //
     OverlapRate,
     Shuffle
 };
-}  // namespace printemps::option::chain_move_reduce_mode
 
+/*****************************************************************************/
+static std::unordered_map<std::string, ChainMoveReduceMode>
+    ChainMoveReduceModeMap = {  //
+        {"OverlapRate", ChainMoveReduceMode::OverlapRate},
+        {"Shuffle", ChainMoveReduceMode::Shuffle}};
+
+/*****************************************************************************/
+static std::unordered_map<ChainMoveReduceMode, std::string>
+    ChainMoveReduceModeInverseMap = {  //
+        {ChainMoveReduceMode::OverlapRate, "OverlapRate"},
+        {ChainMoveReduceMode::Shuffle, "Shuffle"}};
+
+}  // namespace printemps::option::chain_move_reduce_mode
 #endif
 /*****************************************************************************/
 // END
