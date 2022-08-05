@@ -74,11 +74,12 @@ class LagrangeDualController
     inline bool satisfy_not_applicable_skip_condition(
         const bool a_IS_ENABLED_PRINT) {
         if (this->m_model_ptr->number_of_selection_variables() > 0 ||
-            this->m_model_ptr->number_of_intermediate_variables() > 0) {
+            this->m_model_ptr->number_of_dependent_binary_variables() > 0 ||
+            this->m_model_ptr->number_of_dependent_integer_variables() > 0) {
             utility::print_warning(
                 "Solving lagrange dual was skipped because it is not "
                 "applicable to problems which include selection variables or "
-                "intermediate variables.",
+                "dependent variables.",
                 a_IS_ENABLED_PRINT);
             return true;
         }

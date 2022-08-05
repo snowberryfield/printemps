@@ -34,6 +34,10 @@ class Model {
 
     model_component::Objective<T_Variable, T_Expression> m_objective;
 
+    std::unordered_map<model_component::Variable<T_Variable, T_Expression> *,
+                       model_component::Expression<T_Variable, T_Expression> *>
+        m_dependent_expression_map;
+
     std::vector<std::string> m_variable_names;
     std::vector<std::string> m_expression_names;
     std::vector<std::string> m_constraint_names;
@@ -114,6 +118,7 @@ class Model {
         m_constraint_proxies.reserve(
             ModelConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES);
         m_objective.initialize();
+        m_dependent_expression_map.clear();
 
         m_variable_names.clear();
         m_expression_names.clear();
@@ -631,18 +636,7 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void setup(
-        const bool a_IS_ENABLED_PRESOLVE,                               //
-        const bool a_IS_ENABLED_INITIAL_VALUE_CORRECTION,               //
-        const bool a_IS_ENABLED_AGGREGATION_MOVE,                       //
-        const bool a_IS_ENABLED_PRECEDENCE_MOVE,                        //
-        const bool a_IS_ENABLED_VARIABLE_BOUND_MOVE,                    //
-        const bool a_IS_ENABLED_SOFT_SELECTION_MOVE,                    //
-        const bool a_IS_ENABLED_CHAIN_MOVE,                             //
-        const bool a_IS_ENABLED_TWO_FLIP_MOVE,                          //
-        const bool a_IS_ENABLED_USER_DEFINED_MOVE,                      //
-        const option::selection_mode::SelectionMode &a_SELECTION_MODE,  //
-        const double a_GLOBAL_PENALTY_COEFFICIENT,                      //
+    constexpr void setup(const option::Option &a_OPTION,
         const bool   a_IS_ENABLED_PRINT) {
         /**
          * Verify the problem.
@@ -683,7 +677,7 @@ class Model {
          * Presolve the problem by removing redundant constraints and fixing
          * variables implicitly fixed.
          */
-        if (a_IS_ENABLED_PRESOLVE) {
+        if (a_OPTION.is_enabled_presolve) {
             m_problem_size_reducer.setup(this);
             m_problem_size_reducer.reduce_problem_size(a_IS_ENABLED_PRINT);
         }
@@ -691,27 +685,33 @@ class Model {
         /**
          * Extract and eliminate the intermediate variables.
          */
-        if (a_IS_ENABLED_PRESOLVE && m_is_linear &&
-            m_constraint_type_reference.intermediate_ptrs.size() > 0) {
-            preprocess::DependentIntermediateVariableExtractor<T_Variable,
-                                                               T_Expression>
-                dependent_intermediate_variable_extractor(this);
-            while (true) {
                 this->setup_structure();
-                if (dependent_intermediate_variable_extractor.extract(
-                        a_IS_ENABLED_PRINT) == 0) {
+        auto &reference = m_constraint_type_reference;
+        if (a_OPTION.is_enabled_presolve && m_is_linear &&
+            (reference.exclusive_or_ptrs.size() > 0 ||
+             reference.inverted_integers_ptrs.size() > 0 ||
+             reference.constant_sum_integers_ptrs.size() > 0 ||
+             reference.constant_difference_integers_ptrs.size() > 0 ||
+             reference.constant_ratio_integers_ptrs.size() > 0 ||
+             reference.intermediate_ptrs.size() > 0)) {
+            preprocess::DependentVariableExtractor<T_Variable, T_Expression>
+                dependent_variable_extractor(this);
+            while (true) {
+                if (dependent_variable_extractor.extract(a_IS_ENABLED_PRINT) ==
+                    0) {
                     break;
                 }
 
                 while (true) {
                     this->setup_structure();
-                    if (dependent_intermediate_variable_extractor.eliminate(
+                    if (dependent_variable_extractor.eliminate(
                             a_IS_ENABLED_PRINT) == 0) {
                         break;
                     }
                 }
 
                 m_problem_size_reducer.reduce_problem_size(a_IS_ENABLED_PRINT);
+                this->setup_structure();
             }
         }
 
@@ -719,7 +719,7 @@ class Model {
          * Remove redundant set variables.
          */
         int number_of_fixed_variables = 0;
-        if (a_IS_ENABLED_PRESOLVE && m_is_linear) {
+        if (a_OPTION.is_enabled_presolve && m_is_linear) {
             number_of_fixed_variables =
                 m_problem_size_reducer.remove_redundant_set_variables(
                     a_IS_ENABLED_PRINT);
@@ -729,7 +729,7 @@ class Model {
          * Remove duplicated constraints.
          */
         int number_of_removed_constraints = 0;
-        if (a_IS_ENABLED_PRESOLVE) {
+        if (a_OPTION.is_enabled_presolve) {
             number_of_removed_constraints =
                 m_problem_size_reducer.remove_duplicated_constraints(
                     a_IS_ENABLED_PRINT);
@@ -749,11 +749,12 @@ class Model {
          * than that of variables, this process will be skipped because it would
          * affect computational efficiency.
          */
-        if (a_SELECTION_MODE != option::selection_mode::None &&
+        if (a_OPTION.selection_mode != option::selection_mode::Off &&
             this->number_of_variables() > this->number_of_constraints()) {
             preprocess::SelectionExtractor<T_Variable, T_Expression>
                 selection_extractor(this);
-            selection_extractor.extract(a_SELECTION_MODE, a_IS_ENABLED_PRINT);
+            selection_extractor.extract(a_OPTION.selection_mode,
+                                        a_IS_ENABLED_PRINT);
         }
 
         /**
@@ -764,31 +765,24 @@ class Model {
         /**
          * Setup the neighborhood generators.
          */
-        this->setup_neighborhood(a_IS_ENABLED_AGGREGATION_MOVE,     //
-                                 a_IS_ENABLED_PRECEDENCE_MOVE,      //
-                                 a_IS_ENABLED_VARIABLE_BOUND_MOVE,  //
-                                 a_IS_ENABLED_SOFT_SELECTION_MOVE,  //
-                                 a_IS_ENABLED_CHAIN_MOVE,           //
-                                 a_IS_ENABLED_TWO_FLIP_MOVE,        //
-                                 a_IS_ENABLED_USER_DEFINED_MOVE,    //
-                                 a_IS_ENABLED_PRINT);
+        this->setup_neighborhood(a_OPTION, a_IS_ENABLED_PRINT);
 
         /**
          * Verify and correct the initial values.
          */
         verifier.verify_and_correct_selection_variables_initial_values(  //
-            a_IS_ENABLED_INITIAL_VALUE_CORRECTION, a_IS_ENABLED_PRINT);
+            a_OPTION.is_enabled_initial_value_correction, a_IS_ENABLED_PRINT);
 
         verifier.verify_and_correct_binary_variables_initial_values(
-            a_IS_ENABLED_INITIAL_VALUE_CORRECTION, a_IS_ENABLED_PRINT);
+            a_OPTION.is_enabled_initial_value_correction, a_IS_ENABLED_PRINT);
 
         verifier.verify_and_correct_integer_variables_initial_values(
-            a_IS_ENABLED_INITIAL_VALUE_CORRECTION, a_IS_ENABLED_PRINT);
+            a_OPTION.is_enabled_initial_value_correction, a_IS_ENABLED_PRINT);
 
         /**
          * Solve GF(2) equations if needed.
          */
-        if (a_IS_ENABLED_PRESOLVE &&
+        if (a_OPTION.is_enabled_presolve &&
             m_constraint_type_reference.gf2_ptrs.size() > 0) {
             preprocess::GF2Solver<T_Variable, T_Expression> gf2_solver(this);
             const auto IS_SOLVED = gf2_solver.solve(a_IS_ENABLED_PRINT);
@@ -824,7 +818,8 @@ class Model {
         /**
          * Store the global penalty coefficient for evaluation.
          */
-        m_global_penalty_coefficient = a_GLOBAL_PENALTY_COEFFICIENT;
+        m_global_penalty_coefficient =
+            a_OPTION.penalty.initial_penalty_coefficient;
         for (auto &&proxy : m_constraint_proxies) {
             for (auto &&constraint : proxy.flat_indexed_constraints()) {
                 constraint.global_penalty_coefficient() =
@@ -1010,10 +1005,17 @@ class Model {
                     variable_reference.selection_variable_ptrs.push_back(
                         &variable);
                 }
+
                 if (variable.sense() ==
-                    model_component::VariableSense::Intermediate) {
-                    variable_reference.intermediate_variable_ptrs.push_back(
+                    model_component::VariableSense::DependentBinary) {
+                    variable_reference.dependent_binary_variable_ptrs.push_back(
                         &variable);
+                }
+
+                if (variable.sense() ==
+                    model_component::VariableSense::DependentInteger) {
+                    variable_reference.dependent_integer_variable_ptrs
+                        .push_back(&variable);
                 }
             }
         }
@@ -1176,14 +1178,7 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void setup_neighborhood(
-        const bool a_IS_ENABLED_AGGREGATION_MOVE,     //
-        const bool a_IS_ENABLED_PRECEDENCE_MOVE,      //
-        const bool a_IS_ENABLED_VARIABLE_BOUND_MOVE,  //
-        const bool a_IS_ENABLED_SOFT_SELECTION_MOVE,  //
-        const bool a_IS_ENABLED_CHAIN_MOVE,           //
-        const bool a_IS_ENABLED_TWO_FLIP_MOVE,        //
-        const bool a_IS_ENABLED_USER_DEFINED_MOVE,    //
+    constexpr void setup_neighborhood(const option::Option &a_OPTION,
         const bool a_IS_ENABLED_PRINT) {
         utility::print_single_line(a_IS_ENABLED_PRINT);
         utility::print_message("Detecting the neighborhood structure...",
@@ -1389,15 +1384,29 @@ class Model {
             true);
 
         utility::print_info(  //
-            " -- Dependent Intermediate: " +
+            " -- Dependent Binary: " +
                 utility::to_string(  //
                     compute_number_of_variables(
-                        original.intermediate_variable_ptrs),
+                        original.dependent_binary_variable_ptrs),
                     "%d") +
                 " (" +
                 utility::to_string(  //
                     compute_number_of_mutable_variables(
-                        presolved.intermediate_variable_ptrs),
+                        presolved.dependent_binary_variable_ptrs),
+                    "%d") +
+                ")",
+            true);
+
+        utility::print_info(  //
+            " -- Dependent Integer: " +
+                utility::to_string(  //
+                    compute_number_of_variables(
+                        original.dependent_integer_variable_ptrs),
+                    "%d") +
+                " (" +
+                utility::to_string(  //
+                    compute_number_of_mutable_variables(
+                        presolved.dependent_integer_variable_ptrs),
                     "%d") +
                 ")",
             true);
@@ -1927,12 +1936,24 @@ class Model {
     /*************************************************************************/
     constexpr void update(void) {
         /**
-         * Update in order of expressions -> objective, constraints.
+         * Update in order of expressions -> dependent variables -> objective,
+         * constraints.
          */
+
         for (auto &&proxy : m_expression_proxies) {
             for (auto &&expression : proxy.flat_indexed_expressions()) {
                 expression.update();
             }
+        }
+
+        for (auto &&variable_ptr :
+             m_variable_reference.dependent_integer_variable_ptrs) {
+            variable_ptr->update();
+        }
+
+        for (auto &&variable_ptr :
+             m_variable_reference.dependent_binary_variable_ptrs) {
+            variable_ptr->update();
         }
 
         for (auto &&proxy : m_constraint_proxies) {
@@ -1945,13 +1966,35 @@ class Model {
             m_objective.update();
         }
 
-        for (auto &&variable_ptr :
-             m_variable_reference.intermediate_variable_ptrs) {
-            variable_ptr->update_as_intermediate_variable();
-            variable_ptr->dependent_constraint_ptr()->update();
+        this->update_violative_constraint_ptrs_and_feasibility();
+    }
+
+    /*************************************************************************/
+    constexpr void update_dependent_variables_and_disabled_constraints(void) {
+        /**
+         * Update in order of expressions -> dependent variables, and
+         * constraints.
+         */
+        for (auto &&proxy : m_expression_proxies) {
+            for (auto &&expression : proxy.flat_indexed_expressions()) {
+                expression.update();
+            }
         }
 
-        this->update_violative_constraint_ptrs_and_feasibility();
+        for (auto &&variable_ptr :
+             m_variable_reference.dependent_integer_variable_ptrs) {
+            variable_ptr->update();
+        }
+
+        for (auto &&variable_ptr :
+             m_variable_reference.dependent_binary_variable_ptrs) {
+            variable_ptr->update();
+        }
+
+        for (auto &&constraint_ptr :
+             m_constraint_reference.disabled_constraint_ptrs) {
+            constraint_ptr->update();
+        }
     }
 
     /*************************************************************************/
@@ -1959,7 +2002,9 @@ class Model {
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) {
         /**
          * Update in order of objective, constraints -> expressions ->
-         * variables.
+         * variables. Note that this method DOES NOT update disabled constraints
+         * and dependent variables. If the consistent solution is required,
+         * perform update() before obtaining solution.
          */
         if (m_is_defined_objective) {
             m_objective.update(a_MOVE);
@@ -1993,12 +2038,6 @@ class Model {
 
         if (a_MOVE.sense == neighborhood::MoveSense::Selection) {
             a_MOVE.alterations[1].first->select();
-        }
-
-        for (auto &&variable_ptr :
-             m_variable_reference.intermediate_variable_ptrs) {
-            variable_ptr->update_as_intermediate_variable();
-            variable_ptr->dependent_constraint_ptr()->update();
         }
 
         this->update_violative_constraint_ptrs_and_feasibility();
@@ -2088,6 +2127,10 @@ class Model {
         double coefficient = 0.0;
         for (const auto &constraint_ptr : a_CONSTRAINT_PTRS) {
             if (constraint_ptr->is_feasible()) {
+                continue;
+            }
+
+            if (!constraint_ptr->is_enabled()) {
                 continue;
             }
 
@@ -3166,6 +3209,22 @@ class Model {
     }
 
     /*************************************************************************/
+    inline const std::unordered_map<
+        model_component::Variable<T_Variable, T_Expression> *,
+        model_component::Expression<T_Variable, T_Expression> *>
+        &dependent_expression_map(void) const {
+        return m_dependent_expression_map;
+    }
+
+    /*************************************************************************/
+    inline std::unordered_map<
+        model_component::Variable<T_Variable, T_Expression> *,
+        model_component::Expression<T_Variable, T_Expression> *>
+        &dependent_expression_map(void) {
+        return m_dependent_expression_map;
+    }
+
+    /*************************************************************************/
     inline constexpr const std::vector<std::string> &variable_names(
         void) const {
         return m_variable_names;
@@ -3314,18 +3373,13 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr int number_of_min_max_variables(void) const {
-        return m_variable_reference.min_max_variable_ptrs.size();
+    inline constexpr int number_of_dependent_binary_variables(void) const {
+        return m_variable_reference.dependent_binary_variable_ptrs.size();
     }
 
     /*************************************************************************/
-    inline constexpr int number_of_max_min_variables(void) const {
-        return m_variable_reference.max_min_variable_ptrs.size();
-    }
-
-    /*************************************************************************/
-    inline constexpr int number_of_intermediate_variables(void) const {
-        return m_variable_reference.intermediate_variable_ptrs.size();
+    inline constexpr int number_of_dependent_integer_variables(void) const {
+        return m_variable_reference.dependent_integer_variable_ptrs.size();
     }
 
     /*************************************************************************/

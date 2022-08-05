@@ -9,10 +9,11 @@
 namespace printemps::model_component {
 /*****************************************************************************/
 enum class VariableSense {
-    Binary,       //
-    Integer,      //
-    Selection,    //
-    Intermediate  //
+    Binary,           //
+    Integer,          //
+    Selection,        //
+    DependentBinary,  //
+    DependentInteger  //
 };
 }  // namespace printemps::model_component
 #endif

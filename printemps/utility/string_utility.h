@@ -70,6 +70,11 @@ inline std::string to_string(const T_Value      a_VALUE,
 }
 
 /******************************************************************************/
+inline std::string to_true_or_false(const bool a_VALUE) {
+    return a_VALUE != 0 ? "True" : "False";
+}
+
+/******************************************************************************/
 inline std::string format_error_location(const std::string &a_FILE_NAME,
                                          const int          a_LINE,
                                          const std::string &a_FUNCTION_NAME,

@@ -28,10 +28,26 @@ class SelectionExtractor {
             if (!constraint_ptr->is_enabled()) {
                 continue;
             }
+            bool is_valid = true;
 
+            /**
+             * NOTES: Set-partitioning constraints including only "Binary"
+             * variables can be candidates for Selection constraints,which must
+             * not include "Dependent Binary" variables.
+             */
+            for (auto &&sensitivity :
+                 constraint_ptr->expression().sensitivities()) {
+                if (sensitivity.first->sense() !=
+                    model_component::VariableSense::Binary) {
+                    is_valid = false;
+                    break;
+                }
+            }
+            if (is_valid) {
             model_component::Selection<T_Variable, T_Expression> selection(
                 constraint_ptr);
             raw_selections.push_back(selection);
+        }
         }
         return raw_selections;
     }

@@ -280,6 +280,19 @@ class Expression : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
+    inline constexpr Expression<T_Variable, T_Expression> solve(
+        Variable<T_Variable, T_Expression> *a_variable_ptr) const {
+        auto result                 = this->copy();
+        auto coefficient_reciprocal = 1.0 / m_sensitivities.at(a_variable_ptr);
+        result.erase(a_variable_ptr);
+        for (auto &&sensitivity : result.sensitivities()) {
+            sensitivity.second *= -coefficient_reciprocal;
+        }
+        result.m_constant_value *= -coefficient_reciprocal;
+        return result;
+    }
+
+    /*************************************************************************/
     inline constexpr void erase(
         Variable<T_Variable, T_Expression> *a_variable_ptr) {
         m_sensitivities.erase(a_variable_ptr);
@@ -291,6 +304,12 @@ class Expression : public multi_array::AbstractMultiArrayElement {
         const Expression<T_Variable, T_Expression> &a_EXPRESSION) {
         *this += m_sensitivities[a_variable_ptr] * a_EXPRESSION;
         m_sensitivities.erase(a_variable_ptr);
+        for (auto &sensitivity : a_EXPRESSION.sensitivities()) {
+            if (fabs(m_sensitivities.at(sensitivity.first)) <
+                constant::EPSILON_10) {
+                m_sensitivities.erase(sensitivity.first);
+            }
+        }
     }
 
     /*************************************************************************/
