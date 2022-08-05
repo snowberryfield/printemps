@@ -171,14 +171,14 @@ class TabuSearchCoreStateManager {
         this->update_local_penalty_range();
 
         /**
-         * Update the oscillation of local augmented objective.
+         * Update the number of effective updates.
          */
-        this->update_oscillation();
+        this->update_number_of_effective_updates();
 
         /**
          * Update the number of evaluated moves.
          */
-        this->update_number_of_evaluted_moves();
+        this->update_number_of_evaluated_moves();
 
         /**
          * Update whether new feasible solution was found.
@@ -262,14 +262,24 @@ class TabuSearchCoreStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void update_oscillation() {
-        m_state.oscillation +=
-            fabs(m_state.current_solution_score.local_augmented_objective -
-                 -m_state.previous_solution_score.local_augmented_objective);
+    inline constexpr void update_number_of_effective_updates() {
+        if (m_state.update_status &
+            solution::IncumbentHolderConstant::
+                STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
+            m_state.number_of_effective_updates++;
+        } else if (m_state.update_status &
+                   solution::IncumbentHolderConstant::
+                       STATUS_LOCAL_AUGMENTED_INCUMBENT_UPDATE) {
+            if (m_state.current_solution_score.objective <
+                m_incumbent_holder_ptr->global_augmented_incumbent_score()
+                    .objective) {
+                m_state.number_of_effective_updates++;
+            }
+        }
     }
 
     /*************************************************************************/
-    inline constexpr void update_number_of_evaluted_moves() {
+    inline constexpr void update_number_of_evaluated_moves() {
         m_state.number_of_evaluated_moves += m_state.number_of_moves;
     }
 
