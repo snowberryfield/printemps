@@ -75,20 +75,25 @@ class Solver {
 
     /*************************************************************************/
     inline void enable_default_neighborhood(void) {
-        if (m_option.is_enabled_binary_move) {
-            m_model_ptr->neighborhood().binary().enable();
+        auto& neighborhood = m_model_ptr->neighborhood();
+
+        if (m_option.is_enabled_binary_move &&
+            neighborhood.binary().moves().size() > 0) {
+            neighborhood.binary().enable();
         }
 
-        if (m_option.is_enabled_integer_move) {
-            m_model_ptr->neighborhood().integer().enable();
+        if (m_option.is_enabled_integer_move &&
+            neighborhood.integer().moves().size() > 0) {
+            neighborhood.integer().enable();
         }
 
         if (m_option.is_enabled_user_defined_move) {
-            m_model_ptr->neighborhood().user_defined().enable();
+            neighborhood.user_defined().enable();
         }
 
-        if (m_option.selection_mode != option::selection_mode::None) {
-            m_model_ptr->neighborhood().selection().enable();
+        if (m_option.selection_mode != option::selection_mode::Off &&
+            neighborhood.selection().moves().size() > 0) {
+            neighborhood.selection().enable();
         }
     }
 

@@ -201,6 +201,40 @@ convert_to_binomial_constraints(
     return results;
 }
 
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+constexpr std::vector<TrinomialConstraint<T_Variable, T_Expression>>
+convert_to_trinomial_constraints(
+    const std::vector<model_component::Constraint<T_Variable, T_Expression> *>
+        &a_CONSTRAINT_PTRS) {
+    std::vector<TrinomialConstraint<T_Variable, T_Expression>> results;
+    for (const auto &constraint_ptr : a_CONSTRAINT_PTRS) {
+        auto &expression = constraint_ptr->expression();
+
+        if (expression.sensitivities().size() != 3) {
+            throw std::logic_error(utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "The constraint is not trinomial."));
+        }
+
+        auto vector_pair = utility::to_vector_pair(expression.sensitivities());
+
+        TrinomialConstraint<T_Variable, T_Expression> trinomial;
+
+        trinomial.variable_ptr_first  = vector_pair.first[0];
+        trinomial.variable_ptr_second = vector_pair.first[1];
+        trinomial.variable_ptr_third  = vector_pair.first[2];
+        trinomial.sensitivity_first   = vector_pair.second[0];
+        trinomial.sensitivity_second  = vector_pair.second[1];
+        trinomial.sensitivity_third   = vector_pair.second[2];
+        trinomial.constant_value      = expression.constant_value();
+        trinomial.sense               = constraint_ptr->sense();
+        results.push_back(trinomial);
+    }
+
+    return results;
+}
+
 }  // namespace printemps::neighborhood
 #endif
 /*****************************************************************************/

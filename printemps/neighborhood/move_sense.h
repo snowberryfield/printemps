@@ -9,16 +9,24 @@
 namespace printemps::neighborhood {
 /*****************************************************************************/
 enum class MoveSense {
-    Binary,         //
-    Integer,        //
-    Selection,      //
-    Aggregation,    //
-    Precedence,     //
-    VariableBound,  //
-    SoftSelection,  //
-    Chain,          //
-    TwoFlip,        //
-    UserDefined,    //
+    Binary,                      //
+    Integer,                     //
+    Selection,                   //
+    ExclusiveOr,                 //
+    ExclusiveNor,                //
+    InvertedIntegers,            //
+    BalancedIntegers,            //
+    ConstantSumIntegers,         //
+    ConstantDifferenceIntegers,  //
+    ConstantRatioIntegers,       //
+    Aggregation,                 //
+    Precedence,                  //
+    VariableBound,               //
+    SoftSelection,               //
+    TrinomialExclusiveNor,       //
+    Chain,                       //
+    TwoFlip,                     //
+    UserDefined,                 //
     General
 };
 }  // namespace printemps::neighborhood
