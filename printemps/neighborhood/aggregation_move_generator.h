@@ -8,8 +8,7 @@
 
 #include "abstract_move_generator.h"
 
-namespace printemps {
-namespace neighborhood {
+namespace printemps::neighborhood {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class AggregationMoveGenerator
@@ -189,8 +188,7 @@ class AggregationMoveGenerator
         this->m_move_updater = move_updater;
     }
 };
-}  // namespace neighborhood
-}  // namespace printemps
+}  // namespace printemps::neighborhood
 #endif
 /*****************************************************************************/
 // END

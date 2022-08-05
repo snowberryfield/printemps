@@ -8,8 +8,7 @@
 
 #include "mps_constraint_sense.h"
 
-namespace printemps {
-namespace mps {
+namespace printemps::mps {
 /*****************************************************************************/
 struct MPSConstraint {
     MPSConstraintSense                      sense;
@@ -30,8 +29,7 @@ struct MPSConstraint {
         this->rhs = 0.0;
     }
 };
-}  // namespace mps
-}  // namespace printemps
+}  // namespace printemps::mps
 #endif
 /*****************************************************************************/
 // END

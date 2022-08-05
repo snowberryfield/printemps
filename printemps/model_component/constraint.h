@@ -6,16 +6,13 @@
 #ifndef PRINTEMPS_MODEL_COMPONENT_CONSTRAINT_H__
 #define PRINTEMPS_MODEL_COMPONENT_CONSTRAINT_H__
 
-namespace printemps {
-namespace neighborhood {
+namespace printemps::neighborhood {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 struct Move;
-}  // namespace neighborhood
-}  // namespace printemps
+}  // namespace printemps::neighborhood
 
-namespace printemps {
-namespace model_component {
+namespace printemps::model_component {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class Expression;
@@ -859,7 +856,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
 
     /*************************************************************************/
     inline constexpr T_Expression evaluate_constraint(void) const noexcept {
-#ifdef _PRINTEMPS_LINEAR
+#ifdef _PRINTEMPS_LINEAR_MINIMIZATION
         return m_expression.evaluate({});
 #else
         return m_constraint_function({});
@@ -870,7 +867,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     inline constexpr T_Expression evaluate_constraint(
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
         noexcept {
-#ifdef _PRINTEMPS_LINEAR
+#ifdef _PRINTEMPS_LINEAR_MINIMIZATION
         return m_expression.evaluate(a_MOVE);
 #else
         return m_constraint_function(a_MOVE);
@@ -901,7 +898,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         /**
          * m_expression must be updated at first.
          */
-#ifdef _PRINTEMPS_LINEAR
+#ifdef _PRINTEMPS_LINEAR_MINIMIZATION
         m_expression.update();
 #else
         if (m_is_linear) {
@@ -930,7 +927,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         m_negative_part =
             -std::min(m_constraint_value, static_cast<T_Expression>(0));
 
-#ifdef _PRINTEMPS_LINEAR
+#ifdef _PRINTEMPS_LINEAR_MINIMIZATION
         m_expression.update(a_MOVE);
 #else
         if (m_is_linear) {
@@ -1206,8 +1203,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     }
 };  // namespace model_component
 using IPConstraint = Constraint<int, double>;
-}  // namespace model_component
-}  // namespace printemps
+}  // namespace printemps::model_component
 #endif
 /*****************************************************************************/
 // END

@@ -6,13 +6,11 @@
 #ifndef PRINTEMPS_PREPROCESS_PREPROCESS_H__
 #define PRINTEMPS_PREPROCESS_PREPROCESS_H__
 
-namespace printemps {
-namespace model {
+namespace printemps::model {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class Model;
-}  // namespace model
-}  // namespace printemps
+}  // namespace printemps::model
 
 #include "problem_size_reducer.h"
 #include "selection_extractor.h"

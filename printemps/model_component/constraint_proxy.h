@@ -8,8 +8,7 @@
 
 #include "constraint.h"
 
-namespace printemps {
-namespace model_component {
+namespace printemps ::model_component {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class ConstraintProxy : public multi_array::AbstractMultiArray {
@@ -319,8 +318,7 @@ class ConstraintProxy : public multi_array::AbstractMultiArray {
     }
 };
 using IPConstraintProxy = ConstraintProxy<int, double>;
-}  // namespace model_component
-}  // namespace printemps
+}  // namespace printemps::model_component
 #endif
 /*****************************************************************************/
 // END

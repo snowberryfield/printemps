@@ -6,8 +6,7 @@
 #ifndef PRINTEMPS_OPTION_TABU_SEARCH_OPTION_H__
 #define PRINTEMPS_OPTION_TABU_SEARCH_OPTION_H__
 
-namespace printemps {
-namespace option {
+namespace printemps::option {
 /*****************************************************************************/
 struct TabuSearchOptionConstant {
     static constexpr int    DEFAULT_ITERATION_MAX                       = 200;
@@ -126,8 +125,7 @@ struct TabuSearchOption {
         this->seed = TabuSearchOptionConstant::DEFAULT_SEED;
     }
 };
-}  // namespace option
-}  // namespace printemps
+}  // namespace printemps::option
 
 #endif
 /*****************************************************************************/

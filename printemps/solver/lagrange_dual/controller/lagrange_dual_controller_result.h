@@ -6,10 +6,7 @@
 #ifndef PRINTEMPS_SOLVER_LAGRANGE_DUAL_CONTROLLER_LAGRANGE_DUAL_CONTROLLER_RESULT_H__
 #define PRINTEMPS_SOLVER_LAGRANGE_DUAL_CONTROLLER_LAGRANGE_DUAL_CONTROLLER_RESULT_H__
 
-namespace printemps {
-namespace solver {
-namespace lagrange_dual {
-namespace controller {
+namespace printemps::solver::lagrange_dual::controller {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 struct LagrangeDualControllerResult {
@@ -41,10 +38,7 @@ struct LagrangeDualControllerResult {
         this->number_of_iterations = 0;
     }
 };  // namespace controller
-}  // namespace controller
-}  // namespace lagrange_dual
-}  // namespace solver
-}  // namespace printemps
+}  // namespace printemps::solver::lagrange_dual::controller
 
 #endif
 /*****************************************************************************/

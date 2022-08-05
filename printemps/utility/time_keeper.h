@@ -7,8 +7,7 @@
 #ifndef PRINTEMPS_UTILITY_TIME_KEEPER_H__
 #define PRINTEMPS_UTILITY_TIME_KEEPER_H__
 
-namespace printemps {
-namespace utility {
+namespace printemps::utility {
 /*****************************************************************************/
 class TimeKeeper {
    private:
@@ -64,8 +63,7 @@ class TimeKeeper {
         return m_elapsed_time;
     }
 };
-}  // namespace utility
-}  // namespace printemps
+}  // namespace printemps::utility
 
 #endif
 /*****************************************************************************/

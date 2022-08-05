@@ -6,16 +6,14 @@
 #ifndef PRINTEMPS_MPS_MPS_CONSTRAINT_SENSE_H__
 #define PRINTEMPS_MPS_MPS_CONSTRAINT_SENSE_H__
 
-namespace printemps {
-namespace mps {
+namespace printemps::mps {
 /*****************************************************************************/
 enum class MPSConstraintSense {
     Less,   //
     Equal,  //
     Greater
 };
-}  // namespace mps
-}  // namespace printemps
+}  // namespace printemps::mps
 #endif
 /*****************************************************************************/
 // END

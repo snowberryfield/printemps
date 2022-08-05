@@ -6,10 +6,7 @@
 #ifndef PRINTEMPS_SOLVER_LAGRANGE_DUAL_CORE_LAGRANGE_DUAL_CORE_TERMINATION_STATUS_H__
 #define PRINTEMPS_SOLVER_LAGRANGE_DUAL_CORE_LAGRANGE_DUAL_CORE_TERMINATION_STATUS_H__
 
-namespace printemps {
-namespace solver {
-namespace lagrange_dual {
-namespace core {
+namespace printemps::solver::lagrange_dual::core {
 /*****************************************************************************/
 enum class LagrangeDualCoreTerminationStatus {
     TIME_OVER,
@@ -17,10 +14,7 @@ enum class LagrangeDualCoreTerminationStatus {
     CONVERGE,
     REACH_TARGET
 };
-}  // namespace core
-}  // namespace lagrange_dual
-}  // namespace solver
-}  // namespace printemps
+}  // namespace printemps::solver::lagrange_dual::core
 
 #endif
 /*****************************************************************************/

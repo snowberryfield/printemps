@@ -6,15 +6,13 @@
 #ifndef PRINTEMPS_MPS_MPS_OBJECTIVE_SENSE_H__
 #define PRINTEMPS_MPS_MPS_OBJECTIVE_SENSE_H__
 
-namespace printemps {
-namespace mps {
+namespace printemps::mps {
 /*****************************************************************************/
 enum class MPSObjectiveSense {
     Minimize,  //
     Maximize
 };
-}  // namespace mps
-}  // namespace printemps
+}  // namespace printemps::mps
 #endif
 /*****************************************************************************/
 // END

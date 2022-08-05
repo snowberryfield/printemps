@@ -6,10 +6,7 @@
 #ifndef PRINTEMPS_SOLVER_LAGRANGE_DUAL_CORE_LAGRANGE_DUAL_CORE_RESULT_H__
 #define PRINTEMPS_SOLVER_LAGRANGE_DUAL_CORE_LAGRANGE_DUAL_CORE_RESULT_H__
 
-namespace printemps {
-namespace solver {
-namespace lagrange_dual {
-namespace core {
+namespace printemps::solver::lagrange_dual::core {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 struct LagrangeDualCoreResult {
@@ -48,10 +45,7 @@ struct LagrangeDualCoreResult {
         this->dual.clear();
     }
 };
-}  // namespace core
-}  // namespace lagrange_dual
-}  // namespace solver
-}  // namespace printemps
+}  // namespace printemps::solver::lagrange_dual::core
 
 #endif
 /*****************************************************************************/

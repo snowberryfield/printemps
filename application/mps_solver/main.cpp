@@ -4,7 +4,7 @@
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
 
-#define _PRINTEMPS_LINEAR
+#define _PRINTEMPS_LINEAR_MINIMIZATION
 #include <printemps.h>
 
 int main([[maybe_unused]] int argc, char *argv[]) {

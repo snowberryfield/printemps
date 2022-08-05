@@ -8,10 +8,7 @@
 
 #include "lagrange_dual_core_state.h"
 
-namespace printemps {
-namespace solver {
-namespace lagrange_dual {
-namespace core {
+namespace printemps::solver::lagrange_dual::core {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class LagrangeDualCoreStateManager {
@@ -287,10 +284,7 @@ class LagrangeDualCoreStateManager {
         return m_state;
     }
 };
-}  // namespace core
-}  // namespace lagrange_dual
-}  // namespace solver
-}  // namespace printemps
+}  // namespace printemps::solver::lagrange_dual::core
 #endif
 /*****************************************************************************/
 // END

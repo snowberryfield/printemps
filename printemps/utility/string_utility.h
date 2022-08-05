@@ -6,8 +6,7 @@
 #ifndef PRINTEMPS_UTILITY_STRING_UTILITY_H__
 #define PRINTEMPS_UTILITY_STRING_UTILITY_H__
 
-namespace printemps {
-namespace utility {
+namespace printemps::utility {
 /******************************************************************************/
 inline std::string trim(const std::string &a_ORIGINAL) {
     int start_position = 0;
@@ -122,8 +121,7 @@ inline std::string base_name(const std::string &a_ORIGINAL) {
     return remove_path(remove_extension(a_ORIGINAL));
 }
 
-}  // namespace utility
-}  // namespace printemps
+}  // namespace printemps::utility
 
 /******************************************************************************/
 // END

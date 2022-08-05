@@ -6,9 +6,7 @@
 #ifndef PRINTEMPS_UTILITY_Q_LEARNING_ACTION_H__
 #define PRINTEMPS_UTILITY_Q_LEARNING_ACTION_H__
 
-namespace printemps {
-namespace utility {
-namespace q_learning {
+namespace printemps::utility::q_learning {
 /*****************************************************************************/
 template <class T_StateBody, class T_ActionBody>
 class Learner;
@@ -46,10 +44,7 @@ struct Action {
     }
 };
 
-}  // namespace q_learning
-}  // namespace utility
-}  // namespace printemps
-
+}  // namespace printemps::utility::q_learning
 #endif
 /*****************************************************************************/
 // END

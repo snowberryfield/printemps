@@ -6,9 +6,7 @@
 #ifndef PRINTEMPS_OPTION_SELECTION_MODE_H__
 #define PRINTEMPS_OPTION_SELECTION_MODE_H__
 
-namespace printemps {
-namespace option {
-namespace selection_mode {
+namespace printemps::option::selection_mode {
 /*****************************************************************************/
 enum SelectionMode : int {  //
     None,
@@ -18,9 +16,7 @@ enum SelectionMode : int {  //
     Independent,
     UserDefined
 };
-}  // namespace selection_mode
-}  // namespace option
-}  // namespace printemps
+}  // namespace printemps::option::selection_mode
 #endif
 /*****************************************************************************/
 // END

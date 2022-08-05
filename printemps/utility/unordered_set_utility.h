@@ -6,8 +6,7 @@
 #ifndef PRINTEMPS_UTILITY_UNORDERED_SET_UTILITY_H__
 #define PRINTEMPS_UTILITY_UNORDERED_SET_UTILITY_H__
 
-namespace printemps {
-namespace utility {
+namespace printemps::utility {
 /*****************************************************************************/
 template <class T>
 constexpr std::unordered_set<T> intersection_set(
@@ -68,8 +67,7 @@ constexpr std::vector<T> to_vector(
     return result;
 }
 
-}  // namespace utility
-}  // namespace printemps
+}  // namespace printemps::utility
 
 #endif
 /*****************************************************************************/

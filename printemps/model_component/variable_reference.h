@@ -6,8 +6,7 @@
 #ifndef PRINTEMPS_MODEL_COMPONENT_VARIABLE_REFERENCE_H__
 #define PRINTEMPS_MODEL_COMPONENT_VARIABLE_REFERENCE_H__
 
-namespace printemps {
-namespace model_component {
+namespace printemps::model_component {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class Variable;
@@ -40,8 +39,7 @@ struct VariableReference {
         this->intermediate_variable_ptrs.clear();
     }
 };
-}  // namespace model_component
-}  // namespace printemps
+}  // namespace printemps::model_component
 #endif
 /*****************************************************************************/
 // END

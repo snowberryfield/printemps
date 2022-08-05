@@ -6,8 +6,7 @@
 #ifndef PRINTEMPS_OPTION_LOCAL_SEARCH_OPTION_H__
 #define PRINTEMPS_OPTION_LOCAL_SEARCH_OPTION_H__
 
-namespace printemps {
-namespace option {
+namespace printemps::option {
 /*****************************************************************************/
 struct LocalSearchOptionConstant {
     static constexpr int    DEFAULT_ITERATION_MAX = 10000;
@@ -39,8 +38,7 @@ struct LocalSearchOption {
         this->seed          = LocalSearchOptionConstant::DEFAULT_SEED;
     }
 };
-}  // namespace option
-}  // namespace printemps
+}  // namespace printemps::option
 
 #endif
 /*****************************************************************************/

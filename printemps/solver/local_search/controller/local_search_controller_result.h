@@ -6,10 +6,7 @@
 #ifndef PRINTEMPS_SOLVER_LOCAL_SEARCH_CORE_LOCAL_SEARCH_CORE_CONTROLLER_RESULT_H__
 #define PRINTEMPS_SOLVER_LOCAL_SEARCH_CORE_LOCAL_SEARCH_CORE_CONTROLLER_RESULT_H__
 
-namespace printemps {
-namespace solver {
-namespace local_search {
-namespace controller {
+namespace printemps::solver::local_search::controller {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 struct LocalSearchControllerResult {
@@ -36,10 +33,7 @@ struct LocalSearchControllerResult {
         this->number_of_iterations = 0;
     }
 };
-}  // namespace controller
-}  // namespace local_search
-}  // namespace solver
-}  // namespace printemps
+}  // namespace printemps::solver::local_search::controller
 
 #endif
 /*****************************************************************************/

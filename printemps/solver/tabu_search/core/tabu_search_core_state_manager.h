@@ -8,10 +8,7 @@
 
 #include "tabu_search_core_state.h"
 
-namespace printemps {
-namespace solver {
-namespace tabu_search {
-namespace core {
+namespace printemps::solver::tabu_search::core {
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
@@ -487,10 +484,7 @@ class TabuSearchCoreStateManager {
         return m_state;
     }
 };
-}  // namespace core
-}  // namespace tabu_search
-}  // namespace solver
-}  // namespace printemps
+}  // namespace printemps::solver::tabu_search::core
 #endif
 /*****************************************************************************/
 // END

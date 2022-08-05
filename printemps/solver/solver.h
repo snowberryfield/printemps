@@ -14,8 +14,7 @@
 #include "local_search/controller/local_search_controller.h"
 #include "tabu_search/controller/tabu_search_controller.h"
 
-namespace printemps {
-namespace solver {
+namespace printemps::solver {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class Solver {
@@ -468,8 +467,7 @@ inline Result<T_Variable, T_Expression> solve(
     return solve(a_model_ptr, option);
 }
 using IPSolver = Solver<int, double>;
-}  // namespace solver
-}  // namespace printemps
+}  // namespace printemps::solver
 
 #endif
 /*****************************************************************************/
