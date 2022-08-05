@@ -10,10 +10,7 @@
 #include "../core/lagrange_dual_core.h"
 #include "lagrange_dual_controller_result.h"
 
-namespace printemps {
-namespace solver {
-namespace lagrange_dual {
-namespace controller {
+namespace printemps::solver::lagrange_dual::controller {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class LagrangeDualController
@@ -211,10 +208,7 @@ class LagrangeDualController
         return m_result;
     }
 };
-}  // namespace controller
-}  // namespace lagrange_dual
-}  // namespace solver
-}  // namespace printemps
+}  // namespace printemps::solver::lagrange_dual::controller
 
 #endif
 /*****************************************************************************/

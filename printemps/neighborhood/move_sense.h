@@ -6,8 +6,7 @@
 #ifndef PRINTEMPS_NEIGHBORHOOD_MOVE_SENSE_H__
 #define PRINTEMPS_NEIGHBORHOOD_MOVE_SENSE_H__
 
-namespace printemps {
-namespace neighborhood {
+namespace printemps::neighborhood {
 /*****************************************************************************/
 enum class MoveSense {
     Binary,         //
@@ -22,8 +21,7 @@ enum class MoveSense {
     UserDefined,    //
     General
 };
-}  // namespace neighborhood
-}  // namespace printemps
+}  // namespace printemps::neighborhood
 #endif
 /*****************************************************************************/
 // END

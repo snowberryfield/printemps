@@ -12,8 +12,7 @@
 #include "local_search_option.h"
 #include "tabu_search_option.h"
 
-namespace printemps {
-namespace option {
+namespace printemps::option {
 /*****************************************************************************/
 struct OptionConstant {
     static constexpr int    DEFAULT_ITERATION_MAX                       = 100;
@@ -1064,8 +1063,7 @@ struct Option {
         *this = option;
     }
 };
-}  // namespace option
-}  // namespace printemps
+}  // namespace printemps::option
 
 #endif
 /*****************************************************************************/

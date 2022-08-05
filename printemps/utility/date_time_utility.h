@@ -6,8 +6,7 @@
 #ifndef PRINTEMPS_UTILITY_DATE_TIME_UTILITY_H__
 #define PRINTEMPS_UTILITY_DATE_TIME_UTILITY_H__
 
-namespace printemps {
-namespace utility {
+namespace printemps::utility {
 /******************************************************************************/
 inline std::string date_time(void) {
     using std::chrono::system_clock;
@@ -19,8 +18,7 @@ inline std::string date_time(void) {
     buffer << std::put_time(lt, "%c");
     return buffer.str();
 }
-}  // namespace utility
-}  // namespace printemps
+}  // namespace printemps::utility
 
 /******************************************************************************/
 // END

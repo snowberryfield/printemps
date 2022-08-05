@@ -8,8 +8,7 @@
 
 #include "mps_objective_sense.h"
 
-namespace printemps {
-namespace mps {
+namespace printemps::mps {
 /*****************************************************************************/
 struct MPSObjective {
     MPSObjectiveSense                       sense;
@@ -28,8 +27,7 @@ struct MPSObjective {
         this->sensitivities.clear();
     }
 };
-}  // namespace mps
-}  // namespace printemps
+}  // namespace printemps::mps
 #endif
 /*****************************************************************************/
 // END

@@ -21,8 +21,7 @@
 #include "two_flip_move_generator.h"
 #include "user_defined_move_generator.h"
 
-namespace printemps {
-namespace neighborhood {
+namespace printemps::neighborhood {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class Neighborhood {
@@ -306,8 +305,7 @@ class Neighborhood {
                m_two_flip.moves().size();
     }
 };
-}  // namespace neighborhood
-}  // namespace printemps
+}  // namespace printemps::neighborhood
 #endif
 /*****************************************************************************/
 // END

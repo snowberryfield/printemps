@@ -6,8 +6,7 @@
 #ifndef PRINTEMPS_PREPROCESS_PROBLEM_SIZE_REDUCER_H__
 #define PRINTEMPS_PREPROCESS_PROBLEM_SIZE_REDUCER_H__
 
-namespace printemps {
-namespace preprocess {
+namespace printemps::preprocess {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class ProblemSizeReducer {
@@ -912,8 +911,7 @@ class ProblemSizeReducer {
     }
 };
 
-}  // namespace preprocess
-}  // namespace printemps
+}  // namespace printemps::preprocess
 #endif
 /*****************************************************************************/
 // END

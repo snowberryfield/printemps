@@ -6,8 +6,7 @@
 #ifndef PRINTEMPS_SOLUTION_NAMED_SOLUTION_H__
 #define PRINTEMPS_SOLUTION_NAMED_SOLUTION_H__
 
-namespace printemps {
-namespace solution {
+namespace printemps::solution {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class NamedSolution {
@@ -253,8 +252,7 @@ class NamedSolution {
     }
 };
 using IPNamedSolution = NamedSolution<int, double>;
-}  // namespace solution
-}  // namespace printemps
+}  // namespace printemps::solution
 #endif
 /*****************************************************************************/
 // END

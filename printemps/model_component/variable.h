@@ -6,16 +6,13 @@
 #ifndef PRINTEMPS_MODEL_COMPONENT_VARIABLE_H__
 #define PRINTEMPS_MODEL_COMPONENT_VARIABLE_H__
 
-namespace printemps {
-namespace neighborhood {
+namespace printemps::neighborhood {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 struct Move;
-}  // namespace neighborhood
-}  // namespace printemps
+}  // namespace printemps::neighborhood
 
-namespace printemps {
-namespace model_component {
+namespace printemps::model_component {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class Expression;
@@ -564,8 +561,7 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     }
 };
 using IPVariable = Variable<int, double>;
-}  // namespace model_component
-}  // namespace printemps
+}  // namespace printemps::model_component
 #endif
 /*****************************************************************************/
 // END

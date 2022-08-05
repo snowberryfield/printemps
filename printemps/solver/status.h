@@ -6,8 +6,7 @@
 #ifndef PRINTEMPS_SOLVER_STATUS_H__
 #define PRINTEMPS_SOLVER_STATUS_H__
 
-namespace printemps {
-namespace solver {
+namespace printemps::solver {
 /*****************************************************************************/
 struct Status {
     bool is_found_feasible_solution;
@@ -220,8 +219,7 @@ struct Status {
         utility::json::write_json_object(object, a_FILE_NAME);
     }
 };
-}  // namespace solver
-}  // namespace printemps
+}  // namespace printemps::solver
 
 #endif
 /*****************************************************************************/

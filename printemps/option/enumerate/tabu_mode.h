@@ -6,17 +6,13 @@
 #ifndef PRINTEMPS_OPTION_TABU_MODE_H__
 #define PRINTEMPS_OPTION_TABU_MODE_H__
 
-namespace printemps {
-namespace option {
-namespace tabu_mode {
+namespace printemps::option::tabu_mode {
 /*****************************************************************************/
 enum TabuMode : int {
     All,
     Any,
 };
-}  // namespace tabu_mode
-}  // namespace option
-}  // namespace printemps
+}  // namespace printemps::option::tabu_mode
 
 #endif
 /*****************************************************************************/

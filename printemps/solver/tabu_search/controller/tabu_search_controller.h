@@ -14,10 +14,7 @@
 #include "tabu_search_controller_logger.h"
 #include "tabu_search_controller_result.h"
 
-namespace printemps {
-namespace solver {
-namespace tabu_search {
-namespace controller {
+namespace printemps::solver::tabu_search::controller {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class TabuSearchController
@@ -715,10 +712,7 @@ class TabuSearchController
         return m_result;
     }
 };
-}  // namespace controller
-}  // namespace tabu_search
-}  // namespace solver
-}  // namespace printemps
+}  // namespace printemps::solver::tabu_search::controller
 #endif
 /*****************************************************************************/
 // END

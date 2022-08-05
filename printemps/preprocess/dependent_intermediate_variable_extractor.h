@@ -6,8 +6,7 @@
 #ifndef PRINTEMPS_PREPROCESS_DEPENDENT_INTERMEDIATE_VARIABLE_EXTRACTOR_H__
 #define PRINTEMPS_PREPROCESS_DEPENDENT_INTERMEDIATE_VARIABLE_EXTRACTOR_H__
 
-namespace printemps {
-namespace preprocess {
+namespace printemps::preprocess {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class DependentIntermediateVariableExtractor {
@@ -215,9 +214,7 @@ class DependentIntermediateVariableExtractor {
         return number_of_newly_eliminated_dependent_intermediate_vairables;
     }
 };
-
-}  // namespace preprocess
-}  // namespace printemps
+}  // namespace printemps::preprocess
 #endif
 /*****************************************************************************/
 // END

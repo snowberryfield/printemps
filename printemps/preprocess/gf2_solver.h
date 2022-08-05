@@ -6,8 +6,7 @@
 #ifndef PRINTEMPS_PREPROCESS_GF2_H__
 #define PRINTEMPS_PREPROCESS_GF2_H__
 
-namespace printemps {
-namespace preprocess {
+namespace printemps::preprocess {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class GF2Solver {
@@ -182,8 +181,7 @@ class GF2Solver {
         return true;
     }
 };
-}  // namespace preprocess
-}  // namespace printemps
+}  // namespace printemps::preprocess
 
 #endif
 /*****************************************************************************/

@@ -6,10 +6,7 @@
 #ifndef PRINTEMPS_SOLVER_TABU_SEARCH_CORE_RESULT_H__
 #define PRINTEMPS_SOLVER_TABU_SEARCH_CORE_RESULT_H__
 
-namespace printemps {
-namespace solver {
-namespace tabu_search {
-namespace core {
+namespace printemps::solver::tabu_search::core {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 struct TabuSearchCoreResult {
@@ -100,11 +97,7 @@ struct TabuSearchCoreResult {
         /// nothing to do
     }
 };
-}  // namespace core
-}  // namespace tabu_search
-}  // namespace solver
-}  // namespace printemps
-
+}  // namespace printemps::solver::tabu_search::core
 #endif
 /*****************************************************************************/
 // END

@@ -8,8 +8,7 @@
 
 #include "memory.h"
 
-namespace printemps {
-namespace solver {
+namespace printemps::solver {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class AbstractSolverController {
@@ -171,8 +170,7 @@ class AbstractSolverController {
         return m_time_keeper;
     }
 };  // namespace solver
-}  // namespace solver
-}  // namespace printemps
+}  // namespace printemps::solver
 
 #endif
 /*****************************************************************************/

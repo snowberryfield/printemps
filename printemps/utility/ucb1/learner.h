@@ -8,9 +8,7 @@
 
 #include "action.h"
 
-namespace printemps {
-namespace utility {
-namespace ucb1 {
+namespace printemps::utility::ucb1 {
 /*****************************************************************************/
 template <class T_ActionBody>
 class Learner {
@@ -135,9 +133,7 @@ class Learner {
         m_best_action_ptr = best_action_ptr;
     }
 };
-}  // namespace ucb1
-}  // namespace utility
-}  // namespace printemps
+}  // namespace printemps::utility::ucb1
 #endif
 /*****************************************************************************/
 // END

@@ -6,8 +6,7 @@
 #ifndef PRINTEMPS_PREPROCESS_SELECTION_EXTRACTOR_H__
 #define PRINTEMPS_PREPROCESS_SELECTION_EXTRACTOR_H__
 
-namespace printemps {
-namespace preprocess {
+namespace printemps::preprocess {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class SelectionExtractor {
@@ -348,8 +347,7 @@ class SelectionExtractor {
         return m_selections;
     }
 };
-}  // namespace preprocess
-}  // namespace printemps
+}  // namespace printemps::preprocess
 #endif
 /*****************************************************************************/
 // END

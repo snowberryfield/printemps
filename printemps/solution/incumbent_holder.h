@@ -6,8 +6,7 @@
 #ifndef PRINTEMPS_SOLUTION_INCUMBENT_HOLDER_H__
 #define PRINTEMPS_SOLUTION_INCUMBENT_HOLDER_H__
 
-namespace printemps {
-namespace solution {
+namespace printemps::solution {
 /*****************************************************************************/
 struct IncumbentHolderConstant {
     static constexpr bool   DEFAULT_IS_FOUND_FEASIBLE_SOLUTION      = false;
@@ -255,8 +254,7 @@ class IncumbentHolder {
         return m_feasible_incumbent_score;
     }
 };
-}  // namespace solution
-}  // namespace printemps
+}  // namespace printemps::solution
 
 #endif
 /*****************************************************************************/

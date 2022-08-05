@@ -6,9 +6,7 @@
 #ifndef PRINTEMPS_OPTION_VERBOSE_H__
 #define PRINTEMPS_OPTION_VERBOSE_H__
 
-namespace printemps {
-namespace option {
-namespace verbose {
+namespace printemps::option::verbose {
 /*****************************************************************************/
 enum Verbose : int {  //
     None,
@@ -17,9 +15,7 @@ enum Verbose : int {  //
     Full,
     Debug
 };
-}  // namespace verbose
-}  // namespace option
-}  // namespace printemps
+}  // namespace printemps::option::verbose
 
 #endif
 /*****************************************************************************/

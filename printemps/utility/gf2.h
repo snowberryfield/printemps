@@ -6,8 +6,7 @@
 #ifndef PRINTEMPS_UTILITY_GF2_H__
 #define PRINTEMPS_UTILITY_GF2_H__
 
-namespace printemps {
-namespace utility {
+namespace printemps::utility {
 /*****************************************************************************/
 class GF2Matrix {
    private:
@@ -156,8 +155,7 @@ class GF2Matrix {
         return result;
     }
 };
-}  // namespace utility
-}  // namespace printemps
+}  // namespace printemps::utility
 
 #endif
 /*****************************************************************************/

@@ -10,10 +10,7 @@
 #include "../core/local_search_core.h"
 #include "local_search_controller_result.h"
 
-namespace printemps {
-namespace solver {
-namespace local_search {
-namespace controller {
+namespace printemps::solver::local_search::controller {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class LocalSearchController
@@ -185,10 +182,7 @@ class LocalSearchController
         return m_result;
     }
 };
-}  // namespace controller
-}  // namespace local_search
-}  // namespace solver
-}  // namespace printemps
+}  // namespace printemps::solver::local_search::controller
 
 #endif
 /*****************************************************************************/

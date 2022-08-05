@@ -6,8 +6,7 @@
 #ifndef PRINTEMPS_PREPROCESS_FLIPPABLE_VARIABLE_PAIR_H__
 #define PRINTEMPS_PREPROCESS_FLIPPABLE_VARIABLE_PAIR_H__
 
-namespace printemps {
-namespace preprocess {
+namespace printemps::preprocess {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 struct FlippableVariablePair {
@@ -45,8 +44,7 @@ struct FlippableVariablePair {
         this->overlap_rate             = 0;
     }
 };
-}  // namespace preprocess
-}  // namespace printemps
+}  // namespace printemps::preprocess
 #endif
 /*****************************************************************************/
 // END

@@ -8,8 +8,7 @@
 
 #include "mps_variable_sense.h"
 
-namespace printemps {
-namespace mps {
+namespace printemps::mps {
 /*****************************************************************************/
 struct MPSVariable {
     MPSVariableSense sense;
@@ -43,8 +42,7 @@ struct MPSVariable {
         this->is_fixed               = false;
     }
 };
-}  // namespace mps
-}  // namespace printemps
+}  // namespace printemps::mps
 #endif
 /*****************************************************************************/
 // END

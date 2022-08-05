@@ -6,8 +6,7 @@
 #ifndef PRINTEMPS_NEIGHBORHOOD_ABSTRACT_MOVE_GENERATOR_H__
 #define PRINTEMPS_NEIGHBORHOOD_ABSTRACT_MOVE_GENERATOR_H__
 
-namespace printemps {
-namespace neighborhood {
+namespace printemps::neighborhood {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class AbstractMoveGenerator {
@@ -202,8 +201,7 @@ convert_to_binomial_constraints(
     return results;
 }
 
-}  // namespace neighborhood
-}  // namespace printemps
+}  // namespace printemps::neighborhood
 #endif
 /*****************************************************************************/
 // END

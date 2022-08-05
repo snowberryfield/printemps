@@ -14,10 +14,7 @@
 #include "tabu_search_core_state_manager.h"
 #include "tabu_search_core_result.h"
 
-namespace printemps {
-namespace solver {
-namespace tabu_search {
-namespace core {
+namespace printemps::solver::tabu_search::core {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class TabuSearchCore {
@@ -756,7 +753,7 @@ class TabuSearchCore {
                  * The neighborhood solutions will be evaluated in parallel by
                  * fast or ordinary(slow) evaluation methods.
                  */
-#ifndef _PRINTEMPS_LINEAR
+#ifndef _PRINTEMPS_LINEAR_MINIMIZATION
                 if (m_model_ptr->is_enabled_fast_evaluation()) {
 #endif
                     if (TRIAL_MOVE_PTRS[i]->is_univariable_move) {
@@ -771,7 +768,7 @@ class TabuSearchCore {
                             CURRENT_SOLUTION_SCORE);
                     }
 
-#ifndef _PRINTEMPS_LINEAR
+#ifndef _PRINTEMPS_LINEAR_MINIMIZATION
                 } else {
                     m_model_ptr->evaluate(&trial_solution_scores[i],  //
                                           *TRIAL_MOVE_PTRS[i]);
@@ -922,11 +919,7 @@ class TabuSearchCore {
         return m_result;
     }
 };  // namespace core
-}  // namespace core
-}  // namespace tabu_search
-}  // namespace solver
-}  // namespace printemps
-
+}  // namespace printemps::solver::tabu_search::core
 #endif
 /*****************************************************************************/
 // END

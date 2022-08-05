@@ -6,9 +6,7 @@
 #ifndef PRINTEMPS_UTILITY_UCB1_ACTION_H__
 #define PRINTEMPS_UTILITY_UCB1_ACTION_H__
 
-namespace printemps {
-namespace utility {
-namespace ucb1 {
+namespace printemps::utility::ucb1 {
 /*****************************************************************************/
 template <class T_ActionBody>
 struct Action {
@@ -37,10 +35,7 @@ struct Action {
         this->confidence        = 0.0;
     }
 };
-}  // namespace ucb1
-}  // namespace utility
-}  // namespace printemps
-
+}  // namespace printemps::utility::ucb1
 #endif
 /*****************************************************************************/
 // END

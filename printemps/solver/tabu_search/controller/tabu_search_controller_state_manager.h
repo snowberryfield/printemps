@@ -6,10 +6,7 @@
 #ifndef PRINTEMPS_SOLVER_TABU_SEARCH_CONTROLLER_TABU_SEARCH_CONTROLLER_STATE_MANAGER_H__
 #define PRINTEMPS_SOLVER_TABU_SEARCH_CONTROLLER_TABU_SEARCH_CONTROLLER_STATE_MANAGER_H__
 
-namespace printemps {
-namespace solver {
-namespace tabu_search {
-namespace controller {
+namespace printemps::solver::tabu_search::controller {
 /*****************************************************************************/
 struct TabuSearchControllerStateManagerConstant {
     static constexpr double RELATIVE_RANGE_THRESHOLD              = 1E-2;
@@ -1122,10 +1119,7 @@ class TabuSearchControllerStateManager {
         return m_state;
     }
 };
-}  // namespace controller
-}  // namespace tabu_search
-}  // namespace solver
-}  // namespace printemps
+}  // namespace printemps::solver::tabu_search::controller
 #endif
 /*****************************************************************************/
 // END

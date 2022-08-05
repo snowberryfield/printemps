@@ -6,8 +6,7 @@
 #ifndef PRINTEMPS_MODEL_MODEL_H__
 #define PRINTEMPS_MODEL_MODEL_H__
 
-namespace printemps {
-namespace model {
+namespace printemps::model {
 /*****************************************************************************/
 struct ModelConstant {
     /**
@@ -1915,14 +1914,19 @@ class Model {
     constexpr void update_variable_objective_improvabilities(
         const std::vector<model_component::Variable<T_Variable, T_Expression> *>
             &a_VARIABLE_PTRS) const noexcept {
+        double coefficient             = 0.0;
+        bool   is_objective_improvable = false;
         for (const auto &variable_ptr : a_VARIABLE_PTRS) {
-            const auto COEFFICIENT =
-                variable_ptr->objective_sensitivity() * this->sign();
-            const auto IS_OBJECTIVE_IMPROVABLE =
-                (COEFFICIENT > 0 && variable_ptr->has_lower_bound_margin()) ||
-                (COEFFICIENT < 0 && variable_ptr->has_upper_bound_margin());
+#ifdef _PRINTEMPS_LINEAR_MINIMIZATION
+            coefficient = variable_ptr->objective_sensitivity();
+#else
+            coefficient = variable_ptr->objective_sensitivity() * this->sign();
+#endif
+            is_objective_improvable =
+                (coefficient > 0 && variable_ptr->has_lower_bound_margin()) ||
+                (coefficient < 0 && variable_ptr->has_upper_bound_margin());
 
-            variable_ptr->set_is_objective_improvable(IS_OBJECTIVE_IMPROVABLE);
+            variable_ptr->set_is_objective_improvable(is_objective_improvable);
         }
     }
 
@@ -1936,6 +1940,7 @@ class Model {
     constexpr void update_variable_feasibility_improvabilities(
         const std::vector<model_component::Constraint<T_Variable, T_Expression>
                               *> &a_CONSTRAINT_PTRS) const noexcept {
+        double coefficient = 0.0;
         for (const auto &constraint_ptr : a_CONSTRAINT_PTRS) {
             if (constraint_ptr->is_feasible()) {
                 continue;
@@ -1948,15 +1953,15 @@ class Model {
                     continue;
                 }
 
-                const auto COEFFICIENT =
+                coefficient =
                     (constraint_ptr->constraint_value() > constant::EPSILON &&
                      constraint_ptr->is_less_or_equal())
                         ? sensitivity.second
                         : -sensitivity.second;
 
-                if ((COEFFICIENT > 0 &&
+                if ((coefficient > 0 &&
                      sensitivity.first->has_lower_bound_margin()) ||
-                    (COEFFICIENT < 0 &&
+                    (coefficient < 0 &&
                      sensitivity.first->has_upper_bound_margin())) {
                     sensitivity.first->set_is_feasibility_improvable_or(true);
                 }
@@ -2051,12 +2056,12 @@ class Model {
             }
         }
 
-#ifdef _PRINTEMPS_LINEAR
+#ifdef _PRINTEMPS_LINEAR_MINIMIZATION
         double objective             = m_objective.evaluate(a_MOVE);
         double objective_improvement = m_objective.value() - objective;
 
 #else
-        double objective             = 0.0;
+        double objective = 0.0;
         double objective_improvement = 0.0;
         if (m_is_defined_objective) {
             objective = m_objective.evaluate(a_MOVE) * this->sign();
@@ -2126,12 +2131,12 @@ class Model {
             }
         }
 
-#ifdef _PRINTEMPS_LINEAR
+#ifdef _PRINTEMPS_LINEAR_MINIMIZATION
         double objective             = m_objective.evaluate(a_MOVE);
         double objective_improvement = m_objective.value() - objective;
 
 #else
-        double objective             = 0.0;
+        double objective = 0.0;
         double objective_improvement = 0.0;
         if (m_is_defined_objective) {
             objective = m_objective.evaluate(a_MOVE) * this->sign();
@@ -2207,12 +2212,12 @@ class Model {
             is_feasibility_improvable |= violation_diff < -constant::EPSILON;
         }
 
-#ifdef _PRINTEMPS_LINEAR
+#ifdef _PRINTEMPS_LINEAR_MINIMIZATION
         double objective             = m_objective.evaluate(a_MOVE);
         double objective_improvement = m_objective.value() - objective;
 
 #else
-        double objective             = 0.0;
+        double objective = 0.0;
         double objective_improvement = 0.0;
         if (m_is_defined_objective) {
             objective = m_objective.evaluate(a_MOVE) * this->sign();
@@ -2265,8 +2270,8 @@ class Model {
             multi_array::ValueProxy<T_Value> variable_parameter_proxy(
                 proxy.index(), proxy.shape());
             variable_parameter_proxy.fill(a_VALUE);
-            int number_of_elements = proxy.number_of_elements();
-            for (auto i = 0; i < number_of_elements; i++) {
+            const int NUMBER_OF_ELEMENTS = proxy.number_of_elements();
+            for (auto i = 0; i < NUMBER_OF_ELEMENTS; i++) {
                 variable_parameter_proxy.flat_indexed_names(i) =
                     proxy.flat_indexed_variables(i).name();
             }
@@ -2287,8 +2292,8 @@ class Model {
             multi_array::ValueProxy<T_Value> expression_parameter_proxy(
                 proxy.index(), proxy.shape());
             expression_parameter_proxy.fill(a_VALUE);
-            int number_of_elements = proxy.number_of_elements();
-            for (auto i = 0; i < number_of_elements; i++) {
+            int NUMBER_OF_ELEMENTS = proxy.number_of_elements();
+            for (auto i = 0; i < NUMBER_OF_ELEMENTS; i++) {
                 expression_parameter_proxy.flat_indexed_names(i) =
                     proxy.flat_indexed_expressions(i).name();
             }
@@ -2308,8 +2313,8 @@ class Model {
             multi_array::ValueProxy<T_Value> constraint_parameter_proxy(
                 proxy.index(), proxy.shape());
             constraint_parameter_proxy.fill(a_VALUE);
-            int number_of_elements = proxy.number_of_elements();
-            for (auto i = 0; i < number_of_elements; i++) {
+            const int NUMBER_OF_ELEMENTS = proxy.number_of_elements();
+            for (auto i = 0; i < NUMBER_OF_ELEMENTS; i++) {
                 constraint_parameter_proxy.flat_indexed_names(i) =
                     proxy.flat_indexed_constraints(i).name();
             }
@@ -3236,8 +3241,7 @@ class Model {
     }
 };
 using IPModel = Model<int, double>;
-}  // namespace model
-}  // namespace printemps
+}  // namespace printemps::model
 #endif
 /*****************************************************************************/
 // END

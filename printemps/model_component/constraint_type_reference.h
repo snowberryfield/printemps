@@ -6,8 +6,7 @@
 #ifndef PRINTEMPS_MODEL_COMPONENT_CONSTRAINT_TYPE_REFERENCE_H__
 #define PRINTEMPS_MODEL_COMPONENT_CONSTRAINT_TYPE_REFERENCE_H__
 
-namespace printemps {
-namespace model_component {
+namespace printemps::model_component {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class Constraint;
@@ -71,8 +70,7 @@ struct ConstraintTypeReference {
         this->nonlinear_ptrs.clear();
     }
 };
-}  // namespace model_component
-}  // namespace printemps
+}  // namespace printemps::model_component
 #endif
 /*****************************************************************************/
 // END
