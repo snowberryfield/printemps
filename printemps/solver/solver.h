@@ -322,16 +322,7 @@ class Solver {
         /**
          * Setup the model.
          */
-        m_model_ptr->setup(
-            m_option.is_enabled_presolve,
-            m_option.is_enabled_initial_value_correction,
-            m_option.is_enabled_aggregation_move,
-            m_option.is_enabled_precedence_move,
-            m_option.is_enabled_variable_bound_move,
-            m_option.is_enabled_soft_selection_move,
-            m_option.is_enabled_chain_move, m_option.is_enabled_two_flip_move,
-            m_option.is_enabled_user_defined_move, m_option.selection_mode,
-            m_option.initial_penalty_coefficient,
+        m_model_ptr->setup(m_option,
             m_option.verbose >= option::verbose::Outer);
 
         /**

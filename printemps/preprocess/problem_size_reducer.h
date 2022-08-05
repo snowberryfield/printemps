@@ -677,64 +677,117 @@ class ProblemSizeReducer {
                 reference.singleton_ptrs, a_IS_ENABLED_PRINT);
 
         number_of_newly_disabled_constraints +=
-            remove_duplicated_constraints(  //
+            this->remove_duplicated_constraints(  //
+                reference.exclusive_or_ptrs, a_IS_ENABLED_PRINT);
+
+        number_of_newly_disabled_constraints +=
+            this->remove_duplicated_constraints(  //
+                reference.exclusive_nor_ptrs, a_IS_ENABLED_PRINT);
+
+        number_of_newly_disabled_constraints +=
+            this->remove_duplicated_constraints(  //
+                reference.inverted_integers_ptrs, a_IS_ENABLED_PRINT);
+
+        number_of_newly_disabled_constraints +=
+            this->remove_duplicated_constraints(  //
+                reference.balanced_integers_ptrs, a_IS_ENABLED_PRINT);
+
+        number_of_newly_disabled_constraints +=
+            this->remove_duplicated_constraints(  //
+                reference.constant_sum_integers_ptrs, a_IS_ENABLED_PRINT);
+
+        number_of_newly_disabled_constraints +=
+            this->remove_duplicated_constraints(  //
+                reference.constant_difference_integers_ptrs,
+                a_IS_ENABLED_PRINT);
+
+        number_of_newly_disabled_constraints +=
+            this->remove_duplicated_constraints(  //
+                reference.constant_ratio_integers_ptrs, a_IS_ENABLED_PRINT);
+
+        number_of_newly_disabled_constraints +=
+            this->remove_duplicated_constraints(  //
                 reference.aggregation_ptrs, a_IS_ENABLED_PRINT);
 
         number_of_newly_disabled_constraints +=
-            remove_duplicated_constraints(  //
+            this->remove_duplicated_constraints(  //
                 reference.precedence_ptrs, a_IS_ENABLED_PRINT);
 
         number_of_newly_disabled_constraints +=
-            remove_duplicated_constraints(  //
+            this->remove_duplicated_constraints(  //
                 reference.variable_bound_ptrs, a_IS_ENABLED_PRINT);
 
         number_of_newly_disabled_constraints +=
-            remove_duplicated_constraints(  //
+            this->remove_duplicated_constraints(  //
+                reference.trinomial_exclusive_nor_ptrs, a_IS_ENABLED_PRINT);
+
+        number_of_newly_disabled_constraints +=
+            this->remove_duplicated_constraints(  //
                 reference.set_partitioning_ptrs, a_IS_ENABLED_PRINT);
 
         number_of_newly_disabled_constraints +=
-            remove_duplicated_constraints(  //
+            this->remove_duplicated_constraints(  //
                 reference.set_packing_ptrs, a_IS_ENABLED_PRINT);
 
         number_of_newly_disabled_constraints +=
-            remove_duplicated_constraints(  //
+            this->remove_duplicated_constraints(  //
                 reference.set_covering_ptrs, a_IS_ENABLED_PRINT);
 
         number_of_newly_disabled_constraints +=
-            remove_duplicated_constraints(  //
+            this->remove_duplicated_constraints(  //
                 reference.cardinality_ptrs, a_IS_ENABLED_PRINT);
 
         number_of_newly_disabled_constraints +=
-            remove_duplicated_constraints(  //
+            this->remove_duplicated_constraints(  //
                 reference.invariant_knapsack_ptrs, a_IS_ENABLED_PRINT);
 
         number_of_newly_disabled_constraints +=
-            remove_duplicated_constraints(  //
-                reference.equation_knapsack_ptrs, a_IS_ENABLED_PRINT);
+            this->remove_duplicated_constraints(  //
+                reference.multiple_covering_ptrs, a_IS_ENABLED_PRINT);
 
         number_of_newly_disabled_constraints +=
-            remove_duplicated_constraints(  //
-                reference.bin_packing_ptrs, a_IS_ENABLED_PRINT);
+            this->remove_duplicated_constraints(  //
+                reference.binary_flow_ptrs, a_IS_ENABLED_PRINT);
 
         number_of_newly_disabled_constraints +=
-            remove_duplicated_constraints(  //
-                reference.integer_knapsack_ptrs, a_IS_ENABLED_PRINT);
+            this->remove_duplicated_constraints(  //
+                reference.integer_flow_ptrs, a_IS_ENABLED_PRINT);
 
         number_of_newly_disabled_constraints +=
-            remove_duplicated_constraints(  //
+            this->remove_duplicated_constraints(  //
+                reference.soft_selection_ptrs, a_IS_ENABLED_PRINT);
+
+        number_of_newly_disabled_constraints +=
+            this->remove_duplicated_constraints(  //
                 reference.min_max_ptrs, a_IS_ENABLED_PRINT);
 
         number_of_newly_disabled_constraints +=
-            remove_duplicated_constraints(  //
+            this->remove_duplicated_constraints(  //
                 reference.max_min_ptrs, a_IS_ENABLED_PRINT);
 
         number_of_newly_disabled_constraints +=
-            remove_duplicated_constraints(  //
+            this->remove_duplicated_constraints(  //
                 reference.intermediate_ptrs, a_IS_ENABLED_PRINT);
 
         number_of_newly_disabled_constraints +=
-            remove_duplicated_constraints(  //
+            this->remove_duplicated_constraints(  //
+                reference.equation_knapsack_ptrs, a_IS_ENABLED_PRINT);
+
+        number_of_newly_disabled_constraints +=
+            this->remove_duplicated_constraints(  //
+                reference.bin_packing_ptrs, a_IS_ENABLED_PRINT);
+
+        number_of_newly_disabled_constraints +=
+            this->remove_duplicated_constraints(  //
+                reference.integer_knapsack_ptrs, a_IS_ENABLED_PRINT);
+
+        number_of_newly_disabled_constraints +=
+            this->remove_duplicated_constraints(  //
                 reference.gf2_ptrs, a_IS_ENABLED_PRINT);
+
+        number_of_newly_disabled_constraints +=
+            this->remove_duplicated_constraints(  //
+                reference.general_linear_ptrs, a_IS_ENABLED_PRINT);
 
         utility::print_message("Done.", a_IS_ENABLED_PRINT);
         return number_of_newly_disabled_constraints;
