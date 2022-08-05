@@ -563,11 +563,17 @@ class LocalSearchCore {
                     continue;
                 }
 
-                if (score.global_augmented_objective >
-                    CURRENT_SOLUTION_SCORE.global_augmented_objective -
-                        constant::EPSILON) {
+                if (score.is_feasible) {
+                    if (!score.is_objective_improvable) {
                     break;
                 }
+                } else {
+                    if (!(score.total_violation <
+                          CURRENT_SOLUTION_SCORE.total_violation)) {
+                        break;
+                    }
+                }
+
                 bool has_intersection = false;
 
                 for (const auto& constraint_ptr :
