@@ -1193,36 +1193,72 @@ class Model {
         m_neighborhood.selection().setup(
             m_variable_reference.selection_variable_ptrs);
 
-        if (a_IS_ENABLED_AGGREGATION_MOVE) {
+        if (a_OPTION.is_enabled_exclusive_or_move) {
+            m_neighborhood.exclusive_or().setup(
+                m_constraint_type_reference.exclusive_or_ptrs);
+        }
+
+        if (a_OPTION.is_enabled_exclusive_nor_move) {
+            m_neighborhood.exclusive_nor().setup(
+                m_constraint_type_reference.exclusive_nor_ptrs);
+        }
+
+        if (a_OPTION.is_enabled_inverted_integers_move) {
+            m_neighborhood.inverted_integers().setup(
+                m_constraint_type_reference.inverted_integers_ptrs);
+        }
+
+        if (a_OPTION.is_enabled_balanced_integers_move) {
+            m_neighborhood.balanced_integers().setup(
+                m_constraint_type_reference.balanced_integers_ptrs);
+        }
+
+        if (a_OPTION.is_enabled_constant_sum_integers_move) {
+            m_neighborhood.constant_sum_integers().setup(
+                m_constraint_type_reference.constant_sum_integers_ptrs);
+        }
+
+        if (a_OPTION.neighborhood
+                .is_enabled_constant_difference_integers_move) {
+            m_neighborhood.constant_difference_integers().setup(
+                m_constraint_type_reference.constant_difference_integers_ptrs);
+        }
+
+        if (a_OPTION.is_enabled_constant_ratio_integers_move) {
+            m_neighborhood.constant_ratio_integers().setup(
+                m_constraint_type_reference.constant_ratio_integers_ptrs);
+        }
+
+        if (a_OPTION.is_enabled_aggregation_move) {
             m_neighborhood.aggregation().setup(
                 m_constraint_type_reference.aggregation_ptrs);
         }
 
-        if (a_IS_ENABLED_PRECEDENCE_MOVE) {
+        if (a_OPTION.is_enabled_precedence_move) {
             m_neighborhood.precedence().setup(
                 m_constraint_type_reference.precedence_ptrs);
         }
 
-        if (a_IS_ENABLED_VARIABLE_BOUND_MOVE) {
+        if (a_OPTION.is_enabled_variable_bound_move) {
             m_neighborhood.variable_bound().setup(
                 m_constraint_type_reference.variable_bound_ptrs);
         }
 
-        if (a_IS_ENABLED_SOFT_SELECTION_MOVE) {
+        if (a_OPTION.is_enabled_soft_selection_move) {
             m_neighborhood.soft_selection().setup(
                 m_constraint_type_reference.soft_selection_ptrs);
         }
 
-        if (a_IS_ENABLED_CHAIN_MOVE) {
+        if (a_OPTION.is_enabled_chain_move) {
             m_neighborhood.chain().setup();
         }
 
-        if (a_IS_ENABLED_TWO_FLIP_MOVE &&
+        if (a_OPTION.is_enabled_two_flip_move &&
             m_flippable_variable_ptr_pairs.size() > 0) {
             m_neighborhood.two_flip().setup(m_flippable_variable_ptr_pairs);
         }
 
-        if (a_IS_ENABLED_USER_DEFINED_MOVE) {
+        if (a_OPTION.is_enabled_user_defined_move) {
             m_neighborhood.user_defined().setup();
         }
 
