@@ -44,10 +44,10 @@ class SelectionExtractor {
                 }
             }
             if (is_valid) {
-            model_component::Selection<T_Variable, T_Expression> selection(
-                constraint_ptr);
-            raw_selections.push_back(selection);
-        }
+                model_component::Selection<T_Variable, T_Expression> selection(
+                    constraint_ptr);
+                raw_selections.push_back(selection);
+            }
         }
         return raw_selections;
     }
@@ -80,7 +80,7 @@ class SelectionExtractor {
         const option::selection_mode::SelectionMode &a_SELECTION_MODE,
         const bool                                   a_IS_ENABLED_PRINT) {
         switch (a_SELECTION_MODE) {
-            case option::selection_mode::None: {
+            case option::selection_mode::Off: {
                 break;
             }
             case option::selection_mode::Defined: {

@@ -95,7 +95,7 @@ class TabuSearchCore {
         }
 
         if (STATE.elapsed_time + m_option.tabu_search.time_offset >
-            m_option.time_max) {
+            m_option.general.time_max) {
             m_state_manager.set_termination_status(
                 TabuSearchCoreTerminationStatus::TIME_OVER);
             return true;
@@ -118,7 +118,7 @@ class TabuSearchCore {
     /*************************************************************************/
     inline bool satisfy_reach_target_terminate_condition(void) {
         if (m_incumbent_holder_ptr->feasible_incumbent_objective() <=
-            m_option.target_objective_value) {
+            m_option.general.target_objective_value) {
             m_state_manager.set_termination_status(
                 TabuSearchCoreTerminationStatus::REACH_TARGET);
             return true;
@@ -234,13 +234,13 @@ class TabuSearchCore {
         bool accept_feasibility_improvable = true;
 
         if (!m_model_ptr->is_linear() ||
-            m_option.improvability_screening_mode ==
+            m_option.neighborhood.improvability_screening_mode ==
                 option::improvability_screening_mode::Off) {
             m_model_ptr->neighborhood().update_moves(
                 accept_all,                     //
                 accept_objective_improvable,    //
                 accept_feasibility_improvable,  //
-                m_option.is_enabled_parallel_neighborhood_update);
+                m_option.parallel.is_enabled_parallel_neighborhood_update);
 
             m_state_manager.set_number_of_moves(
                 m_model_ptr->neighborhood().move_ptrs().size());
@@ -259,7 +259,7 @@ class TabuSearchCore {
                     neighborhood::related_variable_ptrs(STATE.current_move)));
         }
 
-        switch (m_option.improvability_screening_mode) {
+        switch (m_option.neighborhood.improvability_screening_mode) {
             case option::improvability_screening_mode::Soft: {
                 if (m_model_ptr->is_feasible()) {
                     accept_all                    = false;
@@ -331,7 +331,7 @@ class TabuSearchCore {
             accept_all,                     //
             accept_objective_improvable,    //
             accept_feasibility_improvable,  //
-            m_option.is_enabled_parallel_neighborhood_update);
+            m_option.parallel.is_enabled_parallel_neighborhood_update);
 
         m_state_manager.set_number_of_moves(
             m_model_ptr->neighborhood().move_ptrs().size());
@@ -431,7 +431,7 @@ class TabuSearchCore {
             }
 
             if (chain_move.overlap_rate >
-                    m_option.chain_move_overlap_rate_threshold &&
+                    m_option.neighborhood.chain_move_overlap_rate_threshold &&
                 !neighborhood::has_duplicate_variable(chain_move)) {
                 auto back_chain_move = chain_move;
                 for (auto&& alteration : back_chain_move.alterations) {
@@ -714,12 +714,14 @@ class TabuSearchCore {
          * Print the header of optimization progress table and print the initial
          * solution status.
          */
-        utility::print_single_line(m_option.verbose >= option::verbose::Outer);
-        utility::print_message("Tabu Search starts.",
-                               m_option.verbose >= option::verbose::Outer);
+        utility::print_single_line(m_option.output.verbose >=
+                                   option::verbose::Outer);
+        utility::print_message(
+            "Tabu Search starts.",
+            m_option.output.verbose >= option::verbose::Outer);
 
-        print_table_header(m_option.verbose >= option::verbose::Full);
-        print_table_initial(m_option.verbose >= option::verbose::Full);
+        print_table_header(m_option.output.verbose >= option::verbose::Full);
+        print_table_initial(m_option.output.verbose >= option::verbose::Full);
 
         /**
          * Iterations start.
@@ -799,7 +801,7 @@ class TabuSearchCore {
             const auto TABU_TENURE            = STATE.tabu_tenure;
             const auto DURATION               = ITERATION - TABU_TENURE;
 #ifdef _OPENMP
-#pragma omp parallel for if (m_option.is_enabled_parallel_evaluation) \
+#pragma omp parallel for if (m_option.parallel.is_enabled_parallel_evaluation) \
     schedule(static)
 #endif
             for (auto i = 0; i < NUMBER_OF_MOVES; i++) {
@@ -896,14 +898,15 @@ class TabuSearchCore {
             /**
              * Update the stored chain moves.
              */
-            if (STATE.iteration > 0 && m_option.is_enabled_chain_move) {
+            if (STATE.iteration > 0 &&
+                m_option.neighborhood.is_enabled_chain_move) {
                 this->update_chain_moves();
             }
 
             /**
              * Store the current feasible solution.
              */
-            if (m_option.is_enabled_store_feasible_solutions &&
+            if (m_option.output.is_enabled_store_feasible_solutions &&
                 STATE.current_solution_score.is_feasible) {
                 m_feasible_solutions.push_back(
                     m_model_ptr->export_sparse_solution());
@@ -915,7 +918,8 @@ class TabuSearchCore {
             if ((STATE.iteration %
                  std::max(m_option.tabu_search.log_interval, 1)) == 0 ||
                 STATE.update_status > 0) {
-                print_table_body(m_option.verbose >= option::verbose::Full);
+                print_table_body(m_option.output.verbose >=
+                                 option::verbose::Full);
             }
 
             /**
@@ -936,7 +940,7 @@ class TabuSearchCore {
         /**
          * Print the footer of the optimization progress table.
          */
-        print_table_footer(m_option.verbose >= option::verbose::Full);
+        print_table_footer(m_option.output.verbose >= option::verbose::Full);
 
         /**
          * Postprocess.

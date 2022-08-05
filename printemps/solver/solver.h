@@ -40,7 +40,8 @@ class Solver {
 
     /*************************************************************************/
     inline void print_program_info(const bool a_IS_ENABLED_PRINT) {
-        utility::print_single_line(m_option.verbose >= option::verbose::Outer);
+        utility::print_single_line(m_option.output.verbose >=
+                                   option::verbose::Outer);
         utility::print("PRINTEMPS " + constant::VERSION + " (" +
                            constant::PROJECT_URL + ")",
                        a_IS_ENABLED_PRINT);
@@ -58,17 +59,17 @@ class Solver {
          * solution is found.
          */
         auto target_objective_changed_rate =
-            m_option.target_objective_value /
-                option::OptionConstant::DEFAULT_TARGET_OBJECTIVE -
+            m_option.general.target_objective_value /
+                option::GeneralOptionConstant::DEFAULT_TARGET_OBJECTIVE_VALUE -
             1.0;
 
         if (fabs(target_objective_changed_rate) > constant::EPSILON) {
-            m_option.target_objective_value *= m_model_ptr->sign();
+            m_option.general.target_objective_value *= m_model_ptr->sign();
         }
 
         if (fabs(target_objective_changed_rate) < constant::EPSILON) {
             if (!m_model_ptr->is_defined_objective()) {
-                m_option.target_objective_value = 0.0;
+                m_option.general.target_objective_value = 0.0;
             }
         }
     }
@@ -77,21 +78,22 @@ class Solver {
     inline void enable_default_neighborhood(void) {
         auto& neighborhood = m_model_ptr->neighborhood();
 
-        if (m_option.is_enabled_binary_move &&
+        if (m_option.neighborhood.is_enabled_binary_move &&
             neighborhood.binary().moves().size() > 0) {
             neighborhood.binary().enable();
         }
 
-        if (m_option.is_enabled_integer_move &&
+        if (m_option.neighborhood.is_enabled_integer_move &&
             neighborhood.integer().moves().size() > 0) {
             neighborhood.integer().enable();
         }
 
-        if (m_option.is_enabled_user_defined_move) {
+        if (m_option.neighborhood.is_enabled_user_defined_move) {
             neighborhood.user_defined().enable();
         }
 
-        if (m_option.selection_mode != option::selection_mode::Off &&
+        if (m_option.neighborhood.selection_mode !=
+                option::selection_mode::Off &&
             neighborhood.selection().moves().size() > 0) {
             neighborhood.selection().enable();
         }
@@ -302,7 +304,7 @@ class Solver {
          * Print the program name, the project url, and the starting time.
          */
         this->print_program_info(  //
-            m_option.verbose >= option::verbose::Outer);
+            m_option.output.verbose >= option::verbose::Outer);
 
         /**
          * The model can be solved only once.
@@ -320,7 +322,7 @@ class Solver {
         /**
          * Print the option value.
          */
-        if (m_option.verbose >= option::verbose::Outer) {
+        if (m_option.output.verbose >= option::verbose::Outer) {
             m_option.print();
         }
 
@@ -328,12 +330,12 @@ class Solver {
          * Setup the model.
          */
         m_model_ptr->setup(m_option,
-            m_option.verbose >= option::verbose::Outer);
+                           m_option.output.verbose >= option::verbose::Outer);
 
         /**
          * Print the problem size.
          */
-        if (m_option.verbose >= option::verbose::Outer) {
+        if (m_option.output.verbose >= option::verbose::Outer) {
             m_model_ptr->print_number_of_variables();
             m_model_ptr->print_number_of_constraints();
         }
@@ -343,15 +345,15 @@ class Solver {
          * constraints (set partitioning, set packing, set covering,
          * cardinality, and invariant knapsack).
          */
-        if (m_option.is_enabled_chain_move &&
+        if (m_option.neighborhood.is_enabled_chain_move &&
             !m_model_ptr->has_chain_move_effective_constraints()) {
-            m_option.is_enabled_chain_move = false;
+            m_option.neighborhood.is_enabled_chain_move = false;
             utility::print_warning(
                 "Chain move was disabled because the problem does not include "
                 "any zero-one coefficient constraints (set "
                 "partitioning/packing/covering, cardinality, invariant "
                 "knapsack, and multiple covering).",
-                m_option.verbose >= option::verbose::Warning);
+                m_option.output.verbose >= option::verbose::Warning);
         }
 
         /**
@@ -377,11 +379,12 @@ class Solver {
         /**
          * Prepare feasible solutions archive.
          */
-        m_solution_archive.setup(m_option.feasible_solutions_capacity,  //
-                                 m_model_ptr->is_minimization(),        //
-                                 m_model_ptr->name(),                   //
-                                 m_model_ptr->number_of_variables(),    //
-                                 m_model_ptr->number_of_constraints());
+        m_solution_archive.setup(
+            m_option.output.feasible_solutions_capacity,  //
+            m_model_ptr->is_minimization(),               //
+            m_model_ptr->name(),                          //
+            m_model_ptr->number_of_variables(),           //
+            m_model_ptr->number_of_constraints());
 
         /**
          * Compute the values of expressions, constraints, and the objective
@@ -408,22 +411,23 @@ class Solver {
          * Start optimization.
          */
         utility::print_single_line(  //
-            m_option.verbose >= option::verbose::Outer);
+            m_option.output.verbose >= option::verbose::Outer);
 
         utility::print_message(  //
-            "Optimization starts.", m_option.verbose >= option::verbose::Outer);
+            "Optimization starts.",
+            m_option.output.verbose >= option::verbose::Outer);
 
         /**
          * Solve Lagrange dual to obtain a better initial solution (Optional).
          */
-        if (m_option.is_enabled_lagrange_dual) {
+        if (m_option.lagrange_dual.is_enabled) {
             this->run_lagrange_dual();
         }
 
         /**
          * Run a local search to improve the initial solution (optional).
          */
-        if (m_option.is_enabled_local_search) {
+        if (m_option.local_search.is_enabled) {
             this->run_local_search();
         }
 

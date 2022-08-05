@@ -9,6 +9,7 @@
 namespace printemps::option {
 /*****************************************************************************/
 struct LagrangeDualOptionConstant {
+    static constexpr bool   DEFAULT_IS_ENABLED            = false;
     static constexpr int    DEFAULT_ITERATION_MAX         = 10000;
     static constexpr double DEFAULT_TIME_MAX              = 120.0;
     static constexpr double DEFAULT_TIME_OFFSET           = 0.0;
@@ -21,13 +22,14 @@ struct LagrangeDualOptionConstant {
 
 /*****************************************************************************/
 struct LagrangeDualOption {
+    bool   is_enabled;
     int    iteration_max;
     double time_max;
     double time_offset;  // hidden
     double step_size_extend_rate;
     double step_size_reduce_rate;
     double tolerance;
-    double queue_size;  // hidden
+    int    queue_size;  // hidden
     int    log_interval;
 
     /*************************************************************************/
@@ -36,7 +38,13 @@ struct LagrangeDualOption {
     }
 
     /*************************************************************************/
+    LagrangeDualOption(const utility::json::JsonObject &a_OBJECT) {
+        this->setup(a_OBJECT);
+    }
+
+    /*************************************************************************/
     void initialize(void) {
+        this->is_enabled    = LagrangeDualOptionConstant::DEFAULT_IS_ENABLED;
         this->iteration_max = LagrangeDualOptionConstant::DEFAULT_ITERATION_MAX;
         this->time_max      = LagrangeDualOptionConstant::DEFAULT_TIME_MAX;
         this->time_offset   = LagrangeDualOptionConstant::DEFAULT_TIME_OFFSET;
@@ -47,6 +55,86 @@ struct LagrangeDualOption {
         this->tolerance    = LagrangeDualOptionConstant::DEFAULT_TOLERANCE;
         this->queue_size   = LagrangeDualOptionConstant::DEFAULT_QUEUE_SIZE;
         this->log_interval = LagrangeDualOptionConstant::DEFAULT_LOG_INTERVAL;
+    }
+
+    /*************************************************************************/
+    void print(void) const {
+        utility::print(                         //
+            " -- lagrange_dual.is_enabled: " +  //
+            utility::to_true_or_false(          //
+                this->is_enabled));
+
+        utility::print(                            //
+            " -- lagrange_dual.iteration_max: " +  //
+            utility::to_string(                    //
+                this->iteration_max, "%d"));
+
+        utility::print(                       //
+            " -- lagrange_dual.time_max: " +  //
+            utility::to_string(               //
+                this->time_max, "%f"));
+
+        utility::print(                          //
+            " -- lagrange_dual.time_offset: " +  //
+            utility::to_string(                  //
+                this->time_offset, "%f"));
+
+        utility::print(                                    //
+            " -- lagrange_dual.step_size_extend_rate: " +  //
+            utility::to_string(                            //
+                this->step_size_extend_rate, "%f"));
+
+        utility::print(                                    //
+            " -- lagrange_dual.step_size_reduce_rate: " +  //
+            utility::to_string(                            //
+                this->step_size_reduce_rate, "%f"));
+
+        utility::print(                        //
+            " -- lagrange_dual.tolerance: " +  //
+            utility::to_string(                //
+                this->tolerance, "%f"));
+
+        utility::print(                         //
+            " -- lagrange_dual.queue_size: " +  //
+            utility::to_string(                 //
+                this->queue_size, "%d"));
+
+        utility::print(                           //
+            " -- lagrange_dual.log_interval: " +  //
+            utility::to_string(                   //
+                this->log_interval, "%d"));
+    }
+
+    /******************************************************************************/
+    inline void setup(const utility::json::JsonObject &a_OBJECT) {
+        this->initialize();
+
+        read_json(&this->is_enabled,  //
+                  "is_enabled", a_OBJECT);
+
+        read_json(&this->iteration_max,  //
+                  "iteration_max", a_OBJECT);
+
+        read_json(&this->time_max,  //
+                  "time_max", a_OBJECT);
+
+        read_json(&this->time_offset,  //
+                  "time_offset", a_OBJECT);
+
+        read_json(&this->step_size_extend_rate,  //
+                  "step_size_extend_rate", a_OBJECT);
+
+        read_json(&this->step_size_reduce_rate,  //
+                  "step_size_reduce_rate", a_OBJECT);
+
+        read_json(&this->tolerance,  //
+                  "tolerance", a_OBJECT);
+
+        read_json(&this->queue_size,  //
+                  "queue_size", a_OBJECT);
+
+        read_json(&this->log_interval,  //
+                  "log_interval", a_OBJECT);
     }
 };
 }  // namespace printemps::option

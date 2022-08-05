@@ -637,7 +637,7 @@ class Model {
 
     /*************************************************************************/
     constexpr void setup(const option::Option &a_OPTION,
-        const bool   a_IS_ENABLED_PRINT) {
+                         const bool            a_IS_ENABLED_PRINT) {
         /**
          * Verify the problem.
          */
@@ -677,7 +677,7 @@ class Model {
          * Presolve the problem by removing redundant constraints and fixing
          * variables implicitly fixed.
          */
-        if (a_OPTION.is_enabled_presolve) {
+        if (a_OPTION.preprocess.is_enabled_presolve) {
             m_problem_size_reducer.setup(this);
             m_problem_size_reducer.reduce_problem_size(a_IS_ENABLED_PRINT);
         }
@@ -685,9 +685,9 @@ class Model {
         /**
          * Extract and eliminate the intermediate variables.
          */
-                this->setup_structure();
+        this->setup_structure();
         auto &reference = m_constraint_type_reference;
-        if (a_OPTION.is_enabled_presolve && m_is_linear &&
+        if (a_OPTION.preprocess.is_enabled_presolve && m_is_linear &&
             (reference.exclusive_or_ptrs.size() > 0 ||
              reference.inverted_integers_ptrs.size() > 0 ||
              reference.constant_sum_integers_ptrs.size() > 0 ||
@@ -719,7 +719,7 @@ class Model {
          * Remove redundant set variables.
          */
         int number_of_fixed_variables = 0;
-        if (a_OPTION.is_enabled_presolve && m_is_linear) {
+        if (a_OPTION.preprocess.is_enabled_presolve && m_is_linear) {
             number_of_fixed_variables =
                 m_problem_size_reducer.remove_redundant_set_variables(
                     a_IS_ENABLED_PRINT);
@@ -729,7 +729,7 @@ class Model {
          * Remove duplicated constraints.
          */
         int number_of_removed_constraints = 0;
-        if (a_OPTION.is_enabled_presolve) {
+        if (a_OPTION.preprocess.is_enabled_presolve) {
             number_of_removed_constraints =
                 m_problem_size_reducer.remove_duplicated_constraints(
                     a_IS_ENABLED_PRINT);
@@ -749,11 +749,12 @@ class Model {
          * than that of variables, this process will be skipped because it would
          * affect computational efficiency.
          */
-        if (a_OPTION.selection_mode != option::selection_mode::Off &&
+        if (a_OPTION.neighborhood.selection_mode !=
+                option::selection_mode::Off &&
             this->number_of_variables() > this->number_of_constraints()) {
             preprocess::SelectionExtractor<T_Variable, T_Expression>
                 selection_extractor(this);
-            selection_extractor.extract(a_OPTION.selection_mode,
+            selection_extractor.extract(a_OPTION.neighborhood.selection_mode,
                                         a_IS_ENABLED_PRINT);
         }
 
@@ -771,18 +772,21 @@ class Model {
          * Verify and correct the initial values.
          */
         verifier.verify_and_correct_selection_variables_initial_values(  //
-            a_OPTION.is_enabled_initial_value_correction, a_IS_ENABLED_PRINT);
+            a_OPTION.preprocess.is_enabled_initial_value_correction,
+            a_IS_ENABLED_PRINT);
 
         verifier.verify_and_correct_binary_variables_initial_values(
-            a_OPTION.is_enabled_initial_value_correction, a_IS_ENABLED_PRINT);
+            a_OPTION.preprocess.is_enabled_initial_value_correction,
+            a_IS_ENABLED_PRINT);
 
         verifier.verify_and_correct_integer_variables_initial_values(
-            a_OPTION.is_enabled_initial_value_correction, a_IS_ENABLED_PRINT);
+            a_OPTION.preprocess.is_enabled_initial_value_correction,
+            a_IS_ENABLED_PRINT);
 
         /**
          * Solve GF(2) equations if needed.
          */
-        if (a_OPTION.is_enabled_presolve &&
+        if (a_OPTION.preprocess.is_enabled_presolve &&
             m_constraint_type_reference.gf2_ptrs.size() > 0) {
             preprocess::GF2Solver<T_Variable, T_Expression> gf2_solver(this);
             const auto IS_SOLVED = gf2_solver.solve(a_IS_ENABLED_PRINT);
@@ -1179,7 +1183,7 @@ class Model {
 
     /*************************************************************************/
     constexpr void setup_neighborhood(const option::Option &a_OPTION,
-        const bool a_IS_ENABLED_PRINT) {
+                                      const bool a_IS_ENABLED_PRINT) {
         utility::print_single_line(a_IS_ENABLED_PRINT);
         utility::print_message("Detecting the neighborhood structure...",
                                a_IS_ENABLED_PRINT);
@@ -1193,27 +1197,27 @@ class Model {
         m_neighborhood.selection().setup(
             m_variable_reference.selection_variable_ptrs);
 
-        if (a_OPTION.is_enabled_exclusive_or_move) {
+        if (a_OPTION.neighborhood.is_enabled_exclusive_or_move) {
             m_neighborhood.exclusive_or().setup(
                 m_constraint_type_reference.exclusive_or_ptrs);
         }
 
-        if (a_OPTION.is_enabled_exclusive_nor_move) {
+        if (a_OPTION.neighborhood.is_enabled_exclusive_nor_move) {
             m_neighborhood.exclusive_nor().setup(
                 m_constraint_type_reference.exclusive_nor_ptrs);
         }
 
-        if (a_OPTION.is_enabled_inverted_integers_move) {
+        if (a_OPTION.neighborhood.is_enabled_inverted_integers_move) {
             m_neighborhood.inverted_integers().setup(
                 m_constraint_type_reference.inverted_integers_ptrs);
         }
 
-        if (a_OPTION.is_enabled_balanced_integers_move) {
+        if (a_OPTION.neighborhood.is_enabled_balanced_integers_move) {
             m_neighborhood.balanced_integers().setup(
                 m_constraint_type_reference.balanced_integers_ptrs);
         }
 
-        if (a_OPTION.is_enabled_constant_sum_integers_move) {
+        if (a_OPTION.neighborhood.is_enabled_constant_sum_integers_move) {
             m_neighborhood.constant_sum_integers().setup(
                 m_constraint_type_reference.constant_sum_integers_ptrs);
         }
@@ -1224,41 +1228,41 @@ class Model {
                 m_constraint_type_reference.constant_difference_integers_ptrs);
         }
 
-        if (a_OPTION.is_enabled_constant_ratio_integers_move) {
+        if (a_OPTION.neighborhood.is_enabled_constant_ratio_integers_move) {
             m_neighborhood.constant_ratio_integers().setup(
                 m_constraint_type_reference.constant_ratio_integers_ptrs);
         }
 
-        if (a_OPTION.is_enabled_aggregation_move) {
+        if (a_OPTION.neighborhood.is_enabled_aggregation_move) {
             m_neighborhood.aggregation().setup(
                 m_constraint_type_reference.aggregation_ptrs);
         }
 
-        if (a_OPTION.is_enabled_precedence_move) {
+        if (a_OPTION.neighborhood.is_enabled_precedence_move) {
             m_neighborhood.precedence().setup(
                 m_constraint_type_reference.precedence_ptrs);
         }
 
-        if (a_OPTION.is_enabled_variable_bound_move) {
+        if (a_OPTION.neighborhood.is_enabled_variable_bound_move) {
             m_neighborhood.variable_bound().setup(
                 m_constraint_type_reference.variable_bound_ptrs);
         }
 
-        if (a_OPTION.is_enabled_soft_selection_move) {
+        if (a_OPTION.neighborhood.is_enabled_soft_selection_move) {
             m_neighborhood.soft_selection().setup(
                 m_constraint_type_reference.soft_selection_ptrs);
         }
 
-        if (a_OPTION.is_enabled_chain_move) {
+        if (a_OPTION.neighborhood.is_enabled_chain_move) {
             m_neighborhood.chain().setup();
         }
 
-        if (a_OPTION.is_enabled_two_flip_move &&
+        if (a_OPTION.neighborhood.is_enabled_two_flip_move &&
             m_flippable_variable_ptr_pairs.size() > 0) {
             m_neighborhood.two_flip().setup(m_flippable_variable_ptr_pairs);
         }
 
-        if (a_OPTION.is_enabled_user_defined_move) {
+        if (a_OPTION.neighborhood.is_enabled_user_defined_move) {
             m_neighborhood.user_defined().setup();
         }
 

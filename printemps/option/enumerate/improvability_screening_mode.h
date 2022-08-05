@@ -12,9 +12,28 @@ enum ImprovabilityScreeningMode : int {  //
     Off,
     Soft,
     Aggressive,
-    Automatic,
-    Intensive
+    Intensive,
+    Automatic
 };
+
+/*****************************************************************************/
+static std::unordered_map<std::string, ImprovabilityScreeningMode>
+    ImprovabilityScreeningModeMap = {  //
+        {"Off", ImprovabilityScreeningMode::Off},
+        {"Soft", ImprovabilityScreeningMode::Soft},
+        {"Aggressive", ImprovabilityScreeningMode::Aggressive},
+        {"Intensive", ImprovabilityScreeningMode::Intensive},
+        {"Automatic", ImprovabilityScreeningMode::Automatic}};
+
+/*****************************************************************************/
+static std::unordered_map<ImprovabilityScreeningMode, std::string>
+    ImprovabilityScreeningModeInverseMap = {  //
+        {ImprovabilityScreeningMode::Off, "Off"},
+        {ImprovabilityScreeningMode::Soft, "Soft"},
+        {ImprovabilityScreeningMode::Aggressive, "Aggressive"},
+        {ImprovabilityScreeningMode::Intensive, "Intensive"},
+        {ImprovabilityScreeningMode::Automatic, "Automatic"}};
+
 }  // namespace printemps::option::improvability_screening_mode
 
 #endif

@@ -12,6 +12,18 @@ enum TabuMode : int {
     All,
     Any,
 };
+
+/*****************************************************************************/
+static std::unordered_map<std::string, TabuMode> TabuModeMap = {
+    {"All", TabuMode::All},  //
+    {"Any", TabuMode::Any}   //
+};
+
+/*****************************************************************************/
+static std::unordered_map<TabuMode, std::string> TabuModeInverseMap = {
+    {TabuMode::All, "All"},  //
+    {TabuMode::Any, "Any"}};
+
 }  // namespace printemps::option::tabu_mode
 
 #endif
