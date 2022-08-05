@@ -31,7 +31,7 @@ struct TabuSearchCoreState {
     utility::Range<double> global_augmented_objective_range;
     utility::Range<double> local_penalty_range;
 
-    double oscillation;
+    int number_of_effective_updates;
 
     int  number_of_moves;
     long number_of_evaluated_moves;
@@ -95,7 +95,7 @@ struct TabuSearchCoreState {
         this->global_augmented_objective_range.initialize();
         this->local_penalty_range.initialize();
 
-        this->oscillation = 0.0;
+        this->number_of_effective_updates = 0;
 
         this->number_of_moves           = 0;
         this->number_of_evaluated_moves = 0;

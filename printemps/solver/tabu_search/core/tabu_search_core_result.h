@@ -86,8 +86,8 @@ struct TabuSearchCoreResult {
             std::max(1.0, a_STATE.local_penalty_range.min());
 
         const double PERFORMANCE =
-            a_STATE.oscillation / a_STATE.iteration /
-            std::max(1.0, a_STATE.local_augmented_objective_range.range());
+            static_cast<double>(a_STATE.number_of_effective_updates) /
+            a_STATE.iteration;
 
         this->objective_constraint_rate = OBJECTIVE_CONSTRAINT_RATE;
         this->global_augmented_objective_range =
