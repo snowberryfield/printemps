@@ -98,8 +98,11 @@ class TabuSearchCoreStateManager {
         /**
          * Initialize the range of local penalty.
          */
-        m_state.local_penalty_range.update(
-            m_state.current_solution_score.local_penalty);
+        m_state.local_penalty_range.update(HUGE_VALF);
+        if (!m_state.current_solution_score.is_feasible) {
+            m_state.local_penalty_range.update(
+                m_state.current_solution_score.local_penalty);
+        }
 
         /**
          * Initialize the primal and dual intensities.
@@ -257,8 +260,10 @@ class TabuSearchCoreStateManager {
 
     /*************************************************************************/
     inline constexpr void update_local_penalty_range(void) {
-        m_state.local_penalty_range.update(
-            m_state.current_solution_score.local_penalty);
+        if (!m_state.current_solution_score.is_feasible) {
+            m_state.local_penalty_range.update(
+                m_state.current_solution_score.local_penalty);
+        }
     }
 
     /*************************************************************************/
