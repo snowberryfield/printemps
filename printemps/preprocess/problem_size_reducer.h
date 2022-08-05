@@ -537,10 +537,6 @@ class ProblemSizeReducer {
     /*************************************************************************/
     inline constexpr int remove_redundant_set_variables(
         const bool a_IS_ENABLED_PRINT) {
-        /**
-         * NOTE: This function must be called after extracting selection
-         * variables.
-         */
         utility::print_single_line(a_IS_ENABLED_PRINT);
         utility::print_message(
             "Removing redundant variables which compose set "
@@ -1071,25 +1067,27 @@ class ProblemSizeReducer {
     /*************************************************************************/
     inline constexpr std::pair<int, int> remove_redundant_set_constraints(
         const bool a_IS_ENABLED_PRINT) {
-        /**
-         * NOTE: This function is preliminarily implemented and not incorporated
-         * in the algorithm.
-         */
         utility::print_single_line(a_IS_ENABLED_PRINT);
         utility::print_message(
-            "Removing redundant set patritioning constraints and included "
-            "variables...",
+            "Removing redundant exclusive OR and set partitioning constraints "
+            "and included variables... ",
             a_IS_ENABLED_PRINT);
 
-        auto set_partitioning_ptrs =
+        auto &exclusive_or_ptrs =
+            m_model_ptr->constraint_type_reference().exclusive_or_ptrs;
+        auto &set_partitioning_constraint_ptrs =
             m_model_ptr->constraint_type_reference().set_partitioning_ptrs;
+        auto constraint_ptrs = exclusive_or_ptrs;
+        constraint_ptrs.insert(constraint_ptrs.end(),
+                               set_partitioning_constraint_ptrs.begin(),
+                               set_partitioning_constraint_ptrs.end());
 
         int number_of_newly_disabled_constraints = 0;
         int number_of_newly_fixed_variables      = 0;
 
-        const int SET_PARTITIONINGS_SIZE = set_partitioning_ptrs.size();
+        const int CONSTRAINTS_SIZE = constraint_ptrs.size();
 
-        std::sort(set_partitioning_ptrs.begin(), set_partitioning_ptrs.end(),
+        std::sort(constraint_ptrs.begin(), constraint_ptrs.end(),
                   [](const auto &a_LHS, const auto &a_RHS) {
                       return a_LHS->expression().sensitivities().size() >
                              a_RHS->expression().sensitivities().size();
@@ -1097,17 +1095,17 @@ class ProblemSizeReducer {
 
         std::vector<std::unordered_set<
             model_component::Variable<T_Variable, T_Expression> *>>
-            variable_ptr_sets(SET_PARTITIONINGS_SIZE);
+            variable_ptr_sets(CONSTRAINTS_SIZE);
 
-        for (auto i = 0; i < SET_PARTITIONINGS_SIZE; i++) {
+        for (auto i = 0; i < CONSTRAINTS_SIZE; i++) {
             for (const auto &sensitivity :
-                 set_partitioning_ptrs[i]->expression().sensitivities()) {
+                 constraint_ptrs[i]->expression().sensitivities()) {
                 variable_ptr_sets[i].insert(sensitivity.first);
             }
         }
 
-        for (auto i = 0; i < SET_PARTITIONINGS_SIZE - 1; i++) {
-            for (auto j = i + 1; j < SET_PARTITIONINGS_SIZE; j++) {
+        for (auto i = 0; i < CONSTRAINTS_SIZE - 1; i++) {
+            for (auto j = i + 1; j < CONSTRAINTS_SIZE; j++) {
                 bool is_included = true;
                 for (const auto &variable_ptr : variable_ptr_sets[j]) {
                     if (variable_ptr_sets[i].find(variable_ptr) ==
@@ -1118,10 +1116,10 @@ class ProblemSizeReducer {
                 }
 
                 if (is_included) {
-                    set_partitioning_ptrs[i]->disable();
+                    constraint_ptrs[i]->disable();
                     utility::print_message(  //
-                        "The redundant set partitioning constraint " +
-                            set_partitioning_ptrs[i]->name() + " was removed.",
+                        "The redundant constraint " +
+                            constraint_ptrs[i]->name() + " was removed.",
                         a_IS_ENABLED_PRINT);
 
                     for (const auto &variable_ptr : variable_ptr_sets[i]) {
@@ -1130,9 +1128,8 @@ class ProblemSizeReducer {
                             variable_ptr->fix_by(0);
                             utility::print_message(  //
                                 "The value of redundant variable " +
-                                    variable_ptr->name() +
-                                    " in partitioning constraint " +
-                                    set_partitioning_ptrs[i]->name() +
+                                    variable_ptr->name() + " in constraint " +
+                                    constraint_ptrs[i]->name() +
                                     " was fixed at 0.",
                                 a_IS_ENABLED_PRINT);
                             number_of_newly_fixed_variables++;
@@ -1150,7 +1147,6 @@ class ProblemSizeReducer {
                               number_of_newly_fixed_variables);
     }
 };
-
 }  // namespace printemps::preprocess
 #endif
 /*****************************************************************************/
