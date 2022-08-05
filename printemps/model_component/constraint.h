@@ -61,9 +61,17 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     bool m_is_user_defined_selection;
 
     bool m_is_singleton;
+    bool m_is_exclusive_or;
+    bool m_is_exclusive_nor;
+    bool m_is_inverted_integers;
+    bool m_is_balanced_integers;
+    bool m_is_constant_sum_integers;
+    bool m_is_constant_difference_integers;
+    bool m_is_constant_ratio_integers;
     bool m_is_aggregation;
     bool m_is_precedence;
     bool m_is_variable_bound;
+    bool m_is_trinomial_exclusive_nor;
     bool m_is_set_partitioning;
     bool m_is_set_packing;
     bool m_is_set_covering;
@@ -74,21 +82,17 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     bool m_is_binary_flow;
     bool m_is_integer_flow;
     bool m_is_soft_selection;
-    bool m_is_bin_packing;
-    bool m_is_knapsack;
-    bool m_is_integer_knapsack;
     bool m_is_min_max;
     bool m_is_max_min;
     bool m_is_intermediate;
+    bool m_is_bin_packing;
+    bool m_is_knapsack;
+    bool m_is_integer_knapsack;
     bool m_is_gf2;
     bool m_is_general_linear;
     bool m_has_only_binary_coefficient;
 
-    bool m_has_aux_lower_bound;
-    bool m_has_aux_upper_bound;
-
-    Variable<T_Variable, T_Expression> *m_aux_variable_ptr;
-    T_Expression                        m_aux_variable_coefficient;
+    Variable<T_Variable, T_Expression> *m_key_variable_ptr;
 
     /*************************************************************************/
     /// Default constructor
@@ -225,36 +229,40 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
 
     /*************************************************************************/
     inline constexpr void clear_constraint_type(void) {
-        m_is_singleton          = false;
-        m_is_aggregation        = false;
-        m_is_precedence         = false;
-        m_is_variable_bound     = false;
-        m_is_set_partitioning   = false;
-        m_is_set_packing        = false;
-        m_is_set_covering       = false;
-        m_is_cardinality        = false;
-        m_is_invariant_knapsack = false;
-        m_is_multiple_covering  = false;
-        m_is_equation_knapsack  = false;
-        m_is_binary_flow        = false;
-        m_is_integer_flow       = false;
-        m_is_soft_selection     = false;
-        m_is_bin_packing        = false;
-        m_is_knapsack           = false;
-        m_is_integer_knapsack   = false;
-        m_is_min_max            = false;
-        m_is_max_min            = false;
-        m_is_intermediate       = false;
-        m_is_gf2                = false;
-        m_is_general_linear     = false;
+        m_is_singleton                    = false;
+        m_is_exclusive_or                 = false;
+        m_is_exclusive_nor                = false;
+        m_is_inverted_integers            = false;
+        m_is_balanced_integers            = false;
+        m_is_constant_sum_integers        = false;
+        m_is_constant_difference_integers = false;
+        m_is_constant_ratio_integers      = false;
+        m_is_aggregation                  = false;
+        m_is_precedence                   = false;
+        m_is_variable_bound               = false;
+        m_is_trinomial_exclusive_nor      = false;
+        m_is_set_partitioning             = false;
+        m_is_set_packing                  = false;
+        m_is_set_covering                 = false;
+        m_is_cardinality                  = false;
+        m_is_invariant_knapsack           = false;
+        m_is_multiple_covering            = false;
+        m_is_equation_knapsack            = false;
+        m_is_binary_flow                  = false;
+        m_is_integer_flow                 = false;
+        m_is_soft_selection               = false;
+        m_is_min_max                      = false;
+        m_is_max_min                      = false;
+        m_is_intermediate                 = false;
+        m_is_bin_packing                  = false;
+        m_is_knapsack                     = false;
+        m_is_integer_knapsack             = false;
+        m_is_gf2                          = false;
+        m_is_general_linear               = false;
 
         m_has_only_binary_coefficient = false;
 
-        m_has_aux_lower_bound = false;
-        m_has_aux_upper_bound = false;
-
-        m_aux_variable_ptr         = nullptr;
-        m_aux_variable_coefficient = 0;
+        m_key_variable_ptr = nullptr;
     }
 
     /*************************************************************************/
@@ -390,59 +398,221 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
             return;
         }
 
-        /// Aggregation (and Set Partitioning)
+        /// XOR, XNOR, Inverted Integers, Balanced Integers, Constant Sum
+        /// Integers, Constant Difference Integer, Constant Ratio Integers, and
+        /// Aggregation
         if (m_expression.sensitivities().size() == 2 &&
             m_sense == ConstraintSense::Equal) {
-            m_is_aggregation                 = true;
-            bool has_only_binary_coefficient = true;
+            bool is_valid = true;
             for (const auto &sensitivity : m_expression.sensitivities()) {
-                if ((sensitivity.first->sense() != VariableSense::Binary) &&
-                    (sensitivity.first->sense() != VariableSense::Selection)) {
-                    has_only_binary_coefficient = false;
-                    break;
-                }
-                if (sensitivity.second != 1) {
-                    has_only_binary_coefficient = false;
+                if (sensitivity.first->is_fixed()) {
+                    is_valid = false;
                     break;
                 }
             }
 
-            if (has_only_binary_coefficient &&
-                m_expression.constant_value() == -1) {
-                m_has_only_binary_coefficient = true;
-                m_is_set_partitioning         = true;
+            if (is_valid) {
+                auto &     sensitivities  = m_expression.sensitivities();
+                const auto CONSTANT_VALUE = m_expression.constant_value();
+                std::vector<Variable<T_Variable, T_Expression> *> variable_ptrs;
+                std::vector<T_Expression>                         coefficients;
+
+                for (const auto &sensitivity : sensitivities) {
+                    variable_ptrs.push_back(sensitivity.first);
+                    coefficients.push_back(sensitivity.second);
+                }
+
+                if ((variable_ptrs[0]->sense() == VariableSense::Binary ||
+                     variable_ptrs[0]->sense() ==
+                         VariableSense::DependentBinary) &&
+                    (variable_ptrs[1]->sense() == VariableSense::Binary ||
+                     variable_ptrs[1]->sense() ==
+                         VariableSense::DependentBinary)) {
+                    if (variable_ptrs[0]->name() < variable_ptrs[1]->name()) {
+                        m_key_variable_ptr = variable_ptrs[0];
+                    } else {
+                        m_key_variable_ptr = variable_ptrs[1];
+                    }
+                    if (coefficients[0] == 1 && coefficients[1] == 1 &&
+                        CONSTANT_VALUE == -1) {
+                        m_is_exclusive_or = true;
+                        return;
+                    } else if (coefficients[0] == -1 && coefficients[1] == -1 &&
+                               CONSTANT_VALUE == 1) {
+                        m_is_exclusive_or = true;
+                        return;
+                    } else if (coefficients[0] == 1 && coefficients[1] == -1 &&
+                               CONSTANT_VALUE == 0) {
+                        m_is_exclusive_nor = true;
+                        return;
+                    } else if (coefficients[0] == -1 && coefficients[1] == 1 &&
+                               CONSTANT_VALUE == 0) {
+                        m_is_exclusive_nor = true;
+                        return;
+                    }
+                    m_key_variable_ptr = nullptr;
+                }
+
+                if ((variable_ptrs[0]->sense() == VariableSense::Integer ||
+                     variable_ptrs[0]->sense() ==
+                         VariableSense::DependentInteger) &&
+                    (variable_ptrs[1]->sense() == VariableSense::Integer ||
+                     variable_ptrs[1]->sense() ==
+                         VariableSense::DependentInteger)) {
+                    if (variable_ptrs[0]->name() < variable_ptrs[1]->name()) {
+                        m_key_variable_ptr = variable_ptrs[0];
+                    } else {
+                        m_key_variable_ptr = variable_ptrs[1];
+                    }
+                    if (coefficients[0] == 1 && coefficients[1] == 1 &&
+                        CONSTANT_VALUE == 0) {
+                        m_is_inverted_integers = true;
+                        return;
+                    } else if (coefficients[0] == -1 && coefficients[1] == -1 &&
+                               CONSTANT_VALUE == 0) {
+                        m_is_inverted_integers = true;
+                        return;
+                    } else if (coefficients[0] == 1 && coefficients[1] == -1 &&
+                               CONSTANT_VALUE == 0) {
+                        m_is_balanced_integers = true;
+                        return;
+                    } else if (coefficients[0] == -1 && coefficients[1] == 1 &&
+                               CONSTANT_VALUE == 0) {
+                        m_is_balanced_integers = true;
+                        return;
+                    } else if (coefficients[0] == 1 && coefficients[1] == 1 &&
+                               CONSTANT_VALUE != 0) {
+                        m_is_constant_sum_integers = true;
+                        return;
+                    } else if (coefficients[0] == -1 && coefficients[1] == -1 &&
+                               CONSTANT_VALUE != 0) {
+                        m_is_constant_sum_integers = true;
+                        return;
+                    } else if (coefficients[0] == 1 && coefficients[1] == -1 &&
+                               CONSTANT_VALUE != 0) {
+                        m_is_constant_difference_integers = true;
+                        return;
+                    } else if (coefficients[0] == -1 && coefficients[1] == 1 &&
+                               CONSTANT_VALUE != 0) {
+                        m_is_constant_difference_integers = true;
+                        return;
+                    } else if (fabs(coefficients[0]) == 1 &&
+                               fabs(coefficients[1]) != 1 &&
+                               CONSTANT_VALUE == 0) {
+                        m_is_constant_ratio_integers = true;
+                        m_key_variable_ptr           = variable_ptrs[0];
+                        return;
+                    } else if (fabs(coefficients[0]) != 1 &&
+                               fabs(coefficients[1]) == 1 &&
+                               CONSTANT_VALUE == 0) {
+                        m_is_constant_ratio_integers = true;
+                        m_key_variable_ptr           = variable_ptrs[1];
+                        return;
+                    }
+                    m_key_variable_ptr = nullptr;
+                }
+
+                m_is_aggregation = true;
+                return;
             }
-            return;
         }
 
         /// Precedence or Variable Bound
         if (m_expression.sensitivities().size() == 2 &&
             m_sense != ConstraintSense::Equal) {
-            auto &sensitivities = m_expression.sensitivities();
-            std::vector<Variable<T_Variable, T_Expression> *> variable_ptrs;
-            std::vector<T_Expression>                         coefficients;
-
-            for (const auto &sensitivity : sensitivities) {
-                variable_ptrs.push_back(sensitivity.first);
-                coefficients.push_back(sensitivity.second);
+            bool is_valid = true;
+            for (const auto &sensitivity : m_expression.sensitivities()) {
+                if (sensitivity.first->is_fixed()) {
+                    is_valid = false;
+                    break;
+                }
             }
+            if (is_valid) {
+                auto &sensitivities = m_expression.sensitivities();
+                std::vector<Variable<T_Variable, T_Expression> *> variable_ptrs;
+                std::vector<T_Expression>                         coefficients;
 
-            /// Precedence
-            if ((variable_ptrs[0]->sense() == variable_ptrs[1]->sense()) &&
-                (coefficients[0] == -coefficients[1])) {
-                m_is_precedence = true;
+                for (const auto &sensitivity : sensitivities) {
+                    variable_ptrs.push_back(sensitivity.first);
+                    coefficients.push_back(sensitivity.second);
+                }
+
+                /// Precedence
+                if ((variable_ptrs[0]->sense() == variable_ptrs[1]->sense()) &&
+                    (coefficients[0] == -coefficients[1])) {
+                    m_is_precedence = true;
+                    return;
+                }
+
+                /// Variable Bound
+                /**
+                 * At least one variables of the two must be binary according to
+                 * the definition of Variable Bound proposed by MIPLIB 2017. But
+                 * for convenience of the neighborhood definition, both of them
+                 * can be integer(non-binary) variable.
+                 */
+                m_is_variable_bound = true;
                 return;
             }
+        }
 
-            /// Variable Bound
-            /**
-             * At least one variables of the two must be binary according to the
-             * definition of Variable Bound proposed by MIPLIB 2017. But for
-             * convenience of the neighborhood definition, both of them can be
-             * integer(non-binary) variable.
-             */
-            m_is_variable_bound = true;
-            return;
+        /// Trinomial XNOR
+        if (m_expression.sensitivities().size() == 3 &&
+            m_sense == ConstraintSense::Equal) {
+            bool is_valid = true;
+            for (const auto &sensitivity : m_expression.sensitivities()) {
+                if (sensitivity.first->is_fixed()) {
+                    is_valid = false;
+                    break;
+                }
+            }
+
+            if (is_valid) {
+                auto &sensitivities = m_expression.sensitivities();
+                std::vector<Variable<T_Variable, T_Expression> *>
+                    plus_one_binary_variable_ptrs;
+                std::vector<Variable<T_Variable, T_Expression> *>
+                    minus_one_binary_variable_ptrs;
+                std::vector<Variable<T_Variable, T_Expression> *>
+                    plus_two_binary_variable_ptrs;
+                std::vector<Variable<T_Variable, T_Expression> *>
+                    minus_two_binary_variable_ptrs;
+
+                for (const auto &sensitivity : sensitivities) {
+                    if (sensitivity.first->sense() != VariableSense::Binary &&
+                        sensitivity.first->sense() !=
+                            VariableSense::DependentBinary) {
+                        is_valid = false;
+                        break;
+                    }
+                    if (sensitivity.second == 1) {
+                        plus_one_binary_variable_ptrs.push_back(
+                            sensitivity.first);
+                    } else if (sensitivity.second == -1) {
+                        minus_one_binary_variable_ptrs.push_back(
+                            sensitivity.first);
+                    } else if (sensitivity.second == 2) {
+                        plus_two_binary_variable_ptrs.push_back(
+                            sensitivity.first);
+                    } else if (sensitivity.second == -2) {
+                        minus_two_binary_variable_ptrs.push_back(
+                            sensitivity.first);
+                    }
+                }
+
+                if (is_valid && plus_one_binary_variable_ptrs.size() == 2 &&
+                    minus_two_binary_variable_ptrs.size() == 1) {
+                    m_is_trinomial_exclusive_nor = true;
+                    m_key_variable_ptr = minus_two_binary_variable_ptrs[0];
+                    return;
+                } else if (is_valid &&
+                           minus_one_binary_variable_ptrs.size() == 2 &&
+                           plus_two_binary_variable_ptrs.size() == 1) {
+                    m_is_trinomial_exclusive_nor = true;
+                    m_key_variable_ptr = plus_two_binary_variable_ptrs[0];
+                    return;
+                }
+            }
         }
 
         /// Set Partitioning or Set Packing, Set Covering, Cardinality,
@@ -508,148 +678,13 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
             }
         }
 
-        /// Min-Max, Max-Min, Intermediate
-        {
-            bool is_valid                                          = true;
-            int  number_of_integer_variables_coefficient_plus_one  = 0;
-            int  number_of_integer_variables_coefficient_minus_one = 0;
-            int  number_of_mutable_integer_variables               = 0;
-
-            Variable<T_Variable, T_Expression> *aux_variable_ptr      = nullptr;
-            Variable<T_Variable, T_Expression> *aux_variable_ptr_plus = nullptr;
-            Variable<T_Variable, T_Expression> *aux_variable_ptr_minus =
-                nullptr;
-            T_Expression aux_variable_coefficient = 0;
-
-            auto is_integer = [](const T_Expression a_VALUE) {
-                return fabs(a_VALUE - floor(a_VALUE)) < constant::EPSILON_10;
-            };
-
-            auto constant_value = m_expression.constant_value();
-            if (!is_integer(constant_value)) {
-                is_valid = false;
-            }
-
-            bool is_all_mutable_variable_with_plus_minus_one_coefficient = true;
-            if (is_valid) {
-                for (const auto &sensitivity : m_expression.sensitivities()) {
-                    auto variable_ptr = sensitivity.first;
-                    auto coefficient  = sensitivity.second;
-
-                    if (!is_integer(coefficient)) {
-                        is_valid = false;
-                        break;
-                    }
-                    if (fabs(coefficient) != 1) {
-                        is_all_mutable_variable_with_plus_minus_one_coefficient =
-                            false;
-                    }
-                    if ((variable_ptr->sense() == VariableSense::Integer ||
-                         variable_ptr->sense() ==
-                             VariableSense::Intermediate) &&
-                        !variable_ptr->is_fixed()) {
-                        number_of_mutable_integer_variables++;
-                        if (coefficient == 1) {
-                            aux_variable_ptr_plus = variable_ptr;
-                            number_of_integer_variables_coefficient_plus_one++;
-                        } else if (coefficient == -1) {
-                            aux_variable_ptr_minus = variable_ptr;
-                            number_of_integer_variables_coefficient_minus_one++;
-                        }
-                    }
-                }
-            }
-
-            if (is_valid) {
-                if (number_of_integer_variables_coefficient_minus_one == 1 &&
-                    (is_all_mutable_variable_with_plus_minus_one_coefficient ||
-                     number_of_integer_variables_coefficient_plus_one == 0)) {
-                    is_valid                 = true;
-                    aux_variable_ptr         = aux_variable_ptr_minus;
-                    aux_variable_coefficient = -1;
-                } else if (
-                    number_of_integer_variables_coefficient_plus_one == 1 &&
-                    (is_all_mutable_variable_with_plus_minus_one_coefficient ||
-                     number_of_integer_variables_coefficient_minus_one == 0)) {
-                    is_valid                 = true;
-                    aux_variable_ptr         = aux_variable_ptr_plus;
-                    aux_variable_coefficient = 1;
-                } else {
-                    is_valid = false;
-                }
-            }
-
-            if (is_valid) {
-                auto rest_part_expression = m_expression.copy();
-                rest_part_expression.erase(aux_variable_ptr);
-                T_Expression rest_part_lower_bound =
-                    rest_part_expression.lower_bound();
-                T_Expression rest_part_upper_bound =
-                    rest_part_expression.upper_bound();
-
-                if (aux_variable_coefficient > 0) {
-                    std::swap(rest_part_lower_bound, rest_part_upper_bound);
-                    rest_part_lower_bound *= -1.0;
-                    rest_part_upper_bound *= -1.0;
-                }
-
-                if (aux_variable_ptr->lower_bound() != constant::INT_HALF_MIN &&
-                    aux_variable_ptr->lower_bound() > rest_part_lower_bound) {
-                    m_has_aux_lower_bound = true;
-                } else {
-                    m_has_aux_lower_bound = false;
-                }
-
-                if (aux_variable_ptr->upper_bound() != constant::INT_HALF_MAX &&
-                    aux_variable_ptr->upper_bound() < rest_part_upper_bound) {
-                    m_has_aux_upper_bound = true;
-                } else {
-                    m_has_aux_upper_bound = false;
-                }
-
-                int NUMBER_OF_INTEGER_VARIABLES_COEFFICIENT_ONE =
-                    number_of_integer_variables_coefficient_plus_one +
-                    number_of_integer_variables_coefficient_minus_one;
-
-                if (NUMBER_OF_INTEGER_VARIABLES_COEFFICIENT_ONE == 1) {
-                    if ((m_sense == ConstraintSense::Less &&
-                         aux_variable_coefficient < 0) ||
-                        (m_sense == ConstraintSense::Greater &&
-                         aux_variable_coefficient > 0)) {
-                        m_is_min_max       = true;
-                        m_aux_variable_ptr = aux_variable_ptr;
-                        return;
-                    }
-
-                    if ((m_sense == ConstraintSense::Greater &&
-                         aux_variable_coefficient < 0) ||
-                        (m_sense == ConstraintSense::Less &&
-                         aux_variable_coefficient > 0)) {
-                        m_is_max_min       = true;
-                        m_aux_variable_ptr = aux_variable_ptr;
-                        return;
-                    }
-                }
-
-                if (m_sense == ConstraintSense::Equal) {
-                    m_is_intermediate  = true;
-                    m_aux_variable_ptr = aux_variable_ptr;
-                    return;
-                }
-
-                m_aux_variable_ptr    = nullptr;
-                m_has_aux_lower_bound = false;
-                m_has_aux_upper_bound = false;
-            }
-        }
-
         /// Binary Flow, Integer Flow, Soft Selection
         {
             if (m_sense == ConstraintSense::Equal) {
                 std::vector<Variable<T_Variable, T_Expression> *>
-                    plus_one_coefficient_variable_ptrs;
+                    plus_one_variable_ptrs;
                 std::vector<Variable<T_Variable, T_Expression> *>
-                    minus_one_coefficient_variable_ptrs;
+                    minus_one_variable_ptrs;
 
                 bool is_plus_or_minus_one_coefficient = true;
                 for (const auto &sensitivity : m_expression.sensitivities()) {
@@ -658,17 +693,18 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
                         break;
                     }
                     if (sensitivity.second == 1) {
-                        plus_one_coefficient_variable_ptrs.push_back(
-                            sensitivity.first);
+                        plus_one_variable_ptrs.push_back(sensitivity.first);
                     } else {
-                        minus_one_coefficient_variable_ptrs.push_back(
-                            sensitivity.first);
+                        minus_one_variable_ptrs.push_back(sensitivity.first);
                     }
                 }
 
                 if (is_plus_or_minus_one_coefficient) {
-                    bool has_only_binary_variables  = true;
-                    bool has_only_integer_variables = true;
+                    bool       has_only_binary_variables  = true;
+                    bool       has_only_integer_variables = true;
+                    const auto MINUS_ONE_SIZE = minus_one_variable_ptrs.size();
+                    const auto PLUS_ONE_SIZE  = plus_one_variable_ptrs.size();
+
                     for (const auto &sensitivity :
                          m_expression.sensitivities()) {
                         if ((sensitivity.first->sense() !=
@@ -687,27 +723,24 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
                         }
                     }
                     if (has_only_binary_variables) {
-                        if (plus_one_coefficient_variable_ptrs.size() == 1 &&
-                            minus_one_coefficient_variable_ptrs.size() > 0 &&
+                        if (PLUS_ONE_SIZE == 1 && MINUS_ONE_SIZE > 0 &&
+                            !plus_one_variable_ptrs[0]->is_fixed() &&
                             m_expression.constant_value() == 0) {
                             m_is_soft_selection = true;
-                            m_aux_variable_ptr =
-                                plus_one_coefficient_variable_ptrs.front();
-                            m_aux_variable_coefficient = 1.0;
+                            m_key_variable_ptr  = plus_one_variable_ptrs[0];
                         } else if  //
-                            (plus_one_coefficient_variable_ptrs.size() > 0 &&
-                             minus_one_coefficient_variable_ptrs.size() == 1 &&
+                            (PLUS_ONE_SIZE > 0 && MINUS_ONE_SIZE == 1 &&
+                             !minus_one_variable_ptrs[0]->is_fixed() &&
                              m_expression.constant_value() == 0) {
                             m_is_soft_selection = true;
-                            m_aux_variable_ptr =
-                                minus_one_coefficient_variable_ptrs.front();
-                            m_aux_variable_coefficient = -1.0;
+                            m_key_variable_ptr  = minus_one_variable_ptrs[0];
                         } else {
                             m_is_binary_flow = true;
                         }
 
                         return;
-                    } else if (has_only_integer_variables) {
+                    } else if (has_only_integer_variables &&
+                               PLUS_ONE_SIZE > 1 && MINUS_ONE_SIZE > 1) {
                         m_is_integer_flow = true;
                         return;
                     }
@@ -715,58 +748,191 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
             }
         }
 
-        /// Equation knapsack, or Binpacking, Knapsack
+        /// Min-Max, Max-Min, Intermediate
         {
-            bool has_only_binary_variables = true;
-            bool has_bin_packing_variable  = false;
+            bool is_valid = true;
+            std::vector<Variable<T_Variable, T_Expression> *>
+                plus_one_integer_variable_ptrs;
+            std::vector<Variable<T_Variable, T_Expression> *>
+                minus_one_integer_variable_ptrs;
+
+            auto is_integer = [](const T_Expression a_VALUE) {
+                return fabs(a_VALUE - floor(a_VALUE)) < constant::EPSILON_10;
+            };
+
+            auto constant_value = m_expression.constant_value();
+            if (!is_integer(constant_value)) {
+                is_valid = false;
+            }
+
+            if (is_valid) {
+                for (const auto &sensitivity : m_expression.sensitivities()) {
+                    auto variable_ptr = sensitivity.first;
+                    auto coefficient  = sensitivity.second;
+
+                    if (!is_integer(coefficient)) {
+                        is_valid = false;
+                        break;
+                    }
+
+                    if ((variable_ptr->sense() == VariableSense::Integer ||
+                         variable_ptr->sense() ==
+                             VariableSense::DependentInteger) &&
+                        !variable_ptr->is_fixed()) {
+                        if (coefficient == 1) {
+                            plus_one_integer_variable_ptrs.push_back(
+                                variable_ptr);
+                        } else if (coefficient == -1) {
+                            minus_one_integer_variable_ptrs.push_back(
+                                variable_ptr);
+                        }
+                    }
+                }
+            }
+
+            if (is_valid) {
+                const auto MINUS_ONE_SIZE =
+                    minus_one_integer_variable_ptrs.size();
+                const auto PLUS_ONE_SIZE =
+                    plus_one_integer_variable_ptrs.size();
+                const auto &SENSITIVITIES = m_expression.sensitivities();
+
+                if (m_sense == ConstraintSense::Less &&  //
+                    MINUS_ONE_SIZE == 1 && PLUS_ONE_SIZE == 0 &&
+                    SENSITIVITIES.at(minus_one_integer_variable_ptrs[0]) < 0) {
+                    m_is_min_max       = true;
+                    m_key_variable_ptr = minus_one_integer_variable_ptrs[0];
+                    return;
+                }
+
+                if (m_sense == ConstraintSense::Greater &&  //
+                    PLUS_ONE_SIZE == 1 && MINUS_ONE_SIZE == 0 &&
+                    SENSITIVITIES.at(plus_one_integer_variable_ptrs[0]) > 0) {
+                    m_is_min_max       = true;
+                    m_key_variable_ptr = plus_one_integer_variable_ptrs[0];
+                    return;
+                }
+
+                if (m_sense == ConstraintSense::Greater &&  //
+                    MINUS_ONE_SIZE == 1 && PLUS_ONE_SIZE == 0 &&
+                    SENSITIVITIES.at(minus_one_integer_variable_ptrs[0]) < 0) {
+                    m_is_max_min       = true;
+                    m_key_variable_ptr = minus_one_integer_variable_ptrs[0];
+                    return;
+                }
+
+                if (m_sense == ConstraintSense::Less &&  //
+                    PLUS_ONE_SIZE == 1 && MINUS_ONE_SIZE == 0 &&
+                    SENSITIVITIES.at(plus_one_integer_variable_ptrs[0]) > 0) {
+                    m_is_max_min       = true;
+                    m_key_variable_ptr = plus_one_integer_variable_ptrs[0];
+                    return;
+                }
+
+                if (m_sense == ConstraintSense::Equal &&  //
+                    MINUS_ONE_SIZE == 1 && PLUS_ONE_SIZE != 1) {
+                    m_is_intermediate  = true;
+                    m_key_variable_ptr = minus_one_integer_variable_ptrs[0];
+                    return;
+                }
+
+                if (m_sense == ConstraintSense::Equal &&  //
+                    PLUS_ONE_SIZE == 1 && MINUS_ONE_SIZE != 1) {
+                    m_is_intermediate  = true;
+                    m_key_variable_ptr = plus_one_integer_variable_ptrs[0];
+                    return;
+                }
+
+                if (m_sense == ConstraintSense::Equal &&  //
+                    PLUS_ONE_SIZE + MINUS_ONE_SIZE >= 1) {
+                    auto variable_ptrs = minus_one_integer_variable_ptrs;
+                    variable_ptrs.insert(variable_ptrs.end(),
+                                         plus_one_integer_variable_ptrs.begin(),
+                                         plus_one_integer_variable_ptrs.end());
+
+                    std::sort(variable_ptrs.begin(), variable_ptrs.end(),
+                              [](const auto &a_FIRST, const auto &a_SECOND) {
+                                  return a_FIRST->name() < a_SECOND->name();
+                              });
+
+                    Variable<T_Variable, T_Expression> *key_variable_ptr =
+                        *std::max_element(
+                            variable_ptrs.begin(), variable_ptrs.end(),
+                            [](const auto &a_FIRST, const auto &a_SECOND) {
+                                return a_FIRST->range() < a_SECOND->range();
+                            });
+
+                    m_is_intermediate  = true;
+                    m_key_variable_ptr = key_variable_ptr;
+                    return;
+                }
+
+                m_key_variable_ptr = nullptr;
+            }
+        }
+
+        /// Equation knapsack, Bin Packing, Knapsack, and Integer Knapsack
+        {
+            bool has_only_binary_variables      = true;
+            bool has_bin_packing_variable       = false;
+            bool has_only_positive_coefficients = true;
+            bool has_only_negative_coefficients = true;
 
             for (const auto &sensitivity : m_expression.sensitivities()) {
                 if ((sensitivity.first->sense() != VariableSense::Binary) &&
                     (sensitivity.first->sense() != VariableSense::Selection)) {
                     has_only_binary_variables = false;
-                    break;
                 }
                 if (sensitivity.second == -m_expression.constant_value()) {
                     has_bin_packing_variable = true;
+                }
+
+                if (sensitivity.second < 0) {
+                    has_only_positive_coefficients = false;
+                }
+
+                if (sensitivity.second > 0) {
+                    has_only_negative_coefficients = false;
                 }
             }
 
             if (has_only_binary_variables) {
                 /// Equation knapsack
-                if (m_expression.constant_value() <= -2 &&
-                    m_sense == ConstraintSense::Equal) {
+                if (m_sense == ConstraintSense::Equal &&
+                    (has_only_positive_coefficients ||
+                     has_only_negative_coefficients)) {
                     m_is_equation_knapsack = true;
                     return;
                 }
 
                 /// Bin Packing
                 if (has_bin_packing_variable &&
-                    ((m_expression.constant_value() <= -1 &&
+                    ((has_only_positive_coefficients &&
                       m_sense == ConstraintSense::Less) ||
-                     (m_expression.constant_value() >= 1 &&
+                     (has_only_negative_coefficients &&
                       m_sense == ConstraintSense::Greater))) {
                     m_is_bin_packing = true;
                     return;
                 }
 
                 /// Knapsack
-                if ((m_expression.constant_value() <= -1 &&
+                if ((has_only_positive_coefficients &&
                      m_sense == ConstraintSense::Less) ||
-                    (m_expression.constant_value() >= 1 &&
+                    (has_only_negative_coefficients &&
                      m_sense == ConstraintSense::Greater)) {
                     m_is_knapsack = true;
                     return;
                 }
+            } else {
+                /// Integer Knapsack
+                if ((has_only_positive_coefficients &&
+                     m_sense == ConstraintSense::Less) ||
+                    (has_only_negative_coefficients &&
+                     m_sense == ConstraintSense::Greater)) {
+                    m_is_integer_knapsack = true;
+                    return;
+                }
             }
-        }
-
-        /// Integer Knapsack
-        if ((m_expression.constant_value() < 0 &&
-             m_sense == ConstraintSense::Less) ||
-            (m_expression.constant_value() > 0 &&
-             m_sense == ConstraintSense::Greater)) {
-            m_is_integer_knapsack = true;
-            return;
         }
 
         /// GF2
@@ -774,8 +940,8 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
             bool is_valid                                    = true;
             int  number_of_integer_variables_coefficient_two = 0;
 
-            Variable<T_Variable, T_Expression> *aux_variable_ptr = nullptr;
-            T_Expression                        aux_variable_coefficient = 0;
+            Variable<T_Variable, T_Expression> *key_variable_ptr = nullptr;
+            T_Expression                        key_variable_coefficient = 0;
 
             auto constant_value = m_expression.constant_value();
             if (constant_value != 0 && abs(constant_value) != 1) {
@@ -799,8 +965,8 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
                     if ((variable_ptr->sense() == VariableSense::Integer ||
                          variable_ptr->sense() == VariableSense::Binary) &&
                         abs(coefficient) == 2) {
-                        aux_variable_ptr         = variable_ptr;
-                        aux_variable_coefficient = coefficient;
+                        key_variable_ptr         = variable_ptr;
+                        key_variable_coefficient = coefficient;
                         number_of_integer_variables_coefficient_two++;
                     } else if (variable_ptr->sense() != VariableSense::Binary ||
                                abs(coefficient) != 1) {
@@ -816,27 +982,27 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
 
             if (is_valid) {
                 auto rest_part_expression = m_expression.copy();
-                rest_part_expression.erase(aux_variable_ptr);
+                rest_part_expression.erase(key_variable_ptr);
                 T_Expression rest_part_lower_bound =
                     rest_part_expression.lower_bound();
                 T_Expression rest_part_upper_bound =
                     rest_part_expression.upper_bound();
 
-                if (aux_variable_coefficient > 0) {
+                if (key_variable_coefficient > 0) {
                     std::swap(rest_part_lower_bound, rest_part_upper_bound);
                     rest_part_lower_bound *= -1.0;
                     rest_part_upper_bound *= -1.0;
                 }
 
-                if (aux_variable_ptr->lower_bound() != constant::INT_HALF_MIN &&
-                    aux_variable_ptr->lower_bound() >
+                if (key_variable_ptr->lower_bound() != constant::INT_HALF_MIN &&
+                    key_variable_ptr->lower_bound() >
                         static_cast<int>(
                             std::ceil(rest_part_lower_bound * 0.5))) {
                     is_valid = false;
                 }
 
-                if (aux_variable_ptr->upper_bound() != constant::INT_HALF_MAX &&
-                    aux_variable_ptr->upper_bound() <
+                if (key_variable_ptr->upper_bound() != constant::INT_HALF_MAX &&
+                    key_variable_ptr->upper_bound() <
                         static_cast<int>(
                             std::floor(rest_part_upper_bound * 0.5))) {
                     is_valid = false;
@@ -845,7 +1011,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
 
             if (is_valid) {
                 m_is_gf2           = true;
-                m_aux_variable_ptr = aux_variable_ptr;
+                m_key_variable_ptr = key_variable_ptr;
                 return;
             }
         }
@@ -1045,6 +1211,41 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
+    inline constexpr bool is_exclusive_or(void) const noexcept {
+        return m_is_exclusive_or;
+    }
+
+    /*************************************************************************/
+    inline constexpr bool is_exclusive_nor(void) const noexcept {
+        return m_is_exclusive_nor;
+    }
+
+    /*************************************************************************/
+    inline constexpr bool is_inverted_integers(void) const noexcept {
+        return m_is_inverted_integers;
+    }
+
+    /*************************************************************************/
+    inline constexpr bool is_balanced_integers(void) const noexcept {
+        return m_is_balanced_integers;
+    }
+
+    /*************************************************************************/
+    inline constexpr bool is_constant_sum_integers(void) const noexcept {
+        return m_is_constant_sum_integers;
+    }
+
+    /*************************************************************************/
+    inline constexpr bool is_constant_difference_integers(void) const noexcept {
+        return m_is_constant_difference_integers;
+    }
+
+    /*************************************************************************/
+    inline constexpr bool is_constant_ratio_integers(void) const noexcept {
+        return m_is_constant_ratio_integers;
+    }
+
+    /*************************************************************************/
     inline constexpr bool is_aggregation(void) const noexcept {
         return m_is_aggregation;
     }
@@ -1057,6 +1258,11 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     /*************************************************************************/
     inline constexpr bool is_variable_bound(void) const noexcept {
         return m_is_variable_bound;
+    }
+
+    /*************************************************************************/
+    inline constexpr bool is_trinomial_exclusive_nor(void) const noexcept {
+        return m_is_trinomial_exclusive_nor;
     }
 
     /*************************************************************************/
@@ -1105,6 +1311,21 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
+    inline constexpr bool is_min_max(void) const noexcept {
+        return m_is_min_max;
+    }
+
+    /*************************************************************************/
+    inline constexpr bool is_max_min(void) const noexcept {
+        return m_is_max_min;
+    }
+
+    /*************************************************************************/
+    inline constexpr bool is_intermediate(void) const noexcept {
+        return m_is_intermediate;
+    }
+
+    /*************************************************************************/
     inline constexpr bool is_equation_knapsack(void) const noexcept {
         return m_is_equation_knapsack;
     }
@@ -1122,21 +1343,6 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     /*************************************************************************/
     inline constexpr bool is_integer_knapsack(void) const noexcept {
         return m_is_integer_knapsack;
-    }
-
-    /*************************************************************************/
-    inline constexpr bool is_min_max(void) const noexcept {
-        return m_is_min_max;
-    }
-
-    /*************************************************************************/
-    inline constexpr bool is_max_min(void) const noexcept {
-        return m_is_max_min;
-    }
-
-    /*************************************************************************/
-    inline constexpr bool is_intermediate(void) const noexcept {
-        return m_is_intermediate;
     }
 
     /*************************************************************************/
@@ -1180,28 +1386,12 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr bool has_aux_lower_bound(void) const noexcept {
-        return m_has_aux_lower_bound;
-    }
-
-    /*************************************************************************/
-    inline constexpr bool has_aux_upper_bound(void) const noexcept {
-        return m_has_aux_upper_bound;
-    }
-
-    /*************************************************************************/
-    inline constexpr Variable<T_Variable, T_Expression> *aux_variable_ptr(
+    inline constexpr Variable<T_Variable, T_Expression> *key_variable_ptr(
         void) const {
         return const_cast<Variable<T_Variable, T_Expression> *>(
-            m_aux_variable_ptr);
+            m_key_variable_ptr);
     }
-
-    /*************************************************************************/
-    inline constexpr T_Expression aux_variable_coefficient(void) const
-        noexcept {
-        return m_aux_variable_coefficient;
-    }
-};  // namespace model_component
+};
 using IPConstraint = Constraint<int, double>;
 }  // namespace printemps::model_component
 #endif

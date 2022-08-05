@@ -1051,6 +1051,35 @@ class Model {
                         constraint_type_reference.singleton_ptrs.push_back(
                             &constraint);
                     }
+                    if (constraint.is_exclusive_or()) {
+                        constraint_type_reference.exclusive_or_ptrs.push_back(
+                            &constraint);
+                    }
+                    if (constraint.is_exclusive_nor()) {
+                        constraint_type_reference.exclusive_nor_ptrs.push_back(
+                            &constraint);
+                    }
+                    if (constraint.is_inverted_integers()) {
+                        constraint_type_reference.inverted_integers_ptrs
+                            .push_back(&constraint);
+                    }
+                    if (constraint.is_balanced_integers()) {
+                        constraint_type_reference.balanced_integers_ptrs
+                            .push_back(&constraint);
+                    }
+                    if (constraint.is_constant_sum_integers()) {
+                        constraint_type_reference.constant_sum_integers_ptrs
+                            .push_back(&constraint);
+                    }
+                    if (constraint.is_constant_difference_integers()) {
+                        constraint_type_reference
+                            .constant_difference_integers_ptrs.push_back(
+                                &constraint);
+                    }
+                    if (constraint.is_constant_ratio_integers()) {
+                        constraint_type_reference.constant_ratio_integers_ptrs
+                            .push_back(&constraint);
+                    }
                     if (constraint.is_aggregation()) {
                         constraint_type_reference.aggregation_ptrs.push_back(
                             &constraint);
@@ -1062,6 +1091,10 @@ class Model {
                     if (constraint.is_variable_bound()) {
                         constraint_type_reference.variable_bound_ptrs.push_back(
                             &constraint);
+                    }
+                    if (constraint.is_trinomial_exclusive_nor()) {
+                        constraint_type_reference.trinomial_exclusive_nor_ptrs
+                            .push_back(&constraint);
                     }
                     if (constraint.is_set_partitioning()) {
                         constraint_type_reference.set_partitioning_ptrs
@@ -1099,6 +1132,18 @@ class Model {
                         constraint_type_reference.soft_selection_ptrs.push_back(
                             &constraint);
                     }
+                    if (constraint.is_min_max()) {
+                        constraint_type_reference.min_max_ptrs.push_back(
+                            &constraint);
+                    }
+                    if (constraint.is_max_min()) {
+                        constraint_type_reference.max_min_ptrs.push_back(
+                            &constraint);
+                    }
+                    if (constraint.is_intermediate()) {
+                        constraint_type_reference.intermediate_ptrs.push_back(
+                            &constraint);
+                    }
                     if (constraint.is_equation_knapsack()) {
                         constraint_type_reference.equation_knapsack_ptrs
                             .push_back(&constraint);
@@ -1114,18 +1159,6 @@ class Model {
                     if (constraint.is_integer_knapsack()) {
                         constraint_type_reference.integer_knapsack_ptrs
                             .push_back(&constraint);
-                    }
-                    if (constraint.is_min_max()) {
-                        constraint_type_reference.min_max_ptrs.push_back(
-                            &constraint);
-                    }
-                    if (constraint.is_max_min()) {
-                        constraint_type_reference.max_min_ptrs.push_back(
-                            &constraint);
-                    }
-                    if (constraint.is_intermediate()) {
-                        constraint_type_reference.intermediate_ptrs.push_back(
-                            &constraint);
                     }
                     if (constraint.is_gf2()) {
                         constraint_type_reference.gf2_ptrs.push_back(
@@ -1429,6 +1462,104 @@ class Model {
                 true);
 
             utility::print_info(                        //
+                " -- Exclusive OR: " +                  //
+                    utility::to_string(                 //
+                        compute_number_of_constraints(  //
+                            original.exclusive_or_ptrs),
+                        "%d") +
+                    " (" +
+                    utility::to_string(                         //
+                        compute_number_of_enabled_constraints(  //
+                            presolved.exclusive_or_ptrs),
+                        "%d") +
+                    ")",
+                true);
+
+            utility::print_info(                        //
+                " -- Exclusive XNOR: " +                //
+                    utility::to_string(                 //
+                        compute_number_of_constraints(  //
+                            original.exclusive_nor_ptrs),
+                        "%d") +
+                    " (" +
+                    utility::to_string(                         //
+                        compute_number_of_enabled_constraints(  //
+                            presolved.exclusive_nor_ptrs),
+                        "%d") +
+                    ")",
+                true);
+
+            utility::print_info(                        //
+                " -- Inverted Integers: " +             //
+                    utility::to_string(                 //
+                        compute_number_of_constraints(  //
+                            original.inverted_integers_ptrs),
+                        "%d") +
+                    " (" +
+                    utility::to_string(                         //
+                        compute_number_of_enabled_constraints(  //
+                            presolved.inverted_integers_ptrs),
+                        "%d") +
+                    ")",
+                true);
+
+            utility::print_info(                        //
+                " -- Balanced Integers: " +             //
+                    utility::to_string(                 //
+                        compute_number_of_constraints(  //
+                            original.balanced_integers_ptrs),
+                        "%d") +
+                    " (" +
+                    utility::to_string(                         //
+                        compute_number_of_enabled_constraints(  //
+                            presolved.balanced_integers_ptrs),
+                        "%d") +
+                    ")",
+                true);
+
+            utility::print_info(                        //
+                " -- Constant Sum Integers: " +         //
+                    utility::to_string(                 //
+                        compute_number_of_constraints(  //
+                            original.constant_sum_integers_ptrs),
+                        "%d") +
+                    " (" +
+                    utility::to_string(                         //
+                        compute_number_of_enabled_constraints(  //
+                            presolved.constant_sum_integers_ptrs),
+                        "%d") +
+                    ")",
+                true);
+
+            utility::print_info(                        //
+                " -- Constant Difference Integers: " +  //
+                    utility::to_string(                 //
+                        compute_number_of_constraints(  //
+                            original.constant_difference_integers_ptrs),
+                        "%d") +
+                    " (" +
+                    utility::to_string(                         //
+                        compute_number_of_enabled_constraints(  //
+                            presolved.constant_difference_integers_ptrs),
+                        "%d") +
+                    ")",
+                true);
+
+            utility::print_info(                        //
+                " -- Constant Ratio Integers: " +       //
+                    utility::to_string(                 //
+                        compute_number_of_constraints(  //
+                            original.constant_ratio_integers_ptrs),
+                        "%d") +
+                    " (" +
+                    utility::to_string(                         //
+                        compute_number_of_enabled_constraints(  //
+                            presolved.constant_ratio_integers_ptrs),
+                        "%d") +
+                    ")",
+                true);
+
+            utility::print_info(                        //
                 " -- Aggregation: " +                   //
                     utility::to_string(                 //
                         compute_number_of_constraints(  //
@@ -1466,6 +1597,20 @@ class Model {
                     utility::to_string(                         //
                         compute_number_of_enabled_constraints(  //
                             presolved.variable_bound_ptrs),
+                        "%d") +
+                    ")",
+                true);
+
+            utility::print_info(                        //
+                " -- Trinomial XNOR: " +                //
+                    utility::to_string(                 //
+                        compute_number_of_constraints(  //
+                            original.trinomial_exclusive_nor_ptrs),
+                        "%d") +
+                    " (" +
+                    utility::to_string(                         //
+                        compute_number_of_enabled_constraints(  //
+                            presolved.trinomial_exclusive_nor_ptrs),
                         "%d") +
                     ")",
                 true);
@@ -1597,6 +1742,48 @@ class Model {
                 true);
 
             utility::print_info(                        //
+                " -- Min-Max: " +                       //
+                    utility::to_string(                 //
+                        compute_number_of_constraints(  //
+                            original.min_max_ptrs),
+                        "%d") +
+                    " (" +
+                    utility::to_string(                         //
+                        compute_number_of_enabled_constraints(  //
+                            presolved.min_max_ptrs),
+                        "%d") +
+                    ")",
+                true);
+
+            utility::print_info(                        //
+                " -- Max-Min: " +                       //
+                    utility::to_string(                 //
+                        compute_number_of_constraints(  //
+                            original.max_min_ptrs),
+                        "%d") +
+                    " (" +
+                    utility::to_string(                         //
+                        compute_number_of_enabled_constraints(  //
+                            presolved.max_min_ptrs),
+                        "%d") +
+                    ")",
+                true);
+
+            utility::print_info(                        //
+                " -- Intermediate: " +                  //
+                    utility::to_string(                 //
+                        compute_number_of_constraints(  //
+                            original.intermediate_ptrs),
+                        "%d") +
+                    " (" +
+                    utility::to_string(                         //
+                        compute_number_of_enabled_constraints(  //
+                            presolved.intermediate_ptrs),
+                        "%d") +
+                    ")",
+                true);
+
+            utility::print_info(                        //
                 " -- Equation Knapsack: " +             //
                     utility::to_string(                 //
                         compute_number_of_constraints(  //
@@ -1648,48 +1835,6 @@ class Model {
                     utility::to_string(                         //
                         compute_number_of_enabled_constraints(  //
                             presolved.integer_knapsack_ptrs),
-                        "%d") +
-                    ")",
-                true);
-
-            utility::print_info(                        //
-                " -- Min-Max: " +                       //
-                    utility::to_string(                 //
-                        compute_number_of_constraints(  //
-                            original.min_max_ptrs),
-                        "%d") +
-                    " (" +
-                    utility::to_string(                         //
-                        compute_number_of_enabled_constraints(  //
-                            presolved.min_max_ptrs),
-                        "%d") +
-                    ")",
-                true);
-
-            utility::print_info(                        //
-                " -- Max-Min: " +                       //
-                    utility::to_string(                 //
-                        compute_number_of_constraints(  //
-                            original.max_min_ptrs),
-                        "%d") +
-                    " (" +
-                    utility::to_string(                         //
-                        compute_number_of_enabled_constraints(  //
-                            presolved.max_min_ptrs),
-                        "%d") +
-                    ")",
-                true);
-
-            utility::print_info(                        //
-                " -- Intermediate: " +                  //
-                    utility::to_string(                 //
-                        compute_number_of_constraints(  //
-                            original.intermediate_ptrs),
-                        "%d") +
-                    " (" +
-                    utility::to_string(                         //
-                        compute_number_of_enabled_constraints(  //
-                            presolved.intermediate_ptrs),
                         "%d") +
                     ")",
                 true);
