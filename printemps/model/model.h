@@ -679,6 +679,10 @@ class Model {
          */
         if (a_OPTION.preprocess.is_enabled_presolve) {
             m_problem_size_reducer.setup(this);
+            m_problem_size_reducer.remove_implicit_equality_constraints(
+                a_IS_ENABLED_PRINT);
+            m_problem_size_reducer.remove_redundant_set_constraints(
+                a_IS_ENABLED_PRINT);
             m_problem_size_reducer.reduce_problem_size(a_IS_ENABLED_PRINT);
         }
 
