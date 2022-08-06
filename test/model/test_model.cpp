@@ -1104,9 +1104,9 @@ TEST_F(TestModel, categorize_variables) {
     model.categorize_variables();
     model.categorize_constraints();
 
-    printemps::preprocess::DependentIntermediateVariableExtractor<int, double>
-        dependent_intermediate_variable_extractor(&model);
-    dependent_intermediate_variable_extractor.extract(false);
+    printemps::preprocess::DependentVariableExtractor<int, double>
+        dependent_variable_extractor(&model);
+    dependent_variable_extractor.extract(false);
     printemps::preprocess::SelectionExtractor<int, double> selection_extractor(
         &model);
     selection_extractor.extract_by_independent(false);
@@ -1120,7 +1120,7 @@ TEST_F(TestModel, categorize_variables) {
     EXPECT_EQ(1, model.number_of_binary_variables());
     EXPECT_EQ(600, model.number_of_integer_variables());
     EXPECT_EQ(10, model.number_of_selection_variables());
-    EXPECT_EQ(1, model.number_of_intermediate_variables());
+    EXPECT_EQ(1, model.number_of_dependent_integer_variables());
 }
 
 /*****************************************************************************/
@@ -1179,15 +1179,15 @@ TEST_F(TestModel, categorize_constraints) {
 
     auto& bin_packing = model.create_constraints("bin_packing", 2);
     bin_packing(0)    = z.dot(coefficients) + 5 * w <= 5;
-    bin_packing(1)    = z.dot(coefficients) - 5 * w >= -5;
+    bin_packing(1)    = -z.dot(coefficients) - 5 * w >= -5;
 
     auto& knapsack = model.create_constraints("knapsack", 2);
     knapsack(0)    = z.dot(coefficients) <= 50;
-    knapsack(1)    = z.dot(coefficients) >= -50;
+    knapsack(1)    = -z.dot(coefficients) >= -50;
 
     auto& integer_knapsack = model.create_constraints("integer_knapsack", 2);
     integer_knapsack(0)    = r.dot(coefficients) <= 50;
-    integer_knapsack(1)    = r.dot(coefficients) >= -50;
+    integer_knapsack(1)    = -r.dot(coefficients) >= -50;
 
     auto& min_max = model.create_constraint("min_max");
     min_max       = 2 * z(0) + 3 * z(1) <= x;
@@ -1199,7 +1199,7 @@ TEST_F(TestModel, categorize_constraints) {
     intermediate       = 2 * z(0) + 3 * z(1) == x;
 
     auto& general_liner = model.create_constraint("general_liner");
-    general_liner       = 2 * x + r.sum() == 50;
+    general_liner       = 2 * x + 2 * r.sum() == 50;
 
     auto& nonlinear = model.create_constraint("nonlinear");
     std::function<double(const printemps::neighborhood::Move<int, double>&)> f =
@@ -2435,12 +2435,6 @@ TEST_F(TestModel, export_solution) {
     }
 
     model.update();
-    double total_violation = 0.0;
-    for (auto i = 0; i < 20; i++) {
-        for (auto j = 0; j < 30; j++) {
-            total_violation += v(i, j).violation_value();
-        }
-    }
 
     auto solution = model.export_solution();
     EXPECT_EQ(3, static_cast<int>(solution.variable_value_proxies.size()));
@@ -2449,7 +2443,6 @@ TEST_F(TestModel, export_solution) {
     EXPECT_EQ(3, static_cast<int>(solution.violation_value_proxies.size()));
 
     EXPECT_EQ(model.objective().value(), solution.objective);
-    EXPECT_EQ(total_violation, solution.total_violation);
     EXPECT_EQ(model.is_feasible(), solution.is_feasible);
 
     EXPECT_EQ(x.index(), solution.variable_value_proxies[0].index());
@@ -2561,15 +2554,8 @@ TEST_F(TestModel, export_named_solution) {
         }
     }
 
-    model.set_name("name");
     model.setup_structure();
     model.update();
-    double total_violation = 0.0;
-    for (auto i = 0; i < 20; i++) {
-        for (auto j = 0; j < 30; j++) {
-            total_violation += v(i, j).violation_value();
-        }
-    }
 
     auto named_solution = model.export_named_solution();
 
@@ -2579,7 +2565,6 @@ TEST_F(TestModel, export_named_solution) {
     EXPECT_EQ(3, static_cast<int>(named_solution.violations().size()));
 
     EXPECT_EQ(model.objective().value(), named_solution.objective());
-    EXPECT_EQ(total_violation, named_solution.total_violation());
     EXPECT_EQ(model.is_feasible(), named_solution.is_feasible());
 
     EXPECT_EQ(x.index(), named_solution.variables("x").index());
