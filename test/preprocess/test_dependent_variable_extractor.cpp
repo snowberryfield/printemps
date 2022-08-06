@@ -10,7 +10,7 @@
 
 namespace {
 /*****************************************************************************/
-class TestDependentIntermediateVariableExtractor : public ::testing::Test {
+class TestDependentVariableExtractor : public ::testing::Test {
    protected:
     virtual void SetUp(void) {
         /// nothing to do
@@ -21,8 +21,7 @@ class TestDependentIntermediateVariableExtractor : public ::testing::Test {
 };
 
 /*****************************************************************************/
-TEST_F(TestDependentIntermediateVariableExtractor,
-       extract_intermediate_variables) {
+TEST_F(TestDependentVariableExtractor, extract) {
     /// case 01
     {
         printemps::model::Model<int, double> model;
@@ -37,38 +36,41 @@ TEST_F(TestDependentIntermediateVariableExtractor,
         auto& g = model.create_constraint("g", w == 3 * x + 4 * y + 5 * z);
         auto& h = model.create_constraint("h", v == 6 * z + 7 * w);
         model.minimize(w);
+        model.setup_unique_names();
         model.setup_structure();
 
         EXPECT_TRUE(f(0).is_intermediate());
         EXPECT_TRUE(g(0).is_intermediate());
         EXPECT_TRUE(h(0).is_intermediate());
 
-        printemps::preprocess::DependentIntermediateVariableExtractor<int,
-                                                                      double>
-            dependent_intermediate_variable_extractor(&model);
+        printemps::preprocess::DependentVariableExtractor<int, double>
+            dependent_variable_extractor(&model);
 
         /// Extracting (Round 1)
         {
-            dependent_intermediate_variable_extractor.extract(false);
+            dependent_variable_extractor.extract(false);
 
             model.setup_structure();
 
-            EXPECT_EQ(printemps::model_component::VariableSense::Intermediate,
-                      z(0).sense());
+            EXPECT_EQ(
+                printemps::model_component::VariableSense::DependentInteger,
+                z(0).sense());
             EXPECT_FALSE(f.is_enabled());
 
-            EXPECT_EQ(printemps::model_component::VariableSense::Intermediate,
-                      w(0).sense());
+            EXPECT_EQ(
+                printemps::model_component::VariableSense::DependentInteger,
+                w(0).sense());
             EXPECT_FALSE(g.is_enabled());
 
-            EXPECT_EQ(printemps::model_component::VariableSense::Intermediate,
-                      v(0).sense());
+            EXPECT_EQ(
+                printemps::model_component::VariableSense::DependentInteger,
+                v(0).sense());
             EXPECT_FALSE(h.is_enabled());
         }
 
         /// Eliminating (Round 1-1)
         {
-            dependent_intermediate_variable_extractor.eliminate(false);
+            dependent_variable_extractor.eliminate(false);
 
             model.setup_structure();
 
@@ -82,7 +84,7 @@ TEST_F(TestDependentIntermediateVariableExtractor,
 
         /// Eliminating (Round 1-2)
         {
-            dependent_intermediate_variable_extractor.eliminate(false);
+            dependent_variable_extractor.eliminate(false);
 
             model.setup_structure();
 
@@ -92,15 +94,17 @@ TEST_F(TestDependentIntermediateVariableExtractor,
             EXPECT_EQ(13, sensitivities_objective.at(&x(0)));
             EXPECT_EQ(9, sensitivities_objective.at(&y(0)));
 
-            auto& sensitivities_g = g(0).expression().sensitivities();
+            auto& sensitivities_w =
+                w(0).dependent_expression_ptr()->sensitivities();
 
-            EXPECT_EQ(-13, sensitivities_g.at(&x(0)));
-            EXPECT_EQ(-9, sensitivities_g.at(&y(0)));
+            EXPECT_EQ(13, sensitivities_w.at(&x(0)));
+            EXPECT_EQ(9, sensitivities_w.at(&y(0)));
 
-            auto& sensitivities_h = h(0).expression().sensitivities();
+            auto& sensitivities_v =
+                v(0).dependent_expression_ptr()->sensitivities();
 
-            EXPECT_EQ(-103, sensitivities_h.at(&x(0)));
-            EXPECT_EQ(-69, sensitivities_h.at(&y(0)));
+            EXPECT_EQ(103, sensitivities_v.at(&x(0)));
+            EXPECT_EQ(69, sensitivities_v.at(&y(0)));
         }
     }
 
@@ -116,27 +120,29 @@ TEST_F(TestDependentIntermediateVariableExtractor,
         auto& f = model.create_constraint("f", z == 2 * x + y);
         auto& g = model.create_constraint("g", w == 3 * x + 4 * y + 5 * z);
         model.minimize(w);
+        model.setup_unique_names();
         model.setup_structure();
 
         EXPECT_TRUE(f(0).is_intermediate());
         EXPECT_TRUE(g(0).is_intermediate());
 
-        printemps::preprocess::DependentIntermediateVariableExtractor<int,
-                                                                      double>
-            dependent_intermediate_variable_extractor(&model);
+        printemps::preprocess::DependentVariableExtractor<int, double>
+            dependent_variable_extractor(&model);
 
         /// Extracting (Round 1)
         {
-            dependent_intermediate_variable_extractor.extract(false);
+            dependent_variable_extractor.extract(false);
 
             model.setup_structure();
 
-            EXPECT_EQ(printemps::model_component::VariableSense::Intermediate,
-                      z(0).sense());
+            EXPECT_EQ(
+                printemps::model_component::VariableSense::DependentInteger,
+                z(0).sense());
             EXPECT_FALSE(f.is_enabled());
 
-            EXPECT_EQ(printemps::model_component::VariableSense::Intermediate,
-                      w(0).sense());
+            EXPECT_EQ(
+                printemps::model_component::VariableSense::DependentInteger,
+                w(0).sense());
             EXPECT_FALSE(g.is_enabled());
 
             auto& constraint_proxies = model.constraint_proxies();
@@ -168,7 +174,7 @@ TEST_F(TestDependentIntermediateVariableExtractor,
 
         /// Eliminating (Round 1-1)
         {
-            dependent_intermediate_variable_extractor.eliminate(false);
+            dependent_variable_extractor.eliminate(false);
 
             model.setup_structure();
 
@@ -179,10 +185,11 @@ TEST_F(TestDependentIntermediateVariableExtractor,
             EXPECT_EQ(4, sensitivities_objective.at(&y(0)));
             EXPECT_EQ(5, sensitivities_objective.at(&z(0)));
 
-            auto& sensitivities_g = g(0).expression().sensitivities();
+            auto& sensitivities_w =
+                w(0).dependent_expression_ptr()->sensitivities();
 
-            EXPECT_EQ(-13, sensitivities_g.at(&x(0)));
-            EXPECT_EQ(-9, sensitivities_g.at(&y(0)));
+            EXPECT_EQ(13, sensitivities_w.at(&x(0)));
+            EXPECT_EQ(9, sensitivities_w.at(&y(0)));
 
             auto& constraint_proxies = model.constraint_proxies();
             {
@@ -208,9 +215,8 @@ TEST_F(TestDependentIntermediateVariableExtractor,
 }
 
 /*****************************************************************************/
-TEST_F(TestDependentIntermediateVariableExtractor,
-       eliminate_intermediate_variables) {
-    /// This method is tested in extract_intermediate_variables().
+TEST_F(TestDependentVariableExtractor, eliminate) {
+    /// This method is tested in extract_integer_variables().
 }
 }  // namespace
 /*****************************************************************************/

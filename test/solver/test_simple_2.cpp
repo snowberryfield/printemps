@@ -64,33 +64,6 @@ TEST_F(TestSimple2, simple_2) {
     /// solve
     printemps::option::Option option;
 
-    option.iteration_max                           = 50;
-    option.is_enabled_grouping_penalty_coefficient = true;
-    option.is_enabled_initial_value_correction     = true;
-    option.is_enabled_local_search                 = true;
-    option.is_enabled_parallel_evaluation          = true;
-    option.is_enabled_parallel_neighborhood_update = true;
-    option.is_enabled_binary_move                  = true;
-    option.is_enabled_integer_move                 = true;
-    option.is_enabled_aggregation_move             = true;
-    option.is_enabled_precedence_move              = true;
-    option.is_enabled_variable_bound_move          = true;
-    option.is_enabled_chain_move                   = true;
-    option.is_enabled_user_defined_move            = true;
-    option.target_objective_value                  = -1E100;
-    option.verbose                         = printemps::option::verbose::None;
-    option.tabu_search.iteration_max       = 100;
-    option.tabu_search.initial_tabu_tenure = 10;
-    option.tabu_search.tabu_mode           = printemps::option::tabu_mode::All;
-
-    option.tabu_search.is_enabled_shuffle                          = true;
-    option.tabu_search.is_enabled_move_curtail                     = true;
-    option.tabu_search.is_enabled_automatic_break                  = true;
-    option.tabu_search.is_enabled_automatic_tabu_tenure_adjustment = true;
-    option.tabu_search.move_preserve_rate                          = 0.5;
-    option.tabu_search.is_enabled_initial_modification             = true;
-    option.tabu_search.ignore_tabu_if_global_incumbent             = true;
-
     auto result = printemps::solver::solve(&model, option);
     EXPECT_TRUE(result.solution.is_feasible());
     EXPECT_EQ(1, result.solution.variables("x").values(0));

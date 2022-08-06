@@ -1,0 +1,13 @@
+{
+    "neighborhood": {
+        "chain_move_reduce_mode": "Shuffle",
+        "selection_mode": "Independent",
+        "improvability_screening_mode": "Automatic"
+    },
+    "output": {
+        "verbose": "Debug"
+    },
+    "tabu_search": {
+        "tabu_mode": "Any"
+    }
+}
