@@ -178,13 +178,13 @@ int main(void) {
     /// Run solver
     /*************************************************************************/
     printemps::option::Option option;
-    option.is_enabled_binary_move       = false;
-    option.is_enabled_integer_move      = false;
-    option.is_enabled_user_defined_move = true;
-    option.verbose                      = printemps::option::verbose::Full;
-    option.improvability_screening_mode =
+    option.neighborhood.is_enabled_binary_move       = false;
+    option.neighborhood.is_enabled_integer_move      = false;
+    option.neighborhood.is_enabled_user_defined_move = true;
+    option.neighborhood.improvability_screening_mode =
         printemps::option::improvability_screening_mode::Off;
-    auto result = printemps::solver::solve(&model, option);
+    option.output.verbose = printemps::option::verbose::Full;
+    auto result           = printemps::solver::solve(&model, option);
 
     /*************************************************************************/
     /// Print result
