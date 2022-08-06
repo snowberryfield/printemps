@@ -6,10 +6,7 @@
 #ifndef PRINTEMPS_SOLVER_TABU_SEARCH_CONTROLLER_TABU_SEARCH_CONTROLLER_STATE_H__
 #define PRINTEMPS_SOLVER_TABU_SEARCH_CONTROLLER_TABU_SEARCH_CONTROLLER_STATE_H__
 
-namespace printemps {
-namespace solver {
-namespace tabu_search {
-namespace controller {
+namespace printemps::solver::tabu_search::controller {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 struct TabuSearchControllerState {
@@ -60,7 +57,8 @@ struct TabuSearchControllerState {
     int total_update_status;
 
     bool is_global_augmented_incumbent_updated;
-    bool is_feasible_incumbent_updated;
+    bool previous_is_feasible_incumbent_updated;
+    bool current_is_feasible_incumbent_updated;
     bool is_not_updated;
     bool is_infeasible_stagnation;
     bool is_improved;
@@ -132,7 +130,8 @@ struct TabuSearchControllerState {
         this->total_update_status = 0;
 
         this->is_global_augmented_incumbent_updated   = false;
-        this->is_feasible_incumbent_updated           = false;
+        this->previous_is_feasible_incumbent_updated  = false;
+        this->current_is_feasible_incumbent_updated   = false;
         this->is_not_updated                          = false;
         this->is_infeasible_stagnation                = false;
         this->is_improved                             = false;
@@ -159,10 +158,7 @@ struct TabuSearchControllerState {
             option::improvability_screening_mode::Off;
     }
 };
-}  // namespace controller
-}  // namespace tabu_search
-}  // namespace solver
-}  // namespace printemps
+}  // namespace printemps::solver::tabu_search::controller
 #endif
 /*****************************************************************************/
 // END

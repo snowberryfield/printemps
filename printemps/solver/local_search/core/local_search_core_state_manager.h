@@ -8,10 +8,7 @@
 
 #include "local_search_core_state.h"
 
-namespace printemps {
-namespace solver {
-namespace local_search {
-namespace core {
+namespace printemps::solver::local_search::core {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class LocalSearchCoreStateManager {
@@ -182,10 +179,7 @@ class LocalSearchCoreStateManager {
         return m_state;
     }
 };
-}  // namespace core
-}  // namespace local_search
-}  // namespace solver
-}  // namespace printemps
+}  // namespace printemps::solver::local_search::core
 #endif
 /*****************************************************************************/
 // END

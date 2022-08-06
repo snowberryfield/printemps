@@ -8,8 +8,7 @@
 
 #include "abstract_move_generator.h"
 
-namespace printemps {
-namespace neighborhood {
+namespace printemps::neighborhood {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class IntegerMoveGenerator
@@ -114,27 +113,27 @@ class IntegerMoveGenerator
                             (*a_flags)[4 * i + 1] = 1;
                         }
 
-                        if (value == upper_bound ||
+                        if (value >= upper_bound - 4 ||
                             upper_bound == constant::INT_HALF_MAX) {
                             (*a_flags)[4 * i + 2] = 0;
                         } else {
-                            const auto delta =
+                            const auto DELTA =
                                 std::min(DELTA_MAX, (upper_bound - value) / 2);
                             (*a_moves_ptr)[4 * i + 2]
                                 .alterations.front()
-                                .second           = value + delta;
+                                .second           = value + DELTA;
                             (*a_flags)[4 * i + 2] = 1;
                         }
 
-                        if (value == lower_bound ||
+                        if (value <= lower_bound + 4 ||
                             lower_bound == constant::INT_HALF_MIN) {
                             (*a_flags)[4 * i + 3] = 0;
                         } else {
-                            const auto delta =
+                            const auto DELTA =
                                 std::max(-DELTA_MAX, (lower_bound - value) / 2);
                             (*a_moves_ptr)[4 * i + 3]
                                 .alterations.front()
-                                .second           = value + delta;
+                                .second           = value + DELTA;
                             (*a_flags)[4 * i + 3] = 1;
                         }
                     } else {
@@ -148,8 +147,7 @@ class IntegerMoveGenerator
         this->m_move_updater = move_updater;
     }
 };
-}  // namespace neighborhood
-}  // namespace printemps
+}  // namespace printemps::neighborhood
 #endif
 /*****************************************************************************/
 // END

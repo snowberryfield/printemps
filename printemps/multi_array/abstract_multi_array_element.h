@@ -6,8 +6,7 @@
 #ifndef PRINTEMPS_MULTI_ARRAY_ABSTRACT_MULTI_ARRAY_ELEMENT_H__
 #define PRINTEMPS_MULTI_ARRAY_ABSTRACT_MULTI_ARRAY_ELEMENT_H__
 
-namespace printemps {
-namespace multi_array {
+namespace printemps::multi_array {
 /*****************************************************************************/
 class AbstractMultiArrayElement {
    protected:
@@ -77,8 +76,7 @@ class AbstractMultiArrayElement {
         return m_name;
     }
 };
-}  // namespace multi_array
-}  // namespace printemps
+}  // namespace printemps::multi_array
 #endif
 /*****************************************************************************/
 // END

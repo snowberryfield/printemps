@@ -6,10 +6,7 @@
 #ifndef PRINTEMPS_SOLVER_TABU_SEARCH_CORE_TERMINATION_STATUS_H__
 #define PRINTEMPS_SOLVER_TABU_SEARCH_CORE_TERMINATION_STATUS_H__
 
-namespace printemps {
-namespace solver {
-namespace tabu_search {
-namespace core {
+namespace printemps::solver::tabu_search::core {
 /*****************************************************************************/
 enum class TabuSearchCoreTerminationStatus {
     TIME_OVER,
@@ -20,11 +17,7 @@ enum class TabuSearchCoreTerminationStatus {
     OPTIMAL,
     PENALTY_COEFFICIENT_TOO_LARGE
 };
-}  // namespace core
-}  // namespace tabu_search
-}  // namespace solver
-}  // namespace printemps
-
+}  // namespace printemps::solver::tabu_search::core
 #endif
 /*****************************************************************************/
 // END

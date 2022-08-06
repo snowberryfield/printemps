@@ -6,8 +6,7 @@
 #ifndef PRINTEMPS_UTILITY_UNORDERED_MAP_UTILITY_H__
 #define PRINTEMPS_UTILITY_UNORDERED_MAP_UTILITY_H__
 
-namespace printemps {
-namespace utility {
+namespace printemps::utility {
 /*****************************************************************************/
 template <class T1, class T2>
 inline std::pair<std::vector<T1>, std::vector<T2>> to_vector_pair(
@@ -21,8 +20,7 @@ inline std::pair<std::vector<T1>, std::vector<T2>> to_vector_pair(
     return std::make_pair(result_T1, result_T2);
 }
 
-}  // namespace utility
-}  // namespace printemps
+}  // namespace printemps::utility
 
 #endif
 /*****************************************************************************/

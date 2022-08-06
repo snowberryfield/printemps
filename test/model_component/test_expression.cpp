@@ -341,6 +341,25 @@ TEST_F(TestExpression, disable) {
 }
 
 /*****************************************************************************/
+TEST_F(TestExpression, solve) {
+    auto expression =
+        printemps::model_component::Expression<int, double>::create_instance();
+
+    auto variable_0 =
+        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable_1 =
+        printemps::model_component::Variable<int, double>::create_instance();
+
+    expression  = variable_0 + 2 * variable_1 + 4;
+    auto solved = expression.solve(&variable_0);
+
+    EXPECT_EQ(-2, solved.sensitivities().at(&variable_1));
+    EXPECT_EQ(-4, solved.constant_value());
+    EXPECT_TRUE(solved.sensitivities().find(&variable_0) ==
+                solved.sensitivities().end());
+}
+
+/*****************************************************************************/
 TEST_F(TestExpression, erase) {
     auto expression =
         printemps::model_component::Expression<int, double>::create_instance();

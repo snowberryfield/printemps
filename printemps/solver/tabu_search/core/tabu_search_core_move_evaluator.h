@@ -6,10 +6,7 @@
 #ifndef PRINTEMPS_SOLVER_TABU_SEARCH_CORE_TABU_SEARCH_CORE_MOVE_EVALUATOR_H__
 #define PRINTEMPS_SOLVER_TABU_SEARCH_CORE_TABU_SEARCH_CORE_MOVE_EVALUATOR_H__
 
-namespace printemps {
-namespace solver {
-namespace tabu_search {
-namespace core {
+namespace printemps::solver::tabu_search::core {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class TabuSearchCoreMoveEvaluator {
@@ -149,17 +146,13 @@ class TabuSearchCoreMoveEvaluator {
          * Compute the lagrangian penalty of the move.
          */
         a_score_ptr->lagrangian_penalty = 0.0;
-        if (m_option.is_enabled_lagrange_dual) {
+        if (m_option.lagrange_dual.is_enabled) {
             a_score_ptr->lagrangian_penalty  //
                 = this->compute_lagrangian_penalty(a_MOVE);
         }
     }
 };
-}  // namespace core
-}  // namespace tabu_search
-}  // namespace solver
-}  // namespace printemps
-
+}  // namespace printemps::solver::tabu_search::core
 #endif
 /*****************************************************************************/
 // END

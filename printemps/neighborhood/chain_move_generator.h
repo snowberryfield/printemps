@@ -8,8 +8,7 @@
 
 #include "abstract_move_generator.h"
 
-namespace printemps {
-namespace neighborhood {
+namespace printemps::neighborhood {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class ChainMoveGenerator
@@ -202,8 +201,7 @@ class ChainMoveGenerator
         this->m_flags.resize(a_NUMBER_OF_MOVES);
     }
 };
-}  // namespace neighborhood
-}  // namespace printemps
+}  // namespace printemps::neighborhood
 #endif
 /*****************************************************************************/
 // END

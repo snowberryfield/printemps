@@ -6,8 +6,7 @@
 #ifndef PRINTEMPS_SOLVER_STATUS_H__
 #define PRINTEMPS_SOLVER_STATUS_H__
 
-namespace printemps {
-namespace solver {
+namespace printemps::solver {
 /*****************************************************************************/
 struct Status {
     bool is_found_feasible_solution;
@@ -121,36 +120,42 @@ struct Status {
     }
 
     /*************************************************************************/
+    inline void add_summary_json(utility::json::JsonObject* a_object) const {
+        // Summary
+        a_object->emplace_back("version", constant::VERSION);
+        a_object->emplace_back("name", this->name);
+        a_object->emplace_back("number_of_variables",
+                               this->number_of_variables);
+        a_object->emplace_back("number_of_constraints",
+                               this->number_of_constraints);
+
+        a_object->emplace_back("is_found_feasible_solution",
+                               this->is_found_feasible_solution);
+
+        a_object->emplace_back("start_date_time", this->start_date_time);
+        a_object->emplace_back("finish_date_time", this->finish_date_time);
+        a_object->emplace_back("elapsed_time", this->elapsed_time);
+
+        a_object->emplace_back("number_of_lagrange_dual_iterations",
+                               this->number_of_lagrange_dual_iterations);
+        a_object->emplace_back("number_of_local_search_iterations",
+                               this->number_of_local_search_iterations);
+        a_object->emplace_back("number_of_tabu_search_iterations",
+                               this->number_of_tabu_search_iterations);
+        a_object->emplace_back("number_of_tabu_search_loops",
+                               this->number_of_tabu_search_loops);
+        a_object->emplace_back("number_of_evaluated_moves",
+                               this->number_of_evaluated_moves);
+        a_object->emplace_back("averaged_inner_iteration_speed",
+                               this->averaged_inner_iteration_speed);
+        a_object->emplace_back("averaged_move_evaluation_speed",
+                               this->averaged_move_evaluation_speed);
+    }
+
+    /*************************************************************************/
     void write_json_by_name(const std::string& a_FILE_NAME) const {
         utility::json::JsonObject object;
-
-        // Summary
-        object.emplace_back("version", constant::VERSION);
-        object.emplace_back("name", this->name);
-        object.emplace_back("number_of_variables", this->number_of_variables);
-        object.emplace_back("number_of_constraints",
-                            this->number_of_constraints);
-        object.emplace_back("is_found_feasible_solution",
-                            this->is_found_feasible_solution);
-
-        object.emplace_back("start_date_time", this->start_date_time);
-        object.emplace_back("finish_date_time", this->finish_date_time);
-        object.emplace_back("elapsed_time", this->elapsed_time);
-
-        object.emplace_back("number_of_lagrange_dual_iterations",
-                            this->number_of_lagrange_dual_iterations);
-        object.emplace_back("number_of_local_search_iterations",
-                            this->number_of_local_search_iterations);
-        object.emplace_back("number_of_tabu_search_iterations",
-                            this->number_of_tabu_search_iterations);
-        object.emplace_back("number_of_tabu_search_loops",
-                            this->number_of_tabu_search_loops);
-        object.emplace_back("number_of_evaluated_moves",
-                            this->number_of_evaluated_moves);
-        object.emplace_back("averaged_inner_iteration_speed",
-                            this->averaged_inner_iteration_speed);
-        object.emplace_back("averaged_move_evaluation_speed",
-                            this->averaged_move_evaluation_speed);
+        this->add_summary_json(&object);
 
         /// Penalty coefficients
         object.emplace_back(         //
@@ -175,32 +180,7 @@ struct Status {
         utility::json::JsonObject object;
 
         /// Summary
-        object.emplace_back("version", constant::VERSION);
-        object.emplace_back("name", this->name);
-        object.emplace_back("number_of_variables", this->number_of_variables);
-        object.emplace_back("number_of_constraints",
-                            this->number_of_constraints);
-        object.emplace_back("is_found_feasible_solution",
-                            this->is_found_feasible_solution);
-
-        object.emplace_back("start_date_time", this->start_date_time);
-        object.emplace_back("finish_date_time", this->finish_date_time);
-        object.emplace_back("elapsed_time", this->elapsed_time);
-
-        object.emplace_back("number_of_lagrange_dual_iterations",
-                            this->number_of_lagrange_dual_iterations);
-        object.emplace_back("number_of_local_search_iterations",
-                            this->number_of_local_search_iterations);
-        object.emplace_back("number_of_tabu_search_iterations",
-                            this->number_of_tabu_search_iterations);
-        object.emplace_back("number_of_tabu_search_loops",
-                            this->number_of_tabu_search_loops);
-        object.emplace_back("number_of_evaluated_moves",
-                            this->number_of_evaluated_moves);
-        object.emplace_back("averaged_inner_iteration_speed",
-                            this->averaged_inner_iteration_speed);
-        object.emplace_back("averaged_move_evaluation_speed",
-                            this->averaged_move_evaluation_speed);
+        this->add_summary_json(&object);
 
         /// Penalty coefficients
         object.emplace_back(         //
@@ -220,8 +200,7 @@ struct Status {
         utility::json::write_json_object(object, a_FILE_NAME);
     }
 };
-}  // namespace solver
-}  // namespace printemps
+}  // namespace printemps::solver
 
 #endif
 /*****************************************************************************/

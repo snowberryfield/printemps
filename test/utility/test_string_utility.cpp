@@ -46,6 +46,12 @@ TEST_F(TestStringUtility, to_string) {
 }
 
 /*****************************************************************************/
+TEST_F(TestStringUtility, to_true_or_false) {
+    EXPECT_EQ("False", printemps::utility::to_true_or_false(false));
+    EXPECT_EQ("True", printemps::utility::to_true_or_false(true));
+}
+
+/*****************************************************************************/
 TEST_F(TestStringUtility, format_error_location) {
     /// The test for this function is omitted.
 }

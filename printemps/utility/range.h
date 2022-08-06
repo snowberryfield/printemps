@@ -7,8 +7,7 @@
 #ifndef PRINTEMPS_UTILITY_RANGE_H__
 #define PRINTEMPS_UTILITY_RANGE_H__
 
-namespace printemps {
-namespace utility {
+namespace printemps::utility {
 /*****************************************************************************/
 template <class T>
 class Range {
@@ -59,8 +58,7 @@ class Range {
         return m_max - m_min;
     }
 };
-}  // namespace utility
-}  // namespace printemps
+}  // namespace printemps::utility
 
 #endif
 /*****************************************************************************/

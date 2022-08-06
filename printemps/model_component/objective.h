@@ -6,24 +6,19 @@
 #ifndef PRINTEMPS_MODEL_COMPONENT_OBJECTIVE_H__
 #define PRINTEMPS_MODEL_COMPONENT_OBJECTIVE_H__
 
-namespace printemps {
-namespace neighborhood {
+namespace printemps::neighborhood {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 struct Move;
-}  // namespace neighborhood
-}  // namespace printemps
+}  // namespace printemps::neighborhood
 
-namespace printemps {
-namespace model {
+namespace printemps::model {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class Model;
-}  // namespace model
-}  // namespace printemps
+}  // namespace printemps::model
 
-namespace printemps {
-namespace model_component {
+namespace printemps::model_component {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class Expression;
@@ -166,7 +161,7 @@ class Objective {
 
     /*************************************************************************/
     inline constexpr T_Expression evaluate(void) const noexcept {
-#ifdef _PRINTEMPS_LINEAR
+#ifdef _PRINTEMPS_LINEAR_MINIMIZATION
         return m_expression.evaluate();
 #else
         if (m_is_linear) {
@@ -181,7 +176,7 @@ class Objective {
     inline constexpr T_Expression evaluate(
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
         noexcept {
-#ifdef _PRINTEMPS_LINEAR
+#ifdef _PRINTEMPS_LINEAR_MINIMIZATION
         return m_expression.evaluate(a_MOVE);
 #else
         if (m_is_linear) {
@@ -194,7 +189,7 @@ class Objective {
 
     /*************************************************************************/
     inline constexpr void update(void) {
-#ifdef _PRINTEMPS_LINEAR
+#ifdef _PRINTEMPS_LINEAR_MINIMIZATION
         m_expression.update();
         m_value = m_expression.value();
 #else
@@ -210,7 +205,7 @@ class Objective {
     /*************************************************************************/
     inline constexpr void update(
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) {
-#ifdef _PRINTEMPS_LINEAR
+#ifdef _PRINTEMPS_LINEAR_MINIMIZATION
         m_expression.update(a_MOVE);
         m_value = m_expression.value();
 #else
@@ -245,8 +240,7 @@ class Objective {
     }
 };
 using IPObjective = Objective<int, double>;
-}  // namespace model_component
-}  // namespace printemps
+}  // namespace printemps::model_component
 #endif
 /*****************************************************************************/
 // END

@@ -6,10 +6,7 @@
 #ifndef PRINTEMPS_SOLVER_TABU_SEARCH_CORE_RESULT_H__
 #define PRINTEMPS_SOLVER_TABU_SEARCH_CORE_RESULT_H__
 
-namespace printemps {
-namespace solver {
-namespace tabu_search {
-namespace core {
+namespace printemps::solver::tabu_search::core {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 struct TabuSearchCoreResult {
@@ -89,8 +86,8 @@ struct TabuSearchCoreResult {
             std::max(1.0, a_STATE.local_penalty_range.min());
 
         const double PERFORMANCE =
-            a_STATE.oscillation / a_STATE.iteration /
-            std::max(1.0, a_STATE.local_augmented_objective_range.range());
+            static_cast<double>(a_STATE.number_of_effective_updates) /
+            a_STATE.iteration;
 
         this->objective_constraint_rate = OBJECTIVE_CONSTRAINT_RATE;
         this->global_augmented_objective_range =
@@ -100,11 +97,7 @@ struct TabuSearchCoreResult {
         /// nothing to do
     }
 };
-}  // namespace core
-}  // namespace tabu_search
-}  // namespace solver
-}  // namespace printemps
-
+}  // namespace printemps::solver::tabu_search::core
 #endif
 /*****************************************************************************/
 // END

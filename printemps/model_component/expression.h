@@ -6,16 +6,13 @@
 #ifndef PRINTEMPS_MODEL_COMPONENT_EXPRESSION_H__
 #define PRINTEMPS_MODEL_COMPONENT_EXPRESSION_H__
 
-namespace printemps {
-namespace neighborhood {
+namespace printemps::neighborhood {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 struct Move;
-}  // namespace neighborhood
-}  // namespace printemps
+}  // namespace printemps::neighborhood
 
-namespace printemps {
-namespace model_component {
+namespace printemps::model_component {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class Variable;
@@ -226,7 +223,7 @@ class Expression : public multi_array::AbstractMultiArrayElement {
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
         noexcept {
         /// The following code is required for nonlinear objective functions.
-#ifndef _PRINTEMPS_LINEAR
+#ifndef _PRINTEMPS_LINEAR_MINIMIZATION
         if (a_MOVE.alterations.size() == 0) {
             return this->evaluate();
         }
@@ -283,6 +280,19 @@ class Expression : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
+    inline constexpr Expression<T_Variable, T_Expression> solve(
+        Variable<T_Variable, T_Expression> *a_variable_ptr) const {
+        auto result                 = this->copy();
+        auto coefficient_reciprocal = 1.0 / m_sensitivities.at(a_variable_ptr);
+        result.erase(a_variable_ptr);
+        for (auto &&sensitivity : result.sensitivities()) {
+            sensitivity.second *= -coefficient_reciprocal;
+        }
+        result.m_constant_value *= -coefficient_reciprocal;
+        return result;
+    }
+
+    /*************************************************************************/
     inline constexpr void erase(
         Variable<T_Variable, T_Expression> *a_variable_ptr) {
         m_sensitivities.erase(a_variable_ptr);
@@ -294,6 +304,12 @@ class Expression : public multi_array::AbstractMultiArrayElement {
         const Expression<T_Variable, T_Expression> &a_EXPRESSION) {
         *this += m_sensitivities[a_variable_ptr] * a_EXPRESSION;
         m_sensitivities.erase(a_variable_ptr);
+        for (auto &sensitivity : a_EXPRESSION.sensitivities()) {
+            if (fabs(m_sensitivities.at(sensitivity.first)) <
+                constant::EPSILON_10) {
+                m_sensitivities.erase(sensitivity.first);
+            }
+        }
     }
 
     /*************************************************************************/
@@ -550,8 +566,7 @@ class Expression : public multi_array::AbstractMultiArrayElement {
 };
 
 using IPExpression = Expression<int, double>;
-}  // namespace model_component
-}  // namespace printemps
+}  // namespace printemps::model_component
 #endif
 /*****************************************************************************/
 // END

@@ -43,10 +43,6 @@ TEST_F(TestIntegerMoveGenerator, setup) {
     EXPECT_EQ(32, static_cast<int>(moves.size()));  // (10 - 2) * 4
     EXPECT_EQ(32, static_cast<int>(flags.size()));
 
-    for (const auto& flag : flags) {
-        EXPECT_EQ(1, flag);
-    }
-
     for (const auto& move : moves) {
         EXPECT_EQ(printemps::neighborhood::MoveSense::Integer, move.sense);
         EXPECT_FALSE(move.alterations.front().first->is_fixed());
@@ -78,8 +74,8 @@ TEST_F(TestIntegerMoveGenerator, setup) {
                       moves[4 * i + 1].alterations[0].first->value() - 1);
         }
 
-        if (moves[4 * i + 2].alterations.front().first->value() ==
-            moves[4 * i + 2].alterations.front().first->upper_bound()) {
+        if (moves[4 * i + 2].alterations.front().first->value() >=
+            moves[4 * i + 2].alterations.front().first->upper_bound() - 4) {
             EXPECT_EQ(0, flags[4 * i + 2]);
         } else {
             EXPECT_EQ(1, flags[4 * i + 2]);
@@ -89,8 +85,8 @@ TEST_F(TestIntegerMoveGenerator, setup) {
                           2);
         }
 
-        if (moves[4 * i + 3].alterations.front().first->value() ==
-            moves[4 * i + 3].alterations.front().first->lower_bound()) {
+        if (moves[4 * i + 3].alterations.front().first->value() <=
+            moves[4 * i + 3].alterations.front().first->lower_bound() + 4) {
             EXPECT_EQ(0, flags[4 * i + 3]);
         } else {
             EXPECT_EQ(1, flags[4 * i + 3]);

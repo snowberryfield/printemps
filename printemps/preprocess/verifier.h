@@ -6,16 +6,13 @@
 #ifndef PRINTEMPS_PREPROCESS_VERIFIER_H__
 #define PRINTEMPS_PREPROCESS_VERIFIER_H__
 
-namespace printemps {
-namespace model {
+namespace printemps::model {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class Model;
-}  // namespace model
-}  // namespace printemps
+}  // namespace printemps::model
 
-namespace printemps {
-namespace preprocess {
+namespace printemps::preprocess {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class Verifier {
@@ -324,8 +321,7 @@ class Verifier {
         utility::print_message("Done.", a_IS_ENABLED_PRINT);
     }
 };
-}  // namespace preprocess
-}  // namespace printemps
+}  // namespace printemps::preprocess
 #endif
 /*****************************************************************************/
 // END

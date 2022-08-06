@@ -3,24 +3,23 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_UTILITY_GF2_H__
-#define PRINTEMPS_UTILITY_GF2_H__
+#ifndef PRINTEMPS_UTILITY_BINARY_MATRIX_H__
+#define PRINTEMPS_UTILITY_BINARY_MATRIX_H__
 
-namespace printemps {
-namespace utility {
+namespace printemps::utility {
 /*****************************************************************************/
-class GF2Matrix {
+class BinaryMatrix {
    private:
     std::vector<std::vector<int>> m_rows;
 
    public:
     /*************************************************************************/
-    GF2Matrix(void) {
+    BinaryMatrix(void) {
         this->initialize();
     }
 
     /*************************************************************************/
-    GF2Matrix(const int a_NUMBER_OF_ROWS, const int a_NUMBER_OF_COLUMNS) {
+    BinaryMatrix(const int a_NUMBER_OF_ROWS, const int a_NUMBER_OF_COLUMNS) {
         this->setup(a_NUMBER_OF_ROWS, a_NUMBER_OF_COLUMNS);
     }
 
@@ -69,11 +68,11 @@ class GF2Matrix {
     }
 
     /*************************************************************************/
-    inline std::pair<GF2Matrix, int> inverse_and_rank(void) const {
-        const int SIZE = this->number_of_rows();
-        GF2Matrix A    = *this;
-        GF2Matrix B(SIZE, SIZE);
-        int       rank = 0;
+    inline std::pair<BinaryMatrix, int> inverse_and_rank(void) const {
+        const int    SIZE = this->number_of_rows();
+        BinaryMatrix A    = *this;
+        BinaryMatrix B(SIZE, SIZE);
+        int          rank = 0;
 
         for (auto i = 0; i < SIZE; i++) {
             B[i][i] = 1;
@@ -138,12 +137,12 @@ class GF2Matrix {
     }
 
     /*************************************************************************/
-    inline GF2Matrix dot(const GF2Matrix &a_MATRIX) const {
+    inline BinaryMatrix dot(const BinaryMatrix &a_MATRIX) const {
         const int NUMBER_OF_ROWS           = this->number_of_rows();
         const int NUMBER_OF_COLUMNS        = this->number_of_columns();
         const int RESULT_NUMBER_OF_COLUMNS = a_MATRIX.number_of_columns();
 
-        GF2Matrix result(NUMBER_OF_ROWS, RESULT_NUMBER_OF_COLUMNS);
+        BinaryMatrix result(NUMBER_OF_ROWS, RESULT_NUMBER_OF_COLUMNS);
 
         for (auto i = 0; i < NUMBER_OF_ROWS; i++) {
             for (auto j = 0; j < RESULT_NUMBER_OF_COLUMNS; j++) {
@@ -155,9 +154,56 @@ class GF2Matrix {
         }
         return result;
     }
+
+    /*************************************************************************/
+    inline BinaryMatrix reachability(void) const {
+        auto      reachability = *this;
+        const int SIZE         = m_rows.size();
+
+        std::vector<std::unordered_set<int>> nonzeros(SIZE);
+        for (auto i = 0; i < SIZE; i++) {
+            for (auto j = 0; j < SIZE; j++) {
+                if (reachability[i][j] > 0) {
+                    nonzeros[i].insert(j);
+                }
+            }
+        }
+
+        for (auto l = 0; l < SIZE; l++) {
+            bool is_updated = false;
+            for (auto i = 0; i < SIZE; i++) {
+                for (auto j = 0; j < SIZE; j++) {
+                    if (reachability[i][j] > 0) {
+                        continue;
+                    }
+
+                    for (auto &&k : nonzeros[i]) {
+                        if (reachability[k][j]) {
+                            reachability[i][j] = 1;
+                            is_updated         = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (!is_updated) {
+                break;
+            }
+        }
+
+        return reachability;
+    }
+
+    /*************************************************************************/
+    inline static BinaryMatrix identity(const int a_SIZE) {
+        auto identity = BinaryMatrix(a_SIZE, a_SIZE);
+        for (auto i = 0; i < a_SIZE; i++) {
+            identity[i][i] = 1;
+        }
+        return identity;
+    }
 };
-}  // namespace utility
-}  // namespace printemps
+}  // namespace printemps::utility
 
 #endif
 /*****************************************************************************/

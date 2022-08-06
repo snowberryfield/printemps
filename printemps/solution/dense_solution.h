@@ -6,8 +6,7 @@
 #ifndef PRINTEMPS_SOLUTION_DENSE_SOLUTION_H__
 #define PRINTEMPS_SOLUTION_DENSE_SOLUTION_H__
 
-namespace printemps {
-namespace solution {
+namespace printemps::solution {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 struct DenseSolution {
@@ -38,8 +37,7 @@ struct DenseSolution {
     }
 };
 using IPDenseSolution = DenseSolution<int, double>;
-}  // namespace solution
-}  // namespace printemps
+}  // namespace printemps::solution
 #endif
 /*****************************************************************************/
 // END

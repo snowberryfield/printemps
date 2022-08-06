@@ -6,10 +6,7 @@
 #ifndef PRINTEMPS_SOLVER_LOCAL_SEARCH_CORE_LOCAL_SEARCH_CORE_TERMINATION_STATUS_H__
 #define PRINTEMPS_SOLVER_LOCAL_SEARCH_CORE_LOCAL_SEARCH_CORE_TERMINATION_STATUS_H__
 
-namespace printemps {
-namespace solver {
-namespace local_search {
-namespace core {
+namespace printemps::solver::local_search::core {
 /*****************************************************************************/
 enum class LocalSearchCoreTerminationStatus {
     TIME_OVER,
@@ -19,10 +16,7 @@ enum class LocalSearchCoreTerminationStatus {
     OPTIMAL,
     LOCAL_OPTIMAL
 };
-}  // namespace core
-}  // namespace local_search
-}  // namespace solver
-}  // namespace printemps
+}  // namespace printemps::solver::local_search::core
 
 #endif
 /*****************************************************************************/

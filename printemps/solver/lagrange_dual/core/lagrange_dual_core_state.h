@@ -6,10 +6,7 @@
 #ifndef PRINTEMPS_SOLVER_LAGRANGE_DUAL_CORE_LAGRANGE_DUAL_CORE_STATE_H__
 #define PRINTEMPS_SOLVER_LAGRANGE_DUAL_CORE_LAGRANGE_DUAL_CORE_STATE_H__
 
-namespace printemps {
-namespace solver {
-namespace lagrange_dual {
-namespace core {
+namespace printemps::solver::lagrange_dual::core {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 struct LagrangeDualCoreState {
@@ -60,10 +57,7 @@ struct LagrangeDualCoreState {
         this->queue.initialize();
     }
 };
-}  // namespace core
-}  // namespace lagrange_dual
-}  // namespace solver
-}  // namespace printemps
+}  // namespace printemps::solver::lagrange_dual::core
 
 #endif
 /*****************************************************************************/

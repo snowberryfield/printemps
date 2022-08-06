@@ -6,8 +6,7 @@
 #ifndef PRINTEMPS_UTILITY_RANDOM_H__
 #define PRINTEMPS_UTILITY_RANDOM_H__
 
-namespace printemps {
-namespace utility {
+namespace printemps::utility {
 /*****************************************************************************/
 template <class T_Generator, class T_Value>
 class UniformRandom {
@@ -49,8 +48,7 @@ class UniformRandom {
         return m_distribution(m_engine);
     }
 };
-}  // namespace utility
-}  // namespace printemps
+}  // namespace printemps::utility
 
 #endif
 /*****************************************************************************/
