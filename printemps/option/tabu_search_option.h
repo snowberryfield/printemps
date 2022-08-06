@@ -44,30 +44,30 @@ struct TabuSearchOptionConstant {
 struct TabuSearchOption {
     int                 iteration_max;
     double              time_max;
-    double              time_offset;  // hidden
+    double              time_offset;
     int                 log_interval;
     int                 initial_tabu_tenure;
     double              tabu_tenure_randomize_rate;
-    double              initial_modification_fixed_rate;      // hidden
-    double              initial_modification_randomize_rate;  // hidden
+    double              initial_modification_fixed_rate;
+    double              initial_modification_randomize_rate;
     tabu_mode::TabuMode tabu_mode;
-    double              move_preserve_rate;                           // hidden
-    double              frequency_penalty_coefficient;                // hidden
-    double              lagrangian_penalty_coefficient;               // hidden
-    double              pruning_rate_threshold;                       // hidden
-    bool                is_enabled_shuffle;                           // hidden
-    bool                is_enabled_move_curtail;                      // hidden
-    bool                is_enabled_automatic_break;                   // hidden
-    bool                is_enabled_automatic_tabu_tenure_adjustment;  // hidden
-    bool                is_enabled_automatic_iteration_adjustment;    // hidden
-    bool                is_enabled_initial_modification;              // hidden
-    int                 intensity_increase_count_threshold;           // hidden
-    int                 intensity_decrease_count_threshold;           // hidden
-    double              iteration_increase_rate;                      // hidden
-    double              iteration_decrease_rate;                      // hidden
-    bool                ignore_tabu_if_global_incumbent;              // hidden
-    int                 number_of_initial_modification;               // hidden
-    int                 seed;                                         // hidden
+    double              move_preserve_rate;
+    double              frequency_penalty_coefficient;
+    double              lagrangian_penalty_coefficient;
+    double              pruning_rate_threshold;
+    bool                is_enabled_shuffle;
+    bool                is_enabled_move_curtail;
+    bool                is_enabled_automatic_break;
+    bool                is_enabled_automatic_tabu_tenure_adjustment;
+    bool                is_enabled_automatic_iteration_adjustment;
+    bool                is_enabled_initial_modification;
+    int                 intensity_increase_count_threshold;
+    int                 intensity_decrease_count_threshold;
+    double              iteration_increase_rate;
+    double              iteration_decrease_rate;
+    bool                ignore_tabu_if_global_incumbent;
+    int                 number_of_initial_modification;
+    int                 seed;
 
     /*************************************************************************/
     TabuSearchOption(void) {
