@@ -6,16 +6,13 @@
 #ifndef PRINTEMPS_MODEL_COMPONENT_CONSTRAINT_BINARY_OPERATOR_H__
 #define PRINTEMPS_MODEL_COMPONENT_CONSTRAINT_BINARY_OPERATOR_H__
 
-namespace printemps {
-namespace neighborhood {
+namespace printemps::neighborhood {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 struct Move;
-}  // namespace neighborhood
-}  // namespace printemps
+}  // namespace printemps::neighborhood
 
-namespace printemps {
-namespace model_component {
+namespace printemps ::model_component {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class Variable;
@@ -27,11 +24,9 @@ class Expression;
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class Constraint;
-}  // namespace model_component
-}  // namespace printemps
+}  // namespace printemps::model_component
 
-namespace printemps {
-namespace model_component {
+namespace printemps::model_component {
 /*****************************************************************************/
 // LESS
 /*****************************************************************************/
@@ -341,8 +336,7 @@ constexpr auto operator>=(
         a_EXPRESSION_LEFT.self() - a_EXPRESSION_RIGHT.self(),
         ConstraintSense::Greater);
 }
-}  // namespace model_component
-}  // namespace printemps
+}  // namespace printemps::model_component
 
 /**
  * NOTE: The following operators must be defined in global namespace.

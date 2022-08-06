@@ -6,9 +6,7 @@
 #ifndef PRINTEMPS_UTILITY_JSON_JSON_H__
 #define PRINTEMPS_UTILITY_JSON_JSON_H__
 
-namespace printemps {
-namespace utility {
-namespace json {
+namespace printemps::utility::json {
 /*****************************************************************************/
 using JsonObjectBody = std::vector<std::pair<std::string, std::any>>;
 using JsonArrayBody  = std::vector<std::any>;
@@ -765,9 +763,7 @@ inline JsonArray read_json_array(const std::string& a_FILE_NAME) {
 
     return parse_json_array(TOKENS);
 }
-}  // namespace json
-}  // namespace utility
-}  // namespace printemps
+}  // namespace printemps::utility::json
 #endif
 /*****************************************************************************/
 // END

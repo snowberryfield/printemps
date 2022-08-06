@@ -6,8 +6,7 @@
 #ifndef PRINTEMPS_MODEL_COMPONENT_CONSTRAINT_REFERENCE_H__
 #define PRINTEMPS_MODEL_COMPONENT_CONSTRAINT_REFERENCE_H__
 
-namespace printemps {
-namespace model_component {
+namespace printemps::model_component {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class Constraint;
@@ -32,8 +31,7 @@ struct ConstraintReference {
         this->disabled_constraint_ptrs.clear();
     }
 };
-}  // namespace model_component
-}  // namespace printemps
+}  // namespace printemps::model_component
 #endif
 /*****************************************************************************/
 // END

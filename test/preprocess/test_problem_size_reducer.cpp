@@ -585,7 +585,7 @@ TEST_F(TestProblemSizeReducer, remove_duplicated_constraints) {
     model.create_constraint("g_0", 2 * x(0) + x(1) == 10);
     model.create_constraint("g_1", 2 * x(0) + x(1) == 10);
     model.create_constraint("g_2", 2 * x(0) + x(1) <= 10);
-    model.create_constraint("g_2", 2 * x(0) + x(1) == 20);
+    model.create_constraint("g_3", 2 * x(0) + x(1) == 20);
 
     model.setup_is_linear();
     model.setup_structure();
@@ -595,6 +595,48 @@ TEST_F(TestProblemSizeReducer, remove_duplicated_constraints) {
     auto number_of_newly_disabled_constraints =
         problem_size_reducer.remove_duplicated_constraints(false);
     EXPECT_EQ(1, number_of_newly_disabled_constraints);
+}
+
+/*****************************************************************************/
+TEST_F(TestProblemSizeReducer, remove_redundant_set_constraints) {
+    printemps::model::Model<int, double> model;
+    auto& x = model.create_variables("x", 10, 0, 1);
+
+    model.create_constraint("g_0", x(0) + x(1) == 1);
+    model.create_constraint("g_1", x.selection());
+
+    model.setup_is_linear();
+    model.setup_structure();
+
+    printemps::preprocess::ProblemSizeReducer<int, double>  //
+         problem_size_reducer(&model);
+    auto result = problem_size_reducer.remove_redundant_set_constraints(false);
+    EXPECT_EQ(1, result.first);
+    EXPECT_EQ(8, result.second);
+    EXPECT_FALSE(x(0).is_fixed());
+    EXPECT_FALSE(x(1).is_fixed());
+    EXPECT_TRUE(x(2).is_fixed());
+    EXPECT_TRUE(x(9).is_fixed());
+}
+
+/*****************************************************************************/
+TEST_F(TestProblemSizeReducer, remove_implicit_equality_constraints) {
+    printemps::model::Model<int, double> model;
+    auto& x = model.create_variables("x", 10, -10, 10);
+    model.minimize(x.sum());
+    model.create_constraint("g_0", x(0) + x(1) <= 10);
+    model.create_constraint("g_1", x(0) + x(1) >= 10);
+    model.create_constraint("g_2", -2 * x(0) - x(1) <= -10);
+    model.create_constraint("g_2", 2 * x(0) + x(1) <= 10);
+
+    model.setup_is_linear();
+    model.setup_structure();
+
+    printemps::preprocess::ProblemSizeReducer<int, double>  //
+         problem_size_reducer(&model);
+    auto number_of_newly_disabled_constraints =
+        problem_size_reducer.remove_implicit_equality_constraints(false);
+    EXPECT_EQ(2, number_of_newly_disabled_constraints);
 }
 
 /*****************************************************************************/

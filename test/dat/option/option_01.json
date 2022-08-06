@@ -1,0 +1,13 @@
+{
+    "neighborhood": {
+        "chain_move_reduce_mode": "OverlapRate",
+        "selection_mode": "Off",
+        "improvability_screening_mode": "Off"
+    },
+    "output": {
+        "verbose": "Off"
+    },
+    "tabu_search": {
+        "tabu_mode": "All"
+    }
+}

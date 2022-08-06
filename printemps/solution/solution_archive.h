@@ -6,8 +6,7 @@
 #ifndef PRINTEMPS_SOLUTION_SOLUTION_ARCHIVE_H__
 #define PRINTEMPS_SOLUTION_SOLUTION_ARCHIVE_H__
 
-namespace printemps {
-namespace solution {
+namespace printemps::solution {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class SolutionArchive {
@@ -173,8 +172,7 @@ class SolutionArchive {
         utility::json::write_json_object(object, a_FILE_NAME);
     }
 };
-}  // namespace solution
-}  // namespace printemps
+}  // namespace printemps::solution
 
 #endif
 /*****************************************************************************/

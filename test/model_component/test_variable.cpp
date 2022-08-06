@@ -60,7 +60,7 @@ TEST_F(TestVariable, initialize) {
     EXPECT_EQ(nullptr, variable.selection_ptr());
     EXPECT_TRUE(variable.related_constraint_ptrs().empty());
     EXPECT_TRUE(variable.related_binary_coefficient_constraint_ptrs().empty());
-    EXPECT_EQ(nullptr, variable.dependent_constraint_ptr());
+    EXPECT_EQ(nullptr, variable.dependent_expression_ptr());
     EXPECT_TRUE(variable.constraint_sensitivities().empty());
     EXPECT_EQ(0.0, variable.objective_sensitivity());
 }
@@ -376,97 +376,19 @@ TEST_F(TestVariable, select) {
 }
 
 /*****************************************************************************/
-TEST_F(TestVariable, update_as_intermediate_variable) {
-    {
-        auto variable =
-            printemps::model_component::Variable<int,
-                                                 double>::create_instance();
-        auto constraint =
-            printemps::model_component::Constraint<int,
-                                                   double>::create_instance();
+TEST_F(TestVariable, update) {
+    auto variable_0 =
+        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable_1 =
+        printemps::model_component::Variable<int, double>::create_instance();
 
-        variable.set_dependent_constraint_ptr(&constraint);
-        constraint = (variable <= 10);
-        variable   = 0;
-        constraint.update();
-        variable.update_as_intermediate_variable();
-        EXPECT_EQ(10, variable.value());
-    }
-    {
-        auto variable =
-            printemps::model_component::Variable<int,
-                                                 double>::create_instance();
-        auto constraint =
-            printemps::model_component::Constraint<int,
-                                                   double>::create_instance();
+    auto expression = 2 * variable_0 + 1;
+    variable_1.set_dependent_expression_ptr(&expression);
 
-        variable.set_dependent_constraint_ptr(&constraint);
-        constraint = (-variable <= 10);
-        variable   = 0;
-        constraint.update();
-        variable.update_as_intermediate_variable();
-        EXPECT_EQ(-10, variable.value());
-    }
-    {
-        auto variable =
-            printemps::model_component::Variable<int,
-                                                 double>::create_instance();
-        auto constraint =
-            printemps::model_component::Constraint<int,
-                                                   double>::create_instance();
-
-        variable.set_dependent_constraint_ptr(&constraint);
-        constraint = (variable >= 20);
-        variable   = 0;
-        constraint.update();
-        variable.update_as_intermediate_variable();
-        EXPECT_EQ(20, variable.value());
-    }
-    {
-        auto variable =
-            printemps::model_component::Variable<int,
-                                                 double>::create_instance();
-        auto constraint =
-            printemps::model_component::Constraint<int,
-                                                   double>::create_instance();
-
-        variable.set_dependent_constraint_ptr(&constraint);
-        constraint = (-variable >= 20);
-        variable   = 0;
-        constraint.update();
-        variable.update_as_intermediate_variable();
-        EXPECT_EQ(-20, variable.value());
-    }
-    {
-        auto variable =
-            printemps::model_component::Variable<int,
-                                                 double>::create_instance();
-        auto constraint =
-            printemps::model_component::Constraint<int,
-                                                   double>::create_instance();
-
-        variable.set_dependent_constraint_ptr(&constraint);
-        constraint = (variable == 30);
-        variable   = 0;
-        constraint.update();
-        variable.update_as_intermediate_variable();
-        EXPECT_EQ(30, variable.value());
-    }
-    {
-        auto variable =
-            printemps::model_component::Variable<int,
-                                                 double>::create_instance();
-        auto constraint =
-            printemps::model_component::Constraint<int,
-                                                   double>::create_instance();
-
-        variable.set_dependent_constraint_ptr(&constraint);
-        constraint = (-variable == 30);
-        variable   = 50;
-        constraint.update();
-        variable.update_as_intermediate_variable();
-        EXPECT_EQ(-30, variable.value());
-    }
+    variable_0 = 5;
+    expression.update();
+    variable_1.update();
+    EXPECT_EQ(11, variable_1.value());
 }
 
 /*****************************************************************************/
@@ -601,26 +523,26 @@ TEST_F(TestVariable, setup_hash) {
 }
 
 /*****************************************************************************/
-TEST_F(TestVariable, set_dependent_constraint_ptr) {
+TEST_F(TestVariable, set_dependent_expression_ptr) {
     auto variable =
         printemps::model_component::Variable<int, double>::create_instance();
-    auto constraint =
-        printemps::model_component::Constraint<int, double>::create_instance();
+    auto expression =
+        printemps::model_component::Expression<int, double>::create_instance();
 
     EXPECT_EQ(printemps::model_component::VariableSense::Integer,
               variable.sense());
-    EXPECT_EQ(nullptr, variable.dependent_constraint_ptr());
+    EXPECT_EQ(nullptr, variable.dependent_expression_ptr());
 
-    variable.set_dependent_constraint_ptr(&constraint);
+    variable.set_dependent_expression_ptr(&expression);
 
-    EXPECT_EQ(printemps::model_component::VariableSense::Intermediate,
+    EXPECT_EQ(printemps::model_component::VariableSense::DependentInteger,
               variable.sense());
-    EXPECT_EQ(&constraint, variable.dependent_constraint_ptr());
+    EXPECT_EQ(&expression, variable.dependent_expression_ptr());
 
-    variable.reset_dependent_constraint_ptr();
+    variable.reset_dependent_expression_ptr();
     EXPECT_EQ(printemps::model_component::VariableSense::Integer,
               variable.sense());
-    EXPECT_EQ(nullptr, variable.dependent_constraint_ptr());
+    EXPECT_EQ(nullptr, variable.dependent_expression_ptr());
 }
 
 /*****************************************************************************/

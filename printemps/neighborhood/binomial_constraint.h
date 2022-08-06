@@ -6,8 +6,7 @@
 #ifndef PRINTEMPS_NEIGHBORHOOD_BINOMIAL_CONSTRAINT_H__
 #define PRINTEMPS_NEIGHBORHOOD_BINOMIAL_CONSTRAINT_H__
 
-namespace printemps {
-namespace neighborhood {
+namespace printemps::neighborhood {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 struct BinomialConstraint {
@@ -30,8 +29,7 @@ struct BinomialConstraint {
     }
 };
 
-}  // namespace neighborhood
-}  // namespace printemps
+}  // namespace printemps::neighborhood
 #endif
 /*****************************************************************************/
 // END

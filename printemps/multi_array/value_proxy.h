@@ -9,8 +9,7 @@
 
 #include "abstract_multi_array.h"
 
-namespace printemps {
-namespace multi_array {
+namespace printemps::multi_array {
 /*****************************************************************************/
 template <class T_Value>
 class ValueProxy : public AbstractMultiArray {
@@ -351,8 +350,7 @@ utility::json::JsonObject create_json_array(
     str += "}";
     return utility::json::parse_json_object(str);
 }
-}  // namespace multi_array
-}  // namespace printemps
+}  // namespace printemps::multi_array
 #endif
 
 /*****************************************************************************/

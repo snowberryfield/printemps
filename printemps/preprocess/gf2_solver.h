@@ -6,8 +6,7 @@
 #ifndef PRINTEMPS_PREPROCESS_GF2_H__
 #define PRINTEMPS_PREPROCESS_GF2_H__
 
-namespace printemps {
-namespace preprocess {
+namespace printemps::preprocess {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class GF2Solver {
@@ -56,22 +55,22 @@ class GF2Solver {
             binary_variable_ptrs;
         std::unordered_set<
             model_component::Variable<T_Variable, T_Expression> *>
-            aux_variable_ptrs;
+            key_variable_ptrs;
 
         for (const auto &constraint_ptr : gf2s) {
             auto &expression       = constraint_ptr->expression();
-            auto  aux_variable_ptr = constraint_ptr->aux_variable_ptr();
+            auto  key_variable_ptr = constraint_ptr->key_variable_ptr();
             for (const auto &sensitivity : expression.sensitivities()) {
-                if (sensitivity.first != aux_variable_ptr) {
+                if (sensitivity.first != key_variable_ptr) {
                     binary_variable_ptrs.insert(sensitivity.first);
                 } else {
-                    aux_variable_ptrs.insert(sensitivity.first);
+                    key_variable_ptrs.insert(sensitivity.first);
                 }
             }
         }
 
         /**
-         * If the number of binary/auxiliary variables do not match the that of
+         * If the number of binary/keyiliary variables do not match the that of
          * the GF(2) equations, skip the following processes.
          */
         if (static_cast<int>(binary_variable_ptrs.size()) != GF2S_SIZE) {
@@ -79,7 +78,7 @@ class GF2Solver {
             return false;
         }
 
-        if (static_cast<int>(aux_variable_ptrs.size()) != GF2S_SIZE) {
+        if (static_cast<int>(key_variable_ptrs.size()) != GF2S_SIZE) {
             utility::print_message("Failed.", a_IS_ENABLED_PRINT);
             return false;
         }
@@ -108,24 +107,24 @@ class GF2Solver {
         /**
          * Solve GF(2) equations.
          */
-        utility::GF2Matrix gf2_matrix(GF2S_SIZE, GF2S_SIZE);
-        std::vector<int>   constant_values(GF2S_SIZE, 0);
+        utility::BinaryMatrix binary_matrix(GF2S_SIZE, GF2S_SIZE);
+        std::vector<int>      constant_values(GF2S_SIZE, 0);
 
         for (const auto &constraint_ptr : gf2s) {
             auto &expression       = constraint_ptr->expression();
-            auto  aux_variable_ptr = constraint_ptr->aux_variable_ptr();
+            auto  key_variable_ptr = constraint_ptr->key_variable_ptr();
             int   row              = constraint_map[constraint_ptr];
             for (const auto &sensitivity : expression.sensitivities()) {
-                if (sensitivity.first != aux_variable_ptr) {
-                    int column              = variable_map[sensitivity.first];
-                    gf2_matrix[row][column] = 1;
+                if (sensitivity.first != key_variable_ptr) {
+                    int column = variable_map[sensitivity.first];
+                    binary_matrix[row][column] = 1;
                 }
             }
             constant_values[row] =
                 static_cast<int>(expression.constant_value()) & 1;
         }
 
-        auto  result  = gf2_matrix.inverse_and_rank();
+        auto  result  = binary_matrix.inverse_and_rank();
         auto &inverse = result.first;
         int   rank    = result.second;
 
@@ -149,17 +148,17 @@ class GF2Solver {
 
         for (const auto &constraint_ptr : gf2s) {
             auto & expression       = constraint_ptr->expression();
-            auto   aux_variable_ptr = constraint_ptr->aux_variable_ptr();
+            auto   key_variable_ptr = constraint_ptr->key_variable_ptr();
             double value            = expression.constant_value();
             for (const auto &sensitivity : expression.sensitivities()) {
-                if (sensitivity.first != aux_variable_ptr) {
+                if (sensitivity.first != key_variable_ptr) {
                     value += sensitivity.first->value();
                 }
             }
-            double aux_coefficient =
-                expression.sensitivities().at(aux_variable_ptr);
-            aux_variable_ptr->fix_by(
-                static_cast<int>(-value / aux_coefficient));
+            double key_coefficient =
+                expression.sensitivities().at(key_variable_ptr);
+            key_variable_ptr->fix_by(
+                static_cast<int>(-value / key_coefficient));
         }
 
         for (const auto &variable_ptr : binary_variable_ptrs) {
@@ -170,7 +169,7 @@ class GF2Solver {
                                    a_IS_ENABLED_PRINT);
         }
 
-        for (const auto &variable_ptr : aux_variable_ptrs) {
+        for (const auto &variable_ptr : key_variable_ptrs) {
             utility::print_message("The value of variable " +
                                        variable_ptr->name() + " was fixed at " +
                                        std::to_string(variable_ptr->value()) +
@@ -182,8 +181,7 @@ class GF2Solver {
         return true;
     }
 };
-}  // namespace preprocess
-}  // namespace printemps
+}  // namespace printemps::preprocess
 
 #endif
 /*****************************************************************************/

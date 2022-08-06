@@ -6,10 +6,7 @@
 #ifndef PRINTEMPS_SOLVER_TABU_SEARCH_CONTROLLER_TABU_SEARCH_CONTROLLER_STATE_MANAGER_H__
 #define PRINTEMPS_SOLVER_TABU_SEARCH_CONTROLLER_TABU_SEARCH_CONTROLLER_STATE_MANAGER_H__
 
-namespace printemps {
-namespace solver {
-namespace tabu_search {
-namespace controller {
+namespace printemps::solver::tabu_search::controller {
 /*****************************************************************************/
 struct TabuSearchControllerStateManagerConstant {
     static constexpr double RELATIVE_RANGE_THRESHOLD              = 1E-2;
@@ -91,12 +88,12 @@ class TabuSearchControllerStateManager {
         m_state.number_of_initial_modification = 0;
         m_state.iteration_max = m_option.tabu_search.iteration_max;
         m_state.penalty_coefficient_relaxing_rate =
-            m_option.penalty_coefficient_relaxing_rate;
+            m_option.penalty.penalty_coefficient_relaxing_rate;
         m_state.penalty_coefficient_tightening_rate =
-            m_option.penalty_coefficient_tightening_rate;
+            m_option.penalty.penalty_coefficient_tightening_rate;
 
         m_state.improvability_screening_mode =
-            m_option.improvability_screening_mode;
+            m_option.neighborhood.improvability_screening_mode;
         if (m_state.improvability_screening_mode ==
             option::improvability_screening_mode::Automatic) {
             m_state.improvability_screening_mode =
@@ -108,7 +105,7 @@ class TabuSearchControllerStateManager {
     inline option::Option create_option() const {
         option::Option option = m_option;
 
-        option.improvability_screening_mode =
+        option.neighborhood.improvability_screening_mode =
             m_state.improvability_screening_mode;
         option.tabu_search.iteration_max = m_state.iteration_max;
         option.tabu_search.time_offset   = m_state.total_elapsed_time;
@@ -159,7 +156,7 @@ class TabuSearchControllerStateManager {
          * If the improvability_screening_mode was set to "Automatic",
          * determine the mode according to the search status so far.
          */
-        if (m_option.improvability_screening_mode ==
+        if (m_option.neighborhood.improvability_screening_mode ==
             option::improvability_screening_mode::Automatic) {
             this->update_improvability_screening_mode();
         }
@@ -228,7 +225,7 @@ class TabuSearchControllerStateManager {
              * Disable the special neighborhood moves if the incumbent was
              * updated.
              */
-            this->disable_special_neighborhod_moves();
+            this->disable_special_neighborhood_moves();
 
         } else {
             /**
@@ -237,7 +234,7 @@ class TabuSearchControllerStateManager {
              */
             if (m_state.tabu_search_result.number_of_iterations ==
                 m_option.tabu_search.iteration_max) {
-                this->enable_special_neighborhod_moves();
+                this->enable_special_neighborhood_moves();
             }
         }
 
@@ -245,7 +242,7 @@ class TabuSearchControllerStateManager {
          * Reset chain moves if the global augmented objective was updated.
          */
         if (m_state.is_global_augmented_incumbent_updated) {
-            if (m_option.is_enabled_chain_move) {
+            if (m_option.neighborhood.is_enabled_chain_move) {
                 this->clear_chain_moves();
             }
         }
@@ -254,7 +251,7 @@ class TabuSearchControllerStateManager {
          * Sort and deduplicate registered chain moves.
          */
         if (m_model_ptr->neighborhood().chain().is_enabled() &&
-            m_option.chain_move_capacity > 0) {
+            m_option.neighborhood.chain_move_capacity > 0) {
             this->sort_and_deduplicate_chain_moves();
         }
 
@@ -263,7 +260,7 @@ class TabuSearchControllerStateManager {
          */
         if (static_cast<int>(
                 this->m_model_ptr->neighborhood().chain().moves().size()) >
-            m_option.chain_move_capacity) {
+            m_option.neighborhood.chain_move_capacity) {
             this->reduce_chain_moves(a_mt19937_ptr);
         }
 
@@ -292,7 +289,9 @@ class TabuSearchControllerStateManager {
              solution::IncumbentHolderConstant::
                  STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE);
 
-        m_state.is_feasible_incumbent_updated =
+        m_state.previous_is_feasible_incumbent_updated =
+            m_state.current_is_feasible_incumbent_updated;
+        m_state.current_is_feasible_incumbent_updated =
             (m_state.tabu_search_result.total_update_status &
              solution::IncumbentHolderConstant::
                  STATUS_FEASIBLE_INCUMBENT_UPDATE);
@@ -517,7 +516,7 @@ class TabuSearchControllerStateManager {
         /**
          * If a local incumbent solution was updated the last loop, the initial
          * solution for the next loop and flags to tighten or relax the penalty
-         * coefficients will be determined by complexed rules below.
+         * coefficients will be determined by complex rules below.
          */
         if (GAP < TabuSearchControllerStateManagerConstant::GAP_TOLERANCE) {
             /**
@@ -592,7 +591,7 @@ class TabuSearchControllerStateManager {
     /*************************************************************************/
     inline constexpr void update_penalty_coefficient_relaxing_rate(void) {
         /**
-         * Descrease penalty coefficient relaxing rate if lack of
+         * Decrease penalty coefficient relaxing rate if lack of
          * diversification is detected. This applies only if no feasible
          * solution has been found.
          */
@@ -614,9 +613,9 @@ class TabuSearchControllerStateManager {
          * Revert penalty coefficient relaxing rate if the feasible incumbent
          * solution is updated.
          */
-        if (m_state.is_feasible_incumbent_updated) {
+        if (m_state.current_is_feasible_incumbent_updated) {
             m_state.penalty_coefficient_relaxing_rate =
-                m_option.penalty_coefficient_relaxing_rate;
+                m_option.penalty.penalty_coefficient_relaxing_rate;
             return;
         }
 
@@ -644,7 +643,7 @@ class TabuSearchControllerStateManager {
         m_state.penalty_coefficient_relaxing_rate +=
             TabuSearchControllerStateManagerConstant::
                 PENALTY_COEFFICIENT_RELAXING_RATE_STEP_SIZE *
-            (m_option.penalty_coefficient_relaxing_rate -
+            (m_option.penalty.penalty_coefficient_relaxing_rate -
              m_state.penalty_coefficient_relaxing_rate);
     }
 
@@ -694,7 +693,8 @@ class TabuSearchControllerStateManager {
             }
         }
 
-        const double BALANCE = m_option.penalty_coefficient_updating_balance;
+        const double BALANCE =
+            m_option.penalty.penalty_coefficient_updating_balance;
         const double GAP =
             m_incumbent_holder_ptr->global_augmented_incumbent_objective() -
             m_incumbent_holder_ptr->local_augmented_incumbent_objective();
@@ -731,7 +731,7 @@ class TabuSearchControllerStateManager {
                 }
             }
 
-            if (m_option.is_enabled_grouping_penalty_coefficient) {
+            if (m_option.penalty.is_enabled_grouping_penalty_coefficient) {
                 double max_local_penalty_coefficient = 0;
                 for (auto&& constraint : proxy.flat_indexed_constraints()) {
                     max_local_penalty_coefficient =
@@ -754,7 +754,7 @@ class TabuSearchControllerStateManager {
              * coefficient specified in option.
              */
             const double INITIAL_PENALTY_COEFFICIENT =
-                this->m_option.initial_penalty_coefficient;
+                this->m_option.penalty.initial_penalty_coefficient;
             for (auto&& constraint : proxy.flat_indexed_constraints()) {
                 if (constraint.local_penalty_coefficient_less() >
                     INITIAL_PENALTY_COEFFICIENT) {
@@ -922,71 +922,169 @@ class TabuSearchControllerStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void disable_special_neighborhod_moves(void) {
+    inline constexpr void disable_special_neighborhood_moves(void) {
+        auto& neighborhood = m_model_ptr->neighborhood();
+
+        /// Exclusive OR
+        if (m_option.neighborhood.is_enabled_exclusive_or_move) {
+            neighborhood.exclusive_or().disable();
+        }
+
+        /// Exclusive NOR
+        if (m_option.neighborhood.is_enabled_exclusive_nor_move) {
+            neighborhood.exclusive_nor().disable();
+        }
+
+        /// Inverted Integers
+        if (m_option.neighborhood.is_enabled_inverted_integers_move) {
+            neighborhood.inverted_integers().disable();
+        }
+
+        /// Balanced Integers
+        if (m_option.neighborhood.is_enabled_balanced_integers_move) {
+            neighborhood.balanced_integers().disable();
+        }
+
+        /// Constant Sum Integers
+        if (m_option.neighborhood.is_enabled_constant_sum_integers_move) {
+            neighborhood.constant_sum_integers().disable();
+        }
+
+        /// Constant Difference Integers
+        if (m_option.neighborhood
+                .is_enabled_constant_difference_integers_move) {
+            neighborhood.constant_difference_integers().disable();
+        }
+
+        /// Constant Ratio Integers
+        if (m_option.neighborhood.is_enabled_constant_ratio_integers_move) {
+            neighborhood.constant_ratio_integers().disable();
+        }
+
         /// Aggregation
-        if (m_option.is_enabled_aggregation_move) {
-            m_model_ptr->neighborhood().aggregation().disable();
+        if (m_option.neighborhood.is_enabled_aggregation_move) {
+            neighborhood.aggregation().disable();
         }
 
         /// Precedence
-        if (m_option.is_enabled_precedence_move) {
-            m_model_ptr->neighborhood().precedence().disable();
+        if (m_option.neighborhood.is_enabled_precedence_move) {
+            neighborhood.precedence().disable();
         }
 
         /// Variable Bound
-        if (m_option.is_enabled_variable_bound_move) {
-            m_model_ptr->neighborhood().variable_bound().disable();
+        if (m_option.neighborhood.is_enabled_variable_bound_move) {
+            neighborhood.variable_bound().disable();
+        }
+
+        /// Trinomial Exclusive NOR
+        if (m_option.neighborhood.is_enabled_trinomial_exclusive_nor_move) {
+            neighborhood.trinomial_exclusive_nor().disable();
         }
 
         /// Soft Selection
-        if (m_option.is_enabled_soft_selection_move) {
-            m_model_ptr->neighborhood().soft_selection().disable();
+        if (m_option.neighborhood.is_enabled_soft_selection_move) {
+            neighborhood.soft_selection().disable();
         }
 
         /// Chain
-        if (m_option.is_enabled_chain_move) {
-            m_model_ptr->neighborhood().chain().disable();
+        if (m_option.neighborhood.is_enabled_chain_move) {
+            neighborhood.chain().disable();
         }
 
         /// Two Flip
-        if (m_option.is_enabled_two_flip_move &&
-            m_model_ptr->flippable_variable_ptr_pairs().size() > 0) {
-            m_model_ptr->neighborhood().two_flip().disable();
+        if (m_option.neighborhood.is_enabled_two_flip_move) {
+            neighborhood.two_flip().disable();
         }
         m_state.is_disabled_special_neighborhood_move = true;
     }
 
     /*************************************************************************/
-    inline constexpr void enable_special_neighborhod_moves(void) {
+    inline constexpr void enable_special_neighborhood_moves(void) {
+        auto& neighborhood = m_model_ptr->neighborhood();
+
+        /// Exclusive OR
+        if (m_option.neighborhood.is_enabled_exclusive_or_move &&
+            neighborhood.exclusive_or().moves().size() > 0) {
+            neighborhood.exclusive_or().enable();
+        }
+
+        /// Exclusive NOR
+        if (m_option.neighborhood.is_enabled_exclusive_nor_move &&
+            neighborhood.exclusive_nor().moves().size() > 0) {
+            neighborhood.exclusive_nor().enable();
+        }
+
+        /// Inverted Integers
+        if (m_option.neighborhood.is_enabled_inverted_integers_move &&
+            neighborhood.inverted_integers().moves().size() > 0) {
+            neighborhood.inverted_integers().enable();
+        }
+
+        /// Balanced Integers
+        if (m_option.neighborhood.is_enabled_balanced_integers_move &&
+            neighborhood.balanced_integers().moves().size() > 0) {
+            neighborhood.balanced_integers().enable();
+        }
+
+        /// Constant Sum Integers
+        if (m_option.neighborhood.is_enabled_constant_sum_integers_move &&
+            neighborhood.constant_sum_integers().moves().size() > 0) {
+            neighborhood.constant_sum_integers().enable();
+        }
+
+        /// Constant Difference Integers
+        if (m_option.neighborhood
+                .is_enabled_constant_difference_integers_move &&
+            neighborhood.constant_difference_integers().moves().size() > 0) {
+            neighborhood.constant_difference_integers().enable();
+        }
+
+        /// Constant Ratio Integers
+        if (m_option.neighborhood.is_enabled_constant_ratio_integers_move &&
+            neighborhood.constant_ratio_integers().moves().size() > 0) {
+            neighborhood.constant_ratio_integers().enable();
+        }
+
         /// Aggregation
-        if (m_option.is_enabled_aggregation_move) {
-            m_model_ptr->neighborhood().aggregation().enable();
+        if (m_option.neighborhood.is_enabled_aggregation_move &&
+            neighborhood.aggregation().moves().size() > 0) {
+            neighborhood.aggregation().enable();
         }
 
         /// Precedence
-        if (m_option.is_enabled_precedence_move) {
-            m_model_ptr->neighborhood().precedence().enable();
+        if (m_option.neighborhood.is_enabled_precedence_move &&
+            neighborhood.precedence().moves().size() > 0) {
+            neighborhood.precedence().enable();
         }
 
         /// Variable Bound
-        if (m_option.is_enabled_variable_bound_move) {
-            m_model_ptr->neighborhood().variable_bound().enable();
+        if (m_option.neighborhood.is_enabled_variable_bound_move &&
+            neighborhood.variable_bound().moves().size() > 0) {
+            neighborhood.variable_bound().enable();
+        }
+
+        /// Trinomial Exclusive NOR
+        if (m_option.neighborhood.is_enabled_trinomial_exclusive_nor_move &&
+            neighborhood.trinomial_exclusive_nor().moves().size() > 0) {
+            neighborhood.trinomial_exclusive_nor().enable();
         }
 
         /// Soft Selection
-        if (m_option.is_enabled_soft_selection_move) {
-            m_model_ptr->neighborhood().soft_selection().enable();
+        if (m_option.neighborhood.is_enabled_soft_selection_move &&
+            neighborhood.soft_selection().moves().size() > 0) {
+            neighborhood.soft_selection().enable();
         }
 
         /// Chain
-        if (m_option.is_enabled_chain_move) {
-            m_model_ptr->neighborhood().chain().enable();
+        if (m_option.neighborhood.is_enabled_chain_move &&
+            neighborhood.chain().moves().size() > 0) {
+            neighborhood.chain().enable();
         }
 
         /// Two Flip
-        if (m_option.is_enabled_two_flip_move &&
-            m_model_ptr->flippable_variable_ptr_pairs().size() > 0) {
-            m_model_ptr->neighborhood().two_flip().enable();
+        if (m_option.neighborhood.is_enabled_two_flip_move &&
+            neighborhood.two_flip().moves().size() > 0) {
+            neighborhood.two_flip().enable();
         }
 
         /**
@@ -1013,17 +1111,17 @@ class TabuSearchControllerStateManager {
 
     /*************************************************************************/
     inline constexpr void reduce_chain_moves(std::mt19937* a_mt19937_ptr) {
-        switch (m_option.chain_move_reduce_mode) {
+        switch (m_option.neighborhood.chain_move_reduce_mode) {
             case option::chain_move_reduce_mode::OverlapRate: {
                 m_model_ptr->neighborhood().chain().reduce_moves(
-                    m_option.chain_move_capacity);
+                    m_option.neighborhood.chain_move_capacity);
                 break;
             }
             case option::chain_move_reduce_mode::Shuffle: {
                 m_model_ptr->neighborhood().chain().shuffle_moves(
                     a_mt19937_ptr);
                 m_model_ptr->neighborhood().chain().reduce_moves(
-                    m_option.chain_move_capacity);
+                    m_option.neighborhood.chain_move_capacity);
                 break;
             }
             default: {
@@ -1122,10 +1220,7 @@ class TabuSearchControllerStateManager {
         return m_state;
     }
 };
-}  // namespace controller
-}  // namespace tabu_search
-}  // namespace solver
-}  // namespace printemps
+}  // namespace printemps::solver::tabu_search::controller
 #endif
 /*****************************************************************************/
 // END

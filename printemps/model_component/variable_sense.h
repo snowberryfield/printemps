@@ -6,17 +6,16 @@
 #ifndef PRINTEMPS_MODEL_COMPONENT_VARIABLE_SENSE_H__
 #define PRINTEMPS_MODEL_COMPONENT_VARIABLE_SENSE_H__
 
-namespace printemps {
-namespace model_component {
+namespace printemps::model_component {
 /*****************************************************************************/
 enum class VariableSense {
-    Binary,       //
-    Integer,      //
-    Selection,    //
-    Intermediate  //
+    Binary,           //
+    Integer,          //
+    Selection,        //
+    DependentBinary,  //
+    DependentInteger  //
 };
-}  // namespace model_component
-}  // namespace printemps
+}  // namespace printemps::model_component
 #endif
 /*****************************************************************************/
 // END

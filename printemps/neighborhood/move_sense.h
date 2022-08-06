@@ -6,24 +6,30 @@
 #ifndef PRINTEMPS_NEIGHBORHOOD_MOVE_SENSE_H__
 #define PRINTEMPS_NEIGHBORHOOD_MOVE_SENSE_H__
 
-namespace printemps {
-namespace neighborhood {
+namespace printemps::neighborhood {
 /*****************************************************************************/
 enum class MoveSense {
-    Binary,         //
-    Integer,        //
-    Selection,      //
-    Aggregation,    //
-    Precedence,     //
-    VariableBound,  //
-    SoftSelection,  //
-    Chain,          //
-    TwoFlip,        //
-    UserDefined,    //
+    Binary,                      //
+    Integer,                     //
+    Selection,                   //
+    ExclusiveOr,                 //
+    ExclusiveNor,                //
+    InvertedIntegers,            //
+    BalancedIntegers,            //
+    ConstantSumIntegers,         //
+    ConstantDifferenceIntegers,  //
+    ConstantRatioIntegers,       //
+    Aggregation,                 //
+    Precedence,                  //
+    VariableBound,               //
+    SoftSelection,               //
+    TrinomialExclusiveNor,       //
+    Chain,                       //
+    TwoFlip,                     //
+    UserDefined,                 //
     General
 };
-}  // namespace neighborhood
-}  // namespace printemps
+}  // namespace printemps::neighborhood
 #endif
 /*****************************************************************************/
 // END

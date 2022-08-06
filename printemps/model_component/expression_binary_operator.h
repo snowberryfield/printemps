@@ -6,8 +6,7 @@
 #ifndef PRINTEMPS_MODEL_COMPONENT_EXPRESSION_BINARY_OPERATOR_H__
 #define PRINTEMPS_MODEL_COMPONENT_EXPRESSION_BINARY_OPERATOR_H__
 
-namespace printemps {
-namespace model_component {
+namespace printemps::model_component {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class Variable;
@@ -248,8 +247,7 @@ constexpr Expression<T_Variable, T_Expression> operator/(
     result /= a_VALUE;
     return result;
 }
-}  // namespace model_component
-}  // namespace printemps
+}  // namespace printemps::model_component
 
 #endif
 

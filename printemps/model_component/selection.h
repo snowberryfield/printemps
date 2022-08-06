@@ -6,8 +6,7 @@
 #ifndef PRINTEMPS_MODEL_COMPONENT_SELECTION_H__
 #define PRINTEMPS_MODEL_COMPONENT_SELECTION_H__
 
-namespace printemps {
-namespace model_component {
+namespace printemps::model_component {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class Variable;
@@ -68,8 +67,7 @@ struct Selection {
         }
     }
 };  // namespace model_component
-}  // namespace model_component
-}  // namespace printemps
+}  // namespace printemps::model_component
 #endif
 /*****************************************************************************/
 // END

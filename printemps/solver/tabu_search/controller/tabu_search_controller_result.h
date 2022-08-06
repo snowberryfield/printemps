@@ -6,10 +6,7 @@
 #ifndef PRINTEMPS_SOLVER_TABU_SEARCH_CONTROLLER_TABU_SEARCH_CONTROLLER_RESULT_H__
 #define PRINTEMPS_SOLVER_TABU_SEARCH_CONTROLLER_TABU_SEARCH_CONTROLLER_RESULT_H__
 
-namespace printemps {
-namespace solver {
-namespace tabu_search {
-namespace controller {
+namespace printemps::solver::tabu_search::controller {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 struct TabuSearchControllerResult {
@@ -36,10 +33,7 @@ struct TabuSearchControllerResult {
         this->state.initialize();
     }
 };
-}  // namespace controller
-}  // namespace tabu_search
-}  // namespace solver
-}  // namespace printemps
+}  // namespace printemps::solver::tabu_search::controller
 
 #endif
 /*****************************************************************************/

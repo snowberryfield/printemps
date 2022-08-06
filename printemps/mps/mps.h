@@ -11,8 +11,7 @@
 #include "mps_objective.h"
 #include "mps_read_mode.h"
 
-namespace printemps {
-namespace mps {
+namespace printemps::mps {
 /*****************************************************************************/
 struct MPS {
     std::string                                    name;
@@ -434,8 +433,7 @@ struct MPS {
         }
     }
 };
-}  // namespace mps
-}  // namespace printemps
+}  // namespace printemps::mps
 #endif
 /*****************************************************************************/
 // END

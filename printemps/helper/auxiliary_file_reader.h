@@ -6,8 +6,7 @@
 #ifndef PRINTEMPS_HELPER_AUXILIARY_FILE_READER_H__
 #define PRINTEMPS_HELPER_AUXILIARY_FILE_READER_H__
 
-namespace printemps {
-namespace helper {
+namespace printemps::helper {
 /*****************************************************************************/
 inline std::unordered_map<std::string, int> read_names_and_values(
     const std::string &a_FILE_NAME) {
@@ -148,8 +147,7 @@ inline std::vector<std::pair<std::string, std::string>> read_name_pairs(
 
     return name_pairs;
 }
-}  // namespace helper
-}  // namespace printemps
+}  // namespace printemps::helper
 #endif
 /*****************************************************************************/
 // END

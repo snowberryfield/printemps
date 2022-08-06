@@ -17,9 +17,15 @@ jobs:
       - { os: ubuntu-20.04, cc: clang-10, cxx: clang++-10 } # 10.0.0
       - { os: ubuntu-20.04, cc: clang-11, cxx: clang++-11 } # 11.0.0
       - { os: ubuntu-20.04, cc: clang-12, cxx: clang++-12 } # 12.0.0
-      # For macOS 10.15, the available compilers are specified according to
-      # https://github.com/actions/virtual-environments/blob/master/images/macos/macos-10.15-Readme.md
-      - { os: macos-10.15, cc: gcc-9, cxx: g++-9 } # 9.3.0 Homebrew
+      # For macOS 11, the available compilers are specified according to
+      # https://github.com/actions/virtual-environments/blob/main/images/macos/macos-11-Readme.md
+      - { os: macos-11, cc: gcc-9, cxx: g++-9 } # 9.5.0 
+      - { os: macos-11, cc: gcc-10, cxx: g++-10 } # 10.4.0 
+      - { os: macos-11, cc: gcc-11, cxx: g++-11 } # 11.3.0 
+      # For macOS 12, the available compilers are specified according to
+      # https://github.com/actions/virtual-environments/blob/main/images/macos/macos-12-Readme.md
+      - { os: macos-12, cc: gcc-11, cxx: g++-11 } # 11.3.0 
+
     steps:
     - uses: actions/checkout@v2
 

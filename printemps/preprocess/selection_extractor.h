@@ -6,8 +6,7 @@
 #ifndef PRINTEMPS_PREPROCESS_SELECTION_EXTRACTOR_H__
 #define PRINTEMPS_PREPROCESS_SELECTION_EXTRACTOR_H__
 
-namespace printemps {
-namespace preprocess {
+namespace printemps::preprocess {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class SelectionExtractor {
@@ -29,10 +28,26 @@ class SelectionExtractor {
             if (!constraint_ptr->is_enabled()) {
                 continue;
             }
+            bool is_valid = true;
 
-            model_component::Selection<T_Variable, T_Expression> selection(
-                constraint_ptr);
-            raw_selections.push_back(selection);
+            /**
+             * NOTES: Set-partitioning constraints including only "Binary"
+             * variables can be candidates for Selection constraints,which must
+             * not include "Dependent Binary" variables.
+             */
+            for (auto &&sensitivity :
+                 constraint_ptr->expression().sensitivities()) {
+                if (sensitivity.first->sense() !=
+                    model_component::VariableSense::Binary) {
+                    is_valid = false;
+                    break;
+                }
+            }
+            if (is_valid) {
+                model_component::Selection<T_Variable, T_Expression> selection(
+                    constraint_ptr);
+                raw_selections.push_back(selection);
+            }
         }
         return raw_selections;
     }
@@ -65,7 +80,7 @@ class SelectionExtractor {
         const option::selection_mode::SelectionMode &a_SELECTION_MODE,
         const bool                                   a_IS_ENABLED_PRINT) {
         switch (a_SELECTION_MODE) {
-            case option::selection_mode::None: {
+            case option::selection_mode::Off: {
                 break;
             }
             case option::selection_mode::Defined: {
@@ -348,8 +363,7 @@ class SelectionExtractor {
         return m_selections;
     }
 };
-}  // namespace preprocess
-}  // namespace printemps
+}  // namespace printemps::preprocess
 #endif
 /*****************************************************************************/
 // END

@@ -6,15 +6,13 @@
 #ifndef PRINTEMPS_MPS_MPS_VARIABLE_SENSE_H__
 #define PRINTEMPS_MPS_MPS_VARIABLE_SENSE_H__
 
-namespace printemps {
-namespace mps {
+namespace printemps::mps {
 /*****************************************************************************/
 enum class MPSVariableSense {
     Integer,  //
     Continuous
 };
-}  // namespace mps
-}  // namespace printemps
+}  // namespace printemps::mps
 #endif
 /*****************************************************************************/
 // END

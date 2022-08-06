@@ -6,8 +6,7 @@
 #ifndef PRINTEMPS_UTILITY_CONSOLE_UTILITY_H__
 #define PRINTEMPS_UTILITY_CONSOLE_UTILITY_H__
 
-namespace printemps {
-namespace utility {
+namespace printemps::utility {
 /******************************************************************************/
 inline void print_single_line(const bool a_IS_ENABLED) {
     if (!a_IS_ENABLED) {
@@ -138,8 +137,7 @@ inline void print_info(const std::string &a_MESSAGE, const bool a_IS_ENABLED) {
 inline void print_debug(const std::string &a_MESSAGE, const bool a_IS_ENABLED) {
     print_with_label("DEBUG   : ", a_MESSAGE, a_IS_ENABLED);
 }
-}  // namespace utility
-}  // namespace printemps
+}  // namespace printemps::utility
 
 /******************************************************************************/
 // END

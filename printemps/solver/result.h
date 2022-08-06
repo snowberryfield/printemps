@@ -6,8 +6,7 @@
 #ifndef PRINTEMPS_SOLVER_RESULT_H__
 #define PRINTEMPS_SOLVER_RESULT_H__
 
-namespace printemps {
-namespace solver {
+namespace printemps::solver {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 struct Result {
@@ -38,8 +37,7 @@ struct Result {
         this->solution_archive.initialize();
     }
 };
-}  // namespace solver
-}  // namespace printemps
+}  // namespace printemps::solver
 
 #endif
 /*****************************************************************************/

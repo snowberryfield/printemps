@@ -8,8 +8,7 @@
 
 #include "flippable_variable_pair.h"
 
-namespace printemps {
-namespace preprocess {
+namespace printemps::preprocess {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class FlippableVariablePairExtractor {
@@ -142,8 +141,7 @@ class FlippableVariablePairExtractor {
 };
 using IPFlippableVariablePairExtractor =
     FlippableVariablePairExtractor<int, double>;
-}  // namespace preprocess
-}  // namespace printemps
+}  // namespace printemps::preprocess
 #endif
 /*****************************************************************************/
 // END

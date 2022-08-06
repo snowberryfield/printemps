@@ -6,20 +6,35 @@
 #ifndef PRINTEMPS_OPTION_IMPROVABILITY_SCREENING_MODE_H__
 #define PRINTEMPS_OPTION_IMPROVABILITY_SCREENING_MODE_H__
 
-namespace printemps {
-namespace option {
-namespace improvability_screening_mode {
+namespace printemps::option::improvability_screening_mode {
 /*****************************************************************************/
 enum ImprovabilityScreeningMode : int {  //
     Off,
     Soft,
     Aggressive,
-    Automatic,
-    Intensive
+    Intensive,
+    Automatic
 };
-}  // namespace improvability_screening_mode
-}  // namespace option
-}  // namespace printemps
+
+/*****************************************************************************/
+static std::unordered_map<std::string, ImprovabilityScreeningMode>
+    ImprovabilityScreeningModeMap = {  //
+        {"Off", ImprovabilityScreeningMode::Off},
+        {"Soft", ImprovabilityScreeningMode::Soft},
+        {"Aggressive", ImprovabilityScreeningMode::Aggressive},
+        {"Intensive", ImprovabilityScreeningMode::Intensive},
+        {"Automatic", ImprovabilityScreeningMode::Automatic}};
+
+/*****************************************************************************/
+static std::unordered_map<ImprovabilityScreeningMode, std::string>
+    ImprovabilityScreeningModeInverseMap = {  //
+        {ImprovabilityScreeningMode::Off, "Off"},
+        {ImprovabilityScreeningMode::Soft, "Soft"},
+        {ImprovabilityScreeningMode::Aggressive, "Aggressive"},
+        {ImprovabilityScreeningMode::Intensive, "Intensive"},
+        {ImprovabilityScreeningMode::Automatic, "Automatic"}};
+
+}  // namespace printemps::option::improvability_screening_mode
 
 #endif
 /*****************************************************************************/
