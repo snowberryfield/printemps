@@ -21,7 +21,7 @@ struct PenaltyOptionConstant {
 struct PenaltyOption {
     double penalty_coefficient_relaxing_rate;
     double penalty_coefficient_tightening_rate;
-    double penalty_coefficient_updating_balance;  // hidden
+    double penalty_coefficient_updating_balance;
     double initial_penalty_coefficient;
     bool   is_enabled_grouping_penalty_coefficient;
 

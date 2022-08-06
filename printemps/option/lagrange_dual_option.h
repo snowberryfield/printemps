@@ -25,11 +25,11 @@ struct LagrangeDualOption {
     bool   is_enabled;
     int    iteration_max;
     double time_max;
-    double time_offset;  // hidden
+    double time_offset;
     double step_size_extend_rate;
     double step_size_reduce_rate;
     double tolerance;
-    int    queue_size;  // hidden
+    int    queue_size;
     int    log_interval;
 
     /*************************************************************************/

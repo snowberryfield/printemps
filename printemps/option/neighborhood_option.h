@@ -60,13 +60,12 @@ struct NeighborhoodOption {
     bool is_enabled_trinomial_exclusive_nor_move;
     bool is_enabled_soft_selection_move;
     bool is_enabled_chain_move;
-    bool is_enabled_two_flip_move;  // hidden
+    bool is_enabled_two_flip_move;
     bool is_enabled_user_defined_move;
 
-    int chain_move_capacity;  // hidden
-    chain_move_reduce_mode::ChainMoveReduceMode
-           chain_move_reduce_mode;             // hidden
-    double chain_move_overlap_rate_threshold;  // hidden
+    int                                         chain_move_capacity;
+    chain_move_reduce_mode::ChainMoveReduceMode chain_move_reduce_mode;
+    double chain_move_overlap_rate_threshold;
 
     selection_mode::SelectionMode selection_mode;
     improvability_screening_mode::ImprovabilityScreeningMode

@@ -22,9 +22,9 @@ struct LocalSearchOption {
     bool   is_enabled;
     int    iteration_max;
     double time_max;
-    double time_offset;  // hidden
+    double time_offset;
     int    log_interval;
-    int    seed;  // hidden
+    int    seed;
 
     /*************************************************************************/
     LocalSearchOption(void) {

@@ -18,9 +18,9 @@ struct OutputOptionConstant {
 /*****************************************************************************/
 struct OutputOption {
     verbose::Verbose verbose;
-    bool             is_enabled_write_trend;               // hidden
-    bool             is_enabled_store_feasible_solutions;  // hidden
-    int              feasible_solutions_capacity;          // hidden
+    bool             is_enabled_write_trend;
+    bool             is_enabled_store_feasible_solutions;
+    int              feasible_solutions_capacity;
 
     /*************************************************************************/
     OutputOption(void) {
