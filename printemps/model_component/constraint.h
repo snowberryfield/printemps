@@ -843,30 +843,6 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
                     return;
                 }
 
-                if (m_sense == ConstraintSense::Equal &&  //
-                    PLUS_ONE_SIZE + MINUS_ONE_SIZE >= 1) {
-                    auto variable_ptrs = minus_one_integer_variable_ptrs;
-                    variable_ptrs.insert(variable_ptrs.end(),
-                                         plus_one_integer_variable_ptrs.begin(),
-                                         plus_one_integer_variable_ptrs.end());
-
-                    std::sort(variable_ptrs.begin(), variable_ptrs.end(),
-                              [](const auto &a_FIRST, const auto &a_SECOND) {
-                                  return a_FIRST->name() < a_SECOND->name();
-                              });
-
-                    Variable<T_Variable, T_Expression> *key_variable_ptr =
-                        *std::max_element(
-                            variable_ptrs.begin(), variable_ptrs.end(),
-                            [](const auto &a_FIRST, const auto &a_SECOND) {
-                                return a_FIRST->range() < a_SECOND->range();
-                            });
-
-                    m_is_intermediate  = true;
-                    m_key_variable_ptr = key_variable_ptr;
-                    return;
-                }
-
                 m_key_variable_ptr = nullptr;
             }
         }
