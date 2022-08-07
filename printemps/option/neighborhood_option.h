@@ -245,7 +245,7 @@ struct NeighborhoodOption {
                 .at(this->improvability_screening_mode));
     }
 
-    /******************************************************************************/
+    /**************************************************************************/
     inline void setup(const utility::json::JsonObject &a_OBJECT) {
         this->initialize();
 

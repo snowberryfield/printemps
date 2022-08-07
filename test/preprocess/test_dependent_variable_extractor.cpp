@@ -48,7 +48,8 @@ TEST_F(TestDependentVariableExtractor, extract) {
 
         /// Extracting (Round 1)
         {
-            dependent_variable_extractor.extract(false);
+            printemps::option::Option option;
+            dependent_variable_extractor.extract(option, false);
 
             model.setup_structure();
 
@@ -131,7 +132,8 @@ TEST_F(TestDependentVariableExtractor, extract) {
 
         /// Extracting (Round 1)
         {
-            dependent_variable_extractor.extract(false);
+            printemps::option::Option option;
+            dependent_variable_extractor.extract(option, false);
 
             model.setup_structure();
 

@@ -1073,7 +1073,7 @@ TEST_F(TestConstraint, setup_constraint_type_intermediate) {
         constraint.setup(-x + y + z + 5,
                          printemps::model_component::ConstraintSense::Equal);
         constraint.setup_constraint_type();
-        EXPECT_TRUE(constraint.is_intermediate());
+        EXPECT_FALSE(constraint.is_intermediate());
     }
 
     {

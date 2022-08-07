@@ -41,10 +41,9 @@ TEST_F(TestPenaltyOption, initialize) {
         PenaltyOptionConstant::DEFAULT_INITIAL_PENALTY_COEFFICIENT,  //
         option.initial_penalty_coefficient);
 
-    EXPECT_EQ(  //
-        PenaltyOptionConstant::
-            DEFAULT_IS_ENABLED_GROUPING_PENALTY_COEFFICIENT,  //
-        option.is_enabled_grouping_penalty_coefficient);
+    EXPECT_EQ(                                                                //
+        PenaltyOptionConstant::DEFAULT_IS_ENABLED_GROUP_PENALTY_COEFFICIENT,  //
+        option.is_enabled_group_penalty_coefficient);
 }
 
 }  // namespace

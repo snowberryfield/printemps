@@ -73,7 +73,7 @@ struct Option {
     }
 
    public:
-    /******************************************************************************/
+    /**************************************************************************/
     inline void setup(const std::string &a_FILE_NAME) {
         auto   option_object = utility::json::read_json_object(a_FILE_NAME);
         Option option;

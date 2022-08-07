@@ -50,7 +50,7 @@ struct ParallelOption {
                 this->is_enabled_parallel_neighborhood_update));
     }
 
-    /******************************************************************************/
+    /**************************************************************************/
     inline void setup(const utility::json::JsonObject &a_OBJECT) {
         this->initialize();
 

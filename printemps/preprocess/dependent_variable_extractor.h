@@ -37,7 +37,8 @@ class DependentVariableExtractor {
     }
 
     /*************************************************************************/
-    inline int extract(const bool a_IS_ENABLED_PRINT) {
+    inline int extract(const option::Option &a_OPTION,
+                       const bool            a_IS_ENABLED_PRINT) {
         /**
          * NOTE: This function cannot be constexpr with clang for
          * std::vector<bool>.
@@ -51,7 +52,9 @@ class DependentVariableExtractor {
         auto &reference = m_model_ptr->constraint_type_reference();
 
         auto &exclusive_or_ptrs          = reference.exclusive_or_ptrs;
+        auto &exclusive_nor_ptrs         = reference.exclusive_nor_ptrs;
         auto &inverted_integers_ptrs     = reference.inverted_integers_ptrs;
+        auto &balanced_integers_ptrs     = reference.balanced_integers_ptrs;
         auto &constant_sum_integers_ptrs = reference.constant_sum_integers_ptrs;
         auto &constant_difference_integers_ptrs =
             reference.constant_difference_integers_ptrs;
@@ -73,42 +76,96 @@ class DependentVariableExtractor {
             }
         }
 
-        for (auto &&exclusive_or_ptr : exclusive_or_ptrs) {
-            bool is_valid = true;
-            for (auto &&sensitivity :
-                 exclusive_or_ptr->expression().sensitivities()) {
-                if (set_partitioning_variable_ptrs.find(sensitivity.first) !=
-                    set_partitioning_variable_ptrs.end()) {
-                    is_valid = false;
-                    break;
+        /// Exclusive OR
+        if (a_OPTION.preprocess.is_enabled_extract_dependent_exclusive_or) {
+            for (auto &&exclusive_or_ptr : exclusive_or_ptrs) {
+                bool is_valid = true;
+                for (auto &&sensitivity :
+                     exclusive_or_ptr->expression().sensitivities()) {
+                    if (set_partitioning_variable_ptrs.find(
+                            sensitivity.first) !=
+                        set_partitioning_variable_ptrs.end()) {
+                        is_valid = false;
+                        break;
+                    }
                 }
-            }
-            if (is_valid) {
-                constraint_ptrs.push_back(exclusive_or_ptr);
+                if (is_valid) {
+                    constraint_ptrs.push_back(exclusive_or_ptr);
+                }
             }
         }
 
-        constraint_ptrs.insert(constraint_ptrs.end(),
-                               inverted_integers_ptrs.begin(),
-                               inverted_integers_ptrs.end());
+        /// Exclusive NOR
+        if (a_OPTION.preprocess.is_enabled_extract_dependent_exclusive_nor) {
+            for (auto &&exclusive_nor_ptr : exclusive_nor_ptrs) {
+                bool is_valid = true;
+                for (auto &&sensitivity :
+                     exclusive_nor_ptr->expression().sensitivities()) {
+                    if (set_partitioning_variable_ptrs.find(
+                            sensitivity.first) !=
+                        set_partitioning_variable_ptrs.end()) {
+                        is_valid = false;
+                        break;
+                    }
+                }
+                if (is_valid) {
+                    constraint_ptrs.push_back(exclusive_nor_ptr);
+                }
+            }
+        }
 
-        constraint_ptrs.insert(constraint_ptrs.end(),
-                               constant_sum_integers_ptrs.begin(),
-                               constant_sum_integers_ptrs.end());
+        /// Inverted Integers
+        if (a_OPTION.preprocess
+                .is_enabled_extract_dependent_inverted_integers) {
+            constraint_ptrs.insert(constraint_ptrs.end(),
+                                   inverted_integers_ptrs.begin(),
+                                   inverted_integers_ptrs.end());
+        }
 
-        constraint_ptrs.insert(constraint_ptrs.end(),
-                               constant_difference_integers_ptrs.begin(),
-                               constant_difference_integers_ptrs.end());
+        /// Balanced Integers
+        if (a_OPTION.preprocess
+                .is_enabled_extract_dependent_balanced_integers) {
+            constraint_ptrs.insert(constraint_ptrs.end(),
+                                   balanced_integers_ptrs.begin(),
+                                   balanced_integers_ptrs.end());
+        }
 
-        constraint_ptrs.insert(constraint_ptrs.end(),
-                               constant_ratio_integers_ptrs.begin(),
-                               constant_ratio_integers_ptrs.end());
+        /// Constant Sum Integers
+        if (a_OPTION.preprocess
+                .is_enabled_extract_dependent_constant_sum_integers) {
+            constraint_ptrs.insert(constraint_ptrs.end(),
+                                   constant_sum_integers_ptrs.begin(),
+                                   constant_sum_integers_ptrs.end());
+        }
 
-        constraint_ptrs.insert(constraint_ptrs.end(),  //
-                               intermediate_ptrs.begin(),
-                               intermediate_ptrs.end());
+        /// Constant Difference Integers
+        if (a_OPTION.preprocess
+                .is_enabled_extract_dependent_constant_difference_integers) {
+            constraint_ptrs.insert(constraint_ptrs.end(),
+                                   constant_difference_integers_ptrs.begin(),
+                                   constant_difference_integers_ptrs.end());
+        }
+
+        /// Constant Ratio Integers
+        if (a_OPTION.preprocess
+                .is_enabled_extract_dependent_constant_ratio_integers) {
+            constraint_ptrs.insert(constraint_ptrs.end(),
+                                   constant_ratio_integers_ptrs.begin(),
+                                   constant_ratio_integers_ptrs.end());
+        }
+
+        /// Constant Intermediate Integers
+        if (a_OPTION.preprocess.is_enabled_extract_dependent_intermediate) {
+            constraint_ptrs.insert(constraint_ptrs.end(),  //
+                                   intermediate_ptrs.begin(),
+                                   intermediate_ptrs.end());
+        }
 
         const int CONSTRAINTS_SIZE = constraint_ptrs.size();
+
+        if (CONSTRAINTS_SIZE == 0) {
+            return number_of_newly_extracted_dependent_variables;
+        }
 
         auto adj = utility::BinaryMatrix::identity(CONSTRAINTS_SIZE);
 

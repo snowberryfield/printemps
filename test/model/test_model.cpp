@@ -1105,8 +1105,9 @@ TEST_F(TestModel, categorize_variables) {
     model.categorize_constraints();
 
     printemps::preprocess::DependentVariableExtractor<int, double>
-        dependent_variable_extractor(&model);
-    dependent_variable_extractor.extract(false);
+                              dependent_variable_extractor(&model);
+    printemps::option::Option option;
+    dependent_variable_extractor.extract(option, false);
     printemps::preprocess::SelectionExtractor<int, double> selection_extractor(
         &model);
     selection_extractor.extract_by_independent(false);
