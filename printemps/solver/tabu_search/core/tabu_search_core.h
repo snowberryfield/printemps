@@ -535,19 +535,22 @@ class TabuSearchCore {
 
         if (STATE.update_status &  //
             solution::IncumbentHolderConstant::
-                STATUS_LOCAL_AUGMENTED_INCUMBENT_UPDATE) {
-            mark_current = '!';
-        }
-
-        if (STATE.update_status &  //
-            solution::IncumbentHolderConstant::
-                STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
+                STATUS_FEASIBLE_INCUMBENT_UPDATE) {
+            mark_current                    = '*';
+            mark_global_augmented_incumbent = '*';
+        } else if (STATE.update_status &  //
+                   solution::IncumbentHolderConstant::
+                       STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
             mark_current                    = '#';
             mark_global_augmented_incumbent = '#';
             if (STATE.is_aspirated) {
                 mark_current                    = '@';
                 mark_global_augmented_incumbent = '@';
             }
+        } else if (STATE.update_status &  //
+                   solution::IncumbentHolderConstant::
+                       STATUS_LOCAL_AUGMENTED_INCUMBENT_UPDATE) {
+            mark_current = '!';
         }
 
         std::string color_current_feasible_begin   = "";
@@ -625,6 +628,19 @@ class TabuSearchCore {
         utility::print(
             "---------+------------------------+----------------------+--------"
             "--------------");
+        utility::print_info(  //
+            " -- s: Special neighborhood move was employed.", true);
+        utility::print_info(  //
+            " -- *: Feasible incumbent solution was updated.", true);
+        utility::print_info(  //
+            " -- #: Global incumbent solution was updated.", true);
+        utility::print_info(  //
+            " -- @: Global incumbent solution was updated by aspiration "
+            "criteria.",
+            true);
+        utility::print_info(  //
+            " -- !: Local incumbent solution was updated.", true);
+        utility::print_single_line(true);
     }
 
    public:
@@ -976,7 +992,7 @@ class TabuSearchCore {
     result(void) const {
         return m_result;
     }
-};  // namespace core
+};
 }  // namespace printemps::solver::tabu_search::core
 #endif
 /*****************************************************************************/

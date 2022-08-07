@@ -306,13 +306,12 @@ class LocalSearchCore {
 
         if (STATE.update_status &  //
             solution::IncumbentHolderConstant::
-                STATUS_LOCAL_AUGMENTED_INCUMBENT_UPDATE) {
-            mark_current = '!';
-        }
-
-        if (STATE.update_status &  //
-            solution::IncumbentHolderConstant::
-                STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
+                STATUS_FEASIBLE_INCUMBENT_UPDATE) {
+            mark_current                    = '*';
+            mark_global_augmented_incumbent = '*';
+        } else if (STATE.update_status &  //
+                   solution::IncumbentHolderConstant::
+                       STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
             mark_current                    = '#';
             mark_global_augmented_incumbent = '#';
         }
@@ -383,6 +382,9 @@ class LocalSearchCore {
             "---------+------------------------+----------------------+--------"
             "--------------",
             true);
+        utility::print_info(  //
+            " -- *: Global incumbent solution was updated.", true);
+        utility::print_single_line(true);
     }
 
    public:

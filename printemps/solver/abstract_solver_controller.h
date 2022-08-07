@@ -42,7 +42,8 @@ class AbstractSolverController {
         utility::print_info(
             " -- Incumbent total violation: " +
                 utility::to_string(GLOBAL_INCUMBENT_SOLUTION.total_violation,
-                                   "%.3f"),
+                                   "%.3f") +
+                " (duplicated constr. included) ",
             a_IS_ENABLED_PRINT);
     }
 
