@@ -48,8 +48,8 @@ class AbstractSolverController {
     }
 
     /*************************************************************************/
-    inline constexpr void bound_variables(const double a_OBJECTIVE,
-                                          const bool   a_IS_ENABLED_PRINT) {
+    inline constexpr void update_variable_bounds(
+        const double a_OBJECTIVE, const bool a_IS_ENABLED_PRINT) {
         auto number_of_newly_fixed_variables =
             m_model_ptr->update_variable_bounds(a_OBJECTIVE,
                                                 a_IS_ENABLED_PRINT);

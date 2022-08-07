@@ -42,7 +42,7 @@ TEST_F(TestOption, setup) {
         EXPECT_FLOAT_EQ(0.1,
                         option.penalty.penalty_coefficient_updating_balance);
         EXPECT_FLOAT_EQ(0.1, option.penalty.initial_penalty_coefficient);
-        EXPECT_EQ(true, option.penalty.is_enabled_grouping_penalty_coefficient);
+        EXPECT_EQ(true, option.penalty.is_enabled_group_penalty_coefficient);
 
         /// parallel
         EXPECT_EQ(false, option.parallel.is_enabled_parallel_evaluation);
@@ -50,8 +50,48 @@ TEST_F(TestOption, setup) {
                   option.parallel.is_enabled_parallel_neighborhood_update);
 
         /// preprocess
-        EXPECT_EQ(false, option.preprocess.is_enabled_presolve);
-        EXPECT_EQ(false, option.preprocess.is_enabled_initial_value_correction);
+        EXPECT_EQ(false,  //
+                  option.preprocess.is_enabled_presolve);
+
+        EXPECT_EQ(false,  //
+                  option.preprocess.is_enabled_remove_duplicated_constraints);
+        EXPECT_EQ(false,  //
+                  option.preprocess.is_enabled_remove_redundant_set_variables);
+        EXPECT_EQ(  //
+            false,  //
+            option.preprocess.is_enabled_remove_redundant_set_constraints);
+        EXPECT_EQ(  //
+            false,  //
+            option.preprocess.is_enabled_extract_implicit_equality_constraints);
+
+        EXPECT_EQ(false,  //
+                  option.preprocess.is_enabled_online_bounding);
+        EXPECT_EQ(false,  //
+                  option.preprocess.is_enabled_initial_value_correction);
+        EXPECT_EQ(false,  //
+                  option.preprocess.is_enabled_extract_dependent_exclusive_or);
+        EXPECT_EQ(true,  //
+                  option.preprocess.is_enabled_extract_dependent_exclusive_nor);
+        EXPECT_EQ(  //
+            false,  //
+            option.preprocess.is_enabled_extract_dependent_inverted_integers);
+        EXPECT_EQ(  //
+            true,   //
+            option.preprocess.is_enabled_extract_dependent_balanced_integers);
+        EXPECT_EQ(  //
+            false,  //
+            option.preprocess
+                .is_enabled_extract_dependent_constant_sum_integers);
+        EXPECT_EQ(  //
+            false,  //
+            option.preprocess
+                .is_enabled_extract_dependent_constant_difference_integers);
+        EXPECT_EQ(  //
+            false,  //
+            option.preprocess
+                .is_enabled_extract_dependent_constant_ratio_integers);
+        EXPECT_EQ(  //
+            false, option.preprocess.is_enabled_extract_dependent_intermediate);
 
         /// neighborhood
         EXPECT_EQ(false, option.neighborhood.is_enabled_binary_move);

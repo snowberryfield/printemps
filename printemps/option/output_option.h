@@ -65,7 +65,7 @@ struct OutputOption {
                 this->feasible_solutions_capacity, "%d"));
     }
 
-    /******************************************************************************/
+    /**************************************************************************/
     inline void setup(const utility::json::JsonObject &a_OBJECT) {
         this->initialize();
 

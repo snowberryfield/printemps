@@ -670,9 +670,10 @@ class TabuSearchController
              * Update variable bounds.
              */
             if (this->m_option.preprocess.is_enabled_presolve &&
+                this->m_option.preprocess.is_enabled_online_bounding &&
                 state.current_is_feasible_incumbent_updated &&
                 !state.previous_is_feasible_incumbent_updated) {
-                this->bound_variables(
+                this->update_variable_bounds(
                     this->m_incumbent_holder_ptr
                         ->feasible_incumbent_objective(),
                     this->m_option.output.verbose >= option::verbose::Outer);

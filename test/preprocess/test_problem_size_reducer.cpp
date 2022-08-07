@@ -620,7 +620,7 @@ TEST_F(TestProblemSizeReducer, remove_redundant_set_constraints) {
 }
 
 /*****************************************************************************/
-TEST_F(TestProblemSizeReducer, remove_implicit_equality_constraints) {
+TEST_F(TestProblemSizeReducer, extract_implicit_equality_constraints) {
     printemps::model::Model<int, double> model;
     auto& x = model.create_variables("x", 10, -10, 10);
     model.minimize(x.sum());
@@ -635,7 +635,7 @@ TEST_F(TestProblemSizeReducer, remove_implicit_equality_constraints) {
     printemps::preprocess::ProblemSizeReducer<int, double>  //
          problem_size_reducer(&model);
     auto number_of_newly_disabled_constraints =
-        problem_size_reducer.remove_implicit_equality_constraints(false);
+        problem_size_reducer.extract_implicit_equality_constraints(false);
     EXPECT_EQ(2, number_of_newly_disabled_constraints);
 }
 

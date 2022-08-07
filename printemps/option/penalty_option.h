@@ -13,8 +13,7 @@ struct PenaltyOptionConstant {
     static constexpr double DEFAULT_PENALTY_COEFFICIENT_TIGHTENING_RATE  = 1.0;
     static constexpr double DEFAULT_PENALTY_COEFFICIENT_UPDATING_BALANCE = 0.0;
     static constexpr double DEFAULT_INITIAL_PENALTY_COEFFICIENT          = 1E7;
-    static constexpr bool   DEFAULT_IS_ENABLED_GROUPING_PENALTY_COEFFICIENT =
-        false;
+    static constexpr bool DEFAULT_IS_ENABLED_GROUP_PENALTY_COEFFICIENT = false;
 };
 
 /*****************************************************************************/
@@ -23,7 +22,7 @@ struct PenaltyOption {
     double penalty_coefficient_tightening_rate;
     double penalty_coefficient_updating_balance;
     double initial_penalty_coefficient;
-    bool   is_enabled_grouping_penalty_coefficient;
+    bool   is_enabled_group_penalty_coefficient;
 
     /*************************************************************************/
     PenaltyOption(void) {
@@ -45,8 +44,8 @@ struct PenaltyOption {
             PenaltyOptionConstant::DEFAULT_PENALTY_COEFFICIENT_UPDATING_BALANCE;
         this->initial_penalty_coefficient =
             PenaltyOptionConstant::DEFAULT_INITIAL_PENALTY_COEFFICIENT;
-        this->is_enabled_grouping_penalty_coefficient = PenaltyOptionConstant::
-            DEFAULT_IS_ENABLED_GROUPING_PENALTY_COEFFICIENT;
+        this->is_enabled_group_penalty_coefficient =
+            PenaltyOptionConstant::DEFAULT_IS_ENABLED_GROUP_PENALTY_COEFFICIENT;
     }
 
     /*************************************************************************/
@@ -71,13 +70,13 @@ struct PenaltyOption {
             utility::to_string(                            //
                 this->initial_penalty_coefficient, "%f"));
 
-        utility::print(                                                //
-            " -- penalty.is_enabled_grouping_penalty_coefficient: " +  //
-            utility::to_true_or_false(                                 //
-                this->is_enabled_grouping_penalty_coefficient));
+        utility::print(                                             //
+            " -- penalty.is_enabled_group_penalty_coefficient: " +  //
+            utility::to_true_or_false(                              //
+                this->is_enabled_group_penalty_coefficient));
     }
 
-    /******************************************************************************/
+    /**************************************************************************/
     inline void setup(const utility::json::JsonObject &a_OBJECT) {
         this->initialize();
 
@@ -93,8 +92,8 @@ struct PenaltyOption {
         read_json(&this->initial_penalty_coefficient,  //
                   "initial_penalty_coefficient", a_OBJECT);
 
-        read_json(&this->is_enabled_grouping_penalty_coefficient,  //
-                  "is_enabled_grouping_penalty_coefficient", a_OBJECT);
+        read_json(&this->is_enabled_group_penalty_coefficient,  //
+                  "is_enabled_group_penalty_coefficient", a_OBJECT);
     }
 };
 }  // namespace printemps::option

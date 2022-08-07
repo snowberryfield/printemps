@@ -79,7 +79,7 @@ struct LocalSearchOption {
                 this->seed, "%d"));
     }
 
-    /******************************************************************************/
+    /**************************************************************************/
     inline void setup(const utility::json::JsonObject &a_OBJECT) {
         this->initialize();
 

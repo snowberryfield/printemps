@@ -11,7 +11,7 @@
         "penalty_coefficient_tightening_rate": 0.1,
         "penalty_coefficient_updating_balance": 0.1,
         "initial_penalty_coefficient": 0.1,
-        "is_enabled_grouping_penalty_coefficient": true
+        "is_enabled_group_penalty_coefficient": true
     },
     "parallel": {
         "is_enabled_parallel_evaluation": false,
@@ -19,7 +19,20 @@
     },
     "preprocess": {
         "is_enabled_presolve": false,
-        "is_enabled_initial_value_correction": false
+        "is_enabled_remove_duplicated_constraints": false,
+        "is_enabled_remove_redundant_set_variables": false,
+        "is_enabled_remove_redundant_set_constraints": false,
+        "is_enabled_extract_implicit_equality_constraint": false,
+        "is_enabled_online_bounding": false,
+        "is_enabled_initial_value_correction": false,
+        "is_enabled_extract_dependent_exclusive_or": false,
+        "is_enabled_extract_dependent_exclusive_nor": true,
+        "is_enabled_extract_dependent_inverted_integers": false,
+        "is_enabled_extract_dependent_balanced_integers": true,
+        "is_enabled_extract_dependent_constant_sum_integers": false,
+        "is_enabled_extract_dependent_constant_difference_integers": false,
+        "is_enabled_extract_dependent_constant_ratio_integers": false,
+        "is_enabled_extract_dependent_intermediate": false
     },
     "neighborhood": {
         "is_enabled_binary_move": false,

@@ -679,10 +679,19 @@ class Model {
          */
         if (a_OPTION.preprocess.is_enabled_presolve) {
             m_problem_size_reducer.setup(this);
-            m_problem_size_reducer.remove_implicit_equality_constraints(
-                a_IS_ENABLED_PRINT);
-            m_problem_size_reducer.remove_redundant_set_constraints(
-                a_IS_ENABLED_PRINT);
+
+            if (a_OPTION.preprocess
+                    .is_enabled_extract_implicit_equality_constraints) {
+                m_problem_size_reducer.extract_implicit_equality_constraints(
+                    a_IS_ENABLED_PRINT);
+            }
+
+            if (a_OPTION.preprocess
+                    .is_enabled_remove_redundant_set_constraints) {
+                m_problem_size_reducer.remove_redundant_set_constraints(
+                    a_IS_ENABLED_PRINT);
+            }
+
             m_problem_size_reducer.reduce_problem_size(a_IS_ENABLED_PRINT);
         }
 
@@ -690,19 +699,14 @@ class Model {
          * Extract and eliminate the intermediate variables.
          */
         this->setup_structure();
-        auto &reference = m_constraint_type_reference;
+
         if (a_OPTION.preprocess.is_enabled_presolve && m_is_linear &&
-            (reference.exclusive_or_ptrs.size() > 0 ||
-             reference.inverted_integers_ptrs.size() > 0 ||
-             reference.constant_sum_integers_ptrs.size() > 0 ||
-             reference.constant_difference_integers_ptrs.size() > 0 ||
-             reference.constant_ratio_integers_ptrs.size() > 0 ||
-             reference.intermediate_ptrs.size() > 0)) {
+            a_OPTION.preprocess.is_enabled_extract_dependent()) {
             preprocess::DependentVariableExtractor<T_Variable, T_Expression>
                 dependent_variable_extractor(this);
             while (true) {
-                if (dependent_variable_extractor.extract(a_IS_ENABLED_PRINT) ==
-                    0) {
+                if (dependent_variable_extractor.extract(
+                        a_OPTION, a_IS_ENABLED_PRINT) == 0) {
                     break;
                 }
 
@@ -723,7 +727,8 @@ class Model {
          * Remove redundant set variables.
          */
         int number_of_fixed_variables = 0;
-        if (a_OPTION.preprocess.is_enabled_presolve && m_is_linear) {
+        if (a_OPTION.preprocess.is_enabled_presolve && m_is_linear &&
+            a_OPTION.preprocess.is_enabled_remove_redundant_set_variables) {
             number_of_fixed_variables =
                 m_problem_size_reducer.remove_redundant_set_variables(
                     a_IS_ENABLED_PRINT);
@@ -733,7 +738,8 @@ class Model {
          * Remove duplicated constraints.
          */
         int number_of_removed_constraints = 0;
-        if (a_OPTION.preprocess.is_enabled_presolve) {
+        if (a_OPTION.preprocess.is_enabled_presolve &&
+            a_OPTION.preprocess.is_enabled_remove_duplicated_constraints) {
             number_of_removed_constraints =
                 m_problem_size_reducer.remove_duplicated_constraints(
                     a_IS_ENABLED_PRINT);
