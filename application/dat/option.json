@@ -14,7 +14,20 @@
     },
     "preprocess": {
         "is_enabled_presolve": true,
-        "is_enabled_initial_value_correction": true
+        "is_enabled_remove_duplicated_constraints": true,
+        "is_enabled_remove_redundant_set_variables": true,
+        "is_enabled_remove_redundant_set_constraints": true,
+        "is_enabled_extract_implicit_equality_constraint": true,
+        "is_enabled_online_bounding": true,
+        "is_enabled_initial_value_correction": true,
+        "is_enabled_extract_dependent_exclusive_or": true,
+        "is_enabled_extract_dependent_exclusive_nor": false,
+        "is_enabled_extract_dependent_inverted_integers": true,
+        "is_enabled_extract_dependent_balanced_integers": false,
+        "is_enabled_extract_dependent_constant_sum_integers": true,
+        "is_enabled_extract_dependent_constant_difference_integers": true,
+        "is_enabled_extract_dependent_constant_ratio_integers": true,
+        "is_enabled_extract_dependent_intermediate": true
     },
     "neighborhood": {
         "is_enabled_binary_move": true,
