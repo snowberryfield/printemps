@@ -1535,7 +1535,7 @@ class Model {
                 true);
 
             utility::print_info(                        //
-                " -- Exclusive XNOR: " +                //
+                " -- Exclusive NOR: " +                 //
                     utility::to_string(                 //
                         compute_number_of_constraints(  //
                             original.exclusive_nor_ptrs),
@@ -1661,7 +1661,7 @@ class Model {
                 true);
 
             utility::print_info(                        //
-                " -- Trinomial XNOR: " +                //
+                " -- Trinomial Exclusive NOR: " +       //
                     utility::to_string(                 //
                         compute_number_of_constraints(  //
                             original.trinomial_exclusive_nor_ptrs),
