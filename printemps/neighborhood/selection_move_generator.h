@@ -53,6 +53,9 @@ class SelectionMoveGenerator
             move.is_special_neighborhood_move = false;
             move.is_available                 = true;
             move.overlap_rate                 = 0.0;
+            move.alterations.resize(2);
+            move.alterations[0].second = 0;
+            move.alterations[1].second = 1;
         }
 
         /**
@@ -70,15 +73,12 @@ class SelectionMoveGenerator
 #pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
 #endif
                 for (auto i = 0; i < VARIABLES_SIZE; i++) {
-                    (*a_moves_ptr)[i].alterations.clear();
-                    (*a_moves_ptr)[i].alterations.emplace_back(
-                        a_VARIABLE_PTRS[i]
-                            ->selection_ptr()
-                            ->selected_variable_ptr,
-                        0);
+                    auto &alterations = (*a_moves_ptr)[i].alterations;
 
-                    (*a_moves_ptr)[i].alterations.emplace_back(
-                        a_VARIABLE_PTRS[i], 1);
+                    alterations[0].first = a_VARIABLE_PTRS[i]
+                                               ->selection_ptr()
+                                               ->selected_variable_ptr;
+                    alterations[1].first = a_VARIABLE_PTRS[i];
                 }
 
                 const int MOVES_SIZE = a_moves_ptr->size();

@@ -2418,13 +2418,12 @@ class Model {
                 continue;
             }
 
-            if (a_MOVE.is_selection_move) {
-                if (a_MOVE.hash &
-                    constraint_ptr->expression().selection_mask()) {
-                    continue;
-                }
-            }
             constraint_value = constraint_ptr->evaluate_constraint(a_MOVE);
+
+            if (fabs(constraint_value - constraint_ptr->constraint_value()) <
+                constant::EPSILON_10) {
+                continue;
+            }
 
             violation_diff_negative = 0.0;
             violation_diff_positive = 0.0;
