@@ -24,6 +24,8 @@ struct Selection {
 
     std::unordered_set<Constraint<T_Variable, T_Expression> *>
         related_constraint_ptrs;
+    std::vector<Constraint<T_Variable, T_Expression> *>
+        related_constraint_ptrs_vector;
 
     /*************************************************************************/
     Selection(void) {
@@ -59,14 +61,74 @@ struct Selection {
          * It is expensive and should be called only when necessary.
          */
         this->related_constraint_ptrs.clear();
+
+        /**
+         * NOTE: The member related_constraint_ptrs must include pointers to
+         * disabled constraints because This information will be used to update
+         * the disabled constraint values in model::Model.update().
+         */
         for (auto &&variable_ptr : this->variable_ptrs) {
             for (auto &&constraint_ptr :
                  variable_ptr->related_constraint_ptrs()) {
                 this->related_constraint_ptrs.insert(constraint_ptr);
             }
         }
+
+        /**
+         * NOTE: The following process is to improve the efficiency to access
+         * moves' related constraint pointers in model::Model.evaluate().Broadly
+         * stated, when the pointers of constraints are expressed as arrays,
+         * heuristic reordering is performed to reduce the difference between
+         * the minimum and maximum indexes of the constraints to which the
+         * variables to be written have sensitivity.
+         */
+        std::sort(this->variable_ptrs.begin(), this->variable_ptrs.end(),
+                  [](const auto &a_FIRST, const auto &a_SECOND) {
+                      return a_FIRST->related_constraint_ptrs().size() >
+                             a_SECOND->related_constraint_ptrs().size();
+                  });
+
+        this->related_constraint_ptrs_vector.clear();
+        std::unordered_set<Constraint<T_Variable, T_Expression> *>
+                  inserted_constraint_ptrs;
+        const int VARIABLES_SIZE = this->variable_ptrs.size();
+
+        for (auto i = 0; i < VARIABLES_SIZE; i++) {
+            auto &variable_ptr = this->variable_ptrs[i];
+            std::vector<Constraint<T_Variable, T_Expression> *> constraint_ptrs(
+                variable_ptr->related_constraint_ptrs().begin(),
+                variable_ptr->related_constraint_ptrs().end());
+
+            if (this->related_constraint_ptrs_vector.size() <
+                this->related_constraint_ptrs.size() / 2) {
+                std::sort(
+                    constraint_ptrs.begin(), constraint_ptrs.end(),
+                    [](const auto &a_FIRST, const auto &a_SECOND) {
+                        return a_FIRST->expression().sensitivities().size() <
+                               a_SECOND->expression().sensitivities().size();
+                    });
+            } else {
+                std::sort(
+                    constraint_ptrs.begin(), constraint_ptrs.end(),
+                    [](const auto &a_FIRST, const auto &a_SECOND) {
+                        return a_FIRST->expression().sensitivities().size() >
+                               a_SECOND->expression().sensitivities().size();
+                    });
+            }
+            for (auto &&constraint_ptr : constraint_ptrs) {
+                if (constraint_ptr == this->constraint_ptr) {
+                    continue;
+                }
+                if (inserted_constraint_ptrs.find(constraint_ptr) ==
+                    inserted_constraint_ptrs.end()) {
+                    inserted_constraint_ptrs.insert(constraint_ptr);
+                    this->related_constraint_ptrs_vector.push_back(
+                        constraint_ptr);
+                }
+            }
+        }
     }
-};  // namespace model_component
+};
 }  // namespace printemps::model_component
 #endif
 /*****************************************************************************/

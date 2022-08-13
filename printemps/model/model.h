@@ -810,24 +810,19 @@ class Model {
         }
 
         /**
-         * Setup the fixed sensitivities for fast evaluation.
+         * Set up the fixed sensitivities for fast evaluation.
          */
         this->setup_fixed_sensitivities(a_IS_ENABLED_PRINT);
 
         /**
-         * Setup the bitmask for computational efficiency of evaluating
-         * neighborhood solutions with selection moves.
-         */
-        for (auto &&proxy : m_constraint_proxies) {
-            for (auto &&constraint : proxy.flat_indexed_constraints()) {
-                constraint.expression().setup_selection_mask();
-            }
-        }
-
-        /**
-         * Setup the constraint sensitivities of variables.
+         * Set up the constraint sensitivities of variables.
          */
         this->setup_variable_constraint_sensitivities();
+
+        /**
+         * Set up the indices of related constraints for selection variables.
+         */
+        this->setup_variable_related_selection_constraint_ptr_index();
 
         /**
          * Store the global penalty coefficient for evaluation.
@@ -977,6 +972,14 @@ class Model {
                         &constraint, sensitivity.second);
                 }
             }
+        }
+    }
+
+    /*************************************************************************/
+    constexpr void setup_variable_related_selection_constraint_ptr_index(void) {
+        for (auto &&variable_ptr :
+             m_variable_reference.selection_variable_ptrs) {
+            variable_ptr->setup_related_selection_constraint_ptr_index();
         }
     }
 
@@ -2400,6 +2403,108 @@ class Model {
     }
 
     /*************************************************************************/
+    constexpr void evaluate_selection(
+        solution::SolutionScore *                           a_score_ptr,  //
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE,
+        const solution::SolutionScore &a_CURRENT_SCORE) const noexcept {
+        bool is_feasibility_improvable = false;
+
+        double total_violation         = a_CURRENT_SCORE.total_violation;
+        double local_penalty           = a_CURRENT_SCORE.local_penalty;
+        double constraint_value        = 0.0;
+        double violation_diff_negative = 0.0;
+        double violation_diff_positive = 0.0;
+        double violation_diff          = 0.0;
+
+        const auto &RELATED_CONSTRAINT_PTRS =
+            a_MOVE.alterations.front()
+                .first->selection_ptr()
+                ->related_constraint_ptrs_vector;
+
+        const auto &INDEX_MIN_FIRST =
+            a_MOVE.alterations[0]
+                .first->related_selection_constraint_ptr_index_min();
+        const auto &INDEX_MAX_FIRST =
+            a_MOVE.alterations[0]
+                .first->related_selection_constraint_ptr_index_max();
+        const auto &INDEX_MIN_SECOND =
+            a_MOVE.alterations[1]
+                .first->related_selection_constraint_ptr_index_min();
+        const auto &INDEX_MAX_SECOND =
+            a_MOVE.alterations[1]
+                .first->related_selection_constraint_ptr_index_max();
+
+        const int MIN_INDEX = std::min(INDEX_MIN_FIRST, INDEX_MIN_SECOND);
+        const int MAX_INDEX = std::max(INDEX_MAX_FIRST, INDEX_MAX_SECOND);
+
+        for (auto i = MIN_INDEX; i <= MAX_INDEX; i++) {
+            auto &constraint_ptr = RELATED_CONSTRAINT_PTRS[i];
+            if (!constraint_ptr->is_enabled()) {
+                continue;
+            }
+
+            if ((INDEX_MAX_FIRST < i && i < INDEX_MIN_SECOND) ||
+                (INDEX_MAX_SECOND < i && i < INDEX_MIN_FIRST)) {
+                continue;
+            }
+
+            constraint_value = constraint_ptr->evaluate_constraint(a_MOVE);
+
+            if (fabs(constraint_value - constraint_ptr->constraint_value()) <
+                constant::EPSILON_10) {
+                continue;
+            }
+
+            violation_diff_positive = constraint_ptr->is_less_or_equal()
+                                          ? std::max(constraint_value, 0.0) -
+                                                constraint_ptr->positive_part()
+                                          : 0.0;
+
+            violation_diff_negative = constraint_ptr->is_greater_or_equal()
+                                          ? std::max(-constraint_value, 0.0) -
+                                                constraint_ptr->negative_part()
+                                          : 0.0;
+            violation_diff = violation_diff_positive + violation_diff_negative;
+            local_penalty +=
+                violation_diff_positive *
+                    constraint_ptr->local_penalty_coefficient_less() +
+                violation_diff_negative *
+                    constraint_ptr->local_penalty_coefficient_greater();
+
+            total_violation += violation_diff;
+            is_feasibility_improvable |= violation_diff < -constant::EPSILON;
+        }
+
+#ifdef _PRINTEMPS_LINEAR_MINIMIZATION
+        double objective             = m_objective.evaluate(a_MOVE);
+        double objective_improvement = m_objective.value() - objective;
+
+#else
+        double objective = 0.0;
+        double objective_improvement = 0.0;
+        if (m_is_defined_objective) {
+            objective = m_objective.evaluate(a_MOVE) * this->sign();
+            objective_improvement =
+                m_objective.value() * this->sign() - objective;
+        }
+#endif
+        const double GLOBAL_PENALTY =
+            total_violation * m_global_penalty_coefficient;
+
+        a_score_ptr->objective                  = objective;
+        a_score_ptr->objective_improvement      = objective_improvement;
+        a_score_ptr->total_violation            = total_violation;
+        a_score_ptr->local_penalty              = local_penalty;
+        a_score_ptr->global_penalty             = GLOBAL_PENALTY;
+        a_score_ptr->local_augmented_objective  = objective + local_penalty;
+        a_score_ptr->global_augmented_objective = objective + GLOBAL_PENALTY;
+        a_score_ptr->is_feasible = !(total_violation > constant::EPSILON);
+        a_score_ptr->is_objective_improvable =
+            objective_improvement > constant::EPSILON;
+        a_score_ptr->is_feasibility_improvable = is_feasibility_improvable;
+    }
+
+    /*************************************************************************/
     constexpr void evaluate_multi(
         solution::SolutionScore *                           a_score_ptr,  //
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE,
@@ -2425,18 +2530,15 @@ class Model {
                 continue;
             }
 
-            violation_diff_negative = 0.0;
-            violation_diff_positive = 0.0;
+            violation_diff_positive = constraint_ptr->is_less_or_equal()
+                                          ? std::max(constraint_value, 0.0) -
+                                                constraint_ptr->positive_part()
+                                          : 0.0;
 
-            if (constraint_ptr->is_less_or_equal()) {
-                violation_diff_positive = std::max(constraint_value, 0.0) -
-                                          constraint_ptr->positive_part();
-            }
-
-            if (constraint_ptr->is_greater_or_equal()) {
-                violation_diff_negative = std::max(-constraint_value, 0.0) -
-                                          constraint_ptr->negative_part();
-            }
+            violation_diff_negative = constraint_ptr->is_greater_or_equal()
+                                          ? std::max(-constraint_value, 0.0) -
+                                                constraint_ptr->negative_part()
+                                          : 0.0;
 
             violation_diff = violation_diff_positive + violation_diff_negative;
             local_penalty +=
