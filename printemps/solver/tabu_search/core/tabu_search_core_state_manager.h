@@ -149,7 +149,12 @@ class TabuSearchCoreStateManager {
         this->update_update_status();
 
         /**
-         * Update the aspiraton flag.
+         * Update the number of effective updates.
+         */
+        this->update_number_of_effective_updates();
+
+        /**
+         * Update the aspiration flag.
          */
         this->update_is_aspirated(a_IS_ASPIRATED);
 
@@ -172,11 +177,6 @@ class TabuSearchCoreStateManager {
          * Update the range of local penalty.
          */
         this->update_local_penalty_range();
-
-        /**
-         * Update the number of effective updates.
-         */
-        this->update_number_of_effective_updates();
 
         /**
          * Update the number of evaluated moves.
@@ -228,6 +228,17 @@ class TabuSearchCoreStateManager {
     }
 
     /*************************************************************************/
+    inline constexpr void update_number_of_effective_updates() {
+        if (m_state.update_status &
+                solution::IncumbentHolderConstant::
+                    STATUS_LOCAL_AUGMENTED_INCUMBENT_UPDATE &&
+            m_state.current_solution_score.global_augmented_objective <
+                m_state.previous_solution_score.global_augmented_objective) {
+            m_state.number_of_effective_updates++;
+        }
+    }
+
+    /*************************************************************************/
     inline constexpr void update_update_status(void) {
         m_state.update_status = m_incumbent_holder_ptr->try_update_incumbent(
             m_model_ptr, m_state.current_solution_score);
@@ -263,23 +274,6 @@ class TabuSearchCoreStateManager {
         if (!m_state.current_solution_score.is_feasible) {
             m_state.local_penalty_range.update(
                 m_state.current_solution_score.local_penalty);
-        }
-    }
-
-    /*************************************************************************/
-    inline constexpr void update_number_of_effective_updates() {
-        if (m_state.update_status &
-            solution::IncumbentHolderConstant::
-                STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
-            m_state.number_of_effective_updates++;
-        } else if (m_state.update_status &
-                   solution::IncumbentHolderConstant::
-                       STATUS_LOCAL_AUGMENTED_INCUMBENT_UPDATE) {
-            if (m_state.current_solution_score.objective <
-                m_incumbent_holder_ptr->global_augmented_incumbent_score()
-                    .objective) {
-                m_state.number_of_effective_updates++;
-            }
         }
     }
 
