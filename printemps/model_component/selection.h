@@ -90,7 +90,7 @@ struct Selection {
                       return a_FIRST->name() < a_SECOND->name();
                   });
 
-        std::sort(this->variable_ptrs.begin(), this->variable_ptrs.end(),
+        std::stable_sort(this->variable_ptrs.begin(), this->variable_ptrs.end(),
                          [](const auto &a_FIRST, const auto &a_SECOND) {
                              return a_FIRST->related_constraint_ptrs().size() >
                                     a_SECOND->related_constraint_ptrs().size();
@@ -112,15 +112,15 @@ struct Selection {
                       });
 
             if (this->related_constraint_ptrs_vector.size() <
-                std::sort(
                 this->related_constraint_ptrs_set.size() / 2) {
+                std::stable_sort(
                     constraint_ptrs.begin(), constraint_ptrs.end(),
                     [](const auto &a_FIRST, const auto &a_SECOND) {
                         return a_FIRST->expression().sensitivities().size() <
                                a_SECOND->expression().sensitivities().size();
                     });
             } else {
-                std::sort(
+                std::stable_sort(
                     constraint_ptrs.begin(), constraint_ptrs.end(),
                     [](const auto &a_FIRST, const auto &a_SECOND) {
                         return a_FIRST->expression().sensitivities().size() >
