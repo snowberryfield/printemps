@@ -23,7 +23,7 @@ struct Selection {
     Constraint<T_Variable, T_Expression> *            constraint_ptr;
 
     std::unordered_set<Constraint<T_Variable, T_Expression> *>
-        related_constraint_ptrs;
+        related_constraint_ptrs_set;
     std::vector<Constraint<T_Variable, T_Expression> *>
         related_constraint_ptrs_vector;
 
@@ -42,7 +42,8 @@ struct Selection {
         this->variable_ptrs.clear();
         this->selected_variable_ptr = nullptr;
         this->constraint_ptr        = nullptr;
-        this->related_constraint_ptrs.clear();
+        this->related_constraint_ptrs_set.clear();
+        this->related_constraint_ptrs_vector.clear();
     }
     /*************************************************************************/
     void setup(Constraint<T_Variable, T_Expression> *a_constraint_ptr) {
@@ -60,7 +61,8 @@ struct Selection {
          * NOTE: The following procedure is intentionally excluded from setup().
          * It is expensive and should be called only when necessary.
          */
-        this->related_constraint_ptrs.clear();
+        this->related_constraint_ptrs_set.clear();
+        this->related_constraint_ptrs_vector.clear();
 
         /**
          * NOTE: The member related_constraint_ptrs must include pointers to
@@ -70,7 +72,7 @@ struct Selection {
         for (auto &&variable_ptr : this->variable_ptrs) {
             for (auto &&constraint_ptr :
                  variable_ptr->related_constraint_ptrs()) {
-                this->related_constraint_ptrs.insert(constraint_ptr);
+                this->related_constraint_ptrs_set.insert(constraint_ptr);
             }
         }
 
@@ -89,12 +91,11 @@ struct Selection {
                   });
 
         std::sort(this->variable_ptrs.begin(), this->variable_ptrs.end(),
-                  [](const auto &a_FIRST, const auto &a_SECOND) {
-                      return a_FIRST->related_constraint_ptrs().size() >
-                             a_SECOND->related_constraint_ptrs().size();
-                  });
+                         [](const auto &a_FIRST, const auto &a_SECOND) {
+                             return a_FIRST->related_constraint_ptrs().size() >
+                                    a_SECOND->related_constraint_ptrs().size();
+                         });
 
-        this->related_constraint_ptrs_vector.clear();
         std::unordered_set<Constraint<T_Variable, T_Expression> *>
                   inserted_constraint_ptrs;
         const int VARIABLES_SIZE = this->variable_ptrs.size();
@@ -111,8 +112,8 @@ struct Selection {
                       });
 
             if (this->related_constraint_ptrs_vector.size() <
-                this->related_constraint_ptrs.size() / 2) {
                 std::sort(
+                this->related_constraint_ptrs_set.size() / 2) {
                     constraint_ptrs.begin(), constraint_ptrs.end(),
                     [](const auto &a_FIRST, const auto &a_SECOND) {
                         return a_FIRST->expression().sensitivities().size() <

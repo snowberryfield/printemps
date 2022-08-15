@@ -428,7 +428,8 @@ class Variable : public multi_array::AbstractMultiArrayElement {
                 constraint_ptr->is_set_packing() ||
                 constraint_ptr->is_set_covering() ||
                 constraint_ptr->is_cardinality() ||
-                constraint_ptr->is_invariant_knapsack()) {
+                constraint_ptr->is_invariant_knapsack() ||
+                constraint_ptr->is_multiple_covering()) {
                 m_related_binary_coefficient_constraint_ptrs.insert(
                     constraint_ptr);
             }
