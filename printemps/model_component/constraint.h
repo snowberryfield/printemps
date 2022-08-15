@@ -50,6 +50,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     T_Expression    m_positive_part;
     T_Expression    m_negative_part;
     bool            m_is_linear;
+    bool            m_is_integer;
     bool            m_is_enabled;
     bool            m_is_less_or_equal;     /// <= or ==
     bool            m_is_greater_or_equal;  /// >= or ==
@@ -216,6 +217,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         m_positive_part                     = 0;
         m_negative_part                     = 0;
         m_is_linear                         = true;
+        m_is_integer                        = false;
         m_is_enabled                        = true;
         m_is_less_or_equal                  = false;
         m_is_greater_or_equal               = false;
@@ -278,6 +280,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         m_positive_part    = 0;
         m_negative_part    = 0;
         m_is_linear        = false;
+        m_is_integer       = false;
         m_is_enabled       = true;
 
         this->clear_constraint_type();
@@ -340,7 +343,23 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         m_positive_part    = 0;
         m_negative_part    = 0;
         m_is_linear        = true;
+        m_is_integer       = true;
         m_is_enabled       = true;
+
+        auto is_integer = [](const T_Expression a_VALUE) {
+            return fabs(a_VALUE - floor(a_VALUE)) < constant::EPSILON_10;
+        };
+
+        if (!is_integer(m_expression.constant_value())) {
+            m_is_integer = false;
+        }
+
+        for (const auto &SENSITIVITY : m_expression.sensitivities()) {
+            if (!is_integer(SENSITIVITY.second)) {
+                m_is_integer = false;
+                break;
+            }
+        }
 
         this->clear_constraint_type();
 
@@ -756,12 +775,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
             std::vector<Variable<T_Variable, T_Expression> *>
                 minus_one_integer_variable_ptrs;
 
-            auto is_integer = [](const T_Expression a_VALUE) {
-                return fabs(a_VALUE - floor(a_VALUE)) < constant::EPSILON_10;
-            };
-
-            auto constant_value = m_expression.constant_value();
-            if (!is_integer(constant_value)) {
+            if (!m_is_integer) {
                 is_valid = false;
             }
 
@@ -769,11 +783,6 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
                 for (const auto &sensitivity : m_expression.sensitivities()) {
                     auto variable_ptr = sensitivity.first;
                     auto coefficient  = sensitivity.second;
-
-                    if (!is_integer(coefficient)) {
-                        is_valid = false;
-                        break;
-                    }
 
                     if ((variable_ptr->sense() == VariableSense::Integer ||
                          variable_ptr->sense() ==
@@ -1179,6 +1188,11 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     /*************************************************************************/
     inline constexpr bool is_linear(void) const noexcept {
         return m_is_linear;
+    }
+
+    /*************************************************************************/
+    inline constexpr bool is_integer(void) const noexcept {
+        return m_is_integer;
     }
 
     /*************************************************************************/

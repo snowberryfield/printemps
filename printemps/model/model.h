@@ -44,6 +44,7 @@ class Model {
 
     bool m_is_defined_objective;
     bool m_is_enabled_fast_evaluation;
+    bool m_is_integer;
     bool m_is_linear;
     bool m_is_minimization;
     bool m_is_solved;
@@ -126,6 +127,7 @@ class Model {
 
         m_is_defined_objective       = false;
         m_is_enabled_fast_evaluation = true;
+        m_is_integer                 = false;
         m_is_linear                  = true;
         m_is_minimization            = true;
         m_is_solved                  = false;
@@ -825,10 +827,23 @@ class Model {
         this->setup_variable_related_selection_constraint_ptr_index();
 
         /**
+         * Set up the integrity of constraints.
+         */
+        this->setup_is_integer();
+
+        /**
          * Store the global penalty coefficient for evaluation.
          */
-        m_global_penalty_coefficient =
-            a_OPTION.penalty.initial_penalty_coefficient;
+        this->set_global_penalty_coefficient(
+            a_OPTION.penalty.initial_penalty_coefficient);
+
+        /**
+         * Modify the global penalty coefficient.
+         */
+        if (m_is_integer && m_is_linear) {
+            this->modify_global_penalty_coefficient(a_IS_ENABLED_PRINT);
+        }
+
         for (auto &&proxy : m_constraint_proxies) {
             for (auto &&constraint : proxy.flat_indexed_constraints()) {
                 constraint.global_penalty_coefficient() =
@@ -928,6 +943,20 @@ class Model {
 
         if (m_neighborhood.user_defined().is_enabled()) {
             m_is_enabled_fast_evaluation = false;
+        }
+    }
+
+    /*************************************************************************/
+    constexpr void setup_is_integer(void) {
+        m_is_integer = true;
+
+        for (auto &&proxy : m_constraint_proxies) {
+            for (auto &&constraint : proxy.flat_indexed_constraints()) {
+                if (!constraint.is_integer()) {
+                    m_is_integer = false;
+                    return;
+                }
+            }
         }
     }
 
@@ -1306,6 +1335,34 @@ class Model {
          * build in their own setup() methods.
          */
         utility::print_message("Done.", a_IS_ENABLED_PRINT);
+    }
+
+    /*************************************************************************/
+    constexpr void modify_global_penalty_coefficient(
+        const bool a_IS_ENABLED_PRINT) {
+        utility::print_single_line(a_IS_ENABLED_PRINT);
+        utility::print_message("Modifying the global penalty coefficient...",
+                               a_IS_ENABLED_PRINT);
+
+        const auto ORIGINAL = m_global_penalty_coefficient;
+        const auto MODIFIED =
+            std::min(m_global_penalty_coefficient,
+                     m_objective.expression().upper_bound() -
+                         m_objective.expression().lower_bound() + 1.0);
+
+        if (MODIFIED < ORIGINAL) {
+            m_global_penalty_coefficient = MODIFIED;
+            utility::print_message(
+                "Done (New global penalty coefficient is " +
+                    utility::to_string(m_global_penalty_coefficient, "%.5e") +
+                    ")",
+                a_IS_ENABLED_PRINT);
+        } else {
+            utility::print_message(
+                "Done (global penalty coefficient remains at the original "
+                "value).",
+                a_IS_ENABLED_PRINT);
+        }
     }
 
     /*************************************************************************/
