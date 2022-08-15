@@ -383,7 +383,9 @@ class LocalSearchCore {
             "--------------",
             true);
         utility::print_info(  //
-            " -- *: Global incumbent solution was updated.", true);
+            " -- *: Feasible incumbent solution was updated.", true);
+        utility::print_info(  //
+            " -- #: Global incumbent solution was updated.", true);
         utility::print_single_line(true);
     }
 
