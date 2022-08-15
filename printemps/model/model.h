@@ -933,11 +933,9 @@ class Model {
     /*************************************************************************/
     constexpr void setup_is_enabled_fast_evaluation(void) {
         m_is_enabled_fast_evaluation = true;
-        for (auto &&proxy : m_constraint_proxies) {
-            for (auto &&constraint : proxy.flat_indexed_constraints()) {
-                if (!constraint.is_linear()) {
-                    m_is_enabled_fast_evaluation = false;
-                }
+        for (auto &&constraint_ptr : m_constraint_reference.constraint_ptrs) {
+            if (!constraint_ptr->is_linear()) {
+                m_is_enabled_fast_evaluation = false;
             }
         }
 
@@ -949,32 +947,24 @@ class Model {
     /*************************************************************************/
     constexpr void setup_is_integer(void) {
         m_is_integer = true;
-
-        for (auto &&proxy : m_constraint_proxies) {
-            for (auto &&constraint : proxy.flat_indexed_constraints()) {
-                if (!constraint.is_integer()) {
-                    m_is_integer = false;
-                    return;
-                }
+        for (auto &&constraint_ptr : m_constraint_reference.constraint_ptrs) {
+            if (!constraint_ptr->is_integer()) {
+                m_is_integer = false;
             }
         }
     }
 
     /*************************************************************************/
     constexpr void setup_variable_related_constraints(void) {
-        for (auto &&proxy : m_variable_proxies) {
-            for (auto &&variable : proxy.flat_indexed_variables()) {
-                variable.reset_related_constraint_ptrs();
-            }
+        for (auto &&variable_ptr : m_variable_reference.variable_ptrs) {
+            variable_ptr->reset_related_constraint_ptrs();
         }
 
-        for (auto &&proxy : m_constraint_proxies) {
-            for (auto &&constraint : proxy.flat_indexed_constraints()) {
-                for (auto &&sensitivity :
-                     constraint.expression().sensitivities()) {
-                    sensitivity.first->register_related_constraint_ptr(
-                        &constraint);
-                }
+        for (auto &&constraint_ptr : m_constraint_reference.constraint_ptrs) {
+            for (auto &&sensitivity :
+                 constraint_ptr->expression().sensitivities()) {
+                sensitivity.first->register_related_constraint_ptr(
+                    constraint_ptr);
             }
         }
     }
@@ -988,18 +978,15 @@ class Model {
 
     /*************************************************************************/
     constexpr void setup_variable_constraint_sensitivities(void) {
-        for (auto &&proxy : m_variable_proxies) {
-            for (auto &&variable : proxy.flat_indexed_variables()) {
-                variable.reset_constraint_sensitivities();
-            }
+        for (auto &&variable_ptr : m_variable_reference.variable_ptrs) {
+            variable_ptr->reset_constraint_sensitivities();
         }
-        for (auto &&proxy : m_constraint_proxies) {
-            for (auto &&constraint : proxy.flat_indexed_constraints()) {
-                for (auto &&sensitivity :
-                     constraint.expression().sensitivities()) {
-                    sensitivity.first->register_constraint_sensitivity(
-                        &constraint, sensitivity.second);
-                }
+
+        for (auto &&constraint_ptr : m_constraint_reference.constraint_ptrs) {
+            for (auto &&sensitivity :
+                 constraint_ptr->expression().sensitivities()) {
+                sensitivity.first->register_constraint_sensitivity(
+                    constraint_ptr, sensitivity.second);
             }
         }
     }
@@ -1014,11 +1001,9 @@ class Model {
 
     /*************************************************************************/
     constexpr void setup_variable_related_binary_coefficient_constraints(void) {
-        for (auto &&proxy : m_variable_proxies) {
-            for (auto &&variable : proxy.flat_indexed_variables()) {
-                variable.reset_related_binary_coefficient_constraint_ptrs();
-                variable.setup_related_binary_coefficient_constraint_ptrs();
-            }
+        for (auto &&variable_ptr : m_variable_reference.variable_ptrs) {
+            variable_ptr->reset_related_binary_coefficient_constraint_ptrs();
+            variable_ptr->setup_related_binary_coefficient_constraint_ptrs();
         }
     }
 
