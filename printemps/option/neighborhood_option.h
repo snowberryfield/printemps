@@ -11,8 +11,8 @@ namespace printemps::option {
 struct NeighborhoodOptionConstant {
     static constexpr bool DEFAULT_IS_ENABLED_BINARY_MOVE                = true;
     static constexpr bool DEFAULT_IS_ENABLED_INTEGER_MOVE               = true;
-    static constexpr bool DEFAULT_IS_ENABLED_EXCLUSIVE_OR_MOVE          = true;
-    static constexpr bool DEFAULT_IS_ENABLED_EXCLUSIVE_NOR_MOVE         = true;
+    static constexpr bool DEFAULT_IS_ENABLED_EXCLUSIVE_OR_MOVE          = false;
+    static constexpr bool DEFAULT_IS_ENABLED_EXCLUSIVE_NOR_MOVE         = false;
     static constexpr bool DEFAULT_IS_ENABLED_INVERTED_INTEGERS_MOVE     = true;
     static constexpr bool DEFAULT_IS_ENABLED_BALANCED_INTEGERS_MOVE     = true;
     static constexpr bool DEFAULT_IS_ENABLED_CONSTANT_SUM_INTEGERS_MOVE = true;
