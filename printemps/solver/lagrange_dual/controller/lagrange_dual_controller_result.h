@@ -37,7 +37,7 @@ struct LagrangeDualControllerResult {
             solution::IncumbentHolderConstant::STATUS_NOT_UPDATED;
         this->number_of_iterations = 0;
     }
-};  // namespace controller
+};
 }  // namespace printemps::solver::lagrange_dual::controller
 
 #endif

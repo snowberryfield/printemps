@@ -330,12 +330,17 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
+    inline constexpr void set_sense(const VariableSense &a_SENSE) noexcept {
+        m_sense = a_SENSE;
+    }
+
+    /*************************************************************************/
     inline constexpr VariableSense sense(void) const noexcept {
         return m_sense;
     }
 
     /*************************************************************************/
-    inline std::string sense_string(void) const noexcept {
+    inline std::string sense_label(void) const noexcept {
         switch (m_sense) {
             case VariableSense::Binary: {
                 return "Binary";
@@ -538,18 +543,6 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr int related_selection_constraint_ptr_index_min(void) const
-        noexcept {
-        return m_related_selection_constraint_ptr_index_min;
-    }
-
-    /*************************************************************************/
-    inline constexpr int related_selection_constraint_ptr_index_max(void) const
-        noexcept {
-        return m_related_selection_constraint_ptr_index_max;
-    }
-
-    /*************************************************************************/
     inline constexpr void reset_related_selection_constraint_ptr_index(
         void) noexcept {
         m_related_selection_constraint_ptr_index_min = -1;
@@ -587,6 +580,18 @@ class Variable : public multi_array::AbstractMultiArrayElement {
                 break;
             }
         }
+    }
+
+    /*************************************************************************/
+    inline constexpr int related_selection_constraint_ptr_index_min(void) const
+        noexcept {
+        return m_related_selection_constraint_ptr_index_min;
+    }
+
+    /*************************************************************************/
+    inline constexpr int related_selection_constraint_ptr_index_max(void) const
+        noexcept {
+        return m_related_selection_constraint_ptr_index_max;
     }
 
     /*************************************************************************/

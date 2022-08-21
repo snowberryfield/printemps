@@ -311,10 +311,10 @@ class DependentVariableExtractor {
 
         int number_of_newly_eliminated_dependent_integer_variables = 0;
 
-        auto &binary_ptrs =
-            m_model_ptr->variable_reference().dependent_binary_variable_ptrs;
-        auto &integer_ptrs =
-            m_model_ptr->variable_reference().dependent_integer_variable_ptrs;
+        auto &binary_ptrs = m_model_ptr->variable_type_reference()
+                                .dependent_binary_variable_ptrs;
+        auto &integer_ptrs = m_model_ptr->variable_type_reference()
+                                 .dependent_integer_variable_ptrs;
 
         std::vector<model_component::Variable<T_Variable, T_Expression> *>
             variable_ptrs;
