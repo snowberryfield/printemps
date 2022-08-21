@@ -61,9 +61,9 @@ class AbstractSolverController {
         if (number_of_newly_fixed_variables > 0) {
             m_model_ptr->categorize_variables();
             m_model_ptr->neighborhood().binary().setup(
-                m_model_ptr->variable_reference().binary_variable_ptrs);
+                m_model_ptr->variable_type_reference().binary_variable_ptrs);
             m_model_ptr->neighborhood().integer().setup(
-                m_model_ptr->variable_reference().integer_variable_ptrs);
+                m_model_ptr->variable_type_reference().integer_variable_ptrs);
         }
     }
 
@@ -166,7 +166,7 @@ class AbstractSolverController {
     inline utility::TimeKeeper time_keeper(void) const {
         return m_time_keeper;
     }
-};  // namespace solver
+};
 }  // namespace printemps::solver
 
 #endif

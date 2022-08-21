@@ -132,79 +132,12 @@ class Solver {
         /**
          * Prepare the result object to return.
          */
-        const auto& LAGRANGE_DUAL_RESULT = m_lagrange_dual_controller.result();
-        const auto& LOCAL_SEARCH_RESULT  = m_local_search_controller.result();
-        const auto& TABU_SEARCH_RESULT   = m_tabu_search_controller.result();
-        Status      status(
-            named_solution.is_feasible(),                               //
-            m_start_date_time,                                          //
-            m_finish_date_time,                                         //
-            m_model_ptr->name(),                                        //
-            m_model_ptr->number_of_variables(),                         //
-            m_model_ptr->number_of_constraints(),                       //
-            m_time_keeper.clock(),                                      //
-            LAGRANGE_DUAL_RESULT.number_of_iterations,                  //
-            LOCAL_SEARCH_RESULT.number_of_iterations,                   //
-            TABU_SEARCH_RESULT.state.total_number_of_inner_iterations,  //
-            TABU_SEARCH_RESULT.state.iteration,                         //
-            TABU_SEARCH_RESULT.state.total_number_of_evaluated_moves,   //
-            TABU_SEARCH_RESULT.state.averaged_inner_iteration_speed,    //
-            TABU_SEARCH_RESULT.state.averaged_move_evaluation_speed,    //
-            this->export_named_penalty_coefficients(),                  //
-            this->export_named_update_counts(),
-            this->export_named_violation_counts());
-
+        m_time_keeper.clock();
+        Status<T_Variable, T_Expression> status(this);
         Result<T_Variable, T_Expression> result(  //
             named_solution, status, m_solution_archive);
 
         return result;
-    }
-
-    /*************************************************************************/
-    inline std::unordered_map<std::string, multi_array::ValueProxy<double>>
-    export_named_penalty_coefficients(void) {
-        std::unordered_map<std::string, multi_array::ValueProxy<double>>
-            named_penalty_coefficients;
-
-        auto local_penalty_coefficient_proxies =
-            m_model_ptr->export_local_penalty_coefficient_proxies();
-
-        const int CONSTRAINT_PROXIES_SIZE =
-            m_model_ptr->constraint_proxies().size();
-        const auto& CONSTRAIN_NAMED = m_model_ptr->constraint_names();
-        for (auto i = 0; i < CONSTRAINT_PROXIES_SIZE; i++) {
-            named_penalty_coefficients[CONSTRAIN_NAMED[i]] =
-                local_penalty_coefficient_proxies[i];
-        }
-        return named_penalty_coefficients;
-    }
-
-    /*************************************************************************/
-    inline std::unordered_map<std::string, multi_array::ValueProxy<int>>
-    export_named_update_counts(void) {
-        std::unordered_map<std::string, multi_array::ValueProxy<int>>
-                    named_update_counts;
-        const int   PROXIES_SIZE   = m_model_ptr->variable_proxies().size();
-        const auto& VARIABLE_NAMES = m_model_ptr->variable_names();
-        const auto& COUNTS         = m_memory.update_counts();
-        for (auto i = 0; i < PROXIES_SIZE; i++) {
-            named_update_counts[VARIABLE_NAMES[i]] = COUNTS[i];
-        }
-        return named_update_counts;
-    }
-
-    /*************************************************************************/
-    inline std::unordered_map<std::string, multi_array::ValueProxy<int>>
-    export_named_violation_counts(void) {
-        std::unordered_map<std::string, multi_array::ValueProxy<int>>
-                    named_violation_counts;
-        const int   PROXIES_SIZE     = m_model_ptr->constraint_proxies().size();
-        const auto& CONSTRAINT_NAMES = m_model_ptr->constraint_names();
-        const auto& COUNTS           = m_memory.violation_counts();
-        for (auto i = 0; i < PROXIES_SIZE; i++) {
-            named_violation_counts[CONSTRAINT_NAMES[i]] = COUNTS[i];
-        }
-        return named_violation_counts;
     }
 
     /*************************************************************************/
@@ -445,8 +378,114 @@ class Solver {
     }
 
     /*************************************************************************/
+    inline std::unordered_map<std::string, multi_array::ValueProxy<double>>
+    export_named_penalty_coefficients(void) {
+        std::unordered_map<std::string, multi_array::ValueProxy<double>>
+            named_penalty_coefficients;
+
+        auto local_penalty_coefficient_proxies =
+            m_model_ptr->export_local_penalty_coefficient_proxies();
+
+        const int CONSTRAINT_PROXIES_SIZE =
+            m_model_ptr->constraint_proxies().size();
+        const auto& CONSTRAIN_NAMED = m_model_ptr->constraint_names();
+        for (auto i = 0; i < CONSTRAINT_PROXIES_SIZE; i++) {
+            named_penalty_coefficients[CONSTRAIN_NAMED[i]] =
+                local_penalty_coefficient_proxies[i];
+        }
+        return named_penalty_coefficients;
+    }
+
+    /*************************************************************************/
+    inline std::unordered_map<std::string, multi_array::ValueProxy<int>>
+    export_named_update_counts(void) {
+        std::unordered_map<std::string, multi_array::ValueProxy<int>>
+                    named_update_counts;
+        const int   PROXIES_SIZE   = m_model_ptr->variable_proxies().size();
+        const auto& VARIABLE_NAMES = m_model_ptr->variable_names();
+        const auto& COUNTS         = m_memory.update_counts();
+        for (auto i = 0; i < PROXIES_SIZE; i++) {
+            named_update_counts[VARIABLE_NAMES[i]] = COUNTS[i];
+        }
+        return named_update_counts;
+    }
+
+    /*************************************************************************/
+    inline std::unordered_map<std::string, multi_array::ValueProxy<int>>
+    export_named_violation_counts(void) {
+        std::unordered_map<std::string, multi_array::ValueProxy<int>>
+                    named_violation_counts;
+        const int   PROXIES_SIZE     = m_model_ptr->constraint_proxies().size();
+        const auto& CONSTRAINT_NAMES = m_model_ptr->constraint_names();
+        const auto& COUNTS           = m_memory.violation_counts();
+        for (auto i = 0; i < PROXIES_SIZE; i++) {
+            named_violation_counts[CONSTRAINT_NAMES[i]] = COUNTS[i];
+        }
+        return named_violation_counts;
+    }
+
+    /*************************************************************************/
     inline model::Model<T_Variable, T_Expression>* model_ptr(void) {
         return m_model_ptr;
+    }
+
+    /*************************************************************************/
+    inline const solution::IncumbentHolder<T_Variable, T_Expression>&
+    incumbent_holder(void) const {
+        return m_incumbent_holder;
+    }
+
+    /*************************************************************************/
+    inline const solution::DenseSolution<T_Variable, T_Expression>&
+    current_solution(void) const {
+        return m_current_solution;
+    }
+
+    /*************************************************************************/
+    inline const Memory<T_Variable, T_Expression>& memory(void) const {
+        return m_memory;
+    }
+
+    /*************************************************************************/
+    inline const utility::TimeKeeper& time_keeper(void) const {
+        return m_time_keeper;
+    }
+
+    /*************************************************************************/
+    inline const solution::SolutionArchive<T_Variable, T_Expression>&
+    solution_archive(void) const {
+        return m_solution_archive;
+    }
+
+    /*************************************************************************/
+    inline const std::string& start_date_time(void) const {
+        return m_start_date_time;
+    }
+
+    /*************************************************************************/
+    inline const std::string& finish_date_time(void) const {
+        return m_finish_date_time;
+    }
+
+    /*************************************************************************/
+    inline const lagrange_dual::controller::LagrangeDualController<
+        T_Variable, T_Expression>&
+    lagrange_dual_controller(void) const {
+        return m_lagrange_dual_controller;
+    }
+
+    /*************************************************************************/
+    inline const local_search::controller::LocalSearchController<T_Variable,
+                                                                 T_Expression>&
+    local_search_controller(void) const {
+        return m_local_search_controller;
+    }
+
+    /*************************************************************************/
+    inline const tabu_search::controller::TabuSearchController<T_Variable,
+                                                               T_Expression>&
+    tabu_search_controller(void) const {
+        return m_tabu_search_controller;
     }
 };
 

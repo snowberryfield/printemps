@@ -292,7 +292,7 @@ class Memory {
     inline constexpr double total_violation_count_reciprocal(void) const {
         return m_total_violation_count_reciprocal;
     }
-};  // namespace solver
+};
 }  // namespace printemps::solver
 
 #endif
