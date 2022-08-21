@@ -530,9 +530,13 @@ class TabuSearchController
     inline void print_outer_loop_iteration(const int  a_ITERATION,
                                            const bool a_IS_ENABLED_PRINT) {
         utility::print_message(
-            "Tabu search loop (" + std::to_string(a_ITERATION + 1) + "/" +
-                std::to_string(this->m_option.general.iteration_max) +
-                ") finished.",
+            "Tabu search loop finished (" + std::to_string(a_ITERATION + 1) +
+                "/" + std::to_string(this->m_option.general.iteration_max) +
+                ", Reason: " +
+                core::TabuSearchCoreTerminationStatusInverseMap.at(
+                    m_state_manager.state()
+                        .tabu_search_result.termination_status) +
+                ").",
             a_IS_ENABLED_PRINT);
     }
 
