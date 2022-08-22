@@ -13,9 +13,9 @@ struct TabuSearchControllerStateManagerConstant {
     static constexpr double PENALTY_COEFFICIENT_RELAXING_RATE_MIN = 0.3;
     static constexpr double PENALTY_COEFFICIENT_RELAXING_RATE_MAX = 1.0 - 1E-4;
     static constexpr double PENALTY_COEFFICIENT_RELAXING_RATE_DECREASE_RATE =
-        0.5;
-    static constexpr double PENALTY_COEFFICIENT_RELAXING_RATE_STEP_SIZE = 1E-1;
-    static constexpr int    ITERATION_AFTER_RELAXATION_MAX              = 30;
+        0.9;
+    static constexpr double PENALTY_COEFFICIENT_RELAXING_RATE_STEP_SIZE = 0.1;
+    static constexpr int    ITERATION_AFTER_RELAXATION_MAX              = 20;
     static constexpr double GAP_TOLERANCE        = constant::EPSILON;
     static constexpr int    STAGNATION_THRESHOLD = 80;
 };
