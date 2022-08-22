@@ -4,13 +4,12 @@
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
 #include <gtest/gtest.h>
-#include <random>
-
 #include <printemps.h>
 
 namespace {
+using namespace printemps;
 /*****************************************************************************/
-class TestVerbose : public ::testing::Test {
+class TestMPSConstraint : public ::testing::Test {
    protected:
     virtual void SetUp(void) {
         /// nothing to do
@@ -21,24 +20,14 @@ class TestVerbose : public ::testing::Test {
 };
 
 /*****************************************************************************/
-TEST_F(TestVerbose, VerboseMap) {
-    using namespace printemps::option::verbose;
-    EXPECT_EQ(Off, VerboseMap.at("Off"));
-    EXPECT_EQ(Warning, VerboseMap.at("Warning"));
-    EXPECT_EQ(Outer, VerboseMap.at("Outer"));
-    EXPECT_EQ(Full, VerboseMap.at("Full"));
-    EXPECT_EQ(Debug, VerboseMap.at("Debug"));
+TEST_F(TestMPSConstraint, initialize) {
+    mps::MPSConstraint constraint;
+    EXPECT_EQ(mps::MPSConstraintSense::Less, constraint.sense);
+    EXPECT_EQ("", constraint.name);
+    EXPECT_TRUE(constraint.sensitivities.empty());
+    EXPECT_FLOAT_EQ(0.0, constraint.rhs);
 }
 
-/*****************************************************************************/
-TEST_F(TestVerbose, VerboseInverseMap) {
-    using namespace printemps::option::verbose;
-    EXPECT_EQ("Off", VerboseInverseMap.at(Off));
-    EXPECT_EQ("Warning", VerboseInverseMap.at(Warning));
-    EXPECT_EQ("Outer", VerboseInverseMap.at(Outer));
-    EXPECT_EQ("Full", VerboseInverseMap.at(Full));
-    EXPECT_EQ("Debug", VerboseInverseMap.at(Debug));
-}
 }  // namespace
 /*****************************************************************************/
 // END

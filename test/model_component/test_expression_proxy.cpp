@@ -4,17 +4,16 @@
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
 #include <gtest/gtest.h>
-#include <random>
-
 #include <printemps.h>
 
 namespace {
+using namespace printemps;
 /*****************************************************************************/
 class TestExpressionProxy : public ::testing::Test {
    protected:
-    printemps::utility::UniformRandom<std::uniform_int_distribution<>, int>
+    utility::UniformRandom<std::uniform_int_distribution<>, int>
         m_random_integer;
-    printemps::utility::UniformRandom<std::uniform_int_distribution<>, int>
+    utility::UniformRandom<std::uniform_int_distribution<>, int>
         m_random_positive_integer;
 
     virtual void SetUp(void) {
@@ -35,8 +34,8 @@ class TestExpressionProxy : public ::testing::Test {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, scalar_create_instance) {
-    printemps::model::Model<int, double> model;
-    auto& expression_proxy = model.create_expression("e");
+    model::Model<int, double> model;
+    auto&                     expression_proxy = model.create_expression("e");
 
     /// Check the initial values of the base class members.
     EXPECT_EQ(0, expression_proxy.index());
@@ -48,10 +47,9 @@ TEST_F(TestExpressionProxy, scalar_create_instance) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, scalar_sensitivities) {
-    printemps::model::Model<int, double> model;
-    auto& expression_proxy = model.create_expression("e");
-    auto  variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    model::Model<int, double> model;
+    auto&                     expression_proxy = model.create_expression("e");
+    auto variable = model_component::Variable<int, double>::create_instance();
 
     auto sensitivity = random_integer();
     expression_proxy = sensitivity * variable;
@@ -61,8 +59,8 @@ TEST_F(TestExpressionProxy, scalar_sensitivities) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, scalar_constant_value) {
-    printemps::model::Model<int, double> model;
-    auto& expression_proxy = model.create_expression("e");
+    model::Model<int, double> model;
+    auto&                     expression_proxy = model.create_expression("e");
 
     auto constant    = random_integer();
     expression_proxy = constant;
@@ -72,13 +70,11 @@ TEST_F(TestExpressionProxy, scalar_constant_value) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, scalar_evaluate_arg_void) {
-    printemps::model::Model<int, double> model;
-    auto& expression_proxy = model.create_expression("e");
+    model::Model<int, double> model;
+    auto&                     expression_proxy = model.create_expression("e");
 
-    auto variable_0 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto variable_1 =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable_0 = model_component::Variable<int, double>::create_instance();
+    auto variable_1 = model_component::Variable<int, double>::create_instance();
 
     auto sensitivity_0 = random_integer();
     auto sensitivity_1 = random_integer();
@@ -101,13 +97,11 @@ TEST_F(TestExpressionProxy, scalar_evaluate_arg_void) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, scalar_evaluate_arg_move) {
-    printemps::model::Model<int, double> model;
-    auto& expression_proxy = model.create_expression("e");
+    model::Model<int, double> model;
+    auto&                     expression_proxy = model.create_expression("e");
 
-    auto variable_0 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto variable_1 =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable_0 = model_component::Variable<int, double>::create_instance();
+    auto variable_1 = model_component::Variable<int, double>::create_instance();
 
     auto sensitivity_0 = random_integer();
     auto sensitivity_1 = random_integer();
@@ -128,7 +122,7 @@ TEST_F(TestExpressionProxy, scalar_evaluate_arg_move) {
 
     expression_proxy.update();
 
-    printemps::neighborhood::Move<int, double> move;
+    neighborhood::Move<int, double> move;
     value_0 = random_integer();
     value_1 = random_integer();
 
@@ -143,13 +137,11 @@ TEST_F(TestExpressionProxy, scalar_evaluate_arg_move) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, scalar_update_arg_void) {
-    printemps::model::Model<int, double> model;
-    auto& expression_proxy = model.create_expression("e");
+    model::Model<int, double> model;
+    auto&                     expression_proxy = model.create_expression("e");
 
-    auto variable_0 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto variable_1 =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable_0 = model_component::Variable<int, double>::create_instance();
+    auto variable_1 = model_component::Variable<int, double>::create_instance();
 
     auto sensitivity_0 = random_integer();
     auto sensitivity_1 = random_integer();
@@ -173,13 +165,11 @@ TEST_F(TestExpressionProxy, scalar_update_arg_void) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, scalar_update_arg_move) {
-    printemps::model::Model<int, double> model;
-    auto& expression_proxy = model.create_expression("e");
+    model::Model<int, double> model;
+    auto&                     expression_proxy = model.create_expression("e");
 
-    auto variable_0 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto variable_1 =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable_0 = model_component::Variable<int, double>::create_instance();
+    auto variable_1 = model_component::Variable<int, double>::create_instance();
 
     auto sensitivity_0 = random_integer();
     auto sensitivity_1 = random_integer();
@@ -200,7 +190,7 @@ TEST_F(TestExpressionProxy, scalar_update_arg_move) {
 
     expression_proxy.update();
 
-    printemps::neighborhood::Move<int, double> move;
+    neighborhood::Move<int, double> move;
     value_0 = random_integer();
     value_1 = random_integer();
 
@@ -221,7 +211,7 @@ TEST_F(TestExpressionProxy, scalar_value) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, scalar_set_name) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& expression_proxy = model.create_expression("e");
     expression_proxy.set_name("_e");
@@ -235,13 +225,11 @@ TEST_F(TestExpressionProxy, scalar_name) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, scalar_flat_indexed_expressions_arg_void) {
-    printemps::model::Model<int, double> model;
-    auto& expression_proxy = model.create_expression("e");
+    model::Model<int, double> model;
+    auto&                     expression_proxy = model.create_expression("e");
 
-    auto variable_0 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto variable_1 =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable_0 = model_component::Variable<int, double>::create_instance();
+    auto variable_1 = model_component::Variable<int, double>::create_instance();
 
     auto sensitivity_0 = random_integer();
     auto sensitivity_1 = random_integer();
@@ -268,13 +256,11 @@ TEST_F(TestExpressionProxy, scalar_flat_indexed_expressions_arg_void) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, scalar_flat_indexed_expressions_arg_int) {
-    printemps::model::Model<int, double> model;
-    auto& expression_proxy = model.create_expression("e");
+    model::Model<int, double> model;
+    auto&                     expression_proxy = model.create_expression("e");
 
-    auto variable_0 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto variable_1 =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable_0 = model_component::Variable<int, double>::create_instance();
+    auto variable_1 = model_component::Variable<int, double>::create_instance();
 
     auto sensitivity_0 = random_integer();
     auto sensitivity_1 = random_integer();
@@ -299,13 +285,11 @@ TEST_F(TestExpressionProxy, scalar_flat_indexed_expressions_arg_int) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, scalar_export_values_and_names) {
-    printemps::model::Model<int, double> model;
-    auto& expression_proxy = model.create_expression("e");
+    model::Model<int, double> model;
+    auto&                     expression_proxy = model.create_expression("e");
 
-    auto variable_0 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto variable_1 =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable_0 = model_component::Variable<int, double>::create_instance();
+    auto variable_1 = model_component::Variable<int, double>::create_instance();
 
     auto sensitivity_0 = random_integer();
     auto sensitivity_1 = random_integer();
@@ -330,13 +314,11 @@ TEST_F(TestExpressionProxy, scalar_export_values_and_names) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, scalar_to_expression) {
-    printemps::model::Model<int, double> model;
-    auto& expression_proxy = model.create_expression("e");
+    model::Model<int, double> model;
+    auto&                     expression_proxy = model.create_expression("e");
 
-    auto variable_0 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto variable_1 =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable_0 = model_component::Variable<int, double>::create_instance();
+    auto variable_1 = model_component::Variable<int, double>::create_instance();
 
     auto sensitivity_0 = random_integer();
     auto sensitivity_1 = random_integer();
@@ -354,14 +336,14 @@ TEST_F(TestExpressionProxy, scalar_to_expression) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, scalar_sum_arg_void) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
     expression_proxy       = variable_proxy;
 
     auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
     expression = expression_proxy.sum();
 
     for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
@@ -374,15 +356,15 @@ TEST_F(TestExpressionProxy, scalar_sum_arg_void) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, scalar_sum_arg_indices) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
     expression_proxy       = variable_proxy;
 
     auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
-    expression = expression_proxy.sum({printemps::model_component::Range::All});
+        model_component::Expression<int, double>::create_instance();
+    expression = expression_proxy.sum({model_component::Range::All});
 
     for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
         variable_proxy[i] = 1;
@@ -391,14 +373,13 @@ TEST_F(TestExpressionProxy, scalar_sum_arg_indices) {
     EXPECT_EQ(1, expression.sensitivities().at(&(variable_proxy[0])));
     EXPECT_EQ(1, expression.evaluate());
 
-    ASSERT_THROW(
-        variable_proxy.sum({printemps::model_component::Range::All, 0}),
-        std::logic_error);
+    ASSERT_THROW(variable_proxy.sum({model_component::Range::All, 0}),
+                 std::logic_error);
 }
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, scalar_dot_arg_vector) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
@@ -408,7 +389,7 @@ TEST_F(TestExpressionProxy, scalar_dot_arg_vector) {
     sensitivities.push_back(random_integer());
 
     auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
     expression = variable_proxy.dot(sensitivities);
 
     for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
@@ -422,7 +403,7 @@ TEST_F(TestExpressionProxy, scalar_dot_arg_vector) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, scalar_dot_arg_indice_vector) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
@@ -432,9 +413,9 @@ TEST_F(TestExpressionProxy, scalar_dot_arg_indice_vector) {
     sensitivities.push_back(random_integer());
 
     auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
-    expression = variable_proxy.dot({printemps::model_component::Range::All},
-                                    sensitivities);
+        model_component::Expression<int, double>::create_instance();
+    expression =
+        variable_proxy.dot({model_component::Range::All}, sensitivities);
 
     for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
         variable_proxy[i] = 1;
@@ -445,15 +426,14 @@ TEST_F(TestExpressionProxy, scalar_dot_arg_indice_vector) {
     EXPECT_EQ(sensitivities[0], expression.evaluate());
 
     ASSERT_THROW(
-        expression_proxy.dot({0, printemps::model_component::Range::All},
-                             sensitivities),
+        expression_proxy.dot({0, model_component::Range::All}, sensitivities),
         std::logic_error);
 }
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, scalar_is_enabled) {
-    printemps::model::Model<int, double> model;
-    auto& expression_proxy = model.create_expression("e");
+    model::Model<int, double> model;
+    auto&                     expression_proxy = model.create_expression("e");
     expression_proxy.disable();
     EXPECT_FALSE(expression_proxy.is_enabled());
 
@@ -476,13 +456,11 @@ TEST_F(TestExpressionProxy, scalar_disable) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, scalar_operator_plus) {
-    printemps::model::Model<int, double> model;
-    auto& expression_proxy = model.create_expression("e");
+    model::Model<int, double> model;
+    auto&                     expression_proxy = model.create_expression("e");
 
-    auto variable_0 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto variable_1 =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable_0 = model_component::Variable<int, double>::create_instance();
+    auto variable_1 = model_component::Variable<int, double>::create_instance();
 
     auto sensitivity_0 = random_integer();
     auto sensitivity_1 = random_integer();
@@ -500,13 +478,11 @@ TEST_F(TestExpressionProxy, scalar_operator_plus) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, scalar_operator_minus) {
-    printemps::model::Model<int, double> model;
-    auto& expression_proxy = model.create_expression("e");
+    model::Model<int, double> model;
+    auto&                     expression_proxy = model.create_expression("e");
 
-    auto variable_0 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto variable_1 =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable_0 = model_component::Variable<int, double>::create_instance();
+    auto variable_1 = model_component::Variable<int, double>::create_instance();
 
     auto sensitivity_0 = random_integer();
     auto sensitivity_1 = random_integer();
@@ -524,9 +500,9 @@ TEST_F(TestExpressionProxy, scalar_operator_minus) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, scalar_operator_equal_arg_t_value) {
-    printemps::model::Model<int, double> model;
-    auto& expression_proxy = model.create_expression("e");
-    auto  value            = random_integer();
+    model::Model<int, double> model;
+    auto&                     expression_proxy = model.create_expression("e");
+    auto                      value            = random_integer();
 
     EXPECT_EQ(value, (expression_proxy = value).constant_value());
     EXPECT_EQ(value, expression_proxy.constant_value());
@@ -534,10 +510,10 @@ TEST_F(TestExpressionProxy, scalar_operator_equal_arg_t_value) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, scalar_operator_equal_arg_t_expression_like) {
-    printemps::model::Model<int, double> model;
-    auto& expression_proxy       = model.create_expression("e");
-    auto& variable_proxy         = model.create_variable("x");
-    auto& expression_proxy_other = model.create_expression("y");
+    model::Model<int, double> model;
+    auto&                     expression_proxy = model.create_expression("e");
+    auto&                     variable_proxy   = model.create_variable("x");
+    auto& expression_proxy_other               = model.create_expression("y");
 
     expression_proxy_other = variable_proxy;
 
@@ -565,16 +541,14 @@ TEST_F(TestExpressionProxy, scalar_operator_equal_arg_t_expression_like) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, scalar_operator_equal_expression) {
-    printemps::model::Model<int, double> model;
-    auto& expression_proxy = model.create_expression("e");
+    model::Model<int, double> model;
+    auto&                     expression_proxy = model.create_expression("e");
 
     auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
 
-    auto variable_0 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto variable_1 =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable_0 = model_component::Variable<int, double>::create_instance();
+    auto variable_1 = model_component::Variable<int, double>::create_instance();
 
     auto sensitivity_0 = random_integer();
     auto sensitivity_1 = random_integer();
@@ -591,10 +565,10 @@ TEST_F(TestExpressionProxy, scalar_operator_equal_expression) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, scalar_operator_plus_equal_arg_t_value) {
-    printemps::model::Model<int, double> model;
-    auto& expression_proxy = model.create_expression("e");
-    auto  value_0          = random_integer();
-    auto  value_1          = random_integer();
+    model::Model<int, double> model;
+    auto&                     expression_proxy = model.create_expression("e");
+    auto                      value_0          = random_integer();
+    auto                      value_1          = random_integer();
 
     EXPECT_EQ(value_0, (expression_proxy += value_0).constant_value());
     EXPECT_EQ(value_0, expression_proxy.constant_value());
@@ -605,10 +579,10 @@ TEST_F(TestExpressionProxy, scalar_operator_plus_equal_arg_t_value) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, scalar_operator_plus_equal_arg_t_expression_like) {
-    printemps::model::Model<int, double> model;
-    auto& expression_proxy       = model.create_expression("e");
-    auto& variable_proxy         = model.create_variable("x");
-    auto& expression_proxy_other = model.create_expression("y");
+    model::Model<int, double> model;
+    auto&                     expression_proxy = model.create_expression("e");
+    auto&                     variable_proxy   = model.create_variable("x");
+    auto& expression_proxy_other               = model.create_expression("y");
 
     expression_proxy_other = variable_proxy;
 
@@ -636,15 +610,13 @@ TEST_F(TestExpressionProxy, scalar_operator_plus_equal_arg_t_expression_like) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, operator_plus_equal_arg_expression) {
-    printemps::model::Model<int, double> model;
-    auto& expression_proxy = model.create_expression("e");
-    auto  expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+    model::Model<int, double> model;
+    auto&                     expression_proxy = model.create_expression("e");
+    auto                      expression =
+        model_component::Expression<int, double>::create_instance();
 
-    auto variable_0 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto variable_1 =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable_0 = model_component::Variable<int, double>::create_instance();
+    auto variable_1 = model_component::Variable<int, double>::create_instance();
 
     auto sensitivity_0_0 = random_integer();
     auto sensitivity_0_1 = random_integer();
@@ -672,10 +644,10 @@ TEST_F(TestExpressionProxy, operator_plus_equal_arg_expression) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, scalar_operator_minus_equal_arg_t_value) {
-    printemps::model::Model<int, double> model;
-    auto& expression_proxy = model.create_expression("e");
-    auto  value_0          = random_integer();
-    auto  value_1          = random_integer();
+    model::Model<int, double> model;
+    auto&                     expression_proxy = model.create_expression("e");
+    auto                      value_0          = random_integer();
+    auto                      value_1          = random_integer();
 
     EXPECT_EQ(-value_0, (expression_proxy -= value_0).constant_value());
     EXPECT_EQ(-value_0, expression_proxy.constant_value());
@@ -686,10 +658,10 @@ TEST_F(TestExpressionProxy, scalar_operator_minus_equal_arg_t_value) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, scalar_operator_minus_equal_arg_t_expression_like) {
-    printemps::model::Model<int, double> model;
-    auto& expression_proxy       = model.create_expression("e");
-    auto& variable_proxy         = model.create_variable("x");
-    auto& expression_proxy_other = model.create_expression("y");
+    model::Model<int, double> model;
+    auto&                     expression_proxy = model.create_expression("e");
+    auto&                     variable_proxy   = model.create_variable("x");
+    auto& expression_proxy_other               = model.create_expression("y");
 
     expression_proxy_other = variable_proxy;
 
@@ -717,15 +689,13 @@ TEST_F(TestExpressionProxy, scalar_operator_minus_equal_arg_t_expression_like) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, scalar_operator_minus_equal_arg_expression) {
-    printemps::model::Model<int, double> model;
-    auto& expression_proxy = model.create_expression("e");
-    auto  expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+    model::Model<int, double> model;
+    auto&                     expression_proxy = model.create_expression("e");
+    auto                      expression =
+        model_component::Expression<int, double>::create_instance();
 
-    auto variable_0 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto variable_1 =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable_0 = model_component::Variable<int, double>::create_instance();
+    auto variable_1 = model_component::Variable<int, double>::create_instance();
 
     auto sensitivity_0_0 = random_integer();
     auto sensitivity_0_1 = random_integer();
@@ -753,10 +723,9 @@ TEST_F(TestExpressionProxy, scalar_operator_minus_equal_arg_expression) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, scalar_operator_product_equal_arg_t_value) {
-    printemps::model::Model<int, double> model;
-    auto& expression_proxy = model.create_expression("e");
-    auto  variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    model::Model<int, double> model;
+    auto&                     expression_proxy = model.create_expression("e");
+    auto variable = model_component::Variable<int, double>::create_instance();
 
     auto sensitivity = random_integer();
     auto constant    = random_integer();
@@ -777,10 +746,9 @@ TEST_F(TestExpressionProxy, scalar_operator_product_equal_arg_t_value) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, scalar_operator_divide_equal_arg_t_value) {
-    printemps::model::Model<int, double> model;
-    auto& expression_proxy = model.create_expression("e");
-    auto  variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    model::Model<int, double> model;
+    auto&                     expression_proxy = model.create_expression("e");
+    auto variable = model_component::Variable<int, double>::create_instance();
 
     expression_proxy = 100 * variable + 200;
 
@@ -792,7 +760,7 @@ TEST_F(TestExpressionProxy, scalar_operator_divide_equal_arg_t_value) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, one_dimensional_create_instance) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& expression_proxy = model.create_expressions("e", 2);
 
@@ -806,7 +774,7 @@ TEST_F(TestExpressionProxy, one_dimensional_create_instance) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, one_dimensional_sensitivities) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", 2);
     ASSERT_THROW(auto sensitivities = expression_proxy.sensitivities(),
                  std::logic_error);
@@ -814,7 +782,7 @@ TEST_F(TestExpressionProxy, one_dimensional_sensitivities) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, one_dimensional_constant_value) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", 2);
     ASSERT_THROW(
         [[maybe_unused]] auto constant = expression_proxy.constant_value(),
@@ -823,35 +791,35 @@ TEST_F(TestExpressionProxy, one_dimensional_constant_value) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, one_dimensional_evaluate_arg_void) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", 2);
     ASSERT_THROW(expression_proxy.evaluate(), std::logic_error);
 }
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, one_dimensional_evaluate_arg_move) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", 2);
     ASSERT_THROW(expression_proxy.evaluate({}), std::logic_error);
 }
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, one_dimensional_update_arg_void) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", 2);
     ASSERT_THROW(expression_proxy.update(), std::logic_error);
 }
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, one_dimensional_update_arg_move) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", 2);
     ASSERT_THROW(expression_proxy.update({}), std::logic_error);
 }
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, one_dimensional_value) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", 2);
     ASSERT_THROW([[maybe_unused]] auto value = expression_proxy.value(),
                  std::logic_error);
@@ -859,7 +827,7 @@ TEST_F(TestExpressionProxy, one_dimensional_value) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, one_dimensional_set_name) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& expression_proxy = model.create_expressions("e", 2);
 
@@ -874,13 +842,11 @@ TEST_F(TestExpressionProxy, one_dimensional_name) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, one_dimensional_flat_indexed_expressions_arg_void) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", 2);
 
-    auto variable_0 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto variable_1 =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable_0 = model_component::Variable<int, double>::create_instance();
+    auto variable_1 = model_component::Variable<int, double>::create_instance();
 
     auto sensitivity_0 = random_integer();
     auto sensitivity_1 = random_integer();
@@ -919,13 +885,11 @@ TEST_F(TestExpressionProxy, one_dimensional_flat_indexed_expressions_arg_void) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, one_dimensional_flat_indexed_expressions_arg_int) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", 2);
 
-    auto variable_0 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto variable_1 =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable_0 = model_component::Variable<int, double>::create_instance();
+    auto variable_1 = model_component::Variable<int, double>::create_instance();
 
     auto sensitivity_0 = random_integer();
     auto sensitivity_1 = random_integer();
@@ -963,13 +927,11 @@ TEST_F(TestExpressionProxy, one_dimensional_flat_indexed_expressions_arg_int) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, one_dimensional_export_values_and_names) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", 2);
 
-    auto variable_0 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto variable_1 =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable_0 = model_component::Variable<int, double>::create_instance();
+    auto variable_1 = model_component::Variable<int, double>::create_instance();
 
     auto sensitivity_0 = random_integer();
     auto sensitivity_1 = random_integer();
@@ -1000,7 +962,7 @@ TEST_F(TestExpressionProxy, one_dimensional_export_values_and_names) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, one_dimensional_to_expression) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", 2);
     ASSERT_THROW(auto expression = expression_proxy.to_expression(),
                  std::logic_error);
@@ -1008,7 +970,7 @@ TEST_F(TestExpressionProxy, one_dimensional_to_expression) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, one_dimensional_sum_arg_void) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variables("x", 2);
     auto& expression_proxy = model.create_expressions("e", 2);
@@ -1018,7 +980,7 @@ TEST_F(TestExpressionProxy, one_dimensional_sum_arg_void) {
     }
 
     auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
     expression = variable_proxy.sum();
 
     for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
@@ -1032,7 +994,7 @@ TEST_F(TestExpressionProxy, one_dimensional_sum_arg_void) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, one_dimensional_sum_arg_indices) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variables("x", 2);
     auto& expression_proxy = model.create_expressions("e", 2);
@@ -1042,8 +1004,8 @@ TEST_F(TestExpressionProxy, one_dimensional_sum_arg_indices) {
     }
 
     auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
-    expression = variable_proxy.sum({printemps::model_component::Range::All});
+        model_component::Expression<int, double>::create_instance();
+    expression = variable_proxy.sum({model_component::Range::All});
 
     for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
         variable_proxy[i] = 1;
@@ -1052,14 +1014,13 @@ TEST_F(TestExpressionProxy, one_dimensional_sum_arg_indices) {
     EXPECT_EQ(1, expression.sensitivities().at(&(variable_proxy[0])));
     EXPECT_EQ(1, expression.sensitivities().at(&(variable_proxy[1])));
     EXPECT_EQ(2, expression.evaluate());
-    ASSERT_THROW(
-        expression_proxy.sum({printemps::model_component::Range::All, 0}),
-        std::logic_error);
+    ASSERT_THROW(expression_proxy.sum({model_component::Range::All, 0}),
+                 std::logic_error);
 }
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, one_dimensional_dot_arg_vector) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variables("x", 2);
     auto& expression_proxy = model.create_expressions("e", 2);
@@ -1074,7 +1035,7 @@ TEST_F(TestExpressionProxy, one_dimensional_dot_arg_vector) {
     }
 
     auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
     expression = expression_proxy.dot(sensitivities);
 
     for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
@@ -1090,7 +1051,7 @@ TEST_F(TestExpressionProxy, one_dimensional_dot_arg_vector) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, one_dimensional_dot_arg_indice_vector) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variables("x", 2);
     auto& expression_proxy = model.create_expressions("e", 2);
@@ -1105,7 +1066,7 @@ TEST_F(TestExpressionProxy, one_dimensional_dot_arg_indice_vector) {
     }
 
     auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
     expression = expression_proxy.dot(sensitivities);
 
     for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
@@ -1119,14 +1080,13 @@ TEST_F(TestExpressionProxy, one_dimensional_dot_arg_indice_vector) {
     EXPECT_EQ(sensitivities[0] + sensitivities[1], expression.evaluate());
 
     ASSERT_THROW(
-        expression_proxy.dot({0, printemps::model_component::Range::All},
-                             sensitivities),
+        expression_proxy.dot({0, model_component::Range::All}, sensitivities),
         std::logic_error);
 }
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, one_dimensional_is_enabled) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", 2);
     expression_proxy.disable();
     ASSERT_THROW(expression_proxy.is_enabled(), std::logic_error);
@@ -1156,21 +1116,21 @@ TEST_F(TestExpressionProxy, one_dimensional_disable) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, one_dimensional_operator_plus) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", 2);
     ASSERT_THROW(auto expression = +expression_proxy, std::logic_error);
 }
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, one_dimensional_operator_minus) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", 2);
     ASSERT_THROW(auto expression = -expression_proxy, std::logic_error);
 }
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, one_dimensional_operator_equal_arg_t_value) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", 2);
     auto  value            = random_integer();
     ASSERT_THROW(expression_proxy = value, std::logic_error);
@@ -1179,7 +1139,7 @@ TEST_F(TestExpressionProxy, one_dimensional_operator_equal_arg_t_value) {
 /*****************************************************************************/
 TEST_F(TestExpressionProxy,
        one_dimensional_operator_equal_arg_t_expression_like) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& expression_proxy       = model.create_expressions("e", 2);
     auto& variable_proxy         = model.create_variable("x");
     auto& expression_proxy_other = model.create_expression("y");
@@ -1197,17 +1157,17 @@ TEST_F(TestExpressionProxy,
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, one_dimensional_operator_equal_expression) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", 2);
 
     auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
     ASSERT_THROW(expression_proxy = expression, std::logic_error);
 }
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, one_dimensional_operator_plus_equal_arg_t_value) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", 2);
     auto  value            = random_integer();
     ASSERT_THROW(expression_proxy += value, std::logic_error);
@@ -1216,7 +1176,7 @@ TEST_F(TestExpressionProxy, one_dimensional_operator_plus_equal_arg_t_value) {
 /*****************************************************************************/
 TEST_F(TestExpressionProxy,
        one_dimensional_operator_plus_equal_arg_t_expression_like) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& expression_proxy       = model.create_expressions("e", 2);
     auto& variable_proxy         = model.create_variable("x");
     auto& expression_proxy_other = model.create_expression("y");
@@ -1235,17 +1195,17 @@ TEST_F(TestExpressionProxy,
 /*****************************************************************************/
 TEST_F(TestExpressionProxy,
        one_dimensional_operator_plus_equal_arg_expression) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", 2);
 
     auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
     ASSERT_THROW(expression_proxy += expression, std::logic_error);
 }
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, one_dimensional_operator_minus_equal_arg_t_value) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", 2);
     auto  value            = random_integer();
     ASSERT_THROW(expression_proxy -= value, std::logic_error);
@@ -1254,7 +1214,7 @@ TEST_F(TestExpressionProxy, one_dimensional_operator_minus_equal_arg_t_value) {
 /*****************************************************************************/
 TEST_F(TestExpressionProxy,
        one_dimensional_operator_minus_equal_arg_t_expression_like) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& expression_proxy       = model.create_expressions("e", 2);
     auto& variable_proxy         = model.create_variable("x");
     auto& expression_proxy_other = model.create_expression("y");
@@ -1273,18 +1233,18 @@ TEST_F(TestExpressionProxy,
 /*****************************************************************************/
 TEST_F(TestExpressionProxy,
        one_dimensional_operator_minus_equal_arg_expression) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", 2);
 
     auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
     ASSERT_THROW(expression_proxy -= expression, std::logic_error);
 }
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy,
        one_dimensional_operator_product_equal_arg_t_value) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", 2);
     auto  value            = random_integer();
     ASSERT_THROW(expression_proxy *= value, std::logic_error);
@@ -1292,7 +1252,7 @@ TEST_F(TestExpressionProxy,
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, one_dimensional_operator_divide_equal_arg_t_value) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", 2);
     auto  value            = random_integer();
     ASSERT_THROW(expression_proxy /= value, std::logic_error);
@@ -1300,7 +1260,7 @@ TEST_F(TestExpressionProxy, one_dimensional_operator_divide_equal_arg_t_value) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, one_dimensional_operator_square_bracket) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& expression_proxy = model.create_expressions("e", 2);
     auto  value_0          = random_integer();
@@ -1313,7 +1273,7 @@ TEST_F(TestExpressionProxy, one_dimensional_operator_square_bracket) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, one_dimensional_operator_round_bracket) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& expression_proxy = model.create_expressions("e", 2);
     auto  value_0          = random_integer();
@@ -1327,7 +1287,7 @@ TEST_F(TestExpressionProxy, one_dimensional_operator_round_bracket) {
 /*****************************************************************************/
 TEST_F(TestExpressionProxy,
        one_dimensional_operator_round_bracket_with_indices) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& expression_proxy = model.create_expressions("e", 2);
     auto  value_0          = random_integer();
@@ -1340,7 +1300,7 @@ TEST_F(TestExpressionProxy,
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, two_dimensional_create_instance) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& expression_proxy = model.create_expressions("e", {2, 3});
 
@@ -1356,7 +1316,7 @@ TEST_F(TestExpressionProxy, two_dimensional_create_instance) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, two_dimensional_sensitivities) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", {2, 3});
     ASSERT_THROW(auto sensitivities = expression_proxy.sensitivities(),
                  std::logic_error);
@@ -1364,7 +1324,7 @@ TEST_F(TestExpressionProxy, two_dimensional_sensitivities) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, two_dimensional_constant_value) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", {2, 3});
     ASSERT_THROW(
         [[maybe_unused]] auto constant = expression_proxy.constant_value(),
@@ -1373,35 +1333,35 @@ TEST_F(TestExpressionProxy, two_dimensional_constant_value) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, two_dimensional_evaluate_arg_void) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", {2, 3});
     ASSERT_THROW(expression_proxy.evaluate(), std::logic_error);
 }
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, two_dimensional_evaluate_arg_move) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", {2, 3});
     ASSERT_THROW(expression_proxy.evaluate({}), std::logic_error);
 }
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, two_dimensional_update_arg_void) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", {2, 3});
     ASSERT_THROW(expression_proxy.update(), std::logic_error);
 }
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, two_dimensional_update_arg_move) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", {2, 3});
     ASSERT_THROW(expression_proxy.update({}), std::logic_error);
 }
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, two_dimensional_value) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", {2, 3});
     ASSERT_THROW([[maybe_unused]] auto value = expression_proxy.value(),
                  std::logic_error);
@@ -1409,7 +1369,7 @@ TEST_F(TestExpressionProxy, two_dimensional_value) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, two_dimensional_set_name) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& expression_proxy = model.create_expressions("e", {2, 3});
 
@@ -1424,13 +1384,11 @@ TEST_F(TestExpressionProxy, two_dimensional_name) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, two_dimensional_flat_indexed_expressions_arg_void) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", {2, 3});
 
-    auto variable_0 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto variable_1 =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable_0 = model_component::Variable<int, double>::create_instance();
+    auto variable_1 = model_component::Variable<int, double>::create_instance();
 
     auto sensitivity_0 = random_integer();
     auto sensitivity_1 = random_integer();
@@ -1472,13 +1430,11 @@ TEST_F(TestExpressionProxy, two_dimensional_flat_indexed_expressions_arg_void) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, two_dimensional_flat_indexed_expressions_arg_int) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", {2, 3});
 
-    auto variable_0 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto variable_1 =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable_0 = model_component::Variable<int, double>::create_instance();
+    auto variable_1 = model_component::Variable<int, double>::create_instance();
 
     auto sensitivity_0 = random_integer();
     auto sensitivity_1 = random_integer();
@@ -1519,13 +1475,11 @@ TEST_F(TestExpressionProxy, two_dimensional_flat_indexed_expressions_arg_int) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, two_dimensional_export_values_and_names) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", {2, 3});
 
-    auto variable_0 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto variable_1 =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable_0 = model_component::Variable<int, double>::create_instance();
+    auto variable_1 = model_component::Variable<int, double>::create_instance();
 
     auto sensitivity_0 = random_integer();
     auto sensitivity_1 = random_integer();
@@ -1556,7 +1510,7 @@ TEST_F(TestExpressionProxy, two_dimensional_export_values_and_names) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, two_dimensional_to_expression) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", {2, 3});
     ASSERT_THROW(auto expression = expression_proxy.to_expression(),
                  std::logic_error);
@@ -1564,7 +1518,7 @@ TEST_F(TestExpressionProxy, two_dimensional_to_expression) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, two_dimensional_sum_arg_void) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variables("x", {2, 3});
     auto& expression_proxy = model.create_expressions("e", {2, 3});
@@ -1574,7 +1528,7 @@ TEST_F(TestExpressionProxy, two_dimensional_sum_arg_void) {
     }
 
     auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
     expression = expression_proxy.sum();
 
     for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
@@ -1588,7 +1542,7 @@ TEST_F(TestExpressionProxy, two_dimensional_sum_arg_void) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, two_dimensional_sum_arg_indices) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variables("x", {2, 3});
     auto& expression_proxy = model.create_expressions("e", {2, 3});
@@ -1598,19 +1552,16 @@ TEST_F(TestExpressionProxy, two_dimensional_sum_arg_indices) {
     }
 
     auto expression_0 =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
     auto expression_1 =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
     auto expression_01 =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
 
-    expression_0 =
-        expression_proxy.sum({printemps::model_component::Range::All, 0});
-    expression_1 =
-        expression_proxy.sum({0, printemps::model_component::Range::All});
-    expression_01 =
-        expression_proxy.sum({printemps::model_component::Range::All,
-                              printemps::model_component::Range::All});
+    expression_0  = expression_proxy.sum({model_component::Range::All, 0});
+    expression_1  = expression_proxy.sum({0, model_component::Range::All});
+    expression_01 = expression_proxy.sum(
+        {model_component::Range::All, model_component::Range::All});
 
     for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
         variable_proxy[i] = 1;
@@ -1629,16 +1580,15 @@ TEST_F(TestExpressionProxy, two_dimensional_sum_arg_indices) {
               expression_01.sensitivities().at(&(variable_proxy[2 * 3 - 1])));
     EXPECT_EQ(2 * 3, expression_01.evaluate());
 
-    ASSERT_THROW(expression_proxy.sum({printemps::model_component::Range::All}),
+    ASSERT_THROW(expression_proxy.sum({model_component::Range::All}),
                  std::logic_error);
-    ASSERT_THROW(
-        expression_proxy.sum({printemps::model_component::Range::All, 0, 0}),
-        std::logic_error);
+    ASSERT_THROW(expression_proxy.sum({model_component::Range::All, 0, 0}),
+                 std::logic_error);
 }
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, two_dimensional_dot_arg_vector) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variables("x", {2, 3});
     auto& expression_proxy = model.create_expressions("e", {2, 3});
@@ -1656,7 +1606,7 @@ TEST_F(TestExpressionProxy, two_dimensional_dot_arg_vector) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, two_dimensional_dot_arg_indice_vector) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variables("x", {2, 3});
     auto& expression_proxy = model.create_expressions("e", {2, 3});
@@ -1685,14 +1635,14 @@ TEST_F(TestExpressionProxy, two_dimensional_dot_arg_indice_vector) {
     }
 
     auto expression_0 =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
     auto expression_1 =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
 
-    expression_0 = expression_proxy.dot(
-        {printemps::model_component::Range::All, 0}, sensitivities_0);
-    expression_1 = expression_proxy.dot(
-        {0, printemps::model_component::Range::All}, sensitivities_1);
+    expression_0 =
+        expression_proxy.dot({model_component::Range::All, 0}, sensitivities_0);
+    expression_1 =
+        expression_proxy.dot({0, model_component::Range::All}, sensitivities_1);
 
     for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
         variable_proxy[i] = 1;
@@ -1714,22 +1664,21 @@ TEST_F(TestExpressionProxy, two_dimensional_dot_arg_indice_vector) {
 
     EXPECT_EQ(sum_1, expression_1.evaluate());
 
-    ASSERT_THROW(expression_proxy.dot({printemps::model_component::Range::All},
+    ASSERT_THROW(
+        expression_proxy.dot({model_component::Range::All}, sensitivities_0),
+        std::logic_error);
+    ASSERT_THROW(expression_proxy.dot(
+                     {model_component::Range::All, model_component::Range::All},
+                     sensitivities_01),
+                 std::logic_error);
+    ASSERT_THROW(expression_proxy.dot({model_component::Range::All, 0, 0},
                                       sensitivities_0),
                  std::logic_error);
-    ASSERT_THROW(expression_proxy.dot({printemps::model_component::Range::All,
-                                       printemps::model_component::Range::All},
-                                      sensitivities_01),
-                 std::logic_error);
-    ASSERT_THROW(
-        expression_proxy.dot({printemps::model_component::Range::All, 0, 0},
-                             sensitivities_0),
-        std::logic_error);
 }
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, two_dimensional_is_enabled) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", {2, 3});
     expression_proxy.disable();
     ASSERT_THROW(expression_proxy.is_enabled(), std::logic_error);
@@ -1759,21 +1708,21 @@ TEST_F(TestExpressionProxy, two_dimensional_disable) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, two_dimensional_operator_plus) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", {2, 3});
     ASSERT_THROW(auto expression = +expression_proxy, std::logic_error);
 }
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, two_dimensional_operator_minus) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", {2, 3});
     ASSERT_THROW(auto expression = -expression_proxy, std::logic_error);
 }
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, two_dimensional_operator_equal_arg_t_value) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", {2, 3});
     auto  value            = random_integer();
     ASSERT_THROW(expression_proxy = value, std::logic_error);
@@ -1782,7 +1731,7 @@ TEST_F(TestExpressionProxy, two_dimensional_operator_equal_arg_t_value) {
 /*****************************************************************************/
 TEST_F(TestExpressionProxy,
        two_dimensional_operator_equal_arg_t_expression_like) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& expression_proxy       = model.create_expressions("e", {2, 3});
     auto& variable_proxy         = model.create_variable("x");
     auto& expression_proxy_other = model.create_expression("y");
@@ -1800,17 +1749,17 @@ TEST_F(TestExpressionProxy,
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, two_dimensional_operator_equal_expression) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", {2, 3});
 
     auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
     ASSERT_THROW(expression_proxy = expression, std::logic_error);
 }
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, two_dimensional_operator_plus_equal_arg_t_value) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", {2, 3});
     auto  value            = random_integer();
     ASSERT_THROW(expression_proxy += value, std::logic_error);
@@ -1819,7 +1768,7 @@ TEST_F(TestExpressionProxy, two_dimensional_operator_plus_equal_arg_t_value) {
 /*****************************************************************************/
 TEST_F(TestExpressionProxy,
        two_dimensional_operator_plus_equal_arg_t_expression_like) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& expression_proxy       = model.create_expressions("e", {2, 3});
     auto& variable_proxy         = model.create_variable("x");
     auto& expression_proxy_other = model.create_expression("y");
@@ -1838,17 +1787,17 @@ TEST_F(TestExpressionProxy,
 /*****************************************************************************/
 TEST_F(TestExpressionProxy,
        two_dimensional_operator_plus_equal_arg_expression) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", {2, 3});
 
     auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
     ASSERT_THROW(expression_proxy += expression, std::logic_error);
 }
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, two_dimensional_operator_minus_equal_arg_t_value) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", {2, 3});
     auto  value            = random_integer();
     ASSERT_THROW(expression_proxy -= value, std::logic_error);
@@ -1857,7 +1806,7 @@ TEST_F(TestExpressionProxy, two_dimensional_operator_minus_equal_arg_t_value) {
 /*****************************************************************************/
 TEST_F(TestExpressionProxy,
        two_dimensional_operator_minus_equal_arg_t_expression_like) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& expression_proxy       = model.create_expressions("e", {2, 3});
     auto& variable_proxy         = model.create_variable("x");
     auto& expression_proxy_other = model.create_expression("y");
@@ -1876,18 +1825,18 @@ TEST_F(TestExpressionProxy,
 /*****************************************************************************/
 TEST_F(TestExpressionProxy,
        two_dimensional_operator_minus_equal_arg_expression) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", {2, 3});
 
     auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
     ASSERT_THROW(expression_proxy -= expression, std::logic_error);
 }
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy,
        two_dimensional_operator_product_equal_arg_t_value) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", {2, 3});
     auto  value            = random_integer();
     ASSERT_THROW(expression_proxy *= value, std::logic_error);
@@ -1895,7 +1844,7 @@ TEST_F(TestExpressionProxy,
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, two_dimensional_operator_divide_equal_arg_t_value) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", {2, 3});
     auto  value            = random_integer();
     ASSERT_THROW(expression_proxy /= value, std::logic_error);
@@ -1903,7 +1852,7 @@ TEST_F(TestExpressionProxy, two_dimensional_operator_divide_equal_arg_t_value) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, two_dimensional_operator_square_bracket) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& expression_proxy      = model.create_expressions("x", {2, 3});
     auto  value_0               = random_integer();
@@ -1916,7 +1865,7 @@ TEST_F(TestExpressionProxy, two_dimensional_operator_square_bracket) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, two_dimensional_operator_round_bracket) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& expression_proxy = model.create_expressions("x", {2, 3});
     auto  value_0          = random_integer();
@@ -1930,7 +1879,7 @@ TEST_F(TestExpressionProxy, two_dimensional_operator_round_bracket) {
 /*****************************************************************************/
 TEST_F(TestExpressionProxy,
        two_dimensional_operator_round_bracket_with_indices) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& expression_proxy   = model.create_expressions("x", {2, 3});
     auto  value_0            = random_integer();
@@ -1943,7 +1892,7 @@ TEST_F(TestExpressionProxy,
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, three_dimensional_create_instance) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& expression_proxy = model.create_expressions("e", {2, 3, 4});
 
@@ -1961,7 +1910,7 @@ TEST_F(TestExpressionProxy, three_dimensional_create_instance) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, three_dimensional_operator_round_bracket) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& expression_proxy    = model.create_expressions("e", {2, 3, 4});
     auto  value_0             = random_integer();
@@ -1975,7 +1924,7 @@ TEST_F(TestExpressionProxy, three_dimensional_operator_round_bracket) {
 /*****************************************************************************/
 TEST_F(TestExpressionProxy,
        three_dimensional_operator_round_bracket_with_indices) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& expression_proxy      = model.create_expressions("e", {2, 3, 4});
     auto  value_0               = random_integer();
@@ -1988,7 +1937,7 @@ TEST_F(TestExpressionProxy,
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, four_dimensional_create_instance) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& expression_proxy = model.create_expressions("e", {2, 3, 4, 5});
 
@@ -2008,7 +1957,7 @@ TEST_F(TestExpressionProxy, four_dimensional_create_instance) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, four_dimensional_operator_round_bracket) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& expression_proxy       = model.create_expressions("e", {2, 3, 4, 5});
     auto  value_0                = random_integer();
@@ -2022,7 +1971,7 @@ TEST_F(TestExpressionProxy, four_dimensional_operator_round_bracket) {
 /*****************************************************************************/
 TEST_F(TestExpressionProxy,
        four_dimensional_operator_round_bracket_with_indices) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& expression_proxy = model.create_expressions("e", {2, 3, 4, 5});
     auto  value_0          = random_integer();

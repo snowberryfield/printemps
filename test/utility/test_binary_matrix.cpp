@@ -9,6 +9,7 @@
 #include <printemps.h>
 
 namespace {
+using namespace printemps;
 /*****************************************************************************/
 class TestBinaryMatrix : public ::testing::Test {
    protected:
@@ -22,7 +23,7 @@ class TestBinaryMatrix : public ::testing::Test {
 
 /*****************************************************************************/
 TEST_F(TestBinaryMatrix, setup) {
-    printemps::utility::BinaryMatrix binary_matrix(10, 20);
+    utility::BinaryMatrix binary_matrix(10, 20);
 
     EXPECT_EQ(10, binary_matrix.number_of_rows());
     EXPECT_EQ(20, binary_matrix.number_of_columns());
@@ -31,7 +32,7 @@ TEST_F(TestBinaryMatrix, setup) {
 /*****************************************************************************/
 TEST_F(TestBinaryMatrix, inverse_and_rank) {
     {
-        printemps::utility::BinaryMatrix binary_matrix(3, 3);
+        utility::BinaryMatrix binary_matrix(3, 3);
 
         for (auto i = 0; i < 3; i++) {
             binary_matrix[i][i] = 1;
@@ -44,7 +45,7 @@ TEST_F(TestBinaryMatrix, inverse_and_rank) {
     }
 
     {
-        printemps::utility::BinaryMatrix binary_matrix(3, 3);
+        utility::BinaryMatrix binary_matrix(3, 3);
 
         for (auto i = 0; i < 3; i++) {
             binary_matrix[i][i] = 1;
@@ -60,7 +61,7 @@ TEST_F(TestBinaryMatrix, inverse_and_rank) {
     }
 
     {
-        printemps::utility::BinaryMatrix binary_matrix(3, 3);
+        utility::BinaryMatrix binary_matrix(3, 3);
 
         for (auto i = 0; i < 3; i++) {
             binary_matrix[i][i] = 1;
@@ -74,7 +75,7 @@ TEST_F(TestBinaryMatrix, inverse_and_rank) {
 
 /*****************************************************************************/
 TEST_F(TestBinaryMatrix, reachability) {
-    auto binary_matrix  = printemps::utility::BinaryMatrix::identity(4);
+    auto binary_matrix  = utility::BinaryMatrix::identity(4);
     binary_matrix[0][1] = 1;
     binary_matrix[1][2] = 1;
     binary_matrix[2][3] = 1;
@@ -90,7 +91,7 @@ TEST_F(TestBinaryMatrix, reachability) {
 /*****************************************************************************/
 TEST_F(TestBinaryMatrix, identity) {
     {
-        auto identity = printemps::utility::BinaryMatrix::identity(2);
+        auto identity = utility::BinaryMatrix::identity(2);
         EXPECT_EQ(2, identity.number_of_columns());
         EXPECT_EQ(2, identity.number_of_rows());
         EXPECT_EQ(1, identity[0][0]);
@@ -100,7 +101,7 @@ TEST_F(TestBinaryMatrix, identity) {
     }
 
     {
-        auto identity = printemps::utility::BinaryMatrix::identity(3);
+        auto identity = utility::BinaryMatrix::identity(3);
         EXPECT_EQ(3, identity.number_of_columns());
         EXPECT_EQ(3, identity.number_of_rows());
         EXPECT_EQ(1, identity[0][0]);

@@ -8,6 +8,7 @@
 #include <printemps.h>
 
 namespace {
+using namespace printemps;
 /*****************************************************************************/
 class TestKnapsack : public ::testing::Test {
    protected:
@@ -39,7 +40,7 @@ TEST_F(TestKnapsack, knapsack) {
     /*************************************************************************/
     /// Model object definition
     /*************************************************************************/
-    printemps::model::IPModel model;
+    model::IPModel model;
 
     /*************************************************************************/
     /// Decision variable definitions
@@ -75,12 +76,12 @@ TEST_F(TestKnapsack, knapsack) {
     }
 
     /// solve
-    printemps::option::Option option;
+    option::Option option;
 
-    auto result = printemps::solver::solve(&model, option);
+    auto result = solver::solve(&model, option);
     EXPECT_TRUE(result.solution.is_feasible());
 
-    ASSERT_THROW(printemps::solver::solve(&model, option), std::logic_error);
+    ASSERT_THROW(solver::solve(&model, option), std::logic_error);
 }
 }  // namespace
 /*****************************************************************************/

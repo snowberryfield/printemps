@@ -4,17 +4,16 @@
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
 #include <gtest/gtest.h>
-#include <random>
-
 #include <printemps.h>
 
 namespace {
+using namespace printemps;
 /*****************************************************************************/
 class TestConstraintProxy : public ::testing::Test {
    protected:
-    printemps::utility::UniformRandom<std::uniform_int_distribution<>, int>
+    utility::UniformRandom<std::uniform_int_distribution<>, int>
         m_random_integer;
-    printemps::utility::UniformRandom<std::uniform_int_distribution<>, int>
+    utility::UniformRandom<std::uniform_int_distribution<>, int>
         m_random_positive_integer;
 
     virtual void SetUp(void) {
@@ -35,8 +34,8 @@ class TestConstraintProxy : public ::testing::Test {
 
 /*****************************************************************************/
 TEST_F(TestConstraintProxy, scalar_create_instance) {
-    printemps::model::Model<int, double> model;
-    auto& constraint_proxy = model.create_constraint("c");
+    model::Model<int, double> model;
+    auto&                     constraint_proxy = model.create_constraint("c");
 
     /// Check the initial values of the base class members.
     EXPECT_EQ(0, constraint_proxy.index());
@@ -48,7 +47,7 @@ TEST_F(TestConstraintProxy, scalar_create_instance) {
 
 /*****************************************************************************/
 TEST_F(TestConstraintProxy, scalar_set_name) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& constraint_proxy = model.create_constraint("c");
     constraint_proxy.set_name("_c");
@@ -62,11 +61,10 @@ TEST_F(TestConstraintProxy, scalar_name) {
 
 /*****************************************************************************/
 TEST_F(TestConstraintProxy, scalar_flat_indexed_constraints_arg_void) {
-    printemps::model::Model<int, double> model;
-    auto& constraint_proxy = model.create_constraint("c");
+    model::Model<int, double> model;
+    auto&                     constraint_proxy = model.create_constraint("c");
 
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable = model_component::Variable<int, double>::create_instance();
 
     auto sensitivity = random_integer();
     auto target      = random_integer();
@@ -87,11 +85,10 @@ TEST_F(TestConstraintProxy, scalar_flat_indexed_constraints_arg_void) {
 
 /*****************************************************************************/
 TEST_F(TestConstraintProxy, scalar_flat_indexed_constraints_arg_int) {
-    printemps::model::Model<int, double> model;
-    auto& constraint_proxy = model.create_constraint("c");
+    model::Model<int, double> model;
+    auto&                     constraint_proxy = model.create_constraint("c");
 
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable = model_component::Variable<int, double>::create_instance();
 
     auto sensitivity = random_integer();
     auto target      = random_integer();
@@ -110,10 +107,10 @@ TEST_F(TestConstraintProxy, scalar_flat_indexed_constraints_arg_int) {
 
 /*****************************************************************************/
 TEST_F(TestConstraintProxy, scalar_constraint_value) {
-    printemps::model::Model<int, double> model;
-    auto& variable_proxy   = model.create_variable("x");
-    auto& expression_proxy = model.create_expression("e");
-    auto& constraint_proxy = model.create_constraint("c");
+    model::Model<int, double> model;
+    auto&                     variable_proxy   = model.create_variable("x");
+    auto&                     expression_proxy = model.create_expression("e");
+    auto&                     constraint_proxy = model.create_constraint("c");
 
     auto sensitivity = random_integer();
     auto constant    = random_integer();
@@ -142,11 +139,10 @@ TEST_F(TestConstraintProxy, scalar_violation_value) {
 
 /*****************************************************************************/
 TEST_F(TestConstraintProxy, scalar_export_values_and_names) {
-    printemps::model::Model<int, double> model;
-    auto& constraint_proxy = model.create_constraint("c");
+    model::Model<int, double> model;
+    auto&                     constraint_proxy = model.create_constraint("c");
 
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable = model_component::Variable<int, double>::create_instance();
 
     auto sensitivity = random_integer();
     auto target      = random_integer();
@@ -166,11 +162,10 @@ TEST_F(TestConstraintProxy, scalar_export_values_and_names) {
 
 /*****************************************************************************/
 TEST_F(TestConstraintProxy, scalar_export_violations_and_names) {
-    printemps::model::Model<int, double> model;
-    auto& constraint_proxy = model.create_constraint("c");
+    model::Model<int, double> model;
+    auto&                     constraint_proxy = model.create_constraint("c");
 
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable = model_component::Variable<int, double>::create_instance();
 
     auto sensitivity = random_integer();
     auto target      = random_integer();
@@ -190,8 +185,8 @@ TEST_F(TestConstraintProxy, scalar_export_violations_and_names) {
 
 /*****************************************************************************/
 TEST_F(TestConstraintProxy, scalar_is_enabled) {
-    printemps::model::Model<int, double> model;
-    auto& constraint_proxy = model.create_constraint("e");
+    model::Model<int, double> model;
+    auto&                     constraint_proxy = model.create_constraint("e");
     constraint_proxy.disable();
     EXPECT_FALSE(constraint_proxy.is_enabled());
 
@@ -214,10 +209,9 @@ TEST_F(TestConstraintProxy, scalar_disable) {
 
 /*****************************************************************************/
 TEST_F(TestConstraintProxy, scalar_operator_square_bracket) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto  variable = model_component::Variable<int, double>::create_instance();
     auto& constraint_proxy = model.create_constraint("c");
     auto  sensitivity      = random_integer();
 
@@ -229,10 +223,9 @@ TEST_F(TestConstraintProxy, scalar_operator_square_bracket) {
 
 /*****************************************************************************/
 TEST_F(TestConstraintProxy, scalar_operator_round_bracket) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto  variable = model_component::Variable<int, double>::create_instance();
     auto& constraint_proxy = model.create_constraint("c");
     auto  sensitivity      = random_integer();
 
@@ -244,10 +237,9 @@ TEST_F(TestConstraintProxy, scalar_operator_round_bracket) {
 
 /*****************************************************************************/
 TEST_F(TestConstraintProxy, scalar_operator_round_bracket_with_indices) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto  variable = model_component::Variable<int, double>::create_instance();
     auto& constraint_proxy = model.create_constraint("c");
     auto  sensitivity      = random_integer();
 
@@ -259,11 +251,10 @@ TEST_F(TestConstraintProxy, scalar_operator_round_bracket_with_indices) {
 
 /*****************************************************************************/
 TEST_F(TestConstraintProxy, scalar_operator_equal_arg_constraint) {
-    printemps::model::Model<int, double> model;
-    auto& constraint_proxy = model.create_constraint("c");
+    model::Model<int, double> model;
+    auto&                     constraint_proxy = model.create_constraint("c");
 
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable = model_component::Variable<int, double>::create_instance();
 
     auto sensitivity = random_integer();
     auto target      = random_integer();
@@ -281,7 +272,7 @@ TEST_F(TestConstraintProxy, scalar_operator_equal_arg_constraint) {
 
 /*****************************************************************************/
 TEST_F(TestConstraintProxy, one_dimensional_create_instance) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& expression_proxy = model.create_expressions("e", 2);
 
@@ -295,7 +286,7 @@ TEST_F(TestConstraintProxy, one_dimensional_create_instance) {
 
 /*****************************************************************************/
 TEST_F(TestConstraintProxy, one_dimensional_set_name) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& constraint_proxy = model.create_constraints("c", 2);
 
@@ -310,11 +301,10 @@ TEST_F(TestConstraintProxy, one_dimensional_name) {
 
 /*****************************************************************************/
 TEST_F(TestConstraintProxy, one_dimensional_flat_indexed_constraints_arg_void) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& constraint_proxy = model.create_constraints("c", 2);
 
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable = model_component::Variable<int, double>::create_instance();
 
     auto sensitivity = random_integer();
     auto target      = random_integer();
@@ -344,11 +334,10 @@ TEST_F(TestConstraintProxy, one_dimensional_flat_indexed_constraints_arg_void) {
 
 /*****************************************************************************/
 TEST_F(TestConstraintProxy, one_dimensional_flat_indexed_constraints_arg_int) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& constraint_proxy = model.create_constraints("c", 2);
 
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable = model_component::Variable<int, double>::create_instance();
 
     auto sensitivity = random_integer();
     auto target      = random_integer();
@@ -378,7 +367,7 @@ TEST_F(TestConstraintProxy, one_dimensional_flat_indexed_constraints_arg_int) {
 
 /*****************************************************************************/
 TEST_F(TestConstraintProxy, one_dimensional_constraint_value) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& constraint_proxy = model.create_constraints("c", 2);
 
     ASSERT_THROW(constraint_proxy.constraint_value(), std::logic_error);
@@ -392,11 +381,10 @@ TEST_F(TestConstraintProxy, one_dimensional_violation_value) {
 
 /*****************************************************************************/
 TEST_F(TestConstraintProxy, one_dimensional_export_values_and_names) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& constraint_proxy = model.create_constraints("c", 2);
 
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable = model_component::Variable<int, double>::create_instance();
 
     auto sensitivity = random_integer();
     auto target      = random_integer();
@@ -426,11 +414,10 @@ TEST_F(TestConstraintProxy, one_dimensional_export_values_and_names) {
 
 /*****************************************************************************/
 TEST_F(TestConstraintProxy, one_dimensional_export_violations_and_names) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& constraint_proxy = model.create_constraints("c", 2);
 
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable = model_component::Variable<int, double>::create_instance();
 
     auto sensitivity = random_integer();
     auto target      = random_integer();
@@ -460,7 +447,7 @@ TEST_F(TestConstraintProxy, one_dimensional_export_violations_and_names) {
 
 /*****************************************************************************/
 TEST_F(TestConstraintProxy, one_dimensional_is_enabled) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& constraint_proxy = model.create_constraints("e", 2);
     constraint_proxy.disable();
     ASSERT_THROW(constraint_proxy.is_enabled(), std::logic_error);
@@ -490,10 +477,9 @@ TEST_F(TestConstraintProxy, one_dimensional_disable) {
 
 /*****************************************************************************/
 TEST_F(TestConstraintProxy, one_dimensional_operator_square_bracket) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto  variable = model_component::Variable<int, double>::create_instance();
     auto& constraint_proxy = model.create_constraints("c", 2);
     auto  sensitivity_0    = random_integer();
     auto  sensitivity_1    = random_integer();
@@ -508,10 +494,9 @@ TEST_F(TestConstraintProxy, one_dimensional_operator_square_bracket) {
 
 /*****************************************************************************/
 TEST_F(TestConstraintProxy, one_dimensional_operator_round_bracket) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto  variable = model_component::Variable<int, double>::create_instance();
     auto& constraint_proxy = model.create_constraints("c", 2);
     auto  sensitivity_0    = random_integer();
     auto  sensitivity_1    = random_integer();
@@ -527,10 +512,9 @@ TEST_F(TestConstraintProxy, one_dimensional_operator_round_bracket) {
 /*****************************************************************************/
 TEST_F(TestConstraintProxy,
        one_dimensional_operator_round_bracket_with_indices) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto  variable = model_component::Variable<int, double>::create_instance();
     auto& constraint_proxy = model.create_constraints("c", 2);
     auto  sensitivity_0    = random_integer();
     auto  sensitivity_1    = random_integer();
@@ -545,11 +529,10 @@ TEST_F(TestConstraintProxy,
 
 /*****************************************************************************/
 TEST_F(TestConstraintProxy, one_dimensional_operator_equal_arg_constraint) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& constraint_proxy = model.create_constraints("c", 2);
 
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable = model_component::Variable<int, double>::create_instance();
 
     auto sensitivity = random_integer();
     auto target      = random_integer();
@@ -559,7 +542,7 @@ TEST_F(TestConstraintProxy, one_dimensional_operator_equal_arg_constraint) {
 
 /*****************************************************************************/
 TEST_F(TestConstraintProxy, two_dimensional_create_instance) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& expression_proxy = model.create_expressions("e", {2, 3});
 
@@ -575,7 +558,7 @@ TEST_F(TestConstraintProxy, two_dimensional_create_instance) {
 
 /*****************************************************************************/
 TEST_F(TestConstraintProxy, two_dimensional_set_name) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& constraint_proxy = model.create_constraints("c", {2, 3});
 
@@ -590,11 +573,10 @@ TEST_F(TestConstraintProxy, two_dimensional_name) {
 
 /*****************************************************************************/
 TEST_F(TestConstraintProxy, two_dimensional_flat_indexed_constraints_arg_void) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& constraint_proxy = model.create_constraints("c", {2, 3});
 
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable = model_component::Variable<int, double>::create_instance();
 
     auto sensitivity = random_integer();
     auto target      = random_integer();
@@ -626,11 +608,10 @@ TEST_F(TestConstraintProxy, two_dimensional_flat_indexed_constraints_arg_void) {
 
 /*****************************************************************************/
 TEST_F(TestConstraintProxy, two_dimensional_flat_indexed_constraints_arg_int) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& constraint_proxy = model.create_constraints("c", {2, 3});
 
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable = model_component::Variable<int, double>::create_instance();
 
     auto sensitivity = random_integer();
     auto target      = random_integer();
@@ -661,7 +642,7 @@ TEST_F(TestConstraintProxy, two_dimensional_flat_indexed_constraints_arg_int) {
 
 /*****************************************************************************/
 TEST_F(TestConstraintProxy, two_dimensional_constraint_value) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& constraint_proxy = model.create_constraints("c", {2, 3});
 
     ASSERT_THROW(constraint_proxy.constraint_value(), std::logic_error);
@@ -675,11 +656,10 @@ TEST_F(TestConstraintProxy, two_dimensional_violation_value) {
 
 /*****************************************************************************/
 TEST_F(TestConstraintProxy, two_dimensional_export_values_and_names) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& constraint_proxy = model.create_constraints("c", {2, 3});
 
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable = model_component::Variable<int, double>::create_instance();
 
     auto sensitivity = random_integer();
     auto target      = random_integer();
@@ -709,11 +689,10 @@ TEST_F(TestConstraintProxy, two_dimensional_export_values_and_names) {
 
 /*****************************************************************************/
 TEST_F(TestConstraintProxy, two_dimensional_export_violations_and_names) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& constraint_proxy = model.create_constraints("c", {2, 3});
 
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable = model_component::Variable<int, double>::create_instance();
 
     auto sensitivity = random_integer();
     auto target      = random_integer();
@@ -743,7 +722,7 @@ TEST_F(TestConstraintProxy, two_dimensional_export_violations_and_names) {
 
 /*****************************************************************************/
 TEST_F(TestConstraintProxy, two_dimensional_is_enabled) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& constraint_proxy = model.create_constraints("c", {2, 3});
     constraint_proxy.disable();
     ASSERT_THROW(constraint_proxy.is_enabled(), std::logic_error);
@@ -773,10 +752,9 @@ TEST_F(TestConstraintProxy, two_dimensional_disable) {
 
 /*****************************************************************************/
 TEST_F(TestConstraintProxy, two_dimensional_operator_square_bracket) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto  variable = model_component::Variable<int, double>::create_instance();
     auto& constraint_proxy      = model.create_constraints("c", {2, 3});
     auto  sensitivity_0         = random_integer();
     auto  sensitivity_1         = random_integer();
@@ -791,10 +769,9 @@ TEST_F(TestConstraintProxy, two_dimensional_operator_square_bracket) {
 
 /*****************************************************************************/
 TEST_F(TestConstraintProxy, two_dimensional_operator_round_bracket) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto  variable = model_component::Variable<int, double>::create_instance();
     auto& constraint_proxy = model.create_constraints("c", {2, 3});
     auto  sensitivity_0    = random_integer();
     auto  sensitivity_1    = random_integer();
@@ -812,10 +789,9 @@ TEST_F(TestConstraintProxy, two_dimensional_operator_round_bracket) {
 /*****************************************************************************/
 TEST_F(TestConstraintProxy,
        two_dimensional_operator_round_bracket_with_indices) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto  variable = model_component::Variable<int, double>::create_instance();
     auto& constraint_proxy = model.create_constraints("c", {2, 3});
     auto  sensitivity_0    = random_integer();
     auto  sensitivity_1    = random_integer();
@@ -832,11 +808,10 @@ TEST_F(TestConstraintProxy,
 
 /*****************************************************************************/
 TEST_F(TestConstraintProxy, two_dimensional_operator_equal_arg_constraint) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& constraint_proxy = model.create_constraints("c", {2, 3});
 
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable = model_component::Variable<int, double>::create_instance();
 
     auto sensitivity = random_integer();
     auto target      = random_integer();
@@ -846,7 +821,7 @@ TEST_F(TestConstraintProxy, two_dimensional_operator_equal_arg_constraint) {
 
 /*****************************************************************************/
 TEST_F(TestConstraintProxy, three_dimensional_create_instance) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& constraint_proxy = model.create_constraints("c", {2, 3, 4});
 
@@ -864,10 +839,9 @@ TEST_F(TestConstraintProxy, three_dimensional_create_instance) {
 
 /*****************************************************************************/
 TEST_F(TestConstraintProxy, three_dimensional_operator_round_bracket) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto  variable = model_component::Variable<int, double>::create_instance();
     auto& constraint_proxy = model.create_constraints("c", {2, 3, 4});
     auto  sensitivity_0    = random_integer();
     auto  sensitivity_1    = random_integer();
@@ -885,10 +859,9 @@ TEST_F(TestConstraintProxy, three_dimensional_operator_round_bracket) {
 /*****************************************************************************/
 TEST_F(TestConstraintProxy,
        three_dimensional_operator_round_bracket_with_indices) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto  variable = model_component::Variable<int, double>::create_instance();
     auto& constraint_proxy = model.create_constraints("c", {2, 3, 4});
     auto  sensitivity_0    = random_integer();
     auto  sensitivity_1    = random_integer();
@@ -905,7 +878,7 @@ TEST_F(TestConstraintProxy,
 
 /*****************************************************************************/
 TEST_F(TestConstraintProxy, four_dimensional_create_instance) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& constraint_proxy = model.create_constraints("c", {2, 3, 4, 5});
 
@@ -925,10 +898,9 @@ TEST_F(TestConstraintProxy, four_dimensional_create_instance) {
 
 /*****************************************************************************/
 TEST_F(TestConstraintProxy, four_dimensional_operator_round_bracket) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto  variable = model_component::Variable<int, double>::create_instance();
     auto& constraint_proxy = model.create_constraints("c", {2, 3, 4, 5});
     auto  sensitivity_0    = random_integer();
     auto  sensitivity_1    = random_integer();
@@ -948,10 +920,9 @@ TEST_F(TestConstraintProxy, four_dimensional_operator_round_bracket) {
 /*****************************************************************************/
 TEST_F(TestConstraintProxy,
        four_dimensional_operator_round_bracket_with_indices) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto  variable = model_component::Variable<int, double>::create_instance();
     auto& constraint_proxy = model.create_constraints("c", {2, 3, 4, 5});
     auto  sensitivity_0    = random_integer();
     auto  sensitivity_1    = random_integer();

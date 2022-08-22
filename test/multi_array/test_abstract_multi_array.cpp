@@ -4,11 +4,10 @@
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
 #include <gtest/gtest.h>
-#include <random>
-
 #include <printemps.h>
 
 namespace {
+using namespace printemps;
 /*****************************************************************************/
 class TestAbstractMultiArray : public ::testing::Test {
    protected:
@@ -25,8 +24,8 @@ TEST_F(TestAbstractMultiArray, scalar_create_instance) {
     /**
      * The VariableProxy class inherits the TestAbstractMultiArray class.
      */
-    printemps::model::Model<int, double> model;
-    auto& variable_proxy = model.create_variable("x");
+    model::Model<int, double> model;
+    auto&                     variable_proxy = model.create_variable("x");
     EXPECT_EQ(0, variable_proxy.index());
     EXPECT_EQ(1, variable_proxy.shape()[0]);
     EXPECT_EQ(1, variable_proxy.strides()[0]);
@@ -36,7 +35,7 @@ TEST_F(TestAbstractMultiArray, scalar_create_instance) {
 
 /*****************************************************************************/
 TEST_F(TestAbstractMultiArray, one_dimensional_create_instance) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", 2);
     EXPECT_EQ(0, variable_proxy.index());
@@ -48,7 +47,7 @@ TEST_F(TestAbstractMultiArray, one_dimensional_create_instance) {
 
 /*****************************************************************************/
 TEST_F(TestAbstractMultiArray, two_dimensional_create_instance) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& variable_proxy = model.create_variables("x", {2, 3});
     EXPECT_EQ(0, variable_proxy.index());
     EXPECT_EQ(2, variable_proxy.shape()[0]);
@@ -61,7 +60,7 @@ TEST_F(TestAbstractMultiArray, two_dimensional_create_instance) {
 
 /*****************************************************************************/
 TEST_F(TestAbstractMultiArray, three_dimensional_create_instance) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& variable_proxy = model.create_variables("x", {2, 3, 4});
     EXPECT_EQ(0, variable_proxy.index());
     EXPECT_EQ(2, variable_proxy.shape()[0]);
@@ -76,7 +75,7 @@ TEST_F(TestAbstractMultiArray, three_dimensional_create_instance) {
 
 /*****************************************************************************/
 TEST_F(TestAbstractMultiArray, four_dimensional_create_instance) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& variable_proxy = model.create_variables("x", {2, 3, 4, 5});
     EXPECT_EQ(0, variable_proxy.index());
     EXPECT_EQ(2, variable_proxy.shape()[0]);

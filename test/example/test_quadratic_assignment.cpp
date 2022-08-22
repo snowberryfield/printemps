@@ -4,10 +4,10 @@
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
 #include <gtest/gtest.h>
-#include <random>
 #include <printemps.h>
 
 namespace {
+using namespace printemps;
 /*****************************************************************************/
 class TestQuadracitAssignment : public ::testing::Test {
    protected:
@@ -64,7 +64,7 @@ TEST_F(TestQuadracitAssignment, quadratic_assignment) {
     /*************************************************************************/
     /// Model object definition
     /*************************************************************************/
-    printemps::model::IPModel model;
+    model::IPModel model;
 
     /*************************************************************************/
     /// Decision variable definitions
@@ -74,8 +74,8 @@ TEST_F(TestQuadracitAssignment, quadratic_assignment) {
     /*************************************************************************/
     /// Objective function definition
     /*************************************************************************/
-    std::function<double(const printemps::neighborhood::IPMove&)> f =
-        [&qap, &p](const printemps::neighborhood::IPMove& a_MOVE) {
+    std::function<double(const neighborhood::IPMove&)> f =
+        [&qap, &p](const neighborhood::IPMove& a_MOVE) {
             double f = 0.0;
 
             std::vector<int> p_values(qap.N);
@@ -94,47 +94,45 @@ TEST_F(TestQuadracitAssignment, quadratic_assignment) {
     /*************************************************************************/
     /// Neighborhood definition
     /*************************************************************************/
-    std::function<void(std::vector<printemps::neighborhood::IPMove>*)>
-        move_updater =
-            [&qap,
-             &p](std::vector<printemps::neighborhood::IPMove>* a_moves_ptr) {
-                a_moves_ptr->resize(qap.N * (qap.N - 1) / 2 +
-                                    qap.N * (qap.N - 1) * (qap.N - 2) / 3);
-                auto count = 0;
-                for (auto n = 0; n < qap.N; n++) {
-                    for (auto m = n + 1; m < qap.N; m++) {
+    std::function<void(std::vector<neighborhood::IPMove>*)> move_updater =
+        [&qap, &p](std::vector<neighborhood::IPMove>* a_moves_ptr) {
+            a_moves_ptr->resize(qap.N * (qap.N - 1) / 2 +
+                                qap.N * (qap.N - 1) * (qap.N - 2) / 3);
+            auto count = 0;
+            for (auto n = 0; n < qap.N; n++) {
+                for (auto m = n + 1; m < qap.N; m++) {
+                    (*a_moves_ptr)[count].alterations.clear();
+                    (*a_moves_ptr)[count].alterations.emplace_back(
+                        &p(n), p(m).value());
+                    (*a_moves_ptr)[count].alterations.emplace_back(
+                        &p(m), p(n).value());
+                    count++;
+                }
+            }
+            for (auto n = 0; n < qap.N; n++) {
+                for (auto m = n + 1; m < qap.N; m++) {
+                    for (auto k = m + 1; k < qap.N; k++) {
                         (*a_moves_ptr)[count].alterations.clear();
                         (*a_moves_ptr)[count].alterations.emplace_back(
                             &p(n), p(m).value());
                         (*a_moves_ptr)[count].alterations.emplace_back(
+                            &p(m), p(k).value());
+                        (*a_moves_ptr)[count].alterations.emplace_back(
+                            &p(k), p(n).value());
+                        count++;
+
+                        (*a_moves_ptr)[count].alterations.clear();
+                        (*a_moves_ptr)[count].alterations.emplace_back(
+                            &p(n), p(k).value());
+                        (*a_moves_ptr)[count].alterations.emplace_back(
                             &p(m), p(n).value());
+                        (*a_moves_ptr)[count].alterations.emplace_back(
+                            &p(k), p(m).value());
                         count++;
                     }
                 }
-                for (auto n = 0; n < qap.N; n++) {
-                    for (auto m = n + 1; m < qap.N; m++) {
-                        for (auto k = m + 1; k < qap.N; k++) {
-                            (*a_moves_ptr)[count].alterations.clear();
-                            (*a_moves_ptr)[count].alterations.emplace_back(
-                                &p(n), p(m).value());
-                            (*a_moves_ptr)[count].alterations.emplace_back(
-                                &p(m), p(k).value());
-                            (*a_moves_ptr)[count].alterations.emplace_back(
-                                &p(k), p(n).value());
-                            count++;
-
-                            (*a_moves_ptr)[count].alterations.clear();
-                            (*a_moves_ptr)[count].alterations.emplace_back(
-                                &p(n), p(k).value());
-                            (*a_moves_ptr)[count].alterations.emplace_back(
-                                &p(m), p(n).value());
-                            (*a_moves_ptr)[count].alterations.emplace_back(
-                                &p(k), p(m).value());
-                            count++;
-                        }
-                    }
-                }
-            };
+            }
+        };
     model.neighborhood().user_defined().set_move_updater(move_updater);
 
     /// initial solution
@@ -142,17 +140,17 @@ TEST_F(TestQuadracitAssignment, quadratic_assignment) {
         p(n) = n;
     }
     /// solve
-    printemps::option::Option option;
+    option::Option option;
     option.neighborhood.is_enabled_binary_move       = false;
     option.neighborhood.is_enabled_integer_move      = false;
     option.neighborhood.is_enabled_user_defined_move = true;
     option.neighborhood.improvability_screening_mode =
-        printemps::option::improvability_screening_mode::Off;
+        option::improvability_screening_mode::Off;
 
-    auto result = printemps::solver::solve(&model, option);
+    auto result = solver::solve(&model, option);
     EXPECT_TRUE(result.solution.is_feasible());
 
-    ASSERT_THROW(printemps::solver::solve(&model, option), std::logic_error);
+    ASSERT_THROW(solver::solve(&model, option), std::logic_error);
 }
 }  // namespace
 /*****************************************************************************/

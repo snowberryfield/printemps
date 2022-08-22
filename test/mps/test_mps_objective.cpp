@@ -4,13 +4,12 @@
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
 #include <gtest/gtest.h>
-#include <random>
-
 #include <printemps.h>
 
 namespace {
+using namespace printemps;
 /*****************************************************************************/
-class TestTabuMode : public ::testing::Test {
+class TestMPSObjective : public ::testing::Test {
    protected:
     virtual void SetUp(void) {
         /// nothing to do
@@ -21,18 +20,13 @@ class TestTabuMode : public ::testing::Test {
 };
 
 /*****************************************************************************/
-TEST_F(TestTabuMode, TabuModeMap) {
-    using namespace printemps::option::tabu_mode;
-    EXPECT_EQ(All, TabuModeMap.at("All"));
-    EXPECT_EQ(Any, TabuModeMap.at("Any"));
+TEST_F(TestMPSObjective, initialize) {
+    mps::MPSObjective objective;
+    EXPECT_EQ(mps::MPSObjectiveSense::Minimize, objective.sense);
+    EXPECT_EQ("", objective.name);
+    EXPECT_TRUE(objective.sensitivities.empty());
 }
 
-/*****************************************************************************/
-TEST_F(TestTabuMode, TabuModeInverseMap) {
-    using namespace printemps::option::tabu_mode;
-    EXPECT_EQ("All", TabuModeInverseMap.at(All));
-    EXPECT_EQ("Any", TabuModeInverseMap.at(Any));
-}
 }  // namespace
 /*****************************************************************************/
 // END

@@ -1,9 +1,9 @@
 
-file(GLOB TEST_MODEL_SOURCE ${TOP_DIR}/test/option/*.cpp)
+file(GLOB TEST_SOURCE ${TOP_DIR}/test/option/*.cpp)
 
 add_executable(
     test_option
-    ${TEST_MODEL_SOURCE}
+    ${TEST_SOURCE}
 )
 
 target_include_directories(

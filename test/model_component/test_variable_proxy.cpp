@@ -4,17 +4,16 @@
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
 #include <gtest/gtest.h>
-#include <random>
-
 #include <printemps.h>
 
 namespace {
+using namespace printemps;
 /*****************************************************************************/
 class TestVariableProxy : public ::testing::Test {
    protected:
-    printemps::utility::UniformRandom<std::uniform_int_distribution<>, int>
+    utility::UniformRandom<std::uniform_int_distribution<>, int>
         m_random_integer;
-    printemps::utility::UniformRandom<std::uniform_int_distribution<>, int>
+    utility::UniformRandom<std::uniform_int_distribution<>, int>
         m_random_positive_integer;
 
     virtual void SetUp(void) {
@@ -35,8 +34,8 @@ class TestVariableProxy : public ::testing::Test {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, scalar_create_instance) {
-    printemps::model::Model<int, double> model;
-    auto& variable_proxy = model.create_variable("x");
+    model::Model<int, double> model;
+    auto&                     variable_proxy = model.create_variable("x");
 
     /// Check the initial values of the base class members.
     EXPECT_EQ(0, variable_proxy.index());
@@ -48,7 +47,7 @@ TEST_F(TestVariableProxy, scalar_create_instance) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, scalar_value) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variable("x");
     auto  value          = random_integer();
@@ -58,7 +57,7 @@ TEST_F(TestVariableProxy, scalar_value) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, scalar_set_value) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variable("x");
     auto  value          = random_integer();
@@ -68,8 +67,8 @@ TEST_F(TestVariableProxy, scalar_set_value) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, scalar_evaluate_arg_void) {
-    printemps::model::Model<int, double> model;
-    auto& variable_proxy = model.create_variable("x");
+    model::Model<int, double> model;
+    auto&                     variable_proxy = model.create_variable("x");
 
     auto value     = random_integer();
     variable_proxy = value;
@@ -78,9 +77,9 @@ TEST_F(TestVariableProxy, scalar_evaluate_arg_void) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, scalar_evaluate_arg_move) {
-    printemps::model::Model<int, double> model;
-    auto& variable_proxy_0 = model.create_variable("x_0");
-    auto& variable_proxy_1 = model.create_variable("x_1");
+    model::Model<int, double> model;
+    auto&                     variable_proxy_0 = model.create_variable("x_0");
+    auto&                     variable_proxy_1 = model.create_variable("x_1");
 
     auto value_0_before = random_integer();
     auto value_1_before = random_integer();
@@ -90,8 +89,8 @@ TEST_F(TestVariableProxy, scalar_evaluate_arg_move) {
     variable_proxy_0 = value_0_before;
     variable_proxy_1 = value_1_before;
 
-    printemps::neighborhood::Move<int, double> move_0;
-    printemps::neighborhood::Move<int, double> move_1;
+    neighborhood::Move<int, double> move_0;
+    neighborhood::Move<int, double> move_1;
     move_0.alterations.emplace_back(&variable_proxy_0[0], value_0_after);
     move_1.alterations.emplace_back(&variable_proxy_1[0], value_1_after);
 
@@ -103,7 +102,7 @@ TEST_F(TestVariableProxy, scalar_evaluate_arg_move) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, scalar_fix) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variable("x");
     variable_proxy.fix();
@@ -112,7 +111,7 @@ TEST_F(TestVariableProxy, scalar_fix) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, scalar_is_fixed) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variable("x");
     variable_proxy.unfix();
@@ -121,7 +120,7 @@ TEST_F(TestVariableProxy, scalar_is_fixed) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, scalar_unfix) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variable("x");
     variable_proxy.fix();
@@ -132,7 +131,7 @@ TEST_F(TestVariableProxy, scalar_unfix) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, scalar_fix_by) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variable("x");
     auto  value          = random_integer();
@@ -144,31 +143,31 @@ TEST_F(TestVariableProxy, scalar_fix_by) {
 /*****************************************************************************/
 TEST_F(TestVariableProxy, scalar_sense) {
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
 
         auto& variable_proxy = model.create_variable("x");
-        EXPECT_EQ(printemps::model_component::VariableSense::Integer,
+        EXPECT_EQ(model_component::VariableSense::Integer,
                   variable_proxy.sense());
     }
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
 
         auto& variable_proxy = model.create_variable("x", 0, 1);
-        EXPECT_EQ(printemps::model_component::VariableSense::Binary,
+        EXPECT_EQ(model_component::VariableSense::Binary,
                   variable_proxy.sense());
     }
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
 
         auto& variable_proxy = model.create_variable("x", 0, 10);
-        EXPECT_EQ(printemps::model_component::VariableSense::Integer,
+        EXPECT_EQ(model_component::VariableSense::Integer,
                   variable_proxy.sense());
     }
 }
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, scaler_set_bound) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variable("x");
 
@@ -202,7 +201,7 @@ TEST_F(TestVariableProxy, scaler_has_bounds) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, scalar_set_name) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variable("x");
     variable_proxy.set_name("_x");
@@ -216,7 +215,7 @@ TEST_F(TestVariableProxy, scalar_name) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, scalar_flat_indexed_variables_arg_void) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy                       = model.create_variable("x");
     auto  value                                = random_integer();
@@ -226,7 +225,7 @@ TEST_F(TestVariableProxy, scalar_flat_indexed_variables_arg_void) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, scalar_flat_indexed_variables_arg_int) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy                     = model.create_variable("x");
     auto  value                              = random_integer();
@@ -236,7 +235,7 @@ TEST_F(TestVariableProxy, scalar_flat_indexed_variables_arg_int) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, scalar_export_values) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variable("x");
     auto  value          = random_integer();
@@ -246,7 +245,7 @@ TEST_F(TestVariableProxy, scalar_export_values) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, scalar_to_expression) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variable("x");
     EXPECT_EQ(1, variable_proxy.to_expression().sensitivities().at(
@@ -255,11 +254,11 @@ TEST_F(TestVariableProxy, scalar_to_expression) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, scalar_sum_arg_void) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variable("x");
     auto  expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
     expression = variable_proxy.sum();
 
     for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
@@ -272,12 +271,12 @@ TEST_F(TestVariableProxy, scalar_sum_arg_void) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, scalar_sum_arg_indices) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variable("x");
     auto  expression =
-        printemps::model_component::Expression<int, double>::create_instance();
-    expression = variable_proxy.sum({printemps::model_component::Range::All});
+        model_component::Expression<int, double>::create_instance();
+    expression = variable_proxy.sum({model_component::Range::All});
 
     for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
         variable_proxy[i] = 1;
@@ -286,14 +285,13 @@ TEST_F(TestVariableProxy, scalar_sum_arg_indices) {
     EXPECT_EQ(1, expression.sensitivities().at(&(variable_proxy[0])));
     EXPECT_EQ(1, expression.evaluate());
 
-    ASSERT_THROW(
-        variable_proxy.sum({printemps::model_component::Range::All, 0}),
-        std::logic_error);
+    ASSERT_THROW(variable_proxy.sum({model_component::Range::All, 0}),
+                 std::logic_error);
 }
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, scalar_dot_arg_vector) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variable("x");
 
@@ -301,7 +299,7 @@ TEST_F(TestVariableProxy, scalar_dot_arg_vector) {
     sensitivities.push_back(random_integer());
 
     auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
     expression = variable_proxy.dot(sensitivities);
 
     for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
@@ -315,7 +313,7 @@ TEST_F(TestVariableProxy, scalar_dot_arg_vector) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, scalar_dot_arg_indice_vector) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variable("x");
 
@@ -323,9 +321,9 @@ TEST_F(TestVariableProxy, scalar_dot_arg_indice_vector) {
     sensitivities.push_back(random_integer());
 
     auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
-    expression = variable_proxy.dot({printemps::model_component::Range::All},
-                                    sensitivities);
+        model_component::Expression<int, double>::create_instance();
+    expression =
+        variable_proxy.dot({model_component::Range::All}, sensitivities);
 
     for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
         variable_proxy[i] = 1;
@@ -335,49 +333,46 @@ TEST_F(TestVariableProxy, scalar_dot_arg_indice_vector) {
               expression.sensitivities().at(&(variable_proxy[0])));
     EXPECT_EQ(sensitivities[0], expression.evaluate());
 
-    ASSERT_THROW(variable_proxy.dot({0, printemps::model_component::Range::All},
-                                    sensitivities),
-                 std::logic_error);
-}
-
-/*****************************************************************************/
-TEST_F(TestVariableProxy, scalar_selection_arg_void) {
-    printemps::model::Model<int, double> model;
-
-    auto& variable_proxy = model.create_variable("x");
-    auto  constraint =
-        printemps::model_component::Constraint<int, double>::create_instance();
-
-    constraint = variable_proxy.selection();
-
-    EXPECT_EQ(1,
-              constraint.expression().sensitivities().at(&(variable_proxy[0])));
-    EXPECT_EQ(printemps::model_component::ConstraintSense::Equal,
-              constraint.sense());
-}
-
-/*****************************************************************************/
-TEST_F(TestVariableProxy, scalar_selection_arg_indices) {
-    printemps::model::Model<int, double> model;
-
-    auto& variable_proxy = model.create_variable("x");
-    auto  constraint =
-        printemps::model_component::Constraint<int, double>::create_instance();
-
-    constraint = variable_proxy.selection();
-
-    EXPECT_EQ(1,
-              constraint.expression().sensitivities().at(&(variable_proxy[0])));
-    EXPECT_EQ(printemps::model_component::ConstraintSense::Equal,
-              constraint.sense());
     ASSERT_THROW(
-        variable_proxy.selection({printemps::model_component::Range::All, 0}),
+        variable_proxy.dot({0, model_component::Range::All}, sensitivities),
         std::logic_error);
 }
 
 /*****************************************************************************/
+TEST_F(TestVariableProxy, scalar_selection_arg_void) {
+    model::Model<int, double> model;
+
+    auto& variable_proxy = model.create_variable("x");
+    auto  constraint =
+        model_component::Constraint<int, double>::create_instance();
+
+    constraint = variable_proxy.selection();
+
+    EXPECT_EQ(1,
+              constraint.expression().sensitivities().at(&(variable_proxy[0])));
+    EXPECT_EQ(model_component::ConstraintSense::Equal, constraint.sense());
+}
+
+/*****************************************************************************/
+TEST_F(TestVariableProxy, scalar_selection_arg_indices) {
+    model::Model<int, double> model;
+
+    auto& variable_proxy = model.create_variable("x");
+    auto  constraint =
+        model_component::Constraint<int, double>::create_instance();
+
+    constraint = variable_proxy.selection();
+
+    EXPECT_EQ(1,
+              constraint.expression().sensitivities().at(&(variable_proxy[0])));
+    EXPECT_EQ(model_component::ConstraintSense::Equal, constraint.sense());
+    ASSERT_THROW(variable_proxy.selection({model_component::Range::All, 0}),
+                 std::logic_error);
+}
+
+/*****************************************************************************/
 TEST_F(TestVariableProxy, scalar_operator_plus) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variable("x");
     EXPECT_EQ(1, (+variable_proxy).sensitivities().at(&(variable_proxy[0])));
@@ -385,7 +380,7 @@ TEST_F(TestVariableProxy, scalar_operator_plus) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, scalar_operator_minus) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variable("x");
     EXPECT_EQ(-1, (-variable_proxy).sensitivities().at(&(variable_proxy[0])));
@@ -393,7 +388,7 @@ TEST_F(TestVariableProxy, scalar_operator_minus) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, scalar_operator_equal_arg_t_variable) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variable("x");
     auto  value          = random_integer();
@@ -404,7 +399,7 @@ TEST_F(TestVariableProxy, scalar_operator_equal_arg_t_variable) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, scalar_operator_square_bracket) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variable("x");
     auto  value          = random_integer();
@@ -414,7 +409,7 @@ TEST_F(TestVariableProxy, scalar_operator_square_bracket) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, scalar_operator_round_bracket) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variable("x");
     auto  value          = random_integer();
@@ -424,7 +419,7 @@ TEST_F(TestVariableProxy, scalar_operator_round_bracket) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, scalar_operator_round_bracket_with_indices) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variable("x");
     auto  value          = random_integer();
@@ -434,7 +429,7 @@ TEST_F(TestVariableProxy, scalar_operator_round_bracket_with_indices) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, one_dimensional_create_instance) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", 2);
 
@@ -448,7 +443,7 @@ TEST_F(TestVariableProxy, one_dimensional_create_instance) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, one_dimensional_value) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", 2);
     auto  value          = random_integer();
@@ -457,7 +452,7 @@ TEST_F(TestVariableProxy, one_dimensional_value) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, one_dimensional_set_value) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", 2);
     auto  value          = random_integer();
@@ -466,21 +461,21 @@ TEST_F(TestVariableProxy, one_dimensional_set_value) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, one_dimensional_evaluate_arg_void) {
-    printemps::model::Model<int, double> model;
-    auto& variable_proxy = model.create_variables("x", 2);
+    model::Model<int, double> model;
+    auto&                     variable_proxy = model.create_variables("x", 2);
     ASSERT_THROW(variable_proxy.evaluate(), std::logic_error);
 }
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, one_dimensional_evaluate_arg_move) {
-    printemps::model::Model<int, double> model;
-    auto& variable_proxy = model.create_variables("x", 2);
+    model::Model<int, double> model;
+    auto&                     variable_proxy = model.create_variables("x", 2);
     ASSERT_THROW(variable_proxy.evaluate({}), std::logic_error);
 }
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, one_dimensional_fix) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", 2);
     ASSERT_THROW(variable_proxy.fix(), std::logic_error);
@@ -488,7 +483,7 @@ TEST_F(TestVariableProxy, one_dimensional_fix) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, one_dimensional_is_fixed) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", 2);
     ASSERT_THROW(variable_proxy.is_fixed(), std::logic_error);
@@ -496,7 +491,7 @@ TEST_F(TestVariableProxy, one_dimensional_is_fixed) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, one_dimensional_unfix) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", 2);
     ASSERT_THROW(variable_proxy.unfix(), std::logic_error);
@@ -505,13 +500,13 @@ TEST_F(TestVariableProxy, one_dimensional_unfix) {
 /*****************************************************************************/
 TEST_F(TestVariableProxy, one_dimensional_sense) {
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
 
         auto& variable_proxy = model.create_variables("x", 2, 0, 1);
         ASSERT_THROW(variable_proxy.sense(), std::logic_error);
     }
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
 
         auto& variable_proxy = model.create_variables("x", 2, 0, 10);
         ASSERT_THROW(variable_proxy.sense(), std::logic_error);
@@ -520,7 +515,7 @@ TEST_F(TestVariableProxy, one_dimensional_sense) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, one_dimensional_fix_by) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", 2);
     auto  value          = random_integer();
@@ -529,7 +524,7 @@ TEST_F(TestVariableProxy, one_dimensional_fix_by) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, one_dimensional_set_bound) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", 2);
 
@@ -569,7 +564,7 @@ TEST_F(TestVariableProxy, one_dimensional_has_bounds) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, one_dimensional_set_name) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", 2);
 
@@ -584,7 +579,7 @@ TEST_F(TestVariableProxy, one_dimensional_name) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, one_dimensional_flat_indexed_variables_arg_void) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy                       = model.create_variables("x", 2);
     auto  value_0                              = random_integer();
@@ -597,7 +592,7 @@ TEST_F(TestVariableProxy, one_dimensional_flat_indexed_variables_arg_void) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, one_dimensional_flat_indexed_variables_arg_int) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy                     = model.create_variables("x", 2);
     auto  value_0                            = random_integer();
@@ -610,7 +605,7 @@ TEST_F(TestVariableProxy, one_dimensional_flat_indexed_variables_arg_int) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, one_dimensional_export_values) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", 2);
     auto  value_0        = random_integer();
@@ -623,7 +618,7 @@ TEST_F(TestVariableProxy, one_dimensional_export_values) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, one_dimensional_to_expression) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", 2);
     ASSERT_THROW(variable_proxy.to_expression(), std::logic_error);
@@ -631,11 +626,11 @@ TEST_F(TestVariableProxy, one_dimensional_to_expression) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, one_dimensional_sum_arg_void) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", 2);
     auto  expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
 
     expression = variable_proxy.sum();
 
@@ -650,13 +645,13 @@ TEST_F(TestVariableProxy, one_dimensional_sum_arg_void) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, one_dimensional_sum_arg_indices) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", 2);
     auto  expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
 
-    expression = variable_proxy.sum({printemps::model_component::Range::All});
+    expression = variable_proxy.sum({model_component::Range::All});
 
     for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
         variable_proxy[i] = 1;
@@ -665,14 +660,13 @@ TEST_F(TestVariableProxy, one_dimensional_sum_arg_indices) {
     EXPECT_EQ(1, expression.sensitivities().at(&(variable_proxy[0])));
     EXPECT_EQ(1, expression.sensitivities().at(&(variable_proxy[1])));
     EXPECT_EQ(2, expression.evaluate());
-    ASSERT_THROW(
-        variable_proxy.sum({printemps::model_component::Range::All, 0}),
-        std::logic_error);
+    ASSERT_THROW(variable_proxy.sum({model_component::Range::All, 0}),
+                 std::logic_error);
 }
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, one_dimensional_dot_arg_vector) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", 2);
 
@@ -682,7 +676,7 @@ TEST_F(TestVariableProxy, one_dimensional_dot_arg_vector) {
     }
 
     auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
     expression = variable_proxy.dot(sensitivities);
 
     for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
@@ -698,7 +692,7 @@ TEST_F(TestVariableProxy, one_dimensional_dot_arg_vector) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, one_dimensional_dot_arg_indice_vector) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", 2);
 
@@ -708,7 +702,7 @@ TEST_F(TestVariableProxy, one_dimensional_dot_arg_indice_vector) {
     }
 
     auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
     expression = variable_proxy.dot(sensitivities);
 
     for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
@@ -721,53 +715,50 @@ TEST_F(TestVariableProxy, one_dimensional_dot_arg_indice_vector) {
               expression.sensitivities().at(&(variable_proxy[1])));
     EXPECT_EQ(sensitivities[0] + sensitivities[1], expression.evaluate());
 
-    ASSERT_THROW(variable_proxy.dot({0, printemps::model_component::Range::All},
-                                    sensitivities),
-                 std::logic_error);
-}
-
-/*****************************************************************************/
-TEST_F(TestVariableProxy, one_dimensional_selection_arg_void) {
-    printemps::model::Model<int, double> model;
-
-    auto& variable_proxy = model.create_variables("x", 2);
-    auto  constraint =
-        printemps::model_component::Constraint<int, double>::create_instance();
-
-    constraint = variable_proxy.selection();
-
-    EXPECT_EQ(1,
-              constraint.expression().sensitivities().at(&(variable_proxy[0])));
-    EXPECT_EQ(1,
-              constraint.expression().sensitivities().at(&(variable_proxy[1])));
-    EXPECT_EQ(printemps::model_component::ConstraintSense::Equal,
-              constraint.sense());
-}
-
-/*****************************************************************************/
-TEST_F(TestVariableProxy, one_dimensional_selection_arg_indices) {
-    printemps::model::Model<int, double> model;
-
-    auto& variable_proxy = model.create_variables("x", 2);
-    auto  constraint =
-        printemps::model_component::Constraint<int, double>::create_instance();
-
-    constraint = variable_proxy.selection();
-
-    EXPECT_EQ(1,
-              constraint.expression().sensitivities().at(&(variable_proxy[0])));
-    EXPECT_EQ(1,
-              constraint.expression().sensitivities().at(&(variable_proxy[1])));
-    EXPECT_EQ(printemps::model_component::ConstraintSense::Equal,
-              constraint.sense());
     ASSERT_THROW(
-        variable_proxy.selection({printemps::model_component::Range::All, 0}),
+        variable_proxy.dot({0, model_component::Range::All}, sensitivities),
         std::logic_error);
 }
 
 /*****************************************************************************/
+TEST_F(TestVariableProxy, one_dimensional_selection_arg_void) {
+    model::Model<int, double> model;
+
+    auto& variable_proxy = model.create_variables("x", 2);
+    auto  constraint =
+        model_component::Constraint<int, double>::create_instance();
+
+    constraint = variable_proxy.selection();
+
+    EXPECT_EQ(1,
+              constraint.expression().sensitivities().at(&(variable_proxy[0])));
+    EXPECT_EQ(1,
+              constraint.expression().sensitivities().at(&(variable_proxy[1])));
+    EXPECT_EQ(model_component::ConstraintSense::Equal, constraint.sense());
+}
+
+/*****************************************************************************/
+TEST_F(TestVariableProxy, one_dimensional_selection_arg_indices) {
+    model::Model<int, double> model;
+
+    auto& variable_proxy = model.create_variables("x", 2);
+    auto  constraint =
+        model_component::Constraint<int, double>::create_instance();
+
+    constraint = variable_proxy.selection();
+
+    EXPECT_EQ(1,
+              constraint.expression().sensitivities().at(&(variable_proxy[0])));
+    EXPECT_EQ(1,
+              constraint.expression().sensitivities().at(&(variable_proxy[1])));
+    EXPECT_EQ(model_component::ConstraintSense::Equal, constraint.sense());
+    ASSERT_THROW(variable_proxy.selection({model_component::Range::All, 0}),
+                 std::logic_error);
+}
+
+/*****************************************************************************/
 TEST_F(TestVariableProxy, one_dimensional_operator_plus) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", 2);
     ASSERT_THROW(+variable_proxy, std::logic_error);
@@ -775,7 +766,7 @@ TEST_F(TestVariableProxy, one_dimensional_operator_plus) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, one_dimensional_operator_minus) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", 2);
     ASSERT_THROW(-variable_proxy, std::logic_error);
@@ -783,7 +774,7 @@ TEST_F(TestVariableProxy, one_dimensional_operator_minus) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, one_dimensional_operator_equal_arg_t_variable) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", 2);
     auto  value          = random_integer();
@@ -792,7 +783,7 @@ TEST_F(TestVariableProxy, one_dimensional_operator_equal_arg_t_variable) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, one_dimensional_operator_square_bracket) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", 2);
     auto  value_0        = random_integer();
@@ -805,7 +796,7 @@ TEST_F(TestVariableProxy, one_dimensional_operator_square_bracket) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, one_dimensional_operator_round_bracket) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", 2);
     auto  value_0        = random_integer();
@@ -818,7 +809,7 @@ TEST_F(TestVariableProxy, one_dimensional_operator_round_bracket) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, one_dimensional_operator_round_bracket_with_indices) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", 2);
     auto  value_0        = random_integer();
@@ -831,7 +822,7 @@ TEST_F(TestVariableProxy, one_dimensional_operator_round_bracket_with_indices) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, two_dimensional_create_instance) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& variable_proxy = model.create_variables("x", {2, 3});
 
     /// Check the initial values of the base class members.
@@ -846,7 +837,7 @@ TEST_F(TestVariableProxy, two_dimensional_create_instance) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, two_dimensional_value) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", {2, 3});
     auto  value          = random_integer();
@@ -855,7 +846,7 @@ TEST_F(TestVariableProxy, two_dimensional_value) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, two_dimensional_set_value) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", {2, 3});
     auto  value          = random_integer();
@@ -864,21 +855,21 @@ TEST_F(TestVariableProxy, two_dimensional_set_value) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, two_evaluate_arg_void) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& variable_proxy = model.create_variables("x", {2, 3});
     ASSERT_THROW(variable_proxy.evaluate(), std::logic_error);
 }
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, two_evaluate_arg_move) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& variable_proxy = model.create_variables("x", {2, 3});
     ASSERT_THROW(variable_proxy.evaluate({}), std::logic_error);
 }
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, two_dimensional_fix) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", {2, 3});
     ASSERT_THROW(variable_proxy.fix(), std::logic_error);
@@ -886,7 +877,7 @@ TEST_F(TestVariableProxy, two_dimensional_fix) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, two_dimensional_is_fixed) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", {2, 3});
     ASSERT_THROW(variable_proxy.is_fixed(), std::logic_error);
@@ -894,7 +885,7 @@ TEST_F(TestVariableProxy, two_dimensional_is_fixed) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, two_dimensional_unfix) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", {2, 3});
     ASSERT_THROW(variable_proxy.unfix(), std::logic_error);
@@ -902,7 +893,7 @@ TEST_F(TestVariableProxy, two_dimensional_unfix) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, two_dimensional_fix_by) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", {2, 3});
     auto  value          = random_integer();
@@ -912,13 +903,13 @@ TEST_F(TestVariableProxy, two_dimensional_fix_by) {
 /*****************************************************************************/
 TEST_F(TestVariableProxy, two_dimensional_sense) {
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
 
         auto& variable_proxy = model.create_variables("x", {2, 3}, 0, 1);
         ASSERT_THROW(variable_proxy.sense(), std::logic_error);
     }
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
 
         auto& variable_proxy = model.create_variables("x", {2, 3}, 0, 10);
         ASSERT_THROW(variable_proxy.sense(), std::logic_error);
@@ -927,7 +918,7 @@ TEST_F(TestVariableProxy, two_dimensional_sense) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, two_dimensional_set_bound) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", {2, 3});
 
@@ -967,7 +958,7 @@ TEST_F(TestVariableProxy, two_dimensional_has_bounds) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, two_dimensional_set_name) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", {2, 3});
 
@@ -982,7 +973,7 @@ TEST_F(TestVariableProxy, two_dimensional_name) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, two_dimensional_flat_indexed_variables_arg_void) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", {2, 3});
     auto  value_0        = random_integer();
@@ -996,7 +987,7 @@ TEST_F(TestVariableProxy, two_dimensional_flat_indexed_variables_arg_void) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, two_dimensional_flat_indexed_variables_arg_int) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", {2, 3});
     auto  value_0        = random_integer();
@@ -1010,7 +1001,7 @@ TEST_F(TestVariableProxy, two_dimensional_flat_indexed_variables_arg_int) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, two_dimensional_export_values) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy      = model.create_variables("x", {2, 3});
     auto  value_0             = random_integer();
@@ -1023,7 +1014,7 @@ TEST_F(TestVariableProxy, two_dimensional_export_values) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, two_dimensional_to_expression) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", {2, 3});
     ASSERT_THROW(variable_proxy.to_expression(), std::logic_error);
@@ -1031,11 +1022,11 @@ TEST_F(TestVariableProxy, two_dimensional_to_expression) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, two_dimensional_sum_arg_void) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", {2, 3});
     auto  expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
 
     expression = variable_proxy.sum();
 
@@ -1050,24 +1041,21 @@ TEST_F(TestVariableProxy, two_dimensional_sum_arg_void) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, two_dimensional_sum_arg_indices) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", {2, 3});
 
     auto expression_0 =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
     auto expression_1 =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
     auto expression_01 =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
 
-    expression_0 =
-        variable_proxy.sum({printemps::model_component::Range::All, 0});
-    expression_1 =
-        variable_proxy.sum({0, printemps::model_component::Range::All});
-    expression_01 =
-        variable_proxy.sum({printemps::model_component::Range::All,
-                            printemps::model_component::Range::All});
+    expression_0  = variable_proxy.sum({model_component::Range::All, 0});
+    expression_1  = variable_proxy.sum({0, model_component::Range::All});
+    expression_01 = variable_proxy.sum(
+        {model_component::Range::All, model_component::Range::All});
 
     for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
         variable_proxy[i] = 1;
@@ -1086,20 +1074,19 @@ TEST_F(TestVariableProxy, two_dimensional_sum_arg_indices) {
               expression_01.sensitivities().at(&(variable_proxy[2 * 3 - 1])));
     EXPECT_EQ(2 * 3, expression_01.evaluate());
 
-    ASSERT_THROW(variable_proxy.sum({printemps::model_component::Range::All}),
+    ASSERT_THROW(variable_proxy.sum({model_component::Range::All}),
                  std::logic_error);
-    ASSERT_THROW(
-        variable_proxy.sum({printemps::model_component::Range::All, 0, 0}),
-        std::logic_error);
+    ASSERT_THROW(variable_proxy.sum({model_component::Range::All, 0, 0}),
+                 std::logic_error);
 }
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, two_dimensional_dot_arg_vector) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", {2, 3});
     auto  expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
 
     std::vector<double> sensitivities;
     for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
@@ -1110,7 +1097,7 @@ TEST_F(TestVariableProxy, two_dimensional_dot_arg_vector) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, two_dimensional_dot_arg_indice_vector) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", {2, 3});
 
@@ -1134,16 +1121,16 @@ TEST_F(TestVariableProxy, two_dimensional_dot_arg_indice_vector) {
     }
 
     auto expression_0 =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
     auto expression_1 =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
     auto expression_01 =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
 
-    expression_0 = variable_proxy.dot(
-        {printemps::model_component::Range::All, 0}, sensitivities_0);
-    expression_1 = variable_proxy.dot(
-        {0, printemps::model_component::Range::All}, sensitivities_1);
+    expression_0 =
+        variable_proxy.dot({model_component::Range::All, 0}, sensitivities_0);
+    expression_1 =
+        variable_proxy.dot({0, model_component::Range::All}, sensitivities_1);
 
     for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
         variable_proxy[i] = 1;
@@ -1165,26 +1152,25 @@ TEST_F(TestVariableProxy, two_dimensional_dot_arg_indice_vector) {
 
     EXPECT_EQ(sum_1, expression_1.evaluate());
 
-    ASSERT_THROW(variable_proxy.dot({printemps::model_component::Range::All},
+    ASSERT_THROW(
+        variable_proxy.dot({model_component::Range::All}, sensitivities_0),
+        std::logic_error);
+    ASSERT_THROW(variable_proxy.dot(
+                     {model_component::Range::All, model_component::Range::All},
+                     sensitivities_01),
+                 std::logic_error);
+    ASSERT_THROW(variable_proxy.dot({model_component::Range::All, 0, 0},
                                     sensitivities_0),
                  std::logic_error);
-    ASSERT_THROW(variable_proxy.dot({printemps::model_component::Range::All,
-                                     printemps::model_component::Range::All},
-                                    sensitivities_01),
-                 std::logic_error);
-    ASSERT_THROW(
-        variable_proxy.dot({printemps::model_component::Range::All, 0, 0},
-                           sensitivities_0),
-        std::logic_error);
 }
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, two_dimensional_selection_arg_void) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", {2, 3});
     auto  constraint =
-        printemps::model_component::Constraint<int, double>::create_instance();
+        model_component::Constraint<int, double>::create_instance();
 
     constraint = variable_proxy.selection();
 
@@ -1192,63 +1178,54 @@ TEST_F(TestVariableProxy, two_dimensional_selection_arg_void) {
               constraint.expression().sensitivities().at(&(variable_proxy[0])));
     EXPECT_EQ(1, constraint.expression().sensitivities().at(
                      &(variable_proxy[2 * 3 - 1])));
-    EXPECT_EQ(printemps::model_component::ConstraintSense::Equal,
-              constraint.sense());
+    EXPECT_EQ(model_component::ConstraintSense::Equal, constraint.sense());
 }
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, two_dimensional_selection_arg_indices) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", {2, 3});
 
     auto constraint_0 =
-        printemps::model_component::Constraint<int, double>::create_instance();
+        model_component::Constraint<int, double>::create_instance();
     auto constraint_1 =
-        printemps::model_component::Constraint<int, double>::create_instance();
+        model_component::Constraint<int, double>::create_instance();
     auto constraint_01 =
-        printemps::model_component::Constraint<int, double>::create_instance();
+        model_component::Constraint<int, double>::create_instance();
 
-    constraint_0 =
-        variable_proxy.selection({printemps::model_component::Range::All, 0});
-    constraint_1 =
-        variable_proxy.selection({0, printemps::model_component::Range::All});
-    constraint_01 =
-        variable_proxy.selection({printemps::model_component::Range::All,
-                                  printemps::model_component::Range::All});
+    constraint_0  = variable_proxy.selection({model_component::Range::All, 0});
+    constraint_1  = variable_proxy.selection({0, model_component::Range::All});
+    constraint_01 = variable_proxy.selection(
+        {model_component::Range::All, model_component::Range::All});
 
     EXPECT_EQ(
         1, constraint_0.expression().sensitivities().at(&(variable_proxy[0])));
     EXPECT_EQ(
         1, constraint_0.expression().sensitivities().at(&(variable_proxy[3])));
-    EXPECT_EQ(printemps::model_component::ConstraintSense::Equal,
-              constraint_0.sense());
+    EXPECT_EQ(model_component::ConstraintSense::Equal, constraint_0.sense());
 
     EXPECT_EQ(
         1, constraint_1.expression().sensitivities().at(&(variable_proxy[0])));
     EXPECT_EQ(
         1, constraint_1.expression().sensitivities().at(&(variable_proxy[2])));
-    EXPECT_EQ(printemps::model_component::ConstraintSense::Equal,
-              constraint_0.sense());
+    EXPECT_EQ(model_component::ConstraintSense::Equal, constraint_0.sense());
 
     EXPECT_EQ(
         1, constraint_01.expression().sensitivities().at(&(variable_proxy[0])));
     EXPECT_EQ(1, constraint_01.expression().sensitivities().at(
                      &(variable_proxy[2 * 3 - 1])));
-    EXPECT_EQ(printemps::model_component::ConstraintSense::Equal,
-              constraint_0.sense());
+    EXPECT_EQ(model_component::ConstraintSense::Equal, constraint_0.sense());
 
-    ASSERT_THROW(
-        variable_proxy.selection({printemps::model_component::Range::All}),
-        std::logic_error);
-    ASSERT_THROW(variable_proxy.selection(
-                     {printemps::model_component::Range::All, 0, 0}),
+    ASSERT_THROW(variable_proxy.selection({model_component::Range::All}),
+                 std::logic_error);
+    ASSERT_THROW(variable_proxy.selection({model_component::Range::All, 0, 0}),
                  std::logic_error);
 }
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, two_dimensional_operator_plus) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", {2, 3});
     ASSERT_THROW(+variable_proxy, std::logic_error);
@@ -1256,7 +1233,7 @@ TEST_F(TestVariableProxy, two_dimensional_operator_plus) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, two_dimensional_operator_minus) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", {2, 3});
     ASSERT_THROW(-variable_proxy, std::logic_error);
@@ -1264,7 +1241,7 @@ TEST_F(TestVariableProxy, two_dimensional_operator_minus) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, two_dimensional_operator_equal) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", {2, 3});
     auto  value          = random_integer();
@@ -1273,7 +1250,7 @@ TEST_F(TestVariableProxy, two_dimensional_operator_equal) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, two_dimensional_operator_square_bracket) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy      = model.create_variables("x", {2, 3});
     auto  value_0             = random_integer();
@@ -1286,7 +1263,7 @@ TEST_F(TestVariableProxy, two_dimensional_operator_square_bracket) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, two_dimensional_operator_round_bracket) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", {2, 3});
     auto  value_0        = random_integer();
@@ -1299,7 +1276,7 @@ TEST_F(TestVariableProxy, two_dimensional_operator_round_bracket) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, two_dimensional_operator_round_bracket_with_indices) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variables("x", {2, 3});
     auto  value_0          = random_integer();
@@ -1312,7 +1289,7 @@ TEST_F(TestVariableProxy, two_dimensional_operator_round_bracket_with_indices) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, three_dimensional_create_instance) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& variable_proxy = model.create_variables("x", {2, 3, 4});
 
     /// Check the initial values of the base class members.
@@ -1329,7 +1306,7 @@ TEST_F(TestVariableProxy, three_dimensional_create_instance) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, three_dimensional_operator_round_bracket) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy    = model.create_variables("x", {2, 3, 4});
     auto  value_0           = random_integer();
@@ -1343,7 +1320,7 @@ TEST_F(TestVariableProxy, three_dimensional_operator_round_bracket) {
 /*****************************************************************************/
 TEST_F(TestVariableProxy,
        three_dimensional_operator_round_bracket_with_indices) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy      = model.create_variables("x", {2, 3, 4});
     auto  value_0             = random_integer();
@@ -1356,7 +1333,7 @@ TEST_F(TestVariableProxy,
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, four_dimensional_create_instance) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     auto& variable_proxy = model.create_variables("x", {2, 3, 4, 5});
 
     /// Check the initial values of the base class members.
@@ -1375,7 +1352,7 @@ TEST_F(TestVariableProxy, four_dimensional_create_instance) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, four_dimensional_operator_round_bracket) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy       = model.create_variables("x", {2, 3, 4, 5});
     auto  value_0              = random_integer();
@@ -1389,7 +1366,7 @@ TEST_F(TestVariableProxy, four_dimensional_operator_round_bracket) {
 /*****************************************************************************/
 TEST_F(TestVariableProxy,
        four_dimensional_operator_round_bracket_with_indices) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy         = model.create_variables("x", {2, 3, 4, 5});
     auto  value_0                = random_integer();

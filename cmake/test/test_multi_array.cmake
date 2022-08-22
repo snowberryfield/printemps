@@ -1,25 +1,25 @@
 
-file(GLOB TEST_MODEL_SOURCE ${TOP_DIR}/test/solver/*.cpp)
+file(GLOB TEST_SOURCE ${TOP_DIR}/test/multi_array/*.cpp)
 
 add_executable(
-    test_solver
-    ${TEST_MODEL_SOURCE}
+    test_multi_array
+    ${TEST_SOURCE}
 )
 
 target_include_directories(
-    test_solver
+    test_multi_array
     PUBLIC ${TOP_DIR}/printemps/
     PUBLIC ${TOP_DIR}/external/include/
 )
 
 target_link_libraries(
-    test_solver
+    test_multi_array
     PUBLIC gtest
     PUBLIC gtest_main
     PUBLIC pthread
 )
 
 add_test(
-    NAME test_solver
-    COMMAND test_solver --gtest_output=xml
+    NAME test_multi_array
+    COMMAND test_multi_array --gtest_output=xml
 )

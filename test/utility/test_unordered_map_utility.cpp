@@ -9,6 +9,7 @@
 #include <printemps.h>
 
 namespace {
+using namespace printemps;
 /*****************************************************************************/
 class TestUnorderedMapUtility : public ::testing::Test {
    protected:
@@ -31,8 +32,8 @@ TEST_F(TestUnorderedMapUtility, to_vector_pair) {
     umap_str["b"] = 4.4;
     umap_str["c"] = 5.5;
 
-    auto vector_pair_int = printemps::utility::to_vector_pair(umap_int);
-    auto vector_pair_str = printemps::utility::to_vector_pair(umap_str);
+    auto vector_pair_int = utility::to_vector_pair(umap_int);
+    auto vector_pair_str = utility::to_vector_pair(umap_str);
 
     EXPECT_EQ(2, static_cast<int>(vector_pair_int.first.size()));
     EXPECT_EQ(2, static_cast<int>(vector_pair_int.second.size()));

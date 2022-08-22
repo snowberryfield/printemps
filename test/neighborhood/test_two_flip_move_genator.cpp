@@ -7,6 +7,7 @@
 #include <printemps.h>
 
 namespace {
+using namespace printemps;
 /*****************************************************************************/
 class TestTwoFlipMoveGenerator : public ::testing::Test {
    protected:
@@ -20,12 +21,12 @@ class TestTwoFlipMoveGenerator : public ::testing::Test {
 
 /*****************************************************************************/
 TEST_F(TestTwoFlipMoveGenerator, setup) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& x = model.create_variables("x", 3, 0, 1);
 
-    std::vector<std::pair<printemps::model_component::Variable<int, double>*,
-                          printemps::model_component::Variable<int, double>*>>
+    std::vector<std::pair<model_component::Variable<int, double>*,
+                          model_component::Variable<int, double>*>>
         flippable_variable_pairs;
     flippable_variable_pairs.push_back({&x(0), &x(1)});
     flippable_variable_pairs.push_back({&x(1), &x(2)});
@@ -45,7 +46,7 @@ TEST_F(TestTwoFlipMoveGenerator, setup) {
     EXPECT_EQ(&x(1), moves[0].alterations[1].first);
     EXPECT_EQ(0, moves[0].alterations[1].second);
     EXPECT_FALSE(moves[0].is_univariable_move);
-    EXPECT_EQ(printemps::neighborhood::MoveSense::TwoFlip, moves[0].sense);
+    EXPECT_EQ(neighborhood::MoveSense::TwoFlip, moves[0].sense);
 
     EXPECT_TRUE(moves[1].is_special_neighborhood_move);
     EXPECT_EQ(2, static_cast<int>(moves[1].alterations.size()));
@@ -54,7 +55,7 @@ TEST_F(TestTwoFlipMoveGenerator, setup) {
     EXPECT_EQ(&x(1), moves[1].alterations[1].first);
     EXPECT_EQ(1, moves[1].alterations[1].second);
     EXPECT_FALSE(moves[1].is_univariable_move);
-    EXPECT_EQ(printemps::neighborhood::MoveSense::TwoFlip, moves[1].sense);
+    EXPECT_EQ(neighborhood::MoveSense::TwoFlip, moves[1].sense);
 
     EXPECT_TRUE(moves[2].is_special_neighborhood_move);
     EXPECT_EQ(2, static_cast<int>(moves[2].alterations.size()));
@@ -63,7 +64,7 @@ TEST_F(TestTwoFlipMoveGenerator, setup) {
     EXPECT_EQ(&x(2), moves[2].alterations[1].first);
     EXPECT_EQ(0, moves[2].alterations[1].second);
     EXPECT_FALSE(moves[2].is_univariable_move);
-    EXPECT_EQ(printemps::neighborhood::MoveSense::TwoFlip, moves[2].sense);
+    EXPECT_EQ(neighborhood::MoveSense::TwoFlip, moves[2].sense);
 
     EXPECT_TRUE(moves[3].is_special_neighborhood_move);
     EXPECT_EQ(2, static_cast<int>(moves[3].alterations.size()));
@@ -72,10 +73,8 @@ TEST_F(TestTwoFlipMoveGenerator, setup) {
     EXPECT_EQ(&x(2), moves[3].alterations[1].first);
     EXPECT_EQ(1, moves[3].alterations[1].second);
     EXPECT_FALSE(moves[3].is_univariable_move);
-    EXPECT_EQ(printemps::neighborhood::MoveSense::TwoFlip, moves[3].sense);
-
-}  // namespace
-
+    EXPECT_EQ(neighborhood::MoveSense::TwoFlip, moves[3].sense);
+}
 }  // namespace
 /*****************************************************************************/
 // END

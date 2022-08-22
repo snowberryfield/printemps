@@ -7,6 +7,7 @@
 #include <printemps.h>
 
 namespace {
+using namespace printemps;
 /*****************************************************************************/
 class TestUserDefinedMoveGenerator : public ::testing::Test {
    protected:
@@ -20,7 +21,7 @@ class TestUserDefinedMoveGenerator : public ::testing::Test {
 
 /*****************************************************************************/
 TEST_F(TestUserDefinedMoveGenerator, setup) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     const int N = 100;
     auto&     x = model.create_variables("x", N, 0, 1);
@@ -32,12 +33,10 @@ TEST_F(TestUserDefinedMoveGenerator, setup) {
     }
 
     auto move_updater =
-        [&x, N](std::vector<printemps::neighborhood::Move<int, double>>*
-                    a_moves_ptr) {
+        [&x, N](std::vector<neighborhood::Move<int, double>>* a_moves_ptr) {
             a_moves_ptr->resize(N);
             for (auto i = 0; i < N; i++) {
-                (*a_moves_ptr)[i].sense =
-                    printemps::neighborhood::MoveSense::UserDefined;
+                (*a_moves_ptr)[i].sense = neighborhood::MoveSense::UserDefined;
                 (*a_moves_ptr)[i].alterations.clear();
                 (*a_moves_ptr)[i].alterations.emplace_back(&x(i),
                                                            1 - x(i).value());
@@ -54,8 +53,7 @@ TEST_F(TestUserDefinedMoveGenerator, setup) {
     EXPECT_EQ(N, static_cast<int>(flags.size()));
 
     for (auto i = 0; i < N; i++) {
-        EXPECT_EQ(printemps::neighborhood::MoveSense::UserDefined,
-                  moves[i].sense);
+        EXPECT_EQ(neighborhood::MoveSense::UserDefined, moves[i].sense);
         EXPECT_EQ(1, static_cast<int>(moves[i].alterations.size()));
         EXPECT_EQ(moves[i].alterations[0].second,
                   1 - moves[i].alterations[0].first->value());
@@ -65,8 +63,7 @@ TEST_F(TestUserDefinedMoveGenerator, setup) {
             EXPECT_EQ(1, flags[i]);
         }
     }
-}  // namespace
-
+}
 }  // namespace
 /*****************************************************************************/
 // END

@@ -1,9 +1,9 @@
 
-file(GLOB TEST_MODEL_SOURCE ${TOP_DIR}/test/preprocess/*.cpp)
+file(GLOB TEST_SOURCE ${TOP_DIR}/test/preprocess/*.cpp)
 
 add_executable(
     test_preprocess
-    ${TEST_MODEL_SOURCE}
+    ${TEST_SOURCE}
 )
 
 target_include_directories(
@@ -20,6 +20,6 @@ target_link_libraries(
 )
 
 add_test(
-    NAME test_presolver
+    NAME test_preprocess
     COMMAND test_preprocess --gtest_output=xml
 )

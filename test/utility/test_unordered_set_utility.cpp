@@ -9,6 +9,7 @@
 #include <printemps.h>
 
 namespace {
+using namespace printemps;
 /*****************************************************************************/
 class TestUnorderedSetUtility : public ::testing::Test {
    protected:
@@ -27,11 +28,10 @@ TEST_F(TestUnorderedSetUtility, intersection_set) {
     std::unordered_set<std::string> set_string_0 = {"a", "b", "c", "d", "e"};
     std::unordered_set<std::string> set_string_1 = {"c", "d", "e", "f", "g"};
 
-    auto intersection_int =
-        printemps::utility::intersection_set(set_int_0, set_int_1);
+    auto intersection_int = utility::intersection_set(set_int_0, set_int_1);
 
     auto intersection_str =
-        printemps::utility::intersection_set(set_string_0, set_string_1);
+        utility::intersection_set(set_string_0, set_string_1);
 
     EXPECT_FALSE(intersection_int.find(1) != intersection_int.end());
     EXPECT_FALSE(intersection_int.find(2) != intersection_int.end());
@@ -57,8 +57,8 @@ TEST_F(TestUnorderedSetUtility, update_intersection_set) {
     std::unordered_set<std::string> set_string_0 = {"a", "b", "c", "d", "e"};
     std::unordered_set<std::string> set_string_1 = {"c", "d", "e", "f", "g"};
 
-    printemps::utility::update_intersection_set(&set_int_0, set_int_1);
-    printemps::utility::update_intersection_set(&set_string_0, set_string_1);
+    utility::update_intersection_set(&set_int_0, set_int_1);
+    utility::update_intersection_set(&set_string_0, set_string_1);
 
     EXPECT_FALSE(set_int_0.find(1) != set_int_0.end());
     EXPECT_FALSE(set_int_0.find(2) != set_int_0.end());
@@ -84,8 +84,8 @@ TEST_F(TestUnorderedSetUtility, union_set) {
     std::unordered_set<std::string> set_string_0 = {"a", "b", "c", "d", "e"};
     std::unordered_set<std::string> set_string_1 = {"c", "d", "e", "f", "g"};
 
-    printemps::utility::update_union_set(&set_int_0, set_int_1);
-    printemps::utility::update_union_set(&set_string_0, set_string_1);
+    utility::update_union_set(&set_int_0, set_int_1);
+    utility::update_union_set(&set_string_0, set_string_1);
 
     EXPECT_TRUE(set_int_0.find(1) != set_int_0.end());
     EXPECT_TRUE(set_int_0.find(2) != set_int_0.end());
@@ -111,8 +111,8 @@ TEST_F(TestUnorderedSetUtility, update_union_set) {
     std::unordered_set<std::string> set_string_0 = {"a", "b", "c", "d", "e"};
     std::unordered_set<std::string> set_string_1 = {"c", "d", "e", "f", "g"};
 
-    auto union_int = printemps::utility::union_set(set_int_0, set_int_1);
-    auto union_str = printemps::utility::union_set(set_string_0, set_string_1);
+    auto union_int = utility::union_set(set_int_0, set_int_1);
+    auto union_str = utility::union_set(set_string_0, set_string_1);
 
     EXPECT_TRUE(union_int.find(1) != union_int.end());
     EXPECT_TRUE(union_int.find(2) != union_int.end());
@@ -136,8 +136,8 @@ TEST_F(TestUnorderedSetUtility, to_vector) {
     std::unordered_set<int>         set_int    = {1, 2, 3, 4, 5};
     std::unordered_set<std::string> set_string = {"a", "b", "c", "d", "e"};
 
-    auto vector_int    = printemps::utility::to_vector(set_int);
-    auto vector_string = printemps::utility::to_vector(set_string);
+    auto vector_int    = utility::to_vector(set_int);
+    auto vector_string = utility::to_vector(set_string);
 
     EXPECT_TRUE(std::find(vector_int.begin(), vector_int.end(), 1) !=
                 vector_int.end());

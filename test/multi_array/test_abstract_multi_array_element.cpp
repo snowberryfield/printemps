@@ -4,17 +4,16 @@
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
 #include <gtest/gtest.h>
-#include <random>
-
 #include <printemps.h>
 
 namespace {
+using namespace printemps;
 /*****************************************************************************/
 class TestAbstractMultiArrayElement : public ::testing::Test {
    protected:
-    printemps::utility::UniformRandom<std::uniform_int_distribution<>, int>
+    utility::UniformRandom<std::uniform_int_distribution<>, int>
         m_random_integer;
-    printemps::utility::UniformRandom<std::uniform_int_distribution<>, int>
+    utility::UniformRandom<std::uniform_int_distribution<>, int>
         m_random_positive_integer;
 
     virtual void SetUp(void) {
@@ -38,8 +37,7 @@ TEST_F(TestAbstractMultiArrayElement, initialize) {
     /**
      * The Variable class inherits the TestAbstractMultiArrayElement class.
      */
-    auto element =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto element = model_component::Variable<int, double>::create_instance();
 
     EXPECT_EQ(0, element.proxy_index());
     EXPECT_EQ(0, element.flat_index());
@@ -49,8 +47,7 @@ TEST_F(TestAbstractMultiArrayElement, initialize) {
 
 /*****************************************************************************/
 TEST_F(TestAbstractMultiArrayElement, set_proxy_index) {
-    auto element =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto element = model_component::Variable<int, double>::create_instance();
 
     auto proxy_index = random_integer();
     element.set_proxy_index(proxy_index);
@@ -64,8 +61,7 @@ TEST_F(TestAbstractMultiArrayElement, proxy_index) {
 
 /*****************************************************************************/
 TEST_F(TestAbstractMultiArrayElement, set_flat_index) {
-    auto element =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto element = model_component::Variable<int, double>::create_instance();
 
     auto flat_index = random_integer();
     element.set_flat_index(flat_index);
@@ -79,8 +75,7 @@ TEST_F(TestAbstractMultiArrayElement, flat_index) {
 
 /*****************************************************************************/
 TEST_F(TestAbstractMultiArrayElement, set_multi_dimensional_index) {
-    auto element =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto element = model_component::Variable<int, double>::create_instance();
 
     auto multi_dimensional_index_0 = random_integer();
     auto multi_dimensional_index_1 = random_integer();
@@ -94,8 +89,7 @@ TEST_F(TestAbstractMultiArrayElement, set_multi_dimensional_index) {
 
 /*****************************************************************************/
 TEST_F(TestAbstractMultiArrayElement, set_name) {
-    auto element =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto element = model_component::Variable<int, double>::create_instance();
 
     std::string name = "name";
     element.set_name(name);
