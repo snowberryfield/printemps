@@ -47,7 +47,7 @@
         "is_enabled_chain_move": true,
         "is_enabled_two_flip_move": false,
         "is_enabled_user_defined_move": false,
-        "chain_move_capacity": 10000,
+        "chain_move_capacity": 100000,
         "chain_move_reduce_mode": "OverlapRate",
         "chain_move_overlap_rate_threshold": 0.2,
         "selection_mode": "Independent",

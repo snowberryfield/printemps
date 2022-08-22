@@ -11,8 +11,8 @@ namespace printemps::option {
 struct NeighborhoodOptionConstant {
     static constexpr bool DEFAULT_IS_ENABLED_BINARY_MOVE                = true;
     static constexpr bool DEFAULT_IS_ENABLED_INTEGER_MOVE               = true;
-    static constexpr bool DEFAULT_IS_ENABLED_EXCLUSIVE_OR_MOVE          = false;
-    static constexpr bool DEFAULT_IS_ENABLED_EXCLUSIVE_NOR_MOVE         = false;
+    static constexpr bool DEFAULT_IS_ENABLED_EXCLUSIVE_OR_MOVE          = true;
+    static constexpr bool DEFAULT_IS_ENABLED_EXCLUSIVE_NOR_MOVE         = true;
     static constexpr bool DEFAULT_IS_ENABLED_INVERTED_INTEGERS_MOVE     = true;
     static constexpr bool DEFAULT_IS_ENABLED_BALANCED_INTEGERS_MOVE     = true;
     static constexpr bool DEFAULT_IS_ENABLED_CONSTANT_SUM_INTEGERS_MOVE = true;
@@ -29,7 +29,7 @@ struct NeighborhoodOptionConstant {
     static constexpr bool DEFAULT_IS_ENABLED_CHAIN_MOVE          = true;
     static constexpr bool DEFAULT_IS_ENABLED_TWO_FLIP_MOVE       = false;
     static constexpr bool DEFAULT_IS_ENABLED_USER_DEFINED_MOVE   = false;
-    static constexpr int  DEFAULT_CHAIN_MOVE_CAPACITY            = 10000;
+    static constexpr int  DEFAULT_CHAIN_MOVE_CAPACITY            = 100000;
     static constexpr chain_move_reduce_mode::ChainMoveReduceMode
         DEFAULT_CHAIN_MOVE_REDUCE_MODE = chain_move_reduce_mode::OverlapRate;
 

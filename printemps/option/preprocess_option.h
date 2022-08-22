@@ -233,7 +233,7 @@ struct PreprocessOption {
                   "is_enabled_remove_redundant_set_constraints", a_OBJECT);
 
         read_json(&this->is_enabled_extract_implicit_equality_constraints,  //
-                  "is_enabled_extract_implicit_equality_constraint", a_OBJECT);
+                  "is_enabled_extract_implicit_equality_constraints", a_OBJECT);
 
         read_json(&this->is_enabled_online_bounding,  //
                   "is_enabled_online_bounding", a_OBJECT);
