@@ -35,15 +35,19 @@ link_directories(
     ${TOP_DIR}/external/lib
 )
 
+include(test_mps.cmake)
+include(test_example.cmake)
 include(test_helper.cmake)
-include(test_model_component.cmake)
 include(test_model.cmake)
+include(test_model_component.cmake)
+include(test_multi_array.cmake)
 include(test_neighborhood.cmake)
 include(test_option.cmake)
+include(test_option_enumerate.cmake)
 include(test_preprocess.cmake)
-include(test_solver.cmake)
 include(test_solution.cmake)
 include(test_utility.cmake)
+include(test_utility_json.cmake)
 
 # ##############################################################################
 # # END

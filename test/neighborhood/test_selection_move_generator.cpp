@@ -7,6 +7,7 @@
 #include <printemps.h>
 
 namespace {
+using namespace printemps;
 /*****************************************************************************/
 class TestSelectionMoveGenerator : public ::testing::Test {
    protected:
@@ -20,7 +21,7 @@ class TestSelectionMoveGenerator : public ::testing::Test {
 
 /*****************************************************************************/
 TEST_F(TestSelectionMoveGenerator, setup) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     const int N = 10;
     auto&     x = model.create_variables("x", N, 0, 1);
@@ -29,15 +30,14 @@ TEST_F(TestSelectionMoveGenerator, setup) {
 
     model.setup_structure();
 
-    printemps::preprocess::SelectionExtractor<int, double> selection_extractor(
-        &model);
+    preprocess::SelectionExtractor<int, double> selection_extractor(&model);
     selection_extractor.extract_by_number_of_variables_order(false, false);
     x(0).select();
 
     model.setup_structure();
 
     auto selection_variable_ptrs =
-        model.variable_reference().selection_variable_ptrs;
+        model.variable_type_reference().selection_variable_ptrs;
 
     model.neighborhood().selection().setup(selection_variable_ptrs);
     model.neighborhood().selection().update_moves(true, false, false, false);
@@ -56,7 +56,7 @@ TEST_F(TestSelectionMoveGenerator, setup) {
     }
 
     for (auto& move : moves) {
-        EXPECT_EQ(printemps::neighborhood::MoveSense::Selection, move.sense);
+        EXPECT_EQ(neighborhood::MoveSense::Selection, move.sense);
         EXPECT_EQ(2, static_cast<int>(move.alterations.size()));
 
         EXPECT_EQ(1, move.alterations.front().first->value());
@@ -80,9 +80,7 @@ TEST_F(TestSelectionMoveGenerator, setup) {
                         move.related_constraint_ptrs.end());
         }
     }
-
-}  // namespace
-
+}
 }  // namespace
 /*****************************************************************************/
 // END

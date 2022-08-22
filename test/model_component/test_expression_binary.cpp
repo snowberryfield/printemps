@@ -4,17 +4,16 @@
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
 #include <gtest/gtest.h>
-#include <random>
-
 #include <printemps.h>
 
 namespace {
+using namespace printemps;
 /*****************************************************************************/
 class TestExpressionBinary : public ::testing::Test {
    protected:
-    printemps::utility::UniformRandom<std::uniform_int_distribution<>, int>
+    utility::UniformRandom<std::uniform_int_distribution<>, int>
         m_random_integer;
-    printemps::utility::UniformRandom<std::uniform_int_distribution<>, int>
+    utility::UniformRandom<std::uniform_int_distribution<>, int>
         m_random_positive_integer;
 
     virtual void SetUp(void) {
@@ -35,14 +34,13 @@ class TestExpressionBinary : public ::testing::Test {
 
 /*****************************************************************************/
 TEST_F(TestExpressionBinary, variable_operator_add) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+    auto  variable = model_component::Variable<int, double>::create_instance();
+    auto  expression =
+        model_component::Expression<int, double>::create_instance();
 
     auto constant = random_integer();
 
@@ -128,14 +126,13 @@ TEST_F(TestExpressionBinary, variable_operator_add) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionBinary, variable_proxy_operator_add) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+    auto  variable = model_component::Variable<int, double>::create_instance();
+    auto  expression =
+        model_component::Expression<int, double>::create_instance();
     auto constant = random_integer();
 
     expression_proxy = variable_proxy;
@@ -220,14 +217,13 @@ TEST_F(TestExpressionBinary, variable_proxy_operator_add) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionBinary, expression_operator_add) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+    auto  variable = model_component::Variable<int, double>::create_instance();
+    auto  expression =
+        model_component::Expression<int, double>::create_instance();
     auto constant = random_integer();
 
     expression_proxy = variable_proxy;
@@ -312,14 +308,13 @@ TEST_F(TestExpressionBinary, expression_operator_add) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionBinary, expression_proxy_operator_add) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+    auto  variable = model_component::Variable<int, double>::create_instance();
+    auto  expression =
+        model_component::Expression<int, double>::create_instance();
     auto constant = random_integer();
 
     expression_proxy = variable_proxy;
@@ -404,14 +399,13 @@ TEST_F(TestExpressionBinary, expression_proxy_operator_add) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionBinary, variable_operator_subtract) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+    auto  variable = model_component::Variable<int, double>::create_instance();
+    auto  expression =
+        model_component::Expression<int, double>::create_instance();
 
     auto constant = random_integer();
 
@@ -498,14 +492,13 @@ TEST_F(TestExpressionBinary, variable_operator_subtract) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionBinary, variable_proxy_operator_subtract) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+    auto  variable = model_component::Variable<int, double>::create_instance();
+    auto  expression =
+        model_component::Expression<int, double>::create_instance();
     auto constant = random_integer();
 
     expression_proxy = variable_proxy;
@@ -590,14 +583,13 @@ TEST_F(TestExpressionBinary, variable_proxy_operator_subtract) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionBinary, expression_operator_subtract) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+    auto  variable = model_component::Variable<int, double>::create_instance();
+    auto  expression =
+        model_component::Expression<int, double>::create_instance();
     auto constant = random_integer();
 
     expression_proxy = variable_proxy;
@@ -682,14 +674,13 @@ TEST_F(TestExpressionBinary, expression_operator_subtract) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionBinary, expression_proxy_operator_subtract) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+    auto  variable = model_component::Variable<int, double>::create_instance();
+    auto  expression =
+        model_component::Expression<int, double>::create_instance();
     auto constant = random_integer();
 
     expression_proxy = variable_proxy;
@@ -774,14 +765,13 @@ TEST_F(TestExpressionBinary, expression_proxy_operator_subtract) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionBinary, variable_combination_add_product) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+    auto  variable = model_component::Variable<int, double>::create_instance();
+    auto  expression =
+        model_component::Expression<int, double>::create_instance();
 
     auto sensitivity_0 = random_integer();
     auto sensitivity_1 = random_integer();
@@ -889,14 +879,13 @@ TEST_F(TestExpressionBinary, variable_combination_add_product) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionBinary, variable_proxy_combination_add_product) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+    auto  variable = model_component::Variable<int, double>::create_instance();
+    auto  expression =
+        model_component::Expression<int, double>::create_instance();
 
     auto sensitivity_0 = random_integer();
     auto sensitivity_1 = random_integer();
@@ -1004,14 +993,13 @@ TEST_F(TestExpressionBinary, variable_proxy_combination_add_product) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionBinary, expression_combination_add_product) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+    auto  variable = model_component::Variable<int, double>::create_instance();
+    auto  expression =
+        model_component::Expression<int, double>::create_instance();
 
     auto sensitivity_0 = random_integer();
     auto sensitivity_1 = random_integer();
@@ -1119,14 +1107,13 @@ TEST_F(TestExpressionBinary, expression_combination_add_product) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionBinary, expression_proxy_combination_add_product) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+    auto  variable = model_component::Variable<int, double>::create_instance();
+    auto  expression =
+        model_component::Expression<int, double>::create_instance();
 
     auto sensitivity_0 = random_integer();
     auto sensitivity_1 = random_integer();
@@ -1234,14 +1221,13 @@ TEST_F(TestExpressionBinary, expression_proxy_combination_add_product) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionBinary, variable_combination_subtract_product) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+    auto  variable = model_component::Variable<int, double>::create_instance();
+    auto  expression =
+        model_component::Expression<int, double>::create_instance();
 
     auto sensitivity_0 = random_integer();
     auto sensitivity_1 = random_integer();
@@ -1349,14 +1335,13 @@ TEST_F(TestExpressionBinary, variable_combination_subtract_product) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionBinary, variable_proxy_combination_subtract_product) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+    auto  variable = model_component::Variable<int, double>::create_instance();
+    auto  expression =
+        model_component::Expression<int, double>::create_instance();
 
     auto sensitivity_0 = random_integer();
     auto sensitivity_1 = random_integer();
@@ -1464,14 +1449,13 @@ TEST_F(TestExpressionBinary, variable_proxy_combination_subtract_product) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionBinary, expression_combination_subtract_product) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+    auto  variable = model_component::Variable<int, double>::create_instance();
+    auto  expression =
+        model_component::Expression<int, double>::create_instance();
 
     auto sensitivity_0 = random_integer();
     auto sensitivity_1 = random_integer();
@@ -1579,14 +1563,13 @@ TEST_F(TestExpressionBinary, expression_combination_subtract_product) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionBinary, expression_proxy_combination_subtract_product) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+    auto  variable = model_component::Variable<int, double>::create_instance();
+    auto  expression =
+        model_component::Expression<int, double>::create_instance();
 
     auto sensitivity_0 = random_integer();
     auto sensitivity_1 = random_integer();
@@ -1694,14 +1677,13 @@ TEST_F(TestExpressionBinary, expression_proxy_combination_subtract_product) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionBinary, operator_divide) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+    auto  variable = model_component::Variable<int, double>::create_instance();
+    auto  expression =
+        model_component::Expression<int, double>::create_instance();
 
     auto denominator = static_cast<double>(random_positive_integer());
 

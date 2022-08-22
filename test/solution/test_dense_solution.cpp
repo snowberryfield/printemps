@@ -7,6 +7,7 @@
 #include <printemps.h>
 
 namespace {
+using namespace printemps;
 /*****************************************************************************/
 class TestDenseSolution : public ::testing::Test {
    protected:
@@ -20,7 +21,7 @@ class TestDenseSolution : public ::testing::Test {
 
 /*****************************************************************************/
 TEST_F(TestDenseSolution, constructor) {
-    printemps::solution::DenseSolution<int, double> solution;
+    solution::DenseSolution<int, double> solution;
 
     EXPECT_TRUE(solution.variable_value_proxies.empty());
     EXPECT_TRUE(solution.expression_value_proxies.empty());
@@ -34,7 +35,7 @@ TEST_F(TestDenseSolution, constructor) {
 
 /*****************************************************************************/
 TEST_F(TestDenseSolution, initialize) {
-    printemps::solution::DenseSolution<int, double> solution;
+    solution::DenseSolution<int, double> solution;
     solution.variable_value_proxies.resize(10);
     solution.expression_value_proxies.resize(10);
     solution.constraint_value_proxies.resize(10);

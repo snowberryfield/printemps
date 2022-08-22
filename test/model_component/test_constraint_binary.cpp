@@ -4,16 +4,16 @@
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
 #include <gtest/gtest.h>
-#include <random>
 #include <printemps.h>
 
 namespace {
+using namespace printemps;
 /*****************************************************************************/
 class TestConstraintBinary : public ::testing::Test {
    protected:
-    printemps::utility::UniformRandom<std::uniform_int_distribution<>, int>
+    utility::UniformRandom<std::uniform_int_distribution<>, int>
         m_random_integer;
-    printemps::utility::UniformRandom<std::uniform_int_distribution<>, int>
+    utility::UniformRandom<std::uniform_int_distribution<>, int>
         m_random_positive_integer;
 
     virtual void SetUp(void) {
@@ -34,18 +34,16 @@ class TestConstraintBinary : public ::testing::Test {
 
 /*****************************************************************************/
 TEST_F(TestConstraintBinary, function_lower) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable = model_component::Variable<int, double>::create_instance();
     auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
     auto target = random_integer();
 
     expression = variable;
-    std::function<double(const printemps::neighborhood::Move<int, double>&)> f =
-        [&expression](
-            const printemps::neighborhood::Move<int, double>& a_MOVE) {
+    std::function<double(const neighborhood::Move<int, double>&)> f =
+        [&expression](const neighborhood::Move<int, double>& a_MOVE) {
             return expression.evaluate(a_MOVE);
         };
 
@@ -54,8 +52,7 @@ TEST_F(TestConstraintBinary, function_lower) {
         auto constraint = f <= target;
 
         EXPECT_FALSE(constraint.is_linear());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Less,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Less, constraint.sense());
 
         auto value = random_integer();
         variable   = value;
@@ -69,8 +66,7 @@ TEST_F(TestConstraintBinary, function_lower) {
         auto constraint = target <= f;
 
         EXPECT_FALSE(constraint.is_linear());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Less,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Less, constraint.sense());
 
         auto value = random_integer();
         variable   = value;
@@ -82,18 +78,16 @@ TEST_F(TestConstraintBinary, function_lower) {
 
 /*****************************************************************************/
 TEST_F(TestConstraintBinary, function_equal) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable = model_component::Variable<int, double>::create_instance();
     auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
     auto target = random_integer();
 
     expression = variable;
-    std::function<double(const printemps::neighborhood::Move<int, double>&)> f =
-        [&expression](
-            const printemps::neighborhood::Move<int, double>& a_MOVE) {
+    std::function<double(const neighborhood::Move<int, double>&)> f =
+        [&expression](const neighborhood::Move<int, double>& a_MOVE) {
             return expression.evaluate(a_MOVE);
         };
 
@@ -102,8 +96,7 @@ TEST_F(TestConstraintBinary, function_equal) {
         auto constraint = f == target;
 
         EXPECT_FALSE(constraint.is_linear());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Equal,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Equal, constraint.sense());
 
         auto value = random_integer();
         variable   = value;
@@ -117,8 +110,7 @@ TEST_F(TestConstraintBinary, function_equal) {
         auto constraint = target == f;
 
         EXPECT_FALSE(constraint.is_linear());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Equal,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Equal, constraint.sense());
 
         auto value = random_integer();
         variable   = value;
@@ -130,18 +122,16 @@ TEST_F(TestConstraintBinary, function_equal) {
 
 /*****************************************************************************/
 TEST_F(TestConstraintBinary, function_upper) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable = model_component::Variable<int, double>::create_instance();
     auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
     auto target = random_integer();
 
     expression = variable;
-    std::function<double(const printemps::neighborhood::Move<int, double>&)> f =
-        [&expression](
-            const printemps::neighborhood::Move<int, double>& a_MOVE) {
+    std::function<double(const neighborhood::Move<int, double>&)> f =
+        [&expression](const neighborhood::Move<int, double>& a_MOVE) {
             return expression.evaluate(a_MOVE);
         };
 
@@ -150,7 +140,7 @@ TEST_F(TestConstraintBinary, function_upper) {
         auto constraint = f >= target;
 
         EXPECT_FALSE(constraint.is_linear());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Greater,
+        EXPECT_EQ(model_component::ConstraintSense::Greater,
                   constraint.sense());
 
         auto value = random_integer();
@@ -165,7 +155,7 @@ TEST_F(TestConstraintBinary, function_upper) {
         auto constraint = target >= f;
 
         EXPECT_FALSE(constraint.is_linear());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Greater,
+        EXPECT_EQ(model_component::ConstraintSense::Greater,
                   constraint.sense());
 
         auto value = random_integer();
@@ -178,14 +168,13 @@ TEST_F(TestConstraintBinary, function_upper) {
 
 /*****************************************************************************/
 TEST_F(TestConstraintBinary, variable_lower) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+    auto  variable = model_component::Variable<int, double>::create_instance();
+    auto  expression =
+        model_component::Expression<int, double>::create_instance();
     auto constant = random_integer();
 
     expression_proxy = variable_proxy;
@@ -197,8 +186,7 @@ TEST_F(TestConstraintBinary, variable_lower) {
 
         EXPECT_EQ(0, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Less,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Less, constraint.sense());
     }
 
     /// Variable <= Integer
@@ -207,8 +195,7 @@ TEST_F(TestConstraintBinary, variable_lower) {
 
         EXPECT_EQ(1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(-constant, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Less,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Less, constraint.sense());
     }
 
     ///  Integer <= Variable
@@ -217,8 +204,7 @@ TEST_F(TestConstraintBinary, variable_lower) {
 
         EXPECT_EQ(-1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(constant, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Less,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Less, constraint.sense());
     }
 
     /// Variable <= VariableProxy
@@ -229,8 +215,7 @@ TEST_F(TestConstraintBinary, variable_lower) {
         EXPECT_EQ(
             -1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Less,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Less, constraint.sense());
     }
 
     /// VariableProxy <= Variable
@@ -241,8 +226,7 @@ TEST_F(TestConstraintBinary, variable_lower) {
             1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(-1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Less,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Less, constraint.sense());
     }
 
     /// Variable <= Expression
@@ -251,8 +235,7 @@ TEST_F(TestConstraintBinary, variable_lower) {
 
         EXPECT_EQ(0, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Less,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Less, constraint.sense());
     }
 
     /// Expression <= Variable
@@ -261,8 +244,7 @@ TEST_F(TestConstraintBinary, variable_lower) {
 
         EXPECT_EQ(0, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Less,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Less, constraint.sense());
     }
 
     /// Variable <= ExpressionProxy
@@ -273,8 +255,7 @@ TEST_F(TestConstraintBinary, variable_lower) {
         EXPECT_EQ(
             -1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Less,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Less, constraint.sense());
     }
 
     /// ExpressionProxy <= Variable
@@ -285,21 +266,19 @@ TEST_F(TestConstraintBinary, variable_lower) {
             1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(-1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Less,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Less, constraint.sense());
     }
 }
 
 /*****************************************************************************/
 TEST_F(TestConstraintBinary, variable_equal) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+    auto  variable = model_component::Variable<int, double>::create_instance();
+    auto  expression =
+        model_component::Expression<int, double>::create_instance();
     auto constant = random_integer();
 
     expression_proxy = variable_proxy;
@@ -311,8 +290,7 @@ TEST_F(TestConstraintBinary, variable_equal) {
 
         EXPECT_EQ(0, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Equal,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Equal, constraint.sense());
     }
 
     /// Variable == Integer
@@ -321,8 +299,7 @@ TEST_F(TestConstraintBinary, variable_equal) {
 
         EXPECT_EQ(1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(-constant, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Equal,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Equal, constraint.sense());
     }
 
     ///  Integer == Variable
@@ -331,8 +308,7 @@ TEST_F(TestConstraintBinary, variable_equal) {
 
         EXPECT_EQ(-1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(constant, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Equal,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Equal, constraint.sense());
     }
 
     /// Variable == VariableProxy
@@ -343,8 +319,7 @@ TEST_F(TestConstraintBinary, variable_equal) {
         EXPECT_EQ(
             -1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Equal,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Equal, constraint.sense());
     }
 
     /// VariableProxy == Variable
@@ -355,8 +330,7 @@ TEST_F(TestConstraintBinary, variable_equal) {
             1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(-1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Equal,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Equal, constraint.sense());
     }
 
     /// Variable == Expression
@@ -365,8 +339,7 @@ TEST_F(TestConstraintBinary, variable_equal) {
 
         EXPECT_EQ(0, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Equal,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Equal, constraint.sense());
     }
 
     /// Expression == Variable
@@ -375,8 +348,7 @@ TEST_F(TestConstraintBinary, variable_equal) {
 
         EXPECT_EQ(0, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Equal,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Equal, constraint.sense());
     }
 
     /// Variable == ExpressionProxy
@@ -387,8 +359,7 @@ TEST_F(TestConstraintBinary, variable_equal) {
         EXPECT_EQ(
             -1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Equal,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Equal, constraint.sense());
     }
 
     /// ExpressionProxy == Variable
@@ -399,21 +370,19 @@ TEST_F(TestConstraintBinary, variable_equal) {
             1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(-1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Equal,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Equal, constraint.sense());
     }
 }
 
 /*****************************************************************************/
 TEST_F(TestConstraintBinary, variable_upper) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+    auto  variable = model_component::Variable<int, double>::create_instance();
+    auto  expression =
+        model_component::Expression<int, double>::create_instance();
     auto constant = random_integer();
 
     expression_proxy = variable_proxy;
@@ -425,7 +394,7 @@ TEST_F(TestConstraintBinary, variable_upper) {
 
         EXPECT_EQ(0, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Greater,
+        EXPECT_EQ(model_component::ConstraintSense::Greater,
                   constraint.sense());
     }
 
@@ -435,7 +404,7 @@ TEST_F(TestConstraintBinary, variable_upper) {
 
         EXPECT_EQ(1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(-constant, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Greater,
+        EXPECT_EQ(model_component::ConstraintSense::Greater,
                   constraint.sense());
     }
 
@@ -445,7 +414,7 @@ TEST_F(TestConstraintBinary, variable_upper) {
 
         EXPECT_EQ(-1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(constant, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Greater,
+        EXPECT_EQ(model_component::ConstraintSense::Greater,
                   constraint.sense());
     }
 
@@ -457,7 +426,7 @@ TEST_F(TestConstraintBinary, variable_upper) {
         EXPECT_EQ(
             -1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Greater,
+        EXPECT_EQ(model_component::ConstraintSense::Greater,
                   constraint.sense());
     }
 
@@ -469,7 +438,7 @@ TEST_F(TestConstraintBinary, variable_upper) {
             1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(-1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Greater,
+        EXPECT_EQ(model_component::ConstraintSense::Greater,
                   constraint.sense());
     }
 
@@ -479,7 +448,7 @@ TEST_F(TestConstraintBinary, variable_upper) {
 
         EXPECT_EQ(0, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Greater,
+        EXPECT_EQ(model_component::ConstraintSense::Greater,
                   constraint.sense());
     }
 
@@ -489,7 +458,7 @@ TEST_F(TestConstraintBinary, variable_upper) {
 
         EXPECT_EQ(0, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Greater,
+        EXPECT_EQ(model_component::ConstraintSense::Greater,
                   constraint.sense());
     }
 
@@ -501,7 +470,7 @@ TEST_F(TestConstraintBinary, variable_upper) {
         EXPECT_EQ(
             -1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Greater,
+        EXPECT_EQ(model_component::ConstraintSense::Greater,
                   constraint.sense());
     }
 
@@ -513,21 +482,20 @@ TEST_F(TestConstraintBinary, variable_upper) {
             1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(-1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Greater,
+        EXPECT_EQ(model_component::ConstraintSense::Greater,
                   constraint.sense());
     }
 }
 
 /*****************************************************************************/
 TEST_F(TestConstraintBinary, variable_proxy_lower) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+    auto  variable = model_component::Variable<int, double>::create_instance();
+    auto  expression =
+        model_component::Expression<int, double>::create_instance();
     auto constant = random_integer();
 
     expression_proxy = variable_proxy;
@@ -540,8 +508,7 @@ TEST_F(TestConstraintBinary, variable_proxy_lower) {
         EXPECT_EQ(
             0, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Less,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Less, constraint.sense());
     }
 
     /// VariableProxy <= Integer
@@ -551,8 +518,7 @@ TEST_F(TestConstraintBinary, variable_proxy_lower) {
         EXPECT_EQ(
             1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(-constant, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Less,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Less, constraint.sense());
     }
 
     ///  Integer <= VariableProxy
@@ -562,8 +528,7 @@ TEST_F(TestConstraintBinary, variable_proxy_lower) {
         EXPECT_EQ(
             -1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(constant, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Less,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Less, constraint.sense());
     }
 
     /// VariableProxy <= Variable
@@ -574,8 +539,7 @@ TEST_F(TestConstraintBinary, variable_proxy_lower) {
             1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(-1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Less,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Less, constraint.sense());
     }
 
     /// Variable <= VariableProxy
@@ -586,8 +550,7 @@ TEST_F(TestConstraintBinary, variable_proxy_lower) {
         EXPECT_EQ(
             -1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Less,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Less, constraint.sense());
     }
 
     /// VariableProxy <= Expression
@@ -598,8 +561,7 @@ TEST_F(TestConstraintBinary, variable_proxy_lower) {
             1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(-1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Less,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Less, constraint.sense());
     }
 
     /// Expression <= VariableProxy
@@ -610,8 +572,7 @@ TEST_F(TestConstraintBinary, variable_proxy_lower) {
         EXPECT_EQ(
             -1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Less,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Less, constraint.sense());
     }
 
     /// VariableProxy <= ExpressionProxy
@@ -621,8 +582,7 @@ TEST_F(TestConstraintBinary, variable_proxy_lower) {
         EXPECT_EQ(
             0, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Less,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Less, constraint.sense());
     }
 
     /// ExpressionProxy <= VariableProxy
@@ -632,21 +592,19 @@ TEST_F(TestConstraintBinary, variable_proxy_lower) {
         EXPECT_EQ(
             0, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Less,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Less, constraint.sense());
     }
 }
 
 /*****************************************************************************/
 TEST_F(TestConstraintBinary, variable_proxy_equal) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+    auto  variable = model_component::Variable<int, double>::create_instance();
+    auto  expression =
+        model_component::Expression<int, double>::create_instance();
     auto constant = random_integer();
 
     expression_proxy = variable_proxy;
@@ -659,8 +617,7 @@ TEST_F(TestConstraintBinary, variable_proxy_equal) {
         EXPECT_EQ(
             0, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Equal,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Equal, constraint.sense());
     }
 
     /// VariableProxy == Integer
@@ -670,8 +627,7 @@ TEST_F(TestConstraintBinary, variable_proxy_equal) {
         EXPECT_EQ(
             1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(-constant, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Equal,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Equal, constraint.sense());
     }
 
     ///  Integer == VariableProxy
@@ -681,8 +637,7 @@ TEST_F(TestConstraintBinary, variable_proxy_equal) {
         EXPECT_EQ(
             -1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(constant, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Equal,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Equal, constraint.sense());
     }
 
     /// VariableProxy <= Variable
@@ -693,8 +648,7 @@ TEST_F(TestConstraintBinary, variable_proxy_equal) {
             1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(-1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Equal,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Equal, constraint.sense());
     }
 
     /// Variable <= VariableProxy
@@ -705,8 +659,7 @@ TEST_F(TestConstraintBinary, variable_proxy_equal) {
         EXPECT_EQ(
             -1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Equal,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Equal, constraint.sense());
     }
 
     /// VariableProxy == Expression
@@ -717,8 +670,7 @@ TEST_F(TestConstraintBinary, variable_proxy_equal) {
             1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(-1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Equal,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Equal, constraint.sense());
     }
 
     /// Expression == VariableProxy
@@ -729,8 +681,7 @@ TEST_F(TestConstraintBinary, variable_proxy_equal) {
         EXPECT_EQ(
             -1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Equal,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Equal, constraint.sense());
     }
 
     /// VariableProxy == ExpressionProxy
@@ -740,8 +691,7 @@ TEST_F(TestConstraintBinary, variable_proxy_equal) {
         EXPECT_EQ(
             0, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Equal,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Equal, constraint.sense());
     }
 
     /// ExpressionProxy == VariableProxy
@@ -751,21 +701,19 @@ TEST_F(TestConstraintBinary, variable_proxy_equal) {
         EXPECT_EQ(
             0, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Equal,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Equal, constraint.sense());
     }
 }
 
 /*****************************************************************************/
 TEST_F(TestConstraintBinary, variable_proxy_upper) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+    auto  variable = model_component::Variable<int, double>::create_instance();
+    auto  expression =
+        model_component::Expression<int, double>::create_instance();
     auto constant = random_integer();
 
     expression_proxy = variable_proxy;
@@ -778,7 +726,7 @@ TEST_F(TestConstraintBinary, variable_proxy_upper) {
         EXPECT_EQ(
             0, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Greater,
+        EXPECT_EQ(model_component::ConstraintSense::Greater,
                   constraint.sense());
     }
 
@@ -789,7 +737,7 @@ TEST_F(TestConstraintBinary, variable_proxy_upper) {
         EXPECT_EQ(
             1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(-constant, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Greater,
+        EXPECT_EQ(model_component::ConstraintSense::Greater,
                   constraint.sense());
     }
 
@@ -800,7 +748,7 @@ TEST_F(TestConstraintBinary, variable_proxy_upper) {
         EXPECT_EQ(
             -1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(constant, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Greater,
+        EXPECT_EQ(model_component::ConstraintSense::Greater,
                   constraint.sense());
     }
 
@@ -812,7 +760,7 @@ TEST_F(TestConstraintBinary, variable_proxy_upper) {
             1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(-1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Greater,
+        EXPECT_EQ(model_component::ConstraintSense::Greater,
                   constraint.sense());
     }
 
@@ -824,7 +772,7 @@ TEST_F(TestConstraintBinary, variable_proxy_upper) {
         EXPECT_EQ(
             -1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Greater,
+        EXPECT_EQ(model_component::ConstraintSense::Greater,
                   constraint.sense());
     }
 
@@ -836,7 +784,7 @@ TEST_F(TestConstraintBinary, variable_proxy_upper) {
             1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(-1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Greater,
+        EXPECT_EQ(model_component::ConstraintSense::Greater,
                   constraint.sense());
     }
 
@@ -848,7 +796,7 @@ TEST_F(TestConstraintBinary, variable_proxy_upper) {
         EXPECT_EQ(
             -1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Greater,
+        EXPECT_EQ(model_component::ConstraintSense::Greater,
                   constraint.sense());
     }
 
@@ -859,7 +807,7 @@ TEST_F(TestConstraintBinary, variable_proxy_upper) {
         EXPECT_EQ(
             0, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Greater,
+        EXPECT_EQ(model_component::ConstraintSense::Greater,
                   constraint.sense());
     }
 
@@ -870,21 +818,20 @@ TEST_F(TestConstraintBinary, variable_proxy_upper) {
         EXPECT_EQ(
             0, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Greater,
+        EXPECT_EQ(model_component::ConstraintSense::Greater,
                   constraint.sense());
     }
 }
 
 /*****************************************************************************/
 TEST_F(TestConstraintBinary, expression_lower) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+    auto  variable = model_component::Variable<int, double>::create_instance();
+    auto  expression =
+        model_component::Expression<int, double>::create_instance();
     auto constant = random_integer();
 
     expression_proxy = variable_proxy;
@@ -896,8 +843,7 @@ TEST_F(TestConstraintBinary, expression_lower) {
 
         EXPECT_EQ(0, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Less,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Less, constraint.sense());
     }
 
     /// Expression <= Integer
@@ -906,8 +852,7 @@ TEST_F(TestConstraintBinary, expression_lower) {
 
         EXPECT_EQ(1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(-constant, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Less,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Less, constraint.sense());
     }
 
     ///  Integer <= Expression
@@ -916,8 +861,7 @@ TEST_F(TestConstraintBinary, expression_lower) {
 
         EXPECT_EQ(-1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(constant, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Less,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Less, constraint.sense());
     }
 
     /// Expression <= Variable
@@ -926,8 +870,7 @@ TEST_F(TestConstraintBinary, expression_lower) {
 
         EXPECT_EQ(0, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Less,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Less, constraint.sense());
     }
 
     /// Variable <= Expression
@@ -936,8 +879,7 @@ TEST_F(TestConstraintBinary, expression_lower) {
 
         EXPECT_EQ(0, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Less,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Less, constraint.sense());
     }
 
     /// Expression <= VariableProxy
@@ -948,8 +890,7 @@ TEST_F(TestConstraintBinary, expression_lower) {
         EXPECT_EQ(
             -1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Less,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Less, constraint.sense());
     }
 
     /// VariableProxy <= Expression
@@ -960,8 +901,7 @@ TEST_F(TestConstraintBinary, expression_lower) {
             1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(-1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Less,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Less, constraint.sense());
     }
 
     /// Expression <= ExpressionProxy
@@ -972,8 +912,7 @@ TEST_F(TestConstraintBinary, expression_lower) {
         EXPECT_EQ(
             -1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Less,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Less, constraint.sense());
     }
 
     /// ExpressionProxy <= Expression
@@ -984,21 +923,19 @@ TEST_F(TestConstraintBinary, expression_lower) {
             1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(-1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Less,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Less, constraint.sense());
     }
 }
 
 /*****************************************************************************/
 TEST_F(TestConstraintBinary, expression_equal) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+    auto  variable = model_component::Variable<int, double>::create_instance();
+    auto  expression =
+        model_component::Expression<int, double>::create_instance();
     auto constant = random_integer();
 
     expression_proxy = variable_proxy;
@@ -1010,8 +947,7 @@ TEST_F(TestConstraintBinary, expression_equal) {
 
         EXPECT_EQ(0, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Equal,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Equal, constraint.sense());
     }
 
     /// Expression == Integer
@@ -1020,8 +956,7 @@ TEST_F(TestConstraintBinary, expression_equal) {
 
         EXPECT_EQ(1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(-constant, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Equal,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Equal, constraint.sense());
     }
 
     ///  Integer == Expression
@@ -1030,8 +965,7 @@ TEST_F(TestConstraintBinary, expression_equal) {
 
         EXPECT_EQ(-1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(constant, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Equal,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Equal, constraint.sense());
     }
 
     /// Expression == Variable
@@ -1040,8 +974,7 @@ TEST_F(TestConstraintBinary, expression_equal) {
 
         EXPECT_EQ(0, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Equal,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Equal, constraint.sense());
     }
 
     /// Variable == Expression
@@ -1050,8 +983,7 @@ TEST_F(TestConstraintBinary, expression_equal) {
 
         EXPECT_EQ(0, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Equal,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Equal, constraint.sense());
     }
 
     /// Expression == VariableProxy
@@ -1062,8 +994,7 @@ TEST_F(TestConstraintBinary, expression_equal) {
         EXPECT_EQ(
             -1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Equal,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Equal, constraint.sense());
     }
 
     /// VariableProxy == Expression
@@ -1074,8 +1005,7 @@ TEST_F(TestConstraintBinary, expression_equal) {
             1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(-1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Equal,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Equal, constraint.sense());
     }
 
     /// Expression == ExpressionProxy
@@ -1086,8 +1016,7 @@ TEST_F(TestConstraintBinary, expression_equal) {
         EXPECT_EQ(
             -1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Equal,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Equal, constraint.sense());
     }
 
     /// ExpressionProxy == Expression
@@ -1098,21 +1027,19 @@ TEST_F(TestConstraintBinary, expression_equal) {
             1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(-1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Equal,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Equal, constraint.sense());
     }
 }
 
 /*****************************************************************************/
 TEST_F(TestConstraintBinary, expression_upper) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+    auto  variable = model_component::Variable<int, double>::create_instance();
+    auto  expression =
+        model_component::Expression<int, double>::create_instance();
     auto constant = random_integer();
 
     expression_proxy = variable_proxy;
@@ -1124,7 +1051,7 @@ TEST_F(TestConstraintBinary, expression_upper) {
 
         EXPECT_EQ(0, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Greater,
+        EXPECT_EQ(model_component::ConstraintSense::Greater,
                   constraint.sense());
     }
 
@@ -1134,7 +1061,7 @@ TEST_F(TestConstraintBinary, expression_upper) {
 
         EXPECT_EQ(1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(-constant, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Greater,
+        EXPECT_EQ(model_component::ConstraintSense::Greater,
                   constraint.sense());
     }
 
@@ -1144,7 +1071,7 @@ TEST_F(TestConstraintBinary, expression_upper) {
 
         EXPECT_EQ(-1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(constant, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Greater,
+        EXPECT_EQ(model_component::ConstraintSense::Greater,
                   constraint.sense());
     }
 
@@ -1154,7 +1081,7 @@ TEST_F(TestConstraintBinary, expression_upper) {
 
         EXPECT_EQ(0, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Greater,
+        EXPECT_EQ(model_component::ConstraintSense::Greater,
                   constraint.sense());
     }
 
@@ -1164,7 +1091,7 @@ TEST_F(TestConstraintBinary, expression_upper) {
 
         EXPECT_EQ(0, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Greater,
+        EXPECT_EQ(model_component::ConstraintSense::Greater,
                   constraint.sense());
     }
 
@@ -1176,7 +1103,7 @@ TEST_F(TestConstraintBinary, expression_upper) {
         EXPECT_EQ(
             -1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Greater,
+        EXPECT_EQ(model_component::ConstraintSense::Greater,
                   constraint.sense());
     }
 
@@ -1188,7 +1115,7 @@ TEST_F(TestConstraintBinary, expression_upper) {
             1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(-1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Greater,
+        EXPECT_EQ(model_component::ConstraintSense::Greater,
                   constraint.sense());
     }
 
@@ -1200,7 +1127,7 @@ TEST_F(TestConstraintBinary, expression_upper) {
         EXPECT_EQ(
             -1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Greater,
+        EXPECT_EQ(model_component::ConstraintSense::Greater,
                   constraint.sense());
     }
 
@@ -1212,21 +1139,20 @@ TEST_F(TestConstraintBinary, expression_upper) {
             1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(-1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Greater,
+        EXPECT_EQ(model_component::ConstraintSense::Greater,
                   constraint.sense());
     }
 }
 
 /*****************************************************************************/
 TEST_F(TestConstraintBinary, expression_proxy_lower) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+    auto  variable = model_component::Variable<int, double>::create_instance();
+    auto  expression =
+        model_component::Expression<int, double>::create_instance();
     auto constant = random_integer();
 
     expression_proxy = variable_proxy;
@@ -1239,8 +1165,7 @@ TEST_F(TestConstraintBinary, expression_proxy_lower) {
         EXPECT_EQ(
             0, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Less,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Less, constraint.sense());
     }
 
     /// ExpressionProxy <= Integer
@@ -1250,8 +1175,7 @@ TEST_F(TestConstraintBinary, expression_proxy_lower) {
         EXPECT_EQ(
             1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(-constant, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Less,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Less, constraint.sense());
     }
 
     ///  Integer <= ExpressionProxy
@@ -1261,8 +1185,7 @@ TEST_F(TestConstraintBinary, expression_proxy_lower) {
         EXPECT_EQ(
             -1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(constant, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Less,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Less, constraint.sense());
     }
 
     /// ExpressionProxy <= Variable
@@ -1273,8 +1196,7 @@ TEST_F(TestConstraintBinary, expression_proxy_lower) {
             1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(-1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Less,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Less, constraint.sense());
     }
 
     /// Variable <= ExpressionProxy
@@ -1285,8 +1207,7 @@ TEST_F(TestConstraintBinary, expression_proxy_lower) {
         EXPECT_EQ(
             -1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Less,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Less, constraint.sense());
     }
 
     /// ExpressionProxy <= Expression
@@ -1297,8 +1218,7 @@ TEST_F(TestConstraintBinary, expression_proxy_lower) {
             1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(-1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Less,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Less, constraint.sense());
     }
 
     /// Expression <= ExpressionProxy
@@ -1309,21 +1229,19 @@ TEST_F(TestConstraintBinary, expression_proxy_lower) {
         EXPECT_EQ(
             -1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Less,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Less, constraint.sense());
     }
 }
 
 /*****************************************************************************/
 TEST_F(TestConstraintBinary, expression_proxy_equal) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+    auto  variable = model_component::Variable<int, double>::create_instance();
+    auto  expression =
+        model_component::Expression<int, double>::create_instance();
     auto constant = random_integer();
 
     expression_proxy = variable_proxy;
@@ -1336,8 +1254,7 @@ TEST_F(TestConstraintBinary, expression_proxy_equal) {
         EXPECT_EQ(
             0, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Equal,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Equal, constraint.sense());
     }
 
     /// ExpressionProxy == Integer
@@ -1347,8 +1264,7 @@ TEST_F(TestConstraintBinary, expression_proxy_equal) {
         EXPECT_EQ(
             1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(-constant, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Equal,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Equal, constraint.sense());
     }
 
     ///  Integer == ExpressionProxy
@@ -1358,8 +1274,7 @@ TEST_F(TestConstraintBinary, expression_proxy_equal) {
         EXPECT_EQ(
             -1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(constant, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Equal,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Equal, constraint.sense());
     }
 
     /// ExpressionProxy == Variable
@@ -1370,8 +1285,7 @@ TEST_F(TestConstraintBinary, expression_proxy_equal) {
             1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(-1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Equal,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Equal, constraint.sense());
     }
 
     /// Variable == ExpressionProxy
@@ -1382,8 +1296,7 @@ TEST_F(TestConstraintBinary, expression_proxy_equal) {
         EXPECT_EQ(
             -1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Equal,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Equal, constraint.sense());
     }
 
     /// ExpressionProxy == Expression
@@ -1394,8 +1307,7 @@ TEST_F(TestConstraintBinary, expression_proxy_equal) {
             1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(-1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Equal,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Equal, constraint.sense());
     }
 
     /// Expression == ExpressionProxy
@@ -1406,21 +1318,19 @@ TEST_F(TestConstraintBinary, expression_proxy_equal) {
         EXPECT_EQ(
             -1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Equal,
-                  constraint.sense());
+        EXPECT_EQ(model_component::ConstraintSense::Equal, constraint.sense());
     }
 }
 
 /*****************************************************************************/
 TEST_F(TestConstraintBinary, expression_proxy_upper) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("e");
-    auto  variable =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+    auto  variable = model_component::Variable<int, double>::create_instance();
+    auto  expression =
+        model_component::Expression<int, double>::create_instance();
     auto constant = random_integer();
 
     expression_proxy = variable_proxy;
@@ -1433,7 +1343,7 @@ TEST_F(TestConstraintBinary, expression_proxy_upper) {
         EXPECT_EQ(
             0, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Greater,
+        EXPECT_EQ(model_component::ConstraintSense::Greater,
                   constraint.sense());
     }
 
@@ -1444,7 +1354,7 @@ TEST_F(TestConstraintBinary, expression_proxy_upper) {
         EXPECT_EQ(
             1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(-constant, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Greater,
+        EXPECT_EQ(model_component::ConstraintSense::Greater,
                   constraint.sense());
     }
 
@@ -1455,7 +1365,7 @@ TEST_F(TestConstraintBinary, expression_proxy_upper) {
         EXPECT_EQ(
             -1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(constant, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Greater,
+        EXPECT_EQ(model_component::ConstraintSense::Greater,
                   constraint.sense());
     }
 
@@ -1467,7 +1377,7 @@ TEST_F(TestConstraintBinary, expression_proxy_upper) {
             1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(-1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Greater,
+        EXPECT_EQ(model_component::ConstraintSense::Greater,
                   constraint.sense());
     }
 
@@ -1479,7 +1389,7 @@ TEST_F(TestConstraintBinary, expression_proxy_upper) {
         EXPECT_EQ(
             -1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Greater,
+        EXPECT_EQ(model_component::ConstraintSense::Greater,
                   constraint.sense());
     }
 
@@ -1491,7 +1401,7 @@ TEST_F(TestConstraintBinary, expression_proxy_upper) {
             1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(-1, constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Greater,
+        EXPECT_EQ(model_component::ConstraintSense::Greater,
                   constraint.sense());
     }
 
@@ -1503,7 +1413,7 @@ TEST_F(TestConstraintBinary, expression_proxy_upper) {
         EXPECT_EQ(
             -1, constraint.expression().sensitivities().at(&variable_proxy[0]));
         EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(printemps::model_component::ConstraintSense::Greater,
+        EXPECT_EQ(model_component::ConstraintSense::Greater,
                   constraint.sense());
     }
 }

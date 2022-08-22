@@ -1,9 +1,9 @@
 
-file(GLOB TEST_HELPER_SOURCE ${TOP_DIR}/test/helper/*.cpp)
+file(GLOB TEST_SOURCE ${TOP_DIR}/test/helper/*.cpp)
 
 add_executable(
     test_helper
-    ${TEST_HELPER_SOURCE}
+    ${TEST_SOURCE}
 )
 
 target_include_directories(

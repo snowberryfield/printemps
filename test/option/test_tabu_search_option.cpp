@@ -4,11 +4,10 @@
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
 #include <gtest/gtest.h>
-#include <random>
-
 #include <printemps.h>
 
 namespace {
+using namespace printemps;
 /*****************************************************************************/
 class TestTabuSearchOption : public ::testing::Test {
    protected:

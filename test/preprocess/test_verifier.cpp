@@ -4,17 +4,16 @@
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
 #include <gtest/gtest.h>
-#include <random>
-
 #include <printemps.h>
 
 namespace {
+using namespace printemps;
 /*****************************************************************************/
 class TestVerifier : public ::testing::Test {
    protected:
-    printemps::utility::UniformRandom<std::uniform_int_distribution<>, int>
+    utility::UniformRandom<std::uniform_int_distribution<>, int>
         m_random_integer;
-    printemps::utility::UniformRandom<std::uniform_int_distribution<>, int>
+    utility::UniformRandom<std::uniform_int_distribution<>, int>
         m_random_positive_integer;
 
     virtual void SetUp(void) {
@@ -37,37 +36,37 @@ class TestVerifier : public ::testing::Test {
 TEST_F(TestVerifier, verify_problem) {
     /// No decision variables.
     {
-        printemps::model::Model<int, double>         model;
-        printemps::preprocess::Verifier<int, double> verifier(&model);
+        model::Model<int, double>         model;
+        preprocess::Verifier<int, double> verifier(&model);
         ASSERT_THROW(verifier.verify_problem(false), std::logic_error);
     }
 
     /// No constraint functions.
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
 
         auto& x = model.create_variable("x");
         model.minimize(x);
-        printemps::preprocess::Verifier<int, double> verifier(&model);
+        preprocess::Verifier<int, double> verifier(&model);
         verifier.verify_problem(false);
     }
 
     /// No objective function.
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
 
         auto& x = model.create_variable("x");
         model.create_constraint("g", x == 1);
-        printemps::preprocess::Verifier<int, double> verifier(&model);
+        preprocess::Verifier<int, double> verifier(&model);
         verifier.verify_problem(false);
     }
 
     /// No constraint functions and no objective function
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
 
-        [[maybe_unused]] auto& x = model.create_variable("x");
-        printemps::preprocess::Verifier<int, double> verifier(&model);
+        [[maybe_unused]] auto&            x = model.create_variable("x");
+        preprocess::Verifier<int, double> verifier(&model);
         ASSERT_THROW(verifier.verify_problem(false), std::logic_error);
     }
 }
@@ -77,18 +76,17 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
     /// There is a fixed variable with an invalid initial value.
     /// correction: true
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
 
         auto& x = model.create_variables("x", 10, 0, 1);
         model.create_constraint("g", x.selection());
         x(0).fix_by(2);
 
         model.setup_structure();
-        printemps::preprocess::SelectionExtractor<int, double>
-            selection_extractor(&model);
+        preprocess::SelectionExtractor<int, double> selection_extractor(&model);
         selection_extractor.extract_by_defined_order(false);
 
-        printemps::preprocess::Verifier<int, double> verifier(&model);
+        preprocess::Verifier<int, double> verifier(&model);
         ASSERT_THROW(
             verifier.verify_and_correct_selection_variables_initial_values(
                 true, false),
@@ -98,17 +96,16 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
     /// There is a fixed variable with an invalid initial value.
     /// correction: false
     {
-        printemps::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
+        model::Model<int, double> model;
+        auto&                     x = model.create_variables("x", 10, 0, 1);
         model.create_constraint("g", x.selection());
         x(0).fix_by(2);
 
         model.setup_structure();
-        printemps::preprocess::SelectionExtractor<int, double>
-            selection_extractor(&model);
+        preprocess::SelectionExtractor<int, double> selection_extractor(&model);
         selection_extractor.extract_by_defined_order(false);
 
-        printemps::preprocess::Verifier<int, double> verifier(&model);
+        preprocess::Verifier<int, double> verifier(&model);
         ASSERT_THROW(
             verifier.verify_and_correct_selection_variables_initial_values(
                 false, false),
@@ -118,17 +115,16 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
     /// There is one fixed selected variable.
     /// correction: true
     {
-        printemps::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
+        model::Model<int, double> model;
+        auto&                     x = model.create_variables("x", 10, 0, 1);
         model.create_constraint("g", x.selection());
         x(0).fix_by(1);
 
         model.setup_structure();
-        printemps::preprocess::SelectionExtractor<int, double>
-            selection_extractor(&model);
+        preprocess::SelectionExtractor<int, double> selection_extractor(&model);
         selection_extractor.extract_by_defined_order(false);
 
-        printemps::preprocess::Verifier<int, double> verifier(&model);
+        preprocess::Verifier<int, double> verifier(&model);
         verifier.verify_and_correct_selection_variables_initial_values(true,
                                                                        false);
         EXPECT_EQ(1, x(0).value());
@@ -137,17 +133,16 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
     /// There is one fixed selected variable.
     /// correction: false
     {
-        printemps::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
+        model::Model<int, double> model;
+        auto&                     x = model.create_variables("x", 10, 0, 1);
         model.create_constraint("g", x.selection());
         x(0).fix_by(1);
 
         model.setup_structure();
-        printemps::preprocess::SelectionExtractor<int, double>
-            selection_extractor(&model);
+        preprocess::SelectionExtractor<int, double> selection_extractor(&model);
         selection_extractor.extract_by_defined_order(false);
 
-        printemps::preprocess::Verifier<int, double> verifier(&model);
+        preprocess::Verifier<int, double> verifier(&model);
         verifier.verify_and_correct_selection_variables_initial_values(false,
                                                                        false);
         EXPECT_EQ(1, x(0).value());
@@ -156,18 +151,17 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
     /// There are two fixed selected variables.
     /// correction: true
     {
-        printemps::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
+        model::Model<int, double> model;
+        auto&                     x = model.create_variables("x", 10, 0, 1);
         model.create_constraint("g", x.selection());
         x(0).fix_by(1);
         x(1).fix_by(1);
 
         model.setup_structure();
-        printemps::preprocess::SelectionExtractor<int, double>
-            selection_extractor(&model);
+        preprocess::SelectionExtractor<int, double> selection_extractor(&model);
         selection_extractor.extract_by_defined_order(false);
 
-        printemps::preprocess::Verifier<int, double> verifier(&model);
+        preprocess::Verifier<int, double> verifier(&model);
         ASSERT_THROW(
             verifier.verify_and_correct_selection_variables_initial_values(
                 true, false),
@@ -177,18 +171,17 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
     /// There are two fixed selected variables.
     /// correction: true
     {
-        printemps::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
+        model::Model<int, double> model;
+        auto&                     x = model.create_variables("x", 10, 0, 1);
         model.create_constraint("g", x.selection());
         x(0).fix_by(1);
         x(1).fix_by(1);
 
         model.setup_structure();
-        printemps::preprocess::SelectionExtractor<int, double>
-            selection_extractor(&model);
+        preprocess::SelectionExtractor<int, double> selection_extractor(&model);
         selection_extractor.extract_by_defined_order(false);
 
-        printemps::preprocess::Verifier<int, double> verifier(&model);
+        preprocess::Verifier<int, double> verifier(&model);
         ASSERT_THROW(
             verifier.verify_and_correct_selection_variables_initial_values(
                 false, false),
@@ -198,17 +191,16 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
     /// There are two variables with invalid initial values.
     /// correction: true
     {
-        printemps::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
+        model::Model<int, double> model;
+        auto&                     x = model.create_variables("x", 10, 0, 1);
         model.create_constraint("g", x.selection());
         x(0) = 2;
         x(1) = 3;
         model.setup_structure();
-        printemps::preprocess::SelectionExtractor<int, double>
-            selection_extractor(&model);
+        preprocess::SelectionExtractor<int, double> selection_extractor(&model);
         selection_extractor.extract_by_defined_order(false);
 
-        printemps::preprocess::Verifier<int, double> verifier(&model);
+        preprocess::Verifier<int, double> verifier(&model);
         verifier.verify_and_correct_selection_variables_initial_values(true,
                                                                        false);
 
@@ -219,18 +211,17 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
     /// There are two variables with invalid initial values.
     /// correction: false
     {
-        printemps::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
+        model::Model<int, double> model;
+        auto&                     x = model.create_variables("x", 10, 0, 1);
         model.create_constraint("g", x.selection());
         x(0) = 2;
         x(1) = 3;
 
         model.setup_structure();
-        printemps::preprocess::SelectionExtractor<int, double>
-            selection_extractor(&model);
+        preprocess::SelectionExtractor<int, double> selection_extractor(&model);
         selection_extractor.extract_by_defined_order(false);
 
-        printemps::preprocess::Verifier<int, double> verifier(&model);
+        preprocess::Verifier<int, double> verifier(&model);
         ASSERT_THROW(
             verifier.verify_and_correct_selection_variables_initial_values(
                 false, false),
@@ -240,16 +231,15 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
     /// There is no selected variable.
     /// correction: true
     {
-        printemps::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
+        model::Model<int, double> model;
+        auto&                     x = model.create_variables("x", 10, 0, 1);
         model.create_constraint("g", x.selection());
 
         model.setup_structure();
-        printemps::preprocess::SelectionExtractor<int, double>
-            selection_extractor(&model);
+        preprocess::SelectionExtractor<int, double> selection_extractor(&model);
         selection_extractor.extract_by_defined_order(false);
 
-        printemps::preprocess::Verifier<int, double> verifier(&model);
+        preprocess::Verifier<int, double> verifier(&model);
         verifier.verify_and_correct_selection_variables_initial_values(true,
                                                                        false);
 
@@ -262,16 +252,15 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
     /// There is no selected variable.
     /// correction: false
     {
-        printemps::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
+        model::Model<int, double> model;
+        auto&                     x = model.create_variables("x", 10, 0, 1);
         model.create_constraint("g", x.selection());
 
         model.setup_structure();
-        printemps::preprocess::SelectionExtractor<int, double>
-            selection_extractor(&model);
+        preprocess::SelectionExtractor<int, double> selection_extractor(&model);
         selection_extractor.extract_by_defined_order(false);
 
-        printemps::preprocess::Verifier<int, double> verifier(&model);
+        preprocess::Verifier<int, double> verifier(&model);
 
         ASSERT_THROW(
             verifier.verify_and_correct_selection_variables_initial_values(
@@ -282,17 +271,16 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
     /// There is one selected variable.
     /// correction: true
     {
-        printemps::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
+        model::Model<int, double> model;
+        auto&                     x = model.create_variables("x", 10, 0, 1);
         model.create_constraint("g", x.selection());
         x(0) = 1;
 
         model.setup_structure();
-        printemps::preprocess::SelectionExtractor<int, double>
-            selection_extractor(&model);
+        preprocess::SelectionExtractor<int, double> selection_extractor(&model);
         selection_extractor.extract_by_defined_order(false);
 
-        printemps::preprocess::Verifier<int, double> verifier(&model);
+        preprocess::Verifier<int, double> verifier(&model);
         verifier.verify_and_correct_selection_variables_initial_values(true,
                                                                        false);
 
@@ -302,17 +290,16 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
     /// There is one selected variable.
     /// correction: false
     {
-        printemps::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
+        model::Model<int, double> model;
+        auto&                     x = model.create_variables("x", 10, 0, 1);
         model.create_constraint("g", x.selection());
         x(0) = 1;
 
         model.setup_structure();
-        printemps::preprocess::SelectionExtractor<int, double>
-            selection_extractor(&model);
+        preprocess::SelectionExtractor<int, double> selection_extractor(&model);
         selection_extractor.extract_by_defined_order(false);
 
-        printemps::preprocess::Verifier<int, double> verifier(&model);
+        preprocess::Verifier<int, double> verifier(&model);
         verifier.verify_and_correct_selection_variables_initial_values(false,
                                                                        false);
 
@@ -322,18 +309,17 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
     /// There are two unfixed selected variable.
     /// correction: true
     {
-        printemps::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
+        model::Model<int, double> model;
+        auto&                     x = model.create_variables("x", 10, 0, 1);
         model.create_constraint("g", x.selection());
         x(0) = 1;
         x(1) = 1;
 
         model.setup_structure();
-        printemps::preprocess::SelectionExtractor<int, double>
-            selection_extractor(&model);
+        preprocess::SelectionExtractor<int, double> selection_extractor(&model);
         selection_extractor.extract_by_defined_order(false);
 
-        printemps::preprocess::Verifier<int, double> verifier(&model);
+        preprocess::Verifier<int, double> verifier(&model);
         verifier.verify_and_correct_selection_variables_initial_values(true,
                                                                        false);
 
@@ -344,18 +330,17 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
     /// There are two unfixed selected variable.
     /// correction: false
     {
-        printemps::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
+        model::Model<int, double> model;
+        auto&                     x = model.create_variables("x", 10, 0, 1);
         model.create_constraint("g", x.selection());
         x(0) = 1;
         x(1) = 1;
 
         model.setup_structure();
-        printemps::preprocess::SelectionExtractor<int, double>
-            selection_extractor(&model);
+        preprocess::SelectionExtractor<int, double> selection_extractor(&model);
         selection_extractor.extract_by_defined_order(false);
 
-        printemps::preprocess::Verifier<int, double> verifier(&model);
+        preprocess::Verifier<int, double> verifier(&model);
         ASSERT_THROW(
             verifier.verify_and_correct_selection_variables_initial_values(
                 false, false),
@@ -365,18 +350,17 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
     /// There are 1 fixed and 1 unfixed selected variable.
     /// correction: true
     {
-        printemps::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
+        model::Model<int, double> model;
+        auto&                     x = model.create_variables("x", 10, 0, 1);
         model.create_constraint("g", x.selection());
         x(0) = 1;
         x(1).fix_by(1);
 
         model.setup_structure();
-        printemps::preprocess::SelectionExtractor<int, double>
-            selection_extractor(&model);
+        preprocess::SelectionExtractor<int, double> selection_extractor(&model);
         selection_extractor.extract_by_defined_order(false);
 
-        printemps::preprocess::Verifier<int, double> verifier(&model);
+        preprocess::Verifier<int, double> verifier(&model);
         verifier.verify_and_correct_selection_variables_initial_values(true,
                                                                        false);
 
@@ -387,18 +371,17 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
     /// There are 1 fixed and 1 unfixed selected variable.
     /// correction: false
     {
-        printemps::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
+        model::Model<int, double> model;
+        auto&                     x = model.create_variables("x", 10, 0, 1);
         model.create_constraint("g", x.selection());
         x(0) = 1;
         x(1).fix_by(1);
 
         model.setup_structure();
-        printemps::preprocess::SelectionExtractor<int, double>
-            selection_extractor(&model);
+        preprocess::SelectionExtractor<int, double> selection_extractor(&model);
         selection_extractor.extract_by_defined_order(false);
 
-        printemps::preprocess::Verifier<int, double> verifier(&model);
+        preprocess::Verifier<int, double> verifier(&model);
         ASSERT_THROW(
             verifier.verify_and_correct_selection_variables_initial_values(
                 false, false),
@@ -411,13 +394,13 @@ TEST_F(TestVerifier, verify_and_correct_binary_variables_initial_values) {
     /// There is a fixed variable with an invalid initial value.
     /// correction: true
     {
-        printemps::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
+        model::Model<int, double> model;
+        auto&                     x = model.create_variables("x", 10, 0, 1);
         x(0).fix_by(2);
 
         model.setup_structure();
 
-        printemps::preprocess::Verifier<int, double> verifier(&model);
+        preprocess::Verifier<int, double> verifier(&model);
         ASSERT_THROW(
             verifier.verify_and_correct_binary_variables_initial_values(true,
                                                                         false),
@@ -427,13 +410,13 @@ TEST_F(TestVerifier, verify_and_correct_binary_variables_initial_values) {
     /// There is a fixed variable with an invalid initial value.
     /// correction: false
     {
-        printemps::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
+        model::Model<int, double> model;
+        auto&                     x = model.create_variables("x", 10, 0, 1);
         x(0).fix_by(-1);
 
         model.setup_structure();
 
-        printemps::preprocess::Verifier<int, double> verifier(&model);
+        preprocess::Verifier<int, double> verifier(&model);
         ASSERT_THROW(
             verifier.verify_and_correct_binary_variables_initial_values(false,
                                                                         false),
@@ -443,14 +426,14 @@ TEST_F(TestVerifier, verify_and_correct_binary_variables_initial_values) {
     /// There is a variable with an invalid initial value.
     /// correction: true
     {
-        printemps::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
-        x(0)    = 2;
-        x(1)    = -1;
+        model::Model<int, double> model;
+        auto&                     x = model.create_variables("x", 10, 0, 1);
+        x(0)                        = 2;
+        x(1)                        = -1;
 
         model.setup_structure();
 
-        printemps::preprocess::Verifier<int, double> verifier(&model);
+        preprocess::Verifier<int, double> verifier(&model);
         verifier.verify_and_correct_binary_variables_initial_values(true,
                                                                     false);
         EXPECT_EQ(1, x(0).value());
@@ -460,14 +443,14 @@ TEST_F(TestVerifier, verify_and_correct_binary_variables_initial_values) {
     /// There is a variable with an invalid initial value.
     /// correction: false
     {
-        printemps::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, 0, 1);
-        x(0)    = 2;
-        x(1)    = -1;
+        model::Model<int, double> model;
+        auto&                     x = model.create_variables("x", 10, 0, 1);
+        x(0)                        = 2;
+        x(1)                        = -1;
 
         model.setup_structure();
 
-        printemps::preprocess::Verifier<int, double> verifier(&model);
+        preprocess::Verifier<int, double> verifier(&model);
         ASSERT_THROW(
             verifier.verify_and_correct_binary_variables_initial_values(false,
                                                                         false),
@@ -480,13 +463,13 @@ TEST_F(TestVerifier, verify_and_correct_integer_variables_initial_values) {
     /// There is a fixed variable with an invalid initial value.
     /// correction: true
     {
-        printemps::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, -10, 10);
+        model::Model<int, double> model;
+        auto&                     x = model.create_variables("x", 10, -10, 10);
         x(0).fix_by(11);
 
         model.setup_structure();
 
-        printemps::preprocess::Verifier<int, double> verifier(&model);
+        preprocess::Verifier<int, double> verifier(&model);
         ASSERT_THROW(
             verifier.verify_and_correct_integer_variables_initial_values(true,
                                                                          false),
@@ -496,13 +479,13 @@ TEST_F(TestVerifier, verify_and_correct_integer_variables_initial_values) {
     /// There is a fixed variable with an invalid initial value.
     /// correction: false
     {
-        printemps::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, -10, 10);
+        model::Model<int, double> model;
+        auto&                     x = model.create_variables("x", 10, -10, 10);
         x(0).fix_by(-11);
 
         model.setup_structure();
 
-        printemps::preprocess::Verifier<int, double> verifier(&model);
+        preprocess::Verifier<int, double> verifier(&model);
         ASSERT_THROW(
             verifier.verify_and_correct_integer_variables_initial_values(false,
                                                                          false),
@@ -512,14 +495,14 @@ TEST_F(TestVerifier, verify_and_correct_integer_variables_initial_values) {
     /// There is a variable with an invalid initial value.
     /// correction: true
     {
-        printemps::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, -10, 10);
-        x(0)    = 11;
-        x(1)    = -11;
+        model::Model<int, double> model;
+        auto&                     x = model.create_variables("x", 10, -10, 10);
+        x(0)                        = 11;
+        x(1)                        = -11;
 
         model.setup_structure();
 
-        printemps::preprocess::Verifier<int, double> verifier(&model);
+        preprocess::Verifier<int, double> verifier(&model);
         verifier.verify_and_correct_integer_variables_initial_values(true,
                                                                      false);
 
@@ -530,14 +513,14 @@ TEST_F(TestVerifier, verify_and_correct_integer_variables_initial_values) {
     /// There is a variable with an invalid initial value.
     /// correction: false
     {
-        printemps::model::Model<int, double> model;
-        auto& x = model.create_variables("x", 10, -10, 10);
-        x(0)    = 11;
-        x(1)    = -11;
+        model::Model<int, double> model;
+        auto&                     x = model.create_variables("x", 10, -10, 10);
+        x(0)                        = 11;
+        x(1)                        = -11;
 
         model.setup_structure();
 
-        printemps::preprocess::Verifier<int, double> verifier(&model);
+        preprocess::Verifier<int, double> verifier(&model);
         ASSERT_THROW(
             verifier.verify_and_correct_integer_variables_initial_values(false,
                                                                          false),

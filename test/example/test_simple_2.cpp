@@ -4,10 +4,10 @@
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
 #include <gtest/gtest.h>
-#include <random>
 #include <printemps.h>
 
 namespace {
+using namespace printemps;
 /*****************************************************************************/
 class TestSimple2 : public ::testing::Test {
    protected:
@@ -34,7 +34,7 @@ TEST_F(TestSimple2, simple_2) {
      *        where    f_1 = 2 x_1 + 7 x_2 + 9 x_3 + 1,
      *                 f_2 = 5 y_1 + 6 y_2.
      */
-    printemps::model::IPModel model;
+    model::IPModel model;
 
     auto& x = model.create_variables("x", 3, 0, 1);
     auto& y = model.create_variables("y", 2, 0, 1);
@@ -62,9 +62,9 @@ TEST_F(TestSimple2, simple_2) {
     }
 
     /// solve
-    printemps::option::Option option;
+    option::Option option;
 
-    auto result = printemps::solver::solve(&model, option);
+    auto result = solver::solve(&model, option);
     EXPECT_TRUE(result.solution.is_feasible());
     EXPECT_EQ(1, result.solution.variables("x").values(0));
     EXPECT_EQ(1, result.solution.variables("x").values(1));
@@ -73,7 +73,7 @@ TEST_F(TestSimple2, simple_2) {
     EXPECT_EQ(1, result.solution.variables("y").values(1));
     EXPECT_EQ(16, result.solution.objective());
 
-    ASSERT_THROW(printemps::solver::solve(&model, option), std::logic_error);
+    ASSERT_THROW(solver::solve(&model, option), std::logic_error);
 }
 }  // namespace
 /*****************************************************************************/
