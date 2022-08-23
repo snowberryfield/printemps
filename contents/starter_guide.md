@@ -340,7 +340,7 @@ The methods `create_expressions(name, n)` creates `n` expressions named `name` w
 The `create_expressions("name", {n_1, ..., n_m})` method creates `n_1 * ... * n_m` expressions named `name` with `m`-dimensional index. Each constraint can be accessed by like as `s(0, 0)`.
 
 #### Defining Expression
-An expression can be defined as a first-order functions on decision variables and other expressions (nonlinear functions are modelled in a different way.)
+An expression can be defined as a first-order functions on decision variables and other expressions (nonlinear functions are modeled in a different way.)
 The following code shows examples of expression definitions.
 
 ```c++
