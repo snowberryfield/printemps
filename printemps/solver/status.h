@@ -162,8 +162,7 @@ struct Status {
     }
 
     /*************************************************************************/
-    inline void add_variable_break_down(
-        utility::json::JsonObject *a_object) const {
+    inline void add_variable_detail(utility::json::JsonObject *a_object) const {
         auto &REFERENCE_ORIGINAL =
             this->model_ptr->variable_reference_original();
         utility::json::JsonObject original;
@@ -193,14 +192,14 @@ struct Status {
             "mutable",           //
             REFERENCE_PRESOLVED.mutable_variable_ptrs.size());
 
-        utility::json::JsonObject variable_break_down;
-        variable_break_down.emplace_back("original", original);
-        variable_break_down.emplace_back("presolved", presolved);
-        a_object->emplace_back("variable_break_down", variable_break_down);
+        utility::json::JsonObject variable_detail;
+        variable_detail.emplace_back("original", original);
+        variable_detail.emplace_back("presolved", presolved);
+        a_object->emplace_back("variable_detail", variable_detail);
     }
 
     /*************************************************************************/
-    inline void add_variable_type_break_down(
+    inline void add_variable_type_detail(
         utility::json::JsonObject *a_object) const {
         auto &REFERENCE_ORIGINAL =
             this->model_ptr->variable_type_reference_original();
@@ -274,15 +273,14 @@ struct Status {
             compute_number_of_mutable_variables(
                 REFERENCE_PRESOLVED.dependent_integer_variable_ptrs));
 
-        utility::json::JsonObject variable_type_break_down;
-        variable_type_break_down.emplace_back("original", original);
-        variable_type_break_down.emplace_back("presolved", presolved);
-        a_object->emplace_back("variable_type_break_down",
-                               variable_type_break_down);
+        utility::json::JsonObject variable_type_detail;
+        variable_type_detail.emplace_back("original", original);
+        variable_type_detail.emplace_back("presolved", presolved);
+        a_object->emplace_back("variable_type_detail", variable_type_detail);
     }
 
     /*************************************************************************/
-    inline void add_constraint_break_down(
+    inline void add_constraint_detail(
         utility::json::JsonObject *a_object) const {
         auto &REFERENCE_ORIGINAL =
             this->model_ptr->constraint_reference_original();
@@ -317,14 +315,14 @@ struct Status {
             "disabled",          //
             REFERENCE_PRESOLVED.disabled_constraint_ptrs.size());
 
-        utility::json::JsonObject constraint_break_down;
-        constraint_break_down.emplace_back("original", original);
-        constraint_break_down.emplace_back("presolved", presolved);
-        a_object->emplace_back("constraint_break_down", constraint_break_down);
+        utility::json::JsonObject constraint_detail;
+        constraint_detail.emplace_back("original", original);
+        constraint_detail.emplace_back("presolved", presolved);
+        a_object->emplace_back("constraint_detail", constraint_detail);
     }
 
     /*************************************************************************/
-    inline void add_constraint_type_break_down(
+    inline void add_constraint_type_detail(
         utility::json::JsonObject *a_object) const {
         auto &REFERENCE_ORIGINAL =
             this->model_ptr->constraint_type_reference_original();
@@ -357,18 +355,18 @@ struct Status {
             compute_number_of_constraints(
                 REFERENCE_ORIGINAL.exclusive_or_ptrs));
 
-        original.emplace_back(     //
-            "exclusive_nor_ptrs",  //
+        original.emplace_back(  //
+            "exclusive_nor",    //
             compute_number_of_constraints(
                 REFERENCE_ORIGINAL.exclusive_nor_ptrs));
 
-        original.emplace_back(         //
-            "inverted_integers_ptrs",  //
+        original.emplace_back(    //
+            "inverted_integers",  //
             compute_number_of_constraints(
                 REFERENCE_ORIGINAL.inverted_integers_ptrs));
 
-        original.emplace_back(         //
-            "balanced_integers_ptrs",  //
+        original.emplace_back(    //
+            "balanced_integers",  //
             compute_number_of_constraints(
                 REFERENCE_ORIGINAL.balanced_integers_ptrs));
 
@@ -503,18 +501,18 @@ struct Status {
             compute_number_of_enabled_constraints(
                 REFERENCE_PRESOLVED.exclusive_or_ptrs));
 
-        presolved.emplace_back(    //
-            "exclusive_nor_ptrs",  //
+        presolved.emplace_back(  //
+            "exclusive_nor",     //
             compute_number_of_enabled_constraints(
                 REFERENCE_PRESOLVED.exclusive_nor_ptrs));
 
-        presolved.emplace_back(        //
-            "inverted_integers_ptrs",  //
+        presolved.emplace_back(   //
+            "inverted_integers",  //
             compute_number_of_enabled_constraints(
                 REFERENCE_PRESOLVED.inverted_integers_ptrs));
 
-        presolved.emplace_back(        //
-            "balanced_integers_ptrs",  //
+        presolved.emplace_back(   //
+            "balanced_integers",  //
             compute_number_of_enabled_constraints(
                 REFERENCE_PRESOLVED.balanced_integers_ptrs));
 
@@ -648,21 +646,21 @@ struct Status {
             compute_number_of_enabled_constraints(
                 REFERENCE_PRESOLVED.nonlinear_ptrs));
 
-        utility::json::JsonObject constraint_type_break_down;
-        constraint_type_break_down.emplace_back("original", original);
-        constraint_type_break_down.emplace_back("presolved", presolved);
-        a_object->emplace_back("constraint_type_break_down",
-                               constraint_type_break_down);
+        utility::json::JsonObject constraint_type_detail;
+        constraint_type_detail.emplace_back("original", original);
+        constraint_type_detail.emplace_back("presolved", presolved);
+        a_object->emplace_back("constraint_type_detail",
+                               constraint_type_detail);
     }
 
     /*************************************************************************/
     void write_json_by_name(const std::string &a_FILE_NAME) const {
         utility::json::JsonObject object;
         this->add_summary_json(&object);
-        this->add_variable_break_down(&object);
-        this->add_variable_type_break_down(&object);
-        this->add_constraint_break_down(&object);
-        this->add_constraint_type_break_down(&object);
+        this->add_variable_detail(&object);
+        this->add_variable_type_detail(&object);
+        this->add_constraint_detail(&object);
+        this->add_constraint_type_detail(&object);
 
         /// Penalty coefficients
         object.emplace_back(         //
@@ -686,10 +684,10 @@ struct Status {
     void write_json_by_array(const std::string &a_FILE_NAME) const {
         utility::json::JsonObject object;
         this->add_summary_json(&object);
-        this->add_variable_break_down(&object);
-        this->add_variable_type_break_down(&object);
-        this->add_constraint_break_down(&object);
-        this->add_constraint_type_break_down(&object);
+        this->add_variable_detail(&object);
+        this->add_variable_type_detail(&object);
+        this->add_constraint_detail(&object);
+        this->add_constraint_type_detail(&object);
 
         /// Penalty coefficients
         object.emplace_back(         //
