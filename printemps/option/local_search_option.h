@@ -83,23 +83,59 @@ struct LocalSearchOption {
     inline void setup(const utility::json::JsonObject &a_OBJECT) {
         this->initialize();
 
-        read_json(&this->is_enabled,  //
-                  "is_enabled", a_OBJECT);
+        read_json(              //
+            &this->is_enabled,  //
+            "is_enabled", a_OBJECT);
 
-        read_json(&this->iteration_max,  //
-                  "iteration_max", a_OBJECT);
+        read_json(                 //
+            &this->iteration_max,  //
+            "iteration_max", a_OBJECT);
 
-        read_json(&this->time_max,  //
-                  "time_max", a_OBJECT);
+        read_json(            //
+            &this->time_max,  //
+            "time_max", a_OBJECT);
 
-        read_json(&this->time_offset,  //
-                  "time_offset", a_OBJECT);
+        read_json(               //
+            &this->time_offset,  //
+            "time_offset", a_OBJECT);
 
-        read_json(&this->log_interval,  //
-                  "log_interval", a_OBJECT);
+        read_json(                //
+            &this->log_interval,  //
+            "log_interval", a_OBJECT);
 
-        read_json(&this->seed,  //
-                  "seed", a_OBJECT);
+        read_json(        //
+            &this->seed,  //
+            "seed", a_OBJECT);
+    }
+
+    /**************************************************************************/
+    inline utility::json::JsonObject to_json(void) const {
+        utility::json::JsonObject obj;
+        obj.emplace_back(  //
+            "is_enabled",  //
+            this->is_enabled);
+
+        obj.emplace_back(     //
+            "iteration_max",  //
+            this->iteration_max);
+
+        obj.emplace_back(  //
+            "time_max",    //
+            this->time_max);
+
+        obj.emplace_back(   //
+            "time_offset",  //
+            this->time_offset);
+
+        obj.emplace_back(    //
+            "log_interval",  //
+            this->log_interval);
+
+        obj.emplace_back(  //
+            "seed",        //
+            this->seed);
+
+        return obj;
     }
 };
 }  // namespace printemps::option

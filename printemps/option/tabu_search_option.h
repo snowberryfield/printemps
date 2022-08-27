@@ -267,83 +267,219 @@ struct TabuSearchOption {
     inline void setup(const utility::json::JsonObject &a_OBJECT) {
         this->initialize();
 
-        read_json(&this->iteration_max,  //
-                  "iteration_max", a_OBJECT);
+        read_json(                 //
+            &this->iteration_max,  //
+            "iteration_max", a_OBJECT);
 
-        read_json(&this->time_max,  //
-                  "time_max", a_OBJECT);
+        read_json(            //
+            &this->time_max,  //
+            "time_max", a_OBJECT);
 
-        read_json(&this->time_offset,  //
-                  "time_offset", a_OBJECT);
+        read_json(               //
+            &this->time_offset,  //
+            "time_offset", a_OBJECT);
 
-        read_json(&this->log_interval,  //
-                  "log_interval", a_OBJECT);
+        read_json(                //
+            &this->log_interval,  //
+            "log_interval", a_OBJECT);
 
-        read_json(&this->initial_tabu_tenure,  //
-                  "initial_tabu_tenure", a_OBJECT);
+        read_json(                       //
+            &this->initial_tabu_tenure,  //
+            "initial_tabu_tenure", a_OBJECT);
 
-        read_json(&this->tabu_tenure_randomize_rate,  //
-                  "tabu_tenure_randomize_rate", a_OBJECT);
+        read_json(                              //
+            &this->tabu_tenure_randomize_rate,  //
+            "tabu_tenure_randomize_rate", a_OBJECT);
 
-        read_json(&this->initial_modification_fixed_rate,  //
-                  "initial_modification_fixed_rate", a_OBJECT);
+        read_json(                                   //
+            &this->initial_modification_fixed_rate,  //
+            "initial_modification_fixed_rate", a_OBJECT);
 
-        read_json(&this->initial_modification_randomize_rate,  //
-                  "initial_modification_randomize_rate", a_OBJECT);
+        read_json(                                       //
+            &this->initial_modification_randomize_rate,  //
+            "initial_modification_randomize_rate", a_OBJECT);
 
-        read_json(&this->tabu_mode,  //
-                  "tabu_mode", a_OBJECT);
+        read_json(             //
+            &this->tabu_mode,  //
+            "tabu_mode", a_OBJECT);
 
-        read_json(&this->move_preserve_rate,  //
-                  "move_preserve_rate", a_OBJECT);
+        read_json(                      //
+            &this->move_preserve_rate,  //
+            "move_preserve_rate", a_OBJECT);
 
-        read_json(&this->frequency_penalty_coefficient,  //
-                  "frequency_penalty_coefficient", a_OBJECT);
+        read_json(                                 //
+            &this->frequency_penalty_coefficient,  //
+            "frequency_penalty_coefficient", a_OBJECT);
 
-        read_json(&this->lagrangian_penalty_coefficient,  //
-                  "lagrangian_penalty_coefficient", a_OBJECT);
+        read_json(                                  //
+            &this->lagrangian_penalty_coefficient,  //
+            "lagrangian_penalty_coefficient", a_OBJECT);
 
-        read_json(&this->pruning_rate_threshold,  //
-                  "pruning_rate_threshold", a_OBJECT);
+        read_json(                          //
+            &this->pruning_rate_threshold,  //
+            "pruning_rate_threshold", a_OBJECT);
 
-        read_json(&this->is_enabled_shuffle,  //
-                  "is_enabled_shuffle", a_OBJECT);
+        read_json(                      //
+            &this->is_enabled_shuffle,  //
+            "is_enabled_shuffle", a_OBJECT);
 
-        read_json(&this->is_enabled_move_curtail,  //
-                  "is_enabled_move_curtail", a_OBJECT);
+        read_json(                           //
+            &this->is_enabled_move_curtail,  //
+            "is_enabled_move_curtail", a_OBJECT);
 
-        read_json(&this->is_enabled_automatic_break,  //
-                  "is_enabled_automatic_break", a_OBJECT);
+        read_json(                              //
+            &this->is_enabled_automatic_break,  //
+            "is_enabled_automatic_break", a_OBJECT);
 
-        read_json(&this->is_enabled_automatic_tabu_tenure_adjustment,  //
-                  "is_enabled_automatic_tabu_tenure_adjustment", a_OBJECT);
+        read_json(                                               //
+            &this->is_enabled_automatic_tabu_tenure_adjustment,  //
+            "is_enabled_automatic_tabu_tenure_adjustment", a_OBJECT);
 
-        read_json(&this->is_enabled_automatic_iteration_adjustment,  //
-                  "is_enabled_automatic_iteration_adjustment", a_OBJECT);
+        read_json(                                             //
+            &this->is_enabled_automatic_iteration_adjustment,  //
+            "is_enabled_automatic_iteration_adjustment", a_OBJECT);
 
-        read_json(&this->is_enabled_initial_modification,  //
-                  "is_enabled_initial_modification", a_OBJECT);
+        read_json(                                   //
+            &this->is_enabled_initial_modification,  //
+            "is_enabled_initial_modification", a_OBJECT);
 
-        read_json(&this->intensity_increase_count_threshold,  //
-                  "intensity_increase_count_threshold", a_OBJECT);
+        read_json(                                      //
+            &this->intensity_increase_count_threshold,  //
+            "intensity_increase_count_threshold", a_OBJECT);
 
-        read_json(&this->intensity_decrease_count_threshold,  //
-                  "intensity_decrease_count_threshold", a_OBJECT);
+        read_json(                                      //
+            &this->intensity_decrease_count_threshold,  //
+            "intensity_decrease_count_threshold", a_OBJECT);
 
-        read_json(&this->iteration_increase_rate,  //
-                  "iteration_increase_rate", a_OBJECT);
+        read_json(                           //
+            &this->iteration_increase_rate,  //
+            "iteration_increase_rate", a_OBJECT);
 
-        read_json(&this->iteration_decrease_rate,  //
-                  "iteration_decrease_rate", a_OBJECT);
+        read_json(                           //
+            &this->iteration_decrease_rate,  //
+            "iteration_decrease_rate", a_OBJECT);
 
-        read_json(&this->ignore_tabu_if_global_incumbent,  //
-                  "ignore_tabu_if_global_incumbent", a_OBJECT);
+        read_json(                                   //
+            &this->ignore_tabu_if_global_incumbent,  //
+            "ignore_tabu_if_global_incumbent", a_OBJECT);
 
-        read_json(&this->number_of_initial_modification,  //
-                  "number_of_initial_modification", a_OBJECT);
+        read_json(                                  //
+            &this->number_of_initial_modification,  //
+            "number_of_initial_modification", a_OBJECT);
 
-        read_json(&this->seed,  //
-                  "seed", a_OBJECT);
+        read_json(        //
+            &this->seed,  //
+            "seed", a_OBJECT);
+    }
+
+    /**************************************************************************/
+    inline utility::json::JsonObject to_json(void) const {
+        utility::json::JsonObject obj;
+        obj.emplace_back(     //
+            "iteration_max",  //
+            this->iteration_max);
+
+        obj.emplace_back(  //
+            "time_max",    //
+            this->time_max);
+
+        obj.emplace_back(   //
+            "time_offset",  //
+            this->time_offset);
+
+        obj.emplace_back(    //
+            "log_interval",  //
+            this->log_interval);
+
+        obj.emplace_back(           //
+            "initial_tabu_tenure",  //
+            this->initial_tabu_tenure);
+
+        obj.emplace_back(                  //
+            "tabu_tenure_randomize_rate",  //
+            this->tabu_tenure_randomize_rate);
+
+        obj.emplace_back(  //
+            "initial_modification_fixed_rate",
+            this->initial_modification_fixed_rate);
+
+        obj.emplace_back(  //
+            "initial_modification_randomize_rate",
+            this->initial_modification_randomize_rate);
+
+        obj.emplace_back(  //
+            "tabu_mode",   //
+            tabu_mode::TabuModeInverseMap.at(this->tabu_mode));
+
+        obj.emplace_back(          //
+            "move_preserve_rate",  //
+            this->move_preserve_rate);
+
+        obj.emplace_back(                     //
+            "frequency_penalty_coefficient",  //
+            this->frequency_penalty_coefficient);
+
+        obj.emplace_back(                      //
+            "lagrangian_penalty_coefficient",  //
+            this->lagrangian_penalty_coefficient);
+
+        obj.emplace_back(              //
+            "pruning_rate_threshold",  //
+            this->pruning_rate_threshold);
+
+        obj.emplace_back(          //
+            "is_enabled_shuffle",  //
+            this->is_enabled_shuffle);
+
+        obj.emplace_back(               //
+            "is_enabled_move_curtail",  //
+            this->is_enabled_move_curtail);
+
+        obj.emplace_back(                  //
+            "is_enabled_automatic_break",  //
+            this->is_enabled_automatic_break);
+
+        obj.emplace_back(                                   //
+            "is_enabled_automatic_tabu_tenure_adjustment",  //
+            this->is_enabled_automatic_tabu_tenure_adjustment);
+
+        obj.emplace_back(                                 //
+            "is_enabled_automatic_iteration_adjustment",  //
+            this->is_enabled_automatic_iteration_adjustment);
+
+        obj.emplace_back(                       //
+            "is_enabled_initial_modification",  //
+            this->is_enabled_initial_modification);
+
+        obj.emplace_back(                          //
+            "intensity_increase_count_threshold",  //
+            this->intensity_increase_count_threshold);
+
+        obj.emplace_back(                          //
+            "intensity_decrease_count_threshold",  //
+            this->intensity_decrease_count_threshold);
+
+        obj.emplace_back(               //
+            "iteration_increase_rate",  //
+            this->iteration_increase_rate);
+
+        obj.emplace_back(               //
+            "iteration_decrease_rate",  //
+            this->iteration_decrease_rate);
+
+        obj.emplace_back(                       //
+            "ignore_tabu_if_global_incumbent",  //
+            this->ignore_tabu_if_global_incumbent);
+
+        obj.emplace_back(                      //
+            "number_of_initial_modification",  //
+            this->number_of_initial_modification);
+
+        obj.emplace_back(  //
+            "seed",        //
+            this->seed);
+
+        return obj;
     }
 };
 }  // namespace printemps::option

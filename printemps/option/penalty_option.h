@@ -80,20 +80,50 @@ struct PenaltyOption {
     inline void setup(const utility::json::JsonObject &a_OBJECT) {
         this->initialize();
 
-        read_json(&this->penalty_coefficient_relaxing_rate,  //
-                  "penalty_coefficient_relaxing_rate", a_OBJECT);
+        read_json(                                     //
+            &this->penalty_coefficient_relaxing_rate,  //
+            "penalty_coefficient_relaxing_rate", a_OBJECT);
 
-        read_json(&this->penalty_coefficient_tightening_rate,  //
-                  "penalty_coefficient_tightening_rate", a_OBJECT);
+        read_json(                                       //
+            &this->penalty_coefficient_tightening_rate,  //
+            "penalty_coefficient_tightening_rate", a_OBJECT);
 
-        read_json(&this->penalty_coefficient_updating_balance,  //
-                  "penalty_coefficient_updating_balance", a_OBJECT);
+        read_json(                                        //
+            &this->penalty_coefficient_updating_balance,  //
+            "penalty_coefficient_updating_balance", a_OBJECT);
 
-        read_json(&this->initial_penalty_coefficient,  //
-                  "initial_penalty_coefficient", a_OBJECT);
+        read_json(                               //
+            &this->initial_penalty_coefficient,  //
+            "initial_penalty_coefficient", a_OBJECT);
 
-        read_json(&this->is_enabled_group_penalty_coefficient,  //
-                  "is_enabled_group_penalty_coefficient", a_OBJECT);
+        read_json(                                        //
+            &this->is_enabled_group_penalty_coefficient,  //
+            "is_enabled_group_penalty_coefficient", a_OBJECT);
+    }
+
+    /**************************************************************************/
+    inline utility::json::JsonObject to_json(void) const {
+        utility::json::JsonObject obj;
+        obj.emplace_back(                         //
+            "penalty_coefficient_relaxing_rate",  //
+            this->penalty_coefficient_relaxing_rate);
+
+        obj.emplace_back(                           //
+            "penalty_coefficient_tightening_rate",  //
+            this->penalty_coefficient_tightening_rate);
+
+        obj.emplace_back(                            //
+            "penalty_coefficient_updating_balance",  //
+            this->penalty_coefficient_updating_balance);
+
+        obj.emplace_back(                   //
+            "initial_penalty_coefficient",  //
+            this->initial_penalty_coefficient);
+
+        obj.emplace_back(                            //
+            "is_enabled_group_penalty_coefficient",  //
+            this->is_enabled_group_penalty_coefficient);
+        return obj;
     }
 };
 }  // namespace printemps::option
