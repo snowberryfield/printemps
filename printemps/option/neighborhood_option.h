@@ -249,93 +249,189 @@ struct NeighborhoodOption {
     inline void setup(const utility::json::JsonObject &a_OBJECT) {
         this->initialize();
 
-        /// is_enabled_binary_move
-        read_json(&this->is_enabled_binary_move,  //
-                  "is_enabled_binary_move", a_OBJECT);
+        read_json(                          //
+            &this->is_enabled_binary_move,  //
+            "is_enabled_binary_move", a_OBJECT);
 
-        /// is_enabled_integer_move
-        read_json(&this->is_enabled_integer_move,  //
-                  "is_enabled_integer_move", a_OBJECT);
+        read_json(                           //
+            &this->is_enabled_integer_move,  //
+            "is_enabled_integer_move", a_OBJECT);
 
-        /// is_enabled_exclusive_or_move
-        read_json(&this->is_enabled_exclusive_or_move,  //
-                  "is_enabled_exclusive_or_move", a_OBJECT);
+        read_json(                                //
+            &this->is_enabled_exclusive_or_move,  //
+            "is_enabled_exclusive_or_move", a_OBJECT);
 
-        /// is_enabled_exclusive_nor_move
-        read_json(&this->is_enabled_exclusive_nor_move,  //
-                  "is_enabled_exclusive_nor_move", a_OBJECT);
+        read_json(                                 //
+            &this->is_enabled_exclusive_nor_move,  //
+            "is_enabled_exclusive_nor_move", a_OBJECT);
 
-        /// is_enabled_inverted_integers_move
-        read_json(&this->is_enabled_inverted_integers_move,  //
-                  "is_enabled_inverted_integers_move", a_OBJECT);
+        read_json(                                     //
+            &this->is_enabled_inverted_integers_move,  //
+            "is_enabled_inverted_integers_move", a_OBJECT);
 
-        /// is_enabled_balanced_integers_move
-        read_json(&this->is_enabled_balanced_integers_move,  //
-                  "is_enabled_balanced_integers_move", a_OBJECT);
+        read_json(                                     //
+            &this->is_enabled_balanced_integers_move,  //
+            "is_enabled_balanced_integers_move", a_OBJECT);
 
-        /// is_enabled_constant_sum_integers_move
-        read_json(&this->is_enabled_constant_sum_integers_move,  //
-                  "is_enabled_constant_sum_integers_move", a_OBJECT);
+        read_json(                                         //
+            &this->is_enabled_constant_sum_integers_move,  //
+            "is_enabled_constant_sum_integers_move", a_OBJECT);
 
-        /// is_enabled_constant_difference_integers_move
-        read_json(&this->is_enabled_constant_difference_integers_move,  //
-                  "is_enabled_constant_difference_integers_move", a_OBJECT);
+        read_json(                                                //
+            &this->is_enabled_constant_difference_integers_move,  //
+            "is_enabled_constant_difference_integers_move", a_OBJECT);
 
-        /// is_enabled_constant_ratio_integers_move
-        read_json(&this->is_enabled_constant_ratio_integers_move,  //
-                  "is_enabled_constant_ratio_integers_move", a_OBJECT);
+        read_json(                                           //
+            &this->is_enabled_constant_ratio_integers_move,  //
+            "is_enabled_constant_ratio_integers_move", a_OBJECT);
 
-        /// is_enabled_aggregation_move
-        read_json(&this->is_enabled_aggregation_move,  //
-                  "is_enabled_aggregation_move", a_OBJECT);
+        read_json(                               //
+            &this->is_enabled_aggregation_move,  //
+            "is_enabled_aggregation_move", a_OBJECT);
 
-        /// is_enabled_precedence_move
-        read_json(&this->is_enabled_precedence_move,  //
-                  "is_enabled_precedence_move", a_OBJECT);
+        read_json(                              //
+            &this->is_enabled_precedence_move,  //
+            "is_enabled_precedence_move", a_OBJECT);
 
-        /// is_enabled_variable_bound_move
-        read_json(&this->is_enabled_variable_bound_move,  //
-                  "is_enabled_variable_bound_move", a_OBJECT);
+        read_json(                                  //
+            &this->is_enabled_variable_bound_move,  //
+            "is_enabled_variable_bound_move", a_OBJECT);
 
-        /// is_enabled_trinomial_exclusive_nor_move
-        read_json(&this->is_enabled_trinomial_exclusive_nor_move,  //
-                  "is_enabled_trinomial_exclusive_nor_move", a_OBJECT);
+        read_json(                                           //
+            &this->is_enabled_trinomial_exclusive_nor_move,  //
+            "is_enabled_trinomial_exclusive_nor_move", a_OBJECT);
 
-        /// is_enabled_soft_selection_move
-        read_json(&this->is_enabled_soft_selection_move,  //
-                  "is_enabled_soft_selection_move", a_OBJECT);
+        read_json(                                  //
+            &this->is_enabled_soft_selection_move,  //
+            "is_enabled_soft_selection_move", a_OBJECT);
 
-        /// is_enabled_chain_move
-        read_json(&this->is_enabled_chain_move,  //
-                  "is_enabled_chain_move", a_OBJECT);
+        read_json(                         //
+            &this->is_enabled_chain_move,  //
+            "is_enabled_chain_move", a_OBJECT);
 
-        /// is_enabled_chain_move
-        read_json(&this->is_enabled_two_flip_move,  //
-                  "is_enabled_two_flip_move", a_OBJECT);
+        read_json(                            //
+            &this->is_enabled_two_flip_move,  //
+            "is_enabled_two_flip_move", a_OBJECT);
 
-        /// is_enabled_user_defined_move
-        read_json(&this->is_enabled_user_defined_move,  //
-                  "is_enabled_user_defined_move", a_OBJECT);
+        read_json(                                //
+            &this->is_enabled_user_defined_move,  //
+            "is_enabled_user_defined_move", a_OBJECT);
 
-        /// chain_move_capacity
-        read_json(&this->chain_move_capacity,  //
-                  "chain_move_capacity", a_OBJECT);
+        read_json(                       //
+            &this->chain_move_capacity,  //
+            "chain_move_capacity", a_OBJECT);
 
-        /// chain_move_reduce_mode
-        read_json(&this->chain_move_reduce_mode,  //
-                  "chain_move_reduce_mode", a_OBJECT);
+        read_json(                          //
+            &this->chain_move_reduce_mode,  //
+            "chain_move_reduce_mode", a_OBJECT);
 
-        /// chain_move_overlap_rate_threshold
-        read_json(&this->chain_move_overlap_rate_threshold,  //
-                  "chain_move_overlap_rate_threshold", a_OBJECT);
+        read_json(                                     //
+            &this->chain_move_overlap_rate_threshold,  //
+            "chain_move_overlap_rate_threshold", a_OBJECT);
 
-        /// selection_mode
-        read_json(&this->selection_mode,  //
-                  "selection_mode", a_OBJECT);
+        read_json(                  //
+            &this->selection_mode,  //
+            "selection_mode", a_OBJECT);
 
-        /// improvability_screening_mode
-        read_json(&this->improvability_screening_mode,  //
-                  "improvability_screening_mode", a_OBJECT);
+        read_json(                                //
+            &this->improvability_screening_mode,  //
+            "improvability_screening_mode", a_OBJECT);
+    }
+
+    /**************************************************************************/
+    inline utility::json::JsonObject to_json(void) const {
+        utility::json::JsonObject obj;
+        obj.emplace_back(              //
+            "is_enabled_binary_move",  //
+            this->is_enabled_binary_move);
+
+        obj.emplace_back(               //
+            "is_enabled_integer_move",  //
+            this->is_enabled_integer_move);
+
+        obj.emplace_back(                    //
+            "is_enabled_exclusive_or_move",  //
+            this->is_enabled_exclusive_or_move);
+
+        obj.emplace_back(                     //
+            "is_enabled_exclusive_nor_move",  //
+            this->is_enabled_exclusive_nor_move);
+
+        obj.emplace_back(                         //
+            "is_enabled_inverted_integers_move",  //
+            this->is_enabled_inverted_integers_move);
+
+        obj.emplace_back(                         //
+            "is_enabled_balanced_integers_move",  //
+            this->is_enabled_balanced_integers_move);
+
+        obj.emplace_back(                             //
+            "is_enabled_constant_sum_integers_move",  //
+            this->is_enabled_constant_sum_integers_move);
+
+        obj.emplace_back(                                    //
+            "is_enabled_constant_difference_integers_move",  //
+            this->is_enabled_constant_difference_integers_move);
+
+        obj.emplace_back(                               //
+            "is_enabled_constant_ratio_integers_move",  //
+            this->is_enabled_constant_ratio_integers_move);
+
+        obj.emplace_back(                   //
+            "is_enabled_aggregation_move",  //
+            this->is_enabled_aggregation_move);
+
+        obj.emplace_back(                  //
+            "is_enabled_precedence_move",  //
+            this->is_enabled_precedence_move);
+
+        obj.emplace_back(                      //
+            "is_enabled_variable_bound_move",  //
+            this->is_enabled_variable_bound_move);
+
+        obj.emplace_back(                               //
+            "is_enabled_trinomial_exclusive_nor_move",  //
+            this->is_enabled_trinomial_exclusive_nor_move);
+
+        obj.emplace_back(                      //
+            "is_enabled_soft_selection_move",  //
+            this->is_enabled_soft_selection_move);
+
+        obj.emplace_back(             //
+            "is_enabled_chain_move",  //
+            this->is_enabled_chain_move);
+
+        obj.emplace_back(                //
+            "is_enabled_two_flip_move",  //
+            this->is_enabled_two_flip_move);
+
+        obj.emplace_back(                    //
+            "is_enabled_user_defined_move",  //
+            this->is_enabled_user_defined_move);
+
+        obj.emplace_back(           //
+            "chain_move_capacity",  //
+            this->chain_move_capacity);
+
+        obj.emplace_back(              //
+            "chain_move_reduce_mode",  //
+            chain_move_reduce_mode::ChainMoveReduceModeInverseMap.at(
+                this->chain_move_reduce_mode));
+
+        obj.emplace_back(                         //
+            "chain_move_overlap_rate_threshold",  //
+            this->chain_move_overlap_rate_threshold);
+
+        obj.emplace_back(      //
+            "selection_mode",  //
+            selection_mode::SelectionModeInverseMap.at(this->selection_mode));
+
+        obj.emplace_back(                    //
+            "improvability_screening_mode",  //
+            improvability_screening_mode::ImprovabilityScreeningModeInverseMap
+                .at(this->improvability_screening_mode));
+
+        return obj;
     }
 };
 }  // namespace printemps::option

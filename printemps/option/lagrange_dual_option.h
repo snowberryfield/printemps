@@ -109,32 +109,83 @@ struct LagrangeDualOption {
     inline void setup(const utility::json::JsonObject &a_OBJECT) {
         this->initialize();
 
-        read_json(&this->is_enabled,  //
-                  "is_enabled", a_OBJECT);
+        read_json(              //
+            &this->is_enabled,  //
+            "is_enabled", a_OBJECT);
 
-        read_json(&this->iteration_max,  //
-                  "iteration_max", a_OBJECT);
+        read_json(                 //
+            &this->iteration_max,  //
+            "iteration_max", a_OBJECT);
 
-        read_json(&this->time_max,  //
-                  "time_max", a_OBJECT);
+        read_json(            //
+            &this->time_max,  //
+            "time_max", a_OBJECT);
 
-        read_json(&this->time_offset,  //
-                  "time_offset", a_OBJECT);
+        read_json(               //
+            &this->time_offset,  //
+            "time_offset", a_OBJECT);
 
-        read_json(&this->step_size_extend_rate,  //
-                  "step_size_extend_rate", a_OBJECT);
+        read_json(                         //
+            &this->step_size_extend_rate,  //
+            "step_size_extend_rate", a_OBJECT);
 
-        read_json(&this->step_size_reduce_rate,  //
-                  "step_size_reduce_rate", a_OBJECT);
+        read_json(                         //
+            &this->step_size_reduce_rate,  //
+            "step_size_reduce_rate", a_OBJECT);
 
-        read_json(&this->tolerance,  //
-                  "tolerance", a_OBJECT);
+        read_json(             //
+            &this->tolerance,  //
+            "tolerance", a_OBJECT);
 
-        read_json(&this->queue_size,  //
-                  "queue_size", a_OBJECT);
+        read_json(              //
+            &this->queue_size,  //
+            "queue_size", a_OBJECT);
 
-        read_json(&this->log_interval,  //
-                  "log_interval", a_OBJECT);
+        read_json(                //
+            &this->log_interval,  //
+            "log_interval", a_OBJECT);
+    }
+
+    /**************************************************************************/
+    inline utility::json::JsonObject to_json(void) const {
+        utility::json::JsonObject obj;
+        obj.emplace_back(  //
+            "is_enabled",  //
+            this->is_enabled);
+
+        obj.emplace_back(     //
+            "iteration_max",  //
+            this->iteration_max);
+
+        obj.emplace_back(  //
+            "time_max",    //
+            this->time_max);
+
+        obj.emplace_back(   //
+            "time_offset",  //
+            this->time_offset);
+
+        obj.emplace_back(             //
+            "step_size_extend_rate",  //
+            this->step_size_extend_rate);
+
+        obj.emplace_back(             //
+            "step_size_reduce_rate",  //
+            this->step_size_reduce_rate);
+
+        obj.emplace_back(  //
+            "tolerance",   //
+            this->tolerance);
+
+        obj.emplace_back(  //
+            "queue_size",  //
+            this->queue_size);
+
+        obj.emplace_back(    //
+            "log_interval",  //
+            this->log_interval);
+
+        return obj;
     }
 };
 }  // namespace printemps::option

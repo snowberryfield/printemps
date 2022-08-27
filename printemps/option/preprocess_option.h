@@ -220,54 +220,66 @@ struct PreprocessOption {
     inline void setup(const utility::json::JsonObject &a_OBJECT) {
         this->initialize();
 
-        read_json(&this->is_enabled_presolve,  //
-                  "is_enabled_presolve", a_OBJECT);
+        read_json(                       //
+            &this->is_enabled_presolve,  //
+            "is_enabled_presolve", a_OBJECT);
 
-        read_json(&this->is_enabled_remove_duplicated_constraints,  //
-                  "is_enabled_remove_duplicated_constraints", a_OBJECT);
+        read_json(                                            //
+            &this->is_enabled_remove_duplicated_constraints,  //
+            "is_enabled_remove_duplicated_constraints", a_OBJECT);
 
-        read_json(&this->is_enabled_remove_redundant_set_variables,  //
-                  "is_enabled_remove_redundant_set_variables", a_OBJECT);
+        read_json(                                             //
+            &this->is_enabled_remove_redundant_set_variables,  //
+            "is_enabled_remove_redundant_set_variables", a_OBJECT);
 
-        read_json(&this->is_enabled_remove_redundant_set_constraints,  //
-                  "is_enabled_remove_redundant_set_constraints", a_OBJECT);
+        read_json(                                               //
+            &this->is_enabled_remove_redundant_set_constraints,  //
+            "is_enabled_remove_redundant_set_constraints", a_OBJECT);
 
-        read_json(&this->is_enabled_extract_implicit_equality_constraints,  //
-                  "is_enabled_extract_implicit_equality_constraints", a_OBJECT);
+        read_json(                                                    //
+            &this->is_enabled_extract_implicit_equality_constraints,  //
+            "is_enabled_extract_implicit_equality_constraints", a_OBJECT);
 
-        read_json(&this->is_enabled_online_bounding,  //
-                  "is_enabled_online_bounding", a_OBJECT);
+        read_json(                              //
+            &this->is_enabled_online_bounding,  //
+            "is_enabled_online_bounding", a_OBJECT);
 
-        read_json(&this->is_enabled_initial_value_correction,  //
-                  "is_enabled_initial_value_correction", a_OBJECT);
+        read_json(                                       //
+            &this->is_enabled_initial_value_correction,  //
+            "is_enabled_initial_value_correction", a_OBJECT);
 
-        read_json(&this->is_enabled_extract_dependent_exclusive_or,  //
-                  "is_enabled_extract_dependent_exclusive_or", a_OBJECT);
+        read_json(                                             //
+            &this->is_enabled_extract_dependent_exclusive_or,  //
+            "is_enabled_extract_dependent_exclusive_or", a_OBJECT);
 
-        read_json(&this->is_enabled_extract_dependent_exclusive_nor,  //
-                  "is_enabled_extract_dependent_exclusive_nor", a_OBJECT);
+        read_json(                                              //
+            &this->is_enabled_extract_dependent_exclusive_nor,  //
+            "is_enabled_extract_dependent_exclusive_nor", a_OBJECT);
 
-        read_json(&this->is_enabled_extract_dependent_inverted_integers,  //
-                  "is_enabled_extract_dependent_inverted_integers", a_OBJECT);
+        read_json(                                                  //
+            &this->is_enabled_extract_dependent_inverted_integers,  //
+            "is_enabled_extract_dependent_inverted_integers", a_OBJECT);
 
-        read_json(&this->is_enabled_extract_dependent_balanced_integers,  //
-                  "is_enabled_extract_dependent_balanced_integers", a_OBJECT);
+        read_json(                                                  //
+            &this->is_enabled_extract_dependent_balanced_integers,  //
+            "is_enabled_extract_dependent_balanced_integers", a_OBJECT);
 
-        read_json(&this->is_enabled_extract_dependent_constant_sum_integers,  //
-                  "is_enabled_extract_dependent_constant_sum_integers",
-                  a_OBJECT);
+        read_json(                                                      //
+            &this->is_enabled_extract_dependent_constant_sum_integers,  //
+            "is_enabled_extract_dependent_constant_sum_integers", a_OBJECT);
 
-        read_json(
+        read_json(  //
             &this->is_enabled_extract_dependent_constant_difference_integers,  //
             "is_enabled_extract_dependent_constant_difference_integers",
             a_OBJECT);
 
-        read_json(
+        read_json(                                                        //
             &this->is_enabled_extract_dependent_constant_ratio_integers,  //
             "is_enabled_extract_dependent_constant_ratio_integers", a_OBJECT);
 
-        read_json(&this->is_enabled_extract_dependent_intermediate,  //
-                  "is_enabled_extract_dependent_intermediate", a_OBJECT);
+        read_json(                                             //
+            &this->is_enabled_extract_dependent_intermediate,  //
+            "is_enabled_extract_dependent_intermediate", a_OBJECT);
     }
 
     /**************************************************************************/
@@ -297,6 +309,72 @@ struct PreprocessOption {
             return true;
         }
         return false;
+    }
+
+    /**************************************************************************/
+    inline utility::json::JsonObject to_json(void) const {
+        utility::json::JsonObject obj;
+        obj.emplace_back(           //
+            "is_enabled_presolve",  //
+            this->is_enabled_presolve);
+
+        obj.emplace_back(                                //
+            "is_enabled_remove_duplicated_constraints",  //
+            this->is_enabled_remove_duplicated_constraints);
+
+        obj.emplace_back(                                 //
+            "is_enabled_remove_redundant_set_variables",  //
+            this->is_enabled_remove_redundant_set_variables);
+
+        obj.emplace_back(                                   //
+            "is_enabled_remove_redundant_set_constraints",  //
+            this->is_enabled_remove_redundant_set_constraints);
+
+        obj.emplace_back(                                        //
+            "is_enabled_extract_implicit_equality_constraints",  //
+            this->is_enabled_extract_implicit_equality_constraints);
+
+        obj.emplace_back(                  //
+            "is_enabled_online_bounding",  //
+            this->is_enabled_online_bounding);
+
+        obj.emplace_back(                           //
+            "is_enabled_initial_value_correction",  //
+            this->is_enabled_initial_value_correction);
+
+        obj.emplace_back(                                 //
+            "is_enabled_extract_dependent_exclusive_or",  //
+            this->is_enabled_extract_dependent_exclusive_or);
+
+        obj.emplace_back(                                  //
+            "is_enabled_extract_dependent_exclusive_nor",  //
+            this->is_enabled_extract_dependent_exclusive_nor);
+
+        obj.emplace_back(                                      //
+            "is_enabled_extract_dependent_inverted_integers",  //
+            this->is_enabled_extract_dependent_inverted_integers);
+
+        obj.emplace_back(                                      //
+            "is_enabled_extract_dependent_balanced_integers",  //
+            this->is_enabled_extract_dependent_balanced_integers);
+
+        obj.emplace_back(                                          //
+            "is_enabled_extract_dependent_constant_sum_integers",  //
+            this->is_enabled_extract_dependent_constant_sum_integers);
+
+        obj.emplace_back(                                                 //
+            "is_enabled_extract_dependent_constant_difference_integers",  //
+            this->is_enabled_extract_dependent_constant_difference_integers);
+
+        obj.emplace_back(                                            //
+            "is_enabled_extract_dependent_constant_ratio_integers",  //
+            this->is_enabled_extract_dependent_constant_ratio_integers);
+
+        obj.emplace_back(                                 //
+            "is_enabled_extract_dependent_intermediate",  //
+            this->is_enabled_extract_dependent_intermediate);
+
+        return obj;
     }
 };
 }  // namespace printemps::option

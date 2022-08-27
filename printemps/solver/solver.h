@@ -24,7 +24,9 @@ class Solver {
     solution::DenseSolution<T_Variable, T_Expression>   m_current_solution;
     Memory<T_Variable, T_Expression>                    m_memory;
     utility::TimeKeeper                                 m_time_keeper;
-    option::Option                                      m_option;
+
+    option::Option m_option_original;
+    option::Option m_option;
 
     solution::SolutionArchive<T_Variable, T_Expression> m_solution_archive;
 
@@ -206,6 +208,7 @@ class Solver {
         m_current_solution.initialize();
         m_memory.initialize();
         m_time_keeper.initialize();
+        m_option_original.initialize();
         m_option.initialize();
         m_solution_archive.initialize();
 
@@ -221,8 +224,9 @@ class Solver {
     inline void setup(model::Model<T_Variable, T_Expression>* a_model_ptr,  //
                       const option::Option&                   a_OPTION) {
         this->initialize();
-        m_model_ptr = a_model_ptr;
-        m_option    = a_OPTION;
+        m_model_ptr       = a_model_ptr;
+        m_option_original = a_OPTION;
+        m_option          = a_OPTION;
     }
 
     /*************************************************************************/
@@ -427,6 +431,16 @@ class Solver {
     /*************************************************************************/
     inline model::Model<T_Variable, T_Expression>* model_ptr(void) {
         return m_model_ptr;
+    }
+
+    /*************************************************************************/
+    inline const option::Option& option_original(void) const {
+        return m_option_original;
+    }
+
+    /*************************************************************************/
+    inline const option::Option& option(void) const {
+        return m_option;
     }
 
     /*************************************************************************/

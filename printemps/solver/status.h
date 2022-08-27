@@ -15,6 +15,7 @@ class Solver;
 template <class T_Variable, class T_Expression>
 struct Status {
     model::Model<T_Variable, T_Expression> *model_ptr;
+    option::Option                          option;
 
     bool is_found_feasible_solution;
 
@@ -52,6 +53,9 @@ struct Status {
 
     /*************************************************************************/
     void initialize(void) {
+        this->model_ptr = nullptr;
+        this->option.initialize();
+
         this->is_found_feasible_solution = false;
         this->start_date_time.clear();
         this->finish_date_time.clear();
@@ -81,6 +85,7 @@ struct Status {
             a_solver_ptr->tabu_search_controller().result();
 
         this->model_ptr = a_solver_ptr->model_ptr();
+        this->option    = a_solver_ptr->option_original();
 
         this->is_found_feasible_solution = this->model_ptr->is_feasible();
 
@@ -130,7 +135,6 @@ struct Status {
 
     /*************************************************************************/
     inline void add_summary_json(utility::json::JsonObject *a_object) const {
-        // Summary
         a_object->emplace_back("version", constant::VERSION);
         a_object->emplace_back("name", this->name);
         a_object->emplace_back("number_of_variables",
@@ -159,6 +163,11 @@ struct Status {
                                this->averaged_inner_iteration_speed);
         a_object->emplace_back("averaged_move_evaluation_speed",
                                this->averaged_move_evaluation_speed);
+    }
+
+    /*************************************************************************/
+    inline void add_option_json(utility::json::JsonObject *a_object) const {
+        a_object->emplace_back("option", this->option.to_json());
     }
 
     /*************************************************************************/
@@ -661,6 +670,7 @@ struct Status {
         this->add_variable_type_detail(&object);
         this->add_constraint_detail(&object);
         this->add_constraint_type_detail(&object);
+        this->add_option_json(&object);
 
         /// Penalty coefficients
         object.emplace_back(         //
@@ -688,6 +698,7 @@ struct Status {
         this->add_variable_type_detail(&object);
         this->add_constraint_detail(&object);
         this->add_constraint_type_detail(&object);
+        this->add_option_json(&object);
 
         /// Penalty coefficients
         object.emplace_back(         //
