@@ -6,8 +6,7 @@
 #ifndef PRINTEMPS_MPS_MPS_READ_MODE_H__
 #define PRINTEMPS_MPS_MPS_READ_MODE_H__
 
-namespace printemps {
-namespace mps {
+namespace printemps::mps {
 /*****************************************************************************/
 enum class MPSReadMode {
     Initial,
@@ -19,8 +18,7 @@ enum class MPSReadMode {
     Bounds,
     Endata
 };
-}  // namespace mps
-}  // namespace printemps
+}  // namespace printemps::mps
 #endif
 /*****************************************************************************/
 // END

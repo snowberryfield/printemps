@@ -6,8 +6,7 @@
 #ifndef PRINTEMPS_UTILITY_STRING_UTILITY_H__
 #define PRINTEMPS_UTILITY_STRING_UTILITY_H__
 
-namespace printemps {
-namespace utility {
+namespace printemps::utility {
 /******************************************************************************/
 inline std::string trim(const std::string &a_ORIGINAL) {
     int start_position = 0;
@@ -71,6 +70,11 @@ inline std::string to_string(const T_Value      a_VALUE,
 }
 
 /******************************************************************************/
+inline std::string to_true_or_false(const bool a_VALUE) {
+    return a_VALUE != 0 ? "True" : "False";
+}
+
+/******************************************************************************/
 inline std::string format_error_location(const std::string &a_FILE_NAME,
                                          const int          a_LINE,
                                          const std::string &a_FUNCTION_NAME,
@@ -122,8 +126,16 @@ inline std::string base_name(const std::string &a_ORIGINAL) {
     return remove_path(remove_extension(a_ORIGINAL));
 }
 
-}  // namespace utility
-}  // namespace printemps
+/*****************************************************************************/
+inline std::string bold(const std::string &a_ORIGINAL) {
+#ifdef _PRINTEMPS_STYLING
+    return "\e[1m" + a_ORIGINAL + "\e[0m";
+#else
+    return a_ORIGINAL;
+#endif
+}
+
+}  // namespace printemps::utility
 
 /******************************************************************************/
 // END

@@ -9,6 +9,7 @@
 #include <printemps.h>
 
 namespace {
+using namespace printemps;
 /*****************************************************************************/
 class TestRange : public ::testing::Test {
    protected:
@@ -23,13 +24,13 @@ class TestRange : public ::testing::Test {
 /*****************************************************************************/
 TEST_F(TestRange, initialize) {
     {
-        printemps::utility::Range<int> range;
+        utility::Range<int> range;
         EXPECT_EQ(std::numeric_limits<int>::max(), range.min());
         EXPECT_EQ(std::numeric_limits<int>::lowest(), range.max());
     }
 
     {
-        printemps::utility::Range<double> range;
+        utility::Range<double> range;
         EXPECT_EQ(std::numeric_limits<double>::max(), range.min());
         EXPECT_EQ(std::numeric_limits<double>::lowest(), range.max());
     }
@@ -38,7 +39,7 @@ TEST_F(TestRange, initialize) {
 /*****************************************************************************/
 TEST_F(TestRange, update) {
     {
-        printemps::utility::Range<int> range;
+        utility::Range<int> range;
         range.update(10);
         range.update(-20);
         EXPECT_EQ(-20, range.min());
@@ -48,7 +49,7 @@ TEST_F(TestRange, update) {
     }
 
     {
-        printemps::utility::Range<double> range;
+        utility::Range<double> range;
         range.update(10.0);
         range.update(-20.0);
         EXPECT_FLOAT_EQ(-20.0, range.min());

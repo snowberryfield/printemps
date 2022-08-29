@@ -4,17 +4,16 @@
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
 #include <gtest/gtest.h>
-#include <random>
-
 #include <printemps.h>
 
 namespace {
+using namespace printemps;
 /*****************************************************************************/
 class TestVariable : public ::testing::Test {
    protected:
-    printemps::utility::UniformRandom<std::uniform_int_distribution<>, int>
+    utility::UniformRandom<std::uniform_int_distribution<>, int>
         m_random_integer;
-    printemps::utility::UniformRandom<std::uniform_int_distribution<>, int>
+    utility::UniformRandom<std::uniform_int_distribution<>, int>
         m_random_positive_integer;
 
     virtual void SetUp(void) {
@@ -35,8 +34,7 @@ class TestVariable : public ::testing::Test {
 
 /*****************************************************************************/
 TEST_F(TestVariable, initialize) {
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable = model_component::Variable<int, double>::create_instance();
 
     /// Check the initial values of the base class members.
     EXPECT_EQ(0, variable.proxy_index());
@@ -47,28 +45,29 @@ TEST_F(TestVariable, initialize) {
     /// Check the initial values of the derived class members.
     EXPECT_FALSE(variable.is_fixed());
     EXPECT_EQ(0, variable.value());
-    EXPECT_EQ(printemps::constant::INT_HALF_MIN, variable.lower_bound());
-    EXPECT_EQ(printemps::constant::INT_HALF_MAX, variable.upper_bound());
+    EXPECT_EQ(constant::INT_HALF_MIN, variable.lower_bound());
+    EXPECT_EQ(constant::INT_HALF_MAX, variable.upper_bound());
     EXPECT_FALSE(variable.has_bounds());
     EXPECT_EQ(0.0, variable.lagrangian_coefficient());
     EXPECT_FALSE(variable.is_objective_improvable());
     EXPECT_FALSE(variable.is_feasibility_improvable());
     EXPECT_TRUE(variable.has_lower_bound_margin());
     EXPECT_TRUE(variable.has_upper_bound_margin());
-    EXPECT_EQ(printemps::model_component::VariableSense::Integer,
-              variable.sense());
+    EXPECT_EQ(model_component::VariableSense::Integer, variable.sense());
     EXPECT_EQ(nullptr, variable.selection_ptr());
     EXPECT_TRUE(variable.related_constraint_ptrs().empty());
     EXPECT_TRUE(variable.related_binary_coefficient_constraint_ptrs().empty());
-    EXPECT_EQ(nullptr, variable.dependent_constraint_ptr());
+    EXPECT_EQ(nullptr, variable.dependent_expression_ptr());
     EXPECT_TRUE(variable.constraint_sensitivities().empty());
     EXPECT_EQ(0.0, variable.objective_sensitivity());
+    EXPECT_EQ(0, variable.hash());
+    EXPECT_EQ(-1, variable.related_selection_constraint_ptr_index_min());
+    EXPECT_EQ(-1, variable.related_selection_constraint_ptr_index_max());
 }
 
 /*****************************************************************************/
 TEST_F(TestVariable, set_value_force) {
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable = model_component::Variable<int, double>::create_instance();
 
     auto value_0 = random_integer();
     variable     = value_0;
@@ -82,8 +81,7 @@ TEST_F(TestVariable, set_value_force) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, set_value_if_mutable) {
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable = model_component::Variable<int, double>::create_instance();
 
     auto value_0 = random_integer();
     variable     = value_0;
@@ -98,8 +96,7 @@ TEST_F(TestVariable, set_value_if_mutable) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, value) {
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable = model_component::Variable<int, double>::create_instance();
 
     auto value = random_integer();
     variable   = value;
@@ -108,8 +105,7 @@ TEST_F(TestVariable, value) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, set_value) {
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable = model_component::Variable<int, double>::create_instance();
 
     auto value = random_integer();
     variable.set_value(value);
@@ -122,8 +118,7 @@ TEST_F(TestVariable, set_value) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, evaluate_arg_void) {
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable = model_component::Variable<int, double>::create_instance();
 
     auto value = random_integer();
     variable   = value;
@@ -132,10 +127,8 @@ TEST_F(TestVariable, evaluate_arg_void) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, evaluate_arg_move) {
-    auto variable_0 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto variable_1 =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable_0 = model_component::Variable<int, double>::create_instance();
+    auto variable_1 = model_component::Variable<int, double>::create_instance();
     auto value_0_before = random_integer();
     auto value_1_before = random_integer();
     auto value_0_after  = random_integer();
@@ -144,8 +137,8 @@ TEST_F(TestVariable, evaluate_arg_move) {
     variable_0 = value_0_before;
     variable_1 = value_1_before;
 
-    printemps::neighborhood::Move<int, double> move_0;
-    printemps::neighborhood::Move<int, double> move_1;
+    neighborhood::Move<int, double> move_0;
+    neighborhood::Move<int, double> move_1;
     move_0.alterations.emplace_back(&variable_0, value_0_after);
     move_1.alterations.emplace_back(&variable_1, value_1_after);
 
@@ -157,8 +150,7 @@ TEST_F(TestVariable, evaluate_arg_move) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, fix) {
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable = model_component::Variable<int, double>::create_instance();
     variable.fix();
     EXPECT_TRUE(variable.is_fixed());
     variable.unfix();
@@ -177,8 +169,7 @@ TEST_F(TestVariable, unfix) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, fix_by) {
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable = model_component::Variable<int, double>::create_instance();
 
     auto value = random_integer();
     variable.fix_by(value);
@@ -187,37 +178,8 @@ TEST_F(TestVariable, fix_by) {
 }
 
 /*****************************************************************************/
-TEST_F(TestVariable, sense) {
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
-    EXPECT_EQ(printemps::model_component::VariableSense::Integer,
-              variable.sense());
-    variable.set_bound(0, 1);
-    EXPECT_EQ(printemps::model_component::VariableSense::Binary,
-              variable.sense());
-    variable.set_bound(0, 10);
-    EXPECT_EQ(printemps::model_component::VariableSense::Integer,
-              variable.sense());
-}
-
-/*****************************************************************************/
-TEST_F(TestVariable, setup_sense_binary_or_integer) {
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
-    variable.set_bound(0, 1);
-    printemps::model_component::Selection<int, double> selection;
-    variable.set_selection_ptr(&selection);
-    EXPECT_EQ(printemps::model_component::VariableSense::Selection,
-              variable.sense());
-    variable.setup_sense_binary_or_integer();
-    EXPECT_EQ(printemps::model_component::VariableSense::Binary,
-              variable.sense());
-}
-
-/*****************************************************************************/
 TEST_F(TestVariable, set_bound) {
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable = model_component::Variable<int, double>::create_instance();
 
     auto lower_bound = random_integer();
     auto upper_bound = lower_bound + random_positive_integer();
@@ -226,13 +188,14 @@ TEST_F(TestVariable, set_bound) {
     EXPECT_EQ(lower_bound, variable.lower_bound());
     EXPECT_EQ(upper_bound, variable.upper_bound());
     EXPECT_TRUE(variable.has_bounds());
+    EXPECT_EQ(upper_bound - lower_bound, variable.range());
 
     ASSERT_THROW(variable.set_bound(upper_bound, lower_bound),
                  std::logic_error);
 
     variable.reset_bound();
-    EXPECT_EQ(printemps::constant::INT_HALF_MIN, variable.lower_bound());
-    EXPECT_EQ(printemps::constant::INT_HALF_MAX, variable.upper_bound());
+    EXPECT_EQ(constant::INT_HALF_MIN, variable.lower_bound());
+    EXPECT_EQ(constant::INT_HALF_MAX, variable.upper_bound());
     EXPECT_FALSE(variable.has_bounds());
 }
 
@@ -257,9 +220,13 @@ TEST_F(TestVariable, has_bounds) {
 }
 
 /*****************************************************************************/
+TEST_F(TestVariable, range) {
+    /// This method is tested in set_bound().
+}
+
+/*****************************************************************************/
 TEST_F(TestVariable, set_lagrangian_coefficient) {
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable = model_component::Variable<int, double>::create_instance();
     variable.set_lagrangian_coefficient(10.0);
     EXPECT_FALSE(variable.has_bounds());
 }
@@ -270,8 +237,7 @@ TEST_F(TestVariable, lagrangian_coefficient) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, set_is_objective_improvable) {
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable = model_component::Variable<int, double>::create_instance();
     EXPECT_FALSE(variable.is_objective_improvable());
     variable.set_is_objective_improvable(true);
     EXPECT_TRUE(variable.is_objective_improvable());
@@ -281,8 +247,7 @@ TEST_F(TestVariable, set_is_objective_improvable) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, set_is_objective_improvable_or) {
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable = model_component::Variable<int, double>::create_instance();
     EXPECT_FALSE(variable.is_objective_improvable());
     variable.set_is_objective_improvable_or(true);
     EXPECT_TRUE(variable.is_objective_improvable());
@@ -292,8 +257,7 @@ TEST_F(TestVariable, set_is_objective_improvable_or) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, set_is_objective_improvable_and) {
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable = model_component::Variable<int, double>::create_instance();
     EXPECT_FALSE(variable.is_objective_improvable());
     variable.set_is_objective_improvable(true);
     EXPECT_TRUE(variable.is_objective_improvable());
@@ -308,8 +272,7 @@ TEST_F(TestVariable, is_objective_improvable) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, set_is_feasibility_improvable) {
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable = model_component::Variable<int, double>::create_instance();
     EXPECT_FALSE(variable.is_feasibility_improvable());
     variable.set_is_feasibility_improvable(true);
     EXPECT_TRUE(variable.is_feasibility_improvable());
@@ -319,8 +282,7 @@ TEST_F(TestVariable, set_is_feasibility_improvable) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, set_is_feasibility_improvable_or) {
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable = model_component::Variable<int, double>::create_instance();
     EXPECT_FALSE(variable.is_feasibility_improvable());
     variable.set_is_feasibility_improvable_or(true);
     EXPECT_TRUE(variable.is_feasibility_improvable());
@@ -330,8 +292,7 @@ TEST_F(TestVariable, set_is_feasibility_improvable_or) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, set_is_feasibility_improvable_and) {
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable = model_component::Variable<int, double>::create_instance();
     EXPECT_FALSE(variable.is_feasibility_improvable());
     variable.set_is_feasibility_improvable(true);
     EXPECT_TRUE(variable.is_feasibility_improvable());
@@ -345,14 +306,94 @@ TEST_F(TestVariable, is_feasibility_improvable) {
 }
 
 /*****************************************************************************/
+TEST_F(TestVariable, is_improvable) {
+    {
+        auto variable =
+            model_component::Variable<int, double>::create_instance();
+        variable.set_is_objective_improvable(false);
+        variable.set_is_feasibility_improvable(false);
+        EXPECT_FALSE(variable.is_improvable());
+    }
+
+    {
+        auto variable =
+            model_component::Variable<int, double>::create_instance();
+        variable.set_is_objective_improvable(true);
+        variable.set_is_feasibility_improvable(false);
+        EXPECT_TRUE(variable.is_improvable());
+    }
+
+    {
+        auto variable =
+            model_component::Variable<int, double>::create_instance();
+        variable.set_is_objective_improvable(false);
+        variable.set_is_feasibility_improvable(true);
+        EXPECT_TRUE(variable.is_improvable());
+    }
+
+    {
+        auto variable =
+            model_component::Variable<int, double>::create_instance();
+        variable.set_is_objective_improvable(true);
+        variable.set_is_feasibility_improvable(true);
+        EXPECT_TRUE(variable.is_improvable());
+    }
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, set_sense) {
+    auto variable = model_component::Variable<int, double>::create_instance();
+    variable.set_sense(model_component::VariableSense::Binary);
+    EXPECT_EQ(model_component::VariableSense::Binary, variable.sense());
+    EXPECT_EQ("Binary", variable.sense_label());
+
+    variable.set_sense(model_component::VariableSense::Integer);
+    EXPECT_EQ(model_component::VariableSense::Integer, variable.sense());
+    EXPECT_EQ("Integer", variable.sense_label());
+
+    variable.set_sense(model_component::VariableSense::Selection);
+    EXPECT_EQ(model_component::VariableSense::Selection, variable.sense());
+    EXPECT_EQ("Selection", variable.sense_label());
+
+    variable.set_sense(model_component::VariableSense::DependentBinary);
+    EXPECT_EQ(model_component::VariableSense::DependentBinary,
+              variable.sense());
+    EXPECT_EQ("DependentBinary", variable.sense_label());
+
+    variable.set_sense(model_component::VariableSense::DependentInteger);
+    EXPECT_EQ(model_component::VariableSense::DependentInteger,
+              variable.sense());
+    EXPECT_EQ("DependentInteger", variable.sense_label());
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, sense) {
+    /// This method is tested in set_sense().
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, sense_label) {
+    /// This method is tested in set_sense().
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, setup_sense_binary_or_integer) {
+    auto variable = model_component::Variable<int, double>::create_instance();
+    variable.set_bound(0, 1);
+    model_component::Selection<int, double> selection;
+    variable.set_selection_ptr(&selection);
+    EXPECT_EQ(model_component::VariableSense::Selection, variable.sense());
+    variable.setup_sense_binary_or_integer();
+    EXPECT_EQ(model_component::VariableSense::Binary, variable.sense());
+}
+
+/*****************************************************************************/
 TEST_F(TestVariable, set_selection_ptr) {
-    auto variable_0 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto variable_1 =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable_0 = model_component::Variable<int, double>::create_instance();
+    auto variable_1 = model_component::Variable<int, double>::create_instance();
     variable_0.set_bound(0, 1);
     variable_1.set_bound(0, 1);
-    printemps::model_component::Selection<int, double> selection;
+    model_component::Selection<int, double> selection;
     variable_0.set_selection_ptr(&selection);
     variable_1.set_selection_ptr(&selection);
 
@@ -376,107 +417,26 @@ TEST_F(TestVariable, select) {
 }
 
 /*****************************************************************************/
-TEST_F(TestVariable, update_as_intermediate_variable) {
-    {
-        auto variable =
-            printemps::model_component::Variable<int,
-                                                 double>::create_instance();
-        auto constraint =
-            printemps::model_component::Constraint<int,
-                                                   double>::create_instance();
+TEST_F(TestVariable, update) {
+    auto variable_0 = model_component::Variable<int, double>::create_instance();
+    auto variable_1 = model_component::Variable<int, double>::create_instance();
 
-        variable.set_dependent_constraint_ptr(&constraint);
-        constraint = (variable <= 10);
-        variable   = 0;
-        constraint.update();
-        variable.update_as_intermediate_variable();
-        EXPECT_EQ(10, variable.value());
-    }
-    {
-        auto variable =
-            printemps::model_component::Variable<int,
-                                                 double>::create_instance();
-        auto constraint =
-            printemps::model_component::Constraint<int,
-                                                   double>::create_instance();
+    auto expression = 2 * variable_0 + 1;
+    variable_1.set_dependent_expression_ptr(&expression);
 
-        variable.set_dependent_constraint_ptr(&constraint);
-        constraint = (-variable <= 10);
-        variable   = 0;
-        constraint.update();
-        variable.update_as_intermediate_variable();
-        EXPECT_EQ(-10, variable.value());
-    }
-    {
-        auto variable =
-            printemps::model_component::Variable<int,
-                                                 double>::create_instance();
-        auto constraint =
-            printemps::model_component::Constraint<int,
-                                                   double>::create_instance();
-
-        variable.set_dependent_constraint_ptr(&constraint);
-        constraint = (variable >= 20);
-        variable   = 0;
-        constraint.update();
-        variable.update_as_intermediate_variable();
-        EXPECT_EQ(20, variable.value());
-    }
-    {
-        auto variable =
-            printemps::model_component::Variable<int,
-                                                 double>::create_instance();
-        auto constraint =
-            printemps::model_component::Constraint<int,
-                                                   double>::create_instance();
-
-        variable.set_dependent_constraint_ptr(&constraint);
-        constraint = (-variable >= 20);
-        variable   = 0;
-        constraint.update();
-        variable.update_as_intermediate_variable();
-        EXPECT_EQ(-20, variable.value());
-    }
-    {
-        auto variable =
-            printemps::model_component::Variable<int,
-                                                 double>::create_instance();
-        auto constraint =
-            printemps::model_component::Constraint<int,
-                                                   double>::create_instance();
-
-        variable.set_dependent_constraint_ptr(&constraint);
-        constraint = (variable == 30);
-        variable   = 0;
-        constraint.update();
-        variable.update_as_intermediate_variable();
-        EXPECT_EQ(30, variable.value());
-    }
-    {
-        auto variable =
-            printemps::model_component::Variable<int,
-                                                 double>::create_instance();
-        auto constraint =
-            printemps::model_component::Constraint<int,
-                                                   double>::create_instance();
-
-        variable.set_dependent_constraint_ptr(&constraint);
-        constraint = (-variable == 30);
-        variable   = 50;
-        constraint.update();
-        variable.update_as_intermediate_variable();
-        EXPECT_EQ(-30, variable.value());
-    }
+    variable_0 = 5;
+    expression.update();
+    variable_1.update();
+    EXPECT_EQ(11, variable_1.value());
 }
 
 /*****************************************************************************/
 TEST_F(TestVariable, register_related_constraint_ptr) {
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable = model_component::Variable<int, double>::create_instance();
     auto constraint_0 =
-        printemps::model_component::Constraint<int, double>::create_instance();
+        model_component::Constraint<int, double>::create_instance();
     auto constraint_1 =
-        printemps::model_component::Constraint<int, double>::create_instance();
+        model_component::Constraint<int, double>::create_instance();
 
     EXPECT_TRUE(variable.related_constraint_ptrs().empty());
     EXPECT_FALSE(variable.related_constraint_ptrs().find(&constraint_0) !=
@@ -543,12 +503,11 @@ TEST_F(TestVariable, related_binary_coefficient_constraint_ptrs) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, register_constraint_sensitivity) {
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable = model_component::Variable<int, double>::create_instance();
     auto constraint_0 =
-        printemps::model_component::Constraint<int, double>::create_instance();
+        model_component::Constraint<int, double>::create_instance();
     auto constraint_1 =
-        printemps::model_component::Constraint<int, double>::create_instance();
+        model_component::Constraint<int, double>::create_instance();
 
     EXPECT_TRUE(variable.constraint_sensitivities().empty());
 
@@ -576,7 +535,7 @@ TEST_F(TestVariable, constraint_sensitivities) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, setup_hash) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& x = model.create_variables("x", 2, 0, 1);
     auto& g = model.create_constraints("g", 2);
@@ -601,26 +560,23 @@ TEST_F(TestVariable, setup_hash) {
 }
 
 /*****************************************************************************/
-TEST_F(TestVariable, set_dependent_constraint_ptr) {
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto constraint =
-        printemps::model_component::Constraint<int, double>::create_instance();
+TEST_F(TestVariable, set_dependent_expression_ptr) {
+    auto variable = model_component::Variable<int, double>::create_instance();
+    auto expression =
+        model_component::Expression<int, double>::create_instance();
 
-    EXPECT_EQ(printemps::model_component::VariableSense::Integer,
+    EXPECT_EQ(model_component::VariableSense::Integer, variable.sense());
+    EXPECT_EQ(nullptr, variable.dependent_expression_ptr());
+
+    variable.set_dependent_expression_ptr(&expression);
+
+    EXPECT_EQ(model_component::VariableSense::DependentInteger,
               variable.sense());
-    EXPECT_EQ(nullptr, variable.dependent_constraint_ptr());
+    EXPECT_EQ(&expression, variable.dependent_expression_ptr());
 
-    variable.set_dependent_constraint_ptr(&constraint);
-
-    EXPECT_EQ(printemps::model_component::VariableSense::Intermediate,
-              variable.sense());
-    EXPECT_EQ(&constraint, variable.dependent_constraint_ptr());
-
-    variable.reset_dependent_constraint_ptr();
-    EXPECT_EQ(printemps::model_component::VariableSense::Integer,
-              variable.sense());
-    EXPECT_EQ(nullptr, variable.dependent_constraint_ptr());
+    variable.reset_dependent_expression_ptr();
+    EXPECT_EQ(model_component::VariableSense::Integer, variable.sense());
+    EXPECT_EQ(nullptr, variable.dependent_expression_ptr());
 }
 
 /*****************************************************************************/
@@ -635,8 +591,7 @@ TEST_F(TestVariable, dependent_constraint_ptr) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, set_objective_sensitivity) {
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable = model_component::Variable<int, double>::create_instance();
     EXPECT_EQ(0.0, variable.objective_sensitivity());
     variable.set_objective_sensitivity(100.0);
     EXPECT_EQ(100.0, variable.objective_sensitivity());
@@ -651,10 +606,36 @@ TEST_F(TestVariable, objective_sensitivity) {
 TEST_F(TestVariable, hash) {
     /// This method is tested in setup_hash().
 }
+
+/*****************************************************************************/
+TEST_F(TestVariable, reset_related_selection_constraint_ptr_index) {
+    auto variable = model_component::Variable<int, double>::create_instance();
+    variable.reset_related_selection_constraint_ptr_index();
+    EXPECT_EQ(-1, variable.related_selection_constraint_ptr_index_min());
+    EXPECT_EQ(-1, variable.related_selection_constraint_ptr_index_max());
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, setup_related_selection_constraint_ptr_index) {
+    /// This method is tested in
+    /// TestModel.setup_related_selection_constraint_ptr_index().
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, related_selection_constraint_ptr_index_min) {
+    /// This method is tested in
+    /// TestModel.setup_related_selection_constraint_ptr_index().
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, related_selection_constraint_ptr_index_max) {
+    /// This method is tested in
+    /// TestModel.setup_related_selection_constraint_ptr_index().
+}
+
 /*****************************************************************************/
 TEST_F(TestVariable, update_margin) {
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable = model_component::Variable<int, double>::create_instance();
     variable.set_bound(-10, 10);
     variable.set_value(-10);  /// includes update_margin()
     EXPECT_FALSE(variable.has_lower_bound_margin());
@@ -689,8 +670,7 @@ TEST_F(TestVariable, has_upper_bound_margin) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, set_lower_or_upper_bound) {
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable = model_component::Variable<int, double>::create_instance();
     variable.set_bound(-10, 10);
     variable.set_lower_or_upper_bound(true);
     EXPECT_EQ(-10, variable.value());
@@ -700,40 +680,35 @@ TEST_F(TestVariable, set_lower_or_upper_bound) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, to_expression) {
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable = model_component::Variable<int, double>::create_instance();
 
     EXPECT_EQ(1, variable.to_expression().sensitivities().at(&variable));
 }
 
 /*****************************************************************************/
 TEST_F(TestVariable, reference) {
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable = model_component::Variable<int, double>::create_instance();
 
     EXPECT_EQ(&variable, variable.reference());
 }
 
 /*****************************************************************************/
 TEST_F(TestVariable, operator_plus) {
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable = model_component::Variable<int, double>::create_instance();
 
     EXPECT_EQ(1, (+variable).sensitivities().at(&variable));
 }
 
 /*****************************************************************************/
 TEST_F(TestVariable, operator_minus) {
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable = model_component::Variable<int, double>::create_instance();
 
     EXPECT_EQ(-1, (-variable).sensitivities().at(&variable));
 }
 
 /*****************************************************************************/
 TEST_F(TestVariable, operator_equal_arg_t_variable) {
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable = model_component::Variable<int, double>::create_instance();
 
     auto value = random_integer();
     variable   = value;

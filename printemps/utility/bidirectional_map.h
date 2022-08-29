@@ -6,8 +6,7 @@
 #ifndef PRINTEMPS_UTILITY_BIDIRECTIONAL_MAP_H__
 #define PRINTEMPS_UTILITY_BIDIRECTIONAL_MAP_H__
 
-namespace printemps {
-namespace utility {
+namespace printemps::utility {
 /*****************************************************************************/
 template <class T1, class T2>
 class BidirectionalMap {
@@ -53,8 +52,7 @@ class BidirectionalMap {
         return m_reverse[a_KEY];
     }
 };
-}  // namespace utility
-}  // namespace printemps
+}  // namespace printemps::utility
 
 #endif
 /*****************************************************************************/

@@ -1,0 +1,112 @@
+{
+    "general": {
+        "iteration_max": 1,
+        "time_max": 0.1,
+        "time_offset": 0.1,
+        "target_objective_value": 1E100,
+        "seed": 2
+    },
+    "penalty": {
+        "penalty_coefficient_relaxing_rate": 0.1,
+        "penalty_coefficient_tightening_rate": 0.1,
+        "penalty_coefficient_updating_balance": 0.1,
+        "initial_penalty_coefficient": 0.1,
+        "is_enabled_group_penalty_coefficient": true
+    },
+    "parallel": {
+        "is_enabled_parallel_evaluation": false,
+        "is_enabled_parallel_neighborhood_update": false
+    },
+    "preprocess": {
+        "is_enabled_presolve": false,
+        "is_enabled_remove_duplicated_constraints": false,
+        "is_enabled_remove_redundant_set_variables": false,
+        "is_enabled_remove_redundant_set_constraints": false,
+        "is_enabled_extract_implicit_equality_constraints": false,
+        "is_enabled_online_bounding": false,
+        "is_enabled_initial_value_correction": false,
+        "is_enabled_extract_dependent_exclusive_or": false,
+        "is_enabled_extract_dependent_exclusive_nor": true,
+        "is_enabled_extract_dependent_inverted_integers": false,
+        "is_enabled_extract_dependent_balanced_integers": true,
+        "is_enabled_extract_dependent_constant_sum_integers": false,
+        "is_enabled_extract_dependent_constant_difference_integers": false,
+        "is_enabled_extract_dependent_constant_ratio_integers": false,
+        "is_enabled_extract_dependent_intermediate": false
+    },
+    "neighborhood": {
+        "is_enabled_binary_move": false,
+        "is_enabled_integer_move": false,
+        "is_enabled_exclusive_or_move": false,
+        "is_enabled_exclusive_nor_move": false,
+        "is_enabled_inverted_integers_move": false,
+        "is_enabled_balanced_integers_move": false,
+        "is_enabled_constant_sum_integers_move": false,
+        "is_enabled_constant_difference_integers_move": false,
+        "is_enabled_constant_ratio_integers_move": false,
+        "is_enabled_aggregation_move": false,
+        "is_enabled_precedence_move": true,
+        "is_enabled_variable_bound_move": true,
+        "is_enabled_trinomial_exclusive_nor_move": false,
+        "is_enabled_soft_selection_move": true,
+        "is_enabled_chain_move": false,
+        "is_enabled_two_flip_move": true,
+        "is_enabled_user_defined_move": true,
+        "chain_move_capacity": 1,
+        "chain_move_reduce_mode": 1,
+        "chain_move_overlap_rate_threshold": 0.1,
+        "selection_mode": 0,
+        "improvability_screening_mode": 0
+    },
+    "output": {
+        "verbose": 0,
+        "is_enabled_write_trend": true,
+        "is_enabled_store_feasible_solutions": true,
+        "feasible_solutions_capacity": 1
+    },
+    "lagrange_dual": {
+        "is_enabled": true,
+        "iteration_max": 1,
+        "time_max": 0.1,
+        "time_offset": 0.1,
+        "step_size_extend_rate": 0.1,
+        "step_size_reduce_rate": 0.1,
+        "tolerance": 0.1,
+        "log_interval": 1
+    },
+    "local_search": {
+        "is_enabled": false,
+        "iteration_max": 1,
+        "time_max": 0.1,
+        "time_offset": 0.1,
+        "log_interval": 1
+    },
+    "tabu_search": {
+        "iteration_max": 1,
+        "time_max": 0.1,
+        "time_offset": 0.1,
+        "log_interval": 1,
+        "initial_tabu_tenure": 1,
+        "tabu_tenure_randomize_rate": 0.1,
+        "initial_modification_fixed_rate": 0.1,
+        "initial_modification_randomize_rate": 0.1,
+        "tabu_mode": 1,
+        "move_preserve_rate": 0.1,
+        "frequency_penalty_coefficient": 0.1,
+        "lagrangian_penalty_coefficient": 0.1,
+        "pruning_rate_threshold": 0.1,
+        "is_enabled_shuffle": false,
+        "is_enabled_move_curtail": true,
+        "is_enabled_automatic_break": false,
+        "is_enabled_automatic_tabu_tenure_adjustment": false,
+        "is_enabled_automatic_iteration_adjustment": false,
+        "is_enabled_initial_modification": false,
+        "intensity_increase_count_threshold": 1,
+        "intensity_decrease_count_threshold": 1,
+        "iteration_increase_rate": 0.1,
+        "iteration_decrease_rate": 0.1,
+        "ignore_tabu_if_global_incumbent": false,
+        "number_of_initial_modification": 1,
+        "seed": 2
+    }
+}

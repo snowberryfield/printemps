@@ -6,8 +6,7 @@
 #ifndef PRINTEMPS_SOLUTION_NAMED_SOLUTION_H__
 #define PRINTEMPS_SOLUTION_NAMED_SOLUTION_H__
 
-namespace printemps {
-namespace solution {
+namespace printemps::solution {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class NamedSolution {
@@ -78,148 +77,74 @@ class NamedSolution {
 
     /*************************************************************************/
     void write_json_by_name(const std::string& a_FILE_NAME) const {
-        int indent_level = 0;
+        utility::json::JsonObject object;
 
-        std::ofstream ofs(a_FILE_NAME.c_str());
-        ofs << utility::indent_spaces(indent_level) << "{" << std::endl;
-        indent_level++;
-
-        /// Summary
-        ofs << utility::indent_spaces(indent_level) << "\"version\" : "
-            << "\"" << constant::VERSION << "\"," << std::endl;
-
-        ofs << utility::indent_spaces(indent_level) << "\"name\" : "
-            << "\"" << m_name << "\"," << std::endl;
-
-        ofs << utility::indent_spaces(indent_level)
-            << "\"number_of_variables\" : " << m_number_of_variables << ","
-            << std::endl;
-
-        ofs << utility::indent_spaces(indent_level)
-            << "\"number_of_constraints\" : " << m_number_of_constraints << ","
-            << std::endl;
-
-        ofs << utility::indent_spaces(indent_level)
-            << "\"is_feasible\" : " << (m_is_feasible ? "true," : "false,")
-            << std::endl;
-
-        ofs << utility::indent_spaces(indent_level)
-            << "\"objective\" : " + utility::to_string(m_objective, "%.10e")
-            << "," << std::endl;
-
-        ofs << utility::indent_spaces(indent_level)
-            << "\"total_violation\" : " +
-                   utility::to_string(m_total_violation, "%.10e")
-            << "," << std::endl;
+        // Summary
+        object.emplace_back("version", constant::VERSION);
+        object.emplace_back("name", m_name);
+        object.emplace_back("number_of_variables", m_number_of_variables);
+        object.emplace_back("number_of_constraints", m_number_of_constraints);
+        object.emplace_back("is_found_feasible_solution", m_is_feasible);
+        object.emplace_back("objective", m_objective);
+        object.emplace_back("total_violation", m_total_violation);
 
         /// Decision variables
-        write_values_by_name(&ofs,                      //
-                             m_variable_value_proxies,  //
-                             "variables",               //
-                             indent_level,              //
-                             "%d",                      //
-                             true);
+        object.emplace_back(
+            "variables",  //
+            multi_array::create_json_object(m_variable_value_proxies));
 
         /// Expressions
-        write_values_by_name(&ofs,                        //
-                             m_expression_value_proxies,  //
-                             "expressions",               //
-                             indent_level,                //
-                             "%.10e",                     //
-                             true);
+        object.emplace_back(
+            "expressions",  //
+            multi_array::create_json_object(m_expression_value_proxies));
 
         /// Constraints
-        write_values_by_name(&ofs,                        //
-                             m_constraint_value_proxies,  //
-                             "constraints",               //
-                             indent_level,                //
-                             "%.10e",                     //
-                             true);
+        object.emplace_back(
+            "constraints",  //
+            multi_array::create_json_object(m_constraint_value_proxies));
 
         /// Violations
-        write_values_by_name(&ofs,                       //
-                             m_violation_value_proxies,  //
-                             "violations",               //
-                             indent_level,               //
-                             "%.10e",                    //
-                             false);
+        object.emplace_back(
+            "violations",  //
+            multi_array::create_json_object(m_violation_value_proxies));
 
-        indent_level--;
-        ofs << utility::indent_spaces(indent_level) << "}" << std::endl;
-        ofs.close();
+        utility::json::write_json_object(object, a_FILE_NAME);
     }
 
     /*************************************************************************/
     void write_json_by_array(const std::string& a_FILE_NAME) const {
-        int indent_level = 0;
+        utility::json::JsonObject object;
 
-        std::ofstream ofs(a_FILE_NAME.c_str());
-        ofs << utility::indent_spaces(indent_level) << "{" << std::endl;
-        indent_level++;
-
-        /// Summary
-        ofs << utility::indent_spaces(indent_level) << "\"version\" : "
-            << "\"" << constant::VERSION << "\"," << std::endl;
-
-        ofs << utility::indent_spaces(indent_level) << "\"name\" : "
-            << "\"" << m_name << "\"," << std::endl;
-
-        ofs << utility::indent_spaces(indent_level)
-            << "\"number_of_variables\" : " << m_number_of_variables << ","
-            << std::endl;
-
-        ofs << utility::indent_spaces(indent_level)
-            << "\"number_of_constraints\" : " << m_number_of_constraints << ","
-            << std::endl;
-
-        ofs << utility::indent_spaces(indent_level)
-            << "\"is_feasible\" : " << (m_is_feasible ? "true," : "false,")
-            << std::endl;
-
-        ofs << utility::indent_spaces(indent_level)
-            << "\"objective\" : " + utility::to_string(m_objective, "%.10e")
-            << "," << std::endl;
-
-        ofs << utility::indent_spaces(indent_level)
-            << "\"total_violation\" : " +
-                   utility::to_string(m_total_violation, "%.10e")
-            << "," << std::endl;
+        // Summary
+        object.emplace_back("version", constant::VERSION);
+        object.emplace_back("name", m_name);
+        object.emplace_back("number_of_variables", m_number_of_variables);
+        object.emplace_back("number_of_constraints", m_number_of_constraints);
+        object.emplace_back("is_found_feasible_solution", m_is_feasible);
+        object.emplace_back("objective", m_objective);
+        object.emplace_back("total_violation", m_total_violation);
 
         /// Decision variables
-        write_values_by_array(&ofs,                      //
-                              m_variable_value_proxies,  //
-                              "variables",               //
-                              indent_level,              //
-                              "%d",                      //
-                              true);
+        object.emplace_back(
+            "variables",  //
+            multi_array::create_json_array(m_variable_value_proxies));
 
         /// Expressions
-        write_values_by_array(&ofs,                        //
-                              m_expression_value_proxies,  //
-                              "expressions",               //
-                              indent_level,                //
-                              "%.10e",                     //
-                              true);
+        object.emplace_back(
+            "expressions",  //
+            multi_array::create_json_array(m_expression_value_proxies));
 
         /// Constraints
-        write_values_by_array(&ofs,                        //
-                              m_constraint_value_proxies,  //
-                              "constraints",               //
-                              indent_level,                //
-                              "%.10e",                     //
-                              true);
+        object.emplace_back(
+            "constraints",  //
+            multi_array::create_json_array(m_constraint_value_proxies));
 
         /// Violations
-        write_values_by_array(&ofs,                       //
-                              m_violation_value_proxies,  //
-                              "violations",               //
-                              indent_level,               //
-                              "%.10e",                    //
-                              false);
+        object.emplace_back(
+            "violations",  //
+            multi_array::create_json_array(m_violation_value_proxies));
 
-        indent_level--;
-        ofs << utility::indent_spaces(indent_level) << "}" << std::endl;
-        ofs.close();
+        utility::json::write_json_object(object, a_FILE_NAME);
     }
 
     /*************************************************************************/
@@ -327,8 +252,7 @@ class NamedSolution {
     }
 };
 using IPNamedSolution = NamedSolution<int, double>;
-}  // namespace solution
-}  // namespace printemps
+}  // namespace printemps::solution
 #endif
 /*****************************************************************************/
 // END

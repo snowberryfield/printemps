@@ -7,6 +7,7 @@
 #include <printemps.h>
 
 namespace {
+using namespace printemps;
 /*****************************************************************************/
 class TestIncumbentHolder : public ::testing::Test {
    protected:
@@ -20,7 +21,7 @@ class TestIncumbentHolder : public ::testing::Test {
 
 /*****************************************************************************/
 TEST_F(TestIncumbentHolder, constructor) {
-    printemps::solution::IncumbentHolder<int, double> incumbent_holder;
+    solution::IncumbentHolder<int, double> incumbent_holder;
 
     EXPECT_FALSE(incumbent_holder.is_found_feasible_solution());
     EXPECT_EQ(HUGE_VALF,
@@ -32,10 +33,10 @@ TEST_F(TestIncumbentHolder, constructor) {
 
 /*****************************************************************************/
 TEST_F(TestIncumbentHolder, initialize) {
-    printemps::solution::IncumbentHolder<int, double> incumbent_holder;
+    solution::IncumbentHolder<int, double> incumbent_holder;
 
-    printemps::solution::DenseSolution<int, double> solution;
-    printemps::solution::SolutionScore              score;
+    solution::DenseSolution<int, double> solution;
+    solution::SolutionScore              score;
     score.is_feasible                = true;
     score.objective                  = 10.0;
     score.local_augmented_objective  = 10.0;
@@ -61,8 +62,8 @@ TEST_F(TestIncumbentHolder, initialize) {
 
 /*****************************************************************************/
 TEST_F(TestIncumbentHolder, try_update_incumbent_arg_model_ptr) {
-    printemps::solution::IncumbentHolder<int, double> incumbent_holder;
-    printemps::model::Model<int, double>              model;
+    solution::IncumbentHolder<int, double> incumbent_holder;
+    model::Model<int, double>              model;
 
     auto &x = model.create_variables("x", 2, 0, 1);
     auto &g = model.create_constraints("g", 2);
@@ -77,7 +78,7 @@ TEST_F(TestIncumbentHolder, try_update_incumbent_arg_model_ptr) {
         x(1) = 1;
         model.update();
 
-        printemps::solution::SolutionScore score;
+        solution::SolutionScore score;
         score.is_feasible                = false;
         score.objective                  = 2.0;
         score.local_augmented_objective  = 10.0;
@@ -123,7 +124,7 @@ TEST_F(TestIncumbentHolder, try_update_incumbent_arg_model_ptr) {
         x(1) = 0;
         model.update();
 
-        printemps::solution::SolutionScore score;
+        solution::SolutionScore score;
         score.is_feasible                = true;
         score.objective                  = 1.0;
         score.local_augmented_objective  = 1.0;
@@ -167,14 +168,14 @@ TEST_F(TestIncumbentHolder, try_update_incumbent_arg_model_ptr) {
 
 /*****************************************************************************/
 TEST_F(TestIncumbentHolder, try_update_incumbent_arg_solution) {
-    printemps::solution::IncumbentHolder<int, double> incumbent_holder;
+    solution::IncumbentHolder<int, double> incumbent_holder;
 
     {
-        printemps::solution::DenseSolution<int, double> solution;
+        solution::DenseSolution<int, double> solution;
         solution.is_feasible = false;
         solution.objective   = 100.0;
 
-        printemps::solution::SolutionScore score;
+        solution::SolutionScore score;
         score.is_feasible                = false;
         score.objective                  = 200.0;
         score.local_augmented_objective  = 300.0;
@@ -216,11 +217,11 @@ TEST_F(TestIncumbentHolder, try_update_incumbent_arg_solution) {
     }
 
     {
-        printemps::solution::DenseSolution<int, double> solution;
+        solution::DenseSolution<int, double> solution;
         solution.is_feasible = true;
         solution.objective   = 50.0;
 
-        printemps::solution::SolutionScore score;
+        solution::SolutionScore score;
         score.is_feasible                = true;
         score.objective                  = 100.0;
         score.local_augmented_objective  = 150.0;
@@ -264,10 +265,10 @@ TEST_F(TestIncumbentHolder, try_update_incumbent_arg_solution) {
 
 /*****************************************************************************/
 TEST_F(TestIncumbentHolder, reset_local_augmented_incumbent) {
-    printemps::solution::IncumbentHolder<int, double> incumbent_holder;
+    solution::IncumbentHolder<int, double> incumbent_holder;
 
-    printemps::solution::DenseSolution<int, double> solution;
-    printemps::solution::SolutionScore              score;
+    solution::DenseSolution<int, double> solution;
+    solution::SolutionScore              score;
     score.is_feasible                = true;
     score.objective                  = 10.0;
     score.local_augmented_objective  = 10.0;

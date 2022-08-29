@@ -6,8 +6,7 @@
 #ifndef PRINTEMPS_UTILITY_VECTOR_UTILITY_H__
 #define PRINTEMPS_UTILITY_VECTOR_UTILITY_H__
 
-namespace printemps {
-namespace utility {
+namespace printemps::utility {
 /*****************************************************************************/
 template <class T, class A>
 constexpr int count_duplicate(const std::vector<T, A> &a_ARRAY) {
@@ -66,8 +65,7 @@ inline std::vector<int> sequence(const int a_MAX) {
     std::iota(result.begin(), result.end(), 0);
     return result;
 }
-}  // namespace utility
-}  // namespace printemps
+}  // namespace printemps::utility
 
 #endif
 /*****************************************************************************/

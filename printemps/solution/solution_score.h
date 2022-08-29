@@ -6,8 +6,7 @@
 #ifndef PRINTEMPS_SOLUTION_SOLUTION_SCORE_H__
 #define PRINTEMPS_SOLUTION_SOLUTION_SCORE_H__
 
-namespace printemps {
-namespace solution {
+namespace printemps::solution {
 /*****************************************************************************/
 struct SolutionScore {
     double objective             = 0.0;
@@ -114,8 +113,7 @@ inline int argmin_index_global_augmented_objective(
     return argmin;
 }
 
-}  // namespace solution
-}  // namespace printemps
+}  // namespace printemps::solution
 #endif
 /*****************************************************************************/
 // END

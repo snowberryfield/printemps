@@ -6,20 +6,36 @@
 #ifndef PRINTEMPS_OPTION_SELECTION_MODE_H__
 #define PRINTEMPS_OPTION_SELECTION_MODE_H__
 
-namespace printemps {
-namespace option {
-namespace selection_mode {
+namespace printemps::option::selection_mode {
 /*****************************************************************************/
 enum SelectionMode : int {  //
-    None,
+    Off,
     Defined,
     Smaller,
     Larger,
-    Independent
+    Independent,
+    UserDefined
 };
-}  // namespace selection_mode
-}  // namespace option
-}  // namespace printemps
+
+/*****************************************************************************/
+static std::unordered_map<std::string, SelectionMode> SelectionModeMap = {  //
+    {"Off", SelectionMode::Off},                                            //
+    {"Defined", SelectionMode::Defined},                                    //
+    {"Smaller", SelectionMode::Smaller},                                    //
+    {"Larger", SelectionMode::Larger},                                      //
+    {"Independent", SelectionMode::Independent},                            //
+    {"UserDefined", SelectionMode::UserDefined}};
+
+/*****************************************************************************/
+static std::unordered_map<SelectionMode, std::string> SelectionModeInverseMap =
+    {{SelectionMode::Off, "Off"},
+     {SelectionMode::Defined, "Defined"},
+     {SelectionMode::Smaller, "Smaller"},
+     {SelectionMode::Larger, "Larger"},
+     {SelectionMode::Independent, "Independent"},
+     {SelectionMode::UserDefined, "UserDefined"}};
+
+}  // namespace printemps::option::selection_mode
 #endif
 /*****************************************************************************/
 // END
