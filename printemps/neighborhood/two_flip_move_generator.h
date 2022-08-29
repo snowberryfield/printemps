@@ -8,8 +8,7 @@
 
 #include "abstract_move_generator.h"
 
-namespace printemps {
-namespace neighborhood {
+namespace printemps::neighborhood {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class TwoFlipMoveGenerator
@@ -69,13 +68,13 @@ class TwoFlipMoveGenerator
         /**
          * Setup move objects.
          */
-        auto move_updater =                                     //
-            [this](auto *     a_moves_ptr,                      //
-                   auto *     a_flags,                          //
-                   const bool a_ACCEPT_ALL,                     //
-                   const bool a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
-                   const bool a_ACCEPT_FEASIBILITY_IMPROVABLE,  //
-                   [[maybe_unused]] const bool a_IS_ENABLED_PARALLEL) {
+        auto move_updater =                                                  //
+            [](auto *                      a_moves_ptr,                      //
+               auto *                      a_flags,                          //
+               const bool                  a_ACCEPT_ALL,                     //
+               const bool                  a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
+               const bool                  a_ACCEPT_FEASIBILITY_IMPROVABLE,  //
+               [[maybe_unused]] const bool a_IS_ENABLED_PARALLEL) {
                 const int MOVES_SIZE = a_moves_ptr->size();
 #ifdef _OPENMP
 #pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
@@ -127,8 +126,7 @@ class TwoFlipMoveGenerator
         this->m_move_updater = move_updater;
     }
 };
-}  // namespace neighborhood
-}  // namespace printemps
+}  // namespace printemps::neighborhood
 #endif
 /*****************************************************************************/
 // END

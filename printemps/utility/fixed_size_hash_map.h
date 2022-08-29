@@ -6,8 +6,7 @@
 #ifndef PRINTEMPS_UTILITY_FIXED_SIZE_HASH_MAP__
 #define PRINTEMPS_UTILITY_FIXED_SIZE_HASH_MAP__
 
-namespace printemps {
-namespace utility {
+namespace printemps::utility {
 /*****************************************************************************/
 struct FixedSizeHashMapConstant {
     static constexpr std::uint_fast32_t DEFAULT_BUCKET_SIZE    = 1;
@@ -28,8 +27,8 @@ class FixedSizeHashMap {
     bool *   m_is_occupied;
 
     /*************************************************************************/
-    inline constexpr std::uint_fast32_t compute_hash(
-        const T_Key a_KEY) const noexcept {
+    inline constexpr std::uint_fast32_t compute_hash(const T_Key a_KEY) const
+        noexcept {
         return reinterpret_cast<std::uint_fast64_t>(a_KEY) >> m_shift_size;
     }
 
@@ -148,8 +147,7 @@ class FixedSizeHashMap {
         return m_bucket_size;
     }
 };
-}  // namespace utility
-}  // namespace printemps
+}  // namespace printemps::utility
 #endif
 /*****************************************************************************/
 // END

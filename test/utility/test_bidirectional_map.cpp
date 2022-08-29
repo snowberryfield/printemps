@@ -9,6 +9,7 @@
 #include <printemps.h>
 
 namespace {
+using namespace printemps;
 /*****************************************************************************/
 class TestBidirectionalMap : public ::testing::Test {
    protected:
@@ -22,14 +23,14 @@ class TestBidirectionalMap : public ::testing::Test {
 
 /*****************************************************************************/
 TEST_F(TestBidirectionalMap, initialize) {
-    printemps::utility::BidirectionalMap<int, std::string> bmap;
+    utility::BidirectionalMap<int, std::string> bmap;
 
     EXPECT_TRUE(bmap.empty());
 }
 
 /*****************************************************************************/
 TEST_F(TestBidirectionalMap, operator_square_bracket) {
-    printemps::utility::BidirectionalMap<int, std::string> bmap;
+    utility::BidirectionalMap<int, std::string> bmap;
 
     bmap.insert(0, "zero");
     bmap.insert(1, "one");

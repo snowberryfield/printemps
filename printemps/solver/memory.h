@@ -6,8 +6,7 @@
 #ifndef PRINTEMPS_SOLVER_MEMORY_H__
 #define PRINTEMPS_SOLVER_MEMORY_H__
 
-namespace printemps {
-namespace solver {
+namespace printemps::solver {
 /*****************************************************************************/
 struct MemoryConstant {
     static constexpr int INITIAL_LAST_UPDATE_ITERATION = -1000;
@@ -293,9 +292,8 @@ class Memory {
     inline constexpr double total_violation_count_reciprocal(void) const {
         return m_total_violation_count_reciprocal;
     }
-};  // namespace solver
-}  // namespace solver
-}  // namespace printemps
+};
+}  // namespace printemps::solver
 
 #endif
 /*****************************************************************************/

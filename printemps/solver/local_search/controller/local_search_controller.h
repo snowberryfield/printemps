@@ -10,10 +10,7 @@
 #include "../core/local_search_core.h"
 #include "local_search_controller_result.h"
 
-namespace printemps {
-namespace solver {
-namespace local_search {
-namespace controller {
+namespace printemps::solver::local_search::controller {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class LocalSearchController
@@ -75,7 +72,7 @@ class LocalSearchController
     /*************************************************************************/
     inline bool satisfy_time_over_skip_condition(
         const double a_TOTAL_ELAPSED_TIME, const bool a_IS_ENABLED_PRINT) {
-        if (a_TOTAL_ELAPSED_TIME > this->m_option.time_max) {
+        if (a_TOTAL_ELAPSED_TIME > this->m_option.general.time_max) {
             utility::print_message(
                 "Local search was skipped because of time-over (" +
                     utility::to_string(a_TOTAL_ELAPSED_TIME, "%.3f") + "sec).",
@@ -88,7 +85,7 @@ class LocalSearchController
     inline bool satisfy_reach_target_skip_condition(
         const bool a_IS_ENABLED_PRINT) {
         if (this->m_incumbent_holder_ptr->feasible_incumbent_objective() <=
-            this->m_option.target_objective_value) {
+            this->m_option.general.target_objective_value) {
             utility::print_message(
                 "Local search was skipped because of feasible objective "
                 "reaches the target limit.",
@@ -105,7 +102,7 @@ class LocalSearchController
          * Skip local search if the problem is not linear.
          */
         if (this->satisfy_not_linear_skip_condition(  //
-                this->m_option.verbose >= option::verbose::Outer)) {
+                this->m_option.output.verbose >= option::verbose::Outer)) {
             m_result.initialize();
             return;
         }
@@ -115,7 +112,7 @@ class LocalSearchController
          */
         if (this->satisfy_time_over_skip_condition(
                 TOTAL_ELAPSED_TIME,
-                this->m_option.verbose >= option::verbose::Outer)) {
+                this->m_option.output.verbose >= option::verbose::Outer)) {
             m_result.initialize();
             return;
         }
@@ -125,7 +122,7 @@ class LocalSearchController
          * incumbent reaches the target value.
          */
         if (this->satisfy_reach_target_skip_condition(  //
-                this->m_option.verbose >= option::verbose::Outer)) {
+                this->m_option.output.verbose >= option::verbose::Outer)) {
             m_result.initialize();
             return;
         }
@@ -153,7 +150,7 @@ class LocalSearchController
         /**
          * Update the feasible solutions archive.
          */
-        if (this->m_option.is_enabled_store_feasible_solutions) {
+        if (this->m_option.output.is_enabled_store_feasible_solutions) {
             this->update_archive(local_search.feasible_solutions());
         }
 
@@ -167,15 +164,18 @@ class LocalSearchController
          * Print the search summary.
          */
         utility::print_message(
-            "Local search finished.",
-            this->m_option.verbose >= option::verbose::Outer);
+            "Local search finished (Reason: " +
+                core::LocalSearchCoreTerminationStatusInverseMap.at(
+                    local_search_result.termination_status) +
+                ").",
+            this->m_option.output.verbose >= option::verbose::Outer);
 
         this->print_total_elapsed_time(  //
             this->m_time_keeper.clock(),
-            this->m_option.verbose >= option::verbose::Outer);
+            this->m_option.output.verbose >= option::verbose::Outer);
 
         this->print_incumbent_summary(  //
-            this->m_option.verbose >= option::verbose::Outer);
+            this->m_option.output.verbose >= option::verbose::Outer);
     }
 
     /*************************************************************************/
@@ -185,10 +185,7 @@ class LocalSearchController
         return m_result;
     }
 };
-}  // namespace controller
-}  // namespace local_search
-}  // namespace solver
-}  // namespace printemps
+}  // namespace printemps::solver::local_search::controller
 
 #endif
 /*****************************************************************************/

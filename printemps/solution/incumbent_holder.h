@@ -6,8 +6,7 @@
 #ifndef PRINTEMPS_SOLUTION_INCUMBENT_HOLDER_H__
 #define PRINTEMPS_SOLUTION_INCUMBENT_HOLDER_H__
 
-namespace printemps {
-namespace solution {
+namespace printemps::solution {
 /*****************************************************************************/
 struct IncumbentHolderConstant {
     static constexpr bool   DEFAULT_IS_FOUND_FEASIBLE_SOLUTION      = false;
@@ -131,6 +130,8 @@ class IncumbentHolder {
                 STATUS_LOCAL_AUGMENTED_INCUMBENT_UPDATE;
 
             if (!is_solution_updated) {
+                a_model_ptr
+                    ->update_dependent_variables_and_disabled_constraints();
                 solution            = a_model_ptr->export_solution();
                 is_solution_updated = true;
             }
@@ -147,6 +148,8 @@ class IncumbentHolder {
                 STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE;
 
             if (!is_solution_updated) {
+                a_model_ptr
+                    ->update_dependent_variables_and_disabled_constraints();
                 solution            = a_model_ptr->export_solution();
                 is_solution_updated = true;
             }
@@ -166,6 +169,8 @@ class IncumbentHolder {
                     IncumbentHolderConstant::STATUS_FEASIBLE_INCUMBENT_UPDATE;
 
                 if (!is_solution_updated) {
+                    a_model_ptr
+                        ->update_dependent_variables_and_disabled_constraints();
                     solution            = a_model_ptr->export_solution();
                     is_solution_updated = true;
                 }
@@ -255,8 +260,7 @@ class IncumbentHolder {
         return m_feasible_incumbent_score;
     }
 };
-}  // namespace solution
-}  // namespace printemps
+}  // namespace printemps::solution
 
 #endif
 /*****************************************************************************/

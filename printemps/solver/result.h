@@ -6,19 +6,18 @@
 #ifndef PRINTEMPS_SOLVER_RESULT_H__
 #define PRINTEMPS_SOLVER_RESULT_H__
 
-namespace printemps {
-namespace solver {
+namespace printemps::solver {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 struct Result {
     solution::NamedSolution<T_Variable, T_Expression>   solution;
-    Status                                              status;
+    Status<T_Variable, T_Expression>                    status;
     solution::SolutionArchive<T_Variable, T_Expression> solution_archive;
 
     /*************************************************************************/
     Result(
         solution::NamedSolution<T_Variable, T_Expression> &  a_SOLUTION,
-        Status &                                             a_STATUS,
+        Status<T_Variable, T_Expression> &                   a_STATUS,
         solution::SolutionArchive<T_Variable, T_Expression> &a_SOLUTION_ARCHIVE)
         : solution(a_SOLUTION),
           status(a_STATUS),
@@ -38,8 +37,7 @@ struct Result {
         this->solution_archive.initialize();
     }
 };
-}  // namespace solver
-}  // namespace printemps
+}  // namespace printemps::solver
 
 #endif
 /*****************************************************************************/

@@ -6,16 +6,14 @@
 #ifndef PRINTEMPS_SOLVER_TABU_SEARCH_CORE_RESULT_H__
 #define PRINTEMPS_SOLVER_TABU_SEARCH_CORE_RESULT_H__
 
-namespace printemps {
-namespace solver {
-namespace tabu_search {
-namespace core {
+namespace printemps::solver::tabu_search::core {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 struct TabuSearchCoreResult {
-    int  total_update_status;
-    int  number_of_iterations;
-    long number_of_evaluated_moves;
+    int    total_update_status;
+    int    number_of_iterations;
+    long   number_of_evaluated_moves;
+    double elapsed_time;
 
     TabuSearchCoreTerminationStatus termination_status;
 
@@ -47,6 +45,7 @@ struct TabuSearchCoreResult {
         this->total_update_status       = 0;
         this->number_of_iterations      = 0;
         this->number_of_evaluated_moves = 0;
+        this->elapsed_time              = 0.0;
 
         this->termination_status =
             TabuSearchCoreTerminationStatus::ITERATION_OVER;
@@ -70,8 +69,10 @@ struct TabuSearchCoreResult {
         this->total_update_status       = a_STATE.total_update_status;
         this->number_of_iterations      = a_STATE.iteration;
         this->number_of_evaluated_moves = a_STATE.number_of_evaluated_moves;
-        this->termination_status        = a_STATE.termination_status;
-        this->tabu_tenure               = a_STATE.tabu_tenure;
+        this->elapsed_time              = a_STATE.elapsed_time;
+
+        this->termination_status = a_STATE.termination_status;
+        this->tabu_tenure        = a_STATE.tabu_tenure;
         this->last_local_augmented_incumbent_update_iteration =
             a_STATE.last_local_augmented_incumbent_update_iteration;
         this->last_global_augmented_incumbent_update_iteration =
@@ -89,8 +90,8 @@ struct TabuSearchCoreResult {
             std::max(1.0, a_STATE.local_penalty_range.min());
 
         const double PERFORMANCE =
-            a_STATE.oscillation / a_STATE.iteration /
-            std::max(1.0, a_STATE.local_augmented_objective_range.range());
+            static_cast<double>(a_STATE.number_of_effective_updates) /
+            a_STATE.iteration;
 
         this->objective_constraint_rate = OBJECTIVE_CONSTRAINT_RATE;
         this->global_augmented_objective_range =
@@ -100,11 +101,7 @@ struct TabuSearchCoreResult {
         /// nothing to do
     }
 };
-}  // namespace core
-}  // namespace tabu_search
-}  // namespace solver
-}  // namespace printemps
-
+}  // namespace printemps::solver::tabu_search::core
 #endif
 /*****************************************************************************/
 // END

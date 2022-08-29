@@ -6,16 +6,13 @@
 #ifndef PRINTEMPS_MODEL_COMPONENT_VARIABLE_H__
 #define PRINTEMPS_MODEL_COMPONENT_VARIABLE_H__
 
-namespace printemps {
-namespace neighborhood {
+namespace printemps::neighborhood {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 struct Move;
-}  // namespace neighborhood
-}  // namespace printemps
+}  // namespace printemps::neighborhood
 
-namespace printemps {
-namespace model_component {
+namespace printemps::model_component {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class Expression;
@@ -63,13 +60,15 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     std::unordered_set<Constraint<T_Variable, T_Expression> *>
         m_related_binary_coefficient_constraint_ptrs;
 
-    Constraint<T_Variable, T_Expression> *m_dependent_constraint_ptr;
+    Expression<T_Variable, T_Expression> *m_dependent_expression_ptr;
 
     std::vector<std::pair<Constraint<T_Variable, T_Expression> *, T_Expression>>
                  m_constraint_sensitivities;
     T_Expression m_objective_sensitivity;
 
     std::uint64_t m_hash;
+    int           m_related_selection_constraint_ptr_index_min;
+    int           m_related_selection_constraint_ptr_index_max;
 
     /*************************************************************************/
     /// Default constructor
@@ -134,11 +133,14 @@ class Variable : public multi_array::AbstractMultiArrayElement {
         m_selection_ptr = nullptr;
         m_related_constraint_ptrs.clear();
 
-        m_dependent_constraint_ptr = nullptr;
+        m_dependent_expression_ptr = nullptr;
         m_constraint_sensitivities.clear();
         m_objective_sensitivity = 0.0;
 
         m_hash = 0;
+
+        m_related_selection_constraint_ptr_index_min = -1;
+        m_related_selection_constraint_ptr_index_max = -1;
     }
 
     /*************************************************************************/
@@ -228,6 +230,8 @@ class Variable : public multi_array::AbstractMultiArrayElement {
         m_lower_bound = a_LOWER_BOUND;
         m_upper_bound = a_UPPER_BOUND;
         m_has_bounds  = true;
+        m_value       = std::min(m_value, m_upper_bound);
+        m_value       = std::max(m_value, m_lower_bound);
 
         this->setup_sense_binary_or_integer();
         this->update_margin();
@@ -256,6 +260,11 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     /*************************************************************************/
     inline constexpr bool has_bounds(void) const {
         return m_has_bounds;
+    }
+
+    /*************************************************************************/
+    inline constexpr T_Variable range(void) const {
+        return m_upper_bound - m_lower_bound;
     }
 
     /*************************************************************************/
@@ -316,8 +325,43 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
+    inline constexpr bool is_improvable(void) const noexcept {
+        return m_is_feasibility_improvable || m_is_objective_improvable;
+    }
+
+    /*************************************************************************/
+    inline constexpr void set_sense(const VariableSense &a_SENSE) noexcept {
+        m_sense = a_SENSE;
+    }
+
+    /*************************************************************************/
     inline constexpr VariableSense sense(void) const noexcept {
         return m_sense;
+    }
+
+    /*************************************************************************/
+    inline std::string sense_label(void) const noexcept {
+        switch (m_sense) {
+            case VariableSense::Binary: {
+                return "Binary";
+            }
+            case VariableSense::Integer: {
+                return "Integer";
+            }
+            case VariableSense::Selection: {
+                return "Selection";
+            }
+            case VariableSense::DependentBinary: {
+                return "DependentBinary";
+            }
+            case VariableSense::DependentInteger: {
+                return "DependentInteger";
+            }
+            default: {
+                return "Undefined";
+            }
+        }
+        return "Undefined";
     }
 
     /*************************************************************************/
@@ -350,18 +394,8 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr void update_as_intermediate_variable(void) {
-        auto &sensitivities =
-            m_dependent_constraint_ptr->expression().sensitivities();
-
-        if (sensitivities.at(this) > 0) {
-            this->set_value(static_cast<T_Variable>(
-                m_value - m_dependent_constraint_ptr->constraint_value()));
-
-        } else {
-            this->set_value(static_cast<T_Variable>(
-                m_value + m_dependent_constraint_ptr->constraint_value()));
-        }
+    inline constexpr void update(void) {
+        m_value = m_dependent_expression_ptr->value();
     }
 
     /*************************************************************************/
@@ -399,7 +433,8 @@ class Variable : public multi_array::AbstractMultiArrayElement {
                 constraint_ptr->is_set_packing() ||
                 constraint_ptr->is_set_covering() ||
                 constraint_ptr->is_cardinality() ||
-                constraint_ptr->is_invariant_knapsack()) {
+                constraint_ptr->is_invariant_knapsack() ||
+                constraint_ptr->is_multiple_covering()) {
                 m_related_binary_coefficient_constraint_ptrs.insert(
                     constraint_ptr);
             }
@@ -446,7 +481,7 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr std::vector<
+    inline constexpr const std::vector<
         std::pair<Constraint<T_Variable, T_Expression> *, T_Expression>>
         &constraint_sensitivities(void) const {
         return m_constraint_sensitivities;
@@ -466,23 +501,29 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr void set_dependent_constraint_ptr(
-        Constraint<T_Variable, T_Expression> *a_constraint_ptr) {
-        m_dependent_constraint_ptr = a_constraint_ptr;
-        m_sense                    = VariableSense::Intermediate;
+    inline constexpr void set_dependent_expression_ptr(
+        Expression<T_Variable, T_Expression> *a_expression_ptr) {
+        m_dependent_expression_ptr = a_expression_ptr;
+        setup_sense_binary_or_integer();
+        if (m_sense == VariableSense::Binary) {
+            m_sense = VariableSense::DependentBinary;
+        } else if (m_sense == VariableSense::Integer) {
+            m_sense = VariableSense::DependentInteger;
+        } else {
+        }
     }
 
     /*************************************************************************/
-    inline constexpr void reset_dependent_constraint_ptr(void) {
-        m_dependent_constraint_ptr = nullptr;
+    inline constexpr void reset_dependent_expression_ptr(void) {
+        m_dependent_expression_ptr = nullptr;
         this->setup_sense_binary_or_integer();
     }
 
     /*************************************************************************/
-    inline constexpr Constraint<T_Variable, T_Expression>
-        *dependent_constraint_ptr(void) const {
-        return const_cast<Constraint<T_Variable, T_Expression> *>(
-            m_dependent_constraint_ptr);
+    inline constexpr Expression<T_Variable, T_Expression>
+        *dependent_expression_ptr(void) const {
+        return const_cast<Expression<T_Variable, T_Expression> *>(
+            m_dependent_expression_ptr);
     }
 
     /*************************************************************************/
@@ -499,6 +540,58 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     /*************************************************************************/
     inline constexpr std::uint64_t hash(void) const noexcept {
         return m_hash;
+    }
+
+    /*************************************************************************/
+    inline constexpr void reset_related_selection_constraint_ptr_index(
+        void) noexcept {
+        m_related_selection_constraint_ptr_index_min = -1;
+        m_related_selection_constraint_ptr_index_max = -1;
+    }
+
+    /*************************************************************************/
+    inline constexpr void setup_related_selection_constraint_ptr_index(
+        void) noexcept {
+        if (m_selection_ptr == nullptr) {
+            return;
+        }
+
+        const auto &RELATED_SELECTION_CONSTRAINT_PTRS =
+            m_selection_ptr->related_constraint_ptrs_vector;
+
+        const int CONSTRAINTS_SIZE = RELATED_SELECTION_CONSTRAINT_PTRS.size();
+
+        for (auto i = 0; i < CONSTRAINTS_SIZE; i++) {
+            if (RELATED_SELECTION_CONSTRAINT_PTRS[i]->is_enabled() &&
+                m_related_constraint_ptrs.find(
+                    RELATED_SELECTION_CONSTRAINT_PTRS[i]) !=
+                    m_related_constraint_ptrs.end()) {
+                m_related_selection_constraint_ptr_index_min = i;
+                break;
+            }
+        }
+
+        for (auto i = CONSTRAINTS_SIZE - 1; i >= 0; i--) {
+            if (RELATED_SELECTION_CONSTRAINT_PTRS[i]->is_enabled() &&
+                m_related_constraint_ptrs.find(
+                    RELATED_SELECTION_CONSTRAINT_PTRS[i]) !=
+                    m_related_constraint_ptrs.end()) {
+                m_related_selection_constraint_ptr_index_max = i;
+                break;
+            }
+        }
+    }
+
+    /*************************************************************************/
+    inline constexpr int related_selection_constraint_ptr_index_min(void) const
+        noexcept {
+        return m_related_selection_constraint_ptr_index_min;
+    }
+
+    /*************************************************************************/
+    inline constexpr int related_selection_constraint_ptr_index_max(void) const
+        noexcept {
+        return m_related_selection_constraint_ptr_index_max;
     }
 
     /*************************************************************************/
@@ -564,8 +657,7 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     }
 };
 using IPVariable = Variable<int, double>;
-}  // namespace model_component
-}  // namespace printemps
+}  // namespace printemps::model_component
 #endif
 /*****************************************************************************/
 // END

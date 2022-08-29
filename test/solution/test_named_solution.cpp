@@ -7,6 +7,7 @@
 #include <printemps.h>
 
 namespace {
+using namespace printemps;
 /*****************************************************************************/
 class TestNamedSolution : public ::testing::Test {
    protected:
@@ -20,7 +21,7 @@ class TestNamedSolution : public ::testing::Test {
 
 /*****************************************************************************/
 TEST_F(TestNamedSolution, constructor) {
-    printemps::solution::NamedSolution<int, double> solution;
+    solution::NamedSolution<int, double> solution;
 
     EXPECT_EQ("", solution.name());
     EXPECT_EQ(0, solution.number_of_variables());
@@ -32,10 +33,10 @@ TEST_F(TestNamedSolution, constructor) {
 
 /*****************************************************************************/
 TEST_F(TestNamedSolution, initialize) {
-    printemps::model::Model<int, double> model("name");
-    auto &x = model.create_variables("x", 2, 0, 1);
-    auto &p = model.create_expression("p");
-    auto &g = model.create_constraints("g", 2);
+    model::Model<int, double> model("name");
+    auto&                     x = model.create_variables("x", 2, 0, 1);
+    auto&                     p = model.create_expression("p");
+    auto&                     g = model.create_constraints("g", 2);
 
     p = x(0) + 2 * x(1);
 

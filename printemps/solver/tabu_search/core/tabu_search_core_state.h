@@ -6,10 +6,7 @@
 #ifndef PRINTEMPS_SOLVER_TABU_SEARCH_CORE_TABU_SEARCH_CORE_STATE_H__
 #define PRINTEMPS_SOLVER_TABU_SEARCH_CORE_TABU_SEARCH_CORE_STATE_H__
 
-namespace printemps {
-namespace solver {
-namespace tabu_search {
-namespace core {
+namespace printemps::solver::tabu_search::core {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 struct TabuSearchCoreState {
@@ -34,7 +31,7 @@ struct TabuSearchCoreState {
     utility::Range<double> global_augmented_objective_range;
     utility::Range<double> local_penalty_range;
 
-    double oscillation;
+    int number_of_effective_updates;
 
     int  number_of_moves;
     long number_of_evaluated_moves;
@@ -56,7 +53,6 @@ struct TabuSearchCoreState {
     /**
      * Parameters and related states.
      */
-
     int last_tabu_tenure_updated_iteration;
 
     double current_primal_intensity;
@@ -99,7 +95,7 @@ struct TabuSearchCoreState {
         this->global_augmented_objective_range.initialize();
         this->local_penalty_range.initialize();
 
-        this->oscillation = 0.0;
+        this->number_of_effective_updates = 0;
 
         this->number_of_moves           = 0;
         this->number_of_evaluated_moves = 0;
@@ -135,11 +131,7 @@ struct TabuSearchCoreState {
         this->tabu_tenure          = 0;
     }
 };
-}  // namespace core
-}  // namespace tabu_search
-}  // namespace solver
-}  // namespace printemps
-
+}  // namespace printemps::solver::tabu_search::core
 #endif
 /*****************************************************************************/
 // END

@@ -6,16 +6,13 @@
 #ifndef PRINTEMPS_MODEL_COMPONENT_EXPRESSION_H__
 #define PRINTEMPS_MODEL_COMPONENT_EXPRESSION_H__
 
-namespace printemps {
-namespace neighborhood {
+namespace printemps::neighborhood {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 struct Move;
-}  // namespace neighborhood
-}  // namespace printemps
+}  // namespace printemps::neighborhood
 
-namespace printemps {
-namespace model_component {
+namespace printemps::model_component {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class Variable;
@@ -226,7 +223,7 @@ class Expression : public multi_array::AbstractMultiArrayElement {
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
         noexcept {
         /// The following code is required for nonlinear objective functions.
-#ifndef _MPS_SOLVER
+#ifndef _PRINTEMPS_LINEAR_MINIMIZATION
         if (a_MOVE.alterations.size() == 0) {
             return this->evaluate();
         }
@@ -280,6 +277,19 @@ class Expression : public multi_array::AbstractMultiArrayElement {
     /*************************************************************************/
     inline constexpr void disable(void) {
         m_is_enabled = false;
+    }
+
+    /*************************************************************************/
+    inline constexpr Expression<T_Variable, T_Expression> solve(
+        Variable<T_Variable, T_Expression> *a_variable_ptr) const {
+        auto result                 = this->copy();
+        auto coefficient_reciprocal = 1.0 / m_sensitivities.at(a_variable_ptr);
+        result.erase(a_variable_ptr);
+        for (auto &&sensitivity : result.sensitivities()) {
+            sensitivity.second *= -coefficient_reciprocal;
+        }
+        result.m_constant_value *= -coefficient_reciprocal;
+        return result;
     }
 
     /*************************************************************************/
@@ -550,8 +560,7 @@ class Expression : public multi_array::AbstractMultiArrayElement {
 };
 
 using IPExpression = Expression<int, double>;
-}  // namespace model_component
-}  // namespace printemps
+}  // namespace printemps::model_component
 #endif
 /*****************************************************************************/
 // END

@@ -8,10 +8,7 @@
 
 #include "tabu_search_core_state.h"
 
-namespace printemps {
-namespace solver {
-namespace tabu_search {
-namespace core {
+namespace printemps::solver::tabu_search::core {
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
@@ -102,6 +99,10 @@ class TabuSearchCoreStateManager {
          * Initialize the range of local penalty.
          */
         m_state.local_penalty_range.update(HUGE_VALF);
+        if (!m_state.current_solution_score.is_feasible) {
+            m_state.local_penalty_range.update(
+                m_state.current_solution_score.local_penalty);
+        }
 
         /**
          * Initialize the primal and dual intensities.
@@ -111,11 +112,6 @@ class TabuSearchCoreStateManager {
 
         m_state.current_dual_intensity  = m_memory_ptr->dual_intensity();
         m_state.previous_dual_intensity = m_state.current_dual_intensity;
-
-        if (!m_state.current_solution_score.is_feasible) {
-            m_state.local_penalty_range.update(
-                m_state.current_solution_score.local_penalty);
-        }
 
         /**
          * Initialize the tabu tenure.
@@ -153,7 +149,12 @@ class TabuSearchCoreStateManager {
         this->update_update_status();
 
         /**
-         * Update the aspiraton flag.
+         * Update the number of effective updates.
+         */
+        this->update_number_of_effective_updates();
+
+        /**
+         * Update the aspiration flag.
          */
         this->update_is_aspirated(a_IS_ASPIRATED);
 
@@ -178,14 +179,9 @@ class TabuSearchCoreStateManager {
         this->update_local_penalty_range();
 
         /**
-         * Update the oscillation of local augmented objective.
-         */
-        this->update_oscillation();
-
-        /**
          * Update the number of evaluated moves.
          */
-        this->update_number_of_evaluted_moves();
+        this->update_number_of_evaluated_moves();
 
         /**
          * Update whether new feasible solution was found.
@@ -232,6 +228,17 @@ class TabuSearchCoreStateManager {
     }
 
     /*************************************************************************/
+    inline constexpr void update_number_of_effective_updates() {
+        if (m_state.update_status &
+                solution::IncumbentHolderConstant::
+                    STATUS_LOCAL_AUGMENTED_INCUMBENT_UPDATE &&
+            m_state.current_solution_score.global_augmented_objective <
+                m_state.previous_solution_score.global_augmented_objective) {
+            m_state.number_of_effective_updates++;
+        }
+    }
+
+    /*************************************************************************/
     inline constexpr void update_update_status(void) {
         m_state.update_status = m_incumbent_holder_ptr->try_update_incumbent(
             m_model_ptr, m_state.current_solution_score);
@@ -271,14 +278,7 @@ class TabuSearchCoreStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void update_oscillation() {
-        m_state.oscillation +=
-            fabs(m_state.current_solution_score.local_augmented_objective -
-                 -m_state.previous_solution_score.local_augmented_objective);
-    }
-
-    /*************************************************************************/
-    inline constexpr void update_number_of_evaluted_moves() {
+    inline constexpr void update_number_of_evaluated_moves() {
         m_state.number_of_evaluated_moves += m_state.number_of_moves;
     }
 
@@ -398,9 +398,10 @@ class TabuSearchCoreStateManager {
             m_state.last_tabu_tenure_updated_iteration = m_state.iteration;
             m_state.intensity_decrease_count           = 0;
             m_state.intensity_increase_count           = 0;
-            utility::print_debug("Tabu tenure reverted: " +
-                                     std::to_string(m_state.tabu_tenure) + ".",
-                                 m_option.verbose >= option::verbose::Debug);
+            utility::print_debug(
+                "Tabu tenure reverted: " + std::to_string(m_state.tabu_tenure) +
+                    ".",
+                m_option.output.verbose >= option::verbose::Debug);
         } else if ((m_state.iteration -
                     m_state.last_tabu_tenure_updated_iteration) %
                        (m_state.tabu_tenure + 1) ==
@@ -431,7 +432,7 @@ class TabuSearchCoreStateManager {
                     utility::print_debug(
                         "Tabu tenure increased: " +
                             std::to_string(m_state.tabu_tenure) + ".",
-                        m_option.verbose >= option::verbose::Debug);
+                        m_option.output.verbose >= option::verbose::Debug);
                 }
             } else {
                 m_state.intensity_decrease_count++;
@@ -449,7 +450,7 @@ class TabuSearchCoreStateManager {
                     utility::print_debug(
                         "Tabu tenure decreased: " +
                             std::to_string(m_state.tabu_tenure) + ".",
-                        m_option.verbose >= option::verbose::Debug);
+                        m_option.output.verbose >= option::verbose::Debug);
                 }
             }
         }
@@ -493,10 +494,7 @@ class TabuSearchCoreStateManager {
         return m_state;
     }
 };
-}  // namespace core
-}  // namespace tabu_search
-}  // namespace solver
-}  // namespace printemps
+}  // namespace printemps::solver::tabu_search::core
 #endif
 /*****************************************************************************/
 // END

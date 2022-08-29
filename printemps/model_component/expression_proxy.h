@@ -8,8 +8,7 @@
 
 #include "expression.h"
 
-namespace printemps {
-namespace model_component {
+namespace printemps::model_component {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class ExpressionProxy : public multi_array::AbstractMultiArray {
@@ -672,8 +671,7 @@ class ExpressionProxy : public multi_array::AbstractMultiArray {
     }
 };
 using IPExpressionProxy = ExpressionProxy<int, double>;
-}  // namespace model_component
-}  // namespace printemps
+}  // namespace printemps::model_component
 #endif
 /*****************************************************************************/
 // END

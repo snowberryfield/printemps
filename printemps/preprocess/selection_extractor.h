@@ -6,8 +6,7 @@
 #ifndef PRINTEMPS_PREPROCESS_SELECTION_EXTRACTOR_H__
 #define PRINTEMPS_PREPROCESS_SELECTION_EXTRACTOR_H__
 
-namespace printemps {
-namespace preprocess {
+namespace printemps::preprocess {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class SelectionExtractor {
@@ -29,10 +28,26 @@ class SelectionExtractor {
             if (!constraint_ptr->is_enabled()) {
                 continue;
             }
+            bool is_valid = true;
 
-            model_component::Selection<T_Variable, T_Expression> selection(
-                constraint_ptr);
-            raw_selections.push_back(selection);
+            /**
+             * NOTE: Set-partitioning constraints including only "Binary"
+             * variables can be candidates for Selection constraints,which must
+             * not include "Dependent Binary" variables.
+             */
+            for (auto &&sensitivity :
+                 constraint_ptr->expression().sensitivities()) {
+                if (sensitivity.first->sense() !=
+                    model_component::VariableSense::Binary) {
+                    is_valid = false;
+                    break;
+                }
+            }
+            if (is_valid) {
+                model_component::Selection<T_Variable, T_Expression> selection(
+                    constraint_ptr);
+                raw_selections.push_back(selection);
+            }
         }
         return raw_selections;
     }
@@ -65,7 +80,7 @@ class SelectionExtractor {
         const option::selection_mode::SelectionMode &a_SELECTION_MODE,
         const bool                                   a_IS_ENABLED_PRINT) {
         switch (a_SELECTION_MODE) {
-            case option::selection_mode::None: {
+            case option::selection_mode::Off: {
                 break;
             }
             case option::selection_mode::Defined: {
@@ -81,7 +96,11 @@ class SelectionExtractor {
                 break;
             }
             case option::selection_mode::Independent: {
-                extract_independent(a_IS_ENABLED_PRINT);
+                extract_by_independent(a_IS_ENABLED_PRINT);
+                break;
+            }
+            case option::selection_mode::UserDefined: {
+                extract_by_user_defined(a_IS_ENABLED_PRINT);
                 break;
             }
             default: {
@@ -107,27 +126,28 @@ class SelectionExtractor {
             extracted_variable_ptrs;
 
         for (auto &&selection : raw_selections) {
-            bool has_excluded_variable_ptr = false;
+            bool has_overlap = false;
             for (auto &&variable_ptr : selection.variable_ptrs) {
                 if (std::find(extracted_variable_ptrs.begin(),
                               extracted_variable_ptrs.end(),
                               variable_ptr) != extracted_variable_ptrs.end()) {
-                    has_excluded_variable_ptr = true;
+                    has_overlap = true;
                     break;
                 }
             }
-            if (has_excluded_variable_ptr) {
+
+            if (has_overlap) {
                 continue;
-            } else {
-                utility::print_message(  //
-                    "The constraint " + selection.constraint_ptr->name() +
-                        " was detected as selection constraint.",
-                    a_IS_ENABLED_PRINT);
-                selections.push_back(selection);
-                extracted_variable_ptrs.insert(extracted_variable_ptrs.end(),
-                                               selection.variable_ptrs.begin(),
-                                               selection.variable_ptrs.end());
             }
+
+            utility::print_message(  //
+                "The constraint " + selection.constraint_ptr->name() +
+                    " was detected as selection constraint.",
+                a_IS_ENABLED_PRINT);
+            selections.push_back(selection);
+            extracted_variable_ptrs.insert(extracted_variable_ptrs.end(),
+                                           selection.variable_ptrs.begin(),
+                                           selection.variable_ptrs.end());
         }
 
         for (auto &&selection : selections) {
@@ -179,27 +199,28 @@ class SelectionExtractor {
             extracted_variable_ptrs;
 
         for (auto &&selection : raw_selections) {
-            bool has_excluded_variable_ptr = false;
+            bool has_overlap = false;
             for (auto &&variable_ptr : selection.variable_ptrs) {
                 if (std::find(extracted_variable_ptrs.begin(),
                               extracted_variable_ptrs.end(),
                               variable_ptr) != extracted_variable_ptrs.end()) {
-                    has_excluded_variable_ptr = true;
+                    has_overlap = true;
                     break;
                 }
             }
-            if (has_excluded_variable_ptr) {
+
+            if (has_overlap) {
                 continue;
-            } else {
-                utility::print_message(  //
-                    "The constraint " + selection.constraint_ptr->name() +
-                        " was detected as selection constraint.",
-                    a_IS_ENABLED_PRINT);
-                selections.push_back(selection);
-                extracted_variable_ptrs.insert(extracted_variable_ptrs.end(),
-                                               selection.variable_ptrs.begin(),
-                                               selection.variable_ptrs.end());
             }
+
+            utility::print_message(  //
+                "The constraint " + selection.constraint_ptr->name() +
+                    " was detected as selection constraint.",
+                a_IS_ENABLED_PRINT);
+            selections.push_back(selection);
+            extracted_variable_ptrs.insert(extracted_variable_ptrs.end(),
+                                           selection.variable_ptrs.begin(),
+                                           selection.variable_ptrs.end());
         }
 
         for (auto &&selection : selections) {
@@ -214,7 +235,8 @@ class SelectionExtractor {
     }
 
     /*************************************************************************/
-    inline constexpr void extract_independent(const bool a_IS_ENABLED_PRINT) {
+    inline constexpr void extract_by_independent(
+        const bool a_IS_ENABLED_PRINT) {
         utility::print_single_line(a_IS_ENABLED_PRINT);
         utility::print_message("Extracting independent selection variables...",
                                a_IS_ENABLED_PRINT);
@@ -241,24 +263,79 @@ class SelectionExtractor {
                         break;
                     }
                 }
+
                 if (has_overlap) {
                     break;
                 }
             }
+
             if (has_overlap) {
                 continue;
-            } else {
-                utility::print_message(  //
-                    "The constraint " +
-                        raw_selections[i].constraint_ptr->name() +
-                        " was detected as selection constraint.",
-                    a_IS_ENABLED_PRINT);
-                selections.push_back(raw_selections[i]);
-                extracted_variable_ptrs.insert(
-                    extracted_variable_ptrs.end(),
-                    raw_selections[i].variable_ptrs.begin(),
-                    raw_selections[i].variable_ptrs.end());
             }
+            utility::print_message(  //
+                "The constraint " + raw_selections[i].constraint_ptr->name() +
+                    " was detected as selection constraint.",
+                a_IS_ENABLED_PRINT);
+            selections.push_back(raw_selections[i]);
+            extracted_variable_ptrs.insert(
+                extracted_variable_ptrs.end(),
+                raw_selections[i].variable_ptrs.begin(),
+                raw_selections[i].variable_ptrs.end());
+        }
+
+        for (auto &&selection : selections) {
+            selection.constraint_ptr->disable();
+            selection.setup_related_constraint_ptrs();
+        }
+
+        m_selections = selections;
+        m_model_ptr->set_selections(selections);
+
+        utility::print_message("Done.", a_IS_ENABLED_PRINT);
+    }
+
+    /*************************************************************************/
+    inline constexpr void extract_by_user_defined(
+        const bool a_IS_ENABLED_PRINT) {
+        utility::print_single_line(a_IS_ENABLED_PRINT);
+        utility::print_message("Extracting user-defined selection variables...",
+                               a_IS_ENABLED_PRINT);
+
+        std::vector<model_component::Selection<T_Variable, T_Expression>>
+            selections;
+
+        auto raw_selections = this->extract_raw_selections();
+
+        std::vector<model_component::Variable<T_Variable, T_Expression> *>
+            extracted_variable_ptrs;
+
+        for (auto &&selection : raw_selections) {
+            if (!selection.constraint_ptr->is_user_defined_selection()) {
+                continue;
+            }
+
+            bool has_overlap = false;
+            for (auto &&variable_ptr : selection.variable_ptrs) {
+                if (std::find(extracted_variable_ptrs.begin(),
+                              extracted_variable_ptrs.end(),
+                              variable_ptr) != extracted_variable_ptrs.end()) {
+                    has_overlap = true;
+                    break;
+                }
+            }
+
+            if (has_overlap) {
+                continue;
+            }
+
+            utility::print_message(  //
+                "The constraint " + selection.constraint_ptr->name() +
+                    " was detected as selection constraint.",
+                a_IS_ENABLED_PRINT);
+            selections.push_back(selection);
+            extracted_variable_ptrs.insert(extracted_variable_ptrs.end(),
+                                           selection.variable_ptrs.begin(),
+                                           selection.variable_ptrs.end());
         }
 
         for (auto &&selection : selections) {
@@ -286,8 +363,7 @@ class SelectionExtractor {
         return m_selections;
     }
 };
-}  // namespace preprocess
-}  // namespace printemps
+}  // namespace printemps::preprocess
 #endif
 /*****************************************************************************/
 // END

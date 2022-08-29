@@ -7,6 +7,7 @@
 #include <printemps.h>
 
 namespace {
+using namespace printemps;
 /*****************************************************************************/
 class TestAbstractMoveGenerator : public ::testing::Test {
    protected:
@@ -20,7 +21,7 @@ class TestAbstractMoveGenerator : public ::testing::Test {
 
 /*****************************************************************************/
 TEST_F(TestAbstractMoveGenerator, initialize) {
-    printemps::neighborhood::AbstractMoveGenerator<int, double> move_generator;
+    neighborhood::AbstractMoveGenerator<int, double> move_generator;
 
     EXPECT_TRUE(move_generator.moves().empty());
     EXPECT_TRUE(move_generator.flags().empty());
@@ -34,8 +35,8 @@ TEST_F(TestAbstractMoveGenerator, update_moves) {
 
 /*****************************************************************************/
 TEST_F(TestAbstractMoveGenerator, moves) {
-    printemps::neighborhood::AbstractMoveGenerator<int, double> move_generator;
-    std::vector<printemps::neighborhood::Move<int, double>>     moves(10);
+    neighborhood::AbstractMoveGenerator<int, double> move_generator;
+    std::vector<neighborhood::Move<int, double>>     moves(10);
     move_generator.set_moves(moves);
     EXPECT_EQ(10, static_cast<int>(move_generator.moves().size()));
 }
@@ -47,8 +48,8 @@ TEST_F(TestAbstractMoveGenerator, set_moves) {
 
 /*****************************************************************************/
 TEST_F(TestAbstractMoveGenerator, flags) {
-    printemps::neighborhood::AbstractMoveGenerator<int, double> move_generator;
-    std::vector<short>                                          flags(10);
+    neighborhood::AbstractMoveGenerator<int, double> move_generator;
+    std::vector<short>                               flags(10);
     move_generator.set_flags(flags);
     EXPECT_EQ(10, static_cast<int>(move_generator.flags().size()));
 }
@@ -60,7 +61,7 @@ TEST_F(TestAbstractMoveGenerator, set_flags) {
 
 /*****************************************************************************/
 TEST_F(TestAbstractMoveGenerator, is_enabled) {
-    printemps::neighborhood::AbstractMoveGenerator<int, double> move_generator;
+    neighborhood::AbstractMoveGenerator<int, double> move_generator;
     EXPECT_FALSE(move_generator.is_enabled());
     move_generator.enable();
     EXPECT_TRUE(move_generator.is_enabled());
@@ -80,8 +81,8 @@ TEST_F(TestAbstractMoveGenerator, disable) {
 
 /*****************************************************************************/
 TEST_F(TestAbstractMoveGenerator, reset_availability) {
-    printemps::neighborhood::AbstractMoveGenerator<int, double> move_generator;
-    std::vector<printemps::neighborhood::Move<int, double>>     moves(10);
+    neighborhood::AbstractMoveGenerator<int, double> move_generator;
+    std::vector<neighborhood::Move<int, double>>     moves(10);
 
     move_generator.set_moves(moves);
 

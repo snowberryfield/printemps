@@ -7,6 +7,7 @@
 #include <printemps.h>
 
 namespace {
+using namespace printemps;
 /*****************************************************************************/
 class TestSolutionScore : public ::testing::Test {
    protected:
@@ -20,7 +21,7 @@ class TestSolutionScore : public ::testing::Test {
 
 /*****************************************************************************/
 TEST_F(TestSolutionScore, constructor) {
-    printemps::solution::SolutionScore score;
+    solution::SolutionScore score;
 
     EXPECT_FLOAT_EQ(0.0, score.objective);
     EXPECT_FLOAT_EQ(0.0, score.objective_improvement);
@@ -36,77 +37,74 @@ TEST_F(TestSolutionScore, constructor) {
 
 /*****************************************************************************/
 TEST_F(TestSolutionScore, argmax_index_objective_improvement) {
-    std::vector<printemps::solution::SolutionScore> scores(5);
+    std::vector<solution::SolutionScore> scores(5);
     scores[0].objective_improvement = 2.0;
     scores[1].objective_improvement = 3.0;
     scores[2].objective_improvement = 4.0;
     scores[3].objective_improvement = 5.0;
     scores[4].objective_improvement = 1.0;
 
-    EXPECT_EQ(3,
-              printemps::solution::argmax_index_objective_improvement(scores));
+    EXPECT_EQ(3, solution::argmax_index_objective_improvement(scores));
 }
 
 /*****************************************************************************/
 TEST_F(TestSolutionScore, argmin_index_objective) {
-    std::vector<printemps::solution::SolutionScore> scores(5);
+    std::vector<solution::SolutionScore> scores(5);
     scores[0].objective = 2.0;
     scores[1].objective = 3.0;
     scores[2].objective = 4.0;
     scores[3].objective = 5.0;
     scores[4].objective = 1.0;
 
-    EXPECT_EQ(4, printemps::solution::argmin_index_objective(scores));
+    EXPECT_EQ(4, solution::argmin_index_objective(scores));
 }
 
 /*****************************************************************************/
 TEST_F(TestSolutionScore, argmin_index_local_penalty) {
-    std::vector<printemps::solution::SolutionScore> scores(5);
+    std::vector<solution::SolutionScore> scores(5);
     scores[0].local_penalty = 2.0;
     scores[1].local_penalty = 3.0;
     scores[2].local_penalty = 4.0;
     scores[3].local_penalty = 5.0;
     scores[4].local_penalty = 1.0;
 
-    EXPECT_EQ(4, printemps::solution::argmin_index_local_penalty(scores));
+    EXPECT_EQ(4, solution::argmin_index_local_penalty(scores));
 }
 
 /*****************************************************************************/
 TEST_F(TestSolutionScore, argmin_index_global_penalty) {
-    std::vector<printemps::solution::SolutionScore> scores(5);
+    std::vector<solution::SolutionScore> scores(5);
     scores[0].global_penalty = 2.0;
     scores[1].global_penalty = 3.0;
     scores[2].global_penalty = 4.0;
     scores[3].global_penalty = 5.0;
     scores[4].global_penalty = 1.0;
 
-    EXPECT_EQ(4, printemps::solution::argmin_index_global_penalty(scores));
+    EXPECT_EQ(4, solution::argmin_index_global_penalty(scores));
 }
 
 /*****************************************************************************/
 TEST_F(TestSolutionScore, argmin_index_local_augmented_objective) {
-    std::vector<printemps::solution::SolutionScore> scores(5);
+    std::vector<solution::SolutionScore> scores(5);
     scores[0].local_augmented_objective = 2.0;
     scores[1].local_augmented_objective = 3.0;
     scores[2].local_augmented_objective = 4.0;
     scores[3].local_augmented_objective = 5.0;
     scores[4].local_augmented_objective = 1.0;
 
-    EXPECT_EQ(
-        4, printemps::solution::argmin_index_local_augmented_objective(scores));
+    EXPECT_EQ(4, solution::argmin_index_local_augmented_objective(scores));
 }
 
 /*****************************************************************************/
 TEST_F(TestSolutionScore, argmin_index_global_augmented_objective) {
-    std::vector<printemps::solution::SolutionScore> scores(5);
+    std::vector<solution::SolutionScore> scores(5);
     scores[0].global_augmented_objective = 2.0;
     scores[1].global_augmented_objective = 3.0;
     scores[2].global_augmented_objective = 4.0;
     scores[3].global_augmented_objective = 5.0;
     scores[4].global_augmented_objective = 1.0;
 
-    EXPECT_EQ(4, printemps::solution::argmin_index_global_augmented_objective(
-                     scores));
+    EXPECT_EQ(4, solution::argmin_index_global_augmented_objective(scores));
 }
 
 }  // namespace

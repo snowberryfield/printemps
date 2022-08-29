@@ -6,8 +6,7 @@
 #ifndef PRINTEMPS_UTILITY_FIXED_SIZE_QUEUE_H__
 #define PRINTEMPS_UTILITY_FIXED_SIZE_QUEUE_H__
 
-namespace printemps {
-namespace utility {
+namespace printemps::utility {
 /*****************************************************************************/
 template <class T>
 class FixedSizeQueue {
@@ -82,8 +81,7 @@ class FixedSizeQueue {
                static_cast<double>(m_queue.size());
     }
 };
-}  // namespace utility
-}  // namespace printemps
+}  // namespace printemps::utility
 
 #endif
 /*****************************************************************************/

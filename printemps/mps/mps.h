@@ -11,8 +11,7 @@
 #include "mps_objective.h"
 #include "mps_read_mode.h"
 
-namespace printemps {
-namespace mps {
+namespace printemps::mps {
 /*****************************************************************************/
 struct MPS {
     std::string                                    name;
@@ -24,9 +23,9 @@ struct MPS {
     std::vector<std::string> constraint_names;
 
     int number_of_variables;
-    int number_of_lower_constraints;
+    int number_of_lesser_constraints;
     int number_of_equal_constraints;
-    int number_of_upper_constraints;
+    int number_of_greater_constraints;
 
     /*************************************************************************/
     MPS(void) {
@@ -49,10 +48,10 @@ struct MPS {
         this->variable_names.clear();
         this->constraint_names.clear();
 
-        this->number_of_variables         = 0;
-        this->number_of_lower_constraints = 0;
-        this->number_of_equal_constraints = 0;
-        this->number_of_upper_constraints = 0;
+        this->number_of_variables           = 0;
+        this->number_of_lesser_constraints  = 0;
+        this->number_of_equal_constraints   = 0;
+        this->number_of_greater_constraints = 0;
     }
 
     /*************************************************************************/
@@ -151,7 +150,7 @@ struct MPS {
                             MPSConstraintSense::Less;
                         this->constraints[name].name = name;
                         this->constraint_names.push_back(name);
-                        this->number_of_lower_constraints++;
+                        this->number_of_lesser_constraints++;
                     } else if (items.front() == "E") {
                         name = items[1];
                         this->constraints[name].sense =
@@ -165,7 +164,7 @@ struct MPS {
                             MPSConstraintSense::Greater;
                         this->constraints[name].name = name;
                         this->constraint_names.push_back(name);
-                        this->number_of_upper_constraints++;
+                        this->number_of_greater_constraints++;
                     } else {
                         throw std::logic_error(utility::format_error_location(
                             __FILE__, __LINE__, __func__,
@@ -301,7 +300,7 @@ struct MPS {
                         }
 
                         this->constraint_names.push_back(name_new);
-                        this->number_of_lower_constraints++;
+                        this->number_of_lesser_constraints++;
                     }
                     break;
                 }
@@ -434,8 +433,7 @@ struct MPS {
         }
     }
 };
-}  // namespace mps
-}  // namespace printemps
+}  // namespace printemps::mps
 #endif
 /*****************************************************************************/
 // END

@@ -6,8 +6,7 @@
 #ifndef PRINTEMPS_SOLUTION_SOLUTION_ARCHIVE_H__
 #define PRINTEMPS_SOLUTION_SOLUTION_ARCHIVE_H__
 
-namespace printemps {
-namespace solution {
+namespace printemps::solution {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class SolutionArchive {
@@ -143,82 +142,37 @@ class SolutionArchive {
 
     /*************************************************************************/
     void write_solutions_json(const std::string& a_FILE_NAME) const {
-        int indent_level = 0;
+        utility::json::JsonObject object;
 
-        std::ofstream ofs(a_FILE_NAME.c_str());
-        ofs << utility::indent_spaces(indent_level) << "{" << std::endl;
-        indent_level++;
-
-        /// Summary
-        ofs << utility::indent_spaces(indent_level) << "\"version\" : "
-            << "\"" << constant::VERSION << "\"," << std::endl;
-
-        ofs << utility::indent_spaces(indent_level) << "\"name\" : "
-            << "\"" << m_name << "\"," << std::endl;
-
-        ofs << utility::indent_spaces(indent_level)
-            << "\"number_of_variables\" : " << m_number_of_variables << ","
-            << std::endl;
-
-        ofs << utility::indent_spaces(indent_level)
-            << "\"number_of_constraints\" : " << m_number_of_constraints << ","
-            << std::endl;
+        // Summary
+        object.emplace_back("version", constant::VERSION);
+        object.emplace_back("name", m_name);
+        object.emplace_back("number_of_variables", m_number_of_variables);
+        object.emplace_back("number_of_constraints", m_number_of_constraints);
 
         /// Solutions
-        ofs << utility::indent_spaces(indent_level) << "\"solutions\": ["
-            << std::endl;
+        utility::json::JsonArray solution_array;
 
-        indent_level++;
-        auto&     solutions      = m_solutions;
-        const int SOLUTIONS_SIZE = solutions.size();
-        for (auto i = 0; i < SOLUTIONS_SIZE; i++) {
-            ofs << utility::indent_spaces(indent_level) << "{" << std::endl;
-            indent_level++;
-            ofs << utility::indent_spaces(indent_level) << "\"is_feasible\" : "
-                << (m_solutions[i].is_feasible ? "true," : "false,")
-                << std::endl;
-            ofs << utility::indent_spaces(indent_level)
-                << "\"objective\" : " << m_solutions[i].objective << ","
-                << std::endl;
-            ofs << utility::indent_spaces(indent_level)
-                << "\"total_violation\" : " << m_solutions[i].total_violation
-                << "," << std::endl;
-            ofs << utility::indent_spaces(indent_level) << "\"variables\" : {"
-                << std::endl;
-            indent_level++;
+        for (const auto& solution : m_solutions) {
+            utility::json::JsonObject solution_object;
+            solution_object.emplace_back("is_feasible", solution.is_feasible);
+            solution_object.emplace_back("objective", solution.objective);
+            solution_object.emplace_back("total_violation",
+                                         solution.total_violation);
 
-            const auto& variables      = m_solutions[i].variables;
-            const int   VARIABLES_SIZE = variables.size();
-            int         count          = 0;
-            for (const auto& variable : variables) {
-                ofs << utility::indent_spaces(indent_level) << "\""
-                    << variable.first << "\" : " << variable.second;
-                count++;
-                if (count != VARIABLES_SIZE) {
-                    ofs << "," << std::endl;
-                } else {
-                    ofs << std::endl;
-                }
+            utility::json::JsonObject variable_object;
+
+            for (const auto& variable : solution.variables) {
+                variable_object.emplace_back(variable.first, variable.second);
             }
-            indent_level--;
-            ofs << utility::indent_spaces(indent_level) << "}" << std::endl;
-            indent_level--;
-            ofs << utility::indent_spaces(indent_level) << "}";
-            if (i != SOLUTIONS_SIZE - 1) {
-                ofs << "," << std::endl;
-            } else {
-                ofs << std::endl;
-            }
+            solution_object.emplace_back("variables", variable_object);
+            solution_array.emplace_back(solution_object);
         }
-        indent_level--;
-        ofs << utility::indent_spaces(indent_level) << "]" << std::endl;
-        indent_level--;
-        ofs << utility::indent_spaces(indent_level) << "}" << std::endl;
-        ofs.close();
+        object.emplace_back("solutions", solution_array);
+        utility::json::write_json_object(object, a_FILE_NAME);
     }
 };
-}  // namespace solution
-}  // namespace printemps
+}  // namespace printemps::solution
 
 #endif
 /*****************************************************************************/

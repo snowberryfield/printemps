@@ -1,45 +1,85 @@
 {
-    "iteration_max": 100,
-    "time_max": 120.0,
-    "penalty_coefficient_relaxing_rate": 0.9,
-    "penalty_coefficient_tightening_rate": 1.0,
-    "initial_penalty_coefficient": 1E7,
-    "is_enabled_lagrange_dual": false,
-    "is_enabled_local_search": true,
-    "is_enabled_grouping_penalty_coefficient": false,
-    "is_enabled_presolve": true,
-    "is_enabled_initial_value_correction": true,
-    "is_enabled_parallel_evaluation": true,
-    "is_enabled_parallel_neighborhood_update": true,
-    "is_enabled_binary_move": true,
-    "is_enabled_integer_move": true,
-    "is_enabled_aggregation_move": true,
-    "is_enabled_precedence_move": false,
-    "is_enabled_variable_bound_move": false,
-    "is_enabled_chain_move": true,
-    "selection_mode": 4,
-    "improvability_screening_mode": 3,
-    "target_objective_value": -1E100,
-    "verbose": 0,
+    "general": {
+        "iteration_max": 100,
+        "time_max": 120.0
+    },
+    "penalty": {
+        "penalty_coefficient_relaxing_rate": 0.9,
+        "penalty_coefficient_tightening_rate": 1.0,
+        "initial_penalty_coefficient": 1E7
+    },
+    "parallel": {
+        "is_enabled_parallel_evaluation": true,
+        "is_enabled_parallel_neighborhood_update": true
+    },
+    "preprocess": {
+        "is_enabled_presolve": true,
+        "is_enabled_remove_duplicated_constraints": true,
+        "is_enabled_remove_redundant_set_variables": true,
+        "is_enabled_remove_redundant_set_constraints": true,
+        "is_enabled_extract_implicit_equality_constraint": true,
+        "is_enabled_online_bounding": true,
+        "is_enabled_initial_value_correction": true,
+        "is_enabled_extract_dependent_exclusive_or": true,
+        "is_enabled_extract_dependent_exclusive_nor": false,
+        "is_enabled_extract_dependent_inverted_integers": true,
+        "is_enabled_extract_dependent_balanced_integers": false,
+        "is_enabled_extract_dependent_constant_sum_integers": true,
+        "is_enabled_extract_dependent_constant_difference_integers": true,
+        "is_enabled_extract_dependent_constant_ratio_integers": true,
+        "is_enabled_extract_dependent_intermediate": true
+    },
+    "neighborhood": {
+        "is_enabled_binary_move": true,
+        "is_enabled_integer_move": true,
+        "is_enabled_exclusive_or_move": true,
+        "is_enabled_exclusive_nor_move": true,
+        "is_enabled_inverted_integers_move": true,
+        "is_enabled_balanced_integers_move": true,
+        "is_enabled_constant_sum_integers_move": true,
+        "is_enabled_constant_difference_integers_move": true,
+        "is_enabled_constant_ratio_integers_move": true,
+        "is_enabled_aggregation_move": true,
+        "is_enabled_precedence_move": false,
+        "is_enabled_variable_bound_move": false,
+        "is_enabled_trinomial_exclusive_nor_move": true,
+        "is_enabled_soft_selection_move": false,
+        "is_enabled_chain_move": true,
+        "is_enabled_two_flip_move": false,
+        "is_enabled_user_defined_move": false,
+        "chain_move_capacity": 100000,
+        "chain_move_reduce_mode": "OverlapRate",
+        "chain_move_overlap_rate_threshold": 0.2,
+        "selection_mode": "Independent",
+        "improvability_screening_mode": "Automatic"
+    },
+    "output": {
+        "verbose": "Off",
+        "is_enabled_write_trend": false,
+        "is_enabled_store_feasible_solutions": false,
+        "feasible_solutions_capacity": 1000
+    },
     "lagrange_dual": {
+        "is_enabled": false,
         "iteration_max": 10000,
         "time_max": 120.0,
-        "step_size_extend_rate": 1.05,
-        "step_size_reduce_rate": 0.95,
         "tolerance": 1E-5,
         "log_interval": 10
     },
     "local_search": {
+        "is_enabled": true,
         "iteration_max": 10000,
         "time_max": 120.0,
-        "log_interval": 10
+        "time_offset": 0.0,
+        "log_interval": 10,
+        "seed": 1
     },
     "tabu_search": {
         "iteration_max": 200,
-        "time_max": 120,
+        "time_max": 120.0,
         "log_interval": 10,
         "initial_tabu_tenure": 10,
-        "tabu_tenure_randomize_rate": 0.5,
-        "tabu_mode": 0
+        "tabu_mode": "All",
+        "seed": 1
     }
 }

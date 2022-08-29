@@ -10,10 +10,7 @@
 #include "../core/lagrange_dual_core.h"
 #include "lagrange_dual_controller_result.h"
 
-namespace printemps {
-namespace solver {
-namespace lagrange_dual {
-namespace controller {
+namespace printemps::solver::lagrange_dual::controller {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class LagrangeDualController
@@ -77,11 +74,12 @@ class LagrangeDualController
     inline bool satisfy_not_applicable_skip_condition(
         const bool a_IS_ENABLED_PRINT) {
         if (this->m_model_ptr->number_of_selection_variables() > 0 ||
-            this->m_model_ptr->number_of_intermediate_variables() > 0) {
+            this->m_model_ptr->number_of_dependent_binary_variables() > 0 ||
+            this->m_model_ptr->number_of_dependent_integer_variables() > 0) {
             utility::print_warning(
                 "Solving lagrange dual was skipped because it is not "
                 "applicable to problems which include selection variables or "
-                "intermediate variables.",
+                "dependent variables.",
                 a_IS_ENABLED_PRINT);
             return true;
         }
@@ -91,7 +89,7 @@ class LagrangeDualController
     /*************************************************************************/
     inline bool satisfy_time_over_skip_condition(
         const double a_TOTAL_ELAPSED_TIME, const bool a_IS_ENABLED_PRINT) {
-        if (a_TOTAL_ELAPSED_TIME > this->m_option.time_max) {
+        if (a_TOTAL_ELAPSED_TIME > this->m_option.general.time_max) {
             utility::print_message(
                 "Solving Lagrange dual was skipped because of time-over (" +
                     utility::to_string(a_TOTAL_ELAPSED_TIME, "%.3f") + "sec).",
@@ -105,7 +103,7 @@ class LagrangeDualController
     inline bool satisfy_reach_target_skip_condition(
         const bool a_IS_ENABLED_PRINT) {
         if (this->m_incumbent_holder_ptr->feasible_incumbent_objective() <=
-            this->m_option.target_objective_value) {
+            this->m_option.general.target_objective_value) {
             utility::print_message(
                 "Solving Lagrange dual was skipped because of feasible "
                 "objective reaches the target limit.",
@@ -122,7 +120,7 @@ class LagrangeDualController
          * Skip Lagrange dual if the problem is not linear.
          */
         if (this->satisfy_not_linear_skip_condition(  //
-                this->m_option.verbose >= option::verbose::Outer)) {
+                this->m_option.output.verbose >= option::verbose::Outer)) {
             m_result.initialize();
             return;
         }
@@ -131,7 +129,7 @@ class LagrangeDualController
          * Skip Lagrange dual if it is not applicable.
          */
         if (this->satisfy_not_applicable_skip_condition(  //
-                this->m_option.verbose >= option::verbose::Outer)) {
+                this->m_option.output.verbose >= option::verbose::Outer)) {
             m_result.initialize();
             return;
         }
@@ -141,7 +139,7 @@ class LagrangeDualController
          */
         if (this->satisfy_time_over_skip_condition(
                 TOTAL_ELAPSED_TIME,
-                this->m_option.verbose >= option::verbose::Outer)) {
+                this->m_option.output.verbose >= option::verbose::Outer)) {
             m_result.initialize();
             return;
         }
@@ -151,7 +149,7 @@ class LagrangeDualController
          * incumbent reaches the target value.
          */
         if (this->satisfy_reach_target_skip_condition(  //
-                this->m_option.verbose >= option::verbose::Outer)) {
+                this->m_option.output.verbose >= option::verbose::Outer)) {
             m_result.initialize();
             return;
         }
@@ -179,7 +177,7 @@ class LagrangeDualController
         /**
          * Update the feasible solutions archive.
          */
-        if (this->m_option.is_enabled_store_feasible_solutions) {
+        if (this->m_option.output.is_enabled_store_feasible_solutions) {
             this->update_archive(lagrange_dual.feasible_solutions());
         }
 
@@ -193,15 +191,18 @@ class LagrangeDualController
          * Print the search summary.
          */
         utility::print_message(
-            "Solving Lagrange dual finished. ",
-            this->m_option.verbose >= option::verbose::Outer);
+            "Solving Lagrange dual finished (Reason: " +
+                core::LagrangeDualCoreTerminationStatusInverseMap.at(
+                    lagrange_dual_result.termination_status) +
+                ").",
+            this->m_option.output.verbose >= option::verbose::Outer);
 
         this->print_total_elapsed_time(
             this->m_time_keeper.clock(),
-            this->m_option.verbose >= option::verbose::Outer);
+            this->m_option.output.verbose >= option::verbose::Outer);
 
         this->print_incumbent_summary(  //
-            this->m_option.verbose >= option::verbose::Outer);
+            this->m_option.output.verbose >= option::verbose::Outer);
     }
 
     /*************************************************************************/
@@ -211,10 +212,7 @@ class LagrangeDualController
         return m_result;
     }
 };
-}  // namespace controller
-}  // namespace lagrange_dual
-}  // namespace solver
-}  // namespace printemps
+}  // namespace printemps::solver::lagrange_dual::controller
 
 #endif
 /*****************************************************************************/

@@ -6,8 +6,7 @@
 #ifndef PRINTEMPS_SOLUTION_SPARSE_SOLUTION_H__
 #define PRINTEMPS_SOLUTION_SPARSE_SOLUTION_H__
 
-namespace printemps {
-namespace solution {
+namespace printemps::solution {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 struct SparseSolution {
@@ -32,8 +31,7 @@ struct SparseSolution {
     }
 };
 using IPSparseSolution = SparseSolution<int, double>;
-}  // namespace solution
-}  // namespace printemps
+}  // namespace printemps::solution
 #endif
 /*****************************************************************************/
 // END

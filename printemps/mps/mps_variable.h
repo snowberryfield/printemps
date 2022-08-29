@@ -8,8 +8,7 @@
 
 #include "mps_variable_sense.h"
 
-namespace printemps {
-namespace mps {
+namespace printemps::mps {
 /*****************************************************************************/
 struct MPSVariable {
     MPSVariableSense sense;
@@ -36,15 +35,14 @@ struct MPSVariable {
         this->integer_lower_bound    = 0;
         this->integer_upper_bound    = constant::INT_HALF_MAX;
         this->integer_fixed_value    = 0;
-        this->continuous_lower_bound = 0;
+        this->continuous_lower_bound = 0.0;
         this->continuous_upper_bound = HUGE_VAL;
-        this->continuous_fixed_value = 0;
+        this->continuous_fixed_value = 0.0;
         this->is_bound_defined       = false;
         this->is_fixed               = false;
     }
 };
-}  // namespace mps
-}  // namespace printemps
+}  // namespace printemps::mps
 #endif
 /*****************************************************************************/
 // END

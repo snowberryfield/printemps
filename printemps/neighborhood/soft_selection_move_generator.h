@@ -8,8 +8,7 @@
 
 #include "abstract_move_generator.h"
 
-namespace printemps {
-namespace neighborhood {
+namespace printemps::neighborhood {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class SoftSelectionMoveGenerator
@@ -41,14 +40,14 @@ class SoftSelectionMoveGenerator
         for (auto &&constraint_ptr : constraint_ptrs) {
             const auto &sensitivities =
                 constraint_ptr->expression().sensitivities();
-            const auto aux_variable_ptr = constraint_ptr->aux_variable_ptr();
+            const auto key_variable_ptr = constraint_ptr->key_variable_ptr();
 
             std::vector<Move<T_Variable, T_Expression>> moves;
             moves.reserve(2 * sensitivities.size());
             for (auto &&sensitivity : sensitivities) {
                 const auto variable_ptr = sensitivity.first;
 
-                if (variable_ptr == aux_variable_ptr) {
+                if (variable_ptr == key_variable_ptr) {
                     continue;
                 }
 
@@ -57,7 +56,7 @@ class SoftSelectionMoveGenerator
 
                 move_first.related_constraint_ptrs = utility::union_set(
                     variable_ptr->related_constraint_ptrs(),
-                    aux_variable_ptr->related_constraint_ptrs());
+                    key_variable_ptr->related_constraint_ptrs());
 
                 move_first.sense               = MoveSense::SoftSelection;
                 move_first.is_univariable_move = false;
@@ -69,10 +68,10 @@ class SoftSelectionMoveGenerator
                 move_second = move_first;
 
                 move_first.alterations.emplace_back(variable_ptr, 0);
-                move_first.alterations.emplace_back(aux_variable_ptr, 0);
+                move_first.alterations.emplace_back(key_variable_ptr, 0);
 
                 move_second.alterations.emplace_back(variable_ptr, 1);
-                move_second.alterations.emplace_back(aux_variable_ptr, 1);
+                move_second.alterations.emplace_back(key_variable_ptr, 1);
                 moves.push_back(move_first);
                 moves.push_back(move_second);
             }
@@ -84,13 +83,13 @@ class SoftSelectionMoveGenerator
         /**
          * Setup move updater
          */
-        auto move_updater =                                     //
-            [this](auto *     a_moves_ptr,                      //
-                   auto *     a_flags,                          //
-                   const bool a_ACCEPT_ALL,                     //
-                   const bool a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
-                   const bool a_ACCEPT_FEASIBILITY_IMPROVABLE,  //
-                   [[maybe_unused]] const bool a_IS_ENABLED_PARALLEL) {
+        auto move_updater =                                                  //
+            [](auto *                      a_moves_ptr,                      //
+               auto *                      a_flags,                          //
+               const bool                  a_ACCEPT_ALL,                     //
+               const bool                  a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
+               const bool                  a_ACCEPT_FEASIBILITY_IMPROVABLE,  //
+               [[maybe_unused]] const bool a_IS_ENABLED_PARALLEL) {
                 const int MOVES_SIZE = a_moves_ptr->size();
 #ifdef _OPENMP
 #pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
@@ -137,8 +136,7 @@ class SoftSelectionMoveGenerator
         this->m_move_updater = move_updater;
     }
 };
-}  // namespace neighborhood
-}  // namespace printemps
+}  // namespace printemps::neighborhood
 #endif
 /*****************************************************************************/
 // END

@@ -8,8 +8,7 @@
 
 #include "abstract_move_generator.h"
 
-namespace printemps {
-namespace neighborhood {
+namespace printemps::neighborhood {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class SelectionMoveGenerator
@@ -45,22 +44,26 @@ class SelectionMoveGenerator
         this->m_flags.resize(VARIABLES_SIZE);
 
         for (auto i = 0; i < VARIABLES_SIZE; i++) {
-            auto &move = this->m_moves[i];
-            move.sense = MoveSense::Selection;
-            move.related_constraint_ptrs =
-                a_VARIABLE_PTRS[i]->selection_ptr()->related_constraint_ptrs;
+            auto &move                   = this->m_moves[i];
+            move.sense                   = MoveSense::Selection;
+            move.related_constraint_ptrs = a_VARIABLE_PTRS[i]
+                                               ->selection_ptr()
+                                               ->related_constraint_ptrs_set;
             move.is_univariable_move          = false;
             move.is_selection_move            = true;
             move.is_special_neighborhood_move = false;
             move.is_available                 = true;
             move.overlap_rate                 = 0.0;
+            move.alterations.resize(2);
+            move.alterations[0].second = 0;
+            move.alterations[1].second = 1;
         }
 
         /**
          * Setup move updater
          */
         auto move_updater =  //
-            [this, a_VARIABLE_PTRS, VARIABLES_SIZE](
+            [a_VARIABLE_PTRS, VARIABLES_SIZE](
                 auto *                      a_moves_ptr,                      //
                 auto *                      a_flags,                          //
                 const bool                  a_ACCEPT_ALL,                     //
@@ -71,15 +74,12 @@ class SelectionMoveGenerator
 #pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
 #endif
                 for (auto i = 0; i < VARIABLES_SIZE; i++) {
-                    (*a_moves_ptr)[i].alterations.clear();
-                    (*a_moves_ptr)[i].alterations.emplace_back(
-                        a_VARIABLE_PTRS[i]
-                            ->selection_ptr()
-                            ->selected_variable_ptr,
-                        0);
+                    auto &alterations = (*a_moves_ptr)[i].alterations;
 
-                    (*a_moves_ptr)[i].alterations.emplace_back(
-                        a_VARIABLE_PTRS[i], 1);
+                    alterations[0].first = a_VARIABLE_PTRS[i]
+                                               ->selection_ptr()
+                                               ->selected_variable_ptr;
+                    alterations[1].first = a_VARIABLE_PTRS[i];
                 }
 
                 const int MOVES_SIZE = a_moves_ptr->size();
@@ -120,8 +120,7 @@ class SelectionMoveGenerator
         this->m_move_updater = move_updater;
     }
 };
-}  // namespace neighborhood
-}  // namespace printemps
+}  // namespace printemps::neighborhood
 #endif
 /*****************************************************************************/
 // END

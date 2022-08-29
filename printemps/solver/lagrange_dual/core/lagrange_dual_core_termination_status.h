@@ -6,10 +6,7 @@
 #ifndef PRINTEMPS_SOLVER_LAGRANGE_DUAL_CORE_LAGRANGE_DUAL_CORE_TERMINATION_STATUS_H__
 #define PRINTEMPS_SOLVER_LAGRANGE_DUAL_CORE_LAGRANGE_DUAL_CORE_TERMINATION_STATUS_H__
 
-namespace printemps {
-namespace solver {
-namespace lagrange_dual {
-namespace core {
+namespace printemps::solver::lagrange_dual::core {
 /*****************************************************************************/
 enum class LagrangeDualCoreTerminationStatus {
     TIME_OVER,
@@ -17,10 +14,24 @@ enum class LagrangeDualCoreTerminationStatus {
     CONVERGE,
     REACH_TARGET
 };
-}  // namespace core
-}  // namespace lagrange_dual
-}  // namespace solver
-}  // namespace printemps
+
+/*****************************************************************************/
+static std::unordered_map<std::string, LagrangeDualCoreTerminationStatus>
+    LagrangeDualCoreTerminationStatusMap = {  //
+        {"TIME_OVER", LagrangeDualCoreTerminationStatus::TIME_OVER},
+        {"ITERATION_OVER", LagrangeDualCoreTerminationStatus::ITERATION_OVER},
+        {"CONVERGE", LagrangeDualCoreTerminationStatus::CONVERGE},
+        {"REACH_TARGET", LagrangeDualCoreTerminationStatus::REACH_TARGET}};
+
+/*****************************************************************************/
+static std::unordered_map<LagrangeDualCoreTerminationStatus, std::string>
+    LagrangeDualCoreTerminationStatusInverseMap = {  //
+        {LagrangeDualCoreTerminationStatus::TIME_OVER, "TIME_OVER"},
+        {LagrangeDualCoreTerminationStatus::ITERATION_OVER, "ITERATION_OVER"},
+        {LagrangeDualCoreTerminationStatus::CONVERGE, "CONVERGE"},
+        {LagrangeDualCoreTerminationStatus::REACH_TARGET, "REACH_TARGET"}};
+
+}  // namespace printemps::solver::lagrange_dual::core
 
 #endif
 /*****************************************************************************/

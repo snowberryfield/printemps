@@ -14,10 +14,7 @@
 #include "tabu_search_core_state_manager.h"
 #include "tabu_search_core_result.h"
 
-namespace printemps {
-namespace solver {
-namespace tabu_search {
-namespace core {
+namespace printemps::solver::tabu_search::core {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class TabuSearchCore {
@@ -98,7 +95,7 @@ class TabuSearchCore {
         }
 
         if (STATE.elapsed_time + m_option.tabu_search.time_offset >
-            m_option.time_max) {
+            m_option.general.time_max) {
             m_state_manager.set_termination_status(
                 TabuSearchCoreTerminationStatus::TIME_OVER);
             return true;
@@ -121,7 +118,7 @@ class TabuSearchCore {
     /*************************************************************************/
     inline bool satisfy_reach_target_terminate_condition(void) {
         if (m_incumbent_holder_ptr->feasible_incumbent_objective() <=
-            m_option.target_objective_value) {
+            m_option.general.target_objective_value) {
             m_state_manager.set_termination_status(
                 TabuSearchCoreTerminationStatus::REACH_TARGET);
             return true;
@@ -237,13 +234,13 @@ class TabuSearchCore {
         bool accept_feasibility_improvable = true;
 
         if (!m_model_ptr->is_linear() ||
-            m_option.improvability_screening_mode ==
+            m_option.neighborhood.improvability_screening_mode ==
                 option::improvability_screening_mode::Off) {
             m_model_ptr->neighborhood().update_moves(
                 accept_all,                     //
                 accept_objective_improvable,    //
                 accept_feasibility_improvable,  //
-                m_option.is_enabled_parallel_neighborhood_update);
+                m_option.parallel.is_enabled_parallel_neighborhood_update);
 
             m_state_manager.set_number_of_moves(
                 m_model_ptr->neighborhood().move_ptrs().size());
@@ -262,7 +259,7 @@ class TabuSearchCore {
                     neighborhood::related_variable_ptrs(STATE.current_move)));
         }
 
-        switch (m_option.improvability_screening_mode) {
+        switch (m_option.neighborhood.improvability_screening_mode) {
             case option::improvability_screening_mode::Soft: {
                 if (m_model_ptr->is_feasible()) {
                     accept_all                    = false;
@@ -334,7 +331,7 @@ class TabuSearchCore {
             accept_all,                     //
             accept_objective_improvable,    //
             accept_feasibility_improvable,  //
-            m_option.is_enabled_parallel_neighborhood_update);
+            m_option.parallel.is_enabled_parallel_neighborhood_update);
 
         m_state_manager.set_number_of_moves(
             m_model_ptr->neighborhood().move_ptrs().size());
@@ -434,7 +431,7 @@ class TabuSearchCore {
             }
 
             if (chain_move.overlap_rate >
-                    m_option.chain_move_overlap_rate_threshold &&
+                    m_option.neighborhood.chain_move_overlap_rate_threshold &&
                 !neighborhood::has_duplicate_variable(chain_move)) {
                 auto back_chain_move = chain_move;
                 for (auto&& alteration : back_chain_move.alterations) {
@@ -462,8 +459,8 @@ class TabuSearchCore {
             "  Incumbent Solution ",
             true);
         utility::print(
-            "         |  All Feas. Perm. Impr. |   Aug.Obj.(Penalty)  | "
-            "  Aug.Obj.  Feas.Obj ",
+            "         |  All Feas. Perm. Impr. |   Objective (Viol.)  | "
+            "  Objective (Viol.)  ",
             true);
         utility::print(
             "---------+------------------------+----------------------+--------"
@@ -479,15 +476,40 @@ class TabuSearchCore {
         const auto& STATE = m_state_manager.state();
         const auto  SIGN  = m_model_ptr->sign();
 
+        const auto& CURRENT_SOLUTION_SCORE = STATE.current_solution_score;
+        const auto& INCUMBENT_SOLUTION_SCORE =
+            m_incumbent_holder_ptr->global_augmented_incumbent_score();
+
+        std::string color_current_feasible_begin   = "";
+        std::string color_current_feasible_end     = "";
+        std::string color_incumbent_feasible_begin = "";
+        std::string color_incumbent_feasible_end   = "";
+
+#ifdef _PRINTEMPS_STYLING
+        if (CURRENT_SOLUTION_SCORE.is_feasible) {
+            color_current_feasible_begin = constant::CYAN;
+            color_current_feasible_end   = constant::NO_COLOR;
+        }
+
+        if (INCUMBENT_SOLUTION_SCORE.is_feasible) {
+            color_incumbent_feasible_begin = constant::CYAN;
+            color_incumbent_feasible_end   = constant::NO_COLOR;
+        }
+#endif
+
         std::printf(
-            " INITIAL |          -           - | %9.2e(%9.2e) | %9.2e  %9.2e\n",
-            STATE.current_solution_score.local_augmented_objective * SIGN,
-            STATE.current_solution_score.is_feasible
+            " INITIAL |          -           - | %9.2e %s(%8.2e)%s | %9.2e "
+            "%s(%8.2e)%s\n",
+            CURRENT_SOLUTION_SCORE.objective * SIGN,
+            color_current_feasible_begin.c_str(),
+            CURRENT_SOLUTION_SCORE.is_feasible
                 ? 0.0
-                : STATE.current_solution_score.local_penalty,  //
-            m_incumbent_holder_ptr->global_augmented_incumbent_objective() *
-                SIGN,
-            m_incumbent_holder_ptr->feasible_incumbent_objective() * SIGN);
+                : CURRENT_SOLUTION_SCORE.total_violation,  //
+            color_current_feasible_end.c_str(),
+            INCUMBENT_SOLUTION_SCORE.objective * SIGN,
+            color_incumbent_feasible_begin.c_str(),
+            INCUMBENT_SOLUTION_SCORE.total_violation * SIGN,
+            color_incumbent_feasible_end.c_str());
     }
 
     /*************************************************************************/
@@ -499,10 +521,13 @@ class TabuSearchCore {
         const auto& STATE = m_state_manager.state();
         const auto  SIGN  = m_model_ptr->sign();
 
+        const auto& CURRENT_SOLUTION_SCORE = STATE.current_solution_score;
+        const auto& INCUMBENT_SOLUTION_SCORE =
+            m_incumbent_holder_ptr->global_augmented_incumbent_score();
+
         char mark_special_neighborhood_move  = ' ';
         char mark_current                    = ' ';
         char mark_global_augmented_incumbent = ' ';
-        char mark_feasible_incumbent         = ' ';
 
         if (STATE.current_move.is_special_neighborhood_move) {
             mark_special_neighborhood_move = 's';
@@ -510,33 +535,55 @@ class TabuSearchCore {
 
         if (STATE.update_status &  //
             solution::IncumbentHolderConstant::
-                STATUS_LOCAL_AUGMENTED_INCUMBENT_UPDATE) {
-            mark_current = '!';
-        }
-
-        if (STATE.update_status &  //
-            solution::IncumbentHolderConstant::
-                STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
+                STATUS_FEASIBLE_INCUMBENT_UPDATE) {
+            mark_current                    = '*';
+            mark_global_augmented_incumbent = '*';
+        } else if (STATE.update_status &  //
+                   solution::IncumbentHolderConstant::
+                       STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
             mark_current                    = '#';
             mark_global_augmented_incumbent = '#';
             if (STATE.is_aspirated) {
                 mark_current                    = '@';
                 mark_global_augmented_incumbent = '@';
             }
+        } else if (STATE.update_status &  //
+                   solution::IncumbentHolderConstant::
+                       STATUS_LOCAL_AUGMENTED_INCUMBENT_UPDATE) {
+            mark_current = '!';
+        }
+
+        std::string color_current_feasible_begin   = "";
+        std::string color_current_feasible_end     = "";
+        std::string color_incumbent_feasible_begin = "";
+        std::string color_incumbent_feasible_end   = "";
+        std::string color_incumbent_update_begin   = "";
+        std::string color_incumbent_update_end     = "";
+
+#ifdef _PRINTEMPS_STYLING
+        if (CURRENT_SOLUTION_SCORE.is_feasible) {
+            color_current_feasible_begin = constant::CYAN;
+            color_current_feasible_end   = constant::NO_COLOR;
+        }
+
+        if (INCUMBENT_SOLUTION_SCORE.is_feasible) {
+            color_incumbent_feasible_begin = constant::CYAN;
+            color_incumbent_feasible_end   = constant::NO_COLOR;
         }
 
         if (STATE.update_status &  //
             solution::IncumbentHolderConstant::
-                STATUS_FEASIBLE_INCUMBENT_UPDATE) {
-            mark_current                    = '*';
-            mark_global_augmented_incumbent = '*';
-            mark_feasible_incumbent         = '*';
-            if (STATE.is_aspirated) {
-                mark_current                    = '@';
-                mark_global_augmented_incumbent = '@';
-                mark_feasible_incumbent         = '@';
-            }
+                STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
+            color_current_feasible_begin = constant::YELLOW;
+            color_current_feasible_end   = constant::NO_COLOR;
+
+            color_incumbent_feasible_begin = constant::YELLOW;
+            color_incumbent_feasible_end   = constant::NO_COLOR;
+
+            color_incumbent_update_begin = constant::YELLOW;
+            color_incumbent_update_end   = constant::NO_COLOR;
         }
+#endif
 
         auto int_format = [](const int a_VALUE) {
             if (a_VALUE >= 100000) {
@@ -547,23 +594,30 @@ class TabuSearchCore {
         };
 
         std::printf(  //
-            "%8d%c|%s %s %s %s |%c%9.2e(%9.2e) |%c%9.2e %c%9.2e\n",
+            "%8d%c|%s %s %s %s |%s%c%9.2e%s %s(%8.2e)%s |%s%c%9.2e%s "
+            "%s(%8.2e)%s\n",
             STATE.iteration,
             mark_special_neighborhood_move,                                 //
             int_format(STATE.number_of_all_neighborhoods).c_str(),          //
             int_format(STATE.number_of_feasible_neighborhoods).c_str(),     //
             int_format(STATE.number_of_permissible_neighborhoods).c_str(),  //
             int_format(STATE.number_of_improvable_neighborhoods).c_str(),   //
-            mark_current,                                                   //
-            STATE.current_solution_score.local_augmented_objective * SIGN,  //
-            STATE.current_solution_score.is_feasible
+            color_incumbent_update_begin.c_str(),
+            mark_current,  //
+            CURRENT_SOLUTION_SCORE.objective * SIGN,
+            color_incumbent_update_end.c_str(),
+            color_current_feasible_begin.c_str(),
+            CURRENT_SOLUTION_SCORE.is_feasible
                 ? 0.0
-                : STATE.current_solution_score.local_penalty,  //
-            mark_global_augmented_incumbent,                   //
-            m_incumbent_holder_ptr->global_augmented_incumbent_objective() *
-                SIGN,
-            mark_feasible_incumbent,  //
-            m_incumbent_holder_ptr->feasible_incumbent_objective() * SIGN);
+                : CURRENT_SOLUTION_SCORE.total_violation,
+            color_current_feasible_end.c_str(),  //
+            color_incumbent_update_begin.c_str(),
+            mark_global_augmented_incumbent,
+            INCUMBENT_SOLUTION_SCORE.objective * SIGN,
+            color_incumbent_update_end.c_str(),
+            color_incumbent_feasible_begin.c_str(),
+            INCUMBENT_SOLUTION_SCORE.total_violation * SIGN,
+            color_incumbent_feasible_end.c_str());
     }
     /*************************************************************************/
     inline void print_table_footer(const bool a_IS_ENABLED_PRINT) {
@@ -574,6 +628,19 @@ class TabuSearchCore {
         utility::print(
             "---------+------------------------+----------------------+--------"
             "--------------");
+        utility::print_info(  //
+            " -- s: Special neighborhood move was employed.", true);
+        utility::print_info(  //
+            " -- *: Feasible incumbent solution was updated.", true);
+        utility::print_info(  //
+            " -- #: Global incumbent solution was updated.", true);
+        utility::print_info(  //
+            " -- @: Global incumbent solution was updated by aspiration "
+            "criteria.",
+            true);
+        utility::print_info(  //
+            " -- !: Local incumbent solution was updated.", true);
+        utility::print_single_line(true);
     }
 
    public:
@@ -663,12 +730,14 @@ class TabuSearchCore {
          * Print the header of optimization progress table and print the initial
          * solution status.
          */
-        utility::print_single_line(m_option.verbose >= option::verbose::Full);
-        utility::print_message("Tabu Search starts.",
-                               m_option.verbose >= option::verbose::Full);
+        utility::print_single_line(m_option.output.verbose >=
+                                   option::verbose::Outer);
+        utility::print_message(
+            "Tabu Search starts.",
+            m_option.output.verbose >= option::verbose::Outer);
 
-        print_table_header(m_option.verbose >= option::verbose::Full);
-        print_table_initial(m_option.verbose >= option::verbose::Full);
+        print_table_header(m_option.output.verbose >= option::verbose::Full);
+        print_table_initial(m_option.output.verbose >= option::verbose::Full);
 
         /**
          * Iterations start.
@@ -748,7 +817,7 @@ class TabuSearchCore {
             const auto TABU_TENURE            = STATE.tabu_tenure;
             const auto DURATION               = ITERATION - TABU_TENURE;
 #ifdef _OPENMP
-#pragma omp parallel for if (m_option.is_enabled_parallel_evaluation) \
+#pragma omp parallel for if (m_option.parallel.is_enabled_parallel_evaluation) \
     schedule(static)
 #endif
             for (auto i = 0; i < NUMBER_OF_MOVES; i++) {
@@ -756,7 +825,7 @@ class TabuSearchCore {
                  * The neighborhood solutions will be evaluated in parallel by
                  * fast or ordinary(slow) evaluation methods.
                  */
-#ifndef _MPS_SOLVER
+#ifndef _PRINTEMPS_LINEAR_MINIMIZATION
                 if (m_model_ptr->is_enabled_fast_evaluation()) {
 #endif
                     if (TRIAL_MOVE_PTRS[i]->is_univariable_move) {
@@ -764,6 +833,12 @@ class TabuSearchCore {
                             &trial_solution_scores[i],  //
                             *TRIAL_MOVE_PTRS[i],        //
                             CURRENT_SOLUTION_SCORE);
+                    } else if (TRIAL_MOVE_PTRS[i]->is_selection_move) {
+                        m_model_ptr->evaluate_selection(  //
+                            &trial_solution_scores[i],    //
+                            *TRIAL_MOVE_PTRS[i],          //
+                            CURRENT_SOLUTION_SCORE);
+
                     } else {
                         m_model_ptr->evaluate_multi(    //
                             &trial_solution_scores[i],  //
@@ -771,7 +846,7 @@ class TabuSearchCore {
                             CURRENT_SOLUTION_SCORE);
                     }
 
-#ifndef _MPS_SOLVER
+#ifndef _PRINTEMPS_LINEAR_MINIMIZATION
                 } else {
                     m_model_ptr->evaluate(&trial_solution_scores[i],  //
                                           *TRIAL_MOVE_PTRS[i]);
@@ -845,14 +920,15 @@ class TabuSearchCore {
             /**
              * Update the stored chain moves.
              */
-            if (STATE.iteration > 0 && m_option.is_enabled_chain_move) {
+            if (STATE.iteration > 0 &&
+                m_option.neighborhood.is_enabled_chain_move) {
                 this->update_chain_moves();
             }
 
             /**
              * Store the current feasible solution.
              */
-            if (m_option.is_enabled_store_feasible_solutions &&
+            if (m_option.output.is_enabled_store_feasible_solutions &&
                 STATE.current_solution_score.is_feasible) {
                 m_feasible_solutions.push_back(
                     m_model_ptr->export_sparse_solution());
@@ -864,7 +940,8 @@ class TabuSearchCore {
             if ((STATE.iteration %
                  std::max(m_option.tabu_search.log_interval, 1)) == 0 ||
                 STATE.update_status > 0) {
-                print_table_body(m_option.verbose >= option::verbose::Full);
+                print_table_body(m_option.output.verbose >=
+                                 option::verbose::Full);
             }
 
             /**
@@ -885,7 +962,7 @@ class TabuSearchCore {
         /**
          * Print the footer of the optimization progress table.
          */
-        print_table_footer(m_option.verbose >= option::verbose::Full);
+        print_table_footer(m_option.output.verbose >= option::verbose::Full);
 
         /**
          * Postprocess.
@@ -921,12 +998,8 @@ class TabuSearchCore {
     result(void) const {
         return m_result;
     }
-};  // namespace core
-}  // namespace core
-}  // namespace tabu_search
-}  // namespace solver
-}  // namespace printemps
-
+};
+}  // namespace printemps::solver::tabu_search::core
 #endif
 /*****************************************************************************/
 // END

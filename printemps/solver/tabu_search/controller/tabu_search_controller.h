@@ -14,10 +14,7 @@
 #include "tabu_search_controller_logger.h"
 #include "tabu_search_controller_result.h"
 
-namespace printemps {
-namespace solver {
-namespace tabu_search {
-namespace controller {
+namespace printemps::solver::tabu_search::controller {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class TabuSearchController
@@ -80,11 +77,11 @@ class TabuSearchController
 
         auto& state = m_state_manager.state();
 
-        m_mt19937.seed(this->m_option.seed);
+        m_mt19937.seed(this->m_option.general.seed);
 
         state.current_solution = this->m_initial_solution;
 
-        if (this->m_option.is_enabled_write_trend) {
+        if (this->m_option.output.is_enabled_write_trend) {
             m_logger.setup("trend.txt", this, &state);
             m_logger.write_instance_info();
             m_logger.write_header();
@@ -102,7 +99,7 @@ class TabuSearchController
         const bool a_IS_ENABLED_PRINT) {
         const auto& STATE = m_state_manager.state();
 
-        if (STATE.total_elapsed_time > this->m_option.time_max) {
+        if (STATE.total_elapsed_time > this->m_option.general.time_max) {
             utility::print_message(
                 "Outer loop was terminated because of time-over (" +
                     utility::to_string(STATE.total_elapsed_time, "%.3f") +
@@ -117,7 +114,7 @@ class TabuSearchController
     inline bool satisfy_iteration_over_terminate_condition(
         const bool a_IS_ENABLED_PRINT) {
         const auto& STATE = m_state_manager.state();
-        if (STATE.iteration >= this->m_option.iteration_max) {
+        if (STATE.iteration >= this->m_option.general.iteration_max) {
             utility::print_message(
                 "Outer loop was terminated because of iteration limit (" +
                     utility::to_string(STATE.iteration, "%d") + " iterations).",
@@ -132,7 +129,7 @@ class TabuSearchController
         const bool a_IS_ENABLED_PRINT) {
         const auto& STATE = m_state_manager.state();
         if (this->m_incumbent_holder_ptr->feasible_incumbent_objective() <=
-            this->m_option.target_objective_value) {
+            this->m_option.general.target_objective_value) {
             utility::print_message(
                 "Outer loop was terminated because of feasible objective "
                 "reaches the target limit (" +
@@ -315,7 +312,7 @@ class TabuSearchController
     inline void print_number_of_feasible_solutions(
         const int  a_NUMBER_OF_FEASIBLE_SOLUTIONS,
         const bool a_IS_ENABLED_PRINT) {
-        if (this->m_option.is_enabled_store_feasible_solutions) {
+        if (this->m_option.output.is_enabled_store_feasible_solutions) {
             utility::print_message(
                 "Number of feasible solutions found so far is " +
                     std::to_string(a_NUMBER_OF_FEASIBLE_SOLUTIONS) + ".",
@@ -533,8 +530,13 @@ class TabuSearchController
     inline void print_outer_loop_iteration(const int  a_ITERATION,
                                            const bool a_IS_ENABLED_PRINT) {
         utility::print_message(
-            "Tabu search loop (" + std::to_string(a_ITERATION + 1) + "/" +
-                std::to_string(this->m_option.iteration_max) + ") finished.",
+            "Tabu search loop finished (" + std::to_string(a_ITERATION + 1) +
+                "/" + std::to_string(this->m_option.general.iteration_max) +
+                ", Reason: " +
+                core::TabuSearchCoreTerminationStatusInverseMap.at(
+                    m_state_manager.state()
+                        .tabu_search_result.termination_status) +
+                ").",
             a_IS_ENABLED_PRINT);
     }
 
@@ -612,7 +614,7 @@ class TabuSearchController
              * Terminate the loop if the time is over.
              */
             if (this->satisfy_time_over_terminate_condition(  //
-                    this->m_option.verbose >= option::verbose::Outer)) {
+                    this->m_option.output.verbose >= option::verbose::Outer)) {
                 break;
             }
 
@@ -620,7 +622,7 @@ class TabuSearchController
              * Terminate the loop if the iteration is over.
              */
             if (this->satisfy_iteration_over_terminate_condition(  //
-                    this->m_option.verbose >= option::verbose::Outer)) {
+                    this->m_option.output.verbose >= option::verbose::Outer)) {
                 break;
             }
 
@@ -629,7 +631,7 @@ class TabuSearchController
              * incumbent reaches the target value.
              */
             if (this->satisfy_reach_target_terminate_condition(  //
-                    this->m_option.verbose >= option::verbose::Outer)) {
+                    this->m_option.output.verbose >= option::verbose::Outer)) {
                 break;
             }
 
@@ -637,7 +639,7 @@ class TabuSearchController
              * Terminate the loop if the optimal solution is found.
              */
             if (this->satisfy_optimal_terminate_condition(  //
-                    this->m_option.verbose >= option::verbose::Outer)) {
+                    this->m_option.output.verbose >= option::verbose::Outer)) {
                 break;
             }
 
@@ -671,30 +673,33 @@ class TabuSearchController
             /**
              * Update variable bounds.
              */
-            if (this->m_option.is_enabled_presolve &&
-                state.is_feasible_incumbent_updated) {
-                this->bound_variables(
+            if (this->m_option.preprocess.is_enabled_presolve &&
+                this->m_option.preprocess.is_enabled_online_bounding &&
+                state.current_is_feasible_incumbent_updated &&
+                !state.previous_is_feasible_incumbent_updated) {
+                this->update_variable_bounds(
                     this->m_incumbent_holder_ptr
                         ->feasible_incumbent_objective(),
-                    this->m_option.verbose >= option::verbose::Outer);
+                    this->m_option.output.verbose >= option::verbose::Outer);
             }
 
             /**
              * Update the feasible solutions archive.
              */
-            if (this->m_option.is_enabled_store_feasible_solutions) {
+            if (this->m_option.output.is_enabled_store_feasible_solutions) {
                 this->update_archive(tabu_search.feasible_solutions());
             }
 
             /**
              * Print trend.
              */
-            this->print_trend(this->m_option.verbose >= option::verbose::Outer);
+            this->print_trend(this->m_option.output.verbose >=
+                              option::verbose::Outer);
 
             /**
              * Logging.
              */
-            if (this->m_option.is_enabled_write_trend) {
+            if (this->m_option.output.is_enabled_write_trend) {
                 m_logger.write_log();
             }
 
@@ -715,10 +720,7 @@ class TabuSearchController
         return m_result;
     }
 };
-}  // namespace controller
-}  // namespace tabu_search
-}  // namespace solver
-}  // namespace printemps
+}  // namespace printemps::solver::tabu_search::controller
 #endif
 /*****************************************************************************/
 // END

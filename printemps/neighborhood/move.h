@@ -6,8 +6,7 @@
 #ifndef PRINTEMPS_NEIGHBORHOOD_MOVE_H__
 #define PRINTEMPS_NEIGHBORHOOD_MOVE_H__
 
-namespace printemps {
-namespace neighborhood {
+namespace printemps::neighborhood {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 using Alteration =
@@ -313,8 +312,7 @@ constexpr bool operator!=(const Move<T_Variable, T_Expression> &a_MOVE_FIRST,
 };
 
 using IPMove = Move<int, double>;
-}  // namespace neighborhood
-}  // namespace printemps
+}  // namespace printemps::neighborhood
 #endif
 /*****************************************************************************/
 // END

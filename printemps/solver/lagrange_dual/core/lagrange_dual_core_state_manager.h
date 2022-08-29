@@ -8,10 +8,7 @@
 
 #include "lagrange_dual_core_state.h"
 
-namespace printemps {
-namespace solver {
-namespace lagrange_dual {
-namespace core {
+namespace printemps::solver::lagrange_dual::core {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class LagrangeDualCoreStateManager {
@@ -196,13 +193,14 @@ class LagrangeDualCoreStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void update_dual(void) {
+    inline void update_dual(void) {
+        /// Cannot be constexpr for clang.
         auto& constraint_ptrs =
             m_model_ptr->constraint_reference().constraint_ptrs;
         const int CONSTRAINTS_SIZE = constraint_ptrs.size();
 
 #ifdef _OPENMP
-#pragma omp parallel for if (m_option.is_enabled_parallel_evaluation) \
+#pragma omp parallel for if (m_option.parallel.is_enabled_parallel_evaluation) \
     schedule(static)
 #endif
         for (auto i = 0; i < CONSTRAINTS_SIZE; i++) {
@@ -286,10 +284,7 @@ class LagrangeDualCoreStateManager {
         return m_state;
     }
 };
-}  // namespace core
-}  // namespace lagrange_dual
-}  // namespace solver
-}  // namespace printemps
+}  // namespace printemps::solver::lagrange_dual::core
 #endif
 /*****************************************************************************/
 // END

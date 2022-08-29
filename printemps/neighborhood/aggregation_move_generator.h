@@ -8,8 +8,7 @@
 
 #include "abstract_move_generator.h"
 
-namespace printemps {
-namespace neighborhood {
+namespace printemps::neighborhood {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class AggregationMoveGenerator
@@ -77,7 +76,7 @@ class AggregationMoveGenerator
          * Setup move updater.
          */
         auto move_updater =  //
-            [this, binomials, BINOMIALS_SIZE](
+            [binomials, BINOMIALS_SIZE](
                 auto *                      a_moves_ptr,                      //
                 auto *                      a_flags,                          //
                 const bool                  a_ACCEPT_ALL,                     //
@@ -189,8 +188,7 @@ class AggregationMoveGenerator
         this->m_move_updater = move_updater;
     }
 };
-}  // namespace neighborhood
-}  // namespace printemps
+}  // namespace printemps::neighborhood
 #endif
 /*****************************************************************************/
 // END
