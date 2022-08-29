@@ -1,25 +1,25 @@
 
-file(GLOB TEST_MODEL_SOURCE ${TOP_DIR}/test/model_component/*.cpp)
+file(GLOB TEST_SOURCE ${TOP_DIR}/test/model/*.cpp)
 
 add_executable(
-    test_model_component
-    ${TEST_MODEL_SOURCE}
+    test_model
+    ${TEST_SOURCE}
 )
 
 target_include_directories(
-    test_model_component
+    test_model
     PUBLIC ${TOP_DIR}/printemps/
     PUBLIC ${TOP_DIR}/external/include/
 )
 
 target_link_libraries(
-    test_model_component
+    test_model
     PUBLIC gtest
     PUBLIC gtest_main
     PUBLIC pthread
 )
 
 add_test(
-    NAME test_model_component
-    COMMAND test_model_component --gtest_output=xml
+    NAME test_model
+    COMMAND test_model --gtest_output=xml
 )

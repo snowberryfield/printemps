@@ -21,6 +21,7 @@
 #include "constraint_binary_operator.h"
 
 #include "variable_reference.h"
+#include "variable_type_reference.h"
 #include "constraint_reference.h"
 #include "constraint_type_reference.h"
 

@@ -164,7 +164,10 @@ class LocalSearchController
          * Print the search summary.
          */
         utility::print_message(
-            "Local search finished.",
+            "Local search finished (Reason: " +
+                core::LocalSearchCoreTerminationStatusInverseMap.at(
+                    local_search_result.termination_status) +
+                ").",
             this->m_option.output.verbose >= option::verbose::Outer);
 
         this->print_total_elapsed_time(  //

@@ -7,6 +7,7 @@
 #include <printemps.h>
 
 namespace {
+using namespace printemps;
 /*****************************************************************************/
 class TestConstantRatioIntegersMoveGenerator : public ::testing::Test {
    protected:
@@ -21,7 +22,7 @@ class TestConstantRatioIntegersMoveGenerator : public ::testing::Test {
 /*****************************************************************************/
 TEST_F(TestConstantRatioIntegersMoveGenerator, setup) {
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
 
         auto& x = model.create_variables("x", 2, -10, 10);
         auto& c = model.create_constraint("c", 2 * x[0] - x[1] == 0);
@@ -48,7 +49,7 @@ TEST_F(TestConstantRatioIntegersMoveGenerator, setup) {
         EXPECT_EQ(2, static_cast<int>(moves[0].alterations.size()));
         EXPECT_EQ(1, moves[0].alterations[0].second);
         EXPECT_EQ(2, moves[0].alterations[1].second);
-        EXPECT_EQ(printemps::neighborhood::MoveSense::ConstantRatioIntegers,
+        EXPECT_EQ(neighborhood::MoveSense::ConstantRatioIntegers,
                   moves[0].sense);
         EXPECT_TRUE(moves[0].related_constraint_ptrs.find(&c[0]) !=
                     moves[0].related_constraint_ptrs.end());
@@ -60,14 +61,14 @@ TEST_F(TestConstantRatioIntegersMoveGenerator, setup) {
         EXPECT_EQ(2, static_cast<int>(moves[0].alterations.size()));
         EXPECT_EQ(-1, moves[1].alterations[0].second);
         EXPECT_EQ(-2, moves[1].alterations[1].second);
-        EXPECT_EQ(printemps::neighborhood::MoveSense::ConstantRatioIntegers,
+        EXPECT_EQ(neighborhood::MoveSense::ConstantRatioIntegers,
                   moves[1].sense);
         EXPECT_TRUE(moves[1].related_constraint_ptrs.find(&c[0]) !=
                     moves[1].related_constraint_ptrs.end());
     }
 
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
 
         auto& x = model.create_variables("x", 2, -10, 10);
         auto& c = model.create_constraint("c", 2 * x[0] + x[1] == 0);
@@ -94,7 +95,7 @@ TEST_F(TestConstantRatioIntegersMoveGenerator, setup) {
         EXPECT_EQ(2, static_cast<int>(moves[0].alterations.size()));
         EXPECT_EQ(1, moves[0].alterations[0].second);
         EXPECT_EQ(-2, moves[0].alterations[1].second);
-        EXPECT_EQ(printemps::neighborhood::MoveSense::ConstantRatioIntegers,
+        EXPECT_EQ(neighborhood::MoveSense::ConstantRatioIntegers,
                   moves[0].sense);
         EXPECT_TRUE(moves[0].related_constraint_ptrs.find(&c[0]) !=
                     moves[0].related_constraint_ptrs.end());
@@ -106,7 +107,7 @@ TEST_F(TestConstantRatioIntegersMoveGenerator, setup) {
         EXPECT_EQ(2, static_cast<int>(moves[0].alterations.size()));
         EXPECT_EQ(-1, moves[1].alterations[0].second);
         EXPECT_EQ(2, moves[1].alterations[1].second);
-        EXPECT_EQ(printemps::neighborhood::MoveSense::ConstantRatioIntegers,
+        EXPECT_EQ(neighborhood::MoveSense::ConstantRatioIntegers,
                   moves[1].sense);
         EXPECT_TRUE(moves[1].related_constraint_ptrs.find(&c[0]) !=
                     moves[1].related_constraint_ptrs.end());

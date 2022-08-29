@@ -42,13 +42,14 @@ class AbstractSolverController {
         utility::print_info(
             " -- Incumbent total violation: " +
                 utility::to_string(GLOBAL_INCUMBENT_SOLUTION.total_violation,
-                                   "%.3f"),
+                                   "%.3f") +
+                " (duplicated constr. included) ",
             a_IS_ENABLED_PRINT);
     }
 
     /*************************************************************************/
-    inline constexpr void bound_variables(const double a_OBJECTIVE,
-                                          const bool   a_IS_ENABLED_PRINT) {
+    inline constexpr void update_variable_bounds(
+        const double a_OBJECTIVE, const bool a_IS_ENABLED_PRINT) {
         auto number_of_newly_fixed_variables =
             m_model_ptr->update_variable_bounds(a_OBJECTIVE,
                                                 a_IS_ENABLED_PRINT);
@@ -60,9 +61,9 @@ class AbstractSolverController {
         if (number_of_newly_fixed_variables > 0) {
             m_model_ptr->categorize_variables();
             m_model_ptr->neighborhood().binary().setup(
-                m_model_ptr->variable_reference().binary_variable_ptrs);
+                m_model_ptr->variable_type_reference().binary_variable_ptrs);
             m_model_ptr->neighborhood().integer().setup(
-                m_model_ptr->variable_reference().integer_variable_ptrs);
+                m_model_ptr->variable_type_reference().integer_variable_ptrs);
         }
     }
 
@@ -165,7 +166,7 @@ class AbstractSolverController {
     inline utility::TimeKeeper time_keeper(void) const {
         return m_time_keeper;
     }
-};  // namespace solver
+};
 }  // namespace printemps::solver
 
 #endif

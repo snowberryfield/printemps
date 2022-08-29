@@ -4,10 +4,10 @@
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
 #include <gtest/gtest.h>
-#include <random>
 #include <printemps.h>
 
 namespace {
+using namespace printemps;
 /*****************************************************************************/
 class TestSimple1 : public ::testing::Test {
    protected:
@@ -36,7 +36,7 @@ TEST_F(TestSimple1, simple_1) {
      * [1] R.Fletcher: Practical Methods of Optimization, Second Edition,
      * John Wiley & Sons (2000).
      */
-    printemps::model::IPModel model;
+    model::IPModel model;
 
     auto& x = model.create_variables("x", 2, -100, 100);
     auto& g = model.create_constraints("g", 2);
@@ -50,14 +50,14 @@ TEST_F(TestSimple1, simple_1) {
     x(1) = 50;
 
     /// solve
-    printemps::option::Option option;
+    option::Option option;
 
-    auto result = printemps::solver::solve(&model, option);
+    auto result = solver::solve(&model, option);
     EXPECT_TRUE(result.solution.is_feasible());
     EXPECT_EQ(7, result.solution.variables("x").values(0));
     EXPECT_EQ(70, result.solution.variables("x").values(1));
 
-    ASSERT_THROW(printemps::solver::solve(&model, option), std::logic_error);
+    ASSERT_THROW(solver::solve(&model, option), std::logic_error);
 }
 }  // namespace
 /*****************************************************************************/

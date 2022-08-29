@@ -659,7 +659,7 @@ class ProblemSizeReducer {
     }
 
     /*************************************************************************/
-    inline constexpr int remove_implicit_equality_constraints(
+    inline constexpr int extract_implicit_equality_constraints(
         const bool a_IS_ENABLED_PRINT) {
         utility::print_single_line(a_IS_ENABLED_PRINT);
         utility::print_message("Removing implicit equality constraints...",

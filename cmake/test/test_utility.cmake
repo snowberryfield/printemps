@@ -1,9 +1,9 @@
 
-file(GLOB TEST_MODEL_SOURCE ${TOP_DIR}/test/utility/*.cpp)
+file(GLOB TEST_SOURCE ${TOP_DIR}/test/utility/*.cpp)
 
 add_executable(
     test_utility
-    ${TEST_MODEL_SOURCE}
+    ${TEST_SOURCE}
 )
 
 target_include_directories(

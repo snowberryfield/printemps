@@ -14,8 +14,8 @@ struct TabuSearchControllerStateManagerConstant {
     static constexpr double PENALTY_COEFFICIENT_RELAXING_RATE_MAX = 1.0 - 1E-4;
     static constexpr double PENALTY_COEFFICIENT_RELAXING_RATE_DECREASE_RATE =
         0.9;
-    static constexpr double PENALTY_COEFFICIENT_RELAXING_RATE_STEP_SIZE = 1E-1;
-    static constexpr int    ITERATION_AFTER_RELAXATION_MAX              = 30;
+    static constexpr double PENALTY_COEFFICIENT_RELAXING_RATE_STEP_SIZE = 0.1;
+    static constexpr int    ITERATION_AFTER_RELAXATION_MAX              = 20;
     static constexpr double GAP_TOLERANCE        = constant::EPSILON;
     static constexpr int    STAGNATION_THRESHOLD = 80;
 };
@@ -373,14 +373,14 @@ class TabuSearchControllerStateManager {
          * "Improved" refers to when any of the following conditions are
          * satisfied:
          * - Objective function value is improved from the previous one.
-         * - Total penalty is decreased from the previous one.
+         * - Total violation is decreased from the previous one.
          */
         m_state.is_improved =
-            (m_incumbent_holder_ptr->local_augmented_incumbent_objective() <
-             m_state.previous_solution_score.objective) ||
             (m_incumbent_holder_ptr->local_augmented_incumbent_score()
-                 .global_penalty <
-             m_state.previous_solution_score.global_penalty);
+                 .objective < m_state.previous_solution_score.objective) ||
+            (m_incumbent_holder_ptr->local_augmented_incumbent_score()
+                 .total_violation <
+             m_state.previous_solution_score.total_violation);
     }
 
     /*************************************************************************/
@@ -650,7 +650,8 @@ class TabuSearchControllerStateManager {
     /*************************************************************************/
     inline constexpr void update_penalty_coefficient_reset_flag(void) {
         if (m_state.is_infeasible_stagnation &&
-            m_state.is_exceeded_initial_penalty_coefficient &&
+            (m_state.is_exceeded_initial_penalty_coefficient ||
+             !m_state.is_improved) &&
             m_state.iteration_after_relaxation >
                 TabuSearchControllerStateManagerConstant::
                     ITERATION_AFTER_RELAXATION_MAX) {
@@ -731,7 +732,7 @@ class TabuSearchControllerStateManager {
                 }
             }
 
-            if (m_option.penalty.is_enabled_grouping_penalty_coefficient) {
+            if (m_option.penalty.is_enabled_group_penalty_coefficient) {
                 double max_local_penalty_coefficient = 0;
                 for (auto&& constraint : proxy.flat_indexed_constraints()) {
                     max_local_penalty_coefficient =

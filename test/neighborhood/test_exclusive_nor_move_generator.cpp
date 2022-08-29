@@ -7,6 +7,7 @@
 #include <printemps.h>
 
 namespace {
+using namespace printemps;
 /*****************************************************************************/
 class TestExclusiveNorMoveGenerator : public ::testing::Test {
    protected:
@@ -20,7 +21,7 @@ class TestExclusiveNorMoveGenerator : public ::testing::Test {
 
 /*****************************************************************************/
 TEST_F(TestExclusiveNorMoveGenerator, setup) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& x = model.create_variables("x", 2, 0, 1);
     auto& c = model.create_constraint("c", x[0] - x[1] == 0);
@@ -46,7 +47,7 @@ TEST_F(TestExclusiveNorMoveGenerator, setup) {
     EXPECT_EQ(2, static_cast<int>(moves[0].alterations.size()));
     EXPECT_EQ(0, moves[0].alterations[0].second);
     EXPECT_EQ(0, moves[0].alterations[1].second);
-    EXPECT_EQ(printemps::neighborhood::MoveSense::ExclusiveNor, moves[0].sense);
+    EXPECT_EQ(neighborhood::MoveSense::ExclusiveNor, moves[0].sense);
     EXPECT_TRUE(moves[0].related_constraint_ptrs.find(&c[0]) !=
                 moves[0].related_constraint_ptrs.end());
 
@@ -57,7 +58,7 @@ TEST_F(TestExclusiveNorMoveGenerator, setup) {
     EXPECT_EQ(2, static_cast<int>(moves[0].alterations.size()));
     EXPECT_EQ(1, moves[1].alterations[0].second);
     EXPECT_EQ(1, moves[1].alterations[1].second);
-    EXPECT_EQ(printemps::neighborhood::MoveSense::ExclusiveNor, moves[1].sense);
+    EXPECT_EQ(neighborhood::MoveSense::ExclusiveNor, moves[1].sense);
     EXPECT_TRUE(moves[1].related_constraint_ptrs.find(&c[0]) !=
                 moves[1].related_constraint_ptrs.end());
 }

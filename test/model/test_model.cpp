@@ -4,17 +4,16 @@
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
 #include <gtest/gtest.h>
-#include <random>
-
 #include <printemps.h>
 
 namespace {
+using namespace printemps;
 /*****************************************************************************/
 class TestModel : public ::testing::Test {
    protected:
-    printemps::utility::UniformRandom<std::uniform_int_distribution<>, int>
+    utility::UniformRandom<std::uniform_int_distribution<>, int>
         m_random_integer;
-    printemps::utility::UniformRandom<std::uniform_int_distribution<>, int>
+    utility::UniformRandom<std::uniform_int_distribution<>, int>
         m_random_positive_integer;
 
     virtual void SetUp(void) {
@@ -35,16 +34,16 @@ class TestModel : public ::testing::Test {
 
 /*****************************************************************************/
 TEST_F(TestModel, initialize) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     /// These declarations are for googletest constraint.
     /// http://opencv.jp/googletestdocs/FAQ.html#faq-the-compiler-complains-about-undefined-reference
     auto max_number_of_variable_proxies =
-        printemps::model::ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES;
+        model::ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES;
     auto max_number_of_expression_proxies =
-        printemps::model::ModelConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES;
+        model::ModelConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES;
     auto max_number_of_constraint_proxies =
-        printemps::model::ModelConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES;
+        model::ModelConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES;
 
     EXPECT_EQ("", model.name());
 
@@ -72,71 +71,38 @@ TEST_F(TestModel, initialize) {
     EXPECT_EQ(  //
         true, model.variable_reference().variable_ptrs.empty());
     EXPECT_EQ(  //
-        true, model.variable_reference().fixed_variable_ptrs.empty());
+        true, model.variable_reference_original().variable_ptrs.empty());
+
+    /// Variable Type Reference
     EXPECT_EQ(  //
-        true, model.variable_reference().selection_variable_ptrs.empty());
+        true, model.variable_type_reference().binary_variable_ptrs.empty());
     EXPECT_EQ(  //
-        true, model.variable_reference().binary_variable_ptrs.empty());
-    EXPECT_EQ(  //
-        true, model.variable_reference().integer_variable_ptrs.empty());
-    EXPECT_EQ(  //
-        true,   //
-        model.variable_reference().variable_ptrs.empty());
+        true,
+        model.variable_type_reference_original().binary_variable_ptrs.empty());
 
     /// Constraint Reference
     EXPECT_EQ(  //
-        true,   //
-        model.constraint_reference().constraint_ptrs.empty());
+        true, model.constraint_reference().constraint_ptrs.empty());
     EXPECT_EQ(  //
-        true, model.constraint_reference().enabled_constraint_ptrs.empty());
-    EXPECT_EQ(  //
-        true, model.constraint_reference().disabled_constraint_ptrs.empty());
+        true, model.constraint_reference_original().constraint_ptrs.empty());
 
     /// Constraint Type Reference
     EXPECT_EQ(  //
         true, model.constraint_type_reference().singleton_ptrs.empty());
     EXPECT_EQ(  //
-        true, model.constraint_type_reference().aggregation_ptrs.empty());
-    EXPECT_EQ(  //
-        true, model.constraint_type_reference().precedence_ptrs.empty());
-    EXPECT_EQ(  //
-        true, model.constraint_type_reference().variable_bound_ptrs.empty());
-    EXPECT_EQ(  //
         true,
-
-        model.constraint_type_reference().set_partitioning_ptrs.empty());
-    EXPECT_EQ(  //
-        true, model.constraint_type_reference().set_packing_ptrs.empty());
-    EXPECT_EQ(  //
-        true, model.constraint_type_reference().set_covering_ptrs.empty());
-    EXPECT_EQ(  //
-        true, model.constraint_type_reference().cardinality_ptrs.empty());
-    EXPECT_EQ(  //
-        true,
-        model.constraint_type_reference().invariant_knapsack_ptrs.empty());
-    EXPECT_EQ(  //
-        true, model.constraint_type_reference().equation_knapsack_ptrs.empty());
-    EXPECT_EQ(  //
-        true, model.constraint_type_reference().bin_packing_ptrs.empty());
-    EXPECT_EQ(  //
-        true, model.constraint_type_reference().knapsack_ptrs.empty());
-    EXPECT_EQ(  //
-        true, model.constraint_type_reference().integer_knapsack_ptrs.empty());
-    EXPECT_EQ(  //
-        true, model.constraint_type_reference().general_linear_ptrs.empty());
-    EXPECT_EQ(  //
-        true, model.constraint_type_reference().nonlinear_ptrs.empty());
+        model.constraint_type_reference_original().singleton_ptrs.empty());
 }
 
 /*****************************************************************************/
 TEST_F(TestModel, constructor_arg_name) {
-    printemps::model::Model<int, double> model("name");
+    model::Model<int, double> model("name");
     EXPECT_EQ("name", model.name());
 }
 
 /*****************************************************************************/
 TEST_F(TestModel, set_name) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     EXPECT_EQ("", model.name());
     model.set_name("name");
     EXPECT_EQ("name", model.name());
@@ -150,27 +116,24 @@ TEST_F(TestModel, name) {
 /*****************************************************************************/
 TEST_F(TestModel, create_variable_scalar_without_bound) {
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
         for (auto i = 0;
-             i <
-             printemps::model::ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES;
-             i++) {
+             i < model::ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES; i++) {
             auto  name = "x" + std::to_string(i);
             auto& x    = model.create_variable(name);
             EXPECT_EQ(i + 1, static_cast<int>(model.variable_proxies().size()));
             EXPECT_EQ(i, x.index());
-            EXPECT_EQ(printemps::constant::INT_HALF_MIN, x.lower_bound());
-            EXPECT_EQ(printemps::constant::INT_HALF_MAX, x.upper_bound());
+            EXPECT_EQ(constant::INT_HALF_MIN, x.lower_bound());
+            EXPECT_EQ(constant::INT_HALF_MAX, x.upper_bound());
             EXPECT_FALSE(x.has_bounds());
-            EXPECT_EQ(printemps::model_component::VariableSense::Integer,
-                      x.sense());
+            EXPECT_EQ(model_component::VariableSense::Integer, x.sense());
             EXPECT_EQ(&x, &model.variable_proxies().back());
             EXPECT_EQ(name, model.variable_names().back());
         }
         ASSERT_THROW(model.create_variable("error"), std::logic_error);
     }
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
         ASSERT_THROW(model.create_variable("s p a c e"), std::logic_error);
     }
 }
@@ -178,11 +141,9 @@ TEST_F(TestModel, create_variable_scalar_without_bound) {
 /*****************************************************************************/
 TEST_F(TestModel, create_variable_scalar_with_bound) {
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
         for (auto i = 0;
-             i <
-             printemps::model::ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES;
-             i++) {
+             i < model::ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES; i++) {
             auto  name = "x" + std::to_string(i);
             auto& x    = model.create_variable(name, 0, 1);
             EXPECT_EQ(i + 1, static_cast<int>(model.variable_proxies().size()));
@@ -190,15 +151,14 @@ TEST_F(TestModel, create_variable_scalar_with_bound) {
             EXPECT_EQ(0, x.lower_bound());
             EXPECT_EQ(1, x.upper_bound());
             EXPECT_TRUE(x.has_bounds());
-            EXPECT_EQ(printemps::model_component::VariableSense::Binary,
-                      x.sense());
+            EXPECT_EQ(model_component::VariableSense::Binary, x.sense());
             EXPECT_EQ(&x, &model.variable_proxies().back());
             EXPECT_EQ(name, model.variable_names().back());
         }
         ASSERT_THROW(model.create_variable("error", 0, 1), std::logic_error);
     }
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
         ASSERT_THROW(model.create_variable("s p a c e", 0, 1),
                      std::logic_error);
     }
@@ -207,27 +167,24 @@ TEST_F(TestModel, create_variable_scalar_with_bound) {
 /*****************************************************************************/
 TEST_F(TestModel, create_variable_one_dimensional_without_bound) {
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
         for (auto i = 0;
-             i <
-             printemps::model::ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES;
-             i++) {
+             i < model::ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES; i++) {
             auto  name = "x" + std::to_string(i);
             auto& x    = model.create_variables(name, 2);
             EXPECT_EQ(i + 1, static_cast<int>(model.variable_proxies().size()));
             EXPECT_EQ(i, x.index());
-            EXPECT_EQ(printemps::constant::INT_HALF_MIN, x(0).lower_bound());
-            EXPECT_EQ(printemps::constant::INT_HALF_MAX, x(0).upper_bound());
+            EXPECT_EQ(constant::INT_HALF_MIN, x(0).lower_bound());
+            EXPECT_EQ(constant::INT_HALF_MAX, x(0).upper_bound());
             EXPECT_FALSE(x(0).has_bounds());
-            EXPECT_EQ(printemps::model_component::VariableSense::Integer,
-                      x(0).sense());
+            EXPECT_EQ(model_component::VariableSense::Integer, x(0).sense());
             EXPECT_EQ(&x, &model.variable_proxies().back());
             EXPECT_EQ(name, model.variable_names().back());
         }
         ASSERT_THROW(model.create_variables("error", 2), std::logic_error);
     }
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
         ASSERT_THROW(model.create_variables("s p a c e", 2), std::logic_error);
     }
 }
@@ -235,11 +192,9 @@ TEST_F(TestModel, create_variable_one_dimensional_without_bound) {
 /*****************************************************************************/
 TEST_F(TestModel, create_variable_one_dimensional_with_bound) {
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
         for (auto i = 0;
-             i <
-             printemps::model::ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES;
-             i++) {
+             i < model::ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES; i++) {
             auto  name = "x" + std::to_string(i);
             auto& x    = model.create_variables(name, 2, 0, 1);
             EXPECT_EQ(i + 1, static_cast<int>(model.variable_proxies().size()));
@@ -247,8 +202,7 @@ TEST_F(TestModel, create_variable_one_dimensional_with_bound) {
             EXPECT_EQ(0, x(0).lower_bound());
             EXPECT_EQ(1, x(0).upper_bound());
             EXPECT_TRUE(x(0).has_bounds());
-            EXPECT_EQ(printemps::model_component::VariableSense::Binary,
-                      x(0).sense());
+            EXPECT_EQ(model_component::VariableSense::Binary, x(0).sense());
             EXPECT_EQ(&x, &model.variable_proxies().back());
             EXPECT_EQ(name, model.variable_names().back());
         }
@@ -256,7 +210,7 @@ TEST_F(TestModel, create_variable_one_dimensional_with_bound) {
                      std::logic_error);
     }
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
         ASSERT_THROW(model.create_variables("s p a c e", 2, 0, 1),
                      std::logic_error);
     }
@@ -265,27 +219,24 @@ TEST_F(TestModel, create_variable_one_dimensional_with_bound) {
 /*****************************************************************************/
 TEST_F(TestModel, create_variable_two_dimensional_without_bound) {
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
         for (auto i = 0;
-             i <
-             printemps::model::ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES;
-             i++) {
+             i < model::ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES; i++) {
             auto  name = "x" + std::to_string(i);
             auto& x    = model.create_variables(name, {2, 3});
             EXPECT_EQ(i + 1, static_cast<int>(model.variable_proxies().size()));
             EXPECT_EQ(i, x.index());
-            EXPECT_EQ(printemps::constant::INT_HALF_MIN, x(0, 0).lower_bound());
-            EXPECT_EQ(printemps::constant::INT_HALF_MAX, x(0, 0).upper_bound());
+            EXPECT_EQ(constant::INT_HALF_MIN, x(0, 0).lower_bound());
+            EXPECT_EQ(constant::INT_HALF_MAX, x(0, 0).upper_bound());
             EXPECT_FALSE(x(0, 0).has_bounds());
-            EXPECT_EQ(printemps::model_component::VariableSense::Integer,
-                      x(0, 0).sense());
+            EXPECT_EQ(model_component::VariableSense::Integer, x(0, 0).sense());
             EXPECT_EQ(&x, &model.variable_proxies().back());
             EXPECT_EQ(name, model.variable_names().back());
         }
         ASSERT_THROW(model.create_variables("error", {2, 3}), std::logic_error);
     }
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
         ASSERT_THROW(model.create_variables("s p a c e", {2, 3}),
                      std::logic_error);
     }
@@ -294,11 +245,9 @@ TEST_F(TestModel, create_variable_two_dimensional_without_bound) {
 /*****************************************************************************/
 TEST_F(TestModel, create_variable_two_dimensional_with_bound) {
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
         for (auto i = 0;
-             i <
-             printemps::model::ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES;
-             i++) {
+             i < model::ModelConstant::MAX_NUMBER_OF_VARIABLE_PROXIES; i++) {
             auto  name = "x" + std::to_string(i);
             auto& x    = model.create_variables(name, {2, 3}, 0, 1);
             EXPECT_EQ(i + 1, static_cast<int>(model.variable_proxies().size()));
@@ -306,8 +255,7 @@ TEST_F(TestModel, create_variable_two_dimensional_with_bound) {
             EXPECT_EQ(0, x(0, 0).lower_bound());
             EXPECT_EQ(1, x(0, 0).upper_bound());
             EXPECT_TRUE(x(0, 0).has_bounds());
-            EXPECT_EQ(printemps::model_component::VariableSense::Binary,
-                      x(0, 0).sense());
+            EXPECT_EQ(model_component::VariableSense::Binary, x(0, 0).sense());
             EXPECT_EQ(&x, &model.variable_proxies().back());
             EXPECT_EQ(name, model.variable_names().back());
         }
@@ -315,7 +263,7 @@ TEST_F(TestModel, create_variable_two_dimensional_with_bound) {
                      std::logic_error);
     }
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
         ASSERT_THROW(model.create_variables("s p a c e", {2, 3}, 0, 1),
                      std::logic_error);
     }
@@ -324,11 +272,9 @@ TEST_F(TestModel, create_variable_two_dimensional_with_bound) {
 /*****************************************************************************/
 TEST_F(TestModel, create_expression_scalar) {
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
         for (auto i = 0;
-             i <
-             printemps::model::ModelConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES;
-             i++) {
+             i < model::ModelConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES; i++) {
             auto  name = "p" + std::to_string(i);
             auto& p    = model.create_expression(name);
             EXPECT_EQ(i + 1,
@@ -340,7 +286,7 @@ TEST_F(TestModel, create_expression_scalar) {
         ASSERT_THROW(model.create_expression("error"), std::logic_error);
     }
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
         ASSERT_THROW(model.create_expression("s p a c e"), std::logic_error);
     }
 }
@@ -348,11 +294,9 @@ TEST_F(TestModel, create_expression_scalar) {
 /*****************************************************************************/
 TEST_F(TestModel, create_expression_one_dimensional) {
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
         for (auto i = 0;
-             i <
-             printemps::model::ModelConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES;
-             i++) {
+             i < model::ModelConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES; i++) {
             auto  name = "p" + std::to_string(i);
             auto& p    = model.create_expressions(name, 2);
             EXPECT_EQ(i + 1,
@@ -364,7 +308,7 @@ TEST_F(TestModel, create_expression_one_dimensional) {
         ASSERT_THROW(model.create_expressions("error", 2), std::logic_error);
     }
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
         ASSERT_THROW(model.create_expressions("s p a c e", 2),
                      std::logic_error);
     }
@@ -373,11 +317,9 @@ TEST_F(TestModel, create_expression_one_dimensional) {
 /*****************************************************************************/
 TEST_F(TestModel, create_expression_two_dimensional) {
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
         for (auto i = 0;
-             i <
-             printemps::model::ModelConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES;
-             i++) {
+             i < model::ModelConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES; i++) {
             auto  name = "p" + std::to_string(i);
             auto& p    = model.create_expressions(name, {2, 3});
             EXPECT_EQ(i + 1,
@@ -390,7 +332,7 @@ TEST_F(TestModel, create_expression_two_dimensional) {
                      std::logic_error);
     }
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
         ASSERT_THROW(model.create_expressions("s p a c e", {2, 3}),
                      std::logic_error);
     }
@@ -399,16 +341,13 @@ TEST_F(TestModel, create_expression_two_dimensional) {
 /*****************************************************************************/
 TEST_F(TestModel, create_expression_arg_expression_like) {
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
 
         for (auto i = 0;
-             i <
-             printemps::model::ModelConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES;
-             i++) {
+             i < model::ModelConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES; i++) {
             auto name = "p" + std::to_string(i);
             auto variable =
-                printemps::model_component::Variable<int,
-                                                     double>::create_instance();
+                model_component::Variable<int, double>::create_instance();
 
             auto& p = model.create_expression(name, variable);
             EXPECT_EQ(i + 1,
@@ -419,16 +358,14 @@ TEST_F(TestModel, create_expression_arg_expression_like) {
         }
 
         auto variable =
-            printemps::model_component::Variable<int,
-                                                 double>::create_instance();
+            model_component::Variable<int, double>::create_instance();
         ASSERT_THROW(model.create_expression("error", variable),
                      std::logic_error);
     }
     {
-        printemps::model::Model<int, double> model;
-        auto                                 variable =
-            printemps::model_component::Variable<int,
-                                                 double>::create_instance();
+        model::Model<int, double> model;
+        auto                      variable =
+            model_component::Variable<int, double>::create_instance();
         ASSERT_THROW(model.create_expression("s p a c e", variable),
                      std::logic_error);
     }
@@ -437,15 +374,13 @@ TEST_F(TestModel, create_expression_arg_expression_like) {
 /*****************************************************************************/
 TEST_F(TestModel, create_expression_arg_expression) {
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
 
         for (auto i = 0;
-             i <
-             printemps::model::ModelConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES;
-             i++) {
-            auto name       = "p" + std::to_string(i);
-            auto expression = printemps::model_component::Expression<
-                int, double>::create_instance();
+             i < model::ModelConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES; i++) {
+            auto name = "p" + std::to_string(i);
+            auto expression =
+                model_component::Expression<int, double>::create_instance();
 
             auto& p = model.create_expression(name, expression);
             EXPECT_EQ(i + 1,
@@ -456,17 +391,15 @@ TEST_F(TestModel, create_expression_arg_expression) {
         }
 
         auto expression =
-            printemps::model_component::Expression<int,
-                                                   double>::create_instance();
+            model_component::Expression<int, double>::create_instance();
         ASSERT_THROW(model.create_expression("error", expression),
                      std::logic_error);
     }
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
 
         auto expression =
-            printemps::model_component::Expression<int,
-                                                   double>::create_instance();
+            model_component::Expression<int, double>::create_instance();
         ASSERT_THROW(model.create_expression("s p a c e", expression),
                      std::logic_error);
     }
@@ -475,11 +408,9 @@ TEST_F(TestModel, create_expression_arg_expression) {
 /*****************************************************************************/
 TEST_F(TestModel, create_constraint_scalar) {
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
         for (auto i = 0;
-             i <
-             printemps::model::ModelConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES;
-             i++) {
+             i < model::ModelConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES; i++) {
             auto  name = "g" + std::to_string(i);
             auto& g    = model.create_constraint(name);
             EXPECT_EQ(i + 1,
@@ -491,7 +422,7 @@ TEST_F(TestModel, create_constraint_scalar) {
         ASSERT_THROW(model.create_constraint("error"), std::logic_error);
     }
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
         ASSERT_THROW(model.create_constraint("s p a c e"), std::logic_error);
     }
 }
@@ -499,11 +430,9 @@ TEST_F(TestModel, create_constraint_scalar) {
 /*****************************************************************************/
 TEST_F(TestModel, create_constraint_one_dimensional) {
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
         for (auto i = 0;
-             i <
-             printemps::model::ModelConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES;
-             i++) {
+             i < model::ModelConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES; i++) {
             auto  name = "g" + std::to_string(i);
             auto& g    = model.create_constraints(name, 2);
             EXPECT_EQ(i + 1,
@@ -515,7 +444,7 @@ TEST_F(TestModel, create_constraint_one_dimensional) {
         ASSERT_THROW(model.create_constraints("error", 2), std::logic_error);
     }
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
         ASSERT_THROW(model.create_constraints("s p a c e", 2),
                      std::logic_error);
     }
@@ -524,11 +453,9 @@ TEST_F(TestModel, create_constraint_one_dimensional) {
 /*****************************************************************************/
 TEST_F(TestModel, create_constraint_two_dimensional) {
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
         for (auto i = 0;
-             i <
-             printemps::model::ModelConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES;
-             i++) {
+             i < model::ModelConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES; i++) {
             auto  name = "g" + std::to_string(i);
             auto& g    = model.create_constraints(name, {2, 3});
             EXPECT_EQ(i + 1,
@@ -541,7 +468,7 @@ TEST_F(TestModel, create_constraint_two_dimensional) {
                      std::logic_error);
     }
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
         ASSERT_THROW(model.create_constraints("s p a c e", {2, 3}),
                      std::logic_error);
     }
@@ -550,15 +477,13 @@ TEST_F(TestModel, create_constraint_two_dimensional) {
 /*****************************************************************************/
 TEST_F(TestModel, create_constraint_arg_constraint) {
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
 
         for (auto i = 0;
-             i <
-             printemps::model::ModelConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES;
-             i++) {
-            auto name       = "g" + std::to_string(i);
-            auto expression = printemps::model_component::Expression<
-                int, double>::create_instance();
+             i < model::ModelConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES; i++) {
+            auto name = "g" + std::to_string(i);
+            auto expression =
+                model_component::Expression<int, double>::create_instance();
             auto constraint = expression <= 1;
 
             auto& g = model.create_constraint(name, constraint);
@@ -570,17 +495,15 @@ TEST_F(TestModel, create_constraint_arg_constraint) {
         }
 
         auto expression =
-            printemps::model_component::Expression<int,
-                                                   double>::create_instance();
+            model_component::Expression<int, double>::create_instance();
         auto constraint = expression <= 1;
         ASSERT_THROW(model.create_constraint("error", constraint),
                      std::logic_error);
     }
     {
-        printemps::model::Model<int, double> model;
-        auto                                 expression =
-            printemps::model_component::Expression<int,
-                                                   double>::create_instance();
+        model::Model<int, double> model;
+        auto                      expression =
+            model_component::Expression<int, double>::create_instance();
         auto constraint = expression <= 1;
         ASSERT_THROW(model.create_constraint("s p a c e", constraint),
                      std::logic_error);
@@ -589,12 +512,12 @@ TEST_F(TestModel, create_constraint_arg_constraint) {
 
 /*****************************************************************************/
 TEST_F(TestModel, minimize_arg_function) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& x = model.create_variables("x", 10, -1, 1);
     auto& p = model.create_expression("p", x.sum() + 1);
 
-    auto f = [&p](const printemps::neighborhood::Move<int, double>& a_MOVE) {
+    auto f = [&p](const neighborhood::Move<int, double>& a_MOVE) {
         return p.evaluate(a_MOVE);
     };
     model.minimize(f);
@@ -615,13 +538,13 @@ TEST_F(TestModel, minimize_arg_function) {
 
 /*****************************************************************************/
 TEST_F(TestModel, minimize_arg_expression_like) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& x = model.create_variables("x", 10, -1, 1);
     auto& p = model.create_expression("p", x.sum() + 1);
 
     [[maybe_unused]] auto f =
-        [&p](const printemps::neighborhood::Move<int, double>& a_MOVE) {
+        [&p](const neighborhood::Move<int, double>& a_MOVE) {
             return p.evaluate(a_MOVE);
         };
     model.minimize(p);
@@ -643,13 +566,13 @@ TEST_F(TestModel, minimize_arg_expression_like) {
 
 /*****************************************************************************/
 TEST_F(TestModel, minimize_arg_expression) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& x = model.create_variables("x", 10, -1, 1);
     auto& p = model.create_expression("p", x.sum() + 1);
 
     [[maybe_unused]] auto f =
-        [&p](const printemps::neighborhood::Move<int, double>& a_MOVE) {
+        [&p](const neighborhood::Move<int, double>& a_MOVE) {
             return p.evaluate(a_MOVE);
         };
     model.minimize(p(0));
@@ -671,12 +594,12 @@ TEST_F(TestModel, minimize_arg_expression) {
 
 /*****************************************************************************/
 TEST_F(TestModel, maximize_arg_function) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& x = model.create_variables("x", 10, -1, 1);
     auto& p = model.create_expression("p", x.sum() + 1);
 
-    auto f = [&p](const printemps::neighborhood::Move<int, double>& a_MOVE) {
+    auto f = [&p](const neighborhood::Move<int, double>& a_MOVE) {
         return p.evaluate(a_MOVE);
     };
     model.maximize(f);
@@ -697,13 +620,13 @@ TEST_F(TestModel, maximize_arg_function) {
 
 /*****************************************************************************/
 TEST_F(TestModel, maximize_arg_expression_like) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& x = model.create_variables("x", 10, -1, 1);
     auto& p = model.create_expression("p", x.sum() + 1);
 
     [[maybe_unused]] auto f =
-        [&p](const printemps::neighborhood::Move<int, double>& a_MOVE) {
+        [&p](const neighborhood::Move<int, double>& a_MOVE) {
             return p.evaluate(a_MOVE);
         };
     model.maximize(p);
@@ -725,11 +648,11 @@ TEST_F(TestModel, maximize_arg_expression_like) {
 
 /*****************************************************************************/
 TEST_F(TestModel, maximize_arg_expression) {
-    printemps::model::Model<int, double> model;
-    auto&                 x = model.create_variables("x", 10, -1, 1);
-    auto&                 p = model.create_expression("p", x.sum() + 1);
-    [[maybe_unused]] auto f =
-        [&p](const printemps::neighborhood::Move<int, double>& a_MOVE) {
+    model::Model<int, double> model;
+    auto&                     x = model.create_variables("x", 10, -1, 1);
+    auto&                     p = model.create_expression("p", x.sum() + 1);
+    [[maybe_unused]] auto     f =
+        [&p](const neighborhood::Move<int, double>& a_MOVE) {
             return p.evaluate(a_MOVE);
         };
     model.maximize(p(0));
@@ -761,7 +684,7 @@ TEST_F(TestModel, setup_structure) {
 
 /*****************************************************************************/
 TEST_F(TestModel, setup_unique_names) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& x = model.create_variable("x");
     auto& p = model.create_variables("p", {10});
@@ -790,7 +713,7 @@ TEST_F(TestModel, setup_is_linear) {
     /// Constraint: linear
     /// Objective: linear
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
 
         auto& x = model.create_variable("x");
 
@@ -805,12 +728,12 @@ TEST_F(TestModel, setup_is_linear) {
     /// Constraint: nonlinear (user-defined lambda)
     /// Objective: linear
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
 
         auto& x = model.create_variable("x");
 
-        std::function<double(const printemps::neighborhood::Move<int, double>&)>
-            g = [&x](const printemps::neighborhood::Move<int, double>& a_MOVE) {
+        std::function<double(const neighborhood::Move<int, double>&)> g =
+            [&x](const neighborhood::Move<int, double>& a_MOVE) {
                 return x.evaluate(a_MOVE);
             };
 
@@ -825,12 +748,12 @@ TEST_F(TestModel, setup_is_linear) {
     /// Constraint: linear
     /// Objective: nonlinear (user-defined lambda)
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
 
         auto& x = model.create_variable("x");
 
-        std::function<double(const printemps::neighborhood::Move<int, double>&)>
-            f = [&x](const printemps::neighborhood::Move<int, double>& a_MOVE) {
+        std::function<double(const neighborhood::Move<int, double>&)> f =
+            [&x](const neighborhood::Move<int, double>& a_MOVE) {
                 return x.evaluate(a_MOVE);
             };
 
@@ -845,17 +768,17 @@ TEST_F(TestModel, setup_is_linear) {
     /// Constraint: nonlinear
     /// Objective: nonlinear
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
 
         auto& x = model.create_variable("x");
 
-        std::function<double(const printemps::neighborhood::Move<int, double>&)>
-            g = [&x](const printemps::neighborhood::Move<int, double>& a_MOVE) {
+        std::function<double(const neighborhood::Move<int, double>&)> g =
+            [&x](const neighborhood::Move<int, double>& a_MOVE) {
                 return x.evaluate(a_MOVE);
             };
 
-        std::function<double(const printemps::neighborhood::Move<int, double>&)>
-            f = [&x](const printemps::neighborhood::Move<int, double>& a_MOVE) {
+        std::function<double(const neighborhood::Move<int, double>&)> f =
+            [&x](const neighborhood::Move<int, double>& a_MOVE) {
                 return x.evaluate(a_MOVE);
             };
 
@@ -874,7 +797,7 @@ TEST_F(TestModel, setup_is_enabled_fast_evaluation) {
     /// Objective: linear
     /// User-defined neighborhood: None
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
 
         auto& x = model.create_variable("x");
 
@@ -890,12 +813,12 @@ TEST_F(TestModel, setup_is_enabled_fast_evaluation) {
     /// Objective: linear
     /// User-defined neighborhood: None
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
 
         auto& x = model.create_variable("x");
 
-        std::function<double(const printemps::neighborhood::Move<int, double>&)>
-            g = [&x](const printemps::neighborhood::Move<int, double>& a_MOVE) {
+        std::function<double(const neighborhood::Move<int, double>&)> g =
+            [&x](const neighborhood::Move<int, double>& a_MOVE) {
                 return x.evaluate(a_MOVE);
             };
 
@@ -911,12 +834,12 @@ TEST_F(TestModel, setup_is_enabled_fast_evaluation) {
     /// Objective: nonlinear (user-defined lambda)
     /// User-defined neighborhood: None
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
 
         auto& x = model.create_variable("x");
 
-        std::function<double(const printemps::neighborhood::Move<int, double>&)>
-            f = [&x](const printemps::neighborhood::Move<int, double>& a_MOVE) {
+        std::function<double(const neighborhood::Move<int, double>&)> f =
+            [&x](const neighborhood::Move<int, double>& a_MOVE) {
                 return x.evaluate(a_MOVE);
             };
 
@@ -932,7 +855,7 @@ TEST_F(TestModel, setup_is_enabled_fast_evaluation) {
     /// Objective: linear
     /// User-defined neighborhood: Yes
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
 
         auto& x = model.create_variable("x");
 
@@ -940,8 +863,8 @@ TEST_F(TestModel, setup_is_enabled_fast_evaluation) {
         model.minimize(x);
 
         auto move_updater =
-            []([[maybe_unused]] std::vector<
-                printemps::neighborhood::Move<int, double>>* a_moves_ptr) { ; };
+            []([[maybe_unused]] std::vector<neighborhood::Move<int, double>>*
+                   a_moves_ptr) { ; };
 
         model.neighborhood().user_defined().set_move_updater(move_updater);
         model.neighborhood().user_defined().enable();
@@ -953,7 +876,7 @@ TEST_F(TestModel, setup_is_enabled_fast_evaluation) {
 
 /*****************************************************************************/
 TEST_F(TestModel, setup_variable_related_constraints) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& x = model.create_variables("x", 10, 0, 1);
     auto& y = model.create_variables("y", {20, 30}, 0, 1);
@@ -961,7 +884,7 @@ TEST_F(TestModel, setup_variable_related_constraints) {
     auto& g = model.create_constraints("g", 3);
     g(0)    = x.selection();
     g(1)    = y.selection();
-    g(2) = x(0) + 2 * y.sum({0, printemps::model_component::Range::All}) >= 1;
+    g(2)    = x(0) + 2 * y.sum({0, model_component::Range::All}) >= 1;
 
     model.categorize_constraints();
     model.setup_variable_related_constraints();
@@ -1020,13 +943,8 @@ TEST_F(TestModel, setup_variable_related_constraints) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModel, setup_variable_related_binary_coefficient_constraints) {
-    /// This method is tested in setup_variable_related_constraints().
-}
-
-/*****************************************************************************/
 TEST_F(TestModel, setup_variable_objective_sensitivities) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& x = model.create_variables("x", 10, 0, 1);
     auto& y = model.create_variables("y", {20, 30}, 0, 1);
@@ -1047,7 +965,7 @@ TEST_F(TestModel, setup_variable_objective_sensitivities) {
 
 /*****************************************************************************/
 TEST_F(TestModel, setup_variable_constraint_sensitivities) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& x = model.create_variables("x", 10, 0, 1);
     auto& y = model.create_variables("y", {20, 30}, 0, 1);
@@ -1087,8 +1005,56 @@ TEST_F(TestModel, setup_variable_constraint_sensitivities) {
 }
 
 /*****************************************************************************/
+TEST_F(TestModel, setup_related_selection_constraint_ptr_index) {
+    model::Model<int, double> model;
+
+    auto& x = model.create_variables("x", 4, 0, 1);
+
+    model.create_constraint("selection", x.selection());
+
+    /**
+     * To verify the sort process, constraints are defined in the order of c_1
+     * -> c_2 -> c_0, which will be sorted in the order of c_0 - >c_1 -> c2.
+     */
+    auto& c_1 = model.create_constraint("c_1", x(1) + x(2) <= 1);
+    auto& c_2 = model.create_constraint("c_2", x(2) + x(3) <= 1);
+    auto& c_0 = model.create_constraint("c_0", x(0) + x(1) <= 1);
+
+    model.setup_unique_names();
+    model.setup_structure();
+    preprocess::SelectionExtractor<int, double> selection_extractor(&model);
+    selection_extractor.extract_by_defined_order(false);
+    model.setup_structure();
+    model.setup_variable_related_selection_constraint_ptr_index();
+
+    EXPECT_EQ(1, static_cast<int>(model.selections().size()));
+
+    EXPECT_EQ(3, model.selections()[0].related_constraint_ptrs_vector.size());
+    EXPECT_EQ(&c_0[0], model.selections()[0].related_constraint_ptrs_vector[0]);
+    EXPECT_EQ(&c_1[0], model.selections()[0].related_constraint_ptrs_vector[1]);
+    EXPECT_EQ(&c_2[0], model.selections()[0].related_constraint_ptrs_vector[2]);
+
+    EXPECT_EQ(0, x(0).related_selection_constraint_ptr_index_min());
+    EXPECT_EQ(0, x(0).related_selection_constraint_ptr_index_max());
+
+    EXPECT_EQ(0, x(1).related_selection_constraint_ptr_index_min());
+    EXPECT_EQ(1, x(1).related_selection_constraint_ptr_index_max());
+
+    EXPECT_EQ(1, x(2).related_selection_constraint_ptr_index_min());
+    EXPECT_EQ(2, x(2).related_selection_constraint_ptr_index_max());
+
+    EXPECT_EQ(2, x(3).related_selection_constraint_ptr_index_min());
+    EXPECT_EQ(2, x(3).related_selection_constraint_ptr_index_max());
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, setup_variable_related_binary_coefficient_constraints) {
+    /// This method is tested in setup_variable_related_constraints().
+}
+
+/*****************************************************************************/
 TEST_F(TestModel, categorize_variables) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& x = model.create_variable("x", 0, 1);
     auto& y = model.create_variables("y", 10, 0, 1);
@@ -1104,11 +1070,11 @@ TEST_F(TestModel, categorize_variables) {
     model.categorize_variables();
     model.categorize_constraints();
 
-    printemps::preprocess::DependentVariableExtractor<int, double>
-        dependent_variable_extractor(&model);
-    dependent_variable_extractor.extract(false);
-    printemps::preprocess::SelectionExtractor<int, double> selection_extractor(
-        &model);
+    preprocess::DependentVariableExtractor<int, double>
+                   dependent_variable_extractor(&model);
+    option::Option option;
+    dependent_variable_extractor.extract(option, false);
+    preprocess::SelectionExtractor<int, double> selection_extractor(&model);
     selection_extractor.extract_by_independent(false);
 
     model.categorize_variables();
@@ -1125,8 +1091,8 @@ TEST_F(TestModel, categorize_variables) {
 
 /*****************************************************************************/
 TEST_F(TestModel, categorize_constraints) {
-    printemps::model::Model<int, double> model;
-    auto coefficients = printemps::utility::sequence(10, 20);
+    model::Model<int, double> model;
+    auto                      coefficients = utility::sequence(10, 20);
 
     auto& x = model.create_variable("x", -10, 10);
     auto& y = model.create_variable("y", -10, 10);
@@ -1202,8 +1168,8 @@ TEST_F(TestModel, categorize_constraints) {
     general_liner       = 2 * x + 2 * r.sum() == 50;
 
     auto& nonlinear = model.create_constraint("nonlinear");
-    std::function<double(const printemps::neighborhood::Move<int, double>&)> f =
-        [&x](const printemps::neighborhood::Move<int, double>& a_MOVE) {
+    std::function<double(const neighborhood::Move<int, double>&)> f =
+        [&x](const neighborhood::Move<int, double>& a_MOVE) {
             return x.evaluate(a_MOVE) - 1;
         };
     nonlinear = f <= 5;
@@ -1211,8 +1177,7 @@ TEST_F(TestModel, categorize_constraints) {
     singleton.disable();
 
     model.setup_structure();
-    printemps::preprocess::SelectionExtractor<int, double> selection_extractor(
-        &model);
+    preprocess::SelectionExtractor<int, double> selection_extractor(&model);
     selection_extractor.extract_by_defined_order(false);
     model.setup_structure();
 
@@ -1256,13 +1221,13 @@ TEST_F(TestModel, setup_fixed_sensitivities) {
 
 /*****************************************************************************/
 TEST_F(TestModel, set_selections) {
-    printemps::model::Model<int, double> model;
-    auto& x = model.create_variables("x", 10, 0, 1);
-    auto& y = model.create_variables("y", 5, 0, 1);
-    std::vector<printemps::model_component::Selection<int, double>> selections;
+    model::Model<int, double> model;
+    auto&                     x = model.create_variables("x", 10, 0, 1);
+    auto&                     y = model.create_variables("y", 5, 0, 1);
+    std::vector<model_component::Selection<int, double>> selections;
 
     {
-        printemps::model_component::Selection<int, double> selection;
+        model_component::Selection<int, double> selection;
         for (auto i = 0; i < 10; i++) {
             selection.variable_ptrs.push_back(&(x(i)));
         }
@@ -1270,7 +1235,7 @@ TEST_F(TestModel, set_selections) {
     }
 
     {
-        printemps::model_component::Selection<int, double> selection;
+        model_component::Selection<int, double> selection;
         for (auto i = 0; i < 5; i++) {
             selection.variable_ptrs.push_back(&(y(i)));
         }
@@ -1291,7 +1256,7 @@ TEST_F(TestModel, set_selections) {
 /*****************************************************************************/
 TEST_F(TestModel, update_variable_bounds) {
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
 
         auto& x = model.create_variable("x", 0, 200);
         auto& y = model.create_variable("y", 0, 200);
@@ -1303,7 +1268,7 @@ TEST_F(TestModel, update_variable_bounds) {
     }
 
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
 
         auto& x = model.create_variable("x", 0, 200);
         auto& y = model.create_variable("y", 0, 200);
@@ -1315,7 +1280,7 @@ TEST_F(TestModel, update_variable_bounds) {
     }
 
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
 
         auto& x = model.create_variable("x", 0, 200);
         auto& y = model.create_variable("y", 0, 200);
@@ -1327,7 +1292,7 @@ TEST_F(TestModel, update_variable_bounds) {
     }
 
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
 
         auto& x = model.create_variable("x", 0, 200);
         auto& y = model.create_variable("y", 0, 200);
@@ -1341,7 +1306,7 @@ TEST_F(TestModel, update_variable_bounds) {
 
 /*****************************************************************************/
 TEST_F(TestModel, set_global_penalty_coefficient) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     model.set_global_penalty_coefficient(1E7);
     EXPECT_FLOAT_EQ(1E7, model.global_penalty_coefficient());
 }
@@ -1353,15 +1318,14 @@ TEST_F(TestModel, global_penalty_coefficient) {
 
 /*****************************************************************************/
 TEST_F(TestModel, set_callback) {
-    printemps::model::Model<int, double>              model;
-    printemps::option::Option                         option;
-    printemps::solution::IncumbentHolder<int, double> incumbent_holder;
+    model::Model<int, double>              model;
+    option::Option                         option;
+    solution::IncumbentHolder<int, double> incumbent_holder;
 
     int  v = 1;
-    auto f =
-        [&v]([[maybe_unused]] printemps::option::Option* a_option_ptr,
-             [[maybe_unused]] printemps::solution::IncumbentHolder<int, double>*
-                 a_incumbent_holder_ptr) { v++; };
+    auto f = [&v]([[maybe_unused]] option::Option* a_option_ptr,
+                  [[maybe_unused]] solution::IncumbentHolder<int, double>*
+                      a_incumbent_holder_ptr) { v++; };
     model.set_callback(f);
     model.callback(&option, &incumbent_holder);
     EXPECT_EQ(2, v);
@@ -1374,15 +1338,15 @@ TEST_F(TestModel, callback) {
 
 /*****************************************************************************/
 TEST_F(TestModel, import_variable_values) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& x = model.create_variable("x");
     auto& y = model.create_variables("y", 10);
     auto& z = model.create_variables("z", {10, 10});
 
-    printemps::multi_array::ValueProxy<int> x_value(x.index());
-    printemps::multi_array::ValueProxy<int> y_value(y.index(), 10);
-    printemps::multi_array::ValueProxy<int> z_value(z.index(), {10, 10});
+    multi_array::ValueProxy<int> x_value(x.index());
+    multi_array::ValueProxy<int> y_value(y.index(), 10);
+    multi_array::ValueProxy<int> z_value(z.index(), {10, 10});
 
     x_value.value() = 1;
 
@@ -1413,9 +1377,9 @@ TEST_F(TestModel, import_variable_values) {
 
 /*****************************************************************************/
 TEST_F(TestModel, update_arg_void) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
-    auto sequence = printemps::utility::sequence(10);
+    auto sequence = utility::sequence(10);
 
     auto& x = model.create_variables("x", 10, 0, 1);
     auto& p = model.create_expression("p", x.dot(sequence) + 1);
@@ -1435,9 +1399,9 @@ TEST_F(TestModel, update_arg_void) {
 
 /*****************************************************************************/
 TEST_F(TestModel, update_arg_move) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
-    auto sequence = printemps::utility::sequence(10);
+    auto sequence = utility::sequence(10);
 
     auto& x = model.create_variables("x", 10, 0, 1);
     auto& p = model.create_expression("p", x.dot(sequence) + 1);
@@ -1447,15 +1411,14 @@ TEST_F(TestModel, update_arg_move) {
 
     model.minimize(p);
     model.setup_structure();
-    printemps::preprocess::SelectionExtractor<int, double> selection_extractor(
-        &model);
+    preprocess::SelectionExtractor<int, double> selection_extractor(&model);
     selection_extractor.extract_by_independent(false);
     model.setup_fixed_sensitivities(false);
 
     model.update();
 
-    printemps::neighborhood::Move<int, double> move;
-    move.sense = printemps::neighborhood::MoveSense::Selection;
+    neighborhood::Move<int, double> move;
+    move.sense = neighborhood::MoveSense::Selection;
     move.alterations.emplace_back(&x(0), 0);
     move.alterations.emplace_back(&x(9), 1);
 
@@ -1469,7 +1432,7 @@ TEST_F(TestModel, update_arg_move) {
 
 /*****************************************************************************/
 TEST_F(TestModel, reset_variable_objective_improvabilities_arg_void) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& x = model.create_variable("x", 0, 1);
     auto& y = model.create_variables("y", 10, 0, 1);
@@ -1491,7 +1454,7 @@ TEST_F(TestModel, reset_variable_objective_improvabilities_arg_void) {
 
 /*****************************************************************************/
 TEST_F(TestModel, reset_variable_objective_improvabilities_arg_variable_ptrs) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& x = model.create_variable("x", 0, 1);
     auto& y = model.create_variables("y", 10, 0, 1);
@@ -1515,7 +1478,7 @@ TEST_F(TestModel, reset_variable_objective_improvabilities_arg_variable_ptrs) {
 
 /*****************************************************************************/
 TEST_F(TestModel, reset_variable_feasibility_improvabilities_arg_void) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& x = model.create_variable("x", 0, 1);
     auto& y = model.create_variables("y", 10, 0, 1);
@@ -1538,7 +1501,7 @@ TEST_F(TestModel, reset_variable_feasibility_improvabilities_arg_void) {
 /*****************************************************************************/
 TEST_F(TestModel,
        reset_variable_feasibility_improvabilities_arg_variable_ptrs) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& x = model.create_variable("x", 0, 1);
     auto& y = model.create_variables("y", 10, 0, 1);
@@ -1563,7 +1526,7 @@ TEST_F(TestModel,
 /*****************************************************************************/
 TEST_F(TestModel,
        reset_variable_feasibility_improvabilities_arg_constraint_ptrs) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& x = model.create_variable("x", 0, 1);
     auto& y = model.create_variables("y", 10, 0, 1);
@@ -1580,8 +1543,8 @@ TEST_F(TestModel,
         y(i).set_is_feasibility_improvable(true);
         EXPECT_TRUE(y(i).is_feasibility_improvable());
     }
-    std::vector<printemps::model_component::Constraint<int, double>*>
-        constraint_ptrs = {&g(0), &g(1)};
+    std::vector<model_component::Constraint<int, double>*> constraint_ptrs = {
+        &g(0), &g(1)};
     model.reset_variable_feasibility_improvabilities(constraint_ptrs);
 
     EXPECT_FALSE(x(0).is_feasibility_improvable());
@@ -1596,7 +1559,7 @@ TEST_F(TestModel,
 /*****************************************************************************/
 TEST_F(TestModel, update_variable_improvability) {
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
 
         auto& x = model.create_variable("x", -10, 10);
         auto& y = model.create_variable("y", -10, 10);
@@ -1638,7 +1601,7 @@ TEST_F(TestModel, update_variable_improvability) {
         EXPECT_TRUE(y(0).is_feasibility_improvable());
     }
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
 
         auto& x = model.create_variable("x", -10, 10);
         auto& y = model.create_variable("y", -10, 10);
@@ -1680,7 +1643,7 @@ TEST_F(TestModel, update_variable_improvability) {
         EXPECT_TRUE(y(0).is_feasibility_improvable());
     }
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
 
         auto& x = model.create_variable("x", -10, 10);
         auto& y = model.create_variable("y", -10, 10);
@@ -1722,7 +1685,7 @@ TEST_F(TestModel, update_variable_improvability) {
         EXPECT_TRUE(y(0).is_feasibility_improvable());
     }
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
 
         auto& x = model.create_variable("x", -10, 10);
         auto& y = model.create_variable("y", -10, 10);
@@ -1765,7 +1728,7 @@ TEST_F(TestModel, update_variable_improvability) {
         EXPECT_TRUE(y(0).is_feasibility_improvable());
     }
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
 
         auto& x = model.create_variable("x", -10, 10);
         auto& y = model.create_variable("y", -10, 10);
@@ -1808,7 +1771,7 @@ TEST_F(TestModel, update_variable_improvability) {
         EXPECT_TRUE(y(0).is_feasibility_improvable());
     }
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
 
         auto& x = model.create_variable("x", -10, 10);
         auto& y = model.create_variable("y", -10, 10);
@@ -1854,7 +1817,7 @@ TEST_F(TestModel, update_variable_improvability) {
 
 /*****************************************************************************/
 TEST_F(TestModel, update_violative_constraint_ptrs_and_feasibility) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto&                  x = model.create_variable("x", 0, 10);
     [[maybe_unused]] auto& g = model.create_constraint("g", x <= 5);
@@ -1881,9 +1844,9 @@ TEST_F(TestModel, update_violative_constraint_ptrs_and_feasibility) {
 TEST_F(TestModel, evaluate) {
     /// minimize
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
 
-        auto sequence = printemps::utility::sequence(10);
+        auto sequence = utility::sequence(10);
 
         auto& x = model.create_variables("x", 10, 0, 1);
         auto& p = model.create_expression("p", x.dot(sequence) + 1);
@@ -1900,8 +1863,7 @@ TEST_F(TestModel, evaluate) {
         model.set_global_penalty_coefficient(10000);
 
         model.setup_structure();
-        printemps::preprocess::SelectionExtractor<int, double>
-            selection_extractor(&model);
+        preprocess::SelectionExtractor<int, double> selection_extractor(&model);
         selection_extractor.extract_by_independent(false);
         model.setup_fixed_sensitivities(false);
 
@@ -1913,7 +1875,7 @@ TEST_F(TestModel, evaluate) {
         auto score_before = model.evaluate({});
 
         {
-            printemps::neighborhood::Move<int, double> move;
+            neighborhood::Move<int, double> move;
             for (auto&& element : x.flat_indexed_variables()) {
                 move.alterations.emplace_back(&element, 1);
                 for (auto&& constraint_ptr :
@@ -1954,7 +1916,7 @@ TEST_F(TestModel, evaluate) {
         }
 
         {
-            printemps::neighborhood::Move<int, double> move;
+            neighborhood::Move<int, double> move;
             for (auto&& element : x.flat_indexed_variables()) {
                 move.alterations.emplace_back(&element, 0);
                 for (auto&& constraint_ptr :
@@ -1991,7 +1953,7 @@ TEST_F(TestModel, evaluate) {
         }
 
         {
-            printemps::neighborhood::Move<int, double> move;
+            neighborhood::Move<int, double> move;
             for (auto i = 0; i < 5; i++) {
                 move.alterations.emplace_back(&x(i), 1);
                 for (auto&& constraint_ptr : x(i).related_constraint_ptrs()) {
@@ -2028,7 +1990,7 @@ TEST_F(TestModel, evaluate) {
 
         {
             /// Single
-            printemps::neighborhood::Move<int, double> move;
+            neighborhood::Move<int, double> move;
             move.alterations.emplace_back(&x(1), 0);
             move.related_constraint_ptrs = x(1).related_constraint_ptrs();
 
@@ -2062,9 +2024,9 @@ TEST_F(TestModel, evaluate) {
 
     /// maximize
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
 
-        auto sequence = printemps::utility::sequence(10);
+        auto sequence = utility::sequence(10);
 
         auto& x = model.create_variables("x", 10, 0, 1);
         auto& p = model.create_expression("p", x.dot(sequence) + 1);
@@ -2081,8 +2043,7 @@ TEST_F(TestModel, evaluate) {
         model.set_global_penalty_coefficient(10000);
 
         model.setup_structure();
-        printemps::preprocess::SelectionExtractor<int, double>
-            selection_extractor(&model);
+        preprocess::SelectionExtractor<int, double> selection_extractor(&model);
         selection_extractor.extract_by_independent(false);
         model.setup_fixed_sensitivities(false);
 
@@ -2093,7 +2054,7 @@ TEST_F(TestModel, evaluate) {
         auto score_before = model.evaluate({});
 
         {
-            printemps::neighborhood::Move<int, double> move;
+            neighborhood::Move<int, double> move;
             for (auto&& element : x.flat_indexed_variables()) {
                 move.alterations.emplace_back(&element, 1);
                 for (auto&& constraint_ptr :
@@ -2133,7 +2094,7 @@ TEST_F(TestModel, evaluate) {
             score_before = score_after_1;
         }
         {
-            printemps::neighborhood::Move<int, double> move;
+            neighborhood::Move<int, double> move;
             for (auto&& element : x.flat_indexed_variables()) {
                 move.alterations.emplace_back(&element, 0);
                 for (auto&& constraint_ptr :
@@ -2170,7 +2131,7 @@ TEST_F(TestModel, evaluate) {
         }
 
         {
-            printemps::neighborhood::Move<int, double> move;
+            neighborhood::Move<int, double> move;
             for (auto i = 0; i < 5; i++) {
                 move.alterations.emplace_back(&x(i), 1);
                 for (auto&& constraint_ptr : x(i).related_constraint_ptrs()) {
@@ -2207,7 +2168,7 @@ TEST_F(TestModel, evaluate) {
 
         {
             /// Single
-            printemps::neighborhood::Move<int, double> move;
+            neighborhood::Move<int, double> move;
             move.alterations.emplace_back(&x(1), 0);
             move.related_constraint_ptrs = x(1).related_constraint_ptrs();
 
@@ -2242,9 +2203,9 @@ TEST_F(TestModel, evaluate) {
 
 /*****************************************************************************/
 TEST_F(TestModel, compute_lagrangian) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
-    auto sequence = printemps::utility::sequence(10);
+    auto sequence = utility::sequence(10);
 
     auto& x = model.create_variables("x", 10, 0, 1);
     auto& p = model.create_expression("p", x.dot(sequence) + 1);
@@ -2254,11 +2215,11 @@ TEST_F(TestModel, compute_lagrangian) {
     model.minimize(p);
     model.setup_structure();
 
-    printemps::multi_array::ValueProxy<double> dual_value_proxy(1);
+    multi_array::ValueProxy<double> dual_value_proxy(1);
     dual_value_proxy.value() = 100;
 
-    std::vector<printemps::multi_array::ValueProxy<double>> dual = {
-        dual_value_proxy, dual_value_proxy};
+    std::vector<multi_array::ValueProxy<double>> dual = {dual_value_proxy,
+                                                         dual_value_proxy};
 
     for (auto&& element : x.flat_indexed_variables()) {
         element = 1;
@@ -2272,7 +2233,7 @@ TEST_F(TestModel, compute_lagrangian) {
 
 /*****************************************************************************/
 TEST_F(TestModel, generate_variable_parameter_proxies) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& x = model.create_variable("x");
     auto& y = model.create_variables("y", 10);
@@ -2313,7 +2274,7 @@ TEST_F(TestModel, generate_variable_parameter_proxies) {
 
 /*****************************************************************************/
 TEST_F(TestModel, generate_expression_parameter_proxies) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& p = model.create_expression("p");
     auto& q = model.create_expressions("q", 10);
@@ -2354,7 +2315,7 @@ TEST_F(TestModel, generate_expression_parameter_proxies) {
 
 /*****************************************************************************/
 TEST_F(TestModel, generate_constraint_parameter_proxies) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& g = model.create_constraint("g");
     auto& h = model.create_constraints("h", 10);
@@ -2395,7 +2356,7 @@ TEST_F(TestModel, generate_constraint_parameter_proxies) {
 
 /*****************************************************************************/
 TEST_F(TestModel, export_solution) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& x = model.create_variable("x");
     auto& y = model.create_variables("y", 10);
@@ -2515,7 +2476,7 @@ TEST_F(TestModel, export_solution) {
 
 /*****************************************************************************/
 TEST_F(TestModel, export_named_solution) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& x = model.create_variable("x");
     auto& y = model.create_variables("y", 10);
@@ -2668,7 +2629,7 @@ TEST_F(TestModel, convert_to_named_solution) {
 
 /*****************************************************************************/
 TEST_F(TestModel, export_sparse_solution) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& x = model.create_variable("x");
     auto& y = model.create_variables("y", 10);
@@ -2700,7 +2661,7 @@ TEST_F(TestModel, export_sparse_solution) {
 
 /*****************************************************************************/
 TEST_F(TestModel, convert_to_sparse_solution) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& x = model.create_variable("x");
     auto& y = model.create_variables("y", 10);
@@ -2757,7 +2718,7 @@ TEST_F(TestModel, convert_to_sparse_solution) {
 
 /*****************************************************************************/
 TEST_F(TestModel, import_solution) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& x = model.create_variable("x");
     auto& y = model.create_variables("y", 10);
@@ -2782,7 +2743,7 @@ TEST_F(TestModel, import_solution) {
 
 /*****************************************************************************/
 TEST_F(TestModel, fix_variables) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& x = model.create_variable("x");
     auto& y = model.create_variables("y", 10);
@@ -2813,7 +2774,7 @@ TEST_F(TestModel, fix_variables) {
 
 /*****************************************************************************/
 TEST_F(TestModel, unfix_variables) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& x = model.create_variable("x");
     auto& y = model.create_variables("y", 10);
@@ -2886,6 +2847,21 @@ TEST_F(TestModel, variable_reference) {
 }
 
 /*****************************************************************************/
+TEST_F(TestModel, variable_reference_original) {
+    /// This method is tested in initialize() and so on.
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, variable_type_reference) {
+    /// This method is tested in initialize() and so on.
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, variable_type_reference_original) {
+    /// This method is tested in initialize() and so on.
+}
+
+/*****************************************************************************/
 TEST_F(TestModel, constraint_reference) {
     /// This method is tested in initialize() and so on.
 }
@@ -2922,7 +2898,7 @@ TEST_F(TestModel, sign) {
 
 /*****************************************************************************/
 TEST_F(TestModel, set_is_solved) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
     EXPECT_FALSE(model.is_solved());
     model.set_is_solved(true);
     EXPECT_TRUE(model.is_solved());
@@ -2994,7 +2970,7 @@ TEST_F(TestModel, number_of_disabled_constraints) {
 TEST_F(TestModel, has_chain_move_effective_constraints) {
     /// None
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
 
         [[maybe_unused]] auto& x = model.create_variables("x", 10, 0, 1);
         model.setup_structure();
@@ -3003,7 +2979,7 @@ TEST_F(TestModel, has_chain_move_effective_constraints) {
 
     /// Set Partitioning
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
 
         auto&                  x = model.create_variables("x", 10, 0, 1);
         [[maybe_unused]] auto& f = model.create_constraint("f", x.sum() == 1);
@@ -3014,7 +2990,7 @@ TEST_F(TestModel, has_chain_move_effective_constraints) {
 
     /// Set Packing
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
 
         auto&                  x = model.create_variables("x", 10, 0, 1);
         [[maybe_unused]] auto& f = model.create_constraint("f", x.sum() <= 1);
@@ -3025,7 +3001,7 @@ TEST_F(TestModel, has_chain_move_effective_constraints) {
 
     /// Set Covering
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
 
         auto&                  x = model.create_variables("x", 10, 0, 1);
         [[maybe_unused]] auto& f = model.create_constraint("f", x.sum() >= 1);
@@ -3036,7 +3012,7 @@ TEST_F(TestModel, has_chain_move_effective_constraints) {
 
     /// Cardinality
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
 
         auto&                  x = model.create_variables("x", 10, 0, 1);
         [[maybe_unused]] auto& f = model.create_constraint("f", x.sum() == 5);
@@ -3047,7 +3023,7 @@ TEST_F(TestModel, has_chain_move_effective_constraints) {
 
     /// Invariant Knapsack
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
 
         auto&                  x = model.create_variables("x", 10, 0, 1);
         [[maybe_unused]] auto& f = model.create_constraint("f", x.sum() <= 5);
@@ -3058,7 +3034,7 @@ TEST_F(TestModel, has_chain_move_effective_constraints) {
 
     /// Multiple Covering
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
 
         auto&                  x = model.create_variables("x", 10, 0, 1);
         [[maybe_unused]] auto& f = model.create_constraint("f", x.sum() >= 5);

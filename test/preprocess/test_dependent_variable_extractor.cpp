@@ -4,11 +4,10 @@
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
 #include <gtest/gtest.h>
-#include <random>
-
 #include <printemps.h>
 
 namespace {
+using namespace printemps;
 /*****************************************************************************/
 class TestDependentVariableExtractor : public ::testing::Test {
    protected:
@@ -24,7 +23,7 @@ class TestDependentVariableExtractor : public ::testing::Test {
 TEST_F(TestDependentVariableExtractor, extract) {
     /// case 01
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
 
         auto& x = model.create_variable("x", 0, 1);
         auto& y = model.create_variable("y", 0, 1);
@@ -43,28 +42,26 @@ TEST_F(TestDependentVariableExtractor, extract) {
         EXPECT_TRUE(g(0).is_intermediate());
         EXPECT_TRUE(h(0).is_intermediate());
 
-        printemps::preprocess::DependentVariableExtractor<int, double>
+        preprocess::DependentVariableExtractor<int, double>
             dependent_variable_extractor(&model);
 
         /// Extracting (Round 1)
         {
-            dependent_variable_extractor.extract(false);
+            option::Option option;
+            dependent_variable_extractor.extract(option, false);
 
             model.setup_structure();
 
-            EXPECT_EQ(
-                printemps::model_component::VariableSense::DependentInteger,
-                z(0).sense());
+            EXPECT_EQ(model_component::VariableSense::DependentInteger,
+                      z(0).sense());
             EXPECT_FALSE(f.is_enabled());
 
-            EXPECT_EQ(
-                printemps::model_component::VariableSense::DependentInteger,
-                w(0).sense());
+            EXPECT_EQ(model_component::VariableSense::DependentInteger,
+                      w(0).sense());
             EXPECT_FALSE(g.is_enabled());
 
-            EXPECT_EQ(
-                printemps::model_component::VariableSense::DependentInteger,
-                v(0).sense());
+            EXPECT_EQ(model_component::VariableSense::DependentInteger,
+                      v(0).sense());
             EXPECT_FALSE(h.is_enabled());
         }
 
@@ -110,7 +107,7 @@ TEST_F(TestDependentVariableExtractor, extract) {
 
     /// case 02
     {
-        printemps::model::Model<int, double> model;
+        model::Model<int, double> model;
 
         auto& x = model.create_variable("x", 0, 1);
         auto& y = model.create_variable("y", 0, 1);
@@ -126,23 +123,22 @@ TEST_F(TestDependentVariableExtractor, extract) {
         EXPECT_TRUE(f(0).is_intermediate());
         EXPECT_TRUE(g(0).is_intermediate());
 
-        printemps::preprocess::DependentVariableExtractor<int, double>
+        preprocess::DependentVariableExtractor<int, double>
             dependent_variable_extractor(&model);
 
         /// Extracting (Round 1)
         {
-            dependent_variable_extractor.extract(false);
+            option::Option option;
+            dependent_variable_extractor.extract(option, false);
 
             model.setup_structure();
 
-            EXPECT_EQ(
-                printemps::model_component::VariableSense::DependentInteger,
-                z(0).sense());
+            EXPECT_EQ(model_component::VariableSense::DependentInteger,
+                      z(0).sense());
             EXPECT_FALSE(f.is_enabled());
 
-            EXPECT_EQ(
-                printemps::model_component::VariableSense::DependentInteger,
-                w(0).sense());
+            EXPECT_EQ(model_component::VariableSense::DependentInteger,
+                      w(0).sense());
             EXPECT_FALSE(g.is_enabled());
 
             auto& constraint_proxies = model.constraint_proxies();

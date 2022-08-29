@@ -8,6 +8,7 @@
 #include <printemps.h>
 
 namespace {
+using namespace printemps;
 /*****************************************************************************/
 class TestBinpacking : public ::testing::Test {
    protected:
@@ -37,7 +38,7 @@ TEST_F(TestBinpacking, bin_packing) {
     /*************************************************************************/
     /// Model object definition
     /*************************************************************************/
-    printemps::model::IPModel model;
+    model::IPModel model;
 
     /*************************************************************************/
     /// Decision variable definitions
@@ -53,8 +54,7 @@ TEST_F(TestBinpacking, bin_packing) {
         = model.create_expressions("total_volume", number_of_bins);
 
     for (auto m = 0; m < number_of_bins; m++) {
-        total_volume(m) =
-            x.dot({printemps::model_component::Range::All, m}, item_volumes);
+        total_volume(m) = x.dot({model_component::Range::All, m}, item_volumes);
     }
 
     auto& number_of_used_bins =
@@ -66,8 +66,7 @@ TEST_F(TestBinpacking, bin_packing) {
     auto& constraint_selection =
         model.create_constraints("selection", number_of_items);
     for (auto n = 0; n < number_of_items; n++) {
-        constraint_selection(n) =
-            x.selection({n, printemps::model_component::Range::All});
+        constraint_selection(n) = x.selection({n, model_component::Range::All});
     }
 
     auto& constraint_cut = model.create_constraints("cut", number_of_bins - 1);
@@ -108,15 +107,14 @@ TEST_F(TestBinpacking, bin_packing) {
     }
 
     /// solve
-    printemps::option::Option option;
-    option.neighborhood.selection_mode =
-        printemps::option::selection_mode::Defined;
-    option.tabu_search.tabu_mode = printemps::option::tabu_mode::Any;
+    option::Option option;
+    option.neighborhood.selection_mode = option::selection_mode::Defined;
+    option.tabu_search.tabu_mode       = option::tabu_mode::Any;
 
-    auto result = printemps::solver::solve(&model, option);
+    auto result = solver::solve(&model, option);
     EXPECT_TRUE(result.solution.is_feasible());
 
-    ASSERT_THROW(printemps::solver::solve(&model, option), std::logic_error);
+    ASSERT_THROW(solver::solve(&model, option), std::logic_error);
 }
 }  // namespace
 /*****************************************************************************/

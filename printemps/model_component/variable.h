@@ -67,6 +67,8 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     T_Expression m_objective_sensitivity;
 
     std::uint64_t m_hash;
+    int           m_related_selection_constraint_ptr_index_min;
+    int           m_related_selection_constraint_ptr_index_max;
 
     /*************************************************************************/
     /// Default constructor
@@ -136,6 +138,9 @@ class Variable : public multi_array::AbstractMultiArrayElement {
         m_objective_sensitivity = 0.0;
 
         m_hash = 0;
+
+        m_related_selection_constraint_ptr_index_min = -1;
+        m_related_selection_constraint_ptr_index_max = -1;
     }
 
     /*************************************************************************/
@@ -325,12 +330,17 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
+    inline constexpr void set_sense(const VariableSense &a_SENSE) noexcept {
+        m_sense = a_SENSE;
+    }
+
+    /*************************************************************************/
     inline constexpr VariableSense sense(void) const noexcept {
         return m_sense;
     }
 
     /*************************************************************************/
-    inline std::string sense_string(void) const noexcept {
+    inline std::string sense_label(void) const noexcept {
         switch (m_sense) {
             case VariableSense::Binary: {
                 return "Binary";
@@ -423,7 +433,8 @@ class Variable : public multi_array::AbstractMultiArrayElement {
                 constraint_ptr->is_set_packing() ||
                 constraint_ptr->is_set_covering() ||
                 constraint_ptr->is_cardinality() ||
-                constraint_ptr->is_invariant_knapsack()) {
+                constraint_ptr->is_invariant_knapsack() ||
+                constraint_ptr->is_multiple_covering()) {
                 m_related_binary_coefficient_constraint_ptrs.insert(
                     constraint_ptr);
             }
@@ -529,6 +540,58 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     /*************************************************************************/
     inline constexpr std::uint64_t hash(void) const noexcept {
         return m_hash;
+    }
+
+    /*************************************************************************/
+    inline constexpr void reset_related_selection_constraint_ptr_index(
+        void) noexcept {
+        m_related_selection_constraint_ptr_index_min = -1;
+        m_related_selection_constraint_ptr_index_max = -1;
+    }
+
+    /*************************************************************************/
+    inline constexpr void setup_related_selection_constraint_ptr_index(
+        void) noexcept {
+        if (m_selection_ptr == nullptr) {
+            return;
+        }
+
+        const auto &RELATED_SELECTION_CONSTRAINT_PTRS =
+            m_selection_ptr->related_constraint_ptrs_vector;
+
+        const int CONSTRAINTS_SIZE = RELATED_SELECTION_CONSTRAINT_PTRS.size();
+
+        for (auto i = 0; i < CONSTRAINTS_SIZE; i++) {
+            if (RELATED_SELECTION_CONSTRAINT_PTRS[i]->is_enabled() &&
+                m_related_constraint_ptrs.find(
+                    RELATED_SELECTION_CONSTRAINT_PTRS[i]) !=
+                    m_related_constraint_ptrs.end()) {
+                m_related_selection_constraint_ptr_index_min = i;
+                break;
+            }
+        }
+
+        for (auto i = CONSTRAINTS_SIZE - 1; i >= 0; i--) {
+            if (RELATED_SELECTION_CONSTRAINT_PTRS[i]->is_enabled() &&
+                m_related_constraint_ptrs.find(
+                    RELATED_SELECTION_CONSTRAINT_PTRS[i]) !=
+                    m_related_constraint_ptrs.end()) {
+                m_related_selection_constraint_ptr_index_max = i;
+                break;
+            }
+        }
+    }
+
+    /*************************************************************************/
+    inline constexpr int related_selection_constraint_ptr_index_min(void) const
+        noexcept {
+        return m_related_selection_constraint_ptr_index_min;
+    }
+
+    /*************************************************************************/
+    inline constexpr int related_selection_constraint_ptr_index_max(void) const
+        noexcept {
+        return m_related_selection_constraint_ptr_index_max;
     }
 
     /*************************************************************************/

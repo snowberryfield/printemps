@@ -7,6 +7,7 @@
 #include <printemps.h>
 
 namespace {
+using namespace printemps;
 /*****************************************************************************/
 class TestBinaryMoveGenerator : public ::testing::Test {
    protected:
@@ -20,14 +21,15 @@ class TestBinaryMoveGenerator : public ::testing::Test {
 
 /*****************************************************************************/
 TEST_F(TestBinaryMoveGenerator, setup) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& x = model.create_variables("x", 10, 0, 1);
     x(0).fix_by(0);
 
     model.setup_structure();
 
-    auto binary_variable_ptrs = model.variable_reference().binary_variable_ptrs;
+    auto binary_variable_ptrs =
+        model.variable_type_reference().binary_variable_ptrs;
 
     model.neighborhood().binary().setup(binary_variable_ptrs);
     model.neighborhood().binary().update_moves(true, false, false, false);
@@ -42,7 +44,7 @@ TEST_F(TestBinaryMoveGenerator, setup) {
     }
 
     for (const auto& move : moves) {
-        EXPECT_EQ(printemps::neighborhood::MoveSense::Binary, move.sense);
+        EXPECT_EQ(neighborhood::MoveSense::Binary, move.sense);
         EXPECT_FALSE(move.alterations.front().first->is_fixed());
         EXPECT_EQ(move.alterations.front().second,
                   1 - move.alterations.front().first->value());

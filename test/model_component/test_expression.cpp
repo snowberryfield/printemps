@@ -4,17 +4,16 @@
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
 #include <gtest/gtest.h>
-#include <random>
-
 #include <printemps.h>
 
 namespace {
+using namespace printemps;
 /*****************************************************************************/
 class TestExpression : public ::testing::Test {
    protected:
-    printemps::utility::UniformRandom<std::uniform_int_distribution<>, int>
+    utility::UniformRandom<std::uniform_int_distribution<>, int>
         m_random_integer;
-    printemps::utility::UniformRandom<std::uniform_int_distribution<>, int>
+    utility::UniformRandom<std::uniform_int_distribution<>, int>
         m_random_positive_integer;
 
     virtual void SetUp(void) {
@@ -36,7 +35,7 @@ class TestExpression : public ::testing::Test {
 /*****************************************************************************/
 TEST_F(TestExpression, initialize) {
     auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
 
     /// Check the initial values of the base class members.
     EXPECT_EQ(0, expression.proxy_index());
@@ -58,14 +57,11 @@ TEST_F(TestExpression, initialize) {
 /*****************************************************************************/
 TEST_F(TestExpression, set_sensitivities) {
     auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
 
-    auto variable_0 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto variable_1 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    std::unordered_map<printemps::model_component::Variable<int, double>*,
-                       double>
+    auto variable_0 = model_component::Variable<int, double>::create_instance();
+    auto variable_1 = model_component::Variable<int, double>::create_instance();
+    std::unordered_map<model_component::Variable<int, double>*, double>
         sensitivities;
 
     auto sensitivity_0 = random_integer();
@@ -94,12 +90,10 @@ TEST_F(TestExpression, setup_fixed_sensitivities) {
 /*****************************************************************************/
 TEST_F(TestExpression, setup_selection_mask) {
     auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
-    auto variable_0 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto variable_1 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    expression = variable_0 + variable_1;
+        model_component::Expression<int, double>::create_instance();
+    auto variable_0 = model_component::Variable<int, double>::create_instance();
+    auto variable_1 = model_component::Variable<int, double>::create_instance();
+    expression      = variable_0 + variable_1;
     expression.setup_selection_mask();
     auto selection_mask = ~(reinterpret_cast<std::uint64_t>(&variable_0) |
                             reinterpret_cast<std::uint64_t>(&variable_1));
@@ -109,12 +103,10 @@ TEST_F(TestExpression, setup_selection_mask) {
 /*****************************************************************************/
 TEST_F(TestExpression, setup_hash) {
     auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
-    auto variable_0 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto variable_1 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    expression = variable_0 + variable_1;
+        model_component::Expression<int, double>::create_instance();
+    auto variable_0 = model_component::Variable<int, double>::create_instance();
+    auto variable_1 = model_component::Variable<int, double>::create_instance();
+    expression      = variable_0 + variable_1;
     expression.setup_hash();
 
     std::uint64_t hash = reinterpret_cast<std::uint64_t>(&variable_0) +
@@ -125,7 +117,7 @@ TEST_F(TestExpression, setup_hash) {
 /*****************************************************************************/
 TEST_F(TestExpression, constant_value) {
     auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
 
     auto value = random_integer();
     expression = value;
@@ -135,14 +127,11 @@ TEST_F(TestExpression, constant_value) {
 /*****************************************************************************/
 TEST_F(TestExpression, evaluate_arg_void) {
     auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
 
-    auto variable_0 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto variable_1 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    std::unordered_map<printemps::model_component::Variable<int, double>*,
-                       double>
+    auto variable_0 = model_component::Variable<int, double>::create_instance();
+    auto variable_1 = model_component::Variable<int, double>::create_instance();
+    std::unordered_map<model_component::Variable<int, double>*, double>
         sensitivities;
 
     auto sensitivity_0 = random_integer();
@@ -167,14 +156,11 @@ TEST_F(TestExpression, evaluate_arg_void) {
 /*****************************************************************************/
 TEST_F(TestExpression, evaluate_arg_move) {
     auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
 
-    auto variable_0 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto variable_1 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    std::unordered_map<printemps::model_component::Variable<int, double>*,
-                       double>
+    auto variable_0 = model_component::Variable<int, double>::create_instance();
+    auto variable_1 = model_component::Variable<int, double>::create_instance();
+    std::unordered_map<model_component::Variable<int, double>*, double>
         sensitivities;
 
     auto sensitivity_0 = random_integer();
@@ -193,7 +179,7 @@ TEST_F(TestExpression, evaluate_arg_move) {
 
     expression.update();
 
-    printemps::neighborhood::Move<int, double> move;
+    neighborhood::Move<int, double> move;
     v_value_0 = random_integer();
     v_value_1 = random_integer();
 
@@ -209,14 +195,11 @@ TEST_F(TestExpression, evaluate_arg_move) {
 /*****************************************************************************/
 TEST_F(TestExpression, update_arg_void) {
     auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
 
-    auto variable_0 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto variable_1 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    std::unordered_map<printemps::model_component::Variable<int, double>*,
-                       double>
+    auto variable_0 = model_component::Variable<int, double>::create_instance();
+    auto variable_1 = model_component::Variable<int, double>::create_instance();
+    std::unordered_map<model_component::Variable<int, double>*, double>
         sensitivities;
 
     auto sensitivity_0 = random_integer();
@@ -242,14 +225,11 @@ TEST_F(TestExpression, update_arg_void) {
 /*****************************************************************************/
 TEST_F(TestExpression, update_arg_move) {
     auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
 
-    auto variable_0 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto variable_1 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    std::unordered_map<printemps::model_component::Variable<int, double>*,
-                       double>
+    auto variable_0 = model_component::Variable<int, double>::create_instance();
+    auto variable_1 = model_component::Variable<int, double>::create_instance();
+    std::unordered_map<model_component::Variable<int, double>*, double>
         sensitivities;
 
     auto sensitivity_0 = random_integer();
@@ -267,7 +247,7 @@ TEST_F(TestExpression, update_arg_move) {
     variable_1 = v_value_1;
 
     expression.update();
-    printemps::neighborhood::Move<int, double> move;
+    neighborhood::Move<int, double> move;
     v_value_0 = random_integer();
     v_value_1 = random_integer();
 
@@ -289,14 +269,11 @@ TEST_F(TestExpression, value) {
 /*****************************************************************************/
 TEST_F(TestExpression, self) {
     auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
 
-    auto variable_0 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto variable_1 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    std::unordered_map<printemps::model_component::Variable<int, double>*,
-                       double>
+    auto variable_0 = model_component::Variable<int, double>::create_instance();
+    auto variable_1 = model_component::Variable<int, double>::create_instance();
+    std::unordered_map<model_component::Variable<int, double>*, double>
         sensitivities;
 
     auto sensitivity_0 = random_integer();
@@ -319,7 +296,7 @@ TEST_F(TestExpression, self) {
 /*****************************************************************************/
 TEST_F(TestExpression, is_enabled) {
     auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
     expression.disable();
     EXPECT_FALSE(expression.is_enabled());
 
@@ -343,12 +320,10 @@ TEST_F(TestExpression, disable) {
 /*****************************************************************************/
 TEST_F(TestExpression, solve) {
     auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
 
-    auto variable_0 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto variable_1 =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable_0 = model_component::Variable<int, double>::create_instance();
+    auto variable_1 = model_component::Variable<int, double>::create_instance();
 
     expression  = variable_0 + 2 * variable_1 + 4;
     auto solved = expression.solve(&variable_0);
@@ -362,12 +337,10 @@ TEST_F(TestExpression, solve) {
 /*****************************************************************************/
 TEST_F(TestExpression, erase) {
     auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
 
-    auto variable_0 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto variable_1 =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable_0 = model_component::Variable<int, double>::create_instance();
+    auto variable_1 = model_component::Variable<int, double>::create_instance();
 
     expression = variable_0 + 2 * variable_1 + 4;
     expression.erase(&variable_0);
@@ -380,14 +353,12 @@ TEST_F(TestExpression, erase) {
 /*****************************************************************************/
 TEST_F(TestExpression, substitute) {
     auto expression_0 =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
     auto expression_1 =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
 
-    auto variable_0 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto variable_1 =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable_0 = model_component::Variable<int, double>::create_instance();
+    auto variable_1 = model_component::Variable<int, double>::create_instance();
 
     expression_0 = variable_0 + 2 * variable_1 + 4;
     expression_1 = 3 * variable_0 + 7;
@@ -402,14 +373,11 @@ TEST_F(TestExpression, substitute) {
 /*****************************************************************************/
 TEST_F(TestExpression, lower_bound) {
     auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
 
-    auto variable_0 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto variable_1 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto variable_2 =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable_0 = model_component::Variable<int, double>::create_instance();
+    auto variable_1 = model_component::Variable<int, double>::create_instance();
+    auto variable_2 = model_component::Variable<int, double>::create_instance();
 
     variable_0.set_bound(-10, 20);
     variable_1.set_bound(-100, 200);
@@ -434,20 +402,14 @@ TEST_F(TestExpression, fixed_term_value) {
 /*****************************************************************************/
 TEST_F(TestExpression, mutable_variable_sensitivities) {
     auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
 
-    auto variable_0 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto variable_1 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto variable_2 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto variable_3 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto variable_4 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto variable_5 =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable_0 = model_component::Variable<int, double>::create_instance();
+    auto variable_1 = model_component::Variable<int, double>::create_instance();
+    auto variable_2 = model_component::Variable<int, double>::create_instance();
+    auto variable_3 = model_component::Variable<int, double>::create_instance();
+    auto variable_4 = model_component::Variable<int, double>::create_instance();
+    auto variable_5 = model_component::Variable<int, double>::create_instance();
 
     expression = variable_0 - variable_1 - variable_2 + variable_3 +
                  variable_4 + variable_5;
@@ -501,12 +463,10 @@ TEST_F(TestExpression, hash) {
 /*****************************************************************************/
 TEST_F(TestExpression, operator_plus) {
     auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
 
-    auto variable_0 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto variable_1 =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable_0 = model_component::Variable<int, double>::create_instance();
+    auto variable_1 = model_component::Variable<int, double>::create_instance();
 
     auto sensitivity_0 = random_integer();
     auto sensitivity_1 = random_integer();
@@ -528,12 +488,10 @@ TEST_F(TestExpression, operator_plus) {
 /*****************************************************************************/
 TEST_F(TestExpression, operator_minus) {
     auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
 
-    auto variable_0 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto variable_1 =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable_0 = model_component::Variable<int, double>::create_instance();
+    auto variable_1 = model_component::Variable<int, double>::create_instance();
 
     auto sensitivity_0 = random_integer();
     auto sensitivity_1 = random_integer();
@@ -555,7 +513,7 @@ TEST_F(TestExpression, operator_minus) {
 /*****************************************************************************/
 TEST_F(TestExpression, operator_equal_arg_t_value) {
     auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
 
     auto value = random_integer();
 
@@ -566,9 +524,9 @@ TEST_F(TestExpression, operator_equal_arg_t_value) {
 /*****************************************************************************/
 TEST_F(TestExpression, operator_equal_arg_t_expression_like) {
     auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
 
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("y");
@@ -596,7 +554,7 @@ TEST_F(TestExpression, operator_equal_arg_t_expression_like) {
 /*****************************************************************************/
 TEST_F(TestExpression, operator_plus_equal_arg_t_value) {
     auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
 
     auto value_0 = random_integer();
     auto value_1 = random_integer();
@@ -609,9 +567,9 @@ TEST_F(TestExpression, operator_plus_equal_arg_t_value) {
 /*****************************************************************************/
 TEST_F(TestExpression, operator_plus_equal_arg_t_expression_like) {
     auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
 
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("y");
@@ -639,14 +597,12 @@ TEST_F(TestExpression, operator_plus_equal_arg_t_expression_like) {
 /*****************************************************************************/
 TEST_F(TestExpression, operator_plus_equal_arg_expression) {
     auto expression_0 =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
     auto expression_1 =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
 
-    auto variable_0 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto variable_1 =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable_0 = model_component::Variable<int, double>::create_instance();
+    auto variable_1 = model_component::Variable<int, double>::create_instance();
 
     auto sensitivity_0_0 = random_integer();
     auto sensitivity_0_1 = random_integer();
@@ -673,7 +629,7 @@ TEST_F(TestExpression, operator_plus_equal_arg_expression) {
 /*****************************************************************************/
 TEST_F(TestExpression, operator_minus_equal_arg_t_value) {
     auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
 
     auto value_0 = random_integer();
     auto value_1 = random_integer();
@@ -686,9 +642,9 @@ TEST_F(TestExpression, operator_minus_equal_arg_t_value) {
 /*****************************************************************************/
 TEST_F(TestExpression, operator_minus_equal_arg_t_expression_like) {
     auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
 
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& variable_proxy   = model.create_variable("x");
     auto& expression_proxy = model.create_expression("y");
@@ -716,16 +672,14 @@ TEST_F(TestExpression, operator_minus_equal_arg_t_expression_like) {
 /*****************************************************************************/
 TEST_F(TestExpression, operator_minus_equal_arg_expression) {
     auto expression_0 =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
     auto expression_1 =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
     auto expression_sum =
-        printemps::model_component::Expression<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
 
-    auto variable_0 =
-        printemps::model_component::Variable<int, double>::create_instance();
-    auto variable_1 =
-        printemps::model_component::Variable<int, double>::create_instance();
+    auto variable_0 = model_component::Variable<int, double>::create_instance();
+    auto variable_1 = model_component::Variable<int, double>::create_instance();
 
     auto sensitivity_0_0 = random_integer();
     auto sensitivity_0_1 = random_integer();
@@ -754,9 +708,8 @@ TEST_F(TestExpression, operator_minus_equal_arg_expression) {
 /*****************************************************************************/
 TEST_F(TestExpression, operator_product_equal_arg_t_value) {
     auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
+    auto variable = model_component::Variable<int, double>::create_instance();
 
     auto sensitivity = random_integer();
     auto constant    = random_integer();
@@ -777,9 +730,8 @@ TEST_F(TestExpression, operator_product_equal_arg_t_value) {
 /*****************************************************************************/
 TEST_F(TestExpression, operator_divide_equal_arg_t_value) {
     auto expression =
-        printemps::model_component::Expression<int, double>::create_instance();
-    auto variable =
-        printemps::model_component::Variable<int, double>::create_instance();
+        model_component::Expression<int, double>::create_instance();
+    auto variable = model_component::Variable<int, double>::create_instance();
 
     expression = 100 * variable + 200;
 

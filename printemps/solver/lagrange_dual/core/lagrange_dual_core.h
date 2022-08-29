@@ -219,9 +219,14 @@ class LagrangeDualCore {
         char mark_current                    = ' ';
         char mark_global_augmented_incumbent = ' ';
 
-        if (STATE.update_status &
+        if (STATE.update_status &  //
             solution::IncumbentHolderConstant::
-                STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
+                STATUS_FEASIBLE_INCUMBENT_UPDATE) {
+            mark_current                    = '*';
+            mark_global_augmented_incumbent = '*';
+        } else if (STATE.update_status &  //
+                   solution::IncumbentHolderConstant::
+                       STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
             mark_current                    = '#';
             mark_global_augmented_incumbent = '#';
         }
@@ -291,6 +296,11 @@ class LagrangeDualCore {
             "---------+------------+-----------+----------------------+--------"
             "--------------",
             true);
+        utility::print_info(  //
+            " -- *: Feasible incumbent solution was updated.", true);
+        utility::print_info(  //
+            " -- #: Global incumbent solution was updated.", true);
+        utility::print_single_line(true);
     }
 
    public:
