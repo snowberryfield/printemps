@@ -9,6 +9,7 @@
 #include <printemps.h>
 
 namespace {
+using namespace printemps;
 /*****************************************************************************/
 class TestFixedSizeQueue : public ::testing::Test {
    protected:
@@ -22,7 +23,7 @@ class TestFixedSizeQueue : public ::testing::Test {
 
 /*****************************************************************************/
 TEST_F(TestFixedSizeQueue, initialize) {
-    printemps::utility::FixedSizeQueue<int> queue;
+    utility::FixedSizeQueue<int> queue;
 
     EXPECT_EQ(0, queue.size());
     EXPECT_EQ(0, queue.max_size());
@@ -30,7 +31,7 @@ TEST_F(TestFixedSizeQueue, initialize) {
 
 /*****************************************************************************/
 TEST_F(TestFixedSizeQueue, size) {
-    printemps::utility::FixedSizeQueue<int> queue(100);
+    utility::FixedSizeQueue<int> queue(100);
     EXPECT_EQ(100, queue.max_size());
     EXPECT_EQ(0, queue.size());
     for (auto i = 0; i < 100; i++) {
@@ -51,7 +52,7 @@ TEST_F(TestFixedSizeQueue, max_size) {
 /*****************************************************************************/
 TEST_F(TestFixedSizeQueue, min) {
     {
-        printemps::utility::FixedSizeQueue<int> queue(10);
+        utility::FixedSizeQueue<int> queue(10);
 
         double sum = 0.0;
 
@@ -66,7 +67,7 @@ TEST_F(TestFixedSizeQueue, min) {
         }
     }
     {
-        printemps::utility::FixedSizeQueue<double> queue(110);
+        utility::FixedSizeQueue<double> queue(110);
 
         double sum = 0.0;
 

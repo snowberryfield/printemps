@@ -7,6 +7,7 @@
 #include <printemps.h>
 
 namespace {
+using namespace printemps;
 /*****************************************************************************/
 class TestSoftSelectionMoveGenerator : public ::testing::Test {
    protected:
@@ -20,7 +21,7 @@ class TestSoftSelectionMoveGenerator : public ::testing::Test {
 
 /*****************************************************************************/
 TEST_F(TestSoftSelectionMoveGenerator, setup) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& x = model.create_variables("x", 10, 0, 1);
     auto& y = model.create_variable("y", 0, 1);
@@ -46,8 +47,7 @@ TEST_F(TestSoftSelectionMoveGenerator, setup) {
     EXPECT_EQ(&(y[0]), moves[0].alterations[1].first);
     EXPECT_EQ(0, moves[0].alterations[0].second);
     EXPECT_EQ(0, moves[0].alterations[1].second);
-    EXPECT_EQ(printemps::neighborhood::MoveSense::SoftSelection,
-              moves[0].sense);
+    EXPECT_EQ(neighborhood::MoveSense::SoftSelection, moves[0].sense);
     EXPECT_TRUE(moves[0].related_constraint_ptrs.find(&c[0]) !=
                 moves[0].related_constraint_ptrs.end());
 
@@ -59,13 +59,10 @@ TEST_F(TestSoftSelectionMoveGenerator, setup) {
     EXPECT_EQ(&(y[0]), moves[1].alterations[1].first);
     EXPECT_EQ(1, moves[1].alterations[0].second);
     EXPECT_EQ(1, moves[1].alterations[1].second);
-    EXPECT_EQ(printemps::neighborhood::MoveSense::SoftSelection,
-              moves[1].sense);
+    EXPECT_EQ(neighborhood::MoveSense::SoftSelection, moves[1].sense);
     EXPECT_TRUE(moves[1].related_constraint_ptrs.find(&c[0]) !=
                 moves[1].related_constraint_ptrs.end());
-
-}  // namespace
-
+}
 }  // namespace
 /*****************************************************************************/
 // END

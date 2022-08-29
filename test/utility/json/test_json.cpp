@@ -7,6 +7,7 @@
 #include <printemps.h>
 
 namespace {
+using namespace printemps;
 /*****************************************************************************/
 class TestJson : public ::testing::Test {
    protected:
@@ -20,8 +21,8 @@ class TestJson : public ::testing::Test {
 
 /*****************************************************************************/
 TEST_F(TestJson, add_integer_item) {
-    using JsonObject = printemps::utility::json::JsonObject;
-    using JsonArray  = printemps::utility::json::JsonArray;
+    using JsonObject = utility::json::JsonObject;
+    using JsonArray  = utility::json::JsonArray;
     JsonObject obj;
     obj.emplace_back("key", 0);
 
@@ -36,8 +37,8 @@ TEST_F(TestJson, add_integer_item) {
 
 /*****************************************************************************/
 TEST_F(TestJson, add_double_item) {
-    using JsonObject = printemps::utility::json::JsonObject;
-    using JsonArray  = printemps::utility::json::JsonArray;
+    using JsonObject = utility::json::JsonObject;
+    using JsonArray  = utility::json::JsonArray;
     JsonObject obj;
     obj.emplace_back("key", 3.14);
 
@@ -52,8 +53,8 @@ TEST_F(TestJson, add_double_item) {
 
 /*****************************************************************************/
 TEST_F(TestJson, add_string_item) {
-    using JsonObject = printemps::utility::json::JsonObject;
-    using JsonArray  = printemps::utility::json::JsonArray;
+    using JsonObject = utility::json::JsonObject;
+    using JsonArray  = utility::json::JsonArray;
     JsonObject obj;
     obj.emplace_back("key", std::string("value"));
 
@@ -68,8 +69,8 @@ TEST_F(TestJson, add_string_item) {
 
 /*****************************************************************************/
 TEST_F(TestJson, add_json_object_item) {
-    using JsonObject = printemps::utility::json::JsonObject;
-    using JsonArray  = printemps::utility::json::JsonArray;
+    using JsonObject = utility::json::JsonObject;
+    using JsonArray  = utility::json::JsonArray;
     JsonObject obj;
     JsonObject sub;
     sub.emplace_back("sub_0", 0);
@@ -89,8 +90,8 @@ TEST_F(TestJson, add_json_object_item) {
 
 /*****************************************************************************/
 TEST_F(TestJson, add_json_array_item) {
-    using JsonObject = printemps::utility::json::JsonObject;
-    using JsonArray  = printemps::utility::json::JsonArray;
+    using JsonObject = utility::json::JsonObject;
+    using JsonArray  = utility::json::JsonArray;
     JsonObject obj;
     JsonArray  sub;
     sub.emplace_back(0);
@@ -110,7 +111,7 @@ TEST_F(TestJson, add_json_array_item) {
 
 /*****************************************************************************/
 TEST_F(TestJson, find) {
-    using JsonObject = printemps::utility::json::JsonObject;
+    using JsonObject = utility::json::JsonObject;
     JsonObject obj;
     obj.emplace_back("key", 0);
 
@@ -120,34 +121,32 @@ TEST_F(TestJson, find) {
 
 /*****************************************************************************/
 TEST_F(TestJson, is_integer) {
-    EXPECT_TRUE(printemps::utility::json::is_integer("0"));
-    EXPECT_TRUE(printemps::utility::json::is_integer("-1"));
-    EXPECT_TRUE(printemps::utility::json::is_integer("1"));
-    EXPECT_FALSE(printemps::utility::json::is_integer("3.14"));
-    EXPECT_FALSE(printemps::utility::json::is_integer("string"));
+    EXPECT_TRUE(utility::json::is_integer("0"));
+    EXPECT_TRUE(utility::json::is_integer("-1"));
+    EXPECT_TRUE(utility::json::is_integer("1"));
+    EXPECT_FALSE(utility::json::is_integer("3.14"));
+    EXPECT_FALSE(utility::json::is_integer("string"));
 }
 
 /*****************************************************************************/
 TEST_F(TestJson, close_count) {
-    EXPECT_EQ(0, printemps::utility::json::close_count("{{}}", '{', '}'));
-    EXPECT_EQ(1, printemps::utility::json::close_count("{{{}}", '{', '}'));
-    EXPECT_EQ(-1, printemps::utility::json::close_count("{{}}}", '{', '}'));
-    EXPECT_EQ(0, printemps::utility::json::close_count("{{\"{\"}}", '{', '}'));
+    EXPECT_EQ(0, utility::json::close_count("{{}}", '{', '}'));
+    EXPECT_EQ(1, utility::json::close_count("{{{}}", '{', '}'));
+    EXPECT_EQ(-1, utility::json::close_count("{{}}}", '{', '}'));
+    EXPECT_EQ(0, utility::json::close_count("{{\"{\"}}", '{', '}'));
 }
 
 /*****************************************************************************/
 TEST_F(TestJson, find_end_position) {
     std::vector<std::string> tokens = {"{", "{", "}", "}"};
-    EXPECT_EQ(3,
-              printemps::utility::json::find_end_position(tokens, 0, "{", "}"));
-    EXPECT_EQ(2,
-              printemps::utility::json::find_end_position(tokens, 1, "{", "}"));
+    EXPECT_EQ(3, utility::json::find_end_position(tokens, 0, "{", "}"));
+    EXPECT_EQ(2, utility::json::find_end_position(tokens, 1, "{", "}"));
 }
 
 /*****************************************************************************/
 TEST_F(TestJson, tokenize) {
     std::string str    = "{\"key_0\":\"hoge hoge\",\"key_1\":[1,2,3]}";
-    auto        tokens = printemps::utility::json::tokenize(str);
+    auto        tokens = utility::json::tokenize(str);
     EXPECT_EQ("{", tokens[0]);
     EXPECT_EQ("\"key_0\"", tokens[1]);
     EXPECT_EQ("\"hoge hoge\"", tokens[2]);
@@ -162,14 +161,14 @@ TEST_F(TestJson, tokenize) {
 
 /*****************************************************************************/
 TEST_F(TestJson, parse_json_object) {
-    using JsonObject = printemps::utility::json::JsonObject;
-    using JsonArray  = printemps::utility::json::JsonArray;
+    using JsonObject = utility::json::JsonObject;
+    using JsonArray  = utility::json::JsonArray;
 
     std::string str =
         "{\"key_0\":1,\"key_1\":3.14,\"key_2\":\"hoge "
         "hoge\",\"key_3\":{\"key_3_1\":null},\"key_4\":[1,2]}";
 
-    auto obj = printemps::utility::json::parse_json_object(str);
+    auto obj = utility::json::parse_json_object(str);
 
     EXPECT_EQ(1, obj.get<int>("key_0"));
     EXPECT_FLOAT_EQ(3.14, obj.get<double>("key_1"));
@@ -182,14 +181,14 @@ TEST_F(TestJson, parse_json_object) {
 
 /*****************************************************************************/
 TEST_F(TestJson, parse_json_array) {
-    using JsonObject = printemps::utility::json::JsonObject;
-    using JsonArray  = printemps::utility::json::JsonArray;
+    using JsonObject = utility::json::JsonObject;
+    using JsonArray  = utility::json::JsonArray;
 
     std::string str =
         "[{\"key_0\":1},{\"key_1\":3.14},{\"key_2\":\"hoge "
         "hoge\"},{\"key_3\":null},{\"key_4\":[1,2]}]";
 
-    auto array = printemps::utility::json::parse_json_array(str);
+    auto array = utility::json::parse_json_array(str);
 
     EXPECT_EQ(1, array.get<JsonObject>(0).get<int>("key_0"));
     EXPECT_EQ(3.14, array.get<JsonObject>(1).get<double>("key_1"));

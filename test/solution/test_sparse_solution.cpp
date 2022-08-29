@@ -7,6 +7,7 @@
 #include <printemps.h>
 
 namespace {
+using namespace printemps;
 /*****************************************************************************/
 class TestSparseSolution : public ::testing::Test {
    protected:
@@ -20,7 +21,7 @@ class TestSparseSolution : public ::testing::Test {
 
 /*****************************************************************************/
 TEST_F(TestSparseSolution, constructor) {
-    printemps::solution::SparseSolution<int, double> solution;
+    solution::SparseSolution<int, double> solution;
 
     EXPECT_FLOAT_EQ(0.0, solution.objective);
     EXPECT_FLOAT_EQ(0.0, solution.total_violation);
@@ -30,7 +31,7 @@ TEST_F(TestSparseSolution, constructor) {
 
 /*****************************************************************************/
 TEST_F(TestSparseSolution, initialize) {
-    printemps::solution::SparseSolution<int, double> solution;
+    solution::SparseSolution<int, double> solution;
     solution.objective       = 100.0;
     solution.total_violation = 1000.0;
     solution.is_feasible     = true;

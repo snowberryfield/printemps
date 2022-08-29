@@ -17,13 +17,6 @@ struct VariableReference {
     std::vector<Variable<T_Variable, T_Expression> *> variable_ptrs;
     std::vector<Variable<T_Variable, T_Expression> *> fixed_variable_ptrs;
     std::vector<Variable<T_Variable, T_Expression> *> mutable_variable_ptrs;
-    std::vector<Variable<T_Variable, T_Expression> *> selection_variable_ptrs;
-    std::vector<Variable<T_Variable, T_Expression> *> binary_variable_ptrs;
-    std::vector<Variable<T_Variable, T_Expression> *> integer_variable_ptrs;
-    std::vector<Variable<T_Variable, T_Expression> *>
-        dependent_binary_variable_ptrs;
-    std::vector<Variable<T_Variable, T_Expression> *>
-        dependent_integer_variable_ptrs;
 
     /*************************************************************************/
     VariableReference(void) {
@@ -35,11 +28,6 @@ struct VariableReference {
         this->variable_ptrs.clear();
         this->fixed_variable_ptrs.clear();
         this->mutable_variable_ptrs.clear();
-        this->selection_variable_ptrs.clear();
-        this->binary_variable_ptrs.clear();
-        this->integer_variable_ptrs.clear();
-        this->dependent_binary_variable_ptrs.clear();
-        this->dependent_integer_variable_ptrs.clear();
     }
 };
 }  // namespace printemps::model_component

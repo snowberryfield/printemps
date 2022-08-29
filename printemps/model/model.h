@@ -44,6 +44,7 @@ class Model {
 
     bool m_is_defined_objective;
     bool m_is_enabled_fast_evaluation;
+    bool m_is_integer;
     bool m_is_linear;
     bool m_is_minimization;
     bool m_is_solved;
@@ -56,6 +57,8 @@ class Model {
 
     model_component::VariableReference<T_Variable, T_Expression>  //
         m_variable_reference_original;
+    model_component::VariableTypeReference<T_Variable, T_Expression>  //
+        m_variable_type_reference_original;
     model_component::ConstraintReference<T_Variable, T_Expression>  //
         m_constraint_reference_original;
     model_component::ConstraintTypeReference<T_Variable, T_Expression>  //
@@ -63,6 +66,8 @@ class Model {
 
     model_component::VariableReference<T_Variable, T_Expression>  //
         m_variable_reference;
+    model_component::VariableTypeReference<T_Variable, T_Expression>  //
+        m_variable_type_reference;
     model_component::ConstraintReference<T_Variable, T_Expression>  //
         m_constraint_reference;
     model_component::ConstraintTypeReference<T_Variable, T_Expression>  //
@@ -126,6 +131,7 @@ class Model {
 
         m_is_defined_objective       = false;
         m_is_enabled_fast_evaluation = true;
+        m_is_integer                 = false;
         m_is_linear                  = true;
         m_is_minimization            = true;
         m_is_solved                  = false;
@@ -135,10 +141,12 @@ class Model {
 
         m_selections.clear();
         m_variable_reference_original.initialize();
+        m_variable_type_reference_original.initialize();
         m_constraint_reference_original.initialize();
         m_constraint_type_reference_original.initialize();
 
         m_variable_reference.initialize();
+        m_variable_type_reference.initialize();
         m_constraint_reference.initialize();
         m_constraint_type_reference.initialize();
 
@@ -670,6 +678,7 @@ class Model {
          * variables, and extracting selection constraints.
          */
         m_variable_reference_original        = m_variable_reference;
+        m_variable_type_reference_original   = m_variable_type_reference;
         m_constraint_reference_original      = m_constraint_reference;
         m_constraint_type_reference_original = m_constraint_type_reference;
 
@@ -679,10 +688,19 @@ class Model {
          */
         if (a_OPTION.preprocess.is_enabled_presolve) {
             m_problem_size_reducer.setup(this);
-            m_problem_size_reducer.remove_implicit_equality_constraints(
-                a_IS_ENABLED_PRINT);
-            m_problem_size_reducer.remove_redundant_set_constraints(
-                a_IS_ENABLED_PRINT);
+
+            if (a_OPTION.preprocess
+                    .is_enabled_extract_implicit_equality_constraints) {
+                m_problem_size_reducer.extract_implicit_equality_constraints(
+                    a_IS_ENABLED_PRINT);
+            }
+
+            if (a_OPTION.preprocess
+                    .is_enabled_remove_redundant_set_constraints) {
+                m_problem_size_reducer.remove_redundant_set_constraints(
+                    a_IS_ENABLED_PRINT);
+            }
+
             m_problem_size_reducer.reduce_problem_size(a_IS_ENABLED_PRINT);
         }
 
@@ -690,19 +708,14 @@ class Model {
          * Extract and eliminate the intermediate variables.
          */
         this->setup_structure();
-        auto &reference = m_constraint_type_reference;
+
         if (a_OPTION.preprocess.is_enabled_presolve && m_is_linear &&
-            (reference.exclusive_or_ptrs.size() > 0 ||
-             reference.inverted_integers_ptrs.size() > 0 ||
-             reference.constant_sum_integers_ptrs.size() > 0 ||
-             reference.constant_difference_integers_ptrs.size() > 0 ||
-             reference.constant_ratio_integers_ptrs.size() > 0 ||
-             reference.intermediate_ptrs.size() > 0)) {
+            a_OPTION.preprocess.is_enabled_extract_dependent()) {
             preprocess::DependentVariableExtractor<T_Variable, T_Expression>
                 dependent_variable_extractor(this);
             while (true) {
-                if (dependent_variable_extractor.extract(a_IS_ENABLED_PRINT) ==
-                    0) {
+                if (dependent_variable_extractor.extract(
+                        a_OPTION, a_IS_ENABLED_PRINT) == 0) {
                     break;
                 }
 
@@ -723,7 +736,8 @@ class Model {
          * Remove redundant set variables.
          */
         int number_of_fixed_variables = 0;
-        if (a_OPTION.preprocess.is_enabled_presolve && m_is_linear) {
+        if (a_OPTION.preprocess.is_enabled_presolve && m_is_linear &&
+            a_OPTION.preprocess.is_enabled_remove_redundant_set_variables) {
             number_of_fixed_variables =
                 m_problem_size_reducer.remove_redundant_set_variables(
                     a_IS_ENABLED_PRINT);
@@ -733,7 +747,8 @@ class Model {
          * Remove duplicated constraints.
          */
         int number_of_removed_constraints = 0;
-        if (a_OPTION.preprocess.is_enabled_presolve) {
+        if (a_OPTION.preprocess.is_enabled_presolve &&
+            a_OPTION.preprocess.is_enabled_remove_duplicated_constraints) {
             number_of_removed_constraints =
                 m_problem_size_reducer.remove_duplicated_constraints(
                     a_IS_ENABLED_PRINT);
@@ -804,30 +819,38 @@ class Model {
         }
 
         /**
-         * Setup the fixed sensitivities for fast evaluation.
+         * Set up the fixed sensitivities for fast evaluation.
          */
         this->setup_fixed_sensitivities(a_IS_ENABLED_PRINT);
 
         /**
-         * Setup the bitmask for computational efficiency of evaluating
-         * neighborhood solutions with selection moves.
-         */
-        for (auto &&proxy : m_constraint_proxies) {
-            for (auto &&constraint : proxy.flat_indexed_constraints()) {
-                constraint.expression().setup_selection_mask();
-            }
-        }
-
-        /**
-         * Setup the constraint sensitivities of variables.
+         * Set up the constraint sensitivities of variables.
          */
         this->setup_variable_constraint_sensitivities();
 
         /**
+         * Set up the indices of related constraints for selection variables.
+         */
+        this->setup_variable_related_selection_constraint_ptr_index();
+
+        /**
+         * Set up the integrity of constraints.
+         */
+        this->setup_is_integer();
+
+        /**
          * Store the global penalty coefficient for evaluation.
          */
-        m_global_penalty_coefficient =
-            a_OPTION.penalty.initial_penalty_coefficient;
+        this->set_global_penalty_coefficient(
+            a_OPTION.penalty.initial_penalty_coefficient);
+
+        /**
+         * Modify the global penalty coefficient.
+         */
+        if (m_is_integer && m_is_linear) {
+            this->modify_global_penalty_coefficient(a_IS_ENABLED_PRINT);
+        }
+
         for (auto &&proxy : m_constraint_proxies) {
             for (auto &&constraint : proxy.flat_indexed_constraints()) {
                 constraint.global_penalty_coefficient() =
@@ -916,6 +939,11 @@ class Model {
 
     /*************************************************************************/
     constexpr void setup_is_enabled_fast_evaluation(void) {
+        /**
+         * NOTE: In this method, m_constraint_reference is not referred because
+         * the object may not have been set up at the stage this method is
+         * called.
+         */
         m_is_enabled_fast_evaluation = true;
         for (auto &&proxy : m_constraint_proxies) {
             for (auto &&constraint : proxy.flat_indexed_constraints()) {
@@ -931,7 +959,30 @@ class Model {
     }
 
     /*************************************************************************/
+    constexpr void setup_is_integer(void) {
+        /**
+         * NOTE: In this method, m_constraint_reference is not referred because
+         * the object may not have been set up at the stage this method is
+         * called.
+         */
+        m_is_integer = true;
+        for (auto &&proxy : m_constraint_proxies) {
+            for (auto &&constraint : proxy.flat_indexed_constraints()) {
+                if (!constraint.is_integer()) {
+                    m_is_integer = false;
+                    return;
+                }
+            }
+        }
+    }
+
+    /*************************************************************************/
     constexpr void setup_variable_related_constraints(void) {
+        /**
+         * NOTE: In this method, m_variable_reference is not referred because
+         * the object would not be set up at the stage when this method is
+         * called.
+         */
         for (auto &&proxy : m_variable_proxies) {
             for (auto &&variable : proxy.flat_indexed_variables()) {
                 variable.reset_related_constraint_ptrs();
@@ -958,6 +1009,11 @@ class Model {
 
     /*************************************************************************/
     constexpr void setup_variable_constraint_sensitivities(void) {
+        /**
+         * NOTE: In this method, m_variable_reference is not referred because
+         * the object may not have been set up at the stage this method is
+         * called.
+         */
         for (auto &&proxy : m_variable_proxies) {
             for (auto &&variable : proxy.flat_indexed_variables()) {
                 variable.reset_constraint_sensitivities();
@@ -975,7 +1031,20 @@ class Model {
     }
 
     /*************************************************************************/
+    constexpr void setup_variable_related_selection_constraint_ptr_index(void) {
+        for (auto &&variable_ptr :
+             m_variable_type_reference.selection_variable_ptrs) {
+            variable_ptr->setup_related_selection_constraint_ptr_index();
+        }
+    }
+
+    /*************************************************************************/
     constexpr void setup_variable_related_binary_coefficient_constraints(void) {
+        /**
+         * NOTE: In this method, m_variable_reference is not referred because
+         * the object may not have been set up at the stage this method is
+         * called.
+         */
         for (auto &&proxy : m_variable_proxies) {
             for (auto &&variable : proxy.flat_indexed_variables()) {
                 variable.reset_related_binary_coefficient_constraint_ptrs();
@@ -988,6 +1057,8 @@ class Model {
     constexpr void categorize_variables(void) {
         model_component::VariableReference<T_Variable, T_Expression>
             variable_reference;
+        model_component::VariableTypeReference<T_Variable, T_Expression>
+            variable_type_reference;
 
         for (auto &&proxy : m_variable_proxies) {
             for (auto &&variable : proxy.flat_indexed_variables()) {
@@ -1000,34 +1071,35 @@ class Model {
                 }
                 if (variable.sense() ==
                     model_component::VariableSense::Binary) {
-                    variable_reference.binary_variable_ptrs.push_back(
+                    variable_type_reference.binary_variable_ptrs.push_back(
                         &variable);
                 }
                 if (variable.sense() ==
                     model_component::VariableSense::Integer) {
-                    variable_reference.integer_variable_ptrs.push_back(
+                    variable_type_reference.integer_variable_ptrs.push_back(
                         &variable);
                 }
                 if (variable.sense() ==
                     model_component::VariableSense::Selection) {
-                    variable_reference.selection_variable_ptrs.push_back(
+                    variable_type_reference.selection_variable_ptrs.push_back(
                         &variable);
                 }
 
                 if (variable.sense() ==
                     model_component::VariableSense::DependentBinary) {
-                    variable_reference.dependent_binary_variable_ptrs.push_back(
-                        &variable);
+                    variable_type_reference.dependent_binary_variable_ptrs
+                        .push_back(&variable);
                 }
 
                 if (variable.sense() ==
                     model_component::VariableSense::DependentInteger) {
-                    variable_reference.dependent_integer_variable_ptrs
+                    variable_type_reference.dependent_integer_variable_ptrs
                         .push_back(&variable);
                 }
             }
         }
-        m_variable_reference = variable_reference;
+        m_variable_reference      = variable_reference;
+        m_variable_type_reference = variable_type_reference;
     }
 
     /*************************************************************************/
@@ -1193,13 +1265,13 @@ class Model {
                                a_IS_ENABLED_PRINT);
 
         m_neighborhood.binary().setup(
-            m_variable_reference.binary_variable_ptrs);
+            m_variable_type_reference.binary_variable_ptrs);
 
         m_neighborhood.integer().setup(
-            m_variable_reference.integer_variable_ptrs);
+            m_variable_type_reference.integer_variable_ptrs);
 
         m_neighborhood.selection().setup(
-            m_variable_reference.selection_variable_ptrs);
+            m_variable_type_reference.selection_variable_ptrs);
 
         if (a_OPTION.neighborhood.is_enabled_exclusive_or_move) {
             m_neighborhood.exclusive_or().setup(
@@ -1300,6 +1372,34 @@ class Model {
     }
 
     /*************************************************************************/
+    constexpr void modify_global_penalty_coefficient(
+        const bool a_IS_ENABLED_PRINT) {
+        utility::print_single_line(a_IS_ENABLED_PRINT);
+        utility::print_message("Modifying the global penalty coefficient...",
+                               a_IS_ENABLED_PRINT);
+
+        const auto ORIGINAL = m_global_penalty_coefficient;
+        const auto MODIFIED =
+            std::min(m_global_penalty_coefficient,
+                     m_objective.expression().upper_bound() -
+                         m_objective.expression().lower_bound() + 1.0);
+
+        if (MODIFIED < ORIGINAL) {
+            m_global_penalty_coefficient = MODIFIED;
+            utility::print_message(
+                "Done (New global penalty coefficient is " +
+                    utility::to_string(m_global_penalty_coefficient, "%.5e") +
+                    ")",
+                a_IS_ENABLED_PRINT);
+        } else {
+            utility::print_message(
+                "Done (global penalty coefficient remains at the original "
+                "value).",
+                a_IS_ENABLED_PRINT);
+        }
+    }
+
+    /*************************************************************************/
     constexpr void set_selections(
         const std::vector<model_component::Selection<T_Variable, T_Expression>>
             &a_SELECTIONS) {
@@ -1355,8 +1455,11 @@ class Model {
     constexpr void print_number_of_variables(void) const {
         utility::print_single_line(true);
 
-        const auto &original  = m_variable_reference_original;
-        const auto &presolved = m_variable_reference;
+        const auto &ORIGINAL  = m_variable_reference_original;
+        const auto &PRESOLVED = m_variable_reference;
+
+        const auto &ORIGINAL_TYPE  = m_variable_type_reference_original;
+        const auto &PRESOLVED_TYPE = m_variable_type_reference;
 
         auto compute_number_of_variables = [](const auto &a_VARIABLE_PTRS) {
             return a_VARIABLE_PTRS.size();
@@ -1375,12 +1478,12 @@ class Model {
             "The number of variables: " +
                 utility::to_string(               //
                     compute_number_of_variables(  //
-                        original.variable_ptrs),
+                        ORIGINAL.variable_ptrs),
                     "%d") +
                 " (" +
                 utility::to_string(                       //
                     compute_number_of_mutable_variables(  //
-                        presolved.variable_ptrs),
+                        PRESOLVED.variable_ptrs),
                     "%d") +
                 ")",
             true);
@@ -1389,12 +1492,12 @@ class Model {
             " -- Binary: " +
                 utility::to_string(               //
                     compute_number_of_variables(  //
-                        original.binary_variable_ptrs),
+                        ORIGINAL_TYPE.binary_variable_ptrs),
                     "%d") +
                 " (" +
                 utility::to_string(                       //
                     compute_number_of_mutable_variables(  //
-                        presolved.binary_variable_ptrs),
+                        PRESOLVED_TYPE.binary_variable_ptrs),
                     "%d") +
                 ")",
             true);
@@ -1403,12 +1506,12 @@ class Model {
             " -- Integer: " +
                 utility::to_string(               //
                     compute_number_of_variables(  //
-                        original.integer_variable_ptrs),
+                        ORIGINAL_TYPE.integer_variable_ptrs),
                     "%d") +
                 " (" +
                 utility::to_string(  //
                     compute_number_of_mutable_variables(
-                        presolved.integer_variable_ptrs),
+                        PRESOLVED_TYPE.integer_variable_ptrs),
                     "%d") +
                 ")",
             true);
@@ -1417,12 +1520,12 @@ class Model {
             " -- Selection: " +
                 utility::to_string(  //
                     compute_number_of_variables(
-                        original.selection_variable_ptrs),
+                        ORIGINAL_TYPE.selection_variable_ptrs),
                     "%d") +
                 " (" +
                 utility::to_string(  //
                     compute_number_of_mutable_variables(
-                        presolved.selection_variable_ptrs),
+                        PRESOLVED_TYPE.selection_variable_ptrs),
                     "%d") +
                 ")",
             true);
@@ -1431,12 +1534,12 @@ class Model {
             " -- Dependent Binary: " +
                 utility::to_string(  //
                     compute_number_of_variables(
-                        original.dependent_binary_variable_ptrs),
+                        ORIGINAL_TYPE.dependent_binary_variable_ptrs),
                     "%d") +
                 " (" +
                 utility::to_string(  //
                     compute_number_of_mutable_variables(
-                        presolved.dependent_binary_variable_ptrs),
+                        PRESOLVED_TYPE.dependent_binary_variable_ptrs),
                     "%d") +
                 ")",
             true);
@@ -1445,12 +1548,12 @@ class Model {
             " -- Dependent Integer: " +
                 utility::to_string(  //
                     compute_number_of_variables(
-                        original.dependent_integer_variable_ptrs),
+                        ORIGINAL_TYPE.dependent_integer_variable_ptrs),
                     "%d") +
                 " (" +
                 utility::to_string(  //
                     compute_number_of_mutable_variables(
-                        presolved.dependent_integer_variable_ptrs),
+                        PRESOLVED_TYPE.dependent_integer_variable_ptrs),
                     "%d") +
                 ")",
             true);
@@ -1529,7 +1632,7 @@ class Model {
                 true);
 
             utility::print_info(                        //
-                " -- Exclusive XNOR: " +                //
+                " -- Exclusive NOR: " +                 //
                     utility::to_string(                 //
                         compute_number_of_constraints(  //
                             original.exclusive_nor_ptrs),
@@ -1655,7 +1758,7 @@ class Model {
                 true);
 
             utility::print_info(                        //
-                " -- Trinomial XNOR: " +                //
+                " -- Trinomial Exclusive NOR: " +       //
                     utility::to_string(                 //
                         compute_number_of_constraints(  //
                             original.trinomial_exclusive_nor_ptrs),
@@ -1991,12 +2094,12 @@ class Model {
         }
 
         for (auto &&variable_ptr :
-             m_variable_reference.dependent_integer_variable_ptrs) {
+             m_variable_type_reference.dependent_integer_variable_ptrs) {
             variable_ptr->update();
         }
 
         for (auto &&variable_ptr :
-             m_variable_reference.dependent_binary_variable_ptrs) {
+             m_variable_type_reference.dependent_binary_variable_ptrs) {
             variable_ptr->update();
         }
 
@@ -2026,12 +2129,12 @@ class Model {
         }
 
         for (auto &&variable_ptr :
-             m_variable_reference.dependent_integer_variable_ptrs) {
+             m_variable_type_reference.dependent_integer_variable_ptrs) {
             variable_ptr->update();
         }
 
         for (auto &&variable_ptr :
-             m_variable_reference.dependent_binary_variable_ptrs) {
+             m_variable_type_reference.dependent_binary_variable_ptrs) {
             variable_ptr->update();
         }
 
@@ -2394,6 +2497,150 @@ class Model {
     }
 
     /*************************************************************************/
+    constexpr void evaluate_selection(
+        solution::SolutionScore *                           a_score_ptr,  //
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE,
+        const solution::SolutionScore &a_CURRENT_SCORE) const noexcept {
+        bool is_feasibility_improvable = false;
+
+        double total_violation  = a_CURRENT_SCORE.total_violation;
+        double local_penalty    = a_CURRENT_SCORE.local_penalty;
+        double constraint_value = 0.0;
+        double violation_diff   = 0.0;
+
+        const auto &RELATED_CONSTRAINT_PTRS =
+            a_MOVE.alterations.front()
+                .first->selection_ptr()
+                ->related_constraint_ptrs_vector;
+
+        const auto &INDEX_MIN_FIRST =
+            a_MOVE.alterations[0]
+                .first->related_selection_constraint_ptr_index_min();
+        const auto &INDEX_MAX_FIRST =
+            a_MOVE.alterations[0]
+                .first->related_selection_constraint_ptr_index_max();
+        const auto &INDEX_MIN_SECOND =
+            a_MOVE.alterations[1]
+                .first->related_selection_constraint_ptr_index_min();
+        const auto &INDEX_MAX_SECOND =
+            a_MOVE.alterations[1]
+                .first->related_selection_constraint_ptr_index_max();
+
+        const int MIN_INDEX = std::min(INDEX_MIN_FIRST, INDEX_MIN_SECOND);
+        const int MAX_INDEX = std::max(INDEX_MAX_FIRST, INDEX_MAX_SECOND);
+
+        if ((INDEX_MAX_FIRST < INDEX_MIN_SECOND) ||
+            (INDEX_MAX_SECOND < INDEX_MIN_FIRST)) {
+            for (const auto &alteration : a_MOVE.alterations) {
+                const auto &variable_ptr = alteration.first;
+                const auto  variable_value_diff =
+                    alteration.second - variable_ptr->value();
+                const auto &constraint_sensitivities =
+                    variable_ptr->constraint_sensitivities();
+
+                for (const auto &sensitivity : constraint_sensitivities) {
+                    const auto &constraint_ptr = sensitivity.first;
+                    if (!constraint_ptr->is_enabled()) {
+                        continue;
+                    }
+                    constraint_value = constraint_ptr->constraint_value() +
+                                       sensitivity.second * variable_value_diff;
+
+                    if (constraint_ptr->is_less_or_equal()) {
+                        violation_diff = std::max(constraint_value, 0.0) -
+                                         constraint_ptr->positive_part();
+                        total_violation += violation_diff;
+
+                        local_penalty +=
+                            violation_diff *
+                            constraint_ptr->local_penalty_coefficient_less();
+                    }
+
+                    if (constraint_ptr->is_greater_or_equal()) {
+                        violation_diff = std::min(constraint_value, 0.0) +
+                                         constraint_ptr->negative_part();
+                        total_violation -= violation_diff;
+
+                        local_penalty -=
+                            violation_diff *
+                            constraint_ptr->local_penalty_coefficient_greater();
+                    }
+                }
+            }
+            is_feasibility_improvable = true;
+        } else {
+            double violation_diff_negative = 0.0;
+            double violation_diff_positive = 0.0;
+
+            for (auto i = MIN_INDEX; i <= MAX_INDEX; i++) {
+                auto &constraint_ptr = RELATED_CONSTRAINT_PTRS[i];
+                if (!constraint_ptr->is_enabled()) {
+                    continue;
+                }
+
+                constraint_value = constraint_ptr->evaluate_constraint(a_MOVE);
+
+                if (fabs(constraint_value -
+                         constraint_ptr->constraint_value()) <
+                    constant::EPSILON_10) {
+                    continue;
+                }
+
+                violation_diff_positive =
+                    constraint_ptr->is_less_or_equal()
+                        ? std::max(constraint_value, 0.0) -
+                              constraint_ptr->positive_part()
+                        : 0.0;
+
+                violation_diff_negative =
+                    constraint_ptr->is_greater_or_equal()
+                        ? std::max(-constraint_value, 0.0) -
+                              constraint_ptr->negative_part()
+                        : 0.0;
+                violation_diff =
+                    violation_diff_positive + violation_diff_negative;
+                local_penalty +=
+                    violation_diff_positive *
+                        constraint_ptr->local_penalty_coefficient_less() +
+                    violation_diff_negative *
+                        constraint_ptr->local_penalty_coefficient_greater();
+
+                total_violation += violation_diff;
+                is_feasibility_improvable |=
+                    violation_diff < -constant::EPSILON;
+            }
+        }
+
+#ifdef _PRINTEMPS_LINEAR_MINIMIZATION
+        double objective             = m_objective.evaluate(a_MOVE);
+        double objective_improvement = m_objective.value() - objective;
+
+#else
+        double objective = 0.0;
+        double objective_improvement = 0.0;
+        if (m_is_defined_objective) {
+            objective = m_objective.evaluate(a_MOVE) * this->sign();
+            objective_improvement =
+                m_objective.value() * this->sign() - objective;
+        }
+#endif
+        const double GLOBAL_PENALTY =
+            total_violation * m_global_penalty_coefficient;
+
+        a_score_ptr->objective                  = objective;
+        a_score_ptr->objective_improvement      = objective_improvement;
+        a_score_ptr->total_violation            = total_violation;
+        a_score_ptr->local_penalty              = local_penalty;
+        a_score_ptr->global_penalty             = GLOBAL_PENALTY;
+        a_score_ptr->local_augmented_objective  = objective + local_penalty;
+        a_score_ptr->global_augmented_objective = objective + GLOBAL_PENALTY;
+        a_score_ptr->is_feasible = !(total_violation > constant::EPSILON);
+        a_score_ptr->is_objective_improvable =
+            objective_improvement > constant::EPSILON;
+        a_score_ptr->is_feasibility_improvable = is_feasibility_improvable;
+    }
+
+    /*************************************************************************/
     constexpr void evaluate_multi(
         solution::SolutionScore *                           a_score_ptr,  //
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE,
@@ -2412,26 +2659,22 @@ class Model {
                 continue;
             }
 
-            if (a_MOVE.is_selection_move) {
-                if (a_MOVE.hash &
-                    constraint_ptr->expression().selection_mask()) {
-                    continue;
-                }
-            }
             constraint_value = constraint_ptr->evaluate_constraint(a_MOVE);
 
-            violation_diff_negative = 0.0;
-            violation_diff_positive = 0.0;
-
-            if (constraint_ptr->is_less_or_equal()) {
-                violation_diff_positive = std::max(constraint_value, 0.0) -
-                                          constraint_ptr->positive_part();
+            if (fabs(constraint_value - constraint_ptr->constraint_value()) <
+                constant::EPSILON_10) {
+                continue;
             }
 
-            if (constraint_ptr->is_greater_or_equal()) {
-                violation_diff_negative = std::max(-constraint_value, 0.0) -
-                                          constraint_ptr->negative_part();
-            }
+            violation_diff_positive = constraint_ptr->is_less_or_equal()
+                                          ? std::max(constraint_value, 0.0) -
+                                                constraint_ptr->positive_part()
+                                          : 0.0;
+
+            violation_diff_negative = constraint_ptr->is_greater_or_equal()
+                                          ? std::max(-constraint_value, 0.0) -
+                                                constraint_ptr->negative_part()
+                                          : 0.0;
 
             violation_diff = violation_diff_positive + violation_diff_negative;
             local_penalty +=
@@ -3308,6 +3551,48 @@ class Model {
     }
 
     /*************************************************************************/
+    inline constexpr model_component::VariableReference<T_Variable,
+                                                        T_Expression>
+        &variable_reference_original(void) {
+        return m_variable_reference_original;
+    }
+
+    /*************************************************************************/
+    inline constexpr const model_component::VariableReference<T_Variable,
+                                                              T_Expression>
+        &variable_reference_original(void) const {
+        return m_variable_reference_original;
+    }
+
+    /*************************************************************************/
+    inline constexpr model_component::VariableTypeReference<T_Variable,
+                                                            T_Expression>
+        &variable_type_reference(void) {
+        return m_variable_type_reference;
+    }
+
+    /*************************************************************************/
+    inline constexpr const model_component::VariableTypeReference<T_Variable,
+                                                                  T_Expression>
+        &variable_type_reference(void) const {
+        return m_variable_type_reference;
+    }
+
+    /*************************************************************************/
+    inline constexpr model_component::VariableTypeReference<T_Variable,
+                                                            T_Expression>
+        &variable_type_reference_original(void) {
+        return m_variable_type_reference_original;
+    }
+
+    /*************************************************************************/
+    inline constexpr const model_component::VariableTypeReference<T_Variable,
+                                                                  T_Expression>
+        &variable_type_reference_original(void) const {
+        return m_variable_type_reference_original;
+    }
+
+    /*************************************************************************/
     inline constexpr model_component::ConstraintReference<T_Variable,
                                                           T_Expression>
         &constraint_reference(void) {
@@ -3322,16 +3607,45 @@ class Model {
     }
 
     /*************************************************************************/
+    inline constexpr model_component::ConstraintReference<T_Variable,
+                                                          T_Expression>
+        &constraint_reference_original(void) {
+        return m_constraint_reference_original;
+    }
+
+    /*************************************************************************/
+    inline constexpr const model_component::ConstraintReference<T_Variable,
+                                                                T_Expression>
+        &constraint_reference_original(void) const {
+        return m_constraint_reference_original;
+    }
+
+    /*************************************************************************/
     inline constexpr model_component::ConstraintTypeReference<T_Variable,
                                                               T_Expression>
         &constraint_type_reference(void) {
         return m_constraint_type_reference;
     }
+
     /*************************************************************************/
     inline constexpr const model_component::ConstraintTypeReference<
         T_Variable, T_Expression>
         &constraint_type_reference(void) const {
         return m_constraint_type_reference;
+    }
+
+    /*************************************************************************/
+    inline constexpr model_component::ConstraintTypeReference<T_Variable,
+                                                              T_Expression>
+        &constraint_type_reference_original(void) {
+        return m_constraint_type_reference_original;
+    }
+
+    /*************************************************************************/
+    inline constexpr const model_component::ConstraintTypeReference<
+        T_Variable, T_Expression>
+        &constraint_type_reference_original(void) const {
+        return m_constraint_type_reference_original;
     }
 
     /*************************************************************************/
@@ -3403,27 +3717,27 @@ class Model {
 
     /*************************************************************************/
     inline constexpr int number_of_binary_variables(void) const {
-        return m_variable_reference.binary_variable_ptrs.size();
+        return m_variable_type_reference.binary_variable_ptrs.size();
     }
 
     /*************************************************************************/
     inline constexpr int number_of_integer_variables(void) const {
-        return m_variable_reference.integer_variable_ptrs.size();
+        return m_variable_type_reference.integer_variable_ptrs.size();
     }
 
     /*************************************************************************/
     inline constexpr int number_of_selection_variables(void) const {
-        return m_variable_reference.selection_variable_ptrs.size();
+        return m_variable_type_reference.selection_variable_ptrs.size();
     }
 
     /*************************************************************************/
     inline constexpr int number_of_dependent_binary_variables(void) const {
-        return m_variable_reference.dependent_binary_variable_ptrs.size();
+        return m_variable_type_reference.dependent_binary_variable_ptrs.size();
     }
 
     /*************************************************************************/
     inline constexpr int number_of_dependent_integer_variables(void) const {
-        return m_variable_reference.dependent_integer_variable_ptrs.size();
+        return m_variable_type_reference.dependent_integer_variable_ptrs.size();
     }
 
     /*************************************************************************/

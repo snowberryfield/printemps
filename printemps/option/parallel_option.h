@@ -50,15 +50,31 @@ struct ParallelOption {
                 this->is_enabled_parallel_neighborhood_update));
     }
 
-    /******************************************************************************/
+    /**************************************************************************/
     inline void setup(const utility::json::JsonObject &a_OBJECT) {
         this->initialize();
 
-        read_json(&this->is_enabled_parallel_evaluation,  //
-                  "is_enabled_parallel_evaluation", a_OBJECT);
+        read_json(                                  //
+            &this->is_enabled_parallel_evaluation,  //
+            "is_enabled_parallel_evaluation", a_OBJECT);
 
-        read_json(&this->is_enabled_parallel_neighborhood_update,  //
-                  "is_enabled_parallel_neighborhood_update", a_OBJECT);
+        read_json(                                           //
+            &this->is_enabled_parallel_neighborhood_update,  //
+            "is_enabled_parallel_neighborhood_update", a_OBJECT);
+    }
+
+    /**************************************************************************/
+    inline utility::json::JsonObject to_json(void) const {
+        utility::json::JsonObject obj;
+        obj.emplace_back(                      //
+            "is_enabled_parallel_evaluation",  //
+            this->is_enabled_parallel_evaluation);
+
+        obj.emplace_back(                               //
+            "is_enabled_parallel_neighborhood_update",  //
+            this->is_enabled_parallel_neighborhood_update);
+
+        return obj;
     }
 };
 }  // namespace printemps::option

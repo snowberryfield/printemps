@@ -6,17 +6,21 @@ jobs:
     strategy:
      matrix:
       cfg:
-      # For Ubuntu 18.04, the available compilers are specified according to
-      # https://github.com/actions/virtual-environments/blob/master/images/linux/Ubuntu1804-README.md
-      - { os: ubuntu-18.04, cc: gcc-9, cxx: g++-9 } # 9.2.1
-      - { os: ubuntu-18.04, cc: clang-9, cxx: clang++-9 } # 9.0.0
       # For Ubuntu 20.04, the available compilers are specified according to
-      # https://github.com/actions/virtual-environments/blob/master/images/linux/Ubuntu2004-README.md
-      - { os: ubuntu-20.04, cc: gcc-9, cxx: g++-9 } # 9.3.0
+      # https://github.com/actions/runner-images/blob/main/images/linux/Ubuntu2004-Readme.md
+      - { os: ubuntu-20.04, cc: gcc-9, cxx: g++-9 } # 9.4.0
       - { os: ubuntu-20.04, cc: gcc-10, cxx: g++-10 } # 10.3.0
       - { os: ubuntu-20.04, cc: clang-10, cxx: clang++-10 } # 10.0.0
       - { os: ubuntu-20.04, cc: clang-11, cxx: clang++-11 } # 11.0.0
       - { os: ubuntu-20.04, cc: clang-12, cxx: clang++-12 } # 12.0.0
+      # For Ubuntu 22.04, the available compilers are specified according to
+      # https://github.com/actions/runner-images/blob/main/images/linux/Ubuntu2204-Readme.md
+      - { os: ubuntu-22.04, cc: gcc-9, cxx: g++-9 } # 9.4.0
+      - { os: ubuntu-22.04, cc: gcc-10, cxx: g++-10 } # 10.3.0
+      - { os: ubuntu-22.04, cc: gcc-11, cxx: g++-11 } # 11.2.0
+      - { os: ubuntu-22.04, cc: clang-12, cxx: clang++-12 } # 12.0.1
+      - { os: ubuntu-22.04, cc: clang-13, cxx: clang++-13 } # 13.0.1
+      - { os: ubuntu-22.04, cc: clang-14, cxx: clang++-14 } # 14.0.0
       # For macOS 11, the available compilers are specified according to
       # https://github.com/actions/virtual-environments/blob/main/images/macos/macos-11-Readme.md
       - { os: macos-11, cc: gcc-9, cxx: g++-9 } # 9.5.0 

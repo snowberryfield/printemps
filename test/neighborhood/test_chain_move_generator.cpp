@@ -7,6 +7,7 @@
 #include <printemps.h>
 
 namespace {
+using namespace printemps;
 /*****************************************************************************/
 class TestChainMoveGenerator : public ::testing::Test {
    protected:
@@ -24,8 +25,8 @@ TEST_F(TestChainMoveGenerator, setup) {
 
 /*****************************************************************************/
 TEST_F(TestChainMoveGenerator, register_move) {
-    printemps::model::Model<int, double>       model;
-    printemps::neighborhood::Move<int, double> move;
+    model::Model<int, double>       model;
+    neighborhood::Move<int, double> move;
 
     model.neighborhood().chain().register_move(move);
 
@@ -44,15 +45,15 @@ TEST_F(TestChainMoveGenerator, clear_moves) {
 
 /*****************************************************************************/
 TEST_F(TestChainMoveGenerator, deduplicate_moves) {
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
-    printemps::neighborhood::Move<int, double> move_0;
+    neighborhood::Move<int, double> move_0;
     move_0.overlap_rate = 0.1;
 
-    printemps::neighborhood::Move<int, double> move_1;
+    neighborhood::Move<int, double> move_1;
     move_1.overlap_rate = 0.2;
 
-    printemps::neighborhood::Move<int, double> move_2;
+    neighborhood::Move<int, double> move_2;
     move_2.overlap_rate = 0.3;
 
     for (auto i = 0; i < 3; i++) {
@@ -92,8 +93,8 @@ TEST_F(TestChainMoveGenerator, shuffle_moves) {
 
 /*****************************************************************************/
 TEST_F(TestChainMoveGenerator, reduce_moves) {
-    printemps::model::Model<int, double>       model;
-    printemps::neighborhood::Move<int, double> move;
+    model::Model<int, double>       model;
+    neighborhood::Move<int, double> move;
 
     const int N                   = 5000;
     const int CHAIN_MOVE_CAPACITY = 10000;

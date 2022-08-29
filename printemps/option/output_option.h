@@ -65,21 +65,47 @@ struct OutputOption {
                 this->feasible_solutions_capacity, "%d"));
     }
 
-    /******************************************************************************/
+    /**************************************************************************/
     inline void setup(const utility::json::JsonObject &a_OBJECT) {
         this->initialize();
 
-        read_json(&this->verbose,  //
-                  "verbose", a_OBJECT);
+        read_json(           //
+            &this->verbose,  //
+            "verbose", a_OBJECT);
 
-        read_json(&this->is_enabled_write_trend,  //
-                  "is_enabled_write_trend", a_OBJECT);
+        read_json(                          //
+            &this->is_enabled_write_trend,  //
+            "is_enabled_write_trend", a_OBJECT);
 
-        read_json(&this->is_enabled_store_feasible_solutions,  //
-                  "is_enabled_store_feasible_solutions", a_OBJECT);
+        read_json(                                       //
+            &this->is_enabled_store_feasible_solutions,  //
+            "is_enabled_store_feasible_solutions", a_OBJECT);
 
-        read_json(&this->feasible_solutions_capacity,  //
-                  "feasible_solutions_capacity", a_OBJECT);
+        read_json(                               //
+            &this->feasible_solutions_capacity,  //
+            "feasible_solutions_capacity", a_OBJECT);
+    }
+
+    /**************************************************************************/
+    inline utility::json::JsonObject to_json(void) const {
+        utility::json::JsonObject obj;
+        obj.emplace_back(  //
+            "verbose",     //
+            verbose::VerboseInverseMap.at(this->verbose));
+
+        obj.emplace_back(              //
+            "is_enabled_write_trend",  //
+            this->is_enabled_write_trend);
+
+        obj.emplace_back(                           //
+            "is_enabled_store_feasible_solutions",  //
+            this->is_enabled_store_feasible_solutions);
+
+        obj.emplace_back(                   //
+            "feasible_solutions_capacity",  //
+            this->feasible_solutions_capacity);
+
+        return obj;
     }
 };
 }  // namespace printemps::option

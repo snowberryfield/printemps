@@ -4,17 +4,16 @@
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
 #include <gtest/gtest.h>
-#include <random>
-
 #include <printemps.h>
 
 namespace {
+using namespace printemps;
 /*****************************************************************************/
 class TestFixedSizeHashMap : public ::testing::Test {
    protected:
-    printemps::utility::UniformRandom<std::uniform_int_distribution<>, int>
+    utility::UniformRandom<std::uniform_int_distribution<>, int>
         m_random_integer;
-    printemps::utility::UniformRandom<std::uniform_int_distribution<>, int>
+    utility::UniformRandom<std::uniform_int_distribution<>, int>
         m_random_positive_integer;
 
     virtual void SetUp(void) {
@@ -35,13 +34,12 @@ class TestFixedSizeHashMap : public ::testing::Test {
 
 /*****************************************************************************/
 TEST_F(TestFixedSizeHashMap, initialize) {
-    printemps::utility::FixedSizeHashMap<
-        printemps::model_component::Variable<int, double>*, double>
+    utility::FixedSizeHashMap<model_component::Variable<int, double>*, double>
         fixed_size_hash_map;
 
     /// static const variable seems not to be allowed in EXPECT_EQ().
     std::size_t default_bucket_size =
-        printemps::utility::FixedSizeHashMapConstant::DEFAULT_BUCKET_SIZE;
+        utility::FixedSizeHashMapConstant::DEFAULT_BUCKET_SIZE;
 
     EXPECT_EQ(0, static_cast<int>(fixed_size_hash_map.shift_size()));
     EXPECT_EQ(default_bucket_size, fixed_size_hash_map.bucket_size());
@@ -49,17 +47,15 @@ TEST_F(TestFixedSizeHashMap, initialize) {
 
 /*****************************************************************************/
 TEST_F(TestFixedSizeHashMap, setup) {
-    printemps::utility::FixedSizeHashMap<
-        printemps::model_component::Variable<int, double>*, double>
+    utility::FixedSizeHashMap<model_component::Variable<int, double>*, double>
         fixed_size_hash_map;
 
-    printemps::model::Model<int, double> model;
+    model::Model<int, double> model;
 
     auto& x = model.create_variables("x", {10, 20});
     auto& y = model.create_variables("y", {20, 30, 40});
 
-    std::unordered_map<printemps::model_component::Variable<int, double>*,
-                       double>
+    std::unordered_map<model_component::Variable<int, double>*, double>
         unordered_map;
 
     for (auto i = 0; i < 10; i++) {
@@ -75,13 +71,12 @@ TEST_F(TestFixedSizeHashMap, setup) {
             }
         }
     }
-    fixed_size_hash_map.setup(
-        unordered_map,
-        sizeof(printemps::model_component::Variable<int, double>));
+    fixed_size_hash_map.setup(unordered_map,
+                              sizeof(model_component::Variable<int, double>));
 
-    EXPECT_EQ((unsigned int)log2(
-                  sizeof(printemps::model_component::Variable<int, double>)),
-              fixed_size_hash_map.shift_size());
+    EXPECT_EQ(
+        (unsigned int)log2(sizeof(model_component::Variable<int, double>)),
+        fixed_size_hash_map.shift_size());
 
     /// 10 * 20 + 20 * 30 * 40 = 200 + 24000
     /// 262144 < 24000 * 5(LOAD_FACTOR_MULTIPLIER) < 131072

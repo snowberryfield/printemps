@@ -73,7 +73,7 @@ struct Option {
     }
 
    public:
-    /******************************************************************************/
+    /**************************************************************************/
     inline void setup(const std::string &a_FILE_NAME) {
         auto   option_object = utility::json::read_json_object(a_FILE_NAME);
         Option option;
@@ -134,6 +134,22 @@ struct Option {
 
         *this = option;
     }
+
+    /**************************************************************************/
+    inline utility::json::JsonObject to_json(void) const {
+        utility::json::JsonObject obj;
+        obj.emplace_back("general", this->general.to_json());
+        obj.emplace_back("penalty", this->penalty.to_json());
+        obj.emplace_back("parallel", this->parallel.to_json());
+        obj.emplace_back("preprocess", this->preprocess.to_json());
+        obj.emplace_back("neighborhood", this->neighborhood.to_json());
+        obj.emplace_back("output", this->output.to_json());
+        obj.emplace_back("lagrange_dual", this->lagrange_dual.to_json());
+        obj.emplace_back("local_search", this->local_search.to_json());
+        obj.emplace_back("tabu_search", this->tabu_search.to_json());
+
+        return obj;
+    };
 };
 }  // namespace printemps::option
 

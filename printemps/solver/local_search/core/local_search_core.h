@@ -306,13 +306,12 @@ class LocalSearchCore {
 
         if (STATE.update_status &  //
             solution::IncumbentHolderConstant::
-                STATUS_LOCAL_AUGMENTED_INCUMBENT_UPDATE) {
-            mark_current = '!';
-        }
-
-        if (STATE.update_status &  //
-            solution::IncumbentHolderConstant::
-                STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
+                STATUS_FEASIBLE_INCUMBENT_UPDATE) {
+            mark_current                    = '*';
+            mark_global_augmented_incumbent = '*';
+        } else if (STATE.update_status &  //
+                   solution::IncumbentHolderConstant::
+                       STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
             mark_current                    = '#';
             mark_global_augmented_incumbent = '#';
         }
@@ -383,6 +382,11 @@ class LocalSearchCore {
             "---------+------------------------+----------------------+--------"
             "--------------",
             true);
+        utility::print_info(  //
+            " -- *: Feasible incumbent solution was updated.", true);
+        utility::print_info(  //
+            " -- #: Global incumbent solution was updated.", true);
+        utility::print_single_line(true);
     }
 
    public:
@@ -552,14 +556,24 @@ class LocalSearchCore {
             }
 
             move_indices = utility::sequence(STATE.number_of_moves);
-            std::sort(move_indices.begin(), move_indices.end(),
-                      [&trial_solution_scores](const auto a_FIRST,
-                                               const auto a_SECOND) {
-                          return trial_solution_scores[a_FIRST]
-                                     .global_augmented_objective <
-                                 trial_solution_scores[a_SECOND]
-                                     .global_augmented_objective;
-                      });
+            std::stable_sort(  //
+                move_indices.begin(), move_indices.end(),
+                [&TRIAL_MOVE_PTRS](const auto& a_FIRST, const auto& a_SECOND) {
+                    return TRIAL_MOVE_PTRS[a_FIRST]
+                               ->related_constraint_ptrs.size() <
+                           TRIAL_MOVE_PTRS[a_SECOND]
+                               ->related_constraint_ptrs.size();
+                });
+
+            std::stable_sort(  //
+                move_indices.begin(), move_indices.end(),
+                [&trial_solution_scores](const auto a_FIRST,
+                                         const auto a_SECOND) {
+                    return trial_solution_scores[a_FIRST]
+                               .global_augmented_objective <
+                           trial_solution_scores[a_SECOND]
+                               .global_augmented_objective;
+                });
 
             move.alterations.reserve(m_model_ptr->number_of_variables());
             constraint_ptrs.clear();
@@ -568,9 +582,6 @@ class LocalSearchCore {
             for (auto i = 0; i < NUMBER_OF_MOVES; i++) {
                 auto& score    = trial_solution_scores[move_indices[i]];
                 auto& move_ptr = TRIAL_MOVE_PTRS[move_indices[i]];
-                if (move_ptr->sense == neighborhood::MoveSense::Selection) {
-                    continue;
-                }
 
                 if (score.is_feasible) {
                     if (!score.is_objective_improvable) {
@@ -631,6 +642,14 @@ class LocalSearchCore {
              * Update the model by the selected move.
              */
             m_model_ptr->update(move);
+
+            for (auto&& alteration : move.alterations) {
+                if (alteration.first->sense() ==
+                        model_component::VariableSense::Selection &&
+                    alteration.second == 1) {
+                    alteration.first->select();
+                }
+            }
 
             /**
              * Update the memory.

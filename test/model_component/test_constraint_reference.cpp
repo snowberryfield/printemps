@@ -4,13 +4,12 @@
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
 #include <gtest/gtest.h>
-#include <random>
-
 #include <printemps.h>
 
 namespace {
+using namespace printemps;
 /*****************************************************************************/
-class TestChainMoveReduceMode : public ::testing::Test {
+class TestConstraintReference : public ::testing::Test {
    protected:
     virtual void SetUp(void) {
         /// nothing to do
@@ -21,17 +20,12 @@ class TestChainMoveReduceMode : public ::testing::Test {
 };
 
 /*****************************************************************************/
-TEST_F(TestChainMoveReduceMode, ChainMoveReduceModeMap) {
-    using namespace printemps::option::chain_move_reduce_mode;
-    EXPECT_EQ(OverlapRate, ChainMoveReduceModeMap.at("OverlapRate"));
-    EXPECT_EQ(Shuffle, ChainMoveReduceModeMap.at("Shuffle"));
-}
+TEST_F(TestConstraintReference, initialize) {
+    model_component::ConstraintReference<int, double> reference;
 
-/*****************************************************************************/
-TEST_F(TestChainMoveReduceMode, ChainMoveReduceModeInverseMap) {
-    using namespace printemps::option::chain_move_reduce_mode;
-    EXPECT_EQ("OverlapRate", ChainMoveReduceModeInverseMap.at(OverlapRate));
-    EXPECT_EQ("Shuffle", ChainMoveReduceModeInverseMap.at(Shuffle));
+    EXPECT_TRUE(reference.constraint_ptrs.empty());
+    EXPECT_TRUE(reference.enabled_constraint_ptrs.empty());
+    EXPECT_TRUE(reference.disabled_constraint_ptrs.empty());
 }
 }  // namespace
 /*****************************************************************************/

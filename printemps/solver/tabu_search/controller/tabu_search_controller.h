@@ -530,9 +530,13 @@ class TabuSearchController
     inline void print_outer_loop_iteration(const int  a_ITERATION,
                                            const bool a_IS_ENABLED_PRINT) {
         utility::print_message(
-            "Tabu search loop (" + std::to_string(a_ITERATION + 1) + "/" +
-                std::to_string(this->m_option.general.iteration_max) +
-                ") finished.",
+            "Tabu search loop finished (" + std::to_string(a_ITERATION + 1) +
+                "/" + std::to_string(this->m_option.general.iteration_max) +
+                ", Reason: " +
+                core::TabuSearchCoreTerminationStatusInverseMap.at(
+                    m_state_manager.state()
+                        .tabu_search_result.termination_status) +
+                ").",
             a_IS_ENABLED_PRINT);
     }
 
@@ -670,9 +674,10 @@ class TabuSearchController
              * Update variable bounds.
              */
             if (this->m_option.preprocess.is_enabled_presolve &&
+                this->m_option.preprocess.is_enabled_online_bounding &&
                 state.current_is_feasible_incumbent_updated &&
                 !state.previous_is_feasible_incumbent_updated) {
-                this->bound_variables(
+                this->update_variable_bounds(
                     this->m_incumbent_holder_ptr
                         ->feasible_incumbent_objective(),
                     this->m_option.output.verbose >= option::verbose::Outer);

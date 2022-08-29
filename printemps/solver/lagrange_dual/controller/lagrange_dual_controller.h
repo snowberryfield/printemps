@@ -191,7 +191,10 @@ class LagrangeDualController
          * Print the search summary.
          */
         utility::print_message(
-            "Solving Lagrange dual finished. ",
+            "Solving Lagrange dual finished (Reason: " +
+                core::LagrangeDualCoreTerminationStatusInverseMap.at(
+                    lagrange_dual_result.termination_status) +
+                ").",
             this->m_option.output.verbose >= option::verbose::Outer);
 
         this->print_total_elapsed_time(
