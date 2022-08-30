@@ -19,9 +19,8 @@ __PRINTEMPS__ is a C++ metaheuristics modeler/solver library for general integer
 ## News
 |     Date      | Update                                                                                            |
 |:-------------:|:--------------------------------------------------------------------------------------------------|
-| Apr. 21, 2022 | New benchmark results were added.                                                                 |
-| Apr. 21, 2022 | [Solver Option Guide](./contents/solver_option_guide.md) was updated.                             |
-| Apr. 21, 2022 | [PRINTEMPS v1.7.0](https://github.com/snowberryfield/printemps/releases/tag/v1.7.0) was released. |
+| Apr. 30, 2022 | [Solver Option Guide](./contents/solver_option_guide.md) was updated.                             |
+| Apr. 30, 2022 | [PRINTEMPS v2.0.0](https://github.com/snowberryfield/printemps/releases/tag/v2.0.0) was released. |
 
 ## Algorithm
 PRINTEMPS can compute approximate solutions for __linear and nonlinear integer optimization problems__. It employs __Tabu Search__ [1], a metaheuristics technique, to solve problems. In solving, it replaces constraints with penalty functions which return violations to the corresponding constraints, and the penalty functions multiplied by positive penalty coefficients are added to the objective function. The penalty coefficients are updated iteratively and automatically in a method similar (not exact same) to the one proposed in paper [2].
@@ -86,35 +85,30 @@ Following additional examples are provided in [`example/`](https://github.com/sn
 - [`example/quadratic_assignment.cpp`](https://github.com/snowberryfield/printemps/tree/master/example/quadratic_assignment.cpp) solves a quadratic assignment problem as an example of optimization that incorporates nonlinear functions and user-defined neighborhoods. 
 
 ## Compilation
-A C++ program integrating PRINTEMPS can be compiled by C++14 standards compatible compilers with specifying include search path where it is installed. For instance, the example code [`example/knapsack.cpp`](https://github.com/snowberryfield/printemps/tree/master/example/knapsack.cpp) can be built by the following command using g++:
+A C++ program integrating PRINTEMPS can be compiled by C++17 standards compatible compilers with specifying include search path where it is installed. For instance, the example code [`example/knapsack.cpp`](https://github.com/snowberryfield/printemps/tree/master/example/knapsack.cpp) can be built by the following command using g++:
 ```
-$g++ -std=c++14 -O3 -I path/to/printemps [-fopenmp] sample/knapsack.cpp -o knapsack.exe
+$g++ -std=c++17 -O3 -I path/to/printemps [-fopenmp] sample/knapsack.cpp -o knapsack.exe
 ```
 
 The option `-fopenmp` is required to activate parallel computation. See [Solver Option Guide](./contents/solver_option_guide.md) for details.
 
 Following combinations of operating systems and compilers are confirmed compilation possible:
 
-|   Operating System   |                                       Compiler (version)                                        |
-|:--------------------:|:-----------------------------------------------------------------------------------------------:|
-|  macOS Mojave 10.14  |                                      gcc (9.3.0 Homebrew)                                       |
-| macOS Catalina 10.15 |                                      gcc (9.3.0 Homebrew)                                       |
-|     Ubuntu 18.04     |                                gcc (9.2.1) <br /> clang (9.0.0)                                 |
-|     Ubuntu 20.04     | gcc (9.3.0) <br /> gcc (10.3.0) <br /> clang (10.0.0)<br /> clang (11.0.0)<br /> clang (12.0.0) |
+| Operating System | Compiler (version)                                                |
+|:----------------:|:------------------------------------------------------------------|
+|     macOS 11     | gcc (9.5.0, 10.4.0, 11.3.0)                                       |
+|     macOS 12     | gcc (11.3.0)                                                      |
+|   Ubuntu 18.04   | gcc (9.2.1) <br /> clang (9.0.0)                                  |
+|   Ubuntu 20.04   | gcc (9.3.0, 10.3.0) <br /> clang (10.0.0, 11.0.0, 12.0.0)         |
+|   Ubuntu 22.04   | gcc (9.4.0, 10.3.0, 11.2.0) <br /> clang (12.0.1, 13.0.1, 14.0.0) |
 
 
 ## Standalone Solver
-A standalone executable solver based on PRINTEMPS is also provided. It approximately solves a pure integer programming problem described as MPS (Mathematical Programming System) format file. The solver is powered by [nlohmann_json](https://github.com/nlohmann/json), an external JSON parser/generator.
-The solver can be built by the following command:
+A standalone executable solver based on PRINTEMPS is also provided. It approximately solves a pure integer programming problem described as MPS (Mathematical Programming System) format file. The solver can be built by the following command:
 ```
-$g++ -std=c++14 -O3 -I path/to/printemps -I path/to/nlohmann_json [-fopenmp] application/mps_solver/main.cpp -o mps_solver.exe
-```
-where `path/to/printemps`and`path/to/nlohmann_json`respectively denote the installation paths of PRINTEMPS and nlohmann_json. Alternatively, the solver can also be build with the following command:
-```
-$make -f makefile/Makefile.external [CC=gcc CXX=g++]
 $make -f makefile/Makefile.application [CC=gcc CXX=g++]
 ```
-where the options `CC` and `CXX` respectively designate the paths of C and C++ compilers, which should be specified according to the user's development environment. The former command includes the installation of nlohmann_json. The built solver will be generated at `build/application/Release/mps_solver.exe`.
+where the options `CC` and `CXX` respectively designate the paths of C and C++ compilers, which should be specified according to the user's development environment. The built solver will be generated at `build/application/Release/mps_solver.exe`.
 
 The solver can be run by the following command:
 ```
