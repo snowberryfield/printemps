@@ -8,10 +8,10 @@ The following results were obtained by the solver detailed in [Standalone Solver
 
 ## v2.0.0
 
-|                      No.                       | Last Updated | Version | Computational Time |                                        Instances                                        | Operating System |  Compiler  |                    CPU                    | RAM  |
-|:----------------------------------------------:|:------------:|:-------:|:------------------:|:---------------------------------------------------------------------------------------:|:----------------:|:----------:|:-----------------------------------------:|------|
-| [1](./results/v2.0.0/0001/benchmark_result.md) | Sep. 3, 2022 | v2.0.0  |       600sec       |     [Benchmark Set](https://miplib.zib.de/tag_benchmark.html) <br />(89 instances)      |   Ubuntu 22.04   | g++11.2.0  | Intel(R) Xeon(R) CPU E3-1270 v5 @ 3.60GHz | 16GB |
-| [2](./results/v2.0.0/0002/benchmark_result.md) | Sep. 3, 2022 | v2.0.0  |       600sec       | [Collection Set](https://miplib.zib.de/tag_collection.html) <br />(60 "open" instances) |   Ubuntu 22.04   | g++ 11.2.0 | Intel(R) Xeon(R) CPU E3-1270 v5 @ 3.60GHz | 16GB |
+|                       No.                       | Last Updated | Version | Computational Time |                                        Instances                                        | Operating System |  Compiler  |                    CPU                    | RAM  |
+|:-----------------------------------------------:|:------------:|:-------:|:------------------:|:---------------------------------------------------------------------------------------:|:----------------:|:----------:|:-----------------------------------------:|------|
+| [1](./results/v2.0.0/0001/benchmark_summary.md) | Sep. 3, 2022 | v2.0.0  |       600sec       |     [Benchmark Set](https://miplib.zib.de/tag_benchmark.html) <br />(89 instances)      |   Ubuntu 22.04   | g++11.2.0  | Intel(R) Xeon(R) CPU E3-1270 v5 @ 3.60GHz | 16GB |
+| [2](./results/v2.0.0/0002/benchmark_summary.md) | Sep. 3, 2022 | v2.0.0  |       600sec       | [Collection Set](https://miplib.zib.de/tag_collection.html) <br />(60 "open" instances) |   Ubuntu 22.04   | g++ 11.2.0 | Intel(R) Xeon(R) CPU E3-1270 v5 @ 3.60GHz | 16GB |
 
 ## v1.7.0
 
