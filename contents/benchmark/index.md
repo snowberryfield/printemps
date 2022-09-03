@@ -6,6 +6,13 @@ layout: sub
 # Benchmark Results
 The following results were obtained by the solver detailed in [Standalone Solver](https://snowberryfield.github.io/printemps/#standalone-solver). To refer each detail benchmark result, click the number in the `No.` column for each record.
 
+## v2.0.0
+
+|                      No.                       | Last Updated | Version | Computational Time |                                        Instances                                        | Operating System |  Compiler  |                    CPU                    | RAM  |
+|:----------------------------------------------:|:------------:|:-------:|:------------------:|:---------------------------------------------------------------------------------------:|:----------------:|:----------:|:-----------------------------------------:|------|
+| [1](./results/v2.0.0/0001/benchmark_result.md) | Sep. 3, 2022 | v2.0.0  |       600sec       |     [Benchmark Set](https://miplib.zib.de/tag_benchmark.html) <br />(89 instances)      |   Ubuntu 22.04   | g++11.2.0  | Intel(R) Xeon(R) CPU E3-1270 v5 @ 3.60GHz | 16GB |
+| [2](./results/v2.0.0/0002/benchmark_result.md) | Sep. 3, 2022 | v2.0.0  |       600sec       | [Collection Set](https://miplib.zib.de/tag_collection.html) <br />(60 "open" instances) |   Ubuntu 22.04   | g++ 11.2.0 | Intel(R) Xeon(R) CPU E3-1270 v5 @ 3.60GHz | 16GB |
+
 ## v1.7.0
 
 |                      No.                       | Last Updated  | Version | Computational Time |                                        Instances                                        | Operating System | Compiler  |                    CPU                    | RAM  |
