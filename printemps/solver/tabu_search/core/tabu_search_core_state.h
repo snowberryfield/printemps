@@ -33,8 +33,12 @@ struct TabuSearchCoreState {
 
     int number_of_effective_updates;
 
-    int  number_of_moves;
-    long number_of_evaluated_moves;
+    int    number_of_moves;
+    long   number_of_evaluated_moves;
+    double elapsed_time_for_evaluating_moves;
+
+    long   number_of_updated_moves;
+    double elapsed_time_for_updating_moves;
 
     bool is_few_permissible_neighborhood;
     bool is_found_new_feasible_solution;
@@ -97,8 +101,12 @@ struct TabuSearchCoreState {
 
         this->number_of_effective_updates = 0;
 
-        this->number_of_moves           = 0;
-        this->number_of_evaluated_moves = 0;
+        this->number_of_moves                   = 0;
+        this->number_of_evaluated_moves         = 0;
+        this->elapsed_time_for_evaluating_moves = 0.0;
+
+        this->number_of_updated_moves         = 0;
+        this->elapsed_time_for_updating_moves = 0.0;
 
         this->is_few_permissible_neighborhood = false;
         this->is_found_new_feasible_solution  = false;
