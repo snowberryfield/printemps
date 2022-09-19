@@ -506,6 +506,7 @@ class LagrangeDualCore {
         /**
          * Postprocess.
          */
+        m_state_manager.set_elapsed_time(time_keeper.clock());
         this->postprocess();
     }
 
