@@ -226,7 +226,7 @@ class TabuSearchCore {
     }
 
     /*************************************************************************/
-    inline void update_moves(void) {
+    inline void update_moves(utility::TimeKeeper* a_time_keeper_ptr) {
         const auto& STATE = m_state_manager.state();
 
         bool accept_all                    = true;
@@ -327,11 +327,17 @@ class TabuSearchCore {
             }
         }
 
+        const double START_TIME = a_time_keeper_ptr->clock();
         m_model_ptr->neighborhood().update_moves(
             accept_all,                     //
             accept_objective_improvable,    //
             accept_feasibility_improvable,  //
             m_option.parallel.is_enabled_parallel_neighborhood_update);
+        const double END_TIME = a_time_keeper_ptr->clock();
+
+        m_state_manager.update_move_updating_statistics(
+            m_model_ptr->neighborhood().number_of_updated_moves(),
+            END_TIME - START_TIME);
 
         m_state_manager.set_number_of_moves(
             m_model_ptr->neighborhood().move_ptrs().size());
@@ -778,7 +784,7 @@ class TabuSearchCore {
             /**
              * Update the moves.
              */
-            this->update_moves();
+            this->update_moves(&time_keeper);
 
             /**
              * Shuffle the moves.
@@ -810,6 +816,8 @@ class TabuSearchCore {
             trial_solution_scores.resize(STATE.number_of_moves);
             trial_move_scores.resize(STATE.number_of_moves);
             total_scores.resize(STATE.number_of_moves);
+
+            const double START_TIME = time_keeper.clock();
 
             const auto NUMBER_OF_MOVES        = STATE.number_of_moves;
             const auto CURRENT_SOLUTION_SCORE = STATE.current_solution_score;
@@ -880,6 +888,10 @@ class TabuSearchCore {
                     total_scores[i] += constant::LARGE_VALUE_100;
                 }
             }
+            const double END_TIME = time_keeper.clock();
+
+            m_state_manager.update_move_evaluating_statistics(
+                NUMBER_OF_MOVES, END_TIME - START_TIME);
 
             /**
              * Select moves for the next solution.

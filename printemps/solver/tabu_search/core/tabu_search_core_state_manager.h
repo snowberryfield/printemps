@@ -179,11 +179,6 @@ class TabuSearchCoreStateManager {
         this->update_local_penalty_range();
 
         /**
-         * Update the number of evaluated moves.
-         */
-        this->update_number_of_evaluated_moves();
-
-        /**
          * Update whether new feasible solution was found.
          */
         this->update_is_found_new_feasible_solution();
@@ -275,11 +270,6 @@ class TabuSearchCoreStateManager {
             m_state.local_penalty_range.update(
                 m_state.current_solution_score.local_penalty);
         }
-    }
-
-    /*************************************************************************/
-    inline constexpr void update_number_of_evaluated_moves() {
-        m_state.number_of_evaluated_moves += m_state.number_of_moves;
     }
 
     /*************************************************************************/
@@ -480,6 +470,20 @@ class TabuSearchCoreStateManager {
     /*************************************************************************/
     inline constexpr void next_iteration(void) {
         m_state.iteration++;
+    }
+
+    /*************************************************************************/
+    inline constexpr void update_move_updating_statistics(
+        const int a_NUMBER_OF_UPDATED_MOVES, const double a_ELAPSED_TIME) {
+        m_state.number_of_updated_moves += a_NUMBER_OF_UPDATED_MOVES;
+        m_state.elapsed_time_for_updating_moves += a_ELAPSED_TIME;
+    }
+
+    /*************************************************************************/
+    inline constexpr void update_move_evaluating_statistics(
+        const int a_NUMBER_OF_EVALUATED_MOVES, const double a_ELAPSED_TIME) {
+        m_state.number_of_evaluated_moves += a_NUMBER_OF_EVALUATED_MOVES;
+        m_state.elapsed_time_for_evaluating_moves += a_ELAPSED_TIME;
     }
 
     /*************************************************************************/

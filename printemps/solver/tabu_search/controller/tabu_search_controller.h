@@ -202,6 +202,33 @@ class TabuSearchController
         this->print_averaged_move_evaluation_speed(
             STATE.averaged_move_evaluation_speed, a_IS_ENABLED_PRINT);
 
+/**
+ * Print the state of the parallelization controller for updating moves.
+ */
+#ifdef _OPENMP
+        if (this->m_option.parallel.is_enabled_parallel_neighborhood_update &&
+            this->m_option.parallel
+                .is_enabled_automatic_neighborhood_update_parallelization) {
+            this->print_move_updating_parallelization_controller(
+                STATE.move_updating_parallelization_controller,
+                a_IS_ENABLED_PRINT);
+        }
+#endif
+
+/**
+ * Print the state of the parallelization controller for evaluating
+ * moves.
+ */
+#ifdef _OPENMP
+        if (this->m_option.parallel.is_enabled_parallel_evaluation &&
+            this->m_option.parallel
+                .is_enabled_automatic_evaluation_parallelization) {
+            this->print_move_evaluating_parallelization_controller(
+                STATE.move_evaluating_parallelization_controller,
+                a_IS_ENABLED_PRINT);
+        }
+#endif
+
         /**
          * Print the number of found feasible solutions.
          */
@@ -596,6 +623,74 @@ class TabuSearchController
             "The maximum number of iterations for the next loop was "
             "set to " +
                 std::to_string(a_ITERATION_MAX) + ".",
+            a_IS_ENABLED_PRINT);
+    }
+
+    /*************************************************************************/
+    inline void print_move_updating_parallelization_controller(
+        const utility::ucb1::Learner<bool>& a_CONTROLLER,
+        const bool                          a_IS_ENABLED_PRINT) {
+        const auto& ACTION_ON       = a_CONTROLLER.actions()[0];
+        const auto& ACTION_OFF      = a_CONTROLLER.actions()[1];
+        char        action_on_flag  = ' ';
+        char        action_off_flag = ' ';
+
+        if (a_CONTROLLER.best_action().body) {
+            action_on_flag = '*';
+        } else {
+            action_off_flag = '*';
+        }
+
+        utility::print_message(
+            "The state of the parallelization controller for updating moves "
+            "are as follows ('*' denotes the selected option for the next "
+            "loop):",
+            a_IS_ENABLED_PRINT);
+        utility::print_info(
+            utility::to_string(action_on_flag, "-- (%cOn ) ") +
+                utility::to_string(ACTION_ON.mean, "Mean: %.3e, ") +
+                utility::to_string(ACTION_ON.confidence, "Conf.: %.3e, ") +
+                utility::to_string(ACTION_ON.number_of_samples, "N: %d"),
+            a_IS_ENABLED_PRINT);
+        utility::print_info(
+            utility::to_string(action_off_flag, "-- (%cOff) ") +
+                utility::to_string(ACTION_OFF.mean, "Mean: %.3e, ") +
+                utility::to_string(ACTION_OFF.confidence, "Conf.: %.3e, ") +
+                utility::to_string(ACTION_OFF.number_of_samples, "N: %d"),
+            a_IS_ENABLED_PRINT);
+    }
+
+    /*************************************************************************/
+    inline void print_move_evaluating_parallelization_controller(
+        const utility::ucb1::Learner<bool>& a_CONTROLLER,
+        const bool                          a_IS_ENABLED_PRINT) {
+        const auto& ACTION_ON       = a_CONTROLLER.actions()[0];
+        const auto& ACTION_OFF      = a_CONTROLLER.actions()[1];
+        char        action_on_flag  = ' ';
+        char        action_off_flag = ' ';
+
+        if (a_CONTROLLER.best_action().body) {
+            action_on_flag = '*';
+        } else {
+            action_off_flag = '*';
+        }
+
+        utility::print_message(
+            "The state of the parallelization controller for evaluating moves "
+            "are as follows ('*' denotes the selected option for the next "
+            "loop):",
+            a_IS_ENABLED_PRINT);
+        utility::print_info(
+            utility::to_string(action_on_flag, "-- (%cOn ) ") +
+                utility::to_string(ACTION_ON.mean, "Mean: %.3e, ") +
+                utility::to_string(ACTION_ON.confidence, "Conf.: %.3e, ") +
+                utility::to_string(ACTION_ON.number_of_samples, "N: %d"),
+            a_IS_ENABLED_PRINT);
+        utility::print_info(
+            utility::to_string(action_off_flag, "-- (%cOff) ") +
+                utility::to_string(ACTION_OFF.mean, "Mean: %.3e, ") +
+                utility::to_string(ACTION_OFF.confidence, "Conf.: %.3e, ") +
+                utility::to_string(ACTION_OFF.number_of_samples, "N: %d"),
             a_IS_ENABLED_PRINT);
     }
 
