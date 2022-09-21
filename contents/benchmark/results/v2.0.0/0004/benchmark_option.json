@@ -1,0 +1,9 @@
+{
+    "general": {
+        "iteration_max": 10000000,
+        "time_max": 3600.0
+    },
+    "output": {
+        "is_enabled_write_trend": true
+    }
+}
