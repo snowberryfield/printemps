@@ -14,6 +14,8 @@ struct Action {
     long         number_of_samples;
     double       total_score;
     double       mean;
+    double       min;
+    double       max;
     double       confidence;
 
     /*************************************************************************/
@@ -32,6 +34,8 @@ struct Action {
         this->number_of_samples = 0;
         this->total_score       = 0.0;
         this->mean              = 0.0;
+        this->min               = std::numeric_limits<double>::max();
+        this->max               = std::numeric_limits<double>::lowest();
         this->confidence        = 0.0;
     }
 };

@@ -12,8 +12,11 @@ template <class T_Variable, class T_Expression>
 struct TabuSearchCoreResult {
     int    total_update_status;
     int    number_of_iterations;
+    long   number_of_updated_moves;
     long   number_of_evaluated_moves;
     double elapsed_time;
+    double elapsed_time_for_evaluating_moves;
+    double elapsed_time_for_updating_moves;
 
     TabuSearchCoreTerminationStatus termination_status;
 
@@ -42,10 +45,13 @@ struct TabuSearchCoreResult {
 
     /*************************************************************************/
     inline void initialize(void) {
-        this->total_update_status       = 0;
-        this->number_of_iterations      = 0;
-        this->number_of_evaluated_moves = 0;
-        this->elapsed_time              = 0.0;
+        this->total_update_status               = 0;
+        this->number_of_iterations              = 0;
+        this->number_of_updated_moves           = 0;
+        this->number_of_evaluated_moves         = 0;
+        this->elapsed_time                      = 0.0;
+        this->elapsed_time_for_evaluating_moves = 0.0;
+        this->elapsed_time_for_updating_moves   = 0.0;
 
         this->termination_status =
             TabuSearchCoreTerminationStatus::ITERATION_OVER;
@@ -68,8 +74,14 @@ struct TabuSearchCoreResult {
         const TabuSearchCoreState<T_Variable, T_Expression> &a_STATE) {
         this->total_update_status       = a_STATE.total_update_status;
         this->number_of_iterations      = a_STATE.iteration;
+        this->number_of_updated_moves   = a_STATE.number_of_updated_moves;
         this->number_of_evaluated_moves = a_STATE.number_of_evaluated_moves;
-        this->elapsed_time              = a_STATE.elapsed_time;
+
+        this->elapsed_time = a_STATE.elapsed_time;
+        this->elapsed_time_for_updating_moves =
+            a_STATE.elapsed_time_for_updating_moves;
+        this->elapsed_time_for_evaluating_moves =
+            a_STATE.elapsed_time_for_evaluating_moves;
 
         this->termination_status = a_STATE.termination_status;
         this->tabu_tenure        = a_STATE.tabu_tenure;

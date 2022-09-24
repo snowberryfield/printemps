@@ -99,6 +99,25 @@ class TabuSearchControllerStateManager {
             m_state.improvability_screening_mode =
                 option::improvability_screening_mode::Intensive;
         }
+
+#ifdef _OPENMP
+        if (m_option.parallel.is_enabled_parallel_neighborhood_update &&
+            m_option.parallel
+                .is_enabled_automatic_neighborhood_update_parallelization) {
+            std::vector<utility::ucb1::Action<bool>> actions(2);
+            actions[0] = true;   /// Enables parallelization
+            actions[1] = false;  /// Disables parallelization
+            m_state.move_updating_parallelization_controller.setup(actions);
+        }
+
+        if (m_option.parallel.is_enabled_parallel_evaluation &&
+            m_option.parallel.is_enabled_automatic_evaluation_parallelization) {
+            std::vector<utility::ucb1::Action<bool>> actions(2);
+            actions[0] = true;   /// Enables parallelization
+            actions[1] = false;  /// Disables parallelization
+            m_state.move_evaluating_parallelization_controller.setup(actions);
+        }
+#endif
     }
 
     /*************************************************************************/
@@ -115,6 +134,23 @@ class TabuSearchControllerStateManager {
         option.tabu_search.initial_tabu_tenure = m_state.initial_tabu_tenure;
         option.tabu_search.pruning_rate_threshold =
             m_state.pruning_rate_threshold;
+
+#ifdef _OPENMP
+        if (m_option.parallel.is_enabled_parallel_neighborhood_update &&
+            m_option.parallel
+                .is_enabled_automatic_neighborhood_update_parallelization) {
+            option.parallel.is_enabled_parallel_neighborhood_update =
+                m_state.move_updating_parallelization_controller.best_action()
+                    .body;
+        }
+
+        if (m_option.parallel.is_enabled_parallel_evaluation &&
+            m_option.parallel.is_enabled_automatic_evaluation_parallelization) {
+            option.parallel.is_enabled_parallel_evaluation =
+                m_state.move_evaluating_parallelization_controller.best_action()
+                    .body;
+        }
+#endif
         return option;
     }
 
@@ -274,6 +310,13 @@ class TabuSearchControllerStateManager {
          * Update the various counts about penalty coefficients relaxation.
          */
         this->update_relaxation_status();
+
+/**
+ * Update parallelization controllers.
+ */
+#ifdef _OPENMP
+        this->update_parallelization_controllers();
+#endif
     }
 
     /*************************************************************************/
@@ -1182,6 +1225,30 @@ class TabuSearchControllerStateManager {
             m_state.relaxation_count++;
         } else {
             m_state.iteration_after_relaxation++;
+        }
+    }
+
+    /*************************************************************************/
+    inline constexpr void update_parallelization_controllers(void) {
+        const auto& TABU_SEARCH_RESULT = m_state.tabu_search_result;
+
+        if (m_option.parallel.is_enabled_parallel_neighborhood_update &&
+            m_option.parallel
+                .is_enabled_automatic_neighborhood_update_parallelization) {
+            const double SCORE =
+                TABU_SEARCH_RESULT.number_of_updated_moves /
+                std::max(constant::EPSILON_10,
+                         TABU_SEARCH_RESULT.elapsed_time_for_updating_moves);
+            m_state.move_updating_parallelization_controller.learn(SCORE);
+        }
+
+        if (m_option.parallel.is_enabled_parallel_evaluation &&
+            m_option.parallel.is_enabled_automatic_evaluation_parallelization) {
+            const double SCORE =
+                TABU_SEARCH_RESULT.number_of_evaluated_moves /
+                std::max(constant::EPSILON_10,
+                         TABU_SEARCH_RESULT.elapsed_time_for_evaluating_moves);
+            m_state.move_evaluating_parallelization_controller.learn(SCORE);
         }
     }
 

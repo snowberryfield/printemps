@@ -15,7 +15,9 @@
     },
     "parallel": {
         "is_enabled_parallel_evaluation": false,
-        "is_enabled_parallel_neighborhood_update": false
+        "is_enabled_parallel_neighborhood_update": false,
+        "is_enabled_automatic_evaluation_parallelization": false,
+        "is_enabled_automatic_neighborhood_update_parallelization": false
     },
     "preprocess": {
         "is_enabled_presolve": false,
