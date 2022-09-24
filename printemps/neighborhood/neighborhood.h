@@ -64,6 +64,8 @@ class Neighborhood {
                                                   m_move_generator_ptrs;
     std::vector<Move<T_Variable, T_Expression> *> m_move_ptrs;
 
+    long m_number_of_updated_moves;
+
    public:
     /*************************************************************************/
     Neighborhood(void) {
@@ -116,6 +118,8 @@ class Neighborhood {
                                  &m_user_defined};
 
         m_move_ptrs.clear();
+
+        m_number_of_updated_moves = 0;
     }
 
     /*************************************************************************/
@@ -141,7 +145,8 @@ class Neighborhood {
 
         auto &move_ptrs = m_move_ptrs;
         move_ptrs.resize(number_of_candidate_moves);
-        auto index = 0;
+        auto index                = 0;
+        m_number_of_updated_moves = 0;
 
         for (const auto &move_generator_ptr : m_move_generator_ptrs) {
             if (move_generator_ptr->is_enabled()) {
@@ -154,6 +159,7 @@ class Neighborhood {
                         move_ptrs[index++] = &moves[i];
                     }
                 }
+                m_number_of_updated_moves += moves.size();
             }
         }
     }
@@ -522,6 +528,11 @@ class Neighborhood {
                + m_soft_selection.moves().size()                //
                + m_chain.moves().size()                         //
                + m_two_flip.moves().size();
+    }
+
+    /*************************************************************************/
+    inline constexpr long number_of_updated_moves(void) const noexcept {
+        return m_number_of_updated_moves;
     }
 };
 }  // namespace printemps::neighborhood

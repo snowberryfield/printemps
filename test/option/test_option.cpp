@@ -519,6 +519,16 @@ TEST_F(TestOption, to_json) {
         false,  //
         to_bool(parallel.at("is_enabled_parallel_neighborhood_update")));
 
+    EXPECT_EQ(  //
+        false,  //
+        to_bool(
+            parallel.at("is_enabled_automatic_evaluation_parallelization")));
+
+    EXPECT_EQ(  //
+        false,  //
+        to_bool(parallel.at(
+            "is_enabled_automatic_neighborhood_update_parallelization")));
+
     /// preprocess
     auto preprocess =
         std::any_cast<utility::json::JsonObject>(obj.at("preprocess"));
