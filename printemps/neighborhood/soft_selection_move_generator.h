@@ -3,8 +3,8 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_NEIGHBORHOOD_SOFT_SELECTION_MOVE_MOVE_GENERATOR_H__
-#define PRINTEMPS_NEIGHBORHOOD_SOFT_SELECTION_MOVE_MOVE_GENERATOR_H__
+#ifndef PRINTEMPS_NEIGHBORHOOD_SOFT_SELECTION_MOVE_GENERATOR_H__
+#define PRINTEMPS_NEIGHBORHOOD_SOFT_SELECTION_MOVE_GENERATOR_H__
 
 #include "abstract_move_generator.h"
 
@@ -36,7 +36,6 @@ class SoftSelectionMoveGenerator
         auto constraint_ptrs =
             extract_effective_constraint_ptrs(a_RAW_CONSTRAINT_PTRS);
 
-        std::vector<Move<T_Variable, T_Expression>> moves;
         for (auto &&constraint_ptr : constraint_ptrs) {
             const auto &sensitivities =
                 constraint_ptr->expression().sensitivities();
