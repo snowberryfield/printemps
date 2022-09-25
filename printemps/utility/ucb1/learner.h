@@ -16,9 +16,7 @@ class Learner {
     std::vector<Action<T_ActionBody>> m_actions;
     Action<T_ActionBody> *            m_best_action_ptr;
 
-    double m_min_score;
-    double m_max_score;
-    long   m_total_number_of_samples;
+    long m_total_number_of_samples;
 
    public:
     /*************************************************************************/
@@ -39,8 +37,6 @@ class Learner {
     /*************************************************************************/
     inline void initialize(void) {
         m_actions.clear();
-        m_min_score               = std::numeric_limits<double>::max();
-        m_max_score               = std::numeric_limits<double>::lowest();
         m_total_number_of_samples = 0;
     }
 
@@ -74,16 +70,6 @@ class Learner {
     }
 
     /*************************************************************************/
-    inline constexpr double min_score(void) const noexcept {
-        return m_min_score;
-    }
-
-    /*************************************************************************/
-    inline constexpr double max_score(void) const noexcept {
-        return m_max_score;
-    }
-
-    /*************************************************************************/
     inline constexpr long total_number_of_samples(void) const noexcept {
         return m_total_number_of_samples;
     }
@@ -94,12 +80,15 @@ class Learner {
         m_best_action_ptr->total_score += a_SCORE;
         m_best_action_ptr->mean = m_best_action_ptr->total_score /
                                   m_best_action_ptr->number_of_samples;
-
+        m_best_action_ptr->max = std::max(m_best_action_ptr->max, a_SCORE);
+        m_best_action_ptr->min = std::min(m_best_action_ptr->min, a_SCORE);
         m_total_number_of_samples++;
-        m_max_score = std::max(m_max_score, a_SCORE);
-        m_min_score = std::min(m_min_score, a_SCORE);
 
-        double range = m_max_score - m_min_score;
+        double range = m_best_action_ptr->max - m_best_action_ptr->min;
+        if (m_best_action_ptr->number_of_samples == 1) {
+            range = std::max(fabs(m_best_action_ptr->max),
+                             fabs(m_best_action_ptr->min));
+        }
 
         for (auto &&action : m_actions) {
             if (action.number_of_samples > 0) {

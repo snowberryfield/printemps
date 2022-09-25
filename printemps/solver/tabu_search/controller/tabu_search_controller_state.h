@@ -88,6 +88,12 @@ struct TabuSearchControllerState {
     option::improvability_screening_mode::ImprovabilityScreeningMode
         improvability_screening_mode;
 
+    /**
+     * Learners
+     */
+    utility::ucb1::Learner<bool> move_updating_parallelization_controller;
+    utility::ucb1::Learner<bool> move_evaluating_parallelization_controller;
+
     /*************************************************************************/
     TabuSearchControllerState(void) {
         this->initialize();
@@ -156,6 +162,9 @@ struct TabuSearchControllerState {
         this->is_disabled_special_neighborhood_move     = false;
         this->improvability_screening_mode =
             option::improvability_screening_mode::Off;
+
+        this->move_updating_parallelization_controller.initialize();
+        this->move_evaluating_parallelization_controller.initialize();
     }
 };
 }  // namespace printemps::solver::tabu_search::controller

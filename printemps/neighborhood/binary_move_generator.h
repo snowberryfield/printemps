@@ -73,16 +73,59 @@ class BinaryMoveGenerator
                 const bool                  a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
                 const bool                  a_ACCEPT_FEASIBILITY_IMPROVABLE,  //
                 [[maybe_unused]] const bool a_IS_ENABLED_PARALLEL) {
+                if (a_ACCEPT_ALL) {
+#ifdef _OPENMP
+#pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
+#endif
+                    for (auto i = 0; i < VARIABLES_SIZE; i++) {
+                        (*a_moves_ptr)[i].alterations.front().second =
+                            1 - mutable_variable_ptrs[i]->value();
+                        (*a_flags)[i] = 1;
+                    }
+                    return;
+                }
+
+                if (a_ACCEPT_OBJECTIVE_IMPROVABLE &&
+                    !a_ACCEPT_FEASIBILITY_IMPROVABLE) {
+#ifdef _OPENMP
+#pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
+#endif
+                    for (auto i = 0; i < VARIABLES_SIZE; i++) {
+                        if (mutable_variable_ptrs[i]
+                                ->is_objective_improvable()) {
+                            (*a_moves_ptr)[i].alterations.front().second =
+                                1 - mutable_variable_ptrs[i]->value();
+                            (*a_flags)[i] = 1;
+                        } else {
+                            (*a_flags)[i] = 0;
+                        }
+                    }
+                    return;
+                }
+
+                if (!a_ACCEPT_OBJECTIVE_IMPROVABLE &&
+                    a_ACCEPT_FEASIBILITY_IMPROVABLE) {
+#ifdef _OPENMP
+#pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
+#endif
+                    for (auto i = 0; i < VARIABLES_SIZE; i++) {
+                        if (mutable_variable_ptrs[i]
+                                ->is_feasibility_improvable()) {
+                            (*a_moves_ptr)[i].alterations.front().second =
+                                1 - mutable_variable_ptrs[i]->value();
+                            (*a_flags)[i] = 1;
+                        } else {
+                            (*a_flags)[i] = 0;
+                        }
+                    }
+                    return;
+                }
+
 #ifdef _OPENMP
 #pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
 #endif
                 for (auto i = 0; i < VARIABLES_SIZE; i++) {
-                    if (a_ACCEPT_ALL ||
-                        (a_ACCEPT_OBJECTIVE_IMPROVABLE &&
-                         mutable_variable_ptrs[i]->is_objective_improvable()) ||
-                        (a_ACCEPT_FEASIBILITY_IMPROVABLE &&
-                         mutable_variable_ptrs[i]
-                             ->is_feasibility_improvable())) {
+                    if (mutable_variable_ptrs[i]->is_improvable()) {
                         (*a_moves_ptr)[i].alterations.front().second =
                             1 - mutable_variable_ptrs[i]->value();
                         (*a_flags)[i] = 1;
