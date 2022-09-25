@@ -526,6 +526,7 @@ class Neighborhood {
                + m_precedence.moves().size()                    //
                + m_variable_bound.moves().size()                //
                + m_soft_selection.moves().size()                //
+               + m_trinomial_exclusive_nor.moves().size()       //
                + m_chain.moves().size()                         //
                + m_two_flip.moves().size();
     }
