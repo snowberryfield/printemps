@@ -3,8 +3,8 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_NEIGHBORHOOD_VARIABLE_BOUND_MOVE_MOVE_GENERATOR_H__
-#define PRINTEMPS_NEIGHBORHOOD_VARIABLE_BOUND_MOVE_MOVE_GENERATOR_H__
+#ifndef PRINTEMPS_NEIGHBORHOOD_VARIABLE_BOUND_MOVE_GENERATOR_H__
+#define PRINTEMPS_NEIGHBORHOOD_VARIABLE_BOUND_MOVE_GENERATOR_H__
 
 #include "abstract_move_generator.h"
 
