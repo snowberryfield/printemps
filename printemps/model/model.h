@@ -1324,6 +1324,11 @@ class Model {
                 m_constraint_type_reference.variable_bound_ptrs);
         }
 
+        if (a_OPTION.neighborhood.is_enabled_trinomial_exclusive_nor_move) {
+            m_neighborhood.trinomial_exclusive_nor().setup(
+                m_constraint_type_reference.trinomial_exclusive_nor_ptrs);
+        }
+
         if (a_OPTION.neighborhood.is_enabled_soft_selection_move) {
             m_neighborhood.soft_selection().setup(
                 m_constraint_type_reference.soft_selection_ptrs);
