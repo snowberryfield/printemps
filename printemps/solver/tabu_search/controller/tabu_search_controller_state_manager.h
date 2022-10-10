@@ -151,6 +151,7 @@ class TabuSearchControllerStateManager {
                     .body;
         }
 #endif
+
         return option;
     }
 
@@ -317,6 +318,11 @@ class TabuSearchControllerStateManager {
 #ifdef _OPENMP
         this->update_parallelization_controllers();
 #endif
+
+        /**
+         * Update parallelization counts.
+         */
+        this->update_parallelization_count();
     }
 
     /*************************************************************************/
@@ -1249,6 +1255,19 @@ class TabuSearchControllerStateManager {
                 std::max(constant::EPSILON_10,
                          TABU_SEARCH_RESULT.elapsed_time_for_evaluating_moves);
             m_state.move_evaluating_parallelization_controller.learn(SCORE);
+        }
+    }
+
+    /*************************************************************************/
+    inline constexpr void update_parallelization_count(void) {
+        const auto& TABU_SEARCH_RESULT = m_state.tabu_search_result;
+        const auto& OPTION             = TABU_SEARCH_RESULT.option;
+
+        if (OPTION.parallel.is_enabled_parallel_neighborhood_update) {
+            m_state.move_updating_parallelized_count++;
+        }
+        if (OPTION.parallel.is_enabled_parallel_evaluation) {
+            m_state.move_evaluating_parallelized_count++;
         }
     }
 

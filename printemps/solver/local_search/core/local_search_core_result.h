@@ -16,6 +16,8 @@ struct LocalSearchCoreResult {
 
     LocalSearchCoreTerminationStatus termination_status;
 
+    option::Option option;
+
     /*************************************************************************/
     LocalSearchCoreResult(void) {
         this->initialize();
@@ -23,11 +25,13 @@ struct LocalSearchCoreResult {
 
     /*************************************************************************/
     LocalSearchCoreResult(
-        const LocalSearchCoreState<T_Variable, T_Expression> &a_STATE)
+        const LocalSearchCoreState<T_Variable, T_Expression> &a_STATE,
+        const option::Option &                                a_OPTION)
         : total_update_status(a_STATE.total_update_status),
           number_of_iterations(a_STATE.iteration),
           elapsed_time(a_STATE.elapsed_time),
-          termination_status(a_STATE.termination_status) {
+          termination_status(a_STATE.termination_status),
+          option(a_OPTION) {
         /// nothing to do
     }
 
@@ -38,6 +42,7 @@ struct LocalSearchCoreResult {
         this->elapsed_time         = 0.0;
         this->termination_status =
             LocalSearchCoreTerminationStatus::ITERATION_OVER;
+        this->option.initialize();
     }
 };
 }  // namespace printemps::solver::local_search::core

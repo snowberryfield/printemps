@@ -81,7 +81,7 @@ class TabuSearchCore {
          * Prepare the result.
          */
         m_result = TabuSearchCoreResult<T_Variable, T_Expression>(
-            m_state_manager.state());
+            m_state_manager.state(), m_option);
     }
 
     /*************************************************************************/

@@ -14,8 +14,9 @@ class Solver;
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 struct Status {
-    model::Model<T_Variable, T_Expression> *model_ptr;
-    option::Option                          option;
+    solver::Solver<T_Variable, T_Expression> *solver_ptr;
+    model::Model<T_Variable, T_Expression> *  model_ptr;
+    option::Option                            option;
 
     bool is_found_feasible_solution;
 
@@ -53,7 +54,8 @@ struct Status {
 
     /*************************************************************************/
     void initialize(void) {
-        this->model_ptr = nullptr;
+        this->solver_ptr = nullptr;
+        this->model_ptr  = nullptr;
         this->option.initialize();
 
         this->is_found_feasible_solution = false;
@@ -77,6 +79,7 @@ struct Status {
 
     /*************************************************************************/
     void setup(Solver<T_Variable, T_Expression> *a_solver_ptr) {
+        this->solver_ptr = a_solver_ptr;
         const auto &LAGRANGE_DUAL_RESULT =
             a_solver_ptr->lagrange_dual_controller().result();
         const auto &LOCAL_SEARCH_RESULT =
@@ -163,6 +166,38 @@ struct Status {
                                this->averaged_inner_iteration_speed);
         a_object->emplace_back("averaged_move_evaluation_speed",
                                this->averaged_move_evaluation_speed);
+
+        const auto &TABU_SEARCH_CONTROLLER_STATE =
+            this->solver_ptr->tabu_search_controller().result().state;
+
+        a_object->emplace_back(
+            "move_updating_parallelized_count",
+            TABU_SEARCH_CONTROLLER_STATE.move_updating_parallelized_count);
+
+        a_object->emplace_back(
+            "move_evaluating_parallelized_count",
+            TABU_SEARCH_CONTROLLER_STATE.move_evaluating_parallelized_count);
+
+        double move_updating_parallelized_rate = 0.0;
+        if (this->number_of_tabu_search_loops > 0) {
+            move_updating_parallelized_rate =
+                TABU_SEARCH_CONTROLLER_STATE.move_updating_parallelized_count /
+                static_cast<double>(this->number_of_tabu_search_loops);
+        }
+
+        double move_evaluating_parallelized_rate = 0.0;
+        if (this->number_of_tabu_search_loops > 0) {
+            move_evaluating_parallelized_rate =
+                TABU_SEARCH_CONTROLLER_STATE
+                    .move_evaluating_parallelized_count /
+                static_cast<double>(this->number_of_tabu_search_loops);
+        }
+
+        a_object->emplace_back("move_updating_parallelized_rate",
+                               move_updating_parallelized_rate);
+
+        a_object->emplace_back("move_evaluating_parallelized_rate",
+                               move_evaluating_parallelized_rate);
     }
 
     /*************************************************************************/
