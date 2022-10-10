@@ -3078,13 +3078,13 @@ class Model {
         const int NUMBER_OF_VARIABLES = a_MPS.variable_names.size();
 
         for (auto i = 0; i < NUMBER_OF_VARIABLES; i++) {
-            const auto &NAME     = a_MPS.variable_names[i];
-            const auto &VARIABLE = a_MPS.variables.at(NAME);
+            const auto &VARIABLE_NAME = a_MPS.variable_names[i];
+            const auto &VARIABLE      = a_MPS.variables.at(VARIABLE_NAME);
 
             if (VARIABLE.sense == mps::MPSVariableSense::Continuous) {
                 if (a_ACCEPT_CONTINUOUS) {
                     utility::print_warning(
-                        "The continuous variable " + NAME +
+                        "The continuous variable " + VARIABLE_NAME +
                             " will be regarded as an integer variable.",
                         true);
                 } else {
@@ -3101,8 +3101,8 @@ class Model {
                 variable_proxy(i).fix_by(VARIABLE.integer_fixed_value);
             }
 
-            variable_proxy(i).set_name(NAME);
-            variable_ptrs[NAME] = &variable_proxy(i);
+            variable_proxy(i).set_name(VARIABLE_NAME);
+            variable_ptrs[VARIABLE_NAME] = &variable_proxy(i);
         }
 
         /**
@@ -3118,19 +3118,19 @@ class Model {
 #pragma omp parallel for schedule(static)
 #endif
         for (auto i = 0; i < NUMBER_OF_CONSTRAINTS; i++) {
-            const auto &NAME       = a_MPS.constraint_names[i];
-            const auto &CONSTRAINT = a_MPS.constraints.at(NAME);
+            const auto &CONSTRAINT_NAME = a_MPS.constraint_names[i];
+            const auto &CONSTRAINT      = a_MPS.constraints.at(CONSTRAINT_NAME);
             auto        expression =
                 model_component::Expression<T_Variable,
                                             T_Expression>::create_instance();
 
             Sensitivities expression_sensitivities;
             for (const auto &sensitivity : CONSTRAINT.sensitivities) {
-                std::string  variable_name = sensitivity.first;
-                T_Expression coefficient =
+                const auto &       VARIABLE_NAME = sensitivity.first;
+                const T_Expression COEFFICIENT =
                     static_cast<T_Expression>(sensitivity.second);
-                expression_sensitivities[variable_ptrs[variable_name]] =
-                    coefficient;
+                expression_sensitivities[variable_ptrs[VARIABLE_NAME]] =
+                    COEFFICIENT;
             }
             expression.set_sensitivities(expression_sensitivities);
 
@@ -3150,7 +3150,7 @@ class Model {
                     break;
                 }
             }
-            constraint_proxy(i).set_name(NAME);
+            constraint_proxy(i).set_name(CONSTRAINT_NAME);
         }
 
         /**
