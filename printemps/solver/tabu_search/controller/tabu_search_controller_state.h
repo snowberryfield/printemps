@@ -94,6 +94,9 @@ struct TabuSearchControllerState {
     utility::ucb1::Learner<bool> move_updating_parallelization_controller;
     utility::ucb1::Learner<bool> move_evaluating_parallelization_controller;
 
+    int move_updating_parallelized_count;
+    int move_evaluating_parallelized_count;
+
     /*************************************************************************/
     TabuSearchControllerState(void) {
         this->initialize();
@@ -165,6 +168,8 @@ struct TabuSearchControllerState {
 
         this->move_updating_parallelization_controller.initialize();
         this->move_evaluating_parallelization_controller.initialize();
+        this->move_updating_parallelized_count   = 0;
+        this->move_evaluating_parallelized_count = 0;
     }
 };
 }  // namespace printemps::solver::tabu_search::controller
