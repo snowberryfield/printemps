@@ -107,7 +107,8 @@ class TabuSearchControllerStateManager {
             std::vector<utility::ucb1::Action<bool>> actions(2);
             actions[0] = true;   /// Enables parallelization
             actions[1] = false;  /// Disables parallelization
-            m_state.move_updating_parallelization_controller.setup(actions);
+            m_state.neighborhood_update_parallelization_controller.setup(
+                actions);
         }
 
         if (m_option.parallel.is_enabled_parallel_evaluation &&
@@ -115,7 +116,7 @@ class TabuSearchControllerStateManager {
             std::vector<utility::ucb1::Action<bool>> actions(2);
             actions[0] = true;   /// Enables parallelization
             actions[1] = false;  /// Disables parallelization
-            m_state.move_evaluating_parallelization_controller.setup(actions);
+            m_state.evaluation_parallelization_controller.setup(actions);
         }
 #endif
     }
@@ -123,6 +124,11 @@ class TabuSearchControllerStateManager {
     /*************************************************************************/
     inline option::Option create_option() const {
         option::Option option = m_option;
+
+        option.parallel.is_enabled_parallel_neighborhood_update =
+            m_state.is_enabled_parallel_neighborhood_update;
+        option.parallel.is_enabled_parallel_evaluation =
+            m_state.is_enabled_parallel_evaluation;
 
         option.neighborhood.improvability_screening_mode =
             m_state.improvability_screening_mode;
@@ -134,23 +140,6 @@ class TabuSearchControllerStateManager {
         option.tabu_search.initial_tabu_tenure = m_state.initial_tabu_tenure;
         option.tabu_search.pruning_rate_threshold =
             m_state.pruning_rate_threshold;
-
-#ifdef _OPENMP
-        if (m_option.parallel.is_enabled_parallel_neighborhood_update &&
-            m_option.parallel
-                .is_enabled_automatic_neighborhood_update_parallelization) {
-            option.parallel.is_enabled_parallel_neighborhood_update =
-                m_state.move_updating_parallelization_controller.best_action()
-                    .body;
-        }
-
-        if (m_option.parallel.is_enabled_parallel_evaluation &&
-            m_option.parallel.is_enabled_automatic_evaluation_parallelization) {
-            option.parallel.is_enabled_parallel_evaluation =
-                m_state.move_evaluating_parallelization_controller.best_action()
-                    .body;
-        }
-#endif
 
         return option;
     }
@@ -320,9 +309,10 @@ class TabuSearchControllerStateManager {
 #endif
 
         /**
-         * Update parallelization counts.
+         * Update parallelization.
          */
-        this->update_parallelization_count();
+        this->update_neighborhood_update_parallelization();
+        this->update_evaluation_parallelization();
     }
 
     /*************************************************************************/
@@ -1245,7 +1235,7 @@ class TabuSearchControllerStateManager {
                 TABU_SEARCH_RESULT.number_of_updated_moves /
                 std::max(constant::EPSILON_10,
                          TABU_SEARCH_RESULT.elapsed_time_for_updating_moves);
-            m_state.move_updating_parallelization_controller.learn(SCORE);
+            m_state.neighborhood_update_parallelization_controller.learn(SCORE);
         }
 
         if (m_option.parallel.is_enabled_parallel_evaluation &&
@@ -1254,20 +1244,51 @@ class TabuSearchControllerStateManager {
                 TABU_SEARCH_RESULT.number_of_evaluated_moves /
                 std::max(constant::EPSILON_10,
                          TABU_SEARCH_RESULT.elapsed_time_for_evaluating_moves);
-            m_state.move_evaluating_parallelization_controller.learn(SCORE);
+            m_state.evaluation_parallelization_controller.learn(SCORE);
         }
     }
 
     /*************************************************************************/
-    inline constexpr void update_parallelization_count(void) {
-        const auto& TABU_SEARCH_RESULT = m_state.tabu_search_result;
-        const auto& OPTION             = TABU_SEARCH_RESULT.option;
-
-        if (OPTION.parallel.is_enabled_parallel_neighborhood_update) {
-            m_state.move_updating_parallelized_count++;
+    inline constexpr void update_neighborhood_update_parallelization(void) {
+#ifdef _OPENMP
+        if (m_option.parallel.is_enabled_parallel_neighborhood_update &&
+            m_option.parallel
+                .is_enabled_automatic_neighborhood_update_parallelization) {
+            m_state.is_enabled_parallel_neighborhood_update =
+                m_state.neighborhood_update_parallelization_controller
+                    .best_action()
+                    .body;
+        } else {
+            m_state.is_enabled_parallel_neighborhood_update =
+                m_option.parallel.is_enabled_parallel_neighborhood_update;
         }
-        if (OPTION.parallel.is_enabled_parallel_evaluation) {
-            m_state.move_evaluating_parallelized_count++;
+#else
+        m_state.is_enabled_parallel_neighborhood_update =
+            m_option.parallel.is_enabled_parallel_neighborhood_update;
+#endif
+        if (m_state.is_enabled_parallel_neighborhood_update) {
+            m_state.neighborhood_update_parallelized_count++;
+        }
+    }
+
+    /*************************************************************************/
+    inline constexpr void update_evaluation_parallelization(void) {
+#ifdef _OPENMP
+        if (m_option.parallel.is_enabled_parallel_evaluation &&
+            m_option.parallel.is_enabled_automatic_evaluation_parallelization) {
+            m_state.is_enabled_parallel_evaluation =
+                m_state.evaluation_parallelization_controller.best_action()
+                    .body;
+        } else {
+            m_state.is_enabled_parallel_evaluation =
+                m_option.parallel.is_enabled_parallel_evaluation;
+        }
+#else
+        m_state.is_enabled_parallel_evaluation =
+            m_option.parallel.is_enabled_parallel_evaluation;
+#endif
+        if (m_state.is_enabled_parallel_evaluation) {
+            m_state.evaluation_parallelized_count++;
         }
     }
 

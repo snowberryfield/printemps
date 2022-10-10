@@ -170,34 +170,34 @@ struct Status {
         const auto &TABU_SEARCH_CONTROLLER_STATE =
             this->solver_ptr->tabu_search_controller().result().state;
 
-        a_object->emplace_back(
-            "move_updating_parallelized_count",
-            TABU_SEARCH_CONTROLLER_STATE.move_updating_parallelized_count);
+        a_object->emplace_back("neighborhood_update_parallelized_count",
+                               TABU_SEARCH_CONTROLLER_STATE
+                                   .neighborhood_update_parallelized_count);
 
         a_object->emplace_back(
-            "move_evaluating_parallelized_count",
-            TABU_SEARCH_CONTROLLER_STATE.move_evaluating_parallelized_count);
+            "evaluation_parallelized_count",
+            TABU_SEARCH_CONTROLLER_STATE.evaluation_parallelized_count);
 
-        double move_updating_parallelized_rate = 0.0;
+        double neighborhood_update_parallelized_rate = 0.0;
         if (this->number_of_tabu_search_loops > 0) {
-            move_updating_parallelized_rate =
-                TABU_SEARCH_CONTROLLER_STATE.move_updating_parallelized_count /
-                static_cast<double>(this->number_of_tabu_search_loops);
-        }
-
-        double move_evaluating_parallelized_rate = 0.0;
-        if (this->number_of_tabu_search_loops > 0) {
-            move_evaluating_parallelized_rate =
+            neighborhood_update_parallelized_rate =
                 TABU_SEARCH_CONTROLLER_STATE
-                    .move_evaluating_parallelized_count /
+                    .neighborhood_update_parallelized_count /
                 static_cast<double>(this->number_of_tabu_search_loops);
         }
 
-        a_object->emplace_back("move_updating_parallelized_rate",
-                               move_updating_parallelized_rate);
+        double evaluation_parallelized_rate = 0.0;
+        if (this->number_of_tabu_search_loops > 0) {
+            evaluation_parallelized_rate =
+                TABU_SEARCH_CONTROLLER_STATE.evaluation_parallelized_count /
+                static_cast<double>(this->number_of_tabu_search_loops);
+        }
 
-        a_object->emplace_back("move_evaluating_parallelized_rate",
-                               move_evaluating_parallelized_rate);
+        a_object->emplace_back("neighborhood_update_parallelized_rate",
+                               neighborhood_update_parallelized_rate);
+
+        a_object->emplace_back("evaluation_parallelized_rate",
+                               evaluation_parallelized_rate);
     }
 
     /*************************************************************************/

@@ -88,14 +88,17 @@ struct TabuSearchControllerState {
     option::improvability_screening_mode::ImprovabilityScreeningMode
         improvability_screening_mode;
 
+    bool is_enabled_parallel_neighborhood_update;
+    bool is_enabled_parallel_evaluation;
+
+    int neighborhood_update_parallelized_count;
+    int evaluation_parallelized_count;
+
     /**
      * Learners
      */
-    utility::ucb1::Learner<bool> move_updating_parallelization_controller;
-    utility::ucb1::Learner<bool> move_evaluating_parallelization_controller;
-
-    int move_updating_parallelized_count;
-    int move_evaluating_parallelized_count;
+    utility::ucb1::Learner<bool> neighborhood_update_parallelization_controller;
+    utility::ucb1::Learner<bool> evaluation_parallelization_controller;
 
     /*************************************************************************/
     TabuSearchControllerState(void) {
@@ -166,10 +169,13 @@ struct TabuSearchControllerState {
         this->improvability_screening_mode =
             option::improvability_screening_mode::Off;
 
-        this->move_updating_parallelization_controller.initialize();
-        this->move_evaluating_parallelization_controller.initialize();
-        this->move_updating_parallelized_count   = 0;
-        this->move_evaluating_parallelized_count = 0;
+        this->is_enabled_parallel_neighborhood_update = false;
+        this->is_enabled_parallel_evaluation          = false;
+        this->neighborhood_update_parallelized_count  = 0;
+        this->evaluation_parallelized_count           = 0;
+
+        this->neighborhood_update_parallelization_controller.initialize();
+        this->evaluation_parallelization_controller.initialize();
     }
 };
 }  // namespace printemps::solver::tabu_search::controller
