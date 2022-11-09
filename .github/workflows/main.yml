@@ -28,7 +28,7 @@ jobs:
       - { os: macos-11, cc: gcc-11, cxx: g++-11 } # 11.3.0 
       # For macOS 12, the available compilers are specified according to
       # https://github.com/actions/virtual-environments/blob/main/images/macos/macos-12-Readme.md
-      - { os: macos-12, cc: gcc-11, cxx: g++-11 } # 11.3.0 
+      # - { os: macos-12, cc: gcc-11, cxx: g++-11 } # 11.3.0 
 
     steps:
     - uses: actions/checkout@v2
