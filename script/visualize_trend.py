@@ -209,7 +209,7 @@ def create_penalty_coefficient_control_chart(trend_data):
         tooltips=TOOLTIPS,
         title='Penalty Coefficient Control',
         x_axis_label='Iteration',
-        y_axis_label='Ratio',
+        y_axis_label='Rate',
         x_range=bokeh.models.DataRange1d(start=0),
         y_range=bokeh.models.DataRange1d(start=0.0, end=1.1),
         plot_width=500,
@@ -222,7 +222,7 @@ def create_penalty_coefficient_control_chart(trend_data):
         (trend_data['#iteration']+1),
         legend_label='Relaxing',
         width=3,
-        color=colors[1])
+        color=colors[0])
 
     fig.line(
         x=trend_data['#iteration'],
@@ -231,7 +231,7 @@ def create_penalty_coefficient_control_chart(trend_data):
         (trend_data['#iteration']+1),
         legend_label='Tightening',
         width=3,
-        color=colors[0])
+        color=colors[1])
 
     fig.line(
         x=trend_data['#iteration'],
@@ -312,7 +312,7 @@ def create_penalty_coefficient_reset_control_chart(trend_data):
         tooltips=TOOLTIPS,
         title='Penalty Coefficient Reset Control',
         x_axis_label='Iteration',
-        y_axis_label='Ratio',
+        y_axis_label='Rate',
         x_range=bokeh.models.DataRange1d(start=0),
         y_range=bokeh.models.DataRange1d(start=0.0, end=1.1),
         plot_width=500,
@@ -337,7 +337,7 @@ def create_initial_solution_control_chart(trend_data):
         tooltips=TOOLTIPS,
         title='Initial Solution Control',
         x_axis_label='Iteration',
-        y_axis_label='Ratio',
+        y_axis_label='Rate',
         x_range=bokeh.models.DataRange1d(start=0),
         y_range=bokeh.models.DataRange1d(start=0, end=1.1),
         plot_width=500,
@@ -382,7 +382,7 @@ def create_initial_modification_control_chart(trend_data):
         tooltips=TOOLTIPS,
         title='Initial Modification Control',
         x_axis_label='Iteration',
-        y_axis_label='Ratio',
+        y_axis_label='Rate',
         x_range=bokeh.models.DataRange1d(start=0),
         y_range=bokeh.models.DataRange1d(start=0.0, end=1.1),
         plot_width=500,
@@ -473,6 +473,44 @@ def create_performance_chart(trend_data):
 ###############################################################################
 
 
+def create_parallelization_control_chart(trend_data):
+    fig = bokeh.plotting.figure(
+        tooltips=TOOLTIPS,
+        title='Parallelization Control',
+        x_axis_label='Iteration',
+        y_axis_label='Rate',
+        x_range=bokeh.models.DataRange1d(start=0),
+        y_range=bokeh.models.DataRange1d(start=0, end=1.1),
+        plot_width=500,
+        plot_height=300)
+
+    fig.line(
+        x=trend_data['#iteration'],
+        y=np.cumsum(trend_data['is_enabled_parallel_neighborhood_update']
+                    ) / (trend_data['#iteration'] + 1),
+        legend_label='Neighborhood Update',
+        width=3,
+        color=colors[0])
+
+    fig.line(
+        x=trend_data['#iteration'],
+        y=np.cumsum(trend_data['is_enabled_parallel_evaluation']
+                    ) / (trend_data['#iteration'] + 1),
+        legend_label='Evaluation',
+        width=3,
+        color=colors[1])
+
+    fig.legend.visible = True
+    fig.legend.location = "bottom_center"
+    fig.legend.orientation = "horizontal"
+    new_legend = fig.legend[0]
+    fig.add_layout(new_legend, 'below')
+    return fig
+
+
+###############################################################################
+
+
 def visualize_trend(trend_data, instance_name, output_file_name):
     # Elapsed Time
     fig_elapsed_time = create_elapsed_time_chart(trend_data)
@@ -522,6 +560,10 @@ def visualize_trend(trend_data, instance_name, output_file_name):
     fig_performance \
         = create_performance_chart(trend_data)
 
+    # Parallelization Control
+    fig_parallelization_control \
+        = create_parallelization_control_chart(trend_data)
+
     # plot
     grid = bokeh.layouts.gridplot(
         [[fig_elapsed_time, fig_intensity],
@@ -530,7 +572,7 @@ def visualize_trend(trend_data, instance_name, output_file_name):
          [fig_penalty_coefficient_control, fig_penalty_coefficient_rate_control],
          [fig_penalty_coefficient_reset_control, fig_initial_solution_control],
          [fig_initial_modification_control, fig_initial_tabu_tenure_control],
-         [fig_performance]])
+         [fig_performance, fig_parallelization_control]])
 
     bokeh.plotting.output_file(
         output_file_name,
