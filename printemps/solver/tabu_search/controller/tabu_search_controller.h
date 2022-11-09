@@ -209,8 +209,8 @@ class TabuSearchController
         if (this->m_option.parallel.is_enabled_parallel_neighborhood_update &&
             this->m_option.parallel
                 .is_enabled_automatic_neighborhood_update_parallelization) {
-            this->print_move_updating_parallelization_controller(
-                STATE.move_updating_parallelization_controller,
+            this->print_neighborhood_update_parallelization_controller(
+                STATE.neighborhood_update_parallelization_controller,
                 a_IS_ENABLED_PRINT);
         }
 #endif
@@ -223,8 +223,8 @@ class TabuSearchController
         if (this->m_option.parallel.is_enabled_parallel_evaluation &&
             this->m_option.parallel
                 .is_enabled_automatic_evaluation_parallelization) {
-            this->print_move_evaluating_parallelization_controller(
-                STATE.move_evaluating_parallelization_controller,
+            this->print_evaluation_parallelization_controller(
+                STATE.evaluation_parallelization_controller,
                 a_IS_ENABLED_PRINT);
         }
 #endif
@@ -627,7 +627,7 @@ class TabuSearchController
     }
 
     /*************************************************************************/
-    inline void print_move_updating_parallelization_controller(
+    inline void print_neighborhood_update_parallelization_controller(
         const utility::ucb1::Learner<bool>& a_CONTROLLER,
         const bool                          a_IS_ENABLED_PRINT) {
         const auto& ACTION_ON       = a_CONTROLLER.actions()[0];
@@ -650,18 +650,28 @@ class TabuSearchController
             utility::to_string(action_on_flag, "-- (%cOn ) ") +
                 utility::to_string(ACTION_ON.mean, "Mean: %.3e, ") +
                 utility::to_string(ACTION_ON.confidence, "Conf.: %.3e, ") +
-                utility::to_string(ACTION_ON.number_of_samples, "N: %d"),
+                utility::to_string(ACTION_ON.number_of_samples, "N: %d") +
+                utility::to_string(
+                    ACTION_ON.number_of_samples /
+                        static_cast<double>(
+                            a_CONTROLLER.total_number_of_samples()),
+                    "(%.3f)"),
             a_IS_ENABLED_PRINT);
         utility::print_info(
             utility::to_string(action_off_flag, "-- (%cOff) ") +
                 utility::to_string(ACTION_OFF.mean, "Mean: %.3e, ") +
                 utility::to_string(ACTION_OFF.confidence, "Conf.: %.3e, ") +
-                utility::to_string(ACTION_OFF.number_of_samples, "N: %d"),
+                utility::to_string(ACTION_OFF.number_of_samples, "N: %d") +
+                utility::to_string(
+                    ACTION_OFF.number_of_samples /
+                        static_cast<double>(
+                            a_CONTROLLER.total_number_of_samples()),
+                    "(%.3f)"),
             a_IS_ENABLED_PRINT);
     }
 
     /*************************************************************************/
-    inline void print_move_evaluating_parallelization_controller(
+    inline void print_evaluation_parallelization_controller(
         const utility::ucb1::Learner<bool>& a_CONTROLLER,
         const bool                          a_IS_ENABLED_PRINT) {
         const auto& ACTION_ON       = a_CONTROLLER.actions()[0];
@@ -684,13 +694,23 @@ class TabuSearchController
             utility::to_string(action_on_flag, "-- (%cOn ) ") +
                 utility::to_string(ACTION_ON.mean, "Mean: %.3e, ") +
                 utility::to_string(ACTION_ON.confidence, "Conf.: %.3e, ") +
-                utility::to_string(ACTION_ON.number_of_samples, "N: %d"),
+                utility::to_string(ACTION_ON.number_of_samples, "N: %d") +
+                utility::to_string(
+                    ACTION_ON.number_of_samples /
+                        static_cast<double>(
+                            a_CONTROLLER.total_number_of_samples()),
+                    "(%.3f)"),
             a_IS_ENABLED_PRINT);
         utility::print_info(
             utility::to_string(action_off_flag, "-- (%cOff) ") +
                 utility::to_string(ACTION_OFF.mean, "Mean: %.3e, ") +
                 utility::to_string(ACTION_OFF.confidence, "Conf.: %.3e, ") +
-                utility::to_string(ACTION_OFF.number_of_samples, "N: %d"),
+                utility::to_string(ACTION_OFF.number_of_samples, "N: %d") +
+                utility::to_string(
+                    ACTION_OFF.number_of_samples /
+                        static_cast<double>(
+                            a_CONTROLLER.total_number_of_samples()),
+                    "(%.3f)"),
             a_IS_ENABLED_PRINT);
     }
 

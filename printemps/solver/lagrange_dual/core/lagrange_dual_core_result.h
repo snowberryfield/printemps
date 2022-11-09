@@ -19,6 +19,8 @@ struct LagrangeDualCoreResult {
     solution::DenseSolution<T_Variable, T_Expression> primal;
     std::vector<multi_array::ValueProxy<double>>      dual;
 
+    option::Option option;
+
     /*************************************************************************/
     LagrangeDualCoreResult(void) {
         this->initialize();
@@ -26,14 +28,16 @@ struct LagrangeDualCoreResult {
 
     /*************************************************************************/
     LagrangeDualCoreResult(
-        const LagrangeDualCoreState<T_Variable, T_Expression> &a_STATE)
+        const LagrangeDualCoreState<T_Variable, T_Expression> &a_STATE,
+        const option::Option &                                 a_OPTION)
         : total_update_status(a_STATE.total_update_status),
           number_of_iterations(a_STATE.iteration),
           elapsed_time(a_STATE.elapsed_time),
           termination_status(a_STATE.termination_status),
           lagrangian(a_STATE.lagrangian),
           primal(a_STATE.primal_incumbent),
-          dual(a_STATE.dual_incumbent) {
+          dual(a_STATE.dual_incumbent),
+          option(a_OPTION) {
         /// nothing to do
     }
 
@@ -47,6 +51,7 @@ struct LagrangeDualCoreResult {
         this->lagrangian = -HUGE_VALF;
         this->primal.initialize();
         this->dual.clear();
+        this->option.initialize();
     }
 };
 }  // namespace printemps::solver::lagrange_dual::core
