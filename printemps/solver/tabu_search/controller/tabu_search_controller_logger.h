@@ -95,7 +95,10 @@ class TabuSearchControllerLogger {
             << "penalty_coefficient_tightening_rate "        //
             << "is_enabled_forcibly_initial_modification "   //
             << "number_of_initial_modification "             //
-            << "initial_tabu_tenure" << std::endl;           //
+            << "initial_tabu_tenure "                        //
+            << "is_enabled_parallel_neighborhood_update "    //
+            << "is_enabled_parallel_evaluation "             //
+            << std::endl;                                    //
     }
 
     /*************************************************************************/
@@ -135,7 +138,9 @@ class TabuSearchControllerLogger {
             << s.penalty_coefficient_tightening_rate << " "        //
             << s.is_enabled_forcibly_initial_modification << " "   //
             << s.number_of_initial_modification << " "             //
-            << s.initial_tabu_tenure                               //
+            << s.initial_tabu_tenure << " "                        //
+            << s.is_enabled_parallel_neighborhood_update << " "    //
+            << s.is_enabled_parallel_evaluation                    //
             << std::endl;
     }
 };

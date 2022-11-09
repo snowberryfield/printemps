@@ -32,6 +32,8 @@ struct TabuSearchCoreResult {
     double global_augmented_objective_range;
     double performance;
 
+    option::Option option;
+
     /*************************************************************************/
     TabuSearchCoreResult(void) {
         this->initialize();
@@ -39,8 +41,9 @@ struct TabuSearchCoreResult {
 
     /*************************************************************************/
     TabuSearchCoreResult(
-        const TabuSearchCoreState<T_Variable, T_Expression> &a_STATE) {
-        this->setup(a_STATE);
+        const TabuSearchCoreState<T_Variable, T_Expression> &a_STATE,
+        const option::Option &                               a_OPTION) {
+        this->setup(a_STATE, a_OPTION);
     }
 
     /*************************************************************************/
@@ -67,11 +70,14 @@ struct TabuSearchCoreResult {
         this->objective_constraint_rate        = 1.0;
         this->global_augmented_objective_range = 0.0;
         this->performance                      = 0.0;
+
+        this->option.initialize();
     }
 
     /*************************************************************************/
     inline void setup(
-        const TabuSearchCoreState<T_Variable, T_Expression> &a_STATE) {
+        const TabuSearchCoreState<T_Variable, T_Expression> &a_STATE,
+        const option::Option &                               a_OPTION) {
         this->total_update_status       = a_STATE.total_update_status;
         this->number_of_iterations      = a_STATE.iteration;
         this->number_of_updated_moves   = a_STATE.number_of_updated_moves;
@@ -110,7 +116,7 @@ struct TabuSearchCoreResult {
             a_STATE.global_augmented_objective_range.range();
         this->performance = PERFORMANCE;
 
-        /// nothing to do
+        this->option = a_OPTION;
     }
 };
 }  // namespace printemps::solver::tabu_search::core

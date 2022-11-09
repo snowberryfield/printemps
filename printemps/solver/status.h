@@ -14,8 +14,9 @@ class Solver;
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 struct Status {
-    model::Model<T_Variable, T_Expression> *model_ptr;
-    option::Option                          option;
+    solver::Solver<T_Variable, T_Expression> *solver_ptr;
+    model::Model<T_Variable, T_Expression> *  model_ptr;
+    option::Option                            option;
 
     bool is_found_feasible_solution;
 
@@ -53,7 +54,8 @@ struct Status {
 
     /*************************************************************************/
     void initialize(void) {
-        this->model_ptr = nullptr;
+        this->solver_ptr = nullptr;
+        this->model_ptr  = nullptr;
         this->option.initialize();
 
         this->is_found_feasible_solution = false;
@@ -77,6 +79,7 @@ struct Status {
 
     /*************************************************************************/
     void setup(Solver<T_Variable, T_Expression> *a_solver_ptr) {
+        this->solver_ptr = a_solver_ptr;
         const auto &LAGRANGE_DUAL_RESULT =
             a_solver_ptr->lagrange_dual_controller().result();
         const auto &LOCAL_SEARCH_RESULT =
@@ -163,6 +166,38 @@ struct Status {
                                this->averaged_inner_iteration_speed);
         a_object->emplace_back("averaged_move_evaluation_speed",
                                this->averaged_move_evaluation_speed);
+
+        const auto &TABU_SEARCH_CONTROLLER_STATE =
+            this->solver_ptr->tabu_search_controller().result().state;
+
+        a_object->emplace_back("neighborhood_update_parallelized_count",
+                               TABU_SEARCH_CONTROLLER_STATE
+                                   .neighborhood_update_parallelized_count);
+
+        a_object->emplace_back(
+            "evaluation_parallelized_count",
+            TABU_SEARCH_CONTROLLER_STATE.evaluation_parallelized_count);
+
+        double neighborhood_update_parallelized_rate = 0.0;
+        if (this->number_of_tabu_search_loops > 0) {
+            neighborhood_update_parallelized_rate =
+                TABU_SEARCH_CONTROLLER_STATE
+                    .neighborhood_update_parallelized_count /
+                static_cast<double>(this->number_of_tabu_search_loops);
+        }
+
+        double evaluation_parallelized_rate = 0.0;
+        if (this->number_of_tabu_search_loops > 0) {
+            evaluation_parallelized_rate =
+                TABU_SEARCH_CONTROLLER_STATE.evaluation_parallelized_count /
+                static_cast<double>(this->number_of_tabu_search_loops);
+        }
+
+        a_object->emplace_back("neighborhood_update_parallelized_rate",
+                               neighborhood_update_parallelized_rate);
+
+        a_object->emplace_back("evaluation_parallelized_rate",
+                               evaluation_parallelized_rate);
     }
 
     /*************************************************************************/
@@ -171,493 +206,398 @@ struct Status {
     }
 
     /*************************************************************************/
+    inline void add_nonzero_detail(utility::json::JsonObject *a_object) const {
+        const std::array<std::string, 2> LABELS = {"original", "presolved"};
+        const std::array<
+            model_component::VariableReference<T_Variable, T_Expression> *, 2>
+            VARIABLE_REFERENCE_PTRS = {
+                &(this->model_ptr->variable_reference_original()),
+                &(this->model_ptr->variable_reference())};
+        const std::array<
+            model_component::ConstraintReference<T_Variable, T_Expression> *, 2>
+            CONSTRAINT_REFERENCE_PTRS = {
+                &(this->model_ptr->constraint_reference_original()),
+                &(this->model_ptr->constraint_reference())};
+
+        utility::json::JsonObject nonzero_detail;
+
+        for (auto i = 0; i < 2; i++) {
+            const auto  LABEL = LABELS[i];
+            const auto &VARIABLE_PTRS =
+                VARIABLE_REFERENCE_PTRS[i]->mutable_variable_ptrs;
+            const auto &CONSTRAINT_PTRS =
+                CONSTRAINT_REFERENCE_PTRS[i]->enabled_constraint_ptrs;
+            const int VARIABLES_SIZE   = VARIABLE_PTRS.size();
+            const int CONSTRAINTS_SIZE = CONSTRAINT_PTRS.size();
+
+            long   nonzero                 = 0;
+            double density                 = 0.0;
+            double variable_nonzero_mean   = 0.0;
+            double constraint_nonzero_mean = 0.0;
+
+            utility::Range<int> variable_nonzero_range;
+            utility::Range<int> constraint_nonzero_range;
+
+            for (auto &&constraint_ptr : CONSTRAINT_PTRS) {
+                const int NUMBER_OF_RELATED_VARIABLES =
+                    constraint_ptr->expression().sensitivities().size();
+                nonzero += NUMBER_OF_RELATED_VARIABLES;
+                constraint_nonzero_range.update(NUMBER_OF_RELATED_VARIABLES);
+            }
+
+            for (auto &&variable_ptr : VARIABLE_PTRS) {
+                const int NUMBER_OF_RELATED_CONSTRAINTS =
+                    variable_ptr->related_constraint_ptrs().size();
+                variable_nonzero_range.update(NUMBER_OF_RELATED_CONSTRAINTS);
+            }
+
+            if (VARIABLES_SIZE > 0 && CONSTRAINTS_SIZE > 0) {
+                density = static_cast<double>(nonzero) /
+                          (static_cast<double>(VARIABLES_SIZE) *
+                           static_cast<double>(CONSTRAINTS_SIZE));
+            }
+
+            if (VARIABLES_SIZE > 0) {
+                variable_nonzero_mean = static_cast<double>(nonzero) /
+                                        static_cast<double>(VARIABLES_SIZE);
+            }
+
+            if (CONSTRAINTS_SIZE > 0) {
+                constraint_nonzero_mean = static_cast<double>(nonzero) /
+                                          static_cast<double>(CONSTRAINTS_SIZE);
+            }
+
+            utility::json::JsonObject obj;
+
+            obj.emplace_back("nonzero", nonzero);
+            obj.emplace_back("density", density);
+
+            obj.emplace_back(  //
+                "variable_nonzero_mean", variable_nonzero_mean);
+
+            obj.emplace_back(  //
+                "variable_nonzero_min", variable_nonzero_range.min());
+
+            obj.emplace_back(  //
+                "variable_nonzero_max", variable_nonzero_range.max());
+
+            obj.emplace_back(  //
+                "constraint_nonzero_mean", constraint_nonzero_mean);
+
+            obj.emplace_back(  //
+                "constraint_nonzero_min", constraint_nonzero_range.min());
+
+            obj.emplace_back(  //
+                "constraint_nonzero_max", constraint_nonzero_range.max());
+
+            nonzero_detail.emplace_back(LABEL, obj);
+        }
+        a_object->emplace_back("nonzero_detail", nonzero_detail);
+    }
+
+    /*************************************************************************/
     inline void add_variable_detail(utility::json::JsonObject *a_object) const {
-        auto &REFERENCE_ORIGINAL =
-            this->model_ptr->variable_reference_original();
-        utility::json::JsonObject original;
-
-        auto &REFERENCE_PRESOLVED = this->model_ptr->variable_reference();
-        utility::json::JsonObject presolved;
-
-        /// Original
-        original.emplace_back(  //
-            "all",              //
-            REFERENCE_ORIGINAL.variable_ptrs.size());
-        original.emplace_back(  //
-            "fixed",            ///
-            REFERENCE_ORIGINAL.fixed_variable_ptrs.size());
-        original.emplace_back(  //
-            "mutable",          //
-            REFERENCE_ORIGINAL.mutable_variable_ptrs.size());
-
-        /// Presolved
-        presolved.emplace_back(  //
-            "all",               //
-            REFERENCE_PRESOLVED.variable_ptrs.size());
-        presolved.emplace_back(  //
-            "fixed",             ///
-            REFERENCE_PRESOLVED.fixed_variable_ptrs.size());
-        presolved.emplace_back(  //
-            "mutable",           //
-            REFERENCE_PRESOLVED.mutable_variable_ptrs.size());
+        const std::array<std::string, 2> LABELS = {"original", "presolved"};
+        const std::array<
+            model_component::VariableReference<T_Variable, T_Expression> *, 2>
+            VARIABLE_REFERENCE_PTRS = {
+                &(this->model_ptr->variable_reference_original()),
+                &(this->model_ptr->variable_reference())};
 
         utility::json::JsonObject variable_detail;
-        variable_detail.emplace_back("original", original);
-        variable_detail.emplace_back("presolved", presolved);
+
+        for (auto i = 0; i < 2; i++) {
+            const auto  LABEL     = LABELS[i];
+            const auto &REFERENCE = (*VARIABLE_REFERENCE_PTRS[i]);
+
+            utility::json::JsonObject obj;
+            obj.emplace_back("all", REFERENCE.variable_ptrs.size());
+            obj.emplace_back("fixed", REFERENCE.fixed_variable_ptrs.size());
+            obj.emplace_back("mutable", REFERENCE.mutable_variable_ptrs.size());
+
+            variable_detail.emplace_back(LABEL, obj);
+        }
+
         a_object->emplace_back("variable_detail", variable_detail);
     }
 
     /*************************************************************************/
     inline void add_variable_type_detail(
         utility::json::JsonObject *a_object) const {
-        auto &REFERENCE_ORIGINAL =
-            this->model_ptr->variable_type_reference_original();
-        utility::json::JsonObject original;
+        const std::array<std::string, 2> LABELS = {"original", "presolved"};
+        const std::array<
+            model_component::VariableTypeReference<T_Variable, T_Expression> *,
+            2>
+            VARIABLE_TYPE_REFERENCE_PTRS = {
+                &(this->model_ptr->variable_type_reference_original()),
+                &(this->model_ptr->variable_type_reference())};
 
-        auto &REFERENCE_PRESOLVED = this->model_ptr->variable_type_reference();
-        utility::json::JsonObject presolved;
-
-        auto compute_number_of_variables = [](const auto &a_VARIABLE_PTRS) {
+        std::function<std::size_t(const std::vector<model_component::Variable<
+                                      T_Variable, T_Expression> *> &)>
+            compute_number_of_all_variables =
+                [](const auto &a_VARIABLE_PTRS) -> std::size_t {
             return a_VARIABLE_PTRS.size();
         };
 
-        auto compute_number_of_mutable_variables =
-            [](const auto &a_VARIABLE_PTRS) {
-                return std::count_if(a_VARIABLE_PTRS.begin(),
-                                     a_VARIABLE_PTRS.end(),
-                                     [](const auto *a_VARIABLE_PTR) {
-                                         return !a_VARIABLE_PTR->is_fixed();
-                                     });
-            };
-
-        /// Original
-        original.emplace_back(  //
-            "binary",           //
-            compute_number_of_variables(
-                REFERENCE_ORIGINAL.binary_variable_ptrs));
-
-        original.emplace_back(  //
-            "integer",          //
-            compute_number_of_variables(
-                REFERENCE_ORIGINAL.integer_variable_ptrs));
-
-        original.emplace_back(  //
-            "selection",        //
-            compute_number_of_variables(
-                REFERENCE_ORIGINAL.selection_variable_ptrs));
-
-        original.emplace_back(   //
-            "dependent_binary",  //
-            compute_number_of_variables(
-                REFERENCE_ORIGINAL.dependent_binary_variable_ptrs));
-
-        original.emplace_back(    //
-            "dependent_integer",  //
-            compute_number_of_variables(
-                REFERENCE_ORIGINAL.dependent_integer_variable_ptrs));
-
-        /// Presolved
-        presolved.emplace_back(  //
-            "binary",            //
-            compute_number_of_mutable_variables(
-                REFERENCE_PRESOLVED.binary_variable_ptrs));
-
-        presolved.emplace_back(  //
-            "integer",           //
-            compute_number_of_mutable_variables(
-                REFERENCE_PRESOLVED.integer_variable_ptrs));
-
-        presolved.emplace_back(  //
-            "selection",         //
-            compute_number_of_mutable_variables(
-                REFERENCE_PRESOLVED.selection_variable_ptrs));
-
-        presolved.emplace_back(  //
-            "dependent_binary",  //
-            compute_number_of_mutable_variables(
-                REFERENCE_PRESOLVED.dependent_binary_variable_ptrs));
-
-        presolved.emplace_back(   //
-            "dependent_integer",  //
-            compute_number_of_mutable_variables(
-                REFERENCE_PRESOLVED.dependent_integer_variable_ptrs));
+        std::function<std::size_t(const std::vector<model_component::Variable<
+                                      T_Variable, T_Expression> *> &)>
+            compute_number_of_mutable_variables =
+                [](const auto &a_VARIABLE_PTRS) -> std::size_t {
+            return std::count_if(a_VARIABLE_PTRS.begin(), a_VARIABLE_PTRS.end(),
+                                 [](const auto *a_VARIABLE_PTR) {
+                                     return !a_VARIABLE_PTR->is_fixed();
+                                 });
+        };
 
         utility::json::JsonObject variable_type_detail;
-        variable_type_detail.emplace_back("original", original);
-        variable_type_detail.emplace_back("presolved", presolved);
+
+        for (auto i = 0; i < 2; i++) {
+            const auto  LABEL     = LABELS[i];
+            const auto &REFERENCE = (*VARIABLE_TYPE_REFERENCE_PTRS[i]);
+
+            auto compute_number_of_variables =
+                (i == 0) ? compute_number_of_all_variables
+                         : compute_number_of_mutable_variables;
+
+            utility::json::JsonObject obj;
+
+            obj.emplace_back(  //
+                "binary",      //
+                compute_number_of_variables(REFERENCE.binary_variable_ptrs));
+
+            obj.emplace_back(  //
+                "integer",     //
+                compute_number_of_variables(REFERENCE.integer_variable_ptrs));
+
+            obj.emplace_back(  //
+                "selection",   //
+                compute_number_of_variables(REFERENCE.selection_variable_ptrs));
+
+            obj.emplace_back(        //
+                "dependent_binary",  //
+                compute_number_of_variables(
+                    REFERENCE.dependent_binary_variable_ptrs));
+
+            obj.emplace_back(         //
+                "dependent_integer",  //
+                compute_number_of_variables(
+                    REFERENCE.dependent_integer_variable_ptrs));
+
+            variable_type_detail.emplace_back(LABEL, obj);
+        }
         a_object->emplace_back("variable_type_detail", variable_type_detail);
     }
 
     /*************************************************************************/
     inline void add_constraint_detail(
         utility::json::JsonObject *a_object) const {
-        auto &REFERENCE_ORIGINAL =
-            this->model_ptr->constraint_reference_original();
-        utility::json::JsonObject original;
-
-        auto &REFERENCE_PRESOLVED = this->model_ptr->constraint_reference();
-        utility::json::JsonObject presolved;
-
-        /// Original
-        original.emplace_back(  //
-            "all",              //
-            REFERENCE_ORIGINAL.constraint_ptrs.size());
-
-        original.emplace_back(  //
-            "enabled",          ///
-            REFERENCE_ORIGINAL.enabled_constraint_ptrs.size());
-
-        original.emplace_back(  //
-            "disabled",         //
-            REFERENCE_ORIGINAL.disabled_constraint_ptrs.size());
-
-        /// Presolved
-        presolved.emplace_back(  //
-            "all",               //
-            REFERENCE_PRESOLVED.constraint_ptrs.size());
-
-        presolved.emplace_back(  //
-            "enabled",           ///
-            REFERENCE_PRESOLVED.enabled_constraint_ptrs.size());
-
-        presolved.emplace_back(  //
-            "disabled",          //
-            REFERENCE_PRESOLVED.disabled_constraint_ptrs.size());
+        const std::array<std::string, 2> LABELS = {"original", "presolved"};
+        const std::array<
+            model_component::ConstraintReference<T_Variable, T_Expression> *, 2>
+            CONSTRAINT_REFERENCE_PTRS = {
+                &(this->model_ptr->constraint_reference_original()),
+                &(this->model_ptr->constraint_reference())};
 
         utility::json::JsonObject constraint_detail;
-        constraint_detail.emplace_back("original", original);
-        constraint_detail.emplace_back("presolved", presolved);
+
+        for (auto i = 0; i < 2; i++) {
+            const auto  LABEL     = LABELS[i];
+            const auto &REFERENCE = (*CONSTRAINT_REFERENCE_PTRS[i]);
+
+            utility::json::JsonObject obj;
+
+            obj.emplace_back(  //
+                "all", REFERENCE.constraint_ptrs.size());
+
+            obj.emplace_back(  //
+                "enabled", REFERENCE.enabled_constraint_ptrs.size());
+
+            obj.emplace_back(  //
+                "disabled", REFERENCE.disabled_constraint_ptrs.size());
+
+            constraint_detail.emplace_back(LABEL, obj);
+        }
+
         a_object->emplace_back("constraint_detail", constraint_detail);
     }
 
     /*************************************************************************/
     inline void add_constraint_type_detail(
         utility::json::JsonObject *a_object) const {
-        auto &REFERENCE_ORIGINAL =
-            this->model_ptr->constraint_type_reference_original();
-        utility::json::JsonObject original;
-
-        auto &REFERENCE_PRESOLVED =
-            this->model_ptr->constraint_type_reference();
-        utility::json::JsonObject presolved;
-
-        auto compute_number_of_constraints = [](const auto &a_CONSTRAINT_PTRS) {
-            return a_CONSTRAINT_PTRS.size();
-        };
-
-        auto compute_number_of_enabled_constraints =
-            [](const auto &a_CONSTRAINT_PTRS) {
-                return std::count_if(a_CONSTRAINT_PTRS.begin(),
-                                     a_CONSTRAINT_PTRS.end(),
-                                     [](const auto *a_CONSTRAINT_PTR) {
-                                         return a_CONSTRAINT_PTR->is_enabled();
-                                     });
-            };
-
-        /// Original
-        original.emplace_back(  //
-            "singleton",        //
-            compute_number_of_constraints(REFERENCE_ORIGINAL.singleton_ptrs));
-
-        original.emplace_back(  //
-            "exclusive_or",     //
-            compute_number_of_constraints(
-                REFERENCE_ORIGINAL.exclusive_or_ptrs));
-
-        original.emplace_back(  //
-            "exclusive_nor",    //
-            compute_number_of_constraints(
-                REFERENCE_ORIGINAL.exclusive_nor_ptrs));
-
-        original.emplace_back(    //
-            "inverted_integers",  //
-            compute_number_of_constraints(
-                REFERENCE_ORIGINAL.inverted_integers_ptrs));
-
-        original.emplace_back(    //
-            "balanced_integers",  //
-            compute_number_of_constraints(
-                REFERENCE_ORIGINAL.balanced_integers_ptrs));
-
-        original.emplace_back(        //
-            "constant_sum_integers",  //
-            compute_number_of_constraints(
-                REFERENCE_ORIGINAL.constant_sum_integers_ptrs));
-
-        original.emplace_back(               //
-            "constant_difference_integers",  //
-            compute_number_of_constraints(
-                REFERENCE_ORIGINAL.constant_difference_integers_ptrs));
-
-        original.emplace_back(          //
-            "constant_ratio_integers",  //
-            compute_number_of_constraints(
-                REFERENCE_ORIGINAL.constant_ratio_integers_ptrs));
-
-        original.emplace_back(  //
-            "aggregation",      //
-            compute_number_of_constraints(REFERENCE_ORIGINAL.aggregation_ptrs));
-
-        original.emplace_back(  //
-            "precedence",       //
-            compute_number_of_constraints(REFERENCE_ORIGINAL.precedence_ptrs));
-
-        original.emplace_back(  //
-            "variable_bound",   //
-            compute_number_of_constraints(
-                REFERENCE_ORIGINAL.variable_bound_ptrs));
-
-        original.emplace_back(          //
-            "trinomial_exclusive_nor",  //
-            compute_number_of_constraints(
-                REFERENCE_ORIGINAL.trinomial_exclusive_nor_ptrs));
-
-        original.emplace_back(   //
-            "set_partitioning",  //
-            compute_number_of_constraints(
-                REFERENCE_ORIGINAL.set_partitioning_ptrs));
-
-        original.emplace_back(  //
-            "set_packing",      //
-            compute_number_of_constraints(REFERENCE_ORIGINAL.set_packing_ptrs));
-
-        original.emplace_back(  //
-            "set_covering",     //
-            compute_number_of_constraints(
-                REFERENCE_ORIGINAL.set_covering_ptrs));
-
-        original.emplace_back(  //
-            "cardinality",      //
-            compute_number_of_constraints(REFERENCE_ORIGINAL.cardinality_ptrs));
-
-        original.emplace_back(     //
-            "invariant_knapsack",  //
-            compute_number_of_constraints(
-                REFERENCE_ORIGINAL.invariant_knapsack_ptrs));
-
-        original.emplace_back(    //
-            "multiple_covering",  //
-            compute_number_of_constraints(
-                REFERENCE_ORIGINAL.multiple_covering_ptrs));
-
-        original.emplace_back(  //
-            "binary_flow",      //
-            compute_number_of_constraints(REFERENCE_ORIGINAL.binary_flow_ptrs));
-
-        original.emplace_back(  //
-            "integer_flow",     //
-            compute_number_of_constraints(
-                REFERENCE_ORIGINAL.integer_flow_ptrs));
-
-        original.emplace_back(  //
-            "soft_selection",   //
-            compute_number_of_constraints(
-                REFERENCE_ORIGINAL.soft_selection_ptrs));
-
-        original.emplace_back(  //
-            "min_max",          //
-            compute_number_of_constraints(REFERENCE_ORIGINAL.min_max_ptrs));
-
-        original.emplace_back(  //
-            "max_min",          //
-            compute_number_of_constraints(REFERENCE_ORIGINAL.max_min_ptrs));
-
-        original.emplace_back(  //
-            "intermediate",     //
-            compute_number_of_constraints(
-                REFERENCE_ORIGINAL.intermediate_ptrs));
-
-        original.emplace_back(    //
-            "equation_knapsack",  //
-            compute_number_of_constraints(
-                REFERENCE_ORIGINAL.equation_knapsack_ptrs));
-
-        original.emplace_back(  //
-            "bin_packing",      //
-            compute_number_of_enabled_constraints(
-                REFERENCE_ORIGINAL.bin_packing_ptrs));
-
-        original.emplace_back(  //
-            "knapsack",         //
-            compute_number_of_constraints(REFERENCE_ORIGINAL.knapsack_ptrs));
-
-        original.emplace_back(   //
-            "integer_knapsack",  //
-            compute_number_of_constraints(
-                REFERENCE_ORIGINAL.integer_knapsack_ptrs));
-
-        original.emplace_back(  //
-            "gf2",              //
-            compute_number_of_constraints(REFERENCE_ORIGINAL.gf2_ptrs));
-
-        original.emplace_back(  //
-            "general_linear",   //
-            compute_number_of_constraints(
-                REFERENCE_ORIGINAL.general_linear_ptrs));
-
-        original.emplace_back(  //
-            "nonlinear",        //
-            compute_number_of_constraints(REFERENCE_ORIGINAL.nonlinear_ptrs));
-
-        /// Presolved
-        presolved.emplace_back(  //
-            "singleton",         //
-            compute_number_of_enabled_constraints(
-                REFERENCE_PRESOLVED.singleton_ptrs));
-
-        presolved.emplace_back(  //
-            "exclusive_or",      //
-            compute_number_of_enabled_constraints(
-                REFERENCE_PRESOLVED.exclusive_or_ptrs));
-
-        presolved.emplace_back(  //
-            "exclusive_nor",     //
-            compute_number_of_enabled_constraints(
-                REFERENCE_PRESOLVED.exclusive_nor_ptrs));
-
-        presolved.emplace_back(   //
-            "inverted_integers",  //
-            compute_number_of_enabled_constraints(
-                REFERENCE_PRESOLVED.inverted_integers_ptrs));
-
-        presolved.emplace_back(   //
-            "balanced_integers",  //
-            compute_number_of_enabled_constraints(
-                REFERENCE_PRESOLVED.balanced_integers_ptrs));
-
-        presolved.emplace_back(       //
-            "constant_sum_integers",  //
-            compute_number_of_enabled_constraints(
-                REFERENCE_PRESOLVED.constant_sum_integers_ptrs));
-
-        presolved.emplace_back(              //
-            "constant_difference_integers",  //
-            compute_number_of_enabled_constraints(
-                REFERENCE_PRESOLVED.constant_difference_integers_ptrs));
-
-        presolved.emplace_back(         //
-            "constant_ratio_integers",  //
-            compute_number_of_enabled_constraints(
-                REFERENCE_PRESOLVED.constant_ratio_integers_ptrs));
-
-        presolved.emplace_back(  //
-            "aggregation",       //
-            compute_number_of_enabled_constraints(
-                REFERENCE_PRESOLVED.aggregation_ptrs));
-
-        presolved.emplace_back(  //
-            "precedence",        //
-            compute_number_of_enabled_constraints(
-                REFERENCE_PRESOLVED.precedence_ptrs));
-
-        presolved.emplace_back(  //
-            "variable_bound",    //
-            compute_number_of_enabled_constraints(
-                REFERENCE_PRESOLVED.variable_bound_ptrs));
-
-        presolved.emplace_back(         //
-            "trinomial_exclusive_nor",  //
-            compute_number_of_enabled_constraints(
-                REFERENCE_PRESOLVED.trinomial_exclusive_nor_ptrs));
-
-        presolved.emplace_back(  //
-            "set_partitioning",  //
-            compute_number_of_enabled_constraints(
-                REFERENCE_PRESOLVED.set_partitioning_ptrs));
-
-        presolved.emplace_back(  //
-            "set_packing",       //
-            compute_number_of_enabled_constraints(
-                REFERENCE_PRESOLVED.set_packing_ptrs));
-
-        presolved.emplace_back(  //
-            "set_covering",      //
-            compute_number_of_enabled_constraints(
-                REFERENCE_PRESOLVED.set_covering_ptrs));
-
-        presolved.emplace_back(  //
-            "cardinality",       //
-            compute_number_of_enabled_constraints(
-                REFERENCE_PRESOLVED.cardinality_ptrs));
-
-        presolved.emplace_back(    //
-            "invariant_knapsack",  //
-            compute_number_of_enabled_constraints(
-                REFERENCE_PRESOLVED.invariant_knapsack_ptrs));
-
-        presolved.emplace_back(   //
-            "multiple_covering",  //
-            compute_number_of_enabled_constraints(
-                REFERENCE_PRESOLVED.multiple_covering_ptrs));
-
-        presolved.emplace_back(  //
-            "binary_flow",       //
-            compute_number_of_enabled_constraints(
-                REFERENCE_PRESOLVED.binary_flow_ptrs));
-
-        presolved.emplace_back(  //
-            "integer_flow",      //
-            compute_number_of_enabled_constraints(
-                REFERENCE_PRESOLVED.integer_flow_ptrs));
-
-        presolved.emplace_back(  //
-            "soft_selection",    //
-            compute_number_of_enabled_constraints(
-                REFERENCE_PRESOLVED.soft_selection_ptrs));
-
-        presolved.emplace_back(  //
-            "min_max",           //
-            compute_number_of_enabled_constraints(
-                REFERENCE_PRESOLVED.min_max_ptrs));
-
-        presolved.emplace_back(  //
-            "max_min",           //
-            compute_number_of_enabled_constraints(
-                REFERENCE_PRESOLVED.max_min_ptrs));
-
-        presolved.emplace_back(  //
-            "intermediate",      //
-            compute_number_of_enabled_constraints(
-                REFERENCE_PRESOLVED.intermediate_ptrs));
-
-        presolved.emplace_back(   //
-            "equation_knapsack",  //
-            compute_number_of_enabled_constraints(
-                REFERENCE_PRESOLVED.equation_knapsack_ptrs));
-
-        presolved.emplace_back(  //
-            "bin_packing",       //
-            compute_number_of_enabled_constraints(
-                REFERENCE_PRESOLVED.bin_packing_ptrs));
-
-        presolved.emplace_back(  //
-            "knapsack",          //
-            compute_number_of_enabled_constraints(
-                REFERENCE_PRESOLVED.knapsack_ptrs));
-
-        presolved.emplace_back(  //
-            "integer_knapsack",  //
-            compute_number_of_enabled_constraints(
-                REFERENCE_PRESOLVED.integer_knapsack_ptrs));
-
-        presolved.emplace_back(  //
-            "gf2",               //
-            compute_number_of_enabled_constraints(
-                REFERENCE_PRESOLVED.gf2_ptrs));
-
-        presolved.emplace_back(  //
-            "general_linear",    //
-            compute_number_of_enabled_constraints(
-                REFERENCE_PRESOLVED.general_linear_ptrs));
-
-        presolved.emplace_back(  //
-            "nonlinear",         //
-            compute_number_of_enabled_constraints(
-                REFERENCE_PRESOLVED.nonlinear_ptrs));
+        const std::array<std::string, 2> LABELS = {"original", "presolved"};
+        const std::array<model_component::ConstraintTypeReference<
+                             T_Variable, T_Expression> *,
+                         2>
+            CONSTRAINT_TYPE_REFERENCE_PTRS = {
+                &(this->model_ptr->constraint_type_reference_original()),
+                &(this->model_ptr->constraint_type_reference())};
 
         utility::json::JsonObject constraint_type_detail;
-        constraint_type_detail.emplace_back("original", original);
-        constraint_type_detail.emplace_back("presolved", presolved);
+
+        std::function<std::size_t(const std::vector<model_component::Constraint<
+                                      T_Variable, T_Expression> *> &)>
+            compute_number_of_all_constraints =
+                [](const auto &a_CONSTRAINT_PTRS) {
+                    return a_CONSTRAINT_PTRS.size();
+                };
+
+        std::function<std::size_t(const std::vector<model_component::Constraint<
+                                      T_Variable, T_Expression> *> &)>
+            compute_number_of_enabled_constraints =
+                [](const auto &a_CONSTRAINT_PTRS) {
+                    return std::count_if(
+                        a_CONSTRAINT_PTRS.begin(), a_CONSTRAINT_PTRS.end(),
+                        [](const auto *a_CONSTRAINT_PTR) {
+                            return a_CONSTRAINT_PTR->is_enabled();
+                        });
+                };
+
+        for (auto i = 0; i < 2; i++) {
+            const auto  LABEL     = LABELS[i];
+            const auto &REFERENCE = (*CONSTRAINT_TYPE_REFERENCE_PTRS[i]);
+
+            auto compute_number_of_constraints =
+                (i == 0) ? compute_number_of_all_constraints
+                         : compute_number_of_enabled_constraints;
+
+            utility::json::JsonObject obj;
+
+            obj.emplace_back(  //
+                "singleton",   //
+                compute_number_of_constraints(REFERENCE.singleton_ptrs));
+
+            obj.emplace_back(    //
+                "exclusive_or",  //
+                compute_number_of_constraints(REFERENCE.exclusive_or_ptrs));
+
+            obj.emplace_back(     //
+                "exclusive_nor",  //
+                compute_number_of_constraints(REFERENCE.exclusive_nor_ptrs));
+
+            obj.emplace_back(         //
+                "inverted_integers",  //
+                compute_number_of_constraints(
+                    REFERENCE.inverted_integers_ptrs));
+
+            obj.emplace_back(         //
+                "balanced_integers",  //
+                compute_number_of_constraints(
+                    REFERENCE.balanced_integers_ptrs));
+
+            obj.emplace_back(             //
+                "constant_sum_integers",  //
+                compute_number_of_constraints(
+                    REFERENCE.constant_sum_integers_ptrs));
+
+            obj.emplace_back(                    //
+                "constant_difference_integers",  //
+                compute_number_of_constraints(
+                    REFERENCE.constant_difference_integers_ptrs));
+
+            obj.emplace_back(               //
+                "constant_ratio_integers",  //
+                compute_number_of_constraints(
+                    REFERENCE.constant_ratio_integers_ptrs));
+
+            obj.emplace_back(   //
+                "aggregation",  //
+                compute_number_of_constraints(REFERENCE.aggregation_ptrs));
+
+            obj.emplace_back(  //
+                "precedence",  //
+                compute_number_of_constraints(REFERENCE.precedence_ptrs));
+
+            obj.emplace_back(      //
+                "variable_bound",  //
+                compute_number_of_constraints(REFERENCE.variable_bound_ptrs));
+
+            obj.emplace_back(               //
+                "trinomial_exclusive_nor",  //
+                compute_number_of_constraints(
+                    REFERENCE.trinomial_exclusive_nor_ptrs));
+
+            obj.emplace_back(        //
+                "set_partitioning",  //
+                compute_number_of_constraints(REFERENCE.set_partitioning_ptrs));
+
+            obj.emplace_back(   //
+                "set_packing",  //
+                compute_number_of_constraints(REFERENCE.set_packing_ptrs));
+
+            obj.emplace_back(    //
+                "set_covering",  //
+                compute_number_of_constraints(REFERENCE.set_covering_ptrs));
+
+            obj.emplace_back(   //
+                "cardinality",  //
+                compute_number_of_constraints(REFERENCE.cardinality_ptrs));
+
+            obj.emplace_back(          //
+                "invariant_knapsack",  //
+                compute_number_of_constraints(
+                    REFERENCE.invariant_knapsack_ptrs));
+
+            obj.emplace_back(         //
+                "multiple_covering",  //
+                compute_number_of_constraints(
+                    REFERENCE.multiple_covering_ptrs));
+
+            obj.emplace_back(   //
+                "binary_flow",  //
+                compute_number_of_constraints(REFERENCE.binary_flow_ptrs));
+
+            obj.emplace_back(    //
+                "integer_flow",  //
+                compute_number_of_constraints(REFERENCE.integer_flow_ptrs));
+
+            obj.emplace_back(      //
+                "soft_selection",  //
+                compute_number_of_constraints(REFERENCE.soft_selection_ptrs));
+
+            obj.emplace_back(  //
+                "min_max",     //
+                compute_number_of_constraints(REFERENCE.min_max_ptrs));
+
+            obj.emplace_back(  //
+                "max_min",     //
+                compute_number_of_constraints(REFERENCE.max_min_ptrs));
+
+            obj.emplace_back(    //
+                "intermediate",  //
+                compute_number_of_constraints(REFERENCE.intermediate_ptrs));
+
+            obj.emplace_back(         //
+                "equation_knapsack",  //
+                compute_number_of_constraints(
+                    REFERENCE.equation_knapsack_ptrs));
+
+            obj.emplace_back(   //
+                "bin_packing",  //
+                compute_number_of_constraints(REFERENCE.bin_packing_ptrs));
+
+            obj.emplace_back(  //
+                "knapsack",    //
+                compute_number_of_constraints(REFERENCE.knapsack_ptrs));
+
+            obj.emplace_back(        //
+                "integer_knapsack",  //
+                compute_number_of_constraints(REFERENCE.integer_knapsack_ptrs));
+
+            obj.emplace_back(  //
+                "gf2",         //
+                compute_number_of_constraints(REFERENCE.gf2_ptrs));
+
+            obj.emplace_back(      //
+                "general_linear",  //
+                compute_number_of_constraints(REFERENCE.general_linear_ptrs));
+
+            obj.emplace_back(  //
+                "nonlinear",   //
+                compute_number_of_constraints(REFERENCE.nonlinear_ptrs));
+
+            constraint_type_detail.emplace_back(LABEL, obj);
+        }
+
         a_object->emplace_back("constraint_type_detail",
                                constraint_type_detail);
     }
@@ -670,6 +610,7 @@ struct Status {
         this->add_variable_type_detail(&object);
         this->add_constraint_detail(&object);
         this->add_constraint_type_detail(&object);
+        this->add_nonzero_detail(&object);
         this->add_option_json(&object);
 
         /// Penalty coefficients
@@ -698,6 +639,7 @@ struct Status {
         this->add_variable_type_detail(&object);
         this->add_constraint_detail(&object);
         this->add_constraint_type_detail(&object);
+        this->add_nonzero_detail(&object);
         this->add_option_json(&object);
 
         /// Penalty coefficients
