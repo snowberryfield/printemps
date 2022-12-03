@@ -41,6 +41,16 @@ TEST_F(TestParallelOption, initialize) {
         ParallelOptionConstant::
             DEFAULT_IS_ENABLED_AUTOMATIC_NEIGHBORHOOD_UPDATE_PARALLELIZATION,  //
         option.is_enabled_automatic_neighborhood_update_parallelization);
+
+    EXPECT_EQ(  //
+        ParallelOptionConstant::
+            DEFAULT_EVALUATION_PARALLELIZATION_DISCOUNT_FACTOR,  //
+        option.evaluation_parallelization_discount_factor);
+
+    EXPECT_EQ(  //
+        ParallelOptionConstant::
+            DEFAULT_NEIGHBORHOOD_UPDATE_PARALLELIZATION_DISCOUNT_FACTOR,  //
+        option.neighborhood_update_parallelization_discount_factor);
 }
 
 }  // namespace
