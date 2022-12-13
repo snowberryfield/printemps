@@ -17,15 +17,13 @@ class Learner {
     Action<T_ActionBody> *            m_best_action_ptr;
 
     long   m_total_number_of_samples;
-    double m_total_number_of_effective_samples;
-
-    double m_discount_factor;
+    double m_decay_factor;
 
    public:
     /*************************************************************************/
     Learner(const std::vector<Action<T_ActionBody>> &a_ACTIONS,
-            const double                             a_DISCOUNT_FACTOR) {
-        this->setup(a_ACTIONS, a_DISCOUNT_FACTOR);
+            const double                             a_DECAY_FACTOR) {
+        this->setup(a_ACTIONS, a_DECAY_FACTOR);
     }
 
     /*************************************************************************/
@@ -43,38 +41,25 @@ class Learner {
         m_actions.clear();
         m_best_action_ptr = nullptr;
 
-        m_total_number_of_samples           = 0;
-        m_total_number_of_effective_samples = 0.0;
-        m_discount_factor                   = 0.0;
+        m_total_number_of_samples = 0;
+        m_decay_factor            = 0.0;
     }
 
     /*************************************************************************/
     inline void setup(const std::vector<Action<T_ActionBody>> &a_ACTIONS,
-                      const double a_DISCOUNT_FACTOR) {
+                      const double                             a_DECAY_FACTOR) {
         this->initialize();
         m_actions         = a_ACTIONS;
-        m_discount_factor = a_DISCOUNT_FACTOR;
+        m_decay_factor    = a_DECAY_FACTOR;
         m_best_action_ptr = &(m_actions.front());
     }
 
     /*************************************************************************/
     inline constexpr void learn(const double a_SCORE) {
-        /**
-         * NOTE: Policy for selecting arms are updated by Discounted UCB[1].
-         * [1] A. Garivier, E. Moulines: On Upper-Confidence Bound Policies for
-         * Non-Stationary Bandit Problems, Technical report, LTCI, 2008.
-         */
         m_total_number_of_samples++;
-        m_total_number_of_effective_samples =
-            1.0 + m_discount_factor * m_total_number_of_effective_samples;
-
+        m_best_action_ptr->learn(a_SCORE, m_decay_factor);
         for (auto &&action : m_actions) {
-            if (&action == m_best_action_ptr) {
-                action.learn(a_SCORE, m_discount_factor);
-            } else {
-                action.forget(m_discount_factor);
-            }
-            action.update_confidence(m_total_number_of_effective_samples);
+            action.update_confidence(m_total_number_of_samples);
         }
 
         std::vector<Action<T_ActionBody> *> no_data_action_ptrs;
@@ -129,14 +114,8 @@ class Learner {
     }
 
     /*************************************************************************/
-    inline constexpr double total_number_of_effective_samples(void) const
-        noexcept {
-        return m_total_number_of_effective_samples;
-    }
-
-    /*************************************************************************/
-    inline constexpr double discount_factor(void) const noexcept {
-        return m_discount_factor;
+    inline constexpr double decay_factor(void) const noexcept {
+        return m_decay_factor;
     }
 };
 }  // namespace printemps::utility::ucb1

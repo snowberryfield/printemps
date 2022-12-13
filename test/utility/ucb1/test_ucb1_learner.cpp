@@ -26,8 +26,7 @@ TEST_F(TestUCB1Learner, constructor_without_arg) {
     EXPECT_EQ(0, static_cast<int>(learner.actions().size()));
     EXPECT_EQ(nullptr, &(learner.best_action()));
     EXPECT_EQ(0, learner.total_number_of_samples());
-    EXPECT_FLOAT_EQ(0.0, learner.total_number_of_effective_samples());
-    EXPECT_FLOAT_EQ(0.0, learner.discount_factor());
+    EXPECT_FLOAT_EQ(0.0, learner.decay_factor());
 }
 
 /*****************************************************************************/
@@ -42,8 +41,7 @@ TEST_F(TestUCB1Learner, constructor_with_arg) {
     EXPECT_EQ(1, learner.actions()[1].body);
     EXPECT_EQ(0, learner.best_action().body);
     EXPECT_EQ(0, learner.total_number_of_samples());
-    EXPECT_FLOAT_EQ(0.0, learner.total_number_of_effective_samples());
-    EXPECT_FLOAT_EQ(0.5, learner.discount_factor());
+    EXPECT_FLOAT_EQ(0.5, learner.decay_factor());
 }
 
 /*****************************************************************************/
@@ -62,8 +60,7 @@ TEST_F(TestUCB1Learner, initialize) {
     EXPECT_EQ(0, static_cast<int>(learner.actions().size()));
     EXPECT_EQ(nullptr, &(learner.best_action()));
     EXPECT_EQ(0, learner.total_number_of_samples());
-    EXPECT_FLOAT_EQ(0.0, learner.total_number_of_effective_samples());
-    EXPECT_FLOAT_EQ(0.0, learner.discount_factor());
+    EXPECT_FLOAT_EQ(0.0, learner.decay_factor());
 }
 
 /*****************************************************************************/
@@ -79,8 +76,7 @@ TEST_F(TestUCB1Learner, setup) {
     EXPECT_EQ(1, learner.actions()[1].body);
     EXPECT_EQ(0, learner.best_action().body);
     EXPECT_EQ(0, learner.total_number_of_samples());
-    EXPECT_FLOAT_EQ(0.0, learner.total_number_of_effective_samples());
-    EXPECT_FLOAT_EQ(0.5, learner.discount_factor());
+    EXPECT_FLOAT_EQ(0.5, learner.decay_factor());
 }
 
 /*****************************************************************************/
@@ -93,13 +89,11 @@ TEST_F(TestUCB1Learner, learn) {
     learner.learn(10.0);
     EXPECT_EQ(10.0, learner.actions()[0].total_score);
     EXPECT_EQ(1, learner.total_number_of_samples());
-    EXPECT_FLOAT_EQ(1.0, learner.total_number_of_effective_samples());
     EXPECT_EQ(1, learner.best_action().body);
 
     learner.learn(10.0);
     EXPECT_EQ(10.0, learner.actions()[1].total_score);
     EXPECT_EQ(2, learner.total_number_of_samples());
-    EXPECT_FLOAT_EQ(1.5, learner.total_number_of_effective_samples());
     EXPECT_EQ(0, learner.best_action().body);
 }
 
@@ -119,12 +113,7 @@ TEST_F(TestUCB1Learner, total_number_of_samples) {
 }
 
 /*****************************************************************************/
-TEST_F(TestUCB1Learner, total_number_of_effective_samples) {
-    /// This method is tested in constructor_with_arg().
-}
-
-/*****************************************************************************/
-TEST_F(TestUCB1Learner, discount_factor) {
+TEST_F(TestUCB1Learner, decay_factor) {
     /// This method is tested in constructor_with_arg().
 }
 

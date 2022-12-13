@@ -109,7 +109,7 @@ class TabuSearchControllerStateManager {
             actions[1] = false;  /// Disables parallelization
             m_state.neighborhood_update_parallelization_controller.setup(
                 actions,
-                m_option.parallel.evaluation_parallelization_discount_factor);
+                m_option.parallel.evaluation_parallelization_decay_factor);
         }
 
         if (m_option.parallel.is_enabled_parallel_evaluation &&
@@ -118,9 +118,8 @@ class TabuSearchControllerStateManager {
             actions[0] = true;   /// Enables parallelization
             actions[1] = false;  /// Disables parallelization
             m_state.evaluation_parallelization_controller.setup(
-                actions,
-                m_option.parallel
-                    .neighborhood_update_parallelization_discount_factor);
+                actions, m_option.parallel
+                             .neighborhood_update_parallelization_decay_factor);
         }
 #endif
     }

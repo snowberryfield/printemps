@@ -44,13 +44,13 @@ TEST_F(TestParallelOption, initialize) {
 
     EXPECT_EQ(  //
         ParallelOptionConstant::
-            DEFAULT_EVALUATION_PARALLELIZATION_DISCOUNT_FACTOR,  //
-        option.evaluation_parallelization_discount_factor);
+            DEFAULT_EVALUATION_PARALLELIZATION_DECAY_FACTOR,  //
+        option.evaluation_parallelization_decay_factor);
 
     EXPECT_EQ(  //
         ParallelOptionConstant::
-            DEFAULT_NEIGHBORHOOD_UPDATE_PARALLELIZATION_DISCOUNT_FACTOR,  //
-        option.neighborhood_update_parallelization_discount_factor);
+            DEFAULT_NEIGHBORHOOD_UPDATE_PARALLELIZATION_DECAY_FACTOR,  //
+        option.neighborhood_update_parallelization_decay_factor);
 }
 
 }  // namespace

@@ -18,9 +18,9 @@ struct ParallelOptionConstant {
     static constexpr bool  //
         DEFAULT_IS_ENABLED_AUTOMATIC_NEIGHBORHOOD_UPDATE_PARALLELIZATION = true;
     static constexpr double  //
-        DEFAULT_EVALUATION_PARALLELIZATION_DISCOUNT_FACTOR = 0.5;
+        DEFAULT_EVALUATION_PARALLELIZATION_DECAY_FACTOR = 0.5;
     static constexpr double  //
-        DEFAULT_NEIGHBORHOOD_UPDATE_PARALLELIZATION_DISCOUNT_FACTOR = 0.5;
+        DEFAULT_NEIGHBORHOOD_UPDATE_PARALLELIZATION_DECAY_FACTOR = 0.5;
 };
 
 /*****************************************************************************/
@@ -29,8 +29,8 @@ struct ParallelOption {
     bool   is_enabled_parallel_neighborhood_update;
     bool   is_enabled_automatic_evaluation_parallelization;
     bool   is_enabled_automatic_neighborhood_update_parallelization;
-    double evaluation_parallelization_discount_factor;
-    double neighborhood_update_parallelization_discount_factor;
+    double evaluation_parallelization_decay_factor;
+    double neighborhood_update_parallelization_decay_factor;
 
     /*************************************************************************/
     ParallelOption(void) {
@@ -54,12 +54,11 @@ struct ParallelOption {
         this->is_enabled_automatic_neighborhood_update_parallelization =
             ParallelOptionConstant::
                 DEFAULT_IS_ENABLED_AUTOMATIC_NEIGHBORHOOD_UPDATE_PARALLELIZATION;
-        this->evaluation_parallelization_discount_factor =
+        this->evaluation_parallelization_decay_factor = ParallelOptionConstant::
+            DEFAULT_EVALUATION_PARALLELIZATION_DECAY_FACTOR;
+        this->neighborhood_update_parallelization_decay_factor =
             ParallelOptionConstant::
-                DEFAULT_EVALUATION_PARALLELIZATION_DISCOUNT_FACTOR;
-        this->neighborhood_update_parallelization_discount_factor =
-            ParallelOptionConstant::
-                DEFAULT_NEIGHBORHOOD_UPDATE_PARALLELIZATION_DISCOUNT_FACTOR;
+                DEFAULT_NEIGHBORHOOD_UPDATE_PARALLELIZATION_DECAY_FACTOR;
     }
 
     /*************************************************************************/
@@ -88,18 +87,17 @@ struct ParallelOption {
 
         utility::print(  //
             " -- "
-            "parallel.evaluation_parallelization_discount_factor:"
+            "parallel.evaluation_parallelization_decay_factor:"
             " " +                //
             utility::to_string(  //
-                this->evaluation_parallelization_discount_factor, "%f"));
+                this->evaluation_parallelization_decay_factor, "%f"));
 
         utility::print(  //
             " -- "
-            "parallel.neighborhood_update_parallelization_discount_factor:"
+            "parallel.neighborhood_update_parallelization_decay_factor:"
             " " +                //
             utility::to_string(  //
-                this->neighborhood_update_parallelization_discount_factor,
-                "%f"));
+                this->neighborhood_update_parallelization_decay_factor, "%f"));
     }
 
     /**************************************************************************/
@@ -126,14 +124,14 @@ struct ParallelOption {
             "is_enabled_automatic_neighborhood_update_parallelization",       //
             a_OBJECT);
 
-        read_json(                                              //
-            &this->evaluation_parallelization_discount_factor,  //
-            "evaluation_parallelization_discount_factor",       //
+        read_json(                                           //
+            &this->evaluation_parallelization_decay_factor,  //
+            "evaluation_parallelization_decay_factor",       //
             a_OBJECT);
 
-        read_json(                                                       //
-            &this->neighborhood_update_parallelization_discount_factor,  //
-            "neighborhood_update_parallelization_discount_factor",       //
+        read_json(                                                    //
+            &this->neighborhood_update_parallelization_decay_factor,  //
+            "neighborhood_update_parallelization_decay_factor",       //
             a_OBJECT);
     }
 
@@ -156,13 +154,13 @@ struct ParallelOption {
             "is_enabled_automatic_neighborhood_update_parallelization",  //
             this->is_enabled_automatic_neighborhood_update_parallelization);
 
-        obj.emplace_back(                                  //
-            "evaluation_parallelization_discount_factor",  //
-            this->evaluation_parallelization_discount_factor);
+        obj.emplace_back(                               //
+            "evaluation_parallelization_decay_factor",  //
+            this->evaluation_parallelization_decay_factor);
 
-        obj.emplace_back(                                           //
-            "neighborhood_update_parallelization_discount_factor",  //
-            this->neighborhood_update_parallelization_discount_factor);
+        obj.emplace_back(                                        //
+            "neighborhood_update_parallelization_decay_factor",  //
+            this->neighborhood_update_parallelization_decay_factor);
 
         return obj;
     }
