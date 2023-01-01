@@ -31,6 +31,7 @@ TEST_F(TestIntegerMoveGenerator, setup) {
     x(0).fix();
     x(9).fix();
 
+    model.setup_unique_names();
     model.setup_structure();
 
     auto integer_variable_ptrs =
@@ -51,7 +52,9 @@ TEST_F(TestIntegerMoveGenerator, setup) {
         EXPECT_TRUE(move.is_univariable_move);
         for (auto& constraint_ptr :
              move.alterations.front().first->related_constraint_ptrs()) {
-            EXPECT_TRUE(move.related_constraint_ptrs.find(constraint_ptr) !=
+            EXPECT_TRUE(std::find(move.related_constraint_ptrs.begin(),
+                                  move.related_constraint_ptrs.end(),
+                                  constraint_ptr) !=
                         move.related_constraint_ptrs.end());
         }
     }

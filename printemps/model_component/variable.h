@@ -54,10 +54,10 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     VariableSense m_sense;
 
     Selection<T_Variable, T_Expression> *m_selection_ptr;
-    std::unordered_set<Constraint<T_Variable, T_Expression> *>
+    std::vector<Constraint<T_Variable, T_Expression> *>
         m_related_constraint_ptrs;
 
-    std::unordered_set<Constraint<T_Variable, T_Expression> *>
+    std::vector<Constraint<T_Variable, T_Expression> *>
         m_related_binary_coefficient_constraint_ptrs;
 
     Expression<T_Variable, T_Expression> *m_dependent_expression_ptr;
@@ -401,7 +401,7 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     /*************************************************************************/
     inline constexpr void register_related_constraint_ptr(
         Constraint<T_Variable, T_Expression> *a_constraint_ptr) {
-        m_related_constraint_ptrs.insert(a_constraint_ptr);
+        m_related_constraint_ptrs.push_back(a_constraint_ptr);
     }
 
     /*************************************************************************/
@@ -410,14 +410,27 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr std::unordered_set<Constraint<T_Variable, T_Expression> *>
+    inline constexpr void sort_and_unique_related_constraint_ptrs(void) {
+        std::stable_sort(m_related_constraint_ptrs.begin(),
+                         m_related_constraint_ptrs.end(),
+                         [](const auto &a_FIRST, const auto &a_SECOND) {
+                             return a_FIRST->name() < a_SECOND->name();
+                         });
+
+        m_related_constraint_ptrs.erase(
+            std::unique(m_related_constraint_ptrs.begin(),  //
+                        m_related_constraint_ptrs.end()),
+            m_related_constraint_ptrs.end());
+    }
+
+    /*************************************************************************/
+    inline constexpr std::vector<Constraint<T_Variable, T_Expression> *>
         &related_constraint_ptrs(void) {
         return m_related_constraint_ptrs;
     }
 
     /*************************************************************************/
-    inline constexpr const std::unordered_set<
-        Constraint<T_Variable, T_Expression> *>
+    inline constexpr const std::vector<Constraint<T_Variable, T_Expression> *>
         &related_constraint_ptrs(void) const {
         return m_related_constraint_ptrs;
     }
@@ -435,10 +448,22 @@ class Variable : public multi_array::AbstractMultiArrayElement {
                 constraint_ptr->is_cardinality() ||
                 constraint_ptr->is_invariant_knapsack() ||
                 constraint_ptr->is_multiple_covering()) {
-                m_related_binary_coefficient_constraint_ptrs.insert(
+                m_related_binary_coefficient_constraint_ptrs.push_back(
                     constraint_ptr);
             }
         }
+
+        std::stable_sort(m_related_binary_coefficient_constraint_ptrs.begin(),
+                         m_related_binary_coefficient_constraint_ptrs.end(),
+                         [](const auto &a_FIRST, const auto &a_SECOND) {
+                             return a_FIRST->name() < a_SECOND->name();
+                         });
+
+        m_related_binary_coefficient_constraint_ptrs.erase(
+            std::unique(
+                m_related_binary_coefficient_constraint_ptrs.begin(),  //
+                m_related_binary_coefficient_constraint_ptrs.end()),
+            m_related_binary_coefficient_constraint_ptrs.end());
     }
 
     /*************************************************************************/
@@ -448,14 +473,13 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr std::unordered_set<Constraint<T_Variable, T_Expression> *>
+    inline constexpr std::vector<Constraint<T_Variable, T_Expression> *>
         &related_binary_coefficient_constraint_ptrs(void) {
         return m_related_binary_coefficient_constraint_ptrs;
     }
 
     /*************************************************************************/
-    inline constexpr const std::unordered_set<
-        Constraint<T_Variable, T_Expression> *>
+    inline constexpr const std::vector<Constraint<T_Variable, T_Expression> *>
         &related_binary_coefficient_constraint_ptrs(void) const {
         return m_related_binary_coefficient_constraint_ptrs;
     }
@@ -463,6 +487,16 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     /*************************************************************************/
     inline constexpr void reset_constraint_sensitivities(void) {
         m_constraint_sensitivities.clear();
+    }
+
+    /*************************************************************************/
+    inline constexpr void sort_constraint_sensitivities(void) {
+        std::stable_sort(m_constraint_sensitivities.begin(),
+                         m_constraint_sensitivities.end(),
+                         [](const auto &a_FIRST, const auto &a_SECOND) {
+                             return a_FIRST.first->name() <
+                                    a_SECOND.first->name();
+                         });
     }
 
     /*************************************************************************/
@@ -557,14 +591,15 @@ class Variable : public multi_array::AbstractMultiArrayElement {
         }
 
         const auto &RELATED_SELECTION_CONSTRAINT_PTRS =
-            m_selection_ptr->related_constraint_ptrs_vector;
+            m_selection_ptr->related_constraint_ptrs;
 
         const int CONSTRAINTS_SIZE = RELATED_SELECTION_CONSTRAINT_PTRS.size();
 
         for (auto i = 0; i < CONSTRAINTS_SIZE; i++) {
             if (RELATED_SELECTION_CONSTRAINT_PTRS[i]->is_enabled() &&
-                m_related_constraint_ptrs.find(
-                    RELATED_SELECTION_CONSTRAINT_PTRS[i]) !=
+                std::find(m_related_constraint_ptrs.begin(),
+                          m_related_constraint_ptrs.end(),
+                          RELATED_SELECTION_CONSTRAINT_PTRS[i]) !=
                     m_related_constraint_ptrs.end()) {
                 m_related_selection_constraint_ptr_index_min = i;
                 break;
@@ -573,8 +608,9 @@ class Variable : public multi_array::AbstractMultiArrayElement {
 
         for (auto i = CONSTRAINTS_SIZE - 1; i >= 0; i--) {
             if (RELATED_SELECTION_CONSTRAINT_PTRS[i]->is_enabled() &&
-                m_related_constraint_ptrs.find(
-                    RELATED_SELECTION_CONSTRAINT_PTRS[i]) !=
+                std::find(m_related_constraint_ptrs.begin(),
+                          m_related_constraint_ptrs.end(),
+                          RELATED_SELECTION_CONSTRAINT_PTRS[i]) !=
                     m_related_constraint_ptrs.end()) {
                 m_related_selection_constraint_ptr_index_max = i;
                 break;

@@ -87,8 +87,7 @@ class Verifier {
             T_Expression>
             related_constraint_ptr_values;
         for (auto &&selection : m_model_ptr->selections()) {
-            for (auto &&constraint_ptr :
-                 selection.related_constraint_ptrs_set) {
+            for (auto &&constraint_ptr : selection.related_constraint_ptrs) {
                 related_constraint_ptr_values[constraint_ptr] =
                     static_cast<T_Expression>(0);
             }

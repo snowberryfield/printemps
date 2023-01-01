@@ -53,16 +53,24 @@ class SoftSelectionMoveGenerator
                 Move<T_Variable, T_Expression> move_first;
                 Move<T_Variable, T_Expression> move_second;
 
-                move_first.related_constraint_ptrs = utility::union_set(
-                    variable_ptr->related_constraint_ptrs(),
-                    key_variable_ptr->related_constraint_ptrs());
-
                 move_first.sense               = MoveSense::SoftSelection;
                 move_first.is_univariable_move = false;
                 move_first.is_selection_move   = false;
                 move_first.is_special_neighborhood_move = true;
                 move_first.is_available                 = true;
                 move_first.overlap_rate                 = 0.0;
+
+                move_first.related_constraint_ptrs.insert(
+                    move_first.related_constraint_ptrs.end(),
+                    variable_ptr->related_constraint_ptrs().begin(),
+                    variable_ptr->related_constraint_ptrs().end());
+
+                move_first.related_constraint_ptrs.insert(
+                    move_first.related_constraint_ptrs.end(),
+                    key_variable_ptr->related_constraint_ptrs().begin(),
+                    key_variable_ptr->related_constraint_ptrs().end());
+
+                sort_and_unique_related_constraint_ptrs(&move_first);
 
                 move_second = move_first;
 

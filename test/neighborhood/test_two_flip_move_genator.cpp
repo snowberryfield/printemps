@@ -24,6 +24,7 @@ TEST_F(TestTwoFlipMoveGenerator, setup) {
     model::Model<int, double> model;
 
     auto& x = model.create_variables("x", 3, 0, 1);
+    model.setup_unique_names();
 
     std::vector<std::pair<model_component::Variable<int, double>*,
                           model_component::Variable<int, double>*>>

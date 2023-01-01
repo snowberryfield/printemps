@@ -27,6 +27,7 @@ TEST_F(TestConstantRatioIntegersMoveGenerator, setup) {
         auto& x = model.create_variables("x", 2, -10, 10);
         auto& c = model.create_constraint("c", 2 * x[0] - x[1] == 0);
 
+        model.setup_unique_names();
         model.setup_structure();
 
         auto& constant_ratio_integers_ptrs =
@@ -51,9 +52,9 @@ TEST_F(TestConstantRatioIntegersMoveGenerator, setup) {
         EXPECT_EQ(2, moves[0].alterations[1].second);
         EXPECT_EQ(neighborhood::MoveSense::ConstantRatioIntegers,
                   moves[0].sense);
-        EXPECT_TRUE(moves[0].related_constraint_ptrs.find(&c[0]) !=
-                    moves[0].related_constraint_ptrs.end());
-
+        EXPECT_TRUE(std::find(moves[0].related_constraint_ptrs.begin(),
+                              moves[0].related_constraint_ptrs.end(),
+                              &c[0]) != moves[0].related_constraint_ptrs.end());
         /// (x0,x1) = (-1,-2)
         EXPECT_FALSE(moves[1].is_univariable_move);
         EXPECT_TRUE(moves[1].is_special_neighborhood_move);
@@ -63,8 +64,9 @@ TEST_F(TestConstantRatioIntegersMoveGenerator, setup) {
         EXPECT_EQ(-2, moves[1].alterations[1].second);
         EXPECT_EQ(neighborhood::MoveSense::ConstantRatioIntegers,
                   moves[1].sense);
-        EXPECT_TRUE(moves[1].related_constraint_ptrs.find(&c[0]) !=
-                    moves[1].related_constraint_ptrs.end());
+        EXPECT_TRUE(std::find(moves[1].related_constraint_ptrs.begin(),
+                              moves[1].related_constraint_ptrs.end(),
+                              &c[0]) != moves[1].related_constraint_ptrs.end());
     }
 
     {
@@ -73,6 +75,7 @@ TEST_F(TestConstantRatioIntegersMoveGenerator, setup) {
         auto& x = model.create_variables("x", 2, -10, 10);
         auto& c = model.create_constraint("c", 2 * x[0] + x[1] == 0);
 
+        model.setup_unique_names();
         model.setup_structure();
 
         auto& constant_ratio_integers_ptrs =
@@ -97,8 +100,9 @@ TEST_F(TestConstantRatioIntegersMoveGenerator, setup) {
         EXPECT_EQ(-2, moves[0].alterations[1].second);
         EXPECT_EQ(neighborhood::MoveSense::ConstantRatioIntegers,
                   moves[0].sense);
-        EXPECT_TRUE(moves[0].related_constraint_ptrs.find(&c[0]) !=
-                    moves[0].related_constraint_ptrs.end());
+        EXPECT_TRUE(std::find(moves[0].related_constraint_ptrs.begin(),
+                              moves[0].related_constraint_ptrs.end(),
+                              &c[0]) != moves[0].related_constraint_ptrs.end());
 
         /// (x0,x1) = (-1,2)
         EXPECT_FALSE(moves[1].is_univariable_move);
@@ -109,8 +113,9 @@ TEST_F(TestConstantRatioIntegersMoveGenerator, setup) {
         EXPECT_EQ(2, moves[1].alterations[1].second);
         EXPECT_EQ(neighborhood::MoveSense::ConstantRatioIntegers,
                   moves[1].sense);
-        EXPECT_TRUE(moves[1].related_constraint_ptrs.find(&c[0]) !=
-                    moves[1].related_constraint_ptrs.end());
+        EXPECT_TRUE(std::find(moves[1].related_constraint_ptrs.begin(),
+                              moves[1].related_constraint_ptrs.end(),
+                              &c[0]) != moves[1].related_constraint_ptrs.end());
     }
 }
 }  // namespace

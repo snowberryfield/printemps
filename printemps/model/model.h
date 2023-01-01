@@ -863,8 +863,9 @@ class Model {
     constexpr void setup_structure(void) {
         this->categorize_variables();
         this->categorize_constraints();
-        this->setup_variable_related_binary_coefficient_constraints();
+
         this->setup_variable_related_constraints();
+        this->setup_variable_related_binary_coefficient_constraints();
         this->setup_variable_objective_sensitivities();
         this->setup_variable_constraint_sensitivities();
     }
@@ -998,6 +999,12 @@ class Model {
                 }
             }
         }
+
+        for (auto &&proxy : m_variable_proxies) {
+            for (auto &&variable : proxy.flat_indexed_variables()) {
+                variable.sort_and_unique_related_constraint_ptrs();
+            }
+        }
     }
 
     /*************************************************************************/
@@ -1026,6 +1033,11 @@ class Model {
                     sensitivity.first->register_constraint_sensitivity(
                         &constraint, sensitivity.second);
                 }
+            }
+        }
+        for (auto &&proxy : m_variable_proxies) {
+            for (auto &&variable : proxy.flat_indexed_variables()) {
+                variable.sort_constraint_sensitivities();
             }
         }
     }
@@ -2513,10 +2525,9 @@ class Model {
         double constraint_value = 0.0;
         double violation_diff   = 0.0;
 
-        const auto &RELATED_CONSTRAINT_PTRS =
-            a_MOVE.alterations.front()
-                .first->selection_ptr()
-                ->related_constraint_ptrs_vector;
+        const auto &RELATED_CONSTRAINT_PTRS = a_MOVE.alterations.front()
+                                                  .first->selection_ptr()
+                                                  ->related_constraint_ptrs;
 
         const auto &INDEX_MIN_FIRST =
             a_MOVE.alterations[0]

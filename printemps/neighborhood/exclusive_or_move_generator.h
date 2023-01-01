@@ -52,21 +52,31 @@ class ExclusiveOrMoveGenerator
             move.sense = MoveSense::ExclusiveOr;
             move.alterations.emplace_back(binomials[i].variable_ptr_first, 0);
             move.alterations.emplace_back(binomials[i].variable_ptr_second, 1);
-            move.is_univariable_move = false;
-            move.is_selection_move   = false;
-
-            utility::update_union_set(
-                &(move.related_constraint_ptrs),
-                binomials[i].variable_ptr_first->related_constraint_ptrs());
-
-            utility::update_union_set(
-                &(move.related_constraint_ptrs),
-                binomials[i].variable_ptr_second->related_constraint_ptrs());
-
+            move.is_univariable_move          = false;
+            move.is_selection_move            = false;
             move.is_special_neighborhood_move = true;
             move.is_available                 = true;
             move.overlap_rate                 = 0.0;
 
+            move.related_constraint_ptrs.insert(
+                move.related_constraint_ptrs.end(),
+                binomials[i]
+                    .variable_ptr_first->related_constraint_ptrs()
+                    .begin(),
+                binomials[i]
+                    .variable_ptr_first->related_constraint_ptrs()
+                    .end());
+
+            move.related_constraint_ptrs.insert(
+                move.related_constraint_ptrs.end(),
+                binomials[i]
+                    .variable_ptr_second->related_constraint_ptrs()
+                    .begin(),
+                binomials[i]
+                    .variable_ptr_second->related_constraint_ptrs()
+                    .end());
+
+            sort_and_unique_related_constraint_ptrs(&move);
             this->m_moves[2 * i + 1]                       = move;
             this->m_moves[2 * i + 1].alterations[0].second = 1;
             this->m_moves[2 * i + 1].alterations[1].second = 0;

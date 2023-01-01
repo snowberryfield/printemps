@@ -76,11 +76,18 @@ class FlippableVariablePairExtractor {
         pairs.reserve(VARIABLES_SIZE);
 
         for (auto i = 0; i < VARIABLES_SIZE; i++) {
-            auto &constraint_ptrs_first =
-                variable_ptrs[i]->related_constraint_ptrs();
+            std::unordered_set<
+                model_component::Constraint<T_Variable, T_Expression> *>
+                constraint_ptrs_first(
+                    variable_ptrs[i]->related_constraint_ptrs().begin(),
+                    variable_ptrs[i]->related_constraint_ptrs().end());
             for (auto j = i + 1; j < VARIABLES_SIZE; j++) {
-                auto &constraint_ptrs_second =
-                    variable_ptrs[j]->related_constraint_ptrs();
+                std::unordered_set<
+                    model_component::Constraint<T_Variable, T_Expression> *>
+                    constraint_ptrs_second(
+                        variable_ptrs[j]->related_constraint_ptrs().begin(),
+                        variable_ptrs[j]->related_constraint_ptrs().end());
+
                 auto intersection_set = utility::intersection_set(
                     constraint_ptrs_first, constraint_ptrs_second);
                 auto union_set = utility::union_set(constraint_ptrs_first,
