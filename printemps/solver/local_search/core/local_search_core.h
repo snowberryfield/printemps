@@ -185,8 +185,7 @@ class LocalSearchCore {
             m_model_ptr->update_variable_objective_improvabilities();
         } else {
             m_model_ptr->update_variable_objective_improvabilities(
-                utility::to_vector(
-                    neighborhood::related_variable_ptrs(STATE.current_move)));
+                neighborhood::related_variable_ptrs_vector(STATE.current_move));
         }
 
         if (m_model_ptr->is_feasible()) {
@@ -614,10 +613,15 @@ class LocalSearchCore {
                 move.alterations.insert(move.alterations.end(),
                                         move_ptr->alterations.begin(),
                                         move_ptr->alterations.end());
+
                 move.related_constraint_ptrs.insert(
+                    move.related_constraint_ptrs.end(),
                     move_ptr->related_constraint_ptrs.begin(),
                     move_ptr->related_constraint_ptrs.end());
-                constraint_ptrs = move.related_constraint_ptrs;
+
+                constraint_ptrs.insert(
+                    move_ptr->related_constraint_ptrs.begin(),
+                    move_ptr->related_constraint_ptrs.end());
                 number_of_performed_moves++;
             }
 

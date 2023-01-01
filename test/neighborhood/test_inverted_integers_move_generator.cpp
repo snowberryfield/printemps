@@ -26,6 +26,7 @@ TEST_F(TestInvertedIntegersMoveGenerator, setup) {
     auto& x = model.create_variables("x", 2, -10, 10);
     auto& c = model.create_constraint("c", x[0] + x[1] == 0);
 
+    model.setup_unique_names();
     model.setup_structure();
 
     auto& inverted_integers_ptrs =
@@ -49,10 +50,11 @@ TEST_F(TestInvertedIntegersMoveGenerator, setup) {
     EXPECT_EQ(1, moves[0].alterations[0].second);
     EXPECT_EQ(-1, moves[0].alterations[1].second);
     EXPECT_EQ(neighborhood::MoveSense::InvertedIntegers, moves[0].sense);
-    EXPECT_TRUE(moves[0].related_constraint_ptrs.find(&c[0]) !=
-                moves[0].related_constraint_ptrs.end());
+    EXPECT_TRUE(std::find(moves[0].related_constraint_ptrs.begin(),
+                          moves[0].related_constraint_ptrs.end(),
+                          &c[0]) != moves[0].related_constraint_ptrs.end());
 
-    /// (x0,x1) = (-1,1)
+    /// (x0,x1) = (-1,1)s
     EXPECT_FALSE(moves[1].is_univariable_move);
     EXPECT_TRUE(moves[1].is_special_neighborhood_move);
     EXPECT_EQ(0, moves[1].overlap_rate);
@@ -60,8 +62,9 @@ TEST_F(TestInvertedIntegersMoveGenerator, setup) {
     EXPECT_EQ(-1, moves[1].alterations[0].second);
     EXPECT_EQ(1, moves[1].alterations[1].second);
     EXPECT_EQ(neighborhood::MoveSense::InvertedIntegers, moves[1].sense);
-    EXPECT_TRUE(moves[1].related_constraint_ptrs.find(&c[0]) !=
-                moves[1].related_constraint_ptrs.end());
+    EXPECT_TRUE(std::find(moves[1].related_constraint_ptrs.begin(),
+                          moves[1].related_constraint_ptrs.end(),
+                          &c[0]) != moves[1].related_constraint_ptrs.end());
 }
 }  // namespace
 /*****************************************************************************/

@@ -22,10 +22,7 @@ struct Selection {
     Variable<T_Variable, T_Expression> *              selected_variable_ptr;
     Constraint<T_Variable, T_Expression> *            constraint_ptr;
 
-    std::unordered_set<Constraint<T_Variable, T_Expression> *>
-        related_constraint_ptrs_set;
-    std::vector<Constraint<T_Variable, T_Expression> *>
-        related_constraint_ptrs_vector;
+    std::vector<Constraint<T_Variable, T_Expression> *> related_constraint_ptrs;
 
     /*************************************************************************/
     Selection(void) {
@@ -42,8 +39,7 @@ struct Selection {
         this->variable_ptrs.clear();
         this->selected_variable_ptr = nullptr;
         this->constraint_ptr        = nullptr;
-        this->related_constraint_ptrs_set.clear();
-        this->related_constraint_ptrs_vector.clear();
+        this->related_constraint_ptrs.clear();
     }
     /*************************************************************************/
     void setup(Constraint<T_Variable, T_Expression> *a_constraint_ptr) {
@@ -61,8 +57,9 @@ struct Selection {
          * NOTE: The following procedure is intentionally excluded from setup().
          * It is expensive and should be called only when necessary.
          */
-        this->related_constraint_ptrs_set.clear();
-        this->related_constraint_ptrs_vector.clear();
+        std::unordered_set<Constraint<T_Variable, T_Expression> *>
+            related_constraint_ptrs_set;
+        this->related_constraint_ptrs.clear();
 
         /**
          * NOTE: The member related_constraint_ptrs must include pointers to
@@ -72,7 +69,7 @@ struct Selection {
         for (auto &&variable_ptr : this->variable_ptrs) {
             for (auto &&constraint_ptr :
                  variable_ptr->related_constraint_ptrs()) {
-                this->related_constraint_ptrs_set.insert(constraint_ptr);
+                related_constraint_ptrs_set.insert(constraint_ptr);
             }
         }
 
@@ -102,17 +99,16 @@ struct Selection {
 
         for (auto i = 0; i < VARIABLES_SIZE; i++) {
             auto &variable_ptr = this->variable_ptrs[i];
-            std::vector<Constraint<T_Variable, T_Expression> *> constraint_ptrs(
-                variable_ptr->related_constraint_ptrs().begin(),
-                variable_ptr->related_constraint_ptrs().end());
+            std::vector<Constraint<T_Variable, T_Expression> *>
+                constraint_ptrs = variable_ptr->related_constraint_ptrs();
 
             std::sort(constraint_ptrs.begin(), constraint_ptrs.end(),
                       [](const auto &a_FIRST, const auto &a_SECOND) {
                           return a_FIRST->name() < a_SECOND->name();
                       });
 
-            if (this->related_constraint_ptrs_vector.size() <
-                this->related_constraint_ptrs_set.size() / 2) {
+            if (this->related_constraint_ptrs.size() <
+                related_constraint_ptrs_set.size() / 2) {
                 std::stable_sort(
                     constraint_ptrs.begin(), constraint_ptrs.end(),
                     [](const auto &a_FIRST, const auto &a_SECOND) {
@@ -134,8 +130,7 @@ struct Selection {
                 if (inserted_constraint_ptrs.find(constraint_ptr) ==
                     inserted_constraint_ptrs.end()) {
                     inserted_constraint_ptrs.insert(constraint_ptr);
-                    this->related_constraint_ptrs_vector.push_back(
-                        constraint_ptr);
+                    this->related_constraint_ptrs.push_back(constraint_ptr);
                 }
             }
         }

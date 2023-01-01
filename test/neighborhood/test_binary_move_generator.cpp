@@ -26,6 +26,7 @@ TEST_F(TestBinaryMoveGenerator, setup) {
     auto& x = model.create_variables("x", 10, 0, 1);
     x(0).fix_by(0);
 
+    model.setup_unique_names();
     model.setup_structure();
 
     auto binary_variable_ptrs =
@@ -54,7 +55,9 @@ TEST_F(TestBinaryMoveGenerator, setup) {
 
         for (auto& constraint_ptr :
              move.alterations.front().first->related_constraint_ptrs()) {
-            EXPECT_TRUE(move.related_constraint_ptrs.find(constraint_ptr) !=
+            EXPECT_TRUE(std::find(move.related_constraint_ptrs.begin(),
+                                  move.related_constraint_ptrs.end(),
+                                  constraint_ptr) !=
                         move.related_constraint_ptrs.end());
         }
     }

@@ -75,7 +75,7 @@ struct Action {
             this->range * sqrt(2.0 * log(a_TOTAL_NUMBER_OF_SAMPLES) /
                                this->number_of_samples);
     }
-};  // namespace printemps::utility::ucb1
+};
 }  // namespace printemps::utility::ucb1
 #endif
 /*****************************************************************************/
