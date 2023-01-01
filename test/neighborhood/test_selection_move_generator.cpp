@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2021 Yuji KOGUMA
+// Copyright (c) 2020-2023 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -25,15 +25,17 @@ TEST_F(TestSelectionMoveGenerator, setup) {
 
     const int N = 10;
     auto&     x = model.create_variables("x", N, 0, 1);
-    model.create_constraint("c", x.selection());
+    auto&     f = model.create_constraint("f", x.selection());
+    auto&     g = model.create_constraint("g", x.sum() <= 5);
+
     x(0) = 1;
 
+    model.setup_unique_names();
     model.setup_structure();
 
     preprocess::SelectionExtractor<int, double> selection_extractor(&model);
     selection_extractor.extract_by_number_of_variables_order(false, false);
     x(0).select();
-
     model.setup_structure();
 
     auto selection_variable_ptrs =
@@ -68,17 +70,13 @@ TEST_F(TestSelectionMoveGenerator, setup) {
         }
         EXPECT_FALSE(move.is_univariable_move);
 
-        for (auto& constraint_ptr :
-             move.alterations[0].first->related_constraint_ptrs()) {
-            EXPECT_TRUE(move.related_constraint_ptrs.find(constraint_ptr) !=
-                        move.related_constraint_ptrs.end());
-        }
+        EXPECT_TRUE(std::find(move.related_constraint_ptrs.begin(),
+                              move.related_constraint_ptrs.end(),
+                              &(g(0))) != move.related_constraint_ptrs.end());
 
-        for (auto& constraint_ptr :
-             move.alterations[1].first->related_constraint_ptrs()) {
-            EXPECT_TRUE(move.related_constraint_ptrs.find(constraint_ptr) !=
-                        move.related_constraint_ptrs.end());
-        }
+        EXPECT_TRUE(std::find(move.related_constraint_ptrs.begin(),
+                              move.related_constraint_ptrs.end(),
+                              &(g(0))) != move.related_constraint_ptrs.end());
     }
 }
 }  // namespace
