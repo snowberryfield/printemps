@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2021 Yuji KOGUMA
+// Copyright (c) 2020-2023 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -44,11 +44,8 @@ class SelectionMoveGenerator
         this->m_flags.resize(VARIABLES_SIZE);
 
         for (auto i = 0; i < VARIABLES_SIZE; i++) {
-            auto &move                   = this->m_moves[i];
-            move.sense                   = MoveSense::Selection;
-            move.related_constraint_ptrs = a_VARIABLE_PTRS[i]
-                                               ->selection_ptr()
-                                               ->related_constraint_ptrs_set;
+            auto &move                        = this->m_moves[i];
+            move.sense                        = MoveSense::Selection;
             move.is_univariable_move          = false;
             move.is_selection_move            = true;
             move.is_special_neighborhood_move = false;
@@ -57,6 +54,8 @@ class SelectionMoveGenerator
             move.alterations.resize(2);
             move.alterations[0].second = 0;
             move.alterations[1].second = 1;
+            move.related_constraint_ptrs =
+                a_VARIABLE_PTRS[i]->selection_ptr()->related_constraint_ptrs;
         }
 
         /**

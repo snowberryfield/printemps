@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2021 Yuji KOGUMA
+// Copyright (c) 2020-2023 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -54,14 +54,14 @@ class IntegerMoveGenerator
             auto &move = this->m_moves[4 * i];
 
             move.sense = MoveSense::Integer;
-            move.related_constraint_ptrs =
-                mutable_variable_ptrs[i]->related_constraint_ptrs();
             move.alterations.emplace_back(mutable_variable_ptrs[i], 0);
             move.is_univariable_move          = true;
             move.is_selection_move            = false;
             move.is_special_neighborhood_move = false;
             move.is_available                 = true;
             move.overlap_rate                 = 0.0;
+            move.related_constraint_ptrs =
+                mutable_variable_ptrs[i]->related_constraint_ptrs();
 
             this->m_moves[4 * i + 1] = move;
             this->m_moves[4 * i + 2] = move;
