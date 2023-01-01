@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2021 Yuji KOGUMA
+// Copyright (c) 2020-2023 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -22,6 +22,10 @@ class TestMove : public ::testing::Test {
 /*****************************************************************************/
 TEST_F(TestMove, constructor) {
     neighborhood::Move<int, double> move;
+
+    EXPECT_TRUE(move.alterations.empty());
+    EXPECT_EQ(neighborhood::MoveSense::General, move.sense);
+    EXPECT_TRUE(move.related_constraint_ptrs.empty());
     EXPECT_FALSE(move.is_univariable_move);
     EXPECT_FALSE(move.is_special_neighborhood_move);
     EXPECT_TRUE(move.is_available);
@@ -310,6 +314,7 @@ TEST_F(TestMove, operator_plus) {
     [[maybe_unused]] auto& h = model.create_constraint("h", y + z <= 10);
     [[maybe_unused]] auto& v = model.create_constraint("v", x + z <= 10);
 
+    model.setup_unique_names();
     model.setup_structure();
 
     auto variable_ptrs = model.variable_reference().variable_ptrs;
@@ -407,7 +412,7 @@ TEST_F(TestMove, operator_equal) {
 
         neighborhood::Move<int, double> move_1;
         move_1.alterations.emplace_back(&variable_0, 1);
-        move_1.related_constraint_ptrs.insert(&constraint);
+        move_1.related_constraint_ptrs.push_back(&constraint);
 
         EXPECT_FALSE(move_0 == move_1);
         EXPECT_TRUE(move_0 != move_1);

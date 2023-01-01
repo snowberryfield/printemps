@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2021 Yuji KOGUMA
+// Copyright (c) 2020-2023 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -87,8 +87,7 @@ class Verifier {
             T_Expression>
             related_constraint_ptr_values;
         for (auto &&selection : m_model_ptr->selections()) {
-            for (auto &&constraint_ptr :
-                 selection.related_constraint_ptrs_set) {
+            for (auto &&constraint_ptr : selection.related_constraint_ptrs) {
                 related_constraint_ptr_values[constraint_ptr] =
                     static_cast<T_Expression>(0);
             }

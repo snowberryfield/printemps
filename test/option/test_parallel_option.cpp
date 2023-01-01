@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2021 Yuji KOGUMA
+// Copyright (c) 2020-2023 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -41,6 +41,16 @@ TEST_F(TestParallelOption, initialize) {
         ParallelOptionConstant::
             DEFAULT_IS_ENABLED_AUTOMATIC_NEIGHBORHOOD_UPDATE_PARALLELIZATION,  //
         option.is_enabled_automatic_neighborhood_update_parallelization);
+
+    EXPECT_EQ(  //
+        ParallelOptionConstant::
+            DEFAULT_EVALUATION_PARALLELIZATION_DECAY_FACTOR,  //
+        option.evaluation_parallelization_decay_factor);
+
+    EXPECT_EQ(  //
+        ParallelOptionConstant::
+            DEFAULT_NEIGHBORHOOD_UPDATE_PARALLELIZATION_DECAY_FACTOR,  //
+        option.neighborhood_update_parallelization_decay_factor);
 }
 
 }  // namespace

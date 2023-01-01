@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2021 Yuji KOGUMA
+// Copyright (c) 2020-2023 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -255,8 +255,7 @@ class TabuSearchCore {
             m_model_ptr->update_variable_objective_improvabilities();
         } else {
             m_model_ptr->update_variable_objective_improvabilities(
-                utility::to_vector(
-                    neighborhood::related_variable_ptrs(STATE.current_move)));
+                neighborhood::related_variable_ptrs_vector(STATE.current_move));
         }
 
         switch (m_option.neighborhood.improvability_screening_mode) {
@@ -304,13 +303,11 @@ class TabuSearchCore {
                         m_model_ptr
                             ->update_variable_feasibility_improvabilities();
                     } else {
-                        const auto CHANGED_CONSTRAINT_PTRS = utility::to_vector(
-                            STATE.current_move.related_constraint_ptrs);
                         m_model_ptr->reset_variable_feasibility_improvabilities(
-                            CHANGED_CONSTRAINT_PTRS);
+                            STATE.current_move.related_constraint_ptrs);
                         m_model_ptr
                             ->update_variable_feasibility_improvabilities(
-                                CHANGED_CONSTRAINT_PTRS);
+                                STATE.current_move.related_constraint_ptrs);
                     }
 
                     accept_all                    = false;

@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2021 Yuji KOGUMA
+// Copyright (c) 2020-2023 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -439,37 +439,60 @@ TEST_F(TestVariable, register_related_constraint_ptr) {
         model_component::Constraint<int, double>::create_instance();
 
     EXPECT_TRUE(variable.related_constraint_ptrs().empty());
-    EXPECT_FALSE(variable.related_constraint_ptrs().find(&constraint_0) !=
+    EXPECT_FALSE(std::find(variable.related_constraint_ptrs().begin(),
+                           variable.related_constraint_ptrs().end(),
+                           &constraint_0) !=
                  variable.related_constraint_ptrs().end());
-    EXPECT_FALSE(variable.related_constraint_ptrs().find(&constraint_1) !=
+    EXPECT_FALSE(std::find(variable.related_constraint_ptrs().begin(),
+                           variable.related_constraint_ptrs().end(),
+                           &constraint_1) !=
                  variable.related_constraint_ptrs().end());
 
     variable.register_related_constraint_ptr(&constraint_0);
+    variable.sort_and_unique_related_constraint_ptrs();
     EXPECT_EQ(1, static_cast<int>(variable.related_constraint_ptrs().size()));
-    EXPECT_TRUE(variable.related_constraint_ptrs().find(&constraint_0) !=
+    EXPECT_TRUE(std::find(variable.related_constraint_ptrs().begin(),
+                          variable.related_constraint_ptrs().end(),
+                          &constraint_0) !=
                 variable.related_constraint_ptrs().end());
-    EXPECT_FALSE(variable.related_constraint_ptrs().find(&constraint_1) !=
+    EXPECT_FALSE(std::find(variable.related_constraint_ptrs().begin(),
+                           variable.related_constraint_ptrs().end(),
+                           &constraint_1) !=
                  variable.related_constraint_ptrs().end());
 
     variable.register_related_constraint_ptr(&constraint_1);
+    variable.sort_and_unique_related_constraint_ptrs();
     EXPECT_EQ(2, static_cast<int>(variable.related_constraint_ptrs().size()));
-    EXPECT_TRUE(variable.related_constraint_ptrs().find(&constraint_0) !=
+    EXPECT_TRUE(std::find(variable.related_constraint_ptrs().begin(),
+                          variable.related_constraint_ptrs().end(),
+                          &constraint_0) !=
                 variable.related_constraint_ptrs().end());
-    EXPECT_TRUE(variable.related_constraint_ptrs().find(&constraint_1) !=
+    EXPECT_TRUE(std::find(variable.related_constraint_ptrs().begin(),
+                          variable.related_constraint_ptrs().end(),
+                          &constraint_1) !=
                 variable.related_constraint_ptrs().end());
 
     variable.register_related_constraint_ptr(&constraint_1);
+    variable.sort_and_unique_related_constraint_ptrs();
     EXPECT_EQ(2, static_cast<int>(variable.related_constraint_ptrs().size()));
-    EXPECT_TRUE(variable.related_constraint_ptrs().find(&constraint_0) !=
+    EXPECT_TRUE(std::find(variable.related_constraint_ptrs().begin(),
+                          variable.related_constraint_ptrs().end(),
+                          &constraint_0) !=
                 variable.related_constraint_ptrs().end());
-    EXPECT_TRUE(variable.related_constraint_ptrs().find(&constraint_1) !=
+    EXPECT_TRUE(std::find(variable.related_constraint_ptrs().begin(),
+                          variable.related_constraint_ptrs().end(),
+                          &constraint_1) !=
                 variable.related_constraint_ptrs().end());
 
     variable.reset_related_constraint_ptrs();
     EXPECT_TRUE(variable.related_constraint_ptrs().empty());
-    EXPECT_FALSE(variable.related_constraint_ptrs().find(&constraint_0) !=
+    EXPECT_FALSE(std::find(variable.related_constraint_ptrs().begin(),
+                           variable.related_constraint_ptrs().end(),
+                           &constraint_0) !=
                  variable.related_constraint_ptrs().end());
-    EXPECT_FALSE(variable.related_constraint_ptrs().find(&constraint_1) !=
+    EXPECT_FALSE(std::find(variable.related_constraint_ptrs().begin(),
+                           variable.related_constraint_ptrs().end(),
+                           &constraint_1) !=
                  variable.related_constraint_ptrs().end());
 }
 
@@ -508,6 +531,8 @@ TEST_F(TestVariable, register_constraint_sensitivity) {
         model_component::Constraint<int, double>::create_instance();
     auto constraint_1 =
         model_component::Constraint<int, double>::create_instance();
+    constraint_0.set_name("bb");
+    constraint_1.set_name("aa");
 
     EXPECT_TRUE(variable.constraint_sensitivities().empty());
 
@@ -519,6 +544,10 @@ TEST_F(TestVariable, register_constraint_sensitivity) {
     EXPECT_EQ(2, static_cast<int>(variable.constraint_sensitivities().size()));
     EXPECT_EQ(20, variable.constraint_sensitivities().back().second);
 
+    variable.sort_constraint_sensitivities();
+    EXPECT_EQ("aa", variable.constraint_sensitivities()[0].first->name());
+    EXPECT_EQ("bb", variable.constraint_sensitivities()[1].first->name());
+
     variable.reset_constraint_sensitivities();
     EXPECT_TRUE(variable.constraint_sensitivities().empty());
 }
@@ -526,6 +555,11 @@ TEST_F(TestVariable, register_constraint_sensitivity) {
 /*****************************************************************************/
 TEST_F(TestVariable, reset_constraint_sensitivities) {
     /// This method is tested in register_constraint_sensitivity().
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, sort_constraint_sensitivities) {
+    /// This method is tested in register_related_constraint_ptr().
 }
 
 /*****************************************************************************/

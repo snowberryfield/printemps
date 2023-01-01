@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2021 Yuji KOGUMA
+// Copyright (c) 2020-2023 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -24,6 +24,7 @@ TEST_F(TestTwoFlipMoveGenerator, setup) {
     model::Model<int, double> model;
 
     auto& x = model.create_variables("x", 3, 0, 1);
+    model.setup_unique_names();
 
     std::vector<std::pair<model_component::Variable<int, double>*,
                           model_component::Variable<int, double>*>>
