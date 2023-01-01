@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2021 Yuji KOGUMA
+// Copyright (c) 2020-2023 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -891,54 +891,83 @@ TEST_F(TestModel, setup_variable_related_constraints) {
     model.setup_variable_related_binary_coefficient_constraints();
 
     for (auto i = 0; i < 10; i++) {
-        EXPECT_TRUE(x(i).related_constraint_ptrs().find(&g(0)) !=
-                    x(i).related_constraint_ptrs().end());
-        EXPECT_FALSE(x(i).related_constraint_ptrs().find(&g(1)) !=
-                     x(i).related_constraint_ptrs().end());
+        EXPECT_TRUE(std::find(x(i).related_constraint_ptrs().begin(),
+                              x(i).related_constraint_ptrs().end(),
+                              &g(0)) != x(i).related_constraint_ptrs().end());
+        EXPECT_FALSE(std::find(x(i).related_constraint_ptrs().begin(),
+                               x(i).related_constraint_ptrs().end(),
+                               &g(1)) != x(i).related_constraint_ptrs().end());
         /// Only x(0) is related to g(2).
-        EXPECT_EQ(i == 0, x(i).related_constraint_ptrs().find(&g(2)) !=
-                              x(i).related_constraint_ptrs().end());
+        EXPECT_EQ(i == 0,
+                  std::find(x(i).related_constraint_ptrs().begin(),
+                            x(i).related_constraint_ptrs().end(),
+                            &g(2)) != x(i).related_constraint_ptrs().end());
     }
 
     for (auto i = 0; i < 20; i++) {
         for (auto j = 0; j < 30; j++) {
-            EXPECT_FALSE(y(i, j).related_constraint_ptrs().find(&g(0)) !=
+            EXPECT_FALSE(std::find(y(i, j).related_constraint_ptrs().begin(),
+                                   y(i, j).related_constraint_ptrs().end(),
+                                   &g(0)) !=
                          y(i, j).related_constraint_ptrs().end());
-            EXPECT_TRUE(y(i, j).related_constraint_ptrs().find(&g(1)) !=
+            EXPECT_TRUE(std::find(y(i, j).related_constraint_ptrs().begin(),
+                                  y(i, j).related_constraint_ptrs().end(),
+                                  &g(1)) !=
                         y(i, j).related_constraint_ptrs().end());
             /// Only y(0,*) is related to g(2).
-            EXPECT_EQ(i == 0, y(i, j).related_constraint_ptrs().find(&g(2)) !=
-                                  y(i, j).related_constraint_ptrs().end());
+            EXPECT_EQ(
+                i == 0,
+                std::find(y(i, j).related_constraint_ptrs().begin(),
+                          y(i, j).related_constraint_ptrs().end(),
+                          &g(2)) != y(i, j).related_constraint_ptrs().end());
         }
     }
 
     for (auto i = 0; i < 10; i++) {
         EXPECT_TRUE(
-            x(i).related_binary_coefficient_constraint_ptrs().find(&g(0)) !=
+            std::find(x(i).related_binary_coefficient_constraint_ptrs().begin(),
+                      x(i).related_binary_coefficient_constraint_ptrs().end(),
+                      &g(0)) !=
             x(i).related_binary_coefficient_constraint_ptrs().end());
         EXPECT_FALSE(
-            x(i).related_binary_coefficient_constraint_ptrs().find(&g(1)) !=
+            std::find(x(i).related_binary_coefficient_constraint_ptrs().begin(),
+                      x(i).related_binary_coefficient_constraint_ptrs().end(),
+                      &g(1)) !=
             x(i).related_binary_coefficient_constraint_ptrs().end());
     }
 
     for (auto i = 0; i < 20; i++) {
         for (auto j = 0; j < 30; j++) {
             EXPECT_FALSE(
-                y(i, j).related_binary_coefficient_constraint_ptrs().find(
+                std::find(
+                    y(i, j)
+                        .related_binary_coefficient_constraint_ptrs()
+                        .begin(),
+                    y(i, j).related_binary_coefficient_constraint_ptrs().end(),
                     &g(0)) !=
                 y(i, j).related_binary_coefficient_constraint_ptrs().end());
             EXPECT_TRUE(
-                y(i, j).related_binary_coefficient_constraint_ptrs().find(
+                std::find(
+                    y(i, j)
+                        .related_binary_coefficient_constraint_ptrs()
+                        .begin(),
+                    y(i, j).related_binary_coefficient_constraint_ptrs().end(),
                     &g(1)) !=
                 y(i, j).related_binary_coefficient_constraint_ptrs().end());
             EXPECT_FALSE(
-                y(i, j).related_binary_coefficient_constraint_ptrs().find(
+                std::find(
+                    y(i, j)
+                        .related_binary_coefficient_constraint_ptrs()
+                        .begin(),
+                    y(i, j).related_binary_coefficient_constraint_ptrs().end(),
                     &g(2)) !=
                 y(i, j).related_binary_coefficient_constraint_ptrs().end());
         }
     }
     EXPECT_FALSE(
-        x(0).related_binary_coefficient_constraint_ptrs().find(&g(2)) !=
+        std::find(x(0).related_binary_coefficient_constraint_ptrs().begin(),
+                  x(0).related_binary_coefficient_constraint_ptrs().end(),
+                  &g(2)) !=
         x(0).related_binary_coefficient_constraint_ptrs().end());
 }
 
@@ -1029,10 +1058,10 @@ TEST_F(TestModel, setup_related_selection_constraint_ptr_index) {
 
     EXPECT_EQ(1, static_cast<int>(model.selections().size()));
 
-    EXPECT_EQ(3, model.selections()[0].related_constraint_ptrs_vector.size());
-    EXPECT_EQ(&c_0[0], model.selections()[0].related_constraint_ptrs_vector[0]);
-    EXPECT_EQ(&c_1[0], model.selections()[0].related_constraint_ptrs_vector[1]);
-    EXPECT_EQ(&c_2[0], model.selections()[0].related_constraint_ptrs_vector[2]);
+    EXPECT_EQ(3, model.selections()[0].related_constraint_ptrs.size());
+    EXPECT_EQ(&c_0[0], model.selections()[0].related_constraint_ptrs[0]);
+    EXPECT_EQ(&c_1[0], model.selections()[0].related_constraint_ptrs[1]);
+    EXPECT_EQ(&c_2[0], model.selections()[0].related_constraint_ptrs[2]);
 
     EXPECT_EQ(0, x(0).related_selection_constraint_ptr_index_min());
     EXPECT_EQ(0, x(0).related_selection_constraint_ptr_index_max());
@@ -1861,7 +1890,7 @@ TEST_F(TestModel, evaluate) {
 
         model.minimize(p);
         model.set_global_penalty_coefficient(10000);
-
+        model.setup_unique_names();
         model.setup_structure();
         preprocess::SelectionExtractor<int, double> selection_extractor(&model);
         selection_extractor.extract_by_independent(false);
@@ -1880,9 +1909,10 @@ TEST_F(TestModel, evaluate) {
                 move.alterations.emplace_back(&element, 1);
                 for (auto&& constraint_ptr :
                      element.related_constraint_ptrs()) {
-                    move.related_constraint_ptrs.insert(constraint_ptr);
+                    move.related_constraint_ptrs.push_back(constraint_ptr);
                 }
             }
+            neighborhood::sort_and_unique_related_constraint_ptrs(&move);
 
             auto score_after_0 = model.evaluate(move);
             auto score_after_1 = model.evaluate(move, score_before);
@@ -1921,9 +1951,10 @@ TEST_F(TestModel, evaluate) {
                 move.alterations.emplace_back(&element, 0);
                 for (auto&& constraint_ptr :
                      element.related_constraint_ptrs()) {
-                    move.related_constraint_ptrs.insert(constraint_ptr);
+                    move.related_constraint_ptrs.push_back(constraint_ptr);
                 }
             }
+            neighborhood::sort_and_unique_related_constraint_ptrs(&move);
 
             auto score_after_0 = model.evaluate(move);
             auto score_after_1 = model.evaluate(move, score_before);
@@ -1957,9 +1988,11 @@ TEST_F(TestModel, evaluate) {
             for (auto i = 0; i < 5; i++) {
                 move.alterations.emplace_back(&x(i), 1);
                 for (auto&& constraint_ptr : x(i).related_constraint_ptrs()) {
-                    move.related_constraint_ptrs.insert(constraint_ptr);
+                    move.related_constraint_ptrs.push_back(constraint_ptr);
                 }
             }
+            neighborhood::sort_and_unique_related_constraint_ptrs(&move);
+            std::cout << move.related_constraint_ptrs.size() << std::endl;
 
             auto score_after_0 = model.evaluate(move);
             auto score_after_1 = model.evaluate(move, score_before);
@@ -2041,7 +2074,7 @@ TEST_F(TestModel, evaluate) {
 
         model.maximize(p);
         model.set_global_penalty_coefficient(10000);
-
+        model.setup_unique_names();
         model.setup_structure();
         preprocess::SelectionExtractor<int, double> selection_extractor(&model);
         selection_extractor.extract_by_independent(false);
@@ -2059,9 +2092,10 @@ TEST_F(TestModel, evaluate) {
                 move.alterations.emplace_back(&element, 1);
                 for (auto&& constraint_ptr :
                      element.related_constraint_ptrs()) {
-                    move.related_constraint_ptrs.insert(constraint_ptr);
+                    move.related_constraint_ptrs.push_back(constraint_ptr);
                 }
             }
+            neighborhood::sort_and_unique_related_constraint_ptrs(&move);
 
             auto score_after_0 = model.evaluate(move);
             auto score_after_1 = model.evaluate(move, score_before);
@@ -2099,9 +2133,10 @@ TEST_F(TestModel, evaluate) {
                 move.alterations.emplace_back(&element, 0);
                 for (auto&& constraint_ptr :
                      element.related_constraint_ptrs()) {
-                    move.related_constraint_ptrs.insert(constraint_ptr);
+                    move.related_constraint_ptrs.push_back(constraint_ptr);
                 }
             }
+            neighborhood::sort_and_unique_related_constraint_ptrs(&move);
 
             auto score_after_0 = model.evaluate(move);
             auto score_after_1 = model.evaluate(move, score_before);
@@ -2135,9 +2170,10 @@ TEST_F(TestModel, evaluate) {
             for (auto i = 0; i < 5; i++) {
                 move.alterations.emplace_back(&x(i), 1);
                 for (auto&& constraint_ptr : x(i).related_constraint_ptrs()) {
-                    move.related_constraint_ptrs.insert(constraint_ptr);
+                    move.related_constraint_ptrs.push_back(constraint_ptr);
                 }
             }
+            neighborhood::sort_and_unique_related_constraint_ptrs(&move);
 
             auto score_after_0 = model.evaluate(move);
             auto score_after_1 = model.evaluate(move, score_before);

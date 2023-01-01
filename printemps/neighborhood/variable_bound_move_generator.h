@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2021 Yuji KOGUMA
+// Copyright (c) 2020-2023 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -52,20 +52,31 @@ class VariableBoundMoveGenerator
             move.sense = MoveSense::VariableBound;
             move.alterations.emplace_back(binomials[i].variable_ptr_first, 0);
             move.alterations.emplace_back(binomials[i].variable_ptr_second, 0);
-            move.is_univariable_move = false;
-            move.is_selection_move   = false;
-
-            utility::update_union_set(
-                &(move.related_constraint_ptrs),
-                binomials[i].variable_ptr_first->related_constraint_ptrs());
-
-            utility::update_union_set(
-                &(move.related_constraint_ptrs),
-                binomials[i].variable_ptr_second->related_constraint_ptrs());
-
+            move.is_univariable_move          = false;
+            move.is_selection_move            = false;
             move.is_special_neighborhood_move = true;
             move.is_available                 = true;
             move.overlap_rate                 = 0.0;
+
+            move.related_constraint_ptrs.insert(
+                move.related_constraint_ptrs.end(),
+                binomials[i]
+                    .variable_ptr_first->related_constraint_ptrs()
+                    .begin(),
+                binomials[i]
+                    .variable_ptr_first->related_constraint_ptrs()
+                    .end());
+
+            move.related_constraint_ptrs.insert(
+                move.related_constraint_ptrs.end(),
+                binomials[i]
+                    .variable_ptr_second->related_constraint_ptrs()
+                    .begin(),
+                binomials[i]
+                    .variable_ptr_second->related_constraint_ptrs()
+                    .end());
+
+            sort_and_unique_related_constraint_ptrs(&move);
 
             this->m_moves[4 * i + 1] = move;
             this->m_moves[4 * i + 2] = move;

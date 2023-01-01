@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2021 Yuji KOGUMA
+// Copyright (c) 2020-2023 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -18,7 +18,7 @@ template <class T_Variable, class T_Expression>
 struct Move {
     std::vector<Alteration<T_Variable, T_Expression>> alterations;
     MoveSense                                         sense;
-    std::unordered_set<model_component::Constraint<T_Variable, T_Expression> *>
+    std::vector<model_component::Constraint<T_Variable, T_Expression> *>
         related_constraint_ptrs;
 
     /**
@@ -151,27 +151,33 @@ constexpr bool has_duplicate_variable(
 template <class T_Variable, class T_Expression>
 constexpr double compute_overlap_rate(
     const std::vector<Alteration<T_Variable, T_Expression>> &a_ALTERATIONS) {
-    auto union_ptrs = a_ALTERATIONS.front()
-                          .first->related_binary_coefficient_constraint_ptrs();
+    auto &union_ptrs_vector =
+        a_ALTERATIONS.front()
+            .first->related_binary_coefficient_constraint_ptrs();
+
+    std::unordered_set<model_component::Constraint<T_Variable, T_Expression> *>
+        union_ptrs(union_ptrs_vector.begin(), union_ptrs_vector.end());
+
     if (union_ptrs.size() == 0) {
         return 0.0;
     }
 
-    auto intersection_ptrs =
-        a_ALTERATIONS.front()
-            .first->related_binary_coefficient_constraint_ptrs();
+    auto intersection_ptrs = union_ptrs;
 
     const int ALTERATIONS_SIZE = a_ALTERATIONS.size();
     for (auto i = 1; i < ALTERATIONS_SIZE; i++) {
-        utility::update_union_set(  //
-            &union_ptrs,            //
+        auto &related_constraint_ptrs_vector =
             a_ALTERATIONS[i]
-                .first->related_binary_coefficient_constraint_ptrs());
+                .first->related_binary_coefficient_constraint_ptrs();
+        std::unordered_set<
+            model_component::Constraint<T_Variable, T_Expression> *>
+            related_constraint_ptrs(related_constraint_ptrs_vector.begin(),
+                                    related_constraint_ptrs_vector.end());
 
-        utility::update_intersection_set(
-            &intersection_ptrs,  //
-            a_ALTERATIONS[i]
-                .first->related_binary_coefficient_constraint_ptrs());
+        utility::update_union_set(  //
+            &union_ptrs, related_constraint_ptrs);
+        utility::update_intersection_set(  //
+            &intersection_ptrs, related_constraint_ptrs);
     }
 
     /**
@@ -215,15 +221,29 @@ constexpr bool is_binary_swap(const Move<T_Variable, T_Expression> &a_MOVE) {
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-constexpr std::unordered_set<
-    model_component::Variable<T_Variable, T_Expression> *>
-related_variable_ptrs(const Move<T_Variable, T_Expression> &a_MOVE) {
-    std::unordered_set<model_component::Variable<T_Variable, T_Expression> *>
-        result;
+constexpr std::vector<model_component::Variable<T_Variable, T_Expression> *>
+related_variable_ptrs_vector(const Move<T_Variable, T_Expression> &a_MOVE) {
+    std::vector<model_component::Variable<T_Variable, T_Expression> *> result;
     for (const auto &alteration : a_MOVE.alterations) {
-        result.insert(alteration.first);
+        result.push_back(alteration.first);
     }
     return result;
+}
+
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+void sort_and_unique_related_constraint_ptrs(
+    Move<T_Variable, T_Expression> *a_move_ptr) {
+    std::stable_sort(a_move_ptr->related_constraint_ptrs.begin(),
+                     a_move_ptr->related_constraint_ptrs.end(),
+                     [](const auto &a_FIRST, const auto &a_SECOND) {
+                         return a_FIRST->name() < a_SECOND->name();
+                     });
+
+    a_move_ptr->related_constraint_ptrs.erase(
+        std::unique(a_move_ptr->related_constraint_ptrs.begin(),  //
+                    a_move_ptr->related_constraint_ptrs.end()),
+        a_move_ptr->related_constraint_ptrs.end());
 }
 
 /*****************************************************************************/
@@ -236,7 +256,9 @@ constexpr Move<T_Variable, T_Expression> operator+(
     result.alterations.insert(result.alterations.end(),
                               a_MOVE_SECOND.alterations.begin(),
                               a_MOVE_SECOND.alterations.end());
+
     result.related_constraint_ptrs.insert(
+        result.related_constraint_ptrs.end(),
         a_MOVE_SECOND.related_constraint_ptrs.begin(),
         a_MOVE_SECOND.related_constraint_ptrs.end());
 
@@ -247,6 +269,8 @@ constexpr Move<T_Variable, T_Expression> operator+(
 
     result.overlap_rate = compute_overlap_rate(result.alterations);
     result.hash         = compute_hash(result.alterations);
+
+    sort_and_unique_related_constraint_ptrs(&result);
 
     return result;
 };

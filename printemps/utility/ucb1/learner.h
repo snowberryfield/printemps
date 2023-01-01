@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2021 Yuji KOGUMA
+// Copyright (c) 2020-2023 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -16,12 +16,14 @@ class Learner {
     std::vector<Action<T_ActionBody>> m_actions;
     Action<T_ActionBody> *            m_best_action_ptr;
 
-    long m_total_number_of_samples;
+    long   m_total_number_of_samples;
+    double m_decay_factor;
 
    public:
     /*************************************************************************/
-    Learner(const std::vector<Action<T_ActionBody>> &a_ACTIONS) {
-        this->setup(a_ACTIONS);
+    Learner(const std::vector<Action<T_ActionBody>> &a_ACTIONS,
+            const double                             a_DECAY_FACTOR) {
+        this->setup(a_ACTIONS, a_DECAY_FACTOR);
     }
 
     /*************************************************************************/
@@ -37,14 +39,51 @@ class Learner {
     /*************************************************************************/
     inline void initialize(void) {
         m_actions.clear();
+        m_best_action_ptr = nullptr;
+
         m_total_number_of_samples = 0;
+        m_decay_factor            = 0.0;
     }
 
     /*************************************************************************/
-    inline void setup(const std::vector<Action<T_ActionBody>> &a_ACTIONS) {
+    inline void setup(const std::vector<Action<T_ActionBody>> &a_ACTIONS,
+                      const double                             a_DECAY_FACTOR) {
         this->initialize();
         m_actions         = a_ACTIONS;
+        m_decay_factor    = a_DECAY_FACTOR;
         m_best_action_ptr = &(m_actions.front());
+    }
+
+    /*************************************************************************/
+    inline constexpr void learn(const double a_SCORE) {
+        m_total_number_of_samples++;
+        m_best_action_ptr->learn(a_SCORE, m_decay_factor);
+        for (auto &&action : m_actions) {
+            action.update_confidence(m_total_number_of_samples);
+        }
+
+        std::vector<Action<T_ActionBody> *> no_data_action_ptrs;
+        for (auto &&action : m_actions) {
+            if (action.number_of_samples == 0) {
+                no_data_action_ptrs.push_back(&action);
+            }
+        }
+
+        Action<T_ActionBody> *best_action_ptr = nullptr;
+        if (no_data_action_ptrs.size() > 0) {
+            best_action_ptr = no_data_action_ptrs.front();
+        } else {
+            double argmax_upper_confidence =
+                std::numeric_limits<double>::lowest();
+            for (auto &&action : m_actions) {
+                const double UPPER_CONFIDENCE = action.mean + action.confidence;
+                if (UPPER_CONFIDENCE > argmax_upper_confidence) {
+                    argmax_upper_confidence = UPPER_CONFIDENCE;
+                    best_action_ptr         = &action;
+                }
+            }
+        }
+        m_best_action_ptr = best_action_ptr;
     }
 
     /*************************************************************************/
@@ -75,51 +114,8 @@ class Learner {
     }
 
     /*************************************************************************/
-    inline constexpr void learn(const double a_SCORE) {
-        m_best_action_ptr->number_of_samples++;
-        m_best_action_ptr->total_score += a_SCORE;
-        m_best_action_ptr->mean = m_best_action_ptr->total_score /
-                                  m_best_action_ptr->number_of_samples;
-        m_best_action_ptr->max = std::max(m_best_action_ptr->max, a_SCORE);
-        m_best_action_ptr->min = std::min(m_best_action_ptr->min, a_SCORE);
-        m_total_number_of_samples++;
-
-        double range = m_best_action_ptr->max - m_best_action_ptr->min;
-        if (m_best_action_ptr->number_of_samples == 1) {
-            range = std::max(fabs(m_best_action_ptr->max),
-                             fabs(m_best_action_ptr->min));
-        }
-
-        for (auto &&action : m_actions) {
-            if (action.number_of_samples > 0) {
-                action.confidence =
-                    range * sqrt(2.0 * log(m_total_number_of_samples) /
-                                 action.number_of_samples);
-            }
-        }
-
-        std::vector<Action<T_ActionBody> *> no_data_action_ptrs;
-        for (auto &&action : m_actions) {
-            if (action.number_of_samples == 0) {
-                no_data_action_ptrs.push_back(&action);
-            }
-        }
-
-        Action<T_ActionBody> *best_action_ptr = nullptr;
-        if (no_data_action_ptrs.size() > 0) {
-            best_action_ptr = no_data_action_ptrs.front();
-        } else {
-            double argmax_upper_confidence =
-                std::numeric_limits<double>::lowest();
-            for (auto &&action : m_actions) {
-                double upper_confidence = action.mean + action.confidence;
-                if (upper_confidence > argmax_upper_confidence) {
-                    argmax_upper_confidence = upper_confidence;
-                    best_action_ptr         = &action;
-                }
-            }
-        }
-        m_best_action_ptr = best_action_ptr;
+    inline constexpr double decay_factor(void) const noexcept {
+        return m_decay_factor;
     }
 };
 }  // namespace printemps::utility::ucb1

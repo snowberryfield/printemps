@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2021 Yuji KOGUMA
+// Copyright (c) 2020-2023 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -108,7 +108,8 @@ class TabuSearchControllerStateManager {
             actions[0] = true;   /// Enables parallelization
             actions[1] = false;  /// Disables parallelization
             m_state.neighborhood_update_parallelization_controller.setup(
-                actions);
+                actions,
+                m_option.parallel.evaluation_parallelization_decay_factor);
         }
 
         if (m_option.parallel.is_enabled_parallel_evaluation &&
@@ -116,7 +117,9 @@ class TabuSearchControllerStateManager {
             std::vector<utility::ucb1::Action<bool>> actions(2);
             actions[0] = true;   /// Enables parallelization
             actions[1] = false;  /// Disables parallelization
-            m_state.evaluation_parallelization_controller.setup(actions);
+            m_state.evaluation_parallelization_controller.setup(
+                actions, m_option.parallel
+                             .neighborhood_update_parallelization_decay_factor);
         }
 #endif
     }

@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2021 Yuji KOGUMA
+// Copyright (c) 2020-2023 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -26,6 +26,7 @@ TEST_F(TestConstantSumIntegersMoveGenerator, setup) {
     auto& x = model.create_variables("x", 2, -10, 10);
     auto& c = model.create_constraint("c", x[0] + x[1] == 5);
 
+    model.setup_unique_names();
     model.setup_structure();
 
     auto& constant_sum_integers_ptrs =
@@ -49,8 +50,9 @@ TEST_F(TestConstantSumIntegersMoveGenerator, setup) {
     EXPECT_EQ(1, moves[0].alterations[0].second);
     EXPECT_EQ(4, moves[0].alterations[1].second);
     EXPECT_EQ(neighborhood::MoveSense::ConstantSumIntegers, moves[0].sense);
-    EXPECT_TRUE(moves[0].related_constraint_ptrs.find(&c[0]) !=
-                moves[0].related_constraint_ptrs.end());
+    EXPECT_TRUE(std::find(moves[0].related_constraint_ptrs.begin(),
+                          moves[0].related_constraint_ptrs.end(),
+                          &c[0]) != moves[0].related_constraint_ptrs.end());
 
     /// (x0,x1) = (-1,6)
     EXPECT_FALSE(moves[1].is_univariable_move);
@@ -60,8 +62,9 @@ TEST_F(TestConstantSumIntegersMoveGenerator, setup) {
     EXPECT_EQ(-1, moves[1].alterations[0].second);
     EXPECT_EQ(6, moves[1].alterations[1].second);
     EXPECT_EQ(neighborhood::MoveSense::ConstantSumIntegers, moves[1].sense);
-    EXPECT_TRUE(moves[1].related_constraint_ptrs.find(&c[0]) !=
-                moves[1].related_constraint_ptrs.end());
+    EXPECT_TRUE(std::find(moves[1].related_constraint_ptrs.begin(),
+                          moves[1].related_constraint_ptrs.end(),
+                          &c[0]) != moves[1].related_constraint_ptrs.end());
 }
 }  // namespace
 /*****************************************************************************/
