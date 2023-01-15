@@ -17,11 +17,10 @@ __PRINTEMPS__ is a C++ metaheuristics modeler/solver library for general integer
 - __Flexibility to define neighborhood.__ It automatically detects the neighborhood structure of the problem. In addition to this, PRINTEMPS also accepts user-defined neighborhood.
 
 ## News
-|     Date     | Update                                                                                            |
-|:------------:|:--------------------------------------------------------------------------------------------------|
-| Oct. 6, 2022 | [New benchmark results](./contents/benchmark/index.md) were added.                                |
-| Oct. 6, 2022 | [Solver Option Guide](./contents/solver_option_guide.md) was updated.                             |
-| Oct. 6, 2022 | [PRINTEMPS v2.1.0](https://github.com/snowberryfield/printemps/releases/tag/v2.1.0) was released. |
+|     Date      | Update                                                                                            |
+|:-------------:|:--------------------------------------------------------------------------------------------------|
+| Jan. 15, 2023 | [New benchmark results](./contents/benchmark/index.md) were added.                                |
+| Jan. 15, 2023 | [PRINTEMPS v2.1.2](https://github.com/snowberryfield/printemps/releases/tag/v2.1.2) was released. |
 
 ## Algorithm
 PRINTEMPS can compute approximate solutions for __linear and nonlinear integer optimization problems__. It employs __Tabu Search__ [1], a metaheuristics technique, to solve problems. In solving, it replaces constraints with penalty functions which return violations to the corresponding constraints, and the penalty functions multiplied by positive penalty coefficients are added to the objective function. The penalty coefficients are updated iteratively and automatically in a method similar (not exact same) to the one proposed in paper [2].
@@ -144,7 +143,7 @@ __PRINTEMPS__ is licensed under [MIT license](https://opensource.org/licenses/MI
 
 - [1] F.Glover: [Future Paths for Integer Programming and Links to Artificial Intelligence](http://leeds-faculty.colorado.edu/glover/TS%20-%20Future%20Paths%20for%20Integer%20Programming.pdf), _Computers and Operations Research_, Vol.13 No.5 pp.533-549 (1986).
 
-- [2] K.Nonobe and T.Ibaraki: [An improved tabu search method for the weighted constraint satisfaction problem](https://www.researchgate.net/publication/228737620_An_Improved_Tabu_Search_Method_For_The_Weighted_Constraint_Satisfaction_Problem), _INFOR_ Vol.39, No.2 pp.131–151 (2001).
+- [2] K.Nonobe and T.Ibaraki: [An improved tabu search method for the weighted constraint satisfaction problem](https://www.researchgate.net/publication/228737620_An_Improved_Tabu_Search_Method_For_The_Weighted_Constraint_Satisfaction_Problem), _INFOR_ Vol.39, pp.131–151 (2001).
 
 - [3] R.Fletcher: [Practical Methods of Optimization, Second Edition](https://onlinelibrary.wiley.com/doi/book/10.1002/9781118723203), John Wiley & Sons (2000).
 

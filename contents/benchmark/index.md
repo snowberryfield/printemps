@@ -6,6 +6,19 @@ layout: sub
 # Benchmark Results
 The following results were obtained by the solver detailed in [Standalone Solver](https://snowberryfield.github.io/printemps/#standalone-solver). To refer each detail benchmark result, click the number in the `No.` column for each record.
 
+## v2.1.2
+
+|                       No.                       | Last Updated  | Version | Computational Time |                                        Instances                                        | Operating System |  Compiler  |                    CPU                    | RAM  |
+|:-----------------------------------------------:|:-------------:|:-------:|:------------------:|:---------------------------------------------------------------------------------------:|:----------------:|:----------:|:-----------------------------------------:|------|
+| [1](./results/v2.1.2/0001/benchmark_summary.md) | Jan. 15, 2023 | v2.1.2  |       600sec       |     [Benchmark Set](https://miplib.zib.de/tag_benchmark.html) <br />(89 instances)      |   Ubuntu 22.04   | g++11.2.0  | Intel(R) Xeon(R) CPU E3-1270 v5 @ 3.60GHz | 16GB |
+| [2](./results/v2.1.2/0002/benchmark_summary.md) | Jan. 15, 2023 | v2.1.2  |       600sec       | [Collection Set](https://miplib.zib.de/tag_collection.html) <br />(60 "open" instances) |   Ubuntu 22.04   | g++ 11.2.0 | Intel(R) Xeon(R) CPU E3-1270 v5 @ 3.60GHz | 16GB |
+| [3](./results/v2.1.2/0003/benchmark_summary.md) | Jan. 15, 2023 | v2.1.2  |      3600sec       |     [Benchmark Set](https://miplib.zib.de/tag_benchmark.html) <br />(89 instances)      |   Ubuntu 22.04   | g++11.2.0  | Intel(R) Xeon(R) CPU E3-1270 v5 @ 3.60GHz | 16GB |
+| [4](./results/v2.1.2/0004/benchmark_summary.md) | Jan. 15, 2023 | v2.1.2  |      3600sec       | [Collection Set](https://miplib.zib.de/tag_collection.html) <br />(60 "open" instances) |   Ubuntu 22.04   | g++ 11.2.0 | Intel(R) Xeon(R) CPU E3-1270 v5 @ 3.60GHz | 16GB |
+
+
+## v2.1.1
+Few algorithmic changes from v2.1.0.
+
 ## v2.1.0
 
 |                       No.                       | Last Updated | Version | Computational Time |                                        Instances                                        | Operating System |  Compiler  |                    CPU                    | RAM  |
@@ -14,7 +27,6 @@ The following results were obtained by the solver detailed in [Standalone Solver
 | [2](./results/v2.1.0/0002/benchmark_summary.md) | Oct. 6, 2022 | v2.1.0  |       600sec       | [Collection Set](https://miplib.zib.de/tag_collection.html) <br />(60 "open" instances) |   Ubuntu 22.04   | g++ 11.2.0 | Intel(R) Xeon(R) CPU E3-1270 v5 @ 3.60GHz | 16GB |
 | [3](./results/v2.1.0/0003/benchmark_summary.md) | Oct. 6, 2022 | v2.1.0  |      3600sec       |     [Benchmark Set](https://miplib.zib.de/tag_benchmark.html) <br />(89 instances)      |   Ubuntu 22.04   | g++11.2.0  | Intel(R) Xeon(R) CPU E3-1270 v5 @ 3.60GHz | 16GB |
 | [4](./results/v2.1.0/0004/benchmark_summary.md) | Oct. 6, 2022 | v2.1.0  |      3600sec       | [Collection Set](https://miplib.zib.de/tag_collection.html) <br />(60 "open" instances) |   Ubuntu 22.04   | g++ 11.2.0 | Intel(R) Xeon(R) CPU E3-1270 v5 @ 3.60GHz | 16GB |
-
 
 ## v2.0.0
 
