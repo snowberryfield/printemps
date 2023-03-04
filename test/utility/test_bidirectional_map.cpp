@@ -36,13 +36,13 @@ TEST_F(TestBidirectionalMap, operator_square_bracket) {
     bmap.insert(1, "one");
     bmap.insert(10, "ten");
 
-    EXPECT_EQ("zero", bmap[0]);
-    EXPECT_EQ("one", bmap[1]);
-    EXPECT_EQ("ten", bmap[10]);
+    EXPECT_EQ("zero", bmap.forward_at(0));
+    EXPECT_EQ("one", bmap.forward_at(1));
+    EXPECT_EQ("ten", bmap.forward_at(10));
 
-    EXPECT_EQ(0, bmap["zero"]);
-    EXPECT_EQ(1, bmap["one"]);
-    EXPECT_EQ(10, bmap["ten"]);
+    EXPECT_EQ(0, bmap.reverse_at("zero"));
+    EXPECT_EQ(1, bmap.reverse_at("one"));
+    EXPECT_EQ(10, bmap.reverse_at("ten"));
 
     EXPECT_EQ(3, bmap.size());
 }
