@@ -401,13 +401,13 @@ class LocalSearchCore {
                     solution::IncumbentHolder<T_Variable, T_Expression>*     //
                                                       a_incumbent_holder_ptr,  //
                     Memory<T_Variable, T_Expression>* a_memory_ptr,  //
-                    const option::Option&             a_OPION) {
+                    const option::Option&             a_OPTION) {
         this->initialize();
         this->setup(a_model_ptr,                       //
                     a_INITIAL_VARIABLE_VALUE_PROXIES,  //
                     a_incumbent_holder_ptr,            //
                     a_memory_ptr,                      //
-                    a_OPION);
+                    a_OPTION);
     }
 
     /*************************************************************************/
@@ -437,12 +437,12 @@ class LocalSearchCore {
         solution::IncumbentHolder<T_Variable, T_Expression>*       //
                                           a_incumbent_holder_ptr,  //
         Memory<T_Variable, T_Expression>* a_memory_ptr,            //
-        const option::Option&             a_OPION) {
+        const option::Option&             a_OPTION) {
         m_model_ptr                      = a_model_ptr;
         m_initial_variable_value_proxies = a_INITIAL_VARIABLE_VALUE_PROXIES;
         m_incumbent_holder_ptr           = a_incumbent_holder_ptr;
         m_memory_ptr                     = a_memory_ptr;
-        m_option                         = a_OPION;
+        m_option                         = a_OPTION;
         m_feasible_solutions.clear();
     }
 
