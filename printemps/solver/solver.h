@@ -10,6 +10,7 @@
 #include "status.h"
 #include "result.h"
 
+#include "pdlp/controller/pdlp_controller.h"
 #include "lagrange_dual/controller/lagrange_dual_controller.h"
 #include "local_search/controller/local_search_controller.h"
 #include "tabu_search/controller/tabu_search_controller.h"
@@ -33,6 +34,8 @@ class Solver {
     std::string m_start_date_time;
     std::string m_finish_date_time;
 
+    pdlp::controller::PDLPController<T_Variable, T_Expression>
+        m_pdlp_controller;
     lagrange_dual::controller::LagrangeDualController<T_Variable, T_Expression>
         m_lagrange_dual_controller;
     local_search::controller::LocalSearchController<T_Variable, T_Expression>
@@ -143,6 +146,15 @@ class Solver {
     }
 
     /*************************************************************************/
+    inline void run_pdlp(void) {
+        m_pdlp_controller.setup(m_model_ptr,         //
+                                m_current_solution,  //
+                                m_time_keeper,       //
+                                m_option);
+        m_pdlp_controller.run();
+    }
+
+    /*************************************************************************/
     inline void run_lagrange_dual(void) {
         m_lagrange_dual_controller.setup(m_model_ptr,          //
                                          m_current_solution,   //
@@ -215,6 +227,7 @@ class Solver {
         m_start_date_time.clear();
         m_finish_date_time.clear();
 
+        m_pdlp_controller.initialize();
         m_lagrange_dual_controller.initialize();
         m_local_search_controller.initialize();
         m_tabu_search_controller.initialize();
@@ -355,6 +368,13 @@ class Solver {
             m_option.output.verbose >= option::verbose::Outer);
 
         /**
+         * Solve relaxed LP to obtain a dual bound (Optional).
+         */
+        if (m_option.pdlp.is_enabled) {
+            this->run_pdlp();
+        }
+
+        /**
          * Solve Lagrange dual to obtain a better initial solution (Optional).
          */
         if (m_option.lagrange_dual.is_enabled) {
@@ -479,6 +499,12 @@ class Solver {
     /*************************************************************************/
     inline const std::string& finish_date_time(void) const {
         return m_finish_date_time;
+    }
+
+    /*************************************************************************/
+    inline const pdlp::controller::PDLPController<T_Variable, T_Expression>&
+    pdlp_controller(void) const {
+        return m_pdlp_controller;
     }
 
     /*************************************************************************/
