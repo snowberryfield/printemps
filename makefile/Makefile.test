@@ -21,6 +21,7 @@ test: build
 	$(BUILD_DIR)/test_utility; \
 	$(BUILD_DIR)/test_utility_json; \
 	$(BUILD_DIR)/test_utility_ucb1
+	$(BUILD_DIR)/test_utility_sparse
 
 .PHONY: build
 build:

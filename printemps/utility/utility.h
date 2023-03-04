@@ -22,6 +22,7 @@
 #include "binary_matrix.h"
 #include "q_learning/q_learning.h"
 #include "ucb1/ucb1.h"
+#include "sparse/sparse.h"
 
 #endif
 /*****************************************************************************/

@@ -49,6 +49,7 @@ include(test_solution.cmake)
 include(test_utility.cmake)
 include(test_utility_json.cmake)
 include(test_utility_ucb1.cmake)
+include(test_utility_sparse.cmake)
 
 # ##############################################################################
 # # END

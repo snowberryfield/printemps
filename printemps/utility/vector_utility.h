@@ -23,13 +23,13 @@ constexpr int count(const std::vector<T, A> &a_ARRAY, const T a_VALUE) {
 /*****************************************************************************/
 template <class T, class A>
 constexpr T min(const std::vector<T, A> &a_ARRAY) {
-    return *min_element(a_ARRAY.begin(), a_ARRAY.end());
+    return *std::min_element(a_ARRAY.begin(), a_ARRAY.end());
 }
 
 /*****************************************************************************/
 template <class T, class A>
 constexpr T max(const std::vector<T, A> &a_ARRAY) {
-    return *max_element(a_ARRAY.begin(), a_ARRAY.end());
+    return *std::max_element(a_ARRAY.begin(), a_ARRAY.end());
 }
 
 /*****************************************************************************/
