@@ -3,8 +3,8 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_SOLVER_LOCAL_SEARCH_CORE_LOCAL_SEARCH_CORE_CONTROLLER_H__
-#define PRINTEMPS_SOLVER_LOCAL_SEARCH_CORE_LOCAL_SEARCH_CORE_CONTROLLER_H__
+#ifndef PRINTEMPS_SOLVER_LOCAL_SEARCH_CONTROLLER_LOCAL_SEARCH_CONTROLLER_H__
+#define PRINTEMPS_SOLVER_LOCAL_SEARCH_CONTROLLER_LOCAL_SEARCH_CONTROLLER_H__
 
 #include "../../abstract_solver_controller.h"
 #include "../core/local_search_core.h"

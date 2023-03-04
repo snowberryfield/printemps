@@ -40,8 +40,8 @@ class ProblemSizeReducer {
         utility::print_single_line(a_IS_ENABLED_PRINT);
         utility::print_message("Reducing problem size...", a_IS_ENABLED_PRINT);
 
-        int number_of_disabled_constaints = 0;
-        int number_of_fixed_variables     = 0;
+        int number_of_disabled_constraints = 0;
+        int number_of_fixed_variables      = 0;
 
         if (m_model_ptr->is_linear()) {
             number_of_fixed_variables +=
@@ -49,19 +49,19 @@ class ProblemSizeReducer {
         }
 
         while (true) {
-            const int NUMBER_OF_NEWLY_DISABLED_CONSTAINTS  //
+            const int NUMBER_OF_NEWLY_DISABLED_CONSTRAINTS  //
                 = this->remove_redundant_constraints_with_tightening_variable_bounds(
                     a_IS_ENABLED_PRINT);
 
             const int NUMBER_OF_NEWLY_FIXED_VARIABLES  //
                 = this->remove_implicit_fixed_variables(a_IS_ENABLED_PRINT);
 
-            number_of_disabled_constaints +=
-                NUMBER_OF_NEWLY_DISABLED_CONSTAINTS;
+            number_of_disabled_constraints +=
+                NUMBER_OF_NEWLY_DISABLED_CONSTRAINTS;
             number_of_fixed_variables +=  //
                 NUMBER_OF_NEWLY_FIXED_VARIABLES;
 
-            if (NUMBER_OF_NEWLY_DISABLED_CONSTAINTS == 0 &&
+            if (NUMBER_OF_NEWLY_DISABLED_CONSTRAINTS == 0 &&
                 NUMBER_OF_NEWLY_FIXED_VARIABLES == 0) {
                 break;
             }
@@ -69,7 +69,7 @@ class ProblemSizeReducer {
 
         utility::print_message("Done.", a_IS_ENABLED_PRINT);
 
-        return (number_of_disabled_constaints > 0) ||
+        return (number_of_disabled_constraints > 0) ||
                (number_of_fixed_variables > 0);
     }
 
@@ -270,7 +270,7 @@ class ProblemSizeReducer {
         }
 
         /**
-         * The detected singleton constaint will be disabled instead of fixing
+         * The detected singleton constraint will be disabled instead of fixing
          * or tightening the lower and upper bounds of the variable included in
          * the constraint.
          */

@@ -659,13 +659,13 @@ class TabuSearchCore {
                    solution::IncumbentHolder<T_Variable, T_Expression>*       //
                                                      a_incumbent_holder_ptr,  //
                    Memory<T_Variable, T_Expression>* a_memory_ptr,            //
-                   const option::Option&             a_OPION) {
+                   const option::Option&             a_OPTION) {
         this->initialize();
         this->setup(a_model_ptr,                       //
                     a_INITIAL_VARIABLE_VALUE_PROXIES,  //
                     a_incumbent_holder_ptr,            //
                     a_memory_ptr,                      //
-                    a_OPION);
+                    a_OPTION);
     }
 
     /*************************************************************************/
@@ -720,7 +720,7 @@ class TabuSearchCore {
         this->preprocess();
 
         /**
-         * Prepare the move evaluator.
+         * Prepare a move evaluator.
          */
         TabuSearchCoreMoveEvaluator<T_Variable, T_Expression> move_evaluator(
             m_model_ptr, m_memory_ptr, m_option);
