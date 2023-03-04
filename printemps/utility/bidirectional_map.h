@@ -43,13 +43,23 @@ class BidirectionalMap {
     }
 
     /*************************************************************************/
-    inline constexpr T2 &operator[](const T1 a_KEY) {
-        return m_forward[a_KEY];
+    inline constexpr const T2 &forward_at(const T1 a_KEY) const {
+        return m_forward.at(a_KEY);
     }
 
     /*************************************************************************/
-    inline constexpr T1 &operator[](const T2 a_KEY) {
-        return m_reverse[a_KEY];
+    inline constexpr const T1 &reverse_at(const T2 a_KEY) const {
+        return m_reverse.at(a_KEY);
+    }
+
+    /*************************************************************************/
+    inline constexpr const std::unordered_map<T1, T2> &forward(void) const {
+        return m_forward;
+    }
+
+    /*************************************************************************/
+    inline constexpr const std::unordered_map<T2, T1> &reverse(void) const {
+        return m_reverse;
     }
 };
 }  // namespace printemps::utility
