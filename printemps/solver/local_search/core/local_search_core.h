@@ -6,6 +6,7 @@
 #ifndef PRINTEMPS_SOLVER_LOCAL_SEARCH_CORE_LOCAL_SEARCH_CORE_H__
 #define PRINTEMPS_SOLVER_LOCAL_SEARCH_CORE_LOCAL_SEARCH_CORE_H__
 
+#include "../../integer_step_size_adjuster.h"
 #include "local_search_core_termination_status.h"
 #include "local_search_core_state.h"
 #include "local_search_core_state_manager.h"
@@ -461,6 +462,11 @@ class LocalSearchCore {
          */
         this->preprocess();
 
+        /**
+         * Prepare an step size adjuster for integer moves.
+         */
+        IntegerStepSizeAdjuster integer_step_size_adjuster(m_model_ptr,
+                                                           m_option);
         std::vector<solution::SolutionScore> trial_solution_scores;
         std::vector<int>                     move_indices;
         std::unordered_set<
@@ -606,6 +612,7 @@ class LocalSearchCore {
                         break;
                     }
                 }
+
                 if (has_intersection) {
                     continue;
                 }
@@ -622,6 +629,12 @@ class LocalSearchCore {
                 constraint_ptrs.insert(
                     move_ptr->related_constraint_ptrs.begin(),
                     move_ptr->related_constraint_ptrs.end());
+
+                if (move_ptr->sense == neighborhood::MoveSense::Integer) {
+                    integer_step_size_adjuster.adjust(&move,
+                                                      CURRENT_SOLUTION_SCORE);
+                }
+
                 number_of_performed_moves++;
             }
 
