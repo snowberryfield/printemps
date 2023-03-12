@@ -44,6 +44,35 @@ struct PDLPCoreResult {
         this->termination_status = PDLPCoreTerminationStatus::ITERATION_OVER;
         this->option.initialize();
     }
+
+    /*************************************************************************/
+    inline void scaling(const utility::sparse::Diagonal &a_ROW_SCALER,
+                        const utility::sparse::Diagonal &a_COLUMN_SCALER) {
+        const auto ROW_SCALER_INVERSE    = a_ROW_SCALER.inverse();
+        const auto COLUMN_SCALER_INVERSE = a_COLUMN_SCALER.inverse();
+
+        COLUMN_SCALER_INVERSE.dot(&this->primal.solution);
+        COLUMN_SCALER_INVERSE.dot(&this->primal.lhs);
+        COLUMN_SCALER_INVERSE.dot(&this->primal.direction);
+        COLUMN_SCALER_INVERSE.dot(&this->primal.solution_trial);
+        COLUMN_SCALER_INVERSE.dot(&this->primal.move);
+        COLUMN_SCALER_INVERSE.dot(&this->primal.lagrangian_coefficients);
+        COLUMN_SCALER_INVERSE.dot(&this->primal.reduced_cost_coefficients);
+        COLUMN_SCALER_INVERSE.dot(&this->primal.solution_baseline);
+        COLUMN_SCALER_INVERSE.dot(&this->primal.solution_average);
+        COLUMN_SCALER_INVERSE.dot(&this->primal.buffer);
+
+        ROW_SCALER_INVERSE.dot(&this->dual.solution);
+        ROW_SCALER_INVERSE.dot(&this->dual.lhs);
+        ROW_SCALER_INVERSE.dot(&this->dual.direction);
+        ROW_SCALER_INVERSE.dot(&this->dual.solution_trial);
+        ROW_SCALER_INVERSE.dot(&this->dual.move);
+        ROW_SCALER_INVERSE.dot(&this->dual.lagrangian_coefficients);
+        ROW_SCALER_INVERSE.dot(&this->dual.reduced_cost_coefficients);
+        ROW_SCALER_INVERSE.dot(&this->dual.solution_baseline);
+        ROW_SCALER_INVERSE.dot(&this->dual.solution_average);
+        ROW_SCALER_INVERSE.dot(&this->dual.buffer);
+    }
 };
 }  // namespace printemps::solver::pdlp::core
 

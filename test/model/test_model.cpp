@@ -1249,6 +1249,86 @@ TEST_F(TestModel, setup_fixed_sensitivities) {
 }
 
 /*****************************************************************************/
+TEST_F(TestModel, export_lp_instance) {
+    /// This method is tested in test_expression.h
+    model::Model<int, double> model;
+
+    auto& x = model.create_variables("x", 4, -10, 10);
+    auto& f = model.create_constraints("f", 3);
+
+    f(0) = 2 * x[0] + 3 * x[1] == 10;  // 1
+    f(1) = 4 * x[1] + 5 * x[2] <= 20;  // 0
+    f(2) = 6 * x[2] + 7 * x[3] >= 30;  // 2
+
+    x[0].reset_bound();
+    x[0] = 10;
+
+    model.minimize(x.sum());
+    option::Option option;
+    option.preprocess.is_enabled_presolve = false;
+    model.setup(option, false);
+
+    auto lp_instance = model.export_lp_instance();
+
+    EXPECT_EQ(3, lp_instance.number_of_rows);
+    EXPECT_EQ(4, lp_instance.number_of_columns);
+    EXPECT_FLOAT_EQ(0.0, lp_instance.objective_offset);
+    EXPECT_FLOAT_EQ(1.0, lp_instance.primal_objective_coefficients[0]);
+    EXPECT_FLOAT_EQ(1.0, lp_instance.primal_objective_coefficients[1]);
+    EXPECT_FLOAT_EQ(1.0, lp_instance.primal_objective_coefficients[2]);
+    EXPECT_FLOAT_EQ(1.0, lp_instance.primal_objective_coefficients[3]);
+
+    EXPECT_FLOAT_EQ(printemps::constant::INT_HALF_MIN,
+                    lp_instance.primal_lower_bounds[0]);
+    EXPECT_FLOAT_EQ(-10, lp_instance.primal_lower_bounds[1]);
+    EXPECT_FLOAT_EQ(-10, lp_instance.primal_lower_bounds[2]);
+    EXPECT_FLOAT_EQ(-10, lp_instance.primal_lower_bounds[3]);
+
+    EXPECT_FLOAT_EQ(printemps::constant::INT_HALF_MAX,
+                    lp_instance.primal_upper_bounds[0]);
+    EXPECT_FLOAT_EQ(10, lp_instance.primal_upper_bounds[1]);
+    EXPECT_FLOAT_EQ(10, lp_instance.primal_upper_bounds[2]);
+    EXPECT_FLOAT_EQ(10, lp_instance.primal_upper_bounds[3]);
+
+    EXPECT_FLOAT_EQ(10, lp_instance.primal_initial_solution[0]);
+    EXPECT_FLOAT_EQ(0, lp_instance.primal_initial_solution[1]);
+    EXPECT_FLOAT_EQ(0, lp_instance.primal_initial_solution[2]);
+    EXPECT_FLOAT_EQ(0, lp_instance.primal_initial_solution[3]);
+
+    EXPECT_FLOAT_EQ(-4, lp_instance.primal_constraint_coefficients.values[0]);
+    EXPECT_FLOAT_EQ(-5, lp_instance.primal_constraint_coefficients.values[1]);
+    EXPECT_FLOAT_EQ(2, lp_instance.primal_constraint_coefficients.values[2]);
+    EXPECT_FLOAT_EQ(3, lp_instance.primal_constraint_coefficients.values[3]);
+    EXPECT_FLOAT_EQ(6, lp_instance.primal_constraint_coefficients.values[4]);
+    EXPECT_FLOAT_EQ(7, lp_instance.primal_constraint_coefficients.values[5]);
+
+    EXPECT_EQ(1, lp_instance.is_primal_lower_unbounded[0]);
+    EXPECT_EQ(0, lp_instance.is_primal_lower_unbounded[3]);
+    EXPECT_EQ(1, lp_instance.is_primal_upper_unbounded[0]);
+    EXPECT_EQ(0, lp_instance.is_primal_upper_unbounded[3]);
+
+    EXPECT_FLOAT_EQ(-20.0, lp_instance.dual_objective_coefficients[0]);
+    EXPECT_FLOAT_EQ(10.0, lp_instance.dual_objective_coefficients[1]);
+    EXPECT_FLOAT_EQ(30.0, lp_instance.dual_objective_coefficients[2]);
+
+    EXPECT_FLOAT_EQ(0, lp_instance.dual_lower_bounds[0]);
+    EXPECT_FLOAT_EQ(std::numeric_limits<double>::lowest(),
+                    lp_instance.dual_lower_bounds[1]);
+    EXPECT_FLOAT_EQ(0, lp_instance.dual_lower_bounds[2]);
+
+    EXPECT_FLOAT_EQ(std::numeric_limits<double>::max(),
+                    lp_instance.dual_upper_bounds[0]);
+    EXPECT_FLOAT_EQ(std::numeric_limits<double>::max(),
+                    lp_instance.dual_upper_bounds[1]);
+    EXPECT_FLOAT_EQ(std::numeric_limits<double>::max(),
+                    lp_instance.dual_upper_bounds[2]);
+
+    EXPECT_FLOAT_EQ(0, lp_instance.dual_initial_solution[0]);
+    EXPECT_FLOAT_EQ(0, lp_instance.dual_initial_solution[1]);
+    EXPECT_FLOAT_EQ(0, lp_instance.dual_initial_solution[2]);
+}
+
+/*****************************************************************************/
 TEST_F(TestModel, set_selections) {
     model::Model<int, double> model;
     auto&                     x = model.create_variables("x", 10, 0, 1);
@@ -1290,7 +1370,7 @@ TEST_F(TestModel, update_variable_bounds) {
         auto& x = model.create_variable("x", 0, 200);
         auto& y = model.create_variable("y", 0, 200);
         model.minimize(x + 3 * y);
-        model.update_variable_bounds(100, false);
+        model.update_variable_bounds(100, true, false);
 
         EXPECT_EQ(100, x(0).upper_bound());
         EXPECT_EQ(33, y(0).upper_bound());
@@ -1302,7 +1382,7 @@ TEST_F(TestModel, update_variable_bounds) {
         auto& x = model.create_variable("x", 0, 200);
         auto& y = model.create_variable("y", 0, 200);
         model.minimize(x - 3 * y);
-        model.update_variable_bounds(100, false);
+        model.update_variable_bounds(100, true, false);
 
         EXPECT_EQ(200, x(0).upper_bound());
         EXPECT_EQ(200, y(0).upper_bound());
@@ -1314,7 +1394,7 @@ TEST_F(TestModel, update_variable_bounds) {
         auto& x = model.create_variable("x", 0, 200);
         auto& y = model.create_variable("y", 0, 200);
         model.maximize(x + 3 * y);
-        model.update_variable_bounds(100, false);
+        model.update_variable_bounds(100, true, false);
 
         EXPECT_EQ(0, x(0).lower_bound());
         EXPECT_EQ(0, y(0).lower_bound());
@@ -1326,7 +1406,7 @@ TEST_F(TestModel, update_variable_bounds) {
         auto& x = model.create_variable("x", 0, 200);
         auto& y = model.create_variable("y", 0, 200);
         model.maximize(x - 3 * y);
-        model.update_variable_bounds(100, false);
+        model.update_variable_bounds(100, true, false);
 
         EXPECT_EQ(100, x(0).lower_bound());
         EXPECT_EQ(0, y(0).lower_bound());
@@ -2265,6 +2345,31 @@ TEST_F(TestModel, compute_lagrangian) {
     auto lagrangian = model.compute_lagrangian(dual);
 
     EXPECT_EQ(46 + 100 * (10 - 5) + 100 * (2 - 1), lagrangian);
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, compute_naive_dual_bound) {
+    {
+        model::Model<int, double> model;
+
+        auto& x = model.create_variables("x", 10, -1, 1);
+
+        model.minimize(x.sum() + 1);
+        model.setup_structure();
+
+        EXPECT_EQ(-10 + 1, model.compute_naive_dual_bound());
+    }
+
+    {
+        model::Model<int, double> model;
+
+        auto& x = model.create_variables("x", 10, -1, 1);
+
+        model.maximize(x.sum() + 1);
+        model.setup_structure();
+
+        EXPECT_EQ(10 + 1, model.compute_naive_dual_bound());
+    }
 }
 
 /*****************************************************************************/

@@ -101,9 +101,9 @@ struct Status {
         this->elapsed_time = a_solver_ptr->time_keeper().elapsed_time();
 
         this->number_of_local_search_iterations =
-            LOCAL_SEARCH_RESULT.number_of_iterations;
+            LOCAL_SEARCH_RESULT.core.number_of_iterations;
         this->number_of_lagrange_dual_iterations =
-            LAGRANGE_DUAL_RESULT.number_of_iterations;
+            LAGRANGE_DUAL_RESULT.core.number_of_iterations;
         this->number_of_tabu_search_iterations =
             TABU_SEARCH_RESULT.state.total_number_of_inner_iterations;
         this->number_of_tabu_search_loops = TABU_SEARCH_RESULT.state.iteration;

@@ -1579,10 +1579,15 @@ class Model {
         column_indices.reserve(MUTABLE_VARIABLES_SIZE);
         values.reserve(NONZERO_RESERVATION);
 
+        std::vector<std::tuple<int, int, double>> row_records;
+
         for (auto i = 0; i < ENABLED_CONSTRAINTS_SIZE; i++) {
             const auto &CONSTRAINT_PTR =
                 enabled_constraint_index_map.reverse_at(i);
             const auto &EXPRESSION = CONSTRAINT_PTR->expression();
+
+            row_records.clear();
+
             for (const auto &sensitivity : EXPRESSION.sensitivities()) {
                 if (sensitivity.first->is_fixed()) {
                     continue;
@@ -1590,15 +1595,22 @@ class Model {
                 const auto COLUMN_INDEX =
                     mutable_variable_index_map.forward_at(sensitivity.first);
                 const auto VALUE = sensitivity.second;
-                row_indices.push_back(i);
-                column_indices.push_back(COLUMN_INDEX);
 
                 if (CONSTRAINT_PTR->sense() ==
                     model_component::ConstraintSense::Less) {
-                    values.push_back(-VALUE);
+                    row_records.emplace_back(i, COLUMN_INDEX, -VALUE);
                 } else {
-                    values.push_back(VALUE);
+                    row_records.emplace_back(i, COLUMN_INDEX, VALUE);
                 }
+            }
+            std::sort(row_records.begin(), row_records.end(),
+                      [](const auto &a_FIRST, const auto &a_SECOND) {
+                          return std::get<1>(a_FIRST) < std::get<1>(a_SECOND);
+                      });
+            for (const auto &record : row_records) {
+                row_indices.push_back(std::get<0>(record));
+                column_indices.push_back(std::get<1>(record));
+                values.push_back(std::get<2>(record));
             }
         }
 
@@ -1689,9 +1701,10 @@ class Model {
 
     /*************************************************************************/
     constexpr int update_variable_bounds(const double a_OBJECTIVE,
+                                         const bool   a_IS_PRIMAL,
                                          const bool   a_IS_ENABLED_PRINT) {
         model_component::Constraint<T_Variable, T_Expression> constraint;
-        if (m_is_minimization) {
+        if (m_is_minimization && a_IS_PRIMAL) {
             constraint = m_objective.expression() <= a_OBJECTIVE;
         } else {
             constraint = m_objective.expression() >= a_OBJECTIVE;
@@ -3034,6 +3047,35 @@ class Model {
     }
 
     /*************************************************************************/
+    constexpr double compute_naive_dual_bound(void) const noexcept {
+        double dual_bound = m_is_minimization
+                                ? std::numeric_limits<double>::lowest()
+                                : std::numeric_limits<double>::max();
+
+        if (!m_is_linear) {
+            return dual_bound;
+        }
+
+        dual_bound = m_objective.expression().constant_value();
+        for (auto &&sensitivity : m_objective.expression().sensitivities()) {
+            const auto VARIABLE_PTR = sensitivity.first;
+            const auto COEFFICIENT  = sensitivity.second;
+            if (VARIABLE_PTR->is_fixed()) {
+                dual_bound += VARIABLE_PTR->value() * COEFFICIENT;
+            } else {
+                const auto LOWER_BOUND = VARIABLE_PTR->lower_bound();
+                const auto UPPER_BOUND = VARIABLE_PTR->upper_bound();
+                if (m_is_minimization == (COEFFICIENT > 0)) {
+                    dual_bound += LOWER_BOUND * COEFFICIENT;
+                } else {
+                    dual_bound += UPPER_BOUND * COEFFICIENT;
+                }
+            }
+        }
+        return dual_bound;
+    }
+
+    /*************************************************************************/
     template <class T_Value>
     constexpr std::vector<multi_array::ValueProxy<T_Value>>
     generate_variable_parameter_proxies(const T_Value a_VALUE) const {
@@ -3381,7 +3423,6 @@ class Model {
                         "The continuous variable " + VARIABLE_NAME +
                             " will be regarded as an integer variable.",
                         true);
-                    variable_proxy(i).set_is_continuous(true);
                 } else {
                     throw std::logic_error(utility::format_error_location(
                         __FILE__, __LINE__, __func__,
