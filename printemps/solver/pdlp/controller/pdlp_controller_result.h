@@ -5,11 +5,12 @@
 /*****************************************************************************/
 #ifndef PRINTEMPS_SOLVER_PDLP_CONTROLLER_PDLP_CONTROLLER_RESULT_H__
 #define PRINTEMPS_SOLVER_PDLP_CONTROLLER_PDLP_CONTROLLER_RESULT_H__
+#include "../core/pdlp_core_result.h"
 
 namespace printemps::solver::pdlp::controller {
 /*****************************************************************************/
 struct PDLPControllerResult {
-    int number_of_iterations;
+    core::PDLPCoreResult core;
 
     /*************************************************************************/
     PDLPControllerResult(void) {
@@ -17,14 +18,14 @@ struct PDLPControllerResult {
     }
 
     /*************************************************************************/
-    PDLPControllerResult(const core::PDLPCoreResult &a_RESULT)
-        : number_of_iterations(a_RESULT.number_of_iterations) {
+    PDLPControllerResult(const core::PDLPCoreResult &a_CORE_RESULT)
+        : core(a_CORE_RESULT) {
         /// nothing to do
     }
 
     /*************************************************************************/
     inline void initialize(void) {
-        this->number_of_iterations = 0;
+        this->core.initialize();
     }
 };
 }  // namespace printemps::solver::pdlp::controller

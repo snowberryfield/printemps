@@ -239,6 +239,67 @@ TEST_F(TestOption, setup) {
             1,      //
             option.output.feasible_solutions_capacity);
 
+        /// pdlp
+        EXPECT_EQ(  //
+            false,  //
+            option.pdlp.is_enabled);
+
+        EXPECT_EQ(  //
+            1,      //
+            option.pdlp.iteration_max);
+
+        EXPECT_FLOAT_EQ(  //
+            0.1,          //
+            option.pdlp.time_max);
+
+        EXPECT_FLOAT_EQ(  //
+            0.1,          //
+            option.pdlp.time_offset);
+
+        EXPECT_FLOAT_EQ(  //
+            0.1,          //
+            option.pdlp.tolerance);
+
+        EXPECT_FLOAT_EQ(  //
+            0.1,          //
+            option.pdlp.step_size_extend_exponent);
+
+        EXPECT_FLOAT_EQ(  //
+            0.1,          //
+            option.pdlp.step_size_reduce_exponent);
+
+        EXPECT_FLOAT_EQ(  //
+            0.2,          //
+            option.pdlp.restart_threshold_sufficient);
+
+        EXPECT_FLOAT_EQ(  //
+            0.1,          //
+            option.pdlp.restart_threshold_necessary);
+
+        EXPECT_FLOAT_EQ(  //
+            0.1,          //
+            option.pdlp.restart_threshold_artificial);
+
+        EXPECT_EQ(  //
+            1,      //
+            option.pdlp.restart_check_interval);
+
+        EXPECT_EQ(  //
+            1,      //
+            option.pdlp.convergence_check_interval);
+
+        EXPECT_EQ(  //
+            1,      //
+            option.pdlp.counts_of_ruiz_scaling);
+
+        EXPECT_EQ(  //
+            false,  //
+            option.pdlp.is_enabled_pock_chambolle_scaling);
+
+        EXPECT_EQ(  //
+            1,      //
+            option.pdlp.log_interval);
+
         /// lagrange_dual
         EXPECT_EQ(  //
             true,   //

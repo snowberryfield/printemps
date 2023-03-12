@@ -203,6 +203,9 @@ class LagrangeDualController
 
         this->print_incumbent_summary(  //
             this->m_option.output.verbose >= option::verbose::Outer);
+
+        this->print_dual_bound(  //
+            this->m_option.output.verbose >= option::verbose::Outer);
     }
 
     /*************************************************************************/

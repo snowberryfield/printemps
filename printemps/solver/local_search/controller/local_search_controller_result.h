@@ -6,12 +6,13 @@
 #ifndef PRINTEMPS_SOLVER_LOCAL_SEARCH_CONTROLLER_LOCAL_SEARCH_CONTROLLER_RESULT_H__
 #define PRINTEMPS_SOLVER_LOCAL_SEARCH_CONTROLLER_LOCAL_SEARCH_CONTROLLER_RESULT_H__
 
+#include "../core/local_search_core_result.h"
+
 namespace printemps::solver::local_search::controller {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 struct LocalSearchControllerResult {
-    int update_status;
-    int number_of_iterations;
+    core::LocalSearchCoreResult<T_Variable, T_Expression> core;
 
     /*************************************************************************/
     LocalSearchControllerResult(void) {
@@ -20,17 +21,15 @@ struct LocalSearchControllerResult {
 
     /*************************************************************************/
     LocalSearchControllerResult(
-        const core::LocalSearchCoreResult<T_Variable, T_Expression> &a_RESULT)
-        : update_status(a_RESULT.total_update_status),
-          number_of_iterations(a_RESULT.number_of_iterations) {
+        const core::LocalSearchCoreResult<T_Variable, T_Expression>
+            &a_CORE_RESULT)
+        : core(a_CORE_RESULT) {
         /// nothing to do
     }
 
     /*************************************************************************/
     inline void initialize(void) {
-        this->update_status =
-            solution::IncumbentHolderConstant::STATUS_NOT_UPDATED;
-        this->number_of_iterations = 0;
+        this->core.initialize();
     }
 };
 }  // namespace printemps::solver::local_search::controller

@@ -171,6 +171,8 @@ class TabuSearchController
 
         this->print_incumbent_summary(a_IS_ENABLED_PRINT);
 
+        this->print_dual_bound(a_IS_ENABLED_PRINT);
+
         /**
          * Print the optimization status of the previous tabu search loop.
          */
@@ -795,6 +797,7 @@ class TabuSearchController
                 this->update_variable_bounds(
                     this->m_incumbent_holder_ptr
                         ->feasible_incumbent_objective(),
+                    true,
                     this->m_option.output.verbose >= option::verbose::Outer);
             }
 

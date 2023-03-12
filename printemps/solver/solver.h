@@ -152,6 +152,14 @@ class Solver {
                                 m_time_keeper,       //
                                 m_option);
         m_pdlp_controller.run();
+
+        if (m_pdlp_controller.result().core.dual.relative_violation_norm <
+            m_option.pdlp.tolerance) {
+            const auto DUAL_BOUND =
+                m_pdlp_controller.result().core.dual.objective *
+                m_model_ptr->sign();
+            m_incumbent_holder.update_dual_bound(DUAL_BOUND);
+        }
     }
 
     /*************************************************************************/
@@ -320,6 +328,12 @@ class Solver {
                 constraint.reset_local_penalty_coefficient();
             }
         }
+
+        /**
+         * Compute the initial dual bound by naive method.
+         */
+        m_incumbent_holder.update_dual_bound(
+            m_model_ptr->compute_naive_dual_bound());
 
         /**
          * Create memory which stores updating count for each variable.

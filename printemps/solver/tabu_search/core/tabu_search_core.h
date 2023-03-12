@@ -146,7 +146,15 @@ class TabuSearchCore {
         const auto& STATE = m_state_manager.state();
 
         if (STATE.number_of_moves > 0) {
-            return false;
+            if (fabs(m_incumbent_holder_ptr->feasible_incumbent_objective() -
+                     m_incumbent_holder_ptr->dual_bound()) <
+                constant::EPSILON) {
+                m_state_manager.set_termination_status(
+                    TabuSearchCoreTerminationStatus::OPTIMAL);
+                return true;
+            } else {
+                return false;
+            }
         }
 
         if (m_model_ptr->is_linear() && m_model_ptr->is_feasible()) {

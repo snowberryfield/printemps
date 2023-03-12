@@ -43,7 +43,6 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     T_Variable m_lower_bound;
     T_Variable m_upper_bound;
     bool       m_has_bounds;
-    bool       m_is_continuous;
 
     double m_lagrangian_coefficient;
 
@@ -118,10 +117,9 @@ class Variable : public multi_array::AbstractMultiArrayElement {
          * sufficiently large negative and positive integer, respectively. The
          * default bounds have margin to avoid overflows in calculating moves.
          */
-        m_lower_bound   = constant::INT_HALF_MIN;
-        m_upper_bound   = constant::INT_HALF_MAX;
-        m_has_bounds    = false;
-        m_is_continuous = false;
+        m_lower_bound = constant::INT_HALF_MIN;
+        m_upper_bound = constant::INT_HALF_MAX;
+        m_has_bounds  = false;
 
         m_lagrangian_coefficient = 0.0;
 
@@ -262,16 +260,6 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     /*************************************************************************/
     inline constexpr bool has_bounds(void) const {
         return m_has_bounds;
-    }
-
-    /*************************************************************************/
-    inline constexpr bool is_continuous(void) const {
-        return m_is_continuous;
-    }
-
-    /*************************************************************************/
-    inline constexpr void set_is_continuous(const bool a_IS_CONTINUOUS) {
-        m_is_continuous = a_IS_CONTINUOUS;
     }
 
     /*************************************************************************/

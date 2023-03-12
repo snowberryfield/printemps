@@ -86,6 +86,32 @@ class PDLPController {
     }
 
     /*************************************************************************/
+    inline bool satisfy_solved_skip_condition(const bool a_IS_ENABLED_PRINT) {
+        if (this->m_model_ptr->variable_reference()
+                .mutable_variable_ptrs.size() == 0) {
+            utility::print_warning(
+                "PDLP was skipped because the problem has already been solved.",
+                a_IS_ENABLED_PRINT);
+            return true;
+        }
+        return false;
+    }
+
+    /*************************************************************************/
+    inline bool satisfy_nonsense_skip_condition(
+        const linear_programming::LinearProgramming& a_LP_INSTANCE,
+        const bool                                   a_IS_ENABLED_PRINT) {
+        if (a_LP_INSTANCE.number_of_columns <= 1 ||
+            a_LP_INSTANCE.number_of_rows <= 1) {
+            utility::print_warning(
+                "PDLP was skipped because the problem does not make sense.",
+                a_IS_ENABLED_PRINT);
+            return true;
+        }
+        return false;
+    }
+
+    /*************************************************************************/
     inline bool satisfy_time_over_skip_condition(
         const double a_TOTAL_ELAPSED_TIME, const bool a_IS_ENABLED_PRINT) {
         if (a_TOTAL_ELAPSED_TIME > this->m_option.general.time_max) {
@@ -102,7 +128,7 @@ class PDLPController {
     inline void run(void) {
         const double TOTAL_ELAPSED_TIME = this->m_time_keeper.clock();
         /**
-         * Skip local search if the problem is not linear.
+         * Skip PDLP if the problem is not linear.
          */
         if (this->satisfy_not_linear_skip_condition(  //
                 this->m_option.output.verbose >= option::verbose::Outer)) {
@@ -111,7 +137,16 @@ class PDLPController {
         }
 
         /**
-         * Skip local search if the time is over.
+         * Skip PDLP if the problem has already been solved.
+         */
+        if (this->satisfy_solved_skip_condition(  //
+                this->m_option.output.verbose >= option::verbose::Outer)) {
+            m_result.initialize();
+            return;
+        }
+
+        /**
+         * Skip PDLP if the time is over.
          */
         if (this->satisfy_time_over_skip_condition(
                 TOTAL_ELAPSED_TIME,
@@ -121,7 +156,7 @@ class PDLPController {
         }
 
         /**
-         * Prepare an option object for local search.
+         * Prepare an option object for PDLP.
          */
         option::Option option   = this->m_option;
         option.pdlp.time_offset = TOTAL_ELAPSED_TIME;
@@ -133,6 +168,17 @@ class PDLPController {
             m_initial_solution.variable_value_proxies);
         m_model_ptr->update();
         auto lp_instance = m_model_ptr->export_lp_instance();
+
+        /**
+         * Skip PDLP if the problem does not make sense.
+         */
+        if (this->satisfy_nonsense_skip_condition(
+                lp_instance,
+                this->m_option.output.verbose >= option::verbose::Outer)) {
+            m_result.initialize();
+            return;
+        }
+
         lp_instance.scaling(m_option.pdlp.counts_of_ruiz_scaling,
                             m_option.pdlp.is_enabled_pock_chambolle_scaling);
 
@@ -140,6 +186,9 @@ class PDLPController {
         pdlp_core.run();
 
         auto pdlp_result = pdlp_core.result();
+        pdlp_result.scaling(
+            lp_instance.primal_constraint_coefficients.row_scaler,
+            lp_instance.primal_constraint_coefficients.column_scaler);
 
         /**
          * Store the result.
@@ -162,7 +211,7 @@ class PDLPController {
     }
 
     /*************************************************************************/
-    inline constexpr const PDLPControllerResult result(void) const {
+    inline constexpr const PDLPControllerResult& result(void) const {
         return m_result;
     }
 };
