@@ -3,26 +3,22 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_SOLVER_LAGRANGE_DUAL_CONTROLLER_LAGRANGE_DUAL_CONTROLLER_RESULT_H__
-#define PRINTEMPS_SOLVER_LAGRANGE_DUAL_CONTROLLER_LAGRANGE_DUAL_CONTROLLER_RESULT_H__
+#ifndef PRINTEMPS_SOLVER_PDLP_CONTROLLER_PDLP_CONTROLLER_RESULT_H__
+#define PRINTEMPS_SOLVER_PDLP_CONTROLLER_PDLP_CONTROLLER_RESULT_H__
+#include "../core/pdlp_core_result.h"
 
-#include "../core/lagrange_dual_core_result.h"
-
-namespace printemps::solver::lagrange_dual::controller {
+namespace printemps::solver::pdlp::controller {
 /*****************************************************************************/
-template <class T_Variable, class T_Expression>
-struct LagrangeDualControllerResult {
-    core::LagrangeDualCoreResult<T_Variable, T_Expression> core;
+struct PDLPControllerResult {
+    core::PDLPCoreResult core;
 
     /*************************************************************************/
-    LagrangeDualControllerResult(void) {
+    PDLPControllerResult(void) {
         this->initialize();
     }
 
     /*************************************************************************/
-    LagrangeDualControllerResult(
-        const core::LagrangeDualCoreResult<T_Variable, T_Expression>
-            &a_CORE_RESULT)
+    PDLPControllerResult(const core::PDLPCoreResult &a_CORE_RESULT)
         : core(a_CORE_RESULT) {
         /// nothing to do
     }
@@ -32,7 +28,7 @@ struct LagrangeDualControllerResult {
         this->core.initialize();
     }
 };
-}  // namespace printemps::solver::lagrange_dual::controller
+}  // namespace printemps::solver::pdlp::controller
 
 #endif
 /*****************************************************************************/
