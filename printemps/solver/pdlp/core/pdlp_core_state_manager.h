@@ -557,7 +557,8 @@ class PDLPCoreStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void update_gap(void) {
+    void update_gap(void) {
+        /// This method cannot be constexpr by clang.
         m_state.absolute_gap =
             fabs(m_state.primal.objective - m_state.dual.objective);
         m_state.relative_gap =
