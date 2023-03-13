@@ -237,7 +237,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
     /*************************************************************************/
     inline constexpr void reset_bound(void) {
         for (auto &&variable : m_variables) {
-            variable.rest_bound();
+            variable.reset_bound();
         }
     }
 

@@ -15,6 +15,7 @@
 #include "parallel_option.h"
 #include "neighborhood_option.h"
 #include "output_option.h"
+#include "pdlp_option.h"
 #include "lagrange_dual_option.h"
 #include "local_search_option.h"
 #include "tabu_search_option.h"
@@ -28,6 +29,7 @@ struct Option {
     PreprocessOption   preprocess;
     NeighborhoodOption neighborhood;
     OutputOption       output;
+    PDLPOption         pdlp;
     LagrangeDualOption lagrange_dual;
     LocalSearchOption  local_search;
     TabuSearchOption   tabu_search;
@@ -50,6 +52,7 @@ struct Option {
         this->preprocess.initialize();
         this->neighborhood.initialize();
         this->output.initialize();
+        this->pdlp.initialize();
         this->lagrange_dual.initialize();
         this->local_search.initialize();
         this->tabu_search.initialize();
@@ -67,6 +70,7 @@ struct Option {
         this->preprocess.print();
         this->neighborhood.print();
         this->output.print();
+        this->pdlp.print();
         this->lagrange_dual.print();
         this->local_search.print();
         this->tabu_search.print();
@@ -114,6 +118,11 @@ struct Option {
                     option_object.at("output")));
         }
 
+        if (option_object.find("pdlp")) {
+            option.pdlp = PDLPOption(std::any_cast<utility::json::JsonObject>(
+                option_object.at("pdlp")));
+        }
+
         if (option_object.find("lagrange_dual")) {
             option.lagrange_dual =
                 LagrangeDualOption(std::any_cast<utility::json::JsonObject>(
@@ -144,6 +153,7 @@ struct Option {
         obj.emplace_back("preprocess", this->preprocess.to_json());
         obj.emplace_back("neighborhood", this->neighborhood.to_json());
         obj.emplace_back("output", this->output.to_json());
+        obj.emplace_back("pdlp", this->pdlp.to_json());
         obj.emplace_back("lagrange_dual", this->lagrange_dual.to_json());
         obj.emplace_back("local_search", this->local_search.to_json());
         obj.emplace_back("tabu_search", this->tabu_search.to_json());

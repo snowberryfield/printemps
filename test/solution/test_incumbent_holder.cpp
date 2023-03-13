@@ -29,6 +29,7 @@ TEST_F(TestIncumbentHolder, constructor) {
     EXPECT_EQ(HUGE_VALF,
               incumbent_holder.global_augmented_incumbent_objective());
     EXPECT_EQ(HUGE_VALF, incumbent_holder.feasible_incumbent_objective());
+    EXPECT_FLOAT_EQ(0.0, incumbent_holder.dual_bound());
 }
 
 /*****************************************************************************/
@@ -42,6 +43,7 @@ TEST_F(TestIncumbentHolder, initialize) {
     score.local_augmented_objective  = 10.0;
     score.global_augmented_objective = 10.0;
     incumbent_holder.try_update_incumbent(solution, score);
+    incumbent_holder.update_dual_bound(10.0);
 
     EXPECT_TRUE(incumbent_holder.is_found_feasible_solution());
     EXPECT_FLOAT_EQ(10.0,
@@ -49,6 +51,7 @@ TEST_F(TestIncumbentHolder, initialize) {
     EXPECT_FLOAT_EQ(10.0,
                     incumbent_holder.global_augmented_incumbent_objective());
     EXPECT_FLOAT_EQ(10.0, incumbent_holder.feasible_incumbent_objective());
+    EXPECT_FLOAT_EQ(10.0, incumbent_holder.dual_bound());
 
     incumbent_holder.initialize();
 
@@ -58,6 +61,7 @@ TEST_F(TestIncumbentHolder, initialize) {
     EXPECT_EQ(HUGE_VALF,
               incumbent_holder.global_augmented_incumbent_objective());
     EXPECT_EQ(HUGE_VALF, incumbent_holder.feasible_incumbent_objective());
+    EXPECT_FLOAT_EQ(0.0, incumbent_holder.dual_bound());
 }
 
 /*****************************************************************************/
@@ -301,6 +305,16 @@ TEST_F(TestIncumbentHolder, global_augmented_incumbent_solution) {
 /*****************************************************************************/
 TEST_F(TestIncumbentHolder, feasible_incumbent_solution) {
     /// This method is tested in try_update_incumbent_arg_solution().
+}
+
+/*****************************************************************************/
+TEST_F(TestIncumbentHolder, update_dual_bound) {
+    /// This method is tested in initialize().
+}
+
+/*****************************************************************************/
+TEST_F(TestIncumbentHolder, dual_bound) {
+    /// This method is tested in initialize().
 }
 
 /*****************************************************************************/
