@@ -68,15 +68,23 @@ class BinaryMoveGenerator
          */
         auto move_updater =  //
             [mutable_variable_ptrs, VARIABLES_SIZE](
-                auto *                      a_moves_ptr,                      //
-                auto *                      a_flags,                          //
-                const bool                  a_ACCEPT_ALL,                     //
-                const bool                  a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
-                const bool                  a_ACCEPT_FEASIBILITY_IMPROVABLE,  //
-                [[maybe_unused]] const bool a_IS_ENABLED_PARALLEL) {
+                auto *     a_moves_ptr,                      //
+                auto *     a_flags,                          //
+                const bool a_ACCEPT_ALL,                     //
+                const bool a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
+                const bool a_ACCEPT_FEASIBILITY_IMPROVABLE,  //
+#ifdef _OPENMP
+                const bool a_IS_ENABLED_PARALLEL,  //
+                const int  a_NUMBER_OF_THREADS     //
+#else
+                [[maybe_unused]] const bool a_IS_ENABLED_PARALLEL,  //
+                [[maybe_unused]] const int  a_NUMBER_OF_THREADS     //
+#endif
+            ) {
                 if (a_ACCEPT_ALL) {
 #ifdef _OPENMP
-#pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
+#pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static) \
+    num_threads(a_NUMBER_OF_THREADS)
 #endif
                     for (auto i = 0; i < VARIABLES_SIZE; i++) {
                         (*a_moves_ptr)[i].alterations.front().second =
@@ -89,7 +97,8 @@ class BinaryMoveGenerator
                 if (a_ACCEPT_OBJECTIVE_IMPROVABLE &&
                     !a_ACCEPT_FEASIBILITY_IMPROVABLE) {
 #ifdef _OPENMP
-#pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
+#pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static) \
+    num_threads(a_NUMBER_OF_THREADS)
 #endif
                     for (auto i = 0; i < VARIABLES_SIZE; i++) {
                         if (mutable_variable_ptrs[i]
@@ -107,7 +116,8 @@ class BinaryMoveGenerator
                 if (!a_ACCEPT_OBJECTIVE_IMPROVABLE &&
                     a_ACCEPT_FEASIBILITY_IMPROVABLE) {
 #ifdef _OPENMP
-#pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
+#pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static) \
+    num_threads(a_NUMBER_OF_THREADS)
 #endif
                     for (auto i = 0; i < VARIABLES_SIZE; i++) {
                         if (mutable_variable_ptrs[i]
@@ -123,7 +133,8 @@ class BinaryMoveGenerator
                 }
 
 #ifdef _OPENMP
-#pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
+#pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static) \
+    num_threads(a_NUMBER_OF_THREADS)
 #endif
                 for (auto i = 0; i < VARIABLES_SIZE; i++) {
                     if (mutable_variable_ptrs[i]->is_improvable()) {

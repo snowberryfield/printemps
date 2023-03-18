@@ -72,33 +72,35 @@ class TabuSearchControllerLogger {
 
     /*************************************************************************/
     void write_header(void) {
-        m_ofstream                                           //
-            << "#iteration "                                 //
-            << "elapsed_time "                               //
-            << "averaged_inner_iteration_speed "             //
-            << "averaged_move_evaluation_speed "             //
-            << "local_objective "                            //
-            << "local_violation "                            //
-            << "global_objective "                           //
-            << "global_violation "                           //
-            << "primal_intensity "                           //
-            << "dual_intensity "                             //
-            << "performance "                                //
-            << "update_status "                              //
-            << "employing_local_augmented_solution_flag "    //
-            << "employing_global_augmented_solution_flag "   //
-            << "employing_previous_solution_flag "           //
-            << "is_enabled_penalty_coefficient_relaxing "    //
-            << "is_enabled_penalty_coefficient_tightening "  //
-            << "penalty_coefficient_reset_flag "             //
-            << "penalty_coefficient_relaxing_rate "          //
-            << "penalty_coefficient_tightening_rate "        //
-            << "is_enabled_forcibly_initial_modification "   //
-            << "number_of_initial_modification "             //
-            << "initial_tabu_tenure "                        //
-            << "is_enabled_parallel_neighborhood_update "    //
-            << "is_enabled_parallel_evaluation "             //
-            << std::endl;                                    //
+        m_ofstream                                                //
+            << "#iteration "                                      //
+            << "elapsed_time "                                    //
+            << "averaged_inner_iteration_speed "                  //
+            << "averaged_move_evaluation_speed "                  //
+            << "local_objective "                                 //
+            << "local_violation "                                 //
+            << "global_objective "                                //
+            << "global_violation "                                //
+            << "primal_intensity "                                //
+            << "dual_intensity "                                  //
+            << "performance "                                     //
+            << "update_status "                                   //
+            << "employing_local_augmented_solution_flag "         //
+            << "employing_global_augmented_solution_flag "        //
+            << "employing_previous_solution_flag "                //
+            << "is_enabled_penalty_coefficient_relaxing "         //
+            << "is_enabled_penalty_coefficient_tightening "       //
+            << "penalty_coefficient_reset_flag "                  //
+            << "penalty_coefficient_relaxing_rate "               //
+            << "penalty_coefficient_tightening_rate "             //
+            << "is_enabled_forcibly_initial_modification "        //
+            << "number_of_initial_modification "                  //
+            << "initial_tabu_tenure "                             //
+            << "number_of_threads_neighborhood_update "           //
+            << "averaged_number_of_threads_neighborhood_update "  //
+            << "number_of_threads_evaluation "                    //
+            << "averaged_number_of_threads_evaluation "           //
+            << std::endl;                                         //
     }
 
     /*************************************************************************/
@@ -115,32 +117,34 @@ class TabuSearchControllerLogger {
 
         auto &s = *m_state_ptr;
 
-        m_ofstream                                                 //
-            << s.iteration << " "                                  //
-            << s.total_elapsed_time << " "                         //
-            << s.averaged_inner_iteration_speed << " "             //
-            << s.averaged_move_evaluation_speed << " "             //
-            << local_incumbent.objective << " "                    //
-            << local_incumbent.total_violation << " "              //
-            << global_incumbent.objective << " "                   //
-            << global_incumbent.total_violation << " "             //
-            << s.current_primal_intensity << " "                   //
-            << s.current_dual_intensity << " "                     //
-            << s.tabu_search_result.performance << " "             //
-            << s.tabu_search_result.total_update_status << " "     //
-            << s.employing_local_augmented_solution_flag << " "    //
-            << s.employing_global_augmented_solution_flag << " "   //
-            << s.employing_previous_solution_flag << " "           //
-            << s.is_enabled_penalty_coefficient_relaxing << " "    //
-            << s.is_enabled_penalty_coefficient_tightening << " "  //
-            << s.penalty_coefficient_reset_flag << " "             //
-            << s.penalty_coefficient_relaxing_rate << " "          //
-            << s.penalty_coefficient_tightening_rate << " "        //
-            << s.is_enabled_forcibly_initial_modification << " "   //
-            << s.number_of_initial_modification << " "             //
-            << s.initial_tabu_tenure << " "                        //
-            << s.is_enabled_parallel_neighborhood_update << " "    //
-            << s.is_enabled_parallel_evaluation                    //
+        m_ofstream                                                      //
+            << s.iteration << " "                                       //
+            << s.total_elapsed_time << " "                              //
+            << s.averaged_inner_iteration_speed << " "                  //
+            << s.averaged_move_evaluation_speed << " "                  //
+            << local_incumbent.objective << " "                         //
+            << local_incumbent.total_violation << " "                   //
+            << global_incumbent.objective << " "                        //
+            << global_incumbent.total_violation << " "                  //
+            << s.current_primal_intensity << " "                        //
+            << s.current_dual_intensity << " "                          //
+            << s.tabu_search_result.performance << " "                  //
+            << s.tabu_search_result.total_update_status << " "          //
+            << s.employing_local_augmented_solution_flag << " "         //
+            << s.employing_global_augmented_solution_flag << " "        //
+            << s.employing_previous_solution_flag << " "                //
+            << s.is_enabled_penalty_coefficient_relaxing << " "         //
+            << s.is_enabled_penalty_coefficient_tightening << " "       //
+            << s.penalty_coefficient_reset_flag << " "                  //
+            << s.penalty_coefficient_relaxing_rate << " "               //
+            << s.penalty_coefficient_tightening_rate << " "             //
+            << s.is_enabled_forcibly_initial_modification << " "        //
+            << s.number_of_initial_modification << " "                  //
+            << s.initial_tabu_tenure << " "                             //
+            << s.number_of_threads_neighborhood_update << " "           //
+            << s.averaged_number_of_threads_neighborhood_update << " "  //
+            << s.number_of_threads_evaluation << " "                    //
+            << s.averaged_number_of_threads_evaluation                  //
             << std::endl;
     }
 };

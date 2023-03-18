@@ -45,7 +45,8 @@ TEST_F(TestUserDefinedMoveGenerator, setup) {
 
     model.neighborhood().user_defined().set_move_updater(move_updater);
     model.neighborhood().user_defined().setup();
-    model.neighborhood().user_defined().update_moves(true, false, false, false);
+    model.neighborhood().user_defined().update_moves(true, false, false, false,
+                                                     1);
 
     auto& moves = model.neighborhood().user_defined().moves();
     auto& flags = model.neighborhood().user_defined().flags();

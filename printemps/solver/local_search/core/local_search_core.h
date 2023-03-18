@@ -203,10 +203,11 @@ class LocalSearchCore {
         }
 
         m_model_ptr->neighborhood().update_moves(
-            accept_all,                     //
-            accept_objective_improvable,    //
-            accept_feasibility_improvable,  //
-            m_option.parallel.is_enabled_parallel_neighborhood_update);
+            accept_all,                                                 //
+            accept_objective_improvable,                                //
+            accept_feasibility_improvable,                              //
+            m_option.parallel.is_enabled_parallel_neighborhood_update,  //
+            m_option.parallel.number_of_threads_neighborhood_update);
 
         m_state_manager.set_number_of_moves(
             m_model_ptr->neighborhood().move_ptrs().size());
@@ -541,7 +542,8 @@ class LocalSearchCore {
             const auto CURRENT_SOLUTION_SCORE = STATE.current_solution_score;
 #ifdef _OPENMP
 #pragma omp parallel for if (m_option.parallel.is_enabled_parallel_evaluation) \
-    schedule(static)
+    schedule(static)                                                           \
+        num_threads(m_option.parallel.number_of_threads_evaluation)
 #endif
             for (auto i = 0; i < NUMBER_OF_MOVES; i++) {
                 /**

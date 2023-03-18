@@ -38,7 +38,7 @@ TEST_F(TestIntegerMoveGenerator, setup) {
         model.variable_type_reference().integer_variable_ptrs;
 
     model.neighborhood().integer().setup(integer_variable_ptrs);
-    model.neighborhood().integer().update_moves(true, false, false, false);
+    model.neighborhood().integer().update_moves(true, false, false, false, 1);
 
     auto& moves = model.neighborhood().integer().moves();
     auto& flags = model.neighborhood().integer().flags();

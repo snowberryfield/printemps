@@ -51,6 +51,15 @@ TEST_F(TestParallelOption, initialize) {
         ParallelOptionConstant::
             DEFAULT_NEIGHBORHOOD_UPDATE_PARALLELIZATION_DECAY_FACTOR,  //
         option.neighborhood_update_parallelization_decay_factor);
+
+    EXPECT_EQ(                                                         //
+        ParallelOptionConstant::DEFAULT_NUMBER_OF_THREADS_EVALUATION,  //
+        option.number_of_threads_evaluation);
+
+    EXPECT_EQ(  //
+        ParallelOptionConstant::
+            DEFAULT_NUMBER_OF_THREADS_NEIGHBORHOOD_UPDATE,  //
+        option.number_of_threads_neighborhood_update);
 }
 
 }  // namespace

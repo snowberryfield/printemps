@@ -101,24 +101,47 @@ class TabuSearchControllerStateManager {
         }
 
 #ifdef _OPENMP
+        int max_number_of_threads = 1;
+#pragma omp parallel
+        {
+#pragma omp single
+            max_number_of_threads = omp_get_max_threads();
+        }
+        std::vector<int> thread_patterns;
+        int              number_of_threads = 1;
+        while (true) {
+            if (number_of_threads < max_number_of_threads) {
+                thread_patterns.push_back(number_of_threads);
+                number_of_threads <<= 1;
+            } else {
+                break;
+            }
+        }
+        thread_patterns.push_back(max_number_of_threads);
+        const int THREAD_PATTERNS_SIZE = thread_patterns.size();
         if (m_option.parallel.is_enabled_parallel_neighborhood_update &&
             m_option.parallel
                 .is_enabled_automatic_neighborhood_update_parallelization) {
-            std::vector<utility::ucb1::Action<bool>> actions(2);
-            actions[0] = true;   /// Enables parallelization
-            actions[1] = false;  /// Disables parallelization
+            std::vector<utility::ucb1::Action<int>> actions(
+                THREAD_PATTERNS_SIZE);
+            for (auto i = 0; i < THREAD_PATTERNS_SIZE; i++) {
+                actions[i] = thread_patterns[i];
+            }
             m_state.neighborhood_update_parallelization_controller.setup(
-                actions,
+                actions,  //
                 m_option.parallel.evaluation_parallelization_decay_factor);
         }
 
         if (m_option.parallel.is_enabled_parallel_evaluation &&
             m_option.parallel.is_enabled_automatic_evaluation_parallelization) {
-            std::vector<utility::ucb1::Action<bool>> actions(2);
-            actions[0] = true;   /// Enables parallelization
-            actions[1] = false;  /// Disables parallelization
+            std::vector<utility::ucb1::Action<int>> actions(
+                THREAD_PATTERNS_SIZE);
+            for (auto i = 0; i < THREAD_PATTERNS_SIZE; i++) {
+                actions[i] = thread_patterns[i];
+            }
             m_state.evaluation_parallelization_controller.setup(
-                actions, m_option.parallel
+                actions,  //
+                m_option.parallel
                              .neighborhood_update_parallelization_decay_factor);
         }
 #endif
@@ -130,8 +153,13 @@ class TabuSearchControllerStateManager {
 
         option.parallel.is_enabled_parallel_neighborhood_update =
             m_state.is_enabled_parallel_neighborhood_update;
+        option.parallel.number_of_threads_neighborhood_update =
+            m_state.number_of_threads_neighborhood_update;
+
         option.parallel.is_enabled_parallel_evaluation =
             m_state.is_enabled_parallel_evaluation;
+        option.parallel.number_of_threads_evaluation =
+            m_state.number_of_threads_evaluation;
 
         option.neighborhood.improvability_screening_mode =
             m_state.improvability_screening_mode;
@@ -1253,15 +1281,31 @@ class TabuSearchControllerStateManager {
 
     /*************************************************************************/
     inline constexpr void update_neighborhood_update_parallelization(void) {
+        if (m_state.is_enabled_parallel_neighborhood_update) {
+            m_state.total_number_of_threads_neighborhood_update +=
+                m_state.number_of_threads_neighborhood_update;
+
+        } else {
+            m_state.total_number_of_threads_neighborhood_update++;
+        }
+
+        m_state.averaged_number_of_threads_neighborhood_update =
+            m_state.total_number_of_threads_neighborhood_update /
+            static_cast<double>(m_state.iteration + 1);
+
 #ifdef _OPENMP
         if (m_option.parallel.is_enabled_parallel_neighborhood_update &&
             m_option.parallel
                 .is_enabled_automatic_neighborhood_update_parallelization) {
-            m_state.is_enabled_parallel_neighborhood_update =
+            m_state.number_of_threads_neighborhood_update =
                 m_state.neighborhood_update_parallelization_controller
                     .best_action()
                     .body;
+            m_state.is_enabled_parallel_neighborhood_update =
+                m_state.number_of_threads_neighborhood_update > 1;
         } else {
+            m_state.number_of_threads_neighborhood_update =
+                omp_get_max_threads();
             m_state.is_enabled_parallel_neighborhood_update =
                 m_option.parallel.is_enabled_parallel_neighborhood_update;
         }
@@ -1269,20 +1313,31 @@ class TabuSearchControllerStateManager {
         m_state.is_enabled_parallel_neighborhood_update =
             m_option.parallel.is_enabled_parallel_neighborhood_update;
 #endif
-        if (m_state.is_enabled_parallel_neighborhood_update) {
-            m_state.neighborhood_update_parallelized_count++;
-        }
     }
 
     /*************************************************************************/
     inline constexpr void update_evaluation_parallelization(void) {
+        if (m_state.is_enabled_parallel_neighborhood_update) {
+            m_state.total_number_of_threads_evaluation +=
+                m_state.number_of_threads_evaluation;
+        } else {
+            m_state.total_number_of_threads_evaluation++;
+        }
+
+        m_state.averaged_number_of_threads_evaluation =
+            m_state.total_number_of_threads_evaluation /
+            static_cast<double>(m_state.iteration + 1);
+
 #ifdef _OPENMP
         if (m_option.parallel.is_enabled_parallel_evaluation &&
             m_option.parallel.is_enabled_automatic_evaluation_parallelization) {
-            m_state.is_enabled_parallel_evaluation =
+            m_state.number_of_threads_evaluation =
                 m_state.evaluation_parallelization_controller.best_action()
                     .body;
+            m_state.is_enabled_parallel_evaluation =
+                m_state.number_of_threads_evaluation > 1;
         } else {
+            m_state.number_of_threads_evaluation = omp_get_max_threads();
             m_state.is_enabled_parallel_evaluation =
                 m_option.parallel.is_enabled_parallel_evaluation;
         }
@@ -1290,9 +1345,6 @@ class TabuSearchControllerStateManager {
         m_state.is_enabled_parallel_evaluation =
             m_option.parallel.is_enabled_parallel_evaluation;
 #endif
-        if (m_state.is_enabled_parallel_evaluation) {
-            m_state.evaluation_parallelized_count++;
-        }
     }
 
     /*************************************************************************/

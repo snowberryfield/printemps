@@ -33,8 +33,8 @@ TEST_F(TestExclusiveNorMoveGenerator, setup) {
         model.constraint_type_reference().exclusive_nor_ptrs;
 
     model.neighborhood().exclusive_nor().setup(exclusive_nor_ptrs);
-    model.neighborhood().exclusive_nor().update_moves(true, false, false,
-                                                      false);
+    model.neighborhood().exclusive_nor().update_moves(  //
+        true, false, false, false, 1);
 
     auto& moves = model.neighborhood().exclusive_nor().moves();
     auto& flags = model.neighborhood().exclusive_nor().flags();
