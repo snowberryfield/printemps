@@ -9,15 +9,8 @@
 namespace printemps::solver::tabu_search::controller {
 /*****************************************************************************/
 struct TabuSearchControllerStateManagerConstant {
-    static constexpr double RELATIVE_RANGE_THRESHOLD              = 1E-2;
-    static constexpr double PENALTY_COEFFICIENT_RELAXING_RATE_MIN = 0.3;
-    static constexpr double PENALTY_COEFFICIENT_RELAXING_RATE_MAX = 1.0 - 1E-4;
-    static constexpr double PENALTY_COEFFICIENT_RELAXING_RATE_DECREASE_RATE =
-        0.9;
-    static constexpr double PENALTY_COEFFICIENT_RELAXING_RATE_STEP_SIZE = 0.1;
-    static constexpr int    ITERATION_AFTER_RELAXATION_MAX              = 20;
-    static constexpr double GAP_TOLERANCE        = constant::EPSILON;
-    static constexpr int    STAGNATION_THRESHOLD = 80;
+    static constexpr double RELATIVE_RANGE_THRESHOLD = 1E-2;
+    static constexpr double GAP_TOLERANCE            = constant::EPSILON;
 };
 
 /*****************************************************************************/
@@ -142,7 +135,7 @@ class TabuSearchControllerStateManager {
             m_state.evaluation_parallelization_controller.setup(
                 actions,  //
                 m_option.parallel
-                             .neighborhood_update_parallelization_decay_factor);
+                    .neighborhood_update_parallelization_decay_factor);
         }
 #endif
     }
@@ -195,9 +188,14 @@ class TabuSearchControllerStateManager {
         this->keep_previous_solution();
 
         /**
-         * Update the status of infeasible stagnation.
+         * Update the status of inner stagnation.
          */
-        this->update_is_infeasible_stagnation();
+        this->update_is_inner_stagnation();
+
+        /**
+         * Update the status of outer stagnation.
+         */
+        this->update_is_outer_stagnation();
 
         /**
          * Update the status of improvement in the last tabu search.
@@ -228,15 +226,18 @@ class TabuSearchControllerStateManager {
          * Additional processes for cases when the penalty coefficients are
          * relaxed.
          */
-        if (m_state.is_enabled_penalty_coefficient_relaxing) {
+        if (m_option.penalty.is_enabled_outer_stagnation_breaker &&
+            m_state.is_enabled_penalty_coefficient_relaxing) {
             this->update_penalty_coefficient_relaxing_rate();
         }
 
         /**
          * Additional processes for cases when the penalty coefficients are
-         * tightened: Reset penalty coefficients if stagnation is detected.
+         * tightened: Reset penalty coefficients if inner stagnation is
+         * detected.
          */
-        if (m_state.is_enabled_penalty_coefficient_tightening) {
+        if (m_option.penalty.is_enabled_inner_stagnation_breaker &&
+            m_state.is_enabled_penalty_coefficient_tightening) {
             this->update_penalty_coefficient_reset_flag();
         }
 
@@ -426,15 +427,29 @@ class TabuSearchControllerStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void update_is_infeasible_stagnation(void) {
+    inline constexpr void update_is_inner_stagnation(void) {
         /**
-         * "Stagnation" refers to when the iteration after global augmented
-         * incumbent update is not less than the constant STAGNATION_THRESHOLD.
+         * "Inner stagnation" refers to when a long iteration has passed without
+         * proper adjustment of the penalty coefficients.
          */
-        m_state.is_infeasible_stagnation =
+        m_state.is_inner_stagnation =
+            (m_state.is_exceeded_initial_penalty_coefficient ||
+             !m_state.is_improved) &&
+            m_state.iteration_after_relaxation >
+                m_option.penalty.inner_stagnation_threshold;
+    }
+
+    /*************************************************************************/
+    inline constexpr void update_is_outer_stagnation(void) {
+        /**
+         * "Outer stagnation" refers to when no feasible solution was found so
+         * far, and the iteration after global augmented incumbent update is not
+         * less than m_option.penalty.outer_stagnation_threshold.
+         */
+        m_state.is_outer_stagnation =
             !m_incumbent_holder_ptr->is_found_feasible_solution() &&
             m_state.iteration_after_global_augmented_incumbent_update >=
-                TabuSearchControllerStateManagerConstant::STAGNATION_THRESHOLD;
+                m_option.penalty.outer_stagnation_threshold;
     }
 
     /*************************************************************************/
@@ -503,7 +518,7 @@ class TabuSearchControllerStateManager {
              * improvability screening mode is set to "Aggressive" or
              * "Intensive" to prioritize the search for feasible solutions.
              */
-            if (m_state.is_infeasible_stagnation) {
+            if (m_state.is_outer_stagnation) {
                 if (m_state.relaxation_count % 2 == 0) {
                     m_state.improvability_screening_mode =
                         option::improvability_screening_mode::Intensive;
@@ -665,17 +680,16 @@ class TabuSearchControllerStateManager {
          * diversification is detected. This applies only if no feasible
          * solution has been found.
          */
-        if (m_state.is_infeasible_stagnation &&
+        if (m_state.is_outer_stagnation &&
             ((m_state.current_primal_intensity >
               m_state.current_primal_intensity_before_relaxation) &&
              (m_state.current_dual_intensity >
               m_state.current_dual_intensity_before_relaxation))) {
             m_state.penalty_coefficient_relaxing_rate = std::max(
-                TabuSearchControllerStateManagerConstant::
-                    PENALTY_COEFFICIENT_RELAXING_RATE_MIN,
+                m_option.penalty.penalty_coefficient_relaxing_rate_min,
                 m_state.penalty_coefficient_relaxing_rate *
-                    TabuSearchControllerStateManagerConstant::
-                        PENALTY_COEFFICIENT_RELAXING_RATE_DECREASE_RATE);
+                    m_option.penalty
+                        .penalty_coefficient_relaxing_rate_decrease_rate);
             return;
         }
 
@@ -700,8 +714,7 @@ class TabuSearchControllerStateManager {
                 m_state
                     .employing_global_augmented_solution_count_after_relaxation)) {
             m_state.penalty_coefficient_relaxing_rate =
-                std::min(TabuSearchControllerStateManagerConstant::
-                             PENALTY_COEFFICIENT_RELAXING_RATE_MAX,
+                std::min(m_option.penalty.penalty_coefficient_relaxing_rate_max,
                          sqrt(m_state.penalty_coefficient_relaxing_rate));
             return;
         }
@@ -711,20 +724,14 @@ class TabuSearchControllerStateManager {
          * original value.
          */
         m_state.penalty_coefficient_relaxing_rate +=
-            TabuSearchControllerStateManagerConstant::
-                PENALTY_COEFFICIENT_RELAXING_RATE_STEP_SIZE *
+            m_option.penalty.penalty_coefficient_relaxing_rate_increase_rate *
             (m_option.penalty.penalty_coefficient_relaxing_rate -
              m_state.penalty_coefficient_relaxing_rate);
     }
 
     /*************************************************************************/
     inline constexpr void update_penalty_coefficient_reset_flag(void) {
-        if (m_state.is_infeasible_stagnation &&
-            (m_state.is_exceeded_initial_penalty_coefficient ||
-             !m_state.is_improved) &&
-            m_state.iteration_after_relaxation >
-                TabuSearchControllerStateManagerConstant::
-                    ITERATION_AFTER_RELAXATION_MAX) {
+        if (m_state.is_outer_stagnation && m_state.is_inner_stagnation) {
             m_state.penalty_coefficient_reset_flag           = true;
             m_state.employing_global_augmented_solution_flag = true;
             m_state.is_enabled_forcibly_initial_modification = true;
