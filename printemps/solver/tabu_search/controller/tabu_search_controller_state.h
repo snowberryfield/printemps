@@ -91,14 +91,20 @@ struct TabuSearchControllerState {
     bool is_enabled_parallel_neighborhood_update;
     bool is_enabled_parallel_evaluation;
 
-    int neighborhood_update_parallelized_count;
-    int evaluation_parallelized_count;
+    int number_of_threads_evaluation;
+    int number_of_threads_neighborhood_update;
+
+    long total_number_of_threads_evaluation;
+    long total_number_of_threads_neighborhood_update;
+
+    double averaged_number_of_threads_evaluation;
+    double averaged_number_of_threads_neighborhood_update;
 
     /**
      * Learners
      */
-    utility::ucb1::Learner<bool> neighborhood_update_parallelization_controller;
-    utility::ucb1::Learner<bool> evaluation_parallelization_controller;
+    utility::ucb1::Learner<int> neighborhood_update_parallelization_controller;
+    utility::ucb1::Learner<int> evaluation_parallelization_controller;
 
     /*************************************************************************/
     TabuSearchControllerState(void) {
@@ -171,8 +177,15 @@ struct TabuSearchControllerState {
 
         this->is_enabled_parallel_neighborhood_update = false;
         this->is_enabled_parallel_evaluation          = false;
-        this->neighborhood_update_parallelized_count  = 0;
-        this->evaluation_parallelized_count           = 0;
+
+        this->number_of_threads_evaluation          = 1;
+        this->number_of_threads_neighborhood_update = 1;
+
+        this->total_number_of_threads_evaluation          = 0;
+        this->total_number_of_threads_neighborhood_update = 0;
+
+        this->averaged_number_of_threads_evaluation          = 0.0;
+        this->averaged_number_of_threads_neighborhood_update = 0.0;
 
         this->neighborhood_update_parallelization_controller.initialize();
         this->evaluation_parallelization_controller.initialize();

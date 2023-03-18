@@ -123,11 +123,11 @@ class Neighborhood {
     }
 
     /*************************************************************************/
-    constexpr void update_moves(
-        const bool                  a_ACCEPT_ALL,                     //
-        const bool                  a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
-        const bool                  a_ACCEPT_FEASIBILITY_IMPROVABLE,  //
-        [[maybe_unused]] const bool a_IS_ENABLED_PARALLEL) {
+    constexpr void update_moves(const bool a_ACCEPT_ALL,                     //
+                                const bool a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
+                                const bool a_ACCEPT_FEASIBILITY_IMPROVABLE,  //
+                                const bool a_IS_ENABLED_PARALLEL,            //
+                                const int  a_NUMBER_OF_THREADS) {
         auto number_of_candidate_moves = 0;
 
         for (auto &&move_generator_ptr : m_move_generator_ptrs) {
@@ -136,7 +136,8 @@ class Neighborhood {
                     a_ACCEPT_ALL,                     //
                     a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
                     a_ACCEPT_FEASIBILITY_IMPROVABLE,  //
-                    a_IS_ENABLED_PARALLEL);
+                    a_IS_ENABLED_PARALLEL,            //
+                    a_NUMBER_OF_THREADS);
                 auto &flags = move_generator_ptr->flags();
                 number_of_candidate_moves +=
                     std::accumulate(flags.begin(), flags.end(), 0);

@@ -315,6 +315,25 @@ class Solver {
         }
 
         /**
+         * Set the maximum number of threads for OpenMP.
+         */
+
+#ifdef _OPENMP
+        if (m_option.parallel.is_enabled_automatic_evaluation_parallelization &&
+            m_option.parallel.number_of_threads_evaluation <= 0) {
+            m_option.parallel.number_of_threads_evaluation =
+                omp_get_max_threads();
+        }
+
+        if (m_option.parallel
+                .is_enabled_automatic_neighborhood_update_parallelization &&
+            m_option.parallel.number_of_threads_neighborhood_update <= 0) {
+            m_option.parallel.number_of_threads_neighborhood_update =
+                omp_get_max_threads();
+        }
+#endif
+
+        /**
          * Enables the default neighborhood moves. Special neighborhood moves
          * will be enabled when optimization stagnates.
          */

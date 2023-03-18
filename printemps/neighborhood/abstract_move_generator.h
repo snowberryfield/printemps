@@ -13,7 +13,7 @@ class AbstractMoveGenerator {
    protected:
     std::function<void(std::vector<Move<T_Variable, T_Expression>> *,
                        std::vector<short> *, const bool, const bool, const bool,
-                       const bool)>
+                       const bool, const int)>
         m_move_updater;
 
     std::vector<Move<T_Variable, T_Expression>> m_moves;
@@ -38,7 +38,8 @@ class AbstractMoveGenerator {
                             const bool,                                     //
                             const bool,                                     //
                             const bool,                                     //
-                            const bool) {};
+                            const bool,                                     //
+                            const int) {};
         m_moves.clear();
         m_flags.clear();
         m_is_enabled = false;
@@ -49,13 +50,15 @@ class AbstractMoveGenerator {
         const bool a_ACCEPT_ALL,                     //
         const bool a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
         const bool a_ACCEPT_FEASIBILITY_IMPROVABLE,  //
-        const bool a_IS_ENABLED_PARALLEL) {
+        const bool a_IS_ENABLED_PARALLEL,            //
+        const int  a_NUMBER_OF_THREADS) {
         m_move_updater(&m_moves,                         //
                        &m_flags,                         //
                        a_ACCEPT_ALL,                     //
                        a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
                        a_ACCEPT_FEASIBILITY_IMPROVABLE,  //
-                       a_IS_ENABLED_PARALLEL);
+                       a_IS_ENABLED_PARALLEL,            //
+                       a_NUMBER_OF_THREADS);
     }
 
     /*************************************************************************/

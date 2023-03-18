@@ -33,7 +33,8 @@ TEST_F(TestExclusiveOrMoveGenerator, setup) {
         model.constraint_type_reference().exclusive_or_ptrs;
 
     model.neighborhood().exclusive_or().setup(exclusive_or_ptrs);
-    model.neighborhood().exclusive_or().update_moves(true, false, false, false);
+    model.neighborhood().exclusive_or().update_moves(true, false, false, false,
+                                                     1);
 
     auto& moves = model.neighborhood().exclusive_or().moves();
     auto& flags = model.neighborhood().exclusive_or().flags();

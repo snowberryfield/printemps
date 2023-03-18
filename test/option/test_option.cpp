@@ -78,6 +78,31 @@ TEST_F(TestOption, setup) {
             false,  //
             option.parallel.is_enabled_parallel_neighborhood_update);
 
+        EXPECT_EQ(  //
+            false,  //
+            option.parallel.is_enabled_automatic_evaluation_parallelization);
+
+        EXPECT_EQ(  //
+            false,  //
+            option.parallel
+                .is_enabled_automatic_neighborhood_update_parallelization);
+
+        EXPECT_FLOAT_EQ(  //
+            0.6,          //
+            option.parallel.evaluation_parallelization_decay_factor);
+
+        EXPECT_FLOAT_EQ(  //
+            0.6,          //
+            option.parallel.neighborhood_update_parallelization_decay_factor);
+
+        EXPECT_EQ(  //
+            2,      //
+            option.parallel.number_of_threads_evaluation);
+
+        EXPECT_EQ(  //
+            2,      //
+            option.parallel.number_of_threads_neighborhood_update);
+
         /// preprocess
         EXPECT_EQ(  //
             false,  //
