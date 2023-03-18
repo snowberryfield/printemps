@@ -65,6 +65,38 @@ TEST_F(TestOption, setup) {
             0.1,          //
             option.penalty.initial_penalty_coefficient);
 
+        EXPECT_FLOAT_EQ(  //
+            0.0,          //
+            option.penalty.penalty_coefficient_relaxing_rate_min);
+
+        EXPECT_FLOAT_EQ(  //
+            2.0,          //
+            option.penalty.penalty_coefficient_relaxing_rate_max);
+
+        EXPECT_FLOAT_EQ(  //
+            1.0,          //
+            option.penalty.penalty_coefficient_relaxing_rate_increase_rate);
+
+        EXPECT_FLOAT_EQ(  //
+            0.5,          //
+            option.penalty.penalty_coefficient_relaxing_rate_decrease_rate);
+
+        EXPECT_FLOAT_EQ(  //
+            50,           //
+            option.penalty.inner_stagnation_threshold);
+
+        EXPECT_EQ(  //
+            50,     //
+            option.penalty.outer_stagnation_threshold);
+
+        EXPECT_FLOAT_EQ(  //
+            false,        //
+            option.penalty.is_enabled_inner_stagnation_breaker);
+
+        EXPECT_EQ(  //
+            false,  //
+            option.penalty.is_enabled_outer_stagnation_breaker);
+
         EXPECT_EQ(  //
             true,   //
             option.penalty.is_enabled_group_penalty_coefficient);

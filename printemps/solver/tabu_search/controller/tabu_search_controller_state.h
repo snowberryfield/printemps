@@ -60,9 +60,10 @@ struct TabuSearchControllerState {
     bool previous_is_feasible_incumbent_updated;
     bool current_is_feasible_incumbent_updated;
     bool is_not_updated;
-    bool is_infeasible_stagnation;
     bool is_improved;
     bool is_exceeded_initial_penalty_coefficient;
+    bool is_inner_stagnation;
+    bool is_outer_stagnation;
 
     tabu_search::core::TabuSearchCoreResult<T_Variable, T_Expression>
         tabu_search_result;
@@ -151,9 +152,10 @@ struct TabuSearchControllerState {
         this->previous_is_feasible_incumbent_updated  = false;
         this->current_is_feasible_incumbent_updated   = false;
         this->is_not_updated                          = false;
-        this->is_infeasible_stagnation                = false;
         this->is_improved                             = false;
         this->is_exceeded_initial_penalty_coefficient = false;
+        this->is_inner_stagnation                     = false;
+        this->is_outer_stagnation                     = false;
 
         this->tabu_search_result.initialize();
 

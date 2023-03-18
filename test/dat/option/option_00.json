@@ -11,6 +11,14 @@
         "penalty_coefficient_tightening_rate": 0.1,
         "penalty_coefficient_updating_balance": 0.1,
         "initial_penalty_coefficient": 0.1,
+        "penalty_coefficient_relaxing_rate_min": 0.0,
+        "penalty_coefficient_relaxing_rate_max": 2.0,
+        "penalty_coefficient_relaxing_rate_increase_rate": 1.0,
+        "penalty_coefficient_relaxing_rate_decrease_rate": 0.5,
+        "inner_stagnation_threshold": 50,
+        "outer_stagnation_threshold": 50,
+        "is_enabled_inner_stagnation_breaker": false,
+        "is_enabled_outer_stagnation_breaker": false,
         "is_enabled_group_penalty_coefficient": true
     },
     "parallel": {
