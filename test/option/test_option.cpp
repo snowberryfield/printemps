@@ -279,6 +279,10 @@ TEST_F(TestOption, setup) {
             0,      //
             option.neighborhood.improvability_screening_mode);
 
+        EXPECT_EQ(  //
+            true,   //
+            option.neighborhood.is_enabled_integer_step_size_adjuster);
+
         /// output
         EXPECT_EQ(  //
             0,      //

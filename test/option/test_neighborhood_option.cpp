@@ -114,6 +114,11 @@ TEST_F(TestNeighborhoodOption, initialize) {
     EXPECT_EQ(                                                             //
         NeighborhoodOptionConstant::DEFAULT_IMPROVABILITY_SCREENING_MODE,  //
         option.improvability_screening_mode);
+
+    EXPECT_EQ(  //
+        NeighborhoodOptionConstant::
+            DEFAULT_IS_ENABLED_INTEGER_STEP_SIZE_ADJUSTER,  //
+        option.is_enabled_integer_step_size_adjuster);
 }
 }  // namespace
 /*****************************************************************************/

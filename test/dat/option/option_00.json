@@ -70,7 +70,8 @@
         "chain_move_reduce_mode": 1,
         "chain_move_overlap_rate_threshold": 0.1,
         "selection_mode": 0,
-        "improvability_screening_mode": 0
+        "improvability_screening_mode": 0,
+        "is_enabled_integer_step_size_adjuster": true
     },
     "output": {
         "verbose": 0,
