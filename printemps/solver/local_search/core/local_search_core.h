@@ -632,7 +632,9 @@ class LocalSearchCore {
                     move_ptr->related_constraint_ptrs.begin(),
                     move_ptr->related_constraint_ptrs.end());
 
-                if (move_ptr->sense == neighborhood::MoveSense::Integer) {
+                if (m_option.neighborhood
+                        .is_enabled_integer_step_size_adjuster &&
+                    move_ptr->sense == neighborhood::MoveSense::Integer) {
                     integer_step_size_adjuster.adjust(&move,
                                                       CURRENT_SOLUTION_SCORE);
                 }

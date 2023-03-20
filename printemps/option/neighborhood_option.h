@@ -41,6 +41,7 @@ struct NeighborhoodOptionConstant {
     static constexpr improvability_screening_mode::ImprovabilityScreeningMode
         DEFAULT_IMPROVABILITY_SCREENING_MODE =
             improvability_screening_mode::Automatic;
+    static constexpr bool DEFAULT_IS_ENABLED_INTEGER_STEP_SIZE_ADJUSTER = false;
 };
 
 /*****************************************************************************/
@@ -70,6 +71,8 @@ struct NeighborhoodOption {
     selection_mode::SelectionMode selection_mode;
     improvability_screening_mode::ImprovabilityScreeningMode
         improvability_screening_mode;
+
+    bool is_enabled_integer_step_size_adjuster;
 
     /*************************************************************************/
     NeighborhoodOption(void) {
@@ -131,6 +134,9 @@ struct NeighborhoodOption {
             NeighborhoodOptionConstant::DEFAULT_SELECTION_MODE;
         this->improvability_screening_mode =
             NeighborhoodOptionConstant::DEFAULT_IMPROVABILITY_SCREENING_MODE;
+        this->is_enabled_integer_step_size_adjuster =
+            NeighborhoodOptionConstant::
+                DEFAULT_IS_ENABLED_INTEGER_STEP_SIZE_ADJUSTER;
     }
 
     /*************************************************************************/
@@ -243,6 +249,11 @@ struct NeighborhoodOption {
             " -- improvability_screening_mode: " +  //
             improvability_screening_mode::ImprovabilityScreeningModeInverseMap
                 .at(this->improvability_screening_mode));
+
+        utility::print(                                      //
+            " -- is_enabled_integer_step_size_adjuster: " +  //
+            utility::to_true_or_false(                       //
+                this->is_enabled_integer_step_size_adjuster));
     }
 
     /**************************************************************************/
@@ -336,6 +347,10 @@ struct NeighborhoodOption {
         read_json(                                //
             &this->improvability_screening_mode,  //
             "improvability_screening_mode", a_OBJECT);
+
+        read_json(                                         //
+            &this->is_enabled_integer_step_size_adjuster,  //
+            "is_enabled_integer_step_size_adjuster", a_OBJECT);
     }
 
     /**************************************************************************/
@@ -430,6 +445,10 @@ struct NeighborhoodOption {
             "improvability_screening_mode",  //
             improvability_screening_mode::ImprovabilityScreeningModeInverseMap
                 .at(this->improvability_screening_mode));
+
+        obj.emplace_back(                             //
+            "is_enabled_integer_step_size_adjuster",  //
+            this->is_enabled_integer_step_size_adjuster);
 
         return obj;
     }

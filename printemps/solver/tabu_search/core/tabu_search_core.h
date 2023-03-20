@@ -926,7 +926,8 @@ class TabuSearchCore {
              * its type is "Integer", adjust the step size to obtain better
              * solution.
              */
-            if (m_model_ptr->is_enabled_fast_evaluation() &&
+            if (m_option.neighborhood.is_enabled_integer_step_size_adjuster &&
+                m_model_ptr->is_enabled_fast_evaluation() &&
                 move_ptr->sense == neighborhood::MoveSense::Integer &&
                 trial_solution_scores[SELECTED_INDEX]
                         .global_augmented_objective <
