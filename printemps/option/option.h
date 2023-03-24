@@ -11,8 +11,9 @@
 
 #include "general_option.h"
 #include "penalty_option.h"
-#include "preprocess_option.h"
 #include "parallel_option.h"
+#include "preprocess_option.h"
+#include "restart_option.h"
 #include "neighborhood_option.h"
 #include "output_option.h"
 #include "pdlp_option.h"
@@ -27,6 +28,7 @@ struct Option {
     PenaltyOption      penalty;
     ParallelOption     parallel;
     PreprocessOption   preprocess;
+    RestartOption      restart;
     NeighborhoodOption neighborhood;
     OutputOption       output;
     PDLPOption         pdlp;
@@ -50,6 +52,7 @@ struct Option {
         this->penalty.initialize();
         this->parallel.initialize();
         this->preprocess.initialize();
+        this->restart.initialize();
         this->neighborhood.initialize();
         this->output.initialize();
         this->pdlp.initialize();
@@ -68,6 +71,7 @@ struct Option {
         this->penalty.print();
         this->parallel.print();
         this->preprocess.print();
+        this->restart.print();
         this->neighborhood.print();
         this->output.print();
         this->pdlp.print();
@@ -104,6 +108,12 @@ struct Option {
             option.preprocess =
                 PreprocessOption(std::any_cast<utility::json::JsonObject>(
                     option_object.at("preprocess")));
+        }
+
+        if (option_object.find("restart")) {
+            option.restart =
+                RestartOption(std::any_cast<utility::json::JsonObject>(
+                    option_object.at("restart")));
         }
 
         if (option_object.find("neighborhood")) {
@@ -151,6 +161,7 @@ struct Option {
         obj.emplace_back("penalty", this->penalty.to_json());
         obj.emplace_back("parallel", this->parallel.to_json());
         obj.emplace_back("preprocess", this->preprocess.to_json());
+        obj.emplace_back("restart", this->restart.to_json());
         obj.emplace_back("neighborhood", this->neighborhood.to_json());
         obj.emplace_back("output", this->output.to_json());
         obj.emplace_back("pdlp", this->pdlp.to_json());
