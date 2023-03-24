@@ -3996,6 +3996,11 @@ class Model {
     }
 
     /*************************************************************************/
+    inline constexpr void disable_fast_evaluation(void) {
+        m_is_enabled_fast_evaluation = false;
+    }
+
+    /*************************************************************************/
     inline constexpr bool is_enabled_fast_evaluation(void) const {
         return m_is_enabled_fast_evaluation;
     }

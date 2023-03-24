@@ -370,6 +370,15 @@ class Solver {
             m_model_ptr->number_of_constraints());
 
         /**
+         * Forcibly disable fast neighborhood evaluation by option. The fast
+         * evaluation should not be disabled except for debugging and
+         * performance evaluation.
+         */
+        if (!m_option.general.is_enabled_fast_evaluation) {
+            m_model_ptr->disable_fast_evaluation();
+        }
+
+        /**
          * Compute the values of expressions, constraints, and the objective
          * function according to the initial solution.
          */
