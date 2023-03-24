@@ -101,6 +101,10 @@ TEST_F(TestOption, setup) {
             true,   //
             option.penalty.is_enabled_group_penalty_coefficient);
 
+        EXPECT_EQ(  //
+            false,  //
+            option.penalty.is_enabled_shrink_penalty_coefficient);
+
         /// parallel
         EXPECT_EQ(  //
             false,  //

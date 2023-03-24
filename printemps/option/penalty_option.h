@@ -26,9 +26,10 @@ struct PenaltyOptionConstant {
     static constexpr int DEFAULT_INNER_STAGNATION_THRESHOLD = 20;
     static constexpr int DEFAULT_OUTER_STAGNATION_THRESHOLD = 80;
 
-    static constexpr bool DEFAULT_IS_ENABLED_INNER_STAGNATION_BREAKER  = true;
-    static constexpr bool DEFAULT_IS_ENABLED_OUTER_STAGNATION_BREAKER  = true;
-    static constexpr bool DEFAULT_IS_ENABLED_GROUP_PENALTY_COEFFICIENT = false;
+    static constexpr bool DEFAULT_IS_ENABLED_INNER_STAGNATION_BREAKER   = true;
+    static constexpr bool DEFAULT_IS_ENABLED_OUTER_STAGNATION_BREAKER   = true;
+    static constexpr bool DEFAULT_IS_ENABLED_GROUP_PENALTY_COEFFICIENT  = false;
+    static constexpr bool DEFAULT_IS_ENABLED_SHRINK_PENALTY_COEFFICIENT = true;
 };
 
 /*****************************************************************************/
@@ -47,6 +48,7 @@ struct PenaltyOption {
     bool is_enabled_inner_stagnation_breaker;
     bool is_enabled_outer_stagnation_breaker;
     bool is_enabled_group_penalty_coefficient;
+    bool is_enabled_shrink_penalty_coefficient;
 
     /*************************************************************************/
     PenaltyOption(void) {
@@ -107,6 +109,10 @@ struct PenaltyOption {
         this->is_enabled_group_penalty_coefficient  //
             = PenaltyOptionConstant::
                 DEFAULT_IS_ENABLED_GROUP_PENALTY_COEFFICIENT;
+
+        this->is_enabled_shrink_penalty_coefficient  //
+            = PenaltyOptionConstant::
+                DEFAULT_IS_ENABLED_SHRINK_PENALTY_COEFFICIENT;
     }
 
     /*************************************************************************/
@@ -165,6 +171,11 @@ struct PenaltyOption {
             " -- penalty.is_enabled_group_penalty_coefficient: " +  //
             utility::to_true_or_false(                              //
                 this->is_enabled_group_penalty_coefficient));
+
+        utility::print(                                              //
+            " -- penalty.is_enabled_shrink_penalty_coefficient: " +  //
+            utility::to_true_or_false(                               //
+                this->is_enabled_shrink_penalty_coefficient));
     }
 
     /**************************************************************************/
@@ -222,6 +233,10 @@ struct PenaltyOption {
         read_json(                                        //
             &this->is_enabled_group_penalty_coefficient,  //
             "is_enabled_group_penalty_coefficient", a_OBJECT);
+
+        read_json(                                         //
+            &this->is_enabled_shrink_penalty_coefficient,  //
+            "is_enabled_shrink_penalty_coefficient", a_OBJECT);
     }
 
     /**************************************************************************/
@@ -277,6 +292,10 @@ struct PenaltyOption {
 
         obj.emplace_back(                            //
             "is_enabled_group_penalty_coefficient",  //
+            this->is_enabled_group_penalty_coefficient);
+
+        obj.emplace_back(                             //
+            "is_enabled_shrink_penalty_coefficient",  //
             this->is_enabled_group_penalty_coefficient);
 
         return obj;

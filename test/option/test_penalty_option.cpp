@@ -79,8 +79,12 @@ TEST_F(TestPenaltyOption, initialize) {
     EXPECT_EQ(                                                                //
         PenaltyOptionConstant::DEFAULT_IS_ENABLED_GROUP_PENALTY_COEFFICIENT,  //
         option.is_enabled_group_penalty_coefficient);
-}
 
+    EXPECT_EQ(  //
+        PenaltyOptionConstant::
+            DEFAULT_IS_ENABLED_SHRINK_PENALTY_COEFFICIENT,  //
+        option.is_enabled_shrink_penalty_coefficient);
+}
 }  // namespace
 /*****************************************************************************/
 // END
