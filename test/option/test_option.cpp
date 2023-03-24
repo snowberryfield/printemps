@@ -48,6 +48,10 @@ TEST_F(TestOption, setup) {
             2,      //
             option.general.seed);
 
+        EXPECT_EQ(  //
+            false,  //
+            option.general.is_enabled_fast_evaluation);
+
         /// penalty
         EXPECT_FLOAT_EQ(  //
             0.1,          //

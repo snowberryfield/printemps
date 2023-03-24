@@ -4,7 +4,8 @@
         "time_max": 0.1,
         "time_offset": 0.1,
         "target_objective_value": 1E100,
-        "seed": 2
+        "seed": 2,
+        "is_enabled_fast_evaluation": false
     },
     "penalty": {
         "penalty_coefficient_relaxing_rate": 0.1,
