@@ -1,4 +1,7 @@
 {
+    "restart": {
+        "restart_mode": "Simple"
+    },
     "neighborhood": {
         "chain_move_reduce_mode": "OverlapRate",
         "selection_mode": "Off",

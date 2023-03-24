@@ -220,7 +220,22 @@ class TabuSearchControllerStateManager {
          * Determine the initial solution for the next loop and whether penalty
          * coefficients are to be relaxed or tightened.
          */
-        this->update_initial_solution_and_penalty_coefficient_flags();
+
+        switch (m_option.restart.restart_mode) {
+            case option::restart_mode::Simple: {
+                this->update_initial_solution_and_penalty_coefficient_flags_simple();
+                break;
+            }
+            case option::restart_mode::Smart: {
+                this->update_initial_solution_and_penalty_coefficient_flags_smart();
+                break;
+            }
+            default: {
+                throw std::logic_error(utility::format_error_location(
+                    __FILE__, __LINE__, __func__,
+                    "The specified restart mode is invalid."));
+            }
+        }
 
         /**
          * Additional processes for cases when the penalty coefficients are
@@ -539,21 +554,26 @@ class TabuSearchControllerStateManager {
         m_state.improvability_screening_mode =
             option::improvability_screening_mode::Soft;
     }
+    /*************************************************************************/
+    inline constexpr void
+    update_initial_solution_and_penalty_coefficient_flags_simple(void) {
+        if (m_state.is_not_updated) {
+            m_state.is_enabled_penalty_coefficient_relaxing = true;
+        } else {
+            m_state.is_enabled_penalty_coefficient_tightening = true;
+        }
+        m_state.employing_local_augmented_solution_flag = true;
+    }
 
     /*************************************************************************/
-    inline constexpr void update_initial_solution_and_penalty_coefficient_flags(
-        void) {
-        /**
-         * Prepare variables for control initial solution, penalty coefficients,
-         * initial modification, etc.
-         */
-        const auto& RESULT_LOCAL_AUGMENTED_INCUMBENT_SCORE =
-            m_incumbent_holder_ptr->local_augmented_incumbent_score();
-
+    inline constexpr void
+    update_initial_solution_and_penalty_coefficient_flags_smart(void) {
         /**
          * Determine the initial solution for the next loop and flags to tighten
          * or relax the penalty coefficients.
          */
+        const auto& RESULT_LOCAL_AUGMENTED_INCUMBENT_SCORE =
+            m_incumbent_holder_ptr->local_augmented_incumbent_score();
 
         /**
          *  NOTE: The gap can takes both of positive and negative value.
@@ -1205,8 +1225,7 @@ class TabuSearchControllerStateManager {
             default: {
                 throw std::logic_error(utility::format_error_location(
                     __FILE__, __LINE__, __func__,
-                    "The specified Chain move reduce mode is "
-                    "invalid."));
+                    "The specified chain move reduce mode is invalid."));
             }
         }
     }

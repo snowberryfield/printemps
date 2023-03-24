@@ -524,6 +524,12 @@ TEST_F(TestOption, setup) {
     {
         Option option;
         option.setup("./test/dat/option/option_01.json");
+
+        /// restart
+        EXPECT_EQ(                 //
+            restart_mode::Simple,  //
+            option.restart.restart_mode);
+
         EXPECT_EQ(                                //
             chain_move_reduce_mode::OverlapRate,  //
             option.neighborhood.chain_move_reduce_mode);
@@ -548,6 +554,12 @@ TEST_F(TestOption, setup) {
     {
         Option option;
         option.setup("./test/dat/option/option_02.json");
+
+        /// restart
+        EXPECT_EQ(                //
+            restart_mode::Smart,  //
+            option.restart.restart_mode);
+
         EXPECT_EQ(                            //
             chain_move_reduce_mode::Shuffle,  //
             option.neighborhood.chain_move_reduce_mode);
