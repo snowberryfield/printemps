@@ -93,6 +93,16 @@ class TabuSearchControllerStateManager {
                 option::improvability_screening_mode::Intensive;
         }
 
+        m_state.is_enabled_parallel_neighborhood_update =
+            m_option.parallel.is_enabled_parallel_neighborhood_update;
+        m_state.is_enabled_parallel_evaluation =
+            m_option.parallel.is_enabled_parallel_evaluation;
+
+        m_state.number_of_threads_neighborhood_update =
+            m_option.parallel.number_of_threads_neighborhood_update;
+        m_state.number_of_threads_evaluation =
+            m_option.parallel.number_of_threads_evaluation;
+
 #ifdef _OPENMP
         int max_number_of_threads = 1;
 #pragma omp parallel
