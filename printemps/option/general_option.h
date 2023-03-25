@@ -9,11 +9,12 @@
 namespace printemps::option {
 /*****************************************************************************/
 struct GeneralOptionConstant {
-    static constexpr int    DEFAULT_ITERATION_MAX          = 100;
-    static constexpr double DEFAULT_TIME_MAX               = 120.0;
-    static constexpr double DEFAULT_TIME_OFFSET            = 0.0;
-    static constexpr double DEFAULT_TARGET_OBJECTIVE_VALUE = -1E100;
-    static constexpr bool   DEFAULT_SEED                   = 1;
+    static constexpr int    DEFAULT_ITERATION_MAX              = 100;
+    static constexpr double DEFAULT_TIME_MAX                   = 120.0;
+    static constexpr double DEFAULT_TIME_OFFSET                = 0.0;
+    static constexpr double DEFAULT_TARGET_OBJECTIVE_VALUE     = -1E100;
+    static constexpr bool   DEFAULT_SEED                       = 1;
+    static constexpr bool   DEFAULT_IS_ENABLED_FAST_EVALUATION = true;
 };
 
 /*****************************************************************************/
@@ -23,6 +24,7 @@ struct GeneralOption {
     double time_max;
     double target_objective_value;
     int    seed;
+    bool   is_enabled_fast_evaluation;
 
     /*************************************************************************/
     GeneralOption(void) {
@@ -42,6 +44,8 @@ struct GeneralOption {
         this->target_objective_value =
             GeneralOptionConstant::DEFAULT_TARGET_OBJECTIVE_VALUE;
         this->seed = GeneralOptionConstant::DEFAULT_SEED;
+        this->is_enabled_fast_evaluation =
+            GeneralOptionConstant::DEFAULT_IS_ENABLED_FAST_EVALUATION;
     }
 
     /*************************************************************************/
@@ -70,6 +74,11 @@ struct GeneralOption {
             " -- general.seed: " +  //
             utility::to_string(     //
                 this->seed, "%d"));
+
+        utility::print(                                   //
+            " -- general.is_enabled_fast_evaluation: " +  //
+            utility::to_true_or_false(                    //
+                this->is_enabled_fast_evaluation));
     }
 
     /**************************************************************************/
@@ -95,6 +104,10 @@ struct GeneralOption {
         read_json(        //
             &this->seed,  //
             "seed", a_OBJECT);
+
+        read_json(                              //
+            &this->is_enabled_fast_evaluation,  //
+            "is_enabled_fast_evaluation", a_OBJECT);
     }
 
     /**************************************************************************/
@@ -119,6 +132,10 @@ struct GeneralOption {
         obj.emplace_back(  //
             "seed",        //
             this->seed);
+
+        obj.emplace_back(                  //
+            "is_enabled_fast_evaluation",  //
+            this->is_enabled_fast_evaluation);
 
         return obj;
     }

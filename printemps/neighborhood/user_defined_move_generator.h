@@ -49,13 +49,20 @@ class UserDefinedMoveGenerator
                    const bool a_ACCEPT_ALL,                     //
                    const bool a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
                    const bool a_ACCEPT_FEASIBILITY_IMPROVABLE,  //
-                   [[maybe_unused]] const bool a_IS_ENABLED_PARALLEL) {
+#ifdef _OPENMP
+                   const bool a_IS_ENABLED_PARALLEL,  //
+                   const int  a_NUMBER_OF_THREADS     //
+#else
+                   [[maybe_unused]] const bool a_IS_ENABLED_PARALLEL,  //
+                   [[maybe_unused]] const int  a_NUMBER_OF_THREADS     //
+#endif
+            ) {
                 m_move_updater_wrapper(a_moves_ptr);
                 const int MOVES_SIZE = a_moves_ptr->size();
                 a_flags->resize(MOVES_SIZE);
-
 #ifdef _OPENMP
-#pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
+#pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static) \
+    num_threads(a_NUMBER_OF_THREADS)
 #endif
                 for (auto i = 0; i < MOVES_SIZE; i++) {
                     (*a_moves_ptr)[i].sense = MoveSense::UserDefined;

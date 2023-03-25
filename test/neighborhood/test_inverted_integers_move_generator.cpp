@@ -35,7 +35,7 @@ TEST_F(TestInvertedIntegersMoveGenerator, setup) {
     model.neighborhood().inverted_integers().setup(  //
         inverted_integers_ptrs);
     model.neighborhood().inverted_integers().update_moves(  //
-        true, false, false, false);
+        true, false, false, false, 1);
 
     auto& moves = model.neighborhood().inverted_integers().moves();
     auto& flags = model.neighborhood().inverted_integers().flags();

@@ -35,7 +35,7 @@ TEST_F(TestBalancedIntegersMoveGenerator, setup) {
     model.neighborhood().balanced_integers().setup(  //
         balanced_integers_ptrs);
     model.neighborhood().balanced_integers().update_moves(  //
-        true, false, false, false);
+        true, false, false, false, 1);
 
     auto& moves = model.neighborhood().balanced_integers().moves();
     auto& flags = model.neighborhood().balanced_integers().flags();

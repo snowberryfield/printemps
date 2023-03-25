@@ -4,20 +4,34 @@
         "time_max": 0.1,
         "time_offset": 0.1,
         "target_objective_value": 1E100,
-        "seed": 2
+        "seed": 2,
+        "is_enabled_fast_evaluation": false
     },
     "penalty": {
         "penalty_coefficient_relaxing_rate": 0.1,
         "penalty_coefficient_tightening_rate": 0.1,
         "penalty_coefficient_updating_balance": 0.1,
         "initial_penalty_coefficient": 0.1,
-        "is_enabled_group_penalty_coefficient": true
+        "penalty_coefficient_relaxing_rate_min": 0.0,
+        "penalty_coefficient_relaxing_rate_max": 2.0,
+        "penalty_coefficient_relaxing_rate_increase_rate": 1.0,
+        "penalty_coefficient_relaxing_rate_decrease_rate": 0.5,
+        "inner_stagnation_threshold": 50,
+        "outer_stagnation_threshold": 50,
+        "is_enabled_inner_stagnation_breaker": false,
+        "is_enabled_outer_stagnation_breaker": false,
+        "is_enabled_group_penalty_coefficient": true,
+        "is_enabled_shrink_penalty_coefficient": false
     },
     "parallel": {
         "is_enabled_parallel_evaluation": false,
         "is_enabled_parallel_neighborhood_update": false,
         "is_enabled_automatic_evaluation_parallelization": false,
-        "is_enabled_automatic_neighborhood_update_parallelization": false
+        "is_enabled_automatic_neighborhood_update_parallelization": false,
+        "evaluation_parallelization_decay_factor": 0.6,
+        "neighborhood_update_parallelization_decay_factor": 0.6,
+        "number_of_threads_evaluation": 2,
+        "number_of_threads_neighborhood_update": 2
     },
     "preprocess": {
         "is_enabled_presolve": false,
@@ -58,7 +72,8 @@
         "chain_move_reduce_mode": 1,
         "chain_move_overlap_rate_threshold": 0.1,
         "selection_mode": 0,
-        "improvability_screening_mode": 0
+        "improvability_screening_mode": 0,
+        "is_enabled_integer_step_size_adjuster": true
     },
     "output": {
         "verbose": 0,

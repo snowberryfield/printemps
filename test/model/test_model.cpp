@@ -807,6 +807,9 @@ TEST_F(TestModel, setup_is_enabled_fast_evaluation) {
         model.setup_is_enabled_fast_evaluation();
 
         EXPECT_TRUE(model.is_enabled_fast_evaluation());
+
+        model.disable_fast_evaluation();
+        EXPECT_FALSE(model.is_enabled_fast_evaluation());
     }
 
     /// Constraint: nonlinear (user-defined lambda)
@@ -3019,6 +3022,11 @@ TEST_F(TestModel, is_defined_objective) {
 
 /*****************************************************************************/
 TEST_F(TestModel, is_enabled_fast_evaluation) {
+    /// This method is tested in setup_is_enabled_fast_evaluation().
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, disable_fast_evaluation) {
     /// This method is tested in setup_is_enabled_fast_evaluation().
 }
 

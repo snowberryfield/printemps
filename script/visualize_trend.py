@@ -32,8 +32,8 @@ def create_elapsed_time_chart(trend_data):
         y_axis_label='Elapsed Time[s]',
         x_range=bokeh.models.DataRange1d(start=0),
         y_range=bokeh.models.DataRange1d(start=0),
-        plot_width=500,
-        plot_height=300)
+        width=500,
+        height=300)
 
     fig.line(
         x=trend_data['#iteration'],
@@ -59,8 +59,8 @@ def create_intensity_chart(trend_data):
         y_axis_label='Intensity',
         x_range=bokeh.models.DataRange1d(start=0),
         y_axis_type="log",
-        plot_width=500,
-        plot_height=300)
+        width=500,
+        height=300)
 
     fig.line(
         x=trend_data['#iteration'],
@@ -96,8 +96,8 @@ def create_averaged_inner_iteration_speed_chart(trend_data):
         x_axis_label='Iteration',
         y_axis_label='iterations / sec',
         x_range=bokeh.models.DataRange1d(start=0),
-        plot_width=500,
-        plot_height=300)
+        width=500,
+        height=300)
 
     fig.line(
         x=trend_data['#iteration'],
@@ -119,8 +119,8 @@ def create_averaged_move_evaluation_speed_chart(trend_data):
         x_axis_label='Iteration',
         y_axis_label='moves / sec',
         x_range=bokeh.models.DataRange1d(start=0),
-        plot_width=500,
-        plot_height=300)
+        width=500,
+        height=300)
 
     fig.line(
         x=trend_data['#iteration'],
@@ -140,8 +140,8 @@ def create_objective_chart(trend_data):
         x_axis_label='Iteration',
         y_axis_label='Objective',
         x_range=bokeh.models.DataRange1d(start=0),
-        plot_width=500,
-        plot_height=300)
+        width=500,
+        height=300)
 
     fig.circle(
         x=trend_data['#iteration'],
@@ -176,8 +176,8 @@ def create_violation_chart(trend_data):
         y_axis_label='Violation',
         x_range=bokeh.models.DataRange1d(start=0),
         y_range=bokeh.models.DataRange1d(start=0),
-        plot_width=500,
-        plot_height=300)
+        width=500,
+        height=300)
 
     fig.circle(
         x=trend_data['#iteration'],
@@ -212,8 +212,8 @@ def create_penalty_coefficient_control_chart(trend_data):
         y_axis_label='Rate',
         x_range=bokeh.models.DataRange1d(start=0),
         y_range=bokeh.models.DataRange1d(start=0.0, end=1.1),
-        plot_width=500,
-        plot_height=300)
+        width=500,
+        height=300)
 
     fig.line(
         x=trend_data['#iteration'],
@@ -266,8 +266,8 @@ def create_penalty_coefficient_rate_control_chart(trend_data):
         y_axis_label='Value',
         x_range=bokeh.models.DataRange1d(start=0),
         y_range=bokeh.models.DataRange1d(start=0.0, end=1.1),
-        plot_width=500,
-        plot_height=300)
+        width=500,
+        height=300)
 
     fig.line(
         x=trend_data['#iteration'],
@@ -315,8 +315,8 @@ def create_penalty_coefficient_reset_control_chart(trend_data):
         y_axis_label='Rate',
         x_range=bokeh.models.DataRange1d(start=0),
         y_range=bokeh.models.DataRange1d(start=0.0, end=1.1),
-        plot_width=500,
-        plot_height=300)
+        width=500,
+        height=300)
 
     fig.line(
         x=trend_data['#iteration'],
@@ -340,8 +340,8 @@ def create_initial_solution_control_chart(trend_data):
         y_axis_label='Rate',
         x_range=bokeh.models.DataRange1d(start=0),
         y_range=bokeh.models.DataRange1d(start=0, end=1.1),
-        plot_width=500,
-        plot_height=300)
+        width=500,
+        height=300)
 
     fig.line(
         x=trend_data['#iteration'],
@@ -385,8 +385,8 @@ def create_initial_modification_control_chart(trend_data):
         y_axis_label='Rate',
         x_range=bokeh.models.DataRange1d(start=0),
         y_range=bokeh.models.DataRange1d(start=0.0, end=1.1),
-        plot_width=500,
-        plot_height=300)
+        width=500,
+        height=300)
 
     fig.line(
         x=trend_data['#iteration'],
@@ -413,8 +413,8 @@ def create_initial_tabu_tenure_control_chart(trend_data):
         y_axis_label='Initial Tabu Tenure',
         x_range=bokeh.models.DataRange1d(start=0),
         y_range=bokeh.models.DataRange1d(start=0),
-        plot_width=500,
-        plot_height=300)
+        width=500,
+        height=300)
 
     fig.line(
         x=trend_data['#iteration'],
@@ -450,8 +450,8 @@ def create_performance_chart(trend_data):
         y_axis_label='Performance',
         x_range=bokeh.models.DataRange1d(start=0),
         y_range=bokeh.models.DataRange1d(start=0.0),
-        plot_width=500,
-        plot_height=300)
+        width=500,
+        height=300)
 
     fig.line(
         x=trend_data['#iteration'],
@@ -478,24 +478,23 @@ def create_parallelization_control_chart(trend_data):
         tooltips=TOOLTIPS,
         title='Parallelization Control',
         x_axis_label='Iteration',
-        y_axis_label='Rate',
+        y_axis_label='Number of Threads',
         x_range=bokeh.models.DataRange1d(start=0),
-        y_range=bokeh.models.DataRange1d(start=0, end=1.1),
-        plot_width=500,
-        plot_height=300)
+        y_range=bokeh.models.DataRange1d(start=0),
+        width=500,
+        height=300)
+
 
     fig.line(
         x=trend_data['#iteration'],
-        y=np.cumsum(trend_data['is_enabled_parallel_neighborhood_update']
-                    ) / (trend_data['#iteration'] + 1),
+        y=trend_data['averaged_number_of_threads_neighborhood_update'],
         legend_label='Neighborhood Update',
         width=3,
         color=colors[0])
 
     fig.line(
         x=trend_data['#iteration'],
-        y=np.cumsum(trend_data['is_enabled_parallel_evaluation']
-                    ) / (trend_data['#iteration'] + 1),
+        y=trend_data['averaged_number_of_threads_evaluation'],
         legend_label='Evaluation',
         width=3,
         color=colors[1])

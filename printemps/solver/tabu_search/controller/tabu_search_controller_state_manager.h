@@ -9,15 +9,8 @@
 namespace printemps::solver::tabu_search::controller {
 /*****************************************************************************/
 struct TabuSearchControllerStateManagerConstant {
-    static constexpr double RELATIVE_RANGE_THRESHOLD              = 1E-2;
-    static constexpr double PENALTY_COEFFICIENT_RELAXING_RATE_MIN = 0.3;
-    static constexpr double PENALTY_COEFFICIENT_RELAXING_RATE_MAX = 1.0 - 1E-4;
-    static constexpr double PENALTY_COEFFICIENT_RELAXING_RATE_DECREASE_RATE =
-        0.9;
-    static constexpr double PENALTY_COEFFICIENT_RELAXING_RATE_STEP_SIZE = 0.1;
-    static constexpr int    ITERATION_AFTER_RELAXATION_MAX              = 20;
-    static constexpr double GAP_TOLERANCE        = constant::EPSILON;
-    static constexpr int    STAGNATION_THRESHOLD = 80;
+    static constexpr double RELATIVE_RANGE_THRESHOLD = 1E-2;
+    static constexpr double GAP_TOLERANCE            = constant::EPSILON;
 };
 
 /*****************************************************************************/
@@ -101,25 +94,48 @@ class TabuSearchControllerStateManager {
         }
 
 #ifdef _OPENMP
+        int max_number_of_threads = 1;
+#pragma omp parallel
+        {
+#pragma omp single
+            max_number_of_threads = omp_get_max_threads();
+        }
+        std::vector<int> thread_patterns;
+        int              number_of_threads = 1;
+        while (true) {
+            if (number_of_threads < max_number_of_threads) {
+                thread_patterns.push_back(number_of_threads);
+                number_of_threads <<= 1;
+            } else {
+                break;
+            }
+        }
+        thread_patterns.push_back(max_number_of_threads);
+        const int THREAD_PATTERNS_SIZE = thread_patterns.size();
         if (m_option.parallel.is_enabled_parallel_neighborhood_update &&
             m_option.parallel
                 .is_enabled_automatic_neighborhood_update_parallelization) {
-            std::vector<utility::ucb1::Action<bool>> actions(2);
-            actions[0] = true;   /// Enables parallelization
-            actions[1] = false;  /// Disables parallelization
+            std::vector<utility::ucb1::Action<int>> actions(
+                THREAD_PATTERNS_SIZE);
+            for (auto i = 0; i < THREAD_PATTERNS_SIZE; i++) {
+                actions[i] = thread_patterns[i];
+            }
             m_state.neighborhood_update_parallelization_controller.setup(
-                actions,
+                actions,  //
                 m_option.parallel.evaluation_parallelization_decay_factor);
         }
 
         if (m_option.parallel.is_enabled_parallel_evaluation &&
             m_option.parallel.is_enabled_automatic_evaluation_parallelization) {
-            std::vector<utility::ucb1::Action<bool>> actions(2);
-            actions[0] = true;   /// Enables parallelization
-            actions[1] = false;  /// Disables parallelization
+            std::vector<utility::ucb1::Action<int>> actions(
+                THREAD_PATTERNS_SIZE);
+            for (auto i = 0; i < THREAD_PATTERNS_SIZE; i++) {
+                actions[i] = thread_patterns[i];
+            }
             m_state.evaluation_parallelization_controller.setup(
-                actions, m_option.parallel
-                             .neighborhood_update_parallelization_decay_factor);
+                actions,  //
+                m_option.parallel
+                    .neighborhood_update_parallelization_decay_factor);
         }
 #endif
     }
@@ -130,8 +146,13 @@ class TabuSearchControllerStateManager {
 
         option.parallel.is_enabled_parallel_neighborhood_update =
             m_state.is_enabled_parallel_neighborhood_update;
+        option.parallel.number_of_threads_neighborhood_update =
+            m_state.number_of_threads_neighborhood_update;
+
         option.parallel.is_enabled_parallel_evaluation =
             m_state.is_enabled_parallel_evaluation;
+        option.parallel.number_of_threads_evaluation =
+            m_state.number_of_threads_evaluation;
 
         option.neighborhood.improvability_screening_mode =
             m_state.improvability_screening_mode;
@@ -167,9 +188,14 @@ class TabuSearchControllerStateManager {
         this->keep_previous_solution();
 
         /**
-         * Update the status of infeasible stagnation.
+         * Update the status of inner stagnation.
          */
-        this->update_is_infeasible_stagnation();
+        this->update_is_inner_stagnation();
+
+        /**
+         * Update the status of outer stagnation.
+         */
+        this->update_is_outer_stagnation();
 
         /**
          * Update the status of improvement in the last tabu search.
@@ -194,21 +220,39 @@ class TabuSearchControllerStateManager {
          * Determine the initial solution for the next loop and whether penalty
          * coefficients are to be relaxed or tightened.
          */
-        this->update_initial_solution_and_penalty_coefficient_flags();
+
+        switch (m_option.restart.restart_mode) {
+            case option::restart_mode::Simple: {
+                this->update_initial_solution_and_penalty_coefficient_flags_simple();
+                break;
+            }
+            case option::restart_mode::Smart: {
+                this->update_initial_solution_and_penalty_coefficient_flags_smart();
+                break;
+            }
+            default: {
+                throw std::logic_error(utility::format_error_location(
+                    __FILE__, __LINE__, __func__,
+                    "The specified restart mode is invalid."));
+            }
+        }
 
         /**
          * Additional processes for cases when the penalty coefficients are
          * relaxed.
          */
-        if (m_state.is_enabled_penalty_coefficient_relaxing) {
+        if (m_option.penalty.is_enabled_outer_stagnation_breaker &&
+            m_state.is_enabled_penalty_coefficient_relaxing) {
             this->update_penalty_coefficient_relaxing_rate();
         }
 
         /**
          * Additional processes for cases when the penalty coefficients are
-         * tightened: Reset penalty coefficients if stagnation is detected.
+         * tightened: Reset penalty coefficients if inner stagnation is
+         * detected.
          */
-        if (m_state.is_enabled_penalty_coefficient_tightening) {
+        if (m_option.penalty.is_enabled_inner_stagnation_breaker &&
+            m_state.is_enabled_penalty_coefficient_tightening) {
             this->update_penalty_coefficient_reset_flag();
         }
 
@@ -398,15 +442,29 @@ class TabuSearchControllerStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void update_is_infeasible_stagnation(void) {
+    inline constexpr void update_is_inner_stagnation(void) {
         /**
-         * "Stagnation" refers to when the iteration after global augmented
-         * incumbent update is not less than the constant STAGNATION_THRESHOLD.
+         * "Inner stagnation" refers to when a long iteration has passed without
+         * proper adjustment of the penalty coefficients.
          */
-        m_state.is_infeasible_stagnation =
+        m_state.is_inner_stagnation =
+            (m_state.is_exceeded_initial_penalty_coefficient ||
+             !m_state.is_improved) &&
+            m_state.iteration_after_relaxation >
+                m_option.penalty.inner_stagnation_threshold;
+    }
+
+    /*************************************************************************/
+    inline constexpr void update_is_outer_stagnation(void) {
+        /**
+         * "Outer stagnation" refers to when no feasible solution was found so
+         * far, and the iteration after global augmented incumbent update is not
+         * less than m_option.penalty.outer_stagnation_threshold.
+         */
+        m_state.is_outer_stagnation =
             !m_incumbent_holder_ptr->is_found_feasible_solution() &&
             m_state.iteration_after_global_augmented_incumbent_update >=
-                TabuSearchControllerStateManagerConstant::STAGNATION_THRESHOLD;
+                m_option.penalty.outer_stagnation_threshold;
     }
 
     /*************************************************************************/
@@ -475,7 +533,7 @@ class TabuSearchControllerStateManager {
              * improvability screening mode is set to "Aggressive" or
              * "Intensive" to prioritize the search for feasible solutions.
              */
-            if (m_state.is_infeasible_stagnation) {
+            if (m_state.is_outer_stagnation) {
                 if (m_state.relaxation_count % 2 == 0) {
                     m_state.improvability_screening_mode =
                         option::improvability_screening_mode::Intensive;
@@ -496,21 +554,26 @@ class TabuSearchControllerStateManager {
         m_state.improvability_screening_mode =
             option::improvability_screening_mode::Soft;
     }
+    /*************************************************************************/
+    inline constexpr void
+    update_initial_solution_and_penalty_coefficient_flags_simple(void) {
+        if (m_state.is_not_updated) {
+            m_state.is_enabled_penalty_coefficient_relaxing = true;
+        } else {
+            m_state.is_enabled_penalty_coefficient_tightening = true;
+        }
+        m_state.employing_local_augmented_solution_flag = true;
+    }
 
     /*************************************************************************/
-    inline constexpr void update_initial_solution_and_penalty_coefficient_flags(
-        void) {
-        /**
-         * Prepare variables for control initial solution, penalty coefficients,
-         * initial modification, etc.
-         */
-        const auto& RESULT_LOCAL_AUGMENTED_INCUMBENT_SCORE =
-            m_incumbent_holder_ptr->local_augmented_incumbent_score();
-
+    inline constexpr void
+    update_initial_solution_and_penalty_coefficient_flags_smart(void) {
         /**
          * Determine the initial solution for the next loop and flags to tighten
          * or relax the penalty coefficients.
          */
+        const auto& RESULT_LOCAL_AUGMENTED_INCUMBENT_SCORE =
+            m_incumbent_holder_ptr->local_augmented_incumbent_score();
 
         /**
          *  NOTE: The gap can takes both of positive and negative value.
@@ -637,17 +700,16 @@ class TabuSearchControllerStateManager {
          * diversification is detected. This applies only if no feasible
          * solution has been found.
          */
-        if (m_state.is_infeasible_stagnation &&
+        if (m_state.is_outer_stagnation &&
             ((m_state.current_primal_intensity >
               m_state.current_primal_intensity_before_relaxation) &&
              (m_state.current_dual_intensity >
               m_state.current_dual_intensity_before_relaxation))) {
             m_state.penalty_coefficient_relaxing_rate = std::max(
-                TabuSearchControllerStateManagerConstant::
-                    PENALTY_COEFFICIENT_RELAXING_RATE_MIN,
+                m_option.penalty.penalty_coefficient_relaxing_rate_min,
                 m_state.penalty_coefficient_relaxing_rate *
-                    TabuSearchControllerStateManagerConstant::
-                        PENALTY_COEFFICIENT_RELAXING_RATE_DECREASE_RATE);
+                    m_option.penalty
+                        .penalty_coefficient_relaxing_rate_decrease_rate);
             return;
         }
 
@@ -672,8 +734,7 @@ class TabuSearchControllerStateManager {
                 m_state
                     .employing_global_augmented_solution_count_after_relaxation)) {
             m_state.penalty_coefficient_relaxing_rate =
-                std::min(TabuSearchControllerStateManagerConstant::
-                             PENALTY_COEFFICIENT_RELAXING_RATE_MAX,
+                std::min(m_option.penalty.penalty_coefficient_relaxing_rate_max,
                          sqrt(m_state.penalty_coefficient_relaxing_rate));
             return;
         }
@@ -683,20 +744,14 @@ class TabuSearchControllerStateManager {
          * original value.
          */
         m_state.penalty_coefficient_relaxing_rate +=
-            TabuSearchControllerStateManagerConstant::
-                PENALTY_COEFFICIENT_RELAXING_RATE_STEP_SIZE *
+            m_option.penalty.penalty_coefficient_relaxing_rate_increase_rate *
             (m_option.penalty.penalty_coefficient_relaxing_rate -
              m_state.penalty_coefficient_relaxing_rate);
     }
 
     /*************************************************************************/
     inline constexpr void update_penalty_coefficient_reset_flag(void) {
-        if (m_state.is_infeasible_stagnation &&
-            (m_state.is_exceeded_initial_penalty_coefficient ||
-             !m_state.is_improved) &&
-            m_state.iteration_after_relaxation >
-                TabuSearchControllerStateManagerConstant::
-                    ITERATION_AFTER_RELAXATION_MAX) {
+        if (m_state.is_outer_stagnation && m_state.is_inner_stagnation) {
             m_state.penalty_coefficient_reset_flag           = true;
             m_state.employing_global_augmented_solution_flag = true;
             m_state.is_enabled_forcibly_initial_modification = true;
@@ -1170,8 +1225,7 @@ class TabuSearchControllerStateManager {
             default: {
                 throw std::logic_error(utility::format_error_location(
                     __FILE__, __LINE__, __func__,
-                    "The specified Chain move reduce mode is "
-                    "invalid."));
+                    "The specified chain move reduce mode is invalid."));
             }
         }
     }
@@ -1253,15 +1307,31 @@ class TabuSearchControllerStateManager {
 
     /*************************************************************************/
     inline constexpr void update_neighborhood_update_parallelization(void) {
+        if (m_state.is_enabled_parallel_neighborhood_update) {
+            m_state.total_number_of_threads_neighborhood_update +=
+                m_state.number_of_threads_neighborhood_update;
+
+        } else {
+            m_state.total_number_of_threads_neighborhood_update++;
+        }
+
+        m_state.averaged_number_of_threads_neighborhood_update =
+            m_state.total_number_of_threads_neighborhood_update /
+            static_cast<double>(m_state.iteration + 1);
+
 #ifdef _OPENMP
         if (m_option.parallel.is_enabled_parallel_neighborhood_update &&
             m_option.parallel
                 .is_enabled_automatic_neighborhood_update_parallelization) {
-            m_state.is_enabled_parallel_neighborhood_update =
+            m_state.number_of_threads_neighborhood_update =
                 m_state.neighborhood_update_parallelization_controller
                     .best_action()
                     .body;
+            m_state.is_enabled_parallel_neighborhood_update =
+                m_state.number_of_threads_neighborhood_update > 1;
         } else {
+            m_state.number_of_threads_neighborhood_update =
+                omp_get_max_threads();
             m_state.is_enabled_parallel_neighborhood_update =
                 m_option.parallel.is_enabled_parallel_neighborhood_update;
         }
@@ -1269,20 +1339,31 @@ class TabuSearchControllerStateManager {
         m_state.is_enabled_parallel_neighborhood_update =
             m_option.parallel.is_enabled_parallel_neighborhood_update;
 #endif
-        if (m_state.is_enabled_parallel_neighborhood_update) {
-            m_state.neighborhood_update_parallelized_count++;
-        }
     }
 
     /*************************************************************************/
     inline constexpr void update_evaluation_parallelization(void) {
+        if (m_state.is_enabled_parallel_neighborhood_update) {
+            m_state.total_number_of_threads_evaluation +=
+                m_state.number_of_threads_evaluation;
+        } else {
+            m_state.total_number_of_threads_evaluation++;
+        }
+
+        m_state.averaged_number_of_threads_evaluation =
+            m_state.total_number_of_threads_evaluation /
+            static_cast<double>(m_state.iteration + 1);
+
 #ifdef _OPENMP
         if (m_option.parallel.is_enabled_parallel_evaluation &&
             m_option.parallel.is_enabled_automatic_evaluation_parallelization) {
-            m_state.is_enabled_parallel_evaluation =
+            m_state.number_of_threads_evaluation =
                 m_state.evaluation_parallelization_controller.best_action()
                     .body;
+            m_state.is_enabled_parallel_evaluation =
+                m_state.number_of_threads_evaluation > 1;
         } else {
+            m_state.number_of_threads_evaluation = omp_get_max_threads();
             m_state.is_enabled_parallel_evaluation =
                 m_option.parallel.is_enabled_parallel_evaluation;
         }
@@ -1290,9 +1371,6 @@ class TabuSearchControllerStateManager {
         m_state.is_enabled_parallel_evaluation =
             m_option.parallel.is_enabled_parallel_evaluation;
 #endif
-        if (m_state.is_enabled_parallel_evaluation) {
-            m_state.evaluation_parallelized_count++;
-        }
     }
 
     /*************************************************************************/
