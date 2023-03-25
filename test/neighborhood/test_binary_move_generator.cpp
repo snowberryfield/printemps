@@ -33,7 +33,8 @@ TEST_F(TestBinaryMoveGenerator, setup) {
         model.variable_type_reference().binary_variable_ptrs;
 
     model.neighborhood().binary().setup(binary_variable_ptrs);
-    model.neighborhood().binary().update_moves(true, false, false, false);
+    model.neighborhood().binary().update_moves(  //
+        true, false, false, false, 1);
 
     auto& moves = model.neighborhood().binary().moves();
     auto& flags = model.neighborhood().binary().flags();

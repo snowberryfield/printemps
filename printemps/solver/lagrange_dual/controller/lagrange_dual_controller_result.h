@@ -6,15 +6,13 @@
 #ifndef PRINTEMPS_SOLVER_LAGRANGE_DUAL_CONTROLLER_LAGRANGE_DUAL_CONTROLLER_RESULT_H__
 #define PRINTEMPS_SOLVER_LAGRANGE_DUAL_CONTROLLER_LAGRANGE_DUAL_CONTROLLER_RESULT_H__
 
+#include "../core/lagrange_dual_core_result.h"
+
 namespace printemps::solver::lagrange_dual::controller {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 struct LagrangeDualControllerResult {
-    int update_status;
-    int number_of_iterations;
-
-    solution::DenseSolution<T_Variable, T_Expression> primal;
-    std::vector<multi_array::ValueProxy<double>>      dual;
+    core::LagrangeDualCoreResult<T_Variable, T_Expression> core;
 
     /*************************************************************************/
     LagrangeDualControllerResult(void) {
@@ -23,19 +21,15 @@ struct LagrangeDualControllerResult {
 
     /*************************************************************************/
     LagrangeDualControllerResult(
-        const core::LagrangeDualCoreResult<T_Variable, T_Expression> &a_RESULT)
-        : update_status(a_RESULT.total_update_status),
-          number_of_iterations(a_RESULT.number_of_iterations),
-          primal(a_RESULT.primal),
-          dual(a_RESULT.dual) {
+        const core::LagrangeDualCoreResult<T_Variable, T_Expression>
+            &a_CORE_RESULT)
+        : core(a_CORE_RESULT) {
         /// nothing to do
     }
 
     /*************************************************************************/
     inline void initialize(void) {
-        this->update_status =
-            solution::IncumbentHolderConstant::STATUS_NOT_UPDATED;
-        this->number_of_iterations = 0;
+        this->core.initialize();
     }
 };
 }  // namespace printemps::solver::lagrange_dual::controller

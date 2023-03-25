@@ -113,10 +113,10 @@ class GF2Solver {
         for (const auto &constraint_ptr : gf2s) {
             auto &expression       = constraint_ptr->expression();
             auto  key_variable_ptr = constraint_ptr->key_variable_ptr();
-            int   row              = constraint_map[constraint_ptr];
+            int   row              = constraint_map.forward_at(constraint_ptr);
             for (const auto &sensitivity : expression.sensitivities()) {
                 if (sensitivity.first != key_variable_ptr) {
-                    int column = variable_map[sensitivity.first];
+                    int column = variable_map.forward_at(sensitivity.first);
                     binary_matrix[row][column] = 1;
                 }
             }
@@ -143,7 +143,7 @@ class GF2Solver {
         auto solution = inverse.dot(constant_values);
 
         for (auto i = 0; i < GF2S_SIZE; i++) {
-            variable_map[i]->fix_by(solution[i]);
+            variable_map.reverse_at(i)->fix_by(solution[i]);
         }
 
         for (const auto &constraint_ptr : gf2s) {

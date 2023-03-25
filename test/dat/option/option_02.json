@@ -1,4 +1,7 @@
 {
+    "restart": {
+        "restart_mode": "Smart"
+    },
     "neighborhood": {
         "chain_move_reduce_mode": "Shuffle",
         "selection_mode": "Independent",

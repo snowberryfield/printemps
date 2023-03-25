@@ -18,6 +18,7 @@
 #include "neighborhood/neighborhood.h"
 #include "preprocess/preprocess.h"
 #include "solution/solution.h"
+#include "linear_programming/linear_programming.h"
 #include "model/model.h"
 #include "solver/solver.h"
 #include "standalone/standalone.h"

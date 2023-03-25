@@ -32,7 +32,8 @@ TEST_F(TestPrecedenceMoveGenerator, setup) {
     auto precedence_ptrs = model.constraint_type_reference().precedence_ptrs;
 
     model.neighborhood().precedence().setup(precedence_ptrs);
-    model.neighborhood().precedence().update_moves(true, false, false, false);
+    model.neighborhood().precedence().update_moves(true, false, false, false,
+                                                   1);
 
     auto& moves = model.neighborhood().precedence().moves();
     auto& flags = model.neighborhood().precedence().flags();

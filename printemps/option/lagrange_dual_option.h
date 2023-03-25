@@ -3,8 +3,8 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_SOLVER_LAGRANGE_DUAL_LAGRANGE_DUAL_OPTION_H__
-#define PRINTEMPS_SOLVER_LAGRANGE_DUAL_LAGRANGE_DUAL_OPTION_H__
+#ifndef PRINTEMPS_OPTION_LAGRANGE_DUAL_OPTION_H__
+#define PRINTEMPS_OPTION_LAGRANGE_DUAL_OPTION_H__
 
 namespace printemps::option {
 /*****************************************************************************/

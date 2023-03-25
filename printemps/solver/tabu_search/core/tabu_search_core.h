@@ -6,6 +6,7 @@
 #ifndef PRINTEMPS_SOLVER_TABU_SEARCH_CORE_TABU_SEARCH_CORE_H__
 #define PRINTEMPS_SOLVER_TABU_SEARCH_CORE_TABU_SEARCH_CORE_H__
 
+#include "../../integer_step_size_adjuster.h"
 #include "../../memory.h"
 #include "tabu_search_core_move_score.h"
 #include "tabu_search_core_move_evaluator.h"
@@ -145,7 +146,15 @@ class TabuSearchCore {
         const auto& STATE = m_state_manager.state();
 
         if (STATE.number_of_moves > 0) {
-            return false;
+            if (fabs(m_incumbent_holder_ptr->feasible_incumbent_objective() -
+                     m_incumbent_holder_ptr->dual_bound()) <
+                constant::EPSILON) {
+                m_state_manager.set_termination_status(
+                    TabuSearchCoreTerminationStatus::OPTIMAL);
+                return true;
+            } else {
+                return false;
+            }
         }
 
         if (m_model_ptr->is_linear() && m_model_ptr->is_feasible()) {
@@ -240,7 +249,8 @@ class TabuSearchCore {
                 accept_all,                     //
                 accept_objective_improvable,    //
                 accept_feasibility_improvable,  //
-                m_option.parallel.is_enabled_parallel_neighborhood_update);
+                m_option.parallel.is_enabled_parallel_neighborhood_update,
+                m_option.parallel.number_of_threads_neighborhood_update);
 
             m_state_manager.set_number_of_moves(
                 m_model_ptr->neighborhood().move_ptrs().size());
@@ -326,10 +336,11 @@ class TabuSearchCore {
 
         const double START_TIME = a_time_keeper_ptr->clock();
         m_model_ptr->neighborhood().update_moves(
-            accept_all,                     //
-            accept_objective_improvable,    //
-            accept_feasibility_improvable,  //
-            m_option.parallel.is_enabled_parallel_neighborhood_update);
+            accept_all,                                                 //
+            accept_objective_improvable,                                //
+            accept_feasibility_improvable,                              //
+            m_option.parallel.is_enabled_parallel_neighborhood_update,  //
+            m_option.parallel.number_of_threads_neighborhood_update);
         const double END_TIME = a_time_keeper_ptr->clock();
 
         m_state_manager.update_move_updating_statistics(
@@ -659,13 +670,13 @@ class TabuSearchCore {
                    solution::IncumbentHolder<T_Variable, T_Expression>*       //
                                                      a_incumbent_holder_ptr,  //
                    Memory<T_Variable, T_Expression>* a_memory_ptr,            //
-                   const option::Option&             a_OPION) {
+                   const option::Option&             a_OPTION) {
         this->initialize();
         this->setup(a_model_ptr,                       //
                     a_INITIAL_VARIABLE_VALUE_PROXIES,  //
                     a_incumbent_holder_ptr,            //
                     a_memory_ptr,                      //
-                    a_OPION);
+                    a_OPTION);
     }
 
     /*************************************************************************/
@@ -720,10 +731,16 @@ class TabuSearchCore {
         this->preprocess();
 
         /**
-         * Prepare the move evaluator.
+         * Prepare a move evaluator.
          */
         TabuSearchCoreMoveEvaluator<T_Variable, T_Expression> move_evaluator(
             m_model_ptr, m_memory_ptr, m_option);
+
+        /**
+         * Prepare an step size adjuster for integer moves.
+         */
+        IntegerStepSizeAdjuster integer_step_size_adjuster(m_model_ptr,
+                                                           m_option);
 
         std::vector<solution::SolutionScore> trial_solution_scores;
         std::vector<TabuSearchCoreMoveScore> trial_move_scores;
@@ -823,7 +840,8 @@ class TabuSearchCore {
             const auto DURATION               = ITERATION - TABU_TENURE;
 #ifdef _OPENMP
 #pragma omp parallel for if (m_option.parallel.is_enabled_parallel_evaluation) \
-    schedule(static)
+    schedule(static)                                                           \
+        num_threads(m_option.parallel.number_of_threads_evaluation)
 #endif
             for (auto i = 0; i < NUMBER_OF_MOVES; i++) {
                 /**
@@ -902,6 +920,27 @@ class TabuSearchCore {
              * Update the model by the selected move.
              */
             auto move_ptr = TRIAL_MOVE_PTRS[SELECTED_INDEX];
+
+            /**
+             * If the selected move updates the global incumbent solution and
+             * its type is "Integer", adjust the step size to obtain better
+             * solution.
+             */
+            if (m_option.neighborhood.is_enabled_integer_step_size_adjuster &&
+                m_model_ptr->is_enabled_fast_evaluation() &&
+                move_ptr->sense == neighborhood::MoveSense::Integer &&
+                trial_solution_scores[SELECTED_INDEX]
+                        .global_augmented_objective <
+                    m_incumbent_holder_ptr
+                        ->global_augmented_incumbent_objective()) {
+                integer_step_size_adjuster.adjust(move_ptr,
+                                                  CURRENT_SOLUTION_SCORE);
+                m_model_ptr->evaluate_multi(                 //
+                    &trial_solution_scores[SELECTED_INDEX],  //
+                    *move_ptr,                               //
+                    CURRENT_SOLUTION_SCORE);
+            }
+
             m_model_ptr->update(*move_ptr);
 
             /**

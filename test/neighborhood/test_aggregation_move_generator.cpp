@@ -32,7 +32,8 @@ TEST_F(TestAggregationMoveGenerator, setup) {
     auto aggregation_ptrs = model.constraint_type_reference().aggregation_ptrs;
 
     model.neighborhood().aggregation().setup(aggregation_ptrs);
-    model.neighborhood().aggregation().update_moves(true, false, false, false);
+    model.neighborhood().aggregation().update_moves(  //
+        true, false, false, false, 1);
 
     auto& moves = model.neighborhood().aggregation().moves();
     auto& flags = model.neighborhood().aggregation().flags();

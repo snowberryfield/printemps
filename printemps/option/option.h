@@ -11,10 +11,12 @@
 
 #include "general_option.h"
 #include "penalty_option.h"
-#include "preprocess_option.h"
 #include "parallel_option.h"
+#include "preprocess_option.h"
+#include "restart_option.h"
 #include "neighborhood_option.h"
 #include "output_option.h"
+#include "pdlp_option.h"
 #include "lagrange_dual_option.h"
 #include "local_search_option.h"
 #include "tabu_search_option.h"
@@ -26,8 +28,10 @@ struct Option {
     PenaltyOption      penalty;
     ParallelOption     parallel;
     PreprocessOption   preprocess;
+    RestartOption      restart;
     NeighborhoodOption neighborhood;
     OutputOption       output;
+    PDLPOption         pdlp;
     LagrangeDualOption lagrange_dual;
     LocalSearchOption  local_search;
     TabuSearchOption   tabu_search;
@@ -48,8 +52,10 @@ struct Option {
         this->penalty.initialize();
         this->parallel.initialize();
         this->preprocess.initialize();
+        this->restart.initialize();
         this->neighborhood.initialize();
         this->output.initialize();
+        this->pdlp.initialize();
         this->lagrange_dual.initialize();
         this->local_search.initialize();
         this->tabu_search.initialize();
@@ -65,8 +71,10 @@ struct Option {
         this->penalty.print();
         this->parallel.print();
         this->preprocess.print();
+        this->restart.print();
         this->neighborhood.print();
         this->output.print();
+        this->pdlp.print();
         this->lagrange_dual.print();
         this->local_search.print();
         this->tabu_search.print();
@@ -102,6 +110,12 @@ struct Option {
                     option_object.at("preprocess")));
         }
 
+        if (option_object.find("restart")) {
+            option.restart =
+                RestartOption(std::any_cast<utility::json::JsonObject>(
+                    option_object.at("restart")));
+        }
+
         if (option_object.find("neighborhood")) {
             option.neighborhood =
                 NeighborhoodOption(std::any_cast<utility::json::JsonObject>(
@@ -112,6 +126,11 @@ struct Option {
             option.output =
                 OutputOption(std::any_cast<utility::json::JsonObject>(
                     option_object.at("output")));
+        }
+
+        if (option_object.find("pdlp")) {
+            option.pdlp = PDLPOption(std::any_cast<utility::json::JsonObject>(
+                option_object.at("pdlp")));
         }
 
         if (option_object.find("lagrange_dual")) {
@@ -142,8 +161,10 @@ struct Option {
         obj.emplace_back("penalty", this->penalty.to_json());
         obj.emplace_back("parallel", this->parallel.to_json());
         obj.emplace_back("preprocess", this->preprocess.to_json());
+        obj.emplace_back("restart", this->restart.to_json());
         obj.emplace_back("neighborhood", this->neighborhood.to_json());
         obj.emplace_back("output", this->output.to_json());
+        obj.emplace_back("pdlp", this->pdlp.to_json());
         obj.emplace_back("lagrange_dual", this->lagrange_dual.to_json());
         obj.emplace_back("local_search", this->local_search.to_json());
         obj.emplace_back("tabu_search", this->tabu_search.to_json());

@@ -8,6 +8,7 @@
 
 #include "selection_mode.h"
 #include "chain_move_reduce_mode.h"
+#include "restart_mode.h"
 #include "improvability_screening_mode.h"
 #include "verbose.h"
 #include "tabu_mode.h"
