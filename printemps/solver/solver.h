@@ -319,17 +319,21 @@ class Solver {
          */
 
 #ifdef _OPENMP
-        if (m_option.parallel.is_enabled_automatic_evaluation_parallelization &&
-            m_option.parallel.number_of_threads_evaluation <= 0) {
-            m_option.parallel.number_of_threads_evaluation =
-                omp_get_max_threads();
+        int max_number_of_threads = 1;
+#pragma omp parallel
+        {
+#pragma omp single
+            max_number_of_threads = omp_get_max_threads();
         }
 
-        if (m_option.parallel
-                .is_enabled_automatic_neighborhood_update_parallelization &&
-            m_option.parallel.number_of_threads_neighborhood_update <= 0) {
+        if (m_option.parallel.number_of_threads_evaluation <= 0) {
+            m_option.parallel.number_of_threads_evaluation =
+                max_number_of_threads;
+        }
+
+        if (m_option.parallel.number_of_threads_neighborhood_update <= 0) {
             m_option.parallel.number_of_threads_neighborhood_update =
-                omp_get_max_threads();
+                max_number_of_threads;
         }
 #endif
 
