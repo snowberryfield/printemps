@@ -11,6 +11,7 @@ namespace printemps::solution {
 struct IncumbentHolderConstant {
     static constexpr bool   DEFAULT_IS_FOUND_FEASIBLE_SOLUTION      = false;
     static constexpr double DEFAULT_OBJECTIVE                       = HUGE_VALF;
+    static constexpr double DEFAULT_DUAL_BOUND                      = 0.0;
     static constexpr int    STATUS_NOT_UPDATED                      = 0;
     static constexpr int    STATUS_LOCAL_AUGMENTED_INCUMBENT_UPDATE = 1;
     static constexpr int    STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE = 2;
@@ -28,6 +29,8 @@ class IncumbentHolder {
     DenseSolution<T_Variable, T_Expression>
                                             m_global_augmented_incumbent_solution;
     DenseSolution<T_Variable, T_Expression> m_feasible_incumbent_solution;
+
+    double m_dual_bound;
 
     /**
      * following double-type members contain incumbent objective values as
@@ -65,6 +68,8 @@ class IncumbentHolder {
 
         m_feasible_incumbent_objective =
             IncumbentHolderConstant::DEFAULT_OBJECTIVE;
+
+        m_dual_bound = IncumbentHolderConstant::DEFAULT_DUAL_BOUND;
     }
 
     /*************************************************************************/
@@ -210,6 +215,16 @@ class IncumbentHolder {
     inline constexpr const DenseSolution<T_Variable, T_Expression>
         &feasible_incumbent_solution(void) const {
         return m_feasible_incumbent_solution;
+    }
+
+    /*************************************************************************/
+    inline constexpr void update_dual_bound(const double a_DUAL_BOUND) {
+        m_dual_bound = a_DUAL_BOUND;
+    }
+
+    /*************************************************************************/
+    inline constexpr double dual_bound(void) const {
+        return m_dual_bound;
     }
 
     /*************************************************************************/

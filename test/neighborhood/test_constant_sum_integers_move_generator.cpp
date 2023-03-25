@@ -35,7 +35,7 @@ TEST_F(TestConstantSumIntegersMoveGenerator, setup) {
     model.neighborhood().constant_sum_integers().setup(  //
         constant_sum_integers_ptrs);
     model.neighborhood().constant_sum_integers().update_moves(  //
-        true, false, false, false);
+        true, false, false, false, 1);
 
     auto& moves = model.neighborhood().constant_sum_integers().moves();
     auto& flags = model.neighborhood().constant_sum_integers().flags();

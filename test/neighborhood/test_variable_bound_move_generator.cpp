@@ -34,8 +34,8 @@ TEST_F(TestVariableBoundMoveGenerator, setup) {
             model.constraint_type_reference().variable_bound_ptrs;
 
         model.neighborhood().variable_bound().setup(variable_bound_ptrs);
-        model.neighborhood().variable_bound().update_moves(true, false, false,
-                                                           false);
+        model.neighborhood().variable_bound().update_moves(  //
+            true, false, false, false, 1);
 
         auto& moves = model.neighborhood().variable_bound().moves();
         auto& flags = model.neighborhood().variable_bound().flags();
@@ -100,8 +100,8 @@ TEST_F(TestVariableBoundMoveGenerator, setup) {
             model.constraint_type_reference().variable_bound_ptrs;
 
         model.neighborhood().variable_bound().setup(variable_bound_ptrs);
-        model.neighborhood().variable_bound().update_moves(true, false, false,
-                                                           false);
+        model.neighborhood().variable_bound().update_moves(  //
+            true, false, false, false, 1);
 
         auto& moves = model.neighborhood().variable_bound().moves();
         auto& flags = model.neighborhood().variable_bound().flags();

@@ -19,6 +19,10 @@ struct ConstraintReference {
     std::vector<Constraint<T_Variable, T_Expression> *>
         disabled_constraint_ptrs;
 
+    std::vector<Constraint<T_Variable, T_Expression> *> less_ptrs;
+    std::vector<Constraint<T_Variable, T_Expression> *> equal_ptrs;
+    std::vector<Constraint<T_Variable, T_Expression> *> greater_ptrs;
+
     /*************************************************************************/
     ConstraintReference(void) {
         this->initialize();
@@ -29,6 +33,9 @@ struct ConstraintReference {
         this->constraint_ptrs.clear();
         this->enabled_constraint_ptrs.clear();
         this->disabled_constraint_ptrs.clear();
+        this->less_ptrs.clear();
+        this->equal_ptrs.clear();
+        this->greater_ptrs.clear();
     }
 };
 }  // namespace printemps::model_component

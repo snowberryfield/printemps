@@ -35,7 +35,7 @@ TEST_F(TestConstantRatioIntegersMoveGenerator, setup) {
         model.neighborhood().constant_ratio_integers().setup(  //
             constant_ratio_integers_ptrs);
         model.neighborhood().constant_ratio_integers().update_moves(  //
-            true, false, false, false);
+            true, false, false, false, 1);
 
         auto& moves = model.neighborhood().constant_ratio_integers().moves();
         auto& flags = model.neighborhood().constant_ratio_integers().flags();
@@ -83,7 +83,7 @@ TEST_F(TestConstantRatioIntegersMoveGenerator, setup) {
         model.neighborhood().constant_ratio_integers().setup(  //
             constant_ratio_integers_ptrs);
         model.neighborhood().constant_ratio_integers().update_moves(  //
-            true, false, false, false);
+            true, false, false, false, 1);
 
         auto& moves = model.neighborhood().constant_ratio_integers().moves();
         auto& flags = model.neighborhood().constant_ratio_integers().flags();

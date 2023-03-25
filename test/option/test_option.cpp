@@ -48,6 +48,10 @@ TEST_F(TestOption, setup) {
             2,      //
             option.general.seed);
 
+        EXPECT_EQ(  //
+            false,  //
+            option.general.is_enabled_fast_evaluation);
+
         /// penalty
         EXPECT_FLOAT_EQ(  //
             0.1,          //
@@ -65,9 +69,45 @@ TEST_F(TestOption, setup) {
             0.1,          //
             option.penalty.initial_penalty_coefficient);
 
+        EXPECT_FLOAT_EQ(  //
+            0.0,          //
+            option.penalty.penalty_coefficient_relaxing_rate_min);
+
+        EXPECT_FLOAT_EQ(  //
+            2.0,          //
+            option.penalty.penalty_coefficient_relaxing_rate_max);
+
+        EXPECT_FLOAT_EQ(  //
+            1.0,          //
+            option.penalty.penalty_coefficient_relaxing_rate_increase_rate);
+
+        EXPECT_FLOAT_EQ(  //
+            0.5,          //
+            option.penalty.penalty_coefficient_relaxing_rate_decrease_rate);
+
+        EXPECT_FLOAT_EQ(  //
+            50,           //
+            option.penalty.inner_stagnation_threshold);
+
+        EXPECT_EQ(  //
+            50,     //
+            option.penalty.outer_stagnation_threshold);
+
+        EXPECT_FLOAT_EQ(  //
+            false,        //
+            option.penalty.is_enabled_inner_stagnation_breaker);
+
+        EXPECT_EQ(  //
+            false,  //
+            option.penalty.is_enabled_outer_stagnation_breaker);
+
         EXPECT_EQ(  //
             true,   //
             option.penalty.is_enabled_group_penalty_coefficient);
+
+        EXPECT_EQ(  //
+            false,  //
+            option.penalty.is_enabled_shrink_penalty_coefficient);
 
         /// parallel
         EXPECT_EQ(  //
@@ -77,6 +117,31 @@ TEST_F(TestOption, setup) {
         EXPECT_EQ(  //
             false,  //
             option.parallel.is_enabled_parallel_neighborhood_update);
+
+        EXPECT_EQ(  //
+            false,  //
+            option.parallel.is_enabled_automatic_evaluation_parallelization);
+
+        EXPECT_EQ(  //
+            false,  //
+            option.parallel
+                .is_enabled_automatic_neighborhood_update_parallelization);
+
+        EXPECT_FLOAT_EQ(  //
+            0.6,          //
+            option.parallel.evaluation_parallelization_decay_factor);
+
+        EXPECT_FLOAT_EQ(  //
+            0.6,          //
+            option.parallel.neighborhood_update_parallelization_decay_factor);
+
+        EXPECT_EQ(  //
+            2,      //
+            option.parallel.number_of_threads_evaluation);
+
+        EXPECT_EQ(  //
+            2,      //
+            option.parallel.number_of_threads_neighborhood_update);
 
         /// preprocess
         EXPECT_EQ(  //
@@ -222,6 +287,10 @@ TEST_F(TestOption, setup) {
             0,      //
             option.neighborhood.improvability_screening_mode);
 
+        EXPECT_EQ(  //
+            true,   //
+            option.neighborhood.is_enabled_integer_step_size_adjuster);
+
         /// output
         EXPECT_EQ(  //
             0,      //
@@ -238,6 +307,67 @@ TEST_F(TestOption, setup) {
         EXPECT_EQ(  //
             1,      //
             option.output.feasible_solutions_capacity);
+
+        /// pdlp
+        EXPECT_EQ(  //
+            false,  //
+            option.pdlp.is_enabled);
+
+        EXPECT_EQ(  //
+            1,      //
+            option.pdlp.iteration_max);
+
+        EXPECT_FLOAT_EQ(  //
+            0.1,          //
+            option.pdlp.time_max);
+
+        EXPECT_FLOAT_EQ(  //
+            0.1,          //
+            option.pdlp.time_offset);
+
+        EXPECT_FLOAT_EQ(  //
+            0.1,          //
+            option.pdlp.tolerance);
+
+        EXPECT_FLOAT_EQ(  //
+            0.1,          //
+            option.pdlp.step_size_extend_exponent);
+
+        EXPECT_FLOAT_EQ(  //
+            0.1,          //
+            option.pdlp.step_size_reduce_exponent);
+
+        EXPECT_FLOAT_EQ(  //
+            0.2,          //
+            option.pdlp.restart_threshold_sufficient);
+
+        EXPECT_FLOAT_EQ(  //
+            0.1,          //
+            option.pdlp.restart_threshold_necessary);
+
+        EXPECT_FLOAT_EQ(  //
+            0.1,          //
+            option.pdlp.restart_threshold_artificial);
+
+        EXPECT_EQ(  //
+            1,      //
+            option.pdlp.restart_check_interval);
+
+        EXPECT_EQ(  //
+            1,      //
+            option.pdlp.convergence_check_interval);
+
+        EXPECT_EQ(  //
+            1,      //
+            option.pdlp.counts_of_ruiz_scaling);
+
+        EXPECT_EQ(  //
+            false,  //
+            option.pdlp.is_enabled_pock_chambolle_scaling);
+
+        EXPECT_EQ(  //
+            1,      //
+            option.pdlp.log_interval);
 
         /// lagrange_dual
         EXPECT_EQ(  //
@@ -402,6 +532,12 @@ TEST_F(TestOption, setup) {
     {
         Option option;
         option.setup("./test/dat/option/option_01.json");
+
+        /// restart
+        EXPECT_EQ(                 //
+            restart_mode::Simple,  //
+            option.restart.restart_mode);
+
         EXPECT_EQ(                                //
             chain_move_reduce_mode::OverlapRate,  //
             option.neighborhood.chain_move_reduce_mode);
@@ -426,6 +562,12 @@ TEST_F(TestOption, setup) {
     {
         Option option;
         option.setup("./test/dat/option/option_02.json");
+
+        /// restart
+        EXPECT_EQ(                //
+            restart_mode::Smart,  //
+            option.restart.restart_mode);
+
         EXPECT_EQ(                            //
             chain_move_reduce_mode::Shuffle,  //
             option.neighborhood.chain_move_reduce_mode);

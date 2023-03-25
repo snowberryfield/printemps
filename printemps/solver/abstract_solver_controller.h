@@ -36,22 +36,32 @@ class AbstractSolverController {
             m_incumbent_holder_ptr->global_augmented_incumbent_solution();
         utility::print_info(
             " -- Incumbent objective: " +
-                utility::to_string(GLOBAL_INCUMBENT_SOLUTION.objective, "%.3f"),
+                utility::to_string(GLOBAL_INCUMBENT_SOLUTION.objective, "%.5e"),
             a_IS_ENABLED_PRINT);
 
         utility::print_info(
-            " -- Incumbent total violation: " +
+            " -- Incumbent violation: " +
                 utility::to_string(GLOBAL_INCUMBENT_SOLUTION.total_violation,
-                                   "%.3f") +
-                " (duplicated constr. included) ",
+                                   "%.5e") +
+                " (duplicate constraints included) ",
+            a_IS_ENABLED_PRINT);
+    }
+
+    /*************************************************************************/
+    inline void print_dual_bound(const bool a_IS_ENABLED_PRINT) {
+        utility::print_info(
+            " -- Dual Bound: " +
+                utility::to_string(m_incumbent_holder_ptr->dual_bound(),
+                                   "%.5e"),
             a_IS_ENABLED_PRINT);
     }
 
     /*************************************************************************/
     inline constexpr void update_variable_bounds(
-        const double a_OBJECTIVE, const bool a_IS_ENABLED_PRINT) {
+        const double a_OBJECTIVE, const bool a_IS_PRIMAL,
+        const bool a_IS_ENABLED_PRINT) {
         auto number_of_newly_fixed_variables =
-            m_model_ptr->update_variable_bounds(a_OBJECTIVE,
+            m_model_ptr->update_variable_bounds(a_OBJECTIVE, a_IS_PRIMAL,
                                                 a_IS_ENABLED_PRINT);
 
         /**

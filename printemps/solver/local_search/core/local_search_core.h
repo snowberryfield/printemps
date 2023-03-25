@@ -6,6 +6,7 @@
 #ifndef PRINTEMPS_SOLVER_LOCAL_SEARCH_CORE_LOCAL_SEARCH_CORE_H__
 #define PRINTEMPS_SOLVER_LOCAL_SEARCH_CORE_LOCAL_SEARCH_CORE_H__
 
+#include "../../integer_step_size_adjuster.h"
 #include "local_search_core_termination_status.h"
 #include "local_search_core_state.h"
 #include "local_search_core_state_manager.h"
@@ -202,10 +203,11 @@ class LocalSearchCore {
         }
 
         m_model_ptr->neighborhood().update_moves(
-            accept_all,                     //
-            accept_objective_improvable,    //
-            accept_feasibility_improvable,  //
-            m_option.parallel.is_enabled_parallel_neighborhood_update);
+            accept_all,                                                 //
+            accept_objective_improvable,                                //
+            accept_feasibility_improvable,                              //
+            m_option.parallel.is_enabled_parallel_neighborhood_update,  //
+            m_option.parallel.number_of_threads_neighborhood_update);
 
         m_state_manager.set_number_of_moves(
             m_model_ptr->neighborhood().move_ptrs().size());
@@ -401,13 +403,13 @@ class LocalSearchCore {
                     solution::IncumbentHolder<T_Variable, T_Expression>*     //
                                                       a_incumbent_holder_ptr,  //
                     Memory<T_Variable, T_Expression>* a_memory_ptr,  //
-                    const option::Option&             a_OPION) {
+                    const option::Option&             a_OPTION) {
         this->initialize();
         this->setup(a_model_ptr,                       //
                     a_INITIAL_VARIABLE_VALUE_PROXIES,  //
                     a_incumbent_holder_ptr,            //
                     a_memory_ptr,                      //
-                    a_OPION);
+                    a_OPTION);
     }
 
     /*************************************************************************/
@@ -437,12 +439,12 @@ class LocalSearchCore {
         solution::IncumbentHolder<T_Variable, T_Expression>*       //
                                           a_incumbent_holder_ptr,  //
         Memory<T_Variable, T_Expression>* a_memory_ptr,            //
-        const option::Option&             a_OPION) {
+        const option::Option&             a_OPTION) {
         m_model_ptr                      = a_model_ptr;
         m_initial_variable_value_proxies = a_INITIAL_VARIABLE_VALUE_PROXIES;
         m_incumbent_holder_ptr           = a_incumbent_holder_ptr;
         m_memory_ptr                     = a_memory_ptr;
-        m_option                         = a_OPION;
+        m_option                         = a_OPTION;
         m_feasible_solutions.clear();
     }
 
@@ -461,6 +463,11 @@ class LocalSearchCore {
          */
         this->preprocess();
 
+        /**
+         * Prepare an step size adjuster for integer moves.
+         */
+        IntegerStepSizeAdjuster integer_step_size_adjuster(m_model_ptr,
+                                                           m_option);
         std::vector<solution::SolutionScore> trial_solution_scores;
         std::vector<int>                     move_indices;
         std::unordered_set<
@@ -535,7 +542,8 @@ class LocalSearchCore {
             const auto CURRENT_SOLUTION_SCORE = STATE.current_solution_score;
 #ifdef _OPENMP
 #pragma omp parallel for if (m_option.parallel.is_enabled_parallel_evaluation) \
-    schedule(static)
+    schedule(static)                                                           \
+        num_threads(m_option.parallel.number_of_threads_evaluation)
 #endif
             for (auto i = 0; i < NUMBER_OF_MOVES; i++) {
                 /**
@@ -606,6 +614,7 @@ class LocalSearchCore {
                         break;
                     }
                 }
+
                 if (has_intersection) {
                     continue;
                 }
@@ -622,6 +631,14 @@ class LocalSearchCore {
                 constraint_ptrs.insert(
                     move_ptr->related_constraint_ptrs.begin(),
                     move_ptr->related_constraint_ptrs.end());
+
+                if (m_option.neighborhood
+                        .is_enabled_integer_step_size_adjuster &&
+                    move_ptr->sense == neighborhood::MoveSense::Integer) {
+                    integer_step_size_adjuster.adjust(&move,
+                                                      CURRENT_SOLUTION_SCORE);
+                }
+
                 number_of_performed_moves++;
             }
 

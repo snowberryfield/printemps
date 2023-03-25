@@ -171,6 +171,8 @@ class TabuSearchController
 
         this->print_incumbent_summary(a_IS_ENABLED_PRINT);
 
+        this->print_dual_bound(a_IS_ENABLED_PRINT);
+
         /**
          * Print the optimization status of the previous tabu search loop.
          */
@@ -353,17 +355,20 @@ class TabuSearchController
                                 const bool   a_IS_ENABLED_PRINT) {
         utility::print_message(
             "Historical search intensity is " +
-                std::to_string(a_CURRENT_PRIMAL_INTENSITY) + " (primal) / " +
-                std::to_string(a_CURRENT_DUAL_INTENSITY) + " (dual).",
+                utility::to_string(a_CURRENT_PRIMAL_INTENSITY, "%.3e") +
+                " (primal) / " +
+                utility::to_string(a_CURRENT_DUAL_INTENSITY, "%.3e") +
+                " (dual).",
             a_IS_ENABLED_PRINT);
     }
 
     /*************************************************************************/
     inline void print_performance(const double a_SEARCH_PERFORMANCE,
                                   const bool   a_IS_ENABLED_PRINT) {
-        utility::print_message("Search performance in the previous loop is " +
-                                   std::to_string(a_SEARCH_PERFORMANCE) + ".",
-                               a_IS_ENABLED_PRINT);
+        utility::print_message(
+            "Search performance in the previous loop is " +
+                utility::to_string(a_SEARCH_PERFORMANCE, "%.5e."),
+            a_IS_ENABLED_PRINT);
     }
 
     /*************************************************************************/
@@ -372,7 +377,7 @@ class TabuSearchController
         const bool   a_IS_ENABLED_PRINT) {
         utility::print_message(
             "Averaged inner iteration speed is " +
-                std::to_string(a_AVERAGED_INNER_ITERATION_SPEED) +
+                utility::to_string(a_AVERAGED_INNER_ITERATION_SPEED, "%.5e") +
                 " iterations/sec.",
             a_IS_ENABLED_PRINT);
     }
@@ -383,7 +388,7 @@ class TabuSearchController
         const bool   a_IS_ENABLED_PRINT) {
         utility::print_message(
             "Averaged move evaluation speed is " +
-                std::to_string(a_AVERAGED_MOVE_EVALUATION_SPEED) +
+                utility::to_string(a_AVERAGED_MOVE_EVALUATION_SPEED, "%.5e") +
                 " moves/sec.",
             a_IS_ENABLED_PRINT);
     }
@@ -628,89 +633,72 @@ class TabuSearchController
 
     /*************************************************************************/
     inline void print_neighborhood_update_parallelization_controller(
-        const utility::ucb1::Learner<bool>& a_CONTROLLER,
-        const bool                          a_IS_ENABLED_PRINT) {
-        const auto& ACTION_ON       = a_CONTROLLER.actions()[0];
-        const auto& ACTION_OFF      = a_CONTROLLER.actions()[1];
-        char        action_on_flag  = ' ';
-        char        action_off_flag = ' ';
+        const utility::ucb1::Learner<int>& a_CONTROLLER,
+        const bool                         a_IS_ENABLED_PRINT) {
+        utility::print_message(
+            "The state of the parallelization controller for updating "
+            "neighborhood are as follows ('*' denotes the selected option for "
+            "the next loop):",
+            a_IS_ENABLED_PRINT);
 
-        if (a_CONTROLLER.best_action().body) {
-            action_on_flag = '*';
-        } else {
-            action_off_flag = '*';
+        for (const auto& action : a_CONTROLLER.actions()) {
+            char flag =
+                a_CONTROLLER.best_action().body == action.body ? '*' : ' ';
+            utility::print_info(
+                utility::to_string(flag, "-- (%c") +
+                    utility::to_string(action.body, "%d Threads) ") +
+                    utility::to_string(action.mean, "Mean: %.3e, ") +
+                    utility::to_string(action.confidence, "Conf.: %.3e, ") +
+                    utility::to_string(action.number_of_samples, "N: %d") +
+                    utility::to_string(
+                        action.number_of_samples /
+                            static_cast<double>(
+                                a_CONTROLLER.total_number_of_samples()),
+                        "(%.3f)"),
+                a_IS_ENABLED_PRINT);
         }
 
+        const auto& STATE = m_state_manager.state();
         utility::print_message(
-            "The state of the parallelization controller for updating moves "
-            "are as follows ('*' denotes the selected option for the next "
-            "loop):",
-            a_IS_ENABLED_PRINT);
-        utility::print_info(
-            utility::to_string(action_on_flag, "-- (%cOn ) ") +
-                utility::to_string(ACTION_ON.mean, "Mean: %.3e, ") +
-                utility::to_string(ACTION_ON.confidence, "Conf.: %.3e, ") +
-                utility::to_string(ACTION_ON.number_of_samples, "N: %d") +
+            "Averaged number of threads for updating neighborhood is " +
                 utility::to_string(
-                    ACTION_ON.number_of_samples /
-                        static_cast<double>(
-                            a_CONTROLLER.total_number_of_samples()),
-                    "(%.3f)"),
-            a_IS_ENABLED_PRINT);
-        utility::print_info(
-            utility::to_string(action_off_flag, "-- (%cOff) ") +
-                utility::to_string(ACTION_OFF.mean, "Mean: %.3e, ") +
-                utility::to_string(ACTION_OFF.confidence, "Conf.: %.3e, ") +
-                utility::to_string(ACTION_OFF.number_of_samples, "N: %d") +
-                utility::to_string(
-                    ACTION_OFF.number_of_samples /
-                        static_cast<double>(
-                            a_CONTROLLER.total_number_of_samples()),
-                    "(%.3f)"),
+                    STATE.averaged_number_of_threads_neighborhood_update,
+                    "%.3e."),
             a_IS_ENABLED_PRINT);
     }
 
     /*************************************************************************/
     inline void print_evaluation_parallelization_controller(
-        const utility::ucb1::Learner<bool>& a_CONTROLLER,
-        const bool                          a_IS_ENABLED_PRINT) {
-        const auto& ACTION_ON       = a_CONTROLLER.actions()[0];
-        const auto& ACTION_OFF      = a_CONTROLLER.actions()[1];
-        char        action_on_flag  = ' ';
-        char        action_off_flag = ' ';
-
-        if (a_CONTROLLER.best_action().body) {
-            action_on_flag = '*';
-        } else {
-            action_off_flag = '*';
-        }
-
+        const utility::ucb1::Learner<int>& a_CONTROLLER,
+        const bool                         a_IS_ENABLED_PRINT) {
         utility::print_message(
             "The state of the parallelization controller for evaluating moves "
             "are as follows ('*' denotes the selected option for the next "
             "loop):",
             a_IS_ENABLED_PRINT);
-        utility::print_info(
-            utility::to_string(action_on_flag, "-- (%cOn ) ") +
-                utility::to_string(ACTION_ON.mean, "Mean: %.3e, ") +
-                utility::to_string(ACTION_ON.confidence, "Conf.: %.3e, ") +
-                utility::to_string(ACTION_ON.number_of_samples, "N: %d") +
-                utility::to_string(
-                    ACTION_ON.number_of_samples /
-                        static_cast<double>(
-                            a_CONTROLLER.total_number_of_samples()),
-                    "(%.3f)"),
-            a_IS_ENABLED_PRINT);
-        utility::print_info(
-            utility::to_string(action_off_flag, "-- (%cOff) ") +
-                utility::to_string(ACTION_OFF.mean, "Mean: %.3e, ") +
-                utility::to_string(ACTION_OFF.confidence, "Conf.: %.3e, ") +
-                utility::to_string(ACTION_OFF.number_of_samples, "N: %d") +
-                utility::to_string(
-                    ACTION_OFF.number_of_samples /
-                        static_cast<double>(
-                            a_CONTROLLER.total_number_of_samples()),
-                    "(%.3f)"),
+
+        for (const auto& action : a_CONTROLLER.actions()) {
+            char flag =
+                a_CONTROLLER.best_action().body == action.body ? '*' : ' ';
+            utility::print_info(
+                utility::to_string(flag, "-- (%c") +
+                    utility::to_string(action.body, "%d Threads) ") +
+                    utility::to_string(action.mean, "Mean: %.3e, ") +
+                    utility::to_string(action.confidence, "Conf.: %.3e, ") +
+                    utility::to_string(action.number_of_samples, "N: %d") +
+                    utility::to_string(
+                        action.number_of_samples /
+                            static_cast<double>(
+                                a_CONTROLLER.total_number_of_samples()),
+                        "(%.3f)"),
+                a_IS_ENABLED_PRINT);
+        }
+
+        const auto& STATE = m_state_manager.state();
+        utility::print_message(
+            "Averaged number of threads for evaluation is " +
+                utility::to_string(STATE.averaged_number_of_threads_evaluation,
+                                   "%.3e."),
             a_IS_ENABLED_PRINT);
     }
 
@@ -795,6 +783,7 @@ class TabuSearchController
                 this->update_variable_bounds(
                     this->m_incumbent_holder_ptr
                         ->feasible_incumbent_objective(),
+                    true,
                     this->m_option.output.verbose >= option::verbose::Outer);
             }
 

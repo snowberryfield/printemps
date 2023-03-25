@@ -86,14 +86,22 @@ class BalancedIntegersMoveGenerator
          */
         auto move_updater =  //
             [binomials, BINOMIALS_SIZE](
-                auto *                      a_moves_ptr,                      //
-                auto *                      a_flags,                          //
-                const bool                  a_ACCEPT_ALL,                     //
-                const bool                  a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
-                const bool                  a_ACCEPT_FEASIBILITY_IMPROVABLE,  //
-                [[maybe_unused]] const bool a_IS_ENABLED_PARALLEL) {
+                auto *     a_moves_ptr,                      //
+                auto *     a_flags,                          //
+                const bool a_ACCEPT_ALL,                     //
+                const bool a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
+                const bool a_ACCEPT_FEASIBILITY_IMPROVABLE,  //
 #ifdef _OPENMP
-#pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
+                const bool a_IS_ENABLED_PARALLEL,  //
+                const int  a_NUMBER_OF_THREADS     //
+#else
+                [[maybe_unused]] const bool a_IS_ENABLED_PARALLEL,  //
+                [[maybe_unused]] const int  a_NUMBER_OF_THREADS     //
+#endif
+            ) {
+#ifdef _OPENMP
+#pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static) \
+    num_threads(a_NUMBER_OF_THREADS)
 #endif
                 for (auto i = 0; i < BINOMIALS_SIZE; i++) {
                     {
@@ -116,7 +124,8 @@ class BalancedIntegersMoveGenerator
                 const int MOVES_SIZE = a_moves_ptr->size();
 
 #ifdef _OPENMP
-#pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
+#pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static) \
+    num_threads(a_NUMBER_OF_THREADS)
 #endif
                 for (auto i = 0; i < MOVES_SIZE; i++) {
                     (*a_flags)[i] = 1;

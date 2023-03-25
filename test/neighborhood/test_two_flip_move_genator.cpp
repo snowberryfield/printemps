@@ -33,7 +33,7 @@ TEST_F(TestTwoFlipMoveGenerator, setup) {
     flippable_variable_pairs.push_back({&x(1), &x(2)});
 
     model.neighborhood().two_flip().setup(flippable_variable_pairs);
-    model.neighborhood().two_flip().update_moves(true, false, false, false);
+    model.neighborhood().two_flip().update_moves(true, false, false, false, 1);
 
     auto& moves = model.neighborhood().two_flip().moves();
     auto& flags = model.neighborhood().two_flip().flags();
