@@ -85,7 +85,7 @@ inline void linear_combination(Vector*       a_result_ptr,
 
 /*****************************************************************************/
 inline void linear_combination(Vector*                     a_result_ptr,
-                               const std::vector<double>   a_COEFFICIENTS,
+                               const std::vector<double>&  a_COEFFICIENTS,
                                const std::vector<Vector*>& a_VECTOR_PTRS) {
     const int NUMBER_OF_TERMS = a_VECTOR_PTRS.size();
     const int SIZE            = a_VECTOR_PTRS.front()->size();
@@ -154,7 +154,7 @@ inline void linear_combination(Vector*                     a_result_ptr,
                                const double                a_FIRST_COEFFICIENT,
                                const SparseMatrix&         a_FIRST_MATRIX,
                                const Vector&               a_FIRST_VECTOR,
-                               const std::vector<double>   a_REST_COEFFICIENTS,
+                               const std::vector<double>&  a_REST_COEFFICIENTS,
                                const std::vector<Vector*>& a_REST_VECTOR_PTRS) {
     const auto& VALUES         = a_FIRST_MATRIX.values;
     const auto& ROW_PTRS       = a_FIRST_MATRIX.row_ptrs;
