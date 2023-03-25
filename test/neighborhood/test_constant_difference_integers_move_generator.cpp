@@ -35,7 +35,7 @@ TEST_F(TestConstantDifferenceIntegersMoveGenerator, setup) {
     model.neighborhood().constant_difference_integers().setup(  //
         constant_difference_integers_ptrs);
     model.neighborhood().constant_difference_integers().update_moves(  //
-        true, false, false, false);
+        true, false, false, false, 1);
 
     auto& moves = model.neighborhood().constant_difference_integers().moves();
     auto& flags = model.neighborhood().constant_difference_integers().flags();

@@ -42,8 +42,11 @@ TEST_F(TestGeneralOption, initialize) {
     EXPECT_EQ(                                //
         GeneralOptionConstant::DEFAULT_SEED,  //
         option.seed);
-}
 
+    EXPECT_EQ(                                                      //
+        GeneralOptionConstant::DEFAULT_IS_ENABLED_FAST_EVALUATION,  //
+        option.is_enabled_fast_evaluation);
+}
 }  // namespace
 /*****************************************************************************/
 // END

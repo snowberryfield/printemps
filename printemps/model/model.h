@@ -847,8 +847,9 @@ class Model {
         /**
          * Modify the global penalty coefficient.
          */
-        if (m_is_integer && m_is_linear) {
-            this->modify_global_penalty_coefficient(a_IS_ENABLED_PRINT);
+        if (m_is_integer && m_is_linear &&
+            a_OPTION.penalty.is_enabled_shrink_penalty_coefficient) {
+            this->shrink_global_penalty_coefficient(a_IS_ENABLED_PRINT);
         }
 
         for (auto &&proxy : m_constraint_proxies) {
@@ -1654,7 +1655,7 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void modify_global_penalty_coefficient(
+    constexpr void shrink_global_penalty_coefficient(
         const bool a_IS_ENABLED_PRINT) {
         utility::print_single_line(a_IS_ENABLED_PRINT);
         utility::print_message("Modifying the global penalty coefficient...",
@@ -3992,6 +3993,11 @@ class Model {
     /*************************************************************************/
     inline constexpr bool is_defined_objective(void) const {
         return m_is_defined_objective;
+    }
+
+    /*************************************************************************/
+    inline constexpr void disable_fast_evaluation(void) {
+        m_is_enabled_fast_evaluation = false;
     }
 
     /*************************************************************************/

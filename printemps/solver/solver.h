@@ -315,6 +315,25 @@ class Solver {
         }
 
         /**
+         * Set the maximum number of threads for OpenMP.
+         */
+
+#ifdef _OPENMP
+        if (m_option.parallel.is_enabled_automatic_evaluation_parallelization &&
+            m_option.parallel.number_of_threads_evaluation <= 0) {
+            m_option.parallel.number_of_threads_evaluation =
+                omp_get_max_threads();
+        }
+
+        if (m_option.parallel
+                .is_enabled_automatic_neighborhood_update_parallelization &&
+            m_option.parallel.number_of_threads_neighborhood_update <= 0) {
+            m_option.parallel.number_of_threads_neighborhood_update =
+                omp_get_max_threads();
+        }
+#endif
+
+        /**
          * Enables the default neighborhood moves. Special neighborhood moves
          * will be enabled when optimization stagnates.
          */
@@ -349,6 +368,15 @@ class Solver {
             m_model_ptr->name(),                          //
             m_model_ptr->number_of_variables(),           //
             m_model_ptr->number_of_constraints());
+
+        /**
+         * Forcibly disable fast neighborhood evaluation by option. The fast
+         * evaluation should not be disabled except for debugging and
+         * performance evaluation.
+         */
+        if (!m_option.general.is_enabled_fast_evaluation) {
+            m_model_ptr->disable_fast_evaluation();
+        }
 
         /**
          * Compute the values of expressions, constraints, and the objective

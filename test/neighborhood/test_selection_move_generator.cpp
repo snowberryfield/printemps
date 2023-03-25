@@ -42,7 +42,7 @@ TEST_F(TestSelectionMoveGenerator, setup) {
         model.variable_type_reference().selection_variable_ptrs;
 
     model.neighborhood().selection().setup(selection_variable_ptrs);
-    model.neighborhood().selection().update_moves(true, false, false, false);
+    model.neighborhood().selection().update_moves(true, false, false, false, 1);
 
     auto& moves = model.neighborhood().selection().moves();
     auto& flags = model.neighborhood().selection().flags();

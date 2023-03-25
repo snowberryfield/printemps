@@ -32,8 +32,11 @@ struct Status {
     long        number_of_tabu_search_iterations;
     int         number_of_tabu_search_loops;
     long        number_of_evaluated_moves;
-    double      averaged_inner_iteration_speed;
-    double      averaged_move_evaluation_speed;
+
+    double averaged_inner_iteration_speed;
+    double averaged_move_evaluation_speed;
+    double averaged_number_of_threads_evaluation;
+    double averaged_number_of_threads_neighborhood_update;
 
     std::unordered_map<std::string, multi_array::ValueProxy<double>>
         penalty_coefficients;
@@ -70,8 +73,12 @@ struct Status {
         this->number_of_tabu_search_iterations   = 0;
         this->number_of_tabu_search_loops        = 0;
         this->number_of_evaluated_moves          = 0;
-        this->averaged_inner_iteration_speed     = 0.0;
-        this->averaged_move_evaluation_speed     = 0.0;
+
+        this->averaged_inner_iteration_speed                 = 0.0;
+        this->averaged_move_evaluation_speed                 = 0.0;
+        this->averaged_number_of_threads_evaluation          = 0.0;
+        this->averaged_number_of_threads_neighborhood_update = 0.0;
+
         this->penalty_coefficients.clear();
         this->update_counts.clear();
         this->violation_counts.clear();
@@ -109,10 +116,16 @@ struct Status {
         this->number_of_tabu_search_loops = TABU_SEARCH_RESULT.state.iteration;
         this->number_of_evaluated_moves =
             TABU_SEARCH_RESULT.state.total_number_of_evaluated_moves;
+
         this->averaged_inner_iteration_speed =
             TABU_SEARCH_RESULT.state.averaged_inner_iteration_speed;
         this->averaged_move_evaluation_speed =
             TABU_SEARCH_RESULT.state.averaged_move_evaluation_speed;
+        this->averaged_number_of_threads_neighborhood_update =
+            TABU_SEARCH_RESULT.state
+                .averaged_number_of_threads_neighborhood_update;
+        this->averaged_number_of_threads_evaluation =
+            TABU_SEARCH_RESULT.state.averaged_number_of_threads_evaluation;
 
         this->penalty_coefficients =
             a_solver_ptr->export_named_penalty_coefficients();
@@ -138,66 +151,65 @@ struct Status {
 
     /*************************************************************************/
     inline void add_summary_json(utility::json::JsonObject *a_object) const {
-        a_object->emplace_back("version", constant::VERSION);
-        a_object->emplace_back("name", this->name);
-        a_object->emplace_back("number_of_variables",
-                               this->number_of_variables);
-        a_object->emplace_back("number_of_constraints",
-                               this->number_of_constraints);
+        a_object->emplace_back(  //
+            "version", constant::VERSION);
 
-        a_object->emplace_back("is_found_feasible_solution",
-                               this->is_found_feasible_solution);
+        a_object->emplace_back(  //
+            "name", this->name);
 
-        a_object->emplace_back("start_date_time", this->start_date_time);
-        a_object->emplace_back("finish_date_time", this->finish_date_time);
-        a_object->emplace_back("elapsed_time", this->elapsed_time);
+        a_object->emplace_back(  //
+            "number_of_variables", this->number_of_variables);
 
-        a_object->emplace_back("number_of_lagrange_dual_iterations",
-                               this->number_of_lagrange_dual_iterations);
-        a_object->emplace_back("number_of_local_search_iterations",
-                               this->number_of_local_search_iterations);
-        a_object->emplace_back("number_of_tabu_search_iterations",
-                               this->number_of_tabu_search_iterations);
-        a_object->emplace_back("number_of_tabu_search_loops",
-                               this->number_of_tabu_search_loops);
-        a_object->emplace_back("number_of_evaluated_moves",
-                               this->number_of_evaluated_moves);
-        a_object->emplace_back("averaged_inner_iteration_speed",
-                               this->averaged_inner_iteration_speed);
-        a_object->emplace_back("averaged_move_evaluation_speed",
-                               this->averaged_move_evaluation_speed);
+        a_object->emplace_back(  //
+            "number_of_constraints", this->number_of_constraints);
 
-        const auto &TABU_SEARCH_CONTROLLER_STATE =
-            this->solver_ptr->tabu_search_controller().result().state;
+        a_object->emplace_back(  //
+            "is_found_feasible_solution", this->is_found_feasible_solution);
 
-        a_object->emplace_back("neighborhood_update_parallelized_count",
-                               TABU_SEARCH_CONTROLLER_STATE
-                                   .neighborhood_update_parallelized_count);
+        a_object->emplace_back(  //
+            "start_date_time", this->start_date_time);
 
-        a_object->emplace_back(
-            "evaluation_parallelized_count",
-            TABU_SEARCH_CONTROLLER_STATE.evaluation_parallelized_count);
+        a_object->emplace_back(  //
+            "finish_date_time", this->finish_date_time);
 
-        double neighborhood_update_parallelized_rate = 0.0;
-        if (this->number_of_tabu_search_loops > 0) {
-            neighborhood_update_parallelized_rate =
-                TABU_SEARCH_CONTROLLER_STATE
-                    .neighborhood_update_parallelized_count /
-                static_cast<double>(this->number_of_tabu_search_loops);
-        }
+        a_object->emplace_back(  //
+            "elapsed_time", this->elapsed_time);
 
-        double evaluation_parallelized_rate = 0.0;
-        if (this->number_of_tabu_search_loops > 0) {
-            evaluation_parallelized_rate =
-                TABU_SEARCH_CONTROLLER_STATE.evaluation_parallelized_count /
-                static_cast<double>(this->number_of_tabu_search_loops);
-        }
+        a_object->emplace_back(                    //
+            "number_of_lagrange_dual_iterations",  //
+            this->number_of_lagrange_dual_iterations);
 
-        a_object->emplace_back("neighborhood_update_parallelized_rate",
-                               neighborhood_update_parallelized_rate);
+        a_object->emplace_back(                   //
+            "number_of_local_search_iterations",  //
+            this->number_of_local_search_iterations);
 
-        a_object->emplace_back("evaluation_parallelized_rate",
-                               evaluation_parallelized_rate);
+        a_object->emplace_back(                  //
+            "number_of_tabu_search_iterations",  //
+            this->number_of_tabu_search_iterations);
+
+        a_object->emplace_back(             //
+            "number_of_tabu_search_loops",  //
+            this->number_of_tabu_search_loops);
+
+        a_object->emplace_back(           //
+            "number_of_evaluated_moves",  //
+            this->number_of_evaluated_moves);
+
+        a_object->emplace_back(                //
+            "averaged_inner_iteration_speed",  //
+            this->averaged_inner_iteration_speed);
+
+        a_object->emplace_back(                //
+            "averaged_move_evaluation_speed",  //
+            this->averaged_move_evaluation_speed);
+
+        a_object->emplace_back(                                //
+            "averaged_number_of_threads_neighborhood_update",  //
+            this->averaged_number_of_threads_neighborhood_update);
+
+        a_object->emplace_back(                       //
+            "averaged_number_of_threads_evaluation",  //
+            this->averaged_number_of_threads_evaluation);
     }
 
     /*************************************************************************/

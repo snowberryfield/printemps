@@ -35,7 +35,7 @@ TEST_F(TestTrinomialExclusiveNorMoveGenerator, setup) {
     model.neighborhood().trinomial_exclusive_nor().setup(
         trinomial_exclusive_nor_ptrs);
     model.neighborhood().trinomial_exclusive_nor().update_moves(  //
-        true, false, false, false);
+        true, false, false, false, 1);
 
     auto& moves = model.neighborhood().trinomial_exclusive_nor().moves();
     auto& flags = model.neighborhood().trinomial_exclusive_nor().flags();

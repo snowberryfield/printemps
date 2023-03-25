@@ -249,7 +249,8 @@ class TabuSearchCore {
                 accept_all,                     //
                 accept_objective_improvable,    //
                 accept_feasibility_improvable,  //
-                m_option.parallel.is_enabled_parallel_neighborhood_update);
+                m_option.parallel.is_enabled_parallel_neighborhood_update,
+                m_option.parallel.number_of_threads_neighborhood_update);
 
             m_state_manager.set_number_of_moves(
                 m_model_ptr->neighborhood().move_ptrs().size());
@@ -335,10 +336,11 @@ class TabuSearchCore {
 
         const double START_TIME = a_time_keeper_ptr->clock();
         m_model_ptr->neighborhood().update_moves(
-            accept_all,                     //
-            accept_objective_improvable,    //
-            accept_feasibility_improvable,  //
-            m_option.parallel.is_enabled_parallel_neighborhood_update);
+            accept_all,                                                 //
+            accept_objective_improvable,                                //
+            accept_feasibility_improvable,                              //
+            m_option.parallel.is_enabled_parallel_neighborhood_update,  //
+            m_option.parallel.number_of_threads_neighborhood_update);
         const double END_TIME = a_time_keeper_ptr->clock();
 
         m_state_manager.update_move_updating_statistics(
@@ -838,7 +840,8 @@ class TabuSearchCore {
             const auto DURATION               = ITERATION - TABU_TENURE;
 #ifdef _OPENMP
 #pragma omp parallel for if (m_option.parallel.is_enabled_parallel_evaluation) \
-    schedule(static)
+    schedule(static)                                                           \
+        num_threads(m_option.parallel.number_of_threads_evaluation)
 #endif
             for (auto i = 0; i < NUMBER_OF_MOVES; i++) {
                 /**
@@ -923,7 +926,8 @@ class TabuSearchCore {
              * its type is "Integer", adjust the step size to obtain better
              * solution.
              */
-            if (m_model_ptr->is_enabled_fast_evaluation() &&
+            if (m_option.neighborhood.is_enabled_integer_step_size_adjuster &&
+                m_model_ptr->is_enabled_fast_evaluation() &&
                 move_ptr->sense == neighborhood::MoveSense::Integer &&
                 trial_solution_scores[SELECTED_INDEX]
                         .global_augmented_objective <
