@@ -296,7 +296,7 @@ struct PenaltyOption {
 
         obj.emplace_back(                             //
             "is_enabled_shrink_penalty_coefficient",  //
-            this->is_enabled_group_penalty_coefficient);
+            this->is_enabled_shrink_penalty_coefficient);
 
         return obj;
     }
