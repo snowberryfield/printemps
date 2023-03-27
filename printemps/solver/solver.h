@@ -335,6 +335,9 @@ class Solver {
             m_option.parallel.number_of_threads_neighborhood_update =
                 max_number_of_threads;
         }
+#else
+        m_option.parallel.number_of_threads_evaluation          = 1;
+        m_option.parallel.number_of_threads_neighborhood_update = 1;
 #endif
 
         /**
