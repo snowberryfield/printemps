@@ -407,15 +407,6 @@ class TabuSearchControllerStateManager {
         }
 
         /**
-         * Update the consecutive iteration with no update.
-         */
-        if (m_state.is_not_updated) {
-            m_state.iteration_after_no_update++;
-        } else {
-            m_state.iteration_after_no_update = 0;
-        }
-
-        /**
          * Update the total inner number of iterations and evaluated moves.
          */
         m_state.total_number_of_inner_iterations +=
@@ -623,19 +614,12 @@ class TabuSearchControllerStateManager {
              * If the last loop failed to find any local/global incumbent
              * solution, the global incumbent solution is employed as the
              * initial solution for the next loop with some initial
-             * modifications. The penalty coefficients are to be relaxed after
-             * two consecutive search failures.
+             * modifications. The penalty coefficients are to be relaxed.
              */
             m_state.employing_global_augmented_solution_flag = true;
             m_state.is_enabled_forcibly_initial_modification = true;
+            m_state.is_enabled_penalty_coefficient_relaxing  = true;
 
-            if (RESULT_LOCAL_AUGMENTED_INCUMBENT_SCORE.is_feasible) {
-                m_state.is_enabled_penalty_coefficient_relaxing = true;
-            } else {
-                if (m_state.iteration_after_no_update > 0) {
-                    m_state.is_enabled_penalty_coefficient_relaxing = true;
-                }
-            }
             return;
         }
 
