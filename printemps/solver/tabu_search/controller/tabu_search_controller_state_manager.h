@@ -198,11 +198,6 @@ class TabuSearchControllerStateManager {
         this->keep_previous_solution();
 
         /**
-         * Update the status of inner stagnation.
-         */
-        this->update_is_inner_stagnation();
-
-        /**
          * Update the status of outer stagnation.
          */
         this->update_is_outer_stagnation();
@@ -246,6 +241,12 @@ class TabuSearchControllerStateManager {
                     "The specified restart mode is invalid."));
             }
         }
+
+        /**
+         * Update the status of inner stagnation. This method must be called
+         * after updating penalty coefficient flags.
+         */
+        this->update_is_inner_stagnation();
 
         /**
          * Additional processes for cases when the penalty coefficients are
