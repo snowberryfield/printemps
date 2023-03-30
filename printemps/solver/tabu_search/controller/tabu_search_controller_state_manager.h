@@ -567,10 +567,20 @@ class TabuSearchControllerStateManager {
     /*************************************************************************/
     inline constexpr void
     update_initial_solution_and_penalty_coefficient_flags_simple(void) {
+        const double RELATIVE_RANGE =
+            m_state.tabu_search_result.global_augmented_objective_range /
+            std::max(1.0, fabs(m_incumbent_holder_ptr
+                                   ->global_augmented_incumbent_objective()));
+
         if (m_state.is_not_updated) {
             m_state.is_enabled_penalty_coefficient_relaxing = true;
         } else {
-            m_state.is_enabled_penalty_coefficient_tightening = true;
+            if (RELATIVE_RANGE < TabuSearchControllerStateManagerConstant::
+                                     RELATIVE_RANGE_THRESHOLD) {
+                m_state.is_enabled_penalty_coefficient_relaxing = true;
+            } else {
+                m_state.is_enabled_penalty_coefficient_tightening = true;
+            }
         }
         m_state.employing_local_augmented_solution_flag = true;
     }
