@@ -24,7 +24,6 @@ struct TabuSearchControllerState {
 
     int iteration;
     int iteration_after_global_augmented_incumbent_update;
-    int iteration_after_no_update;
     int iteration_after_relaxation;
     int relaxation_count;
 
@@ -120,7 +119,6 @@ struct TabuSearchControllerState {
 
         this->iteration                                         = 0;
         this->iteration_after_global_augmented_incumbent_update = 0;
-        this->iteration_after_no_update                         = 0;
         this->iteration_after_relaxation                        = 0;
         this->relaxation_count                                  = 0;
 
