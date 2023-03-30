@@ -167,6 +167,16 @@ struct PenaltyOption {
             utility::to_string(                           //
                 this->outer_stagnation_threshold, "%d"));
 
+        utility::print(                                            //
+            " -- penalty.is_enabled_inner_stagnation_breaker: " +  //
+            utility::to_true_or_false(                             //
+                this->is_enabled_inner_stagnation_breaker));
+
+        utility::print(                                            //
+            " -- penalty.is_enabled_outer_stagnation_breaker: " +  //
+            utility::to_true_or_false(                             //
+                this->is_enabled_outer_stagnation_breaker));
+
         utility::print(                                             //
             " -- penalty.is_enabled_group_penalty_coefficient: " +  //
             utility::to_true_or_false(                              //
