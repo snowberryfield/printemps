@@ -13,6 +13,10 @@ class ProblemSizeReducer {
    private:
     model::Model<T_Variable, T_Expression> *m_model_ptr;
 
+    int  m_variable_bound_update_count_in_preprocess;
+    int  m_variable_bound_update_count_in_optimization;
+    bool m_is_preprocess;
+
    public:
     /*************************************************************************/
     ProblemSizeReducer(void) {
@@ -32,7 +36,10 @@ class ProblemSizeReducer {
 
     /*************************************************************************/
     inline void initialize(void) {
-        m_model_ptr = nullptr;
+        m_model_ptr                                   = nullptr;
+        m_variable_bound_update_count_in_preprocess   = 0;
+        m_variable_bound_update_count_in_optimization = 0;
+        m_is_preprocess                               = true;
     }
 
     /*************************************************************************/
@@ -210,7 +217,7 @@ class ProblemSizeReducer {
     }
 
     /*************************************************************************/
-    inline static constexpr bool
+    inline constexpr bool
     remove_redundant_constraint_with_tightening_variable_bound(
         model_component::Constraint<T_Variable, T_Expression>
             *      a_constraint_ptr,  //
@@ -221,6 +228,9 @@ class ProblemSizeReducer {
          * remove_redundant_constraints_with_tightening_variable_bounds().
          */
         bool is_removed = false;
+        int *variable_bound_update_count_ptr =
+            m_is_preprocess ? &m_variable_bound_update_count_in_preprocess
+                            : &m_variable_bound_update_count_in_optimization;
 
         auto mutable_variable_sensitivities =
             a_constraint_ptr->expression().mutable_variable_sensitivities();
@@ -337,6 +347,7 @@ class ProblemSizeReducer {
                             a_IS_ENABLED_PRINT);
                     }
                     variable_ptr->set_bound(variable_lower_bound, bound_floor);
+                    (*variable_bound_update_count_ptr)++;
                 } else {
                     utility::print_message(  //
                         "The redundant constraint " + a_constraint_ptr->name() +
@@ -381,6 +392,7 @@ class ProblemSizeReducer {
                             a_IS_ENABLED_PRINT);
                     }
                     variable_ptr->set_bound(bound_ceil, variable_upper_bound);
+                    (*variable_bound_update_count_ptr)++;
                 } else {
                     utility::print_message(  //
                         "The redundant constraint " + a_constraint_ptr->name() +
@@ -415,12 +427,13 @@ class ProblemSizeReducer {
                     static_cast<T_Variable>(std::ceil(bound_temp));
                 if (bound_ceil > variable_lower_bound &&
                     abs(bound_ceil) < BOUND_LIMIT) {
-                    utility::print_message("The lower bound of the variable " +
-                                               variable_ptr->name() +
-                                               " was tightened by " +
-                                               std::to_string(bound_ceil) + ".",
-                                           a_IS_ENABLED_PRINT);
+                    utility::print_message(  //
+                        "The lower bound of the variable " +
+                            variable_ptr->name() + " was tightened by " +
+                            std::to_string(bound_ceil) + ".",
+                        a_IS_ENABLED_PRINT);
                     variable_ptr->set_bound(bound_ceil, variable_upper_bound);
+                    (*variable_bound_update_count_ptr)++;
                 }
             }
             if (a_constraint_ptr->is_less_or_equal()) {
@@ -437,6 +450,7 @@ class ProblemSizeReducer {
                             std::to_string(bound_floor) + ".",
                         a_IS_ENABLED_PRINT);
                     variable_ptr->set_bound(variable_lower_bound, bound_floor);
+                    (*variable_bound_update_count_ptr)++;
                 }
             }
         }
@@ -462,6 +476,7 @@ class ProblemSizeReducer {
                             std::to_string(bound_floor) + ".",
                         a_IS_ENABLED_PRINT);
                     variable_ptr->set_bound(variable_lower_bound, bound_floor);
+                    (*variable_bound_update_count_ptr)++;
                 }
             }
             if (a_constraint_ptr->is_less_or_equal()) {
@@ -472,12 +487,13 @@ class ProblemSizeReducer {
                     static_cast<T_Variable>(std::ceil(bound_temp));
                 if (bound_ceil > variable_lower_bound &&
                     abs(bound_ceil) < BOUND_LIMIT) {
-                    utility::print_message("The lower bound of the variable " +
-                                               variable_ptr->name() +
-                                               " was tightened by " +
-                                               std::to_string(bound_ceil) + ".",
-                                           a_IS_ENABLED_PRINT);
+                    utility::print_message(  //
+                        "The lower bound of the variable " +
+                            variable_ptr->name() + " was tightened by " +
+                            std::to_string(bound_ceil) + ".",
+                        a_IS_ENABLED_PRINT);
                     variable_ptr->set_bound(bound_ceil, variable_upper_bound);
+                    (*variable_bound_update_count_ptr)++;
                 }
             }
         }
@@ -1145,6 +1161,27 @@ class ProblemSizeReducer {
         utility::print_message("Done.", a_IS_ENABLED_PRINT);
         return std::make_pair(number_of_newly_disabled_constraints,
                               number_of_newly_fixed_variables);
+    }
+
+    /*************************************************************************/
+    inline constexpr int variable_bound_update_count_in_preprocess(void) const {
+        return m_variable_bound_update_count_in_preprocess;
+    }
+
+    /*************************************************************************/
+    inline constexpr int variable_bound_update_count_in_optimization(
+        void) const {
+        return m_variable_bound_update_count_in_optimization;
+    }
+
+    /*************************************************************************/
+    inline constexpr void set_is_preprocess(const bool a_IS_PREPROCESS) {
+        m_is_preprocess = a_IS_PREPROCESS;
+    }
+
+    /*************************************************************************/
+    inline constexpr bool is_preprocess(void) const {
+        return m_is_preprocess;
     }
 };
 }  // namespace printemps::preprocess
