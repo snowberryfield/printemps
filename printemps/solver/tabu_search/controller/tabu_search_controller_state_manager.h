@@ -564,17 +564,29 @@ class TabuSearchControllerStateManager {
             std::max(1.0, fabs(m_incumbent_holder_ptr
                                    ->global_augmented_incumbent_objective()));
 
+        m_state.employing_local_augmented_solution_flag = true;
+        if (m_state.is_global_augmented_incumbent_updated) {
+            m_state.is_enabled_penalty_coefficient_relaxing = true;
+            return;
+        }
+
         if (m_state.is_not_updated) {
             m_state.is_enabled_penalty_coefficient_relaxing = true;
-        } else {
-            if (RELATIVE_RANGE < TabuSearchControllerStateManagerConstant::
-                                     RELATIVE_RANGE_THRESHOLD) {
-                m_state.is_enabled_penalty_coefficient_relaxing = true;
-            } else {
-                m_state.is_enabled_penalty_coefficient_tightening = true;
-            }
+            return;
         }
-        m_state.employing_local_augmented_solution_flag = true;
+
+        if (m_incumbent_holder_ptr->local_augmented_incumbent_score()
+                .is_feasible) {
+            m_state.is_enabled_penalty_coefficient_relaxing = true;
+            return;
+        }
+
+        if (RELATIVE_RANGE < TabuSearchControllerStateManagerConstant::
+                                 RELATIVE_RANGE_THRESHOLD) {
+            m_state.is_enabled_penalty_coefficient_relaxing = true;
+        } else {
+            m_state.is_enabled_penalty_coefficient_tightening = true;
+        }
     }
 
     /*************************************************************************/
