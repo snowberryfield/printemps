@@ -188,6 +188,20 @@ class LagrangeDualController
             lagrange_dual_result);
 
         /**
+         * Update the dual bound.
+         */
+        const auto DUAL_BOUND = m_result.core.lagrangian;
+        if (this->m_model_ptr->is_minimization()) {
+            if (DUAL_BOUND > this->m_incumbent_holder_ptr->dual_bound()) {
+                this->m_incumbent_holder_ptr->update_dual_bound(DUAL_BOUND);
+            }
+        } else {
+            if (-DUAL_BOUND < this->m_incumbent_holder_ptr->dual_bound()) {
+                this->m_incumbent_holder_ptr->update_dual_bound(-DUAL_BOUND);
+            }
+        }
+
+        /**
          * Print the search summary.
          */
         utility::print_message(

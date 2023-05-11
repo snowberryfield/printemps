@@ -147,19 +147,12 @@ class Solver {
 
     /*************************************************************************/
     inline void run_pdlp(void) {
-        m_pdlp_controller.setup(m_model_ptr,         //
-                                m_current_solution,  //
-                                m_time_keeper,       //
+        m_pdlp_controller.setup(m_model_ptr,          //
+                                m_current_solution,   //
+                                &m_incumbent_holder,  //
+                                m_time_keeper,        //
                                 m_option);
         m_pdlp_controller.run();
-
-        if (m_pdlp_controller.result().core.dual.relative_violation_norm <
-            m_option.pdlp.tolerance) {
-            const auto DUAL_BOUND =
-                m_pdlp_controller.result().core.dual.objective *
-                m_model_ptr->sign();
-            m_incumbent_holder.update_dual_bound(DUAL_BOUND);
-        }
     }
 
     /*************************************************************************/
