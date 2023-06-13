@@ -13,6 +13,7 @@ class TimeKeeper {
    private:
     double m_start_time;
     double m_elapsed_time;
+    bool   m_is_started;
 
     /*************************************************************************/
     inline double get_time(void) {
@@ -38,12 +39,14 @@ class TimeKeeper {
     /*************************************************************************/
     inline void set_start_time(void) {
         m_start_time = get_time();
+        m_is_started = true;
     }
 
     /*************************************************************************/
     inline constexpr void initialize(void) {
         m_start_time   = 0.0;
         m_elapsed_time = 0.0;
+        m_is_started   = false;
     }
 
     /*************************************************************************/
@@ -61,6 +64,11 @@ class TimeKeeper {
     /*************************************************************************/
     inline constexpr double elapsed_time(void) const {
         return m_elapsed_time;
+    }
+
+    /*************************************************************************/
+    inline constexpr bool is_started(void) const {
+        return m_is_started;
     }
 };
 }  // namespace printemps::utility

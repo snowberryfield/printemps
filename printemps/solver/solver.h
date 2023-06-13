@@ -210,6 +210,13 @@ class Solver {
     }
 
     /*************************************************************************/
+    Solver(model::Model<T_Variable, T_Expression>* a_model_ptr,  //
+           const option::Option&                   a_OPTION,     //
+           const utility::TimeKeeper&              a_TIME_KEEPER) {
+        this->setup(a_model_ptr, a_OPTION, a_TIME_KEEPER);
+    }
+
+    /*************************************************************************/
     ~Solver(void) {
         /// nothing to do
     }
@@ -236,6 +243,17 @@ class Solver {
 
     /*************************************************************************/
     inline void setup(model::Model<T_Variable, T_Expression>* a_model_ptr,  //
+                      const option::Option&                   a_OPTION,     //
+                      const utility::TimeKeeper&              a_TIME_KEEPER) {
+        this->initialize();
+        m_model_ptr       = a_model_ptr;
+        m_option_original = a_OPTION;
+        m_option          = a_OPTION;
+        m_time_keeper     = a_TIME_KEEPER;
+    }
+
+    /*************************************************************************/
+    inline void setup(model::Model<T_Variable, T_Expression>* a_model_ptr,  //
                       const option::Option&                   a_OPTION) {
         this->initialize();
         m_model_ptr       = a_model_ptr;
@@ -248,7 +266,10 @@ class Solver {
         /**
          * Start to measure computational time and get the starting time.
          */
-        m_time_keeper.set_start_time();
+        if (!m_time_keeper.is_started()) {
+            m_time_keeper.set_start_time();
+        }
+
         m_start_date_time = utility::date_time();
 
         /**
