@@ -858,6 +858,8 @@ class Model {
                     m_global_penalty_coefficient;
             }
         }
+
+        m_problem_size_reducer.set_is_preprocess(false);
     }
 
     /*************************************************************************/
@@ -4147,6 +4149,12 @@ class Model {
     inline constexpr neighborhood::Neighborhood<T_Variable, T_Expression>
         &neighborhood(void) {
         return m_neighborhood;
+    }
+
+    /*************************************************************************/
+    inline constexpr preprocess::ProblemSizeReducer<T_Variable, T_Expression>
+        &problem_size_reducer(void) {
+        return m_problem_size_reducer;
     }
 };
 using IPModel = Model<int, double>;

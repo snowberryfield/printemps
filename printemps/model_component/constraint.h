@@ -527,6 +527,16 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
                         m_is_constant_ratio_integers = true;
                         m_key_variable_ptr           = variable_ptrs[1];
                         return;
+                    } else if (fabs(coefficients[0]) == 1 &&
+                               fabs(coefficients[1]) != 1 && m_is_integer) {
+                        m_is_intermediate  = true;
+                        m_key_variable_ptr = variable_ptrs[0];
+                        return;
+                    } else if (fabs(coefficients[0]) != 1 &&
+                               fabs(coefficients[1]) == 1 && m_is_integer) {
+                        m_is_intermediate  = true;
+                        m_key_variable_ptr = variable_ptrs[1];
+                        return;
                     }
                     m_key_variable_ptr = nullptr;
                 }
