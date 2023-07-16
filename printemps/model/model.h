@@ -858,6 +858,8 @@ class Model {
                     m_global_penalty_coefficient;
             }
         }
+
+        m_problem_size_reducer.set_is_preprocess(false);
     }
 
     /*************************************************************************/
@@ -2841,86 +2843,91 @@ class Model {
 
         const int MIN_INDEX = std::min(INDEX_MIN_FIRST, INDEX_MIN_SECOND);
         const int MAX_INDEX = std::max(INDEX_MAX_FIRST, INDEX_MAX_SECOND);
+        if (MIN_INDEX >= 0 && MAX_INDEX >= 0) {
+            if ((INDEX_MAX_FIRST < INDEX_MIN_SECOND) ||
+                (INDEX_MAX_SECOND < INDEX_MIN_FIRST)) {
+                for (const auto &alteration : a_MOVE.alterations) {
+                    const auto &variable_ptr = alteration.first;
+                    const auto  variable_value_diff =
+                        alteration.second - variable_ptr->value();
+                    const auto &constraint_sensitivities =
+                        variable_ptr->constraint_sensitivities();
 
-        if ((INDEX_MAX_FIRST < INDEX_MIN_SECOND) ||
-            (INDEX_MAX_SECOND < INDEX_MIN_FIRST)) {
-            for (const auto &alteration : a_MOVE.alterations) {
-                const auto &variable_ptr = alteration.first;
-                const auto  variable_value_diff =
-                    alteration.second - variable_ptr->value();
-                const auto &constraint_sensitivities =
-                    variable_ptr->constraint_sensitivities();
+                    for (const auto &sensitivity : constraint_sensitivities) {
+                        const auto &constraint_ptr = sensitivity.first;
+                        if (!constraint_ptr->is_enabled()) {
+                            continue;
+                        }
+                        constraint_value =
+                            constraint_ptr->constraint_value() +
+                            sensitivity.second * variable_value_diff;
 
-                for (const auto &sensitivity : constraint_sensitivities) {
-                    const auto &constraint_ptr = sensitivity.first;
+                        if (constraint_ptr->is_less_or_equal()) {
+                            violation_diff = std::max(constraint_value, 0.0) -
+                                             constraint_ptr->positive_part();
+                            total_violation += violation_diff;
+
+                            local_penalty +=
+                                violation_diff *
+                                constraint_ptr
+                                    ->local_penalty_coefficient_less();
+                        }
+
+                        if (constraint_ptr->is_greater_or_equal()) {
+                            violation_diff = std::min(constraint_value, 0.0) +
+                                             constraint_ptr->negative_part();
+                            total_violation -= violation_diff;
+
+                            local_penalty -=
+                                violation_diff *
+                                constraint_ptr
+                                    ->local_penalty_coefficient_greater();
+                        }
+                    }
+                }
+                is_feasibility_improvable = true;
+            } else {
+                double violation_diff_negative = 0.0;
+                double violation_diff_positive = 0.0;
+
+                for (auto i = MIN_INDEX; i <= MAX_INDEX; i++) {
+                    auto &constraint_ptr = RELATED_CONSTRAINT_PTRS[i];
                     if (!constraint_ptr->is_enabled()) {
                         continue;
                     }
-                    constraint_value = constraint_ptr->constraint_value() +
-                                       sensitivity.second * variable_value_diff;
 
-                    if (constraint_ptr->is_less_or_equal()) {
-                        violation_diff = std::max(constraint_value, 0.0) -
-                                         constraint_ptr->positive_part();
-                        total_violation += violation_diff;
+                    constraint_value =
+                        constraint_ptr->evaluate_constraint(a_MOVE);
 
-                        local_penalty +=
-                            violation_diff *
-                            constraint_ptr->local_penalty_coefficient_less();
+                    if (fabs(constraint_value -
+                             constraint_ptr->constraint_value()) <
+                        constant::EPSILON_10) {
+                        continue;
                     }
 
-                    if (constraint_ptr->is_greater_or_equal()) {
-                        violation_diff = std::min(constraint_value, 0.0) +
-                                         constraint_ptr->negative_part();
-                        total_violation -= violation_diff;
+                    violation_diff_positive =
+                        constraint_ptr->is_less_or_equal()
+                            ? std::max(constraint_value, 0.0) -
+                                  constraint_ptr->positive_part()
+                            : 0.0;
 
-                        local_penalty -=
-                            violation_diff *
+                    violation_diff_negative =
+                        constraint_ptr->is_greater_or_equal()
+                            ? std::max(-constraint_value, 0.0) -
+                                  constraint_ptr->negative_part()
+                            : 0.0;
+                    violation_diff =
+                        violation_diff_positive + violation_diff_negative;
+                    local_penalty +=
+                        violation_diff_positive *
+                            constraint_ptr->local_penalty_coefficient_less() +
+                        violation_diff_negative *
                             constraint_ptr->local_penalty_coefficient_greater();
-                    }
+
+                    total_violation += violation_diff;
+                    is_feasibility_improvable |=
+                        violation_diff < -constant::EPSILON;
                 }
-            }
-            is_feasibility_improvable = true;
-        } else {
-            double violation_diff_negative = 0.0;
-            double violation_diff_positive = 0.0;
-
-            for (auto i = MIN_INDEX; i <= MAX_INDEX; i++) {
-                auto &constraint_ptr = RELATED_CONSTRAINT_PTRS[i];
-                if (!constraint_ptr->is_enabled()) {
-                    continue;
-                }
-
-                constraint_value = constraint_ptr->evaluate_constraint(a_MOVE);
-
-                if (fabs(constraint_value -
-                         constraint_ptr->constraint_value()) <
-                    constant::EPSILON_10) {
-                    continue;
-                }
-
-                violation_diff_positive =
-                    constraint_ptr->is_less_or_equal()
-                        ? std::max(constraint_value, 0.0) -
-                              constraint_ptr->positive_part()
-                        : 0.0;
-
-                violation_diff_negative =
-                    constraint_ptr->is_greater_or_equal()
-                        ? std::max(-constraint_value, 0.0) -
-                              constraint_ptr->negative_part()
-                        : 0.0;
-                violation_diff =
-                    violation_diff_positive + violation_diff_negative;
-                local_penalty +=
-                    violation_diff_positive *
-                        constraint_ptr->local_penalty_coefficient_less() +
-                    violation_diff_negative *
-                        constraint_ptr->local_penalty_coefficient_greater();
-
-                total_violation += violation_diff;
-                is_feasibility_improvable |=
-                    violation_diff < -constant::EPSILON;
             }
         }
 
@@ -4142,6 +4149,12 @@ class Model {
     inline constexpr neighborhood::Neighborhood<T_Variable, T_Expression>
         &neighborhood(void) {
         return m_neighborhood;
+    }
+
+    /*************************************************************************/
+    inline constexpr preprocess::ProblemSizeReducer<T_Variable, T_Expression>
+        &problem_size_reducer(void) {
+        return m_problem_size_reducer;
     }
 };
 using IPModel = Model<int, double>;
