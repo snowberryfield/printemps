@@ -15,11 +15,12 @@ namespace printemps::solver::pdlp::controller {
 template <class T_Variable, class T_Expression>
 class PDLPController {
    private:
-    model::Model<T_Variable, T_Expression>*           m_model_ptr;
-    solution::DenseSolution<T_Variable, T_Expression> m_initial_solution;
-    utility::TimeKeeper                               m_time_keeper;
-    option::Option                                    m_option;
-    PDLPControllerResult                              m_result;
+    model::Model<T_Variable, T_Expression>*              m_model_ptr;
+    solution::DenseSolution<T_Variable, T_Expression>    m_initial_solution;
+    solution::IncumbentHolder<T_Variable, T_Expression>* m_incumbent_holder_ptr;
+    utility::TimeKeeper                                  m_time_keeper;
+    option::Option                                       m_option;
+    PDLPControllerResult                                 m_result;
 
     /*************************************************************************/
     inline void print_total_elapsed_time(const double a_TOTAL_ELAPSED_TIME,
@@ -27,6 +28,15 @@ class PDLPController {
         utility::print_info(  //
             " -- Total elapsed time: " +
                 utility::to_string(a_TOTAL_ELAPSED_TIME, "%.3f") + "sec",
+            a_IS_ENABLED_PRINT);
+    }
+
+    /*************************************************************************/
+    inline void print_dual_bound(const bool a_IS_ENABLED_PRINT) {
+        utility::print_info(
+            " -- Dual Bound: " +
+                utility::to_string(m_incumbent_holder_ptr->dual_bound(),
+                                   "%.5e"),
             a_IS_ENABLED_PRINT);
     }
 
@@ -39,11 +49,14 @@ class PDLPController {
     /*************************************************************************/
     PDLPController(model::Model<T_Variable, T_Expression>* a_model_ptr,  //
                    const solution::DenseSolution<T_Variable, T_Expression>&
-                                              a_INITIAL_SOLUTION,  //
-                   const utility::TimeKeeper& a_TIME_KEEPER,       //
+                       a_INITIAL_SOLUTION,  //
+                   solution::IncumbentHolder<T_Variable, T_Expression>*
+                                              a_incumbent_holder_ptr,
+                   const utility::TimeKeeper& a_TIME_KEEPER,  //
                    const option::Option&      a_OPTION) {
         this->initialize();
-        this->setup(a_model_ptr, a_INITIAL_SOLUTION, a_TIME_KEEPER, a_OPTION);
+        this->setup(a_model_ptr, a_INITIAL_SOLUTION, a_incumbent_holder_ptr,
+                    a_TIME_KEEPER, a_OPTION);
     }
 
     /*************************************************************************/
@@ -55,6 +68,7 @@ class PDLPController {
     inline void initialize(void) {
         m_model_ptr = nullptr;
         m_initial_solution.initialize();
+        m_incumbent_holder_ptr = nullptr;
         m_time_keeper.initialize();
         m_option.initialize();
         m_result.initialize();
@@ -64,13 +78,16 @@ class PDLPController {
     inline void setup(                                        //
         model::Model<T_Variable, T_Expression>* a_model_ptr,  //
         const solution::DenseSolution<T_Variable, T_Expression>&
-                                   a_INITIAL_SOLUTION,  //
-        const utility::TimeKeeper& a_TIME_KEEPER,       //
+            a_INITIAL_SOLUTION,  //
+        solution::IncumbentHolder<T_Variable, T_Expression>*
+                                   a_incumbent_holder_ptr,
+        const utility::TimeKeeper& a_TIME_KEEPER,  //
         const option::Option&      a_OPTION) {
-        m_model_ptr        = a_model_ptr;
-        m_initial_solution = a_INITIAL_SOLUTION;
-        m_time_keeper      = a_TIME_KEEPER;
-        m_option           = a_OPTION;
+        m_model_ptr            = a_model_ptr;
+        m_initial_solution     = a_INITIAL_SOLUTION;
+        m_incumbent_holder_ptr = a_incumbent_holder_ptr;
+        m_time_keeper          = a_TIME_KEEPER;
+        m_option               = a_OPTION;
     }
 
     /*************************************************************************/
@@ -196,6 +213,23 @@ class PDLPController {
         m_result = PDLPControllerResult(pdlp_result);
 
         /**
+         * Update the dual bound.
+         */
+        if (m_result.core.dual.relative_violation_norm <
+            m_option.pdlp.tolerance) {
+            const auto DUAL_BOUND = m_result.core.dual.objective;
+            if (m_model_ptr->is_minimization()) {
+                if (DUAL_BOUND > m_incumbent_holder_ptr->dual_bound()) {
+                    m_incumbent_holder_ptr->update_dual_bound(DUAL_BOUND);
+                }
+            } else {
+                if (-DUAL_BOUND < m_incumbent_holder_ptr->dual_bound()) {
+                    m_incumbent_holder_ptr->update_dual_bound(-DUAL_BOUND);
+                }
+            }
+        }
+
+        /**
          * Print the search summary.
          */
         utility::print_message(
@@ -207,6 +241,9 @@ class PDLPController {
 
         this->print_total_elapsed_time(  //
             this->m_time_keeper.clock(),
+            this->m_option.output.verbose >= option::verbose::Outer);
+
+        this->print_dual_bound(  //
             this->m_option.output.verbose >= option::verbose::Outer);
     }
 

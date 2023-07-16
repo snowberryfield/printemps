@@ -180,6 +180,9 @@ class DependentVariableExtractor {
             }
         }
         std::vector<bool> flags(CONSTRAINTS_SIZE, true);
+        std::unordered_map<
+            model_component::Variable<T_Variable, T_Expression> *, int>
+            key_variable_ptr_counts;
 
         for (auto i = 0; i < CONSTRAINTS_SIZE; i++) {
             if (!constraint_ptrs[i]->is_enabled()) {
@@ -193,6 +196,13 @@ class DependentVariableExtractor {
                 if (adj[i][j] > 0 && adj[j][i] > 0) {
                     flags[j] = false;
                 }
+            }
+            auto key_variable_ptr = constraint_ptrs[i]->key_variable_ptr();
+            if (key_variable_ptr_counts.find(key_variable_ptr) !=
+                key_variable_ptr_counts.end()) {
+                key_variable_ptr_counts[key_variable_ptr] = 0;
+            } else {
+                key_variable_ptr_counts[key_variable_ptr] += 1;
             }
         }
 
@@ -210,7 +220,7 @@ class DependentVariableExtractor {
             }
             auto key_variable_ptr = constraint_ptr->key_variable_ptr();
 
-            if (flags[i]) {
+            if (flags[i] && key_variable_ptr_counts[key_variable_ptr] == 1) {
                 utility::print_message(
                     "The variable " + key_variable_ptr->name() +
                         " in the constraint " + constraint_ptr->name() +

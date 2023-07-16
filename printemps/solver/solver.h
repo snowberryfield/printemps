@@ -147,19 +147,12 @@ class Solver {
 
     /*************************************************************************/
     inline void run_pdlp(void) {
-        m_pdlp_controller.setup(m_model_ptr,         //
-                                m_current_solution,  //
-                                m_time_keeper,       //
+        m_pdlp_controller.setup(m_model_ptr,          //
+                                m_current_solution,   //
+                                &m_incumbent_holder,  //
+                                m_time_keeper,        //
                                 m_option);
         m_pdlp_controller.run();
-
-        if (m_pdlp_controller.result().core.dual.relative_violation_norm <
-            m_option.pdlp.tolerance) {
-            const auto DUAL_BOUND =
-                m_pdlp_controller.result().core.dual.objective *
-                m_model_ptr->sign();
-            m_incumbent_holder.update_dual_bound(DUAL_BOUND);
-        }
     }
 
     /*************************************************************************/
@@ -217,6 +210,13 @@ class Solver {
     }
 
     /*************************************************************************/
+    Solver(model::Model<T_Variable, T_Expression>* a_model_ptr,  //
+           const option::Option&                   a_OPTION,     //
+           const utility::TimeKeeper&              a_TIME_KEEPER) {
+        this->setup(a_model_ptr, a_OPTION, a_TIME_KEEPER);
+    }
+
+    /*************************************************************************/
     ~Solver(void) {
         /// nothing to do
     }
@@ -243,6 +243,17 @@ class Solver {
 
     /*************************************************************************/
     inline void setup(model::Model<T_Variable, T_Expression>* a_model_ptr,  //
+                      const option::Option&                   a_OPTION,     //
+                      const utility::TimeKeeper&              a_TIME_KEEPER) {
+        this->initialize();
+        m_model_ptr       = a_model_ptr;
+        m_option_original = a_OPTION;
+        m_option          = a_OPTION;
+        m_time_keeper     = a_TIME_KEEPER;
+    }
+
+    /*************************************************************************/
+    inline void setup(model::Model<T_Variable, T_Expression>* a_model_ptr,  //
                       const option::Option&                   a_OPTION) {
         this->initialize();
         m_model_ptr       = a_model_ptr;
@@ -255,7 +266,10 @@ class Solver {
         /**
          * Start to measure computational time and get the starting time.
          */
-        m_time_keeper.set_start_time();
+        if (!m_time_keeper.is_started()) {
+            m_time_keeper.set_start_time();
+        }
+
         m_start_date_time = utility::date_time();
 
         /**
@@ -335,6 +349,9 @@ class Solver {
             m_option.parallel.number_of_threads_neighborhood_update =
                 max_number_of_threads;
         }
+#else
+        m_option.parallel.number_of_threads_evaluation          = 1;
+        m_option.parallel.number_of_threads_neighborhood_update = 1;
 #endif
 
         /**
