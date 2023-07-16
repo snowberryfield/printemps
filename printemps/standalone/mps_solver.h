@@ -9,9 +9,10 @@
 namespace printemps::standalone {
 /*****************************************************************************/
 struct MPSSolverConstant {
+    static constexpr int  DEFAULT_MINIMUM_COMMON_ELEMENT           = 5;
     static constexpr bool DEFAULT_ACCEPT_CONTINUOUS_VARIABLES      = false;
     static constexpr bool DEFAULT_EXTRACT_FLIPPABLE_VARIABLE_PAIRS = false;
-    static constexpr int  DEFAULT_MINIMUM_COMMON_ELEMENT           = 5;
+    static constexpr bool DEFAULT_INCLUDE_MPS_LOADING_TIME         = false;
 };
 
 /*****************************************************************************/
@@ -24,12 +25,15 @@ class MPSSolver {
     std::string m_fixed_variable_file_name;
     std::string m_selection_constraint_file_name;
     std::string m_flippable_variable_pair_file_name;
+    int         m_minimum_common_element;
     bool        m_accept_continuous_variables;
     bool        m_extract_flippable_variable_pairs;
-    int         m_minimum_common_element;
+    bool        m_include_mps_loading_time;
 
     printemps::model::IPModel m_model;
     printemps::option::Option m_option;
+
+    utility::TimeKeeper m_time_keeper;
 
     /*************************************************************************/
     inline void print_usage(void) const {
@@ -40,9 +44,9 @@ class MPSSolver {
                   << "[-f FIXED_VARIABLE_FILE_NAME] "
                   << "[-s SELECTION_CONSTRAINT_FILE_NAME] "
                   << "[-x FLIPPABLE_VARIABLE_PAIR_FILE_NAME]"
+                  << "[-c MINIMUM_COMMON_ELEMENT] "
                   << "[--accept-continuous] "
                   << "[--extract-flippable-variable-pairs] "
-                  << "[-c MINIMUM_COMMON_ELEMENT] "
                   << "mps_file" << std::endl;
         std::cout << std::endl;
         std::cout  //
@@ -68,18 +72,18 @@ class MPSSolver {
                "pair file name."
             << std::endl;
         std::cout  //
+            << "  -c MINIMUM_COMMON_ELEMENT: Specify the number of minimum "
+               "common element between two constraints, which is used as the "
+               "threshold for extracting flippable variable pairs. (default: "
+            << MPSSolverConstant::DEFAULT_MINIMUM_COMMON_ELEMENT << ")"
+            << std::endl;
+        std::cout  //
             << "  --accept-continuous: Accept continuous variables as integer "
                "variables."
             << std::endl;
         std::cout  //
             << "  --extract-flippable-variable-pairs: Extract 2-flippable "
                "variable pairs."
-            << std::endl;
-        std::cout  //
-            << "  -c MINIMUM_COMMON_ELEMENT: Specify the number of minimum "
-               "common element between two constraints, which is used as the "
-               "threshold for extracting flippable variable pairs. (default: "
-            << MPSSolverConstant::DEFAULT_MINIMUM_COMMON_ELEMENT << ")"
             << std::endl;
     }
 
@@ -104,12 +108,14 @@ class MPSSolver {
         m_fixed_variable_file_name.clear();
         m_selection_constraint_file_name.clear();
         m_flippable_variable_pair_file_name.clear();
+        m_minimum_common_element =
+            MPSSolverConstant::DEFAULT_MINIMUM_COMMON_ELEMENT;
         m_accept_continuous_variables =
             MPSSolverConstant::DEFAULT_ACCEPT_CONTINUOUS_VARIABLES;
         m_extract_flippable_variable_pairs =
             MPSSolverConstant::DEFAULT_EXTRACT_FLIPPABLE_VARIABLE_PAIRS;
-        m_minimum_common_element =
-            MPSSolverConstant::DEFAULT_MINIMUM_COMMON_ELEMENT;
+        m_include_mps_loading_time =
+            MPSSolverConstant::DEFAULT_INCLUDE_MPS_LOADING_TIME;
 
         m_model.initialize();
         m_option.initialize();
@@ -147,6 +153,9 @@ class MPSSolver {
             } else if (args[i] == "--extract-flippable-variable-pairs") {
                 m_extract_flippable_variable_pairs = true;
                 i++;
+            } else if (args[i] == "--include_mps_loading_time") {
+                m_include_mps_loading_time = true;
+                i++;
             } else {
                 m_mps_file_name = args[i];
                 i++;
@@ -164,6 +173,8 @@ class MPSSolver {
             this->print_usage();
             exit(1);
         }
+
+        m_time_keeper.set_start_time();
 
         /**
          * Parse the command line arguments.
@@ -260,8 +271,15 @@ class MPSSolver {
         /**
          * Run the solver.
          */
-        printemps::solver::IPSolver solver(&m_model, m_option);
-        auto                        result = solver.solve();
+
+        printemps::solver::IPSolver solver;
+
+        if (m_include_mps_loading_time) {
+            solver.setup(&m_model, m_option, m_time_keeper);
+        } else {
+            solver.setup(&m_model, m_option);
+        }
+        auto result = solver.solve();
 
         /**
          * Print the result summary.
