@@ -277,10 +277,10 @@ class TabuSearchController
         /**
          * Print the initial solution for the next loop.
          */
-        if (STATE.employing_global_augmented_solution_flag) {
-            this->print_employing_global_augmented_solution(a_IS_ENABLED_PRINT);
-        } else if (STATE.employing_local_augmented_solution_flag) {
-            this->print_employing_local_augmented_solution(a_IS_ENABLED_PRINT);
+        if (STATE.employing_global_solution_flag) {
+            this->print_employing_global_solution(a_IS_ENABLED_PRINT);
+        } else if (STATE.employing_local_solution_flag) {
+            this->print_employing_local_solution(a_IS_ENABLED_PRINT);
         } else if (STATE.employing_previous_solution_flag) {
             this->print_employing_previous_solution(a_IS_ENABLED_PRINT);
         }
@@ -354,11 +354,11 @@ class TabuSearchController
                                 const double a_CURRENT_DUAL_INTENSITY,
                                 const bool   a_IS_ENABLED_PRINT) {
         utility::print_message(
-            "Historical search intensity is " +
+            "Historical search intensities are " +
                 utility::to_string(a_CURRENT_PRIMAL_INTENSITY, "%.3e") +
-                " (primal) / " +
+                "(primal) / " +
                 utility::to_string(a_CURRENT_DUAL_INTENSITY, "%.3e") +
-                " (dual).",
+                "(dual).",
             a_IS_ENABLED_PRINT);
     }
 
@@ -596,16 +596,14 @@ class TabuSearchController
     }
 
     /*************************************************************************/
-    inline void print_employing_global_augmented_solution(
-        const bool a_IS_ENABLED_PRINT) {
+    inline void print_employing_global_solution(const bool a_IS_ENABLED_PRINT) {
         utility::print_message(
             "The next loop will start from the global incumbent solution.",
             a_IS_ENABLED_PRINT);
     }
 
     /*************************************************************************/
-    inline void print_employing_local_augmented_solution(
-        const bool a_IS_ENABLED_PRINT) {
+    inline void print_employing_local_solution(const bool a_IS_ENABLED_PRINT) {
         utility::print_message(
             "The next loop will start from the local incumbent solution found "
             "in the previous loop.",

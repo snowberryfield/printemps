@@ -487,8 +487,8 @@ class TabuSearchControllerStateManager {
 
     /*************************************************************************/
     inline constexpr void turn_flags_off(void) {
-        m_state.employing_local_augmented_solution_flag   = false;
-        m_state.employing_global_augmented_solution_flag  = false;
+        m_state.employing_local_solution_flag             = false;
+        m_state.employing_global_solution_flag            = false;
         m_state.employing_previous_solution_flag          = false;
         m_state.is_enabled_penalty_coefficient_tightening = false;
         m_state.is_enabled_penalty_coefficient_relaxing   = false;
@@ -564,7 +564,7 @@ class TabuSearchControllerStateManager {
             std::max(1.0, fabs(m_incumbent_holder_ptr
                                    ->global_augmented_incumbent_objective()));
 
-        m_state.employing_local_augmented_solution_flag = true;
+        m_state.employing_local_solution_flag = true;
         if (m_state.is_global_augmented_incumbent_updated) {
             m_state.is_enabled_penalty_coefficient_relaxing = true;
             return;
@@ -616,7 +616,7 @@ class TabuSearchControllerStateManager {
              * the global incumbent is employed as the initial solution for the
              * next loop. The penalty coefficients are to be relaxed.
              */
-            m_state.employing_global_augmented_solution_flag = true;
+            m_state.employing_global_solution_flag          = true;
             m_state.is_enabled_penalty_coefficient_relaxing  = true;
             return;
         }
@@ -628,7 +628,7 @@ class TabuSearchControllerStateManager {
              * initial solution for the next loop with some initial
              * modifications. The penalty coefficients are to be relaxed.
              */
-            m_state.employing_global_augmented_solution_flag = true;
+            m_state.employing_global_solution_flag           = true;
             m_state.is_enabled_forcibly_initial_modification = true;
             m_state.is_enabled_penalty_coefficient_relaxing  = true;
 
@@ -649,7 +649,7 @@ class TabuSearchControllerStateManager {
              * The penalty coefficients are to be relaxed or tightened according
              * to the feasibility of the local incumbent solution.
              */
-            m_state.employing_global_augmented_solution_flag = true;
+            m_state.employing_global_solution_flag           = true;
             m_state.is_enabled_forcibly_initial_modification = true;
 
             if (RESULT_LOCAL_AUGMENTED_INCUMBENT_SCORE.is_feasible) {
@@ -667,14 +667,14 @@ class TabuSearchControllerStateManager {
              * solution for the next loop. The penalty coefficients are to be
              * relaxed.
              */
-            m_state.employing_local_augmented_solution_flag = true;
+            m_state.employing_local_solution_flag           = true;
             m_state.is_enabled_penalty_coefficient_relaxing = true;
             return;
         }
 
         if (RELATIVE_RANGE < TabuSearchControllerStateManagerConstant::
                                  RELATIVE_RANGE_THRESHOLD) {
-            m_state.employing_global_augmented_solution_flag = true;
+            m_state.employing_global_solution_flag           = true;
             m_state.is_enabled_forcibly_initial_modification = true;
             m_state.is_enabled_penalty_coefficient_relaxing  = true;
             return;
@@ -700,12 +700,12 @@ class TabuSearchControllerStateManager {
          */
         if (m_incumbent_holder_ptr->is_found_feasible_solution()) {
             if (m_state.is_improved) {
-                m_state.employing_local_augmented_solution_flag = true;
+                m_state.employing_local_solution_flag = true;
             } else {
                 m_state.employing_previous_solution_flag = true;
             }
         } else {
-            m_state.employing_local_augmented_solution_flag = true;
+            m_state.employing_local_solution_flag = true;
         }
         m_state.is_enabled_penalty_coefficient_tightening = true;
     }
@@ -746,10 +746,8 @@ class TabuSearchControllerStateManager {
          */
         if (m_state.employing_previous_solution_count_after_relaxation >
             std::max(
-                m_state
-                    .employing_local_augmented_solution_count_after_relaxation,
-                m_state
-                    .employing_global_augmented_solution_count_after_relaxation)) {
+                m_state.employing_local_solution_count_after_relaxation,
+                m_state.employing_global_solution_count_after_relaxation)) {
             m_state.penalty_coefficient_relaxing_rate =
                 std::min(m_option.penalty.penalty_coefficient_relaxing_rate_max,
                          sqrt(m_state.penalty_coefficient_relaxing_rate));
@@ -770,7 +768,7 @@ class TabuSearchControllerStateManager {
     inline constexpr void update_penalty_coefficient_reset_flag(void) {
         if (m_state.is_outer_stagnation && m_state.is_inner_stagnation) {
             m_state.penalty_coefficient_reset_flag           = true;
-            m_state.employing_global_augmented_solution_flag = true;
+            m_state.employing_global_solution_flag           = true;
             m_state.is_enabled_forcibly_initial_modification = true;
         }
     }
@@ -1249,19 +1247,18 @@ class TabuSearchControllerStateManager {
 
     /*************************************************************************/
     inline constexpr void update_current_solution(void) {
-        if (m_state.employing_global_augmented_solution_flag) {
+        if (m_state.employing_global_solution_flag) {
             m_state.current_solution =
                 m_incumbent_holder_ptr->global_augmented_incumbent_solution();
             m_state.current_solution_score =
                 m_incumbent_holder_ptr->global_augmented_incumbent_score();
-            m_state
-                .employing_global_augmented_solution_count_after_relaxation++;
-        } else if (m_state.employing_local_augmented_solution_flag) {
+            m_state.employing_global_solution_count_after_relaxation++;
+        } else if (m_state.employing_local_solution_flag) {
             m_state.current_solution =
                 m_incumbent_holder_ptr->local_augmented_incumbent_solution();
             m_state.current_solution_score =
                 m_incumbent_holder_ptr->local_augmented_incumbent_score();
-            m_state.employing_local_augmented_solution_count_after_relaxation++;
+            m_state.employing_local_solution_count_after_relaxation++;
         } else if (m_state.employing_previous_solution_flag) {
             m_state.current_solution       = m_state.previous_solution;
             m_state.current_solution_score = m_state.previous_solution_score;
@@ -1288,10 +1285,8 @@ class TabuSearchControllerStateManager {
 
             m_state.iteration_after_relaxation                         = 0;
             m_state.employing_previous_solution_count_after_relaxation = 0;
-            m_state.employing_global_augmented_solution_count_after_relaxation =
-                0;
-            m_state.employing_local_augmented_solution_count_after_relaxation =
-                0;
+            m_state.employing_global_solution_count_after_relaxation   = 0;
+            m_state.employing_local_solution_count_after_relaxation    = 0;
             m_state.relaxation_count++;
         } else {
             m_state.iteration_after_relaxation++;

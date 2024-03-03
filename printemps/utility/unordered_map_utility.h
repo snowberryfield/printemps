@@ -10,10 +10,10 @@ namespace printemps::utility {
 /*****************************************************************************/
 template <class T1, class T2>
 inline std::pair<std::vector<T1>, std::vector<T2>> to_vector_pair(
-    const std::unordered_map<T1, T2> &a_UNORDERED_SET) {
+    const std::unordered_map<T1, T2> &a_UNORDERED_MAP) {
     std::vector<T1> result_T1;
     std::vector<T2> result_T2;
-    for (const auto &item : a_UNORDERED_SET) {
+    for (const auto &item : a_UNORDERED_MAP) {
         result_T1.push_back(item.first);
         result_T2.push_back(item.second);
     }

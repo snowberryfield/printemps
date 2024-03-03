@@ -880,8 +880,9 @@ class Model {
         const int CONSTRAINT_PROXIES_SIZE = m_constraint_proxies.size();
 
         for (auto i = 0; i < VARIABLE_PROXIES_SIZE; i++) {
-            int number_of_elements = m_variable_proxies[i].number_of_elements();
-            for (auto j = 0; j < number_of_elements; j++) {
+            const int NUMBER_OF_ELEMENTS =
+                m_variable_proxies[i].number_of_elements();
+            for (auto j = 0; j < NUMBER_OF_ELEMENTS; j++) {
                 auto &variable =
                     m_variable_proxies[i].flat_indexed_variables(j);
 
@@ -894,9 +895,9 @@ class Model {
 
         /// Expression
         for (auto i = 0; i < EXPRESSION_PROXIES_SIZE; i++) {
-            int number_of_elements =
+            const int NUMBER_OF_ELEMENTS =
                 m_expression_proxies[i].number_of_elements();
-            for (auto j = 0; j < number_of_elements; j++) {
+            for (auto j = 0; j < NUMBER_OF_ELEMENTS; j++) {
                 auto &expression =
                     m_expression_proxies[i].flat_indexed_expressions(j);
 
@@ -910,9 +911,9 @@ class Model {
 
         /// Constraint
         for (auto i = 0; i < CONSTRAINT_PROXIES_SIZE; i++) {
-            int number_of_elements =
+            const int NUMBER_OF_ELEMENTS =
                 m_constraint_proxies[i].number_of_elements();
-            for (auto j = 0; j < number_of_elements; j++) {
+            for (auto j = 0; j < NUMBER_OF_ELEMENTS; j++) {
                 auto &constraint =
                     m_constraint_proxies[i].flat_indexed_constraints(j);
 
