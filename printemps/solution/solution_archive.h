@@ -28,12 +28,12 @@ class SolutionArchive {
 
     /*************************************************************************/
     SolutionArchive(const int          a_MAX_SIZE,             //
-                    const bool         a_is_ASCENDING,         //
+                    const bool         a_IS_ASCENDING,         //
                     const std::string& a_NAME,                 //
                     const int          a_NUMBER_OF_VARIABLES,  //
                     const int          a_NUMBER_OF_CONSTRAINTS) {
         this->setup(a_MAX_SIZE,             //
-                    a_is_ASCENDING,         //
+                    a_IS_ASCENDING,         //
                     a_NAME,                 //
                     a_NUMBER_OF_VARIABLES,  //
                     a_NUMBER_OF_CONSTRAINTS);
@@ -51,12 +51,12 @@ class SolutionArchive {
 
     /*************************************************************************/
     void setup(const int          a_MAX_SIZE,             //
-               const bool         a_is_ASCENDING,         //
+               const bool         a_IS_ASCENDING,         //
                const std::string& a_NAME,                 //
                const int          a_NUMBER_OF_VARIABLES,  //
                const int          a_NUMBER_OF_CONSTRAINTS) {
         m_max_size     = a_MAX_SIZE;
-        m_is_ascending = a_is_ASCENDING;
+        m_is_ascending = a_IS_ASCENDING;
         m_solutions.clear();
         m_name                  = a_NAME;
         m_number_of_variables   = a_NUMBER_OF_VARIABLES;

@@ -197,8 +197,8 @@ class ConstraintProxy : public multi_array::AbstractMultiArray {
     export_values_and_names(void) const {
         multi_array::ValueProxy<T_Expression> proxy(m_index, m_shape);
 
-        int number_of_elements = this->number_of_elements();
-        for (auto i = 0; i < number_of_elements; i++) {
+        const int NUMBER_OF_ELEMENTS = this->number_of_elements();
+        for (auto i = 0; i < NUMBER_OF_ELEMENTS; i++) {
             proxy.flat_indexed_values()[i] =
                 m_constraints[i].constraint_value();
             proxy.flat_indexed_names()[i] = m_constraints[i].name();
@@ -211,8 +211,8 @@ class ConstraintProxy : public multi_array::AbstractMultiArray {
     export_violations_and_names(void) const {
         multi_array::ValueProxy<T_Expression> proxy(m_index, m_shape);
 
-        int number_of_elements = this->number_of_elements();
-        for (auto i = 0; i < number_of_elements; i++) {
+        const int NUMBER_OF_ELEMENTS = this->number_of_elements();
+        for (auto i = 0; i < NUMBER_OF_ELEMENTS; i++) {
             proxy.flat_indexed_values()[i] = m_constraints[i].violation_value();
             proxy.flat_indexed_names()[i]  = m_constraints[i].name();
         }

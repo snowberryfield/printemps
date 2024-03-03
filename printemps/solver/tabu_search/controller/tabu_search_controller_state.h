@@ -49,8 +49,8 @@ struct TabuSearchControllerState {
     double current_dual_intensity_before_relaxation;
     double previous_dual_intensity_before_relaxation;
 
-    int employing_local_augmented_solution_count_after_relaxation;
-    int employing_global_augmented_solution_count_after_relaxation;
+    int employing_local_solution_count_after_relaxation;
+    int employing_global_solution_count_after_relaxation;
     int employing_previous_solution_count_after_relaxation;
 
     int total_update_status;
@@ -74,8 +74,8 @@ struct TabuSearchControllerState {
     double pruning_rate_threshold;
     int    number_of_initial_modification;
     int    iteration_max;
-    bool   employing_local_augmented_solution_flag;
-    bool   employing_global_augmented_solution_flag;
+    bool   employing_local_solution_flag;
+    bool   employing_global_solution_flag;
     bool   employing_previous_solution_flag;
     bool   is_enabled_penalty_coefficient_tightening;
     bool   is_enabled_penalty_coefficient_relaxing;

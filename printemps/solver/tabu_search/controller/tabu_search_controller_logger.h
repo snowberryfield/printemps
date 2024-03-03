@@ -85,8 +85,8 @@ class TabuSearchControllerLogger {
             << "dual_intensity "                                  //
             << "performance "                                     //
             << "update_status "                                   //
-            << "employing_local_augmented_solution_flag "         //
-            << "employing_global_augmented_solution_flag "        //
+            << "employing_local_solution_flag "                   //
+            << "employing_global_solution_flag "                  //
             << "employing_previous_solution_flag "                //
             << "is_enabled_penalty_coefficient_relaxing "         //
             << "is_enabled_penalty_coefficient_tightening "       //
@@ -130,8 +130,8 @@ class TabuSearchControllerLogger {
             << s.current_dual_intensity << " "                          //
             << s.tabu_search_result.performance << " "                  //
             << s.tabu_search_result.total_update_status << " "          //
-            << s.employing_local_augmented_solution_flag << " "         //
-            << s.employing_global_augmented_solution_flag << " "        //
+            << s.employing_local_solution_flag << " "                   //
+            << s.employing_global_solution_flag << " "                  //
             << s.employing_previous_solution_flag << " "                //
             << s.is_enabled_penalty_coefficient_relaxing << " "         //
             << s.is_enabled_penalty_coefficient_tightening << " "       //
