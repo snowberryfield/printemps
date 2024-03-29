@@ -17,17 +17,15 @@ namespace printemps::solver::local_search::core {
 template <class T_Variable, class T_Expression>
 class LocalSearchCore {
    private:
-    model::Model<T_Variable, T_Expression>* m_model_ptr;
-
-    std::vector<multi_array::ValueProxy<T_Variable>>
-        m_initial_variable_value_proxies;
-
-    solution::IncumbentHolder<T_Variable, T_Expression>* m_incumbent_holder_ptr;
-    Memory<T_Variable, T_Expression>*                    m_memory_ptr;
-    option::Option                                       m_option;
+    model::Model<T_Variable, T_Expression>*           m_model_ptr;
+    GlobalState<T_Variable, T_Expression>*            m_global_state_ptr;
+    solution::DenseSolution<T_Variable, T_Expression> m_initial_solution;
+    option::Option                                    m_option;
 
     std::vector<solution::SparseSolution<T_Variable, T_Expression>>
         m_feasible_solutions;
+    std::vector<solution::SparseSolution<T_Variable, T_Expression>>
+        m_incumbent_solutions;
 
     LocalSearchCoreStateManager<T_Variable, T_Expression> m_state_manager;
     LocalSearchCoreResult<T_Variable, T_Expression>       m_result;
@@ -38,7 +36,12 @@ class LocalSearchCore {
         /**
          * Reset the local augmented incumbent.
          */
-        m_incumbent_holder_ptr->reset_local_augmented_incumbent();
+        m_global_state_ptr->incumbent_holder.reset_local_augmented_incumbent();
+
+        /**
+         * Reset the last update iterations.
+         */
+        m_global_state_ptr->memory.reset_last_update_iterations();
 
         /**
          * Reset the feasible solutions storage.
@@ -46,19 +49,19 @@ class LocalSearchCore {
         m_feasible_solutions.clear();
 
         /**
+         * Reset the incumbent solutions storage.
+         */
+        m_incumbent_solutions.clear();
+
+        /**
          * Prepare a random generator, which is used for shuffling moves.
          */
         m_get_rand_mt.seed(m_option.local_search.seed);
 
         /**
-         * Reset the last update iterations.
-         */
-        m_memory_ptr->reset_last_update_iterations();
-
-        /**
          * Initialize the solution and update the model.
          */
-        m_model_ptr->import_variable_values(m_initial_variable_value_proxies);
+        m_model_ptr->import_solution(m_initial_solution);
         m_model_ptr->update();
 
         /**
@@ -67,10 +70,7 @@ class LocalSearchCore {
         m_model_ptr->reset_variable_objective_improvabilities();
         m_model_ptr->reset_variable_feasibility_improvabilities();
 
-        m_state_manager.setup(m_model_ptr,             //
-                              m_incumbent_holder_ptr,  //
-                              m_memory_ptr,            //
-                              m_option);
+        m_state_manager.setup(m_model_ptr, m_global_state_ptr, m_option);
     }
 
     /*************************************************************************/
@@ -115,7 +115,8 @@ class LocalSearchCore {
 
     /*************************************************************************/
     inline bool satisfy_reach_target_terminate_condition(void) {
-        if (m_incumbent_holder_ptr->feasible_incumbent_objective() <=
+        if (m_global_state_ptr->incumbent_holder
+                .feasible_incumbent_objective() <=
             m_option.general.target_objective_value) {
             m_state_manager.set_termination_status(
                 LocalSearchCoreTerminationStatus::REACH_TARGET);
@@ -217,7 +218,7 @@ class LocalSearchCore {
     inline void update_memory(
         const neighborhood::Move<T_Variable, T_Expression>* a_move_ptr) {
         const auto& STATE = m_state_manager.state();
-        m_memory_ptr->update(*a_move_ptr, STATE.iteration);
+        m_global_state_ptr->memory.update(*a_move_ptr, STATE.iteration);
     }
 
     /*************************************************************************/
@@ -255,7 +256,8 @@ class LocalSearchCore {
 
         const auto& CURRENT_SOLUTION_SCORE = STATE.current_solution_score;
         const auto& INCUMBENT_SOLUTION_SCORE =
-            m_incumbent_holder_ptr->global_augmented_incumbent_score();
+            m_global_state_ptr->incumbent_holder
+                .global_augmented_incumbent_score();
 
         std::string color_current_feasible_begin   = "";
         std::string color_current_feasible_end     = "";
@@ -300,7 +302,8 @@ class LocalSearchCore {
 
         const auto& CURRENT_SOLUTION_SCORE = STATE.current_solution_score;
         const auto& INCUMBENT_SOLUTION_SCORE =
-            m_incumbent_holder_ptr->global_augmented_incumbent_score();
+            m_global_state_ptr->incumbent_holder
+                .global_augmented_incumbent_score();
 
         char mark_current                    = ' ';
         char mark_global_augmented_incumbent = ' ';
@@ -397,18 +400,16 @@ class LocalSearchCore {
     }
 
     /*************************************************************************/
-    LocalSearchCore(model::Model<T_Variable, T_Expression>* a_model_ptr,     //
-                    const std::vector<multi_array::ValueProxy<T_Variable>>&  //
-                        a_INITIAL_VARIABLE_VALUE_PROXIES,                    //
-                    solution::IncumbentHolder<T_Variable, T_Expression>*     //
-                                                      a_incumbent_holder_ptr,  //
-                    Memory<T_Variable, T_Expression>* a_memory_ptr,  //
-                    const option::Option&             a_OPTION) {
+    LocalSearchCore(
+        model::Model<T_Variable, T_Expression>* a_model_ptr,         //
+        GlobalState<T_Variable, T_Expression>*  a_global_state_ptr,  //
+        const solution::SparseSolution<T_Variable, T_Expression>&    //
+                              a_INITIAL_SOLUTION,                    //
+        const option::Option& a_OPTION) {
         this->initialize();
-        this->setup(a_model_ptr,                       //
-                    a_INITIAL_VARIABLE_VALUE_PROXIES,  //
-                    a_incumbent_holder_ptr,            //
-                    a_memory_ptr,                      //
+        this->setup(a_model_ptr,         //
+                    a_global_state_ptr,  //
+                    a_INITIAL_SOLUTION,  //
                     a_OPTION);
     }
 
@@ -419,12 +420,13 @@ class LocalSearchCore {
 
     /*************************************************************************/
     inline void initialize(void) {
-        m_model_ptr = nullptr;
-        m_initial_variable_value_proxies.clear();
-        m_incumbent_holder_ptr = nullptr;
-        m_memory_ptr           = nullptr;
+        m_model_ptr        = nullptr;
+        m_global_state_ptr = nullptr;
+        m_initial_solution.initialize();
         m_option.initialize();
+
         m_feasible_solutions.clear();
+        m_incumbent_solutions.clear();
 
         m_state_manager.initialize();
         m_result.initialize();
@@ -432,20 +434,20 @@ class LocalSearchCore {
     }
 
     /*************************************************************************/
-    inline void setup(                                             //
-        model::Model<T_Variable, T_Expression>* a_model_ptr,       //
-        const std::vector<multi_array::ValueProxy<T_Variable>>&    //
-            a_INITIAL_VARIABLE_VALUE_PROXIES,                      //
-        solution::IncumbentHolder<T_Variable, T_Expression>*       //
-                                          a_incumbent_holder_ptr,  //
-        Memory<T_Variable, T_Expression>* a_memory_ptr,            //
-        const option::Option&             a_OPTION) {
-        m_model_ptr                      = a_model_ptr;
-        m_initial_variable_value_proxies = a_INITIAL_VARIABLE_VALUE_PROXIES;
-        m_incumbent_holder_ptr           = a_incumbent_holder_ptr;
-        m_memory_ptr                     = a_memory_ptr;
-        m_option                         = a_OPTION;
+    inline void setup(                                               //
+        model::Model<T_Variable, T_Expression>* a_model_ptr,         //
+        GlobalState<T_Variable, T_Expression>*  a_global_state_ptr,  //
+        const solution::SparseSolution<T_Variable, T_Expression>&
+                              a_INITIAL_SOLUTION,  //
+        const option::Option& a_OPTION) {
+        m_model_ptr        = a_model_ptr;
+        m_global_state_ptr = a_global_state_ptr;
+        m_model_ptr->import_solution(a_INITIAL_SOLUTION);
+        m_initial_solution = m_model_ptr->export_dense_solution();
+        m_option           = a_OPTION;
+
         m_feasible_solutions.clear();
+        m_incumbent_solutions.clear();
     }
 
     /*************************************************************************/
@@ -713,6 +715,18 @@ class LocalSearchCore {
                                  option::verbose::Full);
 
         /**
+         * Store the incumbent solution.
+         */
+        if (STATE.total_update_status &  //
+            solution::IncumbentHolderConstant::
+                STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
+            m_incumbent_solutions.push_back(
+                m_global_state_ptr->incumbent_holder
+                    .global_augmented_incumbent_solution()
+                    .to_sparse());
+        }
+
+        /**
          * Postprocess.
          */
         m_state_manager.set_elapsed_time(time_keeper.clock());
@@ -720,26 +734,17 @@ class LocalSearchCore {
     }
 
     /*************************************************************************/
-    inline constexpr model::Model<T_Variable, T_Expression>* model_ptr(void) {
-        return m_model_ptr;
-    }
-
-    /*************************************************************************/
-    inline constexpr solution::IncumbentHolder<T_Variable, T_Expression>*
-    incumbent_holder_ptr(void) {
-        return m_incumbent_holder_ptr;
-    }
-
-    /*************************************************************************/
-    inline constexpr Memory<T_Variable, T_Expression>* memory_ptr(void) {
-        return m_memory_ptr;
+    inline constexpr const std::vector<
+        solution::SparseSolution<T_Variable, T_Expression>>&
+    feasible_solutions(void) const {
+        return m_feasible_solutions;
     }
 
     /*************************************************************************/
     inline constexpr const std::vector<
         solution::SparseSolution<T_Variable, T_Expression>>&
-    feasible_solutions(void) const {
-        return m_feasible_solutions;
+    incumbent_solutions(void) const {
+        return m_incumbent_solutions;
     }
 
     /*************************************************************************/

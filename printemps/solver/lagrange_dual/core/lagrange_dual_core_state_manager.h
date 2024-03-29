@@ -13,24 +13,18 @@ namespace printemps::solver::lagrange_dual::core {
 template <class T_Variable, class T_Expression>
 class LagrangeDualCoreStateManager {
    private:
-    LagrangeDualCoreState<T_Variable, T_Expression>      m_state;
-    model::Model<T_Variable, T_Expression>*              m_model_ptr;
-    solution::IncumbentHolder<T_Variable, T_Expression>* m_incumbent_holder_ptr;
-    Memory<T_Variable, T_Expression>*                    m_memory_ptr;
-    option::Option                                       m_option;
+    LagrangeDualCoreState<T_Variable, T_Expression> m_state;
+    model::Model<T_Variable, T_Expression>*         m_model_ptr;
+    GlobalState<T_Variable, T_Expression>*          m_global_state_ptr;
+    option::Option                                  m_option;
 
    public:
     /*************************************************************************/
     LagrangeDualCoreStateManager(
-        model::Model<T_Variable, T_Expression>* a_model_ptr,
-        solution::IncumbentHolder<T_Variable, T_Expression>*
-                                          a_incumbent_holder_ptr,  //
-        Memory<T_Variable, T_Expression>* a_memory_ptr,            //
-        const option::Option&             a_OPTION) {
-        this->setup(a_model_ptr,             //
-                    a_incumbent_holder_ptr,  //
-                    a_memory_ptr,            //
-                    a_OPTION);
+        model::Model<T_Variable, T_Expression>* a_model_ptr,         //
+        GlobalState<T_Variable, T_Expression>*  a_global_state_ptr,  //
+        const option::Option&                   a_OPTION) {
+        this->setup(a_model_ptr, m_global_state_ptr, a_OPTION);
     }
 
     /*************************************************************************/
@@ -41,31 +35,29 @@ class LagrangeDualCoreStateManager {
     /*************************************************************************/
     inline void initialize(void) {
         m_state.initialize();
-        m_model_ptr            = nullptr;
-        m_incumbent_holder_ptr = nullptr;
-        m_memory_ptr           = nullptr;
+        m_global_state_ptr = nullptr;
+        m_model_ptr        = nullptr;
         m_option.initialize();
     }
 
     /*************************************************************************/
-    inline void setup(model::Model<T_Variable, T_Expression>* a_model_ptr,
-                      solution::IncumbentHolder<T_Variable, T_Expression>*
-                                                        a_incumbent_holder_ptr,  //
-                      Memory<T_Variable, T_Expression>* a_memory_ptr,  //
-                      const option::Option&             a_OPTION) {
+    inline void setup(
+        model::Model<T_Variable, T_Expression>* a_model_ptr,         //
+        GlobalState<T_Variable, T_Expression>*  a_global_state_ptr,  //
+        const option::Option&                   a_OPTION) {
         this->initialize();
-        m_model_ptr            = a_model_ptr;
-        m_incumbent_holder_ptr = a_incumbent_holder_ptr;
-        m_memory_ptr           = a_memory_ptr;
-        m_option               = a_OPTION;
+        m_model_ptr        = a_model_ptr;
+        m_global_state_ptr = a_global_state_ptr;
+        m_option           = a_OPTION;
 
         /**
          * Evaluate the initial solution score.
          */
         m_state.current_solution_score  = m_model_ptr->evaluate({});
         m_state.previous_solution_score = m_state.current_solution_score;
-        m_state.update_status = m_incumbent_holder_ptr->try_update_incumbent(
-            m_model_ptr, m_state.current_solution_score);
+        m_state.update_status =
+            m_global_state_ptr->incumbent_holder.try_update_incumbent(
+                m_model_ptr, m_state.current_solution_score);
         m_state.total_update_status =
             solution::IncumbentHolderConstant::STATUS_NOT_UPDATED;
 
@@ -86,7 +78,7 @@ class LagrangeDualCoreStateManager {
         /**
          * Initialize the primal solution.
          */
-        m_state.primal           = m_model_ptr->export_solution();
+        m_state.primal           = m_model_ptr->export_dense_solution();
         m_state.primal_incumbent = m_state.primal;
 
         /**
@@ -152,8 +144,9 @@ class LagrangeDualCoreStateManager {
 
     /*************************************************************************/
     inline constexpr void update_update_status(void) {
-        m_state.update_status = m_incumbent_holder_ptr->try_update_incumbent(
-            m_model_ptr, m_state.current_solution_score);
+        m_state.update_status =
+            m_global_state_ptr->incumbent_holder.try_update_incumbent(
+                m_model_ptr, m_state.current_solution_score);
         m_state.total_update_status =
             m_state.update_status | m_state.total_update_status;
     }
@@ -168,7 +161,7 @@ class LagrangeDualCoreStateManager {
          */
         if (m_state.lagrangian > m_state.lagrangian_incumbent) {
             m_state.lagrangian_incumbent = m_state.lagrangian;
-            m_state.primal_incumbent     = m_model_ptr->export_solution();
+            m_state.primal_incumbent     = m_model_ptr->export_dense_solution();
             m_state.dual_incumbent       = m_state.dual;
         }
 

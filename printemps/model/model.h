@@ -2378,26 +2378,6 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void import_variable_values(
-        const std::vector<multi_array::ValueProxy<T_Variable>> &a_PROXIES) {
-        for (auto &&proxy : m_variable_proxies) {
-            for (auto &&variable : proxy.flat_indexed_variables()) {
-                const int PROXY_INDEX = variable.proxy_index();
-                const int FLAT_INDEX  = variable.flat_index();
-                variable.set_value_if_mutable(
-                    a_PROXIES[PROXY_INDEX].flat_indexed_values(FLAT_INDEX));
-            }
-        }
-        preprocess::Verifier<T_Variable, T_Expression> verifier(this);
-        verifier.verify_and_correct_selection_variables_initial_values(  //
-            false, false);
-        verifier.verify_and_correct_binary_variables_initial_values(  //
-            false, false);
-        verifier.verify_and_correct_integer_variables_initial_values(  //
-            false, false);
-    }
-
-    /*************************************************************************/
     constexpr void update(void) {
         /**
          * Update in order of expressions -> dependent variables -> objective,
@@ -3175,7 +3155,7 @@ class Model {
     }
 
     /*************************************************************************/
-    solution::DenseSolution<T_Variable, T_Expression> export_solution(
+    solution::DenseSolution<T_Variable, T_Expression> export_dense_solution(
         void) const {
         /// This method cannot be constexpr by clang.
         solution::DenseSolution<T_Variable, T_Expression> solution;
@@ -3210,73 +3190,23 @@ class Model {
 
         solution.objective       = m_objective.value();
         solution.total_violation = total_violation;
-        solution.is_feasible     = this->is_feasible();
+        solution.global_augmented_objective =
+            solution.objective + m_global_penalty_coefficient * total_violation;
+        solution.is_feasible = this->is_feasible();
 
         return solution;
     }
 
     /*************************************************************************/
-    constexpr solution::NamedSolution<T_Variable, T_Expression>
-    export_named_solution(void) const {
-        return this->convert_to_named_solution(this->export_solution());
-    }
-
-    /*************************************************************************/
-    solution::NamedSolution<T_Variable, T_Expression> convert_to_named_solution(
-        const solution::DenseSolution<T_Variable, T_Expression> &a_SOLUTION)
-        const {
-        /// This method cannot be constexpr by clang.
-        solution::NamedSolution<T_Variable, T_Expression> named_solution;
-
-        const int VARIABLE_PROXIES_SIZE   = m_variable_proxies.size();
-        const int EXPRESSION_PROXIES_SIZE = m_expression_proxies.size();
-        const int CONSTRAINT_PROXIES_SIZE = m_constraint_proxies.size();
-
-        /// Decision variables
-        for (auto i = 0; i < VARIABLE_PROXIES_SIZE; i++) {
-            named_solution.m_variable_value_proxies[m_variable_names[i]] =
-                a_SOLUTION.variable_value_proxies[i];
-        }
-
-        /// Expression
-        for (auto i = 0; i < EXPRESSION_PROXIES_SIZE; i++) {
-            named_solution.m_expression_value_proxies[m_expression_names[i]] =
-                a_SOLUTION.expression_value_proxies[i];
-        }
-
-        /// Constraint
-        for (auto i = 0; i < CONSTRAINT_PROXIES_SIZE; i++) {
-            named_solution.m_constraint_value_proxies[m_constraint_names[i]] =
-                a_SOLUTION.constraint_value_proxies[i];
-        }
-
-        /// Violation
-        for (auto i = 0; i < CONSTRAINT_PROXIES_SIZE; i++) {
-            named_solution.m_violation_value_proxies[m_constraint_names[i]] =
-                a_SOLUTION.violation_value_proxies[i];
-        }
-
-        named_solution.m_name                  = m_name;
-        named_solution.m_number_of_variables   = this->number_of_variables();
-        named_solution.m_number_of_constraints = this->number_of_constraints();
-        named_solution.m_objective             = a_SOLUTION.objective;
-        named_solution.m_total_violation       = a_SOLUTION.total_violation;
-        named_solution.m_is_feasible           = a_SOLUTION.is_feasible;
-
-        return named_solution;
-    }
-
-    /*************************************************************************/
     solution::SparseSolution<T_Variable, T_Expression> export_sparse_solution(
         void) const {
-        solution::SparseSolution<T_Variable, T_Expression> sparse_solution;
+        solution::SparseSolution<T_Variable, T_Expression> solution;
 
         /// Decision variables
         for (const auto &proxy : m_variable_proxies) {
             for (const auto &variable : proxy.flat_indexed_variables()) {
                 if (variable.value() != 0) {
-                    sparse_solution.variables[variable.name()] =
-                        variable.value();
+                    solution.variables[variable.name()] = variable.value();
                 }
             }
         }
@@ -3289,44 +3219,118 @@ class Model {
             }
         }
 
-        sparse_solution.objective       = m_objective.value();
-        sparse_solution.total_violation = total_violation;
-        sparse_solution.is_feasible     = this->is_feasible();
+        solution.objective       = m_objective.value();
+        solution.total_violation = total_violation;
+        solution.global_augmented_objective =
+            solution.objective + m_global_penalty_coefficient * total_violation;
+        solution.is_feasible = this->is_feasible();
 
-        return sparse_solution;
+        return solution;
     }
 
     /*************************************************************************/
-    solution::SparseSolution<T_Variable, T_Expression>
-    convert_to_sparse_solution(
-        const solution::DenseSolution<T_Variable, T_Expression> &a_SOLUTION)
-        const {
-        solution::SparseSolution<T_Variable, T_Expression> sparse_solution;
+    constexpr solution::NamedSolution<T_Variable, T_Expression>
+    export_named_solution(void) const {
+        /// This method cannot be constexpr by clang.
+        solution::NamedSolution<T_Variable, T_Expression> solution;
+
+        const int VARIABLE_PROXIES_SIZE   = m_variable_proxies.size();
+        const int EXPRESSION_PROXIES_SIZE = m_expression_proxies.size();
+        const int CONSTRAINT_PROXIES_SIZE = m_constraint_proxies.size();
 
         /// Decision variables
-        for (const auto &proxy : m_variable_proxies) {
-            for (const auto &variable : proxy.flat_indexed_variables()) {
-                if (variable.value() != 0) {
-                    sparse_solution.variables[variable.name()] =
-                        variable.value();
-                }
+        for (auto i = 0; i < VARIABLE_PROXIES_SIZE; i++) {
+            solution.m_variable_value_proxies[m_variable_names[i]] =
+                m_variable_proxies[i].export_values_and_names();
+        }
+
+        /// Expression
+        for (auto i = 0; i < EXPRESSION_PROXIES_SIZE; i++) {
+            solution.m_expression_value_proxies[m_expression_names[i]] =
+                m_expression_proxies[i].export_values_and_names();
+        }
+
+        /// Constraint
+        for (auto i = 0; i < CONSTRAINT_PROXIES_SIZE; i++) {
+            solution.m_constraint_value_proxies[m_constraint_names[i]] =
+                m_constraint_proxies[i].export_values_and_names();
+        }
+
+        /// Violation
+        for (auto i = 0; i < CONSTRAINT_PROXIES_SIZE; i++) {
+            solution.m_violation_value_proxies[m_constraint_names[i]] =
+                m_constraint_proxies[i].export_violations_and_names();
+        }
+
+        /// Total violation
+        T_Expression total_violation = 0;
+        for (const auto &proxy : m_constraint_proxies) {
+            for (const auto &constraint : proxy.flat_indexed_constraints()) {
+                total_violation += constraint.violation_value();
             }
         }
 
-        sparse_solution.objective       = a_SOLUTION.objective;
-        sparse_solution.total_violation = a_SOLUTION.total_violation;
-        sparse_solution.is_feasible     = a_SOLUTION.is_feasible;
+        solution.m_name                  = m_name;
+        solution.m_number_of_variables   = this->number_of_variables();
+        solution.m_number_of_constraints = this->number_of_constraints();
+        solution.m_objective             = m_objective.value();
+        solution.m_total_violation       = total_violation;
 
-        return sparse_solution;
+        solution.m_is_feasible = this->is_feasible();
+
+        return solution;
     }
 
     /*************************************************************************/
     constexpr void import_solution(
-        const std::unordered_map<std::string, int> &a_SOLUTION) {
+        const solution::DenseSolution<T_Variable, T_Expression> &a_SOLUTION) {
         for (auto &&proxy : m_variable_proxies) {
             for (auto &&variable : proxy.flat_indexed_variables()) {
-                if (a_SOLUTION.find(variable.name()) != a_SOLUTION.end()) {
-                    variable = a_SOLUTION.at(variable.name());
+                const int PROXY_INDEX = variable.proxy_index();
+                const int FLAT_INDEX  = variable.flat_index();
+                variable.set_value_if_mutable(
+                    a_SOLUTION.variable_value_proxies[PROXY_INDEX]
+                        .flat_indexed_values(FLAT_INDEX));
+            }
+        }
+        preprocess::Verifier<T_Variable, T_Expression> verifier(this);
+        verifier.verify_and_correct_selection_variables_initial_values(  //
+            false, false);
+        verifier.verify_and_correct_binary_variables_initial_values(  //
+            false, false);
+        verifier.verify_and_correct_integer_variables_initial_values(  //
+            false, false);
+    }
+
+    /*************************************************************************/
+    constexpr void import_solution(
+        const solution::SparseSolution<T_Variable, T_Expression> &a_SOLUTION) {
+        const auto &VARIABLES = a_SOLUTION.variables;
+        for (auto &&proxy : m_variable_proxies) {
+            for (auto &&variable : proxy.flat_indexed_variables()) {
+                if (VARIABLES.find(variable.name()) != VARIABLES.end()) {
+                    variable = VARIABLES.at(variable.name());
+                } else {
+                    variable = 0;
+                }
+            }
+        }
+        preprocess::Verifier<T_Variable, T_Expression> verifier(this);
+        verifier.verify_and_correct_selection_variables_initial_values(  //
+            false, false);
+        verifier.verify_and_correct_binary_variables_initial_values(  //
+            false, false);
+        verifier.verify_and_correct_integer_variables_initial_values(  //
+            false, false);
+    }
+
+    /*************************************************************************/
+    constexpr void import_solution(
+        const std::unordered_map<std::string, int> &a_VARIABLES) {
+        for (auto &&proxy : m_variable_proxies) {
+            for (auto &&variable : proxy.flat_indexed_variables()) {
+                if (a_VARIABLES.find(variable.name()) != a_VARIABLES.end()) {
+                    variable = a_VARIABLES.at(variable.name());
                 } else {
                     variable = 0;
                 }
@@ -3336,11 +3340,11 @@ class Model {
 
     /*************************************************************************/
     constexpr void fix_variables(
-        const std::unordered_map<std::string, int> &a_SOLUTION) {
+        const std::unordered_map<std::string, int> &a_VARIABLES) {
         for (auto &&proxy : m_variable_proxies) {
             for (auto &&variable : proxy.flat_indexed_variables()) {
-                if (a_SOLUTION.find(variable.name()) != a_SOLUTION.end()) {
-                    variable.fix_by(a_SOLUTION.at(variable.name()));
+                if (a_VARIABLES.find(variable.name()) != a_VARIABLES.end()) {
+                    variable.fix_by(a_VARIABLES.at(variable.name()));
                 }
             }
         }

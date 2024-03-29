@@ -12,8 +12,8 @@ template <class T_Variable, class T_Expression>
 class Model;
 }  // namespace printemps::model
 
-#include "dense_solution.h"
 #include "sparse_solution.h"
+#include "dense_solution.h"
 #include "named_solution.h"
 #include "solution_score.h"
 #include "solution_archive.h"

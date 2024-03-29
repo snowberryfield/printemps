@@ -6,7 +6,7 @@
 #ifndef PRINTEMPS_SOLVER_H__
 #define PRINTEMPS_SOLVER_H__
 
-#include "memory.h"
+#include "global_state.h"
 #include "status.h"
 #include "result.h"
 
@@ -20,16 +20,13 @@ namespace printemps::solver {
 template <class T_Variable, class T_Expression>
 class Solver {
    private:
-    model::Model<T_Variable, T_Expression>*             m_model_ptr;
-    solution::IncumbentHolder<T_Variable, T_Expression> m_incumbent_holder;
-    solution::DenseSolution<T_Variable, T_Expression>   m_current_solution;
-    Memory<T_Variable, T_Expression>                    m_memory;
-    utility::TimeKeeper                                 m_time_keeper;
+    model::Model<T_Variable, T_Expression>*            m_model_ptr;
+    GlobalState<T_Variable, T_Expression>              m_global_state;
+    solution::SparseSolution<T_Variable, T_Expression> m_current_solution;
+    utility::TimeKeeper                                m_time_keeper;
 
     option::Option m_option_original;
     option::Option m_option;
-
-    solution::SolutionArchive<T_Variable, T_Expression> m_solution_archive;
 
     std::string m_start_date_time;
     std::string m_finish_date_time;
@@ -120,19 +117,19 @@ class Solver {
          * value and the penalty value.
          */
         auto incumbent =
-            m_incumbent_holder.is_found_feasible_solution()
-                ? m_incumbent_holder.feasible_incumbent_solution()
-                : m_incumbent_holder.global_augmented_incumbent_solution();
+            m_global_state.incumbent_holder.is_found_feasible_solution()
+                ? m_global_state.incumbent_holder.feasible_incumbent_solution()
+                : m_global_state.incumbent_holder
+                      .global_augmented_incumbent_solution();
 
         /**
          * All value of the expressions and the constraints are updated forcibly
          * to take into account the cases they are disabled.
          */
-        m_model_ptr->import_variable_values(incumbent.variable_value_proxies);
+        m_model_ptr->import_solution(incumbent);
         m_model_ptr->update();
-        incumbent = m_model_ptr->export_solution();
 
-        auto named_solution = m_model_ptr->convert_to_named_solution(incumbent);
+        auto named_solution = m_model_ptr->export_named_solution();
 
         /**
          * Prepare the result object to return.
@@ -140,61 +137,58 @@ class Solver {
         m_time_keeper.clock();
         Status<T_Variable, T_Expression> status(this);
         Result<T_Variable, T_Expression> result(  //
-            named_solution, status, m_solution_archive);
+            named_solution, status, m_global_state.feasible_solution_archive);
 
         return result;
     }
 
     /*************************************************************************/
     inline void run_pdlp(void) {
-        m_pdlp_controller.setup(m_model_ptr,          //
-                                m_current_solution,   //
-                                &m_incumbent_holder,  //
-                                m_time_keeper,        //
+        m_pdlp_controller.setup(m_model_ptr,         //
+                                &m_global_state,     //
+                                m_current_solution,  //
+                                m_time_keeper,       //
                                 m_option);
         m_pdlp_controller.run();
     }
 
     /*************************************************************************/
     inline void run_lagrange_dual(void) {
-        m_lagrange_dual_controller.setup(m_model_ptr,          //
-                                         m_current_solution,   //
-                                         &m_incumbent_holder,  //
-                                         &m_memory,            //
-                                         &m_solution_archive,  //
-                                         m_time_keeper,        //
+        m_lagrange_dual_controller.setup(m_model_ptr,         //
+                                         &m_global_state,     //
+                                         m_current_solution,  //
+                                         m_time_keeper,       //
                                          m_option);
         m_lagrange_dual_controller.run();
-        m_current_solution =
-            m_incumbent_holder.global_augmented_incumbent_solution();
+        m_current_solution = m_global_state.incumbent_holder
+                                 .global_augmented_incumbent_solution()
+                                 .to_sparse();
     }
 
     /*************************************************************************/
     inline void run_local_search(void) {
-        m_local_search_controller.setup(m_model_ptr,          //
-                                        m_current_solution,   //
-                                        &m_incumbent_holder,  //
-                                        &m_memory,            //
-                                        &m_solution_archive,  //
-                                        m_time_keeper,        //
+        m_local_search_controller.setup(m_model_ptr,         //
+                                        &m_global_state,     //
+                                        m_current_solution,  //
+                                        m_time_keeper,       //
                                         m_option);
         m_local_search_controller.run();
-        m_current_solution =
-            m_incumbent_holder.global_augmented_incumbent_solution();
+        m_current_solution = m_global_state.incumbent_holder
+                                 .global_augmented_incumbent_solution()
+                                 .to_sparse();
     }
 
     /*************************************************************************/
     inline void run_tabu_search(void) {
-        m_tabu_search_controller.setup(m_model_ptr,          //
-                                       m_current_solution,   //
-                                       &m_incumbent_holder,  //
-                                       &m_memory,            //
-                                       &m_solution_archive,  //
-                                       m_time_keeper,        //
+        m_tabu_search_controller.setup(m_model_ptr,         //
+                                       &m_global_state,     //
+                                       m_current_solution,  //
+                                       m_time_keeper,       //
                                        m_option);
         m_tabu_search_controller.run();
-        m_current_solution =
-            m_incumbent_holder.global_augmented_incumbent_solution();
+        m_current_solution = m_global_state.incumbent_holder
+                                 .global_augmented_incumbent_solution()
+                                 .to_sparse();
     }
 
    public:
@@ -224,13 +218,13 @@ class Solver {
     /*************************************************************************/
     inline void initialize(void) {
         m_model_ptr = nullptr;
-        m_incumbent_holder.initialize();
+        m_global_state.initialize();
+
         m_current_solution.initialize();
-        m_memory.initialize();
         m_time_keeper.initialize();
+
         m_option_original.initialize();
         m_option.initialize();
-        m_solution_archive.initialize();
 
         m_start_date_time.clear();
         m_finish_date_time.clear();
@@ -372,22 +366,33 @@ class Solver {
         /**
          * Compute the initial dual bound by naive method.
          */
-        m_incumbent_holder.update_dual_bound(
+        m_global_state.incumbent_holder.update_dual_bound(
             m_model_ptr->compute_naive_dual_bound());
 
         /**
          * Create memory which stores updating count for each variable.
          */
-        m_memory.setup(m_model_ptr);
+        m_global_state.memory.setup(m_model_ptr);
 
         /**
          * Prepare feasible solutions archive.
          */
-        m_solution_archive.setup(
+        m_global_state.feasible_solution_archive.setup(
             m_option.output.feasible_solutions_capacity,  //
-            m_model_ptr->is_minimization(),               //
-            m_model_ptr->name(),                          //
-            m_model_ptr->number_of_variables(),           //
+            m_model_ptr->is_minimization() ? solution::SortMode::Ascending
+                                           : solution::SortMode::Descending,  //
+            m_model_ptr->name(),                                              //
+            m_model_ptr->number_of_variables(),                               //
+            m_model_ptr->number_of_constraints());
+
+        /**
+         * Prepare incumbent solutions archive.
+         */
+        m_global_state.incumbent_solution_archive.setup(
+            -1,  //
+            solution::SortMode::Off,
+            m_model_ptr->name(),                 //
+            m_model_ptr->number_of_variables(),  //
             m_model_ptr->number_of_constraints());
 
         /**
@@ -408,9 +413,13 @@ class Solver {
         /**
          * Update the state.
          */
-        m_current_solution = m_model_ptr->export_solution();
-        m_incumbent_holder.try_update_incumbent(m_current_solution,
-                                                m_model_ptr->evaluate({}));
+        auto initial_solution = m_model_ptr->export_dense_solution();
+        m_global_state.incumbent_holder.try_update_incumbent(
+            initial_solution, m_model_ptr->evaluate({}));
+        m_current_solution = initial_solution.to_sparse();
+
+        m_global_state.incumbent_solution_archive.push(
+            m_model_ptr->export_sparse_solution());
     }
 
     /*************************************************************************/
@@ -490,7 +499,7 @@ class Solver {
                     named_update_counts;
         const int   PROXIES_SIZE   = m_model_ptr->variable_proxies().size();
         const auto& VARIABLE_NAMES = m_model_ptr->variable_names();
-        const auto& COUNTS         = m_memory.update_counts();
+        const auto& COUNTS         = m_global_state.memory.update_counts();
         for (auto i = 0; i < PROXIES_SIZE; i++) {
             named_update_counts[VARIABLE_NAMES[i]] = COUNTS[i];
         }
@@ -504,7 +513,7 @@ class Solver {
                     named_violation_counts;
         const int   PROXIES_SIZE     = m_model_ptr->constraint_proxies().size();
         const auto& CONSTRAINT_NAMES = m_model_ptr->constraint_names();
-        const auto& COUNTS           = m_memory.violation_counts();
+        const auto& COUNTS           = m_global_state.memory.violation_counts();
         for (auto i = 0; i < PROXIES_SIZE; i++) {
             named_violation_counts[CONSTRAINT_NAMES[i]] = COUNTS[i];
         }
@@ -514,6 +523,12 @@ class Solver {
     /*************************************************************************/
     inline model::Model<T_Variable, T_Expression>* model_ptr(void) {
         return m_model_ptr;
+    }
+
+    /*************************************************************************/
+    inline const GlobalState<T_Variable, T_Expression>& global_state(
+        void) const {
+        return m_global_state;
     }
 
     /*************************************************************************/
@@ -527,31 +542,14 @@ class Solver {
     }
 
     /*************************************************************************/
-    inline const solution::IncumbentHolder<T_Variable, T_Expression>&
-    incumbent_holder(void) const {
-        return m_incumbent_holder;
-    }
-
-    /*************************************************************************/
     inline const solution::DenseSolution<T_Variable, T_Expression>&
     current_solution(void) const {
         return m_current_solution;
     }
 
     /*************************************************************************/
-    inline const Memory<T_Variable, T_Expression>& memory(void) const {
-        return m_memory;
-    }
-
-    /*************************************************************************/
     inline const utility::TimeKeeper& time_keeper(void) const {
         return m_time_keeper;
-    }
-
-    /*************************************************************************/
-    inline const solution::SolutionArchive<T_Variable, T_Expression>&
-    solution_archive(void) const {
-        return m_solution_archive;
     }
 
     /*************************************************************************/

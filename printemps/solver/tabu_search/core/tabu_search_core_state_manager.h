@@ -14,24 +14,18 @@ namespace printemps::solver::tabu_search::core {
 template <class T_Variable, class T_Expression>
 class TabuSearchCoreStateManager {
    private:
-    TabuSearchCoreState<T_Variable, T_Expression>        m_state;
-    model::Model<T_Variable, T_Expression>*              m_model_ptr;
-    solution::IncumbentHolder<T_Variable, T_Expression>* m_incumbent_holder_ptr;
-    Memory<T_Variable, T_Expression>*                    m_memory_ptr;
-    option::Option                                       m_option;
+    TabuSearchCoreState<T_Variable, T_Expression> m_state;
+    model::Model<T_Variable, T_Expression>*       m_model_ptr;
+    GlobalState<T_Variable, T_Expression>*        m_global_state_ptr;
+    option::Option                                m_option;
 
    public:
     /*************************************************************************/
     TabuSearchCoreStateManager(
-        model::Model<T_Variable, T_Expression>* a_model_ptr,
-        solution::IncumbentHolder<T_Variable, T_Expression>*
-                                          a_incumbent_holder_ptr,  //
-        Memory<T_Variable, T_Expression>* a_memory_ptr,            //
-        const option::Option&             a_OPTION) {
-        this->setup(a_model_ptr,             //
-                    a_incumbent_holder_ptr,  //
-                    a_memory_ptr,            //
-                    a_OPTION);
+        model::Model<T_Variable, T_Expression>* a_model_ptr,         //
+        GlobalState<T_Variable, T_Expression>*  a_global_state_ptr,  //
+        const option::Option&                   a_OPTION) {
+        this->setup(a_model_ptr, a_global_state_ptr, a_OPTION);
     }
 
     /*************************************************************************/
@@ -42,31 +36,29 @@ class TabuSearchCoreStateManager {
     /*************************************************************************/
     inline void initialize(void) {
         m_state.initialize();
-        m_model_ptr            = nullptr;
-        m_incumbent_holder_ptr = nullptr;
-        m_memory_ptr           = nullptr;
+        m_model_ptr        = nullptr;
+        m_global_state_ptr = nullptr;
         m_option.initialize();
     }
 
     /*************************************************************************/
-    inline void setup(model::Model<T_Variable, T_Expression>* a_model_ptr,
-                      solution::IncumbentHolder<T_Variable, T_Expression>*
-                                                        a_incumbent_holder_ptr,  //
-                      Memory<T_Variable, T_Expression>* a_memory_ptr,  //
-                      const option::Option&             a_OPTION) {
+    inline void setup(
+        model::Model<T_Variable, T_Expression>* a_model_ptr,         //
+        GlobalState<T_Variable, T_Expression>*  a_global_state_ptr,  //
+        const option::Option&                   a_OPTION) {
         this->initialize();
-        m_model_ptr            = a_model_ptr;
-        m_incumbent_holder_ptr = a_incumbent_holder_ptr;
-        m_memory_ptr           = a_memory_ptr;
-        m_option               = a_OPTION;
+        m_model_ptr        = a_model_ptr;
+        m_global_state_ptr = a_global_state_ptr;
+        m_option           = a_OPTION;
 
         /**
          * Evaluate the initial solution score.
          */
         m_state.current_solution_score  = m_model_ptr->evaluate({});
         m_state.previous_solution_score = m_state.current_solution_score;
-        m_state.update_status = m_incumbent_holder_ptr->try_update_incumbent(
-            m_model_ptr, m_state.current_solution_score);
+        m_state.update_status =
+            m_global_state_ptr->incumbent_holder.try_update_incumbent(
+                m_model_ptr, m_state.current_solution_score);
         m_state.total_update_status =
             solution::IncumbentHolderConstant::STATUS_NOT_UPDATED;
 
@@ -107,10 +99,12 @@ class TabuSearchCoreStateManager {
         /**
          * Initialize the primal and dual intensities.
          */
-        m_state.current_primal_intensity  = m_memory_ptr->primal_intensity();
+        m_state.current_primal_intensity =
+            m_global_state_ptr->memory.primal_intensity();
         m_state.previous_primal_intensity = m_state.current_primal_intensity;
 
-        m_state.current_dual_intensity  = m_memory_ptr->dual_intensity();
+        m_state.current_dual_intensity =
+            m_global_state_ptr->memory.dual_intensity();
         m_state.previous_dual_intensity = m_state.current_dual_intensity;
 
         /**
@@ -157,6 +151,11 @@ class TabuSearchCoreStateManager {
          * Update the aspiration flag.
          */
         this->update_is_aspirated(a_IS_ASPIRATED);
+
+        /**
+         * Update the improvement flag.
+         */
+        this->update_is_improved();
 
         /**
          * Update the range of raw objective.
@@ -235,8 +234,9 @@ class TabuSearchCoreStateManager {
 
     /*************************************************************************/
     inline constexpr void update_update_status(void) {
-        m_state.update_status = m_incumbent_holder_ptr->try_update_incumbent(
-            m_model_ptr, m_state.current_solution_score);
+        m_state.update_status =
+            m_global_state_ptr->incumbent_holder.try_update_incumbent(
+                m_model_ptr, m_state.current_solution_score);
         m_state.total_update_status =
             m_state.update_status | m_state.total_update_status;
     }
@@ -244,6 +244,18 @@ class TabuSearchCoreStateManager {
     /*************************************************************************/
     inline constexpr void update_is_aspirated(const bool a_IS_ASPIRATED) {
         m_state.is_aspirated = a_IS_ASPIRATED;
+    }
+
+    /*************************************************************************/
+    inline constexpr void update_is_improved(void) {
+        m_state.is_improved =
+            (m_global_state_ptr->incumbent_holder
+                 .local_augmented_incumbent_score()
+                 .objective < m_state.previous_solution_score.objective) ||
+            (m_global_state_ptr->incumbent_holder
+                 .local_augmented_incumbent_score()
+                 .total_violation <
+             m_state.previous_solution_score.total_violation);
     }
 
     /*************************************************************************/
@@ -404,7 +416,8 @@ class TabuSearchCoreStateManager {
              */
             m_state.previous_primal_intensity =
                 m_state.current_primal_intensity;
-            m_state.current_primal_intensity = m_memory_ptr->primal_intensity();
+            m_state.current_primal_intensity =
+                m_global_state_ptr->memory.primal_intensity();
 
             if (m_state.current_primal_intensity >
                 m_state.previous_primal_intensity) {

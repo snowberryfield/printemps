@@ -33,11 +33,12 @@ struct TabuSearchControllerState {
     double averaged_inner_iteration_speed;
     double averaged_move_evaluation_speed;
 
-    solution::DenseSolution<T_Variable, T_Expression> current_solution;
-    solution::DenseSolution<T_Variable, T_Expression> previous_solution;
+    solution::SparseSolution<T_Variable, T_Expression> current_solution;
+    solution::SparseSolution<T_Variable, T_Expression> previous_solution;
 
-    solution::SolutionScore current_solution_score;
-    solution::SolutionScore previous_solution_score;
+    // This solution is used to calculate the solution distance.
+    solution::SparseSolution<T_Variable, T_Expression>
+        global_augmented_incumbent_solution;
 
     double current_primal_intensity;
     double previous_primal_intensity;
@@ -54,6 +55,9 @@ struct TabuSearchControllerState {
     int employing_previous_solution_count_after_relaxation;
 
     int total_update_status;
+
+    int distance_from_current_solution;
+    int distance_from_global_solution;
 
     bool is_global_augmented_incumbent_updated;
     bool previous_is_feasible_incumbent_updated;
@@ -84,7 +88,6 @@ struct TabuSearchControllerState {
     double penalty_coefficient_relaxing_rate;
     double penalty_coefficient_tightening_rate;
     bool   is_enabled_special_neighborhood_move;
-    bool   is_disabled_special_neighborhood_move;
     option::improvability_screening_mode::ImprovabilityScreeningMode
         improvability_screening_mode;
 
@@ -127,6 +130,8 @@ struct TabuSearchControllerState {
         this->averaged_inner_iteration_speed   = 0.0;
         this->averaged_move_evaluation_speed   = 0.0;
 
+        this->global_augmented_incumbent_solution.initialize();
+
         this->current_solution.initialize();
         this->previous_solution.initialize();
 
@@ -140,11 +145,14 @@ struct TabuSearchControllerState {
         this->current_dual_intensity_before_relaxation  = 0.0;
         this->previous_dual_intensity_before_relaxation = 0.0;
 
-        this->employing_local_augmented_solution_count_after_relaxation  = 0;
-        this->employing_global_augmented_solution_count_after_relaxation = 0;
-        this->employing_previous_solution_count_after_relaxation         = 0;
+        this->employing_local_solution_count_after_relaxation    = 0;
+        this->employing_global_solution_count_after_relaxation   = 0;
+        this->employing_previous_solution_count_after_relaxation = 0;
 
         this->total_update_status = 0;
+
+        this->distance_from_current_solution = 0;
+        this->distance_from_global_solution  = 0;
 
         this->is_global_augmented_incumbent_updated   = false;
         this->previous_is_feasible_incumbent_updated  = false;
@@ -161,8 +169,8 @@ struct TabuSearchControllerState {
         this->pruning_rate_threshold                    = 0.0;
         this->number_of_initial_modification            = 0;
         this->iteration_max                             = 0;
-        this->employing_local_augmented_solution_flag   = false;
-        this->employing_global_augmented_solution_flag  = false;
+        this->employing_local_solution_flag             = false;
+        this->employing_global_solution_flag            = false;
         this->employing_previous_solution_flag          = false;
         this->is_enabled_penalty_coefficient_tightening = false;
         this->is_enabled_penalty_coefficient_relaxing   = false;
@@ -171,7 +179,6 @@ struct TabuSearchControllerState {
         this->penalty_coefficient_relaxing_rate         = 0.0;
         this->penalty_coefficient_tightening_rate       = 0.0;
         this->is_enabled_special_neighborhood_move      = false;
-        this->is_disabled_special_neighborhood_move     = false;
         this->improvability_screening_mode =
             option::improvability_screening_mode::Off;
 

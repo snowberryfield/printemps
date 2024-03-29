@@ -27,6 +27,7 @@ class NamedSolution {
     int          m_number_of_constraints;
     T_Expression m_objective;
     T_Expression m_total_violation;
+    double       m_global_augmented_objective;
     bool         m_is_feasible;
 
    public:
@@ -47,12 +48,13 @@ class NamedSolution {
         m_constraint_value_proxies.clear();
         m_violation_value_proxies.clear();
 
-        m_name                  = "";
-        m_number_of_variables   = 0;
-        m_number_of_constraints = 0;
-        m_objective             = 0;
-        m_total_violation       = 0;
-        m_is_feasible           = false;
+        m_name                       = "";
+        m_number_of_variables        = 0;
+        m_number_of_constraints      = 0;
+        m_objective                  = 0;
+        m_total_violation            = 0;
+        m_global_augmented_objective = 0.0;
+        m_is_feasible                = false;
     }
 
     /*************************************************************************/

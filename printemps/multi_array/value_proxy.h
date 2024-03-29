@@ -109,7 +109,8 @@ class ValueProxy : public AbstractMultiArray {
     /*************************************************************************/
     inline constexpr T_Value &values(
         const std::vector<int> &a_MULTI_DIMENSIONAL_INDEX) {
-        int MULTI_DIMENSIONAL_INDEX_SIZE = a_MULTI_DIMENSIONAL_INDEX.size();
+        const int MULTI_DIMENSIONAL_INDEX_SIZE =
+            a_MULTI_DIMENSIONAL_INDEX.size();
         if (this->number_of_dimensions() != MULTI_DIMENSIONAL_INDEX_SIZE) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -125,7 +126,8 @@ class ValueProxy : public AbstractMultiArray {
     /*************************************************************************/
     inline constexpr T_Value values(
         const std::vector<int> &a_MULTI_DIMENSIONAL_INDEX) const {
-        int MULTI_DIMENSIONAL_INDEX_SIZE = a_MULTI_DIMENSIONAL_INDEX.size();
+        const int MULTI_DIMENSIONAL_INDEX_SIZE =
+            a_MULTI_DIMENSIONAL_INDEX.size();
         if (this->number_of_dimensions() != MULTI_DIMENSIONAL_INDEX_SIZE) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -173,7 +175,9 @@ class ValueProxy : public AbstractMultiArray {
     /*************************************************************************/
     inline constexpr std::string &names(
         const std::vector<int> &a_MULTI_DIMENSIONAL_INDEX) {
-        if (this->number_of_dimensions() != a_MULTI_DIMENSIONAL_INDEX.size()) {
+        const int MULTI_DIMENSIONAL_INDEX_SIZE =
+            a_MULTI_DIMENSIONAL_INDEX.size();
+        if (this->number_of_dimensions() != MULTI_DIMENSIONAL_INDEX_SIZE) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of dimensions does not match."));
@@ -188,7 +192,9 @@ class ValueProxy : public AbstractMultiArray {
     /*************************************************************************/
     inline constexpr const std::string &names(
         const std::vector<int> &a_MULTI_DIMENSIONAL_INDEX) const {
-        if (this->number_of_dimensions() != a_MULTI_DIMENSIONAL_INDEX.size()) {
+        const int MULTI_DIMENSIONAL_INDEX_SIZE =
+            a_MULTI_DIMENSIONAL_INDEX.size();
+        if (this->number_of_dimensions() != MULTI_DIMENSIONAL_INDEX_SIZE) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of dimensions does not match."));
