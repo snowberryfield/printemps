@@ -43,7 +43,7 @@ class ProblemSizeReducer {
     }
 
     /*************************************************************************/
-    inline constexpr bool reduce_problem_size(const bool a_IS_ENABLED_PRINT) {
+    inline bool reduce_problem_size(const bool a_IS_ENABLED_PRINT) {
         utility::print_single_line(a_IS_ENABLED_PRINT);
         utility::print_message("Reducing problem size...", a_IS_ENABLED_PRINT);
 
@@ -81,7 +81,7 @@ class ProblemSizeReducer {
     }
 
     /*************************************************************************/
-    inline constexpr bool remove_independent_variable(
+    inline bool remove_independent_variable(
         model_component::Variable<T_Variable, T_Expression> *a_variable_ptr,  //
         const bool a_IS_MINIMIZATION, const bool a_IS_ENABLED_PRINT) {
         /**
@@ -161,8 +161,7 @@ class ProblemSizeReducer {
     }
 
     /*************************************************************************/
-    inline constexpr int remove_independent_variables(
-        const bool a_IS_ENABLED_PRINT) {
+    inline int remove_independent_variables(const bool a_IS_ENABLED_PRINT) {
         int number_of_newly_fixed_variables = 0;
         for (auto &&proxy : m_model_ptr->variable_proxies()) {
             for (auto &&variable : proxy.flat_indexed_variables()) {
@@ -184,8 +183,7 @@ class ProblemSizeReducer {
     }
 
     /*************************************************************************/
-    inline constexpr int
-    remove_redundant_constraints_with_tightening_variable_bounds(
+    inline int remove_redundant_constraints_with_tightening_variable_bounds(
         const bool a_IS_ENABLED_PRINT) {
         int number_of_newly_disabled_constraints = 0;
         for (auto &&proxy : m_model_ptr->constraint_proxies()) {
@@ -217,8 +215,7 @@ class ProblemSizeReducer {
     }
 
     /*************************************************************************/
-    inline constexpr bool
-    remove_redundant_constraint_with_tightening_variable_bound(
+    inline bool remove_redundant_constraint_with_tightening_variable_bound(
         model_component::Constraint<T_Variable, T_Expression>
             *      a_constraint_ptr,  //
         const bool a_IS_ENABLED_PRINT) {
@@ -501,8 +498,7 @@ class ProblemSizeReducer {
     }
 
     /*************************************************************************/
-    inline constexpr int remove_implicit_fixed_variables(
-        const bool a_IS_ENABLED_PRINT) {
+    inline int remove_implicit_fixed_variables(const bool a_IS_ENABLED_PRINT) {
         int number_of_newly_fixed_variables = 0;
         for (auto &&proxy : m_model_ptr->variable_proxies()) {
             for (auto &&variable : proxy.flat_indexed_variables()) {
@@ -524,7 +520,7 @@ class ProblemSizeReducer {
     }
 
     /*************************************************************************/
-    inline constexpr bool remove_implicit_fixed_variable(
+    inline bool remove_implicit_fixed_variable(
         model_component::Variable<T_Variable, T_Expression> *a_variable_ptr,  //
         const bool a_IS_ENABLED_PRINT) {
         /**
@@ -551,8 +547,7 @@ class ProblemSizeReducer {
     }
 
     /*************************************************************************/
-    inline constexpr int remove_redundant_set_variables(
-        const bool a_IS_ENABLED_PRINT) {
+    inline int remove_redundant_set_variables(const bool a_IS_ENABLED_PRINT) {
         utility::print_single_line(a_IS_ENABLED_PRINT);
         utility::print_message(
             "Removing redundant variables which compose set "
@@ -675,7 +670,7 @@ class ProblemSizeReducer {
     }
 
     /*************************************************************************/
-    inline constexpr int extract_implicit_equality_constraints(
+    inline int extract_implicit_equality_constraints(
         const bool a_IS_ENABLED_PRINT) {
         utility::print_single_line(a_IS_ENABLED_PRINT);
         utility::print_message("Removing implicit equality constraints...",
@@ -862,8 +857,7 @@ class ProblemSizeReducer {
     }
 
     /*************************************************************************/
-    inline constexpr int remove_duplicated_constraints(
-        const bool a_IS_ENABLED_PRINT) {
+    inline int remove_duplicated_constraints(const bool a_IS_ENABLED_PRINT) {
         utility::print_single_line(a_IS_ENABLED_PRINT);
         utility::print_message("Removing duplicated constraints...",
                                a_IS_ENABLED_PRINT);
@@ -993,7 +987,7 @@ class ProblemSizeReducer {
     }
 
     /*************************************************************************/
-    inline constexpr int remove_duplicated_constraints(
+    inline int remove_duplicated_constraints(
         const std::vector<model_component::Constraint<T_Variable, T_Expression>
                               *> &a_CONSTRAINT_PTRS,  //
         const bool                a_IS_ENABLED_PRINT) {
@@ -1081,7 +1075,7 @@ class ProblemSizeReducer {
     }
 
     /*************************************************************************/
-    inline constexpr std::pair<int, int> remove_redundant_set_constraints(
+    inline std::pair<int, int> remove_redundant_set_constraints(
         const bool a_IS_ENABLED_PRINT) {
         utility::print_single_line(a_IS_ENABLED_PRINT);
         utility::print_message(
@@ -1164,23 +1158,22 @@ class ProblemSizeReducer {
     }
 
     /*************************************************************************/
-    inline constexpr int variable_bound_update_count_in_preprocess(void) const {
+    inline int variable_bound_update_count_in_preprocess(void) const {
         return m_variable_bound_update_count_in_preprocess;
     }
 
     /*************************************************************************/
-    inline constexpr int variable_bound_update_count_in_optimization(
-        void) const {
+    inline int variable_bound_update_count_in_optimization(void) const {
         return m_variable_bound_update_count_in_optimization;
     }
 
     /*************************************************************************/
-    inline constexpr void set_is_preprocess(const bool a_IS_PREPROCESS) {
+    inline void set_is_preprocess(const bool a_IS_PREPROCESS) {
         m_is_preprocess = a_IS_PREPROCESS;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_preprocess(void) const {
+    inline bool is_preprocess(void) const {
         return m_is_preprocess;
     }
 };

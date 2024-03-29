@@ -41,11 +41,6 @@ class LagrangeDualController
     }
 
     /*************************************************************************/
-    virtual ~LagrangeDualController(void) {
-        /// nothing to do
-    }
-
-    /*************************************************************************/
     inline void initialize(void) {
         AbstractSolverController<T_Variable, T_Expression>::initialize();
         m_result.initialize();
@@ -228,9 +223,8 @@ class LagrangeDualController
     }
 
     /*************************************************************************/
-    inline constexpr const LagrangeDualControllerResult<T_Variable,
-                                                        T_Expression>&
-    result(void) const {
+    inline const LagrangeDualControllerResult<T_Variable, T_Expression>& result(
+        void) const {
         return m_result;
     }
 };

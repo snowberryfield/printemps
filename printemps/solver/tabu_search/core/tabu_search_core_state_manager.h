@@ -122,7 +122,7 @@ class TabuSearchCoreStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void update(
+    inline void update(
         neighborhood::Move<T_Variable, T_Expression>* a_selected_move_ptr,
         const int a_SELECTED_INDEX, const bool a_IS_ASPIRATED,
         const std::vector<TabuSearchCoreMoveScore>& a_TRIAL_MOVE_SCORES,
@@ -208,21 +208,21 @@ class TabuSearchCoreStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void update_move(
+    inline void update_move(
         neighborhood::Move<T_Variable, T_Expression>* a_selected_move_ptr) {
         m_state.previous_move = m_state.current_move;
         m_state.current_move  = *a_selected_move_ptr;
     }
 
     /*************************************************************************/
-    inline constexpr void update_solution_score(
+    inline void update_solution_score(
         const solution::SolutionScore& a_SOLUTION_SCORE) {
         m_state.previous_solution_score = m_state.current_solution_score;
         m_state.current_solution_score  = a_SOLUTION_SCORE;
     }
 
     /*************************************************************************/
-    inline constexpr void update_number_of_effective_updates() {
+    inline void update_number_of_effective_updates() {
         if (m_state.update_status &
                 solution::IncumbentHolderConstant::
                     STATUS_LOCAL_AUGMENTED_INCUMBENT_UPDATE &&
@@ -233,7 +233,7 @@ class TabuSearchCoreStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void update_update_status(void) {
+    inline void update_update_status(void) {
         m_state.update_status =
             m_global_state_ptr->incumbent_holder.try_update_incumbent(
                 m_model_ptr, m_state.current_solution_score);
@@ -242,12 +242,12 @@ class TabuSearchCoreStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void update_is_aspirated(const bool a_IS_ASPIRATED) {
+    inline void update_is_aspirated(const bool a_IS_ASPIRATED) {
         m_state.is_aspirated = a_IS_ASPIRATED;
     }
 
     /*************************************************************************/
-    inline constexpr void update_is_improved(void) {
+    inline void update_is_improved(void) {
         m_state.is_improved =
             (m_global_state_ptr->incumbent_holder
                  .local_augmented_incumbent_score()
@@ -259,25 +259,25 @@ class TabuSearchCoreStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void update_objective_range(void) {
+    inline void update_objective_range(void) {
         m_state.objective_range.update(
             m_state.current_solution_score.objective);
     }
 
     /*************************************************************************/
-    inline constexpr void update_local_augmented_objective_range(void) {
+    inline void update_local_augmented_objective_range(void) {
         m_state.local_augmented_objective_range.update(
             m_state.current_solution_score.local_augmented_objective);
     }
 
     /*************************************************************************/
-    inline constexpr void update_global_augmented_objective_range(void) {
+    inline void update_global_augmented_objective_range(void) {
         m_state.global_augmented_objective_range.update(
             m_state.current_solution_score.global_augmented_objective);
     }
 
     /*************************************************************************/
-    inline constexpr void update_local_penalty_range(void) {
+    inline void update_local_penalty_range(void) {
         if (!m_state.current_solution_score.is_feasible) {
             m_state.local_penalty_range.update(
                 m_state.current_solution_score.local_penalty);
@@ -285,15 +285,14 @@ class TabuSearchCoreStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void update_is_found_new_feasible_solution(void) {
+    inline void update_is_found_new_feasible_solution(void) {
         if (m_state.current_solution_score.is_feasible) {
             m_state.is_found_new_feasible_solution = true;
         }
     }
 
     /*************************************************************************/
-    inline constexpr void
-    update_last_local_augmented_incumbent_update_iteration(void) {
+    inline void update_last_local_augmented_incumbent_update_iteration(void) {
         if (m_state.update_status &
             solution::IncumbentHolderConstant::
                 STATUS_LOCAL_AUGMENTED_INCUMBENT_UPDATE) {
@@ -303,8 +302,7 @@ class TabuSearchCoreStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void
-    update_last_global_augmented_incumbent_update_iteration(void) {
+    inline void update_last_global_augmented_incumbent_update_iteration(void) {
         if (m_state.update_status &
             solution::IncumbentHolderConstant::
                 STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
@@ -314,8 +312,7 @@ class TabuSearchCoreStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void update_last_feasible_incumbent_update_iteration(
-        void) {
+    inline void update_last_feasible_incumbent_update_iteration(void) {
         if (m_state.update_status & solution::IncumbentHolderConstant::
                                         STATUS_FEASIBLE_INCUMBENT_UPDATE) {
             m_state.last_feasible_incumbent_update_iteration =
@@ -324,7 +321,7 @@ class TabuSearchCoreStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void update_local_augmented_incumbent_update_count(void) {
+    inline void update_local_augmented_incumbent_update_count(void) {
         if (m_state.update_status ==
             solution::IncumbentHolderConstant::
                 STATUS_LOCAL_AUGMENTED_INCUMBENT_UPDATE) {
@@ -341,7 +338,7 @@ class TabuSearchCoreStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void update_number_of_neighborhoods(
+    inline void update_number_of_neighborhoods(
         const std::vector<TabuSearchCoreMoveScore>& a_TRIAL_MOVE_SCORES,
         const std::vector<solution::SolutionScore>& a_TRIAL_SOLUTION_SCORES) {
         m_state.number_of_all_neighborhoods = m_state.number_of_moves;
@@ -387,7 +384,7 @@ class TabuSearchCoreStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void update_tabu_tenure(void) {
+    inline void update_tabu_tenure(void) {
         if ((m_state.update_status &
              solution::IncumbentHolderConstant::
                  STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) &&
@@ -460,53 +457,52 @@ class TabuSearchCoreStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void set_number_of_moves(const int a_NUMBER_OF_MOVES) {
+    inline void set_number_of_moves(const int a_NUMBER_OF_MOVES) {
         m_state.number_of_moves = a_NUMBER_OF_MOVES;
     }
 
     /*************************************************************************/
-    inline constexpr void set_termination_status(
+    inline void set_termination_status(
         const TabuSearchCoreTerminationStatus a_TERMINATION_STATUS) {
         m_state.termination_status = a_TERMINATION_STATUS;
     }
 
     /*************************************************************************/
-    inline constexpr void set_elapsed_time(const double a_ELAPSED_TINE) {
+    inline void set_elapsed_time(const double a_ELAPSED_TINE) {
         m_state.elapsed_time = a_ELAPSED_TINE;
     }
 
     /*************************************************************************/
-    inline constexpr void reset_iteration(void) {
+    inline void reset_iteration(void) {
         m_state.iteration = 0;
     }
 
     /*************************************************************************/
-    inline constexpr void next_iteration(void) {
+    inline void next_iteration(void) {
         m_state.iteration++;
     }
 
     /*************************************************************************/
-    inline constexpr void update_move_updating_statistics(
+    inline void update_move_updating_statistics(
         const int a_NUMBER_OF_UPDATED_MOVES, const double a_ELAPSED_TIME) {
         m_state.number_of_updated_moves += a_NUMBER_OF_UPDATED_MOVES;
         m_state.elapsed_time_for_updating_moves += a_ELAPSED_TIME;
     }
 
     /*************************************************************************/
-    inline constexpr void update_move_evaluating_statistics(
+    inline void update_move_evaluating_statistics(
         const int a_NUMBER_OF_EVALUATED_MOVES, const double a_ELAPSED_TIME) {
         m_state.number_of_evaluated_moves += a_NUMBER_OF_EVALUATED_MOVES;
         m_state.elapsed_time_for_evaluating_moves += a_ELAPSED_TIME;
     }
 
     /*************************************************************************/
-    inline constexpr TabuSearchCoreState<T_Variable, T_Expression>& state(
-        void) {
+    inline TabuSearchCoreState<T_Variable, T_Expression>& state(void) {
         return m_state;
     }
 
     /*************************************************************************/
-    inline constexpr const TabuSearchCoreState<T_Variable, T_Expression>& state(
+    inline const TabuSearchCoreState<T_Variable, T_Expression>& state(
         void) const {
         return m_state;
     }

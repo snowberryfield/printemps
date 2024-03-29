@@ -32,7 +32,7 @@ namespace printemps::model_component {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value,
           template <class, class> class T_ExpressionLike>
-constexpr auto operator<=(
+inline auto operator<=(
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE,
     const T_Value                                     a_TARGET)
     -> decltype(a_EXPRESSION_LIKE.to_expression() - a_TARGET,
@@ -44,7 +44,7 @@ constexpr auto operator<=(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value,
           template <class, class> class T_ExpressionLike>
-constexpr auto operator<=(
+inline auto operator<=(
     const T_Value                                     a_TARGET,
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE)
     -> decltype(-a_EXPRESSION_LIKE.to_expression() + a_TARGET,
@@ -55,9 +55,8 @@ constexpr auto operator<=(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value>
-constexpr auto operator<=(
-    const Expression<T_Variable, T_Expression> &a_EXPRESSION,
-    const T_Value                               a_TARGET)
+inline auto operator<=(const Expression<T_Variable, T_Expression> &a_EXPRESSION,
+                       const T_Value                               a_TARGET)
     -> decltype(a_EXPRESSION.self() - a_TARGET,
                 model_component::Constraint<T_Variable, T_Expression>()) {
     return Constraint<T_Variable, T_Expression>::create_instance(
@@ -66,9 +65,8 @@ constexpr auto operator<=(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value>
-constexpr auto operator<=(
-    const T_Value                               a_TARGET,
-    const Expression<T_Variable, T_Expression> &a_EXPRESSION)
+inline auto operator<=(const T_Value                               a_TARGET,
+                       const Expression<T_Variable, T_Expression> &a_EXPRESSION)
     -> decltype(-a_EXPRESSION.self() + a_TARGET,
                 model_component::Constraint<T_Variable, T_Expression>()) {
     return Constraint<T_Variable, T_Expression>::create_instance(
@@ -78,7 +76,7 @@ constexpr auto operator<=(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression,
           template <class, class> class T_ExpressionLike>
-constexpr auto operator<=(
+inline auto operator<=(
     const Expression<T_Variable, T_Expression> &      a_EXPRESSION,
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE)
     -> decltype(a_EXPRESSION.self() - a_EXPRESSION_LIKE.to_expression(),
@@ -91,7 +89,7 @@ constexpr auto operator<=(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression,
           template <class, class> class T_ExpressionLike>
-constexpr auto operator<=(
+inline auto operator<=(
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE,
     const Expression<T_Variable, T_Expression> &      a_EXPRESSION)
     -> decltype(a_EXPRESSION_LIKE.to_expression() - a_EXPRESSION.self(),
@@ -105,10 +103,10 @@ constexpr auto operator<=(
 template <class T_Variable, class T_Expression,
           template <class, class> class T_ExpressionLikeLeft,
           template <class, class> class T_ExpressionLikeRight>
-constexpr auto operator<=(const T_ExpressionLikeLeft<T_Variable, T_Expression>
-                              &a_EXPRESSION_LIKE_LEFT,
-                          const T_ExpressionLikeRight<T_Variable, T_Expression>
-                              &a_EXPRESSION_LIKE_RIGHT)
+inline auto operator<=(const T_ExpressionLikeLeft<T_Variable, T_Expression>
+                           &a_EXPRESSION_LIKE_LEFT,
+                       const T_ExpressionLikeRight<T_Variable, T_Expression>
+                           &a_EXPRESSION_LIKE_RIGHT)
     -> decltype(a_EXPRESSION_LIKE_LEFT.to_expression() -
                     a_EXPRESSION_LIKE_RIGHT.to_expression(),
                 model_component::Constraint<T_Variable, T_Expression>()) {
@@ -120,7 +118,7 @@ constexpr auto operator<=(const T_ExpressionLikeLeft<T_Variable, T_Expression>
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-constexpr auto operator<=(
+inline auto operator<=(
     const Expression<T_Variable, T_Expression> &a_EXPRESSION_LEFT,
     const Expression<T_Variable, T_Expression> &a_EXPRESSION_RIGHT)
     -> decltype(a_EXPRESSION_LEFT.self() - a_EXPRESSION_RIGHT.self(),
@@ -135,7 +133,7 @@ constexpr auto operator<=(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value,
           template <class, class> class T_ExpressionLike>
-constexpr auto operator==(
+inline auto operator==(
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE,
     const T_Value                                     a_TARGET)
     -> decltype(a_EXPRESSION_LIKE.to_expression() - a_TARGET,
@@ -147,7 +145,7 @@ constexpr auto operator==(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value,
           template <class, class> class T_ExpressionLike>
-constexpr auto operator==(
+inline auto operator==(
     const T_Value                                     a_TARGET,
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE)
     -> decltype(-a_EXPRESSION_LIKE.to_expression() + a_TARGET,
@@ -158,9 +156,8 @@ constexpr auto operator==(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value>
-constexpr auto operator==(
-    const Expression<T_Variable, T_Expression> &a_EXPRESSION,
-    const T_Value                               a_TARGET)
+inline auto operator==(const Expression<T_Variable, T_Expression> &a_EXPRESSION,
+                       const T_Value                               a_TARGET)
     -> decltype(a_EXPRESSION.self() - a_TARGET,
                 model_component::Constraint<T_Variable, T_Expression>()) {
     return Constraint<T_Variable, T_Expression>::create_instance(
@@ -169,9 +166,8 @@ constexpr auto operator==(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value>
-constexpr auto operator==(
-    const T_Value                               a_TARGET,
-    const Expression<T_Variable, T_Expression> &a_EXPRESSION)
+inline auto operator==(const T_Value                               a_TARGET,
+                       const Expression<T_Variable, T_Expression> &a_EXPRESSION)
     -> decltype(-a_EXPRESSION.self() + a_TARGET,
                 model_component::Constraint<T_Variable, T_Expression>()) {
     return Constraint<T_Variable, T_Expression>::create_instance(
@@ -181,7 +177,7 @@ constexpr auto operator==(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression,
           template <class, class> class T_ExpressionLike>
-constexpr auto operator==(
+inline auto operator==(
     const Expression<T_Variable, T_Expression> &      a_EXPRESSION,
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE)
     -> decltype(a_EXPRESSION.self() - a_EXPRESSION_LIKE.to_expression(),
@@ -194,7 +190,7 @@ constexpr auto operator==(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression,
           template <class, class> class T_ExpressionLike>
-constexpr auto operator==(
+inline auto operator==(
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE,
     const Expression<T_Variable, T_Expression> &      a_EXPRESSION)
     -> decltype(a_EXPRESSION_LIKE.to_expression() - a_EXPRESSION.self(),
@@ -208,10 +204,10 @@ constexpr auto operator==(
 template <class T_Variable, class T_Expression,
           template <class, class> class T_ExpressionLikeLeft,
           template <class, class> class T_ExpressionLikeRight>
-constexpr auto operator==(const T_ExpressionLikeLeft<T_Variable, T_Expression>
-                              &a_EXPRESSION_LIKE_LEFT,
-                          const T_ExpressionLikeRight<T_Variable, T_Expression>
-                              &a_EXPRESSION_LIKE_RIGHT)
+inline auto operator==(const T_ExpressionLikeLeft<T_Variable, T_Expression>
+                           &a_EXPRESSION_LIKE_LEFT,
+                       const T_ExpressionLikeRight<T_Variable, T_Expression>
+                           &a_EXPRESSION_LIKE_RIGHT)
     -> decltype(a_EXPRESSION_LIKE_LEFT.to_expression() -
                     a_EXPRESSION_LIKE_RIGHT.to_expression(),
                 model_component::Constraint<T_Variable, T_Expression>()) {
@@ -223,7 +219,7 @@ constexpr auto operator==(const T_ExpressionLikeLeft<T_Variable, T_Expression>
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-constexpr auto operator==(
+inline auto operator==(
     const Expression<T_Variable, T_Expression> &a_EXPRESSION_LEFT,
     const Expression<T_Variable, T_Expression> &a_EXPRESSION_RIGHT)
     -> decltype(a_EXPRESSION_LEFT.self() - a_EXPRESSION_RIGHT.self(),
@@ -238,7 +234,7 @@ constexpr auto operator==(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value,
           template <class, class> class T_ExpressionLike>
-constexpr auto operator>=(
+inline auto operator>=(
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE,
     const T_Value                                     a_TARGET)
     -> decltype(a_EXPRESSION_LIKE.to_expression() - a_TARGET,
@@ -250,7 +246,7 @@ constexpr auto operator>=(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value,
           template <class, class> class T_ExpressionLike>
-constexpr auto operator>=(
+inline auto operator>=(
     const T_Value                                     a_TARGET,
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE)
     -> decltype(-a_EXPRESSION_LIKE.to_expression() + a_TARGET,
@@ -262,9 +258,8 @@ constexpr auto operator>=(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value>
-constexpr auto operator>=(
-    const Expression<T_Variable, T_Expression> &a_EXPRESSION,
-    const T_Value                               a_TARGET)
+inline auto operator>=(const Expression<T_Variable, T_Expression> &a_EXPRESSION,
+                       const T_Value                               a_TARGET)
     -> decltype(a_EXPRESSION.self() - a_TARGET,
                 model_component::Constraint<T_Variable, T_Expression>()) {
     return Constraint<T_Variable, T_Expression>::create_instance(
@@ -273,9 +268,8 @@ constexpr auto operator>=(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value>
-constexpr auto operator>=(
-    const T_Value                               a_TARGET,
-    const Expression<T_Variable, T_Expression> &a_EXPRESSION)
+inline auto operator>=(const T_Value                               a_TARGET,
+                       const Expression<T_Variable, T_Expression> &a_EXPRESSION)
     -> decltype(-a_EXPRESSION.self() + a_TARGET,
                 model_component::Constraint<T_Variable, T_Expression>()) {
     return Constraint<T_Variable, T_Expression>::create_instance(
@@ -285,7 +279,7 @@ constexpr auto operator>=(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression,
           template <class, class> class T_ExpressionLike>
-constexpr auto operator>=(
+inline auto operator>=(
     const Expression<T_Variable, T_Expression> &      a_EXPRESSION,
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE)
     -> decltype(a_EXPRESSION.self() - a_EXPRESSION_LIKE.to_expression(),
@@ -298,7 +292,7 @@ constexpr auto operator>=(
 /*****************************************************************************/
 template <class T_Variable, class T_Expression,
           template <class, class> class T_ExpressionLike>
-constexpr auto operator>=(
+inline auto operator>=(
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE,
     const Expression<T_Variable, T_Expression> &      a_EXPRESSION)
     -> decltype(a_EXPRESSION_LIKE.to_expression() - a_EXPRESSION.self(),
@@ -312,10 +306,10 @@ constexpr auto operator>=(
 template <class T_Variable, class T_Expression,
           template <class, class> class T_ExpressionLikeLeft,
           template <class, class> class T_ExpressionLikeRight>
-constexpr auto operator>=(const T_ExpressionLikeLeft<T_Variable, T_Expression>
-                              &a_EXPRESSION_LIKE_LEFT,
-                          const T_ExpressionLikeRight<T_Variable, T_Expression>
-                              &a_EXPRESSION_LIKE_RIGHT)
+inline auto operator>=(const T_ExpressionLikeLeft<T_Variable, T_Expression>
+                           &a_EXPRESSION_LIKE_LEFT,
+                       const T_ExpressionLikeRight<T_Variable, T_Expression>
+                           &a_EXPRESSION_LIKE_RIGHT)
     -> decltype(a_EXPRESSION_LIKE_LEFT.to_expression() -
                     a_EXPRESSION_LIKE_RIGHT.to_expression(),
                 model_component::Constraint<T_Variable, T_Expression>()) {
@@ -327,7 +321,7 @@ constexpr auto operator>=(const T_ExpressionLikeLeft<T_Variable, T_Expression>
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-constexpr auto operator>=(
+inline auto operator>=(
     const Expression<T_Variable, T_Expression> &a_EXPRESSION_LEFT,
     const Expression<T_Variable, T_Expression> &a_EXPRESSION_RIGHT)
     -> decltype(a_EXPRESSION_LEFT.self() - a_EXPRESSION_RIGHT.self(),
@@ -345,7 +339,7 @@ constexpr auto operator>=(
 // LESS
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value>
-constexpr printemps::model_component::Constraint<T_Variable, T_Expression>
+inline printemps::model_component::Constraint<T_Variable, T_Expression>
 operator<=(const std::function<T_Expression(
                const printemps::neighborhood::Move<T_Variable, T_Expression> &)>
                &         a_FUNCTION,
@@ -360,7 +354,7 @@ operator<=(const std::function<T_Expression(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value>
-constexpr printemps::model_component::Constraint<T_Variable, T_Expression>
+inline printemps::model_component::Constraint<T_Variable, T_Expression>
 operator<=(const T_Value a_TARGET,
            const std::function<T_Expression(
                const printemps::neighborhood::Move<T_Variable, T_Expression> &)>
@@ -377,7 +371,7 @@ operator<=(const T_Value a_TARGET,
 // Equal
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value>
-constexpr printemps::model_component::Constraint<T_Variable, T_Expression>
+inline printemps::model_component::Constraint<T_Variable, T_Expression>
 operator==(const std::function<T_Expression(
                const printemps::neighborhood::Move<T_Variable, T_Expression> &)>
                &         a_FUNCTION,
@@ -392,7 +386,7 @@ operator==(const std::function<T_Expression(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value>
-constexpr printemps::model_component::Constraint<T_Variable, T_Expression>
+inline printemps::model_component::Constraint<T_Variable, T_Expression>
 operator==(const T_Value a_TARGET,
            const std::function<T_Expression(
                const printemps::neighborhood::Move<T_Variable, T_Expression> &)>
@@ -409,7 +403,7 @@ operator==(const T_Value a_TARGET,
 // Greater
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value>
-constexpr printemps::model_component::Constraint<T_Variable, T_Expression>
+inline printemps::model_component::Constraint<T_Variable, T_Expression>
 operator>=(const std::function<T_Expression(
                const printemps::neighborhood::Move<T_Variable, T_Expression> &)>
                &         a_FUNCTION,
@@ -423,7 +417,7 @@ operator>=(const std::function<T_Expression(
 }
 /*****************************************************************************/
 template <class T_Variable, class T_Expression, class T_Value>
-constexpr printemps::model_component::Constraint<T_Variable, T_Expression>
+inline printemps::model_component::Constraint<T_Variable, T_Expression>
 operator>=(const T_Value a_TARGET,
            const std::function<T_Expression(
                const printemps::neighborhood::Move<T_Variable, T_Expression> &)>

@@ -108,8 +108,7 @@ class Expression : public multi_array::AbstractMultiArrayElement {
         Expression<T_Variable, T_Expression> &&) = default;
 
     /*************************************************************************/
-    inline static constexpr Expression<T_Variable, T_Expression>
-    create_instance(void) {
+    inline static Expression<T_Variable, T_Expression> create_instance(void) {
         /**
          * When instantiation, instead of constructor, create_instance() should
          * be called.
@@ -119,8 +118,7 @@ class Expression : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline static constexpr Expression<T_Variable, T_Expression>
-    create_instance(
+    inline static Expression<T_Variable, T_Expression> create_instance(
         const std::unordered_map<Variable<T_Variable, T_Expression> *,
                                  T_Expression> &a_sensitivity,
         const T_Expression                      a_CONSTANT_VALUE) {
@@ -147,28 +145,28 @@ class Expression : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr void set_sensitivities(
+    inline void set_sensitivities(
         const std::unordered_map<Variable<T_Variable, T_Expression> *,
                                  T_Expression> &a_SENSITIVITIES) {
         m_sensitivities = a_SENSITIVITIES;
     }
 
     /*************************************************************************/
-    inline constexpr std::unordered_map<Variable<T_Variable, T_Expression> *,
-                                        T_Expression>
+    inline std::unordered_map<Variable<T_Variable, T_Expression> *,
+                              T_Expression>
         &sensitivities(void) {
         return m_sensitivities;
     }
 
     /*************************************************************************/
-    inline constexpr const std::unordered_map<
-        Variable<T_Variable, T_Expression> *, T_Expression>
+    inline const std::unordered_map<Variable<T_Variable, T_Expression> *,
+                                    T_Expression>
         &sensitivities(void) const {
         return m_sensitivities;
     }
 
     /*************************************************************************/
-    inline constexpr void setup_fixed_sensitivities(void) {
+    inline void setup_fixed_sensitivities(void) {
         /**
          * std::unordered_map is slow in hashing because it uses modulo
          * operations. For efficient evaluations of solutions, a hash map
@@ -180,7 +178,7 @@ class Expression : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr void setup_selection_mask(void) {
+    inline void setup_selection_mask(void) {
         std::uint64_t selection_mask = 0;
         for (const auto &sensitivity : m_sensitivities) {
             selection_mask |=
@@ -191,7 +189,7 @@ class Expression : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr void setup_hash(void) {
+    inline void setup_hash(void) {
         /**
          * NOTE: This method is called in
          * preprocess::remove_duplicated_constraints().
@@ -204,12 +202,12 @@ class Expression : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr T_Expression constant_value(void) const {
+    inline T_Expression constant_value(void) const {
         return m_constant_value;
     }
 
     /*************************************************************************/
-    inline constexpr T_Expression evaluate(void) const noexcept {
+    inline T_Expression evaluate(void) const noexcept {
         T_Expression value = m_constant_value;
 
         for (const auto &sensitivity : m_sensitivities) {
@@ -219,7 +217,7 @@ class Expression : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr T_Expression evaluate(
+    inline T_Expression evaluate(
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
         noexcept {
         /// The following code is required for nonlinear objective functions.
@@ -238,49 +236,48 @@ class Expression : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr void update(void) {
+    inline void update(void) {
         m_value = this->evaluate();
     }
 
     /*************************************************************************/
-    inline constexpr void update(
+    inline void update(
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) {
         m_value = this->evaluate(a_MOVE);
     }
 
     /*************************************************************************/
-    inline constexpr T_Expression value(void) const noexcept {
+    inline T_Expression value(void) const noexcept {
         return m_value;
     }
 
     /*************************************************************************/
-    inline constexpr const Expression<T_Variable, T_Expression> &self(
-        void) const {
+    inline const Expression<T_Variable, T_Expression> &self(void) const {
         return *this;
     }
 
     /*************************************************************************/
-    inline constexpr Expression<T_Variable, T_Expression> copy(void) const {
+    inline Expression<T_Variable, T_Expression> copy(void) const {
         return create_instance(this->sensitivities(), this->constant_value());
     }
 
     /*************************************************************************/
-    inline constexpr bool is_enabled(void) const {
+    inline bool is_enabled(void) const {
         return m_is_enabled;
     }
 
     /*************************************************************************/
-    inline constexpr void enable(void) {
+    inline void enable(void) {
         m_is_enabled = true;
     }
 
     /*************************************************************************/
-    inline constexpr void disable(void) {
+    inline void disable(void) {
         m_is_enabled = false;
     }
 
     /*************************************************************************/
-    inline constexpr Expression<T_Variable, T_Expression> solve(
+    inline Expression<T_Variable, T_Expression> solve(
         Variable<T_Variable, T_Expression> *a_variable_ptr) const {
         auto result                 = this->copy();
         auto coefficient_reciprocal = 1.0 / m_sensitivities.at(a_variable_ptr);
@@ -293,13 +290,12 @@ class Expression : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr void erase(
-        Variable<T_Variable, T_Expression> *a_variable_ptr) {
+    inline void erase(Variable<T_Variable, T_Expression> *a_variable_ptr) {
         m_sensitivities.erase(a_variable_ptr);
     }
 
     /*************************************************************************/
-    inline constexpr void substitute(
+    inline void substitute(
         Variable<T_Variable, T_Expression> *        a_variable_ptr,
         const Expression<T_Variable, T_Expression> &a_EXPRESSION) {
         *this += m_sensitivities[a_variable_ptr] * a_EXPRESSION;
@@ -307,7 +303,7 @@ class Expression : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr T_Expression lower_bound(void) {
+    inline T_Expression lower_bound(void) {
         T_Expression lower_bound = m_constant_value;
         for (const auto &sensitivity : m_sensitivities) {
             if (sensitivity.first->is_fixed()) {
@@ -324,7 +320,7 @@ class Expression : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr T_Expression upper_bound(void) {
+    inline T_Expression upper_bound(void) {
         T_Expression upper_bound = m_constant_value;
         for (const auto &sensitivity : m_sensitivities) {
             if (sensitivity.first->is_fixed()) {
@@ -341,7 +337,7 @@ class Expression : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr T_Expression fixed_term_value(void) {
+    inline T_Expression fixed_term_value(void) {
         int fixed_term_value = 0;
         for (const auto &sensitivity : m_sensitivities) {
             if (sensitivity.first->is_fixed()) {
@@ -404,17 +400,17 @@ class Expression : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr std::uint64_t selection_mask(void) const noexcept {
+    inline std::uint64_t selection_mask(void) const noexcept {
         return m_selection_mask;
     }
 
     /*************************************************************************/
-    inline constexpr std::uint64_t hash(void) const noexcept {
+    inline std::uint64_t hash(void) const noexcept {
         return m_hash;
     }
 
     /*************************************************************************/
-    inline constexpr bool equal(
+    inline bool equal(
         const Expression<T_Variable, T_Expression> &a_EXPRESSION) noexcept {
         if (m_hash != a_EXPRESSION.hash()) {
             return false;
@@ -432,19 +428,17 @@ class Expression : public multi_array::AbstractMultiArrayElement {
     }
 
     /*********************************************************************/
-    inline constexpr bool not_equal(
+    inline bool not_equal(
         const Expression<T_Variable, T_Expression> &a_EXPRESSION) noexcept {
         return !this->equal(a_EXPRESSION);
     }
     /*************************************************************************/
-    inline constexpr Expression<T_Variable, T_Expression> operator+(
-        void) const {
+    inline Expression<T_Variable, T_Expression> operator+(void) const {
         return create_instance(this->sensitivities(), this->constant_value());
     }
 
     /*************************************************************************/
-    inline constexpr Expression<T_Variable, T_Expression> operator-(
-        void) const {
+    inline Expression<T_Variable, T_Expression> operator-(void) const {
         auto result =
             create_instance(this->sensitivities(), this->constant_value());
         for (auto &&sensitivity : result.m_sensitivities) {
@@ -457,7 +451,7 @@ class Expression : public multi_array::AbstractMultiArrayElement {
 
     /*************************************************************************/
     template <class T_Value>
-    inline constexpr Expression<T_Variable, T_Expression> &operator=(
+    inline Expression<T_Variable, T_Expression> &operator=(
         const T_Value a_VALUE) {
         m_sensitivities.clear();
         m_constant_value = a_VALUE;
@@ -466,7 +460,7 @@ class Expression : public multi_array::AbstractMultiArrayElement {
 
     /*************************************************************************/
     template <template <class, class> class T_ExpressionLike>
-    inline constexpr Expression<T_Variable, T_Expression> &operator=(
+    inline Expression<T_Variable, T_Expression> &operator=(
         const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE) {
         m_sensitivities  = a_EXPRESSION_LIKE.to_expression().sensitivities();
         m_constant_value = 0;
@@ -475,7 +469,7 @@ class Expression : public multi_array::AbstractMultiArrayElement {
 
     /*************************************************************************/
     template <template <class, class> class T_ExpressionLike>
-    inline constexpr Expression<T_Variable, T_Expression> &operator=(
+    inline Expression<T_Variable, T_Expression> &operator=(
         const Expression<T_Variable, T_Expression> &a_EXPRESSION) {
         m_sensitivities  = a_EXPRESSION.sensitivities();
         m_constant_value = a_EXPRESSION.constant_value();
@@ -484,7 +478,7 @@ class Expression : public multi_array::AbstractMultiArrayElement {
 
     /*************************************************************************/
     template <class T_Value>
-    inline constexpr Expression<T_Variable, T_Expression> &operator+=(
+    inline Expression<T_Variable, T_Expression> &operator+=(
         const T_Value a_VALUE) {
         m_constant_value += a_VALUE;
         return *this;
@@ -492,14 +486,14 @@ class Expression : public multi_array::AbstractMultiArrayElement {
 
     /*************************************************************************/
     template <template <class, class> class T_ExpressionLike>
-    inline constexpr Expression<T_Variable, T_Expression> &operator+=(
+    inline Expression<T_Variable, T_Expression> &operator+=(
         const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE) {
         *this += a_EXPRESSION_LIKE.to_expression();
         return *this;
     }
 
     /*************************************************************************/
-    inline constexpr Expression<T_Variable, T_Expression> &operator+=(
+    inline Expression<T_Variable, T_Expression> &operator+=(
         const Expression<T_Variable, T_Expression> &a_EXPRESSION) {
         for (const auto &append : a_EXPRESSION.m_sensitivities) {
             if (m_sensitivities.find(append.first) != m_sensitivities.end()) {
@@ -515,7 +509,7 @@ class Expression : public multi_array::AbstractMultiArrayElement {
 
     /*************************************************************************/
     template <class T_Value>
-    inline constexpr Expression<T_Variable, T_Expression> &operator-=(
+    inline Expression<T_Variable, T_Expression> &operator-=(
         const T_Value a_VALUE) {
         m_constant_value -= a_VALUE;
         return *this;
@@ -523,14 +517,14 @@ class Expression : public multi_array::AbstractMultiArrayElement {
 
     /*************************************************************************/
     template <template <class, class> class T_ExpressionLike>
-    inline constexpr Expression<T_Variable, T_Expression> &operator-=(
+    inline Expression<T_Variable, T_Expression> &operator-=(
         const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE) {
         *this -= a_EXPRESSION_LIKE.to_expression();
         return *this;
     }
 
     /*************************************************************************/
-    inline constexpr Expression<T_Variable, T_Expression> &operator-=(
+    inline Expression<T_Variable, T_Expression> &operator-=(
         const Expression<T_Variable, T_Expression> &a_EXPRESSION) {
         *this += (-a_EXPRESSION);
         return *this;
@@ -538,7 +532,7 @@ class Expression : public multi_array::AbstractMultiArrayElement {
 
     /*************************************************************************/
     template <class T_Value>
-    inline constexpr Expression<T_Variable, T_Expression> &operator*=(
+    inline Expression<T_Variable, T_Expression> &operator*=(
         const T_Value a_VALUE) {
         for (auto &&sensitivity : m_sensitivities) {
             sensitivity.second *= a_VALUE;
@@ -549,7 +543,7 @@ class Expression : public multi_array::AbstractMultiArrayElement {
 
     /*************************************************************************/
     template <class T_Value>
-    inline constexpr Expression<T_Variable, T_Expression> &operator/=(
+    inline Expression<T_Variable, T_Expression> &operator/=(
         const T_Value a_VALUE) {
         for (auto &&sensitivity : m_sensitivities) {
             sensitivity.second /= a_VALUE;

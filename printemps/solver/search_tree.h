@@ -120,14 +120,14 @@ class SearchTree {
     }
 
     /*************************************************************************/
-    inline constexpr const std::vector<
+    inline const std::vector<
         std::pair<solution::SparseSolution<T_Variable, T_Expression>, int>>&
     frontier_solutions(void) const {
         return m_frontier_solutions;
     }
 
     /*************************************************************************/
-    inline constexpr const std::vector<
+    inline const std::vector<
         std::pair<solution::SparseSolution<T_Variable, T_Expression>, int>>&
     locally_optimal_solutions(void) const {
         return m_locally_optimal_solutions;

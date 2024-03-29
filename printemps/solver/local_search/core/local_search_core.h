@@ -414,11 +414,6 @@ class LocalSearchCore {
     }
 
     /*************************************************************************/
-    virtual ~LocalSearchCore(void) {
-        /// nothing to do
-    }
-
-    /*************************************************************************/
     inline void initialize(void) {
         m_model_ptr        = nullptr;
         m_global_state_ptr = nullptr;
@@ -734,22 +729,22 @@ class LocalSearchCore {
     }
 
     /*************************************************************************/
-    inline constexpr const std::vector<
+    inline const std::vector<
         solution::SparseSolution<T_Variable, T_Expression>>&
     feasible_solutions(void) const {
         return m_feasible_solutions;
     }
 
     /*************************************************************************/
-    inline constexpr const std::vector<
+    inline const std::vector<
         solution::SparseSolution<T_Variable, T_Expression>>&
     incumbent_solutions(void) const {
         return m_incumbent_solutions;
     }
 
     /*************************************************************************/
-    inline constexpr const LocalSearchCoreResult<T_Variable, T_Expression>&
-    result(void) const {
+    inline const LocalSearchCoreResult<T_Variable, T_Expression>& result(
+        void) const {
         return m_result;
     }
 };

@@ -258,11 +258,6 @@ class PDLPCore {
     }
 
     /*************************************************************************/
-    virtual ~PDLPCore(void) {
-        /// nothing to do
-    }
-
-    /*************************************************************************/
     inline void initialize(void) {
         m_instance_ptr = nullptr;
         m_option.initialize();
@@ -397,7 +392,7 @@ class PDLPCore {
     }
 
     /*************************************************************************/
-    inline constexpr const PDLPCoreResult& result(void) const {
+    inline const PDLPCoreResult& result(void) const {
         return m_result;
     }
 };  // namespace printemps::solver::pdlp::core

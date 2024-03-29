@@ -39,7 +39,7 @@ struct DenseSolution {
     }
 
     /*************************************************************************/
-    inline constexpr int distance(
+    inline int distance(
         const DenseSolution<T_Variable, T_Expression> &a_SOLUTION) const {
         int       distance     = 0;
         const int PROXIES_SIZE = this->variable_value_proxies.size();
@@ -59,8 +59,7 @@ struct DenseSolution {
     }
 
     /*************************************************************************/
-    inline constexpr SparseSolution<T_Variable, T_Expression> to_sparse(
-        void) const {
+    inline SparseSolution<T_Variable, T_Expression> to_sparse(void) const {
         solution::SparseSolution<T_Variable, T_Expression> sparse_solution;
 
         /// Decision variables

@@ -59,18 +59,17 @@ class Node {
     }
 
     /*************************************************************************/
-    inline constexpr T key(void) const noexcept {
+    inline T key(void) const noexcept {
         return m_key;
     }
 
     /*************************************************************************/
-    inline constexpr double weight(void) const noexcept {
+    inline double weight(void) const noexcept {
         return m_weight;
     }
 
     /*************************************************************************/
-    inline constexpr std::unordered_set<int> const &edge_indices(void) const
-        noexcept {
+    inline std::unordered_set<int> const &edge_indices(void) const noexcept {
         return m_edge_indices;
     }
 };

@@ -60,11 +60,6 @@ class PDLPController {
     }
 
     /*************************************************************************/
-    virtual ~PDLPController(void) {
-        /// nothing to do
-    }
-
-    /*************************************************************************/
     inline void initialize(void) {
         m_model_ptr        = nullptr;
         m_global_state_ptr = nullptr;
@@ -250,7 +245,7 @@ class PDLPController {
     }
 
     /*************************************************************************/
-    inline constexpr const PDLPControllerResult& result(void) const {
+    inline const PDLPControllerResult& result(void) const {
         return m_result;
     }
 };

@@ -104,8 +104,8 @@ class VariableProxy : public multi_array::AbstractMultiArray {
         VariableProxy<T_Variable, T_Expression> &&) = default;
 
     /*************************************************************************/
-    inline static constexpr VariableProxy<T_Variable, T_Expression>
-    create_instance(const int a_ID) {
+    inline static VariableProxy<T_Variable, T_Expression> create_instance(
+        const int a_ID) {
         /**
          * When instantiation, instead of constructor, create_instance() should
          * be called.
@@ -115,8 +115,8 @@ class VariableProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline static constexpr VariableProxy<T_Variable, T_Expression>
-    create_instance(const int a_ID, const int a_NUMBER_OF_ELEMENTS) {
+    inline static VariableProxy<T_Variable, T_Expression> create_instance(
+        const int a_ID, const int a_NUMBER_OF_ELEMENTS) {
         /**
          * When instantiation, instead of constructor, create_instance() should
          * be called.
@@ -127,8 +127,8 @@ class VariableProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline static constexpr VariableProxy<T_Variable, T_Expression>
-    create_instance(const int a_ID, const std::vector<int> &a_SHAPE) {
+    inline static VariableProxy<T_Variable, T_Expression> create_instance(
+        const int a_ID, const std::vector<int> &a_SHAPE) {
         /**
          * When instantiation, instead of constructor, create_instance() should
          * be called.
@@ -138,7 +138,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr T_Variable value(void) const {
+    inline T_Variable value(void) const {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -148,7 +148,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr void set_value(T_Variable a_VALUE) {
+    inline void set_value(T_Variable a_VALUE) {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -158,7 +158,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr T_Expression evaluate(void) const {
+    inline T_Expression evaluate(void) const {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -168,7 +168,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr T_Expression evaluate(
+    inline T_Expression evaluate(
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
@@ -179,7 +179,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr void fix(void) {
+    inline void fix(void) {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -189,7 +189,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr void unfix(void) {
+    inline void unfix(void) {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -199,7 +199,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr bool is_fixed(void) const {
+    inline bool is_fixed(void) const {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -209,7 +209,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr void fix_by(const T_Variable a_VALUE) {
+    inline void fix_by(const T_Variable a_VALUE) {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -219,8 +219,8 @@ class VariableProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr void set_bound(const T_Variable a_LOWER_BOUND,
-                                    const T_Variable a_UPPER_BOUND) {
+    inline void set_bound(const T_Variable a_LOWER_BOUND,
+                          const T_Variable a_UPPER_BOUND) {
         if (a_LOWER_BOUND > a_UPPER_BOUND) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -235,14 +235,14 @@ class VariableProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr void reset_bound(void) {
+    inline void reset_bound(void) {
         for (auto &&variable : m_variables) {
             variable.reset_bound();
         }
     }
 
     /*************************************************************************/
-    inline constexpr T_Variable lower_bound(void) const {
+    inline T_Variable lower_bound(void) const {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -252,7 +252,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr T_Variable upper_bound(void) const {
+    inline T_Variable upper_bound(void) const {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -262,7 +262,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr bool has_bounds(void) const {
+    inline bool has_bounds(void) const {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -272,7 +272,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr VariableSense sense(void) const {
+    inline VariableSense sense(void) const {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -282,7 +282,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr void set_name(const std::string &a_NAME) {
+    inline void set_name(const std::string &a_NAME) {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -292,7 +292,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr const std::string &name(void) const {
+    inline const std::string &name(void) const {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -302,32 +302,32 @@ class VariableProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr std::vector<Variable<T_Variable, T_Expression>>
+    inline std::vector<Variable<T_Variable, T_Expression>>
         &flat_indexed_variables(void) {
         return m_variables;
     }
 
     /*************************************************************************/
-    inline constexpr const std::vector<Variable<T_Variable, T_Expression>>
+    inline const std::vector<Variable<T_Variable, T_Expression>>
         &flat_indexed_variables(void) const {
         return m_variables;
     }
 
     /*************************************************************************/
-    inline constexpr Variable<T_Variable, T_Expression> &flat_indexed_variables(
+    inline Variable<T_Variable, T_Expression> &flat_indexed_variables(
         const int a_FLAT_INDEX) {
         return m_variables[a_FLAT_INDEX];
     }
 
     /*************************************************************************/
-    inline constexpr const Variable<T_Variable, T_Expression>
-        &flat_indexed_variables(const int a_FLAT_INDEX) const {
+    inline const Variable<T_Variable, T_Expression> &flat_indexed_variables(
+        const int a_FLAT_INDEX) const {
         return m_variables[a_FLAT_INDEX];
     }
 
     /*************************************************************************/
-    inline constexpr multi_array::ValueProxy<T_Variable>
-    export_values_and_names(void) const {
+    inline multi_array::ValueProxy<T_Variable> export_values_and_names(
+        void) const {
         multi_array::ValueProxy<T_Variable> proxy(m_index, m_shape);
 
         const int NUMBER_OF_ELEMENTS = this->number_of_elements();
@@ -339,8 +339,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr Expression<T_Variable, T_Expression> to_expression(
-        void) const {
+    inline Expression<T_Variable, T_Expression> to_expression(void) const {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -350,7 +349,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr Expression<T_Variable, T_Expression> sum(void) const {
+    inline Expression<T_Variable, T_Expression> sum(void) const {
         std::unordered_map<Variable<T_Variable, T_Expression> *, T_Expression>
             sensitivities;
         sensitivities.reserve(this->number_of_elements());
@@ -365,7 +364,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr Expression<T_Variable, T_Expression> sum(
+    inline Expression<T_Variable, T_Expression> sum(
         const std::vector<int> &a_MULTI_DIMENSIONAL_INDEX) const {
         const int MULTI_DIMENSIONAL_INDEX_SIZE =
             a_MULTI_DIMENSIONAL_INDEX.size();
@@ -416,7 +415,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
 
     /*************************************************************************/
     template <class T_Array>
-    inline constexpr Expression<T_Variable, T_Expression> dot(
+    inline Expression<T_Variable, T_Expression> dot(
         const T_Array &a_COEFFICIENTS) {
         if (this->number_of_dimensions() != 1) {
             throw std::logic_error(utility::format_error_location(
@@ -447,7 +446,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
 
     /*************************************************************************/
     template <class T_Array>
-    inline constexpr Expression<T_Variable, T_Expression> dot(
+    inline Expression<T_Variable, T_Expression> dot(
         const std::vector<int> &a_MULTI_DIMENSIONAL_INDEX,
         const T_Array &         a_COEFFICIENTS) {
         const int MULTI_DIMENSIONAL_INDEX_SIZE =
@@ -512,20 +511,18 @@ class VariableProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr Constraint<T_Variable, T_Expression> selection(
-        void) const {
+    inline Constraint<T_Variable, T_Expression> selection(void) const {
         return this->sum() == 1;
     }
 
     /*************************************************************************/
-    inline constexpr Constraint<T_Variable, T_Expression> selection(
+    inline Constraint<T_Variable, T_Expression> selection(
         const std::vector<int> &a_MULTI_DIMENSIONAL_INDEX) const {
         return this->sum(a_MULTI_DIMENSIONAL_INDEX) == 1;
     }
 
     /*************************************************************************/
-    inline constexpr Expression<T_Variable, T_Expression> operator+(
-        void) const {
+    inline Expression<T_Variable, T_Expression> operator+(void) const {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -535,8 +532,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr Expression<T_Variable, T_Expression> operator-(
-        void) const {
+    inline Expression<T_Variable, T_Expression> operator-(void) const {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -546,7 +542,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr VariableProxy<T_Variable, T_Expression> &operator=(
+    inline VariableProxy<T_Variable, T_Expression> &operator=(
         const T_Variable a_VALUE) {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
@@ -558,19 +554,19 @@ class VariableProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr Variable<T_Variable, T_Expression> &operator[](
+    inline Variable<T_Variable, T_Expression> &operator[](
         const int a_FLAT_INDEX) {
         return m_variables[a_FLAT_INDEX];
     }
 
     /*************************************************************************/
-    inline constexpr const Variable<T_Variable, T_Expression> &operator[](
+    inline const Variable<T_Variable, T_Expression> &operator[](
         const int a_FLAT_INDEX) const {
         return m_variables[a_FLAT_INDEX];
     }
 
     /*************************************************************************/
-    inline constexpr Variable<T_Variable, T_Expression> &operator()(
+    inline Variable<T_Variable, T_Expression> &operator()(
         const std::vector<int> &a_MULTI_DIMENSIONAL_INDEX) {
         const int MULTI_DIMENSIONAL_INDEX_SIZE =
             a_MULTI_DIMENSIONAL_INDEX.size();
@@ -588,7 +584,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr const Variable<T_Variable, T_Expression> &operator()(
+    inline const Variable<T_Variable, T_Expression> &operator()(
         const std::vector<int> &a_MULTI_DIMENSIONAL_INDEX) const {
         if (this->number_of_dimensions() != a_MULTI_DIMENSIONAL_INDEX.size()) {
             throw std::logic_error(utility::format_error_location(
@@ -605,14 +601,13 @@ class VariableProxy : public multi_array::AbstractMultiArray {
 
     /*************************************************************************/
     template <class... Args>
-    inline constexpr Variable<T_Variable, T_Expression> &operator()(
-        Args... args) {
+    inline Variable<T_Variable, T_Expression> &operator()(Args... args) {
         return this->operator()({args...});
     }
 
     /*************************************************************************/
     template <class... Args>
-    inline constexpr const Variable<T_Variable, T_Expression> &operator()(
+    inline const Variable<T_Variable, T_Expression> &operator()(
         Args... args) const {
         return this->operator()({args...});
     }

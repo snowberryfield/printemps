@@ -69,16 +69,10 @@ class AbstractMultiArray {
         this->compute_strides();
     }
 
-    /*************************************************************************/
-    virtual ~AbstractMultiArray(void) {
-        /// nothing to do
-    }
-
    public:
     /*************************************************************************/
     inline int flat_index(
         const std::vector<int> &a_MULTI_DIMENSIONAL_INDEX) const {
-        /// cannot be constexpr
         /**
          * NOTE: The flat_index computed in this method is for elements managed
          * in a proxy object.
@@ -91,7 +85,6 @@ class AbstractMultiArray {
     /*************************************************************************/
     inline std::vector<int> multi_dimensional_index(
         const int a_FLAT_INDEX) const {
-        /// cannot be constexpr
         /**
          * NOTE: The flat_index computed in this method is for elements managed
          * in a proxy object.
@@ -144,27 +137,27 @@ class AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr int index(void) const {
+    inline int index(void) const {
         return m_index;
     }
 
     /*************************************************************************/
-    inline constexpr const std::vector<int> &shape(void) const {
+    inline const std::vector<int> &shape(void) const {
         return m_shape;
     }
 
     /*************************************************************************/
-    inline constexpr const std::vector<int> &strides(void) const {
+    inline const std::vector<int> &strides(void) const {
         return m_strides;
     }
 
     /*************************************************************************/
-    inline constexpr int number_of_dimensions(void) const {
+    inline int number_of_dimensions(void) const {
         return m_number_of_dimensions;
     }
 
     /*************************************************************************/
-    inline constexpr int number_of_elements(void) const {
+    inline int number_of_elements(void) const {
         return m_number_of_elements;
     }
 };

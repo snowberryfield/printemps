@@ -44,50 +44,47 @@ class ValueProxy : public AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr T_Value &flat_indexed_values(const int a_FLAT_INDEX) {
+    inline T_Value &flat_indexed_values(const int a_FLAT_INDEX) {
         return m_values[a_FLAT_INDEX];
     }
 
     /*************************************************************************/
-    inline constexpr T_Value flat_indexed_values(const int a_FLAT_INDEX) const {
+    inline T_Value flat_indexed_values(const int a_FLAT_INDEX) const {
         return m_values[a_FLAT_INDEX];
     }
 
     /*************************************************************************/
-    inline constexpr std::vector<T_Value> &flat_indexed_values(void) {
+    inline std::vector<T_Value> &flat_indexed_values(void) {
         return m_values;
     }
 
     /*************************************************************************/
-    inline constexpr const std::vector<T_Value> &flat_indexed_values(
-        void) const {
+    inline const std::vector<T_Value> &flat_indexed_values(void) const {
         return m_values;
     }
 
     /*************************************************************************/
-    inline constexpr std::string &flat_indexed_names(const int a_FLAT_INDEX) {
+    inline std::string &flat_indexed_names(const int a_FLAT_INDEX) {
         return m_names[a_FLAT_INDEX];
     }
 
     /*************************************************************************/
-    inline constexpr const std::string &flat_indexed_names(
-        const int a_FLAT_INDEX) const {
+    inline const std::string &flat_indexed_names(const int a_FLAT_INDEX) const {
         return m_names[a_FLAT_INDEX];
     }
 
     /*************************************************************************/
-    inline constexpr std::vector<std::string> &flat_indexed_names(void) {
+    inline std::vector<std::string> &flat_indexed_names(void) {
         return m_names;
     }
 
     /*************************************************************************/
-    inline constexpr const std::vector<std::string> &flat_indexed_names(
-        void) const {
+    inline const std::vector<std::string> &flat_indexed_names(void) const {
         return m_names;
     }
 
     /*************************************************************************/
-    inline constexpr T_Value &value(void) {
+    inline T_Value &value(void) {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -97,7 +94,7 @@ class ValueProxy : public AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr T_Value value(void) const {
+    inline T_Value value(void) const {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -107,8 +104,7 @@ class ValueProxy : public AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr T_Value &values(
-        const std::vector<int> &a_MULTI_DIMENSIONAL_INDEX) {
+    inline T_Value &values(const std::vector<int> &a_MULTI_DIMENSIONAL_INDEX) {
         const int MULTI_DIMENSIONAL_INDEX_SIZE =
             a_MULTI_DIMENSIONAL_INDEX.size();
         if (this->number_of_dimensions() != MULTI_DIMENSIONAL_INDEX_SIZE) {
@@ -124,7 +120,7 @@ class ValueProxy : public AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr T_Value values(
+    inline T_Value values(
         const std::vector<int> &a_MULTI_DIMENSIONAL_INDEX) const {
         const int MULTI_DIMENSIONAL_INDEX_SIZE =
             a_MULTI_DIMENSIONAL_INDEX.size();
@@ -142,18 +138,18 @@ class ValueProxy : public AbstractMultiArray {
 
     /*************************************************************************/
     template <class... Args>
-    inline constexpr T_Value &values(Args... args) {
+    inline T_Value &values(Args... args) {
         return this->values({args...});
     }
 
     /*************************************************************************/
     template <class... Args>
-    inline constexpr T_Value values(Args... args) const {
+    inline T_Value values(Args... args) const {
         return this->values({args...});
     }
 
     /*************************************************************************/
-    inline constexpr std::string &name(void) {
+    inline std::string &name(void) {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -163,7 +159,7 @@ class ValueProxy : public AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr const std::string &name(void) const {
+    inline const std::string &name(void) const {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -173,7 +169,7 @@ class ValueProxy : public AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr std::string &names(
+    inline std::string &names(
         const std::vector<int> &a_MULTI_DIMENSIONAL_INDEX) {
         const int MULTI_DIMENSIONAL_INDEX_SIZE =
             a_MULTI_DIMENSIONAL_INDEX.size();
@@ -190,7 +186,7 @@ class ValueProxy : public AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr const std::string &names(
+    inline const std::string &names(
         const std::vector<int> &a_MULTI_DIMENSIONAL_INDEX) const {
         const int MULTI_DIMENSIONAL_INDEX_SIZE =
             a_MULTI_DIMENSIONAL_INDEX.size();
@@ -208,26 +204,25 @@ class ValueProxy : public AbstractMultiArray {
 
     /*************************************************************************/
     template <class... Args>
-    inline constexpr std::string &names(Args... args) {
+    inline std::string &names(Args... args) {
         return this->names({args...});
     }
 
     /*************************************************************************/
     template <class... Args>
-    inline constexpr const std::string &names(Args... args) const {
-        /// This method cannot be constexpr for Clang-6.
+    inline const std::string &names(Args... args) const {
         return this->names({args...});
     }
 
     /*************************************************************************/
-    inline constexpr void fill(const T_Value a_VALUE) {
+    inline void fill(const T_Value a_VALUE) {
         for (auto &&value : m_values) {
             value = a_VALUE;
         }
     }
 
     /*************************************************************************/
-    inline constexpr ValueProxy<T_Value> operator=(const T_Value a_VALUE) {
+    inline ValueProxy<T_Value> operator=(const T_Value a_VALUE) {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -238,39 +233,39 @@ class ValueProxy : public AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr T_Value &operator[](const int a_FLAT_INDEX) {
+    inline T_Value &operator[](const int a_FLAT_INDEX) {
         return m_values[a_FLAT_INDEX];
     }
 
     /*************************************************************************/
-    inline constexpr T_Value operator[](const int a_FLAT_INDEX) const {
+    inline T_Value operator[](const int a_FLAT_INDEX) const {
         return m_values[a_FLAT_INDEX];
     }
 
     /*************************************************************************/
     template <class... Args>
-    inline constexpr T_Value &operator()(Args... args) {
+    inline T_Value &operator()(Args... args) {
         return this->values({args...});
     }
 
     /*************************************************************************/
     template <class... Args>
-    inline constexpr T_Value operator()(Args... args) const {
+    inline T_Value operator()(Args... args) const {
         return this->values({args...});
     }
 };
 
 /*****************************************************************************/
 template <class T_Value>
-inline constexpr bool operator==(const ValueProxy<T_Value> &a_LEFT,
-                                 const ValueProxy<T_Value> &a_RIGHT) {
+inline bool operator==(const ValueProxy<T_Value> &a_LEFT,
+                       const ValueProxy<T_Value> &a_RIGHT) {
     return a_LEFT.flat_indexed_values() == a_RIGHT.flat_indexed_values();
 }
 
 /*****************************************************************************/
 template <class T_Value>
-inline constexpr bool operator!=(const ValueProxy<T_Value> &a_LEFT,
-                                 const ValueProxy<T_Value> &a_RIGHT) {
+inline bool operator!=(const ValueProxy<T_Value> &a_LEFT,
+                       const ValueProxy<T_Value> &a_RIGHT) {
     return !(a_LEFT == a_RIGHT);
 }
 

@@ -37,11 +37,6 @@ class NamedSolution {
     }
 
     /*************************************************************************/
-    virtual ~NamedSolution(void) {
-        /// nothing to do
-    }
-
-    /*************************************************************************/
     void initialize(void) {
         m_variable_value_proxies.clear();
         m_expression_value_proxies.clear();
@@ -172,84 +167,84 @@ class NamedSolution {
     }
 
     /*************************************************************************/
-    inline constexpr const std::unordered_map<
-        std::string, multi_array::ValueProxy<T_Variable>>&
+    inline const std::unordered_map<std::string,
+                                    multi_array::ValueProxy<T_Variable>>&
     variables(void) const {
         return m_variable_value_proxies;
     }
 
     /*************************************************************************/
-    inline constexpr const multi_array::ValueProxy<T_Variable>& variables(
+    inline const multi_array::ValueProxy<T_Variable>& variables(
         const std::string& a_NAME) const {
         return m_variable_value_proxies.at(a_NAME);
     }
 
     /*************************************************************************/
-    inline constexpr const std::unordered_map<
-        std::string, multi_array::ValueProxy<T_Expression>>&
+    inline const std::unordered_map<std::string,
+                                    multi_array::ValueProxy<T_Expression>>&
     expressions(void) const {
         return m_expression_value_proxies;
     }
 
     /*************************************************************************/
-    inline constexpr const multi_array::ValueProxy<T_Expression>& expressions(
+    inline const multi_array::ValueProxy<T_Expression>& expressions(
         const std::string& a_NAME) const {
         return m_expression_value_proxies.at(a_NAME);
     }
 
     /*************************************************************************/
-    inline constexpr const std::unordered_map<
-        std::string, multi_array::ValueProxy<T_Expression>>&
+    inline const std::unordered_map<std::string,
+                                    multi_array::ValueProxy<T_Expression>>&
     constraints(void) const {
         return m_constraint_value_proxies;
     }
 
     /*************************************************************************/
-    inline constexpr const multi_array::ValueProxy<T_Expression>& constraints(
+    inline const multi_array::ValueProxy<T_Expression>& constraints(
         const std::string& a_NAME) const {
         return m_constraint_value_proxies.at(a_NAME);
     }
 
     /*************************************************************************/
-    inline constexpr const std::unordered_map<
-        std::string, multi_array::ValueProxy<T_Expression>>&
+    inline const std::unordered_map<std::string,
+                                    multi_array::ValueProxy<T_Expression>>&
     violations(void) const {
         return m_violation_value_proxies;
     }
 
     /*************************************************************************/
-    inline constexpr const multi_array::ValueProxy<T_Expression>& violations(
+    inline const multi_array::ValueProxy<T_Expression>& violations(
         const std::string& a_NAME) const {
         return m_violation_value_proxies.at(a_NAME);
     }
 
     /*************************************************************************/
-    inline constexpr const std::string& name(void) const {
+    inline const std::string& name(void) const {
         return m_name;
     }
 
     /*************************************************************************/
-    inline constexpr int number_of_variables(void) const {
+    inline int number_of_variables(void) const {
         return m_number_of_variables;
     }
 
     /*************************************************************************/
-    inline constexpr int number_of_constraints(void) const {
+    inline int number_of_constraints(void) const {
         return m_number_of_constraints;
     }
 
     /*************************************************************************/
-    inline constexpr T_Expression objective(void) const {
+    inline T_Expression objective(void) const {
         return m_objective;
     }
 
     /*************************************************************************/
-    inline constexpr T_Expression total_violation(void) const {
+    inline T_Expression total_violation(void) const {
         return m_total_violation;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_feasible(void) const {
+    inline bool is_feasible(void) const {
         return m_is_feasible;
     }
 };

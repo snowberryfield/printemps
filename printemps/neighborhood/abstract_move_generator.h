@@ -27,11 +27,6 @@ class AbstractMoveGenerator {
     }
 
     /*************************************************************************/
-    virtual ~AbstractMoveGenerator(void) {
-        /// nothing to do
-    }
-
-    /*************************************************************************/
     void initialize(void) {
         m_move_updater = [](std::vector<Move<T_Variable, T_Expression>> *,  //
                             std::vector<short> *,                           //
@@ -46,12 +41,11 @@ class AbstractMoveGenerator {
     }
 
     /*************************************************************************/
-    inline constexpr void update_moves(
-        const bool a_ACCEPT_ALL,                     //
-        const bool a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
-        const bool a_ACCEPT_FEASIBILITY_IMPROVABLE,  //
-        const bool a_IS_ENABLED_PARALLEL,            //
-        const int  a_NUMBER_OF_THREADS) {
+    inline void update_moves(const bool a_ACCEPT_ALL,                     //
+                             const bool a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
+                             const bool a_ACCEPT_FEASIBILITY_IMPROVABLE,  //
+                             const bool a_IS_ENABLED_PARALLEL,            //
+                             const int  a_NUMBER_OF_THREADS) {
         m_move_updater(&m_moves,                         //
                        &m_flags,                         //
                        a_ACCEPT_ALL,                     //
@@ -62,18 +56,18 @@ class AbstractMoveGenerator {
     }
 
     /*************************************************************************/
-    inline constexpr std::vector<Move<T_Variable, T_Expression>> &moves(void) {
+    inline std::vector<Move<T_Variable, T_Expression>> &moves(void) {
         return m_moves;
     }
 
     /*************************************************************************/
-    inline constexpr const std::vector<Move<T_Variable, T_Expression>> &moves(
+    inline const std::vector<Move<T_Variable, T_Expression>> &moves(
         void) const {
         return m_moves;
     }
 
     /*************************************************************************/
-    inline constexpr void set_moves(
+    inline void set_moves(
         const std::vector<Move<T_Variable, T_Expression>> &a_MOVES) {
         /**
          * NOTE: This method is for test.
@@ -82,17 +76,17 @@ class AbstractMoveGenerator {
     }
 
     /*************************************************************************/
-    inline constexpr std::vector<short> &flags(void) {
+    inline std::vector<short> &flags(void) {
         return m_flags;
     }
 
     /*************************************************************************/
-    inline constexpr const std::vector<short> &flags(void) const {
+    inline const std::vector<short> &flags(void) const {
         return m_flags;
     }
 
     /*************************************************************************/
-    inline constexpr void set_flags(const std::vector<short> &a_FLAGS) {
+    inline void set_flags(const std::vector<short> &a_FLAGS) {
         /**
          * NOTE: This method is for test.
          */
@@ -100,22 +94,22 @@ class AbstractMoveGenerator {
     }
 
     /*************************************************************************/
-    inline constexpr bool is_enabled(void) const {
+    inline bool is_enabled(void) const {
         return m_is_enabled;
     }
 
     /*************************************************************************/
-    inline constexpr void enable(void) {
+    inline void enable(void) {
         m_is_enabled = true;
     }
 
     /*************************************************************************/
-    inline constexpr void disable(void) {
+    inline void disable(void) {
         m_is_enabled = false;
     }
 
     /*************************************************************************/
-    inline constexpr void reset_availability(void) {
+    inline void reset_availability(void) {
         for (auto &&move : m_moves) {
             move.is_available = true;
         }
@@ -123,7 +117,7 @@ class AbstractMoveGenerator {
 };
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-constexpr std::vector<model_component::Variable<T_Variable, T_Expression> *>
+inline std::vector<model_component::Variable<T_Variable, T_Expression> *>
 extract_mutable_variable_ptrs(
     const std::vector<model_component::Variable<T_Variable, T_Expression> *>
         &a_RAW_VARIABLE_PTRS) {
@@ -138,7 +132,7 @@ extract_mutable_variable_ptrs(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-constexpr std::vector<model_component::Constraint<T_Variable, T_Expression> *>
+inline std::vector<model_component::Constraint<T_Variable, T_Expression> *>
 extract_effective_constraint_ptrs(
     const std::vector<model_component::Constraint<T_Variable, T_Expression> *>
         &a_RAW_CONSTRAINT_PTRS) {
@@ -169,7 +163,7 @@ extract_effective_constraint_ptrs(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-constexpr std::vector<BinomialConstraint<T_Variable, T_Expression>>
+inline std::vector<BinomialConstraint<T_Variable, T_Expression>>
 convert_to_binomial_constraints(
     const std::vector<model_component::Constraint<T_Variable, T_Expression> *>
         &a_CONSTRAINT_PTRS) {
@@ -206,7 +200,7 @@ convert_to_binomial_constraints(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-constexpr std::vector<TrinomialConstraint<T_Variable, T_Expression>>
+inline std::vector<TrinomialConstraint<T_Variable, T_Expression>>
 convert_to_trinomial_constraints(
     const std::vector<model_component::Constraint<T_Variable, T_Expression> *>
         &a_CONSTRAINT_PTRS) {

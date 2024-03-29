@@ -21,11 +21,6 @@ class TwoFlipMoveGenerator
     }
 
     /*************************************************************************/
-    virtual ~TwoFlipMoveGenerator(void) {
-        /// nothing to do
-    }
-
-    /*************************************************************************/
     void setup(const std::vector<
                std::pair<model_component::Variable<T_Variable, T_Expression> *,
                          model_component::Variable<T_Variable, T_Expression> *>>

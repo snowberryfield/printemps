@@ -66,7 +66,7 @@ struct Action {
     }
 
     /*************************************************************************/
-    inline constexpr void update_confidence(
+    inline void update_confidence(
         const double a_TOTAL_NUMBER_OF_SAMPLES) noexcept {
         if (this->number_of_samples == 0) {
             return;

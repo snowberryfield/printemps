@@ -27,11 +27,6 @@ class UniformRandom {
     }
 
     /*************************************************************************/
-    virtual ~UniformRandom(void) {
-        /// nothing to do
-    }
-
-    /*************************************************************************/
     void setup(const T_Value a_MIN, const T_Value a_MAX,
                const unsigned int a_SEED) {
         m_distribution = T_Generator(a_MIN, a_MAX);
