@@ -51,11 +51,6 @@ class Memory {
     }
 
     /*************************************************************************/
-    virtual ~Memory(void) {
-        /// nothing to do
-    }
-
-    /*************************************************************************/
     void initialize(void) {
         m_model_ptr = nullptr;
         m_variable_names.clear();

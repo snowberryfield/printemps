@@ -302,7 +302,8 @@ class MPSSolver {
         result.status.write_json_by_name("status.json");
 
         if (m_option.output.is_enabled_store_feasible_solutions) {
-            result.solution_archive.write_solutions_json("feasible.json");
+            result.feasible_solution_archive.write_solutions_json(
+                "feasible.json");
         }
     }
 

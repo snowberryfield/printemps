@@ -17,24 +17,18 @@ struct TabuSearchControllerStateManagerConstant {
 template <class T_Variable, class T_Expression>
 class TabuSearchControllerStateManager {
    private:
-    TabuSearchControllerState<T_Variable, T_Expression>  m_state;
-    model::Model<T_Variable, T_Expression>*              m_model_ptr;
-    solution::IncumbentHolder<T_Variable, T_Expression>* m_incumbent_holder_ptr;
-    Memory<T_Variable, T_Expression>*                    m_memory_ptr;
-    option::Option                                       m_option;
+    TabuSearchControllerState<T_Variable, T_Expression> m_state;
+    model::Model<T_Variable, T_Expression>*             m_model_ptr;
+    GlobalState<T_Variable, T_Expression>*              m_global_state_ptr;
+    option::Option                                      m_option;
 
    public:
     /*************************************************************************/
     TabuSearchControllerStateManager(
-        model::Model<T_Variable, T_Expression>* a_model_ptr,
-        solution::IncumbentHolder<T_Variable, T_Expression>*
-                                          a_incumbent_holder_ptr,  //
-        Memory<T_Variable, T_Expression>* a_memory_ptr,            //
-        const option::Option&             a_OPTION) {
-        this->setup(a_model_ptr,             //
-                    a_incumbent_holder_ptr,  //
-                    a_memory_ptr,            //
-                    a_OPTION);
+        model::Model<T_Variable, T_Expression>* a_model_ptr,         //
+        GlobalState<T_Variable, T_Expression>*  a_global_state_ptr,  //
+        const option::Option&                   a_OPTION) {
+        this->setup(a_model_ptr, a_global_state_ptr, a_OPTION);
     }
 
     /*************************************************************************/
@@ -45,32 +39,39 @@ class TabuSearchControllerStateManager {
     /*************************************************************************/
     inline void initialize(void) {
         m_state.initialize();
-        m_model_ptr            = nullptr;
-        m_incumbent_holder_ptr = nullptr;
-        m_memory_ptr           = nullptr;
+        m_model_ptr        = nullptr;
+        m_global_state_ptr = nullptr;
         m_option.initialize();
     }
 
     /*************************************************************************/
-    inline void setup(model::Model<T_Variable, T_Expression>* a_model_ptr,
-                      solution::IncumbentHolder<T_Variable, T_Expression>*
-                                                        a_incumbent_holder_ptr,  //
-                      Memory<T_Variable, T_Expression>* a_memory_ptr,  //
-                      const option::Option&             a_OPTION) {
+    inline void setup(
+        model::Model<T_Variable, T_Expression>* a_model_ptr,         //
+        GlobalState<T_Variable, T_Expression>*  a_global_state_ptr,  //
+        const option::Option&                   a_OPTION) {
         this->initialize();
-        m_model_ptr            = a_model_ptr;
-        m_incumbent_holder_ptr = a_incumbent_holder_ptr;
-        m_memory_ptr           = a_memory_ptr;
-        m_option               = a_OPTION;
+        m_model_ptr        = a_model_ptr;
+        m_global_state_ptr = a_global_state_ptr;
+        m_option           = a_OPTION;
 
         /**
          * Initialize the primal and dual intensities.
          */
-        m_state.current_primal_intensity  = m_memory_ptr->primal_intensity();
+        m_state.current_primal_intensity =
+            m_global_state_ptr->memory.primal_intensity();
         m_state.previous_primal_intensity = 0.0;
 
-        m_state.current_dual_intensity  = m_memory_ptr->dual_intensity();
+        m_state.current_dual_intensity =
+            m_global_state_ptr->memory.dual_intensity();
         m_state.previous_dual_intensity = 0.0;
+
+        /**
+         * Initialize the current global augmented incumbent solution.
+         */
+        m_state.global_augmented_incumbent_solution =
+            m_global_state_ptr->incumbent_holder
+                .global_augmented_incumbent_solution()
+                .to_sparse();
 
         /**
          * Initialize the option values.
@@ -182,6 +183,13 @@ class TabuSearchControllerStateManager {
     inline constexpr void update(const tabu_search::core::TabuSearchCoreResult<
                                      T_Variable, T_Expression>& a_RESULT,
                                  std::mt19937*                  a_mt19937_ptr) {
+        /**
+         * Update the distances between local augmented solution and reference
+         * solutions. This method must be called before
+         * update_last_tabu_search_result().
+         */
+        this->update_distance();
+
         /**
          * Update the last tabu search update status.
          */
@@ -397,11 +405,12 @@ class TabuSearchControllerStateManager {
             (m_state.tabu_search_result.total_update_status ==
              solution::IncumbentHolderConstant::STATUS_NOT_UPDATED);
 
-        /**
-         * Update the iteration after global augmented incumbent update.
-         */
         if (m_state.is_global_augmented_incumbent_updated) {
             m_state.iteration_after_global_augmented_incumbent_update = 0;
+            m_state.global_augmented_incumbent_solution =
+                m_global_state_ptr->incumbent_holder
+                    .global_augmented_incumbent_solution()
+                    .to_sparse();
         } else {
             m_state.iteration_after_global_augmented_incumbent_update++;
         }
@@ -426,21 +435,43 @@ class TabuSearchControllerStateManager {
          * Update the total update status.
          */
         m_state.total_update_status |= a_RESULT.total_update_status;
+
+        /**
+         * Update the improving flag.
+         */
+        this->update_is_improved();
     }
 
     /*************************************************************************/
     inline constexpr void update_intensity(void) {
         m_state.previous_primal_intensity = m_state.current_primal_intensity;
-        m_state.current_primal_intensity  = m_memory_ptr->primal_intensity();
+        m_state.current_primal_intensity =
+            m_global_state_ptr->memory.primal_intensity();
 
         m_state.previous_dual_intensity = m_state.current_dual_intensity;
-        m_state.current_dual_intensity  = m_memory_ptr->dual_intensity();
+        m_state.current_dual_intensity =
+            m_global_state_ptr->memory.dual_intensity();
+    }
+
+    /*************************************************************************/
+    inline constexpr void update_distance(void) {
+        const auto LOCAL_AUGMENTED_INCUMBENT_SOLUTION_SPARSE =
+            m_global_state_ptr->incumbent_holder
+                .local_augmented_incumbent_solution()
+                .to_sparse();
+
+        m_state.distance_from_current_solution =
+            LOCAL_AUGMENTED_INCUMBENT_SOLUTION_SPARSE.distance(
+                m_state.current_solution);
+
+        m_state.distance_from_global_solution =
+            LOCAL_AUGMENTED_INCUMBENT_SOLUTION_SPARSE.distance(
+                m_state.global_augmented_incumbent_solution);
     }
 
     /*************************************************************************/
     inline constexpr void keep_previous_solution(void) {
-        m_state.previous_solution       = m_state.current_solution;
-        m_state.previous_solution_score = m_state.current_solution_score;
+        m_state.previous_solution = m_state.current_solution;
     }
 
     /*************************************************************************/
@@ -464,7 +495,8 @@ class TabuSearchControllerStateManager {
          * less than m_option.penalty.outer_stagnation_threshold.
          */
         m_state.is_outer_stagnation =
-            !m_incumbent_holder_ptr->is_found_feasible_solution() &&
+            !m_global_state_ptr->incumbent_holder
+                 .is_found_feasible_solution() &&
             m_state.iteration_after_global_augmented_incumbent_update >=
                 m_option.penalty.outer_stagnation_threshold;
     }
@@ -478,11 +510,12 @@ class TabuSearchControllerStateManager {
          * - Total violation is decreased from the previous one.
          */
         m_state.is_improved =
-            (m_incumbent_holder_ptr->local_augmented_incumbent_score()
-                 .objective < m_state.previous_solution_score.objective) ||
-            (m_incumbent_holder_ptr->local_augmented_incumbent_score()
-                 .total_violation <
-             m_state.previous_solution_score.total_violation);
+            (m_global_state_ptr->incumbent_holder
+                 .local_augmented_incumbent_solution()
+                 .objective < m_state.previous_solution.objective) ||
+            (m_global_state_ptr->incumbent_holder
+                 .local_augmented_incumbent_solution()
+                 .total_violation < m_state.previous_solution.total_violation);
     }
 
     /*************************************************************************/
@@ -495,7 +528,6 @@ class TabuSearchControllerStateManager {
         m_state.is_enabled_forcibly_initial_modification  = false;
         m_state.penalty_coefficient_reset_flag            = false;
         m_state.is_enabled_special_neighborhood_move      = false;
-        m_state.is_disabled_special_neighborhood_move     = false;
     }
 
     /*************************************************************************/
@@ -561,8 +593,8 @@ class TabuSearchControllerStateManager {
     update_initial_solution_and_penalty_coefficient_flags_simple(void) {
         const double RELATIVE_RANGE =
             m_state.tabu_search_result.global_augmented_objective_range /
-            std::max(1.0, fabs(m_incumbent_holder_ptr
-                                   ->global_augmented_incumbent_objective()));
+            std::max(1.0, fabs(m_global_state_ptr->incumbent_holder
+                                   .global_augmented_incumbent_objective()));
 
         m_state.employing_local_solution_flag = true;
         if (m_state.is_global_augmented_incumbent_updated) {
@@ -575,7 +607,8 @@ class TabuSearchControllerStateManager {
             return;
         }
 
-        if (m_incumbent_holder_ptr->local_augmented_incumbent_score()
+        if (m_global_state_ptr->incumbent_holder
+                .local_augmented_incumbent_score()
                 .is_feasible) {
             m_state.is_enabled_penalty_coefficient_relaxing = true;
             return;
@@ -597,18 +630,20 @@ class TabuSearchControllerStateManager {
          * or relax the penalty coefficients.
          */
         const auto& RESULT_LOCAL_AUGMENTED_INCUMBENT_SCORE =
-            m_incumbent_holder_ptr->local_augmented_incumbent_score();
+            m_global_state_ptr->incumbent_holder
+                .local_augmented_incumbent_score();
 
         /**
          *  NOTE: The gap can takes both of positive and negative value.
          */
-        const double GAP =
-            m_incumbent_holder_ptr->global_augmented_incumbent_objective() -
-            m_incumbent_holder_ptr->local_augmented_incumbent_objective();
+        const double GAP = m_global_state_ptr->incumbent_holder
+                               .global_augmented_incumbent_objective() -
+                           m_global_state_ptr->incumbent_holder
+                               .local_augmented_incumbent_objective();
         const double RELATIVE_RANGE =
             m_state.tabu_search_result.global_augmented_objective_range /
-            std::max(1.0, fabs(m_incumbent_holder_ptr
-                                   ->global_augmented_incumbent_objective()));
+            std::max(1.0, fabs(m_global_state_ptr->incumbent_holder
+                                   .global_augmented_incumbent_objective()));
 
         if (m_state.is_global_augmented_incumbent_updated) {
             /**
@@ -617,7 +652,7 @@ class TabuSearchControllerStateManager {
              * next loop. The penalty coefficients are to be relaxed.
              */
             m_state.employing_global_solution_flag          = true;
-            m_state.is_enabled_penalty_coefficient_relaxing  = true;
+            m_state.is_enabled_penalty_coefficient_relaxing = true;
             return;
         }
 
@@ -698,7 +733,7 @@ class TabuSearchControllerStateManager {
          *
          * For all cases, penalty coefficients are to be tightened.
          */
-        if (m_incumbent_holder_ptr->is_found_feasible_solution()) {
+        if (m_global_state_ptr->incumbent_holder.is_found_feasible_solution()) {
             if (m_state.is_improved) {
                 m_state.employing_local_solution_flag = true;
             } else {
@@ -788,7 +823,8 @@ class TabuSearchControllerStateManager {
         double total_squared_violation = 0.0;
 
         const auto& LOCAL_AUGMENTED_INCUMBENT_SOLUTION =
-            m_incumbent_holder_ptr->local_augmented_incumbent_solution();
+            m_global_state_ptr->incumbent_holder
+                .local_augmented_incumbent_solution();
         const auto& CONSTRAINT_VALUE_PROXIES =
             LOCAL_AUGMENTED_INCUMBENT_SOLUTION.constraint_value_proxies;
         const auto& VIOLATION_VALUE_PROXIES =
@@ -808,9 +844,10 @@ class TabuSearchControllerStateManager {
 
         const double BALANCE =
             m_option.penalty.penalty_coefficient_updating_balance;
-        const double GAP =
-            m_incumbent_holder_ptr->global_augmented_incumbent_objective() -
-            m_incumbent_holder_ptr->local_augmented_incumbent_objective();
+        const double GAP = m_global_state_ptr->incumbent_holder
+                               .global_augmented_incumbent_objective() -
+                           m_global_state_ptr->incumbent_holder
+                               .local_augmented_incumbent_objective();
 
         for (auto&& proxy : this->m_model_ptr->constraint_proxies()) {
             for (auto&& constraint : proxy.flat_indexed_constraints()) {
@@ -893,7 +930,8 @@ class TabuSearchControllerStateManager {
 
         const auto& RESULT = m_state.tabu_search_result;
         if (RESULT.objective_constraint_rate > constant::EPSILON) {
-            if (m_incumbent_holder_ptr->local_augmented_incumbent_score()
+            if (m_global_state_ptr->incumbent_holder
+                    .local_augmented_incumbent_score()
                     .is_feasible) {
                 constexpr double MARGIN = 1.0;
                 corrected_penalty_coefficient_relaxing_rate =
@@ -904,7 +942,8 @@ class TabuSearchControllerStateManager {
 
         for (auto&& proxy : m_model_ptr->constraint_proxies()) {
             const auto& CONSTRAINT_VALUES =
-                m_incumbent_holder_ptr->local_augmented_incumbent_solution()
+                m_global_state_ptr->incumbent_holder
+                    .local_augmented_incumbent_solution()
                     .constraint_value_proxies[proxy.index()]
                     .flat_indexed_values();
 
@@ -1108,7 +1147,7 @@ class TabuSearchControllerStateManager {
         if (m_option.neighborhood.is_enabled_two_flip_move) {
             neighborhood.two_flip().disable();
         }
-        m_state.is_disabled_special_neighborhood_move = true;
+        m_state.is_enabled_special_neighborhood_move = false;
     }
 
     /*************************************************************************/
@@ -1249,19 +1288,17 @@ class TabuSearchControllerStateManager {
     inline constexpr void update_current_solution(void) {
         if (m_state.employing_global_solution_flag) {
             m_state.current_solution =
-                m_incumbent_holder_ptr->global_augmented_incumbent_solution();
-            m_state.current_solution_score =
-                m_incumbent_holder_ptr->global_augmented_incumbent_score();
+                m_global_state_ptr->incumbent_holder
+                    .global_augmented_incumbent_solution()
+                    .to_sparse();
             m_state.employing_global_solution_count_after_relaxation++;
         } else if (m_state.employing_local_solution_flag) {
-            m_state.current_solution =
-                m_incumbent_holder_ptr->local_augmented_incumbent_solution();
-            m_state.current_solution_score =
-                m_incumbent_holder_ptr->local_augmented_incumbent_score();
+            m_state.current_solution = m_global_state_ptr->incumbent_holder
+                                           .local_augmented_incumbent_solution()
+                                           .to_sparse();
             m_state.employing_local_solution_count_after_relaxation++;
         } else if (m_state.employing_previous_solution_flag) {
-            m_state.current_solution       = m_state.previous_solution;
-            m_state.current_solution_score = m_state.previous_solution_score;
+            m_state.current_solution = m_state.previous_solution;
             m_state.employing_previous_solution_count_after_relaxation++;
         } else {
             throw std::logic_error(utility::format_error_location(

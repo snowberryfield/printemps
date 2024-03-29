@@ -13,27 +13,26 @@ namespace printemps::solver {
 template <class T_Variable, class T_Expression>
 class AbstractSolverController {
    protected:
-    model::Model<T_Variable, T_Expression>*              m_model_ptr;
-    solution::DenseSolution<T_Variable, T_Expression>    m_initial_solution;
-    solution::IncumbentHolder<T_Variable, T_Expression>* m_incumbent_holder_ptr;
-    Memory<T_Variable, T_Expression>*                    m_memory_ptr;
-    solution::SolutionArchive<T_Variable, T_Expression>* m_solution_archive_ptr;
-    utility::TimeKeeper                                  m_time_keeper;
-    option::Option                                       m_option;
+    model::Model<T_Variable, T_Expression>*            m_model_ptr;
+    GlobalState<T_Variable, T_Expression>*             m_global_state_ptr;
+    solution::SparseSolution<T_Variable, T_Expression> m_initial_solution;
+    utility::TimeKeeper                                m_time_keeper;
+    option::Option                                     m_option;
 
     /*************************************************************************/
-    inline void print_total_elapsed_time(const double a_TOTAL_ELAPSED_TIME,
-                                         const bool   a_IS_ENABLED_PRINT) {
+    inline void print_total_elapsed_time(const bool a_IS_ENABLED_PRINT) {
         utility::print_info(  //
             " -- Total elapsed time: " +
-                utility::to_string(a_TOTAL_ELAPSED_TIME, "%.3f") + "sec",
+                utility::to_string(m_time_keeper.elapsed_time(), "%.3f") +
+                "sec",
             a_IS_ENABLED_PRINT);
     }
 
     /*************************************************************************/
     inline void print_incumbent_summary(const bool a_IS_ENABLED_PRINT) {
         const auto& GLOBAL_INCUMBENT_SOLUTION =
-            m_incumbent_holder_ptr->global_augmented_incumbent_solution();
+            m_global_state_ptr->incumbent_holder
+                .global_augmented_incumbent_solution();
         utility::print_info(
             " -- Incumbent objective: " +
                 utility::to_string(GLOBAL_INCUMBENT_SOLUTION.objective, "%.5e"),
@@ -51,8 +50,8 @@ class AbstractSolverController {
     inline void print_dual_bound(const bool a_IS_ENABLED_PRINT) {
         utility::print_info(
             " -- Dual Bound: " +
-                utility::to_string(m_incumbent_holder_ptr->dual_bound(),
-                                   "%.5e"),
+                utility::to_string(
+                    m_global_state_ptr->incumbent_holder.dual_bound(), "%.5e"),
             a_IS_ENABLED_PRINT);
     }
 
@@ -84,70 +83,79 @@ class AbstractSolverController {
     }
 
     /*************************************************************************/
-    AbstractSolverController(                                 //
-        model::Model<T_Variable, T_Expression>* a_model_ptr,  //
-        const solution::DenseSolution<T_Variable, T_Expression>&
-            a_CURRENT_SOLUTION,  //
-        solution::IncumbentHolder<T_Variable, T_Expression>*
-                                          a_incumbent_holder_ptr,
-        Memory<T_Variable, T_Expression>* a_memory_ptr,  //
-        solution::SolutionArchive<T_Variable, T_Expression>*
-                                   a_solution_archive_ptr,  //
-        const utility::TimeKeeper& a_TIME_KEEPER,           //
+    AbstractSolverController(                                        //
+        model::Model<T_Variable, T_Expression>* a_model_ptr,         //
+        GlobalState<T_Variable, T_Expression>*  a_global_state_ptr,  //
+        const solution::SparseSolution<T_Variable, T_Expression>&
+                                   a_INITIAL_SOLUTION,  //
+        const utility::TimeKeeper& a_TIME_KEEPER,       //
         const option::Option&      a_OPTION) {
-        this->setup(a_model_ptr,             //
-                    a_CURRENT_SOLUTION,      //
-                    a_incumbent_holder_ptr,  //
-                    a_memory_ptr,            //
-                    a_solution_archive_ptr,  //
-                    a_TIME_KEEPER,           //
+        this->setup(a_model_ptr,         //
+                    a_global_state_ptr,  //
+                    a_INITIAL_SOLUTION,  //
+                    a_TIME_KEEPER,       //
                     a_OPTION);
     }
 
     /*************************************************************************/
-    virtual ~AbstractSolverController(void) {
-        /// nothing to do
-    }
-
-    /*************************************************************************/
     inline void initialize(void) {
-        m_model_ptr = nullptr;
+        m_model_ptr        = nullptr;
+        m_global_state_ptr = nullptr;
         m_initial_solution.initialize();
-        m_incumbent_holder_ptr = nullptr;
-        m_memory_ptr           = nullptr;
-        m_solution_archive_ptr = nullptr;
         m_time_keeper.initialize();
         m_option.initialize();
     }
 
     /*************************************************************************/
-    inline void setup(                                        //
-        model::Model<T_Variable, T_Expression>* a_model_ptr,  //
-        const solution::DenseSolution<T_Variable, T_Expression>&
-            a_INITIAL_SOLUTION,  //
-        solution::IncumbentHolder<T_Variable, T_Expression>*
-                                          a_incumbent_holder_ptr,
-        Memory<T_Variable, T_Expression>* a_memory_ptr,  //
-        solution::SolutionArchive<T_Variable, T_Expression>*
-                                   a_solution_archive_ptr,  //
-        const utility::TimeKeeper& a_TIME_KEEPER,           //
+    inline void setup(                                               //
+        model::Model<T_Variable, T_Expression>* a_model_ptr,         //
+        GlobalState<T_Variable, T_Expression>*  a_global_state_ptr,  //
+        const solution::SparseSolution<T_Variable, T_Expression>&
+                                   a_INITIAL_SOLUTION,  //
+        const utility::TimeKeeper& a_TIME_KEEPER,       //
         const option::Option&      a_OPTION) {
-        m_model_ptr            = a_model_ptr;
-        m_initial_solution     = a_INITIAL_SOLUTION;
-        m_incumbent_holder_ptr = a_incumbent_holder_ptr;
-        m_memory_ptr           = a_memory_ptr;
-        m_solution_archive_ptr = a_solution_archive_ptr;
-        m_time_keeper          = a_TIME_KEEPER;
-        m_option               = a_OPTION;
+        m_model_ptr        = a_model_ptr;
+        m_global_state_ptr = a_global_state_ptr;
+        m_initial_solution = a_INITIAL_SOLUTION;
+        m_time_keeper      = a_TIME_KEEPER;
+        m_option           = a_OPTION;
     }
 
     /*************************************************************************/
-    inline void update_archive(
+    inline constexpr void update_feasible_solution_archive(
         const std::vector<solution::SparseSolution<T_Variable, T_Expression>>&
-            a_FEASIBLE_SOLUTIONS) {
-        if (a_FEASIBLE_SOLUTIONS.size() > 0) {
-            m_solution_archive_ptr->push(a_FEASIBLE_SOLUTIONS);
+            a_SOLUTIONS) {
+        if (a_SOLUTIONS.size() == 0) {
+            return;
         }
+        m_global_state_ptr->feasible_solution_archive.push(a_SOLUTIONS);
+    }
+
+    /*************************************************************************/
+    inline constexpr void update_incumbent_solution_archive_and_search_tree(
+        const std::vector<solution::SparseSolution<T_Variable, T_Expression>>&
+            a_SOLUTIONS) {
+        if (a_SOLUTIONS.size() == 0) {
+            return;
+        }
+        auto& incumbent_holder = m_global_state_ptr->incumbent_holder;
+        auto& incumbent_solution_archive =
+            m_global_state_ptr->incumbent_solution_archive;
+        auto& search_tree = m_global_state_ptr->search_tree;
+
+        incumbent_solution_archive.push(a_SOLUTIONS);
+
+        if (!incumbent_solution_archive.has_feasible_solution()) {
+            if (incumbent_solution_archive.update_has_feasible_solution(
+                    a_SOLUTIONS)) {
+                incumbent_solution_archive.remove_infeasible_solutions();
+                search_tree.initialize();
+            }
+        }
+
+        search_tree.update(
+            incumbent_solution_archive,
+            incumbent_holder.global_augmented_incumbent_solution().to_sparse());
     }
 
     /*************************************************************************/
@@ -156,25 +164,9 @@ class AbstractSolverController {
     }
 
     /*************************************************************************/
-    inline constexpr solution::IncumbentHolder<T_Variable, T_Expression>*
-    incumbent_holder_ptr(void) {
-        return m_incumbent_holder_ptr;
-    }
-
-    /*************************************************************************/
-    inline constexpr Memory<T_Variable, T_Expression>* memory_ptr(void) {
-        return m_memory_ptr;
-    }
-
-    /*************************************************************************/
-    inline constexpr solution::SolutionArchive<T_Variable, T_Expression>*
-    solution_archive_ptr(void) {
-        return m_solution_archive_ptr;
-    }
-
-    /*************************************************************************/
-    inline utility::TimeKeeper time_keeper(void) const {
-        return m_time_keeper;
+    inline constexpr GlobalState<T_Variable, T_Expression>* global_state_ptr(
+        void) {
+        return m_global_state_ptr;
     }
 };
 }  // namespace printemps::solver

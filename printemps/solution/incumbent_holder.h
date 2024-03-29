@@ -137,7 +137,7 @@ class IncumbentHolder {
             if (!is_solution_updated) {
                 a_model_ptr
                     ->update_dependent_variables_and_disabled_constraints();
-                solution            = a_model_ptr->export_solution();
+                solution            = a_model_ptr->export_dense_solution();
                 is_solution_updated = true;
             }
 
@@ -155,7 +155,7 @@ class IncumbentHolder {
             if (!is_solution_updated) {
                 a_model_ptr
                     ->update_dependent_variables_and_disabled_constraints();
-                solution            = a_model_ptr->export_solution();
+                solution            = a_model_ptr->export_dense_solution();
                 is_solution_updated = true;
             }
 
@@ -176,7 +176,7 @@ class IncumbentHolder {
                 if (!is_solution_updated) {
                     a_model_ptr
                         ->update_dependent_variables_and_disabled_constraints();
-                    solution            = a_model_ptr->export_solution();
+                    solution            = a_model_ptr->export_dense_solution();
                     is_solution_updated = true;
                 }
 

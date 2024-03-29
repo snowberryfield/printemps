@@ -34,24 +34,17 @@ class TabuSearchController
 
     /*************************************************************************/
     TabuSearchController(
-        model::Model<T_Variable, T_Expression>* a_model_ptr,  //
-        const solution::DenseSolution<T_Variable, T_Expression>&
-            a_INITIAL_SOLUTION,  //
-        solution::IncumbentHolder<T_Variable, T_Expression>*
-                                          a_incumbent_holder_ptr,
-        Memory<T_Variable, T_Expression>* a_memory_ptr,  //
-        solution::SolutionArchive<T_Variable, T_Expression>*
-                                   a_solution_archive_ptr,  //
-        const utility::TimeKeeper& a_TIME_KEEPER,           //
+        model::Model<T_Variable, T_Expression>* a_model_ptr,         //
+        GlobalState<T_Variable, T_Expression>*  a_global_state_ptr,  //
+        const solution::SparseSolution<T_Variable, T_Expression>&
+                                   a_INITIAL_SOLUTION,  //
+        const utility::TimeKeeper& a_TIME_KEEPER,       //
         const option::Option&      a_OPTION) {
         this->initialize();
-
-        this->setup(a_model_ptr,             //
-                    a_INITIAL_SOLUTION,      //
-                    a_incumbent_holder_ptr,  //
-                    a_memory_ptr,            //
-                    a_solution_archive_ptr,  //
-                    a_TIME_KEEPER,           //
+        this->setup(a_model_ptr,         //
+                    a_global_state_ptr,  //
+                    a_INITIAL_SOLUTION,  //
+                    a_TIME_KEEPER,       //
                     a_OPTION);
     }
 
@@ -70,9 +63,8 @@ class TabuSearchController
 
     /*************************************************************************/
     inline void preprocess(void) {
-        m_state_manager.setup(this->m_model_ptr,             //
-                              this->m_incumbent_holder_ptr,  //
-                              this->m_memory_ptr,            //
+        m_state_manager.setup(this->m_model_ptr,         //
+                              this->m_global_state_ptr,  //
                               this->m_option);
 
         auto& state = m_state_manager.state();
@@ -100,7 +92,7 @@ class TabuSearchController
         const auto& STATE = m_state_manager.state();
 
         if (STATE.total_elapsed_time > this->m_option.general.time_max) {
-            utility::print_message(
+            utility::print_message(  //
                 "Outer loop was terminated because of time-over (" +
                     utility::to_string(STATE.total_elapsed_time, "%.3f") +
                     "sec).",
@@ -115,7 +107,7 @@ class TabuSearchController
         const bool a_IS_ENABLED_PRINT) {
         const auto& STATE = m_state_manager.state();
         if (STATE.iteration >= this->m_option.general.iteration_max) {
-            utility::print_message(
+            utility::print_message(  //
                 "Outer loop was terminated because of iteration limit (" +
                     utility::to_string(STATE.iteration, "%d") + " iterations).",
                 a_IS_ENABLED_PRINT);
@@ -128,9 +120,10 @@ class TabuSearchController
     inline bool satisfy_reach_target_terminate_condition(
         const bool a_IS_ENABLED_PRINT) {
         const auto& STATE = m_state_manager.state();
-        if (this->m_incumbent_holder_ptr->feasible_incumbent_objective() <=
+        if (this->m_global_state_ptr->incumbent_holder
+                .feasible_incumbent_objective() <=
             this->m_option.general.target_objective_value) {
-            utility::print_message(
+            utility::print_message(  //
                 "Outer loop was terminated because of feasible objective "
                 "reaches the target limit (" +
                     utility::to_string(STATE.iteration, "%d") + " iterations).",
@@ -147,7 +140,7 @@ class TabuSearchController
         if (STATE.iteration > 0 &&
             STATE.tabu_search_result.termination_status ==
                 tabu_search::core::TabuSearchCoreTerminationStatus::OPTIMAL) {
-            utility::print_message(
+            utility::print_message(  //
                 "Outer loop was terminated because an optimal solution was "
                 "found.",
                 a_IS_ENABLED_PRINT);
@@ -158,321 +151,355 @@ class TabuSearchController
 
     /*************************************************************************/
     inline void print_trend(const bool a_IS_ENABLED_PRINT) {
-        const auto& STATE = m_state_manager.state();
+        this->print_outer_loop_iteration(a_IS_ENABLED_PRINT);
 
         /**
-         * Print the summary.
+         * Print the incumbent summary.
          */
-        this->print_outer_loop_iteration(  //
-            STATE.iteration, a_IS_ENABLED_PRINT);
+        utility::print_dot_line(a_IS_ENABLED_PRINT);
+        utility::print(  //
+            "# Incumbent Summary", a_IS_ENABLED_PRINT);
 
-        this->print_total_elapsed_time(  //
-            STATE.total_elapsed_time, a_IS_ENABLED_PRINT);
-
+        this->print_update_status(a_IS_ENABLED_PRINT);
+        this->print_total_elapsed_time(a_IS_ENABLED_PRINT);
         this->print_incumbent_summary(a_IS_ENABLED_PRINT);
-
         this->print_dual_bound(a_IS_ENABLED_PRINT);
 
         /**
-         * Print the optimization status of the previous tabu search loop.
+         * Print the search behavior summary.
          */
-        this->print_update_status(  //
-            STATE.tabu_search_result.total_update_status, a_IS_ENABLED_PRINT);
+        utility::print_dot_line(a_IS_ENABLED_PRINT);
+        utility::print(  //
+            "# Search Behavior Summary", a_IS_ENABLED_PRINT);
+        this->print_intensity(a_IS_ENABLED_PRINT);
+        this->print_performance(a_IS_ENABLED_PRINT);
+        this->print_distance(a_IS_ENABLED_PRINT);
+        this->print_speed(a_IS_ENABLED_PRINT);
+        this->print_number_of_feasible_solutions(a_IS_ENABLED_PRINT);
 
         /**
-         * Print the search intensity.
+         * Print the search tree summary (frontier solutions).
          */
-        this->print_intensity(  //
-            STATE.current_primal_intensity, STATE.current_dual_intensity,
+        utility::print_dot_line(a_IS_ENABLED_PRINT);
+        utility::print(  //
+            "# Search Tree Summary (Frontier Solutions)", a_IS_ENABLED_PRINT);
+        this->print_frontier_solutions(a_IS_ENABLED_PRINT);
+
+        /**
+         * Print the search tree summary (locally optimal solutions).
+         */
+        utility::print_dot_line(a_IS_ENABLED_PRINT);
+        utility::print(  //
+            "# Search Tree Summary (Locally Optimal Solutions)",
             a_IS_ENABLED_PRINT);
+        this->print_locally_optimal_solutions(a_IS_ENABLED_PRINT);
 
         /**
-         * Print the search performance.
+         * Print the state of the parallelization controller summary
+         * (neighborhood update).
          */
-        this->print_performance(  //
-            STATE.tabu_search_result.performance, a_IS_ENABLED_PRINT);
-
-        /**
-         * Print the averaged inner iteration speed.
-         */
-        this->print_averaged_inner_iteration_speed(
-            STATE.averaged_inner_iteration_speed, a_IS_ENABLED_PRINT);
-
-        /**
-         * Print the averaged move evaluation speed.
-         */
-        this->print_averaged_move_evaluation_speed(
-            STATE.averaged_move_evaluation_speed, a_IS_ENABLED_PRINT);
-
-/**
- * Print the state of the parallelization controller for updating moves.
- */
 #ifdef _OPENMP
         if (this->m_option.parallel.is_enabled_parallel_neighborhood_update &&
             this->m_option.parallel
                 .is_enabled_automatic_neighborhood_update_parallelization) {
+            utility::print_dot_line(a_IS_ENABLED_PRINT);
+            utility::print(  //
+                "# Parallelization Controller Summary (Neighborhood Update)",
+                a_IS_ENABLED_PRINT);
             this->print_neighborhood_update_parallelization_controller(
-                STATE.neighborhood_update_parallelization_controller,
                 a_IS_ENABLED_PRINT);
         }
 #endif
 
-/**
- * Print the state of the parallelization controller for evaluating
- * moves.
- */
+        /**
+         * Print the state of the parallelization controller summary
+         * (move evaluation).
+         */
 #ifdef _OPENMP
         if (this->m_option.parallel.is_enabled_parallel_evaluation &&
             this->m_option.parallel
                 .is_enabled_automatic_evaluation_parallelization) {
+            utility::print_dot_line(a_IS_ENABLED_PRINT);
+            utility::print(  //
+                "# Parallelization Controller Summary (Move Evaluation)",
+                a_IS_ENABLED_PRINT);
             this->print_evaluation_parallelization_controller(
-                STATE.evaluation_parallelization_controller,
                 a_IS_ENABLED_PRINT);
         }
 #endif
 
         /**
-         * Print the number of found feasible solutions.
+         * Print the violation and penalty summary.
          */
-        this->print_number_of_feasible_solutions(
-            this->m_solution_archive_ptr->solutions().size(),
-            a_IS_ENABLED_PRINT);
+        utility::print_dot_line(a_IS_ENABLED_PRINT);
+        utility::print(  //
+            "# Violation and Penalty Summary", a_IS_ENABLED_PRINT);
+
+        this->print_violative_constraints(a_IS_ENABLED_PRINT);
+        this->print_penalty_coefficient(a_IS_ENABLED_PRINT);
 
         /**
-         * Print the number of violative constraints.
+         * Print the tabu search parameters for the Next loop.
          */
-        this->print_violative_constraints(
-            this->m_incumbent_holder_ptr->local_augmented_incumbent_solution(),
-            a_IS_ENABLED_PRINT);
+        utility::print_dot_line(a_IS_ENABLED_PRINT);
+        utility::print(  //
+            "# Tabu Search Parameters for the Next loop", a_IS_ENABLED_PRINT);
 
-        /**
-         * Print message if the penalty coefficients were changed.
-         */
-        if (STATE.penalty_coefficient_reset_flag) {
-            this->print_penalty_coefficient_reset(a_IS_ENABLED_PRINT);
-        } else if (STATE.is_enabled_penalty_coefficient_relaxing) {
-            this->print_penalty_coefficient_relaxing(a_IS_ENABLED_PRINT);
-        } else if (STATE.is_enabled_penalty_coefficient_tightening) {
-            this->print_penalty_coefficient_tightening(a_IS_ENABLED_PRINT);
-        }
+        this->print_initial_tabu_tenure(a_IS_ENABLED_PRINT);
+        this->print_improvability_screening_mode(a_IS_ENABLED_PRINT);
+        this->print_initial_solution(a_IS_ENABLED_PRINT);
+        this->print_number_of_initial_modification(a_IS_ENABLED_PRINT);
+        this->print_inner_iteration_max(a_IS_ENABLED_PRINT);
+        this->print_is_enabled_special_neighborhood_move(a_IS_ENABLED_PRINT);
+        this->print_number_of_stored_chain_moves(a_IS_ENABLED_PRINT);
+    }
 
-        this->print_penalty_coefficient_relaxing_rate(  //
-            STATE.penalty_coefficient_relaxing_rate, a_IS_ENABLED_PRINT);
+    /*************************************************************************/
+    inline void print_outer_loop_iteration(
+        const bool a_IS_ENABLED_PRINT) const {
+        const auto& STATE = m_state_manager.state();
 
-        this->print_penalty_coefficient_tightening_rate(  //
-            STATE.penalty_coefficient_tightening_rate, a_IS_ENABLED_PRINT);
-
-        /**
-         * Print the initial tabu tenure for the next loop.
-         */
-        this->print_initial_tabu_tenure(  //
-            STATE.initial_tabu_tenure, a_IS_ENABLED_PRINT);
-
-        /**
-         * Print the improvability screening_mode
-         */
-        this->print_improvability_screening_mode(  //
-            STATE.improvability_screening_mode, a_IS_ENABLED_PRINT);
-
-        /**
-         * Print the initial solution for the next loop.
-         */
-        if (STATE.employing_global_solution_flag) {
-            this->print_employing_global_solution(a_IS_ENABLED_PRINT);
-        } else if (STATE.employing_local_solution_flag) {
-            this->print_employing_local_solution(a_IS_ENABLED_PRINT);
-        } else if (STATE.employing_previous_solution_flag) {
-            this->print_employing_previous_solution(a_IS_ENABLED_PRINT);
-        }
-
-        /**
-         * Print the number of initial modification for the next
-         * loop.
-         */
-        this->print_number_of_initial_modification(  //
-            STATE.number_of_initial_modification, a_IS_ENABLED_PRINT);
-
-        /**
-         * Print the number of iterations for the next loop.
-         */
-        this->print_inner_iteration_max(  //
-            STATE.iteration_max, a_IS_ENABLED_PRINT);
-
-        /**
-         * Print a message of the special neighborhood moves
-         * activation/deactivation.
-         */
-        if (STATE.is_disabled_special_neighborhood_move) {
-            this->print_special_neighborhood_move_disabled(a_IS_ENABLED_PRINT);
-        }
-
-        if (STATE.is_enabled_special_neighborhood_move) {
-            this->print_special_neighborhood_move_enabled(a_IS_ENABLED_PRINT);
-        }
-
-        /**
-         * Print the number of the stored chain moves.
-         */
-        this->print_number_of_stored_chain_moves(  //
-            this->m_model_ptr->neighborhood().chain().moves().size(),
+        utility::print_message(  //
+            "Tabu search loop finished (" +
+                std::to_string(STATE.iteration + 1) + "/" +
+                std::to_string(this->m_option.general.iteration_max) +
+                ", Reason: " +
+                core::TabuSearchCoreTerminationStatusInverseMap.at(
+                    STATE.tabu_search_result.termination_status) +
+                ").",
             a_IS_ENABLED_PRINT);
     }
 
     /*************************************************************************/
-    inline void print_update_status(const bool a_UPDATE_STATUS,
-                                    const bool a_IS_ENABLED_PRINT) {
-        if (a_UPDATE_STATUS & solution::IncumbentHolderConstant::
-                                  STATUS_FEASIBLE_INCUMBENT_UPDATE) {
-            utility::print_message("Feasible incumbent objective was updated. ",
-                                   a_IS_ENABLED_PRINT);
+    inline void print_update_status(const bool a_IS_ENABLED_PRINT) const {
+        const auto& STATE        = m_state_manager.state();
+        const auto UPDATE_STATUS = STATE.tabu_search_result.total_update_status;
 
-        } else if (a_UPDATE_STATUS &
+        if (UPDATE_STATUS & solution::IncumbentHolderConstant::
+                                STATUS_FEASIBLE_INCUMBENT_UPDATE) {
+            utility::print_info(  //
+                " -- Status: Feasible incumbent objective was updated. ",
+                a_IS_ENABLED_PRINT);
+
+        } else if (UPDATE_STATUS &
                    solution::IncumbentHolderConstant::
                        STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
-            utility::print_message("Global incumbent objective was updated. ",
-                                   a_IS_ENABLED_PRINT);
+            utility::print_info(  //
+                " -- Status: Global incumbent objective was updated. ",
+                a_IS_ENABLED_PRINT);
         } else {
-            utility::print_message("Incumbent objective was not updated.",
-                                   a_IS_ENABLED_PRINT);
+            utility::print_info(  //
+                " -- Status: Incumbent objective was not updated.",
+                a_IS_ENABLED_PRINT);
         }
+    }
+
+    /*************************************************************************/
+    inline void print_intensity(const bool a_IS_ENABLED_PRINT) const {
+        const auto& STATE = m_state_manager.state();
+        utility::print_info(  //
+            " -- Primal search intensity: " +
+                utility::to_string(STATE.current_primal_intensity, "%.3e"),
+            a_IS_ENABLED_PRINT);
+
+        utility::print_info(  //
+            " -- Dual search intensity: " +
+                utility::to_string(STATE.current_dual_intensity, "%.3e"),
+            a_IS_ENABLED_PRINT);
+    }
+
+    /*************************************************************************/
+    inline void print_performance(const bool a_IS_ENABLED_PRINT) const {
+        const auto& STATE = m_state_manager.state();
+        utility::print_info(  //
+            " -- Search performance in the previous loop: " +
+                utility::to_string(STATE.tabu_search_result.performance,
+                                   "%.5e"),
+            a_IS_ENABLED_PRINT);
+    }
+
+    /*************************************************************************/
+    inline void print_distance(const bool a_IS_ENABLED_PRINT) const {
+        const auto& STATE = m_state_manager.state();
+        utility::print_info(  //
+            " -- L0-Distance from the previous initial solution: " +
+                utility::to_string(STATE.distance_from_current_solution, "%d"),
+            a_IS_ENABLED_PRINT);
+        utility::print_info(  //
+            " -- L0-Distance from the global incumbent solution: " +
+                utility::to_string(STATE.distance_from_global_solution, "%d"),
+            a_IS_ENABLED_PRINT);
+    }
+
+    /*************************************************************************/
+    inline void print_speed(const bool a_IS_ENABLED_PRINT) const {
+        const auto& STATE = m_state_manager.state();
+        utility::print_info(  //
+            " -- Averaged inner iteration speed: " +
+                utility::to_string(STATE.averaged_inner_iteration_speed,
+                                   "%.5e") +
+                " iterations/sec",
+            a_IS_ENABLED_PRINT);
+        utility::print_info(  //
+            " -- Averaged move evaluation speed: " +
+                utility::to_string(STATE.averaged_move_evaluation_speed,
+                                   "%.5e") +
+                " moves/sec",
+            a_IS_ENABLED_PRINT);
     }
 
     /*************************************************************************/
     inline void print_number_of_feasible_solutions(
-        const int  a_NUMBER_OF_FEASIBLE_SOLUTIONS,
-        const bool a_IS_ENABLED_PRINT) {
+        const bool a_IS_ENABLED_PRINT) const {
         if (this->m_option.output.is_enabled_store_feasible_solutions) {
-            utility::print_message(
-                "Number of feasible solutions found so far is " +
-                    std::to_string(a_NUMBER_OF_FEASIBLE_SOLUTIONS) + ".",
+            utility::print_info(  //
+                " -- Number of feasible solutions found: " +
+                    std::to_string(
+                        this->m_global_state_ptr->feasible_solution_archive
+                            .solutions()
+                            .size()),
                 a_IS_ENABLED_PRINT);
         }
     }
 
     /*************************************************************************/
-    inline void print_intensity(const double a_CURRENT_PRIMAL_INTENSITY,
-                                const double a_CURRENT_DUAL_INTENSITY,
-                                const bool   a_IS_ENABLED_PRINT) {
-        utility::print_message(
-            "Historical search intensities are " +
-                utility::to_string(a_CURRENT_PRIMAL_INTENSITY, "%.3e") +
-                "(primal) / " +
-                utility::to_string(a_CURRENT_DUAL_INTENSITY, "%.3e") +
-                "(dual).",
-            a_IS_ENABLED_PRINT);
-    }
+    inline void print_frontier_solutions(const bool a_IS_ENABLED_PRINT) const {
+        const auto& FRONTIER_SOLUTIONS =
+            this->m_global_state_ptr->search_tree.frontier_solutions();
+        if (FRONTIER_SOLUTIONS.size() == 0) {
+            utility::print_message(  //
+                "There are no frontier solution nodes in the search tree.",
+                a_IS_ENABLED_PRINT);
+            return;
+        }
 
-    /*************************************************************************/
-    inline void print_performance(const double a_SEARCH_PERFORMANCE,
-                                  const bool   a_IS_ENABLED_PRINT) {
-        utility::print_message(
-            "Search performance in the previous loop is " +
-                utility::to_string(a_SEARCH_PERFORMANCE, "%.5e."),
-            a_IS_ENABLED_PRINT);
-    }
-
-    /*************************************************************************/
-    inline void print_averaged_inner_iteration_speed(
-        const double a_AVERAGED_INNER_ITERATION_SPEED,
-        const bool   a_IS_ENABLED_PRINT) {
-        utility::print_message(
-            "Averaged inner iteration speed is " +
-                utility::to_string(a_AVERAGED_INNER_ITERATION_SPEED, "%.5e") +
-                " iterations/sec.",
-            a_IS_ENABLED_PRINT);
-    }
-
-    /*************************************************************************/
-    inline void print_averaged_move_evaluation_speed(
-        const double a_AVERAGED_MOVE_EVALUATION_SPEED,
-        const bool   a_IS_ENABLED_PRINT) {
-        utility::print_message(
-            "Averaged move evaluation speed is " +
-                utility::to_string(a_AVERAGED_MOVE_EVALUATION_SPEED, "%.5e") +
-                " moves/sec.",
-            a_IS_ENABLED_PRINT);
-    }
-
-    /*************************************************************************/
-    inline void print_penalty_coefficient_relaxing_rate(
-        const double a_PENALTY_COEFFICIENT_RELAXING_RATE,
-        const bool   a_IS_ENABLED_PRINT) {
         utility::print_message(  //
-            "Penalty coefficients relaxing rate is " +
-                std::to_string(a_PENALTY_COEFFICIENT_RELAXING_RATE) + ".",
+            "There are " + std::to_string(FRONTIER_SOLUTIONS.size()) +
+                " frontier solution nodes in the search tree:",
             a_IS_ENABLED_PRINT);
-    }
-
-    /*************************************************************************/
-    inline void print_penalty_coefficient_tightening_rate(
-        const double a_PENALTY_COEFFICIENT_TIGHTENING_RATE,
-        const bool   a_IS_ENABLED_PRINT) {
-        utility::print_message(  //
-            "Penalty coefficients tightening rate is " +
-                std::to_string(a_PENALTY_COEFFICIENT_TIGHTENING_RATE) + ".",
-            a_IS_ENABLED_PRINT);
-    }
-
-    /*************************************************************************/
-    inline void print_penalty_coefficient_reset(const bool a_IS_ENABLED_PRINT) {
-        utility::print_message(
-            "Penalty coefficients were reset due to search stagnation.",
-            a_IS_ENABLED_PRINT);
-    }
-
-    /*************************************************************************/
-    inline void print_penalty_coefficient_relaxing(
-        const bool a_IS_ENABLED_PRINT) {
-        utility::print_message(                    //
-            "Penalty coefficients were relaxed.",  //
-            a_IS_ENABLED_PRINT);
-    }
-
-    /*************************************************************************/
-    inline void print_penalty_coefficient_tightening(
-        const bool a_IS_ENABLED_PRINT) {
-        utility::print_message(                      //
-            "Penalty coefficients were tightened.",  //
-            a_IS_ENABLED_PRINT);
-    }
-
-    /*************************************************************************/
-    inline void print_number_of_stored_chain_moves(
-        const int  a_NUMBER_OF_STORED_CHAIN_MOVES,
-        const bool a_IS_ENABLED_PRINT) {
-        if (a_NUMBER_OF_STORED_CHAIN_MOVES > 0) {
-            utility::print_message(
-                "There are " + std::to_string(a_NUMBER_OF_STORED_CHAIN_MOVES) +
-                    " stored chain moves.",
+        for (const auto& solution : FRONTIER_SOLUTIONS) {
+            utility::print_info(  //
+                " -- obj.: " +
+                    utility::to_string(solution.first.objective, "%.3e,") +
+                    " viol: " +
+                    utility::to_string(solution.first.total_violation,
+                                       "%.3e,") +
+                    " L0-dist.: " + utility::to_string(solution.second, "%d"),
                 a_IS_ENABLED_PRINT);
         }
     }
 
     /*************************************************************************/
-    inline void print_special_neighborhood_move_enabled(
-        const bool a_IS_ENABLED_PRINT) {
-        if (this->m_model_ptr->neighborhood()
-                .number_of_special_neighborhood_moves() > 0) {
-            utility::print_message("Special neighborhood moves were enabled.",
-                                   a_IS_ENABLED_PRINT);
+    inline void print_locally_optimal_solutions(
+        const bool a_IS_ENABLED_PRINT) const {
+        const auto& LOCALLY_OPTIMAL_SOLUTIONS =
+            this->m_global_state_ptr->search_tree.locally_optimal_solutions();
+
+        if (LOCALLY_OPTIMAL_SOLUTIONS.size() == 0) {
+            utility::print_message(  //
+                "There are no locally optimal solutions nodes in the search "
+                "tree.",
+                a_IS_ENABLED_PRINT);
+            return;
+        }
+
+        utility::print_message(  //
+            "There are " + std::to_string(LOCALLY_OPTIMAL_SOLUTIONS.size()) +
+                " locally optimal solution nodes in the search tree:",
+            a_IS_ENABLED_PRINT);
+        for (const auto& solution : LOCALLY_OPTIMAL_SOLUTIONS) {
+            utility::print_info(  //
+                " -- obj.: " +
+                    utility::to_string(solution.first.objective, "%.3e,") +
+                    " viol: " +
+                    utility::to_string(solution.first.total_violation,
+                                       "%.3e,") +
+                    " L0-dist.: " + utility::to_string(solution.second, "%d"),
+                a_IS_ENABLED_PRINT);
         }
     }
 
     /*************************************************************************/
-    inline void print_special_neighborhood_move_disabled(
-        const bool a_IS_ENABLED_PRINT) {
-        if (this->m_model_ptr->neighborhood()
-                .number_of_special_neighborhood_moves() > 0) {
-            utility::print_message("Special neighborhood moves were disabled.",
-                                   a_IS_ENABLED_PRINT);
+    inline void print_neighborhood_update_parallelization_controller(
+        const bool a_IS_ENABLED_PRINT) const {
+        const auto& STATE = m_state_manager.state();
+        const auto& CONTROLLER =
+            STATE.neighborhood_update_parallelization_controller;
+
+        utility::print_message(  //
+            "The state of the parallelization controller for neighborhood "
+            "update are as follows ('*' denotes the selected option for the "
+            "next loop):",
+            a_IS_ENABLED_PRINT);
+
+        for (const auto& action : CONTROLLER.actions()) {
+            char flag =
+                CONTROLLER.best_action().body == action.body ? '*' : ' ';
+            utility::print_info(
+                utility::to_string(flag, " -- (%c") +
+                    utility::to_string(action.body, "%d Threads) ") +
+                    utility::to_string(action.mean, "Mean: %.3e, ") +
+                    utility::to_string(action.confidence, "Conf.: %.3e, ") +
+                    utility::to_string(action.number_of_samples, "N: %d") +
+                    utility::to_string(
+                        action.number_of_samples /
+                            static_cast<double>(
+                                CONTROLLER.total_number_of_samples()),
+                        "(%.3f)"),
+                a_IS_ENABLED_PRINT);
         }
+
+        utility::print_info(  //
+            " -- Averaged number of threads: " +
+                utility::to_string(
+                    STATE.averaged_number_of_threads_neighborhood_update,
+                    "%.3e"),
+            a_IS_ENABLED_PRINT);
+    }
+
+    /*************************************************************************/
+    inline void print_evaluation_parallelization_controller(
+        const bool a_IS_ENABLED_PRINT) const {
+        const auto& STATE      = m_state_manager.state();
+        const auto& CONTROLLER = STATE.evaluation_parallelization_controller;
+
+        utility::print_message(  //
+            "The state of the parallelization controller for move evaluation "
+            "are as follows ('*' denotes the selected option for the next "
+            "loop):",
+            a_IS_ENABLED_PRINT);
+
+        for (const auto& action : CONTROLLER.actions()) {
+            char flag =
+                CONTROLLER.best_action().body == action.body ? '*' : ' ';
+            utility::print_info(
+                utility::to_string(flag, " -- (%c") +
+                    utility::to_string(action.body, "%d Threads) ") +
+                    utility::to_string(action.mean, "Mean: %.3e, ") +
+                    utility::to_string(action.confidence, "Conf.: %.3e, ") +
+                    utility::to_string(action.number_of_samples, "N: %d") +
+                    utility::to_string(
+                        action.number_of_samples /
+                            static_cast<double>(
+                                CONTROLLER.total_number_of_samples()),
+                        "(%.3f)"),
+                a_IS_ENABLED_PRINT);
+        }
+
+        utility::print_info(  //
+            " -- Averaged number of threads: " +
+                utility::to_string(STATE.averaged_number_of_threads_evaluation,
+                                   "%.3e"),
+            a_IS_ENABLED_PRINT);
     }
 
     /*************************************************************************/
     inline void print_violative_constraints(
-        const solution::DenseSolution<T_Variable, T_Expression>& a_SOLUTION,
-        const bool a_IS_ENABLED_PRINT) {
-        if (!a_SOLUTION.is_feasible) {
+        const bool a_IS_ENABLED_PRINT) const {
+        const auto& SOLUTION = this->m_global_state_ptr->incumbent_holder
+                                   .local_augmented_incumbent_solution();
+
+        if (!SOLUTION.is_feasible) {
             int number_of_violative_constraints = 0;
             /**
              * Due to the slow speed of standard output in the Windows DOS,
@@ -482,12 +509,12 @@ class TabuSearchController
              */
             constexpr int MAX_NUMBER_OF_PRINT_ITEMS = 20;
 
-            utility::print_message(
+            utility::print_message(  //
                 "The current solution does not satisfy the following "
                 "constraints:",
                 a_IS_ENABLED_PRINT);
 
-            for (const auto& proxy : a_SOLUTION.violation_value_proxies) {
+            for (const auto& proxy : SOLUTION.violation_value_proxies) {
                 const auto& values      = proxy.flat_indexed_values();
                 const auto& names       = proxy.flat_indexed_names();
                 const int   VALUES_SIZE = values.size();
@@ -509,7 +536,7 @@ class TabuSearchController
                 utility::print_info("and much more...", a_IS_ENABLED_PRINT);
             }
 
-            utility::print_message(
+            utility::print_message(  //
                 "There are " + std::to_string(number_of_violative_constraints) +
                     " violative constraints.",
                 a_IS_ENABLED_PRINT);
@@ -517,36 +544,70 @@ class TabuSearchController
     }
 
     /*************************************************************************/
+    inline void print_penalty_coefficient(const bool a_IS_ENABLED_PRINT) const {
+        const auto& STATE = m_state_manager.state();
+
+        if (STATE.penalty_coefficient_reset_flag) {
+            utility::print_message(                                           //
+                "Penalty coefficients were reset due to search stagnation.",  //
+                a_IS_ENABLED_PRINT);
+        } else if (STATE.is_enabled_penalty_coefficient_relaxing) {
+            utility::print_message(                    //
+                "Penalty coefficients were relaxed.",  //
+                a_IS_ENABLED_PRINT);
+        } else if (STATE.is_enabled_penalty_coefficient_tightening) {
+            utility::print_message(                      //
+                "Penalty coefficients were tightened.",  //
+                a_IS_ENABLED_PRINT);
+        }
+
+        utility::print_info(  //
+            " -- Penalty coefficients relaxing rate: " +
+                std::to_string(STATE.penalty_coefficient_relaxing_rate),
+            a_IS_ENABLED_PRINT);
+
+        utility::print_info(  //
+            " -- Penalty coefficients tightening rate: " +
+                std::to_string(STATE.penalty_coefficient_tightening_rate),
+            a_IS_ENABLED_PRINT);
+    }
+
+    /*************************************************************************/
+    inline void print_initial_tabu_tenure(const bool a_IS_ENABLED_PRINT) const {
+        const auto& STATE = m_state_manager.state();
+
+        utility::print_info(  //
+            " -- Tabu tenure: " + std::to_string(STATE.initial_tabu_tenure),
+            a_IS_ENABLED_PRINT);
+    }
+
+    /*************************************************************************/
     inline void print_improvability_screening_mode(
-        const option::improvability_screening_mode::ImprovabilityScreeningMode&
-             a_IMPROVABILITY_SCREENING_MODE,
-        bool a_IS_ENABLED_PRINT) {
-        switch (a_IMPROVABILITY_SCREENING_MODE) {
+        bool a_IS_ENABLED_PRINT) const {
+        const auto& STATE = m_state_manager.state();
+
+        switch (STATE.improvability_screening_mode) {
             case option::improvability_screening_mode::Off: {
-                utility::print_message(
-                    "No improvability screening will be applied for the next "
-                    "loop.",
+                utility::print_info(  //
+                    " -- Improvability screening mode: off",
                     a_IS_ENABLED_PRINT);
                 break;
             }
             case option::improvability_screening_mode::Soft: {
-                utility::print_message(
-                    "Soft improvability screening will be applied in the "
-                    "next loop.",
+                utility::print_info(  //
+                    " -- Improvability screening mode: soft",
                     a_IS_ENABLED_PRINT);
                 break;
             }
             case option::improvability_screening_mode::Aggressive: {
-                utility::print_message(
-                    "Aggressive improvability screening will be applied in "
-                    "the next loop.",
+                utility::print_info(  //
+                    " -- Improvability screening mode: aggressive",
                     a_IS_ENABLED_PRINT);
                 break;
             }
             case option::improvability_screening_mode::Intensive: {
-                utility::print_message(
-                    "Intensive improvability screening will be applied in "
-                    "the next loop.",
+                utility::print_info(  //
+                    " -- Improvability screening mode: intensive",
                     a_IS_ENABLED_PRINT);
                 break;
             }
@@ -559,145 +620,68 @@ class TabuSearchController
     }
 
     /*************************************************************************/
-    inline void print_outer_loop_iteration(const int  a_ITERATION,
-                                           const bool a_IS_ENABLED_PRINT) {
-        utility::print_message(
-            "Tabu search loop finished (" + std::to_string(a_ITERATION + 1) +
-                "/" + std::to_string(this->m_option.general.iteration_max) +
-                ", Reason: " +
-                core::TabuSearchCoreTerminationStatusInverseMap.at(
-                    m_state_manager.state()
-                        .tabu_search_result.termination_status) +
-                ").",
-            a_IS_ENABLED_PRINT);
-    }
+    inline void print_initial_solution(const bool a_IS_ENABLED_PRINT) const {
+        const auto& STATE = m_state_manager.state();
 
-    /*************************************************************************/
-    inline void print_initial_tabu_tenure(const int  a_INITIAL_TABU_TENURE,
-                                          const bool a_IS_ENABLED_PRINT) {
-        utility::print_message(  //
-            "Tabu tenure for the next loop was set to " +
-                std::to_string(a_INITIAL_TABU_TENURE) + ".",
-            a_IS_ENABLED_PRINT);
+        if (STATE.employing_global_solution_flag) {
+            utility::print_info(  //
+                " -- Initial solution: global incumbent", a_IS_ENABLED_PRINT);
+        } else if (STATE.employing_local_solution_flag) {
+            utility::print_info(  //
+                " -- Initial solution: local incumbent", a_IS_ENABLED_PRINT);
+        } else if (STATE.employing_previous_solution_flag) {
+            utility::print_info(  //
+                " -- Initial solution: previous initial", a_IS_ENABLED_PRINT);
+        }
     }
 
     /*************************************************************************/
     inline void print_number_of_initial_modification(
-        const int  a_NUMBER_OF_INITIAL_MODIFICATION,
-        const bool a_IS_ENABLED_PRINT) {
-        if (a_NUMBER_OF_INITIAL_MODIFICATION > 0) {
-            utility::print_message(
-                "For the initial " +
-                    std::to_string(a_NUMBER_OF_INITIAL_MODIFICATION) +
-                    " iterations in the next loop, the solution will be "
-                    "randomly updated to escape from the local optimum.",
-                a_IS_ENABLED_PRINT);
-        }
-    }
-
-    /*************************************************************************/
-    inline void print_employing_global_solution(const bool a_IS_ENABLED_PRINT) {
-        utility::print_message(
-            "The next loop will start from the global incumbent solution.",
-            a_IS_ENABLED_PRINT);
-    }
-
-    /*************************************************************************/
-    inline void print_employing_local_solution(const bool a_IS_ENABLED_PRINT) {
-        utility::print_message(
-            "The next loop will start from the local incumbent solution found "
-            "in the previous loop.",
-            a_IS_ENABLED_PRINT);
-    }
-
-    /*************************************************************************/
-    inline void print_employing_previous_solution(
-        const bool a_IS_ENABLED_PRINT) {
-        utility::print_message(
-            "The next loop will start from the same initial solution of the "
-            "previous loop.",
-            a_IS_ENABLED_PRINT);
-    }
-
-    /*************************************************************************/
-    inline void print_inner_iteration_max(const int  a_ITERATION_MAX,
-                                          const bool a_IS_ENABLED_PRINT) {
-        utility::print_message(
-            "The maximum number of iterations for the next loop was "
-            "set to " +
-                std::to_string(a_ITERATION_MAX) + ".",
-            a_IS_ENABLED_PRINT);
-    }
-
-    /*************************************************************************/
-    inline void print_neighborhood_update_parallelization_controller(
-        const utility::ucb1::Learner<int>& a_CONTROLLER,
-        const bool                         a_IS_ENABLED_PRINT) {
-        utility::print_message(
-            "The state of the parallelization controller for updating "
-            "neighborhood are as follows ('*' denotes the selected option for "
-            "the next loop):",
-            a_IS_ENABLED_PRINT);
-
-        for (const auto& action : a_CONTROLLER.actions()) {
-            char flag =
-                a_CONTROLLER.best_action().body == action.body ? '*' : ' ';
-            utility::print_info(
-                utility::to_string(flag, "-- (%c") +
-                    utility::to_string(action.body, "%d Threads) ") +
-                    utility::to_string(action.mean, "Mean: %.3e, ") +
-                    utility::to_string(action.confidence, "Conf.: %.3e, ") +
-                    utility::to_string(action.number_of_samples, "N: %d") +
-                    utility::to_string(
-                        action.number_of_samples /
-                            static_cast<double>(
-                                a_CONTROLLER.total_number_of_samples()),
-                        "(%.3f)"),
-                a_IS_ENABLED_PRINT);
-        }
-
+        const bool a_IS_ENABLED_PRINT) const {
         const auto& STATE = m_state_manager.state();
-        utility::print_message(
-            "Averaged number of threads for updating neighborhood is " +
-                utility::to_string(
-                    STATE.averaged_number_of_threads_neighborhood_update,
-                    "%.3e."),
+
+        utility::print_info(  //
+            " -- Initial modifications: " +
+                std::to_string(STATE.number_of_initial_modification),
             a_IS_ENABLED_PRINT);
     }
 
     /*************************************************************************/
-    inline void print_evaluation_parallelization_controller(
-        const utility::ucb1::Learner<int>& a_CONTROLLER,
-        const bool                         a_IS_ENABLED_PRINT) {
-        utility::print_message(
-            "The state of the parallelization controller for evaluating moves "
-            "are as follows ('*' denotes the selected option for the next "
-            "loop):",
-            a_IS_ENABLED_PRINT);
+    inline void print_inner_iteration_max(const bool a_IS_ENABLED_PRINT) const {
+        const auto& STATE = m_state_manager.state();
 
-        for (const auto& action : a_CONTROLLER.actions()) {
-            char flag =
-                a_CONTROLLER.best_action().body == action.body ? '*' : ' ';
-            utility::print_info(
-                utility::to_string(flag, "-- (%c") +
-                    utility::to_string(action.body, "%d Threads) ") +
-                    utility::to_string(action.mean, "Mean: %.3e, ") +
-                    utility::to_string(action.confidence, "Conf.: %.3e, ") +
-                    utility::to_string(action.number_of_samples, "N: %d") +
-                    utility::to_string(
-                        action.number_of_samples /
-                            static_cast<double>(
-                                a_CONTROLLER.total_number_of_samples()),
-                        "(%.3f)"),
+        utility::print_info(  //
+            " -- Maximum number of iterations: " +
+                std::to_string(STATE.iteration_max),
+            a_IS_ENABLED_PRINT);
+    }
+
+    /*************************************************************************/
+    inline void print_is_enabled_special_neighborhood_move(
+        const bool a_IS_ENABLED_PRINT) const {
+        const auto& STATE = m_state_manager.state();
+
+        if (STATE.is_enabled_special_neighborhood_move) {
+            utility::print_info(" -- Special neighborhood moves: enabled",
+                                a_IS_ENABLED_PRINT);
+        } else {
+            utility::print_info(" -- Special neighborhood moves: disabled",
+                                a_IS_ENABLED_PRINT);
+        }
+    }
+
+    /*************************************************************************/
+    inline void print_number_of_stored_chain_moves(
+        const bool a_IS_ENABLED_PRINT) const {
+        const auto NUMBER_OF_STORED_CHAIN_MOVES =
+            this->m_model_ptr->neighborhood().chain().moves().size();
+
+        if (NUMBER_OF_STORED_CHAIN_MOVES > 0) {
+            utility::print_info(  //
+                " -- Number of stored chain moves: " +
+                    std::to_string(NUMBER_OF_STORED_CHAIN_MOVES),
                 a_IS_ENABLED_PRINT);
         }
-
-        const auto& STATE = m_state_manager.state();
-        utility::print_message(
-            "Averaged number of threads for evaluation is " +
-                utility::to_string(STATE.averaged_number_of_threads_evaluation,
-                                   "%.3e."),
-            a_IS_ENABLED_PRINT);
     }
 
     /*************************************************************************/
@@ -753,13 +737,40 @@ class TabuSearchController
              * Run the tabu search.
              */
             core::TabuSearchCore<T_Variable, T_Expression> tabu_search(
-                this->m_model_ptr,                              //
-                state.current_solution.variable_value_proxies,  //
-                this->m_incumbent_holder_ptr,                   //
-                this->m_memory_ptr,                             //
+                this->m_model_ptr,         //
+                this->m_global_state_ptr,  //
+                state.current_solution,    //
                 option);
 
             tabu_search.run();
+
+            /**
+             * Update variable bounds.
+             */
+            if (this->m_option.preprocess.is_enabled_presolve &&
+                this->m_option.preprocess.is_enabled_online_bounding &&
+                state.current_is_feasible_incumbent_updated &&
+                !state.previous_is_feasible_incumbent_updated) {
+                this->update_variable_bounds(
+                    this->m_global_state_ptr->incumbent_holder
+                        .feasible_incumbent_objective(),
+                    true,
+                    this->m_option.output.verbose >= option::verbose::Outer);
+            }
+
+            /**
+             * Update the feasible solutions archive.
+             */
+            if (this->m_option.output.is_enabled_store_feasible_solutions) {
+                this->update_feasible_solution_archive(
+                    tabu_search.feasible_solutions());
+            }
+
+            /**
+             * Update the incumbent solutions archive.
+             */
+            this->update_incumbent_solution_archive_and_search_tree(
+                tabu_search.incumbent_solutions());
 
             /**
              * Update the elapsed time.
@@ -770,27 +781,6 @@ class TabuSearchController
              * Update the state by tabu search result.
              */
             m_state_manager.update(tabu_search.result(), &m_mt19937);
-
-            /**
-             * Update variable bounds.
-             */
-            if (this->m_option.preprocess.is_enabled_presolve &&
-                this->m_option.preprocess.is_enabled_online_bounding &&
-                state.current_is_feasible_incumbent_updated &&
-                !state.previous_is_feasible_incumbent_updated) {
-                this->update_variable_bounds(
-                    this->m_incumbent_holder_ptr
-                        ->feasible_incumbent_objective(),
-                    true,
-                    this->m_option.output.verbose >= option::verbose::Outer);
-            }
-
-            /**
-             * Update the feasible solutions archive.
-             */
-            if (this->m_option.output.is_enabled_store_feasible_solutions) {
-                this->update_archive(tabu_search.feasible_solutions());
-            }
 
             /**
              * Print trend.
@@ -808,7 +798,8 @@ class TabuSearchController
             /**
              * Run the call-back function if specified.
              */
-            this->m_model_ptr->callback(&option, this->m_incumbent_holder_ptr);
+            this->m_model_ptr->callback(
+                &option, &(this->m_global_state_ptr->incumbent_holder));
 
             m_state_manager.next_iteration();
         }

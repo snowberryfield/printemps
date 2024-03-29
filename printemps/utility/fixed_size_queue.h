@@ -21,11 +21,6 @@ class FixedSizeQueue {
     }
 
     /*************************************************************************/
-    virtual ~FixedSizeQueue(void) {
-        /// nothing to do
-    }
-
-    /*************************************************************************/
     FixedSizeQueue(const int a_MAX_SIZE) {
         this->setup(a_MAX_SIZE);
     }

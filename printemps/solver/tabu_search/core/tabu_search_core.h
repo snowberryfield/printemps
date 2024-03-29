@@ -20,17 +20,16 @@ namespace printemps::solver::tabu_search::core {
 template <class T_Variable, class T_Expression>
 class TabuSearchCore {
    private:
-    model::Model<T_Variable, T_Expression>* m_model_ptr;
-
-    std::vector<multi_array::ValueProxy<T_Variable>>
-        m_initial_variable_value_proxies;
-
+    model::Model<T_Variable, T_Expression>*              m_model_ptr;
+    GlobalState<T_Variable, T_Expression>*               m_global_state_ptr;
+    solution::DenseSolution<T_Variable, T_Expression>    m_initial_solution;
     solution::IncumbentHolder<T_Variable, T_Expression>* m_incumbent_holder_ptr;
-    Memory<T_Variable, T_Expression>*                    m_memory_ptr;
     option::Option                                       m_option;
 
     std::vector<solution::SparseSolution<T_Variable, T_Expression>>
         m_feasible_solutions;
+    std::vector<solution::SparseSolution<T_Variable, T_Expression>>
+        m_incumbent_solutions;
 
     TabuSearchCoreStateManager<T_Variable, T_Expression> m_state_manager;
     TabuSearchCoreResult<T_Variable, T_Expression>       m_result;
@@ -41,7 +40,12 @@ class TabuSearchCore {
         /**
          * Reset the local augmented incumbent.
          */
-        m_incumbent_holder_ptr->reset_local_augmented_incumbent();
+        m_global_state_ptr->incumbent_holder.reset_local_augmented_incumbent();
+
+        /**
+         * Reset the last update iterations.
+         */
+        m_global_state_ptr->memory.reset_last_update_iterations();
 
         /**
          * Reset the feasible solutions storage.
@@ -49,19 +53,19 @@ class TabuSearchCore {
         m_feasible_solutions.clear();
 
         /**
+         * Reset the incumbent solutions storage.
+         */
+        m_incumbent_solutions.clear();
+
+        /**
          * Prepare a random generator, which is used for shuffling moves.
          */
         m_get_rand_mt.seed(m_option.tabu_search.seed);
 
         /**
-         * Reset the last update iterations.
-         */
-        m_memory_ptr->reset_last_update_iterations();
-
-        /**
          * Initialize the solution and update the model.
          */
-        m_model_ptr->import_variable_values(m_initial_variable_value_proxies);
+        m_model_ptr->import_solution(m_initial_solution);
         m_model_ptr->update();
 
         /**
@@ -70,10 +74,7 @@ class TabuSearchCore {
         m_model_ptr->reset_variable_objective_improvabilities();
         m_model_ptr->reset_variable_feasibility_improvabilities();
 
-        m_state_manager.setup(m_model_ptr,             //
-                              m_incumbent_holder_ptr,  //
-                              m_memory_ptr,            //
-                              m_option);
+        m_state_manager.setup(m_model_ptr, m_global_state_ptr, m_option);
     }
 
     /*************************************************************************/
@@ -118,7 +119,8 @@ class TabuSearchCore {
 
     /*************************************************************************/
     inline bool satisfy_reach_target_terminate_condition(void) {
-        if (m_incumbent_holder_ptr->feasible_incumbent_objective() <=
+        if (m_global_state_ptr->incumbent_holder
+                .feasible_incumbent_objective() <=
             m_option.general.target_objective_value) {
             m_state_manager.set_termination_status(
                 TabuSearchCoreTerminationStatus::REACH_TARGET);
@@ -146,8 +148,9 @@ class TabuSearchCore {
         const auto& STATE = m_state_manager.state();
 
         if (STATE.number_of_moves > 0) {
-            if (fabs(m_incumbent_holder_ptr->feasible_incumbent_objective() -
-                     m_incumbent_holder_ptr->dual_bound()) <
+            if (fabs(m_global_state_ptr->incumbent_holder
+                         .feasible_incumbent_objective() -
+                     m_global_state_ptr->incumbent_holder.dual_bound()) <
                 constant::EPSILON) {
                 m_state_manager.set_termination_status(
                     TabuSearchCoreTerminationStatus::OPTIMAL);
@@ -401,7 +404,8 @@ class TabuSearchCore {
         if (a_TRIAL_SOLUTION_SCORES[ARGMIN_GLOBAL_AUGMENTED_OBJECTIVE]
                     .global_augmented_objective +
                 constant::EPSILON <
-            m_incumbent_holder_ptr->global_augmented_incumbent_objective()) {
+            m_global_state_ptr->incumbent_holder
+                .global_augmented_incumbent_objective()) {
             selected_index = ARGMIN_GLOBAL_AUGMENTED_OBJECTIVE;
             if (!a_TRIAL_MOVE_SCORES[selected_index].is_permissible) {
                 is_aspirated = true;
@@ -418,10 +422,10 @@ class TabuSearchCore {
         const int RANDOM_WIDTH =
             static_cast<int>(m_option.tabu_search.tabu_tenure_randomize_rate *
                              STATE.tabu_tenure);
-        m_memory_ptr->update(*a_move_ptr,      //
-                             STATE.iteration,  //
-                             RANDOM_WIDTH,     //
-                             &m_get_rand_mt);
+        m_global_state_ptr->memory.update(*a_move_ptr,      //
+                                          STATE.iteration,  //
+                                          RANDOM_WIDTH,     //
+                                          &m_get_rand_mt);
     }
 
     /*************************************************************************/
@@ -492,7 +496,8 @@ class TabuSearchCore {
 
         const auto& CURRENT_SOLUTION_SCORE = STATE.current_solution_score;
         const auto& INCUMBENT_SOLUTION_SCORE =
-            m_incumbent_holder_ptr->global_augmented_incumbent_score();
+            m_global_state_ptr->incumbent_holder
+                .global_augmented_incumbent_score();
 
         std::string color_current_feasible_begin   = "";
         std::string color_current_feasible_end     = "";
@@ -537,7 +542,8 @@ class TabuSearchCore {
 
         const auto& CURRENT_SOLUTION_SCORE = STATE.current_solution_score;
         const auto& INCUMBENT_SOLUTION_SCORE =
-            m_incumbent_holder_ptr->global_augmented_incumbent_score();
+            m_global_state_ptr->incumbent_holder
+                .global_augmented_incumbent_score();
 
         char mark_special_neighborhood_move  = ' ';
         char mark_current                    = ' ';
@@ -664,18 +670,16 @@ class TabuSearchCore {
     }
 
     /*************************************************************************/
-    TabuSearchCore(model::Model<T_Variable, T_Expression>* a_model_ptr,       //
-                   const std::vector<multi_array::ValueProxy<T_Variable>>&    //
-                       a_INITIAL_VARIABLE_VALUE_PROXIES,                      //
-                   solution::IncumbentHolder<T_Variable, T_Expression>*       //
-                                                     a_incumbent_holder_ptr,  //
-                   Memory<T_Variable, T_Expression>* a_memory_ptr,            //
-                   const option::Option&             a_OPTION) {
+    TabuSearchCore(
+        model::Model<T_Variable, T_Expression>* a_model_ptr,         //
+        GlobalState<T_Variable, T_Expression>*  a_global_state_ptr,  //
+        const solution::SparseSolution<T_Variable, T_Expression>&    //
+                              a_INITIAL_SOLUTION,                    //
+        const option::Option& a_OPTION) {
         this->initialize();
-        this->setup(a_model_ptr,                       //
-                    a_INITIAL_VARIABLE_VALUE_PROXIES,  //
-                    a_incumbent_holder_ptr,            //
-                    a_memory_ptr,                      //
+        this->setup(a_model_ptr,         //
+                    a_global_state_ptr,  //
+                    a_INITIAL_SOLUTION,  //
                     a_OPTION);
     }
 
@@ -686,12 +690,14 @@ class TabuSearchCore {
 
     /*************************************************************************/
     inline void initialize(void) {
-        m_model_ptr = nullptr;
-        m_initial_variable_value_proxies.clear();
-        m_incumbent_holder_ptr = nullptr;
-        m_memory_ptr           = nullptr;
+        m_model_ptr        = nullptr;
+        m_global_state_ptr = nullptr;
+
+        m_initial_solution.initialize();
         m_option.initialize();
+
         m_feasible_solutions.clear();
+        m_incumbent_solutions.clear();
 
         m_state_manager.initialize();
         m_result.initialize();
@@ -699,20 +705,20 @@ class TabuSearchCore {
     }
 
     /*************************************************************************/
-    inline void setup(                                             //
-        model::Model<T_Variable, T_Expression>* a_model_ptr,       //
-        const std::vector<multi_array::ValueProxy<T_Variable>>&    //
-            a_INITIAL_VARIABLE_VALUE_PROXIES,                      //
-        solution::IncumbentHolder<T_Variable, T_Expression>*       //
-                                          a_incumbent_holder_ptr,  //
-        Memory<T_Variable, T_Expression>* a_memory_ptr,            //
-        const option::Option&             a_OPTION) {
-        m_model_ptr                      = a_model_ptr;
-        m_initial_variable_value_proxies = a_INITIAL_VARIABLE_VALUE_PROXIES;
-        m_incumbent_holder_ptr           = a_incumbent_holder_ptr;
-        m_memory_ptr                     = a_memory_ptr;
-        m_option                         = a_OPTION;
+    inline void setup(                                               //
+        model::Model<T_Variable, T_Expression>* a_model_ptr,         //
+        GlobalState<T_Variable, T_Expression>*  a_global_state_ptr,  //
+        const solution::SparseSolution<T_Variable, T_Expression>&    //
+                              a_INITIAL_SOLUTION,                    //
+        const option::Option& a_OPTION) {
+        m_model_ptr        = a_model_ptr;
+        m_global_state_ptr = a_global_state_ptr;
+        m_model_ptr->import_solution(a_INITIAL_SOLUTION);
+        m_initial_solution = m_model_ptr->export_dense_solution();
+        m_option           = a_OPTION;
+
         m_feasible_solutions.clear();
+        m_incumbent_solutions.clear();
     }
 
     /*************************************************************************/
@@ -734,7 +740,7 @@ class TabuSearchCore {
          * Prepare a move evaluator.
          */
         TabuSearchCoreMoveEvaluator<T_Variable, T_Expression> move_evaluator(
-            m_model_ptr, m_memory_ptr, m_option);
+            m_model_ptr, &(m_global_state_ptr->memory), m_option);
 
         /**
          * Prepare an step size adjuster for integer moves.
@@ -931,8 +937,8 @@ class TabuSearchCore {
                 move_ptr->sense == neighborhood::MoveSense::Integer &&
                 trial_solution_scores[SELECTED_INDEX]
                         .global_augmented_objective <
-                    m_incumbent_holder_ptr
-                        ->global_augmented_incumbent_objective()) {
+                    m_global_state_ptr->incumbent_holder
+                        .global_augmented_incumbent_objective()) {
                 integer_step_size_adjuster.adjust(move_ptr,
                                                   CURRENT_SOLUTION_SCORE);
                 m_model_ptr->evaluate_multi(                 //
@@ -1013,6 +1019,17 @@ class TabuSearchCore {
         print_table_footer(m_option.output.verbose >= option::verbose::Full);
 
         /**
+         * Store the incumbent solution.
+         */
+        if (STATE.total_update_status &  //
+            solution::IncumbentHolderConstant::
+                STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
+            m_incumbent_solutions.push_back(
+                m_global_state_ptr->incumbent_holder
+                    .global_augmented_incumbent_solution()
+                    .to_sparse());
+        }
+        /**
          * Postprocess.
          */
         m_state_manager.set_elapsed_time(time_keeper.clock());
@@ -1020,26 +1037,17 @@ class TabuSearchCore {
     }
 
     /*************************************************************************/
-    inline constexpr model::Model<T_Variable, T_Expression>* model_ptr(void) {
-        return m_model_ptr;
-    }
-
-    /*************************************************************************/
-    inline constexpr solution::IncumbentHolder<T_Variable, T_Expression>*
-    incumbent_holder_ptr(void) {
-        return m_incumbent_holder_ptr;
-    }
-
-    /*************************************************************************/
-    inline constexpr Memory<T_Variable, T_Expression>* memory_ptr(void) {
-        return m_memory_ptr;
+    inline constexpr const std::vector<
+        solution::SparseSolution<T_Variable, T_Expression>>&
+    feasible_solutions(void) const {
+        return m_feasible_solutions;
     }
 
     /*************************************************************************/
     inline constexpr const std::vector<
         solution::SparseSolution<T_Variable, T_Expression>>&
-    feasible_solutions(void) const {
-        return m_feasible_solutions;
+    incumbent_solutions(void) const {
+        return m_incumbent_solutions;
     }
 
     /*************************************************************************/
