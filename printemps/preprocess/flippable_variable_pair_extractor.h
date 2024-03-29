@@ -140,8 +140,7 @@ class FlippableVariablePairExtractor {
     }
 
     /*************************************************************************/
-    inline constexpr const std::vector<
-        FlippableVariablePair<T_Variable, T_Expression>>
+    inline const std::vector<FlippableVariablePair<T_Variable, T_Expression>>
         &pairs(void) const {
         return this->m_pairs;
     }

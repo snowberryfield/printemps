@@ -21,12 +21,7 @@ class SelectionMoveGenerator
     }
 
     /*************************************************************************/
-    virtual ~SelectionMoveGenerator(void) {
-        /// nothing to do
-    }
-
-    /*************************************************************************/
-    constexpr void setup(
+    inline void setup(
         std::vector<model_component::Variable<T_Variable, T_Expression> *>
             &a_VARIABLE_PTRS) {
         /**

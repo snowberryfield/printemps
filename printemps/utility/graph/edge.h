@@ -58,12 +58,12 @@ class Edge {
     }
 
     /*************************************************************************/
-    inline constexpr double weight(void) const noexcept {
+    inline double weight(void) const noexcept {
         return m_weight;
     }
 
     /*************************************************************************/
-    inline constexpr std::pair<T, T> const &node_keys(void) const noexcept {
+    inline std::pair<T, T> const &node_keys(void) const noexcept {
         return m_node_keys;
     }
 };

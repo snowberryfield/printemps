@@ -21,11 +21,6 @@ class AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    virtual ~AbstractMultiArrayElement(void) {
-        /// nothing to do
-    }
-
-    /*************************************************************************/
     void initialize(void) {
         m_proxy_index             = 0;
         m_flat_index              = 0;
@@ -35,22 +30,22 @@ class AbstractMultiArrayElement {
 
    public:
     /*************************************************************************/
-    inline constexpr void set_proxy_index(const int a_proxy_index) {
+    inline void set_proxy_index(const int a_proxy_index) {
         m_proxy_index = a_proxy_index;
     }
 
     /*************************************************************************/
-    inline constexpr int proxy_index(void) const {
+    inline int proxy_index(void) const {
         return m_proxy_index;
     }
 
     /*************************************************************************/
-    inline constexpr void set_flat_index(const int a_FLAT_INDEX) {
+    inline void set_flat_index(const int a_FLAT_INDEX) {
         m_flat_index = a_FLAT_INDEX;
     }
 
     /*************************************************************************/
-    inline constexpr int flat_index(void) const {
+    inline int flat_index(void) const {
         return m_flat_index;
     }
 
@@ -61,8 +56,7 @@ class AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr const std::vector<int> &multi_dimensional_index(
-        void) const {
+    inline const std::vector<int> &multi_dimensional_index(void) const {
         return m_multi_dimensional_index;
     }
 
@@ -72,7 +66,7 @@ class AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr const std::string &name(void) const {
+    inline const std::string &name(void) const {
         return m_name;
     }
 };

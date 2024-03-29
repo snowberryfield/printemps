@@ -180,9 +180,9 @@ class TabuSearchControllerStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void update(const tabu_search::core::TabuSearchCoreResult<
-                                     T_Variable, T_Expression>& a_RESULT,
-                                 std::mt19937*                  a_mt19937_ptr) {
+    inline void update(const tabu_search::core::TabuSearchCoreResult<
+                           T_Variable, T_Expression>& a_RESULT,
+                       std::mt19937*                  a_mt19937_ptr) {
         /**
          * Update the distances between local augmented solution and reference
          * solutions. This method must be called before
@@ -382,7 +382,7 @@ class TabuSearchControllerStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void update_last_tabu_search_result(
+    inline void update_last_tabu_search_result(
         const tabu_search::core::TabuSearchCoreResult<T_Variable, T_Expression>&
             a_RESULT) {
         /**
@@ -443,7 +443,7 @@ class TabuSearchControllerStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void update_intensity(void) {
+    inline void update_intensity(void) {
         m_state.previous_primal_intensity = m_state.current_primal_intensity;
         m_state.current_primal_intensity =
             m_global_state_ptr->memory.primal_intensity();
@@ -454,7 +454,7 @@ class TabuSearchControllerStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void update_distance(void) {
+    inline void update_distance(void) {
         const auto LOCAL_AUGMENTED_INCUMBENT_SOLUTION_SPARSE =
             m_global_state_ptr->incumbent_holder
                 .local_augmented_incumbent_solution()
@@ -470,12 +470,12 @@ class TabuSearchControllerStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void keep_previous_solution(void) {
+    inline void keep_previous_solution(void) {
         m_state.previous_solution = m_state.current_solution;
     }
 
     /*************************************************************************/
-    inline constexpr void update_is_inner_stagnation(void) {
+    inline void update_is_inner_stagnation(void) {
         /**
          * "Inner stagnation" refers to when a long iteration has passed without
          * proper adjustment of the penalty coefficients.
@@ -488,7 +488,7 @@ class TabuSearchControllerStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void update_is_outer_stagnation(void) {
+    inline void update_is_outer_stagnation(void) {
         /**
          * "Outer stagnation" refers to when no feasible solution was found so
          * far, and the iteration after global augmented incumbent update is not
@@ -502,7 +502,7 @@ class TabuSearchControllerStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void update_is_improved(void) {
+    inline void update_is_improved(void) {
         /**
          * "Improved" refers to when any of the following conditions are
          * satisfied:
@@ -519,7 +519,7 @@ class TabuSearchControllerStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void turn_flags_off(void) {
+    inline void turn_flags_off(void) {
         m_state.employing_local_solution_flag             = false;
         m_state.employing_global_solution_flag            = false;
         m_state.employing_previous_solution_flag          = false;
@@ -531,7 +531,7 @@ class TabuSearchControllerStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void update_improvability_screening_mode(void) {
+    inline void update_improvability_screening_mode(void) {
         if (m_state.tabu_search_result.termination_status ==
             tabu_search::core::TabuSearchCoreTerminationStatus::NO_MOVE) {
             m_state.improvability_screening_mode =
@@ -589,8 +589,8 @@ class TabuSearchControllerStateManager {
             option::improvability_screening_mode::Soft;
     }
     /*************************************************************************/
-    inline constexpr void
-    update_initial_solution_and_penalty_coefficient_flags_simple(void) {
+    inline void update_initial_solution_and_penalty_coefficient_flags_simple(
+        void) {
         const double RELATIVE_RANGE =
             m_state.tabu_search_result.global_augmented_objective_range /
             std::max(1.0, fabs(m_global_state_ptr->incumbent_holder
@@ -623,8 +623,8 @@ class TabuSearchControllerStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void
-    update_initial_solution_and_penalty_coefficient_flags_smart(void) {
+    inline void update_initial_solution_and_penalty_coefficient_flags_smart(
+        void) {
         /**
          * Determine the initial solution for the next loop and flags to tighten
          * or relax the penalty coefficients.
@@ -746,7 +746,7 @@ class TabuSearchControllerStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void update_penalty_coefficient_relaxing_rate(void) {
+    inline void update_penalty_coefficient_relaxing_rate(void) {
         /**
          * Decrease penalty coefficient relaxing rate if lack of
          * diversification is detected. This applies only if no feasible
@@ -800,7 +800,7 @@ class TabuSearchControllerStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void update_penalty_coefficient_reset_flag(void) {
+    inline void update_penalty_coefficient_reset_flag(void) {
         if (m_state.is_outer_stagnation && m_state.is_inner_stagnation) {
             m_state.penalty_coefficient_reset_flag           = true;
             m_state.employing_global_solution_flag           = true;
@@ -809,7 +809,7 @@ class TabuSearchControllerStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void reset_local_penalty_coefficient(void) {
+    inline void reset_local_penalty_coefficient(void) {
         for (auto&& proxy : m_model_ptr->constraint_proxies()) {
             for (auto&& constraint : proxy.flat_indexed_constraints()) {
                 constraint.reset_local_penalty_coefficient();
@@ -818,7 +818,7 @@ class TabuSearchControllerStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void tighten_local_penalty_coefficient(void) {
+    inline void tighten_local_penalty_coefficient(void) {
         double total_violation         = 0.0;
         double total_squared_violation = 0.0;
 
@@ -924,7 +924,7 @@ class TabuSearchControllerStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void relax_local_penalty_coefficient(void) {
+    inline void relax_local_penalty_coefficient(void) {
         double corrected_penalty_coefficient_relaxing_rate =
             m_state.penalty_coefficient_relaxing_rate;
 
@@ -968,7 +968,7 @@ class TabuSearchControllerStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void update_initial_tabu_tenure(void) {
+    inline void update_initial_tabu_tenure(void) {
         if (m_state.is_global_augmented_incumbent_updated) {
             m_state.initial_tabu_tenure =
                 std::min(m_option.tabu_search.initial_tabu_tenure,
@@ -1007,7 +1007,7 @@ class TabuSearchControllerStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void update_number_of_initial_modification(
+    inline void update_number_of_initial_modification(
         std::mt19937* a_mt19937_ptr) {
         if (m_state.is_global_augmented_incumbent_updated) {
             m_state.number_of_initial_modification = 0;
@@ -1040,7 +1040,7 @@ class TabuSearchControllerStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void update_iteration_max(void) {
+    inline void update_iteration_max(void) {
         if (m_state.tabu_search_result.number_of_iterations !=
             m_state.iteration_max) {
             return;
@@ -1066,7 +1066,7 @@ class TabuSearchControllerStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void update_pruning_rate_threshold(void) {
+    inline void update_pruning_rate_threshold(void) {
         m_state.pruning_rate_threshold =
             (m_state.iteration_max == m_option.tabu_search.iteration_max)
                 ? m_option.tabu_search.pruning_rate_threshold
@@ -1074,7 +1074,7 @@ class TabuSearchControllerStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void disable_special_neighborhood_moves(void) {
+    inline void disable_special_neighborhood_moves(void) {
         auto& neighborhood = m_model_ptr->neighborhood();
 
         /// Exclusive OR
@@ -1151,7 +1151,7 @@ class TabuSearchControllerStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void enable_special_neighborhood_moves(void) {
+    inline void enable_special_neighborhood_moves(void) {
         auto& neighborhood = m_model_ptr->neighborhood();
 
         /// Exclusive OR
@@ -1251,18 +1251,18 @@ class TabuSearchControllerStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void clear_chain_moves(void) {
+    inline void clear_chain_moves(void) {
         m_model_ptr->neighborhood().chain().clear_moves();
     }
 
     /*************************************************************************/
-    inline constexpr void sort_and_deduplicate_chain_moves(void) {
+    inline void sort_and_deduplicate_chain_moves(void) {
         m_model_ptr->neighborhood().chain().sort_moves();
         m_model_ptr->neighborhood().chain().deduplicate_moves();
     }
 
     /*************************************************************************/
-    inline constexpr void reduce_chain_moves(std::mt19937* a_mt19937_ptr) {
+    inline void reduce_chain_moves(std::mt19937* a_mt19937_ptr) {
         switch (m_option.neighborhood.chain_move_reduce_mode) {
             case option::chain_move_reduce_mode::OverlapRate: {
                 m_model_ptr->neighborhood().chain().reduce_moves(
@@ -1285,7 +1285,7 @@ class TabuSearchControllerStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void update_current_solution(void) {
+    inline void update_current_solution(void) {
         if (m_state.employing_global_solution_flag) {
             m_state.current_solution =
                 m_global_state_ptr->incumbent_holder
@@ -1308,7 +1308,7 @@ class TabuSearchControllerStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void update_relaxation_status(void) {
+    inline void update_relaxation_status(void) {
         if (m_state.is_enabled_penalty_coefficient_relaxing) {
             m_state.previous_primal_intensity_before_relaxation =
                 m_state.current_primal_intensity_before_relaxation;
@@ -1331,7 +1331,7 @@ class TabuSearchControllerStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void update_parallelization_controllers(void) {
+    inline void update_parallelization_controllers(void) {
         const auto& TABU_SEARCH_RESULT = m_state.tabu_search_result;
 
         if (m_option.parallel.is_enabled_parallel_neighborhood_update &&
@@ -1355,7 +1355,7 @@ class TabuSearchControllerStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void update_neighborhood_update_parallelization(void) {
+    inline void update_neighborhood_update_parallelization(void) {
         if (m_state.is_enabled_parallel_neighborhood_update) {
             m_state.total_number_of_threads_neighborhood_update +=
                 m_state.number_of_threads_neighborhood_update;
@@ -1391,7 +1391,7 @@ class TabuSearchControllerStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void update_evaluation_parallelization(void) {
+    inline void update_evaluation_parallelization(void) {
         if (m_state.is_enabled_parallel_neighborhood_update) {
             m_state.total_number_of_threads_evaluation +=
                 m_state.number_of_threads_evaluation;
@@ -1423,38 +1423,35 @@ class TabuSearchControllerStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void set_total_elapsed_time(
-        const double a_TOTAL_ELAPSED_TIME) {
+    inline void set_total_elapsed_time(const double a_TOTAL_ELAPSED_TIME) {
         m_state.total_elapsed_time = a_TOTAL_ELAPSED_TIME;
         m_state.tabu_search_elapsed_time =
             m_state.total_elapsed_time - m_state.tabu_search_start_time;
     }
 
     /*************************************************************************/
-    inline constexpr void set_tabu_search_start_time(
-        const double a_START_TIME) {
+    inline void set_tabu_search_start_time(const double a_START_TIME) {
         m_state.tabu_search_start_time = a_START_TIME;
     }
 
     /*************************************************************************/
-    inline constexpr void reset_iteration(void) {
+    inline void reset_iteration(void) {
         m_state.iteration = 0;
     }
 
     /*************************************************************************/
-    inline constexpr void next_iteration(void) {
+    inline void next_iteration(void) {
         m_state.iteration++;
     }
 
     /*************************************************************************/
-    inline constexpr TabuSearchControllerState<T_Variable, T_Expression>& state(
-        void) {
+    inline TabuSearchControllerState<T_Variable, T_Expression>& state(void) {
         return m_state;
     }
 
     /*************************************************************************/
-    inline constexpr const TabuSearchControllerState<T_Variable, T_Expression>&
-    state(void) const {
+    inline const TabuSearchControllerState<T_Variable, T_Expression>& state(
+        void) const {
         return m_state;
     }
 };

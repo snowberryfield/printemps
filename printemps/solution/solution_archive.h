@@ -70,7 +70,7 @@ class SolutionArchive {
     }
 
     /*************************************************************************/
-    inline constexpr void push(
+    inline void push(
         const SparseSolution<T_Variable, T_Expression>& a_SOLUTION) {
         std::vector<SparseSolution<T_Variable, T_Expression>> solutions = {
             a_SOLUTION};
@@ -78,7 +78,7 @@ class SolutionArchive {
     }
 
     /*************************************************************************/
-    constexpr void push(
+    inline void push(
         const std::vector<SparseSolution<T_Variable, T_Expression>>&
             a_SOLUTIONS) {
         auto& solutions = m_solutions;
@@ -135,44 +135,43 @@ class SolutionArchive {
     }
 
     /*************************************************************************/
-    inline constexpr int size(void) const {
+    inline int size(void) const {
         return m_solutions.size();
     }
 
     /*************************************************************************/
-    inline constexpr int max_size(void) const {
+    inline int max_size(void) const {
         return m_max_size;
     }
 
     /*************************************************************************/
-    inline constexpr SortMode sort_mode(void) const {
+    inline SortMode sort_mode(void) const {
         return m_sort_mode;
     }
 
     /*************************************************************************/
-    inline constexpr const std::string& name(void) const {
+    inline const std::string& name(void) const {
         return m_name;
     }
 
     /*************************************************************************/
-    inline constexpr int number_of_variables(void) const {
+    inline int number_of_variables(void) const {
         return m_number_of_variables;
     }
 
     /*************************************************************************/
-    inline constexpr int number_of_constraints(void) const {
+    inline int number_of_constraints(void) const {
         return m_number_of_constraints;
     }
 
     /*************************************************************************/
-    inline constexpr const std::vector<
-        SparseSolution<T_Variable, T_Expression>>&
+    inline const std::vector<SparseSolution<T_Variable, T_Expression>>&
     solutions(void) const {
         return m_solutions;
     }
 
     /*************************************************************************/
-    inline constexpr bool update_has_feasible_solution(void) {
+    inline bool update_has_feasible_solution(void) {
         for (const auto& solution : m_solutions) {
             if (solution.is_feasible) {
                 m_has_feasible_solution = true;
@@ -183,7 +182,7 @@ class SolutionArchive {
     }
 
     /*************************************************************************/
-    inline constexpr bool update_has_feasible_solution(
+    inline bool update_has_feasible_solution(
         const std::vector<SparseSolution<T_Variable, T_Expression>>&
             a_SOLUTIONS) {
         for (const auto& solution : a_SOLUTIONS) {
@@ -196,7 +195,7 @@ class SolutionArchive {
     }
 
     /*************************************************************************/
-    inline constexpr bool has_feasible_solution(void) const {
+    inline bool has_feasible_solution(void) const {
         return m_has_feasible_solution;
     }
 

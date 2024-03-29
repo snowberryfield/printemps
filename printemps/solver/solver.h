@@ -211,11 +211,6 @@ class Solver {
     }
 
     /*************************************************************************/
-    ~Solver(void) {
-        /// nothing to do
-    }
-
-    /*************************************************************************/
     inline void initialize(void) {
         m_model_ptr = nullptr;
         m_global_state.initialize();

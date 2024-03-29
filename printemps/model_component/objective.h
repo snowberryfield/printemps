@@ -100,8 +100,7 @@ class Objective {
     }
 
     /*************************************************************************/
-    inline static constexpr Objective<T_Variable, T_Expression> create_instance(
-        void) {
+    inline static Objective<T_Variable, T_Expression> create_instance(void) {
         /**
          * When instantiation, instead of constructor, create_instance() should
          * be called.
@@ -111,7 +110,7 @@ class Objective {
     }
 
     /*************************************************************************/
-    inline static constexpr Objective<T_Variable, T_Expression> create_instance(
+    inline static Objective<T_Variable, T_Expression> create_instance(
         const std::function<
             T_Expression(const neighborhood::Move<T_Variable, T_Expression> &)>
             &a_FUNCTION) {
@@ -124,7 +123,7 @@ class Objective {
     }
 
     /*************************************************************************/
-    inline static constexpr Objective<T_Variable, T_Expression> create_instance(
+    inline static Objective<T_Variable, T_Expression> create_instance(
         const Expression<T_Variable, T_Expression> &a_EXPRESSION) {
         /**
          * When instantiation, instead of constructor, create_instance() should
@@ -160,7 +159,7 @@ class Objective {
     }
 
     /*************************************************************************/
-    inline constexpr T_Expression evaluate(void) const noexcept {
+    inline T_Expression evaluate(void) const noexcept {
 #ifdef _PRINTEMPS_LINEAR_MINIMIZATION
         return m_expression.evaluate();
 #else
@@ -173,7 +172,7 @@ class Objective {
     }
 
     /*************************************************************************/
-    inline constexpr T_Expression evaluate(
+    inline T_Expression evaluate(
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
         noexcept {
 #ifdef _PRINTEMPS_LINEAR_MINIMIZATION
@@ -188,7 +187,7 @@ class Objective {
     }
 
     /*************************************************************************/
-    inline constexpr void update(void) {
+    inline void update(void) {
 #ifdef _PRINTEMPS_LINEAR_MINIMIZATION
         m_expression.update();
         m_value = m_expression.value();
@@ -203,7 +202,7 @@ class Objective {
     }
 
     /*************************************************************************/
-    inline constexpr void update(
+    inline void update(
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) {
 #ifdef _PRINTEMPS_LINEAR_MINIMIZATION
         m_expression.update(a_MOVE);
@@ -219,23 +218,22 @@ class Objective {
     }
 
     /*************************************************************************/
-    inline constexpr Expression<T_Variable, T_Expression> &expression(void) {
+    inline Expression<T_Variable, T_Expression> &expression(void) {
         return m_expression;
     }
 
     /*************************************************************************/
-    inline constexpr const Expression<T_Variable, T_Expression> &expression(
-        void) const {
+    inline const Expression<T_Variable, T_Expression> &expression(void) const {
         return m_expression;
     }
 
     /*************************************************************************/
-    inline constexpr T_Expression value(void) const {
+    inline T_Expression value(void) const {
         return m_value;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_linear(void) const {
+    inline bool is_linear(void) const {
         return m_is_linear;
     }
 };

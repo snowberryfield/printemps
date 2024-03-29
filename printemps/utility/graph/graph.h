@@ -138,23 +138,22 @@ class Graph {
     }
 
     /*************************************************************************/
-    inline constexpr std::unordered_map<int, Node<T>> &nodes(void) noexcept {
+    inline std::unordered_map<int, Node<T>> &nodes(void) noexcept {
         return m_nodes;
     }
 
     /*************************************************************************/
-    inline constexpr std::unordered_map<int, Node<T>> const &nodes(void) const
-        noexcept {
+    inline std::unordered_map<int, Node<T>> const &nodes(void) const noexcept {
         return m_nodes;
     }
 
     /*************************************************************************/
-    inline constexpr std::vector<Edge<T>> &edges(void) noexcept {
+    inline std::vector<Edge<T>> &edges(void) noexcept {
         return m_edges;
     }
 
     /*************************************************************************/
-    inline constexpr std::vector<Edge<T>> const &edges(void) const noexcept {
+    inline std::vector<Edge<T>> const &edges(void) const noexcept {
         return m_edges;
     }
 };

@@ -91,8 +91,8 @@ class ExpressionProxy : public multi_array::AbstractMultiArray {
         ExpressionProxy<T_Variable, T_Expression> &&) = default;
 
     /*************************************************************************/
-    inline static constexpr ExpressionProxy<T_Variable, T_Expression>
-    create_instance(const int a_ID) {
+    inline static ExpressionProxy<T_Variable, T_Expression> create_instance(
+        const int a_ID) {
         /**
          * When instantiation, instead of constructor, create_instance() should
          * be called.
@@ -102,8 +102,8 @@ class ExpressionProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline static constexpr ExpressionProxy<T_Variable, T_Expression>
-    create_instance(const int a_ID, const int a_NUMBER_OF_ELEMENTS) {
+    inline static ExpressionProxy<T_Variable, T_Expression> create_instance(
+        const int a_ID, const int a_NUMBER_OF_ELEMENTS) {
         /**
          * When instantiation, instead of constructor, create_instance() should
          * be called.
@@ -114,8 +114,8 @@ class ExpressionProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline static constexpr ExpressionProxy<T_Variable, T_Expression>
-    create_instance(const int a_ID, const std::vector<int> &a_SHAPE) {
+    inline static ExpressionProxy<T_Variable, T_Expression> create_instance(
+        const int a_ID, const std::vector<int> &a_SHAPE) {
         /**
          * When instantiation, instead of constructor, create_instance() should
          * be called.
@@ -125,8 +125,8 @@ class ExpressionProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr const std::unordered_map<
-        Variable<T_Variable, T_Expression> *, T_Expression>
+    inline const std::unordered_map<Variable<T_Variable, T_Expression> *,
+                                    T_Expression>
         &sensitivities(void) const {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
@@ -137,7 +137,7 @@ class ExpressionProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr T_Expression constant_value(void) const {
+    inline T_Expression constant_value(void) const {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -147,7 +147,7 @@ class ExpressionProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr T_Expression evaluate(void) const {
+    inline T_Expression evaluate(void) const {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -157,7 +157,7 @@ class ExpressionProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr T_Expression evaluate(
+    inline T_Expression evaluate(
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
@@ -168,7 +168,7 @@ class ExpressionProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr void update(void) {
+    inline void update(void) {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -178,7 +178,7 @@ class ExpressionProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr void update(
+    inline void update(
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
@@ -189,7 +189,7 @@ class ExpressionProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr T_Expression value(void) const {
+    inline T_Expression value(void) const {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -199,7 +199,7 @@ class ExpressionProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr void set_name(const std::string &a_NAME) {
+    inline void set_name(const std::string &a_NAME) {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -209,7 +209,7 @@ class ExpressionProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr const std::string &name(void) const {
+    inline const std::string &name(void) const {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -219,32 +219,32 @@ class ExpressionProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr std::vector<Expression<T_Variable, T_Expression>>
+    inline std::vector<Expression<T_Variable, T_Expression>>
         &flat_indexed_expressions(void) {
         return m_expressions;
     }
 
     /*************************************************************************/
-    inline constexpr const std::vector<Expression<T_Variable, T_Expression>>
+    inline const std::vector<Expression<T_Variable, T_Expression>>
         &flat_indexed_expressions(void) const {
         return m_expressions;
     }
 
     /*************************************************************************/
-    inline constexpr Expression<T_Variable, T_Expression>
-        &flat_indexed_expressions(const int a_FLAT_INDEX) {
+    inline Expression<T_Variable, T_Expression> &flat_indexed_expressions(
+        const int a_FLAT_INDEX) {
         return m_expressions[a_FLAT_INDEX];
     }
 
     /*************************************************************************/
-    inline constexpr const Expression<T_Variable, T_Expression>
-        &flat_indexed_expressions(const int a_FLAT_INDEX) const {
+    inline const Expression<T_Variable, T_Expression> &flat_indexed_expressions(
+        const int a_FLAT_INDEX) const {
         return m_expressions[a_FLAT_INDEX];
     }
 
     /*************************************************************************/
-    inline constexpr multi_array::ValueProxy<T_Expression>
-    export_values_and_names(void) const {
+    inline multi_array::ValueProxy<T_Expression> export_values_and_names(
+        void) const {
         multi_array::ValueProxy<T_Expression> proxy(m_index, m_shape);
 
         const int NUMBER_OF_ELEMENTS = this->number_of_elements();
@@ -256,8 +256,7 @@ class ExpressionProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr Expression<T_Variable, T_Expression> to_expression(
-        void) const {
+    inline Expression<T_Variable, T_Expression> to_expression(void) const {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -267,7 +266,7 @@ class ExpressionProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr Expression<T_Variable, T_Expression> sum(void) const {
+    inline Expression<T_Variable, T_Expression> sum(void) const {
         auto result = Expression<T_Variable, T_Expression>::create_instance();
         for (const auto &expression : m_expressions) {
             result += expression;
@@ -276,7 +275,7 @@ class ExpressionProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr Expression<T_Variable, T_Expression> sum(
+    inline Expression<T_Variable, T_Expression> sum(
         const std::vector<int> &a_MULTI_DIMENSIONAL_INDEX) const {
         const int MULTI_DIMENSIONAL_INDEX_SIZE =
             a_MULTI_DIMENSIONAL_INDEX.size();
@@ -321,7 +320,7 @@ class ExpressionProxy : public multi_array::AbstractMultiArray {
 
     /*************************************************************************/
     template <class T_Array>
-    inline constexpr Expression<T_Variable, T_Expression> dot(
+    inline Expression<T_Variable, T_Expression> dot(
         const T_Array &a_COEFFICIENTS) {
         if (this->number_of_dimensions() != 1) {
             throw std::logic_error(utility::format_error_location(
@@ -345,7 +344,7 @@ class ExpressionProxy : public multi_array::AbstractMultiArray {
 
     /*************************************************************************/
     template <class T_Array>
-    inline constexpr Expression<T_Variable, T_Expression> dot(
+    inline Expression<T_Variable, T_Expression> dot(
         const std::vector<int> &a_MULTI_DIMENSIONAL_INDEX,
         const T_Array &         a_COEFFICIENTS) {
         const int MULTI_DIMENSIONAL_INDEX = a_MULTI_DIMENSIONAL_INDEX.size();
@@ -405,7 +404,7 @@ class ExpressionProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr bool is_enabled(void) const {
+    inline bool is_enabled(void) const {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -415,7 +414,7 @@ class ExpressionProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr void enable(void) {
+    inline void enable(void) {
         /**
          *  This method enables all expressions simultaneously.
          */
@@ -425,7 +424,7 @@ class ExpressionProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr void disable(void) {
+    inline void disable(void) {
         /**
          *  This method disables all expressions simultaneously.
          */
@@ -435,8 +434,7 @@ class ExpressionProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr Expression<T_Variable, T_Expression> operator+(
-        void) const {
+    inline Expression<T_Variable, T_Expression> operator+(void) const {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -446,8 +444,7 @@ class ExpressionProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr Expression<T_Variable, T_Expression> operator-(
-        void) const {
+    inline Expression<T_Variable, T_Expression> operator-(void) const {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -458,7 +455,7 @@ class ExpressionProxy : public multi_array::AbstractMultiArray {
 
     /*************************************************************************/
     template <class T_Value>
-    inline constexpr ExpressionProxy<T_Variable, T_Expression> &operator=(
+    inline ExpressionProxy<T_Variable, T_Expression> &operator=(
         const T_Value a_VALUE) {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
@@ -471,7 +468,7 @@ class ExpressionProxy : public multi_array::AbstractMultiArray {
 
     /*************************************************************************/
     template <template <class, class> class T_ExpressionLike>
-    inline constexpr ExpressionProxy<T_Variable, T_Expression> &operator=(
+    inline ExpressionProxy<T_Variable, T_Expression> &operator=(
         const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE) {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
@@ -483,7 +480,7 @@ class ExpressionProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr ExpressionProxy<T_Variable, T_Expression> &operator=(
+    inline ExpressionProxy<T_Variable, T_Expression> &operator=(
         /// explicitly declare operator=
         const ExpressionProxy<T_Variable, T_Expression> &a_EXPRESSION_PROXY) {
         if (this->number_of_elements() != 1) {
@@ -496,7 +493,7 @@ class ExpressionProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr ExpressionProxy<T_Variable, T_Expression> &operator=(
+    inline ExpressionProxy<T_Variable, T_Expression> &operator=(
         const Expression<T_Variable, T_Expression> &a_EXPRESSION) {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
@@ -509,7 +506,7 @@ class ExpressionProxy : public multi_array::AbstractMultiArray {
 
     /*************************************************************************/
     template <class T_Value>
-    inline constexpr ExpressionProxy<T_Variable, T_Expression> &operator+=(
+    inline ExpressionProxy<T_Variable, T_Expression> &operator+=(
         const T_Value a_VALUE) {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
@@ -522,7 +519,7 @@ class ExpressionProxy : public multi_array::AbstractMultiArray {
 
     /*************************************************************************/
     template <template <class, class> class T_ExpressionLike>
-    inline constexpr ExpressionProxy<T_Variable, T_Expression> &operator+=(
+    inline ExpressionProxy<T_Variable, T_Expression> &operator+=(
         const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE) {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
@@ -534,7 +531,7 @@ class ExpressionProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr ExpressionProxy<T_Variable, T_Expression> &operator+=(
+    inline ExpressionProxy<T_Variable, T_Expression> &operator+=(
         const Expression<T_Variable, T_Expression> &a_EXPRESSION) {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
@@ -547,7 +544,7 @@ class ExpressionProxy : public multi_array::AbstractMultiArray {
 
     /*************************************************************************/
     template <class T_Value>
-    inline constexpr ExpressionProxy<T_Variable, T_Expression> &operator-=(
+    inline ExpressionProxy<T_Variable, T_Expression> &operator-=(
         const T_Value a_VALUE) {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
@@ -560,7 +557,7 @@ class ExpressionProxy : public multi_array::AbstractMultiArray {
 
     /*************************************************************************/
     template <template <class, class> class T_ExpressionLike>
-    inline constexpr ExpressionProxy<T_Variable, T_Expression> &operator-=(
+    inline ExpressionProxy<T_Variable, T_Expression> &operator-=(
         const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE) {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
@@ -572,7 +569,7 @@ class ExpressionProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr ExpressionProxy<T_Variable, T_Expression> &operator-=(
+    inline ExpressionProxy<T_Variable, T_Expression> &operator-=(
         const Expression<T_Variable, T_Expression> &a_EXPRESSION) {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
@@ -585,7 +582,7 @@ class ExpressionProxy : public multi_array::AbstractMultiArray {
 
     /*************************************************************************/
     template <class T_Value>
-    inline constexpr ExpressionProxy<T_Variable, T_Expression> &operator*=(
+    inline ExpressionProxy<T_Variable, T_Expression> &operator*=(
         const T_Value a_VALUE) {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
@@ -598,7 +595,7 @@ class ExpressionProxy : public multi_array::AbstractMultiArray {
 
     /*************************************************************************/
     template <class T_Value>
-    inline constexpr ExpressionProxy<T_Variable, T_Expression> &operator/=(
+    inline ExpressionProxy<T_Variable, T_Expression> &operator/=(
         const T_Value a_VALUE) {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
@@ -610,19 +607,19 @@ class ExpressionProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr Expression<T_Variable, T_Expression> &operator[](
+    inline Expression<T_Variable, T_Expression> &operator[](
         const int a_FLAT_INDEX) {
         return m_expressions[a_FLAT_INDEX];
     }
 
     /*************************************************************************/
-    inline constexpr const Expression<T_Variable, T_Expression> &operator[](
+    inline const Expression<T_Variable, T_Expression> &operator[](
         const int a_FLAT_INDEX) const {
         return m_expressions[a_FLAT_INDEX];
     }
 
     /*************************************************************************/
-    inline constexpr Expression<T_Variable, T_Expression> &operator()(
+    inline Expression<T_Variable, T_Expression> &operator()(
         const std::vector<int> &a_MULTI_DIMENSIONAL_INDEX) {
         const int MULTI_DIMENSIONAL_INDEX_SIZE =
             a_MULTI_DIMENSIONAL_INDEX.size();
@@ -639,7 +636,7 @@ class ExpressionProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr const Expression<T_Variable, T_Expression> &operator()(
+    inline const Expression<T_Variable, T_Expression> &operator()(
         const std::vector<int> &a_MULTI_DIMENSIONAL_INDEX) const {
         const int MULTI_DIMENSIONAL_INDEX_SIZE =
             a_MULTI_DIMENSIONAL_INDEX.size();
@@ -658,14 +655,13 @@ class ExpressionProxy : public multi_array::AbstractMultiArray {
 
     /*************************************************************************/
     template <class... Args>
-    inline constexpr Expression<T_Variable, T_Expression> &operator()(
-        Args... args) {
+    inline Expression<T_Variable, T_Expression> &operator()(Args... args) {
         return this->operator()({args...});
     }
 
     /*************************************************************************/
     template <class... Args>
-    inline constexpr const Expression<T_Variable, T_Expression> &operator()(
+    inline const Expression<T_Variable, T_Expression> &operator()(
         Args... args) const {
         return this->operator()({args...});
     }

@@ -56,9 +56,9 @@ class AbstractSolverController {
     }
 
     /*************************************************************************/
-    inline constexpr void update_variable_bounds(
-        const double a_OBJECTIVE, const bool a_IS_PRIMAL,
-        const bool a_IS_ENABLED_PRINT) {
+    inline void update_variable_bounds(const double a_OBJECTIVE,
+                                       const bool   a_IS_PRIMAL,
+                                       const bool   a_IS_ENABLED_PRINT) {
         auto number_of_newly_fixed_variables =
             m_model_ptr->update_variable_bounds(a_OBJECTIVE, a_IS_PRIMAL,
                                                 a_IS_ENABLED_PRINT);
@@ -122,7 +122,7 @@ class AbstractSolverController {
     }
 
     /*************************************************************************/
-    inline constexpr void update_feasible_solution_archive(
+    inline void update_feasible_solution_archive(
         const std::vector<solution::SparseSolution<T_Variable, T_Expression>>&
             a_SOLUTIONS) {
         if (a_SOLUTIONS.size() == 0) {
@@ -132,7 +132,7 @@ class AbstractSolverController {
     }
 
     /*************************************************************************/
-    inline constexpr void update_incumbent_solution_archive_and_search_tree(
+    inline void update_incumbent_solution_archive_and_search_tree(
         const std::vector<solution::SparseSolution<T_Variable, T_Expression>>&
             a_SOLUTIONS) {
         if (a_SOLUTIONS.size() == 0) {
@@ -159,13 +159,12 @@ class AbstractSolverController {
     }
 
     /*************************************************************************/
-    inline constexpr model::Model<T_Variable, T_Expression>* model_ptr(void) {
+    inline model::Model<T_Variable, T_Expression>* model_ptr(void) {
         return m_model_ptr;
     }
 
     /*************************************************************************/
-    inline constexpr GlobalState<T_Variable, T_Expression>* global_state_ptr(
-        void) {
+    inline GlobalState<T_Variable, T_Expression>* global_state_ptr(void) {
         return m_global_state_ptr;
     }
 };

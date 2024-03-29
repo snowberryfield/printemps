@@ -21,11 +21,6 @@ class IntegerMoveGenerator
     }
 
     /*************************************************************************/
-    virtual ~IntegerMoveGenerator(void) {
-        /// nothing to do
-    }
-
-    /*************************************************************************/
     void setup(
         const std::vector<model_component::Variable<T_Variable, T_Expression> *>
             &a_RAW_VARIABLE_PTRS) {

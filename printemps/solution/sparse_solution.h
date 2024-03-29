@@ -34,7 +34,7 @@ struct SparseSolution {
     }
 
     /*************************************************************************/
-    inline constexpr int distance(
+    inline int distance(
         const SparseSolution<T_Variable, T_Expression> &a_SOLUTION) const {
         return utility::distance_l0(this->variables, a_SOLUTION.variables);
     }

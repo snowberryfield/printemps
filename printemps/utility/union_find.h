@@ -76,12 +76,12 @@ class UnionFind {
     }
 
     /*************************************************************************/
-    inline constexpr const std::unordered_map<T, T> &parents(void) const {
+    inline const std::unordered_map<T, T> &parents(void) const {
         return m_parents;
     }
 
     /*************************************************************************/
-    inline constexpr const std::unordered_map<T, int> &sizes(void) const {
+    inline const std::unordered_map<T, int> &sizes(void) const {
         return m_sizes;
     }
 };

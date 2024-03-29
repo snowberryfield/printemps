@@ -557,8 +557,7 @@ class PDLPCoreStateManager {
     }
 
     /*************************************************************************/
-    void update_gap(void) {
-        /// This method cannot be constexpr by clang.
+    inline void update_gap(void) {
         m_state.absolute_gap =
             fabs(m_state.primal.objective - m_state.dual.objective);
         m_state.relative_gap =
@@ -567,50 +566,50 @@ class PDLPCoreStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void set_termination_status(
+    inline void set_termination_status(
         const PDLPCoreTerminationStatus a_TERMINATION_STATUS) {
         m_state.termination_status = a_TERMINATION_STATUS;
     }
 
     /*************************************************************************/
-    inline constexpr void set_elapsed_time(const double a_ELAPSED_TINE) {
+    inline void set_elapsed_time(const double a_ELAPSED_TINE) {
         m_state.elapsed_time = a_ELAPSED_TINE;
     }
 
     /*************************************************************************/
-    inline constexpr void reset_inner_iteration(void) {
+    inline void reset_inner_iteration(void) {
         m_state.inner_iteration = 0;
     }
 
     /*************************************************************************/
-    inline constexpr void reset_iteration(void) {
+    inline void reset_iteration(void) {
         m_state.inner_iteration = 0;
         m_state.outer_iteration = 0;
         m_state.total_iteration = 0;
     }
 
     /*************************************************************************/
-    inline constexpr void next_inner_iteration(void) {
+    inline void next_inner_iteration(void) {
         m_state.inner_iteration++;
     }
 
     /*************************************************************************/
-    inline constexpr void next_outer_iteration(void) {
+    inline void next_outer_iteration(void) {
         m_state.outer_iteration++;
     }
 
     /*************************************************************************/
-    inline constexpr void next_total_iteration(void) {
+    inline void next_total_iteration(void) {
         m_state.total_iteration++;
     }
 
     /*************************************************************************/
-    inline constexpr PDLPCoreState& state(void) {
+    inline PDLPCoreState& state(void) {
         return m_state;
     }
 
     /*************************************************************************/
-    inline constexpr const PDLPCoreState& state(void) const {
+    inline const PDLPCoreState& state(void) const {
         return m_state;
     }
 };  // namespace printemps::solver::pdlp::core

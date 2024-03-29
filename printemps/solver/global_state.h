@@ -30,7 +30,7 @@ struct GlobalState {
     }
 
     /*************************************************************************/
-    inline constexpr void initialize(void) {
+    inline void initialize(void) {
         incumbent_holder.initialize();
         memory.initialize();
         feasible_solution_archive.initialize();

@@ -49,11 +49,6 @@ class TabuSearchController
     }
 
     /*************************************************************************/
-    virtual ~TabuSearchController(void) {
-        /// nothing to do
-    }
-
-    /*************************************************************************/
     inline void initialize(void) {
         AbstractSolverController<T_Variable, T_Expression>::initialize();
         m_result.initialize();
@@ -808,8 +803,8 @@ class TabuSearchController
     }
 
     /*************************************************************************/
-    inline constexpr const TabuSearchControllerResult<T_Variable, T_Expression>&
-    result(void) const {
+    inline const TabuSearchControllerResult<T_Variable, T_Expression>& result(
+        void) const {
         return m_result;
     }
 };

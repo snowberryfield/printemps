@@ -105,8 +105,7 @@ class LagrangeDualCoreStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void update(
-        const solution::SolutionScore& a_SOLUTION_SCORE) {
+    inline void update(const solution::SolutionScore& a_SOLUTION_SCORE) {
         /**
          * Update the current solution score with keeping the previous one.
          */
@@ -129,21 +128,21 @@ class LagrangeDualCoreStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void update_solution_score(
+    inline void update_solution_score(
         const solution::SolutionScore& a_SOLUTION_SCORE) {
         m_state.previous_solution_score = m_state.current_solution_score;
         m_state.current_solution_score  = a_SOLUTION_SCORE;
     }
 
     /*************************************************************************/
-    inline constexpr void update_move(
+    inline void update_move(
         neighborhood::Move<T_Variable, T_Expression>* a_selected_move_ptr) {
         m_state.previous_move = m_state.current_move;
         m_state.current_move  = *a_selected_move_ptr;
     }
 
     /*************************************************************************/
-    inline constexpr void update_update_status(void) {
+    inline void update_update_status(void) {
         m_state.update_status =
             m_global_state_ptr->incumbent_holder.try_update_incumbent(
                 m_model_ptr, m_state.current_solution_score);
@@ -152,7 +151,7 @@ class LagrangeDualCoreStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void update_lagrangian(void) {
+    inline void update_lagrangian(void) {
         m_state.lagrangian =
             m_model_ptr->compute_lagrangian(m_state.dual) * m_model_ptr->sign();
 
@@ -172,7 +171,7 @@ class LagrangeDualCoreStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void update_step_size(void) {
+    inline void update_step_size(void) {
         if (m_state.queue.size() > 0) {
             if (m_state.lagrangian > m_state.queue.average()) {
                 m_state.step_size *=
@@ -187,7 +186,6 @@ class LagrangeDualCoreStateManager {
 
     /*************************************************************************/
     inline void update_dual(void) {
-        /// Cannot be constexpr for clang.
         auto& constraint_ptrs =
             m_model_ptr->constraint_reference().constraint_ptrs;
         const int CONSTRAINTS_SIZE = constraint_ptrs.size();
@@ -246,34 +244,33 @@ class LagrangeDualCoreStateManager {
     }
 
     /*************************************************************************/
-    inline constexpr void set_termination_status(
+    inline void set_termination_status(
         const LagrangeDualCoreTerminationStatus a_TERMINATION_STATUS) {
         m_state.termination_status = a_TERMINATION_STATUS;
     }
     /*************************************************************************/
-    inline constexpr void set_elapsed_time(const double a_ELAPSED_TINE) {
+    inline void set_elapsed_time(const double a_ELAPSED_TINE) {
         m_state.elapsed_time = a_ELAPSED_TINE;
     }
 
     /*************************************************************************/
-    inline constexpr void reset_iteration(void) {
+    inline void reset_iteration(void) {
         m_state.iteration = 0;
     }
 
     /*************************************************************************/
-    inline constexpr void next_iteration(void) {
+    inline void next_iteration(void) {
         m_state.iteration++;
     }
 
     /*************************************************************************/
-    inline constexpr LagrangeDualCoreState<T_Variable, T_Expression>& state(
-        void) {
+    inline LagrangeDualCoreState<T_Variable, T_Expression>& state(void) {
         return m_state;
     }
 
     /*************************************************************************/
-    inline constexpr const LagrangeDualCoreState<T_Variable, T_Expression>&
-    state(void) const {
+    inline const LagrangeDualCoreState<T_Variable, T_Expression>& state(
+        void) const {
         return m_state;
     }
 };

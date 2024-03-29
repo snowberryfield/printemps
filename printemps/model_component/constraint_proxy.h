@@ -95,8 +95,8 @@ class ConstraintProxy : public multi_array::AbstractMultiArray {
         ConstraintProxy<T_Variable, T_Expression> &&) = default;
 
     /*************************************************************************/
-    inline static constexpr ConstraintProxy<T_Variable, T_Expression>
-    create_instance(const int a_ID) {
+    inline static ConstraintProxy<T_Variable, T_Expression> create_instance(
+        const int a_ID) {
         /**
          * When instantiation, instead of constructor, create_instance() should
          * be called.
@@ -106,8 +106,8 @@ class ConstraintProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline static constexpr ConstraintProxy<T_Variable, T_Expression>
-    create_instance(const int a_ID, const int a_NUMBER_OF_ELEMENTS) {
+    inline static ConstraintProxy<T_Variable, T_Expression> create_instance(
+        const int a_ID, const int a_NUMBER_OF_ELEMENTS) {
         /**
          * When instantiation, instead of constructor, create_instance() should
          * be called.
@@ -118,8 +118,8 @@ class ConstraintProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline static constexpr ConstraintProxy<T_Variable, T_Expression>
-    create_instance(const int a_ID, const std::vector<int> &a_SHAPE) {
+    inline static ConstraintProxy<T_Variable, T_Expression> create_instance(
+        const int a_ID, const std::vector<int> &a_SHAPE) {
         /**
          * When instantiation, instead of constructor, create_instance() should
          * be called.
@@ -129,7 +129,7 @@ class ConstraintProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr void set_name(const std::string &a_NAME) {
+    inline void set_name(const std::string &a_NAME) {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -139,7 +139,7 @@ class ConstraintProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr const std::string &name(void) const {
+    inline const std::string &name(void) const {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -149,31 +149,31 @@ class ConstraintProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr std::vector<Constraint<T_Variable, T_Expression>>
+    inline std::vector<Constraint<T_Variable, T_Expression>>
         &flat_indexed_constraints(void) {
         return m_constraints;
     }
 
     /*************************************************************************/
-    inline constexpr const std::vector<Constraint<T_Variable, T_Expression>>
+    inline const std::vector<Constraint<T_Variable, T_Expression>>
         &flat_indexed_constraints(void) const {
         return m_constraints;
     }
 
     /*************************************************************************/
-    inline constexpr Constraint<T_Variable, T_Expression>
-        &flat_indexed_constraints(const int a_FLAT_INDEX) {
+    inline Constraint<T_Variable, T_Expression> &flat_indexed_constraints(
+        const int a_FLAT_INDEX) {
         return m_constraints[a_FLAT_INDEX];
     }
 
     /*************************************************************************/
-    inline constexpr const Constraint<T_Variable, T_Expression>
-        &flat_indexed_constraints(const int a_FLAT_INDEX) const {
+    inline const Constraint<T_Variable, T_Expression> &flat_indexed_constraints(
+        const int a_FLAT_INDEX) const {
         return m_constraints[a_FLAT_INDEX];
     }
 
     /*************************************************************************/
-    inline constexpr T_Expression constraint_value(void) const {
+    inline T_Expression constraint_value(void) const {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -183,7 +183,7 @@ class ConstraintProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr T_Expression violation_value(void) const {
+    inline T_Expression violation_value(void) const {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -193,8 +193,8 @@ class ConstraintProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr multi_array::ValueProxy<T_Expression>
-    export_values_and_names(void) const {
+    inline multi_array::ValueProxy<T_Expression> export_values_and_names(
+        void) const {
         multi_array::ValueProxy<T_Expression> proxy(m_index, m_shape);
 
         const int NUMBER_OF_ELEMENTS = this->number_of_elements();
@@ -207,8 +207,8 @@ class ConstraintProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr multi_array::ValueProxy<T_Expression>
-    export_violations_and_names(void) const {
+    inline multi_array::ValueProxy<T_Expression> export_violations_and_names(
+        void) const {
         multi_array::ValueProxy<T_Expression> proxy(m_index, m_shape);
 
         const int NUMBER_OF_ELEMENTS = this->number_of_elements();
@@ -220,7 +220,7 @@ class ConstraintProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr bool is_enabled(void) const {
+    inline bool is_enabled(void) const {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -230,7 +230,7 @@ class ConstraintProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr void enable(void) {
+    inline void enable(void) {
         /// This method enables all expressions simultaneously.
         for (auto &&constraint : m_constraints) {
             constraint.enable();
@@ -238,7 +238,7 @@ class ConstraintProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr void disable(void) {
+    inline void disable(void) {
         /// This method disables all expressions simultaneously.
         for (auto &&constraint : m_constraints) {
             constraint.disable();
@@ -246,19 +246,18 @@ class ConstraintProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr Constraint<T_Variable, T_Expression> &operator[](
-        int a_FLAT_INDEX) {
+    inline Constraint<T_Variable, T_Expression> &operator[](int a_FLAT_INDEX) {
         return m_constraints[a_FLAT_INDEX];
     }
 
     /*************************************************************************/
-    inline constexpr const Constraint<T_Variable, T_Expression> &operator[](
+    inline const Constraint<T_Variable, T_Expression> &operator[](
         int a_FLAT_INDEX) const {
         return m_constraints[a_FLAT_INDEX];
     }
 
     /*************************************************************************/
-    inline constexpr Constraint<T_Variable, T_Expression> &operator()(
+    inline Constraint<T_Variable, T_Expression> &operator()(
         const std::vector<int> &a_MULTI_DIMENSIONAL_INDEX) {
         const int MULTI_DIMENSIONAL_INDEX_SIZE =
             a_MULTI_DIMENSIONAL_INDEX.size();
@@ -276,7 +275,7 @@ class ConstraintProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline constexpr const Constraint<T_Variable, T_Expression> &operator()(
+    inline const Constraint<T_Variable, T_Expression> &operator()(
         const std::vector<int> &a_MULTI_DIMENSIONAL_INDEX) const {
         if (this->number_of_dimensions() != a_MULTI_DIMENSIONAL_INDEX.size()) {
             throw std::logic_error(utility::format_error_location(
@@ -293,20 +292,19 @@ class ConstraintProxy : public multi_array::AbstractMultiArray {
 
     /*************************************************************************/
     template <class... Args>
-    inline constexpr Constraint<T_Variable, T_Expression> &operator()(
-        Args... args) {
+    inline Constraint<T_Variable, T_Expression> &operator()(Args... args) {
         return this->operator()({args...});
     }
 
     /*************************************************************************/
     template <class... Args>
-    inline constexpr const Constraint<T_Variable, T_Expression> &operator()(
+    inline const Constraint<T_Variable, T_Expression> &operator()(
         Args... args) const {
         return this->operator()({args...});
     }
 
     /*************************************************************************/
-    inline constexpr ConstraintProxy<T_Variable, T_Expression> &operator=(
+    inline ConstraintProxy<T_Variable, T_Expression> &operator=(
         const Constraint<T_Variable, T_Expression> &a_CONSTRAINT) {
         if (this->number_of_elements() != 1) {
             throw std::logic_error(utility::format_error_location(

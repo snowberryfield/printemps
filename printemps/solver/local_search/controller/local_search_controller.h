@@ -41,11 +41,6 @@ class LocalSearchController
     }
 
     /*************************************************************************/
-    virtual ~LocalSearchController(void) {
-        /// nothing to do
-    }
-
-    /*************************************************************************/
     inline void initialize(void) {
         AbstractSolverController<T_Variable, T_Expression>::initialize();
         m_result.initialize();
@@ -183,9 +178,8 @@ class LocalSearchController
     }
 
     /*************************************************************************/
-    inline constexpr const LocalSearchControllerResult<T_Variable,
-                                                       T_Expression>&
-    result(void) const {
+    inline const LocalSearchControllerResult<T_Variable, T_Expression>& result(
+        void) const {
         return m_result;
     }
 };

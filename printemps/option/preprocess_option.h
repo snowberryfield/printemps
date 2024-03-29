@@ -283,7 +283,7 @@ struct PreprocessOption {
     }
 
     /**************************************************************************/
-    inline constexpr bool is_enabled_extract_dependent(void) const {
+    inline bool is_enabled_extract_dependent(void) const {
         if (is_enabled_extract_dependent_exclusive_or) {
             return true;
         }
