@@ -18,6 +18,7 @@
 #include "fixed_size_queue.h"
 #include "bidirectional_map.h"
 #include "range.h"
+#include "union_find.h"
 #include "json/json.h"
 #include "binary_matrix.h"
 #include "q_learning/q_learning.h"
