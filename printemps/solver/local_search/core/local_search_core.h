@@ -478,14 +478,15 @@ class LocalSearchCore {
          * solution status.
          */
         utility::print_single_line(m_option.output.verbose >=
-                                   option::verbose::Full);
+                                   option::verbose::Outer);
         utility::print_message(
             "Local search starts.",
-            m_option.output.verbose >= option::verbose::Full);
+            m_option.output.verbose >= option::verbose::Outer);
+
         this->print_table_header(m_option.output.verbose >=
-                                 option::verbose::Full);
+                                 option::verbose::Inner);
         this->print_table_initial(m_option.output.verbose >=
-                                  option::verbose::Full);
+                                  option::verbose::Inner);
 
         /**
          * Iterations start.
@@ -697,7 +698,7 @@ class LocalSearchCore {
                  std::max(m_option.local_search.log_interval, 1)) == 0 ||
                 STATE.update_status > 1) {
                 this->print_table_body(m_option.output.verbose >=
-                                       option::verbose::Full);
+                                       option::verbose::Inner);
             }
 
             m_state_manager.next_iteration();
@@ -707,7 +708,7 @@ class LocalSearchCore {
          * Print the footer of the optimization progress table.
          */
         this->print_table_footer(m_option.output.verbose >=
-                                 option::verbose::Full);
+                                 option::verbose::Inner);
 
         /**
          * Store the incumbent solution.

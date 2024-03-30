@@ -145,7 +145,7 @@ class TabuSearchController
     }
 
     /*************************************************************************/
-    inline void print_trend(const bool a_IS_ENABLED_PRINT) {
+    inline void print_basic_summary(const bool a_IS_ENABLED_PRINT) {
         this->print_outer_loop_iteration(a_IS_ENABLED_PRINT);
 
         /**
@@ -159,7 +159,10 @@ class TabuSearchController
         this->print_total_elapsed_time(a_IS_ENABLED_PRINT);
         this->print_incumbent_summary(a_IS_ENABLED_PRINT);
         this->print_dual_bound(a_IS_ENABLED_PRINT);
+    }
 
+    /*************************************************************************/
+    inline void print_optional_summary(const bool a_IS_ENABLED_PRINT) {
         /**
          * Print the search behavior summary.
          */
@@ -778,10 +781,16 @@ class TabuSearchController
             m_state_manager.update(tabu_search.result(), &m_mt19937);
 
             /**
-             * Print trend.
+             * Print basic summary.
              */
-            this->print_trend(this->m_option.output.verbose >=
-                              option::verbose::Outer);
+            this->print_basic_summary(this->m_option.output.verbose >=
+                                      option::verbose::Outer);
+
+            /**
+             * Print optional summary.
+             */
+            this->print_optional_summary(this->m_option.output.verbose >=
+                                         option::verbose::Full);
 
             /**
              * Logging.

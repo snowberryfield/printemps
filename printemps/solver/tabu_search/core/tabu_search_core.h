@@ -757,8 +757,8 @@ class TabuSearchCore {
             "Tabu Search starts.",
             m_option.output.verbose >= option::verbose::Outer);
 
-        print_table_header(m_option.output.verbose >= option::verbose::Full);
-        print_table_initial(m_option.output.verbose >= option::verbose::Full);
+        print_table_header(m_option.output.verbose >= option::verbose::Inner);
+        print_table_initial(m_option.output.verbose >= option::verbose::Inner);
 
         /**
          * Iterations start.
@@ -990,7 +990,7 @@ class TabuSearchCore {
                  std::max(m_option.tabu_search.log_interval, 1)) == 0 ||
                 STATE.update_status > 0) {
                 print_table_body(m_option.output.verbose >=
-                                 option::verbose::Full);
+                                 option::verbose::Inner);
             }
 
             /**
@@ -1011,7 +1011,7 @@ class TabuSearchCore {
         /**
          * Print the footer of the optimization progress table.
          */
-        print_table_footer(m_option.output.verbose >= option::verbose::Full);
+        print_table_footer(m_option.output.verbose >= option::verbose::Inner);
 
         /**
          * Store the incumbent solution.

@@ -51,8 +51,7 @@ class LagrangeDualController
         const bool a_IS_ENABLED_PRINT) {
         if (!this->m_model_ptr->is_linear()) {
             utility::print_warning(
-                "Solving Lagrange dual was skipped because the problem is not "
-                "linear.",
+                "Lagrange dual was skipped because the problem is not linear.",
                 a_IS_ENABLED_PRINT);
             return true;
         }
@@ -66,9 +65,9 @@ class LagrangeDualController
             this->m_model_ptr->number_of_dependent_binary_variables() > 0 ||
             this->m_model_ptr->number_of_dependent_integer_variables() > 0) {
             utility::print_warning(
-                "Solving lagrange dual was skipped because it is not "
-                "applicable to problems which include selection variables or "
-                "dependent variables.",
+                "Lagrange dual was skipped because it is not applicable to "
+                "problems which include selection variables or dependent "
+                "variables.",
                 a_IS_ENABLED_PRINT);
             return true;
         }
@@ -95,8 +94,8 @@ class LagrangeDualController
                 .feasible_incumbent_objective() <=
             this->m_option.general.target_objective_value) {
             utility::print_message(
-                "Solving Lagrange dual was skipped because of feasible "
-                "objective reaches the target limit.",
+                "Lagrange dual was skipped because of feasible objective "
+                "reaches the target limit.",
                 a_IS_ENABLED_PRINT);
             return true;
         }
@@ -205,7 +204,7 @@ class LagrangeDualController
          * Print the search summary.
          */
         utility::print_message(
-            "Solving Lagrange dual finished (Reason: " +
+            "Lagrange dual finished (Reason: " +
                 core::LagrangeDualCoreTerminationStatusInverseMap.at(
                     lagrange_dual_result.termination_status) +
                 ").",
