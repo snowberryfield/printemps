@@ -25,6 +25,7 @@ TEST_F(TestVerbose, VerboseMap) {
     EXPECT_EQ(Off, VerboseMap.at("Off"));
     EXPECT_EQ(Warning, VerboseMap.at("Warning"));
     EXPECT_EQ(Outer, VerboseMap.at("Outer"));
+    EXPECT_EQ(Inner, VerboseMap.at("Inner"));
     EXPECT_EQ(Full, VerboseMap.at("Full"));
     EXPECT_EQ(Debug, VerboseMap.at("Debug"));
 }
@@ -35,6 +36,7 @@ TEST_F(TestVerbose, VerboseInverseMap) {
     EXPECT_EQ("Off", VerboseInverseMap.at(Off));
     EXPECT_EQ("Warning", VerboseInverseMap.at(Warning));
     EXPECT_EQ("Outer", VerboseInverseMap.at(Outer));
+    EXPECT_EQ("Inner", VerboseInverseMap.at(Inner));
     EXPECT_EQ("Full", VerboseInverseMap.at(Full));
     EXPECT_EQ("Debug", VerboseInverseMap.at(Debug));
 }

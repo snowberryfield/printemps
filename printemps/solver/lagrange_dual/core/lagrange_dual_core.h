@@ -377,12 +377,13 @@ class LagrangeDualCore {
          * solution status.
          */
         utility::print_single_line(m_option.output.verbose >=
-                                   option::verbose::Full);
+                                   option::verbose::Outer);
         utility::print_message(
             "Lagrange dual starts.",
-            m_option.output.verbose >= option::verbose::Full);
-        print_table_header(m_option.output.verbose >= option::verbose::Full);
-        print_table_initial(m_option.output.verbose >= option::verbose::Full);
+            m_option.output.verbose >= option::verbose::Outer);
+
+        print_table_header(m_option.output.verbose >= option::verbose::Inner);
+        print_table_initial(m_option.output.verbose >= option::verbose::Inner);
 
         auto& variable_ptrs = m_model_ptr->variable_reference().variable_ptrs;
         const int VARIABLES_SIZE = variable_ptrs.size();
@@ -480,7 +481,7 @@ class LagrangeDualCore {
                  std::max(m_option.lagrange_dual.log_interval, 1)) == 0 ||
                 STATE.update_status > 1) {
                 print_table_body(m_option.output.verbose >=
-                                 option::verbose::Full);
+                                 option::verbose::Inner);
             }
 
             /**
@@ -497,7 +498,7 @@ class LagrangeDualCore {
         /**
          * Print the footer of the optimization progress table.
          */
-        print_table_footer(m_option.output.verbose >= option::verbose::Full);
+        print_table_footer(m_option.output.verbose >= option::verbose::Inner);
 
         /**
          * Store the incumbent solution.
