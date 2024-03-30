@@ -35,14 +35,14 @@ jobs:
       - { os: macos-12, cc: gcc-13, cxx: g++-13 } # 13.2.0 
       # For macOS 13, the available compilers are specified according to
       # https://github.com/actions/runner-images/blob/main/images/macos/macos-13-Readme.md
-      - { os: macos-13, cc: gcc-11, cxx: g++-11 } # 11.4.0 
-      - { os: macos-13, cc: gcc-12, cxx: g++-12 } # 12.3.0 
-      - { os: macos-13, cc: gcc-13, cxx: g++-13 } # 13.2.0 
-      # For macOS 13, the available compilers are specified according to
-      # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-Readme.md
-      - { os: macos-14, cc: gcc-11, cxx: g++-11 } # 11.4.0 
-      - { os: macos-14, cc: gcc-12, cxx: g++-12 } # 12.3.0 
-      - { os: macos-14, cc: gcc-13, cxx: g++-13 } # 13.2.0 
+      # - { os: macos-13, cc: gcc-11, cxx: g++-11 } # 11.4.0 
+      # - { os: macos-13, cc: gcc-12, cxx: g++-12 } # 12.3.0 
+      # - { os: macos-13, cc: gcc-13, cxx: g++-13 } # 13.2.0 
+      # # For macOS 13, the available compilers are specified according to
+      # # https://github.com/actions/runner-images/blob/main/images/macos/macos-14-Readme.md
+      # - { os: macos-14, cc: gcc-11, cxx: g++-11 } # 11.4.0 
+      # - { os: macos-14, cc: gcc-12, cxx: g++-12 } # 12.3.0 
+      # - { os: macos-14, cc: gcc-13, cxx: g++-13 } # 13.2.0 
 
     steps:
     - uses: actions/checkout@v2
