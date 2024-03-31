@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2023 Yuji KOGUMA
+// Copyright (c) 2020-2024 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -32,18 +32,13 @@ class TimeKeeper {
     }
 
     /*************************************************************************/
-    virtual ~TimeKeeper(void) {
-        /// nothing to do
-    }
-
-    /*************************************************************************/
     inline void set_start_time(void) {
         m_start_time = get_time();
         m_is_started = true;
     }
 
     /*************************************************************************/
-    inline constexpr void initialize(void) {
+    inline void initialize(void) {
         m_start_time   = 0.0;
         m_elapsed_time = 0.0;
         m_is_started   = false;
@@ -57,17 +52,17 @@ class TimeKeeper {
     }
 
     /*************************************************************************/
-    inline constexpr double start_time(void) const {
+    inline double start_time(void) const {
         return m_start_time;
     }
 
     /*************************************************************************/
-    inline constexpr double elapsed_time(void) const {
+    inline double elapsed_time(void) const {
         return m_elapsed_time;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_started(void) const {
+    inline bool is_started(void) const {
         return m_is_started;
     }
 };

@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2023 Yuji KOGUMA
+// Copyright (c) 2020-2024 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -66,7 +66,7 @@ struct Action {
     }
 
     /*************************************************************************/
-    inline constexpr void update_confidence(
+    inline void update_confidence(
         const double a_TOTAL_NUMBER_OF_SAMPLES) noexcept {
         if (this->number_of_samples == 0) {
             return;

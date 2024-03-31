@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2023 Yuji KOGUMA
+// Copyright (c) 2020-2024 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -27,13 +27,12 @@ class FixedSizeHashMap {
     bool *   m_is_occupied;
 
     /*************************************************************************/
-    inline constexpr std::uint_fast32_t compute_hash(const T_Key a_KEY) const
-        noexcept {
+    inline std::uint_fast32_t compute_hash(const T_Key a_KEY) const noexcept {
         return reinterpret_cast<std::uint_fast64_t>(a_KEY) >> m_shift_size;
     }
 
     /*************************************************************************/
-    inline constexpr std::uint_fast32_t compute_index(
+    inline std::uint_fast32_t compute_index(
         const std::uint_fast32_t a_HASH) const noexcept {
         return a_HASH & m_mask;
     }
@@ -76,7 +75,7 @@ class FixedSizeHashMap {
     }
 
     /*************************************************************************/
-    inline constexpr void initialize(void) {
+    inline void initialize(void) {
         m_shift_size          = 0;
         m_bucket_size         = FixedSizeHashMapConstant::DEFAULT_BUCKET_SIZE;
         m_mask                = m_bucket_size - 1;
@@ -119,7 +118,7 @@ class FixedSizeHashMap {
     }
 
     /*************************************************************************/
-    inline constexpr T_Value at(const T_Key a_KEY) const noexcept {
+    inline T_Value at(const T_Key a_KEY) const noexcept {
         std::uint_fast32_t index =
             (reinterpret_cast<std::uint_fast64_t>(a_KEY) >> m_shift_size) &
             m_mask;
@@ -138,12 +137,12 @@ class FixedSizeHashMap {
     }
 
     /*************************************************************************/
-    inline constexpr std::uint_fast8_t shift_size(void) const {
+    inline std::uint_fast8_t shift_size(void) const {
         return m_shift_size;
     }
 
     /*************************************************************************/
-    inline constexpr std::uint_fast32_t bucket_size(void) const {
+    inline std::uint_fast32_t bucket_size(void) const {
         return m_bucket_size;
     }
 };

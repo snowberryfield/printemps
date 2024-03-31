@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2023 Yuji KOGUMA
+// Copyright (c) 2020-2024 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -9,7 +9,7 @@
 namespace printemps::utility {
 /*****************************************************************************/
 template <class T>
-constexpr std::unordered_set<T> intersection_set(
+inline std::unordered_set<T> intersection_set(
     const std::unordered_set<T> &a_FIRST,
     const std::unordered_set<T> &a_SECOND) {
     std::unordered_set<T> result;
@@ -31,8 +31,8 @@ constexpr std::unordered_set<T> intersection_set(
 
 /*****************************************************************************/
 template <class T>
-constexpr void update_intersection_set(std::unordered_set<T> *      a_first,
-                                       const std::unordered_set<T> &a_SECOND) {
+inline void update_intersection_set(std::unordered_set<T> *      a_first,
+                                    const std::unordered_set<T> &a_SECOND) {
     for (auto it = a_first->begin(); it != a_first->end();) {
         if (a_SECOND.find(*it) == a_SECOND.end()) {
             it = a_first->erase(it);
@@ -44,9 +44,8 @@ constexpr void update_intersection_set(std::unordered_set<T> *      a_first,
 
 /*****************************************************************************/
 template <class T>
-constexpr std::unordered_set<T> union_set(
-    const std::unordered_set<T> &a_FIRST,
-    const std::unordered_set<T> &a_SECOND) {
+inline std::unordered_set<T> union_set(const std::unordered_set<T> &a_FIRST,
+                                       const std::unordered_set<T> &a_SECOND) {
     std::unordered_set<T> result = a_FIRST;
     result.insert(a_SECOND.begin(), a_SECOND.end());
     return result;
@@ -54,15 +53,14 @@ constexpr std::unordered_set<T> union_set(
 
 /*****************************************************************************/
 template <class T>
-constexpr void update_union_set(std::unordered_set<T> *      a_first,
-                                const std::unordered_set<T> &a_SECOND) {
+inline void update_union_set(std::unordered_set<T> *      a_first,
+                             const std::unordered_set<T> &a_SECOND) {
     a_first->insert(a_SECOND.begin(), a_SECOND.end());
 }
 
 /*****************************************************************************/
 template <class T>
-constexpr std::vector<T> to_vector(
-    const std::unordered_set<T> &a_UNORDERED_SET) {
+inline std::vector<T> to_vector(const std::unordered_set<T> &a_UNORDERED_SET) {
     std::vector<T> result(a_UNORDERED_SET.begin(), a_UNORDERED_SET.end());
     return result;
 }

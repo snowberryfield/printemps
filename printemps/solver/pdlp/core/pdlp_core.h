@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2023 Yuji KOGUMA
+// Copyright (c) 2020-2024 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -258,11 +258,6 @@ class PDLPCore {
     }
 
     /*************************************************************************/
-    virtual ~PDLPCore(void) {
-        /// nothing to do
-    }
-
-    /*************************************************************************/
     inline void initialize(void) {
         m_instance_ptr = nullptr;
         m_option.initialize();
@@ -299,11 +294,16 @@ class PDLPCore {
          */
         m_state_manager.update_convergence_information();
 
+        utility::print_single_line(m_option.output.verbose >=
+                                   option::verbose::Outer);
+        utility::print_message(
+            "PDLP starts.", m_option.output.verbose >= option::verbose::Outer);
+
         this->print_table_header(m_option.output.verbose >=
-                                 option::verbose::Full);
+                                 option::verbose::Inner);
 
         this->print_table_initial(m_option.output.verbose >=
-                                  option::verbose::Full);
+                                  option::verbose::Inner);
 
         const int RESTART_CHECK_INTERVAL = m_option.pdlp.restart_check_interval;
         const int CONVERGENCE_CHECK_INTERVAL =
@@ -321,7 +321,7 @@ class PDLPCore {
             if (this->satisfy_time_over_terminate_condition()) {
                 if (!previous_iteration_log_flag) {
                     this->print_table_body(m_option.output.verbose >=
-                                           option::verbose::Full);
+                                           option::verbose::Inner);
                 }
                 break;
             }
@@ -332,7 +332,7 @@ class PDLPCore {
             if (this->satisfy_iteration_over_terminate_condition()) {
                 if (!previous_iteration_log_flag) {
                     this->print_table_body(m_option.output.verbose >=
-                                           option::verbose::Full);
+                                           option::verbose::Inner);
                 }
                 break;
             }
@@ -343,7 +343,7 @@ class PDLPCore {
             if (this->satisfy_optimal_terminate_condition()) {
                 if (!previous_iteration_log_flag) {
                     this->print_table_body(m_option.output.verbose >=
-                                           option::verbose::Full);
+                                           option::verbose::Inner);
                 }
                 break;
             }
@@ -354,7 +354,7 @@ class PDLPCore {
             if (this->satisfy_infeasible_terminate_condition()) {
                 if (!previous_iteration_log_flag) {
                     this->print_table_body(m_option.output.verbose >=
-                                           option::verbose::Full);
+                                           option::verbose::Inner);
                 }
                 break;
             }
@@ -375,7 +375,7 @@ class PDLPCore {
 
             if (state.total_iteration % LOG_INTERVAL == 0) {
                 this->print_table_body(m_option.output.verbose >=
-                                       option::verbose::Full);
+                                       option::verbose::Inner);
                 previous_iteration_log_flag = true;
             } else {
                 previous_iteration_log_flag = false;
@@ -392,12 +392,12 @@ class PDLPCore {
         }
 
         this->print_table_footer(m_option.output.verbose >=
-                                 option::verbose::Full);
+                                 option::verbose::Inner);
         this->postprocess();
     }
 
     /*************************************************************************/
-    inline constexpr const PDLPCoreResult& result(void) const {
+    inline const PDLPCoreResult& result(void) const {
         return m_result;
     }
 };  // namespace printemps::solver::pdlp::core

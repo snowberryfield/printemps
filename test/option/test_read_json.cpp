@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2023 Yuji KOGUMA
+// Copyright (c) 2020-2024 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -518,7 +518,22 @@ TEST_F(TestReadJson, read_json_verbose) {
         std::string               key       = "verbose";
         std::string               wrong_key = "wrong";
 
-        object.emplace_back(key, 3);  // Full
+        object.emplace_back(key, 3);  // Inner
+
+        option::verbose::Verbose parameter;
+        EXPECT_TRUE(option::read_json(&parameter, key, object));
+        EXPECT_EQ(option::verbose::Inner, parameter);
+
+        EXPECT_FALSE(option::read_json(&parameter, wrong_key, object));
+        EXPECT_EQ(option::verbose::Inner, parameter);
+    }
+
+    {
+        utility::json::JsonObject object;
+        std::string               key       = "verbose";
+        std::string               wrong_key = "wrong";
+
+        object.emplace_back(key, 4);  // Full
 
         option::verbose::Verbose parameter;
         EXPECT_TRUE(option::read_json(&parameter, key, object));
@@ -533,7 +548,7 @@ TEST_F(TestReadJson, read_json_verbose) {
         std::string               key       = "verbose";
         std::string               wrong_key = "wrong";
 
-        object.emplace_back(key, 4);  // Debug
+        object.emplace_back(key, 5);  // Debug
 
         option::verbose::Verbose parameter;
         EXPECT_TRUE(option::read_json(&parameter, key, object));
@@ -607,7 +622,7 @@ TEST_F(TestReadJson, read_json_verbose) {
         std::string               key       = "verbose";
         std::string               wrong_key = "wrong";
 
-        object.emplace_back(key, 4);  // Debug
+        object.emplace_back(key, std::string("Debug"));  // Debug
 
         option::verbose::Verbose parameter;
         EXPECT_TRUE(option::read_json(&parameter, key, object));

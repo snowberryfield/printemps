@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2023 Yuji KOGUMA
+// Copyright (c) 2020-2024 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -8,17 +8,22 @@
 
 namespace printemps::solution {
 /*****************************************************************************/
+enum class SortMode { Off, Ascending, Descending };
+
+/*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class SolutionArchive {
    private:
-    int  m_max_size;
-    bool m_is_ascending;
+    int      m_max_size;
+    SortMode m_sort_mode;
     std::vector<SparseSolution<T_Variable, T_Expression>>  //
         m_solutions;
 
     std::string m_name;
     int         m_number_of_variables;
     int         m_number_of_constraints;
+
+    bool m_has_feasible_solution;
 
    public:
     /*************************************************************************/
@@ -28,12 +33,12 @@ class SolutionArchive {
 
     /*************************************************************************/
     SolutionArchive(const int          a_MAX_SIZE,             //
-                    const bool         a_is_ASCENDING,         //
+                    const SortMode     a_SORT_MODE,            //
                     const std::string& a_NAME,                 //
                     const int          a_NUMBER_OF_VARIABLES,  //
                     const int          a_NUMBER_OF_CONSTRAINTS) {
         this->setup(a_MAX_SIZE,             //
-                    a_is_ASCENDING,         //
+                    a_SORT_MODE,            //
                     a_NAME,                 //
                     a_NUMBER_OF_VARIABLES,  //
                     a_NUMBER_OF_CONSTRAINTS);
@@ -41,22 +46,23 @@ class SolutionArchive {
 
     /*************************************************************************/
     void initialize(void) {
-        m_max_size     = 0;
-        m_is_ascending = true;
+        m_max_size  = 0;
+        m_sort_mode = SortMode::Off;
         m_solutions.clear();
         m_name                  = "";
         m_number_of_variables   = 0;
         m_number_of_constraints = 0;
+        m_has_feasible_solution = false;
     }
 
     /*************************************************************************/
     void setup(const int          a_MAX_SIZE,             //
-               const bool         a_is_ASCENDING,         //
+               const SortMode     a_SORT_MODE,            //
                const std::string& a_NAME,                 //
                const int          a_NUMBER_OF_VARIABLES,  //
                const int          a_NUMBER_OF_CONSTRAINTS) {
-        m_max_size     = a_MAX_SIZE;
-        m_is_ascending = a_is_ASCENDING;
+        m_max_size  = a_MAX_SIZE;
+        m_sort_mode = a_SORT_MODE;
         m_solutions.clear();
         m_name                  = a_NAME;
         m_number_of_variables   = a_NUMBER_OF_VARIABLES;
@@ -64,7 +70,7 @@ class SolutionArchive {
     }
 
     /*************************************************************************/
-    inline constexpr void push(
+    inline void push(
         const SparseSolution<T_Variable, T_Expression>& a_SOLUTION) {
         std::vector<SparseSolution<T_Variable, T_Expression>> solutions = {
             a_SOLUTION};
@@ -72,23 +78,31 @@ class SolutionArchive {
     }
 
     /*************************************************************************/
-    constexpr void push(
+    inline void push(
         const std::vector<SparseSolution<T_Variable, T_Expression>>&
             a_SOLUTIONS) {
         auto& solutions = m_solutions;
         solutions.insert(solutions.end(), a_SOLUTIONS.begin(),
                          a_SOLUTIONS.end());
 
-        if (m_is_ascending) {
-            std::sort(solutions.begin(), solutions.end(),
-                      [](const auto& a_LHS, const auto& a_RHS) {
-                          return a_LHS.objective < a_RHS.objective;
-                      });
-        } else {
-            std::sort(solutions.begin(), solutions.end(),
-                      [](const auto& a_LHS, const auto& a_RHS) {
-                          return a_LHS.objective > a_RHS.objective;
-                      });
+        switch (m_sort_mode) {
+            case SortMode::Ascending: {
+                std::sort(solutions.begin(), solutions.end(),
+                          [](const auto& a_LHS, const auto& a_RHS) {
+                              return a_LHS.objective < a_RHS.objective;
+                          });
+                break;
+            }
+            case SortMode::Descending: {
+                std::sort(solutions.begin(), solutions.end(),
+                          [](const auto& a_LHS, const auto& a_RHS) {
+                              return a_LHS.objective > a_RHS.objective;
+                          });
+                break;
+            }
+            default: {
+                /** nothing to do */
+            }
         }
 
         solutions.erase(std::unique(solutions.begin(), solutions.end(),
@@ -98,46 +112,91 @@ class SolutionArchive {
                                     }),
                         solutions.end());
 
-        if (static_cast<int>(solutions.size()) > m_max_size) {
-            solutions.resize(m_max_size);
+        const int SOLUTIONS_SIZE = static_cast<int>(solutions.size());
+        if (m_max_size > 0 && SOLUTIONS_SIZE > m_max_size) {
+            if (m_sort_mode == SortMode::Ascending ||
+                m_sort_mode == SortMode::Descending) {
+                solutions.resize(m_max_size);
+            } else {
+                solutions.erase(
+                    solutions.begin(),
+                    solutions.begin() + SOLUTIONS_SIZE - m_max_size);
+            }
         }
     }
 
     /*************************************************************************/
-    inline constexpr int size(void) const {
+    inline void remove_infeasible_solutions(void) {
+        m_solutions.erase(std::remove_if(m_solutions.begin(), m_solutions.end(),
+                                         [](const auto& a_SOLUTION) {
+                                             return !a_SOLUTION.is_feasible;
+                                         }),
+                          m_solutions.end());
+    }
+
+    /*************************************************************************/
+    inline int size(void) const {
         return m_solutions.size();
     }
 
     /*************************************************************************/
-    inline constexpr int max_size(void) const {
+    inline int max_size(void) const {
         return m_max_size;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_ascending(void) const {
-        return m_is_ascending;
+    inline SortMode sort_mode(void) const {
+        return m_sort_mode;
     }
 
     /*************************************************************************/
-    inline constexpr const std::string& name(void) const {
+    inline const std::string& name(void) const {
         return m_name;
     }
 
     /*************************************************************************/
-    inline constexpr int number_of_variables(void) const {
+    inline int number_of_variables(void) const {
         return m_number_of_variables;
     }
 
     /*************************************************************************/
-    inline constexpr int number_of_constraints(void) const {
+    inline int number_of_constraints(void) const {
         return m_number_of_constraints;
     }
 
     /*************************************************************************/
-    inline constexpr const std::vector<
-        SparseSolution<T_Variable, T_Expression>>&
+    inline const std::vector<SparseSolution<T_Variable, T_Expression>>&
     solutions(void) const {
         return m_solutions;
+    }
+
+    /*************************************************************************/
+    inline bool update_has_feasible_solution(void) {
+        for (const auto& solution : m_solutions) {
+            if (solution.is_feasible) {
+                m_has_feasible_solution = true;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /*************************************************************************/
+    inline bool update_has_feasible_solution(
+        const std::vector<SparseSolution<T_Variable, T_Expression>>&
+            a_SOLUTIONS) {
+        for (const auto& solution : a_SOLUTIONS) {
+            if (solution.is_feasible) {
+                m_has_feasible_solution = true;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /*************************************************************************/
+    inline bool has_feasible_solution(void) const {
+        return m_has_feasible_solution;
     }
 
     /*************************************************************************/

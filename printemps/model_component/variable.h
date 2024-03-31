@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2023 Yuji KOGUMA
+// Copyright (c) 2020-2024 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -96,8 +96,7 @@ class Variable : public multi_array::AbstractMultiArrayElement {
         Variable<T_Variable, T_Expression> &&) = default;
 
     /*************************************************************************/
-    inline static constexpr Variable<T_Variable, T_Expression> create_instance(
-        void) {
+    inline static Variable<T_Variable, T_Expression> create_instance(void) {
         /**
          * When instantiation, instead of constructor, create_instance() should
          * be called.
@@ -144,13 +143,13 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr void set_value_force(const T_Variable a_VALUE) {
+    inline void set_value_force(const T_Variable a_VALUE) {
         m_value = a_VALUE;
         this->update_margin();
     }
 
     /*************************************************************************/
-    inline constexpr void set_value_if_mutable(const T_Variable a_VALUE) {
+    inline void set_value_if_mutable(const T_Variable a_VALUE) {
         if (!m_is_fixed) {
             m_value = a_VALUE;
             this->update_margin();
@@ -158,12 +157,12 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr T_Variable value(void) const noexcept {
+    inline T_Variable value(void) const noexcept {
         return m_value;
     }
 
     /*************************************************************************/
-    inline constexpr void set_value(T_Variable a_VALUE) {
+    inline void set_value(T_Variable a_VALUE) {
         if (m_value != a_VALUE && m_is_fixed) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -174,12 +173,12 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr T_Expression evaluate(void) const noexcept {
+    inline T_Expression evaluate(void) const noexcept {
         return this->value();
     }
 
     /*************************************************************************/
-    inline constexpr T_Expression evaluate(
+    inline T_Expression evaluate(
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
         noexcept {
         if (a_MOVE.alterations.size() == 0) {
@@ -195,30 +194,30 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr void fix(void) {
+    inline void fix(void) {
         m_is_fixed = true;
     }
 
     /*************************************************************************/
-    inline constexpr void unfix(void) {
+    inline void unfix(void) {
         m_is_fixed = false;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_fixed(void) const {
+    inline bool is_fixed(void) const {
         return m_is_fixed;
     }
 
     /*************************************************************************/
-    inline constexpr void fix_by(const T_Variable a_VALUE) {
+    inline void fix_by(const T_Variable a_VALUE) {
         m_value    = a_VALUE;
         m_is_fixed = true;
         this->update_margin();
     }
 
     /*************************************************************************/
-    inline constexpr void set_bound(const T_Variable a_LOWER_BOUND,
-                                    const T_Variable a_UPPER_BOUND) {
+    inline void set_bound(const T_Variable a_LOWER_BOUND,
+                          const T_Variable a_UPPER_BOUND) {
         if (a_LOWER_BOUND > a_UPPER_BOUND) {
             throw std::logic_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -238,7 +237,7 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr void reset_bound(void) {
+    inline void reset_bound(void) {
         m_lower_bound   = constant::INT_HALF_MIN;
         m_upper_bound   = constant::INT_HALF_MAX;
         m_has_bounds    = false;
@@ -248,94 +247,94 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr T_Variable lower_bound(void) const noexcept {
+    inline T_Variable lower_bound(void) const noexcept {
         return m_lower_bound;
     }
 
     /*************************************************************************/
-    inline constexpr T_Variable upper_bound(void) const noexcept {
+    inline T_Variable upper_bound(void) const noexcept {
         return m_upper_bound;
     }
 
     /*************************************************************************/
-    inline constexpr bool has_bounds(void) const {
+    inline bool has_bounds(void) const {
         return m_has_bounds;
     }
 
     /*************************************************************************/
-    inline constexpr T_Variable range(void) const {
+    inline T_Variable range(void) const {
         return m_upper_bound - m_lower_bound;
     }
 
     /*************************************************************************/
-    inline constexpr void set_lagrangian_coefficient(
+    inline void set_lagrangian_coefficient(
         const double a_LAGRANGIAN_COEFFICIENT) {
         m_lagrangian_coefficient = a_LAGRANGIAN_COEFFICIENT;
     }
 
     /*************************************************************************/
-    inline constexpr double lagrangian_coefficient(void) const noexcept {
+    inline double lagrangian_coefficient(void) const noexcept {
         return m_lagrangian_coefficient;
     }
 
     /*************************************************************************/
-    inline constexpr void set_is_objective_improvable(
+    inline void set_is_objective_improvable(
         const bool a_IS_OBJECTIVE_IMPROVABLE) noexcept {
         m_is_objective_improvable = a_IS_OBJECTIVE_IMPROVABLE;
     }
 
     /*************************************************************************/
-    inline constexpr void set_is_objective_improvable_or(
+    inline void set_is_objective_improvable_or(
         const bool a_IS_OBJECTIVE_IMPROVABLE) noexcept {
         m_is_objective_improvable |= a_IS_OBJECTIVE_IMPROVABLE;
     }
 
     /*************************************************************************/
-    inline constexpr void set_is_objective_improvable_and(
+    inline void set_is_objective_improvable_and(
         const bool a_IS_OBJECTIVE_IMPROVABLE) noexcept {
         m_is_objective_improvable &= a_IS_OBJECTIVE_IMPROVABLE;
     }
 
     /*************************************************************************/
-    inline constexpr void set_is_feasibility_improvable(
+    inline void set_is_feasibility_improvable(
         const bool a_IS_FEASIBILITY_IMPROVABLE) noexcept {
         m_is_feasibility_improvable = a_IS_FEASIBILITY_IMPROVABLE;
     }
 
     /*************************************************************************/
-    inline constexpr void set_is_feasibility_improvable_or(
+    inline void set_is_feasibility_improvable_or(
         const bool a_IS_FEASIBILITY_IMPROVABLE) noexcept {
         m_is_feasibility_improvable |= a_IS_FEASIBILITY_IMPROVABLE;
     }
 
     /*************************************************************************/
-    inline constexpr void set_is_feasibility_improvable_and(
+    inline void set_is_feasibility_improvable_and(
         const bool a_IS_FEASIBILITY_IMPROVABLE) noexcept {
         m_is_feasibility_improvable &= a_IS_FEASIBILITY_IMPROVABLE;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_objective_improvable(void) const noexcept {
+    inline bool is_objective_improvable(void) const noexcept {
         return m_is_objective_improvable;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_feasibility_improvable(void) const noexcept {
+    inline bool is_feasibility_improvable(void) const noexcept {
         return m_is_feasibility_improvable;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_improvable(void) const noexcept {
+    inline bool is_improvable(void) const noexcept {
         return m_is_feasibility_improvable || m_is_objective_improvable;
     }
 
     /*************************************************************************/
-    inline constexpr void set_sense(const VariableSense &a_SENSE) noexcept {
+    inline void set_sense(const VariableSense &a_SENSE) noexcept {
         m_sense = a_SENSE;
     }
 
     /*************************************************************************/
-    inline constexpr VariableSense sense(void) const noexcept {
+    inline VariableSense sense(void) const noexcept {
         return m_sense;
     }
 
@@ -365,7 +364,7 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr void setup_sense_binary_or_integer(void) {
+    inline void setup_sense_binary_or_integer(void) {
         if ((m_lower_bound == 0 && m_upper_bound == 1) ||
             (m_lower_bound == 0 && m_upper_bound == 0) ||
             (m_lower_bound == 1 && m_upper_bound == 1)) {
@@ -376,41 +375,40 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr void set_selection_ptr(
+    inline void set_selection_ptr(
         Selection<T_Variable, T_Expression> *a_SELECTION) {
         m_selection_ptr = a_SELECTION;
         m_sense         = VariableSense::Selection;
     }
 
     /*************************************************************************/
-    inline constexpr Selection<T_Variable, T_Expression> *selection_ptr(
-        void) const {
+    inline Selection<T_Variable, T_Expression> *selection_ptr(void) const {
         return m_selection_ptr;
     }
 
     /*************************************************************************/
-    inline constexpr void select(void) const {
+    inline void select(void) const {
         m_selection_ptr->selected_variable_ptr = this->reference();
     }
 
     /*************************************************************************/
-    inline constexpr void update(void) {
+    inline void update(void) {
         m_value = m_dependent_expression_ptr->value();
     }
 
     /*************************************************************************/
-    inline constexpr void register_related_constraint_ptr(
+    inline void register_related_constraint_ptr(
         Constraint<T_Variable, T_Expression> *a_constraint_ptr) {
         m_related_constraint_ptrs.push_back(a_constraint_ptr);
     }
 
     /*************************************************************************/
-    inline constexpr void reset_related_constraint_ptrs(void) {
+    inline void reset_related_constraint_ptrs(void) {
         m_related_constraint_ptrs.clear();
     }
 
     /*************************************************************************/
-    inline constexpr void sort_and_unique_related_constraint_ptrs(void) {
+    inline void sort_and_unique_related_constraint_ptrs(void) {
         std::stable_sort(m_related_constraint_ptrs.begin(),
                          m_related_constraint_ptrs.end(),
                          [](const auto &a_FIRST, const auto &a_SECOND) {
@@ -424,20 +422,19 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr std::vector<Constraint<T_Variable, T_Expression> *>
+    inline std::vector<Constraint<T_Variable, T_Expression> *>
         &related_constraint_ptrs(void) {
         return m_related_constraint_ptrs;
     }
 
     /*************************************************************************/
-    inline constexpr const std::vector<Constraint<T_Variable, T_Expression> *>
+    inline const std::vector<Constraint<T_Variable, T_Expression> *>
         &related_constraint_ptrs(void) const {
         return m_related_constraint_ptrs;
     }
 
     /*************************************************************************/
-    inline constexpr void setup_related_binary_coefficient_constraint_ptrs(
-        void) {
+    inline void setup_related_binary_coefficient_constraint_ptrs(void) {
         /**
          * NOTE: This method must be called after constraint categorization.
          */
@@ -467,30 +464,29 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr void reset_related_binary_coefficient_constraint_ptrs(
-        void) {
+    inline void reset_related_binary_coefficient_constraint_ptrs(void) {
         m_related_binary_coefficient_constraint_ptrs.clear();
     }
 
     /*************************************************************************/
-    inline constexpr std::vector<Constraint<T_Variable, T_Expression> *>
+    inline std::vector<Constraint<T_Variable, T_Expression> *>
         &related_binary_coefficient_constraint_ptrs(void) {
         return m_related_binary_coefficient_constraint_ptrs;
     }
 
     /*************************************************************************/
-    inline constexpr const std::vector<Constraint<T_Variable, T_Expression> *>
+    inline const std::vector<Constraint<T_Variable, T_Expression> *>
         &related_binary_coefficient_constraint_ptrs(void) const {
         return m_related_binary_coefficient_constraint_ptrs;
     }
 
     /*************************************************************************/
-    inline constexpr void reset_constraint_sensitivities(void) {
+    inline void reset_constraint_sensitivities(void) {
         m_constraint_sensitivities.clear();
     }
 
     /*************************************************************************/
-    inline constexpr void sort_constraint_sensitivities(void) {
+    inline void sort_constraint_sensitivities(void) {
         std::stable_sort(m_constraint_sensitivities.begin(),
                          m_constraint_sensitivities.end(),
                          [](const auto &a_FIRST, const auto &a_SECOND) {
@@ -500,7 +496,7 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr void register_constraint_sensitivity(
+    inline void register_constraint_sensitivity(
         Constraint<T_Variable, T_Expression> *a_constraint_ptr,
         const T_Expression                    a_SENSITIVITY) {
         m_constraint_sensitivities.emplace_back(a_constraint_ptr,
@@ -508,21 +504,21 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr std::vector<
+    inline std::vector<
         std::pair<Constraint<T_Variable, T_Expression> *, T_Expression>>
         &constraint_sensitivities(void) {
         return m_constraint_sensitivities;
     }
 
     /*************************************************************************/
-    inline constexpr const std::vector<
+    inline const std::vector<
         std::pair<Constraint<T_Variable, T_Expression> *, T_Expression>>
         &constraint_sensitivities(void) const {
         return m_constraint_sensitivities;
     }
 
     /*************************************************************************/
-    inline constexpr void setup_hash(void) {
+    inline void setup_hash(void) {
         /**
          * NOTE: This method is called in
          * preprocess::remove_redundant_set_variables().
@@ -535,7 +531,7 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr void set_dependent_expression_ptr(
+    inline void set_dependent_expression_ptr(
         Expression<T_Variable, T_Expression> *a_expression_ptr) {
         m_dependent_expression_ptr = a_expression_ptr;
         setup_sense_binary_or_integer();
@@ -548,44 +544,41 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr void reset_dependent_expression_ptr(void) {
+    inline void reset_dependent_expression_ptr(void) {
         m_dependent_expression_ptr = nullptr;
         this->setup_sense_binary_or_integer();
     }
 
     /*************************************************************************/
-    inline constexpr Expression<T_Variable, T_Expression>
-        *dependent_expression_ptr(void) const {
+    inline Expression<T_Variable, T_Expression> *dependent_expression_ptr(
+        void) const {
         return const_cast<Expression<T_Variable, T_Expression> *>(
             m_dependent_expression_ptr);
     }
 
     /*************************************************************************/
-    inline constexpr void set_objective_sensitivity(
-        const T_Expression a_SENSITIVITY) {
+    inline void set_objective_sensitivity(const T_Expression a_SENSITIVITY) {
         m_objective_sensitivity = a_SENSITIVITY;
     }
 
     /*************************************************************************/
-    inline constexpr T_Expression objective_sensitivity(void) const noexcept {
+    inline T_Expression objective_sensitivity(void) const noexcept {
         return m_objective_sensitivity;
     }
 
     /*************************************************************************/
-    inline constexpr std::uint64_t hash(void) const noexcept {
+    inline std::uint64_t hash(void) const noexcept {
         return m_hash;
     }
 
     /*************************************************************************/
-    inline constexpr void reset_related_selection_constraint_ptr_index(
-        void) noexcept {
+    inline void reset_related_selection_constraint_ptr_index(void) noexcept {
         m_related_selection_constraint_ptr_index_min = -1;
         m_related_selection_constraint_ptr_index_max = -1;
     }
 
     /*************************************************************************/
-    inline constexpr void setup_related_selection_constraint_ptr_index(
-        void) noexcept {
+    inline void setup_related_selection_constraint_ptr_index(void) noexcept {
         if (m_selection_ptr == nullptr) {
             return;
         }
@@ -619,41 +612,38 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr int related_selection_constraint_ptr_index_min(void) const
-        noexcept {
+    inline int related_selection_constraint_ptr_index_min(void) const noexcept {
         return m_related_selection_constraint_ptr_index_min;
     }
 
     /*************************************************************************/
-    inline constexpr int related_selection_constraint_ptr_index_max(void) const
-        noexcept {
+    inline int related_selection_constraint_ptr_index_max(void) const noexcept {
         return m_related_selection_constraint_ptr_index_max;
     }
 
     /*************************************************************************/
-    inline constexpr void update_margin(void) {
+    inline void update_margin(void) {
         m_has_lower_bound_margin = m_value > m_lower_bound;
         m_has_upper_bound_margin = m_value < m_upper_bound;
     }
 
     /*************************************************************************/
-    inline constexpr bool has_lower_bound_margin(void) const noexcept {
+    inline bool has_lower_bound_margin(void) const noexcept {
         return m_has_lower_bound_margin;
     }
 
     /*************************************************************************/
-    inline constexpr bool has_upper_bound_margin(void) const noexcept {
+    inline bool has_upper_bound_margin(void) const noexcept {
         return m_has_upper_bound_margin;
     }
 
     /*************************************************************************/
-    inline constexpr void set_lower_or_upper_bound(const bool a_IS_LOWER) {
+    inline void set_lower_or_upper_bound(const bool a_IS_LOWER) {
         this->set_value_if_mutable(a_IS_LOWER ? m_lower_bound : m_upper_bound);
     }
 
     /*************************************************************************/
-    inline constexpr Expression<T_Variable, T_Expression> to_expression(
-        void) const {
+    inline Expression<T_Variable, T_Expression> to_expression(void) const {
         std::unordered_map<Variable<T_Variable, T_Expression> *, T_Expression>
             sensitivity;
 
@@ -663,24 +653,22 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr Variable<T_Variable, T_Expression> *reference(void) const {
+    inline Variable<T_Variable, T_Expression> *reference(void) const {
         return const_cast<Variable<T_Variable, T_Expression> *>(this);
     }
 
     /*************************************************************************/
-    inline constexpr Expression<T_Variable, T_Expression> operator+(
-        void) const {
+    inline Expression<T_Variable, T_Expression> operator+(void) const {
         return this->to_expression();
     }
 
     /*************************************************************************/
-    inline constexpr Expression<T_Variable, T_Expression> operator-(
-        void) const {
+    inline Expression<T_Variable, T_Expression> operator-(void) const {
         return -this->to_expression();
     }
 
     /*************************************************************************/
-    inline constexpr Variable<T_Variable, T_Expression> &operator=(
+    inline Variable<T_Variable, T_Expression> &operator=(
         const T_Variable a_VALUE) {
         if (m_value != a_VALUE && m_is_fixed) {
             throw std::logic_error(utility::format_error_location(

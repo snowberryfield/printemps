@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2023 Yuji KOGUMA
+// Copyright (c) 2020-2024 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -15,19 +15,20 @@ namespace printemps::solver::pdlp::controller {
 template <class T_Variable, class T_Expression>
 class PDLPController {
    private:
-    model::Model<T_Variable, T_Expression>*              m_model_ptr;
-    solution::DenseSolution<T_Variable, T_Expression>    m_initial_solution;
-    solution::IncumbentHolder<T_Variable, T_Expression>* m_incumbent_holder_ptr;
-    utility::TimeKeeper                                  m_time_keeper;
-    option::Option                                       m_option;
-    PDLPControllerResult                                 m_result;
+    model::Model<T_Variable, T_Expression>*            m_model_ptr;
+    GlobalState<T_Variable, T_Expression>*             m_global_state_ptr;
+    solution::SparseSolution<T_Variable, T_Expression> m_initial_solution;
+    utility::TimeKeeper                                m_time_keeper;
+    option::Option                                     m_option;
+
+    PDLPControllerResult m_result;
 
     /*************************************************************************/
-    inline void print_total_elapsed_time(const double a_TOTAL_ELAPSED_TIME,
-                                         const bool   a_IS_ENABLED_PRINT) {
+    inline void print_total_elapsed_time(const bool a_IS_ENABLED_PRINT) {
         utility::print_info(  //
             " -- Total elapsed time: " +
-                utility::to_string(a_TOTAL_ELAPSED_TIME, "%.3f") + "sec",
+                utility::to_string(m_time_keeper.elapsed_time(), "%.3f") +
+                "sec",
             a_IS_ENABLED_PRINT);
     }
 
@@ -35,8 +36,8 @@ class PDLPController {
     inline void print_dual_bound(const bool a_IS_ENABLED_PRINT) {
         utility::print_info(
             " -- Dual Bound: " +
-                utility::to_string(m_incumbent_holder_ptr->dual_bound(),
-                                   "%.5e"),
+                utility::to_string(
+                    m_global_state_ptr->incumbent_holder.dual_bound(), "%.5e"),
             a_IS_ENABLED_PRINT);
     }
 
@@ -48,46 +49,39 @@ class PDLPController {
 
     /*************************************************************************/
     PDLPController(model::Model<T_Variable, T_Expression>* a_model_ptr,  //
-                   const solution::DenseSolution<T_Variable, T_Expression>&
-                       a_INITIAL_SOLUTION,  //
-                   solution::IncumbentHolder<T_Variable, T_Expression>*
-                                              a_incumbent_holder_ptr,
-                   const utility::TimeKeeper& a_TIME_KEEPER,  //
-                   const option::Option&      a_OPTION) {
+                   const solution::SparseSolution<T_Variable, T_Expression>&
+                                                          a_INITIAL_SOLUTION,  //
+                   const utility::TimeKeeper&             a_TIME_KEEPER,  //
+                   const option::Option&                  a_OPTION,       //
+                   GlobalState<T_Variable, T_Expression>* a_global_state_ptr) {
         this->initialize();
-        this->setup(a_model_ptr, a_INITIAL_SOLUTION, a_incumbent_holder_ptr,
-                    a_TIME_KEEPER, a_OPTION);
-    }
-
-    /*************************************************************************/
-    virtual ~PDLPController(void) {
-        /// nothing to do
+        this->setup(a_model_ptr, a_INITIAL_SOLUTION, a_TIME_KEEPER, a_OPTION,
+                    a_global_state_ptr);
     }
 
     /*************************************************************************/
     inline void initialize(void) {
-        m_model_ptr = nullptr;
+        m_model_ptr        = nullptr;
+        m_global_state_ptr = nullptr;
         m_initial_solution.initialize();
-        m_incumbent_holder_ptr = nullptr;
         m_time_keeper.initialize();
         m_option.initialize();
         m_result.initialize();
     }
 
     /*************************************************************************/
-    inline void setup(                                        //
-        model::Model<T_Variable, T_Expression>* a_model_ptr,  //
-        const solution::DenseSolution<T_Variable, T_Expression>&
-            a_INITIAL_SOLUTION,  //
-        solution::IncumbentHolder<T_Variable, T_Expression>*
-                                   a_incumbent_holder_ptr,
-        const utility::TimeKeeper& a_TIME_KEEPER,  //
+    inline void setup(                                               //
+        model::Model<T_Variable, T_Expression>* a_model_ptr,         //
+        GlobalState<T_Variable, T_Expression>*  a_global_state_ptr,  //
+        const solution::SparseSolution<T_Variable, T_Expression>&
+                                   a_INITIAL_SOLUTION,  //
+        const utility::TimeKeeper& a_TIME_KEEPER,       //
         const option::Option&      a_OPTION) {
-        m_model_ptr            = a_model_ptr;
-        m_initial_solution     = a_INITIAL_SOLUTION;
-        m_incumbent_holder_ptr = a_incumbent_holder_ptr;
-        m_time_keeper          = a_TIME_KEEPER;
-        m_option               = a_OPTION;
+        m_model_ptr        = a_model_ptr;
+        m_global_state_ptr = a_global_state_ptr;
+        m_initial_solution = a_INITIAL_SOLUTION;
+        m_time_keeper      = a_TIME_KEEPER;
+        m_option           = a_OPTION;
     }
 
     /*************************************************************************/
@@ -181,8 +175,7 @@ class PDLPController {
         /**
          * Run the PDLP
          */
-        m_model_ptr->import_variable_values(
-            m_initial_solution.variable_value_proxies);
+        m_model_ptr->import_solution(m_initial_solution);
         m_model_ptr->update();
         auto lp_instance = m_model_ptr->export_lp_instance();
 
@@ -219,12 +212,16 @@ class PDLPController {
             m_option.pdlp.tolerance) {
             const auto DUAL_BOUND = m_result.core.dual.objective;
             if (m_model_ptr->is_minimization()) {
-                if (DUAL_BOUND > m_incumbent_holder_ptr->dual_bound()) {
-                    m_incumbent_holder_ptr->update_dual_bound(DUAL_BOUND);
+                if (DUAL_BOUND >
+                    m_global_state_ptr->incumbent_holder.dual_bound()) {
+                    m_global_state_ptr->incumbent_holder.update_dual_bound(
+                        DUAL_BOUND);
                 }
             } else {
-                if (-DUAL_BOUND < m_incumbent_holder_ptr->dual_bound()) {
-                    m_incumbent_holder_ptr->update_dual_bound(-DUAL_BOUND);
+                if (-DUAL_BOUND <
+                    m_global_state_ptr->incumbent_holder.dual_bound()) {
+                    m_global_state_ptr->incumbent_holder.update_dual_bound(
+                        -DUAL_BOUND);
                 }
             }
         }
@@ -239,8 +236,8 @@ class PDLPController {
                 ").",
             this->m_option.output.verbose >= option::verbose::Outer);
 
+        this->m_time_keeper.clock();
         this->print_total_elapsed_time(  //
-            this->m_time_keeper.clock(),
             this->m_option.output.verbose >= option::verbose::Outer);
 
         this->print_dual_bound(  //
@@ -248,7 +245,7 @@ class PDLPController {
     }
 
     /*************************************************************************/
-    inline constexpr const PDLPControllerResult& result(void) const {
+    inline const PDLPControllerResult& result(void) const {
         return m_result;
     }
 };

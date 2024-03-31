@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2023 Yuji KOGUMA
+// Copyright (c) 2020-2024 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -9,45 +9,45 @@
 namespace printemps::utility {
 /*****************************************************************************/
 template <class T, class A>
-constexpr int count_duplicate(const std::vector<T, A> &a_ARRAY) {
+inline int count_duplicate(const std::vector<T, A> &a_ARRAY) {
     std::set<T> set(a_ARRAY.begin(), a_ARRAY.end());
     return a_ARRAY.size() - set.size();
 }
 
 /*****************************************************************************/
 template <class T, class A>
-constexpr int count(const std::vector<T, A> &a_ARRAY, const T a_VALUE) {
+inline int count(const std::vector<T, A> &a_ARRAY, const T a_VALUE) {
     return std::count(a_ARRAY.begin(), a_ARRAY.end(), a_VALUE);
 }
 
 /*****************************************************************************/
 template <class T, class A>
-constexpr T min(const std::vector<T, A> &a_ARRAY) {
+inline T min(const std::vector<T, A> &a_ARRAY) {
     return *std::min_element(a_ARRAY.begin(), a_ARRAY.end());
 }
 
 /*****************************************************************************/
 template <class T, class A>
-constexpr T max(const std::vector<T, A> &a_ARRAY) {
+inline T max(const std::vector<T, A> &a_ARRAY) {
     return *std::max_element(a_ARRAY.begin(), a_ARRAY.end());
 }
 
 /*****************************************************************************/
 template <class T, class A>
-constexpr T max_abs(const std::vector<T, A> &a_ARRAY) {
+inline T max_abs(const std::vector<T, A> &a_ARRAY) {
     return std::max(max(a_ARRAY), -min(a_ARRAY));
 }
 
 /*****************************************************************************/
 template <class T, class A>
-constexpr int argmin(const std::vector<T, A> &a_ARRAY) {
+inline int argmin(const std::vector<T, A> &a_ARRAY) {
     return (std::distance(a_ARRAY.begin(),
                           min_element(a_ARRAY.begin(), a_ARRAY.end())));
 }
 
 /*****************************************************************************/
 template <class T, class A>
-constexpr int argmax(const std::vector<T, A> &a_ARRAY) {
+inline int argmax(const std::vector<T, A> &a_ARRAY) {
     return (std::distance(a_ARRAY.begin(),
                           max_element(a_ARRAY.begin(), a_ARRAY.end())));
 }

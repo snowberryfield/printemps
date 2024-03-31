@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2023 Yuji KOGUMA
+// Copyright (c) 2020-2024 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -16,17 +16,15 @@ namespace printemps::solver::lagrange_dual::core {
 template <class T_Variable, class T_Expression>
 class LagrangeDualCore {
    private:
-    model::Model<T_Variable, T_Expression>* m_model_ptr;
-
-    std::vector<multi_array::ValueProxy<T_Variable>>
-        m_initial_variable_value_proxies;
-
-    solution::IncumbentHolder<T_Variable, T_Expression>* m_incumbent_holder_ptr;
-    Memory<T_Variable, T_Expression>*                    m_memory_ptr;
-    option::Option                                       m_option;
+    model::Model<T_Variable, T_Expression>*           m_model_ptr;
+    GlobalState<T_Variable, T_Expression>*            m_global_state_ptr;
+    solution::DenseSolution<T_Variable, T_Expression> m_initial_solution;
+    option::Option                                    m_option;
 
     std::vector<solution::SparseSolution<T_Variable, T_Expression>>
         m_feasible_solutions;
+    std::vector<solution::SparseSolution<T_Variable, T_Expression>>
+        m_incumbent_solutions;
 
     LagrangeDualCoreStateManager<T_Variable, T_Expression> m_state_manager;
     LagrangeDualCoreResult<T_Variable, T_Expression>       m_result;
@@ -37,7 +35,12 @@ class LagrangeDualCore {
         /**
          * Reset the local augmented incumbent.
          */
-        m_incumbent_holder_ptr->reset_local_augmented_incumbent();
+        m_global_state_ptr->incumbent_holder.reset_local_augmented_incumbent();
+
+        /**
+         * Reset the last update iterations.
+         */
+        m_global_state_ptr->memory.reset_last_update_iterations();
 
         /**
          * Reset the feasible solutions storage.
@@ -45,20 +48,17 @@ class LagrangeDualCore {
         m_feasible_solutions.clear();
 
         /**
-         * Reset the last update iterations.
+         * Reset the incumbent solutions storage.
          */
-        m_memory_ptr->reset_last_update_iterations();
+        m_incumbent_solutions.clear();
 
         /**
          * Initialize the solution and update the model.
          */
-        m_model_ptr->import_variable_values(m_initial_variable_value_proxies);
+        m_model_ptr->import_solution(m_initial_solution);
         m_model_ptr->update();
 
-        m_state_manager.setup(m_model_ptr,             //
-                              m_incumbent_holder_ptr,  //
-                              m_memory_ptr,            //
-                              m_option);
+        m_state_manager.setup(m_model_ptr, m_global_state_ptr, m_option);
     }
 
     /*************************************************************************/
@@ -105,10 +105,10 @@ class LagrangeDualCore {
 
     /*************************************************************************/
     inline bool satisfy_reach_target_terminate_condition(void) {
-        auto        incumbent_holder_ptr = this->m_incumbent_holder_ptr;
-        const auto& m_option             = this->m_option;
+        auto&       incumbent_holder = m_global_state_ptr->incumbent_holder;
+        const auto& m_option         = this->m_option;
 
-        if (incumbent_holder_ptr->feasible_incumbent_objective() <=
+        if (incumbent_holder.feasible_incumbent_objective() <=
             m_option.general.target_objective_value) {
             m_state_manager.set_termination_status(
                 LagrangeDualCoreTerminationStatus::REACH_TARGET);
@@ -168,7 +168,8 @@ class LagrangeDualCore {
 
         const auto& CURRENT_SOLUTION_SCORE = STATE.current_solution_score;
         const auto& INCUMBENT_SOLUTION_SCORE =
-            m_incumbent_holder_ptr->global_augmented_incumbent_score();
+            m_global_state_ptr->incumbent_holder
+                .global_augmented_incumbent_score();
 
         std::string color_current_feasible_begin   = "";
         std::string color_current_feasible_end     = "";
@@ -214,7 +215,8 @@ class LagrangeDualCore {
 
         const auto& CURRENT_SOLUTION_SCORE = STATE.current_solution_score;
         const auto& INCUMBENT_SOLUTION_SCORE =
-            m_incumbent_holder_ptr->global_augmented_incumbent_score();
+            m_global_state_ptr->incumbent_holder
+                .global_augmented_incumbent_score();
 
         char mark_current                    = ' ';
         char mark_global_augmented_incumbent = ' ';
@@ -310,34 +312,28 @@ class LagrangeDualCore {
     }
 
     /*************************************************************************/
-    LagrangeDualCore(model::Model<T_Variable, T_Expression>* a_model_ptr,     //
-                     const std::vector<multi_array::ValueProxy<T_Variable>>&  //
-                         a_INITIAL_VARIABLE_VALUE_PROXIES,                    //
-                     solution::IncumbentHolder<T_Variable, T_Expression>*     //
-                                                       a_incumbent_holder_ptr,  //
-                     Memory<T_Variable, T_Expression>* a_memory_ptr,  //
-                     const option::Option&             a_OPTION) {
+    LagrangeDualCore(
+        model::Model<T_Variable, T_Expression>* a_model_ptr,         //
+        GlobalState<T_Variable, T_Expression>*  a_global_state_ptr,  //
+        const solution::SparseSolution<T_Variable, T_Expression>&    //
+                              a_INITIAL_SOLUTION,                    //
+        const option::Option& a_OPTION) {
         this->initialize();
-        this->setup(a_model_ptr,                       //
-                    a_INITIAL_VARIABLE_VALUE_PROXIES,  //
-                    a_incumbent_holder_ptr,            //
-                    a_memory_ptr,                      //
+        this->setup(a_model_ptr,         //
+                    a_global_state_ptr,  //
+                    a_INITIAL_SOLUTION,  //
                     a_OPTION);
     }
 
     /*************************************************************************/
-    virtual ~LagrangeDualCore(void) {
-        /// nothing to do
-    }
-
-    /*************************************************************************/
     inline void initialize(void) {
-        m_model_ptr = nullptr;
-        m_initial_variable_value_proxies.clear();
-        m_incumbent_holder_ptr = nullptr;
-        m_memory_ptr           = nullptr;
+        m_model_ptr        = nullptr;
+        m_global_state_ptr = nullptr;
+        m_initial_solution.initialize();
         m_option.initialize();
+
         m_feasible_solutions.clear();
+        m_incumbent_solutions.clear();
 
         m_state_manager.initialize();
         m_result.initialize();
@@ -345,20 +341,20 @@ class LagrangeDualCore {
     }
 
     /*************************************************************************/
-    inline void setup(                                             //
-        model::Model<T_Variable, T_Expression>* a_model_ptr,       //
-        const std::vector<multi_array::ValueProxy<T_Variable>>&    //
-            a_INITIAL_VARIABLE_VALUE_PROXIES,                      //
-        solution::IncumbentHolder<T_Variable, T_Expression>*       //
-                                          a_incumbent_holder_ptr,  //
-        Memory<T_Variable, T_Expression>* a_memory_ptr,            //
-        const option::Option&             a_OPTION) {
-        m_model_ptr                      = a_model_ptr;
-        m_initial_variable_value_proxies = a_INITIAL_VARIABLE_VALUE_PROXIES;
-        m_incumbent_holder_ptr           = a_incumbent_holder_ptr;
-        m_memory_ptr                     = a_memory_ptr;
-        m_option                         = a_OPTION;
+    inline void setup(                                               //
+        model::Model<T_Variable, T_Expression>* a_model_ptr,         //
+        GlobalState<T_Variable, T_Expression>*  a_global_state_ptr,  //
+        const solution::SparseSolution<T_Variable, T_Expression>&    //
+                              a_INITIAL_SOLUTION,                    //
+        const option::Option& a_OPTION) {
+        m_model_ptr        = a_model_ptr;
+        m_global_state_ptr = a_global_state_ptr;
+        m_model_ptr->import_solution(a_INITIAL_SOLUTION);
+        m_initial_solution = m_model_ptr->export_dense_solution();
+        m_option           = a_OPTION;
+
         m_feasible_solutions.clear();
+        m_incumbent_solutions.clear();
     }
 
     /*************************************************************************/
@@ -381,12 +377,13 @@ class LagrangeDualCore {
          * solution status.
          */
         utility::print_single_line(m_option.output.verbose >=
-                                   option::verbose::Full);
+                                   option::verbose::Outer);
         utility::print_message(
             "Lagrange dual starts.",
-            m_option.output.verbose >= option::verbose::Full);
-        print_table_header(m_option.output.verbose >= option::verbose::Full);
-        print_table_initial(m_option.output.verbose >= option::verbose::Full);
+            m_option.output.verbose >= option::verbose::Outer);
+
+        print_table_header(m_option.output.verbose >= option::verbose::Inner);
+        print_table_initial(m_option.output.verbose >= option::verbose::Inner);
 
         auto& variable_ptrs = m_model_ptr->variable_reference().variable_ptrs;
         const int VARIABLES_SIZE = variable_ptrs.size();
@@ -484,7 +481,7 @@ class LagrangeDualCore {
                  std::max(m_option.lagrange_dual.log_interval, 1)) == 0 ||
                 STATE.update_status > 1) {
                 print_table_body(m_option.output.verbose >=
-                                 option::verbose::Full);
+                                 option::verbose::Inner);
             }
 
             /**
@@ -501,7 +498,19 @@ class LagrangeDualCore {
         /**
          * Print the footer of the optimization progress table.
          */
-        print_table_footer(m_option.output.verbose >= option::verbose::Full);
+        print_table_footer(m_option.output.verbose >= option::verbose::Inner);
+
+        /**
+         * Store the incumbent solution.
+         */
+        if (STATE.total_update_status &  //
+            solution::IncumbentHolderConstant::
+                STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
+            m_incumbent_solutions.push_back(
+                m_global_state_ptr->incumbent_holder
+                    .global_augmented_incumbent_solution()
+                    .to_sparse());
+        }
 
         /**
          * Postprocess.
@@ -511,31 +520,22 @@ class LagrangeDualCore {
     }
 
     /*************************************************************************/
-    inline constexpr model::Model<T_Variable, T_Expression>* model_ptr(void) {
-        return m_model_ptr;
-    }
-
-    /*************************************************************************/
-    inline constexpr solution::IncumbentHolder<T_Variable, T_Expression>*
-    incumbent_holder_ptr(void) {
-        return m_incumbent_holder_ptr;
-    }
-
-    /*************************************************************************/
-    inline constexpr Memory<T_Variable, T_Expression>* memory_ptr(void) {
-        return m_memory_ptr;
-    }
-
-    /*************************************************************************/
-    inline constexpr const std::vector<
+    inline const std::vector<
         solution::SparseSolution<T_Variable, T_Expression>>&
     feasible_solutions(void) const {
         return m_feasible_solutions;
     }
 
     /*************************************************************************/
-    inline constexpr const LagrangeDualCoreResult<T_Variable, T_Expression>&
-    result(void) const {
+    inline const std::vector<
+        solution::SparseSolution<T_Variable, T_Expression>>&
+    incumbent_solutions(void) const {
+        return m_incumbent_solutions;
+    }
+
+    /*************************************************************************/
+    inline const LagrangeDualCoreResult<T_Variable, T_Expression>& result(
+        void) const {
         return m_result;
     }
 };

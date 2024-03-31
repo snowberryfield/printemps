@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2023 Yuji KOGUMA
+// Copyright (c) 2020-2024 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -21,12 +21,7 @@ class SelectionMoveGenerator
     }
 
     /*************************************************************************/
-    virtual ~SelectionMoveGenerator(void) {
-        /// nothing to do
-    }
-
-    /*************************************************************************/
-    constexpr void setup(
+    inline void setup(
         std::vector<model_component::Variable<T_Variable, T_Expression> *>
             &a_VARIABLE_PTRS) {
         /**

@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2023 Yuji KOGUMA
+// Copyright (c) 2020-2024 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -23,6 +23,17 @@ inline void print_single_broken_line(const bool a_IS_ENABLED) {
     }
     std::string single_broken_line(80, '-');
     std::cout << single_broken_line << std::endl;
+}
+
+/******************************************************************************/
+inline void print_dot_line(const bool a_IS_ENABLED) {
+    if (!a_IS_ENABLED) {
+        return;
+    }
+    for (auto i = 0; i < 40; i++) {
+        std::cout << "- ";
+    }
+    std::cout << std::endl;
 }
 
 /******************************************************************************/
@@ -111,6 +122,13 @@ inline void print_with_label(const std::string &a_HEADER_LABEL,
         }
     }
 }
+
+/******************************************************************************/
+inline void print_no_label(const std::string &a_MESSAGE,
+                           const bool         a_IS_ENABLED) {
+    print_with_label("        : ", a_MESSAGE, a_IS_ENABLED);
+}
+
 /******************************************************************************/
 inline void print_message(const std::string &a_MESSAGE,
                           const bool         a_IS_ENABLED) {

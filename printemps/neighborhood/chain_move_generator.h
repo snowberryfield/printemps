@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2023 Yuji KOGUMA
+// Copyright (c) 2020-2024 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -17,11 +17,6 @@ class ChainMoveGenerator
    public:
     /*************************************************************************/
     ChainMoveGenerator(void) {
-        /// nothing to do
-    }
-
-    /*************************************************************************/
-    virtual ~ChainMoveGenerator(void) {
         /// nothing to do
     }
 
@@ -89,20 +84,19 @@ class ChainMoveGenerator
     }
 
     /*************************************************************************/
-    inline constexpr void register_move(
-        const Move<T_Variable, T_Expression> &a_MOVE) {
+    inline void register_move(const Move<T_Variable, T_Expression> &a_MOVE) {
         this->m_moves.push_back(a_MOVE);
         this->m_flags.resize(this->m_moves.size());
     }
 
     /*************************************************************************/
-    inline constexpr void clear_moves() {
+    inline void clear_moves() {
         this->m_moves.clear();
         this->m_flags.clear();
     }
 
     /*************************************************************************/
-    constexpr void deduplicate_moves() {
+    inline void deduplicate_moves() {
         this->m_moves.erase(std::unique(this->m_moves.begin(),  //
                                         this->m_moves.end()),
                             this->m_moves.end());
@@ -110,7 +104,7 @@ class ChainMoveGenerator
     }
 
     /*************************************************************************/
-    inline constexpr void sort_moves(void) {
+    inline void sort_moves(void) {
         std::sort(this->m_moves.begin(), this->m_moves.end(),
                   [](const auto &a_LHS, const auto &a_RHS) {
                       /**
@@ -195,12 +189,12 @@ class ChainMoveGenerator
     }
 
     /*************************************************************************/
-    inline constexpr void shuffle_moves(std::mt19937 *a_rand) {
+    inline void shuffle_moves(std::mt19937 *a_rand) {
         std::shuffle(this->m_moves.begin(), this->m_moves.end(), *a_rand);
     }
 
     /*************************************************************************/
-    inline constexpr void reduce_moves(const int a_NUMBER_OF_MOVES) {
+    inline void reduce_moves(const int a_NUMBER_OF_MOVES) {
         if (static_cast<int>(this->m_moves.size()) <= a_NUMBER_OF_MOVES) {
             return;
         }

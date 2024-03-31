@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2023 Yuji KOGUMA
+// Copyright (c) 2020-2024 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -1449,45 +1449,6 @@ TEST_F(TestModel, callback) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModel, import_variable_values) {
-    model::Model<int, double> model;
-
-    auto& x = model.create_variable("x");
-    auto& y = model.create_variables("y", 10);
-    auto& z = model.create_variables("z", {10, 10});
-
-    multi_array::ValueProxy<int> x_value(x.index());
-    multi_array::ValueProxy<int> y_value(y.index(), 10);
-    multi_array::ValueProxy<int> z_value(z.index(), {10, 10});
-
-    x_value.value() = 1;
-
-    for (auto i = 0; i < 10; i++) {
-        y_value(i) = 10 * i;
-    }
-
-    for (auto i = 0; i < 10; i++) {
-        for (auto j = 0; j < 10; j++) {
-            z_value(i, j) = 100 * (i + j);
-        }
-    }
-
-    model.import_variable_values({x_value, y_value, z_value});
-
-    EXPECT_EQ(1, x.value());
-
-    for (auto i = 0; i < 10; i++) {
-        EXPECT_EQ(10 * i, y(i).value());
-    }
-
-    for (auto i = 0; i < 10; i++) {
-        for (auto j = 0; j < 10; j++) {
-            EXPECT_EQ(100 * (i + j), z(i, j).value());
-        }
-    }
-}
-
-/*****************************************************************************/
 TEST_F(TestModel, update_arg_void) {
     model::Model<int, double> model;
 
@@ -2075,7 +2036,6 @@ TEST_F(TestModel, evaluate) {
                 }
             }
             neighborhood::sort_and_unique_related_constraint_ptrs(&move);
-            std::cout << move.related_constraint_ptrs.size() << std::endl;
 
             auto score_after_0 = model.evaluate(move);
             auto score_after_1 = model.evaluate(move, score_before);
@@ -2499,7 +2459,7 @@ TEST_F(TestModel, generate_constraint_parameter_proxies) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModel, export_solution) {
+TEST_F(TestModel, export_dense_solution) {
     model::Model<int, double> model;
 
     auto& x = model.create_variable("x");
@@ -2541,7 +2501,7 @@ TEST_F(TestModel, export_solution) {
 
     model.update();
 
-    auto solution = model.export_solution();
+    auto solution = model.export_dense_solution();
     EXPECT_EQ(3, static_cast<int>(solution.variable_value_proxies.size()));
     EXPECT_EQ(3, static_cast<int>(solution.expression_value_proxies.size()));
     EXPECT_EQ(3, static_cast<int>(solution.constraint_value_proxies.size()));
@@ -2616,6 +2576,38 @@ TEST_F(TestModel, export_solution) {
                       solution.violation_value_proxies[2](i, j));
         }
     }
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, export_sparse_solution) {
+    model::Model<int, double> model;
+
+    auto& x = model.create_variable("x");
+    auto& y = model.create_variables("y", 10);
+    auto& z = model.create_variables("z", {20, 30});
+
+    model.minimize(random_integer() * x.sum() + random_integer() * y.sum() +
+                   random_integer() * z.sum());
+    model.setup_unique_names();
+
+    x = 10;
+    for (auto i = 0; i < 10; i++) {
+        y(i) = random_integer();
+    }
+
+    for (auto i = 0; i < 20; i++) {
+        for (auto j = 0; j < 30; j++) {
+            z(i, j) = random_integer();
+        }
+    }
+
+    model.update();
+
+    auto sparse_solution = model.export_sparse_solution();
+    EXPECT_EQ(model.objective().value(), sparse_solution.objective);
+    EXPECT_EQ(model.is_feasible(), sparse_solution.is_feasible);
+
+    EXPECT_EQ(10, sparse_solution.variables[x[0].name()]);
 }
 
 /*****************************************************************************/
@@ -2767,116 +2759,93 @@ TEST_F(TestModel, export_named_solution) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModel, convert_to_named_solution) {
-    /// This method is tested in export_named_solution.
-}
-
-/*****************************************************************************/
-TEST_F(TestModel, export_sparse_solution) {
+TEST_F(TestModel, import_solution_arg_dense_solution) {
     model::Model<int, double> model;
 
     auto& x = model.create_variable("x");
     auto& y = model.create_variables("y", 10);
-    auto& z = model.create_variables("z", {20, 30});
+    auto& z = model.create_variables("z", {10, 10});
 
-    model.minimize(random_integer() * x.sum() + random_integer() * y.sum() +
-                   random_integer() * z.sum());
-    model.setup_unique_names();
+    multi_array::ValueProxy<int> x_value(x.index());
+    multi_array::ValueProxy<int> y_value(y.index(), 10);
+    multi_array::ValueProxy<int> z_value(z.index(), {10, 10});
 
-    x = 10;
+    x_value.value() = 1;
+
     for (auto i = 0; i < 10; i++) {
-        y(i) = random_integer();
+        y_value(i) = 10 * i;
     }
 
-    for (auto i = 0; i < 20; i++) {
-        for (auto j = 0; j < 30; j++) {
-            z(i, j) = random_integer();
-        }
-    }
-
-    model.update();
-
-    auto sparse_solution = model.export_sparse_solution();
-    EXPECT_EQ(model.objective().value(), sparse_solution.objective);
-    EXPECT_EQ(model.is_feasible(), sparse_solution.is_feasible);
-
-    EXPECT_EQ(10, sparse_solution.variables["x"]);
-}
-
-/*****************************************************************************/
-TEST_F(TestModel, convert_to_sparse_solution) {
-    model::Model<int, double> model;
-
-    auto& x = model.create_variable("x");
-    auto& y = model.create_variables("y", 10);
-    auto& z = model.create_variables("z", {20, 30});
-
-    auto& p = model.create_expression("p");
-    auto& q = model.create_expressions("q", 10);
-    auto& r = model.create_expressions("r", {20, 30});
-
-    auto& v = model.create_constraints("v", {20, 30});
-
-    p = random_integer() * x;
     for (auto i = 0; i < 10; i++) {
-        q(i) = random_integer() * y(i);
-    }
-
-    for (auto i = 0; i < 20; i++) {
-        for (auto j = 0; j < 30; j++) {
-            r(i, j) = random_integer() * z(i, j) + random_integer();
-            v(i, j) = r(i, j) == random_integer();
-        }
-    }
-    model.minimize(random_integer() * p + random_integer() * q.sum() +
-                   random_integer() * r.sum());
-    model.setup_unique_names();
-
-    x = 10;
-    for (auto i = 0; i < 10; i++) {
-        y(i) = random_integer();
-    }
-
-    for (auto i = 0; i < 20; i++) {
-        for (auto j = 0; j < 30; j++) {
-            z(i, j) = random_integer();
+        for (auto j = 0; j < 10; j++) {
+            z_value(i, j) = 100 * (i + j);
         }
     }
 
-    model.update();
-    double total_violation = 0.0;
-    for (auto i = 0; i < 20; i++) {
-        for (auto j = 0; j < 30; j++) {
-            total_violation += v(i, j).violation_value();
-        }
-    }
+    solution::DenseSolution<int, double> solution;
+    solution.variable_value_proxies.push_back(x_value);
+    solution.variable_value_proxies.push_back(y_value);
+    solution.variable_value_proxies.push_back(z_value);
 
-    auto solution        = model.export_solution();
-    auto sparse_solution = model.convert_to_sparse_solution(solution);
-    EXPECT_EQ(model.objective().value(), sparse_solution.objective);
-    EXPECT_EQ(total_violation, sparse_solution.total_violation);
-    EXPECT_EQ(model.is_feasible(), sparse_solution.is_feasible);
-
-    EXPECT_EQ(10, sparse_solution.variables["x"]);
-}
-
-/*****************************************************************************/
-TEST_F(TestModel, import_solution) {
-    model::Model<int, double> model;
-
-    auto& x = model.create_variable("x");
-    auto& y = model.create_variables("y", 10);
-    auto& z = model.create_variables("z", {20, 30});
-
-    model.setup_unique_names();
-
-    std::unordered_map<std::string, int> solution;
-    solution["x"]         = 1;
-    solution["y[ 0]"]     = 2;
-    solution["y[ 9]"]     = 3;
-    solution["z[ 0,  0]"] = 4;
-    solution["z[19, 19]"] = 5;
     model.import_solution(solution);
+
+    EXPECT_EQ(1, x.value());
+
+    for (auto i = 0; i < 10; i++) {
+        EXPECT_EQ(10 * i, y(i).value());
+    }
+
+    for (auto i = 0; i < 10; i++) {
+        for (auto j = 0; j < 10; j++) {
+            EXPECT_EQ(100 * (i + j), z(i, j).value());
+        }
+    }
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, import_solution_arg_sparse_solution) {
+    model::Model<int, double> model;
+
+    auto& x = model.create_variable("x");
+    auto& y = model.create_variables("y", 10);
+    auto& z = model.create_variables("z", {20, 30});
+
+    model.setup_unique_names();
+
+    solution::SparseSolution<int, double> solution;
+    solution.variables["x"]         = 1;
+    solution.variables["y[ 0]"]     = 2;
+    solution.variables["y[ 9]"]     = 3;
+    solution.variables["z[ 0,  0]"] = 4;
+    solution.variables["z[19, 19]"] = 5;
+
+    model.import_solution(solution);
+
+    EXPECT_EQ(x.value(), 1);
+    EXPECT_EQ(y(0).value(), 2);
+    EXPECT_EQ(y(9).value(), 3);
+    EXPECT_EQ(z(0, 0).value(), 4);
+    EXPECT_EQ(z(19, 19).value(), 5);
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, import_solution_arg_unordered_map) {
+    model::Model<int, double> model;
+
+    auto& x = model.create_variable("x");
+    auto& y = model.create_variables("y", 10);
+    auto& z = model.create_variables("z", {20, 30});
+
+    model.setup_unique_names();
+
+    std::unordered_map<std::string, int> variables;
+    variables["x"]         = 1;
+    variables["y[ 0]"]     = 2;
+    variables["y[ 9]"]     = 3;
+    variables["z[ 0,  0]"] = 4;
+    variables["z[19, 19]"] = 5;
+
+    model.import_solution(variables);
 
     EXPECT_EQ(x.value(), 1);
     EXPECT_EQ(y(0).value(), 2);

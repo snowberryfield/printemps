@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2023 Yuji KOGUMA
+// Copyright (c) 2020-2024 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -17,11 +17,6 @@ class InvertedIntegersMoveGenerator
    public:
     /*************************************************************************/
     InvertedIntegersMoveGenerator(void) {
-        /// nothing to do
-    }
-
-    /*************************************************************************/
-    virtual ~InvertedIntegersMoveGenerator(void) {
         /// nothing to do
     }
 

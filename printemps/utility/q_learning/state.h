@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2023 Yuji KOGUMA
+// Copyright (c) 2020-2024 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -82,9 +82,8 @@ struct State {
     }
 
     /**************************************************************************/
-    inline constexpr void observe(const double a_REWARD,
-                                  const double a_LEARNING_RATE,
-                                  const double a_DECAY_RATE) {
+    inline void observe(const double a_REWARD, const double a_LEARNING_RATE,
+                        const double a_DECAY_RATE) {
         auto action_ptr = this->learner_ptr->m_current_action_ptr;
         action_ptr->q_value =
             (1.0 - a_LEARNING_RATE) * action_ptr->q_value +

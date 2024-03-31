@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2023 Yuji KOGUMA
+// Copyright (c) 2020-2024 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -57,8 +57,7 @@ struct Move {
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-constexpr bool has_fixed_variable(
-    const Move<T_Variable, T_Expression> &a_MOVE) {
+inline bool has_fixed_variable(const Move<T_Variable, T_Expression> &a_MOVE) {
     for (const auto &alteration : a_MOVE.alterations) {
         if (alteration.first->is_fixed()) {
             return true;
@@ -69,7 +68,7 @@ constexpr bool has_fixed_variable(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-constexpr bool has_selection_variable(
+inline bool has_selection_variable(
     const Move<T_Variable, T_Expression> &a_MOVE) {
     for (const auto &alteration : a_MOVE.alterations) {
         if (alteration.first->sense() ==
@@ -82,8 +81,7 @@ constexpr bool has_selection_variable(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-constexpr bool has_bound_violation(
-    const Move<T_Variable, T_Expression> &a_MOVE) {
+inline bool has_bound_violation(const Move<T_Variable, T_Expression> &a_MOVE) {
     for (const auto &alteration : a_MOVE.alterations) {
         if (alteration.second < alteration.first->lower_bound()) {
             return true;
@@ -97,7 +95,7 @@ constexpr bool has_bound_violation(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-constexpr bool has_objective_improvable_variable(
+inline bool has_objective_improvable_variable(
     const Move<T_Variable, T_Expression> &a_MOVE) {
     for (const auto &alteration : a_MOVE.alterations) {
         if (alteration.first->is_objective_improvable()) {
@@ -109,7 +107,7 @@ constexpr bool has_objective_improvable_variable(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-constexpr bool has_feasibility_improvable_variable(
+inline bool has_feasibility_improvable_variable(
     const Move<T_Variable, T_Expression> &a_MOVE) {
     for (const auto &alteration : a_MOVE.alterations) {
         if (alteration.first->is_feasibility_improvable()) {
@@ -121,7 +119,7 @@ constexpr bool has_feasibility_improvable_variable(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-constexpr bool has_feasibility_not_improvable_variable(
+inline bool has_feasibility_not_improvable_variable(
     const Move<T_Variable, T_Expression> &a_MOVE) {
     for (const auto &alteration : a_MOVE.alterations) {
         if (!alteration.first->is_feasibility_improvable()) {
@@ -133,7 +131,7 @@ constexpr bool has_feasibility_not_improvable_variable(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-constexpr bool has_duplicate_variable(
+inline bool has_duplicate_variable(
     const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) {
     auto &    alterations      = a_MOVE.alterations;
     const int ALTERATIONS_SIZE = alterations.size();
@@ -149,7 +147,7 @@ constexpr bool has_duplicate_variable(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-constexpr double compute_overlap_rate(
+inline double compute_overlap_rate(
     const std::vector<Alteration<T_Variable, T_Expression>> &a_ALTERATIONS) {
     auto &union_ptrs_vector =
         a_ALTERATIONS.front()
@@ -192,7 +190,7 @@ constexpr double compute_overlap_rate(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-constexpr double compute_hash(
+inline double compute_hash(
     const std::vector<Alteration<T_Variable, T_Expression>> &a_ALTERATIONS) {
     /**
      * NOTE: Chain moves will be sorted in descending order by overlap_ratio to
@@ -209,7 +207,7 @@ constexpr double compute_hash(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-constexpr bool is_binary_swap(const Move<T_Variable, T_Expression> &a_MOVE) {
+inline bool is_binary_swap(const Move<T_Variable, T_Expression> &a_MOVE) {
     for (const auto &alteration : a_MOVE.alterations) {
         if (alteration.first->sense() !=
             model_component::VariableSense::Binary) {
@@ -221,7 +219,7 @@ constexpr bool is_binary_swap(const Move<T_Variable, T_Expression> &a_MOVE) {
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-constexpr std::vector<model_component::Variable<T_Variable, T_Expression> *>
+inline std::vector<model_component::Variable<T_Variable, T_Expression> *>
 related_variable_ptrs_vector(const Move<T_Variable, T_Expression> &a_MOVE) {
     std::vector<model_component::Variable<T_Variable, T_Expression> *> result;
     for (const auto &alteration : a_MOVE.alterations) {
@@ -248,7 +246,7 @@ void sort_and_unique_related_constraint_ptrs(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-constexpr Move<T_Variable, T_Expression> operator+(
+inline Move<T_Variable, T_Expression> operator+(
     const Move<T_Variable, T_Expression> &a_MOVE_FIRST,
     const Move<T_Variable, T_Expression> &a_MOVE_SECOND) {
     auto result = a_MOVE_FIRST;
@@ -277,8 +275,8 @@ constexpr Move<T_Variable, T_Expression> operator+(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-constexpr bool operator==(const Move<T_Variable, T_Expression> &a_MOVE_FIRST,
-                          const Move<T_Variable, T_Expression> &a_MOVE_SECOND) {
+inline bool operator==(const Move<T_Variable, T_Expression> &a_MOVE_FIRST,
+                       const Move<T_Variable, T_Expression> &a_MOVE_SECOND) {
     /**
      * If the numbers of alterations of two moves are different, they
      * must be different.
@@ -330,8 +328,8 @@ constexpr bool operator==(const Move<T_Variable, T_Expression> &a_MOVE_FIRST,
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-constexpr bool operator!=(const Move<T_Variable, T_Expression> &a_MOVE_FIRST,
-                          const Move<T_Variable, T_Expression> &a_MOVE_SECOND) {
+inline bool operator!=(const Move<T_Variable, T_Expression> &a_MOVE_FIRST,
+                       const Move<T_Variable, T_Expression> &a_MOVE_SECOND) {
     return !(a_MOVE_FIRST == a_MOVE_SECOND);
 };
 

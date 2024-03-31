@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2023 Yuji KOGUMA
+// Copyright (c) 2020-2024 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -283,7 +283,7 @@ struct PreprocessOption {
     }
 
     /**************************************************************************/
-    inline constexpr bool is_enabled_extract_dependent(void) const {
+    inline bool is_enabled_extract_dependent(void) const {
         if (is_enabled_extract_dependent_exclusive_or) {
             return true;
         }

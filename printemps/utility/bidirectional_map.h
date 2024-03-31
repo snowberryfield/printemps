@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2023 Yuji KOGUMA
+// Copyright (c) 2020-2024 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -27,38 +27,38 @@ class BidirectionalMap {
     }
 
     /*************************************************************************/
-    inline constexpr int size(void) const {
+    inline int size(void) const {
         return m_forward.size();
     }
 
     /*************************************************************************/
-    inline constexpr bool empty(void) const {
+    inline bool empty(void) const {
         return m_forward.empty() && m_reverse.empty();
     }
 
     /*************************************************************************/
-    inline constexpr void insert(const T1 &a_FIRST, const T2 &a_SECOND) {
+    inline void insert(const T1 &a_FIRST, const T2 &a_SECOND) {
         m_forward[a_FIRST]  = a_SECOND;
         m_reverse[a_SECOND] = a_FIRST;
     }
 
     /*************************************************************************/
-    inline constexpr const T2 &forward_at(const T1 a_KEY) const {
+    inline const T2 &forward_at(const T1 a_KEY) const {
         return m_forward.at(a_KEY);
     }
 
     /*************************************************************************/
-    inline constexpr const T1 &reverse_at(const T2 a_KEY) const {
+    inline const T1 &reverse_at(const T2 a_KEY) const {
         return m_reverse.at(a_KEY);
     }
 
     /*************************************************************************/
-    inline constexpr const std::unordered_map<T1, T2> &forward(void) const {
+    inline const std::unordered_map<T1, T2> &forward(void) const {
         return m_forward;
     }
 
     /*************************************************************************/
-    inline constexpr const std::unordered_map<T2, T1> &reverse(void) const {
+    inline const std::unordered_map<T2, T1> &reverse(void) const {
         return m_reverse;
     }
 };

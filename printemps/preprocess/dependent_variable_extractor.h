@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2023 Yuji KOGUMA
+// Copyright (c) 2020-2024 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -39,10 +39,6 @@ class DependentVariableExtractor {
     /*************************************************************************/
     inline int extract(const option::Option &a_OPTION,
                        const bool            a_IS_ENABLED_PRINT) {
-        /**
-         * NOTE: This function cannot be constexpr with clang for
-         * std::vector<bool>.
-         */
         utility::print_single_line(a_IS_ENABLED_PRINT);
         utility::print_message("Extracting dependent variables...",
                                a_IS_ENABLED_PRINT);
@@ -314,7 +310,7 @@ class DependentVariableExtractor {
     }
 
     /*************************************************************************/
-    inline constexpr int eliminate(const bool a_IS_ENABLED_PRINT) {
+    inline int eliminate(const bool a_IS_ENABLED_PRINT) {
         utility::print_single_line(a_IS_ENABLED_PRINT);
         utility::print_message("Eliminating dependent integer variables...",
                                a_IS_ENABLED_PRINT);

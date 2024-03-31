@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2023 Yuji KOGUMA
+// Copyright (c) 2020-2024 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -18,6 +18,8 @@
 #include "fixed_size_queue.h"
 #include "bidirectional_map.h"
 #include "range.h"
+#include "union_find.h"
+#include "graph/graph.h"
 #include "json/json.h"
 #include "binary_matrix.h"
 #include "q_learning/q_learning.h"

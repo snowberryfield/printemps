@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2023 Yuji KOGUMA
+// Copyright (c) 2020-2024 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -55,7 +55,7 @@ class Learner {
     }
 
     /*************************************************************************/
-    inline constexpr void learn(const double a_SCORE) {
+    inline void learn(const double a_SCORE) {
         m_total_number_of_samples++;
         m_best_action_ptr->learn(a_SCORE, m_decay_factor);
         for (auto &&action : m_actions) {
@@ -87,34 +87,33 @@ class Learner {
     }
 
     /*************************************************************************/
-    inline constexpr std::vector<Action<T_ActionBody>> &actions(void) noexcept {
+    inline std::vector<Action<T_ActionBody>> &actions(void) noexcept {
         return m_actions;
     }
 
     /*************************************************************************/
-    inline constexpr const std::vector<Action<T_ActionBody>> &actions(
-        void) const noexcept {
-        return m_actions;
-    }
-
-    /*************************************************************************/
-    inline constexpr Action<T_ActionBody> &best_action(void) noexcept {
-        return *m_best_action_ptr;
-    }
-
-    /*************************************************************************/
-    inline constexpr const Action<T_ActionBody> &best_action(void) const
+    inline const std::vector<Action<T_ActionBody>> &actions(void) const
         noexcept {
+        return m_actions;
+    }
+
+    /*************************************************************************/
+    inline Action<T_ActionBody> &best_action(void) noexcept {
         return *m_best_action_ptr;
     }
 
     /*************************************************************************/
-    inline constexpr long total_number_of_samples(void) const noexcept {
+    inline const Action<T_ActionBody> &best_action(void) const noexcept {
+        return *m_best_action_ptr;
+    }
+
+    /*************************************************************************/
+    inline long total_number_of_samples(void) const noexcept {
         return m_total_number_of_samples;
     }
 
     /*************************************************************************/
-    inline constexpr double decay_factor(void) const noexcept {
+    inline double decay_factor(void) const noexcept {
         return m_decay_factor;
     }
 };

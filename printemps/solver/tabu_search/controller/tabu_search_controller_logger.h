@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2023 Yuji KOGUMA
+// Copyright (c) 2020-2024 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -85,8 +85,10 @@ class TabuSearchControllerLogger {
             << "dual_intensity "                                  //
             << "performance "                                     //
             << "update_status "                                   //
-            << "employing_local_augmented_solution_flag "         //
-            << "employing_global_augmented_solution_flag "        //
+            << "distance_from_current_solution "                  //
+            << "distance_from_global_solution "                   //
+            << "employing_local_solution_flag "                   //
+            << "employing_global_solution_flag "                  //
             << "employing_previous_solution_flag "                //
             << "is_enabled_penalty_coefficient_relaxing "         //
             << "is_enabled_penalty_coefficient_tightening "       //
@@ -110,10 +112,11 @@ class TabuSearchControllerLogger {
                 __FILE__, __LINE__, __func__,
                 "This log file " + m_file_name + " is not opened."));
         }
-        auto &global_incumbent = m_controller_ptr->incumbent_holder_ptr()
-                                     ->global_augmented_incumbent_score();
-        auto &local_incumbent = m_controller_ptr->incumbent_holder_ptr()
-                                    ->local_augmented_incumbent_score();
+        auto  global_state_ptr = m_controller_ptr->global_state_ptr();
+        auto &global_incumbent = global_state_ptr->incumbent_holder
+                                     .global_augmented_incumbent_score();
+        auto &local_incumbent = global_state_ptr->incumbent_holder
+                                    .local_augmented_incumbent_score();
 
         auto &s = *m_state_ptr;
 
@@ -130,8 +133,10 @@ class TabuSearchControllerLogger {
             << s.current_dual_intensity << " "                          //
             << s.tabu_search_result.performance << " "                  //
             << s.tabu_search_result.total_update_status << " "          //
-            << s.employing_local_augmented_solution_flag << " "         //
-            << s.employing_global_augmented_solution_flag << " "        //
+            << s.distance_from_current_solution << " "                  //
+            << s.distance_from_global_solution << " "                   //
+            << s.employing_local_solution_flag << " "                   //
+            << s.employing_global_solution_flag << " "                  //
             << s.employing_previous_solution_flag << " "                //
             << s.is_enabled_penalty_coefficient_relaxing << " "         //
             << s.is_enabled_penalty_coefficient_tightening << " "       //

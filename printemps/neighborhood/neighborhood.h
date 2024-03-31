@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2023 Yuji KOGUMA
+// Copyright (c) 2020-2024 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -73,11 +73,6 @@ class Neighborhood {
     }
 
     /*************************************************************************/
-    virtual ~Neighborhood(void) {
-        /// nothing to do
-    }
-
-    /*************************************************************************/
     void initialize(void) {
         m_binary.initialize();
         m_integer.initialize();
@@ -123,11 +118,11 @@ class Neighborhood {
     }
 
     /*************************************************************************/
-    constexpr void update_moves(const bool a_ACCEPT_ALL,                     //
-                                const bool a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
-                                const bool a_ACCEPT_FEASIBILITY_IMPROVABLE,  //
-                                const bool a_IS_ENABLED_PARALLEL,            //
-                                const int  a_NUMBER_OF_THREADS) {
+    inline void update_moves(const bool a_ACCEPT_ALL,                     //
+                             const bool a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
+                             const bool a_ACCEPT_FEASIBILITY_IMPROVABLE,  //
+                             const bool a_IS_ENABLED_PARALLEL,            //
+                             const int  a_NUMBER_OF_THREADS) {
         auto number_of_candidate_moves = 0;
 
         for (auto &&move_generator_ptr : m_move_generator_ptrs) {
@@ -166,25 +161,24 @@ class Neighborhood {
     }
 
     /*************************************************************************/
-    inline constexpr std::vector<Move<T_Variable, T_Expression> *> &move_ptrs(
+    inline std::vector<Move<T_Variable, T_Expression> *> &move_ptrs(
         void) noexcept {
         return m_move_ptrs;
     }
 
     /*************************************************************************/
-    inline constexpr const std::vector<Move<T_Variable, T_Expression> *>
-        &move_ptrs(void) const noexcept {
+    inline const std::vector<Move<T_Variable, T_Expression> *> &move_ptrs(
+        void) const noexcept {
         return m_move_ptrs;
     }
 
     /*************************************************************************/
-    inline constexpr void shuffle_moves(std::mt19937 *a_rand) noexcept {
+    inline void shuffle_moves(std::mt19937 *a_rand) noexcept {
         std::shuffle(m_move_ptrs.begin(), m_move_ptrs.end(), *a_rand);
     }
 
     /*************************************************************************/
-    inline constexpr void reset_special_neighborhood_moves_availability(
-        void) noexcept {
+    inline void reset_special_neighborhood_moves_availability(void) noexcept {
         m_exclusive_or.reset_availability();
         m_exclusive_nor.reset_availability();
         m_inverted_integers.reset_availability();
@@ -202,7 +196,7 @@ class Neighborhood {
     }
 
     /*************************************************************************/
-    inline constexpr bool is_enabled_special_neighborhood_move(void) const {
+    inline bool is_enabled_special_neighborhood_move(void) const {
         if (m_precedence.is_enabled()) {
             return true;
         }
@@ -263,259 +257,259 @@ class Neighborhood {
     }
 
     /*************************************************************************/
-    inline constexpr BinaryMoveGenerator  //
-        <T_Variable, T_Expression>        //
+    inline BinaryMoveGenerator      //
+        <T_Variable, T_Expression>  //
             &binary(void) noexcept {
         return m_binary;
     }
 
     /*************************************************************************/
-    inline constexpr const BinaryMoveGenerator  //
-        <T_Variable, T_Expression>              //
+    inline const BinaryMoveGenerator  //
+        <T_Variable, T_Expression>    //
             &binary(void) const noexcept {
         return m_binary;
     }
 
     /*************************************************************************/
-    inline constexpr IntegerMoveGenerator  //
-        <T_Variable, T_Expression>         //
+    inline IntegerMoveGenerator     //
+        <T_Variable, T_Expression>  //
             &integer(void) noexcept {
         return m_integer;
     }
 
     /*************************************************************************/
-    inline constexpr const IntegerMoveGenerator  //
-        <T_Variable, T_Expression>               //
+    inline const IntegerMoveGenerator  //
+        <T_Variable, T_Expression>     //
             &integer(void) const noexcept {
         return m_integer;
     }
 
     /*************************************************************************/
-    inline constexpr SelectionMoveGenerator  //
-        <T_Variable, T_Expression>           //
+    inline SelectionMoveGenerator   //
+        <T_Variable, T_Expression>  //
             &selection(void) noexcept {
         return m_selection;
     }
 
     /*************************************************************************/
-    inline constexpr const SelectionMoveGenerator  //
-        <T_Variable, T_Expression>                 //
+    inline const SelectionMoveGenerator  //
+        <T_Variable, T_Expression>       //
             &selection(void) const noexcept {
         return m_selection;
     }
 
     /*************************************************************************/
-    inline constexpr ExclusiveOrMoveGenerator  //
-        <T_Variable, T_Expression>             //
+    inline ExclusiveOrMoveGenerator  //
+        <T_Variable, T_Expression>   //
             &exclusive_or(void) noexcept {
         return m_exclusive_or;
     }
 
     /*************************************************************************/
-    inline constexpr const ExclusiveOrMoveGenerator  //
-        <T_Variable, T_Expression>                   //
+    inline const ExclusiveOrMoveGenerator  //
+        <T_Variable, T_Expression>         //
             &exclusive_or(void) const noexcept {
         return m_exclusive_or;
     }
 
     /*************************************************************************/
-    inline constexpr ExclusiveNorMoveGenerator  //
-        <T_Variable, T_Expression>              //
+    inline ExclusiveNorMoveGenerator  //
+        <T_Variable, T_Expression>    //
             &exclusive_nor(void) noexcept {
         return m_exclusive_nor;
     }
 
     /*************************************************************************/
-    inline constexpr const ExclusiveNorMoveGenerator  //
-        <T_Variable, T_Expression>                    //
+    inline const ExclusiveNorMoveGenerator  //
+        <T_Variable, T_Expression>          //
             &exclusive_nor(void) const noexcept {
         return m_exclusive_nor;
     }
 
     /*************************************************************************/
-    inline constexpr InvertedIntegersMoveGenerator  //
-        <T_Variable, T_Expression>                  //
+    inline InvertedIntegersMoveGenerator  //
+        <T_Variable, T_Expression>        //
             &inverted_integers(void) noexcept {
         return m_inverted_integers;
     }
 
     /*************************************************************************/
-    inline constexpr const InvertedIntegersMoveGenerator  //
-        <T_Variable, T_Expression>                        //
+    inline const InvertedIntegersMoveGenerator  //
+        <T_Variable, T_Expression>              //
             &inverted_integers(void) const noexcept {
         return m_inverted_integers;
     }
 
     /*************************************************************************/
-    inline constexpr BalancedIntegersMoveGenerator  //
-        <T_Variable, T_Expression>                  //
+    inline BalancedIntegersMoveGenerator  //
+        <T_Variable, T_Expression>        //
             &balanced_integers(void) noexcept {
         return m_balanced_integers;
     }
 
     /*************************************************************************/
-    inline constexpr const BalancedIntegersMoveGenerator  //
-        <T_Variable, T_Expression>                        //
+    inline const BalancedIntegersMoveGenerator  //
+        <T_Variable, T_Expression>              //
             &balanced_integers(void) const noexcept {
         return m_balanced_integers;
     }
 
     /*************************************************************************/
-    inline constexpr ConstantSumIntegersMoveGenerator  //
-        <T_Variable, T_Expression>                     //
+    inline ConstantSumIntegersMoveGenerator  //
+        <T_Variable, T_Expression>           //
             &constant_sum_integers(void) noexcept {
         return m_constant_sum_integers;
     }
 
     /*************************************************************************/
-    inline constexpr const ConstantSumIntegersMoveGenerator  //
-        <T_Variable, T_Expression>                           //
+    inline const ConstantSumIntegersMoveGenerator  //
+        <T_Variable, T_Expression>                 //
             &constant_sum_integers(void) const noexcept {
         return m_constant_sum_integers;
     }
 
     /*************************************************************************/
-    inline constexpr ConstantDifferenceIntegersMoveGenerator  //
-        <T_Variable, T_Expression>                            //
+    inline ConstantDifferenceIntegersMoveGenerator  //
+        <T_Variable, T_Expression>                  //
             &constant_difference_integers(void) noexcept {
         return m_constant_difference_integers;
     }
 
     /*************************************************************************/
-    inline constexpr const ConstantDifferenceIntegersMoveGenerator  //
-        <T_Variable, T_Expression>                                  //
+    inline const ConstantDifferenceIntegersMoveGenerator  //
+        <T_Variable, T_Expression>                        //
             &constant_difference_integers(void) const noexcept {
         return m_constant_difference_integers;
     }
 
     /*************************************************************************/
-    inline constexpr ConstantRatioIntegersMoveGenerator  //
-        <T_Variable, T_Expression>                       //
+    inline ConstantRatioIntegersMoveGenerator  //
+        <T_Variable, T_Expression>             //
             &constant_ratio_integers(void) noexcept {
         return m_constant_ratio_integers;
     }
 
     /*************************************************************************/
-    inline constexpr const ConstantRatioIntegersMoveGenerator  //
-        <T_Variable, T_Expression>                             //
+    inline const ConstantRatioIntegersMoveGenerator  //
+        <T_Variable, T_Expression>                   //
             &constant_ratio_integers(void) const noexcept {
         return m_constant_ratio_integers;
     }
 
     /*************************************************************************/
-    inline constexpr AggregationMoveGenerator  //
-        <T_Variable, T_Expression>             //
+    inline AggregationMoveGenerator  //
+        <T_Variable, T_Expression>   //
             &aggregation(void) noexcept {
         return m_aggregation;
     }
 
     /*************************************************************************/
-    inline constexpr const AggregationMoveGenerator  //
-        <T_Variable, T_Expression>                   //
+    inline const AggregationMoveGenerator  //
+        <T_Variable, T_Expression>         //
             &aggregation(void) const noexcept {
         return m_aggregation;
     }
 
     /*************************************************************************/
-    inline constexpr PrecedenceMoveGenerator  //
-        <T_Variable, T_Expression>            //
+    inline PrecedenceMoveGenerator  //
+        <T_Variable, T_Expression>  //
             &precedence(void) noexcept {
         return m_precedence;
     }
 
     /*************************************************************************/
-    inline constexpr const PrecedenceMoveGenerator  //
-        <T_Variable, T_Expression>                  //
+    inline const PrecedenceMoveGenerator  //
+        <T_Variable, T_Expression>        //
             &precedence(void) const noexcept {
         return m_precedence;
     }
 
     /*************************************************************************/
-    inline constexpr VariableBoundMoveGenerator  //
-        <T_Variable, T_Expression>               //
+    inline VariableBoundMoveGenerator  //
+        <T_Variable, T_Expression>     //
             &variable_bound(void) noexcept {
         return m_variable_bound;
     }
 
     /*************************************************************************/
-    inline constexpr const VariableBoundMoveGenerator  //
+    inline const VariableBoundMoveGenerator  //
         <T_Variable, T_Expression>
             &variable_bound(void) const noexcept {
         return m_variable_bound;
     }
 
     /*************************************************************************/
-    inline constexpr SoftSelectionMoveGenerator  //
-        <T_Variable, T_Expression>               //
+    inline SoftSelectionMoveGenerator  //
+        <T_Variable, T_Expression>     //
             &soft_selection(void) noexcept {
         return m_soft_selection;
     }
 
     /*************************************************************************/
-    inline constexpr const SoftSelectionMoveGenerator  //
-        <T_Variable, T_Expression>                     //
+    inline const SoftSelectionMoveGenerator  //
+        <T_Variable, T_Expression>           //
             &soft_selection(void) const noexcept {
         return m_soft_selection;
     }
 
     /*************************************************************************/
-    inline constexpr TrinomialExclusiveNorMoveGenerator  //
-        <T_Variable, T_Expression>                       //
+    inline TrinomialExclusiveNorMoveGenerator  //
+        <T_Variable, T_Expression>             //
             &trinomial_exclusive_nor(void) noexcept {
         return m_trinomial_exclusive_nor;
     }
 
     /*************************************************************************/
-    inline constexpr const TrinomialExclusiveNorMoveGenerator  //
-        <T_Variable, T_Expression>                             //
+    inline const TrinomialExclusiveNorMoveGenerator  //
+        <T_Variable, T_Expression>                   //
             &trinomial_exclusive_nor(void) const noexcept {
         return m_trinomial_exclusive_nor;
     }
 
     /*************************************************************************/
-    inline constexpr ChainMoveGenerator  //
-        <T_Variable, T_Expression>       //
+    inline ChainMoveGenerator       //
+        <T_Variable, T_Expression>  //
             &chain(void) noexcept {
         return m_chain;
     }
 
     /*************************************************************************/
-    inline constexpr const ChainMoveGenerator  //
-        <T_Variable, T_Expression>             //
+    inline const ChainMoveGenerator  //
+        <T_Variable, T_Expression>   //
             &chain(void) const noexcept {
         return m_chain;
     }
 
     /*************************************************************************/
-    inline constexpr TwoFlipMoveGenerator  //
-        <T_Variable, T_Expression>         //
+    inline TwoFlipMoveGenerator     //
+        <T_Variable, T_Expression>  //
             &two_flip(void) noexcept {
         return m_two_flip;
     }
 
     /*************************************************************************/
-    inline constexpr const TwoFlipMoveGenerator  //
-        <T_Variable, T_Expression>               //
+    inline const TwoFlipMoveGenerator  //
+        <T_Variable, T_Expression>     //
             &two_flip(void) const noexcept {
         return m_two_flip;
     }
 
     /*************************************************************************/
-    inline constexpr UserDefinedMoveGenerator  //
-        <T_Variable, T_Expression>             //
+    inline UserDefinedMoveGenerator  //
+        <T_Variable, T_Expression>   //
             &user_defined(void) noexcept {
         return m_user_defined;
     }
 
     /*************************************************************************/
-    inline constexpr const UserDefinedMoveGenerator  //
+    inline const UserDefinedMoveGenerator  //
         <T_Variable, T_Expression>
             &user_defined(void) const noexcept {
         return m_user_defined;
     }
 
     /*************************************************************************/
-    inline constexpr int number_of_special_neighborhood_moves(void) const {
+    inline int number_of_special_neighborhood_moves(void) const {
         return m_exclusive_or.moves().size()                    //
                + m_exclusive_nor.moves().size()                 //
                + m_inverted_integers.moves().size()             //
@@ -533,7 +527,7 @@ class Neighborhood {
     }
 
     /*************************************************************************/
-    inline constexpr long number_of_updated_moves(void) const noexcept {
+    inline long number_of_updated_moves(void) const noexcept {
         return m_number_of_updated_moves;
     }
 };

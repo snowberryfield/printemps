@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2023 Yuji KOGUMA
+// Copyright (c) 2020-2024 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -21,14 +21,8 @@ class SoftSelectionMoveGenerator
     }
 
     /*************************************************************************/
-    virtual ~SoftSelectionMoveGenerator(void) {
-        /// nothing to do
-    }
-
-    /*************************************************************************/
-    constexpr void setup(
-        const std::vector<model_component::Constraint<T_Variable, T_Expression>
-                              *> &a_RAW_CONSTRAINT_PTRS) {
+    inline void setup(const std::vector<model_component::Constraint<
+                          T_Variable, T_Expression> *> &a_RAW_CONSTRAINT_PTRS) {
         /**
          * Exclude constraints which contain fixed variables or selection
          * variables.
