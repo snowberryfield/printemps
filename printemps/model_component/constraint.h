@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2023 Yuji KOGUMA
+// Copyright (c) 2020-2024 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -156,8 +156,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline static constexpr Constraint<T_Variable, T_Expression>
-    create_instance(void) {
+    inline static Constraint<T_Variable, T_Expression> create_instance(void) {
         /**
          * When instantiation, instead of constructor, create_instance() should
          * be called.
@@ -167,8 +166,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline static constexpr Constraint<T_Variable, T_Expression>
-    create_instance(
+    inline static Constraint<T_Variable, T_Expression> create_instance(
         const std::function<T_Expression(
             const neighborhood::Move<T_Variable, T_Expression> &)> &a_FUNCTION,
         const ConstraintSense                                       a_SENSE) {
@@ -181,9 +179,9 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline static constexpr Constraint<T_Variable, T_Expression>
-    create_instance(const Expression<T_Variable, T_Expression> &a_EXPRESSION,
-                    const ConstraintSense                       a_SENSE) {
+    inline static Constraint<T_Variable, T_Expression> create_instance(
+        const Expression<T_Variable, T_Expression> &a_EXPRESSION,
+        const ConstraintSense                       a_SENSE) {
         /**
          * When instantiation, instead of constructor, create_instance() should
          * be called.
@@ -230,7 +228,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr void clear_constraint_type(void) {
+    inline void clear_constraint_type(void) {
         m_is_singleton                    = false;
         m_is_exclusive_or                 = false;
         m_is_exclusive_nor                = false;
@@ -268,7 +266,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    constexpr void setup(
+    inline void setup(
         const std::function<T_Expression(
             const neighborhood::Move<T_Variable, T_Expression> &)> &a_FUNCTION,
         const ConstraintSense                                       a_SENSE) {
@@ -328,9 +326,8 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    constexpr void setup(
-        const Expression<T_Variable, T_Expression> &a_EXPRESSION,
-        const ConstraintSense                       a_SENSE) {
+    inline void setup(const Expression<T_Variable, T_Expression> &a_EXPRESSION,
+                      const ConstraintSense                       a_SENSE) {
         m_function =  //
             []([[maybe_unused]] const neighborhood::Move<
                 T_Variable, T_Expression> &a_MOVE) {
@@ -408,7 +405,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    constexpr void setup_constraint_type(void) {
+    inline void setup_constraint_type(void) {
         this->clear_constraint_type();
 
         /// Singleton
@@ -1016,7 +1013,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr T_Expression evaluate_constraint(void) const noexcept {
+    inline T_Expression evaluate_constraint(void) const noexcept {
 #ifdef _PRINTEMPS_LINEAR_MINIMIZATION
         return m_expression.evaluate({});
 #else
@@ -1025,7 +1022,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr T_Expression evaluate_constraint(
+    inline T_Expression evaluate_constraint(
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
         noexcept {
 #ifdef _PRINTEMPS_LINEAR_MINIMIZATION
@@ -1036,26 +1033,26 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr T_Expression evaluate_violation(void) const noexcept {
+    inline T_Expression evaluate_violation(void) const noexcept {
         return m_violation_function({});
     }
 
     /*************************************************************************/
-    inline constexpr T_Expression evaluate_violation(
+    inline T_Expression evaluate_violation(
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
         noexcept {
         return m_violation_function(a_MOVE);
     }
 
     /*************************************************************************/
-    inline constexpr T_Expression evaluate_violation_diff(
+    inline T_Expression evaluate_violation_diff(
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
         noexcept {
         return m_violation_function(a_MOVE) - m_violation_value;
     }
 
     /*************************************************************************/
-    inline constexpr void update(void) {
+    inline void update(void) {
         /**
          * m_expression must be updated at first.
          */
@@ -1075,7 +1072,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr void update(
+    inline void update(
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) {
         /**
          * m_expression must be updated after m_constraint_value and
@@ -1098,86 +1095,83 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr Expression<T_Variable, T_Expression> &expression(
-        void) noexcept {
+    inline Expression<T_Variable, T_Expression> &expression(void) noexcept {
         return m_expression;
     }
 
     /*************************************************************************/
-    inline constexpr const Expression<T_Variable, T_Expression> &expression(
-        void) const noexcept {
+    inline const Expression<T_Variable, T_Expression> &expression(void) const
+        noexcept {
         return m_expression;
     }
 
     /*************************************************************************/
-    inline constexpr ConstraintSense sense(void) const noexcept {
+    inline ConstraintSense sense(void) const noexcept {
         return m_sense;
     }
 
     /*************************************************************************/
-    inline constexpr T_Expression constraint_value(void) const noexcept {
+    inline T_Expression constraint_value(void) const noexcept {
         return m_constraint_value;
     }
 
     /*************************************************************************/
-    inline constexpr T_Expression violation_value(void) const noexcept {
+    inline T_Expression violation_value(void) const noexcept {
         return m_violation_value;
     }
 
     /*************************************************************************/
-    inline constexpr T_Expression positive_part(void) const noexcept {
+    inline T_Expression positive_part(void) const noexcept {
         return m_positive_part;
     }
 
     /*************************************************************************/
-    inline constexpr T_Expression negative_part(void) const noexcept {
+    inline T_Expression negative_part(void) const noexcept {
         return m_negative_part;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_feasible(void) const noexcept {
+    inline bool is_feasible(void) const noexcept {
         return m_violation_value < constant::EPSILON;
     }
 
     /*************************************************************************/
-    inline constexpr double &local_penalty_coefficient_less(void) noexcept {
+    inline double &local_penalty_coefficient_less(void) noexcept {
         return m_local_penalty_coefficient_less;
     }
 
     /*************************************************************************/
-    inline constexpr double local_penalty_coefficient_less(void) const
-        noexcept {
+    inline double local_penalty_coefficient_less(void) const noexcept {
         return m_local_penalty_coefficient_less;
     }
 
     /*************************************************************************/
-    inline constexpr double &local_penalty_coefficient_greater(void) noexcept {
+    inline double &local_penalty_coefficient_greater(void) noexcept {
         return m_local_penalty_coefficient_greater;
     }
     /*************************************************************************/
-    inline constexpr double local_penalty_coefficient_greater(void) const
-        noexcept {
+    inline double local_penalty_coefficient_greater(void) const noexcept {
         return m_local_penalty_coefficient_greater;
     }
 
     /*************************************************************************/
-    inline constexpr double &global_penalty_coefficient(void) noexcept {
+    inline double &global_penalty_coefficient(void) noexcept {
         return m_global_penalty_coefficient;
     }
 
     /*************************************************************************/
-    inline constexpr double global_penalty_coefficient(void) const noexcept {
+    inline double global_penalty_coefficient(void) const noexcept {
         return m_global_penalty_coefficient;
     }
 
     /*************************************************************************/
-    inline constexpr void reset_local_penalty_coefficient(void) noexcept {
+    inline void reset_local_penalty_coefficient(void) noexcept {
         m_local_penalty_coefficient_less    = m_global_penalty_coefficient;
         m_local_penalty_coefficient_greater = m_global_penalty_coefficient;
     }
 
     /*************************************************************************/
-    inline constexpr void limit_local_penalty_coefficient(void) noexcept {
+    inline void limit_local_penalty_coefficient(void) noexcept {
         m_local_penalty_coefficient_less = std::min(
             m_local_penalty_coefficient_less, m_global_penalty_coefficient);
         m_local_penalty_coefficient_greater = std::min(
@@ -1185,209 +1179,208 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline constexpr bool is_user_defined_selection(void) const noexcept {
+    inline bool is_user_defined_selection(void) const noexcept {
         return m_is_user_defined_selection;
     }
 
     /*************************************************************************/
-    inline constexpr void set_is_user_defined_selection(
+    inline void set_is_user_defined_selection(
         const bool a_IS_USER_DEFINED_SELECTION) noexcept {
         m_is_user_defined_selection = a_IS_USER_DEFINED_SELECTION;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_linear(void) const noexcept {
+    inline bool is_linear(void) const noexcept {
         return m_is_linear;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_integer(void) const noexcept {
+    inline bool is_integer(void) const noexcept {
         return m_is_integer;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_singleton(void) const noexcept {
+    inline bool is_singleton(void) const noexcept {
         return m_is_singleton;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_exclusive_or(void) const noexcept {
+    inline bool is_exclusive_or(void) const noexcept {
         return m_is_exclusive_or;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_exclusive_nor(void) const noexcept {
+    inline bool is_exclusive_nor(void) const noexcept {
         return m_is_exclusive_nor;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_inverted_integers(void) const noexcept {
+    inline bool is_inverted_integers(void) const noexcept {
         return m_is_inverted_integers;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_balanced_integers(void) const noexcept {
+    inline bool is_balanced_integers(void) const noexcept {
         return m_is_balanced_integers;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_constant_sum_integers(void) const noexcept {
+    inline bool is_constant_sum_integers(void) const noexcept {
         return m_is_constant_sum_integers;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_constant_difference_integers(void) const noexcept {
+    inline bool is_constant_difference_integers(void) const noexcept {
         return m_is_constant_difference_integers;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_constant_ratio_integers(void) const noexcept {
+    inline bool is_constant_ratio_integers(void) const noexcept {
         return m_is_constant_ratio_integers;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_aggregation(void) const noexcept {
+    inline bool is_aggregation(void) const noexcept {
         return m_is_aggregation;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_precedence(void) const noexcept {
+    inline bool is_precedence(void) const noexcept {
         return m_is_precedence;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_variable_bound(void) const noexcept {
+    inline bool is_variable_bound(void) const noexcept {
         return m_is_variable_bound;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_trinomial_exclusive_nor(void) const noexcept {
+    inline bool is_trinomial_exclusive_nor(void) const noexcept {
         return m_is_trinomial_exclusive_nor;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_set_partitioning(void) const noexcept {
+    inline bool is_set_partitioning(void) const noexcept {
         return m_is_set_partitioning;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_set_packing(void) const noexcept {
+    inline bool is_set_packing(void) const noexcept {
         return m_is_set_packing;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_set_covering(void) const noexcept {
+    inline bool is_set_covering(void) const noexcept {
         return m_is_set_covering;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_cardinality(void) const noexcept {
+    inline bool is_cardinality(void) const noexcept {
         return m_is_cardinality;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_invariant_knapsack(void) const noexcept {
+    inline bool is_invariant_knapsack(void) const noexcept {
         return m_is_invariant_knapsack;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_multiple_covering(void) const noexcept {
+    inline bool is_multiple_covering(void) const noexcept {
         return m_is_multiple_covering;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_binary_flow(void) const noexcept {
+    inline bool is_binary_flow(void) const noexcept {
         return m_is_binary_flow;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_integer_flow(void) const noexcept {
+    inline bool is_integer_flow(void) const noexcept {
         return m_is_integer_flow;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_soft_selection(void) const noexcept {
+    inline bool is_soft_selection(void) const noexcept {
         return m_is_soft_selection;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_min_max(void) const noexcept {
+    inline bool is_min_max(void) const noexcept {
         return m_is_min_max;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_max_min(void) const noexcept {
+    inline bool is_max_min(void) const noexcept {
         return m_is_max_min;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_intermediate(void) const noexcept {
+    inline bool is_intermediate(void) const noexcept {
         return m_is_intermediate;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_equation_knapsack(void) const noexcept {
+    inline bool is_equation_knapsack(void) const noexcept {
         return m_is_equation_knapsack;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_bin_packing(void) const noexcept {
+    inline bool is_bin_packing(void) const noexcept {
         return m_is_bin_packing;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_knapsack(void) const noexcept {
+    inline bool is_knapsack(void) const noexcept {
         return m_is_knapsack;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_integer_knapsack(void) const noexcept {
+    inline bool is_integer_knapsack(void) const noexcept {
         return m_is_integer_knapsack;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_gf2(void) const noexcept {
+    inline bool is_gf2(void) const noexcept {
         return m_is_gf2;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_general_linear(void) const noexcept {
+    inline bool is_general_linear(void) const noexcept {
         return m_is_general_linear;
     }
 
     /*************************************************************************/
-    inline constexpr bool has_only_binary_coefficient(void) const noexcept {
+    inline bool has_only_binary_coefficient(void) const noexcept {
         return m_has_only_binary_coefficient;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_enabled(void) const noexcept {
+    inline bool is_enabled(void) const noexcept {
         return m_is_enabled;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_less_or_equal(void) const noexcept {
+    inline bool is_less_or_equal(void) const noexcept {
         return m_is_less_or_equal;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_greater_or_equal(void) const noexcept {
+    inline bool is_greater_or_equal(void) const noexcept {
         return m_is_greater_or_equal;
     }
 
     /*************************************************************************/
-    inline constexpr void enable(void) noexcept {
+    inline void enable(void) noexcept {
         m_is_enabled = true;
     }
 
     /*************************************************************************/
-    inline constexpr void disable(void) noexcept {
+    inline void disable(void) noexcept {
         m_is_enabled = false;
     }
 
     /*************************************************************************/
-    inline constexpr Variable<T_Variable, T_Expression> *key_variable_ptr(
-        void) const {
+    inline Variable<T_Variable, T_Expression> *key_variable_ptr(void) const {
         return const_cast<Variable<T_Variable, T_Expression> *>(
             m_key_variable_ptr);
     }

@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2023 Yuji KOGUMA
+// Copyright (c) 2020-2024 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -140,8 +140,7 @@ class FlippableVariablePairExtractor {
     }
 
     /*************************************************************************/
-    inline constexpr const std::vector<
-        FlippableVariablePair<T_Variable, T_Expression>>
+    inline const std::vector<FlippableVariablePair<T_Variable, T_Expression>>
         &pairs(void) const {
         return this->m_pairs;
     }

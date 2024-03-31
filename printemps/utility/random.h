@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2023 Yuji KOGUMA
+// Copyright (c) 2020-2024 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -24,11 +24,6 @@ class UniformRandom {
     UniformRandom(const T_Value a_MIN, const T_Value a_MAX,
                   const unsigned int a_SEED) {
         this->setup(a_MIN, a_MAX, a_SEED);
-    }
-
-    /*************************************************************************/
-    virtual ~UniformRandom(void) {
-        /// nothing to do
     }
 
     /*************************************************************************/

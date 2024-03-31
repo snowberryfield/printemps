@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2023 Yuji KOGUMA
+// Copyright (c) 2020-2024 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -47,7 +47,7 @@ class TabuSearchCoreMoveEvaluator {
     }
 
     /*************************************************************************/
-    inline constexpr bool compute_permissibility(
+    inline bool compute_permissibility(
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE,  //
         const int a_DURATION) const noexcept {
         const auto &LAST_UPDATE_ITERATIONS =
@@ -92,7 +92,7 @@ class TabuSearchCoreMoveEvaluator {
     }
 
     /*************************************************************************/
-    inline constexpr double compute_frequency_penalty(
+    inline double compute_frequency_penalty(
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE,
         const int a_ITERATION) const noexcept {
         const auto &UPDATE_COUNTS = m_memory_ptr->update_counts();
@@ -112,7 +112,7 @@ class TabuSearchCoreMoveEvaluator {
     }
 
     /*************************************************************************/
-    inline constexpr double compute_lagrangian_penalty(
+    inline double compute_lagrangian_penalty(
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
         noexcept {
         double lagrangian_penalty = 0.0;
@@ -125,7 +125,7 @@ class TabuSearchCoreMoveEvaluator {
     }
 
     /*************************************************************************/
-    inline constexpr void evaluate(
+    inline void evaluate(
         TabuSearchCoreMoveScore *                           a_score_ptr,  //
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE,       //
         const int                                           a_ITERATION,  //

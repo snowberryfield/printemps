@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2023 Yuji KOGUMA
+// Copyright (c) 2020-2024 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -54,7 +54,7 @@ class Verifier {
     }
 
     /*************************************************************************/
-    constexpr void verify_problem(const bool a_IS_ENABLED_PRINT) {
+    inline void verify_problem(const bool a_IS_ENABLED_PRINT) {
         utility::print_single_line(a_IS_ENABLED_PRINT);
         utility::print_message("Verifying the problem...", a_IS_ENABLED_PRINT);
 
@@ -74,7 +74,7 @@ class Verifier {
     }
 
     /*************************************************************************/
-    constexpr void verify_and_correct_selection_variables_initial_values(
+    inline void verify_and_correct_selection_variables_initial_values(
         const bool a_IS_ENABLED_CORRECTION, const bool a_IS_ENABLED_PRINT) {
         utility::print_single_line(a_IS_ENABLED_PRINT);
         utility::print_message(
@@ -343,7 +343,7 @@ class Verifier {
     }
 
     /*************************************************************************/
-    constexpr void verify_and_correct_binary_variables_initial_values(
+    inline void verify_and_correct_binary_variables_initial_values(
         const bool a_IS_ENABLED_CORRECTION, const bool a_IS_ENABLED_PRINT) {
         utility::print_single_line(a_IS_ENABLED_PRINT);
         utility::print_message(
@@ -383,7 +383,7 @@ class Verifier {
     }
 
     /*************************************************************************/
-    constexpr void verify_and_correct_integer_variables_initial_values(
+    inline void verify_and_correct_integer_variables_initial_values(
         const bool a_IS_ENABLED_CORRECTION, const bool a_IS_ENABLED_PRINT) {
         utility::print_single_line(a_IS_ENABLED_PRINT);
         utility::print_message(

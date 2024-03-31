@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2023 Yuji KOGUMA
+// Copyright (c) 2020-2024 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -26,29 +26,18 @@ class LagrangeDualController
 
     /*************************************************************************/
     LagrangeDualController(
-        model::Model<T_Variable, T_Expression>* a_model_ptr,  //
-        const solution::DenseSolution<T_Variable, T_Expression>&
-            a_INITIAL_SOLUTION,  //
-        solution::IncumbentHolder<T_Variable, T_Expression>*
-                                          a_incumbent_holder_ptr,
-        Memory<T_Variable, T_Expression>* a_memory_ptr,  //
-        solution::SolutionArchive<T_Variable, T_Expression>*
-                                   a_solution_archive_ptr,  //
-        const utility::TimeKeeper& a_TIME_KEEPER,           //
+        model::Model<T_Variable, T_Expression>* a_model_ptr,         //
+        GlobalState<T_Variable, T_Expression>*  a_global_state_ptr,  //
+        const solution::SparseSolution<T_Variable, T_Expression>&
+                                   a_INITIAL_SOLUTION,  //
+        const utility::TimeKeeper& a_TIME_KEEPER,       //
         const option::Option&      a_OPTION) {
         this->initialize();
-        this->setup(a_model_ptr,             //
-                    a_INITIAL_SOLUTION,      //
-                    a_incumbent_holder_ptr,  //
-                    a_memory_ptr,            //
-                    a_solution_archive_ptr,  //
-                    a_TIME_KEEPER,           //
+        this->setup(a_model_ptr,         //
+                    a_global_state_ptr,  //
+                    a_INITIAL_SOLUTION,  //
+                    a_TIME_KEEPER,       //
                     a_OPTION);
-    }
-
-    /*************************************************************************/
-    virtual ~LagrangeDualController(void) {
-        /// nothing to do
     }
 
     /*************************************************************************/
@@ -62,8 +51,7 @@ class LagrangeDualController
         const bool a_IS_ENABLED_PRINT) {
         if (!this->m_model_ptr->is_linear()) {
             utility::print_warning(
-                "Solving Lagrange dual was skipped because the problem is not "
-                "linear.",
+                "Lagrange dual was skipped because the problem is not linear.",
                 a_IS_ENABLED_PRINT);
             return true;
         }
@@ -77,9 +65,9 @@ class LagrangeDualController
             this->m_model_ptr->number_of_dependent_binary_variables() > 0 ||
             this->m_model_ptr->number_of_dependent_integer_variables() > 0) {
             utility::print_warning(
-                "Solving lagrange dual was skipped because it is not "
-                "applicable to problems which include selection variables or "
-                "dependent variables.",
+                "Lagrange dual was skipped because it is not applicable to "
+                "problems which include selection variables or dependent "
+                "variables.",
                 a_IS_ENABLED_PRINT);
             return true;
         }
@@ -102,11 +90,12 @@ class LagrangeDualController
     /*************************************************************************/
     inline bool satisfy_reach_target_skip_condition(
         const bool a_IS_ENABLED_PRINT) {
-        if (this->m_incumbent_holder_ptr->feasible_incumbent_objective() <=
+        if (this->m_global_state_ptr->incumbent_holder
+                .feasible_incumbent_objective() <=
             this->m_option.general.target_objective_value) {
             utility::print_message(
-                "Solving Lagrange dual was skipped because of feasible "
-                "objective reaches the target limit.",
+                "Lagrange dual was skipped because of feasible objective "
+                "reaches the target limit.",
                 a_IS_ENABLED_PRINT);
             return true;
         }
@@ -164,10 +153,9 @@ class LagrangeDualController
          * Run the lagrange dual search.
          */
         core::LagrangeDualCore<T_Variable, T_Expression> lagrange_dual(
-            this->m_model_ptr,                                //
-            this->m_initial_solution.variable_value_proxies,  //
-            this->m_incumbent_holder_ptr,                     //
-            this->m_memory_ptr,                               //
+            this->m_model_ptr,         //
+            this->m_global_state_ptr,  //
+            this->m_initial_solution,  //
             option);
 
         lagrange_dual.run();
@@ -178,8 +166,15 @@ class LagrangeDualController
          * Update the feasible solutions archive.
          */
         if (this->m_option.output.is_enabled_store_feasible_solutions) {
-            this->update_archive(lagrange_dual.feasible_solutions());
+            this->update_feasible_solution_archive(
+                lagrange_dual.feasible_solutions());
         }
+
+        /**
+         * Update the incumbent solutions archive.
+         */
+        this->update_incumbent_solution_archive_and_search_tree(
+            lagrange_dual.incumbent_solutions());
 
         /**
          * Store the result.
@@ -192,12 +187,16 @@ class LagrangeDualController
          */
         const auto DUAL_BOUND = m_result.core.lagrangian;
         if (this->m_model_ptr->is_minimization()) {
-            if (DUAL_BOUND > this->m_incumbent_holder_ptr->dual_bound()) {
-                this->m_incumbent_holder_ptr->update_dual_bound(DUAL_BOUND);
+            if (DUAL_BOUND >
+                this->m_global_state_ptr->incumbent_holder.dual_bound()) {
+                this->m_global_state_ptr->incumbent_holder.update_dual_bound(
+                    DUAL_BOUND);
             }
         } else {
-            if (-DUAL_BOUND < this->m_incumbent_holder_ptr->dual_bound()) {
-                this->m_incumbent_holder_ptr->update_dual_bound(-DUAL_BOUND);
+            if (-DUAL_BOUND <
+                this->m_global_state_ptr->incumbent_holder.dual_bound()) {
+                this->m_global_state_ptr->incumbent_holder.update_dual_bound(
+                    -DUAL_BOUND);
             }
         }
 
@@ -205,14 +204,14 @@ class LagrangeDualController
          * Print the search summary.
          */
         utility::print_message(
-            "Solving Lagrange dual finished (Reason: " +
+            "Lagrange dual finished (Reason: " +
                 core::LagrangeDualCoreTerminationStatusInverseMap.at(
                     lagrange_dual_result.termination_status) +
                 ").",
             this->m_option.output.verbose >= option::verbose::Outer);
 
-        this->print_total_elapsed_time(
-            this->m_time_keeper.clock(),
+        this->m_time_keeper.clock();
+        this->print_total_elapsed_time(  //
             this->m_option.output.verbose >= option::verbose::Outer);
 
         this->print_incumbent_summary(  //
@@ -223,9 +222,8 @@ class LagrangeDualController
     }
 
     /*************************************************************************/
-    inline constexpr const LagrangeDualControllerResult<T_Variable,
-                                                        T_Expression>&
-    result(void) const {
+    inline const LagrangeDualControllerResult<T_Variable, T_Expression>& result(
+        void) const {
         return m_result;
     }
 };

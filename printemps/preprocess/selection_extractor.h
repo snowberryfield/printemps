@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2023 Yuji KOGUMA
+// Copyright (c) 2020-2024 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -16,8 +16,7 @@ class SelectionExtractor {
         m_selections;
 
     /*************************************************************************/
-    inline constexpr std::vector<
-        model_component::Selection<T_Variable, T_Expression>>
+    inline std::vector<model_component::Selection<T_Variable, T_Expression>>
     extract_raw_selections(void) {
         auto &set_patritioning_ptrs =
             m_model_ptr->constraint_type_reference().set_partitioning_ptrs;
@@ -76,7 +75,7 @@ class SelectionExtractor {
     }
 
     /*************************************************************************/
-    inline constexpr void extract(
+    inline void extract(
         const option::selection_mode::SelectionMode &a_SELECTION_MODE,
         const bool                                   a_IS_ENABLED_PRINT) {
         switch (a_SELECTION_MODE) {
@@ -112,8 +111,7 @@ class SelectionExtractor {
     }
 
     /*************************************************************************/
-    inline constexpr void extract_by_defined_order(
-        const bool a_IS_ENABLED_PRINT) {
+    inline void extract_by_defined_order(const bool a_IS_ENABLED_PRINT) {
         utility::print_single_line(a_IS_ENABLED_PRINT);
         utility::print_message("Extracting selection by defined order...",
                                a_IS_ENABLED_PRINT);
@@ -162,7 +160,7 @@ class SelectionExtractor {
     }
 
     /*************************************************************************/
-    inline constexpr void extract_by_number_of_variables_order(
+    inline void extract_by_number_of_variables_order(
         const bool a_IS_SMALLER_ORDER, const bool a_IS_ENABLED_PRINT) {
         utility::print_single_line(a_IS_ENABLED_PRINT);
         if (a_IS_SMALLER_ORDER) {
@@ -235,8 +233,7 @@ class SelectionExtractor {
     }
 
     /*************************************************************************/
-    inline constexpr void extract_by_independent(
-        const bool a_IS_ENABLED_PRINT) {
+    inline void extract_by_independent(const bool a_IS_ENABLED_PRINT) {
         utility::print_single_line(a_IS_ENABLED_PRINT);
         utility::print_message("Extracting independent selection variables...",
                                a_IS_ENABLED_PRINT);
@@ -295,8 +292,7 @@ class SelectionExtractor {
     }
 
     /*************************************************************************/
-    inline constexpr void extract_by_user_defined(
-        const bool a_IS_ENABLED_PRINT) {
+    inline void extract_by_user_defined(const bool a_IS_ENABLED_PRINT) {
         utility::print_single_line(a_IS_ENABLED_PRINT);
         utility::print_message("Extracting user-defined selection variables...",
                                a_IS_ENABLED_PRINT);
@@ -350,15 +346,14 @@ class SelectionExtractor {
     }
 
     /*************************************************************************/
-    inline constexpr const std::vector<
+    inline const std::vector<
         model_component::Selection<T_Variable, T_Expression>>
         &selections(void) const {
         return m_selections;
     }
 
     /*************************************************************************/
-    inline constexpr std::vector<
-        model_component::Selection<T_Variable, T_Expression>>
+    inline std::vector<model_component::Selection<T_Variable, T_Expression>>
         &selections(void) {
         return m_selections;
     }

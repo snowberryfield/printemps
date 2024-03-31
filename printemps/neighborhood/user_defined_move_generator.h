@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2023 Yuji KOGUMA
+// Copyright (c) 2020-2024 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -24,18 +24,13 @@ class UserDefinedMoveGenerator
     }
 
     /*************************************************************************/
-    virtual ~UserDefinedMoveGenerator(void) {
-        /// nothing to do
-    }
-
-    /*************************************************************************/
-    inline constexpr void initialize(void) {
+    inline void initialize(void) {
         this->m_move_updater_wrapper =
             [](std::vector<Move<T_Variable, T_Expression>> *) {};
     }
 
     /*************************************************************************/
-    inline constexpr void set_move_updater(
+    inline void set_move_updater(
         const std::function<void(std::vector<Move<T_Variable, T_Expression>> *)>
             &a_MOVE_UPDATER) {
         this->m_move_updater_wrapper = a_MOVE_UPDATER;

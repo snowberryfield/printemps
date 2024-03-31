@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2023 Yuji KOGUMA
+// Copyright (c) 2020-2024 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -40,6 +40,113 @@ TEST_F(TestUnorderedMapUtility, to_vector_pair) {
 
     EXPECT_EQ(3, static_cast<int>(vector_pair_str.first.size()));
     EXPECT_EQ(3, static_cast<int>(vector_pair_str.second.size()));
+}
+
+/*****************************************************************************/
+TEST_F(TestUnorderedMapUtility, distance_l1) {
+    {
+        std::unordered_map<std::string, int> first;
+        std::unordered_map<std::string, int> second;
+
+        first["a"]  = 10;
+        first["b"]  = -20;
+        second["b"] = 30;
+        second["c"] = -40;
+        second["d"] = 50;
+
+        EXPECT_EQ(10 + 50 + 40 + 50, utility::distance_l1(first, second));
+        EXPECT_EQ(10 + 50 + 40 + 50, utility::distance_l1(second, first));
+    }
+
+    {
+        std::unordered_map<std::string, int> first;
+        std::unordered_map<std::string, int> second;
+
+        first["a"]  = 10;
+        first["b"]  = -20;
+        second["b"] = -20;
+        second["c"] = -40;
+        second["d"] = 50;
+
+        EXPECT_EQ(10 + 0 + 40 + 50, utility::distance_l1(first, second));
+        EXPECT_EQ(10 + 0 + 40 + 50, utility::distance_l1(second, first));
+    }
+}
+
+/*****************************************************************************/
+TEST_F(TestUnorderedMapUtility, distance_l0) {
+    {
+        std::unordered_map<std::string, int> first;
+        std::unordered_map<std::string, int> second;
+
+        first["a"]  = 10;
+        first["b"]  = -20;
+        second["b"] = 30;
+        second["c"] = -40;
+        second["d"] = 50;
+
+        EXPECT_EQ(4, utility::distance_l0(first, second));
+        EXPECT_EQ(4, utility::distance_l0(second, first));
+    }
+
+    {
+        std::unordered_map<std::string, int> first;
+        std::unordered_map<std::string, int> second;
+
+        first["a"]  = 10;
+        first["b"]  = -20;
+        second["b"] = -20;
+        second["c"] = -40;
+        second["d"] = 50;
+
+        EXPECT_EQ(3, utility::distance_l0(first, second));
+        EXPECT_EQ(3, utility::distance_l0(second, first));
+    }
+
+    {
+        std::unordered_map<std::string, int> first;
+        std::unordered_map<std::string, int> second;
+
+        first["a"]  = 10;
+        first["b"]  = 20;
+        first["c"]  = 30;
+        second["a"] = 10;
+        second["b"] = 20;
+        second["c"] = 30;
+
+        EXPECT_EQ(0, utility::distance_l0(first, second));
+        EXPECT_EQ(0, utility::distance_l0(second, first));
+    }
+
+    {
+        std::unordered_map<std::string, int> first;
+        std::unordered_map<std::string, int> second;
+
+        first["a"]  = 10;
+        first["b"]  = 20;
+        first["c"]  = 30;
+        second["a"] = 20;
+        second["b"] = 30;
+        second["c"] = 40;
+
+        EXPECT_EQ(3, utility::distance_l0(first, second));
+        EXPECT_EQ(3, utility::distance_l0(second, first));
+    }
+
+    {
+        std::unordered_map<std::string, int> first;
+        std::unordered_map<std::string, int> second;
+
+        first["a"]  = 10;
+        first["b"]  = 20;
+        first["c"]  = 30;
+        second["d"] = 10;
+        second["e"] = 20;
+        second["f"] = 30;
+
+        EXPECT_EQ(6, utility::distance_l0(first, second));
+        EXPECT_EQ(6, utility::distance_l0(second, first));
+    }
 }
 }  // namespace
 /*****************************************************************************/

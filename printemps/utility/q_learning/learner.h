@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2023 Yuji KOGUMA
+// Copyright (c) 2020-2024 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -33,11 +33,6 @@ class Learner {
     }
 
     /*************************************************************************/
-    ~Learner(void) {
-        /// nothing to do
-    }
-
-    /*************************************************************************/
     void set_seed(const std::uint_fast32_t &a_SEED) {
         m_get_rand_mt.seed(a_SEED);
     }
@@ -68,31 +63,28 @@ class Learner {
     }
 
     /*************************************************************************/
-    inline constexpr std::vector<State<T_StateBody, T_ActionBody>> &states(
-        void) {
+    inline std::vector<State<T_StateBody, T_ActionBody>> &states(void) {
         return m_states;
     }
 
     /*************************************************************************/
-    inline constexpr const std::vector<State<T_StateBody, T_ActionBody>>
-        &states(void) const {
-        return m_states;
-    }
-
-    /*************************************************************************/
-    inline constexpr const State<T_StateBody, T_ActionBody> &current_state(
+    inline const std::vector<State<T_StateBody, T_ActionBody>> &states(
         void) const {
+        return m_states;
+    }
+
+    /*************************************************************************/
+    inline const State<T_StateBody, T_ActionBody> &current_state(void) const {
         return *m_current_state_ptr;
     }
 
     /*************************************************************************/
-    inline constexpr const Action<T_StateBody, T_ActionBody> &current_action(
-        void) const {
+    inline const Action<T_StateBody, T_ActionBody> &current_action(void) const {
         return *m_current_action_ptr;
     }
 
     /**************************************************************************/
-    inline constexpr void setup(void) {
+    inline void setup(void) {
         m_current_state_ptr  = &(m_states.front());
         m_current_action_ptr = &(m_current_state_ptr->actions.front());
         for (auto &&state : m_states) {
@@ -101,8 +93,8 @@ class Learner {
     }
 
     /**************************************************************************/
-    inline constexpr Action<T_StateBody, T_ActionBody>
-        &epsilon_greedy_selected_action(const double a_RATIO) {
+    inline Action<T_StateBody, T_ActionBody> &epsilon_greedy_selected_action(
+        const double a_RATIO) {
         m_current_action_ptr =
             m_current_state_ptr->epsilon_greedy_selected_action_ptr(
                 a_RATIO, &m_get_rand_mt);

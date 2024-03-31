@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2023 Yuji KOGUMA
+// Copyright (c) 2020-2024 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -51,11 +51,6 @@ class IncumbentHolder {
     }
 
     /*************************************************************************/
-    virtual ~IncumbentHolder(void) {
-        /// nothing to do
-    }
-
-    /*************************************************************************/
     void initialize(void) {
         m_is_found_feasible_solution =
             IncumbentHolderConstant::DEFAULT_IS_FOUND_FEASIBLE_SOLUTION;
@@ -73,7 +68,7 @@ class IncumbentHolder {
     }
 
     /*************************************************************************/
-    constexpr int try_update_incumbent(
+    inline int try_update_incumbent(
         const DenseSolution<T_Variable, T_Expression> &a_SOLUTION,
         const SolutionScore &                          a_SCORE) {
         int status = IncumbentHolderConstant::STATUS_NOT_UPDATED;
@@ -120,7 +115,7 @@ class IncumbentHolder {
     }
 
     /*************************************************************************/
-    constexpr int try_update_incumbent(
+    inline int try_update_incumbent(
         model::Model<T_Variable, T_Expression> *a_model_ptr,
         const SolutionScore &                   a_SCORE) {
         /// solution here defined is not substituted when no improvement
@@ -137,7 +132,7 @@ class IncumbentHolder {
             if (!is_solution_updated) {
                 a_model_ptr
                     ->update_dependent_variables_and_disabled_constraints();
-                solution            = a_model_ptr->export_solution();
+                solution            = a_model_ptr->export_dense_solution();
                 is_solution_updated = true;
             }
 
@@ -155,7 +150,7 @@ class IncumbentHolder {
             if (!is_solution_updated) {
                 a_model_ptr
                     ->update_dependent_variables_and_disabled_constraints();
-                solution            = a_model_ptr->export_solution();
+                solution            = a_model_ptr->export_dense_solution();
                 is_solution_updated = true;
             }
 
@@ -176,7 +171,7 @@ class IncumbentHolder {
                 if (!is_solution_updated) {
                     a_model_ptr
                         ->update_dependent_variables_and_disabled_constraints();
-                    solution            = a_model_ptr->export_solution();
+                    solution            = a_model_ptr->export_dense_solution();
                     is_solution_updated = true;
                 }
 
@@ -189,46 +184,46 @@ class IncumbentHolder {
     }
 
     /*************************************************************************/
-    inline constexpr void reset_local_augmented_incumbent(void) {
+    inline void reset_local_augmented_incumbent(void) {
         m_local_augmented_incumbent_objective =
             IncumbentHolderConstant::DEFAULT_OBJECTIVE;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_found_feasible_solution(void) const {
+    inline bool is_found_feasible_solution(void) const {
         return m_is_found_feasible_solution;
     }
 
     /*************************************************************************/
-    inline constexpr const DenseSolution<T_Variable, T_Expression>
+    inline const DenseSolution<T_Variable, T_Expression>
         &local_augmented_incumbent_solution(void) const {
         return m_local_augmented_incumbent_solution;
     }
 
     /*************************************************************************/
-    inline constexpr const DenseSolution<T_Variable, T_Expression>
+    inline const DenseSolution<T_Variable, T_Expression>
         &global_augmented_incumbent_solution(void) const {
         return m_global_augmented_incumbent_solution;
     }
 
     /*************************************************************************/
-    inline constexpr const DenseSolution<T_Variable, T_Expression>
+    inline const DenseSolution<T_Variable, T_Expression>
         &feasible_incumbent_solution(void) const {
         return m_feasible_incumbent_solution;
     }
 
     /*************************************************************************/
-    inline constexpr void update_dual_bound(const double a_DUAL_BOUND) {
+    inline void update_dual_bound(const double a_DUAL_BOUND) {
         m_dual_bound = a_DUAL_BOUND;
     }
 
     /*************************************************************************/
-    inline constexpr double dual_bound(void) const {
+    inline double dual_bound(void) const {
         return m_dual_bound;
     }
 
     /*************************************************************************/
-    inline constexpr double local_augmented_incumbent_objective(void) const {
+    inline double local_augmented_incumbent_objective(void) const {
         /**
          * This method returns the local augmented incumbent objective as
          * minimization problem; it will be nagated for maximization
@@ -238,7 +233,7 @@ class IncumbentHolder {
     }
 
     /*************************************************************************/
-    inline constexpr double global_augmented_incumbent_objective(void) const {
+    inline double global_augmented_incumbent_objective(void) const {
         /**
          * This method returns the global augmented incumbent objective as
          * minimization problem; it will be nagated for maximization
@@ -248,7 +243,7 @@ class IncumbentHolder {
     }
 
     /*************************************************************************/
-    inline constexpr double feasible_incumbent_objective(void) const {
+    inline double feasible_incumbent_objective(void) const {
         /**
          * This method returns the local augmented incumbent objective as
          * minimization problem; it will be nagated for maximization
@@ -259,19 +254,16 @@ class IncumbentHolder {
 
     /*************************************************************************/
     inline const SolutionScore &local_augmented_incumbent_score(void) const {
-        /// cannot be constexpr by clang
         return m_local_augmented_incumbent_score;
     }
 
     /*************************************************************************/
     inline const SolutionScore &global_augmented_incumbent_score(void) const {
-        /// cannot be constexpr by clang
         return m_global_augmented_incumbent_score;
     }
 
     /*************************************************************************/
     inline const SolutionScore &feasible_incumbent_score(void) const {
-        /// cannot be constexpr by clang
         return m_feasible_incumbent_score;
     }
 };

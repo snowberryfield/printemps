@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2023 Yuji KOGUMA
+// Copyright (c) 2020-2024 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -51,11 +51,6 @@ class Memory {
     }
 
     /*************************************************************************/
-    virtual ~Memory(void) {
-        /// nothing to do
-    }
-
-    /*************************************************************************/
     void initialize(void) {
         m_model_ptr = nullptr;
         m_variable_names.clear();
@@ -78,8 +73,7 @@ class Memory {
     }
 
     /*************************************************************************/
-    inline constexpr void setup(
-        model::Model<T_Variable, T_Expression> *a_model_ptr) {
+    inline void setup(model::Model<T_Variable, T_Expression> *a_model_ptr) {
         this->initialize();
         m_model_ptr = a_model_ptr;
 
@@ -168,24 +162,24 @@ class Memory {
     }
 
     /*************************************************************************/
-    inline constexpr double primal_intensity(void) const noexcept {
+    inline double primal_intensity(void) const noexcept {
         return m_primal_intensity;
     }
 
     /*************************************************************************/
-    inline constexpr double dual_intensity(void) const noexcept {
+    inline double dual_intensity(void) const noexcept {
         return m_dual_intensity;
     }
 
     /*************************************************************************/
-    constexpr void update(
+    inline void update(
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE,
         const int a_ITERATION) noexcept {
         this->update(a_MOVE, a_ITERATION, 0, nullptr);
     }
 
     /*************************************************************************/
-    constexpr void update(
+    inline void update(
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE,
         const int                                           a_ITERATION,     //
         const int                                           a_RANDOM_WIDTH,  //
@@ -235,16 +229,15 @@ class Memory {
 
     /*************************************************************************/
     inline void reset_last_update_iterations(void) {
-        /// This method cannot be constexpr.
         for (auto &&proxy : m_last_update_iterations) {
             for (auto &&value : proxy.flat_indexed_values()) {
                 value = MemoryConstant::INITIAL_LAST_UPDATE_ITERATION;
             }
         }
     }
+
     /*************************************************************************/
     inline void revert_last_update_iterations(const int a_ITERATION) {
-        /// This method cannot be constexpr.
         for (auto &&proxy : m_last_update_iterations) {
             for (auto &&value : proxy.flat_indexed_values()) {
                 if (value > a_ITERATION) {
@@ -256,40 +249,40 @@ class Memory {
     }
 
     /*************************************************************************/
-    inline constexpr const std::vector<multi_array::ValueProxy<int>>
+    inline const std::vector<multi_array::ValueProxy<int>>
         &last_update_iterations(void) const {
         return m_last_update_iterations;
     }
 
     /*************************************************************************/
-    inline constexpr const std::vector<multi_array::ValueProxy<int>>
-        &update_counts(void) const {
+    inline const std::vector<multi_array::ValueProxy<int>> &update_counts(
+        void) const {
         return m_update_counts;
     }
 
     /*************************************************************************/
-    inline constexpr long total_update_count(void) const {
+    inline long total_update_count(void) const {
         return m_total_update_count;
     }
 
     /*************************************************************************/
-    inline constexpr double total_update_count_reciprocal(void) const {
+    inline double total_update_count_reciprocal(void) const {
         return m_total_update_count_reciprocal;
     }
 
     /*************************************************************************/
-    inline constexpr const std::vector<multi_array::ValueProxy<int>>
-        &violation_counts(void) const {
+    inline const std::vector<multi_array::ValueProxy<int>> &violation_counts(
+        void) const {
         return m_violation_counts;
     }
 
     /*************************************************************************/
-    inline constexpr long total_violation_count(void) const {
+    inline long total_violation_count(void) const {
         return m_total_violation_count;
     }
 
     /*************************************************************************/
-    inline constexpr double total_violation_count_reciprocal(void) const {
+    inline double total_violation_count_reciprocal(void) const {
         return m_total_violation_count_reciprocal;
     }
 };

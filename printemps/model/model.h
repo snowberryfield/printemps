@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2023 Yuji KOGUMA
+// Copyright (c) 2020-2024 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -108,11 +108,6 @@ class Model {
     }
 
     /*************************************************************************/
-    virtual ~Model(void) {
-        /// nothing to do
-    }
-
-    /*************************************************************************/
     void initialize(void) {
         m_name = "";
 
@@ -161,17 +156,17 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void set_name(const std::string &a_NAME) {
+    inline void set_name(const std::string &a_NAME) {
         m_name = a_NAME;
     }
 
     /*************************************************************************/
-    inline constexpr const std::string &name(void) const {
+    inline const std::string &name(void) const {
         return m_name;
     }
 
     /*************************************************************************/
-    constexpr model_component::VariableProxy<T_Variable, T_Expression>
+    inline model_component::VariableProxy<T_Variable, T_Expression>
         &create_variable(const std::string &a_NAME) {
         if (utility::has_space(a_NAME)) {
             throw std::logic_error(utility::format_error_location(
@@ -200,7 +195,7 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr model_component::VariableProxy<T_Variable, T_Expression>
+    inline model_component::VariableProxy<T_Variable, T_Expression>
         &create_variable(const std::string &a_NAME,         //
                          const T_Variable   a_LOWER_BOUND,  //
                          const T_Variable   a_UPPER_BOUND) {
@@ -211,7 +206,7 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr model_component::VariableProxy<T_Variable, T_Expression>
+    inline model_component::VariableProxy<T_Variable, T_Expression>
         &create_variables(const std::string &a_NAME,  //
                           const int          a_NUMBER_OF_ELEMENTS) {
         if (utility::has_space(a_NAME)) {
@@ -241,7 +236,7 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr model_component::VariableProxy<T_Variable, T_Expression>
+    inline model_component::VariableProxy<T_Variable, T_Expression>
         &create_variables(const std::string &a_NAME,                //
                           const int          a_NUMBER_OF_ELEMENTS,  //
                           const T_Variable   a_LOWER_BOUND,         //
@@ -253,7 +248,7 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr model_component::VariableProxy<T_Variable, T_Expression>
+    inline model_component::VariableProxy<T_Variable, T_Expression>
         &create_variables(const std::string &     a_NAME,  //
                           const std::vector<int> &a_SHAPE) {
         if (utility::has_space(a_NAME)) {
@@ -284,7 +279,7 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr model_component::VariableProxy<T_Variable, T_Expression>
+    inline model_component::VariableProxy<T_Variable, T_Expression>
         &create_variables(const std::string &     a_NAME,         //
                           const std::vector<int> &a_SHAPE,        //
                           const T_Variable        a_LOWER_BOUND,  //
@@ -296,7 +291,7 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr model_component::ExpressionProxy<T_Variable, T_Expression>
+    inline model_component::ExpressionProxy<T_Variable, T_Expression>
         &create_expression(const std::string &a_NAME) {
         if (utility::has_space(a_NAME)) {
             throw std::logic_error(utility::format_error_location(
@@ -325,7 +320,7 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr model_component::ExpressionProxy<T_Variable, T_Expression>
+    inline model_component::ExpressionProxy<T_Variable, T_Expression>
         &create_expressions(const std::string &a_NAME,  //
                             int                a_NUMBER_OF_ELEMENTS) {
         if (utility::has_space(a_NAME)) {
@@ -355,7 +350,7 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr model_component::ExpressionProxy<T_Variable, T_Expression>
+    inline model_component::ExpressionProxy<T_Variable, T_Expression>
         &create_expressions(const std::string &     a_NAME,  //
                             const std::vector<int> &a_SHAPE) {
         if (utility::has_space(a_NAME)) {
@@ -387,7 +382,7 @@ class Model {
 
     /*************************************************************************/
     template <template <class, class> class T_ExpressionLike>
-    constexpr model_component::ExpressionProxy<T_Variable, T_Expression> &
+    inline model_component::ExpressionProxy<T_Variable, T_Expression> &
     create_expression(
         const std::string &                               a_NAME,  //
         const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE) {
@@ -419,7 +414,7 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr model_component::ExpressionProxy<T_Variable, T_Expression>
+    inline model_component::ExpressionProxy<T_Variable, T_Expression>
         &create_expression(
             const std::string &a_NAME,  //
             const model_component::Expression<T_Variable, T_Expression>
@@ -452,7 +447,7 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr model_component::ConstraintProxy<T_Variable, T_Expression>
+    inline model_component::ConstraintProxy<T_Variable, T_Expression>
         &create_constraint(const std::string &a_NAME) {
         if (utility::has_space(a_NAME)) {
             throw std::logic_error(utility::format_error_location(
@@ -481,7 +476,7 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr model_component::ConstraintProxy<T_Variable, T_Expression>
+    inline model_component::ConstraintProxy<T_Variable, T_Expression>
         &create_constraints(const std::string &a_NAME,  //
                             int                a_NUMBER_OF_ELEMENTS) {
         if (utility::has_space(a_NAME)) {
@@ -511,7 +506,7 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr model_component::ConstraintProxy<T_Variable, T_Expression>
+    inline model_component::ConstraintProxy<T_Variable, T_Expression>
         &create_constraints(const std::string &     a_NAME,  //
                             const std::vector<int> &a_SHAPE) {
         if (utility::has_space(a_NAME)) {
@@ -542,7 +537,7 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr model_component::ConstraintProxy<T_Variable, T_Expression>
+    inline model_component::ConstraintProxy<T_Variable, T_Expression>
         &create_constraint(
             const std::string &a_NAME,  //
             const model_component::Constraint<T_Variable, T_Expression>
@@ -575,7 +570,7 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void minimize(
+    inline void minimize(
         const std::function<
             T_Expression(const neighborhood::Move<T_Variable, T_Expression> &)>
             &a_FUNCTION) {
@@ -588,7 +583,7 @@ class Model {
 
     /*************************************************************************/
     template <template <class, class> class T_ExpressionLike>
-    inline constexpr void minimize(
+    inline void minimize(
         const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE) {
         auto objective = model_component::Objective<T_Variable, T_Expression>::
             create_instance(a_EXPRESSION_LIKE.to_expression());
@@ -599,7 +594,7 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void minimize(
+    inline void minimize(
         const model_component::Expression<T_Variable, T_Expression>
             &a_EXPRESSION) {
         auto objective = model_component::Objective<
@@ -610,7 +605,7 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void maximize(
+    inline void maximize(
         const std::function<
             T_Expression(const neighborhood::Move<T_Variable, T_Expression> &)>
             &a_FUNCTION) {
@@ -623,7 +618,7 @@ class Model {
 
     /*************************************************************************/
     template <template <class, class> class T_ExpressionLike>
-    inline constexpr void maximize(
+    inline void maximize(
         const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE) {
         auto objective = model_component::Objective<T_Variable, T_Expression>::
             create_instance(a_EXPRESSION_LIKE.to_expression());
@@ -633,7 +628,7 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void maximize(
+    inline void maximize(
         const model_component::Expression<T_Variable, T_Expression>
             &a_EXPRESSION) {
         auto objective = model_component::Objective<
@@ -644,8 +639,8 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void setup(const option::Option &a_OPTION,
-                         const bool            a_IS_ENABLED_PRINT) {
+    inline void setup(const option::Option &a_OPTION,
+                      const bool            a_IS_ENABLED_PRINT) {
         /**
          * Verify the problem.
          */
@@ -863,7 +858,7 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void setup_structure(void) {
+    inline void setup_structure(void) {
         this->categorize_variables();
         this->categorize_constraints();
 
@@ -874,14 +869,15 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void setup_unique_names(void) {
+    inline void setup_unique_names(void) {
         const int VARIABLE_PROXIES_SIZE   = m_variable_proxies.size();
         const int EXPRESSION_PROXIES_SIZE = m_expression_proxies.size();
         const int CONSTRAINT_PROXIES_SIZE = m_constraint_proxies.size();
 
         for (auto i = 0; i < VARIABLE_PROXIES_SIZE; i++) {
-            int number_of_elements = m_variable_proxies[i].number_of_elements();
-            for (auto j = 0; j < number_of_elements; j++) {
+            const int NUMBER_OF_ELEMENTS =
+                m_variable_proxies[i].number_of_elements();
+            for (auto j = 0; j < NUMBER_OF_ELEMENTS; j++) {
                 auto &variable =
                     m_variable_proxies[i].flat_indexed_variables(j);
 
@@ -894,9 +890,9 @@ class Model {
 
         /// Expression
         for (auto i = 0; i < EXPRESSION_PROXIES_SIZE; i++) {
-            int number_of_elements =
+            const int NUMBER_OF_ELEMENTS =
                 m_expression_proxies[i].number_of_elements();
-            for (auto j = 0; j < number_of_elements; j++) {
+            for (auto j = 0; j < NUMBER_OF_ELEMENTS; j++) {
                 auto &expression =
                     m_expression_proxies[i].flat_indexed_expressions(j);
 
@@ -910,9 +906,9 @@ class Model {
 
         /// Constraint
         for (auto i = 0; i < CONSTRAINT_PROXIES_SIZE; i++) {
-            int number_of_elements =
+            const int NUMBER_OF_ELEMENTS =
                 m_constraint_proxies[i].number_of_elements();
-            for (auto j = 0; j < number_of_elements; j++) {
+            for (auto j = 0; j < NUMBER_OF_ELEMENTS; j++) {
                 auto &constraint =
                     m_constraint_proxies[i].flat_indexed_constraints(j);
 
@@ -926,7 +922,7 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void setup_is_linear(void) {
+    inline void setup_is_linear(void) {
         m_is_linear = true;
         for (auto &&proxy : m_constraint_proxies) {
             for (auto &&constraint : proxy.flat_indexed_constraints()) {
@@ -942,7 +938,7 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void setup_is_enabled_fast_evaluation(void) {
+    inline void setup_is_enabled_fast_evaluation(void) {
         /**
          * NOTE: In this method, m_constraint_reference is not referred because
          * the object may not have been set up at the stage this method is
@@ -963,7 +959,7 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void setup_is_integer(void) {
+    inline void setup_is_integer(void) {
         /**
          * NOTE: In this method, m_constraint_reference is not referred because
          * the object may not have been set up at the stage this method is
@@ -981,7 +977,7 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void setup_variable_related_constraints(void) {
+    inline void setup_variable_related_constraints(void) {
         /**
          * NOTE: In this method, m_variable_reference is not referred because
          * the object would not be set up at the stage when this method is
@@ -1011,14 +1007,14 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void setup_variable_objective_sensitivities(void) {
+    inline void setup_variable_objective_sensitivities(void) {
         for (auto &&sensitivity : m_objective.expression().sensitivities()) {
             sensitivity.first->set_objective_sensitivity(sensitivity.second);
         }
     }
 
     /*************************************************************************/
-    constexpr void setup_variable_constraint_sensitivities(void) {
+    inline void setup_variable_constraint_sensitivities(void) {
         /**
          * NOTE: In this method, m_variable_reference is not referred because
          * the object may not have been set up at the stage this method is
@@ -1046,7 +1042,7 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void setup_variable_related_selection_constraint_ptr_index(void) {
+    inline void setup_variable_related_selection_constraint_ptr_index(void) {
         for (auto &&variable_ptr :
              m_variable_type_reference.selection_variable_ptrs) {
             variable_ptr->setup_related_selection_constraint_ptr_index();
@@ -1054,7 +1050,7 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void setup_variable_related_binary_coefficient_constraints(void) {
+    inline void setup_variable_related_binary_coefficient_constraints(void) {
         /**
          * NOTE: In this method, m_variable_reference is not referred because
          * the object may not have been set up at the stage this method is
@@ -1069,7 +1065,7 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void categorize_variables(void) {
+    inline void categorize_variables(void) {
         model_component::VariableReference<T_Variable, T_Expression>
             variable_reference;
         model_component::VariableTypeReference<T_Variable, T_Expression>
@@ -1118,7 +1114,7 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void categorize_constraints(void) {
+    inline void categorize_constraints(void) {
         model_component::ConstraintReference<T_Variable, T_Expression>
             constraint_reference;
         model_component::ConstraintTypeReference<T_Variable, T_Expression>
@@ -1294,8 +1290,8 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void setup_neighborhood(const option::Option &a_OPTION,
-                                      const bool a_IS_ENABLED_PRINT) {
+    inline void setup_neighborhood(const option::Option &a_OPTION,
+                                   const bool            a_IS_ENABLED_PRINT) {
         utility::print_single_line(a_IS_ENABLED_PRINT);
         utility::print_message("Detecting the neighborhood structure...",
                                a_IS_ENABLED_PRINT);
@@ -1387,7 +1383,7 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void setup_fixed_sensitivities(const bool a_IS_ENABLED_PRINT) {
+    inline void setup_fixed_sensitivities(const bool a_IS_ENABLED_PRINT) {
         utility::print_single_line(a_IS_ENABLED_PRINT);
         utility::print_message("Creating the sensitivity matrix...",
                                a_IS_ENABLED_PRINT);
@@ -1657,7 +1653,7 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void shrink_global_penalty_coefficient(
+    inline void shrink_global_penalty_coefficient(
         const bool a_IS_ENABLED_PRINT) {
         utility::print_single_line(a_IS_ENABLED_PRINT);
         utility::print_message("Modifying the global penalty coefficient...",
@@ -1685,7 +1681,7 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void set_selections(
+    inline void set_selections(
         const std::vector<model_component::Selection<T_Variable, T_Expression>>
             &a_SELECTIONS) {
         m_selections = a_SELECTIONS;
@@ -1703,9 +1699,9 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr int update_variable_bounds(const double a_OBJECTIVE,
-                                         const bool   a_IS_PRIMAL,
-                                         const bool   a_IS_ENABLED_PRINT) {
+    inline int update_variable_bounds(const double a_OBJECTIVE,
+                                      const bool   a_IS_PRIMAL,
+                                      const bool   a_IS_ENABLED_PRINT) {
         model_component::Constraint<T_Variable, T_Expression> constraint;
         if (m_is_minimization && a_IS_PRIMAL) {
             constraint = m_objective.expression() <= a_OBJECTIVE;
@@ -1727,18 +1723,18 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void set_global_penalty_coefficient(
+    inline void set_global_penalty_coefficient(
         const double a_GLOBAL_PENALTY_COEFFICIENT) {
         m_global_penalty_coefficient = a_GLOBAL_PENALTY_COEFFICIENT;
     }
 
     /*************************************************************************/
-    inline constexpr double global_penalty_coefficient(void) const noexcept {
+    inline double global_penalty_coefficient(void) const noexcept {
         return m_global_penalty_coefficient;
     }
 
     /*************************************************************************/
-    constexpr void print_number_of_variables(void) const {
+    inline void print_number_of_variables(void) const {
         utility::print_single_line(true);
 
         const auto &ORIGINAL  = m_variable_reference_original;
@@ -1850,7 +1846,7 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void print_number_of_constraints(void) const {
+    inline void print_number_of_constraints(void) const {
         utility::print_single_line(true);
 
         const auto &ORIGINAL  = m_constraint_reference_original;
@@ -2360,7 +2356,7 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void set_callback(
+    inline void set_callback(
         const std::function<
             void(option::Option *,
                  solution::IncumbentHolder<T_Variable, T_Expression> *)>
@@ -2369,35 +2365,14 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void callback(
-        option::Option *a_option_ptr,
-        solution::IncumbentHolder<T_Variable, T_Expression>
-            *a_incumbent_holder_ptr) {
+    inline void callback(option::Option *a_option_ptr,
+                         solution::IncumbentHolder<T_Variable, T_Expression>
+                             *a_incumbent_holder_ptr) {
         m_callback(a_option_ptr, a_incumbent_holder_ptr);
     }
 
     /*************************************************************************/
-    constexpr void import_variable_values(
-        const std::vector<multi_array::ValueProxy<T_Variable>> &a_PROXIES) {
-        for (auto &&proxy : m_variable_proxies) {
-            for (auto &&variable : proxy.flat_indexed_variables()) {
-                const int PROXY_INDEX = variable.proxy_index();
-                const int FLAT_INDEX  = variable.flat_index();
-                variable.set_value_if_mutable(
-                    a_PROXIES[PROXY_INDEX].flat_indexed_values(FLAT_INDEX));
-            }
-        }
-        preprocess::Verifier<T_Variable, T_Expression> verifier(this);
-        verifier.verify_and_correct_selection_variables_initial_values(  //
-            false, false);
-        verifier.verify_and_correct_binary_variables_initial_values(  //
-            false, false);
-        verifier.verify_and_correct_integer_variables_initial_values(  //
-            false, false);
-    }
-
-    /*************************************************************************/
-    constexpr void update(void) {
+    inline void update(void) {
         /**
          * Update in order of expressions -> dependent variables -> objective,
          * constraints.
@@ -2433,7 +2408,7 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void update_dependent_variables_and_disabled_constraints(void) {
+    inline void update_dependent_variables_and_disabled_constraints(void) {
         /**
          * Update in order of expressions -> dependent variables, and
          * constraints.
@@ -2461,7 +2436,7 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void update(
+    inline void update(
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) {
         /**
          * Update in order of objective, constraints -> expressions ->
@@ -2507,7 +2482,7 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void reset_variable_objective_improvabilities(
+    inline void reset_variable_objective_improvabilities(
         const std::vector<model_component::Variable<T_Variable, T_Expression> *>
             &a_VARIABLE_PTRS) {
         for (auto &&variable_ptr : a_VARIABLE_PTRS) {
@@ -2516,13 +2491,13 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void reset_variable_objective_improvabilities(void) {
+    inline void reset_variable_objective_improvabilities(void) {
         this->reset_variable_objective_improvabilities(
             this->variable_reference().variable_ptrs);
     }
 
     /*************************************************************************/
-    inline constexpr void reset_variable_feasibility_improvabilities(
+    inline void reset_variable_feasibility_improvabilities(
         const std::vector<model_component::Variable<T_Variable, T_Expression> *>
             &a_VARIABLE_PTRS) const noexcept {
         for (auto &&variable_ptr : a_VARIABLE_PTRS) {
@@ -2531,7 +2506,7 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void reset_variable_feasibility_improvabilities(
+    inline void reset_variable_feasibility_improvabilities(
         const std::vector<model_component::Constraint<T_Variable, T_Expression>
                               *> &a_CONSTRAINT_PTRS) const noexcept {
         for (const auto &constraint_ptr : a_CONSTRAINT_PTRS) {
@@ -2546,19 +2521,19 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void reset_variable_feasibility_improvabilities(void) {
+    inline void reset_variable_feasibility_improvabilities(void) {
         this->reset_variable_feasibility_improvabilities(
             this->variable_reference().variable_ptrs);
     }
 
     /*************************************************************************/
-    inline constexpr void update_variable_objective_improvabilities(void) {
+    inline void update_variable_objective_improvabilities(void) {
         this->update_variable_objective_improvabilities(
             this->variable_reference().mutable_variable_ptrs);
     }
 
     /*************************************************************************/
-    constexpr void update_variable_objective_improvabilities(
+    inline void update_variable_objective_improvabilities(
         const std::vector<model_component::Variable<T_Variable, T_Expression> *>
             &a_VARIABLE_PTRS) const noexcept {
         double coefficient             = 0.0;
@@ -2578,13 +2553,13 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void update_variable_feasibility_improvabilities(void) {
+    inline void update_variable_feasibility_improvabilities(void) {
         this->update_variable_feasibility_improvabilities(
             this->constraint_reference().enabled_constraint_ptrs);
     }
 
     /*************************************************************************/
-    constexpr void update_variable_feasibility_improvabilities(
+    inline void update_variable_feasibility_improvabilities(
         const std::vector<model_component::Constraint<T_Variable, T_Expression>
                               *> &a_CONSTRAINT_PTRS) const noexcept {
         double coefficient = 0.0;
@@ -2621,8 +2596,7 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void update_violative_constraint_ptrs_and_feasibility(
-        void) {
+    inline void update_violative_constraint_ptrs_and_feasibility(void) {
         m_violative_constraint_ptrs.clear();
         for (auto &&constraint_ptr :
              m_constraint_reference.enabled_constraint_ptrs) {
@@ -2656,7 +2630,7 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void evaluate(
+    inline void evaluate(
         solution::SolutionScore *                           a_score_ptr,  //
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
         noexcept {
@@ -2738,7 +2712,7 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void evaluate_single(
+    inline void evaluate_single(
         solution::SolutionScore *                           a_score_ptr,  //
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE,
         const solution::SolutionScore &a_CURRENT_SCORE) const noexcept {
@@ -2813,7 +2787,7 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void evaluate_selection(
+    inline void evaluate_selection(
         solution::SolutionScore *                           a_score_ptr,  //
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE,
         const solution::SolutionScore &a_CURRENT_SCORE) const noexcept {
@@ -2961,7 +2935,7 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void evaluate_multi(
+    inline void evaluate_multi(
         solution::SolutionScore *                           a_score_ptr,  //
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE,
         const solution::SolutionScore &a_CURRENT_SCORE) const noexcept {
@@ -3037,7 +3011,7 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr double compute_lagrangian(
+    inline double compute_lagrangian(
         const std::vector<multi_array::ValueProxy<double>>
             &a_LAGRANGE_MULTIPLIER_PROXIES) const noexcept {
         double lagrangian = m_objective.value();
@@ -3055,7 +3029,7 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr double compute_naive_dual_bound(void) const noexcept {
+    inline double compute_naive_dual_bound(void) const noexcept {
         double dual_bound = m_is_minimization
                                 ? std::numeric_limits<double>::lowest()
                                 : std::numeric_limits<double>::max();
@@ -3085,7 +3059,7 @@ class Model {
 
     /*************************************************************************/
     template <class T_Value>
-    constexpr std::vector<multi_array::ValueProxy<T_Value>>
+    inline std::vector<multi_array::ValueProxy<T_Value>>
     generate_variable_parameter_proxies(const T_Value a_VALUE) const {
         std::vector<multi_array::ValueProxy<T_Value>>
             variable_parameter_proxies;
@@ -3107,7 +3081,7 @@ class Model {
 
     /*************************************************************************/
     template <class T_Value>
-    constexpr std::vector<multi_array::ValueProxy<T_Value>>
+    inline std::vector<multi_array::ValueProxy<T_Value>>
     generate_expression_parameter_proxies(const T_Value a_VALUE) const {
         std::vector<multi_array::ValueProxy<T_Value>>
             expression_parameter_proxies;
@@ -3128,7 +3102,7 @@ class Model {
 
     /*************************************************************************/
     template <class T_Value>
-    constexpr std::vector<multi_array::ValueProxy<T_Value>>
+    inline std::vector<multi_array::ValueProxy<T_Value>>
     generate_constraint_parameter_proxies(const T_Value a_VALUE) const {
         std::vector<multi_array::ValueProxy<T_Value>>
             constraint_parameter_proxies;
@@ -3174,9 +3148,8 @@ class Model {
     }
 
     /*************************************************************************/
-    solution::DenseSolution<T_Variable, T_Expression> export_solution(
-        void) const {
-        /// This method cannot be constexpr by clang.
+    inline solution::DenseSolution<T_Variable, T_Expression>
+    export_dense_solution(void) const {
         solution::DenseSolution<T_Variable, T_Expression> solution;
 
         /// Decision variables
@@ -3209,73 +3182,23 @@ class Model {
 
         solution.objective       = m_objective.value();
         solution.total_violation = total_violation;
-        solution.is_feasible     = this->is_feasible();
+        solution.global_augmented_objective =
+            solution.objective + m_global_penalty_coefficient * total_violation;
+        solution.is_feasible = this->is_feasible();
 
         return solution;
     }
 
     /*************************************************************************/
-    constexpr solution::NamedSolution<T_Variable, T_Expression>
-    export_named_solution(void) const {
-        return this->convert_to_named_solution(this->export_solution());
-    }
-
-    /*************************************************************************/
-    solution::NamedSolution<T_Variable, T_Expression> convert_to_named_solution(
-        const solution::DenseSolution<T_Variable, T_Expression> &a_SOLUTION)
-        const {
-        /// This method cannot be constexpr by clang.
-        solution::NamedSolution<T_Variable, T_Expression> named_solution;
-
-        const int VARIABLE_PROXIES_SIZE   = m_variable_proxies.size();
-        const int EXPRESSION_PROXIES_SIZE = m_expression_proxies.size();
-        const int CONSTRAINT_PROXIES_SIZE = m_constraint_proxies.size();
-
-        /// Decision variables
-        for (auto i = 0; i < VARIABLE_PROXIES_SIZE; i++) {
-            named_solution.m_variable_value_proxies[m_variable_names[i]] =
-                a_SOLUTION.variable_value_proxies[i];
-        }
-
-        /// Expression
-        for (auto i = 0; i < EXPRESSION_PROXIES_SIZE; i++) {
-            named_solution.m_expression_value_proxies[m_expression_names[i]] =
-                a_SOLUTION.expression_value_proxies[i];
-        }
-
-        /// Constraint
-        for (auto i = 0; i < CONSTRAINT_PROXIES_SIZE; i++) {
-            named_solution.m_constraint_value_proxies[m_constraint_names[i]] =
-                a_SOLUTION.constraint_value_proxies[i];
-        }
-
-        /// Violation
-        for (auto i = 0; i < CONSTRAINT_PROXIES_SIZE; i++) {
-            named_solution.m_violation_value_proxies[m_constraint_names[i]] =
-                a_SOLUTION.violation_value_proxies[i];
-        }
-
-        named_solution.m_name                  = m_name;
-        named_solution.m_number_of_variables   = this->number_of_variables();
-        named_solution.m_number_of_constraints = this->number_of_constraints();
-        named_solution.m_objective             = a_SOLUTION.objective;
-        named_solution.m_total_violation       = a_SOLUTION.total_violation;
-        named_solution.m_is_feasible           = a_SOLUTION.is_feasible;
-
-        return named_solution;
-    }
-
-    /*************************************************************************/
     solution::SparseSolution<T_Variable, T_Expression> export_sparse_solution(
         void) const {
-        solution::SparseSolution<T_Variable, T_Expression> sparse_solution;
+        solution::SparseSolution<T_Variable, T_Expression> solution;
 
         /// Decision variables
         for (const auto &proxy : m_variable_proxies) {
             for (const auto &variable : proxy.flat_indexed_variables()) {
                 if (variable.value() != 0) {
-                    sparse_solution.variables[variable.name()] =
-                        variable.value();
+                    solution.variables[variable.name()] = variable.value();
                 }
             }
         }
@@ -3288,44 +3211,117 @@ class Model {
             }
         }
 
-        sparse_solution.objective       = m_objective.value();
-        sparse_solution.total_violation = total_violation;
-        sparse_solution.is_feasible     = this->is_feasible();
+        solution.objective       = m_objective.value();
+        solution.total_violation = total_violation;
+        solution.global_augmented_objective =
+            solution.objective + m_global_penalty_coefficient * total_violation;
+        solution.is_feasible = this->is_feasible();
 
-        return sparse_solution;
+        return solution;
     }
 
     /*************************************************************************/
-    solution::SparseSolution<T_Variable, T_Expression>
-    convert_to_sparse_solution(
-        const solution::DenseSolution<T_Variable, T_Expression> &a_SOLUTION)
-        const {
-        solution::SparseSolution<T_Variable, T_Expression> sparse_solution;
+    inline solution::NamedSolution<T_Variable, T_Expression>
+    export_named_solution(void) const {
+        solution::NamedSolution<T_Variable, T_Expression> solution;
+
+        const int VARIABLE_PROXIES_SIZE   = m_variable_proxies.size();
+        const int EXPRESSION_PROXIES_SIZE = m_expression_proxies.size();
+        const int CONSTRAINT_PROXIES_SIZE = m_constraint_proxies.size();
 
         /// Decision variables
-        for (const auto &proxy : m_variable_proxies) {
-            for (const auto &variable : proxy.flat_indexed_variables()) {
-                if (variable.value() != 0) {
-                    sparse_solution.variables[variable.name()] =
-                        variable.value();
-                }
+        for (auto i = 0; i < VARIABLE_PROXIES_SIZE; i++) {
+            solution.m_variable_value_proxies[m_variable_names[i]] =
+                m_variable_proxies[i].export_values_and_names();
+        }
+
+        /// Expression
+        for (auto i = 0; i < EXPRESSION_PROXIES_SIZE; i++) {
+            solution.m_expression_value_proxies[m_expression_names[i]] =
+                m_expression_proxies[i].export_values_and_names();
+        }
+
+        /// Constraint
+        for (auto i = 0; i < CONSTRAINT_PROXIES_SIZE; i++) {
+            solution.m_constraint_value_proxies[m_constraint_names[i]] =
+                m_constraint_proxies[i].export_values_and_names();
+        }
+
+        /// Violation
+        for (auto i = 0; i < CONSTRAINT_PROXIES_SIZE; i++) {
+            solution.m_violation_value_proxies[m_constraint_names[i]] =
+                m_constraint_proxies[i].export_violations_and_names();
+        }
+
+        /// Total violation
+        T_Expression total_violation = 0;
+        for (const auto &proxy : m_constraint_proxies) {
+            for (const auto &constraint : proxy.flat_indexed_constraints()) {
+                total_violation += constraint.violation_value();
             }
         }
 
-        sparse_solution.objective       = a_SOLUTION.objective;
-        sparse_solution.total_violation = a_SOLUTION.total_violation;
-        sparse_solution.is_feasible     = a_SOLUTION.is_feasible;
+        solution.m_name                  = m_name;
+        solution.m_number_of_variables   = this->number_of_variables();
+        solution.m_number_of_constraints = this->number_of_constraints();
+        solution.m_objective             = m_objective.value();
+        solution.m_total_violation       = total_violation;
 
-        return sparse_solution;
+        solution.m_is_feasible = this->is_feasible();
+
+        return solution;
     }
 
     /*************************************************************************/
-    constexpr void import_solution(
-        const std::unordered_map<std::string, int> &a_SOLUTION) {
+    inline void import_solution(
+        const solution::DenseSolution<T_Variable, T_Expression> &a_SOLUTION) {
         for (auto &&proxy : m_variable_proxies) {
             for (auto &&variable : proxy.flat_indexed_variables()) {
-                if (a_SOLUTION.find(variable.name()) != a_SOLUTION.end()) {
-                    variable = a_SOLUTION.at(variable.name());
+                const int PROXY_INDEX = variable.proxy_index();
+                const int FLAT_INDEX  = variable.flat_index();
+                variable.set_value_if_mutable(
+                    a_SOLUTION.variable_value_proxies[PROXY_INDEX]
+                        .flat_indexed_values(FLAT_INDEX));
+            }
+        }
+        preprocess::Verifier<T_Variable, T_Expression> verifier(this);
+        verifier.verify_and_correct_selection_variables_initial_values(  //
+            false, false);
+        verifier.verify_and_correct_binary_variables_initial_values(  //
+            false, false);
+        verifier.verify_and_correct_integer_variables_initial_values(  //
+            false, false);
+    }
+
+    /*************************************************************************/
+    inline void import_solution(
+        const solution::SparseSolution<T_Variable, T_Expression> &a_SOLUTION) {
+        const auto &VARIABLES = a_SOLUTION.variables;
+        for (auto &&proxy : m_variable_proxies) {
+            for (auto &&variable : proxy.flat_indexed_variables()) {
+                if (VARIABLES.find(variable.name()) != VARIABLES.end()) {
+                    variable = VARIABLES.at(variable.name());
+                } else {
+                    variable = 0;
+                }
+            }
+        }
+        preprocess::Verifier<T_Variable, T_Expression> verifier(this);
+        verifier.verify_and_correct_selection_variables_initial_values(  //
+            false, false);
+        verifier.verify_and_correct_binary_variables_initial_values(  //
+            false, false);
+        verifier.verify_and_correct_integer_variables_initial_values(  //
+            false, false);
+    }
+
+    /*************************************************************************/
+    inline void import_solution(
+        const std::unordered_map<std::string, int> &a_VARIABLES) {
+        for (auto &&proxy : m_variable_proxies) {
+            for (auto &&variable : proxy.flat_indexed_variables()) {
+                if (a_VARIABLES.find(variable.name()) != a_VARIABLES.end()) {
+                    variable = a_VARIABLES.at(variable.name());
                 } else {
                     variable = 0;
                 }
@@ -3334,19 +3330,19 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void fix_variables(
-        const std::unordered_map<std::string, int> &a_SOLUTION) {
+    inline void fix_variables(
+        const std::unordered_map<std::string, int> &a_VARIABLES) {
         for (auto &&proxy : m_variable_proxies) {
             for (auto &&variable : proxy.flat_indexed_variables()) {
-                if (a_SOLUTION.find(variable.name()) != a_SOLUTION.end()) {
-                    variable.fix_by(a_SOLUTION.at(variable.name()));
+                if (a_VARIABLES.find(variable.name()) != a_VARIABLES.end()) {
+                    variable.fix_by(a_VARIABLES.at(variable.name()));
                 }
             }
         }
     }
 
     /*************************************************************************/
-    constexpr void unfix_variables(
+    inline void unfix_variables(
         const std::unordered_set<std::string> &a_VARIABLE_NAMES) {
         for (auto &&proxy : m_variable_proxies) {
             for (auto &&variable : proxy.flat_indexed_variables()) {
@@ -3360,7 +3356,7 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void set_user_defined_selection_constraints(
+    inline void set_user_defined_selection_constraints(
         const std::unordered_set<std::string> &a_CONSTRAINT_NAMES) {
         for (auto &&proxy : m_constraint_proxies) {
             for (auto &&constraint : proxy.flat_indexed_constraints()) {
@@ -3373,7 +3369,7 @@ class Model {
     }
 
     /*************************************************************************/
-    constexpr void setup_flippable_variable_ptr_pairs(
+    inline void setup_flippable_variable_ptr_pairs(
         const std::vector<std::pair<std::string, std::string>>
             &a_VARIABLE_NAME_PAIRS) {
         std::unordered_map<
@@ -3791,55 +3787,54 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr std::vector<
-        model_component::VariableProxy<T_Variable, T_Expression>>
+    inline std::vector<model_component::VariableProxy<T_Variable, T_Expression>>
         &variable_proxies(void) {
         return m_variable_proxies;
     }
 
     /*************************************************************************/
-    inline constexpr const std::vector<
+    inline const std::vector<
         model_component::VariableProxy<T_Variable, T_Expression>>
         &variable_proxies(void) const {
         return m_variable_proxies;
     }
 
     /*************************************************************************/
-    inline constexpr std::vector<
+    inline std::vector<
         model_component::ExpressionProxy<T_Variable, T_Expression>>
         &expression_proxies(void) {
         return m_expression_proxies;
     }
 
     /*************************************************************************/
-    inline constexpr const std::vector<
+    inline const std::vector<
         model_component::ExpressionProxy<T_Variable, T_Expression>>
         &expression_proxies(void) const {
         return m_expression_proxies;
     }
 
     /*************************************************************************/
-    inline constexpr std::vector<
+    inline std::vector<
         model_component::ConstraintProxy<T_Variable, T_Expression>>
         &constraint_proxies(void) {
         return m_constraint_proxies;
     }
 
     /*************************************************************************/
-    inline constexpr const std::vector<
+    inline const std::vector<
         model_component::ConstraintProxy<T_Variable, T_Expression>>
         &constraint_proxies(void) const {
         return m_constraint_proxies;
     }
 
     /*************************************************************************/
-    inline constexpr model_component::Objective<T_Variable, T_Expression>
-        &objective(void) {
+    inline model_component::Objective<T_Variable, T_Expression> &objective(
+        void) {
         return m_objective;
     }
 
     /*************************************************************************/
-    inline constexpr const model_component::Objective<T_Variable, T_Expression>
+    inline const model_component::Objective<T_Variable, T_Expression>
         &objective(void) const {
         return m_objective;
     }
@@ -3861,169 +3856,154 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr const std::vector<std::string> &variable_names(
-        void) const {
+    inline const std::vector<std::string> &variable_names(void) const {
         return m_variable_names;
     }
 
     /*************************************************************************/
-    inline constexpr const std::vector<std::string> &expression_names(
-        void) const {
+    inline const std::vector<std::string> &expression_names(void) const {
         return m_expression_names;
     }
 
     /*************************************************************************/
-    inline constexpr const std::vector<std::string> &constraint_names(
-        void) const {
+    inline const std::vector<std::string> &constraint_names(void) const {
         return m_constraint_names;
     }
 
     /*************************************************************************/
-    inline constexpr const std::vector<
+    inline const std::vector<
         model_component::Selection<T_Variable, T_Expression>>
         &selections(void) const {
         return m_selections;
     }
 
     /*************************************************************************/
-    inline constexpr model_component::VariableReference<T_Variable,
-                                                        T_Expression>
+    inline model_component::VariableReference<T_Variable, T_Expression>
         &variable_reference(void) {
         return m_variable_reference;
     }
 
     /*************************************************************************/
-    inline constexpr const model_component::VariableReference<T_Variable,
-                                                              T_Expression>
+    inline const model_component::VariableReference<T_Variable, T_Expression>
         &variable_reference(void) const {
         return m_variable_reference;
     }
 
     /*************************************************************************/
-    inline constexpr model_component::VariableReference<T_Variable,
-                                                        T_Expression>
+    inline model_component::VariableReference<T_Variable, T_Expression>
         &variable_reference_original(void) {
         return m_variable_reference_original;
     }
 
     /*************************************************************************/
-    inline constexpr const model_component::VariableReference<T_Variable,
-                                                              T_Expression>
+    inline const model_component::VariableReference<T_Variable, T_Expression>
         &variable_reference_original(void) const {
         return m_variable_reference_original;
     }
 
     /*************************************************************************/
-    inline constexpr model_component::VariableTypeReference<T_Variable,
-                                                            T_Expression>
+    inline model_component::VariableTypeReference<T_Variable, T_Expression>
         &variable_type_reference(void) {
         return m_variable_type_reference;
     }
 
     /*************************************************************************/
-    inline constexpr const model_component::VariableTypeReference<T_Variable,
-                                                                  T_Expression>
+    inline const model_component::VariableTypeReference<T_Variable,
+                                                        T_Expression>
         &variable_type_reference(void) const {
         return m_variable_type_reference;
     }
 
     /*************************************************************************/
-    inline constexpr model_component::VariableTypeReference<T_Variable,
-                                                            T_Expression>
+    inline model_component::VariableTypeReference<T_Variable, T_Expression>
         &variable_type_reference_original(void) {
         return m_variable_type_reference_original;
     }
 
     /*************************************************************************/
-    inline constexpr const model_component::VariableTypeReference<T_Variable,
-                                                                  T_Expression>
+    inline const model_component::VariableTypeReference<T_Variable,
+                                                        T_Expression>
         &variable_type_reference_original(void) const {
         return m_variable_type_reference_original;
     }
 
     /*************************************************************************/
-    inline constexpr model_component::ConstraintReference<T_Variable,
-                                                          T_Expression>
+    inline model_component::ConstraintReference<T_Variable, T_Expression>
         &constraint_reference(void) {
         return m_constraint_reference;
     }
 
     /*************************************************************************/
-    inline constexpr const model_component::ConstraintReference<T_Variable,
-                                                                T_Expression>
+    inline const model_component::ConstraintReference<T_Variable, T_Expression>
         &constraint_reference(void) const {
         return m_constraint_reference;
     }
 
     /*************************************************************************/
-    inline constexpr model_component::ConstraintReference<T_Variable,
-                                                          T_Expression>
+    inline model_component::ConstraintReference<T_Variable, T_Expression>
         &constraint_reference_original(void) {
         return m_constraint_reference_original;
     }
 
     /*************************************************************************/
-    inline constexpr const model_component::ConstraintReference<T_Variable,
-                                                                T_Expression>
+    inline const model_component::ConstraintReference<T_Variable, T_Expression>
         &constraint_reference_original(void) const {
         return m_constraint_reference_original;
     }
 
     /*************************************************************************/
-    inline constexpr model_component::ConstraintTypeReference<T_Variable,
-                                                              T_Expression>
+    inline model_component::ConstraintTypeReference<T_Variable, T_Expression>
         &constraint_type_reference(void) {
         return m_constraint_type_reference;
     }
 
     /*************************************************************************/
-    inline constexpr const model_component::ConstraintTypeReference<
-        T_Variable, T_Expression>
+    inline const model_component::ConstraintTypeReference<T_Variable,
+                                                          T_Expression>
         &constraint_type_reference(void) const {
         return m_constraint_type_reference;
     }
 
     /*************************************************************************/
-    inline constexpr model_component::ConstraintTypeReference<T_Variable,
-                                                              T_Expression>
+    inline model_component::ConstraintTypeReference<T_Variable, T_Expression>
         &constraint_type_reference_original(void) {
         return m_constraint_type_reference_original;
     }
 
     /*************************************************************************/
-    inline constexpr const model_component::ConstraintTypeReference<
-        T_Variable, T_Expression>
+    inline const model_component::ConstraintTypeReference<T_Variable,
+                                                          T_Expression>
         &constraint_type_reference_original(void) const {
         return m_constraint_type_reference_original;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_defined_objective(void) const {
+    inline bool is_defined_objective(void) const {
         return m_is_defined_objective;
     }
 
     /*************************************************************************/
-    inline constexpr void disable_fast_evaluation(void) {
+    inline void disable_fast_evaluation(void) {
         m_is_enabled_fast_evaluation = false;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_enabled_fast_evaluation(void) const {
+    inline bool is_enabled_fast_evaluation(void) const {
         return m_is_enabled_fast_evaluation;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_linear(void) const {
+    inline bool is_linear(void) const {
         return m_is_linear;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_minimization(void) const {
+    inline bool is_minimization(void) const {
         return m_is_minimization;
     }
 
     /*************************************************************************/
-    inline constexpr double sign(void) const {
+    inline double sign(void) const {
         /**
          * In this program, maximization problems are solved as minimization
          * problems by nagating the objective function values. This method
@@ -4033,89 +4013,89 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr void set_is_solved(const bool a_IS_SOLVED) {
+    inline void set_is_solved(const bool a_IS_SOLVED) {
         m_is_solved = a_IS_SOLVED;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_solved(void) const {
+    inline bool is_solved(void) const {
         return m_is_solved;
     }
 
     /*************************************************************************/
-    inline constexpr const std::vector<
+    inline const std::vector<
         model_component::Constraint<T_Variable, T_Expression> *>
         &violative_constraint_ptrs(void) const {
         return m_violative_constraint_ptrs;
     }
 
     /*************************************************************************/
-    inline constexpr bool is_feasible(void) const {
+    inline bool is_feasible(void) const {
         return m_is_feasible;
     }
 
     /*************************************************************************/
-    inline constexpr int number_of_variables(void) const {
+    inline int number_of_variables(void) const {
         return m_variable_reference.variable_ptrs.size();
     }
 
     /*************************************************************************/
-    inline constexpr int number_of_fixed_variables(void) const {
+    inline int number_of_fixed_variables(void) const {
         return m_variable_reference.fixed_variable_ptrs.size();
     }
 
     /*************************************************************************/
-    inline constexpr int number_of_mutable_variables(void) const {
+    inline int number_of_mutable_variables(void) const {
         return m_variable_reference.mutable_variable_ptrs.size();
     }
 
     /*************************************************************************/
-    inline constexpr int number_of_binary_variables(void) const {
+    inline int number_of_binary_variables(void) const {
         return m_variable_type_reference.binary_variable_ptrs.size();
     }
 
     /*************************************************************************/
-    inline constexpr int number_of_integer_variables(void) const {
+    inline int number_of_integer_variables(void) const {
         return m_variable_type_reference.integer_variable_ptrs.size();
     }
 
     /*************************************************************************/
-    inline constexpr int number_of_selection_variables(void) const {
+    inline int number_of_selection_variables(void) const {
         return m_variable_type_reference.selection_variable_ptrs.size();
     }
 
     /*************************************************************************/
-    inline constexpr int number_of_dependent_binary_variables(void) const {
+    inline int number_of_dependent_binary_variables(void) const {
         return m_variable_type_reference.dependent_binary_variable_ptrs.size();
     }
 
     /*************************************************************************/
-    inline constexpr int number_of_dependent_integer_variables(void) const {
+    inline int number_of_dependent_integer_variables(void) const {
         return m_variable_type_reference.dependent_integer_variable_ptrs.size();
     }
 
     /*************************************************************************/
-    inline constexpr int number_of_constraints(void) const {
+    inline int number_of_constraints(void) const {
         return m_constraint_reference.constraint_ptrs.size();
     }
 
     /*************************************************************************/
-    inline constexpr int number_of_selection_constraints(void) const {
+    inline int number_of_selection_constraints(void) const {
         return m_selections.size();
     }
 
     /*************************************************************************/
-    inline constexpr int number_of_enabled_constraints(void) const {
+    inline int number_of_enabled_constraints(void) const {
         return m_constraint_reference.enabled_constraint_ptrs.size();
     }
 
     /*************************************************************************/
-    inline constexpr int number_of_disabled_constraints(void) const {
+    inline int number_of_disabled_constraints(void) const {
         return m_constraint_reference.disabled_constraint_ptrs.size();
     }
 
     /*************************************************************************/
-    inline constexpr bool has_chain_move_effective_constraints(void) const {
+    inline bool has_chain_move_effective_constraints(void) const {
         if (m_constraint_type_reference.set_partitioning_ptrs.size() > 0) {
             return true;
         }
@@ -4138,7 +4118,7 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr std::vector<
+    inline std::vector<
         std::pair<model_component::Variable<T_Variable, T_Expression> *,
                   model_component::Variable<T_Variable, T_Expression> *>>
         &flippable_variable_ptr_pairs(void) {
@@ -4146,13 +4126,13 @@ class Model {
     }
 
     /*************************************************************************/
-    inline constexpr neighborhood::Neighborhood<T_Variable, T_Expression>
-        &neighborhood(void) {
+    inline neighborhood::Neighborhood<T_Variable, T_Expression> &neighborhood(
+        void) {
         return m_neighborhood;
     }
 
     /*************************************************************************/
-    inline constexpr preprocess::ProblemSizeReducer<T_Variable, T_Expression>
+    inline preprocess::ProblemSizeReducer<T_Variable, T_Expression>
         &problem_size_reducer(void) {
         return m_problem_size_reducer;
     }

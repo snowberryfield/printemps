@@ -22,7 +22,7 @@ else() # Debug
         -Wall
         -Wextra
         -Wno-error=missing-field-initializers
-        -pthreadls
+        -pthread
     )
 endif()
 
@@ -47,6 +47,7 @@ include(test_option_enumerate.cmake)
 include(test_preprocess.cmake)
 include(test_solution.cmake)
 include(test_utility.cmake)
+include(test_utility_graph.cmake)
 include(test_utility_json.cmake)
 include(test_utility_ucb1.cmake)
 include(test_utility_sparse.cmake)
