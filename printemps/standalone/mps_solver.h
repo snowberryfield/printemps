@@ -13,6 +13,7 @@ struct MPSSolverConstant {
     static constexpr bool DEFAULT_ACCEPT_CONTINUOUS_VARIABLES      = false;
     static constexpr bool DEFAULT_EXTRACT_FLIPPABLE_VARIABLE_PAIRS = false;
     static constexpr bool DEFAULT_INCLUDE_MPS_LOADING_TIME         = false;
+    static constexpr bool DEFAULT_EXPORT_JSON_INSTANCE             = false;
 };
 
 /*****************************************************************************/
@@ -29,6 +30,7 @@ class MPSSolver {
     bool        m_accept_continuous_variables;
     bool        m_extract_flippable_variable_pairs;
     bool        m_include_mps_loading_time;
+    bool        m_export_json_instance;
 
     printemps::model::IPModel m_model;
     printemps::option::Option m_option;
@@ -37,6 +39,12 @@ class MPSSolver {
 
     /*************************************************************************/
     inline void print_usage(void) const {
+        std::cout << std::endl;
+        std::cout << "PRINTEMPS " + constant::VERSION + " (" +
+                         constant::PROJECT_URL + ")"
+                  << std::endl;
+        std::cout << std::endl;
+
         std::cout << "Usage: ./mps_solver.exe "
                   << "[-p OPTION_FILE_NAME] "
                   << "[-i INITIAL_SOLUTION_FILE_NAME] "
@@ -47,6 +55,8 @@ class MPSSolver {
                   << "[-c MINIMUM_COMMON_ELEMENT] "
                   << "[--accept-continuous] "
                   << "[--extract-flippable-variable-pairs] "
+                  << "[--include-mps-loading-time] "
+                  << "[--export-json-instance] "
                   << "mps_file" << std::endl;
         std::cout << std::endl;
         std::cout  //
@@ -85,6 +95,14 @@ class MPSSolver {
             << "  --extract-flippable-variable-pairs: Extract 2-flippable "
                "variable pairs."
             << std::endl;
+        std::cout  //
+            << "  --include-mps-loading-time: Include MPS file loading time in "
+               "the calculation time. "
+            << std::endl;
+        std::cout  //
+            << "  --export-json-instance: Export the target instance as JSON "
+               "format."
+            << std::endl;
     }
 
    public:
@@ -116,6 +134,8 @@ class MPSSolver {
             MPSSolverConstant::DEFAULT_EXTRACT_FLIPPABLE_VARIABLE_PAIRS;
         m_include_mps_loading_time =
             MPSSolverConstant::DEFAULT_INCLUDE_MPS_LOADING_TIME;
+        m_export_json_instance =
+            MPSSolverConstant::DEFAULT_EXPORT_JSON_INSTANCE;
 
         m_model.initialize();
         m_option.initialize();
@@ -153,8 +173,11 @@ class MPSSolver {
             } else if (args[i] == "--extract-flippable-variable-pairs") {
                 m_extract_flippable_variable_pairs = true;
                 i++;
-            } else if (args[i] == "--include_mps_loading_time") {
+            } else if (args[i] == "--include-mps-loading-time") {
                 m_include_mps_loading_time = true;
+                i++;
+            } else if (args[i] == "--export-json-instance") {
+                m_export_json_instance = true;
                 i++;
             } else {
                 m_mps_file_name = args[i];
@@ -304,6 +327,10 @@ class MPSSolver {
         if (m_option.output.is_enabled_store_feasible_solutions) {
             result.feasible_solution_archive.write_solutions_json(
                 "feasible.json");
+        }
+
+        if (m_export_json_instance) {
+            m_model.write_json(m_model.name() + ".json");
         }
     }
 
