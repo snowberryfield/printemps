@@ -13,7 +13,6 @@ if(${CMAKE_BUILD_TYPE} STREQUAL "Release")
         -O3
         -Wextra
         -Wno-error=missing-field-initializers
-        -Wno-deprecated-copy
         -pthread
     )
 else() # Debug

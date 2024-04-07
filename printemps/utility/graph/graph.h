@@ -97,12 +97,11 @@ class Graph {
             edge_ptrs.push_back(&edge);
         }
 
-        std::stable_sort(edge_ptrs.begin(), edge_ptrs.end(),
-                         [this](const auto &a_EDGE_PTR_FIRST,
-                                const auto &a_EDGE_PTR_SECOND) {
-                             return a_EDGE_PTR_FIRST->weight() <
-                                    a_EDGE_PTR_SECOND->weight();
-                         });
+        std::stable_sort(
+            edge_ptrs.begin(), edge_ptrs.end(),
+            [](const auto &a_EDGE_PTR_FIRST, const auto &a_EDGE_PTR_SECOND) {
+                return a_EDGE_PTR_FIRST->weight() < a_EDGE_PTR_SECOND->weight();
+            });
 
         std::unordered_set<T> total_node_keys;
         for (const auto &node : m_nodes) {

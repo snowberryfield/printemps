@@ -6,6 +6,7 @@
 #ifndef PRINTEMPS_STD_H__
 #define PRINTEMPS_STD_H__
 
+#include <array>
 #include <algorithm>
 #include <any>
 #include <cctype>
