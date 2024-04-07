@@ -24,7 +24,7 @@ class LagrangeDualCoreStateManager {
         model::Model<T_Variable, T_Expression>* a_model_ptr,         //
         GlobalState<T_Variable, T_Expression>*  a_global_state_ptr,  //
         const option::Option&                   a_OPTION) {
-        this->setup(a_model_ptr, m_global_state_ptr, a_OPTION);
+        this->setup(a_model_ptr, a_global_state_ptr, a_OPTION);
     }
 
     /*************************************************************************/
