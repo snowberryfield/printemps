@@ -35,8 +35,9 @@ struct Status {
 
     double averaged_inner_iteration_speed;
     double averaged_move_evaluation_speed;
-    double averaged_number_of_threads_evaluation;
-    double averaged_number_of_threads_neighborhood_update;
+
+    double averaged_number_of_threads_move_update;
+    double averaged_number_of_threads_move_evaluation;
 
     std::unordered_map<std::string, multi_array::ValueProxy<double>>
         penalty_coefficients;
@@ -74,10 +75,10 @@ struct Status {
         this->number_of_tabu_search_loops        = 0;
         this->number_of_evaluated_moves          = 0;
 
-        this->averaged_inner_iteration_speed                 = 0.0;
-        this->averaged_move_evaluation_speed                 = 0.0;
-        this->averaged_number_of_threads_evaluation          = 0.0;
-        this->averaged_number_of_threads_neighborhood_update = 0.0;
+        this->averaged_inner_iteration_speed             = 0.0;
+        this->averaged_move_evaluation_speed             = 0.0;
+        this->averaged_number_of_threads_move_update     = 0.0;
+        this->averaged_number_of_threads_move_evaluation = 0.0;
 
         this->penalty_coefficients.clear();
         this->update_counts.clear();
@@ -121,11 +122,10 @@ struct Status {
             TABU_SEARCH_RESULT.state.averaged_inner_iteration_speed;
         this->averaged_move_evaluation_speed =
             TABU_SEARCH_RESULT.state.averaged_move_evaluation_speed;
-        this->averaged_number_of_threads_neighborhood_update =
-            TABU_SEARCH_RESULT.state
-                .averaged_number_of_threads_neighborhood_update;
-        this->averaged_number_of_threads_evaluation =
-            TABU_SEARCH_RESULT.state.averaged_number_of_threads_evaluation;
+        this->averaged_number_of_threads_move_update =
+            TABU_SEARCH_RESULT.state.averaged_number_of_threads_move_update;
+        this->averaged_number_of_threads_move_evaluation =
+            TABU_SEARCH_RESULT.state.averaged_number_of_threads_move_evaluation;
 
         this->penalty_coefficients =
             a_solver_ptr->export_named_penalty_coefficients();
@@ -203,13 +203,13 @@ struct Status {
             "averaged_move_evaluation_speed",  //
             this->averaged_move_evaluation_speed);
 
-        a_object->emplace_back(                                //
-            "averaged_number_of_threads_neighborhood_update",  //
-            this->averaged_number_of_threads_neighborhood_update);
+        a_object->emplace_back(                        //
+            "averaged_number_of_threads_move_update",  //
+            this->averaged_number_of_threads_move_update);
 
-        a_object->emplace_back(                       //
-            "averaged_number_of_threads_evaluation",  //
-            this->averaged_number_of_threads_evaluation);
+        a_object->emplace_back(                            //
+            "averaged_number_of_threads_move_evaluation",  //
+            this->averaged_number_of_threads_move_evaluation);
 
         const auto &PROBLEM_SIZE_REDUCER =
             this->model_ptr->problem_size_reducer();

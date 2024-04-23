@@ -194,17 +194,17 @@ class TabuSearchController
 
         /**
          * Print the state of the parallelization controller summary
-         * (neighborhood update).
+         * (move update).
          */
 #ifdef _OPENMP
-        if (this->m_option.parallel.is_enabled_parallel_neighborhood_update &&
+        if (this->m_option.parallel.is_enabled_move_update_parallelization &&
             this->m_option.parallel
-                .is_enabled_automatic_neighborhood_update_parallelization) {
+                .is_enabled_automatic_move_update_parallelization) {
             utility::print_dot_line(a_IS_ENABLED_PRINT);
             utility::print(  //
-                "# Parallelization Controller Summary (Neighborhood Update)",
+                "# Parallelization Controller Summary (Move Update)",
                 a_IS_ENABLED_PRINT);
-            this->print_neighborhood_update_parallelization_controller(
+            this->print_parallelization_controller_move_update(
                 a_IS_ENABLED_PRINT);
         }
 #endif
@@ -214,14 +214,15 @@ class TabuSearchController
          * (move evaluation).
          */
 #ifdef _OPENMP
-        if (this->m_option.parallel.is_enabled_parallel_evaluation &&
+        if (this->m_option.parallel
+                .is_enabled_move_evaluation_parallelization &&
             this->m_option.parallel
-                .is_enabled_automatic_evaluation_parallelization) {
+                .is_enabled_automatic_move_evaluation_parallelization) {
             utility::print_dot_line(a_IS_ENABLED_PRINT);
             utility::print(  //
                 "# Parallelization Controller Summary (Move Evaluation)",
                 a_IS_ENABLED_PRINT);
-            this->print_evaluation_parallelization_controller(
+            this->print_parallelization_controller_move_evaluation(
                 a_IS_ENABLED_PRINT);
         }
 #endif
@@ -407,9 +408,9 @@ class TabuSearchController
             a_IS_ENABLED_PRINT);
         for (const auto& solution : LOCALLY_OPTIMAL_SOLUTIONS) {
             utility::print_info(  //
-                " -- obj.: " +
+                " -- Obj.: " +
                     utility::to_string(solution.first.objective, "%.3e,") +
-                    " viol: " +
+                    " Viol: " +
                     utility::to_string(solution.first.total_violation,
                                        "%.3e,") +
                     " L0-dist.: " + utility::to_string(solution.second, "%d"),
@@ -418,16 +419,14 @@ class TabuSearchController
     }
 
     /*************************************************************************/
-    inline void print_neighborhood_update_parallelization_controller(
+    inline void print_parallelization_controller_move_update(
         const bool a_IS_ENABLED_PRINT) const {
-        const auto& STATE = m_state_manager.state();
-        const auto& CONTROLLER =
-            STATE.neighborhood_update_parallelization_controller;
+        const auto& STATE      = m_state_manager.state();
+        const auto& CONTROLLER = STATE.parallelization_controller_move_update;
 
         utility::print_message(  //
-            "The state of the parallelization controller for neighborhood "
-            "update are as follows ('*' denotes the selected option for the "
-            "next loop):",
+            "The state of the parallelization controller for move update are "
+            "as follows ('*' denotes the selected option for the next loop):",
             a_IS_ENABLED_PRINT);
 
         for (const auto& action : CONTROLLER.actions()) {
@@ -449,17 +448,17 @@ class TabuSearchController
 
         utility::print_info(  //
             " -- Averaged number of threads: " +
-                utility::to_string(
-                    STATE.averaged_number_of_threads_neighborhood_update,
-                    "%.3e"),
+                utility::to_string(STATE.averaged_number_of_threads_move_update,
+                                   "%.3e"),
             a_IS_ENABLED_PRINT);
     }
 
     /*************************************************************************/
-    inline void print_evaluation_parallelization_controller(
+    inline void print_parallelization_controller_move_evaluation(
         const bool a_IS_ENABLED_PRINT) const {
-        const auto& STATE      = m_state_manager.state();
-        const auto& CONTROLLER = STATE.evaluation_parallelization_controller;
+        const auto& STATE = m_state_manager.state();
+        const auto& CONTROLLER =
+            STATE.parallelization_controller_move_evaluation;
 
         utility::print_message(  //
             "The state of the parallelization controller for move evaluation "
@@ -486,8 +485,8 @@ class TabuSearchController
 
         utility::print_info(  //
             " -- Averaged number of threads: " +
-                utility::to_string(STATE.averaged_number_of_threads_evaluation,
-                                   "%.3e"),
+                utility::to_string(
+                    STATE.averaged_number_of_threads_move_evaluation, "%.3e"),
             a_IS_ENABLED_PRINT);
     }
 

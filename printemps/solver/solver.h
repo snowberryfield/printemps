@@ -329,18 +329,19 @@ class Solver {
             max_number_of_threads = omp_get_max_threads();
         }
 
-        if (m_option.parallel.number_of_threads_evaluation <= 0) {
-            m_option.parallel.number_of_threads_evaluation =
+        if (m_option.parallel.number_of_threads_move_update <= 0) {
+            m_option.parallel.number_of_threads_move_update =
                 max_number_of_threads;
         }
 
-        if (m_option.parallel.number_of_threads_neighborhood_update <= 0) {
-            m_option.parallel.number_of_threads_neighborhood_update =
+        if (m_option.parallel.number_of_threads_move_evaluation <= 0) {
+            m_option.parallel.number_of_threads_move_evaluation =
                 max_number_of_threads;
         }
+
 #else
-        m_option.parallel.number_of_threads_evaluation          = 1;
-        m_option.parallel.number_of_threads_neighborhood_update = 1;
+        m_option.parallel.number_of_threads_move_update     = 1;
+        m_option.parallel.number_of_threads_move_evaluation = 1;
 #endif
 
         /**

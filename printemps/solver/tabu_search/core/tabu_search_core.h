@@ -133,7 +133,7 @@ class TabuSearchCore {
     inline bool satisfy_early_stop_terminate_condition(void) {
         const auto& STATE = m_state_manager.state();
 
-        if (STATE.local_augmented_incumbent_update_count >
+        if (STATE.number_of_ineffective_updates >
             m_option.tabu_search.pruning_rate_threshold *
                 m_option.tabu_search.iteration_max) {
             m_state_manager.set_termination_status(
@@ -252,8 +252,8 @@ class TabuSearchCore {
                 accept_all,                     //
                 accept_objective_improvable,    //
                 accept_feasibility_improvable,  //
-                m_option.parallel.is_enabled_parallel_neighborhood_update,
-                m_option.parallel.number_of_threads_neighborhood_update);
+                m_option.parallel.is_enabled_move_update_parallelization,
+                m_option.parallel.number_of_threads_move_update);
 
             m_state_manager.set_number_of_moves(
                 m_model_ptr->neighborhood().move_ptrs().size());
@@ -339,14 +339,14 @@ class TabuSearchCore {
 
         const double START_TIME = a_time_keeper_ptr->clock();
         m_model_ptr->neighborhood().update_moves(
-            accept_all,                                                 //
-            accept_objective_improvable,                                //
-            accept_feasibility_improvable,                              //
-            m_option.parallel.is_enabled_parallel_neighborhood_update,  //
-            m_option.parallel.number_of_threads_neighborhood_update);
+            accept_all,                                                //
+            accept_objective_improvable,                               //
+            accept_feasibility_improvable,                             //
+            m_option.parallel.is_enabled_move_update_parallelization,  //
+            m_option.parallel.number_of_threads_move_update);
         const double END_TIME = a_time_keeper_ptr->clock();
 
-        m_state_manager.update_move_updating_statistics(
+        m_state_manager.update_move_update_statistics(
             m_model_ptr->neighborhood().number_of_updated_moves(),
             END_TIME - START_TIME);
 
@@ -840,9 +840,10 @@ class TabuSearchCore {
             const auto TABU_TENURE            = STATE.tabu_tenure;
             const auto DURATION               = ITERATION - TABU_TENURE;
 #ifdef _OPENMP
-#pragma omp parallel for if (m_option.parallel.is_enabled_parallel_evaluation) \
-    schedule(static)                                                           \
-        num_threads(m_option.parallel.number_of_threads_evaluation)
+#pragma omp parallel for if (m_option.parallel                                \
+                                 .is_enabled_move_evaluation_parallelization) \
+    schedule(static)                                                          \
+        num_threads(m_option.parallel.number_of_threads_move_evaluation)
 #endif
             for (auto i = 0; i < NUMBER_OF_MOVES; i++) {
                 /**
@@ -906,7 +907,7 @@ class TabuSearchCore {
             }
             const double END_TIME = time_keeper.clock();
 
-            m_state_manager.update_move_evaluating_statistics(
+            m_state_manager.update_move_evaluation_statistics(
                 NUMBER_OF_MOVES, END_TIME - START_TIME);
 
             /**

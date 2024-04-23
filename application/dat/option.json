@@ -9,8 +9,8 @@
         "initial_penalty_coefficient": 1E7
     },
     "parallel": {
-        "is_enabled_parallel_evaluation": true,
-        "is_enabled_parallel_neighborhood_update": true
+        "is_enabled_move_evaluation_parallelization": true,
+        "is_enabled_move_update_parallelization": true
     },
     "preprocess": {
         "is_enabled_presolve": true,

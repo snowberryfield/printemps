@@ -32,13 +32,14 @@ struct TabuSearchCoreState {
     utility::Range<double> local_penalty_range;
 
     int number_of_effective_updates;
+    int number_of_ineffective_updates;
+    int number_of_moves;
 
-    int    number_of_moves;
-    long   number_of_evaluated_moves;
-    double elapsed_time_for_evaluating_moves;
+    long number_of_evaluated_moves;
+    long number_of_updated_moves;
 
-    long   number_of_updated_moves;
-    double elapsed_time_for_updating_moves;
+    double elapsed_time_for_move_evaluation;
+    double elapsed_time_for_move_update;
 
     bool is_few_permissible_neighborhood;
     bool is_found_new_feasible_solution;
@@ -48,7 +49,6 @@ struct TabuSearchCoreState {
     int last_local_augmented_incumbent_update_iteration;
     int last_global_augmented_incumbent_update_iteration;
     int last_feasible_incumbent_update_iteration;
-    int local_augmented_incumbent_update_count;
 
     int number_of_all_neighborhoods;
     int number_of_feasible_neighborhoods;
@@ -100,14 +100,15 @@ struct TabuSearchCoreState {
         this->global_augmented_objective_range.initialize();
         this->local_penalty_range.initialize();
 
-        this->number_of_effective_updates = 0;
+        this->number_of_effective_updates   = 0;
+        this->number_of_ineffective_updates = 0;
 
-        this->number_of_moves                   = 0;
-        this->number_of_evaluated_moves         = 0;
-        this->elapsed_time_for_evaluating_moves = 0.0;
+        this->number_of_moves           = 0;
+        this->number_of_evaluated_moves = 0;
+        this->number_of_updated_moves   = 0;
 
-        this->number_of_updated_moves         = 0;
-        this->elapsed_time_for_updating_moves = 0.0;
+        this->elapsed_time_for_move_evaluation = 0.0;
+        this->elapsed_time_for_move_update     = 0.0;
 
         this->is_few_permissible_neighborhood = false;
         this->is_found_new_feasible_solution  = false;
@@ -117,7 +118,6 @@ struct TabuSearchCoreState {
         this->last_local_augmented_incumbent_update_iteration  = 0;
         this->last_global_augmented_incumbent_update_iteration = 0;
         this->last_feasible_incumbent_update_iteration         = 0;
-        this->local_augmented_incumbent_update_count           = 0;
 
         this->number_of_all_neighborhoods         = 0;
         this->number_of_feasible_neighborhoods    = 0;
