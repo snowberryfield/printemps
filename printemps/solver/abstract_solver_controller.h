@@ -73,6 +73,8 @@ class AbstractSolverController {
                 m_model_ptr->variable_type_reference().binary_variable_ptrs);
             m_model_ptr->neighborhood().integer().setup(
                 m_model_ptr->variable_type_reference().integer_variable_ptrs);
+            m_model_ptr
+                ->setup_positive_and_negative_coefficient_mutable_variable_ptrs();
         }
     }
 

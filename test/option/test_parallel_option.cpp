@@ -23,43 +23,41 @@ class TestParallelOption : public ::testing::Test {
 TEST_F(TestParallelOption, initialize) {
     using namespace printemps::option;
     ParallelOption option;
-    EXPECT_EQ(                                                           //
-        ParallelOptionConstant::DEFAULT_IS_ENABLED_PARALLEL_EVALUATION,  //
-        option.is_enabled_parallel_evaluation);
+    EXPECT_EQ(  //
+        ParallelOptionConstant::
+            DEFAULT_IS_ENABLED_MOVE_UPDATE_PARALLELIZATION,  //
+        option.is_enabled_move_update_parallelization);
 
     EXPECT_EQ(  //
         ParallelOptionConstant::
-            DEFAULT_IS_ENABLED_PARALLEL_NEIGHBORHOOD_UPDATE,  //
-        option.is_enabled_parallel_neighborhood_update);
+            DEFAULT_IS_ENABLED_MOVE_EVALUATION_PARALLELIZATION,  //
+        option.is_enabled_move_evaluation_parallelization);
 
     EXPECT_EQ(  //
         ParallelOptionConstant::
-            DEFAULT_IS_ENABLED_AUTOMATIC_EVALUATION_PARALLELIZATION,  //
-        option.is_enabled_automatic_evaluation_parallelization);
+            DEFAULT_IS_ENABLED_AUTOMATIC_MOVE_UPDATE_PARALLELIZATION,  //
+        option.is_enabled_automatic_move_update_parallelization);
 
     EXPECT_EQ(  //
         ParallelOptionConstant::
-            DEFAULT_IS_ENABLED_AUTOMATIC_NEIGHBORHOOD_UPDATE_PARALLELIZATION,  //
-        option.is_enabled_automatic_neighborhood_update_parallelization);
+            DEFAULT_IS_ENABLED_AUTOMATIC_MOVE_EVALUATION_PARALLELIZATION,  //
+        option.is_enabled_automatic_move_evaluation_parallelization);
 
-    EXPECT_EQ(  //
-        ParallelOptionConstant::
-            DEFAULT_EVALUATION_PARALLELIZATION_DECAY_FACTOR,  //
-        option.evaluation_parallelization_decay_factor);
-
-    EXPECT_EQ(  //
-        ParallelOptionConstant::
-            DEFAULT_NEIGHBORHOOD_UPDATE_PARALLELIZATION_DECAY_FACTOR,  //
-        option.neighborhood_update_parallelization_decay_factor);
+    EXPECT_EQ(                                                     //
+        ParallelOptionConstant::DEFAULT_DECAY_FACTOR_MOVE_UPDATE,  //
+        option.decay_factor_move_update);
 
     EXPECT_EQ(                                                         //
-        ParallelOptionConstant::DEFAULT_NUMBER_OF_THREADS_EVALUATION,  //
-        option.number_of_threads_evaluation);
+        ParallelOptionConstant::DEFAULT_DECAY_FACTOR_MOVE_EVALUATION,  //
+        option.decay_factor_move_evaluation);
 
-    EXPECT_EQ(  //
-        ParallelOptionConstant::
-            DEFAULT_NUMBER_OF_THREADS_NEIGHBORHOOD_UPDATE,  //
-        option.number_of_threads_neighborhood_update);
+    EXPECT_EQ(                                                          //
+        ParallelOptionConstant::DEFAULT_NUMBER_OF_THREADS_MOVE_UPDATE,  //
+        option.number_of_threads_move_update);
+
+    EXPECT_EQ(                                                              //
+        ParallelOptionConstant::DEFAULT_NUMBER_OF_THREADS_MOVE_EVALUATION,  //
+        option.number_of_threads_move_evaluation);
 }
 
 }  // namespace

@@ -314,6 +314,18 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
+    inline void set_is_feasibility_improvable_if_has_lower_bound_margin(
+        void) noexcept {
+        m_is_feasibility_improvable |= m_has_lower_bound_margin;
+    }
+
+    /*************************************************************************/
+    inline void set_is_feasibility_improvable_if_has_upper_bound_margin(
+        void) noexcept {
+        m_is_feasibility_improvable |= m_has_upper_bound_margin;
+    }
+
+    /*************************************************************************/
     inline bool is_objective_improvable(void) const noexcept {
         return m_is_objective_improvable;
     }

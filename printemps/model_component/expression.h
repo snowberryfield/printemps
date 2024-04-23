@@ -61,6 +61,18 @@ class Expression : public multi_array::AbstractMultiArrayElement {
     std::unordered_map<Variable<T_Variable, T_Expression> *, T_Expression>
         m_sensitivities;
 
+    std::unordered_map<Variable<T_Variable, T_Expression> *, T_Expression>
+        m_mutable_variable_sensitivities;
+    std::unordered_map<Variable<T_Variable, T_Expression> *, T_Expression>
+        m_positive_coefficient_mutable_variable_sensitivities;
+    std::unordered_map<Variable<T_Variable, T_Expression> *, T_Expression>
+        m_negative_coefficient_mutable_variable_sensitivities;
+
+    std::vector<Variable<T_Variable, T_Expression> *>
+        m_positive_coefficient_mutable_variable_ptrs;
+    std::vector<Variable<T_Variable, T_Expression> *>
+        m_negative_coefficient_mutable_variable_ptrs;
+
     utility::FixedSizeHashMap<Variable<T_Variable, T_Expression> *,
                               T_Expression>
         m_fixed_sensitivities;
@@ -138,6 +150,11 @@ class Expression : public multi_array::AbstractMultiArrayElement {
         m_value          = 0;
         m_is_enabled     = true;
         m_sensitivities.clear();
+        m_mutable_variable_sensitivities.clear();
+        m_positive_coefficient_mutable_variable_sensitivities.clear();
+        m_negative_coefficient_mutable_variable_sensitivities.clear();
+        m_positive_coefficient_mutable_variable_ptrs.clear();
+        m_negative_coefficient_mutable_variable_ptrs.clear();
         m_fixed_sensitivities.initialize();
 
         m_selection_mask = 0;
@@ -163,6 +180,50 @@ class Expression : public multi_array::AbstractMultiArrayElement {
                                     T_Expression>
         &sensitivities(void) const {
         return m_sensitivities;
+    }
+
+    /*************************************************************************/
+    inline void setup_mutable_variable_sensitivities(void) {
+        m_mutable_variable_sensitivities.clear();
+        m_positive_coefficient_mutable_variable_sensitivities.clear();
+        m_negative_coefficient_mutable_variable_sensitivities.clear();
+
+        for (const auto &sensitivity : m_sensitivities) {
+            auto &variable_ptr = sensitivity.first;
+            auto &coefficient  = sensitivity.second;
+            if (variable_ptr->is_fixed()) {
+                continue;
+            }
+            if (sensitivity.second > 0) {
+                m_positive_coefficient_mutable_variable_sensitivities
+                    [variable_ptr] = coefficient;
+
+            } else {
+                m_negative_coefficient_mutable_variable_sensitivities
+                    [variable_ptr] = coefficient;
+            }
+            m_mutable_variable_sensitivities[variable_ptr] = coefficient;
+        }
+    }
+
+    /*************************************************************************/
+    inline void setup_positive_and_negative_coefficient_mutable_variable_ptrs(
+        void) {
+        m_positive_coefficient_mutable_variable_ptrs.clear();
+        m_negative_coefficient_mutable_variable_ptrs.clear();
+
+        for (const auto &sensitivity : m_sensitivities) {
+            if (sensitivity.first->is_fixed()) {
+                continue;
+            }
+            if (sensitivity.second > 0) {
+                m_positive_coefficient_mutable_variable_ptrs.push_back(
+                    sensitivity.first);
+            } else {
+                m_negative_coefficient_mutable_variable_ptrs.push_back(
+                    sensitivity.first);
+            }
+        }
     }
 
     /*************************************************************************/
@@ -349,54 +410,38 @@ class Expression : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline std::unordered_map<
+    inline const std::unordered_map<
         model_component::Variable<T_Variable, T_Expression> *, T_Expression>
-    mutable_variable_sensitivities(void) const {
-        std::unordered_map<
-            model_component::Variable<T_Variable, T_Expression> *, T_Expression>
-            mutable_variable_sensitivities;
-
-        for (const auto &sensitivity : m_sensitivities) {
-            if (!sensitivity.first->is_fixed()) {
-                mutable_variable_sensitivities[sensitivity.first] =
-                    sensitivity.second;
-            }
-        }
-        return mutable_variable_sensitivities;
+        &mutable_variable_sensitivities(void) const {
+        return m_mutable_variable_sensitivities;
     }
 
     /*************************************************************************/
-    inline std::unordered_map<
+    inline const std::unordered_map<
         model_component::Variable<T_Variable, T_Expression> *, T_Expression>
-    positive_mutable_variable_sensitivities(void) const {
-        std::unordered_map<
-            model_component::Variable<T_Variable, T_Expression> *, T_Expression>
-            positive_mutable_variable_sensitivities;
-
-        for (const auto &sensitivity : m_sensitivities) {
-            if (!sensitivity.first->is_fixed() && sensitivity.second > 0) {
-                positive_mutable_variable_sensitivities[sensitivity.first] =
-                    sensitivity.second;
-            }
-        }
-        return positive_mutable_variable_sensitivities;
+        &positive_coefficient_mutable_variable_sensitivities(void) const {
+        return m_positive_coefficient_mutable_variable_sensitivities;
     }
 
     /*************************************************************************/
-    inline std::unordered_map<
+    inline const std::unordered_map<
         model_component::Variable<T_Variable, T_Expression> *, T_Expression>
-    negative_mutable_variable_sensitivities(void) const {
-        std::unordered_map<
-            model_component::Variable<T_Variable, T_Expression> *, T_Expression>
-            negative_mutable_variable_sensitivities;
+        &negative_coefficient_mutable_variable_sensitivities(void) const {
+        return m_negative_coefficient_mutable_variable_sensitivities;
+    }
 
-        for (const auto &sensitivity : m_sensitivities) {
-            if (!sensitivity.first->is_fixed() && sensitivity.second < 0) {
-                negative_mutable_variable_sensitivities[sensitivity.first] =
-                    sensitivity.second;
-            }
-        }
-        return negative_mutable_variable_sensitivities;
+    /*************************************************************************/
+    inline const std::vector<
+        model_component::Variable<T_Variable, T_Expression> *>
+        &positive_coefficient_mutable_variable_ptrs(void) const {
+        return m_positive_coefficient_mutable_variable_ptrs;
+    }
+
+    /*************************************************************************/
+    inline const std::vector<
+        model_component::Variable<T_Variable, T_Expression> *>
+        &negative_coefficient_mutable_variable_ptrs(void) const {
+        return m_negative_coefficient_mutable_variable_ptrs;
     }
 
     /*************************************************************************/
