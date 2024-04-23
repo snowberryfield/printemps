@@ -229,16 +229,18 @@ class ProblemSizeReducer {
             m_is_preprocess ? &m_variable_bound_update_count_in_preprocess
                             : &m_variable_bound_update_count_in_optimization;
 
-        auto mutable_variable_sensitivities =
+        a_constraint_ptr->expression().setup_mutable_variable_sensitivities();
+
+        auto &mutable_variable_sensitivities =
             a_constraint_ptr->expression().mutable_variable_sensitivities();
 
-        auto positive_mutable_variable_sensitivities =
+        auto &positive_coefficient_mutable_variable_sensitivities =
             a_constraint_ptr->expression()
-                .positive_mutable_variable_sensitivities();
+                .positive_coefficient_mutable_variable_sensitivities();
 
-        auto negative_mutable_variable_sensitivities =
+        auto &negative_coefficient_mutable_variable_sensitivities =
             a_constraint_ptr->expression()
-                .negative_mutable_variable_sensitivities();
+                .negative_coefficient_mutable_variable_sensitivities();
 
         double constraint_lower_bound =
             a_constraint_ptr->expression().lower_bound();
@@ -409,7 +411,8 @@ class ProblemSizeReducer {
          * Tighten the lower and upper bounds of the variables based on the
          * bounds of the rest part.
          */
-        for (auto &&sensitivity : positive_mutable_variable_sensitivities) {
+        for (auto &&sensitivity :
+             positive_coefficient_mutable_variable_sensitivities) {
             auto variable_ptr = sensitivity.first;
             auto coefficient  = sensitivity.second;
 
@@ -452,7 +455,8 @@ class ProblemSizeReducer {
             }
         }
 
-        for (auto &&sensitivity : negative_mutable_variable_sensitivities) {
+        for (auto &&sensitivity :
+             negative_coefficient_mutable_variable_sensitivities) {
             auto variable_ptr = sensitivity.first;
             auto coefficient  = sensitivity.second;
 

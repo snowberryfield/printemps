@@ -1252,6 +1252,12 @@ TEST_F(TestModel, setup_fixed_sensitivities) {
 }
 
 /*****************************************************************************/
+TEST_F(TestModel,
+       setup_positive_and_negative_coefficient_mutable_variable_ptrs) {
+    /// This method is tested in test_expression.h
+}
+
+/*****************************************************************************/
 TEST_F(TestModel, export_lp_instance) {
     /// This method is tested in test_expression.h
     model::Model<int, double> model;
@@ -1642,6 +1648,7 @@ TEST_F(TestModel, update_variable_improvability) {
         model.minimize(-x + y);
         model.setup_structure();
         model.setup_fixed_sensitivities(false);
+        model.setup_positive_and_negative_coefficient_mutable_variable_ptrs();
 
         x = -10;
         y = -10;
@@ -1684,6 +1691,7 @@ TEST_F(TestModel, update_variable_improvability) {
         model.minimize(-x + y);
         model.setup_structure();
         model.setup_fixed_sensitivities(false);
+        model.setup_positive_and_negative_coefficient_mutable_variable_ptrs();
 
         x = -10;
         y = -10;
@@ -1726,6 +1734,7 @@ TEST_F(TestModel, update_variable_improvability) {
         model.minimize(-x + y);
         model.setup_structure();
         model.setup_fixed_sensitivities(false);
+        model.setup_positive_and_negative_coefficient_mutable_variable_ptrs();
 
         x = -10;
         y = -10;
@@ -1768,6 +1777,7 @@ TEST_F(TestModel, update_variable_improvability) {
         model.maximize(-x + y);
         model.setup_structure();
         model.setup_fixed_sensitivities(false);
+        model.setup_positive_and_negative_coefficient_mutable_variable_ptrs();
 
         x = -10;
         y = -10;
@@ -1811,6 +1821,7 @@ TEST_F(TestModel, update_variable_improvability) {
         model.maximize(-x + y);
         model.setup_structure();
         model.setup_fixed_sensitivities(false);
+        model.setup_positive_and_negative_coefficient_mutable_variable_ptrs();
 
         x = -10;
         y = -10;
@@ -1854,6 +1865,7 @@ TEST_F(TestModel, update_variable_improvability) {
         model.maximize(-x + y);
         model.setup_structure();
         model.setup_fixed_sensitivities(false);
+        model.setup_positive_and_negative_coefficient_mutable_variable_ptrs();
 
         x = -10;
         y = -10;

@@ -819,6 +819,12 @@ class Model {
         this->setup_fixed_sensitivities(a_IS_ENABLED_PRINT);
 
         /**
+         * Set up the pointers to mutable variable with positive and negative
+         * coefficients for efficient improvability screening.
+         */
+        this->setup_positive_and_negative_coefficient_mutable_variable_ptrs();
+
+        /**
          * Set up the constraint sensitivities of variables.
          */
         this->setup_variable_constraint_sensitivities();
@@ -1406,6 +1412,26 @@ class Model {
          * build in their own setup() methods.
          */
         utility::print_message("Done.", a_IS_ENABLED_PRINT);
+    }
+
+    /*************************************************************************/
+    inline void setup_positive_and_negative_coefficient_mutable_variable_ptrs(
+        void) {
+        for (auto &&proxy : m_expression_proxies) {
+            for (auto &&expression : proxy.flat_indexed_expressions()) {
+                expression
+                    .setup_positive_and_negative_coefficient_mutable_variable_ptrs();
+            }
+        }
+
+        for (auto &&proxy : m_constraint_proxies) {
+            for (auto &&constraint : proxy.flat_indexed_constraints()) {
+                constraint.expression()
+                    .setup_positive_and_negative_coefficient_mutable_variable_ptrs();
+            }
+        }
+        m_objective.expression()
+            .setup_positive_and_negative_coefficient_mutable_variable_ptrs();
     }
 
     /*************************************************************************/
@@ -2561,8 +2587,7 @@ class Model {
     /*************************************************************************/
     inline void update_variable_feasibility_improvabilities(
         const std::vector<model_component::Constraint<T_Variable, T_Expression>
-                              *> &a_CONSTRAINT_PTRS) const noexcept {
-        double coefficient = 0.0;
+                              *> &a_CONSTRAINT_PTRS) {
         for (const auto &constraint_ptr : a_CONSTRAINT_PTRS) {
             if (constraint_ptr->is_feasible()) {
                 continue;
@@ -2572,24 +2597,36 @@ class Model {
                 continue;
             }
 
-            for (const auto &sensitivity :
-                 constraint_ptr->expression().sensitivities()) {
-                if (sensitivity.first->is_feasibility_improvable() ||
-                    sensitivity.first->is_fixed()) {
-                    continue;
+            const bool IS_POSITIVE_CONSTRAINT_VALUE =
+                constraint_ptr->constraint_value() > 0;
+
+            if (IS_POSITIVE_CONSTRAINT_VALUE) {
+                for (const auto &variable_ptr :
+                     constraint_ptr->expression()
+                         .positive_coefficient_mutable_variable_ptrs()) {
+                    variable_ptr
+                        ->set_is_feasibility_improvable_if_has_lower_bound_margin();
                 }
 
-                coefficient =
-                    (constraint_ptr->constraint_value() > constant::EPSILON &&
-                     constraint_ptr->is_less_or_equal())
-                        ? sensitivity.second
-                        : -sensitivity.second;
+                for (const auto &variable_ptr :
+                     constraint_ptr->expression()
+                         .negative_coefficient_mutable_variable_ptrs()) {
+                    variable_ptr
+                        ->set_is_feasibility_improvable_if_has_upper_bound_margin();
+                }
+            } else {
+                for (const auto &variable_ptr :
+                     constraint_ptr->expression()
+                         .negative_coefficient_mutable_variable_ptrs()) {
+                    variable_ptr
+                        ->set_is_feasibility_improvable_if_has_lower_bound_margin();
+                }
 
-                if ((coefficient > 0 &&
-                     sensitivity.first->has_lower_bound_margin()) ||
-                    (coefficient < 0 &&
-                     sensitivity.first->has_upper_bound_margin())) {
-                    sensitivity.first->set_is_feasibility_improvable_or(true);
+                for (const auto &variable_ptr :
+                     constraint_ptr->expression()
+                         .positive_coefficient_mutable_variable_ptrs()) {
+                    variable_ptr
+                        ->set_is_feasibility_improvable_if_has_upper_bound_margin();
                 }
             }
         }
@@ -2736,9 +2773,9 @@ class Model {
                                sensitivity.second * variable_value_diff;
 
             if (constraint_ptr->is_less_or_equal()) {
-                violation_diff = std::max(constraint_value, 0.0) -
-                                 constraint_ptr->positive_part();
-                total_violation += violation_diff;
+                total_violation +=
+                    (violation_diff = std::max(constraint_value, 0.0) -
+                                      constraint_ptr->positive_part());
 
                 local_penalty +=
                     violation_diff *
@@ -2746,9 +2783,9 @@ class Model {
             }
 
             if (constraint_ptr->is_greater_or_equal()) {
-                violation_diff = std::min(constraint_value, 0.0) +
-                                 constraint_ptr->negative_part();
-                total_violation -= violation_diff;
+                total_violation -=
+                    (violation_diff = std::min(constraint_value, 0.0) +
+                                      constraint_ptr->negative_part());
 
                 local_penalty -=
                     violation_diff *
@@ -2837,9 +2874,10 @@ class Model {
                             sensitivity.second * variable_value_diff;
 
                         if (constraint_ptr->is_less_or_equal()) {
-                            violation_diff = std::max(constraint_value, 0.0) -
-                                             constraint_ptr->positive_part();
-                            total_violation += violation_diff;
+                            total_violation +=
+                                (violation_diff =
+                                     std::max(constraint_value, 0.0) -
+                                     constraint_ptr->positive_part());
 
                             local_penalty +=
                                 violation_diff *
@@ -2848,9 +2886,10 @@ class Model {
                         }
 
                         if (constraint_ptr->is_greater_or_equal()) {
-                            violation_diff = std::min(constraint_value, 0.0) +
-                                             constraint_ptr->negative_part();
-                            total_violation -= violation_diff;
+                            total_violation -=
+                                (violation_diff =
+                                     std::min(constraint_value, 0.0) +
+                                     constraint_ptr->negative_part());
 
                             local_penalty -=
                                 violation_diff *

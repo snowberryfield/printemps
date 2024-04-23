@@ -83,6 +83,82 @@ TEST_F(TestExpression, sensitivities) {
 }
 
 /*****************************************************************************/
+TEST_F(TestExpression, setup_mutable_variable_sensitivities) {
+    auto expression =
+        model_component::Expression<int, double>::create_instance();
+
+    auto variable_0 = model_component::Variable<int, double>::create_instance();
+    auto variable_1 = model_component::Variable<int, double>::create_instance();
+    auto variable_2 = model_component::Variable<int, double>::create_instance();
+    auto variable_3 = model_component::Variable<int, double>::create_instance();
+    auto variable_4 = model_component::Variable<int, double>::create_instance();
+    auto variable_5 = model_component::Variable<int, double>::create_instance();
+
+    expression = variable_0 - variable_1 - variable_2 + variable_3 +
+                 variable_4 + variable_5;
+    variable_3.fix_by(1);
+    variable_4.fix_by(1);
+    variable_5.fix_by(1);
+
+    expression.setup_mutable_variable_sensitivities();
+
+    auto mutable_variable_sensitivities =
+        expression.mutable_variable_sensitivities();
+
+    auto positive_mutable_variable_sensitivities =
+        expression.positive_coefficient_mutable_variable_sensitivities();
+
+    auto negative_mutable_variable_sensitivities =
+        expression.negative_coefficient_mutable_variable_sensitivities();
+
+    EXPECT_EQ(3, static_cast<int>(mutable_variable_sensitivities.size()));
+    EXPECT_EQ(1,
+              static_cast<int>(positive_mutable_variable_sensitivities.size()));
+    EXPECT_TRUE(positive_mutable_variable_sensitivities.find(&variable_0) !=
+                positive_mutable_variable_sensitivities.end());
+
+    EXPECT_EQ(2,
+              static_cast<int>(negative_mutable_variable_sensitivities.size()));
+    EXPECT_TRUE(negative_mutable_variable_sensitivities.find(&variable_1) !=
+                negative_mutable_variable_sensitivities.end());
+    EXPECT_TRUE(negative_mutable_variable_sensitivities.find(&variable_2) !=
+                negative_mutable_variable_sensitivities.end());
+}
+
+/*****************************************************************************/
+TEST_F(TestExpression,
+       setup_positive_and_negative_coefficient_mutable_variable_ptrs) {
+    auto expression =
+        model_component::Expression<int, double>::create_instance();
+
+    auto variable_0 = model_component::Variable<int, double>::create_instance();
+    auto variable_1 = model_component::Variable<int, double>::create_instance();
+    auto variable_2 = model_component::Variable<int, double>::create_instance();
+    auto variable_3 = model_component::Variable<int, double>::create_instance();
+    auto variable_4 = model_component::Variable<int, double>::create_instance();
+    auto variable_5 = model_component::Variable<int, double>::create_instance();
+
+    expression = variable_0 - variable_1 - variable_2 + variable_3 +
+                 variable_4 + variable_5;
+    variable_3.fix_by(1);
+    variable_4.fix_by(1);
+    variable_5.fix_by(1);
+
+    expression.setup_positive_and_negative_coefficient_mutable_variable_ptrs();
+
+    auto positive_coefficient_mutable_variable_ptrs =
+        expression.positive_coefficient_mutable_variable_ptrs();
+
+    auto negative_coefficient_mutable_variable_ptrs =
+        expression.negative_coefficient_mutable_variable_ptrs();
+
+    EXPECT_EQ(
+        1, static_cast<int>(positive_coefficient_mutable_variable_ptrs.size()));
+    EXPECT_EQ(
+        2, static_cast<int>(negative_coefficient_mutable_variable_ptrs.size()));
+}
+
+/*****************************************************************************/
 TEST_F(TestExpression, setup_fixed_sensitivities) {
     /// This method is tested in test_fixed_size_hash_map().
 }
@@ -400,54 +476,24 @@ TEST_F(TestExpression, fixed_term_value) {
 }
 
 /*****************************************************************************/
-TEST_F(TestExpression, mutable_variable_sensitivities) {
-    auto expression =
-        model_component::Expression<int, double>::create_instance();
-
-    auto variable_0 = model_component::Variable<int, double>::create_instance();
-    auto variable_1 = model_component::Variable<int, double>::create_instance();
-    auto variable_2 = model_component::Variable<int, double>::create_instance();
-    auto variable_3 = model_component::Variable<int, double>::create_instance();
-    auto variable_4 = model_component::Variable<int, double>::create_instance();
-    auto variable_5 = model_component::Variable<int, double>::create_instance();
-
-    expression = variable_0 - variable_1 - variable_2 + variable_3 +
-                 variable_4 + variable_5;
-    variable_3.fix_by(1);
-    variable_4.fix_by(1);
-    variable_5.fix_by(1);
-
-    auto mutable_variable_sensitivities =
-        expression.mutable_variable_sensitivities();
-
-    auto positive_mutable_variable_sensitivities =
-        expression.positive_mutable_variable_sensitivities();
-
-    auto negative_mutable_variable_sensitivities =
-        expression.negative_mutable_variable_sensitivities();
-
-    EXPECT_EQ(3, static_cast<int>(mutable_variable_sensitivities.size()));
-    EXPECT_EQ(1,
-              static_cast<int>(positive_mutable_variable_sensitivities.size()));
-    EXPECT_TRUE(positive_mutable_variable_sensitivities.find(&variable_0) !=
-                positive_mutable_variable_sensitivities.end());
-
-    EXPECT_EQ(2,
-              static_cast<int>(negative_mutable_variable_sensitivities.size()));
-    EXPECT_TRUE(negative_mutable_variable_sensitivities.find(&variable_1) !=
-                negative_mutable_variable_sensitivities.end());
-    EXPECT_TRUE(negative_mutable_variable_sensitivities.find(&variable_2) !=
-                negative_mutable_variable_sensitivities.end());
+TEST_F(TestExpression, positive_coefficient_mutable_variable_sensitivities) {
+    /// This method is tested in setup_mutable_variable_sensitivities().
 }
 
 /*****************************************************************************/
-TEST_F(TestExpression, positive_mutable_variable_sensitivities) {
-    /// This method is tested in mutable_variable_sensitivities().
+TEST_F(TestExpression, negative_coefficient_mutable_variable_sensitivities) {
+    /// This method is tested in setup_mutable_variable_sensitivities().
+}
+/*****************************************************************************/
+TEST_F(TestExpression, positive_coefficient_mutable_variable_ptrs) {
+    /// This method is tested in
+    /// setup_positive_and_negative_coefficient_mutable_variable_ptrs().
 }
 
 /*****************************************************************************/
-TEST_F(TestExpression, negative_mutable_variable_sensitivities) {
-    /// This method is tested in mutable_variable_sensitivities().
+TEST_F(TestExpression, negative_coefficient_mutable_variable_ptrs) {
+    /// This method is tested in
+    /// setup_positive_and_negative_coefficient_mutable_variable_ptrs().
 }
 
 /*****************************************************************************/
