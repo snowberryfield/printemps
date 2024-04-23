@@ -572,7 +572,7 @@ def create_parallelization_control_chart(trend_data):
 
     fig.line(
         x=trend_data["#iteration"],
-        y=trend_data["averaged_number_of_threads_neighborhood_update"],
+        y=trend_data["averaged_number_of_threads_move_update;"],
         legend_label="Neighborhood Update",
         width=3,
         color=colors[0],
@@ -580,7 +580,7 @@ def create_parallelization_control_chart(trend_data):
 
     fig.line(
         x=trend_data["#iteration"],
-        y=trend_data["averaged_number_of_threads_evaluation"],
+        y=trend_data["averaged_number_of_threads_move_evaluation"],
         legend_label="Evaluation",
         width=3,
         color=colors[1],

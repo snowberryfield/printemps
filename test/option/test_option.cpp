@@ -110,38 +110,39 @@ TEST_F(TestOption, setup) {
             option.penalty.is_enabled_shrink_penalty_coefficient);
 
         /// parallel
-        EXPECT_EQ(  //
-            false,  //
-            option.parallel.is_enabled_parallel_evaluation);
 
         EXPECT_EQ(  //
             false,  //
-            option.parallel.is_enabled_parallel_neighborhood_update);
+            option.parallel.is_enabled_move_update_parallelization);
 
         EXPECT_EQ(  //
             false,  //
-            option.parallel.is_enabled_automatic_evaluation_parallelization);
+            option.parallel.is_enabled_move_evaluation_parallelization);
+
+        EXPECT_EQ(  //
+            false,  //
+            option.parallel.is_enabled_automatic_move_update_parallelization);
 
         EXPECT_EQ(  //
             false,  //
             option.parallel
-                .is_enabled_automatic_neighborhood_update_parallelization);
+                .is_enabled_automatic_move_evaluation_parallelization);
 
         EXPECT_FLOAT_EQ(  //
             0.6,          //
-            option.parallel.evaluation_parallelization_decay_factor);
+            option.parallel.decay_factor_move_update);
 
         EXPECT_FLOAT_EQ(  //
             0.6,          //
-            option.parallel.neighborhood_update_parallelization_decay_factor);
+            option.parallel.decay_factor_move_evaluation);
+
+        EXPECT_EQ(  //
+            -1,     //
+            option.parallel.number_of_threads_move_update);
 
         EXPECT_EQ(  //
             2,      //
-            option.parallel.number_of_threads_evaluation);
-
-        EXPECT_EQ(  //
-            2,      //
-            option.parallel.number_of_threads_neighborhood_update);
+            option.parallel.number_of_threads_move_evaluation);
 
         /// preprocess
         EXPECT_EQ(  //
@@ -655,21 +656,37 @@ TEST_F(TestOption, to_json) {
 
     EXPECT_EQ(  //
         false,  //
-        to_bool(parallel.at("is_enabled_parallel_evaluation")));
+        to_bool(parallel.at("is_enabled_move_update_parallelization")));
 
     EXPECT_EQ(  //
         false,  //
-        to_bool(parallel.at("is_enabled_parallel_neighborhood_update")));
+        to_bool(parallel.at("is_enabled_move_evaluation_parallelization")));
 
     EXPECT_EQ(  //
         false,  //
         to_bool(
-            parallel.at("is_enabled_automatic_evaluation_parallelization")));
+            parallel.at("is_enabled_automatic_move_update_parallelization")));
 
     EXPECT_EQ(  //
         false,  //
         to_bool(parallel.at(
-            "is_enabled_automatic_neighborhood_update_parallelization")));
+            "is_enabled_automatic_move_evaluation_parallelization")));
+
+    EXPECT_EQ(  //
+        0.6,    //
+        to_double(parallel.at("decay_factor_move_update")));
+
+    EXPECT_EQ(  //
+        0.6,    //
+        to_double(parallel.at("decay_factor_move_evaluation")));
+
+    EXPECT_EQ(  //
+        -1,     //
+        to_int(parallel.at("number_of_threads_move_update")));
+
+    EXPECT_EQ(  //
+        2,      //
+        to_int(parallel.at("number_of_threads_move_evaluation")));
 
     /// preprocess
     auto preprocess =

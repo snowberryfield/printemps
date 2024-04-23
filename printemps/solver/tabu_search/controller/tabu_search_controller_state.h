@@ -91,23 +91,23 @@ struct TabuSearchControllerState {
     option::improvability_screening_mode::ImprovabilityScreeningMode
         improvability_screening_mode;
 
-    bool is_enabled_parallel_neighborhood_update;
-    bool is_enabled_parallel_evaluation;
+    bool is_enabled_move_update_parallelization;
+    bool is_enabled_move_evaluation_parallelization;
 
-    int number_of_threads_evaluation;
-    int number_of_threads_neighborhood_update;
+    int number_of_threads_move_update;
+    int number_of_threads_move_evaluation;
 
-    long total_number_of_threads_evaluation;
-    long total_number_of_threads_neighborhood_update;
+    long total_number_of_threads_move_update;
+    long total_number_of_threads_move_evaluation;
 
-    double averaged_number_of_threads_evaluation;
-    double averaged_number_of_threads_neighborhood_update;
+    double averaged_number_of_threads_move_update;
+    double averaged_number_of_threads_move_evaluation;
 
     /**
      * Learners
      */
-    utility::ucb1::Learner<int> neighborhood_update_parallelization_controller;
-    utility::ucb1::Learner<int> evaluation_parallelization_controller;
+    utility::ucb1::Learner<int> parallelization_controller_move_update;
+    utility::ucb1::Learner<int> parallelization_controller_move_evaluation;
 
     /*************************************************************************/
     TabuSearchControllerState(void) {
@@ -182,20 +182,20 @@ struct TabuSearchControllerState {
         this->improvability_screening_mode =
             option::improvability_screening_mode::Off;
 
-        this->is_enabled_parallel_neighborhood_update = false;
-        this->is_enabled_parallel_evaluation          = false;
+        this->is_enabled_move_update_parallelization     = false;
+        this->is_enabled_move_evaluation_parallelization = false;
 
-        this->number_of_threads_evaluation          = 1;
-        this->number_of_threads_neighborhood_update = 1;
+        this->number_of_threads_move_evaluation = 1;
+        this->number_of_threads_move_update     = 1;
 
-        this->total_number_of_threads_evaluation          = 0;
-        this->total_number_of_threads_neighborhood_update = 0;
+        this->total_number_of_threads_move_update     = 0;
+        this->total_number_of_threads_move_evaluation = 0;
 
-        this->averaged_number_of_threads_evaluation          = 0.0;
-        this->averaged_number_of_threads_neighborhood_update = 0.0;
+        this->averaged_number_of_threads_move_update     = 0.0;
+        this->averaged_number_of_threads_move_evaluation = 0.0;
 
-        this->neighborhood_update_parallelization_controller.initialize();
-        this->evaluation_parallelization_controller.initialize();
+        this->parallelization_controller_move_update.initialize();
+        this->parallelization_controller_move_evaluation.initialize();
     }
 };
 }  // namespace printemps::solver::tabu_search::controller

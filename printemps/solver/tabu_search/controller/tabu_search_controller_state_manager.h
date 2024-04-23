@@ -94,15 +94,15 @@ class TabuSearchControllerStateManager {
                 option::improvability_screening_mode::Intensive;
         }
 
-        m_state.is_enabled_parallel_neighborhood_update =
-            m_option.parallel.is_enabled_parallel_neighborhood_update;
-        m_state.is_enabled_parallel_evaluation =
-            m_option.parallel.is_enabled_parallel_evaluation;
+        m_state.is_enabled_move_update_parallelization =
+            m_option.parallel.is_enabled_move_update_parallelization;
+        m_state.is_enabled_move_evaluation_parallelization =
+            m_option.parallel.is_enabled_move_evaluation_parallelization;
 
-        m_state.number_of_threads_neighborhood_update =
-            m_option.parallel.number_of_threads_neighborhood_update;
-        m_state.number_of_threads_evaluation =
-            m_option.parallel.number_of_threads_evaluation;
+        m_state.number_of_threads_move_update =
+            m_option.parallel.number_of_threads_move_update;
+        m_state.number_of_threads_move_evaluation =
+            m_option.parallel.number_of_threads_move_evaluation;
 
 #ifdef _OPENMP
         int max_number_of_threads = 1;
@@ -123,30 +123,39 @@ class TabuSearchControllerStateManager {
         }
         thread_patterns.push_back(max_number_of_threads);
         const int THREAD_PATTERNS_SIZE = thread_patterns.size();
-        if (m_option.parallel.is_enabled_parallel_neighborhood_update &&
+
+        if (m_option.parallel.is_enabled_move_update_parallelization &&
             m_option.parallel
-                .is_enabled_automatic_neighborhood_update_parallelization) {
+                .is_enabled_automatic_move_update_parallelization) {
             std::vector<utility::ucb1::Action<int>> actions(
                 THREAD_PATTERNS_SIZE);
             for (auto i = 0; i < THREAD_PATTERNS_SIZE; i++) {
                 actions[i] = thread_patterns[i];
             }
-            m_state.neighborhood_update_parallelization_controller.setup(
+            m_state.parallelization_controller_move_update.setup(
                 actions,  //
-                m_option.parallel.evaluation_parallelization_decay_factor);
+                m_option.parallel.decay_factor_move_update);
+
+            m_state.number_of_threads_move_update =
+                m_state.parallelization_controller_move_update.best_action()
+                    .body;
         }
 
-        if (m_option.parallel.is_enabled_parallel_evaluation &&
-            m_option.parallel.is_enabled_automatic_evaluation_parallelization) {
+        if (m_option.parallel.is_enabled_move_evaluation_parallelization &&
+            m_option.parallel
+                .is_enabled_automatic_move_evaluation_parallelization) {
             std::vector<utility::ucb1::Action<int>> actions(
                 THREAD_PATTERNS_SIZE);
             for (auto i = 0; i < THREAD_PATTERNS_SIZE; i++) {
                 actions[i] = thread_patterns[i];
             }
-            m_state.evaluation_parallelization_controller.setup(
+            m_state.parallelization_controller_move_evaluation.setup(
                 actions,  //
-                m_option.parallel
-                    .neighborhood_update_parallelization_decay_factor);
+                m_option.parallel.decay_factor_move_evaluation);
+
+            m_state.number_of_threads_move_evaluation =
+                m_state.parallelization_controller_move_evaluation.best_action()
+                    .body;
         }
 #endif
     }
@@ -155,15 +164,15 @@ class TabuSearchControllerStateManager {
     inline option::Option create_option() const {
         option::Option option = m_option;
 
-        option.parallel.is_enabled_parallel_neighborhood_update =
-            m_state.is_enabled_parallel_neighborhood_update;
-        option.parallel.number_of_threads_neighborhood_update =
-            m_state.number_of_threads_neighborhood_update;
+        option.parallel.is_enabled_move_update_parallelization =
+            m_state.is_enabled_move_update_parallelization;
+        option.parallel.number_of_threads_move_update =
+            m_state.number_of_threads_move_update;
 
-        option.parallel.is_enabled_parallel_evaluation =
-            m_state.is_enabled_parallel_evaluation;
-        option.parallel.number_of_threads_evaluation =
-            m_state.number_of_threads_evaluation;
+        option.parallel.is_enabled_move_evaluation_parallelization =
+            m_state.is_enabled_move_evaluation_parallelization;
+        option.parallel.number_of_threads_move_evaluation =
+            m_state.number_of_threads_move_evaluation;
 
         option.neighborhood.improvability_screening_mode =
             m_state.improvability_screening_mode;
@@ -377,8 +386,8 @@ class TabuSearchControllerStateManager {
         /**
          * Update parallelization.
          */
-        this->update_neighborhood_update_parallelization();
-        this->update_evaluation_parallelization();
+        this->update_move_update_parallelization();
+        this->update_move_evaluation_parallelization();
     }
 
     /*************************************************************************/
@@ -1287,15 +1296,16 @@ class TabuSearchControllerStateManager {
     /*************************************************************************/
     inline void update_current_solution(void) {
         if (m_state.employing_global_solution_flag) {
-            m_state.current_solution =
+            m_state.current_solution =  //
                 m_global_state_ptr->incumbent_holder
                     .global_augmented_incumbent_solution()
                     .to_sparse();
             m_state.employing_global_solution_count_after_relaxation++;
         } else if (m_state.employing_local_solution_flag) {
-            m_state.current_solution = m_global_state_ptr->incumbent_holder
-                                           .local_augmented_incumbent_solution()
-                                           .to_sparse();
+            m_state.current_solution =  //
+                m_global_state_ptr->incumbent_holder
+                    .local_augmented_incumbent_solution()
+                    .to_sparse();
             m_state.employing_local_solution_count_after_relaxation++;
         } else if (m_state.employing_previous_solution_flag) {
             m_state.current_solution = m_state.previous_solution;
@@ -1334,91 +1344,91 @@ class TabuSearchControllerStateManager {
     inline void update_parallelization_controllers(void) {
         const auto& TABU_SEARCH_RESULT = m_state.tabu_search_result;
 
-        if (m_option.parallel.is_enabled_parallel_neighborhood_update &&
+        if (m_option.parallel.is_enabled_move_update_parallelization &&
             m_option.parallel
-                .is_enabled_automatic_neighborhood_update_parallelization) {
+                .is_enabled_automatic_move_update_parallelization) {
             const double SCORE =
                 TABU_SEARCH_RESULT.number_of_updated_moves /
                 std::max(constant::EPSILON_10,
-                         TABU_SEARCH_RESULT.elapsed_time_for_updating_moves);
-            m_state.neighborhood_update_parallelization_controller.learn(SCORE);
+                         TABU_SEARCH_RESULT.elapsed_time_for_move_update);
+            m_state.parallelization_controller_move_update.learn(SCORE);
         }
 
-        if (m_option.parallel.is_enabled_parallel_evaluation &&
-            m_option.parallel.is_enabled_automatic_evaluation_parallelization) {
+        if (m_option.parallel.is_enabled_move_evaluation_parallelization &&
+            m_option.parallel
+                .is_enabled_automatic_move_evaluation_parallelization) {
             const double SCORE =
                 TABU_SEARCH_RESULT.number_of_evaluated_moves /
                 std::max(constant::EPSILON_10,
-                         TABU_SEARCH_RESULT.elapsed_time_for_evaluating_moves);
-            m_state.evaluation_parallelization_controller.learn(SCORE);
+                         TABU_SEARCH_RESULT.elapsed_time_for_move_evaluation);
+            m_state.parallelization_controller_move_evaluation.learn(SCORE);
         }
     }
 
     /*************************************************************************/
-    inline void update_neighborhood_update_parallelization(void) {
-        if (m_state.is_enabled_parallel_neighborhood_update) {
-            m_state.total_number_of_threads_neighborhood_update +=
-                m_state.number_of_threads_neighborhood_update;
+    inline void update_move_update_parallelization(void) {
+        if (m_state.is_enabled_move_update_parallelization) {
+            m_state.total_number_of_threads_move_update +=
+                m_state.number_of_threads_move_update;
 
         } else {
-            m_state.total_number_of_threads_neighborhood_update++;
+            m_state.total_number_of_threads_move_update++;
         }
 
-        m_state.averaged_number_of_threads_neighborhood_update =
-            m_state.total_number_of_threads_neighborhood_update /
+        m_state.averaged_number_of_threads_move_update =
+            m_state.total_number_of_threads_move_update /
             static_cast<double>(m_state.iteration + 1);
 
 #ifdef _OPENMP
-        if (m_option.parallel.is_enabled_parallel_neighborhood_update &&
+        if (m_option.parallel.is_enabled_move_update_parallelization &&
             m_option.parallel
-                .is_enabled_automatic_neighborhood_update_parallelization) {
-            m_state.number_of_threads_neighborhood_update =
-                m_state.neighborhood_update_parallelization_controller
-                    .best_action()
+                .is_enabled_automatic_move_update_parallelization) {
+            m_state.number_of_threads_move_update =
+                m_state.parallelization_controller_move_update.best_action()
                     .body;
-            m_state.is_enabled_parallel_neighborhood_update =
-                m_state.number_of_threads_neighborhood_update > 1;
+            m_state.is_enabled_move_update_parallelization =
+                m_state.number_of_threads_move_update > 1;
         } else {
-            m_state.number_of_threads_neighborhood_update =
-                omp_get_max_threads();
-            m_state.is_enabled_parallel_neighborhood_update =
-                m_option.parallel.is_enabled_parallel_neighborhood_update;
+            m_state.number_of_threads_move_update = omp_get_max_threads();
+            m_state.is_enabled_move_update_parallelization =
+                m_option.parallel.is_enabled_move_update_parallelization;
         }
 #else
-        m_state.is_enabled_parallel_neighborhood_update =
-            m_option.parallel.is_enabled_parallel_neighborhood_update;
+        m_state.is_enabled_move_update_parallelization =
+            m_option.parallel.is_enabled_move_update_parallelization;
 #endif
     }
 
     /*************************************************************************/
-    inline void update_evaluation_parallelization(void) {
-        if (m_state.is_enabled_parallel_neighborhood_update) {
-            m_state.total_number_of_threads_evaluation +=
-                m_state.number_of_threads_evaluation;
+    inline void update_move_evaluation_parallelization(void) {
+        if (m_state.is_enabled_move_evaluation_parallelization) {
+            m_state.total_number_of_threads_move_evaluation +=
+                m_state.number_of_threads_move_evaluation;
         } else {
-            m_state.total_number_of_threads_evaluation++;
+            m_state.total_number_of_threads_move_evaluation++;
         }
 
-        m_state.averaged_number_of_threads_evaluation =
-            m_state.total_number_of_threads_evaluation /
+        m_state.averaged_number_of_threads_move_evaluation =
+            m_state.total_number_of_threads_move_evaluation /
             static_cast<double>(m_state.iteration + 1);
 
 #ifdef _OPENMP
-        if (m_option.parallel.is_enabled_parallel_evaluation &&
-            m_option.parallel.is_enabled_automatic_evaluation_parallelization) {
-            m_state.number_of_threads_evaluation =
-                m_state.evaluation_parallelization_controller.best_action()
+        if (m_option.parallel.is_enabled_move_evaluation_parallelization &&
+            m_option.parallel
+                .is_enabled_automatic_move_evaluation_parallelization) {
+            m_state.number_of_threads_move_evaluation =
+                m_state.parallelization_controller_move_evaluation.best_action()
                     .body;
-            m_state.is_enabled_parallel_evaluation =
-                m_state.number_of_threads_evaluation > 1;
+            m_state.is_enabled_move_evaluation_parallelization =
+                m_state.number_of_threads_move_evaluation > 1;
         } else {
-            m_state.number_of_threads_evaluation = omp_get_max_threads();
-            m_state.is_enabled_parallel_evaluation =
-                m_option.parallel.is_enabled_parallel_evaluation;
+            m_state.number_of_threads_move_evaluation = omp_get_max_threads();
+            m_state.is_enabled_move_evaluation_parallelization =
+                m_option.parallel.is_enabled_move_evaluation_parallelization;
         }
 #else
-        m_state.is_enabled_parallel_evaluation =
-            m_option.parallel.is_enabled_parallel_evaluation;
+        m_state.is_enabled_move_evaluation_parallelization =
+            m_option.parallel.is_enabled_move_evaluation_parallelization;
 #endif
     }
 

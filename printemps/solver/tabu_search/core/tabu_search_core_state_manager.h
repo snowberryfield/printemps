@@ -148,6 +148,11 @@ class TabuSearchCoreStateManager {
         this->update_number_of_effective_updates();
 
         /**
+         * Update the number of effective updates for pruning.
+         */
+        this->update_number_of_ineffective_updates();
+
+        /**
          * Update the aspiration flag.
          */
         this->update_is_aspirated(a_IS_ASPIRATED);
@@ -190,12 +195,6 @@ class TabuSearchCoreStateManager {
         this->update_last_feasible_incumbent_update_iteration();
 
         /**
-         * For pruning, count updating of the local augmented incumbent
-         * without global augmented incumbent improvement.
-         */
-        this->update_local_augmented_incumbent_update_count();
-
-        /**
          * Update the number of neighborhoods.
          */
         this->update_number_of_neighborhoods(a_TRIAL_MOVE_SCORES,
@@ -229,6 +228,25 @@ class TabuSearchCoreStateManager {
             m_state.current_solution_score.global_augmented_objective <
                 m_state.previous_solution_score.global_augmented_objective) {
             m_state.number_of_effective_updates++;
+        }
+    }
+
+    /*************************************************************************/
+    inline void update_number_of_ineffective_updates(void) {
+        if (m_state.update_status ==
+                solution::IncumbentHolderConstant::
+                    STATUS_LOCAL_AUGMENTED_INCUMBENT_UPDATE &&
+            m_state.current_solution_score.global_augmented_objective >
+                m_state.previous_solution_score.global_augmented_objective) {
+            m_state.number_of_ineffective_updates++;
+            return;
+        }
+
+        if (m_state.update_status &
+            solution::IncumbentHolderConstant::
+                STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
+            m_state.number_of_ineffective_updates = 0;
+            return;
         }
     }
 
@@ -317,23 +335,6 @@ class TabuSearchCoreStateManager {
                                         STATUS_FEASIBLE_INCUMBENT_UPDATE) {
             m_state.last_feasible_incumbent_update_iteration =
                 m_state.iteration;
-        }
-    }
-
-    /*************************************************************************/
-    inline void update_local_augmented_incumbent_update_count(void) {
-        if (m_state.update_status ==
-            solution::IncumbentHolderConstant::
-                STATUS_LOCAL_AUGMENTED_INCUMBENT_UPDATE) {
-            m_state.local_augmented_incumbent_update_count++;
-            return;
-        }
-
-        if (m_state.update_status &
-            solution::IncumbentHolderConstant::
-                STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE) {
-            m_state.local_augmented_incumbent_update_count = 0;
-            return;
         }
     }
 
@@ -483,17 +484,17 @@ class TabuSearchCoreStateManager {
     }
 
     /*************************************************************************/
-    inline void update_move_updating_statistics(
+    inline void update_move_update_statistics(
         const int a_NUMBER_OF_UPDATED_MOVES, const double a_ELAPSED_TIME) {
         m_state.number_of_updated_moves += a_NUMBER_OF_UPDATED_MOVES;
-        m_state.elapsed_time_for_updating_moves += a_ELAPSED_TIME;
+        m_state.elapsed_time_for_move_update += a_ELAPSED_TIME;
     }
 
     /*************************************************************************/
-    inline void update_move_evaluating_statistics(
+    inline void update_move_evaluation_statistics(
         const int a_NUMBER_OF_EVALUATED_MOVES, const double a_ELAPSED_TIME) {
         m_state.number_of_evaluated_moves += a_NUMBER_OF_EVALUATED_MOVES;
-        m_state.elapsed_time_for_evaluating_moves += a_ELAPSED_TIME;
+        m_state.elapsed_time_for_move_evaluation += a_ELAPSED_TIME;
     }
 
     /*************************************************************************/

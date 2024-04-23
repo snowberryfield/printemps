@@ -301,6 +301,32 @@ TEST_F(TestVariable, set_is_feasibility_improvable_and) {
 }
 
 /*****************************************************************************/
+TEST_F(TestVariable, set_is_feasibility_improvable_if_has_lower_bound_margin) {
+    auto variable = model_component::Variable<int, double>::create_instance();
+    EXPECT_FALSE(variable.is_feasibility_improvable());
+    variable.set_bound(0, 1);
+    variable = 0;
+    variable.set_is_feasibility_improvable_if_has_lower_bound_margin();
+    EXPECT_FALSE(variable.is_feasibility_improvable());
+    variable = 1;
+    variable.set_is_feasibility_improvable_if_has_lower_bound_margin();
+    EXPECT_TRUE(variable.is_feasibility_improvable());
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, set_is_feasibility_improvable_if_has_upper_bound_margin) {
+    auto variable = model_component::Variable<int, double>::create_instance();
+    EXPECT_FALSE(variable.is_feasibility_improvable());
+    variable.set_bound(0, 1);
+    variable = 1;
+    variable.set_is_feasibility_improvable_if_has_upper_bound_margin();
+    EXPECT_FALSE(variable.is_feasibility_improvable());
+    variable = 0;
+    variable.set_is_feasibility_improvable_if_has_upper_bound_margin();
+    EXPECT_TRUE(variable.is_feasibility_improvable());
+}
+
+/*****************************************************************************/
 TEST_F(TestVariable, is_feasibility_improvable) {
     /// This method is tested in set_is_feasibility_improvable().
 }

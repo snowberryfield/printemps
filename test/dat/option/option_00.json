@@ -24,14 +24,14 @@
         "is_enabled_shrink_penalty_coefficient": false
     },
     "parallel": {
-        "is_enabled_parallel_evaluation": false,
-        "is_enabled_parallel_neighborhood_update": false,
-        "is_enabled_automatic_evaluation_parallelization": false,
-        "is_enabled_automatic_neighborhood_update_parallelization": false,
-        "evaluation_parallelization_decay_factor": 0.6,
-        "neighborhood_update_parallelization_decay_factor": 0.6,
-        "number_of_threads_evaluation": 2,
-        "number_of_threads_neighborhood_update": 2
+        "is_enabled_move_update_parallelization": false,
+        "is_enabled_move_evaluation_parallelization": false,
+        "is_enabled_automatic_move_update_parallelization": false,
+        "is_enabled_automatic_move_evaluation_parallelization": false,
+        "decay_factor_move_update": 0.6,
+        "decay_factor_move_evaluation": 0.6,
+        "number_of_threads_move_update": 2,
+        "number_of_threads_move_evaluation": 2
     },
     "preprocess": {
         "is_enabled_presolve": false,

@@ -428,7 +428,8 @@ class LagrangeDualCore {
              */
             const double SIGN = m_model_ptr->sign();
 #ifdef _OPENMP
-#pragma omp parallel for if (m_option.parallel.is_enabled_parallel_evaluation) \
+#pragma omp parallel for if (m_option.parallel                                \
+                                 .is_enabled_move_evaluation_parallelization) \
     schedule(static)
 #endif
             for (auto i = 0; i < VARIABLES_SIZE; i++) {
