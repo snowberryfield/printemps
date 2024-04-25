@@ -154,7 +154,7 @@ def create_objective_chart(trend_data):
         height=300,
     )
 
-    fig.circle(
+    fig.scatter(
         x=trend_data["#iteration"],
         y=trend_data["local_objective"],
         legend_label="Local Incumbent",
@@ -194,7 +194,7 @@ def create_violation_chart(trend_data):
         height=300,
     )
 
-    fig.circle(
+    fig.scatter(
         x=trend_data["#iteration"],
         y=trend_data["local_violation"],
         legend_label="Local Incumbent",
