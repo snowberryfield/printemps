@@ -100,17 +100,17 @@ class LocalSearchCoreStateManager {
     }
 
     /*************************************************************************/
-    inline void update_solution_score(
-        const solution::SolutionScore& a_SOLUTION_SCORE) {
-        m_state.previous_solution_score = m_state.current_solution_score;
-        m_state.current_solution_score  = a_SOLUTION_SCORE;
-    }
-
-    /*************************************************************************/
     inline void update_move(
         neighborhood::Move<T_Variable, T_Expression>* a_selected_move_ptr) {
         m_state.previous_move = m_state.current_move;
         m_state.current_move  = *a_selected_move_ptr;
+    }
+
+    /*************************************************************************/
+    inline void update_solution_score(
+        const solution::SolutionScore& a_SOLUTION_SCORE) {
+        m_state.previous_solution_score = m_state.current_solution_score;
+        m_state.current_solution_score  = a_SOLUTION_SCORE;
     }
 
     /*************************************************************************/
