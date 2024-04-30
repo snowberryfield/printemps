@@ -378,9 +378,9 @@ class TabuSearchController
             a_IS_ENABLED_PRINT);
         for (const auto& solution : FRONTIER_SOLUTIONS) {
             utility::print_info(  //
-                " -- obj.: " +
+                " -- Obj.: " +
                     utility::to_string(solution.first.objective, "%.3e,") +
-                    " viol: " +
+                    " Viol: " +
                     utility::to_string(solution.first.total_violation,
                                        "%.3e,") +
                     " L0-dist.: " + utility::to_string(solution.second, "%d"),

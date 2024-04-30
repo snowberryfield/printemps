@@ -2597,10 +2597,7 @@ class Model {
                 continue;
             }
 
-            const bool IS_POSITIVE_CONSTRAINT_VALUE =
-                constraint_ptr->constraint_value() > 0;
-
-            if (IS_POSITIVE_CONSTRAINT_VALUE) {
+            if (constraint_ptr->constraint_value() > 0) {
                 for (const auto &variable_ptr :
                      constraint_ptr->expression()
                          .positive_coefficient_mutable_variable_ptrs()) {

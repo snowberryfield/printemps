@@ -2,6 +2,9 @@
 ### for macOS ###
 .DS_Store
 
+### venv ###
+.venv/
+
 ### VSCode ###
 .vscode/
 
