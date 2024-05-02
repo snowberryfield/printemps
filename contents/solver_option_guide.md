@@ -12,7 +12,7 @@ layout: sub
     - [Parallel Options](#parallel-options)
     - [Preprocess Options](#preprocess-options)
     - [Neighborhood Options](#neighborhood-options)
-    - [Output Options](#neighborhood-options)
+    - [Output Options](#output-options)
     - [Lagrange Dual Search Options](#lagrange-dual-search-options)
     - [Local Search Options](#local-search-options)
     - [Tabu Search Options](#tabu-search-options)
@@ -51,12 +51,12 @@ auto result = printemps::solver::solve(&model, option);
 | `is_enabled_grouping_penalty_coefficient` |  `bool`  | `false` | If this option is set `true`, the penalty coefficients for constraints belonging to the same constraint group are aligned to the largest one in the group. Here, "constraint groups" are constraints which share common symbol and are distinguished by their indices. |
 
 ### Parallel Options
-| Name                                                       |  Type  | Default | Description                                                                                                                                                        |
-|:-----------------------------------------------------------|:------:|:-------:|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `is_enabled_parallel_evaluation`                           | `bool` | `true`  | If this option is set `true`, evaluations of solutions will be parallelized using [OpenMP](https://www.openmp.org).                                                |
-| `is_enabled_parallel_neighborhood_update`                  | `bool` | `true`  | If this option is set `true`, updating the neighborhood of the current solution will be parallelized using [OpenMP](https://www.openmp.org).                       |
-| `is_enabled_automatic_evaluation_parallelization`          | `bool` | `true`  | If this option is set `true`, parallelization of evaluating solutions are automatically enabled or disabled according to real-measured computational speed.        |
-| `is_enabled_automatic_neighborhood_update_parallelization` | `bool` | `true`  | If this option is set `true`, parallelization of updating neighborhood moves are automatically enabled or disabled according to real-measured computational speed. |
+| Name                                                   |  Type  | Default | Description                                                                                                                                                        |
+|:-------------------------------------------------------|:------:|:-------:|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `is_enabled_move_evaluation_parallelization`           | `bool` | `true`  | If this option is set `true`, evaluations of solutions will be parallelized using [OpenMP](https://www.openmp.org).                                                |
+| `is_enabled_move_update_parallelization`               | `bool` | `true`  | If this option is set `true`, updating the neighborhood of the current solution will be parallelized using [OpenMP](https://www.openmp.org).                       |
+| `is_enabled_automatic_move_update_parallelization`     | `bool` | `true`  | If this option is set `true`, parallelization of evaluating solutions are automatically enabled or disabled according to real-measured computational speed.        |
+| `is_enabled_automatic_move_evaluation_parallelization` | `bool` | `true`  | If this option is set `true`, parallelization of updating neighborhood moves are automatically enabled or disabled according to real-measured computational speed. |
 
 
 ### Preprocess Options
@@ -104,7 +104,7 @@ auto result = printemps::solver::solve(&model, option);
 ### Output Options
 | Name                                  |                    Type                     | Default | Description                                                                                                                                                                                                                                                                                                                                                            |
 |:--------------------------------------|:-------------------------------------------:|:-------:|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `verbose`                             | `printemps::option::`<br/> `verbose` <br /> |  `Off`  | Log level of standard output. <br /> `None`: No output. <br /> `Warn`: Output only warning messages. <br /> `Outer`: Output warning messages and outer loop intermediate results. <br /> `Full`: Output full information.                                                                                                                                              |
+| `verbose`                             | `printemps::option::`<br/> `verbose` <br /> |  `Off`  | Log level of standard output. <br /> `Off`: No output. <br /> `Warning`: Output only warning messages. <br /> `Outer`: Output warning messages and intermediate results of outer loops. `Inner`: Output warning messages and intermediate results of outer and inner tabu search loops. <br /> `Full`: Output full information.                                        |
 | `is_enabled_write_trend`              |                   `bool`                    | `false` | If this option is set `true`, search trend will be written in a text file named `trend.txt`. The ouput file can be visualized by `script/visualize_trend.py`.                                                                                                                                                                                                          |
 | `is_enabled_store_feasible_solutions` |                   `bool`                    | `false` | If this option is set `true`, feasible solutions found in the search will be stored, and written in a JSON file named `feasible.json`.  The ouput file can be visualized by `script/visualize_solutions.py`. Activating this option with large `feasible_solutions_capacity` would affect search performance especially for problems with too many feasible solutions. |
 | `feasible_solutions_capacity`         |                    `int`                    | `1000`  | Allowed maximum number of the stored feasible solutions. If the capacity is exceeded, worse solutions will be clipped.                                                                                                                                                                                                                                                 |

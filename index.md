@@ -4,27 +4,26 @@ layout: default
 ---
 
 
-[Abstract](#abstract) | [News](#news) | [Algorithm](#algorithm) | [Installation](#installation) | [Example](#example) | [Compilation](#compilation) | [Standalone Solver](#standalone-solver) | [Documents](#documents) | [Benchmark](#benchmark) | [Test](#test) | [License](#license) | [References](#references)
-
+[Abstract](#abstract) | [News](#news) | [Algorithm](#algorithm) | [Installation](#installation) | [Example](#example) | [Compilation](#compilation) | [Standalone Solver](#standalone-solver) | [Documents](#documents) | [Benchmark](#benchmark) | [Test](#test) | [License](#license) | [References](#references) | [Citation](#citation)
 
 
 ## Abstract
-__PRINTEMPS__ is a C++ metaheuristics modeler/solver library for general integer optimization problems. PRINTEMPS emphasizes on the following aspects:
-- __Portability.__ It is implemented as a header-only library which does not depend on any other proprietary or open-source libraries. Users can integrate it in to their own codes by just copying necessary files. 
+__PRINTEMPS__ is a C++ metaheuristics modeler/solver library for general integer optimization problems. PRINTEMPS emphasizes the following aspects:
+- __Portability.__ It is implemented as a header-only library which does not depend on any other proprietary or open-source libraries. Users can integrate it into their own codes by just copying the necessary files. 
 
-- __Intuitiveness in modeling.__ It provides an intuitive modeling environment to define a optimization model as a program code. Users can define constraint and objective functions using arithmetic operations on decision variables.
+- __Intuitiveness in modeling.__ It provides an intuitive modeling environment to define an optimization model as a program code. Users can define constraint and objective functions using arithmetic operations on decision variables.
 
-- __Flexibility to define neighborhood.__ It automatically detects the neighborhood structure of the problem. In addition to this, PRINTEMPS also accepts user-defined neighborhood.
+- __Flexibility to define neighborhood.__ It automatically detects the neighborhood structure of the problem. In addition to this, PRINTEMPS also accepts user-defined neighborhoods.
 
 ## News
 |     Date      | Update                                                                                            |
 |:-------------:|:--------------------------------------------------------------------------------------------------|
-| Jan. 15, 2023 | [New benchmark results](./contents/benchmark/index.md) were added.                                |
-| Jan. 15, 2023 | [PRINTEMPS v2.1.2](https://github.com/snowberryfield/printemps/releases/tag/v2.1.2) was released. |
+| May. 2, 2024 | [PRINTEMPS v2.3.0](https://github.com/snowberryfield/printemps/releases/tag/v2.3.0) was released. |
+| May. 2, 2024 | [Solver Option Guide](https://snowberryfield.github.io/printemps/contents/solver_option_guide.html) was updated in accordance with v2.3.0.|
+| Feb. 8, 2024 | [Tabu Search-Based Heuristic Solver for General Integer Linear Programming Problems](https://ieeexplore.ieee.org/document/10418217), a paper on PRINTEMPS, has been published in IEEE Access. |
 
 ## Algorithm
-PRINTEMPS can compute approximate solutions for __linear and nonlinear integer optimization problems__. It employs __Tabu Search__ [1], a metaheuristics technique, to solve problems. In solving, it replaces constraints with penalty functions which return violations to the corresponding constraints, and the penalty functions multiplied by positive penalty coefficients are added to the objective function. The penalty coefficients are updated iteratively and automatically in a method similar (not exact same) to the one proposed in paper [2].
-The figure below shows the flow-chart of the algorithm of PRINTEMPS. 
+PRINTEMPS can compute approximate solutions for __integer linear and nonlinear optimization problems__ by  __Weighted Tabu Search__ [1]. PRINTEMPS is tuned for high performance, particularly for linear integer programming problems. For more information on the algorithm, please refer to the literature [2]. The figure below shows the flow-chart of the algorithm of PRINTEMPS. 
 
 <div align="center">
 
@@ -141,10 +140,24 @@ __PRINTEMPS__ is licensed under [MIT license](https://opensource.org/licenses/MI
 
 ## References
 
-- [1] F.Glover: [Future Paths for Integer Programming and Links to Artificial Intelligence](http://leeds-faculty.colorado.edu/glover/TS%20-%20Future%20Paths%20for%20Integer%20Programming.pdf), _Computers and Operations Research_, Vol.13 No.5 pp.533-549 (1986).
+- [1] K.Nonobe and T.Ibaraki: [An improved tabu search method for the weighted constraint satisfaction problem](https://www.researchgate.net/publication/228737620_An_Improved_Tabu_Search_Method_For_The_Weighted_Constraint_Satisfaction_Problem), _INFOR_, Vol.39, pp.131–151 (2001).
 
-- [2] K.Nonobe and T.Ibaraki: [An improved tabu search method for the weighted constraint satisfaction problem](https://www.researchgate.net/publication/228737620_An_Improved_Tabu_Search_Method_For_The_Weighted_Constraint_Satisfaction_Problem), _INFOR_ Vol.39, pp.131–151 (2001).
+- [2] Y.Koguma: [Tabu Search-Based Heuristic Solver for General Integer Linear Programming Problems](https://ieeexplore.ieee.org/document/10418217), __IEEE Access__, Vol.12, pp.19059-19076 (2014).
 
 - [3] R.Fletcher: [Practical Methods of Optimization, Second Edition](https://onlinelibrary.wiley.com/doi/book/10.1002/9781118723203), John Wiley & Sons (2000).
 
 - [4] Wikipedia "Sudoku" : https://en.wikipedia.org/wiki/Sudoku
+
+## Citation
+I would appreciate it if you could cite the following article when referring to PRINTEMPS in your work:
+```
+@ARTICLE{10418217,
+  author={Koguma, Yuji},
+  journal={IEEE Access}, 
+  title={Tabu Search-Based Heuristic Solver for General Integer Linear Programming Problems}, 
+  year={2024},
+  volume={12},
+  number={},
+  pages={19059-19076},
+  doi={10.1109/ACCESS.2024.3361323}}
+```
