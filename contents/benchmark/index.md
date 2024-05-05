@@ -16,7 +16,7 @@ The following results were obtained by the solver detailed in [Standalone Solver
 
 (**) From this version, computational time includes the time to read the MPS file.
 
-## For v2.2.0 and v2.2.1
+## v2.2.0 and v2.2.1
 Please refer to [Tabu Search-Based Heuristic Solver for General Integer Linear Programming Problems](https://ieeexplore.ieee.org/document/10418217) for numerical experimental results for v2.2.1; v2.2.0 and v2.2.1 have little algorithmic difference.
 
 ## v2.1.2
