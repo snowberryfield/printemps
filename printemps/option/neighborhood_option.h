@@ -245,14 +245,14 @@ struct NeighborhoodOption {
             " -- neighborhood.selection_mode: " +  //
             selection_mode::SelectionModeInverseMap.at(this->selection_mode));
 
-        utility::print(                             //
-            " -- improvability_screening_mode: " +  //
+        utility::print(                                          //
+            " -- neighborhood.improvability_screening_mode: " +  //
             improvability_screening_mode::ImprovabilityScreeningModeInverseMap
                 .at(this->improvability_screening_mode));
 
-        utility::print(                                      //
-            " -- is_enabled_integer_step_size_adjuster: " +  //
-            utility::to_true_or_false(                       //
+        utility::print(                                                   //
+            " -- neighborhood.is_enabled_integer_step_size_adjuster: " +  //
+            utility::to_true_or_false(                                    //
                 this->is_enabled_integer_step_size_adjuster));
     }
 
