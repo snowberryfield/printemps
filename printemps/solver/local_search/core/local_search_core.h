@@ -687,7 +687,10 @@ class LocalSearchCore {
             /**
              * Store the current feasible solution.
              */
-            if (STATE.current_solution_score.is_feasible) {
+            if (m_option.output.is_enabled_store_feasible_solutions &&
+                STATE.current_solution_score.is_feasible) {
+                m_model_ptr
+                    ->update_dependent_variables_and_disabled_constraints();
                 m_feasible_solutions.push_back(
                     m_model_ptr->export_sparse_solution());
             }

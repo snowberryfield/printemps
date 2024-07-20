@@ -25,12 +25,12 @@ class Edge {
     }
 
     /*************************************************************************/
-    Edge(const int a_NODE_KEY_FIRST, const int a_NODE_KEY_SECOND) {
+    Edge(const T a_NODE_KEY_FIRST, const T a_NODE_KEY_SECOND) {
         this->setup(a_NODE_KEY_FIRST, a_NODE_KEY_SECOND);
     }
 
     /*************************************************************************/
-    Edge(const int a_NODE_KEY_FIRST, const int a_NODE_KEY_SECOND,
+    Edge(const T a_NODE_KEY_FIRST, const T a_NODE_KEY_SECOND,
          const double a_WEIGHT) {
         this->setup(a_NODE_KEY_FIRST, a_NODE_KEY_SECOND, a_WEIGHT);
     }
@@ -41,15 +41,15 @@ class Edge {
     }
 
     /*************************************************************************/
-    inline void setup(const int a_NODE_KEY_FIRST,
-                      const int a_NODE_KEY_SECOND) noexcept {
+    inline void setup(const T a_NODE_KEY_FIRST,
+                      const T a_NODE_KEY_SECOND) noexcept {
         this->initialize();
         m_node_keys.first  = a_NODE_KEY_FIRST;
         m_node_keys.second = a_NODE_KEY_SECOND;
     }
 
     /*************************************************************************/
-    inline void setup(const int a_NODE_KEY_FIRST, const int a_NODE_KEY_SECOND,
+    inline void setup(const T a_NODE_KEY_FIRST, const T a_NODE_KEY_SECOND,
                       const double a_WEIGHT) noexcept {
         this->initialize();
         m_node_keys.first  = a_NODE_KEY_FIRST;
