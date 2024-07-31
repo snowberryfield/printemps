@@ -660,8 +660,8 @@ class TabuSearchControllerStateManager {
              * the global incumbent is employed as the initial solution for the
              * next loop. The penalty coefficients are to be relaxed.
              */
-            m_state.employing_global_solution_flag          = true;
-            m_state.is_enabled_penalty_coefficient_relaxing = true;
+            m_state.employing_global_solution_flag = true;
+                m_state.is_enabled_penalty_coefficient_relaxing = true;
             return;
         }
 

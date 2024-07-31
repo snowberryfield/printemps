@@ -163,94 +163,132 @@ class TabuSearchController
 
     /*************************************************************************/
     inline void print_optional_summary(const bool a_IS_ENABLED_PRINT) {
-        /**
-         * Print the search behavior summary.
-         */
-        utility::print_dot_line(a_IS_ENABLED_PRINT);
-        utility::print(  //
-            "# Search Behavior Summary", a_IS_ENABLED_PRINT);
-        this->print_intensity(a_IS_ENABLED_PRINT);
-        this->print_performance(a_IS_ENABLED_PRINT);
-        this->print_distance(a_IS_ENABLED_PRINT);
-        this->print_speed(a_IS_ENABLED_PRINT);
-        this->print_number_of_feasible_solutions(a_IS_ENABLED_PRINT);
-
-        /**
-         * Print the search tree summary (frontier solutions).
-         */
-        utility::print_dot_line(a_IS_ENABLED_PRINT);
-        utility::print(  //
-            "# Search Tree Summary (Frontier Solutions)", a_IS_ENABLED_PRINT);
-        this->print_frontier_solutions(a_IS_ENABLED_PRINT);
-
-        /**
-         * Print the search tree summary (locally optimal solutions).
-         */
-        utility::print_dot_line(a_IS_ENABLED_PRINT);
-        utility::print(  //
-            "# Search Tree Summary (Locally Optimal Solutions)",
-            a_IS_ENABLED_PRINT);
-        this->print_locally_optimal_solutions(a_IS_ENABLED_PRINT);
-
-        /**
-         * Print the state of the parallelization controller summary
-         * (move update).
-         */
-#ifdef _OPENMP
-        if (this->m_option.parallel.is_enabled_move_update_parallelization &&
-            this->m_option.parallel
-                .is_enabled_automatic_move_update_parallelization) {
+        if (this->m_option.output.is_enabled_print_search_behavior_summary) {
+            /**
+             * Print the search behavior summary.
+             */
             utility::print_dot_line(a_IS_ENABLED_PRINT);
             utility::print(  //
-                "# Parallelization Controller Summary (Move Update)",
-                a_IS_ENABLED_PRINT);
-            this->print_parallelization_controller_move_update(
-                a_IS_ENABLED_PRINT);
+                "# Search Behavior Summary", a_IS_ENABLED_PRINT);
+            this->print_intensity(a_IS_ENABLED_PRINT);
+            this->print_performance(a_IS_ENABLED_PRINT);
+            this->print_distance(a_IS_ENABLED_PRINT);
+            this->print_speed(a_IS_ENABLED_PRINT);
+            this->print_number_of_feasible_solutions(a_IS_ENABLED_PRINT);
         }
-#endif
 
-        /**
-         * Print the state of the parallelization controller summary
-         * (move evaluation).
-         */
-#ifdef _OPENMP
-        if (this->m_option.parallel
-                .is_enabled_move_evaluation_parallelization &&
-            this->m_option.parallel
-                .is_enabled_automatic_move_evaluation_parallelization) {
+        if (this->m_option.output.is_enabled_print_tree_summary) {
+            /**
+             * Print the search tree summary (frontier solutions).
+             */
+
             utility::print_dot_line(a_IS_ENABLED_PRINT);
             utility::print(  //
-                "# Parallelization Controller Summary (Move Evaluation)",
+                "# Search Tree Summary (Frontier Solutions)",
                 a_IS_ENABLED_PRINT);
-            this->print_parallelization_controller_move_evaluation(
+            this->print_frontier_solutions(a_IS_ENABLED_PRINT);
+
+            /**
+             * Print the search tree summary (locally optimal solutions).
+             */
+            utility::print_dot_line(a_IS_ENABLED_PRINT);
+            utility::print(  //
+                "# Search Tree Summary (Locally Optimal Solutions)",
                 a_IS_ENABLED_PRINT);
+            this->print_locally_optimal_solutions(a_IS_ENABLED_PRINT);
         }
+
+        if (this->m_option.output
+                .is_enabled_print_parallelization_controller_summary) {
+            /**
+             * Print the state of the parallelization controller summary
+             * (move update).
+             */
+
+#ifdef _OPENMP
+            if (this->m_option.parallel
+                    .is_enabled_move_update_parallelization &&
+                this->m_option.parallel
+                    .is_enabled_automatic_move_update_parallelization) {
+                utility::print_dot_line(a_IS_ENABLED_PRINT);
+                utility::print(  //
+                    "# Parallelization Controller Summary (Move Update)",
+                    a_IS_ENABLED_PRINT);
+                this->print_parallelization_controller_move_update(
+                    a_IS_ENABLED_PRINT);
+            }
 #endif
 
-        /**
-         * Print the violation and penalty summary.
-         */
-        utility::print_dot_line(a_IS_ENABLED_PRINT);
-        utility::print(  //
-            "# Violation and Penalty Summary", a_IS_ENABLED_PRINT);
+            /**
+             * Print the state of the parallelization controller summary
+             * (move evaluation).
+             */
+#ifdef _OPENMP
+            if (this->m_option.parallel
+                    .is_enabled_move_evaluation_parallelization &&
+                this->m_option.parallel
+                    .is_enabled_automatic_move_evaluation_parallelization) {
+                utility::print_dot_line(a_IS_ENABLED_PRINT);
+                utility::print(  //
+                    "# Parallelization Controller Summary (Move Evaluation)",
+                    a_IS_ENABLED_PRINT);
+                this->print_parallelization_controller_move_evaluation(
+                    a_IS_ENABLED_PRINT);
+            }
+#endif
+        }
 
-        this->print_violative_constraints(a_IS_ENABLED_PRINT);
-        this->print_penalty_coefficient(a_IS_ENABLED_PRINT);
+        if (this->m_option.output.is_enabled_print_variable_update_summary) {
+            /**
+             * Print the variable update summary.
+             */
+            utility::print_dot_line(a_IS_ENABLED_PRINT);
+            utility::print(  //
+                "# Variable Update Summary", a_IS_ENABLED_PRINT);
+            this->print_variable_update_frequency(a_IS_ENABLED_PRINT);
+        }
 
-        /**
-         * Print the tabu search parameters for the Next loop.
-         */
-        utility::print_dot_line(a_IS_ENABLED_PRINT);
-        utility::print(  //
-            "# Tabu Search Parameters for the Next loop", a_IS_ENABLED_PRINT);
+        if (this->m_option.output
+                .is_enabled_print_constraint_violation_summary) {
+            /**
+             * Print the constraint violation summary.
+             */
+            utility::print_dot_line(a_IS_ENABLED_PRINT);
+            utility::print(  //
+                "# Constraint Violation Summary", a_IS_ENABLED_PRINT);
+            this->print_constraint_violation_frequency(a_IS_ENABLED_PRINT);
+        }
 
-        this->print_initial_tabu_tenure(a_IS_ENABLED_PRINT);
-        this->print_improvability_screening_mode(a_IS_ENABLED_PRINT);
-        this->print_initial_solution(a_IS_ENABLED_PRINT);
-        this->print_number_of_initial_modification(a_IS_ENABLED_PRINT);
-        this->print_inner_iteration_max(a_IS_ENABLED_PRINT);
-        this->print_is_enabled_special_neighborhood_move(a_IS_ENABLED_PRINT);
-        this->print_number_of_stored_chain_moves(a_IS_ENABLED_PRINT);
+        if (this->m_option.output
+                .is_enabled_print_violation_and_penalty_summary) {
+            /**
+             * Print the violation and penalty summary.
+             */
+            utility::print_dot_line(a_IS_ENABLED_PRINT);
+            utility::print(  //
+                "# Violation and Penalty Summary", a_IS_ENABLED_PRINT);
+            this->print_violative_constraints(a_IS_ENABLED_PRINT);
+            this->print_penalty_coefficient(a_IS_ENABLED_PRINT);
+        }
+
+        if (this->m_option.output.is_enabled_print_tabu_search_parameter) {
+            /**
+             * Print the tabu search parameters for the Next loop.
+             */
+            utility::print_dot_line(a_IS_ENABLED_PRINT);
+            utility::print(  //
+                "# Tabu Search Parameters for the Next loop",
+                a_IS_ENABLED_PRINT);
+
+            this->print_initial_tabu_tenure(a_IS_ENABLED_PRINT);
+            this->print_improvability_screening_mode(a_IS_ENABLED_PRINT);
+            this->print_initial_solution(a_IS_ENABLED_PRINT);
+            this->print_number_of_initial_modification(a_IS_ENABLED_PRINT);
+            this->print_inner_iteration_max(a_IS_ENABLED_PRINT);
+            this->print_is_enabled_special_neighborhood_move(
+                a_IS_ENABLED_PRINT);
+            this->print_number_of_stored_chain_moves(a_IS_ENABLED_PRINT);
+        }
     }
 
     /*************************************************************************/
@@ -491,6 +529,162 @@ class TabuSearchController
     }
 
     /*************************************************************************/
+    inline void print_variable_update_frequency(
+        const bool a_IS_ENABLED_PRINT) const {
+        auto mutable_variable_ptrs =
+            this->m_model_ptr->variable_reference().mutable_variable_ptrs;
+        if (mutable_variable_ptrs.size() == 0) {
+            return;
+        }
+
+        constexpr int MAX_NUMBER_OF_PRINT_ITEMS = 5;
+        const double  TOTAL_UPDATE_COUNT        = std::max(
+            1.0, static_cast<double>(
+                     this->m_global_state_ptr->memory.total_update_count()));
+
+        const int MUTABLE_VARIABLES_SIZE = mutable_variable_ptrs.size();
+
+        std::stable_sort(
+            mutable_variable_ptrs.begin(), mutable_variable_ptrs.end(),
+            [](const auto& a_FIRST, const auto& a_SECOND) {
+                return a_FIRST->update_count() < a_SECOND->update_count();
+            });
+
+        int count = 0;
+        for (auto i = 0; i < MUTABLE_VARIABLES_SIZE; i++) {
+            double update_rate =
+                mutable_variable_ptrs[i]->update_count() / TOTAL_UPDATE_COUNT;
+            update_rate = std::max(0.0, std::min(1.0, update_rate));
+
+            if (count > MAX_NUMBER_OF_PRINT_ITEMS) {
+                break;
+            }
+
+            if (count == 0) {
+                utility::print_message(  //
+                    "Low-frequent updated variables:", a_IS_ENABLED_PRINT);
+            }
+
+            utility::print_info(
+                " -- " + mutable_variable_ptrs[i]->name()  //
+                    + " (" + mutable_variable_ptrs[i]->sense_label() +
+                    ", Freq.: " + utility::to_string(update_rate, "%.3e") + ")",
+                a_IS_ENABLED_PRINT);
+
+            count++;
+        }
+
+        count = 0;
+        for (auto i = MUTABLE_VARIABLES_SIZE - 1; i >= 0; i--) {
+            double update_rate =
+                mutable_variable_ptrs[i]->update_count() / TOTAL_UPDATE_COUNT;
+            update_rate = std::max(0.0, std::min(1.0, update_rate));
+
+            if (update_rate < constant::EPSILON_10) {
+                break;
+            }
+
+            if (count > MAX_NUMBER_OF_PRINT_ITEMS) {
+                break;
+            }
+
+            if (count == 0) {
+                utility::print_message(  //
+                    "High-frequent updated variables:", a_IS_ENABLED_PRINT);
+            }
+
+            utility::print_info(
+                " -- " + mutable_variable_ptrs[i]->name()  //
+                    + " (" + mutable_variable_ptrs[i]->sense_label() +
+                    ", Freq.: " + utility::to_string(update_rate, "%.3e") + ")",
+                a_IS_ENABLED_PRINT);
+
+            count++;
+        }
+    }
+
+    /*************************************************************************/
+    inline void print_constraint_violation_frequency(
+        const bool a_IS_ENABLED_PRINT) const {
+        auto enabled_constraint_ptrs =
+            this->m_model_ptr->constraint_reference().enabled_constraint_ptrs;
+        if (enabled_constraint_ptrs.size() == 0) {
+            return;
+        }
+
+        constexpr int MAX_NUMBER_OF_PRINT_ITEMS = 5;
+        const double  TOTAL_UPDATE_COUNT        = std::max(
+            1.0, static_cast<double>(
+                     this->m_global_state_ptr->memory.total_update_count()));
+
+        const int ENABLED_CONSTRAINTS_SIZE = enabled_constraint_ptrs.size();
+
+        std::stable_sort(
+            enabled_constraint_ptrs.begin(), enabled_constraint_ptrs.end(),
+            [](const auto& a_FIRST, const auto& a_SECOND) {
+                return a_FIRST->violation_count() > a_SECOND->violation_count();
+            });
+
+        int count = 0;
+        for (auto i = 0; i < ENABLED_CONSTRAINTS_SIZE; i++) {
+            double satisfaction_rate =
+                1.0 - enabled_constraint_ptrs[i]->violation_count() /
+                          TOTAL_UPDATE_COUNT;
+            satisfaction_rate = std::max(0.0, std::min(1.0, satisfaction_rate));
+
+            if (std::fabs(1.0 - satisfaction_rate) < constant::EPSILON_10) {
+                break;
+            }
+
+            if (count > MAX_NUMBER_OF_PRINT_ITEMS) {
+                break;
+            }
+
+            if (count == 0) {
+                utility::print_message(  //
+                    "Low-frequent satisfied constraints:", a_IS_ENABLED_PRINT);
+            }
+
+            utility::print_info(
+                " -- " + enabled_constraint_ptrs[i]->name()  //
+                    + " (" + enabled_constraint_ptrs[i]->type() + ", Freq.: " +
+                    utility::to_string(satisfaction_rate, "%.3e") + ")",
+                a_IS_ENABLED_PRINT);
+
+            count++;
+        }
+
+        count = 0;
+        for (auto i = ENABLED_CONSTRAINTS_SIZE - 1; i >= 0; i--) {
+            double satisfaction_rate =
+                1.0 - enabled_constraint_ptrs[i]->violation_count() /
+                          TOTAL_UPDATE_COUNT;
+            satisfaction_rate = std::max(0.0, std::min(1.0, satisfaction_rate));
+
+            if (satisfaction_rate < constant::EPSILON_10) {
+                break;
+            }
+
+            if (count > MAX_NUMBER_OF_PRINT_ITEMS) {
+                break;
+            }
+
+            if (count == 0) {
+                utility::print_message(  //
+                    "High-frequent satisfied constraints:", a_IS_ENABLED_PRINT);
+            }
+
+            utility::print_info(
+                " -- " + enabled_constraint_ptrs[i]->name()  //
+                    + " (" + enabled_constraint_ptrs[i]->type() + ", Freq.: " +
+                    utility::to_string(satisfaction_rate, "%.3e") + ")",
+                a_IS_ENABLED_PRINT);
+
+            count++;
+        }
+    }
+
+    /*************************************************************************/
     inline void print_violative_constraints(
         const bool a_IS_ENABLED_PRINT) const {
         const auto& SOLUTION = this->m_global_state_ptr->incumbent_holder
@@ -502,33 +696,38 @@ class TabuSearchController
              * Due to the slow speed of standard output in the Windows DOS,
              * printing all violations will affect performance. To avoid
              * this problem, the maximum number of violations to be printed
-             * is 20.
+             * is 10.
              */
-            constexpr int MAX_NUMBER_OF_PRINT_ITEMS = 20;
+            constexpr int MAX_NUMBER_OF_PRINT_ITEMS = 10;
 
             utility::print_message(  //
                 "The current solution does not satisfy the following "
                 "constraints:",
                 a_IS_ENABLED_PRINT);
 
-            for (const auto& proxy : SOLUTION.violation_value_proxies) {
-                const auto& values      = proxy.flat_indexed_values();
-                const auto& names       = proxy.flat_indexed_names();
-                const int   VALUES_SIZE = values.size();
+            const auto& VIOLATION_VALUE_PROXIES =
+                SOLUTION.violation_value_proxies;
 
-                for (auto i = 0; i < VALUES_SIZE; i++) {
-                    if (values[i] > 0) {
+            for (auto&& proxy : this->m_model_ptr->constraint_proxies()) {
+                for (auto&& constraint : proxy.flat_indexed_constraints()) {
+                    const double VIOLATION =
+                        VIOLATION_VALUE_PROXIES[proxy.index()]
+                                               [constraint.flat_index()];
+
+                    if (VIOLATION > 0) {
                         number_of_violative_constraints++;
                         if (number_of_violative_constraints <=
                             MAX_NUMBER_OF_PRINT_ITEMS) {
                             utility::print_info(
-                                " -- " + names[i] + " (violation: " +
-                                    std::to_string(values[i]) + ")",
+                                " -- " + constraint.name()  //
+                                    + " (" + constraint.type() + ", Viol.: " +
+                                    std::to_string(VIOLATION) + ")",
                                 a_IS_ENABLED_PRINT);
                         }
                     }
                 }
             }
+
             if (number_of_violative_constraints > MAX_NUMBER_OF_PRINT_ITEMS) {
                 utility::print_info("and much more...", a_IS_ENABLED_PRINT);
             }

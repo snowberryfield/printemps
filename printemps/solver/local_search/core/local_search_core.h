@@ -41,7 +41,7 @@ class LocalSearchCore {
         /**
          * Reset the last update iterations.
          */
-        m_global_state_ptr->memory.reset_last_update_iterations();
+        m_global_state_ptr->memory.reset_local_last_update_iterations();
 
         /**
          * Reset the feasible solutions storage.

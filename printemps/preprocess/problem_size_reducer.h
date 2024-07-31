@@ -599,21 +599,21 @@ class ProblemSizeReducer {
          * Pre-sort the variables pointers for efficient subsequent procedures.
          */
         if (m_model_ptr->is_minimization()) {
-            std::sort(variable_ptrs.begin(), variable_ptrs.end(),
-                      [](const auto &a_LHS, const auto &a_RHS) {
-                          return (a_LHS->hash() == a_RHS->hash())
-                                     ? (a_LHS->objective_sensitivity() <
-                                        a_RHS->objective_sensitivity())
-                                     : (a_LHS->hash() < a_RHS->hash());
-                      });
+            std::stable_sort(variable_ptrs.begin(), variable_ptrs.end(),
+                             [](const auto &a_LHS, const auto &a_RHS) {
+                                 return (a_LHS->hash() == a_RHS->hash())
+                                            ? (a_LHS->objective_sensitivity() <
+                                               a_RHS->objective_sensitivity())
+                                            : (a_LHS->hash() < a_RHS->hash());
+                             });
         } else {
-            std::sort(variable_ptrs.begin(), variable_ptrs.end(),
-                      [](const auto &a_LHS, const auto &a_RHS) {
-                          return (a_LHS->hash() == a_RHS->hash())
-                                     ? (a_LHS->objective_sensitivity() >
-                                        a_RHS->objective_sensitivity())
-                                     : (a_LHS->hash() < a_RHS->hash());
-                      });
+            std::stable_sort(variable_ptrs.begin(), variable_ptrs.end(),
+                             [](const auto &a_LHS, const auto &a_RHS) {
+                                 return (a_LHS->hash() == a_RHS->hash())
+                                            ? (a_LHS->objective_sensitivity() >
+                                               a_RHS->objective_sensitivity())
+                                            : (a_LHS->hash() < a_RHS->hash());
+                             });
         }
 
         int i = 0;
@@ -745,11 +745,11 @@ class ProblemSizeReducer {
 
         const int CONSTRAINTS_SIZE = constraint_ptrs.size();
 
-        std::sort(constraint_ptrs.begin(), constraint_ptrs.end(),
-                  [](const auto &a_FIRST, const auto &a_SECOND) {
-                      return a_FIRST->expression().hash() <
-                             a_SECOND->expression().hash();
-                  });
+        std::stable_sort(constraint_ptrs.begin(), constraint_ptrs.end(),
+                         [](const auto &a_FIRST, const auto &a_SECOND) {
+                             return a_FIRST->expression().hash() <
+                                    a_SECOND->expression().hash();
+                         });
 
         std::vector<model_component::Constraint<T_Variable, T_Expression>>
             additional_constraints;
@@ -1013,11 +1013,11 @@ class ProblemSizeReducer {
 
         const int CONSTRAINTS_SIZE = constraint_ptrs.size();
 
-        std::sort(constraint_ptrs.begin(), constraint_ptrs.end(),
-                  [](const auto &a_FIRST, const auto &a_SECOND) {
-                      return a_FIRST->expression().hash() <
-                             a_SECOND->expression().hash();
-                  });
+        std::stable_sort(constraint_ptrs.begin(), constraint_ptrs.end(),
+                         [](const auto &a_FIRST, const auto &a_SECOND) {
+                             return a_FIRST->expression().hash() <
+                                    a_SECOND->expression().hash();
+                         });
 
         int i = 0;
         while (i < CONSTRAINTS_SIZE) {
@@ -1101,11 +1101,11 @@ class ProblemSizeReducer {
 
         const int CONSTRAINTS_SIZE = constraint_ptrs.size();
 
-        std::sort(constraint_ptrs.begin(), constraint_ptrs.end(),
-                  [](const auto &a_LHS, const auto &a_RHS) {
-                      return a_LHS->expression().sensitivities().size() >
-                             a_RHS->expression().sensitivities().size();
-                  });
+        std::stable_sort(constraint_ptrs.begin(), constraint_ptrs.end(),
+                         [](const auto &a_LHS, const auto &a_RHS) {
+                             return a_LHS->expression().sensitivities().size() >
+                                    a_RHS->expression().sensitivities().size();
+                         });
 
         std::vector<std::unordered_set<
             model_component::Variable<T_Variable, T_Expression> *>>

@@ -87,17 +87,17 @@ class SolutionArchive {
 
         switch (m_sort_mode) {
             case SortMode::Ascending: {
-                std::sort(solutions.begin(), solutions.end(),
-                          [](const auto& a_LHS, const auto& a_RHS) {
-                              return a_LHS.objective < a_RHS.objective;
-                          });
+                std::stable_sort(solutions.begin(), solutions.end(),
+                                 [](const auto& a_LHS, const auto& a_RHS) {
+                                     return a_LHS.objective < a_RHS.objective;
+                                 });
                 break;
             }
             case SortMode::Descending: {
-                std::sort(solutions.begin(), solutions.end(),
-                          [](const auto& a_LHS, const auto& a_RHS) {
-                              return a_LHS.objective > a_RHS.objective;
-                          });
+                std::stable_sort(solutions.begin(), solutions.end(),
+                                 [](const auto& a_LHS, const auto& a_RHS) {
+                                     return a_LHS.objective > a_RHS.objective;
+                                 });
                 break;
             }
             default: {

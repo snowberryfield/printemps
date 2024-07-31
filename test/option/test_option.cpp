@@ -309,6 +309,34 @@ TEST_F(TestOption, setup) {
             1,      //
             option.output.feasible_solutions_capacity);
 
+        EXPECT_EQ(  //
+            false,  //
+            option.output.is_enabled_print_search_behavior_summary);
+
+        EXPECT_EQ(  //
+            false,  //
+            option.output.is_enabled_print_tree_summary);
+
+        EXPECT_EQ(  //
+            false,  //
+            option.output.is_enabled_print_parallelization_controller_summary);
+
+        EXPECT_EQ(  //
+            false,  //
+            option.output.is_enabled_print_variable_update_summary);
+
+        EXPECT_EQ(  //
+            false,  //
+            option.output.is_enabled_print_constraint_violation_summary);
+
+        EXPECT_EQ(  //
+            false,  //
+            option.output.is_enabled_print_violation_and_penalty_summary);
+
+        EXPECT_EQ(  //
+            false,  //
+            option.output.is_enabled_print_tabu_search_parameter);
+
         /// pdlp
         EXPECT_EQ(  //
             false,  //
