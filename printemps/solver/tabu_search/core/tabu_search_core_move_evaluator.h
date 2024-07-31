@@ -50,9 +50,6 @@ class TabuSearchCoreMoveEvaluator {
     inline bool compute_permissibility(
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE,  //
         const int a_DURATION) const noexcept {
-        const auto &LAST_UPDATE_ITERATIONS =
-            m_memory_ptr->last_update_iterations();
-
         if (m_option.tabu_search.tabu_mode == option::tabu_mode::All &&
             a_MOVE.sense != neighborhood::MoveSense::Selection) {
             /**
@@ -61,10 +58,8 @@ class TabuSearchCoreMoveEvaluator {
              * be altered are included in the tabu list.
              */
             for (const auto &alteration : a_MOVE.alterations) {
-                const int &LAST_UPDATE_ITERATION =
-                    LAST_UPDATE_ITERATIONS[alteration.first->proxy_index()]
-                                          [alteration.first->flat_index()];
-                if (a_DURATION >= LAST_UPDATE_ITERATION) {
+                if (a_DURATION >=
+                    alteration.first->local_last_update_iteration()) {
                     return true;
                 }
             }
@@ -76,10 +71,8 @@ class TabuSearchCoreMoveEvaluator {
              * about a variable in the tabu list.
              */
             for (const auto &alteration : a_MOVE.alterations) {
-                const int &LAST_UPDATE_ITERATION =
-                    LAST_UPDATE_ITERATIONS[alteration.first->proxy_index()]
-                                          [alteration.first->flat_index()];
-                if (a_DURATION < LAST_UPDATE_ITERATION) {
+                if (a_DURATION <
+                    alteration.first->local_last_update_iteration()) {
                     return false;
                 }
             }
@@ -95,18 +88,16 @@ class TabuSearchCoreMoveEvaluator {
     inline double compute_frequency_penalty(
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE,
         const int a_ITERATION) const noexcept {
-        const auto &UPDATE_COUNTS = m_memory_ptr->update_counts();
-
         if (a_ITERATION == 0) {
             return 0.0;
         }
 
-        int move_update_count = 0;
+        int total_update_count = 0;
         for (const auto &alteration : a_MOVE.alterations) {
-            move_update_count += UPDATE_COUNTS[alteration.first->proxy_index()]
-                                              [alteration.first->flat_index()];
+            total_update_count += alteration.first->update_count();
         }
-        return move_update_count *
+
+        return total_update_count *
                m_memory_ptr->total_update_count_reciprocal() *
                m_option.tabu_search.frequency_penalty_coefficient;
     }

@@ -1163,131 +1163,129 @@ class Model {
                     constraint_reference.disabled_constraint_ptrs.push_back(
                         &constraint);
                 }
-                if (!constraint.is_linear()) {
+
+                if (constraint.is_singleton()) {
+                    constraint_type_reference.singleton_ptrs.push_back(
+                        &constraint);
+                }
+                if (constraint.is_exclusive_or()) {
+                    constraint_type_reference.exclusive_or_ptrs.push_back(
+                        &constraint);
+                }
+                if (constraint.is_exclusive_nor()) {
+                    constraint_type_reference.exclusive_nor_ptrs.push_back(
+                        &constraint);
+                }
+                if (constraint.is_inverted_integers()) {
+                    constraint_type_reference.inverted_integers_ptrs.push_back(
+                        &constraint);
+                }
+                if (constraint.is_balanced_integers()) {
+                    constraint_type_reference.balanced_integers_ptrs.push_back(
+                        &constraint);
+                }
+                if (constraint.is_constant_sum_integers()) {
+                    constraint_type_reference.constant_sum_integers_ptrs
+                        .push_back(&constraint);
+                }
+                if (constraint.is_constant_difference_integers()) {
+                    constraint_type_reference.constant_difference_integers_ptrs
+                        .push_back(&constraint);
+                }
+                if (constraint.is_constant_ratio_integers()) {
+                    constraint_type_reference.constant_ratio_integers_ptrs
+                        .push_back(&constraint);
+                }
+                if (constraint.is_aggregation()) {
+                    constraint_type_reference.aggregation_ptrs.push_back(
+                        &constraint);
+                }
+                if (constraint.is_precedence()) {
+                    constraint_type_reference.precedence_ptrs.push_back(
+                        &constraint);
+                }
+                if (constraint.is_variable_bound()) {
+                    constraint_type_reference.variable_bound_ptrs.push_back(
+                        &constraint);
+                }
+                if (constraint.is_trinomial_exclusive_nor()) {
+                    constraint_type_reference.trinomial_exclusive_nor_ptrs
+                        .push_back(&constraint);
+                }
+                if (constraint.is_set_partitioning()) {
+                    constraint_type_reference.set_partitioning_ptrs.push_back(
+                        &constraint);
+                }
+                if (constraint.is_set_packing()) {
+                    constraint_type_reference.set_packing_ptrs.push_back(
+                        &constraint);
+                }
+                if (constraint.is_set_covering()) {
+                    constraint_type_reference.set_covering_ptrs.push_back(
+                        &constraint);
+                }
+                if (constraint.is_cardinality()) {
+                    constraint_type_reference.cardinality_ptrs.push_back(
+                        &constraint);
+                }
+                if (constraint.is_invariant_knapsack()) {
+                    constraint_type_reference.invariant_knapsack_ptrs.push_back(
+                        &constraint);
+                }
+                if (constraint.is_multiple_covering()) {
+                    constraint_type_reference.multiple_covering_ptrs.push_back(
+                        &constraint);
+                }
+                if (constraint.is_binary_flow()) {
+                    constraint_type_reference.binary_flow_ptrs.push_back(
+                        &constraint);
+                }
+                if (constraint.is_integer_flow()) {
+                    constraint_type_reference.integer_flow_ptrs.push_back(
+                        &constraint);
+                }
+                if (constraint.is_soft_selection()) {
+                    constraint_type_reference.soft_selection_ptrs.push_back(
+                        &constraint);
+                }
+                if (constraint.is_min_max()) {
+                    constraint_type_reference.min_max_ptrs.push_back(
+                        &constraint);
+                }
+                if (constraint.is_max_min()) {
+                    constraint_type_reference.max_min_ptrs.push_back(
+                        &constraint);
+                }
+                if (constraint.is_intermediate()) {
+                    constraint_type_reference.intermediate_ptrs.push_back(
+                        &constraint);
+                }
+                if (constraint.is_equation_knapsack()) {
+                    constraint_type_reference.equation_knapsack_ptrs.push_back(
+                        &constraint);
+                }
+                if (constraint.is_bin_packing()) {
+                    constraint_type_reference.bin_packing_ptrs.push_back(
+                        &constraint);
+                }
+                if (constraint.is_knapsack()) {
+                    constraint_type_reference.knapsack_ptrs.push_back(
+                        &constraint);
+                }
+                if (constraint.is_integer_knapsack()) {
+                    constraint_type_reference.integer_knapsack_ptrs.push_back(
+                        &constraint);
+                }
+                if (constraint.is_gf2()) {
+                    constraint_type_reference.gf2_ptrs.push_back(&constraint);
+                }
+                if (constraint.is_general_linear()) {
+                    constraint_type_reference.general_linear_ptrs.push_back(
+                        &constraint);
+                }
+                if (constraint.is_nonlinear()) {
                     constraint_type_reference.nonlinear_ptrs.push_back(
                         &constraint);
-                } else {
-                    if (constraint.is_singleton()) {
-                        constraint_type_reference.singleton_ptrs.push_back(
-                            &constraint);
-                    }
-                    if (constraint.is_exclusive_or()) {
-                        constraint_type_reference.exclusive_or_ptrs.push_back(
-                            &constraint);
-                    }
-                    if (constraint.is_exclusive_nor()) {
-                        constraint_type_reference.exclusive_nor_ptrs.push_back(
-                            &constraint);
-                    }
-                    if (constraint.is_inverted_integers()) {
-                        constraint_type_reference.inverted_integers_ptrs
-                            .push_back(&constraint);
-                    }
-                    if (constraint.is_balanced_integers()) {
-                        constraint_type_reference.balanced_integers_ptrs
-                            .push_back(&constraint);
-                    }
-                    if (constraint.is_constant_sum_integers()) {
-                        constraint_type_reference.constant_sum_integers_ptrs
-                            .push_back(&constraint);
-                    }
-                    if (constraint.is_constant_difference_integers()) {
-                        constraint_type_reference
-                            .constant_difference_integers_ptrs.push_back(
-                                &constraint);
-                    }
-                    if (constraint.is_constant_ratio_integers()) {
-                        constraint_type_reference.constant_ratio_integers_ptrs
-                            .push_back(&constraint);
-                    }
-                    if (constraint.is_aggregation()) {
-                        constraint_type_reference.aggregation_ptrs.push_back(
-                            &constraint);
-                    }
-                    if (constraint.is_precedence()) {
-                        constraint_type_reference.precedence_ptrs.push_back(
-                            &constraint);
-                    }
-                    if (constraint.is_variable_bound()) {
-                        constraint_type_reference.variable_bound_ptrs.push_back(
-                            &constraint);
-                    }
-                    if (constraint.is_trinomial_exclusive_nor()) {
-                        constraint_type_reference.trinomial_exclusive_nor_ptrs
-                            .push_back(&constraint);
-                    }
-                    if (constraint.is_set_partitioning()) {
-                        constraint_type_reference.set_partitioning_ptrs
-                            .push_back(&constraint);
-                    }
-                    if (constraint.is_set_packing()) {
-                        constraint_type_reference.set_packing_ptrs.push_back(
-                            &constraint);
-                    }
-                    if (constraint.is_set_covering()) {
-                        constraint_type_reference.set_covering_ptrs.push_back(
-                            &constraint);
-                    }
-                    if (constraint.is_cardinality()) {
-                        constraint_type_reference.cardinality_ptrs.push_back(
-                            &constraint);
-                    }
-                    if (constraint.is_invariant_knapsack()) {
-                        constraint_type_reference.invariant_knapsack_ptrs
-                            .push_back(&constraint);
-                    }
-                    if (constraint.is_multiple_covering()) {
-                        constraint_type_reference.multiple_covering_ptrs
-                            .push_back(&constraint);
-                    }
-                    if (constraint.is_binary_flow()) {
-                        constraint_type_reference.binary_flow_ptrs.push_back(
-                            &constraint);
-                    }
-                    if (constraint.is_integer_flow()) {
-                        constraint_type_reference.integer_flow_ptrs.push_back(
-                            &constraint);
-                    }
-                    if (constraint.is_soft_selection()) {
-                        constraint_type_reference.soft_selection_ptrs.push_back(
-                            &constraint);
-                    }
-                    if (constraint.is_min_max()) {
-                        constraint_type_reference.min_max_ptrs.push_back(
-                            &constraint);
-                    }
-                    if (constraint.is_max_min()) {
-                        constraint_type_reference.max_min_ptrs.push_back(
-                            &constraint);
-                    }
-                    if (constraint.is_intermediate()) {
-                        constraint_type_reference.intermediate_ptrs.push_back(
-                            &constraint);
-                    }
-                    if (constraint.is_equation_knapsack()) {
-                        constraint_type_reference.equation_knapsack_ptrs
-                            .push_back(&constraint);
-                    }
-                    if (constraint.is_bin_packing()) {
-                        constraint_type_reference.bin_packing_ptrs.push_back(
-                            &constraint);
-                    }
-                    if (constraint.is_knapsack()) {
-                        constraint_type_reference.knapsack_ptrs.push_back(
-                            &constraint);
-                    }
-                    if (constraint.is_integer_knapsack()) {
-                        constraint_type_reference.integer_knapsack_ptrs
-                            .push_back(&constraint);
-                    }
-                    if (constraint.is_gf2()) {
-                        constraint_type_reference.gf2_ptrs.push_back(
-                            &constraint);
-                    }
-                    if (constraint.is_general_linear()) {
-                        constraint_type_reference.general_linear_ptrs.push_back(
-                            &constraint);
-                    }
                 }
             }
         }
@@ -1628,10 +1626,11 @@ class Model {
                     row_records.emplace_back(i, COLUMN_INDEX, VALUE);
                 }
             }
-            std::sort(row_records.begin(), row_records.end(),
-                      [](const auto &a_FIRST, const auto &a_SECOND) {
-                          return std::get<1>(a_FIRST) < std::get<1>(a_SECOND);
-                      });
+            std::stable_sort(row_records.begin(), row_records.end(),
+                             [](const auto &a_FIRST, const auto &a_SECOND) {
+                                 return std::get<1>(a_FIRST) <
+                                        std::get<1>(a_SECOND);
+                             });
             for (const auto &record : row_records) {
                 row_indices.push_back(std::get<0>(record));
                 column_indices.push_back(std::get<1>(record));
@@ -3099,6 +3098,7 @@ class Model {
     generate_variable_parameter_proxies(const T_Value a_VALUE) const {
         std::vector<multi_array::ValueProxy<T_Value>>
             variable_parameter_proxies;
+        variable_parameter_proxies.reserve(m_variable_proxies.size());
 
         for (const auto &proxy : m_variable_proxies) {
             multi_array::ValueProxy<T_Value> variable_parameter_proxy(
@@ -3121,6 +3121,7 @@ class Model {
     generate_expression_parameter_proxies(const T_Value a_VALUE) const {
         std::vector<multi_array::ValueProxy<T_Value>>
             expression_parameter_proxies;
+        expression_parameter_proxies.reserve(m_expression_proxies.size());
 
         for (const auto &proxy : m_expression_proxies) {
             multi_array::ValueProxy<T_Value> expression_parameter_proxy(
@@ -3142,6 +3143,7 @@ class Model {
     generate_constraint_parameter_proxies(const T_Value a_VALUE) const {
         std::vector<multi_array::ValueProxy<T_Value>>
             constraint_parameter_proxies;
+        constraint_parameter_proxies.reserve(m_constraint_proxies.size());
 
         for (const auto &proxy : m_constraint_proxies) {
             multi_array::ValueProxy<T_Value> constraint_parameter_proxy(
@@ -3162,6 +3164,8 @@ class Model {
     export_local_penalty_coefficient_proxies(void) const {
         std::vector<multi_array::ValueProxy<double>>
             local_penalty_coefficient_proxies;
+        local_penalty_coefficient_proxies.reserve(m_constraint_proxies.size());
+
         for (const auto &proxy : m_constraint_proxies) {
             multi_array::ValueProxy<double> local_penalty_coefficient_proxy(
                 proxy.index(), proxy.shape());
@@ -3175,12 +3179,58 @@ class Model {
                     std::max(proxy.flat_indexed_constraints(i)
                                  .local_penalty_coefficient_less(),
                              proxy.flat_indexed_constraints(i)
-                                 .local_penalty_coefficient_less());
+                                 .local_penalty_coefficient_greater());
             }
             local_penalty_coefficient_proxies.push_back(
                 local_penalty_coefficient_proxy);
         }
         return local_penalty_coefficient_proxies;
+    }
+
+    /*************************************************************************/
+    std::vector<multi_array::ValueProxy<int>> export_update_count_proxies(
+        void) const {
+        std::vector<multi_array::ValueProxy<int>> update_count_proxies;
+        update_count_proxies.reserve(m_variable_proxies.size());
+
+        for (const auto &proxy : m_variable_proxies) {
+            multi_array::ValueProxy<int> update_count_proxy(proxy.index(),
+                                                            proxy.shape());
+
+            const int NUMBER_OF_ELEMENTS = proxy.number_of_elements();
+
+            for (auto i = 0; i < NUMBER_OF_ELEMENTS; i++) {
+                update_count_proxy.flat_indexed_names(i) =
+                    proxy.flat_indexed_variables(i).name();
+                update_count_proxy.flat_indexed_values(i) =
+                    proxy.flat_indexed_variables(i).update_count();
+            }
+            update_count_proxies.push_back(update_count_proxy);
+        }
+        return update_count_proxies;
+    }
+
+    /*************************************************************************/
+    std::vector<multi_array::ValueProxy<int>> export_violation_count_proxies(
+        void) const {
+        std::vector<multi_array::ValueProxy<int>> violation_count_proxies;
+        violation_count_proxies.reserve(m_constraint_proxies.size());
+
+        for (const auto &proxy : m_constraint_proxies) {
+            multi_array::ValueProxy<int> violation_count_proxy(proxy.index(),
+                                                               proxy.shape());
+
+            const int NUMBER_OF_ELEMENTS = proxy.number_of_elements();
+
+            for (auto i = 0; i < NUMBER_OF_ELEMENTS; i++) {
+                violation_count_proxy.flat_indexed_names(i) =
+                    proxy.flat_indexed_constraints(i).name();
+                violation_count_proxy.flat_indexed_values(i) =
+                    proxy.flat_indexed_constraints(i).violation_count();
+            }
+            violation_count_proxies.push_back(violation_count_proxy);
+        }
+        return violation_count_proxies;
     }
 
     /*************************************************************************/

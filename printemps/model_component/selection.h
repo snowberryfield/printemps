@@ -82,10 +82,10 @@ struct Selection {
          * variables to be written have sensitivity.
          */
 
-        std::sort(this->variable_ptrs.begin(), this->variable_ptrs.end(),
-                  [](const auto &a_FIRST, const auto &a_SECOND) {
-                      return a_FIRST->name() < a_SECOND->name();
-                  });
+        std::stable_sort(this->variable_ptrs.begin(), this->variable_ptrs.end(),
+                         [](const auto &a_FIRST, const auto &a_SECOND) {
+                             return a_FIRST->name() < a_SECOND->name();
+                         });
 
         std::stable_sort(this->variable_ptrs.begin(), this->variable_ptrs.end(),
                          [](const auto &a_FIRST, const auto &a_SECOND) {
@@ -102,10 +102,10 @@ struct Selection {
             std::vector<Constraint<T_Variable, T_Expression> *>
                 constraint_ptrs = variable_ptr->related_constraint_ptrs();
 
-            std::sort(constraint_ptrs.begin(), constraint_ptrs.end(),
-                      [](const auto &a_FIRST, const auto &a_SECOND) {
-                          return a_FIRST->name() < a_SECOND->name();
-                      });
+            std::stable_sort(constraint_ptrs.begin(), constraint_ptrs.end(),
+                             [](const auto &a_FIRST, const auto &a_SECOND) {
+                                 return a_FIRST->name() < a_SECOND->name();
+                             });
 
             if (this->related_constraint_ptrs.size() <
                 related_constraint_ptrs_set.size() / 2) {

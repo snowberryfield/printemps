@@ -111,10 +111,11 @@ class FlippableVariablePairExtractor {
                 }
             }
         }
-        std::sort(pairs.begin(), pairs.end(),
-                  [](const auto &a_FIRST, const auto &a_SECOND) {
-                      return a_FIRST.overlap_rate > a_SECOND.overlap_rate;
-                  });
+        std::stable_sort(pairs.begin(), pairs.end(),
+                         [](const auto &a_FIRST, const auto &a_SECOND) {
+                             return a_FIRST.overlap_rate >
+                                    a_SECOND.overlap_rate;
+                         });
 
         utility::print_message(std::to_string(pairs.size()) +
                                    " flippable variable pairs were found.",

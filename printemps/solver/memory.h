@@ -9,7 +9,7 @@
 namespace printemps::solver {
 /*****************************************************************************/
 struct MemoryConstant {
-    static constexpr int INITIAL_LAST_UPDATE_ITERATION = -1000;
+    static constexpr int INITIAL_LOCAL_LAST_UPDATE_ITERATION = -1000;
 };
 
 /*****************************************************************************/
@@ -17,13 +17,6 @@ template <class T_Variable, class T_Expression>
 class Memory {
    private:
     model::Model<T_Variable, T_Expression> *m_model_ptr;
-
-    std::vector<std::string> m_variable_names;
-    std::vector<std::string> m_constraint_names;
-
-    std::vector<multi_array::ValueProxy<int>> m_last_update_iterations;
-    std::vector<multi_array::ValueProxy<int>> m_update_counts;
-    std::vector<multi_array::ValueProxy<int>> m_violation_counts;
 
     long   m_total_update_count;
     double m_total_update_count_reciprocal;
@@ -53,10 +46,7 @@ class Memory {
     /*************************************************************************/
     void initialize(void) {
         m_model_ptr = nullptr;
-        m_variable_names.clear();
-        m_last_update_iterations.clear();
-        m_update_counts.clear();
-        m_violation_counts.clear();
+
         m_total_update_count            = 0;
         m_total_update_count_reciprocal = 0.0;
 
@@ -77,88 +67,17 @@ class Memory {
         this->initialize();
         m_model_ptr = a_model_ptr;
 
-        /**
-         * Short-term memory:
-         * The short-term memory records the iteration count at which each
-         * variable has been updated last. The initial value of the short-term
-         * memory must be sufficiently large and finite negative value. The
-         * finiteness is required so that an operation a_ITERATION -
-         * last_update_iterations[proxy_index][index] in
-         * tabu_search_move_score.h can return finite integer value.
-         */
-        m_last_update_iterations =
-            a_model_ptr->generate_variable_parameter_proxies(
-                MemoryConstant::INITIAL_LAST_UPDATE_ITERATION);
-
-        /**
-         * Long-term memory:
-         * The Long-term memory records the number of times which each variable
-         * has been updated. The initial value of the long-term memory is 0.
-         */
-        m_update_counts = a_model_ptr->generate_variable_parameter_proxies(0);
-
-        m_violation_counts =
-            a_model_ptr->generate_constraint_parameter_proxies(0);
-
-        m_variable_names   = m_model_ptr->variable_names();
-        m_constraint_names = m_model_ptr->constraint_names();
-    }
-
-    /*************************************************************************/
-    void print_last_update_iterations(void) {
-        /// This method is for debug.
-        const int VARIABLE_PROXIES_SIZE = m_variable_names.size();
-        for (auto i = 0; i < VARIABLE_PROXIES_SIZE; i++) {
-            auto &last_update_iteration = m_last_update_iterations[i];
-            const std::string NAME      = m_variable_names[i];
-            const int         NUMBER_OF_ELEMENTS =
-                last_update_iteration.number_of_elements();
-            for (auto j = 0; j < NUMBER_OF_ELEMENTS; j++) {
-                utility::print(
-                    NAME + last_update_iteration.indices_label(j) + " = " +
-                    std::to_string(
-                        last_update_iteration.flat_indexed_values(j)));
-            }
+        auto &variable_ptrs = m_model_ptr->variable_reference().variable_ptrs;
+        for (auto &&variable_ptr : variable_ptrs) {
+            variable_ptr->reset_local_last_update_iteration();
+            variable_ptr->reset_update_count();
         }
-    }
 
-    /*************************************************************************/
-    void print_update_counts(void) {
-        /// This method is for debug.
-        const int VARIABLE_PROXIES_SIZE = m_variable_names.size();
-        for (auto i = 0; i < VARIABLE_PROXIES_SIZE; i++) {
-            auto &            update_counts = m_update_counts[i];
-            const std::string NAME          = m_variable_names[i];
-            const int NUMBER_OF_ELEMENTS = update_counts.number_of_elements();
-            for (auto j = 0; j < NUMBER_OF_ELEMENTS; j++) {
-                utility::print(
-                    NAME + update_counts.indices_label(j) + " = " +
-                    std::to_string(update_counts.flat_indexed_values(j)));
-            }
+        auto &constraint_ptrs =
+            m_model_ptr->constraint_reference().constraint_ptrs;
+        for (auto &&constraint_ptr : constraint_ptrs) {
+            constraint_ptr->reset_violation_count();
         }
-    }
-
-    /*************************************************************************/
-    void print_frequency(void) {
-        /// This method is for debug.
-        const int VARIABLE_PROXIES_SIZE = m_variable_names.size();
-        for (auto i = 0; i < VARIABLE_PROXIES_SIZE; i++) {
-            auto &            update_counts = m_update_counts[i];
-            const std::string NAME          = m_variable_names[i];
-            const int NUMBER_OF_ELEMENTS = update_counts.number_of_elements();
-            for (auto j = 0; j < NUMBER_OF_ELEMENTS; j++) {
-                utility::print(
-                    NAME + update_counts.indices_label(j) + " = " +
-                    std::to_string(update_counts.flat_indexed_values(j) *
-                                   m_total_update_count_reciprocal));
-            }
-        }
-    }
-
-    /*************************************************************************/
-    void print_primal_intensity(void) {
-        /// This method is for debug.
-        utility::print(std::to_string(m_primal_intensity));
     }
 
     /*************************************************************************/
@@ -185,29 +104,28 @@ class Memory {
         const int                                           a_RANDOM_WIDTH,  //
         std::mt19937 *get_rand_mt) noexcept {
         for (const auto &alteration : a_MOVE.alterations) {
-            const int PROXY_INDEX = alteration.first->proxy_index();
-            const int FLAT_INDEX  = alteration.first->flat_index();
-            int       randomness  = 0;
+            int randomness = 0;
             if (a_RANDOM_WIDTH > 0) {
                 randomness =
                     (*get_rand_mt)() % (2 * a_RANDOM_WIDTH) - a_RANDOM_WIDTH;
             }
 
-            m_last_update_iterations[PROXY_INDEX][FLAT_INDEX] =
-                a_ITERATION + randomness;
+            alteration.first->set_local_last_update_iteration(a_ITERATION +
+                                                              randomness);
+            alteration.first->set_global_last_update_iteration(
+                m_total_update_count);
+
             m_primal_intensity_numerator +=
-                2.0 * m_update_counts[PROXY_INDEX][FLAT_INDEX] + 1;
-            m_update_counts[PROXY_INDEX][FLAT_INDEX]++;
+                2.0 * alteration.first->update_count() + 1;
+            alteration.first->increment_update_count();
             m_total_update_count++;
         }
 
         for (const auto &constraint_ptr :
              m_model_ptr->violative_constraint_ptrs()) {
-            const int PROXY_INDEX = constraint_ptr->proxy_index();
-            const int FLAT_INDEX  = constraint_ptr->flat_index();
             m_dual_intensity_numerator +=
-                2.0 * m_violation_counts[PROXY_INDEX][FLAT_INDEX] + 1;
-            m_violation_counts[PROXY_INDEX][FLAT_INDEX]++;
+                2.0 * constraint_ptr->violation_count() + 1;
+            constraint_ptr->increment_violation_count();
             m_total_violation_count++;
         }
 
@@ -228,36 +146,11 @@ class Memory {
     }
 
     /*************************************************************************/
-    inline void reset_last_update_iterations(void) {
-        for (auto &&proxy : m_last_update_iterations) {
-            for (auto &&value : proxy.flat_indexed_values()) {
-                value = MemoryConstant::INITIAL_LAST_UPDATE_ITERATION;
-            }
+    inline void reset_local_last_update_iterations(void) {
+        auto &variable_ptrs = m_model_ptr->variable_reference().variable_ptrs;
+        for (auto &&variable_ptr : variable_ptrs) {
+            variable_ptr->reset_local_last_update_iteration();
         }
-    }
-
-    /*************************************************************************/
-    inline void revert_last_update_iterations(const int a_ITERATION) {
-        for (auto &&proxy : m_last_update_iterations) {
-            for (auto &&value : proxy.flat_indexed_values()) {
-                if (value > a_ITERATION) {
-                    value = MemoryConstant::INITIAL_LAST_UPDATE_ITERATION;
-                }
-                value -= (a_ITERATION + 1);
-            }
-        }
-    }
-
-    /*************************************************************************/
-    inline const std::vector<multi_array::ValueProxy<int>>
-        &last_update_iterations(void) const {
-        return m_last_update_iterations;
-    }
-
-    /*************************************************************************/
-    inline const std::vector<multi_array::ValueProxy<int>> &update_counts(
-        void) const {
-        return m_update_counts;
     }
 
     /*************************************************************************/
@@ -268,12 +161,6 @@ class Memory {
     /*************************************************************************/
     inline double total_update_count_reciprocal(void) const {
         return m_total_update_count_reciprocal;
-    }
-
-    /*************************************************************************/
-    inline const std::vector<multi_array::ValueProxy<int>> &violation_counts(
-        void) const {
-        return m_violation_counts;
     }
 
     /*************************************************************************/

@@ -13,6 +13,27 @@ struct OutputOptionConstant {
     static constexpr bool             DEFAULT_IS_ENABLED_WRITE_TREND  = false;
     static constexpr bool DEFAULT_IS_ENABLED_STORE_FEASIBLE_SOLUTIONS = false;
     static constexpr int  DEFAULT_FEASIBLE_SOLUTIONS_CAPACITY         = 1000;
+
+    static constexpr bool  //
+        DEFAULT_IS_ENABLED_PRINT_SEARCH_BEHAVIOR_SUMMARY = true;
+
+    static constexpr bool  //
+        DEFAULT_IS_ENABLED_PRINT_TREE_SUMMARY = true;
+
+    static constexpr bool  //
+        DEFAULT_IS_ENABLED_PRINT_PARALLELIZATION_CONTROLLER_SUMMARY = true;
+
+    static constexpr bool  //
+        DEFAULT_IS_ENABLED_PRINT_VARIABLE_UPDATE_SUMMARY = true;
+
+    static constexpr bool  //
+        DEFAULT_IS_ENABLED_PRINT_CONSTRAINT_VIOLATION_SUMMARY = true;
+
+    static constexpr bool  //
+        DEFAULT_IS_ENABLED_PRINT_VIOLATION_AND_PENALTY_SUMMARY = true;
+
+    static constexpr bool  //
+        DEFAULT_IS_ENABLED_PRINT_TABU_SEARCH_PARAMETER = true;
 };
 
 /*****************************************************************************/
@@ -21,6 +42,14 @@ struct OutputOption {
     bool             is_enabled_write_trend;
     bool             is_enabled_store_feasible_solutions;
     int              feasible_solutions_capacity;
+
+    bool is_enabled_print_search_behavior_summary;
+    bool is_enabled_print_tree_summary;
+    bool is_enabled_print_parallelization_controller_summary;
+    bool is_enabled_print_variable_update_summary;
+    bool is_enabled_print_constraint_violation_summary;
+    bool is_enabled_print_violation_and_penalty_summary;
+    bool is_enabled_print_tabu_search_parameter;
 
     /*************************************************************************/
     OutputOption(void) {
@@ -41,6 +70,32 @@ struct OutputOption {
             OutputOptionConstant::DEFAULT_IS_ENABLED_STORE_FEASIBLE_SOLUTIONS;
         this->feasible_solutions_capacity =
             OutputOptionConstant::DEFAULT_FEASIBLE_SOLUTIONS_CAPACITY;
+
+        this->is_enabled_print_search_behavior_summary =  //
+            OutputOptionConstant::
+                DEFAULT_IS_ENABLED_PRINT_SEARCH_BEHAVIOR_SUMMARY;
+
+        this->is_enabled_print_tree_summary =  //
+            OutputOptionConstant::DEFAULT_IS_ENABLED_PRINT_TREE_SUMMARY;
+
+        this->is_enabled_print_parallelization_controller_summary =
+            OutputOptionConstant::
+                DEFAULT_IS_ENABLED_PRINT_PARALLELIZATION_CONTROLLER_SUMMARY;
+
+        this->is_enabled_print_variable_update_summary =  //
+            OutputOptionConstant::
+                DEFAULT_IS_ENABLED_PRINT_VARIABLE_UPDATE_SUMMARY;
+
+        this->is_enabled_print_constraint_violation_summary =
+            OutputOptionConstant::
+                DEFAULT_IS_ENABLED_PRINT_CONSTRAINT_VIOLATION_SUMMARY;
+
+        this->is_enabled_print_violation_and_penalty_summary =
+            OutputOptionConstant::
+                DEFAULT_IS_ENABLED_PRINT_VIOLATION_AND_PENALTY_SUMMARY;
+
+        this->is_enabled_print_tabu_search_parameter = OutputOptionConstant::
+            DEFAULT_IS_ENABLED_PRINT_TABU_SEARCH_PARAMETER;
     }
 
     /*************************************************************************/
@@ -63,6 +118,41 @@ struct OutputOption {
             " -- output.feasible_solutions_capacity: " +  //
             utility::to_string(                           //
                 this->feasible_solutions_capacity, "%d"));
+
+        utility::print(                                                //
+            " -- output.is_enabled_print_search_behavior_summary: " +  //
+            utility::to_true_or_false(                                 //
+                this->is_enabled_print_search_behavior_summary));
+
+        utility::print(                                     //
+            " -- output.is_enabled_print_tree_summary: " +  //
+            utility::to_true_or_false(                      //
+                this->is_enabled_print_tree_summary));
+
+        utility::print(  //
+            " -- output.is_enabled_print_parallelization_controller_summary: " +  //
+            utility::to_true_or_false(  //
+                this->is_enabled_print_parallelization_controller_summary));
+
+        utility::print(                                                //
+            " -- output.is_enabled_print_variable_update_summary: " +  //
+            utility::to_true_or_false(                                 //
+                this->is_enabled_print_variable_update_summary));
+
+        utility::print(                                                     //
+            " -- output.is_enabled_print_constraint_violation_summary: " +  //
+            utility::to_true_or_false(                                      //
+                this->is_enabled_print_constraint_violation_summary));
+
+        utility::print(                                                      //
+            " -- output.is_enabled_print_violation_and_penalty_summary: " +  //
+            utility::to_true_or_false(                                       //
+                this->is_enabled_print_violation_and_penalty_summary));
+
+        utility::print(                                              //
+            " -- output.is_enabled_print_tabu_search_parameter: " +  //
+            utility::to_true_or_false(                               //
+                this->is_enabled_print_tabu_search_parameter));
     }
 
     /**************************************************************************/
@@ -84,6 +174,34 @@ struct OutputOption {
         read_json(                               //
             &this->feasible_solutions_capacity,  //
             "feasible_solutions_capacity", a_OBJECT);
+
+        read_json(                                            //
+            &this->is_enabled_print_search_behavior_summary,  //
+            "is_enabled_print_search_behavior_summary", a_OBJECT);
+
+        read_json(                                 //
+            &this->is_enabled_print_tree_summary,  //
+            "is_enabled_print_tree_summary", a_OBJECT);
+
+        read_json(                                                       //
+            &this->is_enabled_print_parallelization_controller_summary,  //
+            "is_enabled_print_parallelization_controller_summary", a_OBJECT);
+
+        read_json(                                            //
+            &this->is_enabled_print_variable_update_summary,  //
+            "is_enabled_print_variable_update_summary", a_OBJECT);
+
+        read_json(                                                 //
+            &this->is_enabled_print_constraint_violation_summary,  //
+            "is_enabled_print_constraint_violation_summary", a_OBJECT);
+
+        read_json(                                                  //
+            &this->is_enabled_print_violation_and_penalty_summary,  //
+            "is_enabled_print_violation_and_penalty_summary", a_OBJECT);
+
+        read_json(                                          //
+            &this->is_enabled_print_tabu_search_parameter,  //
+            "is_enabled_print_tabu_search_parameter", a_OBJECT);
     }
 
     /**************************************************************************/
@@ -104,6 +222,34 @@ struct OutputOption {
         obj.emplace_back(                   //
             "feasible_solutions_capacity",  //
             this->feasible_solutions_capacity);
+
+        obj.emplace_back(                                //
+            "is_enabled_print_search_behavior_summary",  //
+            this->is_enabled_print_search_behavior_summary);
+
+        obj.emplace_back(                     //
+            "is_enabled_print_tree_summary",  //
+            this->is_enabled_print_tree_summary);
+
+        obj.emplace_back(                                           //
+            "is_enabled_print_parallelization_controller_summary",  //
+            this->is_enabled_print_parallelization_controller_summary);
+
+        obj.emplace_back(                                //
+            "is_enabled_print_variable_update_summary",  //
+            this->is_enabled_print_variable_update_summary);
+
+        obj.emplace_back(                                     //
+            "is_enabled_print_constraint_violation_summary",  //
+            this->is_enabled_print_constraint_violation_summary);
+
+        obj.emplace_back(                                      //
+            "is_enabled_print_violation_and_penalty_summary",  //
+            this->is_enabled_print_violation_and_penalty_summary);
+
+        obj.emplace_back(                              //
+            "is_enabled_print_tabu_search_parameter",  //
+            this->is_enabled_print_tabu_search_parameter);
 
         return obj;
     }

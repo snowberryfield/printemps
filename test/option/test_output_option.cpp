@@ -39,6 +39,40 @@ TEST_F(TestOutputOption, initialize) {
     EXPECT_EQ(                                                      //
         OutputOptionConstant::DEFAULT_FEASIBLE_SOLUTIONS_CAPACITY,  //
         option.feasible_solutions_capacity);
+
+    EXPECT_EQ(  //
+        OutputOptionConstant::
+            DEFAULT_IS_ENABLED_PRINT_SEARCH_BEHAVIOR_SUMMARY,  //
+        option.is_enabled_print_search_behavior_summary);
+
+    EXPECT_EQ(                                                        //
+        OutputOptionConstant::DEFAULT_IS_ENABLED_PRINT_TREE_SUMMARY,  //
+        option.is_enabled_print_tree_summary);
+
+    EXPECT_EQ(  //
+        OutputOptionConstant::
+            DEFAULT_IS_ENABLED_PRINT_PARALLELIZATION_CONTROLLER_SUMMARY,  //
+        option.is_enabled_print_parallelization_controller_summary);
+
+    EXPECT_EQ(  //
+        OutputOptionConstant::
+            DEFAULT_IS_ENABLED_PRINT_VARIABLE_UPDATE_SUMMARY,  //
+        option.is_enabled_print_variable_update_summary);
+
+    EXPECT_EQ(  //
+        OutputOptionConstant::
+            DEFAULT_IS_ENABLED_PRINT_CONSTRAINT_VIOLATION_SUMMARY,  //
+        option.is_enabled_print_constraint_violation_summary);
+
+    EXPECT_EQ(  //
+        OutputOptionConstant::
+            DEFAULT_IS_ENABLED_PRINT_VIOLATION_AND_PENALTY_SUMMARY,  //
+        option.is_enabled_print_violation_and_penalty_summary);
+
+    EXPECT_EQ(  //
+        OutputOptionConstant::
+            DEFAULT_IS_ENABLED_PRINT_TABU_SEARCH_PARAMETER,  //
+        option.is_enabled_print_tabu_search_parameter);
 }
 
 }  // namespace

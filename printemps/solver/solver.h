@@ -366,7 +366,7 @@ class Solver {
             m_model_ptr->compute_naive_dual_bound());
 
         /**
-         * Create memory which stores updating count for each variable.
+         * Create memory which stores update count for each variable.
          */
         m_global_state.memory.setup(m_model_ptr);
 
@@ -480,9 +480,9 @@ class Solver {
 
         const int CONSTRAINT_PROXIES_SIZE =
             m_model_ptr->constraint_proxies().size();
-        const auto& CONSTRAIN_NAMED = m_model_ptr->constraint_names();
+        const auto& CONSTRAINT_NAMES = m_model_ptr->constraint_names();
         for (auto i = 0; i < CONSTRAINT_PROXIES_SIZE; i++) {
-            named_penalty_coefficients[CONSTRAIN_NAMED[i]] =
+            named_penalty_coefficients[CONSTRAINT_NAMES[i]] =
                 local_penalty_coefficient_proxies[i];
         }
         return named_penalty_coefficients;
@@ -492,12 +492,15 @@ class Solver {
     inline std::unordered_map<std::string, multi_array::ValueProxy<int>>
     export_named_update_counts(void) {
         std::unordered_map<std::string, multi_array::ValueProxy<int>>
-                    named_update_counts;
-        const int   PROXIES_SIZE   = m_model_ptr->variable_proxies().size();
+            named_update_counts;
+
+        auto update_count_proxies = m_model_ptr->export_update_count_proxies();
+
+        const int VARIABLE_PROXIES_SIZE =
+            m_model_ptr->variable_proxies().size();
         const auto& VARIABLE_NAMES = m_model_ptr->variable_names();
-        const auto& COUNTS         = m_global_state.memory.update_counts();
-        for (auto i = 0; i < PROXIES_SIZE; i++) {
-            named_update_counts[VARIABLE_NAMES[i]] = COUNTS[i];
+        for (auto i = 0; i < VARIABLE_PROXIES_SIZE; i++) {
+            named_update_counts[VARIABLE_NAMES[i]] = update_count_proxies[i];
         }
         return named_update_counts;
     }
@@ -506,12 +509,17 @@ class Solver {
     inline std::unordered_map<std::string, multi_array::ValueProxy<int>>
     export_named_violation_counts(void) {
         std::unordered_map<std::string, multi_array::ValueProxy<int>>
-                    named_violation_counts;
-        const int   PROXIES_SIZE     = m_model_ptr->constraint_proxies().size();
+            named_violation_counts;
+
+        auto violation_count_proxies =
+            m_model_ptr->export_violation_count_proxies();
+
+        const int CONSTRAINT_PROXIES_SIZE =
+            m_model_ptr->constraint_proxies().size();
         const auto& CONSTRAINT_NAMES = m_model_ptr->constraint_names();
-        const auto& COUNTS           = m_global_state.memory.violation_counts();
-        for (auto i = 0; i < PROXIES_SIZE; i++) {
-            named_violation_counts[CONSTRAINT_NAMES[i]] = COUNTS[i];
+        for (auto i = 0; i < CONSTRAINT_PROXIES_SIZE; i++) {
+            named_violation_counts[CONSTRAINT_NAMES[i]] =
+                violation_count_proxies[i];
         }
         return named_violation_counts;
     }

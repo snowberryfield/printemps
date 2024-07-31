@@ -180,17 +180,17 @@ class SelectionExtractor {
         auto raw_selections = this->extract_raw_selections();
 
         if (a_IS_SMALLER_ORDER) {
-            std::sort(raw_selections.begin(), raw_selections.end(),
-                      [](const auto &a_LHS, const auto &a_RHS) {
-                          return a_LHS.variable_ptrs.size() <
-                                 a_RHS.variable_ptrs.size();
-                      });
+            std::stable_sort(raw_selections.begin(), raw_selections.end(),
+                             [](const auto &a_LHS, const auto &a_RHS) {
+                                 return a_LHS.variable_ptrs.size() <
+                                        a_RHS.variable_ptrs.size();
+                             });
         } else {
-            std::sort(raw_selections.begin(), raw_selections.end(),
-                      [](const auto &a_LHS, const auto &a_RHS) {
-                          return a_LHS.variable_ptrs.size() >
-                                 a_RHS.variable_ptrs.size();
-                      });
+            std::stable_sort(raw_selections.begin(), raw_selections.end(),
+                             [](const auto &a_LHS, const auto &a_RHS) {
+                                 return a_LHS.variable_ptrs.size() >
+                                        a_RHS.variable_ptrs.size();
+                             });
         }
 
         std::vector<model_component::Variable<T_Variable, T_Expression> *>

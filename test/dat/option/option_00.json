@@ -79,7 +79,14 @@
         "verbose": 0,
         "is_enabled_write_trend": true,
         "is_enabled_store_feasible_solutions": true,
-        "feasible_solutions_capacity": 1
+        "feasible_solutions_capacity": 1,
+        "is_enabled_print_search_behavior_summary":false,
+        "is_enabled_print_tree_summary":false,
+        "is_enabled_print_parallelization_controller_summary":false,
+        "is_enabled_print_variable_update_summary":false,
+        "is_enabled_print_constraint_violation_summary":false,
+        "is_enabled_print_violation_and_penalty_summary":false,
+        "is_enabled_print_tabu_search_parameter":false
     },
     "pdlp": {
         "is_enabled": false,

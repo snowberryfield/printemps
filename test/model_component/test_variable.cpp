@@ -48,12 +48,20 @@ TEST_F(TestVariable, initialize) {
     EXPECT_EQ(constant::INT_HALF_MIN, variable.lower_bound());
     EXPECT_EQ(constant::INT_HALF_MAX, variable.upper_bound());
     EXPECT_FALSE(variable.has_bounds());
-    EXPECT_EQ(0.0, variable.lagrangian_coefficient());
+
     EXPECT_FALSE(variable.is_objective_improvable());
     EXPECT_FALSE(variable.is_feasibility_improvable());
     EXPECT_TRUE(variable.has_lower_bound_margin());
     EXPECT_TRUE(variable.has_upper_bound_margin());
+
+    EXPECT_EQ(
+        model_component::VariableConstant::INITIAL_LOCAL_LAST_UPDATE_ITERATION,
+        variable.local_last_update_iteration());
+    EXPECT_EQ(0, variable.global_last_update_iteration());
+    EXPECT_EQ(0, variable.update_count());
+
     EXPECT_EQ(model_component::VariableSense::Integer, variable.sense());
+    EXPECT_EQ(0.0, variable.lagrangian_coefficient());
     EXPECT_EQ(nullptr, variable.selection_ptr());
     EXPECT_TRUE(variable.related_constraint_ptrs().empty());
     EXPECT_TRUE(variable.related_binary_coefficient_constraint_ptrs().empty());
@@ -149,35 +157,6 @@ TEST_F(TestVariable, evaluate_arg_move) {
 }
 
 /*****************************************************************************/
-TEST_F(TestVariable, fix) {
-    auto variable = model_component::Variable<int, double>::create_instance();
-    variable.fix();
-    EXPECT_TRUE(variable.is_fixed());
-    variable.unfix();
-    EXPECT_FALSE(variable.is_fixed());
-}
-
-/*****************************************************************************/
-TEST_F(TestVariable, is_fixed) {
-    /// This method is tested in fix().
-}
-
-/*****************************************************************************/
-TEST_F(TestVariable, unfix) {
-    /// This method is tested in fix().
-}
-
-/*****************************************************************************/
-TEST_F(TestVariable, fix_by) {
-    auto variable = model_component::Variable<int, double>::create_instance();
-
-    auto value = random_integer();
-    variable.fix_by(value);
-    EXPECT_TRUE(variable.is_fixed());
-    EXPECT_EQ(value, variable.value());
-}
-
-/*****************************************************************************/
 TEST_F(TestVariable, set_bound) {
     auto variable = model_component::Variable<int, double>::create_instance();
 
@@ -220,19 +199,114 @@ TEST_F(TestVariable, has_bounds) {
 }
 
 /*****************************************************************************/
+TEST_F(TestVariable, set_lower_or_upper_bound) {
+    auto variable = model_component::Variable<int, double>::create_instance();
+    variable.set_bound(-10, 10);
+    variable.set_lower_or_upper_bound(true);
+    EXPECT_EQ(-10, variable.value());
+    variable.set_lower_or_upper_bound(false);
+    EXPECT_EQ(10, variable.value());
+}
+
+/*****************************************************************************/
 TEST_F(TestVariable, range) {
     /// This method is tested in set_bound().
 }
 
 /*****************************************************************************/
-TEST_F(TestVariable, set_lagrangian_coefficient) {
+TEST_F(TestVariable, set_local_last_update_iteration) {
     auto variable = model_component::Variable<int, double>::create_instance();
-    variable.set_lagrangian_coefficient(10.0);
-    EXPECT_FALSE(variable.has_bounds());
+
+    variable.set_local_last_update_iteration(10);
+    EXPECT_EQ(10, variable.local_last_update_iteration());
+    variable.reset_local_last_update_iteration();
+
+    EXPECT_EQ(
+        model_component::VariableConstant::INITIAL_LOCAL_LAST_UPDATE_ITERATION,
+        variable.local_last_update_iteration());
 }
+
 /*****************************************************************************/
-TEST_F(TestVariable, lagrangian_coefficient) {
-    /// This method is tested in lagrangian_coefficient().
+TEST_F(TestVariable, reset_local_last_update_iteration) {
+    /// This method is tested in set_local_last_update_iteration().
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, local_last_update_iteration) {
+    /// This method is tested in set_local_last_update_iteration().
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, set_global_last_update_iteration) {
+    auto variable = model_component::Variable<int, double>::create_instance();
+
+    variable.set_global_last_update_iteration(10);
+    EXPECT_EQ(10, variable.global_last_update_iteration());
+    variable.reset_global_last_update_iteration();
+
+    EXPECT_EQ(0, variable.global_last_update_iteration());
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, reset_global_last_update_iteration) {
+    /// This method is tested in set_global_last_update_iteration().
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, global_last_update_iteration) {
+    /// This method is tested in set_global_last_update_iteration().
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, increment_update_count) {
+    auto variable = model_component::Variable<int, double>::create_instance();
+
+    EXPECT_EQ(0, variable.update_count());
+    variable.increment_update_count();
+    EXPECT_EQ(1, variable.update_count());
+    variable.increment_update_count();
+    EXPECT_EQ(2, variable.update_count());
+    variable.increment_update_count();
+    EXPECT_EQ(0, variable.update_count());
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, reset_update_count) {
+    /// This method is tested in increment_update_count().
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, update_count) {
+    /// This method is tested in increment_update_count().
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, fix) {
+    auto variable = model_component::Variable<int, double>::create_instance();
+    variable.fix();
+    EXPECT_TRUE(variable.is_fixed());
+    variable.unfix();
+    EXPECT_FALSE(variable.is_fixed());
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, is_fixed) {
+    /// This method is tested in fix().
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, unfix) {
+    /// This method is tested in fix().
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, fix_by) {
+    auto variable = model_component::Variable<int, double>::create_instance();
+
+    auto value = random_integer();
+    variable.fix_by(value);
+    EXPECT_TRUE(variable.is_fixed());
+    EXPECT_EQ(value, variable.value());
 }
 
 /*****************************************************************************/
@@ -367,6 +441,41 @@ TEST_F(TestVariable, is_improvable) {
 }
 
 /*****************************************************************************/
+TEST_F(TestVariable, update_margin) {
+    auto variable = model_component::Variable<int, double>::create_instance();
+    variable.set_bound(-10, 10);
+    variable.set_value(-10);  /// includes update_margin()
+    EXPECT_FALSE(variable.has_lower_bound_margin());
+    EXPECT_TRUE(variable.has_upper_bound_margin());
+
+    variable.set_value_if_mutable(10);  /// includes update_margin()
+    EXPECT_TRUE(variable.has_lower_bound_margin());
+    EXPECT_FALSE(variable.has_upper_bound_margin());
+
+    variable.set_bound(-100, 100);  /// includes update_margin()
+    EXPECT_TRUE(variable.has_lower_bound_margin());
+    EXPECT_TRUE(variable.has_upper_bound_margin());
+
+    variable = -100;  /// includes update_margin()
+    EXPECT_FALSE(variable.has_lower_bound_margin());
+    EXPECT_TRUE(variable.has_upper_bound_margin());
+
+    variable.fix_by(100);  /// includes update_margin()
+    EXPECT_TRUE(variable.has_lower_bound_margin());
+    EXPECT_FALSE(variable.has_upper_bound_margin());
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, has_lower_bound_margin) {
+    /// This method is tested in update_margin().
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, has_upper_bound_margin) {
+    /// This method is tested in update_margin().
+}
+
+/*****************************************************************************/
 TEST_F(TestVariable, set_sense) {
     auto variable = model_component::Variable<int, double>::create_instance();
     variable.set_sense(model_component::VariableSense::Binary);
@@ -393,6 +502,17 @@ TEST_F(TestVariable, set_sense) {
 }
 
 /*****************************************************************************/
+TEST_F(TestVariable, setup_sense_binary_or_integer) {
+    auto variable = model_component::Variable<int, double>::create_instance();
+    variable.set_bound(0, 1);
+    model_component::Selection<int, double> selection;
+    variable.set_selection_ptr(&selection);
+    EXPECT_EQ(model_component::VariableSense::Selection, variable.sense());
+    variable.setup_sense_binary_or_integer();
+    EXPECT_EQ(model_component::VariableSense::Binary, variable.sense());
+}
+
+/*****************************************************************************/
 TEST_F(TestVariable, sense) {
     /// This method is tested in set_sense().
 }
@@ -403,14 +523,14 @@ TEST_F(TestVariable, sense_label) {
 }
 
 /*****************************************************************************/
-TEST_F(TestVariable, setup_sense_binary_or_integer) {
+TEST_F(TestVariable, set_lagrangian_coefficient) {
     auto variable = model_component::Variable<int, double>::create_instance();
-    variable.set_bound(0, 1);
-    model_component::Selection<int, double> selection;
-    variable.set_selection_ptr(&selection);
-    EXPECT_EQ(model_component::VariableSense::Selection, variable.sense());
-    variable.setup_sense_binary_or_integer();
-    EXPECT_EQ(model_component::VariableSense::Binary, variable.sense());
+    variable.set_lagrangian_coefficient(10.0);
+    EXPECT_FALSE(variable.has_bounds());
+}
+/*****************************************************************************/
+TEST_F(TestVariable, lagrangian_coefficient) {
+    /// This method is tested in lagrangian_coefficient().
 }
 
 /*****************************************************************************/
@@ -528,6 +648,11 @@ TEST_F(TestVariable, reset_related_constraint_ptrs) {
 }
 
 /*****************************************************************************/
+TEST_F(TestVariable, sort_and_unique_related_constraint_ptrs) {
+    /// This method is tested in register_related_constraint_ptr().
+}
+
+/*****************************************************************************/
 TEST_F(TestVariable, related_constraint_ptrs) {
     /// This method is tested in register_related_constraint_ptr().
 }
@@ -548,6 +673,36 @@ TEST_F(TestVariable, reset_setup_binary_coefficient_constraint_ptrs) {
 TEST_F(TestVariable, related_binary_coefficient_constraint_ptrs) {
     /// This method is tested in
     /// Model.setup_variable_related_binary_coefficient_constraint_ptrs().
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, set_dependent_expression_ptr) {
+    auto variable = model_component::Variable<int, double>::create_instance();
+    auto expression =
+        model_component::Expression<int, double>::create_instance();
+
+    EXPECT_EQ(model_component::VariableSense::Integer, variable.sense());
+    EXPECT_EQ(nullptr, variable.dependent_expression_ptr());
+
+    variable.set_dependent_expression_ptr(&expression);
+
+    EXPECT_EQ(model_component::VariableSense::DependentInteger,
+              variable.sense());
+    EXPECT_EQ(&expression, variable.dependent_expression_ptr());
+
+    variable.reset_dependent_expression_ptr();
+    EXPECT_EQ(model_component::VariableSense::Integer, variable.sense());
+    EXPECT_EQ(nullptr, variable.dependent_expression_ptr());
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, reset_dependent_constraint_ptr) {
+    /// This method is tested in setup_uniform_sensitivity().
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, dependent_constraint_ptr) {
+    /// This method is tested in setup_uniform_sensitivity().
 }
 
 /*****************************************************************************/
@@ -594,6 +749,19 @@ TEST_F(TestVariable, constraint_sensitivities) {
 }
 
 /*****************************************************************************/
+TEST_F(TestVariable, set_objective_sensitivity) {
+    auto variable = model_component::Variable<int, double>::create_instance();
+    EXPECT_EQ(0.0, variable.objective_sensitivity());
+    variable.set_objective_sensitivity(100.0);
+    EXPECT_EQ(100.0, variable.objective_sensitivity());
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, objective_sensitivity) {
+    /// This method is tested in set_objective_sensitivity().
+}
+
+/*****************************************************************************/
 TEST_F(TestVariable, setup_hash) {
     model::Model<int, double> model;
 
@@ -617,49 +785,6 @@ TEST_F(TestVariable, setup_hash) {
         std::uint64_t hash = reinterpret_cast<std::uint64_t>(&g(0));
         EXPECT_EQ(hash, x(1).hash());
     }
-}
-
-/*****************************************************************************/
-TEST_F(TestVariable, set_dependent_expression_ptr) {
-    auto variable = model_component::Variable<int, double>::create_instance();
-    auto expression =
-        model_component::Expression<int, double>::create_instance();
-
-    EXPECT_EQ(model_component::VariableSense::Integer, variable.sense());
-    EXPECT_EQ(nullptr, variable.dependent_expression_ptr());
-
-    variable.set_dependent_expression_ptr(&expression);
-
-    EXPECT_EQ(model_component::VariableSense::DependentInteger,
-              variable.sense());
-    EXPECT_EQ(&expression, variable.dependent_expression_ptr());
-
-    variable.reset_dependent_expression_ptr();
-    EXPECT_EQ(model_component::VariableSense::Integer, variable.sense());
-    EXPECT_EQ(nullptr, variable.dependent_expression_ptr());
-}
-
-/*****************************************************************************/
-TEST_F(TestVariable, reset_dependent_constraint_ptr) {
-    /// This method is tested in setup_uniform_sensitivity().
-}
-
-/*****************************************************************************/
-TEST_F(TestVariable, dependent_constraint_ptr) {
-    /// This method is tested in setup_uniform_sensitivity().
-}
-
-/*****************************************************************************/
-TEST_F(TestVariable, set_objective_sensitivity) {
-    auto variable = model_component::Variable<int, double>::create_instance();
-    EXPECT_EQ(0.0, variable.objective_sensitivity());
-    variable.set_objective_sensitivity(100.0);
-    EXPECT_EQ(100.0, variable.objective_sensitivity());
-}
-
-/*****************************************************************************/
-TEST_F(TestVariable, objective_sensitivity) {
-    /// This method is tested in set_objective_sensitivity().
 }
 
 /*****************************************************************************/
@@ -691,51 +816,6 @@ TEST_F(TestVariable, related_selection_constraint_ptr_index_min) {
 TEST_F(TestVariable, related_selection_constraint_ptr_index_max) {
     /// This method is tested in
     /// TestModel.setup_related_selection_constraint_ptr_index().
-}
-
-/*****************************************************************************/
-TEST_F(TestVariable, update_margin) {
-    auto variable = model_component::Variable<int, double>::create_instance();
-    variable.set_bound(-10, 10);
-    variable.set_value(-10);  /// includes update_margin()
-    EXPECT_FALSE(variable.has_lower_bound_margin());
-    EXPECT_TRUE(variable.has_upper_bound_margin());
-
-    variable.set_value_if_mutable(10);  /// includes update_margin()
-    EXPECT_TRUE(variable.has_lower_bound_margin());
-    EXPECT_FALSE(variable.has_upper_bound_margin());
-
-    variable.set_bound(-100, 100);  /// includes update_margin()
-    EXPECT_TRUE(variable.has_lower_bound_margin());
-    EXPECT_TRUE(variable.has_upper_bound_margin());
-
-    variable = -100;  /// includes update_margin()
-    EXPECT_FALSE(variable.has_lower_bound_margin());
-    EXPECT_TRUE(variable.has_upper_bound_margin());
-
-    variable.fix_by(100);  /// includes update_margin()
-    EXPECT_TRUE(variable.has_lower_bound_margin());
-    EXPECT_FALSE(variable.has_upper_bound_margin());
-}
-
-/*****************************************************************************/
-TEST_F(TestVariable, has_lower_bound_margin) {
-    /// This method is tested in update_margin().
-}
-
-/*****************************************************************************/
-TEST_F(TestVariable, has_upper_bound_margin) {
-    /// This method is tested in update_margin().
-}
-
-/*****************************************************************************/
-TEST_F(TestVariable, set_lower_or_upper_bound) {
-    auto variable = model_component::Variable<int, double>::create_instance();
-    variable.set_bound(-10, 10);
-    variable.set_lower_or_upper_bound(true);
-    EXPECT_EQ(-10, variable.value());
-    variable.set_lower_or_upper_bound(false);
-    EXPECT_EQ(10, variable.value());
 }
 
 /*****************************************************************************/

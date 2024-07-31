@@ -49,15 +49,20 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     T_Expression    m_violation_value;
     T_Expression    m_positive_part;
     T_Expression    m_negative_part;
-    bool            m_is_linear;
-    bool            m_is_integer;
-    bool            m_is_enabled;
-    bool            m_is_less_or_equal;     /// <= or ==
-    bool            m_is_greater_or_equal;  /// >= or ==
 
     double m_local_penalty_coefficient_less;
     double m_local_penalty_coefficient_greater;
     double m_global_penalty_coefficient;
+
+    Variable<T_Variable, T_Expression> *m_key_variable_ptr;
+
+    int m_violation_count;
+
+    bool m_is_linear;
+    bool m_is_integer;
+    bool m_is_enabled;
+    bool m_is_less_or_equal;     /// <= or ==
+    bool m_is_greater_or_equal;  /// >= or ==
 
     bool m_is_user_defined_selection;
 
@@ -79,21 +84,21 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     bool m_is_cardinality;
     bool m_is_invariant_knapsack;
     bool m_is_multiple_covering;
-    bool m_is_equation_knapsack;
     bool m_is_binary_flow;
     bool m_is_integer_flow;
     bool m_is_soft_selection;
     bool m_is_min_max;
     bool m_is_max_min;
     bool m_is_intermediate;
+    bool m_is_equation_knapsack;
     bool m_is_bin_packing;
     bool m_is_knapsack;
     bool m_is_integer_knapsack;
     bool m_is_gf2;
     bool m_is_general_linear;
-    bool m_has_only_binary_coefficient;
+    bool m_is_nonlinear;
 
-    Variable<T_Variable, T_Expression> *m_key_variable_ptr;
+    bool m_has_only_binary_coefficient;
 
     /*************************************************************************/
     /// Default constructor
@@ -209,21 +214,27 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         };
 
         m_expression.initialize();
-        m_sense                             = ConstraintSense::Less;
-        m_constraint_value                  = 0;
-        m_violation_value                   = 0;
-        m_positive_part                     = 0;
-        m_negative_part                     = 0;
-        m_is_linear                         = true;
-        m_is_integer                        = false;
-        m_is_enabled                        = true;
-        m_is_less_or_equal                  = false;
-        m_is_greater_or_equal               = false;
+        m_sense            = ConstraintSense::Less;
+        m_constraint_value = 0;
+        m_violation_value  = 0;
+        m_positive_part    = 0;
+        m_negative_part    = 0;
+
         m_local_penalty_coefficient_less    = HUGE_VALF;
         m_local_penalty_coefficient_greater = HUGE_VALF;
         m_global_penalty_coefficient        = HUGE_VALF;
 
+        m_key_variable_ptr = nullptr;
+        m_violation_count  = 0;
+
+        m_is_linear           = true;
+        m_is_integer          = false;
+        m_is_enabled          = true;
+        m_is_less_or_equal    = false;
+        m_is_greater_or_equal = false;
+
         m_is_user_defined_selection = false;
+
         this->clear_constraint_type();
     }
 
@@ -247,18 +258,19 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         m_is_cardinality                  = false;
         m_is_invariant_knapsack           = false;
         m_is_multiple_covering            = false;
-        m_is_equation_knapsack            = false;
         m_is_binary_flow                  = false;
         m_is_integer_flow                 = false;
         m_is_soft_selection               = false;
         m_is_min_max                      = false;
         m_is_max_min                      = false;
         m_is_intermediate                 = false;
+        m_is_equation_knapsack            = false;
         m_is_bin_packing                  = false;
         m_is_knapsack                     = false;
         m_is_integer_knapsack             = false;
         m_is_gf2                          = false;
         m_is_general_linear               = false;
+        m_is_nonlinear                    = false;
 
         m_has_only_binary_coefficient = false;
 
@@ -277,9 +289,10 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         m_violation_value  = 0;
         m_positive_part    = 0;
         m_negative_part    = 0;
-        m_is_linear        = false;
-        m_is_integer       = false;
-        m_is_enabled       = true;
+
+        m_is_linear  = false;
+        m_is_integer = false;
+        m_is_enabled = true;
 
         this->clear_constraint_type();
 
@@ -339,9 +352,10 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         m_violation_value  = 0;
         m_positive_part    = 0;
         m_negative_part    = 0;
-        m_is_linear        = true;
-        m_is_integer       = true;
-        m_is_enabled       = true;
+
+        m_is_linear  = true;
+        m_is_integer = true;
+        m_is_enabled = true;
 
         auto is_integer = [](const T_Expression a_VALUE) {
             return fabs(a_VALUE - floor(a_VALUE)) < constant::EPSILON_10;
@@ -407,6 +421,11 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     /*************************************************************************/
     inline void setup_constraint_type(void) {
         this->clear_constraint_type();
+
+        if (!m_is_linear) {
+            m_is_nonlinear = true;
+            return;
+        }
 
         /// Singleton
         if (m_expression.sensitivities().size() == 1) {
@@ -1179,6 +1198,27 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
+    inline Variable<T_Variable, T_Expression> *key_variable_ptr(void) const {
+        return const_cast<Variable<T_Variable, T_Expression> *>(
+            m_key_variable_ptr);
+    }
+
+    /*************************************************************************/
+    inline void increment_violation_count(void) noexcept {
+        m_violation_count++;
+    }
+
+    /*************************************************************************/
+    inline void reset_violation_count(void) noexcept {
+        m_violation_count = 0;
+    }
+
+    /*************************************************************************/
+    inline long violation_count(void) const noexcept {
+        return m_violation_count;
+    }
+
+    /*************************************************************************/
     inline bool is_user_defined_selection(void) const noexcept {
         return m_is_user_defined_selection;
     }
@@ -1197,6 +1237,31 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     /*************************************************************************/
     inline bool is_integer(void) const noexcept {
         return m_is_integer;
+    }
+
+    /*************************************************************************/
+    inline void enable(void) noexcept {
+        m_is_enabled = true;
+    }
+
+    /*************************************************************************/
+    inline void disable(void) noexcept {
+        m_is_enabled = false;
+    }
+
+    /*************************************************************************/
+    inline bool is_enabled(void) const noexcept {
+        return m_is_enabled;
+    }
+
+    /*************************************************************************/
+    inline bool is_less_or_equal(void) const noexcept {
+        return m_is_less_or_equal;
+    }
+
+    /*************************************************************************/
+    inline bool is_greater_or_equal(void) const noexcept {
+        return m_is_greater_or_equal;
     }
 
     /*************************************************************************/
@@ -1350,39 +1415,141 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
+    inline bool is_nonlinear(void) const noexcept {
+        return m_is_nonlinear;
+    }
+
+    /*************************************************************************/
     inline bool has_only_binary_coefficient(void) const noexcept {
         return m_has_only_binary_coefficient;
     }
 
     /*************************************************************************/
-    inline bool is_enabled(void) const noexcept {
-        return m_is_enabled;
-    }
+    inline std::string type(void) const noexcept {
+        if (m_is_singleton) {
+            return "Singleton";
+        }
 
-    /*************************************************************************/
-    inline bool is_less_or_equal(void) const noexcept {
-        return m_is_less_or_equal;
-    }
+        if (m_is_exclusive_or) {
+            return "Exclusive OR";
+        }
 
-    /*************************************************************************/
-    inline bool is_greater_or_equal(void) const noexcept {
-        return m_is_greater_or_equal;
-    }
+        if (m_is_exclusive_nor) {
+            return "Exclusive NOR";
+        }
 
-    /*************************************************************************/
-    inline void enable(void) noexcept {
-        m_is_enabled = true;
-    }
+        if (m_is_inverted_integers) {
+            return "Inverted Integers";
+        }
 
-    /*************************************************************************/
-    inline void disable(void) noexcept {
-        m_is_enabled = false;
-    }
+        if (m_is_balanced_integers) {
+            return "Balanced Integers";
+        }
 
-    /*************************************************************************/
-    inline Variable<T_Variable, T_Expression> *key_variable_ptr(void) const {
-        return const_cast<Variable<T_Variable, T_Expression> *>(
-            m_key_variable_ptr);
+        if (m_is_constant_sum_integers) {
+            return "Constant Sum Integers";
+        }
+
+        if (m_is_constant_difference_integers) {
+            return "Constant Difference Integers";
+        }
+
+        if (m_is_constant_ratio_integers) {
+            return "Constant Ratio Integers";
+        }
+
+        if (m_is_aggregation) {
+            return "Aggregation";
+        }
+
+        if (m_is_precedence) {
+            return "Precedence";
+        }
+
+        if (m_is_variable_bound) {
+            return "Variable Bound";
+        }
+
+        if (m_is_trinomial_exclusive_nor) {
+            return "Trinomial Exclusive NOR";
+        }
+
+        if (m_is_set_partitioning) {
+            return "Set Partitioning";
+        }
+
+        if (m_is_set_packing) {
+            return "Set Packing";
+        }
+
+        if (m_is_set_covering) {
+            return "Set Covering";
+        }
+
+        if (m_is_cardinality) {
+            return "Cardinality";
+        }
+
+        if (m_is_invariant_knapsack) {
+            return "Invariant Knapsack";
+        }
+
+        if (m_is_multiple_covering) {
+            return "Multiple Covering";
+        }
+
+        if (m_is_binary_flow) {
+            return "Binary Flow";
+        }
+
+        if (m_is_integer_flow) {
+            return "Integer Flow";
+        }
+
+        if (m_is_soft_selection) {
+            return "Soft Selection";
+        }
+
+        if (m_is_min_max) {
+            return "Min-Max";
+        }
+
+        if (m_is_max_min) {
+            return "Max-Min";
+        }
+
+        if (m_is_intermediate) {
+            return "Intermediate";
+        }
+
+        if (m_is_equation_knapsack) {
+            return "Equation Knapsack";
+        }
+
+        if (m_is_bin_packing) {
+            return "Bin Packing";
+        }
+
+        if (m_is_knapsack) {
+            return "Knapsack";
+        }
+
+        if (m_is_integer_knapsack) {
+            return "Integer Knapsack";
+        }
+
+        if (m_is_gf2) {
+            return "GF(2)";
+        }
+
+        if (m_is_general_linear) {
+            return "General Linear";
+        }
+
+        if (m_is_nonlinear) {
+            return "Non-Linear";
+        }
+        return "Unknown";
     }
 };
 using IPConstraint = Constraint<int, double>;
