@@ -12,7 +12,7 @@ find_package(Threads REQUIRED)
 
 ExternalProject_Add(
     ${PROJECT_NAME}
-    URL https://github.com/google/googletest/archive/release-1.8.0.tar.gz
+    URL https://github.com/google/googletest/releases/download/v1.15.2/googletest-1.15.2.tar.gz
     PREFIX ${BUILD_DIR}
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR}
     CMAKE_ARGS -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
