@@ -553,6 +553,12 @@ class LocalSearchCore {
                     m_model_ptr->evaluate_single(&trial_solution_scores[i],  //
                                                  *TRIAL_MOVE_PTRS[i],        //
                                                  CURRENT_SOLUTION_SCORE);
+                } else if (TRIAL_MOVE_PTRS[i]->is_selection_move) {
+                    m_model_ptr->evaluate_selection(  //
+                        &trial_solution_scores[i],    //
+                        *TRIAL_MOVE_PTRS[i],          //
+                        CURRENT_SOLUTION_SCORE);
+
                 } else {
                     m_model_ptr->evaluate_multi(    //
                         &trial_solution_scores[i],  //
