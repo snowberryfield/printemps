@@ -68,6 +68,7 @@ struct PrimalDualState {
 
     /*************************************************************************/
     inline void setup(const int a_SIZE) {
+        this->objective               = 0.0;
         this->absolute_violation_norm = 0.0;
         this->relative_violation_norm = 0.0;
 
