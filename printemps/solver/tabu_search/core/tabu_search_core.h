@@ -160,7 +160,7 @@ class TabuSearchCore {
             }
         }
 
-        if (m_model_ptr->is_linear() && m_model_ptr->is_feasible()) {
+        if (m_model_ptr->is_feasible()) {
             /**
              * NOTE: If the current solution is feasible and there is no
              * improvable solution, the solution should be an optimum. It can
@@ -245,8 +245,7 @@ class TabuSearchCore {
         bool accept_objective_improvable   = true;
         bool accept_feasibility_improvable = true;
 
-        if (!m_model_ptr->is_linear() ||
-            m_option.neighborhood.improvability_screening_mode ==
+        if (m_option.neighborhood.improvability_screening_mode ==
                 option::improvability_screening_mode::Off) {
             m_model_ptr->neighborhood().update_moves(
                 accept_all,                     //
@@ -851,7 +850,7 @@ class TabuSearchCore {
                  * fast or ordinary(slow) evaluation methods.
                  */
 #ifndef _PRINTEMPS_LINEAR_MINIMIZATION
-                if (m_model_ptr->is_enabled_fast_evaluation()) {
+                if (m_option.general.is_enabled_fast_evaluation) {
 #endif
                     if (TRIAL_MOVE_PTRS[i]->is_univariable_move) {
                         m_model_ptr->evaluate_single(
@@ -929,7 +928,6 @@ class TabuSearchCore {
              * solution.
              */
             if (m_option.neighborhood.is_enabled_integer_step_size_adjuster &&
-                m_model_ptr->is_enabled_fast_evaluation() &&
                 move_ptr->sense == neighborhood::MoveSense::Integer &&
                 trial_solution_scores[SELECTED_INDEX]
                         .global_augmented_objective <

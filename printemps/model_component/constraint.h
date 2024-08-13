@@ -30,18 +30,6 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
      */
 
    public:
-    std::function<T_Expression(
-        const neighborhood::Move<T_Variable, T_Expression> &)>
-        m_function;
-
-    std::function<T_Expression(
-        const neighborhood::Move<T_Variable, T_Expression> &)>
-        m_constraint_function;
-
-    std::function<T_Expression(
-        const neighborhood::Move<T_Variable, T_Expression> &)>
-        m_violation_function;
-
     Expression<T_Variable, T_Expression> m_expression;
 
     ConstraintSense m_sense;
@@ -58,7 +46,6 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
 
     int m_violation_count;
 
-    bool m_is_linear;
     bool m_is_integer;
     bool m_is_enabled;
     bool m_is_less_or_equal;     /// <= or ==
@@ -96,7 +83,6 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     bool m_is_integer_knapsack;
     bool m_is_gf2;
     bool m_is_general_linear;
-    bool m_is_nonlinear;
 
     bool m_has_only_binary_coefficient;
 
@@ -111,14 +97,6 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     Constraint(const Constraint<T_Variable, T_Expression> &) = default;
 
     /*************************************************************************/
-    Constraint(
-        const std::function<T_Expression(
-            const neighborhood::Move<T_Variable, T_Expression> &)> &a_FUNCTION,
-        const ConstraintSense                                       a_SENSE) {
-        this->setup(a_FUNCTION, a_SENSE);
-    }
-
-    /*************************************************************************/
     Constraint(const Expression<T_Variable, T_Expression> &a_EXPRESSION,
                const ConstraintSense                       a_SENSE) {
         this->setup(a_EXPRESSION, a_SENSE);
@@ -129,11 +107,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     /// Copy assignment
     Constraint<T_Variable, T_Expression> &operator=(
         const Constraint<T_Variable, T_Expression> &a_CONSTRAINT) {
-        if (a_CONSTRAINT.m_is_linear) {
-            this->setup(a_CONSTRAINT.m_expression, a_CONSTRAINT.m_sense);
-        } else {
-            this->setup(a_CONSTRAINT.m_function, a_CONSTRAINT.m_sense);
-        }
+        this->setup(a_CONSTRAINT.m_expression, a_CONSTRAINT.m_sense);
         return *this;
     }
 
@@ -151,12 +125,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         if (this == &a_constraint) {
             return *this;
         }
-
-        if (a_constraint.is_linear()) {
-            this->setup(a_constraint.m_expression, a_constraint.m_sense);
-        } else {
-            this->setup(a_constraint.m_function, a_constraint.m_sense);
-        }
+        this->setup(a_constraint.m_expression, a_constraint.m_sense);
         return *this;
     }
 
@@ -167,19 +136,6 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
          * be called.
          */
         Constraint<T_Variable, T_Expression> constraint;
-        return constraint;
-    }
-
-    /*************************************************************************/
-    inline static Constraint<T_Variable, T_Expression> create_instance(
-        const std::function<T_Expression(
-            const neighborhood::Move<T_Variable, T_Expression> &)> &a_FUNCTION,
-        const ConstraintSense                                       a_SENSE) {
-        /**
-         * When instantiation, instead of constructor, create_instance() should
-         * be called.
-         */
-        Constraint<T_Variable, T_Expression> constraint(a_FUNCTION, a_SENSE);
         return constraint;
     }
 
@@ -198,21 +154,6 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     /*************************************************************************/
     void initialize(void) {
         multi_array::AbstractMultiArrayElement::initialize();
-
-        m_function =  //
-            []([[maybe_unused]] const neighborhood::Move<
-                T_Variable, T_Expression> &a_MOVE) {
-                return static_cast<T_Expression>(0);
-            };
-        m_constraint_function = []([[maybe_unused]] const neighborhood::Move<
-                                    T_Variable, T_Expression> &a_MOVE) {
-            return static_cast<T_Expression>(0);
-        };
-        m_violation_function = []([[maybe_unused]] const neighborhood::Move<
-                                   T_Variable, T_Expression> &a_MOVE) {
-            return static_cast<T_Expression>(0);
-        };
-
         m_expression.initialize();
         m_sense            = ConstraintSense::Less;
         m_constraint_value = 0;
@@ -227,7 +168,6 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         m_key_variable_ptr = nullptr;
         m_violation_count  = 0;
 
-        m_is_linear           = true;
         m_is_integer          = false;
         m_is_enabled          = true;
         m_is_less_or_equal    = false;
@@ -270,82 +210,14 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         m_is_integer_knapsack             = false;
         m_is_gf2                          = false;
         m_is_general_linear               = false;
-        m_is_nonlinear                    = false;
 
         m_has_only_binary_coefficient = false;
-
-        m_key_variable_ptr = nullptr;
-    }
-
-    /*************************************************************************/
-    inline void setup(
-        const std::function<T_Expression(
-            const neighborhood::Move<T_Variable, T_Expression> &)> &a_FUNCTION,
-        const ConstraintSense                                       a_SENSE) {
-        m_function = a_FUNCTION;
-        m_expression.initialize();
-        m_sense            = a_SENSE;
-        m_constraint_value = 0;
-        m_violation_value  = 0;
-        m_positive_part    = 0;
-        m_negative_part    = 0;
-
-        m_is_linear  = false;
-        m_is_integer = false;
-        m_is_enabled = true;
-
-        this->clear_constraint_type();
-
-        m_constraint_function =
-            [this](const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) {
-                return m_function(a_MOVE);
-            };
-
-        switch (m_sense) {
-            case ConstraintSense::Less: {
-                m_violation_function =
-                    [this](const neighborhood::Move<T_Variable, T_Expression>
-                               &a_MOVE) {
-                        return std::max(m_function(a_MOVE),
-                                        static_cast<T_Expression>(0));
-                    };
-                m_is_less_or_equal    = true;
-                m_is_greater_or_equal = false;
-                break;
-            }
-            case ConstraintSense::Equal: {
-                m_violation_function =
-                    [this](const neighborhood::Move<T_Variable, T_Expression> &
-                               a_MOVE) { return std::abs(m_function(a_MOVE)); };
-                m_is_less_or_equal    = true;
-                m_is_greater_or_equal = true;
-                break;
-            }
-            case ConstraintSense::Greater: {
-                m_violation_function =
-                    [this](const neighborhood::Move<T_Variable, T_Expression>
-                               &a_MOVE) {
-                        return std::max(-m_function(a_MOVE),
-                                        static_cast<T_Expression>(0));
-                    };
-                m_is_less_or_equal    = false;
-                m_is_greater_or_equal = true;
-                break;
-            }
-            default: {
-                break;
-            }
-        }
+        m_key_variable_ptr            = nullptr;
     }
 
     /*************************************************************************/
     inline void setup(const Expression<T_Variable, T_Expression> &a_EXPRESSION,
                       const ConstraintSense                       a_SENSE) {
-        m_function =  //
-            []([[maybe_unused]] const neighborhood::Move<
-                T_Variable, T_Expression> &a_MOVE) {
-                return static_cast<T_Expression>(0);
-            };
         m_expression       = a_EXPRESSION;
         m_sense            = a_SENSE;
         m_constraint_value = 0;
@@ -353,7 +225,6 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         m_positive_part    = 0;
         m_negative_part    = 0;
 
-        m_is_linear  = true;
         m_is_integer = true;
         m_is_enabled = true;
 
@@ -374,46 +245,26 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
 
         this->clear_constraint_type();
 
-        m_constraint_function =
-            [this](const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) {
-                return m_expression.evaluate(a_MOVE);
-            };
-
         switch (m_sense) {
             case ConstraintSense::Less: {
-                m_violation_function =
-                    [this](const neighborhood::Move<T_Variable, T_Expression>
-                               &a_MOVE) {
-                        return std::max(m_expression.evaluate(a_MOVE),
-                                        static_cast<T_Expression>(0));
-                    };
                 m_is_less_or_equal    = true;
                 m_is_greater_or_equal = false;
                 break;
             }
             case ConstraintSense::Equal: {
-                m_violation_function =
-                    [this](const neighborhood::Move<T_Variable, T_Expression>
-                               &a_MOVE) {
-                        return std::abs(m_expression.evaluate(a_MOVE));
-                    };
                 m_is_less_or_equal    = true;
                 m_is_greater_or_equal = true;
                 break;
             }
             case ConstraintSense::Greater: {
-                m_violation_function =
-                    [this](const neighborhood::Move<T_Variable, T_Expression>
-                               &a_MOVE) {
-                        return std::max(-m_expression.evaluate(a_MOVE),
-                                        static_cast<T_Expression>(0));
-                    };
                 m_is_less_or_equal    = false;
                 m_is_greater_or_equal = true;
                 break;
             }
             default: {
-                break;
+                throw std::logic_error(utility::format_error_location(
+                    __FILE__, __LINE__, __func__,
+                    "Constraint sense is invalid."));
             }
         }
     }
@@ -421,12 +272,6 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     /*************************************************************************/
     inline void setup_constraint_type(void) {
         this->clear_constraint_type();
-
-        if (!m_is_linear) {
-            m_is_nonlinear = true;
-            return;
-        }
-
         /// Singleton
         if (m_expression.sensitivities().size() == 1) {
             m_is_singleton = true;
@@ -1033,41 +878,14 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
 
     /*************************************************************************/
     inline T_Expression evaluate_constraint(void) const noexcept {
-#ifdef _PRINTEMPS_LINEAR_MINIMIZATION
         return m_expression.evaluate({});
-#else
-        return m_constraint_function({});
-#endif
     }
 
     /*************************************************************************/
     inline T_Expression evaluate_constraint(
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
         noexcept {
-#ifdef _PRINTEMPS_LINEAR_MINIMIZATION
         return m_expression.evaluate(a_MOVE);
-#else
-        return m_constraint_function(a_MOVE);
-#endif
-    }
-
-    /*************************************************************************/
-    inline T_Expression evaluate_violation(void) const noexcept {
-        return m_violation_function({});
-    }
-
-    /*************************************************************************/
-    inline T_Expression evaluate_violation(
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
-        noexcept {
-        return m_violation_function(a_MOVE);
-    }
-
-    /*************************************************************************/
-    inline T_Expression evaluate_violation_diff(
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
-        noexcept {
-        return m_violation_function(a_MOVE) - m_violation_value;
     }
 
     /*************************************************************************/
@@ -1075,19 +893,27 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         /**
          * m_expression must be updated at first.
          */
-#ifdef _PRINTEMPS_LINEAR_MINIMIZATION
         m_expression.update();
-#else
-        if (m_is_linear) {
-            m_expression.update();
-        }
-#endif
-        m_constraint_value = m_constraint_function({});
-        m_violation_value  = m_violation_function({});
+        m_constraint_value = m_expression.evaluate({});
+
         m_positive_part =
             std::max(m_constraint_value, static_cast<T_Expression>(0));
         m_negative_part =
             -std::min(m_constraint_value, static_cast<T_Expression>(0));
+        switch (m_sense) {
+            case ConstraintSense::Less: {
+                m_violation_value = m_positive_part;
+                break;
+            }
+            case ConstraintSense::Equal: {
+                m_violation_value = m_positive_part + m_negative_part;
+                break;
+            }
+            case ConstraintSense::Greater: {
+                m_violation_value = m_negative_part;
+                break;
+            }
+        }
     }
 
     /*************************************************************************/
@@ -1097,20 +923,31 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
          * m_expression must be updated after m_constraint_value and
          * m_violation.
          */
-        m_constraint_value = m_constraint_function(a_MOVE);
-        m_violation_value  = m_violation_function(a_MOVE);
+        m_constraint_value = m_expression.evaluate(a_MOVE);
         m_positive_part =
             std::max(m_constraint_value, static_cast<T_Expression>(0));
         m_negative_part =
             -std::min(m_constraint_value, static_cast<T_Expression>(0));
-
-#ifdef _PRINTEMPS_LINEAR_MINIMIZATION
-        m_expression.update(a_MOVE);
-#else
-        if (m_is_linear) {
-            m_expression.update(a_MOVE);
+        switch (m_sense) {
+            case ConstraintSense::Less: {
+                m_violation_value = m_positive_part;
+                break;
+            }
+            case ConstraintSense::Equal: {
+                m_violation_value = m_positive_part + m_negative_part;
+                break;
+            }
+            case ConstraintSense::Greater: {
+                m_violation_value = m_negative_part;
+                break;
+            }
+            default: {
+                throw std::logic_error(utility::format_error_location(
+                    __FILE__, __LINE__, __func__,
+                    "Constraint sense is invalid."));
+            }
         }
-#endif
+        m_expression.update(a_MOVE);
     }
 
     /*************************************************************************/
@@ -1227,11 +1064,6 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     inline void set_is_user_defined_selection(
         const bool a_IS_USER_DEFINED_SELECTION) noexcept {
         m_is_user_defined_selection = a_IS_USER_DEFINED_SELECTION;
-    }
-
-    /*************************************************************************/
-    inline bool is_linear(void) const noexcept {
-        return m_is_linear;
     }
 
     /*************************************************************************/
@@ -1415,11 +1247,6 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline bool is_nonlinear(void) const noexcept {
-        return m_is_nonlinear;
-    }
-
-    /*************************************************************************/
     inline bool has_only_binary_coefficient(void) const noexcept {
         return m_has_only_binary_coefficient;
     }
@@ -1546,9 +1373,6 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
             return "General Linear";
         }
 
-        if (m_is_nonlinear) {
-            return "Non-Linear";
-        }
         return "Unknown";
     }
 };

@@ -33,78 +33,6 @@ class TestConstraint : public ::testing::Test {
 };
 
 /*****************************************************************************/
-TEST_F(TestConstraint, constructor_arg_function) {
-    auto expression =
-        model_component::Expression<int, double>::create_instance();
-    auto variable = model_component::Variable<int, double>::create_instance();
-
-    auto sensitivity = random_integer();
-    auto constant    = random_integer();
-    auto target      = random_integer();
-
-    expression = sensitivity * variable + constant;
-    std::function<double(const neighborhood::Move<int, double>&)> f =
-        [&expression](const auto& a_MOVE) {
-            return expression.evaluate(a_MOVE);
-        };
-
-    /// Less
-    {
-        model_component::Constraint<int, double> constraint(f <= target);
-
-        EXPECT_TRUE(constraint.expression().sensitivities().empty());
-        EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(model_component::ConstraintSense::Less, constraint.sense());
-        EXPECT_EQ(0, constraint.constraint_value());
-        EXPECT_EQ(0, constraint.violation_value());
-        EXPECT_EQ(0, constraint.positive_part());
-        EXPECT_EQ(0, constraint.negative_part());
-        EXPECT_FALSE(constraint.is_linear());
-        EXPECT_FALSE(constraint.is_integer());
-        EXPECT_TRUE(constraint.is_enabled());
-        EXPECT_TRUE(constraint.is_less_or_equal());
-        EXPECT_FALSE(constraint.is_greater_or_equal());
-    }
-
-    /// Equal
-    {
-        model_component::Constraint<int, double> constraint(f == target);
-
-        EXPECT_TRUE(constraint.expression().sensitivities().empty());
-        EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(model_component::ConstraintSense::Equal, constraint.sense());
-        EXPECT_EQ(0, constraint.constraint_value());
-        EXPECT_EQ(0, constraint.violation_value());
-        EXPECT_EQ(0, constraint.positive_part());
-        EXPECT_EQ(0, constraint.negative_part());
-        EXPECT_FALSE(constraint.is_linear());
-        EXPECT_FALSE(constraint.is_integer());
-        EXPECT_TRUE(constraint.is_enabled());
-        EXPECT_TRUE(constraint.is_less_or_equal());
-        EXPECT_TRUE(constraint.is_greater_or_equal());
-    }
-
-    /// Greater
-    {
-        model_component::Constraint<int, double> constraint(f >= target);
-
-        EXPECT_TRUE(constraint.expression().sensitivities().empty());
-        EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(model_component::ConstraintSense::Greater,
-                  constraint.sense());
-        EXPECT_EQ(0, constraint.constraint_value());
-        EXPECT_EQ(0, constraint.violation_value());
-        EXPECT_EQ(0, constraint.positive_part());
-        EXPECT_EQ(0, constraint.negative_part());
-        EXPECT_FALSE(constraint.is_linear());
-        EXPECT_FALSE(constraint.is_integer());
-        EXPECT_TRUE(constraint.is_enabled());
-        EXPECT_FALSE(constraint.is_less_or_equal());
-        EXPECT_TRUE(constraint.is_greater_or_equal());
-    }
-}
-
-/*****************************************************************************/
 TEST_F(TestConstraint, constructor_arg_expression) {
     auto expression =
         model_component::Expression<int, double>::create_instance();
@@ -130,7 +58,6 @@ TEST_F(TestConstraint, constructor_arg_expression) {
         EXPECT_EQ(0, constraint.violation_value());
         EXPECT_EQ(0, constraint.positive_part());
         EXPECT_EQ(0, constraint.negative_part());
-        EXPECT_TRUE(constraint.is_linear());
         EXPECT_TRUE(constraint.is_integer());
         EXPECT_TRUE(constraint.is_enabled());
         EXPECT_TRUE(constraint.is_less_or_equal());
@@ -150,7 +77,6 @@ TEST_F(TestConstraint, constructor_arg_expression) {
         EXPECT_EQ(0, constraint.violation_value());
         EXPECT_EQ(0, constraint.positive_part());
         EXPECT_EQ(0, constraint.negative_part());
-        EXPECT_TRUE(constraint.is_linear());
         EXPECT_TRUE(constraint.is_integer());
         EXPECT_TRUE(constraint.is_enabled());
         EXPECT_TRUE(constraint.is_less_or_equal());
@@ -171,7 +97,6 @@ TEST_F(TestConstraint, constructor_arg_expression) {
         EXPECT_EQ(0, constraint.violation_value());
         EXPECT_EQ(0, constraint.positive_part());
         EXPECT_EQ(0, constraint.negative_part());
-        EXPECT_TRUE(constraint.is_linear());
         EXPECT_TRUE(constraint.is_integer());
         EXPECT_TRUE(constraint.is_enabled());
         EXPECT_FALSE(constraint.is_less_or_equal());
@@ -196,104 +121,6 @@ TEST_F(TestConstraint, constructor_arg_expression) {
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraint, operator_equal_function) {
-    auto expression =
-        model_component::Expression<int, double>::create_instance();
-    auto variable = model_component::Variable<int, double>::create_instance();
-
-    auto sensitivity = random_integer();
-    auto constant    = random_integer();
-    auto target      = random_integer();
-
-    expression = sensitivity * variable + constant;
-
-    std::function<double(const neighborhood::Move<int, double>&)> f =
-        [&expression, target](const neighborhood::Move<int, double>& a_MOVE) {
-            return expression.evaluate(a_MOVE) - target;
-        };
-
-    /// Less
-    {
-        auto constraint_source =
-            model_component::Constraint<int, double>::create_instance();
-        constraint_source.setup(f, model_component::ConstraintSense::Less);
-
-        auto constraint =
-            model_component::Constraint<int, double>::create_instance();
-
-        EXPECT_FALSE((constraint = constraint_source).is_linear());
-
-        EXPECT_TRUE(constraint.expression().sensitivities().empty());
-        EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(model_component::ConstraintSense::Less, constraint.sense());
-        EXPECT_EQ(0, constraint.constraint_value());
-        EXPECT_EQ(0, constraint.violation_value());
-        EXPECT_FALSE(constraint.is_linear());
-
-        auto value = random_integer();
-        variable   = value;
-
-        auto expected_value = sensitivity * value + constant - target;
-        EXPECT_EQ(expected_value, constraint.evaluate_constraint());
-        constraint.update();
-        EXPECT_EQ(expected_value, constraint.constraint_value());
-    }
-
-    /// Equal
-    {
-        auto constraint_source =
-            model_component::Constraint<int, double>::create_instance();
-        constraint_source.setup(f, model_component::ConstraintSense::Equal);
-        auto constraint =
-            model_component::Constraint<int, double>::create_instance();
-
-        EXPECT_FALSE((constraint = constraint_source).is_linear());
-
-        EXPECT_TRUE(constraint.expression().sensitivities().empty());
-        EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(model_component::ConstraintSense::Equal, constraint.sense());
-        EXPECT_EQ(0, constraint.constraint_value());
-        EXPECT_EQ(0, constraint.violation_value());
-        EXPECT_FALSE(constraint.is_linear());
-
-        auto value = random_integer();
-        variable   = value;
-
-        auto expected_value = sensitivity * value + constant - target;
-        EXPECT_EQ(expected_value, constraint.evaluate_constraint());
-        constraint.update();
-        EXPECT_EQ(expected_value, constraint.constraint_value());
-    }
-
-    /// Greater
-    {
-        auto constraint_source =
-            model_component::Constraint<int, double>::create_instance();
-        constraint_source.setup(f, model_component::ConstraintSense::Greater);
-        auto constraint =
-            model_component::Constraint<int, double>::create_instance();
-
-        EXPECT_FALSE((constraint = constraint_source).is_linear());
-
-        EXPECT_TRUE(constraint.expression().sensitivities().empty());
-        EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(model_component::ConstraintSense::Greater,
-                  constraint.sense());
-        EXPECT_EQ(0, constraint.constraint_value());
-        EXPECT_EQ(0, constraint.violation_value());
-        EXPECT_FALSE(constraint.is_linear());
-
-        auto value = random_integer();
-        variable   = value;
-
-        auto expected_value = sensitivity * value + constant - target;
-        EXPECT_EQ(expected_value, constraint.evaluate_constraint());
-        constraint.update();
-        EXPECT_EQ(expected_value, constraint.constraint_value());
-    }
-}
-
-/*****************************************************************************/
 TEST_F(TestConstraint, operator_equal_expression) {
     auto expression =
         model_component::Expression<int, double>::create_instance();
@@ -314,22 +141,20 @@ TEST_F(TestConstraint, operator_equal_expression) {
         auto constraint =
             model_component::Constraint<int, double>::create_instance();
 
-        EXPECT_TRUE((constraint = constraint_source).is_linear());
-
+        constraint = constraint_source;
         EXPECT_EQ(sensitivity,
                   constraint.expression().sensitivities().at(&variable));
         EXPECT_EQ(constant - target, constraint.expression().constant_value());
         EXPECT_EQ(model_component::ConstraintSense::Less, constraint.sense());
         EXPECT_EQ(0, constraint.constraint_value());
         EXPECT_EQ(0, constraint.violation_value());
-        EXPECT_TRUE(constraint.is_linear());
 
         auto value = random_integer();
         variable   = value;
+        constraint.update();
 
         auto expected_value = sensitivity * value + constant - target;
         EXPECT_EQ(expected_value, constraint.evaluate_constraint());
-        constraint.update();
         EXPECT_EQ(expected_value, constraint.constraint_value());
     }
 
@@ -341,8 +166,7 @@ TEST_F(TestConstraint, operator_equal_expression) {
                                 model_component::ConstraintSense::Equal);
         auto constraint =
             model_component::Constraint<int, double>::create_instance();
-
-        EXPECT_TRUE((constraint = constraint_source).is_linear());
+        constraint = constraint_source;
 
         EXPECT_EQ(sensitivity,
                   constraint.expression().sensitivities().at(&variable));
@@ -350,14 +174,13 @@ TEST_F(TestConstraint, operator_equal_expression) {
         EXPECT_EQ(model_component::ConstraintSense::Equal, constraint.sense());
         EXPECT_EQ(0, constraint.constraint_value());
         EXPECT_EQ(0, constraint.violation_value());
-        EXPECT_TRUE(constraint.is_linear());
 
         auto value = random_integer();
         variable   = value;
+        constraint.update();
 
         auto expected_value = sensitivity * value + constant - target;
         EXPECT_EQ(expected_value, constraint.evaluate_constraint());
-        constraint.update();
         EXPECT_EQ(expected_value, constraint.constraint_value());
     }
 
@@ -370,7 +193,7 @@ TEST_F(TestConstraint, operator_equal_expression) {
         auto constraint =
             model_component::Constraint<int, double>::create_instance();
 
-        EXPECT_TRUE((constraint = constraint_source).is_linear());
+        constraint = constraint_source;
 
         EXPECT_EQ(sensitivity,
                   constraint.expression().sensitivities().at(&variable));
@@ -379,14 +202,13 @@ TEST_F(TestConstraint, operator_equal_expression) {
                   constraint.sense());
         EXPECT_EQ(0, constraint.constraint_value());
         EXPECT_EQ(0, constraint.violation_value());
-        EXPECT_TRUE(constraint.is_linear());
 
         auto value = random_integer();
         variable   = value;
+        constraint.update();
 
         auto expected_value = sensitivity * value + constant - target;
         EXPECT_EQ(expected_value, constraint.evaluate_constraint());
-        constraint.update();
         EXPECT_EQ(expected_value, constraint.constraint_value());
     }
 }
@@ -405,8 +227,6 @@ TEST_F(TestConstraint, initialize) {
     /// Check the initial values of the derived class members.
     EXPECT_EQ(0, constraint.evaluate_constraint());
     EXPECT_EQ(0, constraint.evaluate_constraint({}));
-    EXPECT_EQ(0, constraint.evaluate_violation());
-    EXPECT_EQ(0, constraint.evaluate_violation({}));
     EXPECT_TRUE(constraint.expression().sensitivities().empty());
     EXPECT_EQ(0, constraint.expression().constant_value());
     EXPECT_EQ(model_component::ConstraintSense::Less, constraint.sense());
@@ -423,7 +243,6 @@ TEST_F(TestConstraint, initialize) {
 
     EXPECT_FALSE(constraint.is_user_defined_selection());
 
-    EXPECT_TRUE(constraint.is_linear());
     EXPECT_FALSE(constraint.is_integer());
     EXPECT_TRUE(constraint.is_enabled());
     EXPECT_FALSE(constraint.is_less_or_equal());
@@ -446,8 +265,6 @@ TEST_F(TestConstraint, initialize) {
     EXPECT_FALSE(constraint.is_max_min());
     EXPECT_FALSE(constraint.is_intermediate());
     EXPECT_FALSE(constraint.is_general_linear());
-    EXPECT_FALSE(constraint.is_nonlinear());
-
     EXPECT_FALSE(constraint.has_only_binary_coefficient());
 }
 
@@ -456,88 +273,7 @@ TEST_F(TestConstraint, clear_constraint_type) {
     /// This method is tested in other methods.
 }
 
-/*****************************************************************************/
-TEST_F(TestConstraint, setup_arg_function) {
-    auto expression =
-        model_component::Expression<int, double>::create_instance();
-    auto variable = model_component::Variable<int, double>::create_instance();
-
-    auto sensitivity = random_integer();
-    auto constant    = random_integer();
-    auto target      = random_integer();
-
-    expression = sensitivity * variable + constant;
-
-    std::function<double(const neighborhood::Move<int, double>&)> f =
-        [&expression, target](const neighborhood::Move<int, double>& a_MOVE) {
-            return expression.evaluate(a_MOVE) - target;
-        };
-
-    /// Less
-    {
-        auto constraint =
-            model_component::Constraint<int, double>::create_instance();
-
-        constraint.setup(f, model_component::ConstraintSense::Less);
-
-        EXPECT_TRUE(constraint.expression().sensitivities().empty());
-        EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(model_component::ConstraintSense::Less, constraint.sense());
-        EXPECT_EQ(0, constraint.constraint_value());
-        EXPECT_EQ(0, constraint.violation_value());
-        EXPECT_EQ(0, constraint.positive_part());
-        EXPECT_EQ(0, constraint.negative_part());
-        EXPECT_FALSE(constraint.is_linear());
-        EXPECT_FALSE(constraint.is_integer());
-        EXPECT_TRUE(constraint.is_enabled());
-        EXPECT_TRUE(constraint.is_less_or_equal());
-        EXPECT_FALSE(constraint.is_greater_or_equal());
-    }
-
-    /// Equal
-    {
-        auto constraint =
-            model_component::Constraint<int, double>::create_instance();
-        constraint.setup(f, model_component::ConstraintSense::Equal);
-
-        EXPECT_TRUE(constraint.expression().sensitivities().empty());
-        EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(model_component::ConstraintSense::Equal, constraint.sense());
-        EXPECT_EQ(0, constraint.constraint_value());
-        EXPECT_EQ(0, constraint.violation_value());
-        EXPECT_EQ(0, constraint.positive_part());
-        EXPECT_EQ(0, constraint.negative_part());
-        EXPECT_FALSE(constraint.is_linear());
-        EXPECT_FALSE(constraint.is_integer());
-        EXPECT_TRUE(constraint.is_enabled());
-        EXPECT_TRUE(constraint.is_less_or_equal());
-        EXPECT_TRUE(constraint.is_greater_or_equal());
-    }
-
-    /// Greater
-    {
-        auto constraint =
-            model_component::Constraint<int, double>::create_instance();
-        ;
-        constraint.setup(f, model_component::ConstraintSense::Greater);
-
-        EXPECT_TRUE(constraint.expression().sensitivities().empty());
-        EXPECT_EQ(0, constraint.expression().constant_value());
-        EXPECT_EQ(model_component::ConstraintSense::Greater,
-                  constraint.sense());
-        EXPECT_EQ(0, constraint.constraint_value());
-        EXPECT_EQ(0, constraint.violation_value());
-        EXPECT_EQ(0, constraint.positive_part());
-        EXPECT_EQ(0, constraint.negative_part());
-        EXPECT_FALSE(constraint.is_linear());
-        EXPECT_FALSE(constraint.is_integer());
-        EXPECT_TRUE(constraint.is_enabled());
-        EXPECT_FALSE(constraint.is_less_or_equal());
-        EXPECT_TRUE(constraint.is_greater_or_equal());
-    }
-}
-
-/*****************************************************************************/
+/****************************************************************************/
 TEST_F(TestConstraint, setup_arg_expression) {
     auto expression =
         model_component::Expression<int, double>::create_instance();
@@ -564,7 +300,6 @@ TEST_F(TestConstraint, setup_arg_expression) {
         EXPECT_EQ(0, constraint.violation_value());
         EXPECT_EQ(0, constraint.positive_part());
         EXPECT_EQ(0, constraint.negative_part());
-        EXPECT_TRUE(constraint.is_linear());
         EXPECT_TRUE(constraint.is_integer());
         EXPECT_TRUE(constraint.is_enabled());
         EXPECT_TRUE(constraint.is_less_or_equal());
@@ -587,7 +322,6 @@ TEST_F(TestConstraint, setup_arg_expression) {
         EXPECT_EQ(0, constraint.violation_value());
         EXPECT_EQ(0, constraint.positive_part());
         EXPECT_EQ(0, constraint.negative_part());
-        EXPECT_TRUE(constraint.is_linear());
         EXPECT_TRUE(constraint.is_integer());
         EXPECT_TRUE(constraint.is_enabled());
         EXPECT_TRUE(constraint.is_less_or_equal());
@@ -610,7 +344,6 @@ TEST_F(TestConstraint, setup_arg_expression) {
         EXPECT_EQ(0, constraint.violation_value());
         EXPECT_EQ(0, constraint.positive_part());
         EXPECT_EQ(0, constraint.negative_part());
-        EXPECT_TRUE(constraint.is_linear());
         EXPECT_TRUE(constraint.is_integer());
         EXPECT_TRUE(constraint.is_enabled());
         EXPECT_FALSE(constraint.is_less_or_equal());
@@ -1677,70 +1410,6 @@ TEST_F(TestConstraint, setup_constraint_type_general_linear) {
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraint, setup_constraint_type_nonlinear) {
-    model::Model<int, double> model;
-
-    auto expression =
-        model_component::Expression<int, double>::create_instance();
-    auto variable = model_component::Variable<int, double>::create_instance();
-
-    auto sensitivity = random_integer();
-    auto constant    = random_integer();
-    auto target      = random_integer();
-
-    expression = sensitivity * variable + constant;
-
-    std::function<double(const neighborhood::Move<int, double>&)> f =
-        [&expression, target](const neighborhood::Move<int, double>& a_MOVE) {
-            return expression.evaluate(a_MOVE) - target;
-        };
-
-    auto constraint =
-        model_component::Constraint<int, double>::create_instance();
-
-    constraint.setup(f, model_component::ConstraintSense::Less);
-    constraint.setup_constraint_type();
-    EXPECT_TRUE(constraint.is_nonlinear());
-    EXPECT_EQ("Non-Linear", constraint.type());
-    constraint.clear_constraint_type();
-    EXPECT_FALSE(constraint.is_nonlinear());
-}
-
-/*****************************************************************************/
-TEST_F(TestConstraint, evaluate_function_arg_void) {
-    auto expression =
-        model_component::Expression<int, double>::create_instance();
-    auto variable = model_component::Variable<int, double>::create_instance();
-
-    auto sensitivity = random_integer();
-    auto constant    = random_integer();
-    auto target      = random_integer();
-
-    expression = sensitivity * variable + constant;
-
-    std::function<double(const neighborhood::Move<int, double>&)> f =
-        [&expression, target](const neighborhood::Move<int, double>& a_MOVE) {
-            return expression.evaluate(a_MOVE) - target;
-        };
-
-    auto constraint =
-        model_component::Constraint<int, double>::create_instance();
-
-    constraint.setup(f, model_component::ConstraintSense::Less);
-
-    auto value = random_integer();
-    variable   = value;
-
-    auto expected_value = sensitivity * value + constant - target;
-    EXPECT_EQ(expected_value, constraint.evaluate_constraint());
-    constraint.update();
-    EXPECT_EQ(expected_value, constraint.constraint_value());
-
-    EXPECT_EQ(std::max(expected_value, 0), constraint.positive_part());
-    EXPECT_EQ(-std::min(expected_value, 0), constraint.negative_part());
-}
-
-/*****************************************************************************/
 TEST_F(TestConstraint, evaluate_expression_arg_void) {
     auto expression =
         model_component::Expression<int, double>::create_instance();
@@ -1760,69 +1429,14 @@ TEST_F(TestConstraint, evaluate_expression_arg_void) {
 
     auto value = random_integer();
     variable   = value;
+    constraint.update();
 
     auto expected_value = sensitivity * value + constant - target;
     EXPECT_EQ(expected_value, constraint.evaluate_constraint());
-    constraint.update();
     EXPECT_EQ(expected_value, constraint.constraint_value());
 
     EXPECT_EQ(std::max(expected_value, 0), constraint.positive_part());
     EXPECT_EQ(-std::min(expected_value, 0), constraint.negative_part());
-}
-
-/*****************************************************************************/
-TEST_F(TestConstraint, evaluate_function_arg_move) {
-    auto expression =
-        model_component::Expression<int, double>::create_instance();
-    auto variable = model_component::Variable<int, double>::create_instance();
-
-    auto sensitivity = random_integer();
-    auto constant    = random_integer();
-    auto target      = random_integer();
-
-    expression = sensitivity * variable + constant;
-    expression.setup_fixed_sensitivities();
-
-    std::function<double(const neighborhood::Move<int, double>&)> f =
-        [&expression, target](const neighborhood::Move<int, double>& a_MOVE) {
-            return expression.evaluate(a_MOVE) - target;
-        };
-
-    auto constraint =
-        model_component::Constraint<int, double>::create_instance();
-    constraint.setup(f, model_component::ConstraintSense::Less);
-
-    /// initial
-    {
-        auto value = random_integer();
-        variable   = value;
-
-        auto expected_value = sensitivity * value + constant - target;
-        EXPECT_EQ(expected_value, constraint.evaluate_constraint());
-        constraint.update();
-        EXPECT_EQ(expected_value, constraint.constraint_value());
-
-        /// expression.update() must be called after constraint.update();
-        expression.update();
-
-        EXPECT_EQ(std::max(expected_value, 0), constraint.positive_part());
-        EXPECT_EQ(-std::min(expected_value, 0), constraint.negative_part());
-    }
-    /// after move
-    {
-        auto value = random_integer();
-
-        neighborhood::Move<int, double> move;
-        move.alterations.emplace_back(&variable, value);
-
-        auto expected_value = sensitivity * value + constant - target;
-        EXPECT_EQ(expected_value, constraint.evaluate_constraint(move));
-        constraint.update(move);
-        EXPECT_EQ(expected_value, constraint.constraint_value());
-
-        EXPECT_EQ(std::max(expected_value, 0), constraint.positive_part());
-        EXPECT_EQ(-std::min(expected_value, 0), constraint.negative_part());
-    }
 }
 
 /*****************************************************************************/
@@ -1850,7 +1464,6 @@ TEST_F(TestConstraint, evaluate_expression_arg_move) {
 
         auto expected_value = sensitivity * value + constant - target;
         EXPECT_EQ(expected_value, constraint.evaluate_constraint());
-        constraint.update();
         EXPECT_EQ(expected_value, constraint.constraint_value());
 
         EXPECT_EQ(std::max(expected_value, 0), constraint.positive_part());
@@ -1875,404 +1488,13 @@ TEST_F(TestConstraint, evaluate_expression_arg_move) {
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraint, evaluate_violation_function_arg_void) {
-    auto expression =
-        model_component::Expression<int, double>::create_instance();
-    auto variable = model_component::Variable<int, double>::create_instance();
-
-    auto sensitivity = random_integer();
-    auto constant    = random_integer();
-    auto target      = random_integer();
-
-    expression = sensitivity * variable + constant;
-
-    std::function<double(const neighborhood::Move<int, double>&)> f =
-        [&expression, target](const neighborhood::Move<int, double>& a_MOVE) {
-            return expression.evaluate(a_MOVE) - target;
-        };
-
-    /// Less
-    {
-        auto constraint =
-            model_component::Constraint<int, double>::create_instance();
-        constraint.setup(f, model_component::ConstraintSense::Less);
-
-        auto value = random_integer();
-        variable   = value;
-
-        auto expected_value =
-            std::max(sensitivity * value + constant - target, 0);
-        EXPECT_EQ(expected_value, constraint.evaluate_violation());
-        constraint.update();
-        EXPECT_EQ(expected_value, constraint.violation_value());
-    }
-
-    /// Equal
-    {
-        auto constraint =
-            model_component::Constraint<int, double>::create_instance();
-        constraint.setup(f, model_component::ConstraintSense::Equal);
-
-        auto value = random_integer();
-        variable   = value;
-
-        auto expected_value = std::abs(sensitivity * value + constant - target);
-        EXPECT_EQ(expected_value, constraint.evaluate_violation());
-        constraint.update();
-        EXPECT_EQ(expected_value, constraint.violation_value());
-    }
-
-    /// Greater
-    {
-        auto constraint =
-            model_component::Constraint<int, double>::create_instance();
-        constraint.setup(f, model_component::ConstraintSense::Greater);
-
-        auto value = random_integer();
-        variable   = value;
-
-        auto expected_value =
-            std::max(-(sensitivity * value + constant - target), 0);
-        EXPECT_EQ(expected_value, constraint.evaluate_violation());
-        constraint.update();
-        EXPECT_EQ(expected_value, constraint.violation_value());
-    }
-}
-
-/*****************************************************************************/
-TEST_F(TestConstraint, evaluate_violation_expression_arg_void) {
-    auto expression =
-        model_component::Expression<int, double>::create_instance();
-    auto variable = model_component::Variable<int, double>::create_instance();
-
-    auto sensitivity = random_integer();
-    auto constant    = random_integer();
-    auto target      = random_integer();
-
-    expression = sensitivity * variable + constant;
-
-    /// Less
-    {
-        auto constraint =
-            model_component::Constraint<int, double>::create_instance();
-        constraint.setup(expression - target,
-                         model_component::ConstraintSense::Less);
-        constraint.expression().setup_fixed_sensitivities();
-
-        auto value = random_integer();
-        variable   = value;
-
-        auto expected_value =
-            std::max(sensitivity * value + constant - target, 0);
-        EXPECT_EQ(expected_value, constraint.evaluate_violation());
-        constraint.update();
-        EXPECT_EQ(expected_value, constraint.violation_value());
-    }
-
-    /// Equal
-    {
-        auto constraint =
-            model_component::Constraint<int, double>::create_instance();
-        constraint.setup(expression - target,
-                         model_component::ConstraintSense::Equal);
-        constraint.expression().setup_fixed_sensitivities();
-
-        auto value = random_integer();
-        variable   = value;
-
-        auto expected_value = std::abs(sensitivity * value + constant - target);
-        EXPECT_EQ(expected_value, constraint.evaluate_violation());
-        constraint.update();
-        EXPECT_EQ(expected_value, constraint.violation_value());
-    }
-
-    /// Greater
-    {
-        auto constraint =
-            model_component::Constraint<int, double>::create_instance();
-        constraint.setup(expression - target,
-                         model_component::ConstraintSense::Greater);
-        constraint.expression().setup_fixed_sensitivities();
-
-        auto value = random_integer();
-        variable   = value;
-
-        auto expected_value =
-            std::max(-(sensitivity * value + constant - target), 0);
-        EXPECT_EQ(expected_value, constraint.evaluate_violation());
-        constraint.update();
-        EXPECT_EQ(expected_value, constraint.violation_value());
-    }
-}
-
-/*****************************************************************************/
-TEST_F(TestConstraint, evaluate_violation_function_arg_move) {
-    auto expression =
-        model_component::Expression<int, double>::create_instance();
-    auto variable = model_component::Variable<int, double>::create_instance();
-
-    auto sensitivity = random_integer();
-    auto constant    = random_integer();
-    auto target      = random_integer();
-
-    expression = sensitivity * variable + constant;
-    expression.setup_fixed_sensitivities();
-
-    std::function<double(const neighborhood::Move<int, double>&)> f =
-        [&expression, target](const neighborhood::Move<int, double>& a_MOVE) {
-            return expression.evaluate(a_MOVE) - target;
-        };
-
-    /// Less
-    {
-        auto constraint =
-            model_component::Constraint<int, double>::create_instance();
-        constraint.setup(f, model_component::ConstraintSense::Less);
-
-        /// initial
-        {
-            auto value = random_integer();
-            variable   = value;
-
-            auto expected_value =
-                std::max(sensitivity * value + constant - target, 0);
-            EXPECT_EQ(expected_value, constraint.evaluate_violation());
-            constraint.update();
-            EXPECT_EQ(expected_value, constraint.violation_value());
-
-            /// expression.update() must be called after constraint.update();
-            expression.update();
-        }
-
-        /// after move
-        {
-            auto value = random_integer();
-
-            neighborhood::Move<int, double> move;
-            move.alterations.emplace_back(&variable, value);
-
-            auto expected_value =
-                std::max(sensitivity * value + constant - target, 0);
-            EXPECT_EQ(expected_value, constraint.evaluate_violation(move));
-            constraint.update(move);
-            EXPECT_EQ(expected_value, constraint.violation_value());
-        }
-    }
-
-    /// Equal
-    {
-        auto constraint =
-            model_component::Constraint<int, double>::create_instance();
-        constraint.setup(f, model_component::ConstraintSense::Equal);
-
-        /// initial
-        {
-            auto value = random_integer();
-            variable   = value;
-
-            auto expected_value =
-                std::abs(sensitivity * value + constant - target);
-            EXPECT_EQ(expected_value, constraint.evaluate_violation());
-            constraint.update();
-            EXPECT_EQ(expected_value, constraint.violation_value());
-
-            /// expression.update() must be called after constraint.update();
-            expression.update();
-        }
-
-        /// after move
-        {
-            auto value = random_integer();
-
-            neighborhood::Move<int, double> move;
-            move.alterations.emplace_back(&variable, value);
-
-            auto expected_value =
-                std::abs(sensitivity * value + constant - target);
-            EXPECT_EQ(expected_value, constraint.evaluate_violation(move));
-            constraint.update(move);
-            EXPECT_EQ(expected_value, constraint.violation_value());
-        }
-    }
-
-    /// Greater
-    {
-        auto constraint =
-            model_component::Constraint<int, double>::create_instance();
-        constraint.setup(f, model_component::ConstraintSense::Greater);
-
-        /// initial
-        {
-            auto value = random_integer();
-            variable   = value;
-
-            auto expected_value =
-                std::max(-(sensitivity * value + constant - target), 0);
-            EXPECT_EQ(expected_value, constraint.evaluate_violation());
-            constraint.update();
-            EXPECT_EQ(expected_value, constraint.violation_value());
-
-            /// expression.update() must be called after constraint.update();
-            expression.update();
-        }
-
-        /// after move
-        {
-            auto value = random_integer();
-
-            neighborhood::Move<int, double> move;
-            move.alterations.emplace_back(&variable, value);
-
-            auto expected_value =
-                std::max(-(sensitivity * value + constant - target), 0);
-            EXPECT_EQ(expected_value, constraint.evaluate_violation(move));
-            constraint.update(move);
-            EXPECT_EQ(expected_value, constraint.violation_value());
-        }
-    }
-}
-
-/*****************************************************************************/
-TEST_F(TestConstraint, evaluate_violation_expression_arg_move) {
-    auto expression =
-        model_component::Expression<int, double>::create_instance();
-    auto variable = model_component::Variable<int, double>::create_instance();
-
-    auto sensitivity = random_integer();
-    auto constant    = random_integer();
-    auto target      = random_integer();
-
-    expression = sensitivity * variable + constant;
-
-    /// Less
-    {
-        auto constraint =
-            model_component::Constraint<int, double>::create_instance();
-        constraint.setup(expression - target,
-                         model_component::ConstraintSense::Less);
-        constraint.expression().setup_fixed_sensitivities();
-
-        /// initial
-        {
-            auto value = random_integer();
-            variable   = value;
-            constraint.update();
-
-            auto expected_value =
-                std::max(sensitivity * value + constant - target, 0);
-            EXPECT_EQ(expected_value, constraint.evaluate_violation());
-            constraint.update();
-            EXPECT_EQ(expected_value, constraint.violation_value());
-        }
-
-        /// after move
-        {
-            auto value = random_integer();
-
-            neighborhood::Move<int, double> move;
-            move.alterations.emplace_back(&variable, value);
-
-            auto expected_value =
-                std::max(sensitivity * value + constant - target, 0);
-            EXPECT_EQ(expected_value, constraint.evaluate_violation(move));
-            constraint.update(move);
-            EXPECT_EQ(expected_value, constraint.violation_value());
-        }
-    }
-
-    /// Equal
-    {
-        auto constraint =
-            model_component::Constraint<int, double>::create_instance();
-        constraint.setup(expression - target,
-                         model_component::ConstraintSense::Equal);
-        constraint.expression().setup_fixed_sensitivities();
-
-        /// initial
-        {
-            auto value = random_integer();
-            variable   = value;
-            constraint.update();
-
-            auto expected_value =
-                std::abs(sensitivity * value + constant - target);
-            EXPECT_EQ(expected_value, constraint.evaluate_violation());
-            constraint.update();
-            EXPECT_EQ(expected_value, constraint.violation_value());
-        }
-
-        /// after move
-        {
-            auto value = random_integer();
-
-            neighborhood::Move<int, double> move;
-            move.alterations.emplace_back(&variable, value);
-
-            auto expected_value =
-                std::abs(sensitivity * value + constant - target);
-            EXPECT_EQ(expected_value, constraint.evaluate_violation(move));
-            constraint.update(move);
-            EXPECT_EQ(expected_value, constraint.violation_value());
-        }
-    }
-
-    /// Greater
-    {
-        auto constraint =
-            model_component::Constraint<int, double>::create_instance();
-        constraint.setup(expression - target,
-                         model_component::ConstraintSense::Greater);
-        constraint.expression().setup_fixed_sensitivities();
-
-        /// initial
-        {
-            auto value = random_integer();
-            variable   = value;
-            constraint.update();
-
-            auto expected_value =
-                std::max(-(sensitivity * value + constant - target), 0);
-            EXPECT_EQ(expected_value, constraint.evaluate_violation());
-            constraint.update();
-            EXPECT_EQ(expected_value, constraint.violation_value());
-        }
-
-        /// after move
-        {
-            auto                            value = random_integer();
-            neighborhood::Move<int, double> move;
-            move.alterations.emplace_back(&variable, value);
-
-            auto expected_value =
-                std::max(-(sensitivity * value + constant - target), 0);
-            EXPECT_EQ(expected_value, constraint.evaluate_violation(move));
-            constraint.update(move);
-            EXPECT_EQ(expected_value, constraint.violation_value());
-        }
-    }
-}
-
-/*****************************************************************************/
-TEST_F(TestConstraint, evaluate_violation_diff) {
-    /// The test for this function is omitted.
-}
-
-/*****************************************************************************/
 TEST_F(TestConstraint, update_arg_void) {
-    /// This method is tested in following tests:
-    /// - evaluate_function_arg_void()
-    /// - evaluate_expression_arg_void()
-    /// - evaluate_violation_function_arg_void()
-    /// - evaluate_violation_expression_arg_void()
+    /// This method is tested in evaluate_expression_arg_void().
 }
 
 /*****************************************************************************/
 TEST_F(TestConstraint, update_arg_move) {
-    /// This method is tested in following tests:
-    /// - evaluate_function_arg_move()
-    /// - evaluate_expression_arg_move()
-    /// - evaluate_violation_function_arg_move()
-    /// - evaluate_violation_expression_arg_move()
+    /// This method is tested in evaluate_expression_arg_move().
 }
 
 /*****************************************************************************/
@@ -2396,17 +1618,8 @@ TEST_F(TestConstraint, is_user_defined_selection) {
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraint, is_linear) {
-    /// This method is tested in following tests:
-    /// - constructor_arg_function()
-    /// - constructor_arg_expression()
-}
-
-/*****************************************************************************/
 TEST_F(TestConstraint, is_integer) {
-    /// This method is tested in following tests:
-    /// - constructor_arg_function()
-    /// - constructor_arg_expression()
+    /// This method is tested in constructor_arg_expression()
 }
 
 /*****************************************************************************/
@@ -2552,11 +1765,6 @@ TEST_F(TestConstraint, is_gf2) {
 /*****************************************************************************/
 TEST_F(TestConstraint, is_general_linear) {
     /// This method is tested in setup_constraint_type_general_linear().
-}
-
-/*****************************************************************************/
-TEST_F(TestConstraint, is_nonlinear) {
-    /// This method is tested in setup_constraint_type_is_nonlinear().
 }
 
 /*****************************************************************************/

@@ -56,7 +56,6 @@ TEST_F(TestConstraintTypeReference, initialize) {
     EXPECT_TRUE(reference.integer_knapsack_ptrs.empty());
     EXPECT_TRUE(reference.gf2_ptrs.empty());
     EXPECT_TRUE(reference.general_linear_ptrs.empty());
-    EXPECT_TRUE(reference.nonlinear_ptrs.empty());
 }
 }  // namespace
 /*****************************************************************************/

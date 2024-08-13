@@ -77,16 +77,6 @@ target_include_directories(
     PRIVATE ${TOP_DIR}/printemps/
 )
 
-# quadratic_assignment
-add_executable(
-    quadratic_assignment.exe ${TOP_DIR}/example/quadratic_assignment.cpp
-)
-
-target_include_directories(
-    quadratic_assignment.exe
-    PRIVATE ${TOP_DIR}/printemps/
-)
-
 # sudoku
 add_executable(
     sudoku.exe ${TOP_DIR}/example/sudoku.cpp

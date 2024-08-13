@@ -50,10 +50,8 @@ class ProblemSizeReducer {
         int number_of_disabled_constraints = 0;
         int number_of_fixed_variables      = 0;
 
-        if (m_model_ptr->is_linear()) {
-            number_of_fixed_variables +=
-                this->remove_independent_variables(a_IS_ENABLED_PRINT);
-        }
+        number_of_fixed_variables +=
+            this->remove_independent_variables(a_IS_ENABLED_PRINT);
 
         while (true) {
             const int NUMBER_OF_NEWLY_DISABLED_CONSTRAINTS  //
@@ -188,14 +186,6 @@ class ProblemSizeReducer {
         int number_of_newly_disabled_constraints = 0;
         for (auto &&proxy : m_model_ptr->constraint_proxies()) {
             for (auto &&constraint : proxy.flat_indexed_constraints()) {
-                /**
-                 * If the constraint is nonlinear, the following procedures
-                 * will be skipped.
-                 */
-                if (!constraint.is_linear()) {
-                    continue;
-                }
-
                 /**
                  * If the constraint has already been disabled, the following
                  * procedures will be skipped.

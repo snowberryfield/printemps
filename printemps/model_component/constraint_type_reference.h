@@ -50,7 +50,6 @@ struct ConstraintTypeReference {
     std::vector<Constraint<T_Variable, T_Expression> *> integer_knapsack_ptrs;
     std::vector<Constraint<T_Variable, T_Expression> *> gf2_ptrs;
     std::vector<Constraint<T_Variable, T_Expression> *> general_linear_ptrs;
-    std::vector<Constraint<T_Variable, T_Expression> *> nonlinear_ptrs;
 
     /*************************************************************************/
     ConstraintTypeReference(void) {
@@ -89,7 +88,6 @@ struct ConstraintTypeReference {
         this->integer_knapsack_ptrs.clear();
         this->gf2_ptrs.clear();
         this->general_linear_ptrs.clear();
-        this->nonlinear_ptrs.clear();
     }
 };
 }  // namespace printemps::model_component

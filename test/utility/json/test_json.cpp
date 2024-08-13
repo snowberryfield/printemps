@@ -139,8 +139,10 @@ TEST_F(TestJson, close_count) {
 /*****************************************************************************/
 TEST_F(TestJson, find_end_position) {
     std::vector<std::string> tokens = {"{", "{", "}", "}"};
-    EXPECT_EQ(3, utility::json::find_end_position(tokens, 0, "{", "}"));
-    EXPECT_EQ(2, utility::json::find_end_position(tokens, 1, "{", "}"));
+    EXPECT_EQ(3, static_cast<int>(
+                     utility::json::find_end_position(tokens, 0, "{", "}")));
+    EXPECT_EQ(2, static_cast<int>(
+                     utility::json::find_end_position(tokens, 1, "{", "}")));
 }
 
 /*****************************************************************************/
