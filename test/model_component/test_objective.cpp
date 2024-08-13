@@ -41,31 +41,6 @@ TEST_F(TestObjective, initialize) {
     EXPECT_TRUE(objective.expression().sensitivities().empty());
     EXPECT_EQ(0, objective.expression().constant_value());
     EXPECT_EQ(0, objective.value());
-    EXPECT_TRUE(objective.is_linear());
-}
-
-/*****************************************************************************/
-TEST_F(TestObjective, create_instance_arg_function) {
-    auto expression =
-        model_component::Expression<int, double>::create_instance();
-    auto variable = model_component::Variable<int, double>::create_instance();
-
-    auto sensitivity = random_integer();
-    auto constant    = random_integer();
-
-    expression = sensitivity * variable + constant;
-
-    auto f = [&expression](const neighborhood::Move<int, double> &a_MOVE) {
-        return expression.evaluate(a_MOVE);
-    };
-
-    auto objective =
-        model_component::Objective<int, double>::create_instance(f);
-
-    EXPECT_TRUE(objective.expression().sensitivities().empty());
-    EXPECT_EQ(0, objective.expression().constant_value());
-    EXPECT_EQ(0, objective.value());
-    EXPECT_FALSE(objective.is_linear());
 }
 
 /*****************************************************************************/
@@ -88,23 +63,6 @@ TEST_F(TestObjective, create_instance_arg_expression) {
               objective.expression().sensitivities().at(&variable));
     EXPECT_EQ(constant, objective.expression().constant_value());
     EXPECT_EQ(0, objective.value());
-    EXPECT_TRUE(objective.is_linear());
-}
-
-/*****************************************************************************/
-TEST_F(TestObjective, setup_arg_function) {
-    auto f =
-        []([[maybe_unused]] const neighborhood::Move<int, double> &a_MOVE) {
-            return 0;
-        };
-
-    auto objective = model_component::Objective<int, double>::create_instance();
-    objective.setup(f);
-
-    EXPECT_TRUE(objective.expression().sensitivities().empty());
-    EXPECT_EQ(0, objective.expression().constant_value());
-    EXPECT_EQ(0, objective.value());
-    EXPECT_FALSE(objective.is_linear());
 }
 
 /*****************************************************************************/
@@ -125,35 +83,6 @@ TEST_F(TestObjective, setup_arg_expression) {
               objective.expression().sensitivities().at(&variable));
     EXPECT_EQ(constant, objective.expression().constant_value());
     EXPECT_EQ(0, objective.value());
-    EXPECT_TRUE(objective.is_linear());
-}
-
-/*****************************************************************************/
-TEST_F(TestObjective, evaluate_function_arg_void) {
-    auto expression =
-        model_component::Expression<int, double>::create_instance();
-    auto variable = model_component::Variable<int, double>::create_instance();
-
-    auto sensitivity = random_integer();
-    auto constant    = random_integer();
-
-    expression = sensitivity * variable + constant;
-    expression.setup_fixed_sensitivities();
-
-    auto f = [&expression](const neighborhood::Move<int, double> &a_MOVE) {
-        return expression.evaluate(a_MOVE);
-    };
-
-    auto objective =
-        model_component::Objective<int, double>::create_instance(f);
-
-    auto value = random_integer();
-    variable   = value;
-
-    auto expected_value = sensitivity * value + constant;
-    EXPECT_EQ(expected_value, objective.evaluate());
-    objective.update();
-    EXPECT_EQ(expected_value, objective.value());
 }
 
 /*****************************************************************************/
@@ -178,50 +107,6 @@ TEST_F(TestObjective, evaluate_expression_arg_void) {
     EXPECT_EQ(expected_value, objective.evaluate());
     objective.update();
     EXPECT_EQ(expected_value, objective.value());
-}
-
-/*****************************************************************************/
-TEST_F(TestObjective, evaluate_function_arg_move) {
-    auto expression =
-        model_component::Expression<int, double>::create_instance();
-    auto variable = model_component::Variable<int, double>::create_instance();
-
-    auto sensitivity = random_integer();
-    auto constant    = random_integer();
-
-    expression = sensitivity * variable + constant;
-    expression.setup_fixed_sensitivities();
-
-    auto f = [&expression,
-              &variable](const neighborhood::Move<int, double> &a_MOVE) {
-        return expression.evaluate(a_MOVE);
-    };
-
-    auto objective =
-        model_component::Objective<int, double>::create_instance(f);
-
-    {
-        auto value = random_integer();
-        variable   = value;
-
-        auto expected_value = sensitivity * value + constant;
-        EXPECT_EQ(expected_value, objective.evaluate());
-        objective.update();
-        EXPECT_EQ(expected_value, objective.value());
-
-        /// expression.update() must be called after objective.update();
-        expression.update();
-    }
-    {
-        auto                            value = random_integer();
-        neighborhood::Move<int, double> move;
-        move.alterations.emplace_back(&variable, value);
-
-        auto expected_value = sensitivity * value + constant;
-        EXPECT_EQ(expected_value, objective.evaluate(move));
-        objective.update(move);
-        EXPECT_EQ(expected_value, objective.value());
-    }
 }
 
 /*****************************************************************************/
@@ -263,14 +148,12 @@ TEST_F(TestObjective, evaluate_expression_arg_move) {
 
 /*****************************************************************************/
 TEST_F(TestObjective, update_arg_void) {
-    /// This method is tested in evaluate_function_arg_void() and
-    /// tested in evaluate_expression_arg_void().
+    /// This method is tested in evaluate_expression_arg_void().
 }
 
 /*****************************************************************************/
 TEST_F(TestObjective, update_arg_move) {
-    /// This method is tested in evaluate_function_arg_move() and
-    /// tested in evaluate_expression_arg_move().
+    /// This method is tested in evaluate_expression_arg_move().
 }
 
 /*****************************************************************************/
@@ -281,16 +164,8 @@ TEST_F(TestObjective, expression) {
 /*****************************************************************************/
 TEST_F(TestObjective, value) {
     /// This method is tested in following tests:
-    /// - evaluate_function_arg_void,
     /// - evaluate_expression_arg_void,
-    /// - evaluate_function_arg_move and
     /// - evaluate_expression_arg_move.
-}
-
-/*****************************************************************************/
-TEST_F(TestObjective, is_linear) {
-    /// This method is tested in create_instance_arg_function() and
-    /// create_instance_arg_expression().
 }
 
 }  // namespace

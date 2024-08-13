@@ -85,18 +85,6 @@ class PDLPController {
     }
 
     /*************************************************************************/
-    inline bool satisfy_not_linear_skip_condition(
-        const bool a_IS_ENABLED_PRINT) {
-        if (!this->m_model_ptr->is_linear()) {
-            utility::print_warning(
-                "PDLP was skipped because the problem is not linear.",
-                a_IS_ENABLED_PRINT);
-            return true;
-        }
-        return false;
-    }
-
-    /*************************************************************************/
     inline bool satisfy_solved_skip_condition(const bool a_IS_ENABLED_PRINT) {
         if (this->m_model_ptr->variable_reference()
                 .mutable_variable_ptrs.size() == 0) {
@@ -138,15 +126,6 @@ class PDLPController {
     /*************************************************************************/
     inline void run(void) {
         const double TOTAL_ELAPSED_TIME = this->m_time_keeper.clock();
-        /**
-         * Skip PDLP if the problem is not linear.
-         */
-        if (this->satisfy_not_linear_skip_condition(  //
-                this->m_option.output.verbose >= option::verbose::Outer)) {
-            m_result.initialize();
-            return;
-        }
-
         /**
          * Skip PDLP if the problem has already been solved.
          */

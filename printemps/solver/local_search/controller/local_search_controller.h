@@ -47,18 +47,6 @@ class LocalSearchController
     }
 
     /*************************************************************************/
-    inline bool satisfy_not_linear_skip_condition(
-        const bool a_IS_ENABLED_PRINT) {
-        if (!this->m_model_ptr->is_linear()) {
-            utility::print_warning(
-                "Local search was skipped because the problem is not linear.",
-                a_IS_ENABLED_PRINT);
-            return true;
-        }
-        return false;
-    }
-
-    /*************************************************************************/
     inline bool satisfy_time_over_skip_condition(
         const double a_TOTAL_ELAPSED_TIME, const bool a_IS_ENABLED_PRINT) {
         if (a_TOTAL_ELAPSED_TIME > this->m_option.general.time_max) {
@@ -88,15 +76,6 @@ class LocalSearchController
     /*************************************************************************/
     inline void run(void) {
         const double TOTAL_ELAPSED_TIME = this->m_time_keeper.clock();
-        /**
-         * Skip local search if the problem is not linear.
-         */
-        if (this->satisfy_not_linear_skip_condition(  //
-                this->m_option.output.verbose >= option::verbose::Outer)) {
-            m_result.initialize();
-            return;
-        }
-
         /**
          * Skip local search if the time is over.
          */

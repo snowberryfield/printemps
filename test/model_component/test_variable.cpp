@@ -266,7 +266,7 @@ TEST_F(TestVariable, increment_update_count) {
     EXPECT_EQ(1, variable.update_count());
     variable.increment_update_count();
     EXPECT_EQ(2, variable.update_count());
-    variable.increment_update_count();
+    variable.reset_update_count();
     EXPECT_EQ(0, variable.update_count());
 }
 
@@ -771,7 +771,6 @@ TEST_F(TestVariable, setup_hash) {
     g(0) = x(0) + x(1) == 1;
     g(1) = x(0) == 1;
 
-    model.setup_is_linear();
     model.setup_structure();
     {
         x(0).setup_hash();

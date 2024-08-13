@@ -139,7 +139,6 @@ TEST_F(TestVariableFixer, remove_redundant_set_variables) {
                        + x(3) - x(4) - 2 * x(5)  //
                        + x(6) + x(7) + 2 * x(8));
 
-        model.setup_is_linear();
         model.setup_structure();
 
         preprocess::ProblemSizeReducer<int, double>  //
@@ -171,7 +170,6 @@ TEST_F(TestVariableFixer, remove_redundant_set_variables) {
                        + x(3) - x(4) - 2 * x(5)  //
                        + x(6) + x(7) + 2 * x(8));
 
-        model.setup_is_linear();
         model.setup_structure();
 
         preprocess::ProblemSizeReducer<int, double>  //
@@ -586,7 +584,6 @@ TEST_F(TestProblemSizeReducer, remove_duplicated_constraints) {
     model.create_constraint("g_2", 2 * x(0) + x(1) <= 10);
     model.create_constraint("g_3", 2 * x(0) + x(1) == 20);
 
-    model.setup_is_linear();
     model.setup_structure();
 
     preprocess::ProblemSizeReducer<int, double>  //
@@ -604,7 +601,6 @@ TEST_F(TestProblemSizeReducer, remove_redundant_set_constraints) {
     model.create_constraint("g_0", x(0) + x(1) == 1);
     model.create_constraint("g_1", x.selection());
 
-    model.setup_is_linear();
     model.setup_structure();
 
     preprocess::ProblemSizeReducer<int, double>  //
@@ -628,7 +624,6 @@ TEST_F(TestProblemSizeReducer, extract_implicit_equality_constraints) {
     model.create_constraint("g_2", -2 * x(0) - x(1) <= -10);
     model.create_constraint("g_2", 2 * x(0) + x(1) <= 10);
 
-    model.setup_is_linear();
     model.setup_structure();
 
     preprocess::ProblemSizeReducer<int, double>  //
@@ -649,7 +644,6 @@ TEST_F(TestProblemSizeReducer, reduce_problem_size) {
     model.create_constraint("g_2", 8 * x(1) >= 20);
     model.create_constraint("g_3", x(1) + x(2) + 1 == 8);
 
-    model.setup_is_linear();
     model.setup_structure();
 
     preprocess::ProblemSizeReducer<int, double>  //

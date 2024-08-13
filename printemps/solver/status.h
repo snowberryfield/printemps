@@ -614,10 +614,6 @@ struct Status {
                 "general_linear",  //
                 compute_number_of_constraints(REFERENCE.general_linear_ptrs));
 
-            obj.emplace_back(  //
-                "nonlinear",   //
-                compute_number_of_constraints(REFERENCE.nonlinear_ptrs));
-
             constraint_type_detail.emplace_back(LABEL, obj);
         }
 

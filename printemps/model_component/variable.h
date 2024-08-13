@@ -150,8 +150,8 @@ class Variable : public multi_array::AbstractMultiArrayElement {
         m_extension->related_binary_coefficient_constraint_ptrs.clear();
         m_extension->dependent_expression_ptr = nullptr;
         m_extension->constraint_sensitivities.clear();
-        m_extension->objective_sensitivity                      = 0.0;
-        m_extension->hash                                       = 0;
+        m_extension->objective_sensitivity = 0.0;
+        m_extension->hash                  = 0;
         m_extension->related_selection_constraint_ptr_index_min = -1;
         m_extension->related_selection_constraint_ptr_index_max = -1;
     }

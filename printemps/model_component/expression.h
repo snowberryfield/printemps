@@ -281,13 +281,6 @@ class Expression : public multi_array::AbstractMultiArrayElement {
     inline T_Expression evaluate(
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
         noexcept {
-        /// The following code is required for nonlinear objective functions.
-#ifndef _PRINTEMPS_LINEAR_MINIMIZATION
-        if (a_MOVE.alterations.size() == 0) {
-            return this->evaluate();
-        }
-#endif
-
         T_Expression new_value = m_value;
         for (const auto &alteration : a_MOVE.alterations) {
             new_value += m_fixed_sensitivities.at(alteration.first) *

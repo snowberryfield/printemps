@@ -43,9 +43,7 @@ class Model {
     std::vector<std::string> m_constraint_names;
 
     bool m_is_defined_objective;
-    bool m_is_enabled_fast_evaluation;
     bool m_is_integer;
-    bool m_is_linear;
     bool m_is_minimization;
     bool m_is_solved;
     bool m_is_feasible;
@@ -124,13 +122,11 @@ class Model {
         m_expression_names.clear();
         m_constraint_names.clear();
 
-        m_is_defined_objective       = false;
-        m_is_enabled_fast_evaluation = true;
-        m_is_integer                 = false;
-        m_is_linear                  = true;
-        m_is_minimization            = true;
-        m_is_solved                  = false;
-        m_is_feasible                = false;
+        m_is_defined_objective = false;
+        m_is_integer           = false;
+        m_is_minimization      = true;
+        m_is_solved            = false;
+        m_is_feasible          = false;
 
         m_global_penalty_coefficient = 0.0;
 
@@ -653,16 +649,6 @@ class Model {
         this->setup_unique_names();
 
         /**
-         * Determine the linearity.
-         */
-        this->setup_is_linear();
-
-        /**
-         * Determine if the fast evaluation can be enabled.
-         */
-        this->setup_is_enabled_fast_evaluation();
-
-        /**
          * Initial structure analysis.
          */
         this->setup_structure();
@@ -704,7 +690,7 @@ class Model {
          */
         this->setup_structure();
 
-        if (a_OPTION.preprocess.is_enabled_presolve && m_is_linear &&
+        if (a_OPTION.preprocess.is_enabled_presolve &&
             a_OPTION.preprocess.is_enabled_extract_dependent()) {
             preprocess::DependentVariableExtractor<T_Variable, T_Expression>
                 dependent_variable_extractor(this);
@@ -731,7 +717,7 @@ class Model {
          * Remove redundant set variables.
          */
         int number_of_fixed_variables = 0;
-        if (a_OPTION.preprocess.is_enabled_presolve && m_is_linear &&
+        if (a_OPTION.preprocess.is_enabled_presolve &&
             a_OPTION.preprocess.is_enabled_remove_redundant_set_variables) {
             number_of_fixed_variables =
                 m_problem_size_reducer.remove_redundant_set_variables(
@@ -814,7 +800,7 @@ class Model {
         }
 
         /**
-         * Set up the fixed sensitivities for fast evaluation.
+         * Set up the fixed sensitivities.
          */
         this->setup_fixed_sensitivities(a_IS_ENABLED_PRINT);
 
@@ -848,7 +834,7 @@ class Model {
         /**
          * Modify the global penalty coefficient.
          */
-        if (m_is_integer && m_is_linear &&
+        if (m_is_integer &&
             a_OPTION.penalty.is_enabled_shrink_penalty_coefficient) {
             this->shrink_global_penalty_coefficient(a_IS_ENABLED_PRINT);
         }
@@ -924,43 +910,6 @@ class Model {
                         m_constraint_proxies[i].indices_label(j));
                 }
             }
-        }
-    }
-
-    /*************************************************************************/
-    inline void setup_is_linear(void) {
-        m_is_linear = true;
-        for (auto &&proxy : m_constraint_proxies) {
-            for (auto &&constraint : proxy.flat_indexed_constraints()) {
-                if (!constraint.is_linear()) {
-                    m_is_linear = false;
-                }
-            }
-        }
-
-        if (!m_objective.is_linear()) {
-            m_is_linear = false;
-        }
-    }
-
-    /*************************************************************************/
-    inline void setup_is_enabled_fast_evaluation(void) {
-        /**
-         * NOTE: In this method, m_constraint_reference is not referred because
-         * the object may not have been set up at the stage this method is
-         * called.
-         */
-        m_is_enabled_fast_evaluation = true;
-        for (auto &&proxy : m_constraint_proxies) {
-            for (auto &&constraint : proxy.flat_indexed_constraints()) {
-                if (!constraint.is_linear()) {
-                    m_is_enabled_fast_evaluation = false;
-                }
-            }
-        }
-
-        if (m_neighborhood.user_defined().is_enabled()) {
-            m_is_enabled_fast_evaluation = false;
         }
     }
 
@@ -1281,10 +1230,6 @@ class Model {
                 }
                 if (constraint.is_general_linear()) {
                     constraint_type_reference.general_linear_ptrs.push_back(
-                        &constraint);
-                }
-                if (constraint.is_nonlinear()) {
-                    constraint_type_reference.nonlinear_ptrs.push_back(
                         &constraint);
                 }
             }
@@ -1725,8 +1670,8 @@ class Model {
 
     /*************************************************************************/
     inline void update_variable_bounds(const double a_OBJECTIVE,
-                                      const bool   a_IS_PRIMAL,
-                                      const bool   a_IS_ENABLED_PRINT) {
+                                       const bool   a_IS_PRIMAL,
+                                       const bool   a_IS_ENABLED_PRINT) {
         model_component::Constraint<T_Variable, T_Expression> constraint;
         if (m_is_minimization && a_IS_PRIMAL) {
             constraint = m_objective.expression() <= a_OBJECTIVE;
@@ -1734,9 +1679,9 @@ class Model {
             constraint = m_objective.expression() >= a_OBJECTIVE;
         }
 
-            m_problem_size_reducer
-                .remove_redundant_constraint_with_tightening_variable_bound(
-                    &constraint, a_IS_ENABLED_PRINT);
+        m_problem_size_reducer
+            .remove_redundant_constraint_with_tightening_variable_bound(
+                &constraint, a_IS_ENABLED_PRINT);
     }
 
     /*************************************************************************/
@@ -2349,20 +2294,6 @@ class Model {
                 utility::to_string(                         //
                     compute_number_of_enabled_constraints(  //
                         PRESOLVED_TYPE.general_linear_ptrs),
-                    "%d") +
-                ")",
-            true);
-
-        utility::print_info(                        //
-            " -- Nonlinear: " +                     //
-                utility::to_string(                 //
-                    compute_number_of_constraints(  //
-                        ORIGINAL_TYPE.nonlinear_ptrs),
-                    "%d") +
-                " (" +
-                utility::to_string(                         //
-                    compute_number_of_enabled_constraints(  //
-                        PRESOLVED_TYPE.nonlinear_ptrs),
                     "%d") +
                 ")",
             true);
@@ -3076,10 +3007,6 @@ class Model {
                                 ? std::numeric_limits<double>::lowest()
                                 : std::numeric_limits<double>::max();
 
-        if (!m_is_linear) {
-            return dual_bound;
-        }
-
         dual_bound = m_objective.expression().constant_value();
         for (auto &&sensitivity : m_objective.expression().sensitivities()) {
             const auto VARIABLE_PTR = sensitivity.first;
@@ -3612,16 +3539,6 @@ class Model {
         this->setup_unique_names();
 
         /**
-         * Determine the linearity.
-         */
-        this->setup_is_linear();
-
-        if (!m_is_linear) {
-            throw std::logic_error(utility::format_error_location(
-                __FILE__, __LINE__, __func__,
-                "Nonlinear model cannot be written in MPS format."));
-        }
-        /**
          * Determine the sensitivities.
          */
         this->setup_variable_constraint_sensitivities();
@@ -3757,16 +3674,6 @@ class Model {
          */
         this->setup_unique_names();
 
-        /**
-         * Determine the linearity.
-         */
-        this->setup_is_linear();
-
-        if (!m_is_linear) {
-            throw std::logic_error(utility::format_error_location(
-                __FILE__, __LINE__, __func__,
-                "Nonlinear model cannot be written in JSON format."));
-        }
         /**
          * Determine the sensitivities.
          */
@@ -4073,21 +3980,6 @@ class Model {
     /*************************************************************************/
     inline bool is_defined_objective(void) const {
         return m_is_defined_objective;
-    }
-
-    /*************************************************************************/
-    inline void disable_fast_evaluation(void) {
-        m_is_enabled_fast_evaluation = false;
-    }
-
-    /*************************************************************************/
-    inline bool is_enabled_fast_evaluation(void) const {
-        return m_is_enabled_fast_evaluation;
-    }
-
-    /*************************************************************************/
-    inline bool is_linear(void) const {
-        return m_is_linear;
     }
 
     /*************************************************************************/

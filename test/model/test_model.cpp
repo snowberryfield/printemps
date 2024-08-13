@@ -59,8 +59,6 @@ TEST_F(TestModel, initialize) {
     EXPECT_TRUE(model.constraint_names().empty());
 
     EXPECT_FALSE(model.is_defined_objective());
-    EXPECT_TRUE(model.is_enabled_fast_evaluation());
-    EXPECT_TRUE(model.is_linear());
     EXPECT_TRUE(model.is_minimization());
     EXPECT_EQ(1.0, model.sign());
     EXPECT_FALSE(model.is_solved());
@@ -511,32 +509,6 @@ TEST_F(TestModel, create_constraint_arg_constraint) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModel, minimize_arg_function) {
-    model::Model<int, double> model;
-
-    auto& x = model.create_variables("x", 10, -1, 1);
-    auto& p = model.create_expression("p", x.sum() + 1);
-
-    auto f = [&p](const neighborhood::Move<int, double>& a_MOVE) {
-        return p.evaluate(a_MOVE);
-    };
-    model.minimize(f);
-
-    EXPECT_TRUE(model.is_defined_objective());
-    EXPECT_TRUE(model.is_minimization());
-    EXPECT_EQ(1.0, model.sign());
-    EXPECT_TRUE(model.objective().expression().sensitivities().empty());
-    EXPECT_EQ(0, model.objective().expression().constant_value());
-    EXPECT_FALSE(model.objective().is_linear());
-
-    for (auto&& element : x.flat_indexed_variables()) {
-        element = 1;
-    }
-    model.update();
-    EXPECT_EQ(10 + 1, model.objective().value());
-}
-
-/*****************************************************************************/
 TEST_F(TestModel, minimize_arg_expression_like) {
     model::Model<int, double> model;
 
@@ -555,7 +527,6 @@ TEST_F(TestModel, minimize_arg_expression_like) {
     EXPECT_EQ(10, static_cast<int>(
                       model.objective().expression().sensitivities().size()));
     EXPECT_EQ(1, model.objective().expression().constant_value());
-    EXPECT_TRUE(model.objective().is_linear());
 
     for (auto&& element : x.flat_indexed_variables()) {
         element = 1;
@@ -583,33 +554,6 @@ TEST_F(TestModel, minimize_arg_expression) {
     EXPECT_EQ(10, static_cast<int>(
                       model.objective().expression().sensitivities().size()));
     EXPECT_EQ(1, model.objective().expression().constant_value());
-    EXPECT_TRUE(model.objective().is_linear());
-
-    for (auto&& element : x.flat_indexed_variables()) {
-        element = 1;
-    }
-    model.update();
-    EXPECT_EQ(10 + 1, model.objective().value());
-}
-
-/*****************************************************************************/
-TEST_F(TestModel, maximize_arg_function) {
-    model::Model<int, double> model;
-
-    auto& x = model.create_variables("x", 10, -1, 1);
-    auto& p = model.create_expression("p", x.sum() + 1);
-
-    auto f = [&p](const neighborhood::Move<int, double>& a_MOVE) {
-        return p.evaluate(a_MOVE);
-    };
-    model.maximize(f);
-
-    EXPECT_TRUE(model.is_defined_objective());
-    EXPECT_FALSE(model.is_minimization());
-    EXPECT_EQ(-1.0, model.sign());
-    EXPECT_TRUE(model.objective().expression().sensitivities().empty());
-    EXPECT_EQ(0, model.objective().expression().constant_value());
-    EXPECT_FALSE(model.objective().is_linear());
 
     for (auto&& element : x.flat_indexed_variables()) {
         element = 1;
@@ -637,7 +581,6 @@ TEST_F(TestModel, maximize_arg_expression_like) {
     EXPECT_EQ(10, static_cast<int>(
                       model.objective().expression().sensitivities().size()));
     EXPECT_EQ(1, model.objective().expression().constant_value());
-    EXPECT_TRUE(model.objective().is_linear());
 
     for (auto&& element : x.flat_indexed_variables()) {
         element = 1;
@@ -663,7 +606,6 @@ TEST_F(TestModel, maximize_arg_expression) {
     EXPECT_EQ(10, static_cast<int>(
                       model.objective().expression().sensitivities().size()));
     EXPECT_EQ(1, model.objective().expression().constant_value());
-    EXPECT_TRUE(model.objective().is_linear());
 
     for (auto&& element : x.flat_indexed_variables()) {
         element = 1;
@@ -706,175 +648,6 @@ TEST_F(TestModel, setup_unique_names) {
     EXPECT_EQ("g[ 0,  1]", g(0, 1).name());
     EXPECT_EQ("g[19, 28]", g(19, 28).name());
     EXPECT_EQ("_g_19_29", g(19, 29).name());
-}
-
-/*****************************************************************************/
-TEST_F(TestModel, setup_is_linear) {
-    /// Constraint: linear
-    /// Objective: linear
-    {
-        model::Model<int, double> model;
-
-        auto& x = model.create_variable("x");
-
-        model.create_constraint("g", x <= 0);
-        model.minimize(x);
-
-        model.setup_is_linear();
-
-        EXPECT_TRUE(model.is_linear());
-    }
-
-    /// Constraint: nonlinear (user-defined lambda)
-    /// Objective: linear
-    {
-        model::Model<int, double> model;
-
-        auto& x = model.create_variable("x");
-
-        std::function<double(const neighborhood::Move<int, double>&)> g =
-            [&x](const neighborhood::Move<int, double>& a_MOVE) {
-                return x.evaluate(a_MOVE);
-            };
-
-        model.create_constraint("g", g <= 0);
-        model.minimize(x);
-
-        model.setup_is_linear();
-
-        EXPECT_FALSE(model.is_linear());
-    }
-
-    /// Constraint: linear
-    /// Objective: nonlinear (user-defined lambda)
-    {
-        model::Model<int, double> model;
-
-        auto& x = model.create_variable("x");
-
-        std::function<double(const neighborhood::Move<int, double>&)> f =
-            [&x](const neighborhood::Move<int, double>& a_MOVE) {
-                return x.evaluate(a_MOVE);
-            };
-
-        model.create_constraint("g", x <= 0);
-        model.minimize(f);
-
-        model.setup_is_linear();
-
-        EXPECT_FALSE(model.is_linear());
-    }
-
-    /// Constraint: nonlinear
-    /// Objective: nonlinear
-    {
-        model::Model<int, double> model;
-
-        auto& x = model.create_variable("x");
-
-        std::function<double(const neighborhood::Move<int, double>&)> g =
-            [&x](const neighborhood::Move<int, double>& a_MOVE) {
-                return x.evaluate(a_MOVE);
-            };
-
-        std::function<double(const neighborhood::Move<int, double>&)> f =
-            [&x](const neighborhood::Move<int, double>& a_MOVE) {
-                return x.evaluate(a_MOVE);
-            };
-
-        model.create_constraint("g", g <= 0);
-        model.minimize(f);
-
-        model.setup_is_linear();
-
-        EXPECT_FALSE(model.is_linear());
-    }
-}
-
-/*****************************************************************************/
-TEST_F(TestModel, setup_is_enabled_fast_evaluation) {
-    /// Constraint: linear
-    /// Objective: linear
-    /// User-defined neighborhood: None
-    {
-        model::Model<int, double> model;
-
-        auto& x = model.create_variable("x");
-
-        model.create_constraint("g", x <= 0);
-        model.minimize(x);
-
-        model.setup_is_enabled_fast_evaluation();
-
-        EXPECT_TRUE(model.is_enabled_fast_evaluation());
-
-        model.disable_fast_evaluation();
-        EXPECT_FALSE(model.is_enabled_fast_evaluation());
-    }
-
-    /// Constraint: nonlinear (user-defined lambda)
-    /// Objective: linear
-    /// User-defined neighborhood: None
-    {
-        model::Model<int, double> model;
-
-        auto& x = model.create_variable("x");
-
-        std::function<double(const neighborhood::Move<int, double>&)> g =
-            [&x](const neighborhood::Move<int, double>& a_MOVE) {
-                return x.evaluate(a_MOVE);
-            };
-
-        model.create_constraint("g", g <= 0);
-        model.minimize(x);
-
-        model.setup_is_enabled_fast_evaluation();
-
-        EXPECT_FALSE(model.is_enabled_fast_evaluation());
-    }
-
-    /// Constraint: linear
-    /// Objective: nonlinear (user-defined lambda)
-    /// User-defined neighborhood: None
-    {
-        model::Model<int, double> model;
-
-        auto& x = model.create_variable("x");
-
-        std::function<double(const neighborhood::Move<int, double>&)> f =
-            [&x](const neighborhood::Move<int, double>& a_MOVE) {
-                return x.evaluate(a_MOVE);
-            };
-
-        model.create_constraint("g", x <= 0);
-        model.minimize(f);
-
-        model.setup_is_enabled_fast_evaluation();
-
-        EXPECT_TRUE(model.is_enabled_fast_evaluation());
-    }
-
-    /// Constraint: linear
-    /// Objective: linear
-    /// User-defined neighborhood: Yes
-    {
-        model::Model<int, double> model;
-
-        auto& x = model.create_variable("x");
-
-        model.create_constraint("g", x <= 0);
-        model.minimize(x);
-
-        auto move_updater =
-            []([[maybe_unused]] std::vector<neighborhood::Move<int, double>>*
-                   a_moves_ptr) { ; };
-
-        model.neighborhood().user_defined().set_move_updater(move_updater);
-        model.neighborhood().user_defined().enable();
-        model.setup_is_enabled_fast_evaluation();
-
-        EXPECT_FALSE(model.is_enabled_fast_evaluation());
-    }
 }
 
 /*****************************************************************************/
@@ -1199,13 +972,6 @@ TEST_F(TestModel, categorize_constraints) {
     auto& general_liner = model.create_constraint("general_liner");
     general_liner       = 2 * x + 2 * r.sum() == 50;
 
-    auto& nonlinear = model.create_constraint("nonlinear");
-    std::function<double(const neighborhood::Move<int, double>&)> f =
-        [&x](const neighborhood::Move<int, double>& a_MOVE) {
-            return x.evaluate(a_MOVE) - 1;
-        };
-    nonlinear = f <= 5;
-
     singleton.disable();
 
     model.setup_structure();
@@ -1213,9 +979,9 @@ TEST_F(TestModel, categorize_constraints) {
     selection_extractor.extract_by_defined_order(false);
     model.setup_structure();
 
-    EXPECT_EQ(28, model.number_of_constraints());
+    EXPECT_EQ(27, model.number_of_constraints());
     EXPECT_EQ(1, model.number_of_selection_constraints());
-    EXPECT_EQ(26, model.number_of_enabled_constraints());
+    EXPECT_EQ(25, model.number_of_enabled_constraints());
     EXPECT_EQ(2, model.number_of_disabled_constraints());
 
     auto reference = model.constraint_type_reference();
@@ -1238,7 +1004,6 @@ TEST_F(TestModel, categorize_constraints) {
     EXPECT_EQ(1, static_cast<int>(reference.max_min_ptrs.size()));
     EXPECT_EQ(1, static_cast<int>(reference.intermediate_ptrs.size()));
     EXPECT_EQ(1, static_cast<int>(reference.general_linear_ptrs.size()));
-    EXPECT_EQ(1, static_cast<int>(reference.nonlinear_ptrs.size()));
 }
 
 /*****************************************************************************/
@@ -2947,7 +2712,7 @@ TEST_F(TestModel, constraint_proxies) {
 
 /*****************************************************************************/
 TEST_F(TestModel, objective) {
-    /// This method is tested in minimize_arg_function and so on.
+    /// This method is tested in minimize_arg_expression and so on.
 }
 
 /*****************************************************************************/
@@ -3002,32 +2767,17 @@ TEST_F(TestModel, constraint_type_reference) {
 
 /*****************************************************************************/
 TEST_F(TestModel, is_defined_objective) {
-    /// This method is tested in minimize_arg_function() and so on.
-}
-
-/*****************************************************************************/
-TEST_F(TestModel, is_enabled_fast_evaluation) {
-    /// This method is tested in setup_is_enabled_fast_evaluation().
-}
-
-/*****************************************************************************/
-TEST_F(TestModel, disable_fast_evaluation) {
-    /// This method is tested in setup_is_enabled_fast_evaluation().
-}
-
-/*****************************************************************************/
-TEST_F(TestModel, is_linear) {
-    /// This method is tested in setup_is_linear().
+    /// This method is tested in minimize_arg_expression() and so on.
 }
 
 /*****************************************************************************/
 TEST_F(TestModel, is_minimization) {
-    /// This method is tested in minimize_arg_function() and so on.
+    /// This method is tested in minimize_arg_expression() and so on.
 }
 
 /*****************************************************************************/
 TEST_F(TestModel, sign) {
-    /// This method is tested in minimize_arg_function() and so on.
+    /// This method is tested in minimize_arg_expression() and so on.
 }
 
 /*****************************************************************************/
