@@ -2848,9 +2848,24 @@ class Model {
             a_MOVE.alterations[1]
                 .first->related_selection_constraint_ptr_index_max();
 
-        const int MIN_INDEX = std::min(INDEX_MIN_FIRST, INDEX_MIN_SECOND);
-        const int MAX_INDEX = std::max(INDEX_MAX_FIRST, INDEX_MAX_SECOND);
-        if (MIN_INDEX >= 0 && MAX_INDEX >= 0) {
+        int index_min = -1;
+        if (INDEX_MIN_FIRST == -1 && INDEX_MIN_SECOND >= 0) {
+            index_min = INDEX_MIN_SECOND;
+        } else if (INDEX_MIN_FIRST >= 0 && INDEX_MIN_SECOND == -1) {
+            index_min = INDEX_MIN_FIRST;
+        } else if (INDEX_MIN_FIRST >= 0 && INDEX_MIN_SECOND >= 0) {
+            index_min = std::min(INDEX_MIN_FIRST, INDEX_MIN_SECOND);
+        }
+
+        int index_max = -1;
+        if (INDEX_MAX_FIRST == -1 && INDEX_MAX_SECOND >= 0) {
+            index_max = INDEX_MAX_SECOND;
+        } else if (INDEX_MAX_FIRST >= 0 && INDEX_MAX_SECOND == -1) {
+            index_max = INDEX_MAX_FIRST;
+        } else if (INDEX_MAX_FIRST >= 0 && INDEX_MAX_SECOND >= 0) {
+            index_max = std::max(INDEX_MAX_FIRST, INDEX_MAX_SECOND);
+        }
+        if (index_min >= 0 && index_max >= 0) {
             if ((INDEX_MAX_FIRST < INDEX_MIN_SECOND) ||
                 (INDEX_MAX_SECOND < INDEX_MIN_FIRST)) {
                 for (const auto &alteration : a_MOVE.alterations) {
@@ -2899,7 +2914,7 @@ class Model {
                 double violation_diff_negative = 0.0;
                 double violation_diff_positive = 0.0;
 
-                for (auto i = MIN_INDEX; i <= MAX_INDEX; i++) {
+                for (auto i = index_min; i <= index_max; i++) {
                     auto &constraint_ptr = RELATED_CONSTRAINT_PTRS[i];
                     if (!constraint_ptr->is_enabled()) {
                         continue;
