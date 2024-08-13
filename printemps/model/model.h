@@ -1724,7 +1724,7 @@ class Model {
     }
 
     /*************************************************************************/
-    inline int update_variable_bounds(const double a_OBJECTIVE,
+    inline void update_variable_bounds(const double a_OBJECTIVE,
                                       const bool   a_IS_PRIMAL,
                                       const bool   a_IS_ENABLED_PRINT) {
         model_component::Constraint<T_Variable, T_Expression> constraint;
@@ -1733,18 +1733,10 @@ class Model {
         } else {
             constraint = m_objective.expression() >= a_OBJECTIVE;
         }
-        bool is_bound_tightened =
+
             m_problem_size_reducer
                 .remove_redundant_constraint_with_tightening_variable_bound(
                     &constraint, a_IS_ENABLED_PRINT);
-
-        int number_of_newly_fixed_variables = 0;
-        if (is_bound_tightened) {
-            m_problem_size_reducer.remove_implicit_fixed_variables(
-                a_IS_ENABLED_PRINT);
-        }
-
-        return number_of_newly_fixed_variables;
     }
 
     /*************************************************************************/

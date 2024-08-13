@@ -204,9 +204,13 @@ class ProblemSizeReducer {
                     continue;
                 }
 
-                if (remove_redundant_constraint_with_tightening_variable_bound(
+                const auto &[is_constraint_disabled,
+                             is_variable_bound_updated] =
+                    remove_redundant_constraint_with_tightening_variable_bound(
                         &constraint,  //
-                        a_IS_ENABLED_PRINT)) {
+                        a_IS_ENABLED_PRINT);
+
+                if (is_constraint_disabled) {
                     number_of_newly_disabled_constraints++;
                 }
             }
@@ -215,7 +219,8 @@ class ProblemSizeReducer {
     }
 
     /*************************************************************************/
-    inline bool remove_redundant_constraint_with_tightening_variable_bound(
+    inline std::pair<bool, bool>
+    remove_redundant_constraint_with_tightening_variable_bound(
         model_component::Constraint<T_Variable, T_Expression>
             *      a_constraint_ptr,  //
         const bool a_IS_ENABLED_PRINT) {
@@ -224,7 +229,9 @@ class ProblemSizeReducer {
          * NOTE: This function should be called from
          * remove_redundant_constraints_with_tightening_variable_bounds().
          */
-        bool is_removed = false;
+        bool is_constraint_disabled    = false;
+        bool is_variable_bound_updated = false;
+
         int *variable_bound_update_count_ptr =
             m_is_preprocess ? &m_variable_bound_update_count_in_preprocess
                             : &m_variable_bound_update_count_in_optimization;
@@ -273,8 +280,9 @@ class ProblemSizeReducer {
 
             if (a_constraint_ptr->is_enabled()) {
                 a_constraint_ptr->disable();
-                is_removed = true;
-                return is_removed;
+                is_constraint_disabled = true;
+                return std::make_pair(is_constraint_disabled,
+                                      is_variable_bound_updated);
             }
         }
 
@@ -311,8 +319,9 @@ class ProblemSizeReducer {
                 variable_ptr->fix_by(bound_temp);
                 if (a_constraint_ptr->is_enabled()) {
                     a_constraint_ptr->disable();
-                    is_removed = true;
-                    return is_removed;
+                    is_constraint_disabled = true;
+                    return std::make_pair(is_constraint_disabled,
+                                          is_variable_bound_updated);
                 }
             } else if ((a_constraint_ptr->sense() ==
                             model_component::ConstraintSense::Less &&
@@ -346,6 +355,7 @@ class ProblemSizeReducer {
                             a_IS_ENABLED_PRINT);
                     }
                     variable_ptr->set_bound(variable_lower_bound, bound_floor);
+                    is_variable_bound_updated = true;
                     (*variable_bound_update_count_ptr)++;
                 } else {
                     utility::print_message(  //
@@ -355,8 +365,9 @@ class ProblemSizeReducer {
                 }
                 if (a_constraint_ptr->is_enabled()) {
                     a_constraint_ptr->disable();
-                    is_removed = true;
-                    return is_removed;
+                    is_constraint_disabled = true;
+                    return std::make_pair(is_constraint_disabled,
+                                          is_variable_bound_updated);
                 }
 
             } else if ((a_constraint_ptr->sense() ==
@@ -391,6 +402,7 @@ class ProblemSizeReducer {
                             a_IS_ENABLED_PRINT);
                     }
                     variable_ptr->set_bound(bound_ceil, variable_upper_bound);
+                    is_variable_bound_updated = true;
                     (*variable_bound_update_count_ptr)++;
                 } else {
                     utility::print_message(  //
@@ -400,11 +412,13 @@ class ProblemSizeReducer {
                 }
                 if (a_constraint_ptr->is_enabled()) {
                     a_constraint_ptr->disable();
-                    is_removed = true;
-                    return is_removed;
+                    is_constraint_disabled = true;
+                    return std::make_pair(is_constraint_disabled,
+                                          is_variable_bound_updated);
                 }
             }
-            return is_removed;
+            return std::make_pair(is_constraint_disabled,
+                                  is_variable_bound_updated);
         }
 
         /**
@@ -433,6 +447,7 @@ class ProblemSizeReducer {
                             std::to_string(bound_ceil) + ".",
                         a_IS_ENABLED_PRINT);
                     variable_ptr->set_bound(bound_ceil, variable_upper_bound);
+                    is_variable_bound_updated = true;
                     (*variable_bound_update_count_ptr)++;
                 }
             }
@@ -450,6 +465,7 @@ class ProblemSizeReducer {
                             std::to_string(bound_floor) + ".",
                         a_IS_ENABLED_PRINT);
                     variable_ptr->set_bound(variable_lower_bound, bound_floor);
+                    is_variable_bound_updated = true;
                     (*variable_bound_update_count_ptr)++;
                 }
             }
@@ -477,6 +493,7 @@ class ProblemSizeReducer {
                             std::to_string(bound_floor) + ".",
                         a_IS_ENABLED_PRINT);
                     variable_ptr->set_bound(variable_lower_bound, bound_floor);
+                    is_variable_bound_updated = true;
                     (*variable_bound_update_count_ptr)++;
                 }
             }
@@ -494,11 +511,13 @@ class ProblemSizeReducer {
                             std::to_string(bound_ceil) + ".",
                         a_IS_ENABLED_PRINT);
                     variable_ptr->set_bound(bound_ceil, variable_upper_bound);
+                    is_variable_bound_updated = true;
                     (*variable_bound_update_count_ptr)++;
                 }
             }
         }
-        return is_removed;
+        return std::make_pair(is_constraint_disabled,
+                              is_variable_bound_updated);
     }
 
     /*************************************************************************/
