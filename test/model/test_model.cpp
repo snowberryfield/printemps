@@ -1379,6 +1379,7 @@ TEST_F(TestModel, update_variable_bounds) {
         auto& x = model.create_variable("x", 0, 200);
         auto& y = model.create_variable("y", 0, 200);
         model.minimize(x + 3 * y);
+        model.problem_size_reducer().setup(&model);
         model.update_variable_bounds(100, true, false);
 
         EXPECT_EQ(100, x(0).upper_bound());
@@ -1391,6 +1392,7 @@ TEST_F(TestModel, update_variable_bounds) {
         auto& x = model.create_variable("x", 0, 200);
         auto& y = model.create_variable("y", 0, 200);
         model.minimize(x - 3 * y);
+        model.problem_size_reducer().setup(&model);
         model.update_variable_bounds(100, true, false);
 
         EXPECT_EQ(200, x(0).upper_bound());
@@ -1403,6 +1405,7 @@ TEST_F(TestModel, update_variable_bounds) {
         auto& x = model.create_variable("x", 0, 200);
         auto& y = model.create_variable("y", 0, 200);
         model.maximize(x + 3 * y);
+        model.problem_size_reducer().setup(&model);
         model.update_variable_bounds(100, true, false);
 
         EXPECT_EQ(0, x(0).lower_bound());
@@ -1415,6 +1418,7 @@ TEST_F(TestModel, update_variable_bounds) {
         auto& x = model.create_variable("x", 0, 200);
         auto& y = model.create_variable("y", 0, 200);
         model.maximize(x - 3 * y);
+        model.problem_size_reducer().setup(&model);
         model.update_variable_bounds(100, true, false);
 
         EXPECT_EQ(100, x(0).lower_bound());
