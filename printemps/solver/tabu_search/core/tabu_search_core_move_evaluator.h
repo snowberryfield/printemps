@@ -85,6 +85,18 @@ class TabuSearchCoreMoveEvaluator {
     }
 
     /*************************************************************************/
+    inline long compute_total_update_count(
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
+        noexcept {
+        long total_update_count = 0;
+        for (const auto &alteration : a_MOVE.alterations) {
+            total_update_count += alteration.first->update_count();
+        }
+
+        return total_update_count;
+    }
+
+    /*************************************************************************/
     inline double compute_frequency_penalty(
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE,
         const int a_ITERATION) const noexcept {

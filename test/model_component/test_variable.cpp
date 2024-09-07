@@ -68,7 +68,7 @@ TEST_F(TestVariable, initialize) {
     EXPECT_EQ(nullptr, variable.dependent_expression_ptr());
     EXPECT_TRUE(variable.constraint_sensitivities().empty());
     EXPECT_EQ(0.0, variable.objective_sensitivity());
-    EXPECT_EQ(0, variable.hash());
+    EXPECT_EQ(0UL, variable.hash());
     EXPECT_EQ(-1, variable.related_selection_constraint_ptr_index_min());
     EXPECT_EQ(-1, variable.related_selection_constraint_ptr_index_max());
 }
