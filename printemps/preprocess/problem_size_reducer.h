@@ -610,18 +610,38 @@ class ProblemSizeReducer {
         if (m_model_ptr->is_minimization()) {
             std::stable_sort(variable_ptrs.begin(), variable_ptrs.end(),
                              [](const auto &a_LHS, const auto &a_RHS) {
-                                 return (a_LHS->hash() == a_RHS->hash())
-                                            ? (a_LHS->objective_sensitivity() <
-                                               a_RHS->objective_sensitivity())
-                                            : (a_LHS->hash() < a_RHS->hash());
+                                 if (a_LHS->hash() != a_RHS->hash()) {
+                                     return a_LHS->hash() < a_RHS->hash();
+                                 }
+
+                                 if (a_LHS->objective_sensitivity() !=
+                                     a_RHS->objective_sensitivity()) {
+                                     return a_LHS->objective_sensitivity() <
+                                            a_RHS->objective_sensitivity();
+                                 }
+
+                                 if (a_LHS->value() != a_RHS->value()) {
+                                     return a_LHS->value() > a_RHS->value();
+                                 }
+                                 return a_LHS->name() < a_RHS->name();
                              });
         } else {
             std::stable_sort(variable_ptrs.begin(), variable_ptrs.end(),
                              [](const auto &a_LHS, const auto &a_RHS) {
-                                 return (a_LHS->hash() == a_RHS->hash())
-                                            ? (a_LHS->objective_sensitivity() >
-                                               a_RHS->objective_sensitivity())
-                                            : (a_LHS->hash() < a_RHS->hash());
+                                 if (a_LHS->hash() != a_RHS->hash()) {
+                                     return a_LHS->hash() < a_RHS->hash();
+                                 }
+
+                                 if (a_LHS->objective_sensitivity() !=
+                                     a_RHS->objective_sensitivity()) {
+                                     return a_LHS->objective_sensitivity() >
+                                            a_RHS->objective_sensitivity();
+                                 }
+
+                                 if (a_LHS->value() != a_RHS->value()) {
+                                     return a_LHS->value() > a_RHS->value();
+                                 }
+                                 return a_LHS->name() < a_RHS->name();
                              });
         }
 
