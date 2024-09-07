@@ -103,6 +103,8 @@ struct TabuSearchControllerState {
     double averaged_number_of_threads_move_update;
     double averaged_number_of_threads_move_evaluation;
 
+    utility::Range<double> local_penalty_coefficient_range;
+
     /**
      * Learners
      */
@@ -193,6 +195,8 @@ struct TabuSearchControllerState {
 
         this->averaged_number_of_threads_move_update     = 0.0;
         this->averaged_number_of_threads_move_evaluation = 0.0;
+
+        this->local_penalty_coefficient_range.initialize();
 
         this->parallelization_controller_move_update.initialize();
         this->parallelization_controller_move_evaluation.initialize();
