@@ -847,11 +847,13 @@ class TabuSearchControllerStateManager {
 
         for (auto&& proxy : this->m_model_ptr->constraint_proxies()) {
             for (auto&& constraint : proxy.flat_indexed_constraints()) {
-                const double VIOLATION =
+                const double VIOLATION_VALUE =
                     VIOLATION_VALUE_PROXIES[proxy.index()]
                                            [constraint.flat_index()];
-                total_violation += VIOLATION;
-                total_squared_violation += VIOLATION * VIOLATION;
+                const long VIOLATION_COUNT = constraint.violation_count();
+                total_violation += VIOLATION_VALUE * (VIOLATION_COUNT + 1);
+                total_squared_violation += VIOLATION_VALUE * VIOLATION_VALUE *
+                                           std::log((VIOLATION_COUNT + 1.0));
             }
         }
 
@@ -868,12 +870,13 @@ class TabuSearchControllerStateManager {
                     [proxy.index()][constraint.flat_index()];
                 const double VIOLATION_VALUE = VIOLATION_VALUE_PROXIES  //
                     [proxy.index()][constraint.flat_index()];
+                const long VIOLATION_COUNT = constraint.violation_count();
 
                 const double DELTA_PENALTY_COEFFICIENT_CONSTANT =
                     std::max(0.0, GAP) / total_violation;
                 const double DELTA_PENALTY_COEFFICIENT_PROPORTIONAL =
                     std::max(0.0, GAP) / total_squared_violation *
-                    VIOLATION_VALUE;
+                    std::log((VIOLATION_COUNT + 1.0)) * VIOLATION_VALUE;
 
                 const double POSITIVE_PART = std::max(CONSTRAINT_VALUE, 0.0);
                 const double NEGATIVE_PART = std::max(-CONSTRAINT_VALUE, 0.0);
