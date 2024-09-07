@@ -480,9 +480,9 @@ class Solver {
     }
 
     /*************************************************************************/
-    inline std::unordered_map<std::string, multi_array::ValueProxy<int>>
+    inline std::unordered_map<std::string, multi_array::ValueProxy<long>>
     export_named_update_counts(void) {
-        std::unordered_map<std::string, multi_array::ValueProxy<int>>
+        std::unordered_map<std::string, multi_array::ValueProxy<long>>
             named_update_counts;
 
         auto update_count_proxies = m_model_ptr->export_update_count_proxies();
@@ -497,9 +497,9 @@ class Solver {
     }
 
     /*************************************************************************/
-    inline std::unordered_map<std::string, multi_array::ValueProxy<int>>
+    inline std::unordered_map<std::string, multi_array::ValueProxy<long>>
     export_named_violation_counts(void) {
-        std::unordered_map<std::string, multi_array::ValueProxy<int>>
+        std::unordered_map<std::string, multi_array::ValueProxy<long>>
             named_violation_counts;
 
         auto violation_count_proxies =

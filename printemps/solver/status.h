@@ -42,8 +42,9 @@ struct Status {
     std::unordered_map<std::string, multi_array::ValueProxy<double>>
         penalty_coefficients;
 
-    std::unordered_map<std::string, multi_array::ValueProxy<int>> update_counts;
-    std::unordered_map<std::string, multi_array::ValueProxy<int>>
+    std::unordered_map<std::string, multi_array::ValueProxy<long>>
+        update_counts;
+    std::unordered_map<std::string, multi_array::ValueProxy<long>>
         violation_counts;
 
     /*************************************************************************/
