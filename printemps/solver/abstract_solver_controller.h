@@ -23,8 +23,9 @@ class AbstractSolverController {
     inline void print_total_elapsed_time(const bool a_IS_ENABLED_PRINT) {
         utility::print_info(  //
             " -- Total elapsed time: " +
-                utility::to_string(m_time_keeper.elapsed_time(), "%.3f") +
-                "sec",
+                utility::to_string(m_time_keeper.elapsed_time(), "%.3fsec") +
+                utility::to_string(m_option.general.time_max,
+                                   " (Limit: %.3fsec)"),
             a_IS_ENABLED_PRINT);
     }
 
