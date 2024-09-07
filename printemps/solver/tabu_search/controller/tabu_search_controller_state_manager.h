@@ -296,6 +296,11 @@ class TabuSearchControllerStateManager {
         }
 
         /**
+         * Update the local penalty coefficient range.
+         */
+        this->update_local_penalty_coefficient_range();
+
+        /**
          * Update the initial tabu tenure for the next loop.
          */
         if (m_option.tabu_search.is_enabled_automatic_tabu_tenure_adjustment) {
@@ -971,6 +976,24 @@ class TabuSearchControllerStateManager {
                     NEGATIVE_PART < constant::EPSILON) {
                     constraint.local_penalty_coefficient_greater() *=
                         corrected_penalty_coefficient_relaxing_rate;
+                }
+            }
+        }
+    }
+
+    /*************************************************************************/
+    inline void update_local_penalty_coefficient_range(void) {
+        m_state.local_penalty_coefficient_range.initialize();
+        for (auto&& proxy : m_model_ptr->constraint_proxies()) {
+            for (auto&& constraint : proxy.flat_indexed_constraints()) {
+                if (constraint.is_less_or_equal()) {
+                    m_state.local_penalty_coefficient_range.update(
+                        constraint.local_penalty_coefficient_less());
+                }
+
+                if (constraint.is_greater_or_equal()) {
+                    m_state.local_penalty_coefficient_range.update(
+                        constraint.local_penalty_coefficient_greater());
                 }
             }
         }

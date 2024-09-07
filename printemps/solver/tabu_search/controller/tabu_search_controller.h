@@ -766,6 +766,15 @@ class TabuSearchController
             " -- Penalty coefficients tightening rate: " +
                 std::to_string(STATE.penalty_coefficient_tightening_rate),
             a_IS_ENABLED_PRINT);
+
+        utility::print_info(  //
+            " -- Current Penalty coefficients (Min / Max) : " +
+                utility::to_string(STATE.local_penalty_coefficient_range.min(),
+                                   "%.3e") +
+                " / " +
+                utility::to_string(STATE.local_penalty_coefficient_range.max(),
+                                   "%.3e"),
+            a_IS_ENABLED_PRINT);
     }
 
     /*************************************************************************/
