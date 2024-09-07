@@ -65,6 +65,13 @@ inline std::vector<T> to_vector(const std::unordered_set<T> &a_UNORDERED_SET) {
     return result;
 }
 
+/*****************************************************************************/
+template <class T>
+inline std::unordered_set<T> from_vector(const std::vector<T> &a_VECTOR) {
+    std::unordered_set<T> result(a_VECTOR.begin(), a_VECTOR.end());
+    return result;
+}
+
 }  // namespace printemps::utility
 
 #endif
