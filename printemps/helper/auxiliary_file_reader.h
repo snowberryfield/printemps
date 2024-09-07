@@ -45,7 +45,7 @@ inline std::unordered_map<std::string, int> read_names_and_values(
         }
         int ITEMS_SIZE = items.size();
 
-        if (ITEMS_SIZE != 2) {
+        if (ITEMS_SIZE < 2) {
             continue;
         }
         names_and_values[items[0]] =
