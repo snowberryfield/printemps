@@ -15,7 +15,7 @@ struct TabuSearchOptionConstant {
     static constexpr int    DEFAULT_LOG_INTERVAL                        = 10;
     static constexpr int    DEFAULT_INITIAL_TABU_TENURE                 = 10;
     static constexpr double DEFAULT_TABU_TENURE_RANDOMIZE_RATE          = 0.3;
-    static constexpr double DEFAULT_INITIAL_MODIFICATION_FIXED_RATE     = 1.0;
+    static constexpr double DEFAULT_INITIAL_MODIFICATION_FIXED_RATE     = 0.5;
     static constexpr double DEFAULT_INITIAL_MODIFICATION_RANDOMIZE_RATE = 0.5;
     static constexpr tabu_mode::TabuMode DEFAULT_TABU_MODE = tabu_mode::All;
     static constexpr double              DEFAULT_MOVE_PRESERVE_RATE = 1.0;
