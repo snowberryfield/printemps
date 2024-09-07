@@ -69,7 +69,7 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     T_Variable m_upper_bound;
     int        m_local_last_update_iteration;
     int        m_global_last_update_iteration;
-    int        m_update_count;
+    long       m_update_count;
 
     std::unique_ptr<VariableExtention<T_Variable, T_Expression>> m_extension;
 
@@ -150,8 +150,8 @@ class Variable : public multi_array::AbstractMultiArrayElement {
         m_extension->related_binary_coefficient_constraint_ptrs.clear();
         m_extension->dependent_expression_ptr = nullptr;
         m_extension->constraint_sensitivities.clear();
-        m_extension->objective_sensitivity = 0.0;
-        m_extension->hash                  = 0;
+        m_extension->objective_sensitivity                      = 0.0;
+        m_extension->hash                                       = 0;
         m_extension->related_selection_constraint_ptr_index_min = -1;
         m_extension->related_selection_constraint_ptr_index_max = -1;
     }
@@ -307,7 +307,7 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline int update_count(void) const noexcept {
+    inline long update_count(void) const noexcept {
         return m_update_count;
     }
 

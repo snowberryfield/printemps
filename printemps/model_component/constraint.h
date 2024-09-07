@@ -44,7 +44,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
 
     Variable<T_Variable, T_Expression> *m_key_variable_ptr;
 
-    int m_violation_count;
+    long m_violation_count;
 
     bool m_is_integer;
     bool m_is_enabled;
