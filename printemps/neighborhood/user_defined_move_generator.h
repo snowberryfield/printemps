@@ -62,16 +62,15 @@ class UserDefinedMoveGenerator
                 for (auto i = 0; i < MOVES_SIZE; i++) {
                     (*a_moves_ptr)[i].sense = MoveSense::UserDefined;
                     (*a_flags)[i]           = 1;
-                    if (neighborhood::has_fixed_variable((*a_moves_ptr)[i])) {
+                    if ((*a_moves_ptr)[i].has_fixed_variable()) {
                         (*a_flags)[i] = 0;
                         continue;
                     }
-                    if (neighborhood::has_selection_variable(
-                            (*a_moves_ptr)[i])) {
+                    if ((*a_moves_ptr)[i].has_selection_variable()) {
                         (*a_flags)[i] = 0;
                         continue;
                     }
-                    if (neighborhood::has_bound_violation((*a_moves_ptr)[i])) {
+                    if ((*a_moves_ptr)[i].has_bound_violation()) {
                         (*a_flags)[i] = 0;
                         continue;
                     }
@@ -79,14 +78,14 @@ class UserDefinedMoveGenerator
                         /** nothing to do */
                     } else {
                         if (a_ACCEPT_OBJECTIVE_IMPROVABLE &&
-                            neighborhood::has_objective_improvable_variable(
-                                (*a_moves_ptr)[i])) {
+                            (*a_moves_ptr)[i]
+                                .has_objective_improvable_variable()) {
                             continue;
                         }
 
                         if (a_ACCEPT_FEASIBILITY_IMPROVABLE &&
-                            neighborhood::has_feasibility_improvable_variable(
-                                (*a_moves_ptr)[i])) {
+                            (*a_moves_ptr)[i]
+                                .has_feasibility_improvable_variable()) {
                             continue;
                         }
                         (*a_flags)[i] = 0;

@@ -39,6 +39,9 @@ class AggregationMoveGenerator
          * Setup move objects.
          */
         const int BINOMIALS_SIZE = binomials.size();
+        this->m_moves.clear();
+        this->m_flags.clear();
+
         this->m_moves.resize(4 * BINOMIALS_SIZE);
         this->m_flags.resize(4 * BINOMIALS_SIZE);
 
@@ -71,7 +74,7 @@ class AggregationMoveGenerator
                     .variable_ptr_second->related_constraint_ptrs()
                     .end());
 
-            sort_and_unique_related_constraint_ptrs(&move);
+            move.sort_and_unique_related_constraint_ptrs();
 
             this->m_moves[4 * i + 1] = move;
             this->m_moves[4 * i + 2] = move;
@@ -174,11 +177,11 @@ class AggregationMoveGenerator
                         (*a_flags)[i] = 0;
                         continue;
                     }
-                    if (neighborhood::has_fixed_variable((*a_moves_ptr)[i])) {
+                    if ((*a_moves_ptr)[i].has_fixed_variable()) {
                         (*a_flags)[i] = 0;
                         continue;
                     }
-                    if (neighborhood::has_bound_violation((*a_moves_ptr)[i])) {
+                    if ((*a_moves_ptr)[i].has_bound_violation()) {
                         (*a_flags)[i] = 0;
                         continue;
                     }
@@ -186,14 +189,14 @@ class AggregationMoveGenerator
                         /** nothing to do */
                     } else {
                         if (a_ACCEPT_OBJECTIVE_IMPROVABLE &&
-                            neighborhood::has_objective_improvable_variable(
-                                (*a_moves_ptr)[i])) {
+                            (*a_moves_ptr)[i]
+                                .has_objective_improvable_variable()) {
                             continue;
                         }
 
                         if (a_ACCEPT_FEASIBILITY_IMPROVABLE &&
-                            neighborhood::has_feasibility_improvable_variable(
-                                (*a_moves_ptr)[i])) {
+                            (*a_moves_ptr)[i]
+                                .has_feasibility_improvable_variable()) {
                             continue;
                         }
                         (*a_flags)[i] = 0;

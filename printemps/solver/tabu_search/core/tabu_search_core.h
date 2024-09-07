@@ -267,7 +267,7 @@ class TabuSearchCore {
             m_model_ptr->update_variable_objective_improvabilities();
         } else {
             m_model_ptr->update_variable_objective_improvabilities(
-                neighborhood::related_variable_ptrs_vector(STATE.current_move));
+                STATE.current_move.related_variable_ptrs_vector());
         }
 
         switch (m_option.neighborhood.improvability_screening_mode) {
@@ -449,7 +449,7 @@ class TabuSearchCore {
 
             if (chain_move.overlap_rate >
                     m_option.neighborhood.chain_move_overlap_rate_threshold &&
-                !neighborhood::has_duplicate_variable(chain_move)) {
+                !chain_move.has_duplicate_variable()) {
                 auto back_chain_move = chain_move;
                 for (auto&& alteration : back_chain_move.alterations) {
                     alteration.second = 1 - alteration.second;

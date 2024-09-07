@@ -38,12 +38,15 @@ class TrinomialExclusiveNorMoveGenerator
         /**
          * Setup move objects.
          */
-        const int BINOMIALS_SIZE = trinomial.size();
+        const int TRINOMIALS_SIZE = trinomial.size();
 
-        this->m_moves.resize(2 * BINOMIALS_SIZE);
-        this->m_flags.resize(2 * BINOMIALS_SIZE);
+        this->m_moves.clear();
+        this->m_flags.clear();
 
-        for (auto i = 0; i < BINOMIALS_SIZE; i++) {
+        this->m_moves.resize(2 * TRINOMIALS_SIZE);
+        this->m_flags.resize(2 * TRINOMIALS_SIZE);
+
+        for (auto i = 0; i < TRINOMIALS_SIZE; i++) {
             auto &move = this->m_moves[2 * i];
             move.sense = MoveSense::TrinomialExclusiveNor;
             move.alterations.emplace_back(trinomial[i].variable_ptr_first, 0);
@@ -82,7 +85,7 @@ class TrinomialExclusiveNorMoveGenerator
                     .variable_ptr_third->related_constraint_ptrs()
                     .end());
 
-            sort_and_unique_related_constraint_ptrs(&move);
+            move.sort_and_unique_related_constraint_ptrs();
 
             this->m_moves[2 * i + 1] = move;
 
@@ -120,12 +123,12 @@ class TrinomialExclusiveNorMoveGenerator
                         continue;
                     }
 
-                    if (neighborhood::has_fixed_variable((*a_moves_ptr)[i])) {
+                    if ((*a_moves_ptr)[i].has_fixed_variable()) {
                         (*a_flags)[i] = 0;
                         continue;
                     }
 
-                    if (neighborhood::has_bound_violation((*a_moves_ptr)[i])) {
+                    if ((*a_moves_ptr)[i].has_bound_violation()) {
                         (*a_flags)[i] = 0;
                         continue;
                     }
@@ -146,14 +149,14 @@ class TrinomialExclusiveNorMoveGenerator
                         /** nothing to do */
                     } else {
                         if (a_ACCEPT_OBJECTIVE_IMPROVABLE &&
-                            neighborhood::has_objective_improvable_variable(
-                                (*a_moves_ptr)[i])) {
+                            (*a_moves_ptr)[i]
+                                .has_objective_improvable_variable()) {
                             continue;
                         }
 
                         if (a_ACCEPT_FEASIBILITY_IMPROVABLE &&
-                            neighborhood::has_feasibility_improvable_variable(
-                                (*a_moves_ptr)[i])) {
+                            (*a_moves_ptr)[i]
+                                .has_feasibility_improvable_variable()) {
                             continue;
                         }
                         (*a_flags)[i] = 0;

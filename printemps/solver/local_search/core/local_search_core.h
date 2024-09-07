@@ -187,7 +187,7 @@ class LocalSearchCore {
             m_model_ptr->update_variable_objective_improvabilities();
         } else {
             m_model_ptr->update_variable_objective_improvabilities(
-                neighborhood::related_variable_ptrs_vector(STATE.current_move));
+                STATE.current_move.related_variable_ptrs_vector());
         }
 
         if (m_model_ptr->is_feasible()) {
