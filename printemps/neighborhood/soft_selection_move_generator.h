@@ -30,6 +30,9 @@ class SoftSelectionMoveGenerator
         auto constraint_ptrs =
             extract_effective_constraint_ptrs(a_RAW_CONSTRAINT_PTRS);
 
+        this->m_moves.clear();
+        this->m_flags.clear();
+
         for (auto &&constraint_ptr : constraint_ptrs) {
             const auto &sensitivities =
                 constraint_ptr->expression().sensitivities();
@@ -64,7 +67,7 @@ class SoftSelectionMoveGenerator
                     key_variable_ptr->related_constraint_ptrs().begin(),
                     key_variable_ptr->related_constraint_ptrs().end());
 
-                sort_and_unique_related_constraint_ptrs(&move_first);
+                move_first.sort_and_unique_related_constraint_ptrs();
 
                 move_second = move_first;
 
@@ -109,7 +112,7 @@ class SoftSelectionMoveGenerator
                         (*a_flags)[i] = 0;
                         continue;
                     }
-                    if (neighborhood::has_fixed_variable((*a_moves_ptr)[i])) {
+                    if ((*a_moves_ptr)[i].has_fixed_variable()) {
                         (*a_flags)[i] = 0;
                         continue;
                     }
@@ -128,14 +131,14 @@ class SoftSelectionMoveGenerator
                         /** nothing to do */
                     } else {
                         if (a_ACCEPT_OBJECTIVE_IMPROVABLE &&
-                            neighborhood::has_objective_improvable_variable(
-                                (*a_moves_ptr)[i])) {
+                            (*a_moves_ptr)[i]
+                                .has_objective_improvable_variable()) {
                             continue;
                         }
 
                         if (a_ACCEPT_FEASIBILITY_IMPROVABLE &&
-                            neighborhood::has_feasibility_improvable_variable(
-                                (*a_moves_ptr)[i])) {
+                            (*a_moves_ptr)[i]
+                                .has_feasibility_improvable_variable()) {
                             continue;
                         }
                         (*a_flags)[i] = 0;

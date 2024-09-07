@@ -34,6 +34,67 @@ TEST_F(TestMove, constructor) {
 }
 
 /*****************************************************************************/
+TEST_F(TestMove, sense_label) {
+    neighborhood::Move<int, double> move;
+    move.sense = neighborhood::MoveSense::Binary;
+    EXPECT_EQ("Binary", move.sense_label());
+
+    move.sense = neighborhood::MoveSense::Integer;
+    EXPECT_EQ("Integer", move.sense_label());
+
+    move.sense = neighborhood::MoveSense::Selection;
+    EXPECT_EQ("Selection", move.sense_label());
+
+    move.sense = neighborhood::MoveSense::ExclusiveOr;
+    EXPECT_EQ("ExclusiveOr", move.sense_label());
+
+    move.sense = neighborhood::MoveSense::ExclusiveNor;
+    EXPECT_EQ("ExclusiveNor", move.sense_label());
+
+    move.sense = neighborhood::MoveSense::InvertedIntegers;
+    EXPECT_EQ("InvertedIntegers", move.sense_label());
+
+    move.sense = neighborhood::MoveSense::BalancedIntegers;
+    EXPECT_EQ("BalancedIntegers", move.sense_label());
+
+    move.sense = neighborhood::MoveSense::ConstantSumIntegers;
+    EXPECT_EQ("ConstantSumIntegers", move.sense_label());
+
+    move.sense = neighborhood::MoveSense::ConstantDifferenceIntegers;
+    EXPECT_EQ("ConstantDifferenceIntegers", move.sense_label());
+
+    move.sense = neighborhood::MoveSense::ConstantRatioIntegers;
+    EXPECT_EQ("ConstantRatioIntegers", move.sense_label());
+
+    move.sense = neighborhood::MoveSense::Aggregation;
+    EXPECT_EQ("Aggregation", move.sense_label());
+
+    move.sense = neighborhood::MoveSense::Precedence;
+    EXPECT_EQ("Precedence", move.sense_label());
+
+    move.sense = neighborhood::MoveSense::VariableBound;
+    EXPECT_EQ("VariableBound", move.sense_label());
+
+    move.sense = neighborhood::MoveSense::SoftSelection;
+    EXPECT_EQ("SoftSelection", move.sense_label());
+
+    move.sense = neighborhood::MoveSense::TrinomialExclusiveNor;
+    EXPECT_EQ("TrinomialExclusiveNor", move.sense_label());
+
+    move.sense = neighborhood::MoveSense::Chain;
+    EXPECT_EQ("Chain", move.sense_label());
+
+    move.sense = neighborhood::MoveSense::TwoFlip;
+    EXPECT_EQ("TwoFlip", move.sense_label());
+
+    move.sense = neighborhood::MoveSense::UserDefined;
+    EXPECT_EQ("UserDefined", move.sense_label());
+
+    move.sense = neighborhood::MoveSense::General;
+    EXPECT_EQ("General", move.sense_label());
+}
+
+/*****************************************************************************/
 TEST_F(TestMove, has_fixed_variable) {
     auto variable_0 = model_component::Variable<int, double>::create_instance();
     auto variable_1 = model_component::Variable<int, double>::create_instance();
@@ -43,7 +104,7 @@ TEST_F(TestMove, has_fixed_variable) {
     {
         neighborhood::Move<int, double> move;
         move.alterations.emplace_back(&variable_0, 1);
-        EXPECT_FALSE(neighborhood::has_fixed_variable(move));
+        EXPECT_FALSE(move.has_fixed_variable());
     }
 
     /// The move have a fixed variable.
@@ -51,7 +112,7 @@ TEST_F(TestMove, has_fixed_variable) {
         neighborhood::Move<int, double> move;
         move.alterations.emplace_back(&variable_0, 1);
         move.alterations.emplace_back(&variable_1, 1);
-        EXPECT_TRUE(neighborhood::has_fixed_variable(move));
+        EXPECT_TRUE(move.has_fixed_variable());
     }
 }
 
@@ -67,7 +128,7 @@ TEST_F(TestMove, has_selection_variable) {
     {
         neighborhood::Move<int, double> move;
         move.alterations.emplace_back(&variable_0, 1);
-        EXPECT_FALSE(neighborhood::has_selection_variable(move));
+        EXPECT_FALSE(move.has_selection_variable());
     }
 
     /// The move has a selection variable.
@@ -75,7 +136,7 @@ TEST_F(TestMove, has_selection_variable) {
         neighborhood::Move<int, double> move;
         move.alterations.emplace_back(&variable_0, 1);
         move.alterations.emplace_back(&variable_1, 1);
-        EXPECT_TRUE(neighborhood::has_selection_variable(move));
+        EXPECT_TRUE(move.has_selection_variable());
     }
 }
 
@@ -90,7 +151,7 @@ TEST_F(TestMove, has_bound_violation) {
     {
         neighborhood::Move<int, double> move;
         move.alterations.emplace_back(&variable_0, 1);
-        EXPECT_FALSE(neighborhood::has_bound_violation(move));
+        EXPECT_FALSE(move.has_bound_violation());
     }
 
     /// The move has a bound violation.
@@ -98,7 +159,7 @@ TEST_F(TestMove, has_bound_violation) {
         neighborhood::Move<int, double> move;
         move.alterations.emplace_back(&variable_0, 1);
         move.alterations.emplace_back(&variable_1, 20);
-        EXPECT_TRUE(neighborhood::has_bound_violation(move));
+        EXPECT_TRUE(move.has_bound_violation());
     }
 }
 
@@ -113,7 +174,7 @@ TEST_F(TestMove, has_objective_improvable_variable) {
     {
         neighborhood::Move<int, double> move;
         move.alterations.emplace_back(&variable_0, 1);
-        EXPECT_FALSE(neighborhood::has_objective_improvable_variable(move));
+        EXPECT_FALSE(move.has_objective_improvable_variable());
     }
 
     /// The move has an objective improvable variable.
@@ -121,7 +182,7 @@ TEST_F(TestMove, has_objective_improvable_variable) {
         neighborhood::Move<int, double> move;
         move.alterations.emplace_back(&variable_0, 1);
         move.alterations.emplace_back(&variable_1, 1);
-        EXPECT_TRUE(neighborhood::has_objective_improvable_variable(move));
+        EXPECT_TRUE(move.has_objective_improvable_variable());
     }
 }
 
@@ -136,7 +197,7 @@ TEST_F(TestMove, has_feasibility_improvable_variable) {
     {
         neighborhood::Move<int, double> move;
         move.alterations.emplace_back(&variable_0, 1);
-        EXPECT_FALSE(neighborhood::has_feasibility_improvable_variable(move));
+        EXPECT_FALSE(move.has_feasibility_improvable_variable());
     }
 
     /// The move has a feasibility improvable variable.
@@ -144,32 +205,7 @@ TEST_F(TestMove, has_feasibility_improvable_variable) {
         neighborhood::Move<int, double> move;
         move.alterations.emplace_back(&variable_0, 1);
         move.alterations.emplace_back(&variable_1, 1);
-        EXPECT_TRUE(neighborhood::has_feasibility_improvable_variable(move));
-    }
-}
-
-/*****************************************************************************/
-TEST_F(TestMove, has_feasibility_not_improvable_variable) {
-    auto variable_0 = model_component::Variable<int, double>::create_instance();
-    auto variable_1 = model_component::Variable<int, double>::create_instance();
-    variable_0.set_is_feasibility_improvable(false);
-    variable_1.set_is_feasibility_improvable(true);
-
-    /// The move does not have a feasibility improvable variable.
-    {
-        neighborhood::Move<int, double> move;
-        move.alterations.emplace_back(&variable_0, 1);
-        EXPECT_TRUE(
-            neighborhood::has_feasibility_not_improvable_variable(move));
-    }
-
-    /// The move has a feasibility improvable variable.
-    {
-        neighborhood::Move<int, double> move;
-        move.alterations.emplace_back(&variable_0, 1);
-        move.alterations.emplace_back(&variable_1, 1);
-        EXPECT_TRUE(
-            neighborhood::has_feasibility_not_improvable_variable(move));
+        EXPECT_TRUE(move.has_feasibility_improvable_variable());
     }
 }
 
@@ -183,7 +219,7 @@ TEST_F(TestMove, has_duplicate_variable) {
         neighborhood::Move<int, double> move;
         move.alterations.emplace_back(&variable_0, 1);
         move.alterations.emplace_back(&variable_1, 1);
-        EXPECT_FALSE(neighborhood::has_duplicate_variable(move));
+        EXPECT_FALSE(move.has_duplicate_variable());
     }
 
     /// The move has a duplicated variable.
@@ -191,7 +227,7 @@ TEST_F(TestMove, has_duplicate_variable) {
         neighborhood::Move<int, double> move;
         move.alterations.emplace_back(&variable_0, 1);
         move.alterations.emplace_back(&variable_0, 1);
-        EXPECT_TRUE(neighborhood::has_duplicate_variable(move));
+        EXPECT_TRUE(move.has_duplicate_variable());
     }
 }
 
@@ -214,10 +250,9 @@ TEST_F(TestMove, compute_overlap_rate) {
         neighborhood::Move<int, double> move;
         move.alterations.emplace_back(&x(0), 1);
         move.alterations.emplace_back(&x(1), 1);
-        double overlap_rate =
-            neighborhood::compute_overlap_rate(move.alterations);
+        move.setup_overlap_rate();
 
-        EXPECT_FLOAT_EQ(2.0 / 3.0, overlap_rate);
+        EXPECT_FLOAT_EQ(2.0 / 3.0, move.overlap_rate);
     }
 
     /// x(0), x(1), and x(2) have one common constraint.
@@ -226,10 +261,9 @@ TEST_F(TestMove, compute_overlap_rate) {
         move.alterations.emplace_back(&x(0), 1);
         move.alterations.emplace_back(&x(1), 1);
         move.alterations.emplace_back(&x(2), 1);
-        double overlap_rate =
-            neighborhood::compute_overlap_rate(move.alterations);
+        move.setup_overlap_rate();
 
-        EXPECT_FLOAT_EQ(pow(1.0 / 3.0, 1.0 / (3 - 1)), overlap_rate);
+        EXPECT_FLOAT_EQ(pow(1.0 / 3.0, 1.0 / (3 - 1)), move.overlap_rate);
     }
 
     /// x(0), x(1), x(2), and x(3) has no common constraint.
@@ -239,10 +273,9 @@ TEST_F(TestMove, compute_overlap_rate) {
         move.alterations.emplace_back(&x(1), 1);
         move.alterations.emplace_back(&x(2), 1);
         move.alterations.emplace_back(&x(3), 1);
-        double overlap_rate =
-            neighborhood::compute_overlap_rate(move.alterations);
+        move.setup_overlap_rate();
 
-        EXPECT_FLOAT_EQ(0.0, overlap_rate);
+        EXPECT_FLOAT_EQ(0.0, move.overlap_rate);
     }
 }
 
@@ -265,7 +298,8 @@ TEST_F(TestMove, compute_hash) {
                 hash ^ reinterpret_cast<std::uint_fast64_t>(alteration.first);
         }
 
-        EXPECT_EQ(hash, neighborhood::compute_hash(move.alterations));
+        move.setup_hash();
+        EXPECT_EQ(hash, move.hash);
     }
 
     /// Case 2
@@ -281,7 +315,8 @@ TEST_F(TestMove, compute_hash) {
                 hash ^ reinterpret_cast<std::uint_fast64_t>(alteration.first);
         }
 
-        EXPECT_EQ(hash, neighborhood::compute_hash(move.alterations));
+        move.setup_hash();
+        EXPECT_EQ(hash, move.hash);
     }
 
     /// Case 3
@@ -298,7 +333,8 @@ TEST_F(TestMove, compute_hash) {
                 hash ^ reinterpret_cast<std::uint_fast64_t>(alteration.first);
         }
 
-        EXPECT_EQ(hash, neighborhood::compute_hash(move.alterations));
+        move.setup_hash();
+        EXPECT_EQ(hash, move.hash);
     }
 }
 
@@ -337,7 +373,7 @@ TEST_F(TestMove, operator_plus) {
 
     /// Combined move for x and y.
     auto move_x_y = move_x + move_y;
-    EXPECT_FALSE(neighborhood::has_duplicate_variable(move_x_y));
+    EXPECT_FALSE(move_x_y.has_duplicate_variable());
     EXPECT_EQ(2, static_cast<int>(move_x_y.alterations.size()));
     EXPECT_EQ(3, static_cast<int>(move_x_y.related_constraint_ptrs.size()));
     EXPECT_EQ(neighborhood::MoveSense::Chain, move_x_y.sense);
@@ -350,7 +386,7 @@ TEST_F(TestMove, operator_plus) {
 
     /// Combined move for x, y, and z.
     auto move_x_y_z = move_x_y + move_z;
-    EXPECT_EQ(false, neighborhood::has_duplicate_variable(move_x_y_z));
+    EXPECT_FALSE(move_x_y_z.has_duplicate_variable());
     EXPECT_EQ(3, static_cast<int>(move_x_y_z.alterations.size()));
     EXPECT_EQ(3, static_cast<int>(move_x_y_z.related_constraint_ptrs.size()));
     EXPECT_EQ(neighborhood::MoveSense::Chain, move_x_y_z.sense);
@@ -366,7 +402,7 @@ TEST_F(TestMove, operator_plus) {
 
     /// Combined move for x, y, and z, which has duplication.
     auto move_x_y_z_z = move_x_y_z + move_z;
-    EXPECT_EQ(true, neighborhood::has_duplicate_variable(move_x_y_z_z));
+    EXPECT_TRUE(move_x_y_z_z.has_duplicate_variable());
     EXPECT_EQ(4, static_cast<int>(move_x_y_z_z.alterations.size()));
     EXPECT_EQ(3, static_cast<int>(move_x_y_z_z.related_constraint_ptrs.size()));
     EXPECT_EQ(neighborhood::MoveSense::Chain, move_x_y_z_z.sense);

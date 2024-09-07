@@ -47,7 +47,7 @@ class ChainMoveGenerator
                         (*a_flags)[i] = 0;
                         continue;
                     }
-                    if (neighborhood::has_fixed_variable((*a_moves_ptr)[i])) {
+                    if ((*a_moves_ptr)[i].has_fixed_variable()) {
                         (*a_flags)[i] = 0;
                         continue;
                     }
@@ -66,14 +66,14 @@ class ChainMoveGenerator
                         /** nothing to do */
                     } else {
                         if (a_ACCEPT_OBJECTIVE_IMPROVABLE &&
-                            neighborhood::has_objective_improvable_variable(
-                                (*a_moves_ptr)[i])) {
+                            (*a_moves_ptr)[i]
+                                .has_objective_improvable_variable()) {
                             continue;
                         }
 
                         if (a_ACCEPT_FEASIBILITY_IMPROVABLE &&
-                            neighborhood::has_feasibility_improvable_variable(
-                                (*a_moves_ptr)[i])) {
+                            (*a_moves_ptr)[i]
+                                .has_feasibility_improvable_variable()) {
                             continue;
                         }
                         (*a_flags)[i] = 0;

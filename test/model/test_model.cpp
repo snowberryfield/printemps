@@ -1737,7 +1737,7 @@ TEST_F(TestModel, evaluate) {
                     move.related_constraint_ptrs.push_back(constraint_ptr);
                 }
             }
-            neighborhood::sort_and_unique_related_constraint_ptrs(&move);
+            move.sort_and_unique_related_constraint_ptrs();
 
             auto score_after_0 = model.evaluate(move);
             auto score_after_1 = model.evaluate(move, score_before);
@@ -1779,7 +1779,7 @@ TEST_F(TestModel, evaluate) {
                     move.related_constraint_ptrs.push_back(constraint_ptr);
                 }
             }
-            neighborhood::sort_and_unique_related_constraint_ptrs(&move);
+            move.sort_and_unique_related_constraint_ptrs();
 
             auto score_after_0 = model.evaluate(move);
             auto score_after_1 = model.evaluate(move, score_before);
@@ -1816,7 +1816,7 @@ TEST_F(TestModel, evaluate) {
                     move.related_constraint_ptrs.push_back(constraint_ptr);
                 }
             }
-            neighborhood::sort_and_unique_related_constraint_ptrs(&move);
+            move.sort_and_unique_related_constraint_ptrs();
 
             auto score_after_0 = model.evaluate(move);
             auto score_after_1 = model.evaluate(move, score_before);
@@ -1919,7 +1919,7 @@ TEST_F(TestModel, evaluate) {
                     move.related_constraint_ptrs.push_back(constraint_ptr);
                 }
             }
-            neighborhood::sort_and_unique_related_constraint_ptrs(&move);
+            move.sort_and_unique_related_constraint_ptrs();
 
             auto score_after_0 = model.evaluate(move);
             auto score_after_1 = model.evaluate(move, score_before);
@@ -1960,7 +1960,7 @@ TEST_F(TestModel, evaluate) {
                     move.related_constraint_ptrs.push_back(constraint_ptr);
                 }
             }
-            neighborhood::sort_and_unique_related_constraint_ptrs(&move);
+            move.sort_and_unique_related_constraint_ptrs();
 
             auto score_after_0 = model.evaluate(move);
             auto score_after_1 = model.evaluate(move, score_before);
@@ -1997,7 +1997,7 @@ TEST_F(TestModel, evaluate) {
                     move.related_constraint_ptrs.push_back(constraint_ptr);
                 }
             }
-            neighborhood::sort_and_unique_related_constraint_ptrs(&move);
+            move.sort_and_unique_related_constraint_ptrs();
 
             auto score_after_0 = model.evaluate(move);
             auto score_after_1 = model.evaluate(move, score_before);

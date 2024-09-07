@@ -23,7 +23,7 @@ class SelectionMoveGenerator
     /*************************************************************************/
     inline void setup(
         std::vector<model_component::Variable<T_Variable, T_Expression> *>
-            &a_VARIABLE_PTRS) {
+            &a_RAW_VARIABLE_PTRS) {
         /**
          *  "Swap" move for binary variables in selection
          * constraints: e.g.) selection constraint x + y + z = 1 (x,
@@ -34,7 +34,17 @@ class SelectionMoveGenerator
         /**
          * Setup move objects.
          */
-        const int VARIABLES_SIZE = a_VARIABLE_PTRS.size();
+        auto mutable_variable_ptrs =
+            extract_mutable_variable_ptrs(a_RAW_VARIABLE_PTRS);
+
+        /**
+         * Setup move objects.
+         */
+        const int VARIABLES_SIZE = mutable_variable_ptrs.size();
+
+        this->m_moves.clear();
+        this->m_flags.clear();
+
         this->m_moves.resize(VARIABLES_SIZE);
         this->m_flags.resize(VARIABLES_SIZE);
 
@@ -47,17 +57,18 @@ class SelectionMoveGenerator
             move.is_available                 = true;
             move.overlap_rate                 = 0.0;
             move.alterations.resize(2);
-            move.alterations[0].second = 0;
-            move.alterations[1].second = 1;
-            move.related_constraint_ptrs =
-                a_VARIABLE_PTRS[i]->selection_ptr()->related_constraint_ptrs;
+            move.alterations[0].second   = 0;
+            move.alterations[1].second   = 1;
+            move.related_constraint_ptrs = mutable_variable_ptrs[i]
+                                               ->selection_ptr()
+                                               ->related_constraint_ptrs;
         }
 
         /**
          * Setup move updater
          */
         auto move_updater =  //
-            [a_VARIABLE_PTRS, VARIABLES_SIZE](
+            [mutable_variable_ptrs, VARIABLES_SIZE](
                 auto *     a_moves_ptr,                      //
                 auto *     a_flags,                          //
                 const bool a_ACCEPT_ALL,                     //
@@ -78,10 +89,10 @@ class SelectionMoveGenerator
                 for (auto i = 0; i < VARIABLES_SIZE; i++) {
                     auto &alterations = (*a_moves_ptr)[i].alterations;
 
-                    alterations[0].first = a_VARIABLE_PTRS[i]
+                    alterations[0].first = mutable_variable_ptrs[i]
                                                ->selection_ptr()
                                                ->selected_variable_ptr;
-                    alterations[1].first = a_VARIABLE_PTRS[i];
+                    alterations[1].first = mutable_variable_ptrs[i];
                 }
 
                 const int MOVES_SIZE = a_moves_ptr->size();
@@ -92,10 +103,6 @@ class SelectionMoveGenerator
 #endif
                 for (auto i = 0; i < MOVES_SIZE; i++) {
                     (*a_flags)[i] = 1;
-                    if (neighborhood::has_fixed_variable((*a_moves_ptr)[i])) {
-                        (*a_flags)[i] = 0;
-                        continue;
-                    }
                     if ((*a_moves_ptr)[i].alterations[0].first ==
                         (*a_moves_ptr)[i].alterations[1].first) {
                         (*a_flags)[i] = 0;
@@ -106,14 +113,14 @@ class SelectionMoveGenerator
                         /** nothing to do */
                     } else {
                         if (a_ACCEPT_OBJECTIVE_IMPROVABLE &&
-                            neighborhood::has_objective_improvable_variable(
-                                (*a_moves_ptr)[i])) {
+                            (*a_moves_ptr)[i]
+                                .has_objective_improvable_variable()) {
                             continue;
                         }
 
                         if (a_ACCEPT_FEASIBILITY_IMPROVABLE &&
-                            neighborhood::has_feasibility_improvable_variable(
-                                (*a_moves_ptr)[i])) {
+                            (*a_moves_ptr)[i]
+                                .has_feasibility_improvable_variable()) {
                             continue;
                         }
                         (*a_flags)[i] = 0;

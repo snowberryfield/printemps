@@ -42,6 +42,10 @@ class IntegerMoveGenerator
          * Setup move objects.
          */
         const int VARIABLES_SIZE = mutable_variable_ptrs.size();
+
+        this->m_moves.clear();
+        this->m_flags.clear();
+
         this->m_moves.resize(4 * VARIABLES_SIZE);
         this->m_flags.resize(4 * VARIABLES_SIZE);
 
