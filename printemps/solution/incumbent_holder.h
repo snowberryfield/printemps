@@ -266,6 +266,12 @@ class IncumbentHolder {
     inline const SolutionScore &feasible_incumbent_score(void) const {
         return m_feasible_incumbent_score;
     }
+
+    /*************************************************************************/
+    inline double objective_gap(void) const {
+        return m_global_augmented_incumbent_score.objective -
+               m_local_augmented_incumbent_score.objective;
+    }
 };
 }  // namespace printemps::solution
 
