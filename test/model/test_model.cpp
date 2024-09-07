@@ -834,7 +834,8 @@ TEST_F(TestModel, setup_related_selection_constraint_ptr_index) {
 
     EXPECT_EQ(1, static_cast<int>(model.selections().size()));
 
-    EXPECT_EQ(3, model.selections()[0].related_constraint_ptrs.size());
+    EXPECT_EQ(3, static_cast<int>(
+                     model.selections()[0].related_constraint_ptrs.size()));
     EXPECT_EQ(&c_0[0], model.selections()[0].related_constraint_ptrs[0]);
     EXPECT_EQ(&c_1[0], model.selections()[0].related_constraint_ptrs[1]);
     EXPECT_EQ(&c_2[0], model.selections()[0].related_constraint_ptrs[2]);
@@ -1681,17 +1682,25 @@ TEST_F(TestModel, update_violative_constraint_ptrs_and_feasibility) {
     x = 4;
     model.update();  // include update_feasibility()
     EXPECT_TRUE(model.is_feasible());
-    EXPECT_TRUE(model.violative_constraint_ptrs().empty());
+    EXPECT_TRUE(model.current_violative_constraint_ptrs().empty());
 
     x = 5;
     model.update();
     EXPECT_TRUE(model.is_feasible());
-    EXPECT_TRUE(model.violative_constraint_ptrs().empty());
+    EXPECT_TRUE(model.current_violative_constraint_ptrs().empty());
 
     x = 6;
     model.update();
     EXPECT_FALSE(model.is_feasible());
-    EXPECT_EQ(1, static_cast<int>(model.violative_constraint_ptrs().size()));
+    EXPECT_EQ(
+        1, static_cast<int>(model.current_violative_constraint_ptrs().size()));
+
+    x = 5;
+    model.update();
+    EXPECT_TRUE(model.is_feasible());
+    EXPECT_EQ(
+        1, static_cast<int>(model.previous_violative_constraint_ptrs().size()));
+    EXPECT_TRUE(model.current_violative_constraint_ptrs().empty());
 }
 
 /*****************************************************************************/
@@ -2793,6 +2802,16 @@ TEST_F(TestModel, set_is_solved) {
 /*****************************************************************************/
 TEST_F(TestModel, is_solved) {
     /// This method is tested in set_is_solved().
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, current_violative_constraint_ptrs) {
+    /// This method is tested in update_violative_constraint_ptrs().
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, previous_violative_constraint_ptrs) {
+    /// This method is tested in update_violative_constraint_ptrs().
 }
 
 /*****************************************************************************/

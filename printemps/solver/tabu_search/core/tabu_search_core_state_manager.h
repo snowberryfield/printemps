@@ -266,14 +266,19 @@ class TabuSearchCoreStateManager {
 
     /*************************************************************************/
     inline void update_is_improved(void) {
-        m_state.is_improved =
+        m_state.is_objective_improved =
             (m_global_state_ptr->incumbent_holder
                  .local_augmented_incumbent_score()
-                 .objective < m_state.previous_solution_score.objective) ||
+                 .objective < m_state.previous_solution_score.objective);
+
+        m_state.is_feasibility_improved =
             (m_global_state_ptr->incumbent_holder
                  .local_augmented_incumbent_score()
                  .total_violation <
              m_state.previous_solution_score.total_violation);
+
+        m_state.is_improved =
+            m_state.is_objective_improved || m_state.is_feasibility_improved;
     }
 
     /*************************************************************************/

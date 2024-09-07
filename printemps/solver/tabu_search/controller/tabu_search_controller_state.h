@@ -63,6 +63,8 @@ struct TabuSearchControllerState {
     bool previous_is_feasible_incumbent_updated;
     bool current_is_feasible_incumbent_updated;
     bool is_not_updated;
+    bool is_objective_improved;
+    bool is_feasibility_improved;
     bool is_improved;
     bool is_exceeded_initial_penalty_coefficient;
     bool is_inner_stagnation;
@@ -160,6 +162,8 @@ struct TabuSearchControllerState {
         this->previous_is_feasible_incumbent_updated  = false;
         this->current_is_feasible_incumbent_updated   = false;
         this->is_not_updated                          = false;
+        this->is_objective_improved                   = false;
+        this->is_feasibility_improved                 = false;
         this->is_improved                             = false;
         this->is_exceeded_initial_penalty_coefficient = false;
         this->is_inner_stagnation                     = false;

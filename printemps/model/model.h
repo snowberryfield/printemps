@@ -46,7 +46,9 @@ class Model {
     bool m_is_integer;
     bool m_is_minimization;
     bool m_is_solved;
-    bool m_is_feasible;
+
+    bool m_current_is_feasible;
+    bool m_previous_is_feasible;
 
     double m_global_penalty_coefficient;
 
@@ -72,7 +74,9 @@ class Model {
         m_constraint_type_reference;
 
     std::vector<model_component::Constraint<T_Variable, T_Expression> *>
-        m_violative_constraint_ptrs;
+        m_current_violative_constraint_ptrs;
+    std::vector<model_component::Constraint<T_Variable, T_Expression> *>
+        m_previous_violative_constraint_ptrs;
 
     std::vector<
         std::pair<model_component::Variable<T_Variable, T_Expression> *,
@@ -126,7 +130,8 @@ class Model {
         m_is_integer           = false;
         m_is_minimization      = true;
         m_is_solved            = false;
-        m_is_feasible          = false;
+        m_current_is_feasible  = false;
+        m_previous_is_feasible = false;
 
         m_global_penalty_coefficient = 0.0;
 
@@ -141,7 +146,8 @@ class Model {
         m_constraint_reference.initialize();
         m_constraint_type_reference.initialize();
 
-        m_violative_constraint_ptrs.clear();
+        m_current_violative_constraint_ptrs.clear();
+        m_previous_violative_constraint_ptrs.clear();
         m_flippable_variable_ptr_pairs.clear();
 
         m_neighborhood.initialize();
@@ -1679,9 +1685,33 @@ class Model {
             constraint = m_objective.expression() >= a_OBJECTIVE;
         }
 
-        m_problem_size_reducer
-            .remove_redundant_constraint_with_tightening_variable_bound(
-                &constraint, a_IS_ENABLED_PRINT);
+        const auto &[is_constraint_disabled, is_variable_bound_updated] =
+            m_problem_size_reducer
+                .remove_redundant_constraint_with_tightening_variable_bound(
+                    &constraint, a_IS_ENABLED_PRINT);
+
+        if (!is_variable_bound_updated) {
+            return;
+        }
+
+        const int NUMBER_OF_NEWLY_FIXED_VARIABLES =
+            m_problem_size_reducer.remove_implicit_fixed_variables(
+                a_IS_ENABLED_PRINT);
+
+        /**
+         * If there is new fixed variable, setup the variable category
+         * and the binary/integer neighborhood again.
+         */
+        if (NUMBER_OF_NEWLY_FIXED_VARIABLES > 0) {
+            this->categorize_variables();
+            m_neighborhood.binary().setup(
+                this->variable_type_reference().binary_variable_ptrs);
+            m_neighborhood.integer().setup(
+                this->variable_type_reference().integer_variable_ptrs);
+            m_neighborhood.selection().setup(
+                this->variable_type_reference().selection_variable_ptrs);
+            this->setup_positive_and_negative_coefficient_mutable_variable_ptrs();
+        }
     }
 
     /*************************************************************************/
@@ -2487,7 +2517,7 @@ class Model {
         double coefficient             = 0.0;
         bool   is_objective_improvable = false;
         for (const auto &variable_ptr : a_VARIABLE_PTRS) {
-#ifdef _PRINTEMPS_LINEAR_MINIMIZATION
+#ifdef _PRINTEMPS_MPS_SOLVER
             coefficient = variable_ptr->objective_sensitivity();
 #else
             coefficient = variable_ptr->objective_sensitivity() * this->sign();
@@ -2553,14 +2583,19 @@ class Model {
 
     /*************************************************************************/
     inline void update_violative_constraint_ptrs_and_feasibility(void) {
-        m_violative_constraint_ptrs.clear();
+        m_previous_violative_constraint_ptrs =
+            m_current_violative_constraint_ptrs;
+        m_previous_is_feasible = m_current_is_feasible;
+
+        m_current_violative_constraint_ptrs.clear();
         for (auto &&constraint_ptr :
              m_constraint_reference.enabled_constraint_ptrs) {
             if (!constraint_ptr->is_feasible()) {
-                m_violative_constraint_ptrs.push_back(constraint_ptr);
+                m_current_violative_constraint_ptrs.push_back(constraint_ptr);
             }
         }
-        m_is_feasible = (m_violative_constraint_ptrs.size() == 0);
+        m_current_is_feasible =
+            (m_current_violative_constraint_ptrs.size() == 0);
     }
 
     /*************************************************************************/
@@ -2637,7 +2672,7 @@ class Model {
             }
         }
 
-#ifdef _PRINTEMPS_LINEAR_MINIMIZATION
+#ifdef _PRINTEMPS_MPS_SOLVER
         double objective             = m_objective.evaluate(a_MOVE);
         double objective_improvement = m_objective.value() - objective;
 
@@ -2712,7 +2747,7 @@ class Model {
             }
         }
 
-#ifdef _PRINTEMPS_LINEAR_MINIMIZATION
+#ifdef _PRINTEMPS_MPS_SOLVER
         double objective             = m_objective.evaluate(a_MOVE);
         double objective_improvement = m_objective.value() - objective;
 
@@ -2878,7 +2913,7 @@ class Model {
             }
         }
 
-#ifdef _PRINTEMPS_LINEAR_MINIMIZATION
+#ifdef _PRINTEMPS_MPS_SOLVER
         double objective             = m_objective.evaluate(a_MOVE);
         double objective_improvement = m_objective.value() - objective;
 
@@ -2954,7 +2989,7 @@ class Model {
             is_feasibility_improvable |= violation_diff < -constant::EPSILON;
         }
 
-#ifdef _PRINTEMPS_LINEAR_MINIMIZATION
+#ifdef _PRINTEMPS_MPS_SOLVER
         double objective             = m_objective.evaluate(a_MOVE);
         double objective_improvement = m_objective.value() - objective;
 
@@ -3122,14 +3157,14 @@ class Model {
     }
 
     /*************************************************************************/
-    std::vector<multi_array::ValueProxy<int>> export_update_count_proxies(
+    std::vector<multi_array::ValueProxy<long>> export_update_count_proxies(
         void) const {
-        std::vector<multi_array::ValueProxy<int>> update_count_proxies;
+        std::vector<multi_array::ValueProxy<long>> update_count_proxies;
         update_count_proxies.reserve(m_variable_proxies.size());
 
         for (const auto &proxy : m_variable_proxies) {
-            multi_array::ValueProxy<int> update_count_proxy(proxy.index(),
-                                                            proxy.shape());
+            multi_array::ValueProxy<long> update_count_proxy(proxy.index(),
+                                                             proxy.shape());
 
             const int NUMBER_OF_ELEMENTS = proxy.number_of_elements();
 
@@ -3145,14 +3180,14 @@ class Model {
     }
 
     /*************************************************************************/
-    std::vector<multi_array::ValueProxy<int>> export_violation_count_proxies(
+    std::vector<multi_array::ValueProxy<long>> export_violation_count_proxies(
         void) const {
-        std::vector<multi_array::ValueProxy<int>> violation_count_proxies;
+        std::vector<multi_array::ValueProxy<long>> violation_count_proxies;
         violation_count_proxies.reserve(m_constraint_proxies.size());
 
         for (const auto &proxy : m_constraint_proxies) {
-            multi_array::ValueProxy<int> violation_count_proxy(proxy.index(),
-                                                               proxy.shape());
+            multi_array::ValueProxy<long> violation_count_proxy(proxy.index(),
+                                                                proxy.shape());
 
             const int NUMBER_OF_ELEMENTS = proxy.number_of_elements();
 
@@ -4010,13 +4045,30 @@ class Model {
     /*************************************************************************/
     inline const std::vector<
         model_component::Constraint<T_Variable, T_Expression> *>
-        &violative_constraint_ptrs(void) const {
-        return m_violative_constraint_ptrs;
+        &current_violative_constraint_ptrs(void) const {
+        return m_current_violative_constraint_ptrs;
+    }
+
+    /*************************************************************************/
+    inline const std::vector<
+        model_component::Constraint<T_Variable, T_Expression> *>
+        &previous_violative_constraint_ptrs(void) const {
+        return m_previous_violative_constraint_ptrs;
     }
 
     /*************************************************************************/
     inline bool is_feasible(void) const {
-        return m_is_feasible;
+        return m_current_is_feasible;
+    }
+
+    /*************************************************************************/
+    inline bool current_is_feasible(void) const {
+        return m_current_is_feasible;
+    }
+
+    /*************************************************************************/
+    inline bool previous_is_feasible(void) const {
+        return m_previous_is_feasible;
     }
 
     /*************************************************************************/

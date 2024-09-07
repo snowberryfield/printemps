@@ -29,11 +29,6 @@ class SelectionExtractor {
             }
             bool is_valid = true;
 
-            /**
-             * NOTE: Set-partitioning constraints including only "Binary"
-             * variables can be candidates for Selection constraints,which must
-             * not include "Dependent Binary" variables.
-             */
             for (auto &&sensitivity :
                  constraint_ptr->expression().sensitivities()) {
                 if (sensitivity.first->sense() !=

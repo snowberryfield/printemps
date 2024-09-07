@@ -75,6 +75,8 @@ class TabuSearchCore {
         m_model_ptr->reset_variable_feasibility_improvabilities();
 
         m_state_manager.setup(m_model_ptr, m_global_state_ptr, m_option);
+
+        this->initial_modification();
     }
 
     /*************************************************************************/
@@ -238,6 +240,110 @@ class TabuSearchCore {
     }
 
     /*************************************************************************/
+    inline void initial_modification(void) {
+        const auto& STATE = m_state_manager.state();
+
+        std::vector<TabuSearchCoreMoveScore> trial_move_scores;
+
+        std::vector<neighborhood::Move<T_Variable, T_Expression>*>
+                            candidate_move_ptrs;
+        std::vector<double> candidate_move_weights;
+
+        TabuSearchCoreMoveEvaluator<T_Variable, T_Expression> move_evaluator(
+            m_model_ptr, &(m_global_state_ptr->memory), m_option);
+
+        for (auto i = 0;
+             i < m_option.tabu_search.number_of_initial_modification; i++) {
+            m_model_ptr->neighborhood().update_moves(
+                true,  //
+                true,  //
+                true,  //
+                m_option.parallel.is_enabled_move_update_parallelization,
+                m_option.parallel.number_of_threads_move_update);
+
+            auto& trial_move_ptrs = m_model_ptr->neighborhood().move_ptrs();
+
+            const int TRIAL_MOVES_SIZE = trial_move_ptrs.size();
+            trial_move_scores.resize(TRIAL_MOVES_SIZE);
+
+            candidate_move_ptrs.clear();
+            candidate_move_weights.clear();
+
+            for (auto j = 0; j < TRIAL_MOVES_SIZE; j++) {
+                const bool IS_PERMISSIBLE =
+                    move_evaluator.compute_permissibility(*trial_move_ptrs[j],
+                                                          0);
+                if (!IS_PERMISSIBLE) {
+                    continue;
+                }
+
+                if (trial_move_ptrs[j]->sense ==
+                    neighborhood::MoveSense::Integer) {
+                    auto variable_ptr =
+                        trial_move_ptrs[j]->alterations.front().first;
+                    const T_Variable CURRENT_VALUE = variable_ptr->value();
+                    const T_Variable TARGET_VALUE =
+                        trial_move_ptrs[j]->alterations.front().second;
+
+                    if (std::abs(CURRENT_VALUE - TARGET_VALUE) > 1) {
+                        continue;
+                    }
+                }
+
+                const double WEIGHT =
+                    1.0 / (move_evaluator.compute_total_update_count(
+                               *trial_move_ptrs[j]) +
+                           1.0);
+
+                candidate_move_ptrs.push_back(trial_move_ptrs[j]);
+                candidate_move_weights.push_back(WEIGHT);
+            }
+
+            if (candidate_move_ptrs.empty()) {
+                break;
+            }
+
+            std::discrete_distribution<> dist(candidate_move_weights.begin(),
+                                              candidate_move_weights.end());
+
+            const int SELECTED_INDEX = dist(m_get_rand_mt);
+
+            auto selected_move_ptr = candidate_move_ptrs[SELECTED_INDEX];
+            solution::SolutionScore selected_solution_score;
+            TabuSearchCoreMoveScore selected_move_score;
+
+            const auto& CURRENT_SOLUTION_SCORE = STATE.current_solution_score;
+
+            if (selected_move_ptr->is_univariable_move) {
+                m_model_ptr->evaluate_single(&selected_solution_score,  //
+                                             *selected_move_ptr,        //
+                                             CURRENT_SOLUTION_SCORE);
+            } else if (selected_move_ptr->is_selection_move) {
+                m_model_ptr->evaluate_selection(  //
+                    &selected_solution_score,     //
+                    *selected_move_ptr,           //
+                    CURRENT_SOLUTION_SCORE);
+            } else {
+                m_model_ptr->evaluate_multi(   //
+                    &selected_solution_score,  //
+                    *selected_move_ptr,        //
+                    CURRENT_SOLUTION_SCORE);
+            }
+
+            move_evaluator.evaluate(&selected_move_score,  //
+                                    *selected_move_ptr,    //
+                                    0, 0);
+
+            m_model_ptr->update(*selected_move_ptr);
+            this->update_memory(selected_move_ptr);
+
+            m_state_manager.update(selected_move_ptr, 0, false,
+                                   {selected_move_score},
+                                   {selected_solution_score});
+        }
+    }
+
+    /*************************************************************************/
     inline void update_moves(utility::TimeKeeper* a_time_keeper_ptr) {
         const auto& STATE = m_state_manager.state();
 
@@ -246,7 +352,7 @@ class TabuSearchCore {
         bool accept_feasibility_improvable = true;
 
         if (m_option.neighborhood.improvability_screening_mode ==
-                option::improvability_screening_mode::Off) {
+            option::improvability_screening_mode::Off) {
             m_model_ptr->neighborhood().update_moves(
                 accept_all,                     //
                 accept_objective_improvable,    //
@@ -279,7 +385,7 @@ class TabuSearchCore {
                 } else {
                     m_model_ptr->reset_variable_feasibility_improvabilities();
                     m_model_ptr->update_variable_feasibility_improvabilities(
-                        m_model_ptr->violative_constraint_ptrs());
+                        m_model_ptr->current_violative_constraint_ptrs());
 
                     accept_all                    = false;
                     accept_objective_improvable   = true;
@@ -293,9 +399,22 @@ class TabuSearchCore {
                     accept_objective_improvable   = true;
                     accept_feasibility_improvable = false;
                 } else {
-                    m_model_ptr->reset_variable_feasibility_improvabilities();
-                    m_model_ptr->update_variable_feasibility_improvabilities(
-                        m_model_ptr->violative_constraint_ptrs());
+                    if (m_model_ptr->previous_is_feasible() ||
+                        STATE.iteration == 0) {
+                        m_model_ptr
+                            ->reset_variable_feasibility_improvabilities();
+                        m_model_ptr
+                            ->update_variable_feasibility_improvabilities(
+                                m_model_ptr
+                                    ->current_violative_constraint_ptrs());
+                    } else {
+                        m_model_ptr->reset_variable_feasibility_improvabilities(
+                            STATE.current_move.related_constraint_ptrs);
+                        m_model_ptr
+                            ->update_variable_feasibility_improvabilities(
+                                m_model_ptr
+                                    ->current_violative_constraint_ptrs());
+                    }
 
                     accept_all                    = false;
                     accept_objective_improvable   = false;
@@ -365,26 +484,9 @@ class TabuSearchCore {
         const std::vector<double>&                  a_TOTAL_SCORES,
         const std::vector<TabuSearchCoreMoveScore>& a_TRIAL_MOVE_SCORES,
         const std::vector<solution::SolutionScore>& a_TRIAL_SOLUTION_SCORES) {
-        const auto& STATE = m_state_manager.state();
-
         int  selected_index = 0;
         bool is_aspirated   = false;
 
-        if (STATE.iteration <
-            m_option.tabu_search.number_of_initial_modification) {
-            /**
-             * For diversification, the move for next solution will be
-             * randomly selected for initial several iteration.
-             */
-            selected_index = m_get_rand_mt() % STATE.number_of_moves;
-            is_aspirated   = false;
-            return std::make_pair(selected_index, is_aspirated);
-        }
-
-        /**
-         * The move for next solution will be determined by evaluations
-         * of solutions and moves after the inital modifications.
-         */
         selected_index = utility::argmin(a_TOTAL_SCORES);
         is_aspirated   = false;
 
@@ -766,6 +868,7 @@ class TabuSearchCore {
 
         while (true) {
             m_state_manager.set_elapsed_time(time_keeper.clock());
+
             /**
              * Terminate the loop if the time is over.
              */
@@ -838,6 +941,7 @@ class TabuSearchCore {
             const auto ITERATION              = STATE.iteration;
             const auto TABU_TENURE            = STATE.tabu_tenure;
             const auto DURATION               = ITERATION - TABU_TENURE;
+
 #ifdef _OPENMP
 #pragma omp parallel for if (m_option.parallel                                \
                                  .is_enabled_move_evaluation_parallelization) \
@@ -849,7 +953,7 @@ class TabuSearchCore {
                  * The neighborhood solutions will be evaluated in parallel by
                  * fast or ordinary(slow) evaluation methods.
                  */
-#ifndef _PRINTEMPS_LINEAR_MINIMIZATION
+#ifndef _PRINTEMPS_MPS_SOLVER
                 if (m_option.general.is_enabled_fast_evaluation) {
 #endif
                     if (TRIAL_MOVE_PTRS[i]->is_univariable_move) {
@@ -862,7 +966,6 @@ class TabuSearchCore {
                             &trial_solution_scores[i],    //
                             *TRIAL_MOVE_PTRS[i],          //
                             CURRENT_SOLUTION_SCORE);
-
                     } else {
                         m_model_ptr->evaluate_multi(    //
                             &trial_solution_scores[i],  //
@@ -870,7 +973,7 @@ class TabuSearchCore {
                             CURRENT_SOLUTION_SCORE);
                     }
 
-#ifndef _PRINTEMPS_LINEAR_MINIMIZATION
+#ifndef _PRINTEMPS_MPS_SOLVER
                 } else {
                     m_model_ptr->evaluate(&trial_solution_scores[i],  //
                                           *TRIAL_MOVE_PTRS[i]);
