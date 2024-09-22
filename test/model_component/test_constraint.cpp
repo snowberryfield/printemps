@@ -56,12 +56,15 @@ TEST_F(TestConstraint, constructor_arg_expression) {
         EXPECT_EQ(model_component::ConstraintSense::Less, constraint.sense());
         EXPECT_EQ(0, constraint.constraint_value());
         EXPECT_EQ(0, constraint.violation_value());
+        EXPECT_EQ(0, constraint.margin_value());
         EXPECT_EQ(0, constraint.positive_part());
         EXPECT_EQ(0, constraint.negative_part());
+        EXPECT_EQ(sensitivity, constraint.max_abs_coefficient());
         EXPECT_TRUE(constraint.is_integer());
         EXPECT_TRUE(constraint.is_enabled());
         EXPECT_TRUE(constraint.is_less_or_equal());
         EXPECT_FALSE(constraint.is_greater_or_equal());
+        EXPECT_FALSE(constraint.has_margin());
     }
 
     /// Equal
@@ -75,12 +78,15 @@ TEST_F(TestConstraint, constructor_arg_expression) {
         EXPECT_EQ(model_component::ConstraintSense::Equal, constraint.sense());
         EXPECT_EQ(0, constraint.constraint_value());
         EXPECT_EQ(0, constraint.violation_value());
+        EXPECT_EQ(0, constraint.margin_value());
         EXPECT_EQ(0, constraint.positive_part());
         EXPECT_EQ(0, constraint.negative_part());
+        EXPECT_EQ(sensitivity, constraint.max_abs_coefficient());
         EXPECT_TRUE(constraint.is_integer());
         EXPECT_TRUE(constraint.is_enabled());
         EXPECT_TRUE(constraint.is_less_or_equal());
         EXPECT_TRUE(constraint.is_greater_or_equal());
+        EXPECT_FALSE(constraint.has_margin());
     }
 
     /// Greater
@@ -95,12 +101,15 @@ TEST_F(TestConstraint, constructor_arg_expression) {
                   constraint.sense());
         EXPECT_EQ(0, constraint.constraint_value());
         EXPECT_EQ(0, constraint.violation_value());
+        EXPECT_EQ(0, constraint.margin_value());
         EXPECT_EQ(0, constraint.positive_part());
         EXPECT_EQ(0, constraint.negative_part());
+        EXPECT_EQ(sensitivity, constraint.max_abs_coefficient());
         EXPECT_TRUE(constraint.is_integer());
         EXPECT_TRUE(constraint.is_enabled());
         EXPECT_FALSE(constraint.is_less_or_equal());
         EXPECT_TRUE(constraint.is_greater_or_equal());
+        EXPECT_FALSE(constraint.has_margin());
     }
 
     /// Not Integer(1)
@@ -117,6 +126,54 @@ TEST_F(TestConstraint, constructor_arg_expression) {
                                                             1.1 * target);
 
         EXPECT_FALSE(constraint.is_integer());
+    }
+
+    /// Binary coefficient / Binary variable
+    {
+        auto variable =
+            model_component::Variable<int, double>::create_instance();
+        variable.set_bound(0, 1);
+
+        model_component::Constraint<int, double> constraint(variable >= 1);
+
+        EXPECT_TRUE(constraint.has_only_binary_coefficient());
+        EXPECT_TRUE(constraint.has_only_binary_variable());
+    }
+
+    /// Not binary coefficient / Binary variable
+    {
+        auto variable =
+            model_component::Variable<int, double>::create_instance();
+        variable.set_bound(0, 1);
+
+        model_component::Constraint<int, double> constraint(2 * variable >= 1);
+
+        EXPECT_FALSE(constraint.has_only_binary_coefficient());
+        EXPECT_TRUE(constraint.has_only_binary_variable());
+    }
+
+    /// Binary coefficient / not binary variable
+    {
+        auto variable =
+            model_component::Variable<int, double>::create_instance();
+        variable.set_bound(0, 2);
+
+        model_component::Constraint<int, double> constraint(variable >= 1);
+
+        EXPECT_TRUE(constraint.has_only_binary_coefficient());
+        EXPECT_FALSE(constraint.has_only_binary_variable());
+    }
+
+    /// Not binary coefficient / Not binary variable
+    {
+        auto variable =
+            model_component::Variable<int, double>::create_instance();
+        variable.set_bound(0, 2);
+
+        model_component::Constraint<int, double> constraint(2 * variable >= 1);
+
+        EXPECT_FALSE(constraint.has_only_binary_coefficient());
+        EXPECT_FALSE(constraint.has_only_binary_variable());
     }
 }
 
@@ -310,7 +367,6 @@ TEST_F(TestConstraint, setup_arg_expression) {
     {
         auto constraint =
             model_component::Constraint<int, double>::create_instance();
-        ;
         constraint.setup(expression - target,
                          model_component::ConstraintSense::Equal);
 
@@ -1518,12 +1574,22 @@ TEST_F(TestConstraint, violation_value) {
 }
 
 /*****************************************************************************/
+TEST_F(TestConstraint, margin_value) {
+    /// This method is tested in tested in other cases.
+}
+
+/*****************************************************************************/
 TEST_F(TestConstraint, positive_part) {
     /// This method is tested in tested in other cases.
 }
 
 /*****************************************************************************/
 TEST_F(TestConstraint, negative_part) {
+    /// This method is tested in tested in other cases.
+}
+
+/*****************************************************************************/
+TEST_F(TestConstraint, max_abs_coefficient) {
     /// This method is tested in tested in other cases.
 }
 
@@ -1615,6 +1681,102 @@ TEST_F(TestConstraint, set_is_user_defined_selection) {
 /*****************************************************************************/
 TEST_F(TestConstraint, is_user_defined_selection) {
     /// This method is tested in set_is_user_defined_selection().
+}
+
+/*****************************************************************************/
+TEST_F(TestConstraint, has_only_binary_coefficient) {
+    /// This method is tested in other methods.
+}
+
+/*****************************************************************************/
+TEST_F(TestConstraint, has_only_binary_variable) {
+    /// This method is tested in other methods.
+}
+
+/*****************************************************************************/
+TEST_F(TestConstraint, is_evaluation_ignorable) {
+    model::Model<int, double> model;
+
+    auto& x = model.create_variable("x", 0, 1);
+    auto& y = model.create_variable("y", 0, 1);
+
+    /// Less
+    {
+        auto constraint =
+            model_component::Constraint<int, double>::create_instance();
+        constraint.setup(x + y - 1, model_component::ConstraintSense::Less);
+        x = 0;
+        y = 0;
+        constraint.update();
+        EXPECT_TRUE(constraint.is_evaluation_ignorable());
+
+        x = 1;
+        y = 0;
+        constraint.update();
+        EXPECT_FALSE(constraint.is_evaluation_ignorable());
+
+        x = 0;
+        y = 1;
+        constraint.update();
+        EXPECT_FALSE(constraint.is_evaluation_ignorable());
+
+        x = 1;
+        y = 1;
+        constraint.update();
+        EXPECT_FALSE(constraint.is_evaluation_ignorable());
+    }
+
+    /// Equal
+    {
+        auto constraint =
+            model_component::Constraint<int, double>::create_instance();
+        constraint.setup(x + y - 1, model_component::ConstraintSense::Equal);
+        x = 0;
+        y = 0;
+        constraint.update();
+        EXPECT_FALSE(constraint.is_evaluation_ignorable());
+
+        x = 1;
+        y = 0;
+        constraint.update();
+        EXPECT_FALSE(constraint.is_evaluation_ignorable());
+
+        x = 0;
+        y = 1;
+        constraint.update();
+        EXPECT_FALSE(constraint.is_evaluation_ignorable());
+
+        x = 1;
+        y = 1;
+        constraint.update();
+        EXPECT_FALSE(constraint.is_evaluation_ignorable());
+    }
+
+    /// Greater
+    {
+        auto constraint =
+            model_component::Constraint<int, double>::create_instance();
+        constraint.setup(x + y - 1, model_component::ConstraintSense::Greater);
+        x = 0;
+        y = 0;
+        constraint.update();
+        EXPECT_FALSE(constraint.is_evaluation_ignorable());
+
+        x = 1;
+        y = 0;
+        constraint.update();
+        EXPECT_FALSE(constraint.is_evaluation_ignorable());
+
+        x = 0;
+        y = 1;
+        constraint.update();
+        EXPECT_FALSE(constraint.is_evaluation_ignorable());
+
+        x = 1;
+        y = 1;
+        constraint.update();
+        EXPECT_TRUE(constraint.is_evaluation_ignorable());
+    }
 }
 
 /*****************************************************************************/
@@ -1765,11 +1927,6 @@ TEST_F(TestConstraint, is_gf2) {
 /*****************************************************************************/
 TEST_F(TestConstraint, is_general_linear) {
     /// This method is tested in setup_constraint_type_general_linear().
-}
-
-/*****************************************************************************/
-TEST_F(TestConstraint, has_only_binary_coefficient) {
-    /// This method is tested in other methods.
 }
 
 /*****************************************************************************/

@@ -2720,9 +2720,10 @@ class Model {
 
         for (const auto &sensitivity : constraint_sensitivities) {
             const auto &constraint_ptr = sensitivity.first;
-            if (!constraint_ptr->is_enabled()) {
+            if (constraint_ptr->is_evaluation_ignorable()) {
                 continue;
             }
+
             constraint_value = constraint_ptr->constraint_value() +
                                sensitivity.second * variable_value_diff;
 
