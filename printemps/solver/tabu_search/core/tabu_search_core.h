@@ -291,7 +291,7 @@ class TabuSearchCore {
                 }
 
                 const double WEIGHT =
-                    1.0 / (move_evaluator.compute_total_update_count(
+                    1.0 / (move_evaluator.compute_minimum_update_count(
                                *trial_move_ptrs[j]) +
                            1.0);
 
