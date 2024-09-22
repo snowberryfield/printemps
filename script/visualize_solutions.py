@@ -22,12 +22,11 @@ import pandas as pd
 import plotly
 import plotly.express as px
 
-###############################################################################
-
 np.random.seed(1)
 
 
-def compute_distance(first, second):
+#######################################################################################################################
+def compute_distance(first: dict, second: dict) -> None:
     # Compute the Manhattan distance between solutions first and second.
     first_set = set(first.keys())
     second_set = set(second.keys())
@@ -45,25 +44,13 @@ def compute_distance(first, second):
     return distance
 
 
-###############################################################################
+#######################################################################################################################
 
 
 class Visualizer:
     def __init__(
-        self,
-        solution_object,
-        max_number_of_solutions,
-        is_enabled_shuffle,
-        is_descending,
-    ):
-        """
-        Parameters
-        ----------
-            solution_object : dict
-            max_number_of_solutions : int
-            is_enabled_shuffle : bool
-            is_descending : bool
-        """
+        self, solution_object: dict, max_number_of_solutions: int, is_enabled_shuffle: bool, is_descending: bool
+    ) -> None:
         self.solutions = copy.deepcopy(solution_object["solutions"])
         self.name = solution_object["name"]
         self.number_of_variables = solution_object["number_of_variables"]
@@ -71,17 +58,13 @@ class Visualizer:
 
         self.max_number_of_solutions = max_number_of_solutions
         self.is_descending = is_descending
-        self.number_of_solutions = min(
-            len(self.solutions), self.max_number_of_solutions
-        )
+        self.number_of_solutions = min(len(self.solutions), self.max_number_of_solutions)
 
         print(" instance name: {}".format(self.name))
         print(" number of variables: {}".format(self.number_of_variables))
         print(" number of constraints: {}".format(self.number_of_constraints))
         print(" original number of feasible solutions: {}".format(len(self.solutions)))
-        print(
-            " reduced number of feasible solutions: {}".format(self.number_of_solutions)
-        )
+        print(" reduced number of feasible solutions: {}".format(self.number_of_solutions))
 
         if is_enabled_shuffle:
             np.random.shuffle(self.solutions)
@@ -95,28 +78,25 @@ class Visualizer:
 
         self.__setup_distance_matrix()
 
-    ###########################################################################
-    def __setup_distance_matrix(self):
+    ###################################################################################################################
+    def __setup_distance_matrix(self) -> None:
         # Compute Manhattan distance for each solutions pair.
         distance_matrix = np.zeros((self.number_of_solutions, self.number_of_solutions))
 
         for i in range(self.number_of_solutions):
             for j in range(i + 1, self.number_of_solutions):
-                distance = compute_distance(
-                    self.solutions[i]["variables"], self.solutions[j]["variables"]
-                )
+                distance = compute_distance(self.solutions[i]["variables"], self.solutions[j]["variables"])
                 distance_matrix[i, j] = distance
                 distance_matrix[j, i] = distance
         self.distance_matrix = distance_matrix
 
-    ###########################################################################
-    def plot_heatmap(
-        self, output_file_name="heatmap.png", is_enabled_write_title=False
-    ):
+    ###################################################################################################################
+    def plot_heatmap(self, output_file_name: str = "heatmap.png", is_enabled_write_title: bool = False) -> None:
         # plot the Manhattan distance_matrix as a heatmap.
-        title = (
-            "Manhattan distance between 2 solutions \n (Instance: %s, #Variable: %d, #Constraint: %d)"
-            % (self.name, self.number_of_variables, self.number_of_constraints)
+        title = "Manhattan distance between 2 solutions \n (Instance: %s, #Variable: %d, #Constraint: %d)" % (
+            self.name,
+            self.number_of_variables,
+            self.number_of_constraints,
         )
         if self.is_descending:
             footnote_text = "* The solutions are sorted in descending order of objective function value."
@@ -128,19 +108,15 @@ class Visualizer:
         plt.imshow(self.distance_matrix)
         plt.xlabel("Solution No.")
         plt.ylabel("Solution No.")
-        plt.text(
-            -0.1 * self.number_of_solutions,
-            1.19 * self.number_of_solutions,
-            footnote_text,
-        )
+        plt.text(-0.1 * self.number_of_solutions, 1.19 * self.number_of_solutions, footnote_text)
 
         plt.grid(False)
         plt.colorbar()
         plt.subplots_adjust(bottom=0.15)
         plt.savefig(output_file_name)
 
-    ###########################################################################
-    def plot_tsne(self, output_file_name="tsne.png", is_enabled_write_title=False):
+    ###################################################################################################################
+    def plot_tsne(self, output_file_name: str = "tsne.png", is_enabled_write_title: bool = False) -> None:
         # Plot the 2D solution coordinates mapped by t-SNE and objective function values.
         title = (
             "2D solution coordinates mapped into 2D with t-SNE and objective function values\n (Instance: %s, #Variable: %d, #Constraint: %d)"
@@ -150,9 +126,7 @@ class Visualizer:
         tsne = TSNE(n_components=2, random_state=0)
         coordinates = tsne.fit_transform(self.distance_matrix)
 
-        objectives = [
-            self.solutions[i]["objective"] for i in range(self.number_of_solutions)
-        ]
+        objectives = [self.solutions[i]["objective"] for i in range(self.number_of_solutions)]
 
         fig = plt.figure()
         ax = fig.add_subplot(111, projection="3d")
@@ -179,19 +153,12 @@ class Visualizer:
             marker=".",
         )
 
-        fig.colorbar(
-            scatter,
-            ax=ax,
-            shrink=0.5,
-            aspect=8,
-            pad=0.18,
-            format=ticker.FuncFormatter(fmt),
-        )
+        fig.colorbar(scatter, ax=ax, shrink=0.5, aspect=8, pad=0.18, format=ticker.FuncFormatter(fmt))
         ax.zaxis.labelpad = 15
         plt.savefig(output_file_name)
 
-    ###########################################################################
-    def plot_mds(self, output_file_name="mds.png", is_enabled_write_title=False):
+    ###################################################################################################################
+    def plot_mds(self, output_file_name: str = "mds.png", is_enabled_write_title: bool = False) -> None:
         # Plot the 2D solution coordinates mapped by MDS and objective function values.
         title = (
             "2D solution coordinates mapped by MDS and objective function values\n (Instance: %s, #Variable: %d, #Constraint: %d)"
@@ -201,9 +168,7 @@ class Visualizer:
         mds = MDS(n_components=2, random_state=0, dissimilarity="precomputed")
         coordinates = mds.fit_transform(self.distance_matrix)
 
-        objectives = [
-            self.solutions[i]["objective"] for i in range(self.number_of_solutions)
-        ]
+        objectives = [self.solutions[i]["objective"] for i in range(self.number_of_solutions)]
 
         fig = plt.figure()
         ax = fig.add_subplot(111, projection="3d")
@@ -230,21 +195,14 @@ class Visualizer:
             marker=".",
         )
 
-        fig.colorbar(
-            scatter,
-            ax=ax,
-            shrink=0.5,
-            aspect=8,
-            pad=0.18,
-            format=ticker.FuncFormatter(fmt),
-        )
+        fig.colorbar(scatter, ax=ax, shrink=0.5, aspect=8, pad=0.18, format=ticker.FuncFormatter(fmt))
         ax.zaxis.labelpad = 15
         plt.savefig(output_file_name)
 
-    ###########################################################################
+    ###################################################################################################################
     def plot_contribution(
-        self, output_file_name="contribution.html", is_enabled_write_title=False
-    ):
+        self, output_file_name: str = "contribution.html", is_enabled_write_title: bool = False
+    ) -> None:
         # Plot the variable contributions to objective function values.
         title = (
             "Variable contributions to objective function values\n (Instance: %s, #Variable: %d, #Constraint: %d)"
@@ -256,15 +214,12 @@ class Visualizer:
         for solution in self.solutions:
             for variable_name in solution["variables"].keys():
                 if objective_distribution_dict.get(variable_name):
-                    objective_distribution_dict[variable_name].append(
-                        solution["objective"]
-                    )
+                    objective_distribution_dict[variable_name].append(solution["objective"])
                 else:
                     objective_distribution_dict[variable_name] = [solution["objective"]]
 
         objective_distributions = [
-            {"variable": key, "objectives": value}
-            for (key, value) in objective_distribution_dict.items()
+            {"variable": key, "objectives": value} for (key, value) in objective_distribution_dict.items()
         ]
 
         objective_distributions.sort(key=lambda x: min(x["objectives"]))
@@ -278,18 +233,16 @@ class Visualizer:
                 data.append(record)
 
         df = pd.DataFrame(data, columns=cols)
-
         fig = px.scatter(df, x="objective", y="variable", orientation="h")
-
         fig.update_layout(title=title if is_enabled_write_title else "", autosize=True)
 
         plotly.offline.plot(fig, filename=output_file_name)
 
-    ###########################################################################
+    ###################################################################################################################
 
     def write_minimum_spanning_tree_dot(
-        self, output_file_name="mst.dot", is_enabled_write_title=False
-    ):
+        self, output_file_name: str = "mst.dot", is_enabled_write_title: bool = False
+    ) -> None:
         # Create the minimum spanning tree and write as a dot file.
         graph = nx.Graph()
         label = (
@@ -315,21 +268,12 @@ class Visualizer:
         max_objective = np.max(objectives)
 
         for i in range(self.number_of_solutions):
-            color = cm.summer(
-                np.log(objectives[i] - min_objective + 1)
-                / np.log(max_objective - min_objective + 1)
-            )
+            color = cm.summer(np.log(objectives[i] - min_objective + 1) / np.log(max_objective - min_objective + 1))
             red = int(np.floor(color[0] * 255))
             green = int(np.floor(color[1] * 255))
             blue = int(np.floor(color[2] * 255))
             alpha = 127
-            fillcolor = (
-                "#"
-                + format(red, "02x")
-                + format(green, "02x")
-                + format(blue, "02x")
-                + format(alpha, "02x")
-            )
+            fillcolor = "#" + format(red, "02x") + format(green, "02x") + format(blue, "02x") + format(alpha, "02x")
 
             mst.nodes[i]["label"] = objectives[i]
             mst.nodes[i]["penwidth"] = 0.1
@@ -342,16 +286,10 @@ class Visualizer:
         nx.drawing.nx_agraph.write_dot(mst, output_file_name)
 
 
-###############################################################################
-
-
-def main():
-    parser = argparse.ArgumentParser(
-        description="A script for visualizing feasible solutions."
-    )
-    parser.add_argument(
-        "input_file_name", help="specify the input file name.", type=str
-    )
+#######################################################################################################################
+def main() -> None:
+    parser = argparse.ArgumentParser(description="A script for visualizing feasible solutions.")
+    parser.add_argument("input_file_name", help="specify the input file name.", type=str)
     parser.add_argument(
         "-n",
         "--number_of_solutions",
@@ -359,30 +297,38 @@ def main():
         type=int,
         default=1000000,
     )
+
     parser.add_argument(
         "-s",
         "--shuffle",
         help="Extract solutions with shuffling if -n option is enabled.",
         action="store_true",
     )
+
     parser.add_argument(
-        "--descending", help="sort solutions in descending order.", action="store_true"
+        "--descending",
+        help="sort solutions in descending order.",
+        action="store_true",
     )
+
     parser.add_argument(
         "--tsne",
         help="enable generating 3D plot of 2D solution coordinates mapped by t-SNE and objective function values.",
         action="store_true",
     )
+
     parser.add_argument(
         "--mds",
         help="enable generating 3D plot of 2D solution coordinates mapped by MDS and objective function values.",
         action="store_true",
     )
+
     parser.add_argument(
         "--contribution",
         help="enable generating 2D plots of variable contributions to objective function values.",
         action="store_true",
     )
+
     parser.add_argument(
         "--dot",
         help="enable generating the minimum spanning tree dot file.",
@@ -418,11 +364,10 @@ def main():
         visualizer.write_minimum_spanning_tree_dot()
 
 
-###############################################################################
-
+#######################################################################################################################
 if __name__ == "__main__":
     main()
 
-###############################################################################
+#######################################################################################################################
 # END
-###############################################################################
+#######################################################################################################################
