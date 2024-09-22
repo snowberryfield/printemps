@@ -753,7 +753,8 @@ class TabuSearchControllerStateManager {
                 m_state.employing_previous_solution_flag = true;
             }
         } else {
-            m_state.employing_local_solution_flag = true;
+            m_state.employing_local_solution_flag            = true;
+            m_state.is_enabled_forcibly_initial_modification = true;
         }
         m_state.is_enabled_penalty_coefficient_tightening = true;
     }
