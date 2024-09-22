@@ -97,6 +97,19 @@ class TabuSearchCoreMoveEvaluator {
     }
 
     /*************************************************************************/
+    inline long compute_minimum_update_count(
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
+        noexcept {
+        long minimum_update_count = std::numeric_limits<long>::max();
+        for (const auto &alteration : a_MOVE.alterations) {
+            minimum_update_count = std::min(minimum_update_count,
+                                            alteration.first->update_count());
+        }
+
+        return minimum_update_count;
+    }
+
+    /*************************************************************************/
     inline double compute_frequency_penalty(
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE,
         const int a_ITERATION) const noexcept {
