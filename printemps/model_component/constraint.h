@@ -35,8 +35,10 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     ConstraintSense m_sense;
     T_Expression    m_constraint_value;
     T_Expression    m_violation_value;
+    T_Expression    m_margin_value;
     T_Expression    m_positive_part;
     T_Expression    m_negative_part;
+    T_Expression    m_max_abs_coefficient;
 
     double m_local_penalty_coefficient_less;
     double m_local_penalty_coefficient_greater;
@@ -50,8 +52,11 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     bool m_is_enabled;
     bool m_is_less_or_equal;     /// <= or ==
     bool m_is_greater_or_equal;  /// >= or ==
+    bool m_has_margin;
 
     bool m_is_user_defined_selection;
+    bool m_has_only_binary_coefficient;
+    bool m_has_only_binary_variable;
 
     bool m_is_singleton;
     bool m_is_exclusive_or;
@@ -83,8 +88,6 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     bool m_is_integer_knapsack;
     bool m_is_gf2;
     bool m_is_general_linear;
-
-    bool m_has_only_binary_coefficient;
 
     /*************************************************************************/
     /// Default constructor
@@ -155,11 +158,13 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     void initialize(void) {
         multi_array::AbstractMultiArrayElement::initialize();
         m_expression.initialize();
-        m_sense            = ConstraintSense::Less;
-        m_constraint_value = 0;
-        m_violation_value  = 0;
-        m_positive_part    = 0;
-        m_negative_part    = 0;
+        m_sense               = ConstraintSense::Less;
+        m_constraint_value    = 0;
+        m_violation_value     = 0;
+        m_margin_value        = 0;
+        m_positive_part       = 0;
+        m_negative_part       = 0;
+        m_max_abs_coefficient = 0;
 
         m_local_penalty_coefficient_less    = HUGE_VALF;
         m_local_penalty_coefficient_greater = HUGE_VALF;
@@ -172,8 +177,11 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         m_is_enabled          = true;
         m_is_less_or_equal    = false;
         m_is_greater_or_equal = false;
+        m_has_margin          = false;
 
-        m_is_user_defined_selection = false;
+        m_is_user_defined_selection   = false;
+        m_has_only_binary_coefficient = false;
+        m_has_only_binary_variable    = false;
 
         this->clear_constraint_type();
     }
@@ -211,8 +219,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         m_is_gf2                          = false;
         m_is_general_linear               = false;
 
-        m_has_only_binary_coefficient = false;
-        m_key_variable_ptr            = nullptr;
+        m_key_variable_ptr = nullptr;
     }
 
     /*************************************************************************/
@@ -222,12 +229,12 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         m_sense            = a_SENSE;
         m_constraint_value = 0;
         m_violation_value  = 0;
+        m_margin_value     = 0;
         m_positive_part    = 0;
         m_negative_part    = 0;
+        m_is_enabled       = true;
 
-        m_is_integer = true;
-        m_is_enabled = true;
-
+        m_is_integer    = true;
         auto is_integer = [](const T_Expression a_VALUE) {
             return fabs(a_VALUE - floor(a_VALUE)) < constant::EPSILON_10;
         };
@@ -239,6 +246,29 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         for (const auto &SENSITIVITY : m_expression.sensitivities()) {
             if (!is_integer(SENSITIVITY.second)) {
                 m_is_integer = false;
+                break;
+            }
+        }
+
+        m_max_abs_coefficient = 0;
+        for (const auto &SENSITIVITY : m_expression.sensitivities()) {
+            m_max_abs_coefficient =
+                std::max(m_max_abs_coefficient, std::fabs(SENSITIVITY.second));
+        }
+
+        m_has_only_binary_coefficient = true;
+        for (const auto &sensitivity : m_expression.sensitivities()) {
+            if (sensitivity.second != 1) {
+                m_has_only_binary_coefficient = false;
+                break;
+            }
+        }
+
+        m_has_only_binary_variable = true;
+        for (const auto &sensitivity : m_expression.sensitivities()) {
+            if ((sensitivity.first->sense() != VariableSense::Binary) &&
+                (sensitivity.first->sense() != VariableSense::Selection)) {
+                m_has_only_binary_variable = false;
                 break;
             }
         }
@@ -508,20 +538,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         /// Set Partitioning or Set Packing, Set Covering, Cardinality,
         /// Invariant Knapsack.
         {
-            bool has_only_binary_coefficient = true;
-            for (const auto &sensitivity : m_expression.sensitivities()) {
-                if ((sensitivity.first->sense() != VariableSense::Binary) &&
-                    (sensitivity.first->sense() != VariableSense::Selection)) {
-                    has_only_binary_coefficient = false;
-                    break;
-                }
-                if (sensitivity.second != 1) {
-                    has_only_binary_coefficient = false;
-                    break;
-                }
-            }
-            if (has_only_binary_coefficient) {
-                m_has_only_binary_coefficient = true;
+            if (m_has_only_binary_coefficient && m_has_only_binary_variable) {
                 /// Set Partitioning
                 if (m_expression.constant_value() == -1 &&
                     m_sense == ConstraintSense::Equal) {
@@ -563,8 +580,6 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
                     m_is_multiple_covering = true;
                     return;
                 }
-            } else {
-                m_has_only_binary_coefficient = false;
             }
         }
 
@@ -903,17 +918,23 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         switch (m_sense) {
             case ConstraintSense::Less: {
                 m_violation_value = m_positive_part;
+                m_margin_value    = m_negative_part;
                 break;
             }
             case ConstraintSense::Equal: {
                 m_violation_value = m_positive_part + m_negative_part;
+                m_margin_value    = 0;
                 break;
             }
             case ConstraintSense::Greater: {
                 m_violation_value = m_negative_part;
+                m_margin_value    = m_positive_part;
                 break;
             }
         }
+        m_has_margin =
+            m_has_only_binary_variable &
+            (m_margin_value >= m_max_abs_coefficient - constant::EPSILON_10);
     }
 
     /*************************************************************************/
@@ -931,14 +952,17 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         switch (m_sense) {
             case ConstraintSense::Less: {
                 m_violation_value = m_positive_part;
+                m_margin_value    = m_negative_part;
                 break;
             }
             case ConstraintSense::Equal: {
                 m_violation_value = m_positive_part + m_negative_part;
+                m_margin_value    = 0;
                 break;
             }
             case ConstraintSense::Greater: {
                 m_violation_value = m_negative_part;
+                m_margin_value    = m_positive_part;
                 break;
             }
             default: {
@@ -947,6 +971,8 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
                     "Constraint sense is invalid."));
             }
         }
+        m_has_margin = m_has_only_binary_variable &
+                       (m_margin_value >= m_max_abs_coefficient);
         m_expression.update(a_MOVE);
     }
 
@@ -977,6 +1003,11 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
+    inline T_Expression margin_value(void) const noexcept {
+        return m_margin_value;
+    }
+
+    /*************************************************************************/
     inline T_Expression positive_part(void) const noexcept {
         return m_positive_part;
     }
@@ -984,6 +1015,11 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     /*************************************************************************/
     inline T_Expression negative_part(void) const noexcept {
         return m_negative_part;
+    }
+
+    /*************************************************************************/
+    inline T_Expression max_abs_coefficient(void) const noexcept {
+        return m_max_abs_coefficient;
     }
 
     /*************************************************************************/
@@ -1067,6 +1103,21 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
+    inline bool has_only_binary_coefficient(void) const noexcept {
+        return m_has_only_binary_coefficient;
+    }
+
+    /*************************************************************************/
+    inline bool has_only_binary_variable(void) const noexcept {
+        return m_has_only_binary_variable;
+    }
+
+    /*************************************************************************/
+    inline bool is_evaluation_ignorable(void) const noexcept {
+        return !m_is_enabled || m_has_margin;
+    }
+
+    /*************************************************************************/
     inline bool is_integer(void) const noexcept {
         return m_is_integer;
     }
@@ -1094,6 +1145,11 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     /*************************************************************************/
     inline bool is_greater_or_equal(void) const noexcept {
         return m_is_greater_or_equal;
+    }
+
+    /*************************************************************************/
+    inline bool has_margin(void) const noexcept {
+        return m_has_margin;
     }
 
     /*************************************************************************/
@@ -1244,11 +1300,6 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     /*************************************************************************/
     inline bool is_general_linear(void) const noexcept {
         return m_is_general_linear;
-    }
-
-    /*************************************************************************/
-    inline bool has_only_binary_coefficient(void) const noexcept {
-        return m_has_only_binary_coefficient;
     }
 
     /*************************************************************************/
