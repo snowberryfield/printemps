@@ -1,30 +1,23 @@
 # -*- coding: utf-8 -*-
-###############################################################################
+#######################################################################################################################
 # Copyright (c) 2020-2024 Yuji KOGUMA
 # Released under the MIT license
 # https://opensource.org/licenses/mit-license.php
-###############################################################################
+#######################################################################################################################
 
 import subprocess
 import json
 import argparse
 import numpy as np
 
-###############################################################################
 
-
-def run_batch(executable, mps_list, option_file_name):
+#######################################################################################################################
+def run_batch(executable: str, mps_list: list, option_file_name: str) -> list:
     results = []
     index = 0
-    print(
-        "-----+-------------+----------+-------------+-------------+-----------+--------"
-    )
-    print(
-        " no. | name        | feasible |   objective |  known best | violation | time[s]"
-    )
-    print(
-        "-----+-------------+----------+-------------+-------------+-----------+--------"
-    )
+    print("-----+-------------+----------+-------------+-------------+-----------+--------")
+    print(" no. | name        | feasible |   objective |  known best | violation | time[s]")
+    print("-----+-------------+----------+-------------+-------------+-----------+--------")
 
     for mps in mps_list:
         commands = [executable, mps]
@@ -52,15 +45,9 @@ def run_batch(executable, mps_list, option_file_name):
                 "objective": incumbent["objective"],
                 "total_violation": incumbent["total_violation"],
                 "elapsed_time": status["elapsed_time"],
-                "number_of_lagrange_dual_iterations": status[
-                    "number_of_lagrange_dual_iterations"
-                ],
-                "number_of_local_search_iterations": status[
-                    "number_of_local_search_iterations"
-                ],
-                "number_of_tabu_search_iterations": status[
-                    "number_of_tabu_search_iterations"
-                ],
+                "number_of_lagrange_dual_iterations": status["number_of_lagrange_dual_iterations"],
+                "number_of_local_search_iterations": status["number_of_local_search_iterations"],
+                "number_of_tabu_search_iterations": status["number_of_tabu_search_iterations"],
                 "number_of_tabu_search_loops": status["number_of_tabu_search_loops"],
             },
         }
@@ -69,27 +56,11 @@ def run_batch(executable, mps_list, option_file_name):
             " {0:03d} | {1:11s} | {2:8s} | {3:11.4e} | {4:11.4e} | {5:9.3e} | {6:7.1f}".format(
                 index,
                 result["instance"]["name"][:11],
-                (
-                    "Yes"
-                    if result["computed"]["is_found_feasible_solution"] == 1
-                    else "No"
-                ),
-                (
-                    np.nan
-                    if result["computed"]["objective"] == "N/A"
-                    else result["computed"]["objective"]
-                ),
+                ("Yes" if result["computed"]["is_found_feasible_solution"] == 1 else "No"),
+                (np.nan if result["computed"]["objective"] == "N/A" else result["computed"]["objective"]),
                 np.nan,
-                (
-                    np.nan
-                    if result["computed"]["total_violation"] == "N/A"
-                    else result["computed"]["total_violation"]
-                ),
-                (
-                    np.nan
-                    if result["computed"]["elapsed_time"] == "N/A"
-                    else result["computed"]["elapsed_time"]
-                ),
+                (np.nan if result["computed"]["total_violation"] == "N/A" else result["computed"]["total_violation"]),
+                (np.nan if result["computed"]["elapsed_time"] == "N/A" else result["computed"]["elapsed_time"]),
             )
         )
         index += 1
@@ -97,10 +68,8 @@ def run_batch(executable, mps_list, option_file_name):
     return results
 
 
-###############################################################################
-
-
-def write_csv(results):
+#######################################################################################################################
+def write_csv(results: list) -> None:
     with open("batch_result.csv", "w") as f:
 
         f.write(
@@ -133,20 +102,28 @@ def write_csv(results):
             )
 
 
-###############################################################################
-
-
-def main():
-    parser = argparse.ArgumentParser(
-        description="A script for batch execution of printemps"
-    )
+#######################################################################################################################
+def main() -> None:
+    parser = argparse.ArgumentParser(description="A script for batch execution of printemps")
     parser.add_argument(
-        "executable", help="specify the executable of printemps.", type=str
+        "executable",
+        help="specify the executable of printemps.",
+        type=str,
     )
-    parser.add_argument("mps_list", help="specify the mps list file name.", type=str)
+
     parser.add_argument(
-        "-p", "--option", help="specify the option file name.", type=str
+        "mps_list",
+        help="specify the mps list file name.",
+        type=str,
     )
+
+    parser.add_argument(
+        "-p",
+        "--option",
+        help="specify the option file name.",
+        type=str,
+    )
+
     args = parser.parse_args()
 
     mps_list_file_name = args.mps_list
@@ -162,12 +139,10 @@ def main():
     write_csv(results)
 
 
-###############################################################################
-
-
+#######################################################################################################################
 if __name__ == "__main__":
     main()
 
-###############################################################################
+#######################################################################################################################
 # END
-###############################################################################
+#######################################################################################################################
