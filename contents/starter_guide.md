@@ -30,23 +30,8 @@ layout: sub
 - [References](#references)
 
 ## Introduction
-PRINTEMPS can compute approximate solutions for __linear and nonlinear integer optimization problems__ formulated as follows:
-
-
-```
-(P):  minimize  f(x)
-         x
-     subject to g(x) <= 0, 
-                h(x)  = 0, 
-                l <= x <= u, 
-                x \in Z^{N},
-```
-where `x` denotes N-dimensional integer vector with the lower bound vector `l` and the upper bound vector `u`. 
-The function `f:R^{N} -> R` denotes the scalar objective function to be minimized, and `g:R^{N} -> R^{I}`, `h:R^{N} -> R^{J}` respectively denote `I`-dimensional inequality and `J`-dimensional equality constraint functions.
-
-PRINTEMPS employs __Tabu Search__ [1], a metaheuristics technique, to solve problems. 
-In solving, it replaces constraints with penalty functions which return violations to the corresponding constraints, and the penalty functions multiplied by positive penalty coefficients are added to the objective function. 
-The penalty coefficients are updated iteratively and automatically in a method similar (not exact same) to the one proposed in paper [2]. 
+PRINTEMPS can compute approximate solutions for __integer linear programming problems__ by __Weighted Tabu Search__ [1].
+In solving, it replaces constraints with penalty functions which return violations to the corresponding constraints, and the penalty functions multiplied by positive penalty coefficients are added to the objective function. For more information on the algorithm, please refer to the literature [2]. 
 The figure below shows the flow-chart of the algorithm of PRINTEMPS. 
 
 <div align="center">
@@ -340,7 +325,7 @@ The methods `create_expressions(name, n)` creates `n` expressions named `name` w
 The `create_expressions("name", {n_1, ..., n_m})` method creates `n_1 * ... * n_m` expressions named `name` with `m`-dimensional index. Each constraint can be accessed by like as `s(0, 0)`.
 
 #### Defining Expression
-An expression can be defined as a first-order functions on decision variables and other expressions (nonlinear functions are modeled in a different way.)
+An expression can be defined as a first-order functions on decision variables and other expressions.
 The following code shows examples of expression definitions.
 
 ```c++
@@ -783,17 +768,10 @@ To make it easier to check the value, the utility functions `print_variable_valu
 They respectively print the values of all variables, expressions,  constraints, and violations to the standard output. 
 Please refer [example](https://github.com/snowberryfield/printemps/tree/master/example/simple_2.cpp).
 
-## Work-in-Progress Topics
-The following topics are to be written:
-- User-Defined Neighborhoods
-- Integrating Nonlinear Functions
-
-For the user-defined neighborhoods and the non-linear function, please refer [example](https://github.com/snowberryfield/printemps/tree/master/example/quadratic_assignment.cpp).
-
 ## References
 
-- [1] F.Glover: [Future Paths for Integer Programming and Links to Artificial Intelligence](http://leeds-faculty.colorado.edu/glover/TS%20-%20Future%20Paths%20for%20Integer%20Programming.pdf), _Computers and Operations Research_, Vol.13 No.5 pp.533-549 (1986).
+- [1] K.Nonobe and T.Ibaraki: [An improved tabu search method for the weighted constraint satisfaction problem](https://www.researchgate.net/publication/228737620_An_Improved_Tabu_Search_Method_For_The_Weighted_Constraint_Satisfaction_Problem), _INFOR_, Vol.39, pp.131–151 (2001).
 
-- [2] K.Nonobe and T.Ibaraki: [An improved tabu search method for the weighted constraint satisfaction problem](https://www.researchgate.net/publication/228737620_An_Improved_Tabu_Search_Method_For_The_Weighted_Constraint_Satisfaction_Problem), _INFOR_ Vol.39, No.2 pp.131–151 (2001).
+- [2] Y.Koguma: [Tabu Search-Based Heuristic Solver for General Integer Linear Programming Problems](https://ieeexplore.ieee.org/document/10418217), __IEEE Access__, Vol.12, pp.19059-19076 (2014).
 
 - [3] R.Fletcher: [Practical Methods of Optimization, Second Edition](https://onlinelibrary.wiley.com/doi/book/10.1002/9781118723203), John Wiley & Sons (2000).

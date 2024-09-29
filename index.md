@@ -8,7 +8,7 @@ layout: default
 
 
 ## Abstract
-__PRINTEMPS__ is a C++ metaheuristics modeler/solver library for general integer optimization problems. PRINTEMPS emphasizes the following aspects:
+__PRINTEMPS__ is a C++ metaheuristics modeler/solver library for general linear integer optimization problems. PRINTEMPS emphasizes the following aspects:
 - __Portability.__ It is implemented as a header-only library which does not depend on any other proprietary or open-source libraries. Users can integrate it into their own codes by just copying the necessary files. 
 
 - __Intuitiveness in modeling.__ It provides an intuitive modeling environment to define an optimization model as a program code. Users can define constraint and objective functions using arithmetic operations on decision variables.
@@ -18,12 +18,11 @@ __PRINTEMPS__ is a C++ metaheuristics modeler/solver library for general integer
 ## News
 |     Date      | Update                                                                                            |
 |:-------------:|:--------------------------------------------------------------------------------------------------|
-| Aug 2, 2024 | [PRINTEMPS v2.4.0](https://github.com/snowberryfield/printemps/releases/tag/v2.4.0) was released. |
-| Aug 2, 2024 | [Solver Option Guide](https://snowberryfield.github.io/printemps/contents/solver_option_guide.html) was updated in accordance with v2.4.0.|
+| Sep 29, 2024 | [PRINTEMPS v2.5.0](https://github.com/snowberryfield/printemps/releases/tag/v2.5.0) was released. |
 | Feb. 8, 2024 | [Tabu Search-Based Heuristic Solver for General Integer Linear Programming Problems](https://ieeexplore.ieee.org/document/10418217), a paper on PRINTEMPS, has been published in IEEE Access. |
 
 ## Algorithm
-PRINTEMPS can compute approximate solutions for __integer linear and nonlinear optimization problems__ by  __Weighted Tabu Search__ [1]. PRINTEMPS is tuned for high performance, particularly for linear integer programming problems. For more information on the algorithm, please refer to the literature [2]. The figure below shows the flow-chart of the algorithm of PRINTEMPS. 
+PRINTEMPS can compute approximate solutions for __integer linear programming problems__ by  __Weighted Tabu Search__ [1]. For more information on the algorithm, please refer to the literature [2]. The figure below shows the flow-chart of the algorithm of PRINTEMPS. 
 
 <div align="center">
 
@@ -81,7 +80,6 @@ Following additional examples are provided in [`example/`](https://github.com/sn
 - [`example/knapsack.cpp`](https://github.com/snowberryfield/printemps/tree/master/example/knapsack.cpp) solves a knapsack problem which considers maximization of total prices of items to be included in a "knapsack" with satisfying two constraints, volume and weight capacities. 
 - [`example/bin_packing.cpp`](https://github.com/snowberryfield/printemps/tree/master/example/bin_packing.cpp) solves a bin-packing problem which considers minimization of the number of bin to pack all given items. 
 - [`example/sudoku.cpp`](https://github.com/snowberryfield/printemps/tree/master/example/sudoku.cpp) solves a "Sudoku" puzzle [4] as a binary integer programming problem.
-- [`example/quadratic_assignment.cpp`](https://github.com/snowberryfield/printemps/tree/master/example/quadratic_assignment.cpp) solves a quadratic assignment problem as an example of optimization that incorporates nonlinear functions and user-defined neighborhoods. 
 
 ## Compilation
 A C++ program integrating PRINTEMPS can be compiled by C++17 standards compatible compilers with specifying include search path where it is installed. For instance, the example code [`example/knapsack.cpp`](https://github.com/snowberryfield/printemps/tree/master/example/knapsack.cpp) can be built by the following command using g++:
@@ -93,14 +91,13 @@ The option `-fopenmp` is required to activate parallel computation. See [Solver 
 
 Following combinations of operating systems and compilers are confirmed compilation possible:
 
-| Operating System | Compiler (version)                                                |
-|:----------------:|:------------------------------------------------------------------|
-|     macOS 11     | gcc (9.5.0, 10.4.0, 11.3.0)                                       |
-|     macOS 12     | gcc (11.3.0)                                                      |
-|   Ubuntu 18.04   | gcc (9.2.1) <br /> clang (9.0.0)                                  |
-|   Ubuntu 20.04   | gcc (9.3.0, 10.3.0) <br /> clang (10.0.0, 11.0.0, 12.0.0)         |
-|   Ubuntu 22.04   | gcc (9.4.0, 10.3.0, 11.2.0) <br /> clang (12.0.1, 13.0.1, 14.0.0) |
-
+| Operating System | Compiler (version)                                                 |
+|:----------------:|:-------------------------------------------------------------------|
+|     macOS 12     | gcc (11.4.0, 12.4.0, 14.1.0_2)                                     |
+|     macOS 13     | gcc (11.4.0, 12.4.0, 14.1.0_2)                                     |
+|     macOS 12     | gcc (11.4.0, 12.4.0, 13.3.0, 14.1.0_2)                             |
+|   Ubuntu 22.04   | gcc (10.5.0, 11.4.0, 12.3.0) <br /> clang (13.0.1, 14.0.0, 15.0.7) |
+|   Ubuntu 24.04   | gcc (12.3.0, 13.2.0, 14.0.1) <br /> clang (16.0.6, 17.0.6, 18.1.3) |
 
 ## Standalone Solver
 A standalone executable solver based on PRINTEMPS is also provided. It approximately solves a pure integer programming problem described as MPS (Mathematical Programming System) format file. The solver can be built by the following command:
