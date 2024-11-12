@@ -45,7 +45,7 @@ class MPSSolver {
                   << std::endl;
         std::cout << std::endl;
 
-        std::cout << "Usage: ./mps_solver.exe "
+        std::cout << "Usage: ./mps_solver "
                   << "[-p OPTION_FILE_NAME] "
                   << "[-i INITIAL_SOLUTION_FILE_NAME] "
                   << "[-m MUTABLE_VARIABLE_FILE_NAME] "
