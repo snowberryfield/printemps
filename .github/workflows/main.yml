@@ -41,9 +41,24 @@ jobs:
       - { os: macos-14, cc: gcc-12, cxx: g++-12 } # 12.4.0 
       - { os: macos-14, cc: gcc-13, cxx: g++-13 } # 13.3.0 
       - { os: macos-14, cc: gcc-14, cxx: g++-14 } # 14.1.0_2 
+      - { os: windows-2022, cc: gcc, cxx: g++, msys2_system: mingw64, msys2_arch: x86_64 }
 
     steps:
     - uses: actions/checkout@v2
+
+    - uses: msys2/setup-msys2@v2
+      id: msys2
+      if: matrix.cfg.msys2_system != ''
+      with:
+        msystem: ${{matrix.cfg.msys2_system}}
+        install: >-
+          make
+          mingw-w64-${{matrix.cfg.msys2_arch}}-gcc
+          mingw-w64-${{matrix.cfg.msys2_arch}}-cmake
+    - if: matrix.cfg.msys2_system != ''
+      run: |
+        Add-Content $env:GITHUB_PATH "${{ steps.msys2.outputs.msys2-location }}\${{matrix.cfg.msys2_system}}\bin"
+        Add-Content $env:GITHUB_PATH "${{ steps.msys2.outputs.msys2-location }}\usr\bin"
 
     - name: Install googletest
       run: make -f makefile/Makefile.external CC=${{ matrix.cfg.cc }} CXX=${{ matrix.cfg.cxx }}
