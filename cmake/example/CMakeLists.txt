@@ -39,51 +39,51 @@ endif()
 
 # simple_1
 add_executable(
-    simple_1.exe ${TOP_DIR}/example/simple_1.cpp
+    simple_1 ${TOP_DIR}/example/simple_1.cpp
 )
 
 target_include_directories(
-    simple_1.exe
+    simple_1
     PRIVATE ${TOP_DIR}/printemps/
 )
 
 # simple_2
 add_executable(
-    simple_2.exe ${TOP_DIR}/example/simple_2.cpp
+    simple_2 ${TOP_DIR}/example/simple_2.cpp
 )
 
 target_include_directories(
-    simple_2.exe
+    simple_2
     PRIVATE ${TOP_DIR}/printemps/
 )
 
 # knapsack
 add_executable(
-    knapsack.exe ${TOP_DIR}/example/knapsack.cpp
+    knapsack ${TOP_DIR}/example/knapsack.cpp
 )
 
 target_include_directories(
-    knapsack.exe
+    knapsack
     PRIVATE ${TOP_DIR}/printemps/
 )
 
 # bin_packing
 add_executable(
-    bin_packing.exe ${TOP_DIR}/example/bin_packing.cpp
+    bin_packing ${TOP_DIR}/example/bin_packing.cpp
 )
 
 target_include_directories(
-    bin_packing.exe
+    bin_packing
     PRIVATE ${TOP_DIR}/printemps/
 )
 
 # sudoku
 add_executable(
-    sudoku.exe ${TOP_DIR}/example/sudoku.cpp
+    sudoku ${TOP_DIR}/example/sudoku.cpp
 )
 
 target_include_directories(
-    sudoku.exe
+    sudoku
     PRIVATE ${TOP_DIR}/printemps/
 )
 
