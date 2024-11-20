@@ -39,11 +39,11 @@ endif()
 
 # mps_solver
 add_executable(
-    mps_solver.exe ${TOP_DIR}/application/mps_solver/main.cpp
+    mps_solver ${TOP_DIR}/application/mps_solver/main.cpp
 )
 
 target_include_directories(
-    mps_solver.exe
+    mps_solver
     PRIVATE ${TOP_DIR}/printemps/
     PRIVATE ${TOP_DIR}/external/include/
 )
