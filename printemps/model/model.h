@@ -3130,7 +3130,7 @@ class Model {
     }
 
     /*************************************************************************/
-    std::vector<multi_array::ValueProxy<double>>
+    inline std::vector<multi_array::ValueProxy<double>>
     export_local_penalty_coefficient_proxies(void) const {
         std::vector<multi_array::ValueProxy<double>>
             local_penalty_coefficient_proxies;
@@ -3158,8 +3158,8 @@ class Model {
     }
 
     /*************************************************************************/
-    std::vector<multi_array::ValueProxy<long>> export_update_count_proxies(
-        void) const {
+    inline std::vector<multi_array::ValueProxy<long>>
+    export_update_count_proxies(void) const {
         std::vector<multi_array::ValueProxy<long>> update_count_proxies;
         update_count_proxies.reserve(m_variable_proxies.size());
 
@@ -3181,8 +3181,8 @@ class Model {
     }
 
     /*************************************************************************/
-    std::vector<multi_array::ValueProxy<long>> export_violation_count_proxies(
-        void) const {
+    inline std::vector<multi_array::ValueProxy<long>>
+    export_violation_count_proxies(void) const {
         std::vector<multi_array::ValueProxy<long>> violation_count_proxies;
         violation_count_proxies.reserve(m_constraint_proxies.size());
 
@@ -3246,8 +3246,8 @@ class Model {
     }
 
     /*************************************************************************/
-    solution::SparseSolution<T_Variable, T_Expression> export_sparse_solution(
-        void) const {
+    inline solution::SparseSolution<T_Variable, T_Expression>
+    export_sparse_solution(void) const {
         solution::SparseSolution<T_Variable, T_Expression> solution;
 
         /// Decision variables
@@ -3326,6 +3326,57 @@ class Model {
         solution.m_is_feasible = this->is_feasible();
 
         return solution;
+    }
+
+    /*************************************************************************/
+    inline std::unordered_map<std::string, multi_array::ValueProxy<double>>
+    export_named_penalty_coefficients(void) {
+        std::unordered_map<std::string, multi_array::ValueProxy<double>>
+            named_penalty_coefficients;
+
+        auto local_penalty_coefficient_proxies =
+            this->export_local_penalty_coefficient_proxies();
+
+        const int   CONSTRAINT_PROXIES_SIZE = this->constraint_proxies().size();
+        const auto &CONSTRAINT_NAMES        = this->constraint_names();
+        for (auto i = 0; i < CONSTRAINT_PROXIES_SIZE; i++) {
+            named_penalty_coefficients[CONSTRAINT_NAMES[i]] =
+                local_penalty_coefficient_proxies[i];
+        }
+        return named_penalty_coefficients;
+    }
+
+    /*************************************************************************/
+    inline std::unordered_map<std::string, multi_array::ValueProxy<long>>
+    export_named_update_counts(void) {
+        std::unordered_map<std::string, multi_array::ValueProxy<long>>
+            named_update_counts;
+
+        auto update_count_proxies = this->export_update_count_proxies();
+
+        const int   VARIABLE_PROXIES_SIZE = this->variable_proxies().size();
+        const auto &VARIABLE_NAMES        = this->variable_names();
+        for (auto i = 0; i < VARIABLE_PROXIES_SIZE; i++) {
+            named_update_counts[VARIABLE_NAMES[i]] = update_count_proxies[i];
+        }
+        return named_update_counts;
+    }
+
+    /*************************************************************************/
+    inline std::unordered_map<std::string, multi_array::ValueProxy<long>>
+    export_named_violation_counts(void) {
+        std::unordered_map<std::string, multi_array::ValueProxy<long>>
+            named_violation_counts;
+
+        auto violation_count_proxies = this->export_violation_count_proxies();
+
+        const int   CONSTRAINT_PROXIES_SIZE = this->constraint_proxies().size();
+        const auto &CONSTRAINT_NAMES        = this->constraint_names();
+        for (auto i = 0; i < CONSTRAINT_PROXIES_SIZE; i++) {
+            named_violation_counts[CONSTRAINT_NAMES[i]] =
+                violation_count_proxies[i];
+        }
+        return named_violation_counts;
     }
 
     /*************************************************************************/
