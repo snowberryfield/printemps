@@ -461,61 +461,6 @@ class Solver {
     }
 
     /*************************************************************************/
-    inline std::unordered_map<std::string, multi_array::ValueProxy<double>>
-    export_named_penalty_coefficients(void) {
-        std::unordered_map<std::string, multi_array::ValueProxy<double>>
-            named_penalty_coefficients;
-
-        auto local_penalty_coefficient_proxies =
-            m_model_ptr->export_local_penalty_coefficient_proxies();
-
-        const int CONSTRAINT_PROXIES_SIZE =
-            m_model_ptr->constraint_proxies().size();
-        const auto& CONSTRAINT_NAMES = m_model_ptr->constraint_names();
-        for (auto i = 0; i < CONSTRAINT_PROXIES_SIZE; i++) {
-            named_penalty_coefficients[CONSTRAINT_NAMES[i]] =
-                local_penalty_coefficient_proxies[i];
-        }
-        return named_penalty_coefficients;
-    }
-
-    /*************************************************************************/
-    inline std::unordered_map<std::string, multi_array::ValueProxy<long>>
-    export_named_update_counts(void) {
-        std::unordered_map<std::string, multi_array::ValueProxy<long>>
-            named_update_counts;
-
-        auto update_count_proxies = m_model_ptr->export_update_count_proxies();
-
-        const int VARIABLE_PROXIES_SIZE =
-            m_model_ptr->variable_proxies().size();
-        const auto& VARIABLE_NAMES = m_model_ptr->variable_names();
-        for (auto i = 0; i < VARIABLE_PROXIES_SIZE; i++) {
-            named_update_counts[VARIABLE_NAMES[i]] = update_count_proxies[i];
-        }
-        return named_update_counts;
-    }
-
-    /*************************************************************************/
-    inline std::unordered_map<std::string, multi_array::ValueProxy<long>>
-    export_named_violation_counts(void) {
-        std::unordered_map<std::string, multi_array::ValueProxy<long>>
-            named_violation_counts;
-
-        auto violation_count_proxies =
-            m_model_ptr->export_violation_count_proxies();
-
-        const int CONSTRAINT_PROXIES_SIZE =
-            m_model_ptr->constraint_proxies().size();
-        const auto& CONSTRAINT_NAMES = m_model_ptr->constraint_names();
-        for (auto i = 0; i < CONSTRAINT_PROXIES_SIZE; i++) {
-            named_violation_counts[CONSTRAINT_NAMES[i]] =
-                violation_count_proxies[i];
-        }
-        return named_violation_counts;
-    }
-
-    /*************************************************************************/
     inline model::Model<T_Variable, T_Expression>* model_ptr(void) {
         return m_model_ptr;
     }
