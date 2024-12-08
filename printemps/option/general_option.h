@@ -13,7 +13,7 @@ struct GeneralOptionConstant {
     static constexpr double DEFAULT_TIME_MAX                   = 120.0;
     static constexpr double DEFAULT_TIME_OFFSET                = 0.0;
     static constexpr double DEFAULT_TARGET_OBJECTIVE_VALUE     = -1E100;
-    static constexpr bool   DEFAULT_SEED                       = 1;
+    static constexpr int    DEFAULT_SEED                       = 1;
     static constexpr bool   DEFAULT_IS_ENABLED_FAST_EVALUATION = true;
 };
 
