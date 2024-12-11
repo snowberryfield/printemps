@@ -18,6 +18,7 @@ __PRINTEMPS__ is a C++ metaheuristics modeler/solver library for general linear 
 ## News
 |     Date      | Update                                                                                            |
 |:-------------:|:--------------------------------------------------------------------------------------------------|
+| Dec 12, 2024 | [New benchmark results](./contents/benchmark/index.md) were added.                                |
 | Sep 29, 2024 | [PRINTEMPS v2.5.0](https://github.com/snowberryfield/printemps/releases/tag/v2.5.0) was released. |
 | Feb. 8, 2024 | [Tabu Search-Based Heuristic Solver for General Integer Linear Programming Problems](https://ieeexplore.ieee.org/document/10418217), a paper on PRINTEMPS, has been published in IEEE Access. |
 
