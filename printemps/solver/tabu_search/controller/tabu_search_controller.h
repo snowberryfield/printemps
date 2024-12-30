@@ -467,7 +467,7 @@ class TabuSearchController
             " -- Averaged number of threads for move update: " +
                 utility::to_string(  //
                     STATE.averaged_number_of_threads_move_update, "%.3e"),
-                a_IS_ENABLED_PRINT);
+            a_IS_ENABLED_PRINT);
         utility::print_info(  //
             " -- Averaged number of threads for move evaluation: " +
                 utility::to_string(
@@ -502,6 +502,10 @@ class TabuSearchController
             double update_rate =
                 mutable_variable_ptrs[i]->update_count() / TOTAL_UPDATE_COUNT;
             update_rate = std::max(0.0, std::min(1.0, update_rate));
+            double density =
+                mutable_variable_ptrs[i]->related_constraint_ptrs().size() /
+                static_cast<double>(
+                    std::max(1, this->m_model_ptr->number_of_constraints()));
 
             if (count > MAX_NUMBER_OF_PRINT_ITEMS) {
                 break;
@@ -515,7 +519,8 @@ class TabuSearchController
             utility::print_info(
                 " -- " + mutable_variable_ptrs[i]->name()  //
                     + " (" + mutable_variable_ptrs[i]->sense_label() +
-                    ", Freq.: " + utility::to_string(update_rate, "%.3e") + ")",
+                    ", Freq.: " + utility::to_string(update_rate, "%.3e") +
+                    ", Dens.: " + utility::to_string(density, "%.3e") + ")",
                 a_IS_ENABLED_PRINT);
 
             count++;
@@ -526,6 +531,10 @@ class TabuSearchController
             double update_rate =
                 mutable_variable_ptrs[i]->update_count() / TOTAL_UPDATE_COUNT;
             update_rate = std::max(0.0, std::min(1.0, update_rate));
+            double density =
+                mutable_variable_ptrs[i]->related_constraint_ptrs().size() /
+                static_cast<double>(
+                    std::max(1, this->m_model_ptr->number_of_constraints()));
 
             if (update_rate < constant::EPSILON_10) {
                 break;
@@ -543,7 +552,8 @@ class TabuSearchController
             utility::print_info(
                 " -- " + mutable_variable_ptrs[i]->name()  //
                     + " (" + mutable_variable_ptrs[i]->sense_label() +
-                    ", Freq.: " + utility::to_string(update_rate, "%.3e") + ")",
+                    ", Freq.: " + utility::to_string(update_rate, "%.3e") +
+                    ", Dens.: " + utility::to_string(density, "%.3e") + ")",
                 a_IS_ENABLED_PRINT);
 
             count++;
@@ -579,6 +589,13 @@ class TabuSearchController
                           TOTAL_UPDATE_COUNT;
             satisfaction_rate = std::max(0.0, std::min(1.0, satisfaction_rate));
 
+            double density = enabled_constraint_ptrs[i]
+                                 ->expression()
+                                 .sensitivities()
+                                 .size() /
+                             static_cast<double>(std::max(
+                                 1, this->m_model_ptr->number_of_variables()));
+
             if (std::fabs(1.0 - satisfaction_rate) < constant::EPSILON_10) {
                 break;
             }
@@ -595,7 +612,8 @@ class TabuSearchController
             utility::print_info(
                 " -- " + enabled_constraint_ptrs[i]->name()  //
                     + " (" + enabled_constraint_ptrs[i]->type() + ", Freq.: " +
-                    utility::to_string(satisfaction_rate, "%.3e") + ")",
+                    utility::to_string(satisfaction_rate, "%.3e") +
+                    ", Dens.: " + utility::to_string(density, "%.3e") + ")",
                 a_IS_ENABLED_PRINT);
 
             count++;
@@ -607,6 +625,13 @@ class TabuSearchController
                 1.0 - enabled_constraint_ptrs[i]->violation_count() /
                           TOTAL_UPDATE_COUNT;
             satisfaction_rate = std::max(0.0, std::min(1.0, satisfaction_rate));
+
+            double density = enabled_constraint_ptrs[i]
+                                 ->expression()
+                                 .sensitivities()
+                                 .size() /
+                             static_cast<double>(std::max(
+                                 1, this->m_model_ptr->number_of_variables()));
 
             if (satisfaction_rate < constant::EPSILON_10) {
                 break;
@@ -624,7 +649,8 @@ class TabuSearchController
             utility::print_info(
                 " -- " + enabled_constraint_ptrs[i]->name()  //
                     + " (" + enabled_constraint_ptrs[i]->type() + ", Freq.: " +
-                    utility::to_string(satisfaction_rate, "%.3e") + ")",
+                    utility::to_string(satisfaction_rate, "%.3e") +
+                    ", Dens.: " + utility::to_string(density, "%.3e") + ")",
                 a_IS_ENABLED_PRINT);
 
             count++;
