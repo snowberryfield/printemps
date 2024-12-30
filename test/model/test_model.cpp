@@ -2249,6 +2249,179 @@ TEST_F(TestModel, generate_constraint_parameter_proxies) {
 }
 
 /*****************************************************************************/
+TEST_F(TestModel, export_local_penalty_coefficient_proxies) {
+    model::Model<int, double> model;
+
+    auto& g = model.create_constraint("g");
+    auto& h = model.create_constraints("h", 10);
+    auto& v = model.create_constraints("v", {10, 10});
+
+    model.setup_unique_names();
+
+    g(0).local_penalty_coefficient_less()    = 1.0;
+    g(0).local_penalty_coefficient_greater() = 10.0;
+
+    for (auto i = 0; i < 10; i++) {
+        h(i).local_penalty_coefficient_less()    = 20.0;
+        h(i).local_penalty_coefficient_greater() = 2.0;
+    }
+
+    for (auto i = 0; i < 10; i++) {
+        for (auto j = 0; j < 10; j++) {
+            v(i, j).local_penalty_coefficient_less()    = 3.0;
+            v(i, j).local_penalty_coefficient_greater() = 30.0;
+        }
+    }
+
+    auto local_penalty_coefficient_proxies =
+        model.export_local_penalty_coefficient_proxies();
+
+    EXPECT_EQ(g.index(), local_penalty_coefficient_proxies[0].index());
+    EXPECT_EQ(1, local_penalty_coefficient_proxies[0].number_of_dimensions());
+    EXPECT_EQ(1, local_penalty_coefficient_proxies[0].number_of_elements());
+    EXPECT_EQ("g", local_penalty_coefficient_proxies[0].flat_indexed_names(0));
+
+    EXPECT_EQ(h.index(), local_penalty_coefficient_proxies[1].index());
+    EXPECT_EQ(1, local_penalty_coefficient_proxies[1].number_of_dimensions());
+    EXPECT_EQ(10, local_penalty_coefficient_proxies[1].number_of_elements());
+    EXPECT_EQ("h[ 0]",
+              local_penalty_coefficient_proxies[1].flat_indexed_names(0));
+    EXPECT_EQ("h[ 9]",
+              local_penalty_coefficient_proxies[1].flat_indexed_names(10 - 1));
+
+    EXPECT_EQ(v.index(), local_penalty_coefficient_proxies[2].index());
+    EXPECT_EQ(2, local_penalty_coefficient_proxies[2].number_of_dimensions());
+    EXPECT_EQ(100, local_penalty_coefficient_proxies[2].number_of_elements());
+    EXPECT_EQ("v[ 0,  0]",
+              local_penalty_coefficient_proxies[2].flat_indexed_names(0));
+    EXPECT_EQ("v[ 9,  9]",
+              local_penalty_coefficient_proxies[2].flat_indexed_names(100 - 1));
+
+    for (auto&& value :
+         local_penalty_coefficient_proxies[0].flat_indexed_values()) {
+        EXPECT_FLOAT_EQ(10.0, value);
+    }
+    for (auto&& value :
+         local_penalty_coefficient_proxies[1].flat_indexed_values()) {
+        EXPECT_FLOAT_EQ(20.0, value);
+    }
+    for (auto&& value :
+         local_penalty_coefficient_proxies[2].flat_indexed_values()) {
+        EXPECT_FLOAT_EQ(30.0, value);
+    }
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, export_update_count_proxies) {
+    model::Model<int, double> model;
+
+    auto& x = model.create_variable("x");
+    auto& y = model.create_variables("y", 10);
+    auto& z = model.create_variables("z", {10, 10});
+
+    model.setup_unique_names();
+    x(0).increment_update_count();
+
+    for (auto i = 0; i < 10; i++) {
+        y(i).increment_update_count();
+        y(i).increment_update_count();
+    }
+
+    for (auto i = 0; i < 10; i++) {
+        for (auto j = 0; j < 10; j++) {
+            z(i, j).increment_update_count();
+            z(i, j).increment_update_count();
+            z(i, j).increment_update_count();
+        }
+    }
+
+    auto update_count_proxies = model.export_update_count_proxies();
+
+    EXPECT_EQ(x.index(), update_count_proxies[0].index());
+    EXPECT_EQ(1, update_count_proxies[0].number_of_dimensions());
+    EXPECT_EQ(1, update_count_proxies[0].number_of_elements());
+    EXPECT_EQ("x", update_count_proxies[0].flat_indexed_names(0));
+
+    EXPECT_EQ(y.index(), update_count_proxies[1].index());
+    EXPECT_EQ(1, update_count_proxies[1].number_of_dimensions());
+    EXPECT_EQ(10, update_count_proxies[1].number_of_elements());
+    EXPECT_EQ("y[ 0]", update_count_proxies[1].flat_indexed_names(0));
+    EXPECT_EQ("y[ 9]", update_count_proxies[1].flat_indexed_names(10 - 1));
+
+    EXPECT_EQ(z.index(), update_count_proxies[2].index());
+    EXPECT_EQ(2, update_count_proxies[2].number_of_dimensions());
+    EXPECT_EQ(100, update_count_proxies[2].number_of_elements());
+    EXPECT_EQ("z[ 0,  0]", update_count_proxies[2].flat_indexed_names(0));
+    EXPECT_EQ("z[ 9,  9]", update_count_proxies[2].flat_indexed_names(100 - 1));
+
+    for (auto&& value : update_count_proxies[0].flat_indexed_values()) {
+        EXPECT_EQ(1, value);
+    }
+    for (auto&& value : update_count_proxies[1].flat_indexed_values()) {
+        EXPECT_EQ(2, value);
+    }
+    for (auto&& value : update_count_proxies[2].flat_indexed_values()) {
+        EXPECT_EQ(3, value);
+    }
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, export_violation_count_proxies) {
+    model::Model<int, double> model;
+
+    auto& g = model.create_constraint("g");
+    auto& h = model.create_constraints("h", 10);
+    auto& v = model.create_constraints("v", {10, 10});
+
+    model.setup_unique_names();
+
+    g(0).increment_violation_count();
+
+    for (auto i = 0; i < 10; i++) {
+        h(i).increment_violation_count();
+        h(i).increment_violation_count();
+    }
+
+    for (auto i = 0; i < 10; i++) {
+        for (auto j = 0; j < 10; j++) {
+            v(i, j).increment_violation_count();
+            v(i, j).increment_violation_count();
+            v(i, j).increment_violation_count();
+        }
+    }
+
+    auto violation_count_proxies = model.export_violation_count_proxies();
+
+    EXPECT_EQ(g.index(), violation_count_proxies[0].index());
+    EXPECT_EQ(1, violation_count_proxies[0].number_of_dimensions());
+    EXPECT_EQ(1, violation_count_proxies[0].number_of_elements());
+    EXPECT_EQ("g", violation_count_proxies[0].flat_indexed_names(0));
+
+    EXPECT_EQ(h.index(), violation_count_proxies[1].index());
+    EXPECT_EQ(1, violation_count_proxies[1].number_of_dimensions());
+    EXPECT_EQ(10, violation_count_proxies[1].number_of_elements());
+    EXPECT_EQ("h[ 0]", violation_count_proxies[1].flat_indexed_names(0));
+    EXPECT_EQ("h[ 9]", violation_count_proxies[1].flat_indexed_names(10 - 1));
+
+    EXPECT_EQ(v.index(), violation_count_proxies[2].index());
+    EXPECT_EQ(2, violation_count_proxies[2].number_of_dimensions());
+    EXPECT_EQ(100, violation_count_proxies[2].number_of_elements());
+    EXPECT_EQ("v[ 0,  0]", violation_count_proxies[2].flat_indexed_names(0));
+    EXPECT_EQ("v[ 9,  9]",
+              violation_count_proxies[2].flat_indexed_names(100 - 1));
+
+    for (auto&& value : violation_count_proxies[0].flat_indexed_values()) {
+        EXPECT_EQ(1, value);
+    }
+    for (auto&& value : violation_count_proxies[1].flat_indexed_values()) {
+        EXPECT_EQ(2, value);
+    }
+    for (auto&& value : violation_count_proxies[2].flat_indexed_values()) {
+        EXPECT_EQ(3, value);
+    }
+}
+
+/*****************************************************************************/
 TEST_F(TestModel, export_dense_solution) {
     model::Model<int, double> model;
 
@@ -2546,6 +2719,107 @@ TEST_F(TestModel, export_named_solution) {
                       named_solution.violations().at("v")(i, j));
         }
     }
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, export_named_penalty_coefficients) {
+    model::Model<int, double> model;
+
+    auto& g = model.create_constraint("g");
+    auto& h = model.create_constraints("h", 10);
+    auto& v = model.create_constraints("v", {10, 10});
+
+    model.setup_unique_names();
+
+    g(0).local_penalty_coefficient_less()    = 1.0;
+    g(0).local_penalty_coefficient_greater() = 10.0;
+
+    for (auto i = 0; i < 10; i++) {
+        h(i).local_penalty_coefficient_less()    = 20.0;
+        h(i).local_penalty_coefficient_greater() = 2.0;
+    }
+
+    for (auto i = 0; i < 10; i++) {
+        for (auto j = 0; j < 10; j++) {
+            v(i, j).local_penalty_coefficient_less()    = 3.0;
+            v(i, j).local_penalty_coefficient_greater() = 30.0;
+        }
+    }
+
+    auto named_penalty_coefficients = model.export_named_penalty_coefficients();
+
+    EXPECT_FLOAT_EQ(10.0, named_penalty_coefficients["g"](0));
+    EXPECT_FLOAT_EQ(20.0, named_penalty_coefficients["h"](0));
+    EXPECT_FLOAT_EQ(20.0, named_penalty_coefficients["h"](9));
+    EXPECT_FLOAT_EQ(30.0, named_penalty_coefficients["v"](0, 0));
+    EXPECT_FLOAT_EQ(30.0, named_penalty_coefficients["v"](9, 9));
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, export_named_update_counts) {
+    model::Model<int, double> model;
+
+    auto& x = model.create_variable("x");
+    auto& y = model.create_variables("y", 10);
+    auto& z = model.create_variables("z", {10, 10});
+
+    model.setup_unique_names();
+    x(0).increment_update_count();
+
+    for (auto i = 0; i < 10; i++) {
+        y(i).increment_update_count();
+        y(i).increment_update_count();
+    }
+
+    for (auto i = 0; i < 10; i++) {
+        for (auto j = 0; j < 10; j++) {
+            z(i, j).increment_update_count();
+            z(i, j).increment_update_count();
+            z(i, j).increment_update_count();
+        }
+    }
+
+    auto named_update_counts = model.export_named_update_counts();
+
+    EXPECT_EQ(1, named_update_counts["x"](0));
+    EXPECT_EQ(2, named_update_counts["y"](0));
+    EXPECT_EQ(2, named_update_counts["y"](9));
+    EXPECT_EQ(3, named_update_counts["z"](0, 0));
+    EXPECT_EQ(3, named_update_counts["z"](9, 9));
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, export_named_violation_counts) {
+    model::Model<int, double> model;
+
+    auto& g = model.create_constraint("g");
+    auto& h = model.create_constraints("h", 10);
+    auto& v = model.create_constraints("v", {10, 10});
+
+    model.setup_unique_names();
+
+    g(0).increment_violation_count();
+
+    for (auto i = 0; i < 10; i++) {
+        h(i).increment_violation_count();
+        h(i).increment_violation_count();
+    }
+
+    for (auto i = 0; i < 10; i++) {
+        for (auto j = 0; j < 10; j++) {
+            v(i, j).increment_violation_count();
+            v(i, j).increment_violation_count();
+            v(i, j).increment_violation_count();
+        }
+    }
+
+    auto violation_counts = model.export_named_violation_counts();
+
+    EXPECT_EQ(1, violation_counts["g"](0));
+    EXPECT_EQ(2, violation_counts["h"](0));
+    EXPECT_EQ(2, violation_counts["h"](9));
+    EXPECT_EQ(3, violation_counts["v"](0, 0));
+    EXPECT_EQ(3, violation_counts["v"](9, 9));
 }
 
 /*****************************************************************************/
