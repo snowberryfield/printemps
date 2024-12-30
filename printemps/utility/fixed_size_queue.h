@@ -26,13 +26,13 @@ class FixedSizeQueue {
     }
 
     /*************************************************************************/
-    void initialize(void) {
+    inline void initialize(void) {
         m_max_size = 0;
         m_queue.clear();
     }
 
     /*************************************************************************/
-    void setup(const int a_MAX_SIZE) {
+    inline void setup(const int a_MAX_SIZE) {
         m_max_size = a_MAX_SIZE;
         m_queue.clear();
     }
