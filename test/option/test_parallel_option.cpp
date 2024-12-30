@@ -33,24 +33,6 @@ TEST_F(TestParallelOption, initialize) {
             DEFAULT_IS_ENABLED_MOVE_EVALUATION_PARALLELIZATION,  //
         option.is_enabled_move_evaluation_parallelization);
 
-    EXPECT_EQ(  //
-        ParallelOptionConstant::
-            DEFAULT_IS_ENABLED_AUTOMATIC_MOVE_UPDATE_PARALLELIZATION,  //
-        option.is_enabled_automatic_move_update_parallelization);
-
-    EXPECT_EQ(  //
-        ParallelOptionConstant::
-            DEFAULT_IS_ENABLED_AUTOMATIC_MOVE_EVALUATION_PARALLELIZATION,  //
-        option.is_enabled_automatic_move_evaluation_parallelization);
-
-    EXPECT_EQ(                                                     //
-        ParallelOptionConstant::DEFAULT_DECAY_FACTOR_MOVE_UPDATE,  //
-        option.decay_factor_move_update);
-
-    EXPECT_EQ(                                                         //
-        ParallelOptionConstant::DEFAULT_DECAY_FACTOR_MOVE_EVALUATION,  //
-        option.decay_factor_move_evaluation);
-
     EXPECT_EQ(                                                          //
         ParallelOptionConstant::DEFAULT_NUMBER_OF_THREADS_MOVE_UPDATE,  //
         option.number_of_threads_move_update);
@@ -58,6 +40,16 @@ TEST_F(TestParallelOption, initialize) {
     EXPECT_EQ(                                                              //
         ParallelOptionConstant::DEFAULT_NUMBER_OF_THREADS_MOVE_EVALUATION,  //
         option.number_of_threads_move_evaluation);
+
+    EXPECT_EQ(  //
+        ParallelOptionConstant::
+            DEFAULT_IS_ENABLED_THREAD_COUNT_OPTIMIZATION,  //
+        option.is_enabled_thread_count_optimization);
+
+    EXPECT_EQ(  //
+        ParallelOptionConstant::
+            DEFAULT_THREAD_COUNT_OPTIMIZATION_DECAY_FACTOR,  //
+        option.thread_count_optimization_decay_factor);
 }
 
 }  // namespace

@@ -108,10 +108,11 @@ struct TabuSearchControllerState {
     utility::Range<double> local_penalty_coefficient_range;
 
     /**
-     * Learners
+     * Learner
      */
-    utility::ucb1::Learner<int> parallelization_controller_move_update;
-    utility::ucb1::Learner<int> parallelization_controller_move_evaluation;
+    utility::ucb1::Learner<std::pair<int, int>> thread_count_optimizer;
+    int max_number_of_threads_move_update;
+    int max_number_of_threads_move_evaluation;
 
     /*************************************************************************/
     TabuSearchControllerState(void) {
@@ -191,8 +192,8 @@ struct TabuSearchControllerState {
         this->is_enabled_move_update_parallelization     = false;
         this->is_enabled_move_evaluation_parallelization = false;
 
-        this->number_of_threads_move_evaluation = 1;
         this->number_of_threads_move_update     = 1;
+        this->number_of_threads_move_evaluation = 1;
 
         this->total_number_of_threads_move_update     = 0;
         this->total_number_of_threads_move_evaluation = 0;
@@ -201,9 +202,10 @@ struct TabuSearchControllerState {
         this->averaged_number_of_threads_move_evaluation = 0.0;
 
         this->local_penalty_coefficient_range.initialize();
+        this->thread_count_optimizer.initialize();
 
-        this->parallelization_controller_move_update.initialize();
-        this->parallelization_controller_move_evaluation.initialize();
+        this->max_number_of_threads_move_update     = 1;
+        this->max_number_of_threads_move_evaluation = 1;
     }
 };
 }  // namespace printemps::solver::tabu_search::controller

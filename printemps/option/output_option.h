@@ -21,7 +21,7 @@ struct OutputOptionConstant {
         DEFAULT_IS_ENABLED_PRINT_TREE_SUMMARY = true;
 
     static constexpr bool  //
-        DEFAULT_IS_ENABLED_PRINT_PARALLELIZATION_CONTROLLER_SUMMARY = true;
+        DEFAULT_IS_ENABLED_PRINT_THREAD_COUNT_OPTIMIZER_SUMMARY = true;
 
     static constexpr bool  //
         DEFAULT_IS_ENABLED_PRINT_VARIABLE_UPDATE_SUMMARY = true;
@@ -45,7 +45,7 @@ struct OutputOption {
 
     bool is_enabled_print_search_behavior_summary;
     bool is_enabled_print_tree_summary;
-    bool is_enabled_print_parallelization_controller_summary;
+    bool is_enabled_print_thread_count_optimizer_summary;
     bool is_enabled_print_variable_update_summary;
     bool is_enabled_print_constraint_violation_summary;
     bool is_enabled_print_violation_and_penalty_summary;
@@ -78,9 +78,9 @@ struct OutputOption {
         this->is_enabled_print_tree_summary =  //
             OutputOptionConstant::DEFAULT_IS_ENABLED_PRINT_TREE_SUMMARY;
 
-        this->is_enabled_print_parallelization_controller_summary =
+        this->is_enabled_print_thread_count_optimizer_summary =
             OutputOptionConstant::
-                DEFAULT_IS_ENABLED_PRINT_PARALLELIZATION_CONTROLLER_SUMMARY;
+                DEFAULT_IS_ENABLED_PRINT_THREAD_COUNT_OPTIMIZER_SUMMARY;
 
         this->is_enabled_print_variable_update_summary =  //
             OutputOptionConstant::
@@ -129,10 +129,10 @@ struct OutputOption {
             utility::to_true_or_false(                      //
                 this->is_enabled_print_tree_summary));
 
-        utility::print(  //
-            " -- output.is_enabled_print_parallelization_controller_summary: " +  //
-            utility::to_true_or_false(  //
-                this->is_enabled_print_parallelization_controller_summary));
+        utility::print(                                                       //
+            " -- output.is_enabled_print_thread_count_optimizer_summary: " +  //
+            utility::to_true_or_false(                                        //
+                this->is_enabled_print_thread_count_optimizer_summary));
 
         utility::print(                                                //
             " -- output.is_enabled_print_variable_update_summary: " +  //
@@ -183,9 +183,9 @@ struct OutputOption {
             &this->is_enabled_print_tree_summary,  //
             "is_enabled_print_tree_summary", a_OBJECT);
 
-        read_json(                                                       //
-            &this->is_enabled_print_parallelization_controller_summary,  //
-            "is_enabled_print_parallelization_controller_summary", a_OBJECT);
+        read_json(                                                   //
+            &this->is_enabled_print_thread_count_optimizer_summary,  //
+            "is_enabled_print_thread_count_optimizer_summary", a_OBJECT);
 
         read_json(                                            //
             &this->is_enabled_print_variable_update_summary,  //
@@ -231,9 +231,9 @@ struct OutputOption {
             "is_enabled_print_tree_summary",  //
             this->is_enabled_print_tree_summary);
 
-        obj.emplace_back(                                           //
-            "is_enabled_print_parallelization_controller_summary",  //
-            this->is_enabled_print_parallelization_controller_summary);
+        obj.emplace_back(                                       //
+            "is_enabled_print_thread_count_optimizer_summary",  //
+            this->is_enabled_print_thread_count_optimizer_summary);
 
         obj.emplace_back(                                //
             "is_enabled_print_variable_update_summary",  //

@@ -199,41 +199,20 @@ class TabuSearchController
         }
 
         if (this->m_option.output
-                .is_enabled_print_parallelization_controller_summary) {
+                .is_enabled_print_thread_count_optimizer_summary) {
             /**
-             * Print the state of the parallelization controller summary
-             * (move update).
+             * Print the state of the thread count optimizer summary.
              */
-
 #ifdef _OPENMP
             if (this->m_option.parallel
                     .is_enabled_move_update_parallelization &&
                 this->m_option.parallel
-                    .is_enabled_automatic_move_update_parallelization) {
-                utility::print_dot_line(a_IS_ENABLED_PRINT);
-                utility::print(  //
-                    "# Parallelization Controller Summary (Move Update)",
-                    a_IS_ENABLED_PRINT);
-                this->print_parallelization_controller_move_update(
-                    a_IS_ENABLED_PRINT);
-            }
-#endif
-
-            /**
-             * Print the state of the parallelization controller summary
-             * (move evaluation).
-             */
-#ifdef _OPENMP
-            if (this->m_option.parallel
                     .is_enabled_move_evaluation_parallelization &&
-                this->m_option.parallel
-                    .is_enabled_automatic_move_evaluation_parallelization) {
+                this->m_option.parallel.is_enabled_thread_count_optimization) {
                 utility::print_dot_line(a_IS_ENABLED_PRINT);
                 utility::print(  //
-                    "# Parallelization Controller Summary (Move Evaluation)",
-                    a_IS_ENABLED_PRINT);
-                this->print_parallelization_controller_move_evaluation(
-                    a_IS_ENABLED_PRINT);
+                    "# Thread Count Optimization Summary", a_IS_ENABLED_PRINT);
+                this->print_thread_count_optimizer(a_IS_ENABLED_PRINT);
             }
 #endif
         }
@@ -457,24 +436,25 @@ class TabuSearchController
     }
 
     /*************************************************************************/
-    inline void print_parallelization_controller_move_update(
+    inline void print_thread_count_optimizer(
         const bool a_IS_ENABLED_PRINT) const {
         const auto& STATE      = m_state_manager.state();
-        const auto& CONTROLLER = STATE.parallelization_controller_move_update;
+        const auto& CONTROLLER = STATE.thread_count_optimizer;
 
         utility::print_message(  //
-            "The state of the parallelization controller for move update are "
-            "as follows ('*' denotes the selected option for the next loop):",
+            "The state of the thread count optimization (U: Update moves, E: "
+            "Evaluate moves, '*': Selected pattern for the next loop):",
             a_IS_ENABLED_PRINT);
 
         for (const auto& action : CONTROLLER.actions()) {
             char flag =
                 CONTROLLER.best_action().body == action.body ? '*' : ' ';
             utility::print_info(
-                utility::to_string(flag, " -- (%c") +
-                    utility::to_string(action.body, "%d Threads) ") +
-                    utility::to_string(action.mean, "Mean: %.3e, ") +
-                    utility::to_string(action.confidence, "Conf.: %.3e, ") +
+                utility::to_string(flag, " -- %c(U,E)=") +
+                    utility::to_string(action.body.first, "(%03d,") +
+                    utility::to_string(action.body.second, "%03d), ") +
+                    "Mean/Conf.: " + utility::to_string(action.mean, "%.1e/") +
+                    utility::to_string(action.confidence, "%.1e, ") +
                     utility::to_string(action.number_of_samples, "N: %d") +
                     utility::to_string(
                         action.number_of_samples /
@@ -483,46 +463,13 @@ class TabuSearchController
                         "(%.3f)"),
                 a_IS_ENABLED_PRINT);
         }
-
         utility::print_info(  //
-            " -- Averaged number of threads: " +
-                utility::to_string(STATE.averaged_number_of_threads_move_update,
-                                   "%.3e"),
-            a_IS_ENABLED_PRINT);
-    }
-
-    /*************************************************************************/
-    inline void print_parallelization_controller_move_evaluation(
-        const bool a_IS_ENABLED_PRINT) const {
-        const auto& STATE = m_state_manager.state();
-        const auto& CONTROLLER =
-            STATE.parallelization_controller_move_evaluation;
-
-        utility::print_message(  //
-            "The state of the parallelization controller for move evaluation "
-            "are as follows ('*' denotes the selected option for the next "
-            "loop):",
-            a_IS_ENABLED_PRINT);
-
-        for (const auto& action : CONTROLLER.actions()) {
-            char flag =
-                CONTROLLER.best_action().body == action.body ? '*' : ' ';
-            utility::print_info(
-                utility::to_string(flag, " -- (%c") +
-                    utility::to_string(action.body, "%d Threads) ") +
-                    utility::to_string(action.mean, "Mean: %.3e, ") +
-                    utility::to_string(action.confidence, "Conf.: %.3e, ") +
-                    utility::to_string(action.number_of_samples, "N: %d") +
-                    utility::to_string(
-                        action.number_of_samples /
-                            static_cast<double>(
-                                CONTROLLER.total_number_of_samples()),
-                        "(%.3f)"),
+            " -- Averaged number of threads for move update: " +
+                utility::to_string(  //
+                    STATE.averaged_number_of_threads_move_update, "%.3e"),
                 a_IS_ENABLED_PRINT);
-        }
-
         utility::print_info(  //
-            " -- Averaged number of threads: " +
+            " -- Averaged number of threads for move evaluation: " +
                 utility::to_string(
                     STATE.averaged_number_of_threads_move_evaluation, "%.3e"),
             a_IS_ENABLED_PRINT);

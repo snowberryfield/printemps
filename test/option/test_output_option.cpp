@@ -51,8 +51,8 @@ TEST_F(TestOutputOption, initialize) {
 
     EXPECT_EQ(  //
         OutputOptionConstant::
-            DEFAULT_IS_ENABLED_PRINT_PARALLELIZATION_CONTROLLER_SUMMARY,  //
-        option.is_enabled_print_parallelization_controller_summary);
+            DEFAULT_IS_ENABLED_PRINT_THREAD_COUNT_OPTIMIZER_SUMMARY,  //
+        option.is_enabled_print_thread_count_optimizer_summary);
 
     EXPECT_EQ(  //
         OutputOptionConstant::
