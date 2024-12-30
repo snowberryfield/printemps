@@ -953,7 +953,7 @@ class TabuSearchCore {
                  * The neighborhood solutions will be evaluated in parallel by
                  * fast or ordinary(slow) evaluation methods.
                  */
-#ifndef _PRINTEMPS_MPS_SOLVER
+#ifdef _PRINTEMPS_DISABLE_FAST_EVALUATION
                 if (m_option.general.is_enabled_fast_evaluation) {
 #endif
                     if (TRIAL_MOVE_PTRS[i]->is_univariable_move) {
@@ -973,7 +973,7 @@ class TabuSearchCore {
                             CURRENT_SOLUTION_SCORE);
                     }
 
-#ifndef _PRINTEMPS_MPS_SOLVER
+#ifdef _PRINTEMPS_DISABLE_FAST_EVALUATION
                 } else {
                     m_model_ptr->evaluate(&trial_solution_scores[i],  //
                                           *TRIAL_MOVE_PTRS[i]);

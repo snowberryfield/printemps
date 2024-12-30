@@ -11,6 +11,7 @@ namespace printemps::mps {
 enum class MPSReadMode {
     Initial,
     Name,
+    Objsense,
     Rows,
     Columns,
     Rhs,
