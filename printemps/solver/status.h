@@ -18,7 +18,9 @@ struct Status {
     model::Model<T_Variable, T_Expression> *  model_ptr;
     option::Option                            option;
 
-    bool is_found_feasible_solution;
+    T_Expression objective;
+    T_Expression total_violation;
+    bool         is_found_feasible_solution;
 
     std::string start_date_time;
     std::string finish_date_time;
@@ -63,7 +65,10 @@ struct Status {
         this->model_ptr  = nullptr;
         this->option.initialize();
 
+        this->objective                  = 0;
+        this->total_violation            = 0;
         this->is_found_feasible_solution = false;
+
         this->start_date_time.clear();
         this->finish_date_time.clear();
         this->name                               = "";
@@ -96,10 +101,17 @@ struct Status {
         const auto &TABU_SEARCH_RESULT =
             a_solver_ptr->tabu_search_controller().result();
 
+        const auto &INCUMBENT_SOLUTION =
+            this->solver_ptr->global_state()
+                .incumbent_holder.global_augmented_incumbent_solution();
+
         this->model_ptr = a_solver_ptr->model_ptr();
         this->option    = a_solver_ptr->option_original();
 
-        this->is_found_feasible_solution = this->model_ptr->is_feasible();
+        this->objective = INCUMBENT_SOLUTION.objective;
+
+        this->total_violation            = INCUMBENT_SOLUTION.total_violation;
+        this->is_found_feasible_solution = INCUMBENT_SOLUTION.is_feasible;
 
         this->start_date_time  = a_solver_ptr->start_date_time();
         this->finish_date_time = a_solver_ptr->finish_date_time();
@@ -164,6 +176,12 @@ struct Status {
 
         a_object->emplace_back(  //
             "number_of_constraints", this->number_of_constraints);
+
+        a_object->emplace_back(  //
+            "objective", this->objective);
+
+        a_object->emplace_back(  //
+            "total_violation", this->total_violation);
 
         a_object->emplace_back(  //
             "is_found_feasible_solution", this->is_found_feasible_solution);
