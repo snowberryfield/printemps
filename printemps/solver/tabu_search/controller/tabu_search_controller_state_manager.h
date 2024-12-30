@@ -94,70 +94,97 @@ class TabuSearchControllerStateManager {
                 option::improvability_screening_mode::Intensive;
         }
 
-        m_state.is_enabled_move_update_parallelization =
-            m_option.parallel.is_enabled_move_update_parallelization;
-        m_state.is_enabled_move_evaluation_parallelization =
-            m_option.parallel.is_enabled_move_evaluation_parallelization;
-
-        m_state.number_of_threads_move_update =
-            m_option.parallel.number_of_threads_move_update;
-        m_state.number_of_threads_move_evaluation =
-            m_option.parallel.number_of_threads_move_evaluation;
-
 #ifdef _OPENMP
-        int max_number_of_threads = 1;
+        m_state.max_number_of_threads_move_update =
+            m_option.parallel.number_of_threads_move_update;
+        m_state.max_number_of_threads_move_evaluation =
+            m_option.parallel.number_of_threads_move_evaluation;
 #pragma omp parallel
         {
 #pragma omp single
-            max_number_of_threads = omp_get_max_threads();
-        }
-        std::vector<int> thread_patterns;
-        int              number_of_threads = 1;
-        while (true) {
-            if (number_of_threads < max_number_of_threads) {
-                thread_patterns.push_back(number_of_threads);
-                number_of_threads <<= 1;
-            } else {
-                break;
+            {
+                if (m_state.max_number_of_threads_move_update < 0) {
+                    m_state.max_number_of_threads_move_update =
+                        omp_get_max_threads();
+                }
+
+                if (m_state.max_number_of_threads_move_evaluation < 0) {
+                    m_state.max_number_of_threads_move_evaluation =
+                        omp_get_max_threads();
+                }
             }
         }
-        thread_patterns.push_back(max_number_of_threads);
-        const int THREAD_PATTERNS_SIZE = thread_patterns.size();
 
         if (m_option.parallel.is_enabled_move_update_parallelization &&
-            m_option.parallel
-                .is_enabled_automatic_move_update_parallelization) {
-            std::vector<utility::ucb1::Action<int>> actions(
-                THREAD_PATTERNS_SIZE);
-            for (auto i = 0; i < THREAD_PATTERNS_SIZE; i++) {
-                actions[i] = thread_patterns[i];
+            m_option.parallel.is_enabled_move_evaluation_parallelization &&
+            m_option.parallel.is_enabled_thread_count_optimization) {
+            std::vector<std::pair<int, int>> thread_patterns;
+
+            int number_of_threads_move_update     = 1;
+            int number_of_threads_move_evaluation = 1;
+
+            while (number_of_threads_move_update <
+                   m_state.max_number_of_threads_move_update) {
+                number_of_threads_move_evaluation = 1;
+                while (number_of_threads_move_evaluation <
+                       m_state.max_number_of_threads_move_evaluation) {
+                    thread_patterns.push_back(
+                        std::make_pair(number_of_threads_move_update,
+                                       number_of_threads_move_evaluation));
+                    number_of_threads_move_evaluation <<= 1;
+                }
+                thread_patterns.push_back(std::make_pair(
+                    number_of_threads_move_update,
+                    m_state.max_number_of_threads_move_evaluation));
+                number_of_threads_move_update <<= 1;
             }
-            m_state.parallelization_controller_move_update.setup(
-                actions,  //
-                m_option.parallel.decay_factor_move_update);
+            thread_patterns.push_back(
+                std::make_pair(m_state.max_number_of_threads_move_update,
+                               m_state.max_number_of_threads_move_evaluation));
+
+            std::vector<utility::ucb1::Action<std::pair<int, int>>> actions;
+
+            const int THREAD_PATTERNS_SIZE = thread_patterns.size();
+            for (auto i = 0; i < THREAD_PATTERNS_SIZE; i++) {
+                if (thread_patterns[i].first == thread_patterns[i].second ||
+                    thread_patterns[i].first == 1) {
+                    actions.push_back(thread_patterns[i]);
+                }
+            }
+            m_state.thread_count_optimizer.setup(
+                actions,
+                m_option.parallel.thread_count_optimization_decay_factor);
 
             m_state.number_of_threads_move_update =
-                m_state.parallelization_controller_move_update.best_action()
-                    .body;
-        }
-
-        if (m_option.parallel.is_enabled_move_evaluation_parallelization &&
-            m_option.parallel
-                .is_enabled_automatic_move_evaluation_parallelization) {
-            std::vector<utility::ucb1::Action<int>> actions(
-                THREAD_PATTERNS_SIZE);
-            for (auto i = 0; i < THREAD_PATTERNS_SIZE; i++) {
-                actions[i] = thread_patterns[i];
-            }
-            m_state.parallelization_controller_move_evaluation.setup(
-                actions,  //
-                m_option.parallel.decay_factor_move_evaluation);
+                m_state.thread_count_optimizer.best_action().body.first;
 
             m_state.number_of_threads_move_evaluation =
-                m_state.parallelization_controller_move_evaluation.best_action()
-                    .body;
+                m_state.thread_count_optimizer.best_action().body.second;
+
+        } else {
+            if (m_option.parallel.is_enabled_move_update_parallelization) {
+                m_state.number_of_threads_move_update =
+                    m_state.max_number_of_threads_move_update;
+            } else {
+                m_state.number_of_threads_move_update = 1;
+            }
+
+            if (m_option.parallel.is_enabled_move_evaluation_parallelization) {
+                m_state.number_of_threads_move_evaluation =
+                    m_state.max_number_of_threads_move_evaluation;
+            } else {
+                m_state.number_of_threads_move_evaluation = 1;
+            }
         }
+#else
+        m_state.number_of_threads_move_update     = 1;
+        m_state.number_of_threads_move_evaluation = 1;
 #endif
+        m_state.is_enabled_move_update_parallelization =
+            m_state.number_of_threads_move_update > 1;
+
+        m_state.is_enabled_move_evaluation_parallelization =
+            m_state.number_of_threads_move_evaluation > 1;
     }
 
     /*************************************************************************/
@@ -385,14 +412,13 @@ class TabuSearchControllerStateManager {
  * Update parallelization controllers.
  */
 #ifdef _OPENMP
-        this->update_parallelization_controllers();
+        this->update_thread_count_optimizers();
 #endif
 
         /**
          * Update parallelization.
          */
-        this->update_move_update_parallelization();
-        this->update_move_evaluation_parallelization();
+        this->update_parallelization();
     }
 
     /*************************************************************************/
@@ -1367,95 +1393,72 @@ class TabuSearchControllerStateManager {
     }
 
     /*************************************************************************/
-    inline void update_parallelization_controllers(void) {
+    inline void update_thread_count_optimizers(void) {
         const auto& TABU_SEARCH_RESULT = m_state.tabu_search_result;
 
         if (m_option.parallel.is_enabled_move_update_parallelization &&
-            m_option.parallel
-                .is_enabled_automatic_move_update_parallelization) {
-            const double SCORE =
-                TABU_SEARCH_RESULT.number_of_updated_moves /
-                std::max(constant::EPSILON_10,
-                         TABU_SEARCH_RESULT.elapsed_time_for_move_update);
-            m_state.parallelization_controller_move_update.learn(SCORE);
-        }
-
-        if (m_option.parallel.is_enabled_move_evaluation_parallelization &&
-            m_option.parallel
-                .is_enabled_automatic_move_evaluation_parallelization) {
+            m_option.parallel.is_enabled_move_evaluation_parallelization &&
+            m_option.parallel.is_enabled_thread_count_optimization) {
             const double SCORE =
                 TABU_SEARCH_RESULT.number_of_evaluated_moves /
-                std::max(constant::EPSILON_10,
-                         TABU_SEARCH_RESULT.elapsed_time_for_move_evaluation);
-            m_state.parallelization_controller_move_evaluation.learn(SCORE);
+                std::max(
+                    constant::EPSILON_10,
+                    TABU_SEARCH_RESULT.elapsed_time_for_move_update +
+                        TABU_SEARCH_RESULT.elapsed_time_for_move_evaluation);
+            m_state.thread_count_optimizer.learn(SCORE);
         }
     }
 
     /*************************************************************************/
-    inline void update_move_update_parallelization(void) {
-        if (m_state.is_enabled_move_update_parallelization) {
-            m_state.total_number_of_threads_move_update +=
-                m_state.number_of_threads_move_update;
-
-        } else {
-            m_state.total_number_of_threads_move_update++;
-        }
+    inline void update_parallelization(void) {
+        m_state.total_number_of_threads_move_update +=
+            m_state.number_of_threads_move_update;
 
         m_state.averaged_number_of_threads_move_update =
             m_state.total_number_of_threads_move_update /
             static_cast<double>(m_state.iteration + 1);
 
-#ifdef _OPENMP
-        if (m_option.parallel.is_enabled_move_update_parallelization &&
-            m_option.parallel
-                .is_enabled_automatic_move_update_parallelization) {
-            m_state.number_of_threads_move_update =
-                m_state.parallelization_controller_move_update.best_action()
-                    .body;
-            m_state.is_enabled_move_update_parallelization =
-                m_state.number_of_threads_move_update > 1;
-        } else {
-            m_state.number_of_threads_move_update = omp_get_max_threads();
-            m_state.is_enabled_move_update_parallelization =
-                m_option.parallel.is_enabled_move_update_parallelization;
-        }
-#else
-        m_state.is_enabled_move_update_parallelization =
-            m_option.parallel.is_enabled_move_update_parallelization;
-#endif
-    }
-
-    /*************************************************************************/
-    inline void update_move_evaluation_parallelization(void) {
-        if (m_state.is_enabled_move_evaluation_parallelization) {
-            m_state.total_number_of_threads_move_evaluation +=
-                m_state.number_of_threads_move_evaluation;
-        } else {
-            m_state.total_number_of_threads_move_evaluation++;
-        }
+        m_state.total_number_of_threads_move_evaluation +=
+            m_state.number_of_threads_move_evaluation;
 
         m_state.averaged_number_of_threads_move_evaluation =
             m_state.total_number_of_threads_move_evaluation /
             static_cast<double>(m_state.iteration + 1);
 
 #ifdef _OPENMP
-        if (m_option.parallel.is_enabled_move_evaluation_parallelization &&
-            m_option.parallel
-                .is_enabled_automatic_move_evaluation_parallelization) {
-            m_state.number_of_threads_move_evaluation =
-                m_state.parallelization_controller_move_evaluation.best_action()
-                    .body;
-            m_state.is_enabled_move_evaluation_parallelization =
-                m_state.number_of_threads_move_evaluation > 1;
+        if (m_option.parallel.is_enabled_move_update_parallelization &&
+            m_option.parallel.is_enabled_move_evaluation_parallelization &&
+            m_option.parallel.is_enabled_thread_count_optimization) {
+            auto& best_action = m_state.thread_count_optimizer.best_action();
+
+            m_state.number_of_threads_move_update     = best_action.body.first;
+            m_state.number_of_threads_move_evaluation = best_action.body.second;
+
         } else {
-            m_state.number_of_threads_move_evaluation = omp_get_max_threads();
-            m_state.is_enabled_move_evaluation_parallelization =
-                m_option.parallel.is_enabled_move_evaluation_parallelization;
+            if (m_option.parallel.is_enabled_move_update_parallelization) {
+                m_state.number_of_threads_move_update =
+                    m_state.max_number_of_threads_move_update;
+            } else {
+                m_state.number_of_threads_move_update = 1;
+            }
+
+            if (m_option.parallel.is_enabled_move_evaluation_parallelization) {
+                m_state.number_of_threads_move_evaluation =
+                    m_state.max_number_of_threads_move_evaluation;
+            } else {
+                m_state.number_of_threads_move_evaluation = 1;
+            }
         }
 #else
-        m_state.is_enabled_move_evaluation_parallelization =
-            m_option.parallel.is_enabled_move_evaluation_parallelization;
+        m_state.number_of_threads_move_update     = 1;
+        m_state.number_of_threads_move_evaluation = 1;
 #endif
+
+        m_state.is_enabled_move_update_parallelization =
+            m_state.number_of_threads_move_update > 1;
+
+        m_state.is_enabled_move_evaluation_parallelization =
+            m_state.number_of_threads_move_evaluation > 1;
     }
 
     /*************************************************************************/

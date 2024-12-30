@@ -26,12 +26,10 @@
     "parallel": {
         "is_enabled_move_update_parallelization": false,
         "is_enabled_move_evaluation_parallelization": false,
-        "is_enabled_automatic_move_update_parallelization": false,
-        "is_enabled_automatic_move_evaluation_parallelization": false,
-        "decay_factor_move_update": 0.6,
-        "decay_factor_move_evaluation": 0.6,
         "number_of_threads_move_update": 2,
-        "number_of_threads_move_evaluation": 2
+        "number_of_threads_move_evaluation": 2,
+        "is_enabled_thread_count_optimization": false,
+        "thread_count_optimization_decay_factor": 0.6
     },
     "preprocess": {
         "is_enabled_presolve": false,
@@ -82,7 +80,7 @@
         "feasible_solutions_capacity": 1,
         "is_enabled_print_search_behavior_summary":false,
         "is_enabled_print_tree_summary":false,
-        "is_enabled_print_parallelization_controller_summary":false,
+        "is_enabled_print_thread_count_optimizer_summary":false,
         "is_enabled_print_variable_update_summary":false,
         "is_enabled_print_constraint_violation_summary":false,
         "is_enabled_print_violation_and_penalty_summary":false,

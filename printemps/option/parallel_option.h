@@ -14,20 +14,15 @@ struct ParallelOptionConstant {
     static constexpr bool  //
         DEFAULT_IS_ENABLED_MOVE_EVALUATION_PARALLELIZATION = true;
 
-    static constexpr bool  //
-        DEFAULT_IS_ENABLED_AUTOMATIC_MOVE_UPDATE_PARALLELIZATION = true;
-    static constexpr bool  //
-        DEFAULT_IS_ENABLED_AUTOMATIC_MOVE_EVALUATION_PARALLELIZATION = true;
-
-    static constexpr double  //
-        DEFAULT_DECAY_FACTOR_MOVE_UPDATE = 0.5;
-    static constexpr double  //
-        DEFAULT_DECAY_FACTOR_MOVE_EVALUATION = 0.5;
-
     static constexpr int                                 //
         DEFAULT_NUMBER_OF_THREADS_MOVE_EVALUATION = -1;  // Adjust to max
     static constexpr int                                 //
         DEFAULT_NUMBER_OF_THREADS_MOVE_UPDATE = -1;      // Adjust to max
+
+    static constexpr bool  //
+        DEFAULT_IS_ENABLED_THREAD_COUNT_OPTIMIZATION = true;
+    static constexpr double  //
+        DEFAULT_THREAD_COUNT_OPTIMIZATION_DECAY_FACTOR = 0.5;
 };
 
 /*****************************************************************************/
@@ -35,14 +30,11 @@ struct ParallelOption {
     bool is_enabled_move_update_parallelization;
     bool is_enabled_move_evaluation_parallelization;
 
-    bool is_enabled_automatic_move_update_parallelization;
-    bool is_enabled_automatic_move_evaluation_parallelization;
-
-    double decay_factor_move_update;
-    double decay_factor_move_evaluation;
-
     int number_of_threads_move_update;
     int number_of_threads_move_evaluation;
+
+    bool   is_enabled_thread_count_optimization;
+    double thread_count_optimization_decay_factor;
 
     /*************************************************************************/
     ParallelOption(void) {
@@ -64,25 +56,19 @@ struct ParallelOption {
             = ParallelOptionConstant::
                 DEFAULT_IS_ENABLED_MOVE_EVALUATION_PARALLELIZATION;
 
-        this->is_enabled_automatic_move_update_parallelization  //
-            = ParallelOptionConstant::
-                DEFAULT_IS_ENABLED_AUTOMATIC_MOVE_UPDATE_PARALLELIZATION;
-
-        this->is_enabled_automatic_move_evaluation_parallelization  //
-            = ParallelOptionConstant::
-                DEFAULT_IS_ENABLED_AUTOMATIC_MOVE_EVALUATION_PARALLELIZATION;
-
-        this->decay_factor_move_update  //
-            = ParallelOptionConstant::DEFAULT_DECAY_FACTOR_MOVE_UPDATE;
-
-        this->decay_factor_move_evaluation  //
-            = ParallelOptionConstant::DEFAULT_DECAY_FACTOR_MOVE_EVALUATION;
-
         this->number_of_threads_move_update  //
             = ParallelOptionConstant::DEFAULT_NUMBER_OF_THREADS_MOVE_UPDATE;
 
         this->number_of_threads_move_evaluation  //
             = ParallelOptionConstant::DEFAULT_NUMBER_OF_THREADS_MOVE_EVALUATION;
+
+        this->is_enabled_thread_count_optimization  //
+            = ParallelOptionConstant::
+                DEFAULT_IS_ENABLED_THREAD_COUNT_OPTIMIZATION;
+
+        this->thread_count_optimization_decay_factor  //
+            = ParallelOptionConstant::
+                DEFAULT_THREAD_COUNT_OPTIMIZATION_DECAY_FACTOR;
     }
 
     /*************************************************************************/
@@ -97,28 +83,6 @@ struct ParallelOption {
             utility::to_true_or_false(                                     //
                 this->is_enabled_move_evaluation_parallelization));
 
-        utility::print(  //
-            " -- parallel.is_enabled_automatic_move_update_parallelization:"
-            " " +                       //
-            utility::to_true_or_false(  //
-                this->is_enabled_automatic_move_update_parallelization));
-
-        utility::print(  //
-            " -- parallel.is_enabled_automatic_move_evaluation_parallelization:"
-            " " +                       //
-            utility::to_true_or_false(  //
-                this->is_enabled_automatic_move_evaluation_parallelization));
-
-        utility::print(                                  //
-            " -- parallel.decay_factor_move_update: " +  //
-            utility::to_string(                          //
-                this->decay_factor_move_update, "%f"));
-
-        utility::print(                                      //
-            " -- parallel.decay_factor_move_evaluation: " +  //
-            utility::to_string(                              //
-                this->decay_factor_move_evaluation, "%f"));
-
         utility::print(                                       //
             " -- parallel.number_of_threads_move_update: " +  //
             utility::to_string(                               //
@@ -128,6 +92,17 @@ struct ParallelOption {
             " -- parallel.number_of_threads_move_evaluation: " +  //
             utility::to_string(                                   //
                 this->number_of_threads_move_evaluation, "%d"));
+
+        utility::print(  //
+            " -- parallel.is_enabled_thread_count_optimization:"
+            " " +                       //
+            utility::to_true_or_false(  //
+                this->is_enabled_thread_count_optimization));
+
+        utility::print(                                                //
+            " -- parallel.thread_count_optimization_decay_factor: " +  //
+            utility::to_string(                                        //
+                this->thread_count_optimization_decay_factor, "%f"));
     }
 
     /**************************************************************************/
@@ -144,26 +119,6 @@ struct ParallelOption {
             "is_enabled_move_evaluation_parallelization",       //
             a_OBJECT);
 
-        read_json(                                                    //
-            &this->is_enabled_automatic_move_update_parallelization,  //
-            "is_enabled_automatic_move_update_parallelization",       //
-            a_OBJECT);
-
-        read_json(                                                        //
-            &this->is_enabled_automatic_move_evaluation_parallelization,  //
-            "is_enabled_automatic_move_evaluation_parallelization",       //
-            a_OBJECT);
-
-        read_json(                            //
-            &this->decay_factor_move_update,  //
-            "decay_factor_move_update",       //
-            a_OBJECT);
-
-        read_json(                                //
-            &this->decay_factor_move_evaluation,  //
-            "decay_factor_move_evaluation",       //
-            a_OBJECT);
-
         read_json(                                 //
             &this->number_of_threads_move_update,  //
             "number_of_threads_move_update;",      //
@@ -172,6 +127,16 @@ struct ParallelOption {
         read_json(                                     //
             &this->number_of_threads_move_evaluation,  //
             "number_of_threads_move_evaluation",       //
+            a_OBJECT);
+
+        read_json(                                        //
+            &this->is_enabled_thread_count_optimization,  //
+            "is_enabled_thread_count_optimization",       //
+            a_OBJECT);
+
+        read_json(                                          //
+            &this->thread_count_optimization_decay_factor,  //
+            "thread_count_optimization_decay_factor",       //
             a_OBJECT);
     }
 
@@ -186,22 +151,6 @@ struct ParallelOption {
             "is_enabled_move_evaluation_parallelization",  //
             this->is_enabled_move_evaluation_parallelization);
 
-        obj.emplace_back(                                        //
-            "is_enabled_automatic_move_update_parallelization",  //
-            this->is_enabled_automatic_move_update_parallelization);
-
-        obj.emplace_back(                                            //
-            "is_enabled_automatic_move_evaluation_parallelization",  //
-            this->is_enabled_automatic_move_evaluation_parallelization);
-
-        obj.emplace_back(                //
-            "decay_factor_move_update",  //
-            this->decay_factor_move_update);
-
-        obj.emplace_back(                    //
-            "decay_factor_move_evaluation",  //
-            this->decay_factor_move_evaluation);
-
         obj.emplace_back(                     //
             "number_of_threads_move_update",  //
             this->number_of_threads_move_update);
@@ -209,6 +158,14 @@ struct ParallelOption {
         obj.emplace_back(                         //
             "number_of_threads_move_evaluation",  //
             this->number_of_threads_move_evaluation);
+
+        obj.emplace_back(                            //
+            "is_enabled_thread_count_optimization",  //
+            this->is_enabled_thread_count_optimization);
+
+        obj.emplace_back(                              //
+            "thread_count_optimization_decay_factor",  //
+            this->thread_count_optimization_decay_factor);
 
         return obj;
     }

@@ -120,29 +120,20 @@ TEST_F(TestOption, setup) {
             option.parallel.is_enabled_move_evaluation_parallelization);
 
         EXPECT_EQ(  //
-            false,  //
-            option.parallel.is_enabled_automatic_move_update_parallelization);
-
-        EXPECT_EQ(  //
-            false,  //
-            option.parallel
-                .is_enabled_automatic_move_evaluation_parallelization);
-
-        EXPECT_FLOAT_EQ(  //
-            0.6,          //
-            option.parallel.decay_factor_move_update);
-
-        EXPECT_FLOAT_EQ(  //
-            0.6,          //
-            option.parallel.decay_factor_move_evaluation);
-
-        EXPECT_EQ(  //
             -1,     //
             option.parallel.number_of_threads_move_update);
 
         EXPECT_EQ(  //
             2,      //
             option.parallel.number_of_threads_move_evaluation);
+
+        EXPECT_EQ(  //
+            false,  //
+            option.parallel.is_enabled_thread_count_optimization);
+
+        EXPECT_FLOAT_EQ(  //
+            0.6,          //
+            option.parallel.thread_count_optimization_decay_factor);
 
         /// preprocess
         EXPECT_EQ(  //
@@ -319,7 +310,7 @@ TEST_F(TestOption, setup) {
 
         EXPECT_EQ(  //
             false,  //
-            option.output.is_enabled_print_parallelization_controller_summary);
+            option.output.is_enabled_print_thread_count_optimizer_summary);
 
         EXPECT_EQ(  //
             false,  //
@@ -691,30 +682,20 @@ TEST_F(TestOption, to_json) {
         to_bool(parallel.at("is_enabled_move_evaluation_parallelization")));
 
     EXPECT_EQ(  //
-        false,  //
-        to_bool(
-            parallel.at("is_enabled_automatic_move_update_parallelization")));
-
-    EXPECT_EQ(  //
-        false,  //
-        to_bool(parallel.at(
-            "is_enabled_automatic_move_evaluation_parallelization")));
-
-    EXPECT_EQ(  //
-        0.6,    //
-        to_double(parallel.at("decay_factor_move_update")));
-
-    EXPECT_EQ(  //
-        0.6,    //
-        to_double(parallel.at("decay_factor_move_evaluation")));
-
-    EXPECT_EQ(  //
         -1,     //
         to_int(parallel.at("number_of_threads_move_update")));
 
     EXPECT_EQ(  //
         2,      //
         to_int(parallel.at("number_of_threads_move_evaluation")));
+
+    EXPECT_EQ(  //
+        false,  //
+        to_bool(parallel.at("is_enabled_thread_count_optimization")));
+
+    EXPECT_EQ(  //
+        0.6,    //
+        to_double(parallel.at("thread_count_optimization_decay_factor")));
 
     /// preprocess
     auto preprocess =
