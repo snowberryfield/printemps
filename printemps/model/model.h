@@ -2517,11 +2517,7 @@ class Model {
         double coefficient             = 0.0;
         bool   is_objective_improvable = false;
         for (const auto &variable_ptr : a_VARIABLE_PTRS) {
-#ifdef _PRINTEMPS_MPS_SOLVER
-            coefficient = variable_ptr->objective_sensitivity();
-#else
             coefficient = variable_ptr->objective_sensitivity() * this->sign();
-#endif
             is_objective_improvable =
                 (coefficient > 0 && variable_ptr->has_lower_bound_margin()) ||
                 (coefficient < 0 && variable_ptr->has_upper_bound_margin());
@@ -2672,33 +2668,26 @@ class Model {
             }
         }
 
-#ifdef _PRINTEMPS_MPS_SOLVER
-        double objective             = m_objective.evaluate(a_MOVE);
-        double objective_improvement = m_objective.value() - objective;
+        const double OBJECTIVE =
+            m_is_defined_objective ? m_objective.evaluate(a_MOVE) * this->sign()
+                                   : 0.0;
 
-#else
-        double objective = 0.0;
-        double objective_improvement = 0.0;
-        if (m_is_defined_objective) {
-            objective = m_objective.evaluate(a_MOVE) * this->sign();
-            objective_improvement =
-                m_objective.value() * this->sign() - objective;
-        }
-#endif
+        const double OBJECTIVE_IMPROVEMENT =
+            m_objective.value() * this->sign() - OBJECTIVE;
 
         const double GLOBAL_PENALTY =
             total_violation * m_global_penalty_coefficient;
 
-        a_score_ptr->objective                  = objective;
-        a_score_ptr->objective_improvement      = objective_improvement;
+        a_score_ptr->objective                  = OBJECTIVE;
+        a_score_ptr->objective_improvement      = OBJECTIVE_IMPROVEMENT;
         a_score_ptr->total_violation            = total_violation;
         a_score_ptr->local_penalty              = local_penalty;
         a_score_ptr->global_penalty             = GLOBAL_PENALTY;
-        a_score_ptr->local_augmented_objective  = objective + local_penalty;
-        a_score_ptr->global_augmented_objective = objective + GLOBAL_PENALTY;
+        a_score_ptr->local_augmented_objective  = OBJECTIVE + local_penalty;
+        a_score_ptr->global_augmented_objective = OBJECTIVE + GLOBAL_PENALTY;
         a_score_ptr->is_feasible = !(total_violation > constant::EPSILON);
         a_score_ptr->is_objective_improvable =
-            objective_improvement > constant::EPSILON;
+            OBJECTIVE_IMPROVEMENT > constant::EPSILON;
         a_score_ptr->is_feasibility_improvable = is_feasibility_improvable;
     }
 
@@ -2748,33 +2737,26 @@ class Model {
             }
         }
 
-#ifdef _PRINTEMPS_MPS_SOLVER
-        double objective             = m_objective.evaluate(a_MOVE);
-        double objective_improvement = m_objective.value() - objective;
+        const double OBJECTIVE =
+            m_is_defined_objective ? m_objective.evaluate(a_MOVE) * this->sign()
+                                   : 0.0;
 
-#else
-        double objective = 0.0;
-        double objective_improvement = 0.0;
-        if (m_is_defined_objective) {
-            objective = m_objective.evaluate(a_MOVE) * this->sign();
-            objective_improvement =
-                m_objective.value() * this->sign() - objective;
-        }
-#endif
+        const double OBJECTIVE_IMPROVEMENT =
+            m_objective.value() * this->sign() - OBJECTIVE;
 
         const double GLOBAL_PENALTY =
             total_violation * m_global_penalty_coefficient;
 
-        a_score_ptr->objective                  = objective;
-        a_score_ptr->objective_improvement      = objective_improvement;
+        a_score_ptr->objective                  = OBJECTIVE;
+        a_score_ptr->objective_improvement      = OBJECTIVE_IMPROVEMENT;
         a_score_ptr->total_violation            = total_violation;
         a_score_ptr->local_penalty              = local_penalty;
         a_score_ptr->global_penalty             = GLOBAL_PENALTY;
-        a_score_ptr->local_augmented_objective  = objective + local_penalty;
-        a_score_ptr->global_augmented_objective = objective + GLOBAL_PENALTY;
+        a_score_ptr->local_augmented_objective  = OBJECTIVE + local_penalty;
+        a_score_ptr->global_augmented_objective = OBJECTIVE + GLOBAL_PENALTY;
         a_score_ptr->is_feasible = !(total_violation > constant::EPSILON);
         a_score_ptr->is_objective_improvable =
-            objective_improvement > constant::EPSILON;
+            OBJECTIVE_IMPROVEMENT > constant::EPSILON;
         a_score_ptr->is_feasibility_improvable = true;  /// do not care.
     }
 
@@ -2914,32 +2896,26 @@ class Model {
             }
         }
 
-#ifdef _PRINTEMPS_MPS_SOLVER
-        double objective             = m_objective.evaluate(a_MOVE);
-        double objective_improvement = m_objective.value() - objective;
+        const double OBJECTIVE =
+            m_is_defined_objective ? m_objective.evaluate(a_MOVE) * this->sign()
+                                   : 0.0;
 
-#else
-        double objective = 0.0;
-        double objective_improvement = 0.0;
-        if (m_is_defined_objective) {
-            objective = m_objective.evaluate(a_MOVE) * this->sign();
-            objective_improvement =
-                m_objective.value() * this->sign() - objective;
-        }
-#endif
+        const double OBJECTIVE_IMPROVEMENT =
+            m_objective.value() * this->sign() - OBJECTIVE;
+
         const double GLOBAL_PENALTY =
             total_violation * m_global_penalty_coefficient;
 
-        a_score_ptr->objective                  = objective;
-        a_score_ptr->objective_improvement      = objective_improvement;
+        a_score_ptr->objective                  = OBJECTIVE;
+        a_score_ptr->objective_improvement      = OBJECTIVE_IMPROVEMENT;
         a_score_ptr->total_violation            = total_violation;
         a_score_ptr->local_penalty              = local_penalty;
         a_score_ptr->global_penalty             = GLOBAL_PENALTY;
-        a_score_ptr->local_augmented_objective  = objective + local_penalty;
-        a_score_ptr->global_augmented_objective = objective + GLOBAL_PENALTY;
+        a_score_ptr->local_augmented_objective  = OBJECTIVE + local_penalty;
+        a_score_ptr->global_augmented_objective = OBJECTIVE + GLOBAL_PENALTY;
         a_score_ptr->is_feasible = !(total_violation > constant::EPSILON);
         a_score_ptr->is_objective_improvable =
-            objective_improvement > constant::EPSILON;
+            OBJECTIVE_IMPROVEMENT > constant::EPSILON;
         a_score_ptr->is_feasibility_improvable = is_feasibility_improvable;
     }
 
@@ -2990,32 +2966,26 @@ class Model {
             is_feasibility_improvable |= violation_diff < -constant::EPSILON;
         }
 
-#ifdef _PRINTEMPS_MPS_SOLVER
-        double objective             = m_objective.evaluate(a_MOVE);
-        double objective_improvement = m_objective.value() - objective;
+        const double OBJECTIVE =
+            m_is_defined_objective ? m_objective.evaluate(a_MOVE) * this->sign()
+                                   : 0.0;
 
-#else
-        double objective = 0.0;
-        double objective_improvement = 0.0;
-        if (m_is_defined_objective) {
-            objective = m_objective.evaluate(a_MOVE) * this->sign();
-            objective_improvement =
-                m_objective.value() * this->sign() - objective;
-        }
-#endif
+        const double OBJECTIVE_IMPROVEMENT =
+            m_objective.value() * this->sign() - OBJECTIVE;
+
         const double GLOBAL_PENALTY =
             total_violation * m_global_penalty_coefficient;
 
-        a_score_ptr->objective                  = objective;
-        a_score_ptr->objective_improvement      = objective_improvement;
+        a_score_ptr->objective                  = OBJECTIVE;
+        a_score_ptr->objective_improvement      = OBJECTIVE_IMPROVEMENT;
         a_score_ptr->total_violation            = total_violation;
         a_score_ptr->local_penalty              = local_penalty;
         a_score_ptr->global_penalty             = GLOBAL_PENALTY;
-        a_score_ptr->local_augmented_objective  = objective + local_penalty;
-        a_score_ptr->global_augmented_objective = objective + GLOBAL_PENALTY;
+        a_score_ptr->local_augmented_objective  = OBJECTIVE + local_penalty;
+        a_score_ptr->global_augmented_objective = OBJECTIVE + GLOBAL_PENALTY;
         a_score_ptr->is_feasible = !(total_violation > constant::EPSILON);
         a_score_ptr->is_objective_improvable =
-            objective_improvement > constant::EPSILON;
+            OBJECTIVE_IMPROVEMENT > constant::EPSILON;
         a_score_ptr->is_feasibility_improvable = is_feasibility_improvable;
     }
 
@@ -3515,6 +3485,8 @@ class Model {
             T_Expression>;
 
         VariableMap variable_ptrs;
+
+        m_is_minimization = a_MPS.is_minimization;
 
         auto &variable_proxy =
             this->create_variables("variables", a_MPS.variables.size());
@@ -4070,6 +4042,11 @@ class Model {
     }
 
     /*************************************************************************/
+    inline void set_is_minimization(const bool a_IS_MINIMIZATION) {
+        m_is_minimization = a_IS_MINIMIZATION;
+    }
+
+    /*************************************************************************/
     inline bool is_minimization(void) const {
         return m_is_minimization;
     }
@@ -4078,7 +4055,7 @@ class Model {
     inline double sign(void) const {
         /**
          * In this program, maximization problems are solved as minimization
-         * problems by nagating the objective function values. This method
+         * problems by negating the objective function values. This method
          * is used to show objective function values for output.
          */
         return m_is_minimization ? 1.0 : -1.0;

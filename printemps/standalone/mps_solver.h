@@ -14,6 +14,8 @@ struct MPSSolverConstant {
     static constexpr bool DEFAULT_EXTRACT_FLIPPABLE_VARIABLE_PAIRS = false;
     static constexpr bool DEFAULT_INCLUDE_MPS_LOADING_TIME         = false;
     static constexpr bool DEFAULT_EXPORT_JSON_INSTANCE             = false;
+    static constexpr bool DEFAULT_IS_MINIMIZATION_EXPLICIT         = false;
+    static constexpr bool DEFAULT_IS_MAXIMIZATION_EXPLICIT         = false;
 };
 
 /*****************************************************************************/
@@ -31,6 +33,8 @@ class MPSSolver {
     bool        m_extract_flippable_variable_pairs;
     bool        m_include_mps_loading_time;
     bool        m_export_json_instance;
+    bool        m_is_minimization_explicit;
+    bool        m_is_maximization_explicit;
 
     printemps::model::IPModel m_model;
     printemps::option::Option m_option;
@@ -57,6 +61,8 @@ class MPSSolver {
                   << "[--extract-flippable-variable-pairs] "
                   << "[--include-mps-loading-time] "
                   << "[--export-json-instance] "
+                  << "[--minimize] "
+                  << "[--maximize] "
                   << "mps_file" << std::endl;
         std::cout << std::endl;
         std::cout  //
@@ -103,6 +109,14 @@ class MPSSolver {
             << "  --export-json-instance: Export the target instance as JSON "
                "format."
             << std::endl;
+        std::cout  //
+            << "  --minimization: Minimize the objective function value "
+               "regardless of the settings in the MPS file."
+            << std::endl;
+        std::cout  //
+            << "  --maximization: Maximize the objective function value "
+               "regardless of the settings in the MPS file."
+            << std::endl;
     }
 
    public:
@@ -136,6 +150,10 @@ class MPSSolver {
             MPSSolverConstant::DEFAULT_INCLUDE_MPS_LOADING_TIME;
         m_export_json_instance =
             MPSSolverConstant::DEFAULT_EXPORT_JSON_INSTANCE;
+        m_is_minimization_explicit =
+            MPSSolverConstant::DEFAULT_IS_MINIMIZATION_EXPLICIT;
+        m_is_maximization_explicit =
+            MPSSolverConstant::DEFAULT_IS_MAXIMIZATION_EXPLICIT;
 
         m_model.initialize();
         m_option.initialize();
@@ -179,6 +197,12 @@ class MPSSolver {
             } else if (args[i] == "--export-json-instance") {
                 m_export_json_instance = true;
                 i++;
+            } else if (args[i] == "--minimization") {
+                m_is_minimization_explicit = true;
+                i++;
+            } else if (args[i] == "--maximization") {
+                m_is_maximization_explicit = true;
+                i++;
             } else {
                 m_mps_file_name = args[i];
                 i++;
@@ -216,12 +240,28 @@ class MPSSolver {
         }
 
         /**
+         * Minimization and maximization cannot be specified at the same time.
+         */
+        if (m_is_minimization_explicit && m_is_maximization_explicit) {
+            throw std::logic_error(printemps::utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "The flags --minimization and --maximization cannot be used "
+                "simultaneously."));
+        }
+
+        /**
          * Read the specified MPS file and convert to the model.
          */
         {
             printemps::mps::MPS mps(m_mps_file_name);
             m_model.import_mps(mps, m_accept_continuous_variables);
             m_model.set_name(printemps::utility::base_name(m_mps_file_name));
+
+            if (m_is_minimization_explicit) {
+                m_model.set_is_minimization(true);
+            } else if (m_is_maximization_explicit) {
+                m_model.set_is_minimization(false);
+            }
         }
 
         /**

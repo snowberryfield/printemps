@@ -27,6 +27,8 @@ struct MPS {
     int number_of_equal_constraints;
     int number_of_greater_constraints;
 
+    bool is_minimization;
+
     /*************************************************************************/
     MPS(void) {
         this->initialize();
@@ -52,6 +54,8 @@ struct MPS {
         this->number_of_lesser_constraints  = 0;
         this->number_of_equal_constraints   = 0;
         this->number_of_greater_constraints = 0;
+
+        this->is_minimization = true;
     }
 
     /*************************************************************************/
@@ -106,8 +110,15 @@ struct MPS {
                 continue;
             }
 
+            if (items.front().front() == '*') {
+                continue;
+            }
+
             if (items.front() == "NAME") {
                 read_mode = MPSReadMode::Name;
+            } else if (items.front() == "OBJSENSE" && ITEMS_SIZE == 1) {
+                read_mode = MPSReadMode::Objsense;
+                continue;
             } else if (items.front() == "ROWS" && ITEMS_SIZE == 1) {
                 read_mode = MPSReadMode::Rows;
                 continue;
@@ -137,6 +148,34 @@ struct MPS {
                             "section."));
                     } else {
                         this->name = items[1];
+                    }
+                    break;
+                }
+                case MPSReadMode::Objsense: {
+                    if (ITEMS_SIZE > 1) {
+                        throw std::logic_error(utility::format_error_location(
+                            __FILE__, __LINE__, __func__,
+                            "The MPS file has something wrong in OBJSENSE "
+                            "section."));
+                    } else {
+                        if (items.front() == "MIN" ||
+                            items.front() == "MINIMIZE" ||
+                            items.front() == "min" ||
+                            items.front() == "minimize") {
+                            this->is_minimization = true;
+                        } else if (items.front() == "MAX" ||
+                                   items.front() == "MAXIMIZE" ||
+                                   items.front() == "max" ||
+                                   items.front() == "maximize") {
+                            this->is_minimization = false;
+                        } else {
+                            throw std::logic_error(
+                                utility::format_error_location(
+                                    __FILE__, __LINE__, __func__,
+                                    "The MPS file has something wrong in "
+                                    "OBJSENSE "
+                                    "section."));
+                        }
                     }
                     break;
                 }
