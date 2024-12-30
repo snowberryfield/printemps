@@ -27,14 +27,14 @@ class UnionFind {
     }
 
     /*************************************************************************/
-    void initialize(void) {
+    inline void initialize(void) {
         m_parents.clear();
         m_has_parent.clear();
         m_sizes.clear();
     }
 
     /*************************************************************************/
-    void setup(const std::unordered_set<T> &a_ELEMENTS) {
+    inline void setup(const std::unordered_set<T> &a_ELEMENTS) {
         for (const auto &element : a_ELEMENTS) {
             m_parents[element]    = element;
             m_has_parent[element] = false;
