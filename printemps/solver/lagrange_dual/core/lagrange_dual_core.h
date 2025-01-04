@@ -200,7 +200,7 @@ class LagrangeDualCore {
             color_current_feasible_end.c_str(),
             INCUMBENT_SOLUTION_SCORE.objective * SIGN,
             color_incumbent_feasible_begin.c_str(),
-            std::max(INCUMBENT_SOLUTION_SCORE.total_violation, 0.0) * SIGN,
+            std::max(INCUMBENT_SOLUTION_SCORE.total_violation, 0.0),
             color_incumbent_feasible_end.c_str());
     }
 
@@ -285,7 +285,7 @@ class LagrangeDualCore {
             INCUMBENT_SOLUTION_SCORE.objective * SIGN,
             color_incumbent_update_end.c_str(),
             color_incumbent_feasible_begin.c_str(),
-            std::max(INCUMBENT_SOLUTION_SCORE.total_violation, 0.0) * SIGN,
+            std::max(INCUMBENT_SOLUTION_SCORE.total_violation, 0.0),
             color_incumbent_feasible_end.c_str());
     }
 

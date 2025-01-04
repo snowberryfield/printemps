@@ -158,15 +158,19 @@ struct MPS {
                             "The MPS file has something wrong in OBJSENSE "
                             "section."));
                     } else {
-                        if (items.front() == "MIN" ||
+                        if (items.front() == "MINIMIZATION" ||
                             items.front() == "MINIMIZE" ||
-                            items.front() == "min" ||
-                            items.front() == "minimize") {
+                            items.front() == "MIN" ||
+                            items.front() == "minimization" ||
+                            items.front() == "minimize" ||
+                            items.front() == "min") {
                             this->is_minimization = true;
-                        } else if (items.front() == "MAX" ||
+                        } else if (items.front() == "MAXIMIZATION" ||
                                    items.front() == "MAXIMIZE" ||
-                                   items.front() == "max" ||
-                                   items.front() == "maximize") {
+                                   items.front() == "MAX" ||
+                                   items.front() == "maximization" ||
+                                   items.front() == "maximize" ||
+                                   items.front() == "max") {
                             this->is_minimization = false;
                         } else {
                             throw std::logic_error(
