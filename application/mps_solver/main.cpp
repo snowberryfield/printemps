@@ -6,7 +6,7 @@
 #define _PRINTEMPS_STYLING
 #include <printemps.h>
 
-int main(int argc, char *argv[]) {
+int main(const int argc, const char *argv[]) {
     printemps::standalone::MPSSolver(argc, argv).run();
     return 0;
 }
