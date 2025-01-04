@@ -178,7 +178,7 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     /*************************************************************************/
     inline void set_value(T_Variable a_VALUE) {
         if (m_value != a_VALUE && m_is_fixed) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "A fixed variable was attempted to be changed."));
         }
@@ -211,7 +211,7 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     inline void set_bound(const T_Variable a_LOWER_BOUND,
                           const T_Variable a_UPPER_BOUND) {
         if (a_LOWER_BOUND > a_UPPER_BOUND) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The specified lower bound is bigger than the specified upper "
                 "bound. lower bound: " +
@@ -748,7 +748,7 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     inline Variable<T_Variable, T_Expression> &operator=(
         const T_Variable a_VALUE) {
         if (m_value != a_VALUE && m_is_fixed) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "A fixed variable was attempted to be changed."));
         }

@@ -290,8 +290,8 @@ TEST_F(TestConstraintProxy, one_dimensional_set_name) {
 
     auto& constraint_proxy = model.create_constraints("c", 2);
 
-    ASSERT_THROW(constraint_proxy.set_name("_c"), std::logic_error);
-    ASSERT_THROW(constraint_proxy.name(), std::logic_error);
+    ASSERT_THROW(constraint_proxy.set_name("_c"), std::runtime_error);
+    ASSERT_THROW(constraint_proxy.name(), std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -370,8 +370,8 @@ TEST_F(TestConstraintProxy, one_dimensional_constraint_value) {
     model::Model<int, double> model;
     auto& constraint_proxy = model.create_constraints("c", 2);
 
-    ASSERT_THROW(constraint_proxy.constraint_value(), std::logic_error);
-    ASSERT_THROW(constraint_proxy.violation_value(), std::logic_error);
+    ASSERT_THROW(constraint_proxy.constraint_value(), std::runtime_error);
+    ASSERT_THROW(constraint_proxy.violation_value(), std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -450,17 +450,17 @@ TEST_F(TestConstraintProxy, one_dimensional_is_enabled) {
     model::Model<int, double> model;
     auto& constraint_proxy = model.create_constraints("e", 2);
     constraint_proxy.disable();
-    ASSERT_THROW(constraint_proxy.is_enabled(), std::logic_error);
+    ASSERT_THROW(constraint_proxy.is_enabled(), std::runtime_error);
     EXPECT_FALSE(constraint_proxy[0].is_enabled());
     EXPECT_FALSE(constraint_proxy[1].is_enabled());
 
     constraint_proxy.enable();
-    ASSERT_THROW(constraint_proxy.is_enabled(), std::logic_error);
+    ASSERT_THROW(constraint_proxy.is_enabled(), std::runtime_error);
     EXPECT_TRUE(constraint_proxy[0].is_enabled());
     EXPECT_TRUE(constraint_proxy[1].is_enabled());
 
     constraint_proxy.disable();
-    ASSERT_THROW(constraint_proxy.is_enabled(), std::logic_error);
+    ASSERT_THROW(constraint_proxy.is_enabled(), std::runtime_error);
     EXPECT_FALSE(constraint_proxy[0].is_enabled());
     EXPECT_FALSE(constraint_proxy[1].is_enabled());
 }
@@ -537,7 +537,7 @@ TEST_F(TestConstraintProxy, one_dimensional_operator_equal_arg_constraint) {
     auto sensitivity = random_integer();
     auto target      = random_integer();
     ASSERT_THROW(constraint_proxy = (sensitivity * variable == target),
-                 std::logic_error);
+                 std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -562,8 +562,8 @@ TEST_F(TestConstraintProxy, two_dimensional_set_name) {
 
     auto& constraint_proxy = model.create_constraints("c", {2, 3});
 
-    ASSERT_THROW(constraint_proxy.set_name("_c"), std::logic_error);
-    ASSERT_THROW(constraint_proxy.name(), std::logic_error);
+    ASSERT_THROW(constraint_proxy.set_name("_c"), std::runtime_error);
+    ASSERT_THROW(constraint_proxy.name(), std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -645,8 +645,8 @@ TEST_F(TestConstraintProxy, two_dimensional_constraint_value) {
     model::Model<int, double> model;
     auto& constraint_proxy = model.create_constraints("c", {2, 3});
 
-    ASSERT_THROW(constraint_proxy.constraint_value(), std::logic_error);
-    ASSERT_THROW(constraint_proxy.violation_value(), std::logic_error);
+    ASSERT_THROW(constraint_proxy.constraint_value(), std::runtime_error);
+    ASSERT_THROW(constraint_proxy.violation_value(), std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -725,17 +725,17 @@ TEST_F(TestConstraintProxy, two_dimensional_is_enabled) {
     model::Model<int, double> model;
     auto& constraint_proxy = model.create_constraints("c", {2, 3});
     constraint_proxy.disable();
-    ASSERT_THROW(constraint_proxy.is_enabled(), std::logic_error);
+    ASSERT_THROW(constraint_proxy.is_enabled(), std::runtime_error);
     EXPECT_FALSE(constraint_proxy[0].is_enabled());
     EXPECT_FALSE(constraint_proxy[2 * 3 - 1].is_enabled());
 
     constraint_proxy.enable();
-    ASSERT_THROW(constraint_proxy.is_enabled(), std::logic_error);
+    ASSERT_THROW(constraint_proxy.is_enabled(), std::runtime_error);
     EXPECT_TRUE(constraint_proxy[0].is_enabled());
     EXPECT_TRUE(constraint_proxy[2 * 3 - 1].is_enabled());
 
     constraint_proxy.disable();
-    ASSERT_THROW(constraint_proxy.is_enabled(), std::logic_error);
+    ASSERT_THROW(constraint_proxy.is_enabled(), std::runtime_error);
     EXPECT_FALSE(constraint_proxy[0].is_enabled());
     EXPECT_FALSE(constraint_proxy[2 * 3 - 1].is_enabled());
 }
@@ -816,7 +816,7 @@ TEST_F(TestConstraintProxy, two_dimensional_operator_equal_arg_constraint) {
     auto sensitivity = random_integer();
     auto target      = random_integer();
     ASSERT_THROW(constraint_proxy = (sensitivity * variable == target),
-                 std::logic_error);
+                 std::runtime_error);
 }
 
 /*****************************************************************************/

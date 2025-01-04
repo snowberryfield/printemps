@@ -113,7 +113,7 @@ struct Vector {
     /*************************************************************************/
     inline Vector operator+=(const Vector& a_VECTOR) {
         if (this->size() != a_VECTOR.size()) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "Vector sizes are inconsistent."));
         }
@@ -139,7 +139,7 @@ struct Vector {
     /*************************************************************************/
     inline Vector operator-=(const Vector& a_VECTOR) {
         if (this->size() != a_VECTOR.size()) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "Vector sizes are inconsistent."));
         }
@@ -175,7 +175,7 @@ struct Vector {
                       const Vector& a_UPPER_BOUNDS) {
         if (this->size() != a_LOWER_BOUNDS.size() ||
             this->size() != a_UPPER_BOUNDS.size()) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "Vector sizes are inconsistent."));
         }
@@ -214,7 +214,7 @@ struct Vector {
     /*************************************************************************/
     inline double dot(const Vector& a_VECTOR) const {
         if (this->size() != a_VECTOR.size()) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "Vector sizes are inconsistent."));
         }
@@ -233,7 +233,7 @@ struct Vector {
     /*************************************************************************/
     inline void learn(const Vector& a_VECTOR, const double a_LEARNING_RATE) {
         if (this->size() != a_VECTOR.size()) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "Vector sizes are inconsistent."));
         }

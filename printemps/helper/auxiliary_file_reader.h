@@ -24,7 +24,7 @@ inline std::unordered_map<std::string, int> read_names_and_values(
 
         ifs.open(a_FILE_NAME.c_str());
         if (ifs.fail()) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "Cannot open the specified file: " + a_FILE_NAME));
         }
@@ -71,7 +71,7 @@ inline std::unordered_set<std::string> read_names(
 
         ifs.open(a_FILE_NAME.c_str());
         if (ifs.fail()) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "Cannot open the specified file: " + a_FILE_NAME));
         }
@@ -118,7 +118,7 @@ inline std::vector<std::pair<std::string, std::string>> read_name_pairs(
 
         ifs.open(a_FILE_NAME.c_str());
         if (ifs.fail()) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "Cannot open the specified file: " + a_FILE_NAME));
         }

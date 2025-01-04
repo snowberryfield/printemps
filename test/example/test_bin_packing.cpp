@@ -114,7 +114,7 @@ TEST_F(TestBinpacking, bin_packing) {
     auto result = solver::solve(&model, option);
     EXPECT_TRUE(result.solution.is_feasible());
 
-    ASSERT_THROW(solver::solve(&model, option), std::logic_error);
+    ASSERT_THROW(solver::solve(&model, option), std::runtime_error);
 }
 }  // namespace
 /*****************************************************************************/

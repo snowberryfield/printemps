@@ -74,7 +74,7 @@ struct MPS {
 
             ifs.open(a_FILE_NAME.c_str());
             if (ifs.fail()) {
-                throw std::logic_error(utility::format_error_location(
+                throw std::runtime_error(utility::format_error_location(
                     __FILE__, __LINE__, __func__,
                     "Cannot open the specified MPS file: " + a_FILE_NAME));
             }
@@ -142,7 +142,7 @@ struct MPS {
             switch (read_mode) {
                 case MPSReadMode::Name: {
                     if (ITEMS_SIZE < 2) {
-                        throw std::logic_error(utility::format_error_location(
+                        throw std::runtime_error(utility::format_error_location(
                             __FILE__, __LINE__, __func__,
                             "The MPS file has something wrong in NAME "
                             "section."));
@@ -153,7 +153,7 @@ struct MPS {
                 }
                 case MPSReadMode::Objsense: {
                     if (ITEMS_SIZE > 1) {
-                        throw std::logic_error(utility::format_error_location(
+                        throw std::runtime_error(utility::format_error_location(
                             __FILE__, __LINE__, __func__,
                             "The MPS file has something wrong in OBJSENSE "
                             "section."));
@@ -173,7 +173,7 @@ struct MPS {
                                    items.front() == "max") {
                             this->is_minimization = false;
                         } else {
-                            throw std::logic_error(
+                            throw std::runtime_error(
                                 utility::format_error_location(
                                     __FILE__, __LINE__, __func__,
                                     "The MPS file has something wrong in "
@@ -209,7 +209,7 @@ struct MPS {
                         this->constraint_names.push_back(name);
                         this->number_of_greater_constraints++;
                     } else {
-                        throw std::logic_error(utility::format_error_location(
+                        throw std::runtime_error(utility::format_error_location(
                             __FILE__, __LINE__, __func__,
                             "The MPS file has something wrong in ROWS "
                             "section."));
@@ -218,7 +218,7 @@ struct MPS {
                 }
                 case MPSReadMode::Columns: {
                     if (ITEMS_SIZE < 3) {
-                        throw std::logic_error(utility::format_error_location(
+                        throw std::runtime_error(utility::format_error_location(
                             __FILE__, __LINE__, __func__,
                             "The MPS file has something wrong in COLUMNS "
                             "section."));
@@ -247,7 +247,7 @@ struct MPS {
                                 this->constraints[expression_name]
                                     .sensitivities[name] = sensitivity;
                             } else {
-                                throw std::logic_error(
+                                throw std::runtime_error(
                                     utility::format_error_location(
                                         __FILE__, __LINE__, __func__,
                                         "An undefined constraint or objective "
@@ -267,7 +267,7 @@ struct MPS {
                 }
                 case MPSReadMode::Rhs: {
                     if (ITEMS_SIZE < 3) {
-                        throw std::logic_error(utility::format_error_location(
+                        throw std::runtime_error(utility::format_error_location(
                             __FILE__, __LINE__, __func__,
                             "The MPS file has something wrong in RHS "
                             "section."));
@@ -288,7 +288,7 @@ struct MPS {
                      * https://www.ibm.com/support/knowledgecenter/vi/SSSA5P_20.1.0/ilog.odms.cplex.help/CPLEX/FileFormats/topics/MPS_records.html
                      */
                     if (ITEMS_SIZE < 3) {
-                        throw std::logic_error(utility::format_error_location(
+                        throw std::runtime_error(utility::format_error_location(
                             __FILE__, __LINE__, __func__,
                             "The MPS file has something wrong in RANGES "
                             "section."));
@@ -334,7 +334,7 @@ struct MPS {
                                 break;
                             }
                             default: {
-                                throw std::logic_error(
+                                throw std::runtime_error(
                                     utility::format_error_location(
                                         __FILE__, __LINE__, __func__,
                                         "The MPS file has something wrong in "
@@ -349,7 +349,7 @@ struct MPS {
                 }
                 case MPSReadMode::Bounds: {
                     if (ITEMS_SIZE < 3) {
-                        throw std::logic_error(utility::format_error_location(
+                        throw std::runtime_error(utility::format_error_location(
                             __FILE__, __LINE__, __func__,
                             "The MPS file has something wrong in BOUNDS "
                             "section."));
@@ -358,7 +358,7 @@ struct MPS {
                     category = items.front();
                     name     = items[2];
                     if (this->variables.find(name) == this->variables.end()) {
-                        throw std::logic_error(utility::format_error_location(
+                        throw std::runtime_error(utility::format_error_location(
                             __FILE__, __LINE__, __func__,
                             "An undefined variable name is specified in RHS "
                             "section."));
@@ -457,7 +457,7 @@ struct MPS {
         }
 
         if (!is_valid) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__, "The MPS file is not valid."));
         }
 

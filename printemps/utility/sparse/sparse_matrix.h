@@ -210,7 +210,7 @@ struct SparseMatrix {
     /*************************************************************************/
     inline void dot(Vector* a_result_ptr, const Vector& a_X) const {
         if (this->number_of_columns != static_cast<int>(a_X.size())) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The matrix and vector sizes are inconsistent."));
         }
@@ -241,7 +241,7 @@ struct SparseMatrix {
     inline void scale_row(SparseMatrix*   a_result_ptr,
                           const Diagonal& a_DIAGONAL) const {
         if (this->number_of_rows != static_cast<int>(a_DIAGONAL.size())) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The matrix sizes are inconsistent."));
         }
@@ -266,7 +266,7 @@ struct SparseMatrix {
     inline void scale_column(SparseMatrix*   a_result_ptr,
                              const Diagonal& a_DIAGONAL) const {
         if (this->number_of_columns != static_cast<int>(a_DIAGONAL.size())) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The matrix sizes are inconsistent."));
         }

@@ -108,7 +108,7 @@ class TabuSearchControllerLogger {
     /*************************************************************************/
     void write_log(void) {
         if (!m_ofstream.is_open()) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "This log file " + m_file_name + " is not opened."));
         }

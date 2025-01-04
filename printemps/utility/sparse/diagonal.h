@@ -66,7 +66,7 @@ struct Diagonal {
     /*************************************************************************/
     inline Diagonal operator*=(const Diagonal& a_DIAGONAL) {
         if (this->size() != a_DIAGONAL.size()) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "Matrix sizes are inconsistent."));
         }
@@ -82,7 +82,7 @@ struct Diagonal {
     /*************************************************************************/
     inline void dot(Vector* a_result_ptr, const Vector& a_VECTOR) const {
         if (this->size() != a_VECTOR.size()) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "Matrix and vector sizes are inconsistent."));
         }
@@ -98,7 +98,7 @@ struct Diagonal {
     /*************************************************************************/
     inline Vector dot(const Vector& a_VECTOR) const {
         if (this->size() != a_VECTOR.size()) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "Matrix and vector sizes are inconsistent."));
         }
@@ -111,7 +111,7 @@ struct Diagonal {
     /*************************************************************************/
     inline void dot(Vector* a_result_ptr) const {
         if (this->size() != a_result_ptr->size()) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "Matrix and vector sizes are inconsistent."));
         }

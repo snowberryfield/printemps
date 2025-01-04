@@ -140,7 +140,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
     /*************************************************************************/
     inline T_Variable value(void) const {
         if (this->number_of_elements() != 1) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of elements is not one."));
         }
@@ -150,7 +150,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
     /*************************************************************************/
     inline void set_value(T_Variable a_VALUE) {
         if (this->number_of_elements() != 1) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of elements is not one."));
         }
@@ -160,7 +160,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
     /*************************************************************************/
     inline T_Expression evaluate(void) const {
         if (this->number_of_elements() != 1) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of elements is not one."));
         }
@@ -171,7 +171,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
     inline T_Expression evaluate(
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const {
         if (this->number_of_elements() != 1) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of elements is not one."));
         }
@@ -181,7 +181,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
     /*************************************************************************/
     inline void fix(void) {
         if (this->number_of_elements() != 1) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of elements is not one."));
         }
@@ -191,7 +191,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
     /*************************************************************************/
     inline void unfix(void) {
         if (this->number_of_elements() != 1) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of elements is not one."));
         }
@@ -201,7 +201,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
     /*************************************************************************/
     inline bool is_fixed(void) const {
         if (this->number_of_elements() != 1) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of elements is not one."));
         }
@@ -211,7 +211,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
     /*************************************************************************/
     inline void fix_by(const T_Variable a_VALUE) {
         if (this->number_of_elements() != 1) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of elements is not one."));
         }
@@ -222,7 +222,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
     inline void set_bound(const T_Variable a_LOWER_BOUND,
                           const T_Variable a_UPPER_BOUND) {
         if (a_LOWER_BOUND > a_UPPER_BOUND) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The specified lower bound is bigger than the specified upper "
                 "bound. lower bound: " +
@@ -244,7 +244,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
     /*************************************************************************/
     inline T_Variable lower_bound(void) const {
         if (this->number_of_elements() != 1) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of elements is not one."));
         }
@@ -254,7 +254,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
     /*************************************************************************/
     inline T_Variable upper_bound(void) const {
         if (this->number_of_elements() != 1) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of elements is not one."));
         }
@@ -264,7 +264,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
     /*************************************************************************/
     inline bool has_bounds(void) const {
         if (this->number_of_elements() != 1) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of elements is not one."));
         }
@@ -274,7 +274,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
     /*************************************************************************/
     inline VariableSense sense(void) const {
         if (this->number_of_elements() != 1) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of elements is not one."));
         }
@@ -284,7 +284,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
     /*************************************************************************/
     inline void set_name(const std::string &a_NAME) {
         if (this->number_of_elements() != 1) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of elements is not one."));
         }
@@ -294,7 +294,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
     /*************************************************************************/
     inline const std::string &name(void) const {
         if (this->number_of_elements() != 1) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of elements is not one."));
         }
@@ -341,7 +341,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
     /*************************************************************************/
     inline Expression<T_Variable, T_Expression> to_expression(void) const {
         if (this->number_of_elements() != 1) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of elements is not one."));
         }
@@ -369,7 +369,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
         const int MULTI_DIMENSIONAL_INDEX_SIZE =
             a_MULTI_DIMENSIONAL_INDEX.size();
         if (this->number_of_dimensions() != MULTI_DIMENSIONAL_INDEX_SIZE) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of dimensions does not match."));
         }
@@ -418,14 +418,14 @@ class VariableProxy : public multi_array::AbstractMultiArray {
     inline Expression<T_Variable, T_Expression> dot(
         const T_Array &a_COEFFICIENTS) {
         if (this->number_of_dimensions() != 1) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of dimensions does not one."));
         }
 
         const int COEFFICIENTS_SIZE = a_COEFFICIENTS.size();
         if (this->number_of_elements() != COEFFICIENTS_SIZE) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of elements does not match."));
         }
@@ -452,14 +452,14 @@ class VariableProxy : public multi_array::AbstractMultiArray {
         const int MULTI_DIMENSIONAL_INDEX_SIZE =
             a_MULTI_DIMENSIONAL_INDEX.size();
         if (this->number_of_dimensions() != MULTI_DIMENSIONAL_INDEX_SIZE) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of dimensions does not match."));
         }
 
         if (std::count(a_MULTI_DIMENSIONAL_INDEX.begin(),
                        a_MULTI_DIMENSIONAL_INDEX.end(), Range::All) >= 2) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of specified Range::All is more than one."));
         }
@@ -490,7 +490,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
         }
 
         if (variable_ptrs.size() != a_COEFFICIENTS.size()) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "Number of elements does not match."));
         }
@@ -524,7 +524,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
     /*************************************************************************/
     inline Expression<T_Variable, T_Expression> operator+(void) const {
         if (this->number_of_elements() != 1) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of elements is not one."));
         }
@@ -534,7 +534,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
     /*************************************************************************/
     inline Expression<T_Variable, T_Expression> operator-(void) const {
         if (this->number_of_elements() != 1) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of elements is not one."));
         }
@@ -545,7 +545,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
     inline VariableProxy<T_Variable, T_Expression> &operator=(
         const T_Variable a_VALUE) {
         if (this->number_of_elements() != 1) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of elements is not one."));
         }
@@ -571,7 +571,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
         const int MULTI_DIMENSIONAL_INDEX_SIZE =
             a_MULTI_DIMENSIONAL_INDEX.size();
         if (this->number_of_dimensions() != MULTI_DIMENSIONAL_INDEX_SIZE) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of dimensions does not match."));
         }
@@ -587,7 +587,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
     inline const Variable<T_Variable, T_Expression> &operator()(
         const std::vector<int> &a_MULTI_DIMENSIONAL_INDEX) const {
         if (this->number_of_dimensions() != a_MULTI_DIMENSIONAL_INDEX.size()) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of dimensions does not match."));
         }

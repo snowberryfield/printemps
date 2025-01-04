@@ -84,9 +84,9 @@ TEST_F(TestValueProxy, scalar_values) {
     value_proxy.values(0) = value;
     EXPECT_EQ(value, value_proxy.values(0));
 
-    ASSERT_THROW(value_proxy.values(0, 1) = value, std::logic_error);
-    ASSERT_THROW(value_proxy.values(0, 1, 2) = value, std::logic_error);
-    ASSERT_THROW(value_proxy.values(0, 1, 2, 3) = value, std::logic_error);
+    ASSERT_THROW(value_proxy.values(0, 1) = value, std::runtime_error);
+    ASSERT_THROW(value_proxy.values(0, 1, 2) = value, std::runtime_error);
+    ASSERT_THROW(value_proxy.values(0, 1, 2, 3) = value, std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -128,9 +128,9 @@ TEST_F(TestValueProxy, scalar_operator_round_bracket) {
     value_proxy(0) = value;
     EXPECT_EQ(value, value_proxy(0));
 
-    ASSERT_THROW(value_proxy(0, 1) = value, std::logic_error);
-    ASSERT_THROW(value_proxy(0, 1, 2) = value, std::logic_error);
-    ASSERT_THROW(value_proxy(0, 1, 2, 3) = value, std::logic_error);
+    ASSERT_THROW(value_proxy(0, 1) = value, std::runtime_error);
+    ASSERT_THROW(value_proxy(0, 1, 2) = value, std::runtime_error);
+    ASSERT_THROW(value_proxy(0, 1, 2, 3) = value, std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -163,7 +163,7 @@ TEST_F(TestValueProxy, one_dimensional_value) {
     multi_array::ValueProxy<int> value_proxy(ID, 2);
 
     auto value = random_integer();
-    ASSERT_THROW(value_proxy.value() = value, std::logic_error);
+    ASSERT_THROW(value_proxy.value() = value, std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -178,9 +178,9 @@ TEST_F(TestValueProxy, one_dimensional_values) {
     EXPECT_EQ(value_0, value_proxy.values(0));
     EXPECT_EQ(value_1, value_proxy.values(1));
 
-    ASSERT_THROW(value_proxy.values(0, 1) = value_0, std::logic_error);
-    ASSERT_THROW(value_proxy.values(0, 1, 2) = value_0, std::logic_error);
-    ASSERT_THROW(value_proxy.values(0, 1, 2, 3) = value_0, std::logic_error);
+    ASSERT_THROW(value_proxy.values(0, 1) = value_0, std::runtime_error);
+    ASSERT_THROW(value_proxy.values(0, 1, 2) = value_0, std::runtime_error);
+    ASSERT_THROW(value_proxy.values(0, 1, 2, 3) = value_0, std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -232,9 +232,9 @@ TEST_F(TestValueProxy, one_dimensional_operator_round_bracket) {
     EXPECT_EQ(value_0, value_proxy(0));
     EXPECT_EQ(value_1, value_proxy(1));
 
-    ASSERT_THROW(value_proxy(0, 1) = value_0, std::logic_error);
-    ASSERT_THROW(value_proxy(0, 1, 2) = value_0, std::logic_error);
-    ASSERT_THROW(value_proxy(0, 1, 2, 3) = value_0, std::logic_error);
+    ASSERT_THROW(value_proxy(0, 1) = value_0, std::runtime_error);
+    ASSERT_THROW(value_proxy(0, 1, 2) = value_0, std::runtime_error);
+    ASSERT_THROW(value_proxy(0, 1, 2, 3) = value_0, std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -243,7 +243,7 @@ TEST_F(TestValueProxy, one_dimensional_operator_equal) {
     multi_array::ValueProxy<int> value_proxy(ID, 2);
 
     auto value = random_integer();
-    ASSERT_THROW(value_proxy = value, std::logic_error);
+    ASSERT_THROW(value_proxy = value, std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -268,7 +268,7 @@ TEST_F(TestValueProxy, two_dimensional_value) {
     multi_array::ValueProxy<int> value_proxy(ID, {2, 3});
 
     auto value = random_integer();
-    ASSERT_THROW(value_proxy.value() = value, std::logic_error);
+    ASSERT_THROW(value_proxy.value() = value, std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -283,9 +283,9 @@ TEST_F(TestValueProxy, two_dimensional_values) {
     EXPECT_EQ(value_0, value_proxy.values(0, 0));
     EXPECT_EQ(value_1, value_proxy.values(1, 2));
 
-    ASSERT_THROW(value_proxy.values(0) = value_0, std::logic_error);
-    ASSERT_THROW(value_proxy.values(0, 1, 2) = value_0, std::logic_error);
-    ASSERT_THROW(value_proxy.values(0, 1, 2, 3) = value_0, std::logic_error);
+    ASSERT_THROW(value_proxy.values(0) = value_0, std::runtime_error);
+    ASSERT_THROW(value_proxy.values(0, 1, 2) = value_0, std::runtime_error);
+    ASSERT_THROW(value_proxy.values(0, 1, 2, 3) = value_0, std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -337,9 +337,9 @@ TEST_F(TestValueProxy, two_dimensional_operator_round_bracket) {
     EXPECT_EQ(value_0, value_proxy(0, 0));
     EXPECT_EQ(value_1, value_proxy(1, 2));
 
-    ASSERT_THROW(value_proxy(0) = value_0, std::logic_error);
-    ASSERT_THROW(value_proxy(0, 1, 2) = value_0, std::logic_error);
-    ASSERT_THROW(value_proxy(0, 1, 2, 3) = value_0, std::logic_error);
+    ASSERT_THROW(value_proxy(0) = value_0, std::runtime_error);
+    ASSERT_THROW(value_proxy(0, 1, 2) = value_0, std::runtime_error);
+    ASSERT_THROW(value_proxy(0, 1, 2, 3) = value_0, std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -348,7 +348,7 @@ TEST_F(TestValueProxy, two_dimensional_operator_equal) {
     multi_array::ValueProxy<int> value_proxy(ID, {2, 3});
 
     auto value = random_integer();
-    ASSERT_THROW(value_proxy = value, std::logic_error);
+    ASSERT_THROW(value_proxy = value, std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -375,7 +375,7 @@ TEST_F(TestValueProxy, three_dimensional_value) {
     multi_array::ValueProxy<int> value_proxy(ID, {2, 3, 4});
 
     auto value = random_integer();
-    ASSERT_THROW(value_proxy.value() = value, std::logic_error);
+    ASSERT_THROW(value_proxy.value() = value, std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -390,9 +390,9 @@ TEST_F(TestValueProxy, three_dimensional_values) {
     EXPECT_EQ(value_0, value_proxy(0, 0, 0));
     EXPECT_EQ(value_1, value_proxy(1, 2, 3));
 
-    ASSERT_THROW(value_proxy.values(0) = value_0, std::logic_error);
-    ASSERT_THROW(value_proxy.values(0, 1) = value_0, std::logic_error);
-    ASSERT_THROW(value_proxy.values(0, 1, 2, 3) = value_0, std::logic_error);
+    ASSERT_THROW(value_proxy.values(0) = value_0, std::runtime_error);
+    ASSERT_THROW(value_proxy.values(0, 1) = value_0, std::runtime_error);
+    ASSERT_THROW(value_proxy.values(0, 1, 2, 3) = value_0, std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -407,9 +407,9 @@ TEST_F(TestValueProxy, three_dimensional_operator_round_bracket) {
     EXPECT_EQ(value_0, value_proxy(0, 0, 0));
     EXPECT_EQ(value_1, value_proxy(1, 2, 3));
 
-    ASSERT_THROW(value_proxy(0) = value_0, std::logic_error);
-    ASSERT_THROW(value_proxy(0, 1) = value_0, std::logic_error);
-    ASSERT_THROW(value_proxy(0, 1, 2, 3) = value_0, std::logic_error);
+    ASSERT_THROW(value_proxy(0) = value_0, std::runtime_error);
+    ASSERT_THROW(value_proxy(0, 1) = value_0, std::runtime_error);
+    ASSERT_THROW(value_proxy(0, 1, 2, 3) = value_0, std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -439,7 +439,7 @@ TEST_F(TestValueProxy, four_dimensional_value) {
     multi_array::ValueProxy<int> value_proxy(ID, {2, 3, 4, 5});
 
     auto value = random_integer();
-    ASSERT_THROW(value_proxy.value() = value, std::logic_error);
+    ASSERT_THROW(value_proxy.value() = value, std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -454,9 +454,9 @@ TEST_F(TestValueProxy, four_dimensional_values) {
     EXPECT_EQ(value_0, value_proxy.values(0, 0, 0, 0));
     EXPECT_EQ(value_1, value_proxy.values(1, 2, 3, 4));
 
-    ASSERT_THROW(value_proxy.values(0) = value_0, std::logic_error);
-    ASSERT_THROW(value_proxy.values(0, 1) = value_0, std::logic_error);
-    ASSERT_THROW(value_proxy.values(0, 1, 2) = value_0, std::logic_error);
+    ASSERT_THROW(value_proxy.values(0) = value_0, std::runtime_error);
+    ASSERT_THROW(value_proxy.values(0, 1) = value_0, std::runtime_error);
+    ASSERT_THROW(value_proxy.values(0, 1, 2) = value_0, std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -484,9 +484,9 @@ TEST_F(TestValueProxy, four_dimensional_operator_round_bracket) {
     EXPECT_EQ(value_0, value_proxy(0, 0, 0, 0));
     EXPECT_EQ(value_1, value_proxy(1, 2, 3, 4));
 
-    ASSERT_THROW(value_proxy(0) = value_0, std::logic_error);
-    ASSERT_THROW(value_proxy(0, 1) = value_0, std::logic_error);
-    ASSERT_THROW(value_proxy(0, 1, 2) = value_0, std::logic_error);
+    ASSERT_THROW(value_proxy(0) = value_0, std::runtime_error);
+    ASSERT_THROW(value_proxy(0, 1) = value_0, std::runtime_error);
+    ASSERT_THROW(value_proxy(0, 1, 2) = value_0, std::runtime_error);
 }
 
 }  // namespace

@@ -59,13 +59,13 @@ class Verifier {
         utility::print_message("Verifying the problem...", a_IS_ENABLED_PRINT);
 
         if (m_model_ptr->variable_proxies().size() == 0) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__, "No variables are defined."));
         }
 
         if (m_model_ptr->constraint_proxies().size() == 0 &&
             !m_model_ptr->is_defined_objective()) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "Neither objective nor constraint functions are defined."));
         }
@@ -123,7 +123,7 @@ class Verifier {
              * Return logic error if there is an invalid fixed variable.
              */
             if (fixed_invalid_variable_ptrs.size() > 0) {
-                throw std::logic_error(utility::format_error_location(
+                throw std::runtime_error(utility::format_error_location(
                     __FILE__, __LINE__, __func__,
                     "There is an invalid fixed variable."));
             }
@@ -133,7 +133,7 @@ class Verifier {
              * selected variables.
              */
             if (fixed_selected_variable_ptrs.size() > 1) {
-                throw std::logic_error(utility::format_error_location(
+                throw std::runtime_error(utility::format_error_location(
                     __FILE__, __LINE__, __func__,
                     "There are more than one fixed selected variables."));
             }
@@ -145,7 +145,7 @@ class Verifier {
              */
             if (invalid_variable_ptrs.size() > 0) {
                 if (!a_IS_ENABLED_CORRECTION) {
-                    throw std::logic_error(utility::format_error_location(
+                    throw std::runtime_error(utility::format_error_location(
                         __FILE__, __LINE__, __func__,
                         "There is a variable of which initial value violates "
                         "binary constraint."));
@@ -168,7 +168,7 @@ class Verifier {
             if (fixed_selected_variable_ptrs.size() == 1) {
                 if (!a_IS_ENABLED_CORRECTION &&
                     selected_variable_ptrs.size() >= 2) {
-                    throw std::logic_error(utility::format_error_location(
+                    throw std::runtime_error(utility::format_error_location(
                         __FILE__, __LINE__, __func__,
                         "There are more than one selected variables."));
                 }
@@ -199,7 +199,7 @@ class Verifier {
              */
             else if (selected_variable_ptrs.size() > 1) {
                 if (!a_IS_ENABLED_CORRECTION) {
-                    throw std::logic_error(utility::format_error_location(
+                    throw std::runtime_error(utility::format_error_location(
                         __FILE__, __LINE__, __func__,
                         "There are more than one selected variables."));
                 }
@@ -242,7 +242,7 @@ class Verifier {
                 }
 
                 if (selected_variable_ptr == nullptr) {
-                    throw std::logic_error(utility::format_error_location(
+                    throw std::runtime_error(utility::format_error_location(
                         __FILE__, __LINE__, __func__,
                         "The initial value could not be modified for some "
                         "unknown reasons."));
@@ -273,7 +273,7 @@ class Verifier {
              */
             else if (selected_variable_ptrs.size() == 0) {
                 if (!a_IS_ENABLED_CORRECTION) {
-                    throw std::logic_error(utility::format_error_location(
+                    throw std::runtime_error(utility::format_error_location(
                         __FILE__, __LINE__, __func__,
                         "There is no selected variables."));
                 }
@@ -319,7 +319,7 @@ class Verifier {
                 }
 
                 if (selected_variable_ptr == nullptr) {
-                    throw std::logic_error(utility::format_error_location(
+                    throw std::runtime_error(utility::format_error_location(
                         __FILE__, __LINE__, __func__,
                         "The initial value could not be modified for some "
                         "unknown reasons."));
@@ -356,13 +356,13 @@ class Verifier {
                 continue;
             }
             if (variable_ptr->is_fixed()) {
-                throw std::logic_error(utility::format_error_location(
+                throw std::runtime_error(utility::format_error_location(
                     __FILE__, __LINE__, __func__,
                     "There is an invalid fixed variable."));
             }
 
             if (!a_IS_ENABLED_CORRECTION) {
-                throw std::logic_error(utility::format_error_location(
+                throw std::runtime_error(utility::format_error_location(
                     __FILE__, __LINE__, __func__,
                     "An initial value violates binary constraint."));
             }
@@ -398,13 +398,13 @@ class Verifier {
             }
 
             if (variable_ptr->is_fixed()) {
-                throw std::logic_error(utility::format_error_location(
+                throw std::runtime_error(utility::format_error_location(
                     __FILE__, __LINE__, __func__,
                     "There is an invalid fixed variable"));
             }
 
             if (!a_IS_ENABLED_CORRECTION) {
-                throw std::logic_error(utility::format_error_location(
+                throw std::runtime_error(utility::format_error_location(
                     __FILE__, __LINE__, __func__,
                     "An initial value violates the lower or upper bound "
                     "constraint."));
