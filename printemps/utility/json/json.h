@@ -70,7 +70,7 @@ struct JsonObject {
         if (this->body[INDEX].second.type() == typeid(T)) {
             return std::any_cast<T>(this->body[INDEX].second);
         } else {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The type of " + this->body[INDEX].first + " is wrong."));
         }
@@ -131,7 +131,7 @@ struct JsonArray {
         if (this->body[a_INDEX].type() == typeid(T)) {
             return std::any_cast<T>(this->body[a_INDEX]);
         } else {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__, "A cast error has occurred."));
         }
     }
@@ -695,8 +695,8 @@ inline JsonObject read_json_object(const std::string& a_FILE_NAME) {
     ifs.open(a_FILE_NAME.c_str());
 
     if (ifs.fail()) {
-        throw std::logic_error("Cannot open the specified file: " +
-                               a_FILE_NAME);
+        throw std::runtime_error("Cannot open the specified file: " +
+                                 a_FILE_NAME);
     }
 
     while (std::getline(ifs, buffer)) {
@@ -706,20 +706,20 @@ inline JsonObject read_json_object(const std::string& a_FILE_NAME) {
     ifs.close();
 
     if (close_count(str, '{', '}') != 0) {
-        throw std::logic_error("Specified JSON file is not valid: " +
-                               a_FILE_NAME);
+        throw std::runtime_error("Specified JSON file is not valid: " +
+                                 a_FILE_NAME);
     }
 
     if (close_count(str, '[', ']') != 0) {
-        throw std::logic_error("Specified JSON file is not valid: " +
-                               a_FILE_NAME);
+        throw std::runtime_error("Specified JSON file is not valid: " +
+                                 a_FILE_NAME);
     }
 
     const auto TOKENS = tokenize(str);
 
     if (TOKENS.front() != "{" || TOKENS.back() != "}") {
-        throw std::logic_error("Specified JSON file is not valid: " +
-                               a_FILE_NAME);
+        throw std::runtime_error("Specified JSON file is not valid: " +
+                                 a_FILE_NAME);
     }
 
     return parse_json_object(TOKENS);
@@ -734,8 +734,8 @@ inline JsonArray read_json_array(const std::string& a_FILE_NAME) {
     ifs.open(a_FILE_NAME.c_str());
 
     if (ifs.fail()) {
-        throw std::logic_error("Cannot open the specified file: " +
-                               a_FILE_NAME);
+        throw std::runtime_error("Cannot open the specified file: " +
+                                 a_FILE_NAME);
     }
 
     while (std::getline(ifs, buffer)) {
@@ -745,20 +745,20 @@ inline JsonArray read_json_array(const std::string& a_FILE_NAME) {
     ifs.close();
 
     if (close_count(str, '{', '}') != 0) {
-        throw std::logic_error("Specified JSON file is not valid: " +
-                               a_FILE_NAME);
+        throw std::runtime_error("Specified JSON file is not valid: " +
+                                 a_FILE_NAME);
     }
 
     if (close_count(str, '[', ']') != 0) {
-        throw std::logic_error("Specified JSON file is not valid: " +
-                               a_FILE_NAME);
+        throw std::runtime_error("Specified JSON file is not valid: " +
+                                 a_FILE_NAME);
     }
 
     const auto TOKENS = tokenize(str);
 
     if (TOKENS.front() != "[" || TOKENS.back() != "]") {
-        throw std::logic_error("Specified JSON file is not valid: " +
-                               a_FILE_NAME);
+        throw std::runtime_error("Specified JSON file is not valid: " +
+                                 a_FILE_NAME);
     }
 
     return parse_json_array(TOKENS);

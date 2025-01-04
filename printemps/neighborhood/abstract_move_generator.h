@@ -172,7 +172,7 @@ convert_to_binomial_constraints(
         auto &expression = constraint_ptr->expression();
 
         if (expression.sensitivities().size() != 2) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The constraint is not binomial."));
         }
@@ -209,7 +209,7 @@ convert_to_trinomial_constraints(
         auto &expression = constraint_ptr->expression();
 
         if (expression.sensitivities().size() != 3) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The constraint is not trinomial."));
         }

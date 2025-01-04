@@ -60,7 +60,7 @@ class MPSSolver {
          */
         if (!m_argparser.mutable_variable_file_name.empty() &&
             !m_argparser.fixed_variable_file_name.empty()) {
-            throw std::logic_error(printemps::utility::format_error_location(
+            throw std::runtime_error(printemps::utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The flags -m and -v cannot be used simultaneously."));
         }
@@ -70,7 +70,7 @@ class MPSSolver {
          */
         if (m_argparser.is_minimization_explicit &&
             m_argparser.is_maximization_explicit) {
-            throw std::logic_error(printemps::utility::format_error_location(
+            throw std::runtime_error(printemps::utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The flags --minimization and --maximization cannot be used "
                 "simultaneously."));

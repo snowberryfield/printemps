@@ -374,7 +374,7 @@ TEST_F(TestExpressionProxy, scalar_sum_arg_indices) {
     EXPECT_EQ(1, expression.evaluate());
 
     ASSERT_THROW(variable_proxy.sum({model_component::Range::All, 0}),
-                 std::logic_error);
+                 std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -427,7 +427,7 @@ TEST_F(TestExpressionProxy, scalar_dot_arg_indice_vector) {
 
     ASSERT_THROW(
         expression_proxy.dot({0, model_component::Range::All}, sensitivities),
-        std::logic_error);
+        std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -777,7 +777,7 @@ TEST_F(TestExpressionProxy, one_dimensional_sensitivities) {
     model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", 2);
     ASSERT_THROW(auto sensitivities = expression_proxy.sensitivities(),
-                 std::logic_error);
+                 std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -786,35 +786,35 @@ TEST_F(TestExpressionProxy, one_dimensional_constant_value) {
     auto& expression_proxy = model.create_expressions("e", 2);
     ASSERT_THROW(
         [[maybe_unused]] auto constant = expression_proxy.constant_value(),
-        std::logic_error);
+        std::runtime_error);
 }
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, one_dimensional_evaluate_arg_void) {
     model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", 2);
-    ASSERT_THROW(expression_proxy.evaluate(), std::logic_error);
+    ASSERT_THROW(expression_proxy.evaluate(), std::runtime_error);
 }
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, one_dimensional_evaluate_arg_move) {
     model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", 2);
-    ASSERT_THROW(expression_proxy.evaluate({}), std::logic_error);
+    ASSERT_THROW(expression_proxy.evaluate({}), std::runtime_error);
 }
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, one_dimensional_update_arg_void) {
     model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", 2);
-    ASSERT_THROW(expression_proxy.update(), std::logic_error);
+    ASSERT_THROW(expression_proxy.update(), std::runtime_error);
 }
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, one_dimensional_update_arg_move) {
     model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", 2);
-    ASSERT_THROW(expression_proxy.update({}), std::logic_error);
+    ASSERT_THROW(expression_proxy.update({}), std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -822,7 +822,7 @@ TEST_F(TestExpressionProxy, one_dimensional_value) {
     model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", 2);
     ASSERT_THROW([[maybe_unused]] auto value = expression_proxy.value(),
-                 std::logic_error);
+                 std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -831,8 +831,8 @@ TEST_F(TestExpressionProxy, one_dimensional_set_name) {
 
     auto& expression_proxy = model.create_expressions("e", 2);
 
-    ASSERT_THROW(expression_proxy.set_name("_e"), std::logic_error);
-    ASSERT_THROW(expression_proxy.name(), std::logic_error);
+    ASSERT_THROW(expression_proxy.set_name("_e"), std::runtime_error);
+    ASSERT_THROW(expression_proxy.name(), std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -965,7 +965,7 @@ TEST_F(TestExpressionProxy, one_dimensional_to_expression) {
     model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", 2);
     ASSERT_THROW(auto expression = expression_proxy.to_expression(),
-                 std::logic_error);
+                 std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -1015,7 +1015,7 @@ TEST_F(TestExpressionProxy, one_dimensional_sum_arg_indices) {
     EXPECT_EQ(1, expression.sensitivities().at(&(variable_proxy[1])));
     EXPECT_EQ(2, expression.evaluate());
     ASSERT_THROW(expression_proxy.sum({model_component::Range::All, 0}),
-                 std::logic_error);
+                 std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -1081,7 +1081,7 @@ TEST_F(TestExpressionProxy, one_dimensional_dot_arg_indice_vector) {
 
     ASSERT_THROW(
         expression_proxy.dot({0, model_component::Range::All}, sensitivities),
-        std::logic_error);
+        std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -1089,17 +1089,17 @@ TEST_F(TestExpressionProxy, one_dimensional_is_enabled) {
     model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", 2);
     expression_proxy.disable();
-    ASSERT_THROW(expression_proxy.is_enabled(), std::logic_error);
+    ASSERT_THROW(expression_proxy.is_enabled(), std::runtime_error);
     EXPECT_FALSE(expression_proxy[0].is_enabled());
     EXPECT_FALSE(expression_proxy[1].is_enabled());
 
     expression_proxy.enable();
-    ASSERT_THROW(expression_proxy.is_enabled(), std::logic_error);
+    ASSERT_THROW(expression_proxy.is_enabled(), std::runtime_error);
     EXPECT_TRUE(expression_proxy[0].is_enabled());
     EXPECT_TRUE(expression_proxy[1].is_enabled());
 
     expression_proxy.disable();
-    ASSERT_THROW(expression_proxy.is_enabled(), std::logic_error);
+    ASSERT_THROW(expression_proxy.is_enabled(), std::runtime_error);
     EXPECT_FALSE(expression_proxy[0].is_enabled());
     EXPECT_FALSE(expression_proxy[1].is_enabled());
 }
@@ -1118,14 +1118,14 @@ TEST_F(TestExpressionProxy, one_dimensional_disable) {
 TEST_F(TestExpressionProxy, one_dimensional_operator_plus) {
     model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", 2);
-    ASSERT_THROW(auto expression = +expression_proxy, std::logic_error);
+    ASSERT_THROW(auto expression = +expression_proxy, std::runtime_error);
 }
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, one_dimensional_operator_minus) {
     model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", 2);
-    ASSERT_THROW(auto expression = -expression_proxy, std::logic_error);
+    ASSERT_THROW(auto expression = -expression_proxy, std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -1133,7 +1133,7 @@ TEST_F(TestExpressionProxy, one_dimensional_operator_equal_arg_t_value) {
     model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", 2);
     auto  value            = random_integer();
-    ASSERT_THROW(expression_proxy = value, std::logic_error);
+    ASSERT_THROW(expression_proxy = value, std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -1146,13 +1146,13 @@ TEST_F(TestExpressionProxy,
     expression_proxy_other       = variable_proxy;
 
     /// variable proxy
-    ASSERT_THROW(expression_proxy = variable_proxy, std::logic_error);
+    ASSERT_THROW(expression_proxy = variable_proxy, std::runtime_error);
 
     /// variable
-    ASSERT_THROW(expression_proxy = variable_proxy[0], std::logic_error);
+    ASSERT_THROW(expression_proxy = variable_proxy[0], std::runtime_error);
 
     /// expression proxy
-    ASSERT_THROW(expression_proxy = expression_proxy_other, std::logic_error);
+    ASSERT_THROW(expression_proxy = expression_proxy_other, std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -1162,7 +1162,7 @@ TEST_F(TestExpressionProxy, one_dimensional_operator_equal_expression) {
 
     auto expression =
         model_component::Expression<int, double>::create_instance();
-    ASSERT_THROW(expression_proxy = expression, std::logic_error);
+    ASSERT_THROW(expression_proxy = expression, std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -1170,7 +1170,7 @@ TEST_F(TestExpressionProxy, one_dimensional_operator_plus_equal_arg_t_value) {
     model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", 2);
     auto  value            = random_integer();
-    ASSERT_THROW(expression_proxy += value, std::logic_error);
+    ASSERT_THROW(expression_proxy += value, std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -1183,13 +1183,14 @@ TEST_F(TestExpressionProxy,
     expression_proxy_other       = variable_proxy;
 
     /// variable proxy
-    ASSERT_THROW(expression_proxy += variable_proxy, std::logic_error);
+    ASSERT_THROW(expression_proxy += variable_proxy, std::runtime_error);
 
     /// variable
-    ASSERT_THROW(expression_proxy += variable_proxy[0], std::logic_error);
+    ASSERT_THROW(expression_proxy += variable_proxy[0], std::runtime_error);
 
     /// expression proxy
-    ASSERT_THROW(expression_proxy += expression_proxy_other, std::logic_error);
+    ASSERT_THROW(expression_proxy += expression_proxy_other,
+                 std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -1200,7 +1201,7 @@ TEST_F(TestExpressionProxy,
 
     auto expression =
         model_component::Expression<int, double>::create_instance();
-    ASSERT_THROW(expression_proxy += expression, std::logic_error);
+    ASSERT_THROW(expression_proxy += expression, std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -1208,7 +1209,7 @@ TEST_F(TestExpressionProxy, one_dimensional_operator_minus_equal_arg_t_value) {
     model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", 2);
     auto  value            = random_integer();
-    ASSERT_THROW(expression_proxy -= value, std::logic_error);
+    ASSERT_THROW(expression_proxy -= value, std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -1221,13 +1222,14 @@ TEST_F(TestExpressionProxy,
     expression_proxy_other       = variable_proxy;
 
     /// variable proxy
-    ASSERT_THROW(expression_proxy -= variable_proxy, std::logic_error);
+    ASSERT_THROW(expression_proxy -= variable_proxy, std::runtime_error);
 
     /// variable
-    ASSERT_THROW(expression_proxy -= variable_proxy[0], std::logic_error);
+    ASSERT_THROW(expression_proxy -= variable_proxy[0], std::runtime_error);
 
     /// expression proxy
-    ASSERT_THROW(expression_proxy -= expression_proxy_other, std::logic_error);
+    ASSERT_THROW(expression_proxy -= expression_proxy_other,
+                 std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -1238,7 +1240,7 @@ TEST_F(TestExpressionProxy,
 
     auto expression =
         model_component::Expression<int, double>::create_instance();
-    ASSERT_THROW(expression_proxy -= expression, std::logic_error);
+    ASSERT_THROW(expression_proxy -= expression, std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -1247,7 +1249,7 @@ TEST_F(TestExpressionProxy,
     model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", 2);
     auto  value            = random_integer();
-    ASSERT_THROW(expression_proxy *= value, std::logic_error);
+    ASSERT_THROW(expression_proxy *= value, std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -1255,7 +1257,7 @@ TEST_F(TestExpressionProxy, one_dimensional_operator_divide_equal_arg_t_value) {
     model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", 2);
     auto  value            = random_integer();
-    ASSERT_THROW(expression_proxy /= value, std::logic_error);
+    ASSERT_THROW(expression_proxy /= value, std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -1319,7 +1321,7 @@ TEST_F(TestExpressionProxy, two_dimensional_sensitivities) {
     model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", {2, 3});
     ASSERT_THROW(auto sensitivities = expression_proxy.sensitivities(),
-                 std::logic_error);
+                 std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -1328,35 +1330,35 @@ TEST_F(TestExpressionProxy, two_dimensional_constant_value) {
     auto& expression_proxy = model.create_expressions("e", {2, 3});
     ASSERT_THROW(
         [[maybe_unused]] auto constant = expression_proxy.constant_value(),
-        std::logic_error);
+        std::runtime_error);
 }
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, two_dimensional_evaluate_arg_void) {
     model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", {2, 3});
-    ASSERT_THROW(expression_proxy.evaluate(), std::logic_error);
+    ASSERT_THROW(expression_proxy.evaluate(), std::runtime_error);
 }
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, two_dimensional_evaluate_arg_move) {
     model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", {2, 3});
-    ASSERT_THROW(expression_proxy.evaluate({}), std::logic_error);
+    ASSERT_THROW(expression_proxy.evaluate({}), std::runtime_error);
 }
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, two_dimensional_update_arg_void) {
     model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", {2, 3});
-    ASSERT_THROW(expression_proxy.update(), std::logic_error);
+    ASSERT_THROW(expression_proxy.update(), std::runtime_error);
 }
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, two_dimensional_update_arg_move) {
     model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", {2, 3});
-    ASSERT_THROW(expression_proxy.update({}), std::logic_error);
+    ASSERT_THROW(expression_proxy.update({}), std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -1364,7 +1366,7 @@ TEST_F(TestExpressionProxy, two_dimensional_value) {
     model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", {2, 3});
     ASSERT_THROW([[maybe_unused]] auto value = expression_proxy.value(),
-                 std::logic_error);
+                 std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -1373,8 +1375,8 @@ TEST_F(TestExpressionProxy, two_dimensional_set_name) {
 
     auto& expression_proxy = model.create_expressions("e", {2, 3});
 
-    ASSERT_THROW(expression_proxy.set_name("_e"), std::logic_error);
-    ASSERT_THROW(expression_proxy.name(), std::logic_error);
+    ASSERT_THROW(expression_proxy.set_name("_e"), std::runtime_error);
+    ASSERT_THROW(expression_proxy.name(), std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -1513,7 +1515,7 @@ TEST_F(TestExpressionProxy, two_dimensional_to_expression) {
     model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", {2, 3});
     ASSERT_THROW(auto expression = expression_proxy.to_expression(),
-                 std::logic_error);
+                 std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -1581,9 +1583,9 @@ TEST_F(TestExpressionProxy, two_dimensional_sum_arg_indices) {
     EXPECT_EQ(2 * 3, expression_01.evaluate());
 
     ASSERT_THROW(expression_proxy.sum({model_component::Range::All}),
-                 std::logic_error);
+                 std::runtime_error);
     ASSERT_THROW(expression_proxy.sum({model_component::Range::All, 0, 0}),
-                 std::logic_error);
+                 std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -1601,7 +1603,7 @@ TEST_F(TestExpressionProxy, two_dimensional_dot_arg_vector) {
     for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
         sensitivities.push_back(random_integer());
     }
-    ASSERT_THROW(expression_proxy.dot(sensitivities), std::logic_error);
+    ASSERT_THROW(expression_proxy.dot(sensitivities), std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -1666,14 +1668,14 @@ TEST_F(TestExpressionProxy, two_dimensional_dot_arg_indice_vector) {
 
     ASSERT_THROW(
         expression_proxy.dot({model_component::Range::All}, sensitivities_0),
-        std::logic_error);
+        std::runtime_error);
     ASSERT_THROW(expression_proxy.dot(
                      {model_component::Range::All, model_component::Range::All},
                      sensitivities_01),
-                 std::logic_error);
+                 std::runtime_error);
     ASSERT_THROW(expression_proxy.dot({model_component::Range::All, 0, 0},
                                       sensitivities_0),
-                 std::logic_error);
+                 std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -1681,17 +1683,17 @@ TEST_F(TestExpressionProxy, two_dimensional_is_enabled) {
     model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", {2, 3});
     expression_proxy.disable();
-    ASSERT_THROW(expression_proxy.is_enabled(), std::logic_error);
+    ASSERT_THROW(expression_proxy.is_enabled(), std::runtime_error);
     EXPECT_FALSE(expression_proxy[0].is_enabled());
     EXPECT_FALSE(expression_proxy[2 * 3 - 1].is_enabled());
 
     expression_proxy.enable();
-    ASSERT_THROW(expression_proxy.is_enabled(), std::logic_error);
+    ASSERT_THROW(expression_proxy.is_enabled(), std::runtime_error);
     EXPECT_TRUE(expression_proxy[0].is_enabled());
     EXPECT_TRUE(expression_proxy[2 * 3 - 1].is_enabled());
 
     expression_proxy.disable();
-    ASSERT_THROW(expression_proxy.is_enabled(), std::logic_error);
+    ASSERT_THROW(expression_proxy.is_enabled(), std::runtime_error);
     EXPECT_FALSE(expression_proxy[0].is_enabled());
     EXPECT_FALSE(expression_proxy[2 * 3 - 1].is_enabled());
 }
@@ -1710,14 +1712,14 @@ TEST_F(TestExpressionProxy, two_dimensional_disable) {
 TEST_F(TestExpressionProxy, two_dimensional_operator_plus) {
     model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", {2, 3});
-    ASSERT_THROW(auto expression = +expression_proxy, std::logic_error);
+    ASSERT_THROW(auto expression = +expression_proxy, std::runtime_error);
 }
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, two_dimensional_operator_minus) {
     model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", {2, 3});
-    ASSERT_THROW(auto expression = -expression_proxy, std::logic_error);
+    ASSERT_THROW(auto expression = -expression_proxy, std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -1725,7 +1727,7 @@ TEST_F(TestExpressionProxy, two_dimensional_operator_equal_arg_t_value) {
     model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", {2, 3});
     auto  value            = random_integer();
-    ASSERT_THROW(expression_proxy = value, std::logic_error);
+    ASSERT_THROW(expression_proxy = value, std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -1738,13 +1740,13 @@ TEST_F(TestExpressionProxy,
     expression_proxy_other       = variable_proxy;
 
     /// variable proxy
-    ASSERT_THROW(expression_proxy = variable_proxy, std::logic_error);
+    ASSERT_THROW(expression_proxy = variable_proxy, std::runtime_error);
 
     /// variable
-    ASSERT_THROW(expression_proxy = variable_proxy[0], std::logic_error);
+    ASSERT_THROW(expression_proxy = variable_proxy[0], std::runtime_error);
 
     /// expression proxy
-    ASSERT_THROW(expression_proxy = expression_proxy_other, std::logic_error);
+    ASSERT_THROW(expression_proxy = expression_proxy_other, std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -1754,7 +1756,7 @@ TEST_F(TestExpressionProxy, two_dimensional_operator_equal_expression) {
 
     auto expression =
         model_component::Expression<int, double>::create_instance();
-    ASSERT_THROW(expression_proxy = expression, std::logic_error);
+    ASSERT_THROW(expression_proxy = expression, std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -1762,7 +1764,7 @@ TEST_F(TestExpressionProxy, two_dimensional_operator_plus_equal_arg_t_value) {
     model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", {2, 3});
     auto  value            = random_integer();
-    ASSERT_THROW(expression_proxy += value, std::logic_error);
+    ASSERT_THROW(expression_proxy += value, std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -1775,13 +1777,14 @@ TEST_F(TestExpressionProxy,
     expression_proxy_other       = variable_proxy;
 
     /// variable proxy
-    ASSERT_THROW(expression_proxy += variable_proxy, std::logic_error);
+    ASSERT_THROW(expression_proxy += variable_proxy, std::runtime_error);
 
     /// variable
-    ASSERT_THROW(expression_proxy += variable_proxy[0], std::logic_error);
+    ASSERT_THROW(expression_proxy += variable_proxy[0], std::runtime_error);
 
     /// expression proxy
-    ASSERT_THROW(expression_proxy += expression_proxy_other, std::logic_error);
+    ASSERT_THROW(expression_proxy += expression_proxy_other,
+                 std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -1792,7 +1795,7 @@ TEST_F(TestExpressionProxy,
 
     auto expression =
         model_component::Expression<int, double>::create_instance();
-    ASSERT_THROW(expression_proxy += expression, std::logic_error);
+    ASSERT_THROW(expression_proxy += expression, std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -1800,7 +1803,7 @@ TEST_F(TestExpressionProxy, two_dimensional_operator_minus_equal_arg_t_value) {
     model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", {2, 3});
     auto  value            = random_integer();
-    ASSERT_THROW(expression_proxy -= value, std::logic_error);
+    ASSERT_THROW(expression_proxy -= value, std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -1813,13 +1816,14 @@ TEST_F(TestExpressionProxy,
     expression_proxy_other       = variable_proxy;
 
     /// variable proxy
-    ASSERT_THROW(expression_proxy -= variable_proxy, std::logic_error);
+    ASSERT_THROW(expression_proxy -= variable_proxy, std::runtime_error);
 
     /// variable
-    ASSERT_THROW(expression_proxy -= variable_proxy[0], std::logic_error);
+    ASSERT_THROW(expression_proxy -= variable_proxy[0], std::runtime_error);
 
     /// expression proxy
-    ASSERT_THROW(expression_proxy -= expression_proxy_other, std::logic_error);
+    ASSERT_THROW(expression_proxy -= expression_proxy_other,
+                 std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -1830,7 +1834,7 @@ TEST_F(TestExpressionProxy,
 
     auto expression =
         model_component::Expression<int, double>::create_instance();
-    ASSERT_THROW(expression_proxy -= expression, std::logic_error);
+    ASSERT_THROW(expression_proxy -= expression, std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -1839,7 +1843,7 @@ TEST_F(TestExpressionProxy,
     model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", {2, 3});
     auto  value            = random_integer();
-    ASSERT_THROW(expression_proxy *= value, std::logic_error);
+    ASSERT_THROW(expression_proxy *= value, std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -1847,7 +1851,7 @@ TEST_F(TestExpressionProxy, two_dimensional_operator_divide_equal_arg_t_value) {
     model::Model<int, double> model;
     auto& expression_proxy = model.create_expressions("e", {2, 3});
     auto  value            = random_integer();
-    ASSERT_THROW(expression_proxy /= value, std::logic_error);
+    ASSERT_THROW(expression_proxy /= value, std::runtime_error);
 }
 
 /*****************************************************************************/

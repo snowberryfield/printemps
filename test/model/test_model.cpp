@@ -128,11 +128,11 @@ TEST_F(TestModel, create_variable_scalar_without_bound) {
             EXPECT_EQ(&x, &model.variable_proxies().back());
             EXPECT_EQ(name, model.variable_names().back());
         }
-        ASSERT_THROW(model.create_variable("error"), std::logic_error);
+        ASSERT_THROW(model.create_variable("error"), std::runtime_error);
     }
     {
         model::Model<int, double> model;
-        ASSERT_THROW(model.create_variable("s p a c e"), std::logic_error);
+        ASSERT_THROW(model.create_variable("s p a c e"), std::runtime_error);
     }
 }
 
@@ -153,12 +153,12 @@ TEST_F(TestModel, create_variable_scalar_with_bound) {
             EXPECT_EQ(&x, &model.variable_proxies().back());
             EXPECT_EQ(name, model.variable_names().back());
         }
-        ASSERT_THROW(model.create_variable("error", 0, 1), std::logic_error);
+        ASSERT_THROW(model.create_variable("error", 0, 1), std::runtime_error);
     }
     {
         model::Model<int, double> model;
         ASSERT_THROW(model.create_variable("s p a c e", 0, 1),
-                     std::logic_error);
+                     std::runtime_error);
     }
 }
 
@@ -179,11 +179,12 @@ TEST_F(TestModel, create_variable_one_dimensional_without_bound) {
             EXPECT_EQ(&x, &model.variable_proxies().back());
             EXPECT_EQ(name, model.variable_names().back());
         }
-        ASSERT_THROW(model.create_variables("error", 2), std::logic_error);
+        ASSERT_THROW(model.create_variables("error", 2), std::runtime_error);
     }
     {
         model::Model<int, double> model;
-        ASSERT_THROW(model.create_variables("s p a c e", 2), std::logic_error);
+        ASSERT_THROW(model.create_variables("s p a c e", 2),
+                     std::runtime_error);
     }
 }
 
@@ -205,12 +206,12 @@ TEST_F(TestModel, create_variable_one_dimensional_with_bound) {
             EXPECT_EQ(name, model.variable_names().back());
         }
         ASSERT_THROW(model.create_variables("error", 2, 0, 1),
-                     std::logic_error);
+                     std::runtime_error);
     }
     {
         model::Model<int, double> model;
         ASSERT_THROW(model.create_variables("s p a c e", 2, 0, 1),
-                     std::logic_error);
+                     std::runtime_error);
     }
 }
 
@@ -231,12 +232,13 @@ TEST_F(TestModel, create_variable_two_dimensional_without_bound) {
             EXPECT_EQ(&x, &model.variable_proxies().back());
             EXPECT_EQ(name, model.variable_names().back());
         }
-        ASSERT_THROW(model.create_variables("error", {2, 3}), std::logic_error);
+        ASSERT_THROW(model.create_variables("error", {2, 3}),
+                     std::runtime_error);
     }
     {
         model::Model<int, double> model;
         ASSERT_THROW(model.create_variables("s p a c e", {2, 3}),
-                     std::logic_error);
+                     std::runtime_error);
     }
 }
 
@@ -258,12 +260,12 @@ TEST_F(TestModel, create_variable_two_dimensional_with_bound) {
             EXPECT_EQ(name, model.variable_names().back());
         }
         ASSERT_THROW(model.create_variables("error", {2, 3}, 0, 1),
-                     std::logic_error);
+                     std::runtime_error);
     }
     {
         model::Model<int, double> model;
         ASSERT_THROW(model.create_variables("s p a c e", {2, 3}, 0, 1),
-                     std::logic_error);
+                     std::runtime_error);
     }
 }
 
@@ -281,11 +283,11 @@ TEST_F(TestModel, create_expression_scalar) {
             EXPECT_EQ(&p, &model.expression_proxies().back());
             EXPECT_EQ(name, model.expression_names().back());
         }
-        ASSERT_THROW(model.create_expression("error"), std::logic_error);
+        ASSERT_THROW(model.create_expression("error"), std::runtime_error);
     }
     {
         model::Model<int, double> model;
-        ASSERT_THROW(model.create_expression("s p a c e"), std::logic_error);
+        ASSERT_THROW(model.create_expression("s p a c e"), std::runtime_error);
     }
 }
 
@@ -303,12 +305,12 @@ TEST_F(TestModel, create_expression_one_dimensional) {
             EXPECT_EQ(&p, &model.expression_proxies().back());
             EXPECT_EQ(name, model.expression_names().back());
         }
-        ASSERT_THROW(model.create_expressions("error", 2), std::logic_error);
+        ASSERT_THROW(model.create_expressions("error", 2), std::runtime_error);
     }
     {
         model::Model<int, double> model;
         ASSERT_THROW(model.create_expressions("s p a c e", 2),
-                     std::logic_error);
+                     std::runtime_error);
     }
 }
 
@@ -327,12 +329,12 @@ TEST_F(TestModel, create_expression_two_dimensional) {
             EXPECT_EQ(name, model.expression_names().back());
         }
         ASSERT_THROW(model.create_expressions("error", {2, 3}),
-                     std::logic_error);
+                     std::runtime_error);
     }
     {
         model::Model<int, double> model;
         ASSERT_THROW(model.create_expressions("s p a c e", {2, 3}),
-                     std::logic_error);
+                     std::runtime_error);
     }
 }
 
@@ -358,14 +360,14 @@ TEST_F(TestModel, create_expression_arg_expression_like) {
         auto variable =
             model_component::Variable<int, double>::create_instance();
         ASSERT_THROW(model.create_expression("error", variable),
-                     std::logic_error);
+                     std::runtime_error);
     }
     {
         model::Model<int, double> model;
         auto                      variable =
             model_component::Variable<int, double>::create_instance();
         ASSERT_THROW(model.create_expression("s p a c e", variable),
-                     std::logic_error);
+                     std::runtime_error);
     }
 }
 
@@ -391,7 +393,7 @@ TEST_F(TestModel, create_expression_arg_expression) {
         auto expression =
             model_component::Expression<int, double>::create_instance();
         ASSERT_THROW(model.create_expression("error", expression),
-                     std::logic_error);
+                     std::runtime_error);
     }
     {
         model::Model<int, double> model;
@@ -399,7 +401,7 @@ TEST_F(TestModel, create_expression_arg_expression) {
         auto expression =
             model_component::Expression<int, double>::create_instance();
         ASSERT_THROW(model.create_expression("s p a c e", expression),
-                     std::logic_error);
+                     std::runtime_error);
     }
 }
 
@@ -417,11 +419,11 @@ TEST_F(TestModel, create_constraint_scalar) {
             EXPECT_EQ(&g, &model.constraint_proxies().back());
             EXPECT_EQ(name, model.constraint_names().back());
         }
-        ASSERT_THROW(model.create_constraint("error"), std::logic_error);
+        ASSERT_THROW(model.create_constraint("error"), std::runtime_error);
     }
     {
         model::Model<int, double> model;
-        ASSERT_THROW(model.create_constraint("s p a c e"), std::logic_error);
+        ASSERT_THROW(model.create_constraint("s p a c e"), std::runtime_error);
     }
 }
 
@@ -439,12 +441,12 @@ TEST_F(TestModel, create_constraint_one_dimensional) {
             EXPECT_EQ(&g, &model.constraint_proxies().back());
             EXPECT_EQ(name, model.constraint_names().back());
         }
-        ASSERT_THROW(model.create_constraints("error", 2), std::logic_error);
+        ASSERT_THROW(model.create_constraints("error", 2), std::runtime_error);
     }
     {
         model::Model<int, double> model;
         ASSERT_THROW(model.create_constraints("s p a c e", 2),
-                     std::logic_error);
+                     std::runtime_error);
     }
 }
 
@@ -463,12 +465,12 @@ TEST_F(TestModel, create_constraint_two_dimensional) {
             EXPECT_EQ(name, model.constraint_names().back());
         }
         ASSERT_THROW(model.create_constraints("error", {2, 3}),
-                     std::logic_error);
+                     std::runtime_error);
     }
     {
         model::Model<int, double> model;
         ASSERT_THROW(model.create_constraints("s p a c e", {2, 3}),
-                     std::logic_error);
+                     std::runtime_error);
     }
 }
 
@@ -496,7 +498,7 @@ TEST_F(TestModel, create_constraint_arg_constraint) {
             model_component::Expression<int, double>::create_instance();
         auto constraint = expression <= 1;
         ASSERT_THROW(model.create_constraint("error", constraint),
-                     std::logic_error);
+                     std::runtime_error);
     }
     {
         model::Model<int, double> model;
@@ -504,7 +506,7 @@ TEST_F(TestModel, create_constraint_arg_constraint) {
             model_component::Expression<int, double>::create_instance();
         auto constraint = expression <= 1;
         ASSERT_THROW(model.create_constraint("s p a c e", constraint),
-                     std::logic_error);
+                     std::runtime_error);
     }
 }
 

@@ -38,7 +38,7 @@ TEST_F(TestVerifier, verify_problem) {
     {
         model::Model<int, double>         model;
         preprocess::Verifier<int, double> verifier(&model);
-        ASSERT_THROW(verifier.verify_problem(false), std::logic_error);
+        ASSERT_THROW(verifier.verify_problem(false), std::runtime_error);
     }
 
     /// No constraint functions.
@@ -67,7 +67,7 @@ TEST_F(TestVerifier, verify_problem) {
 
         [[maybe_unused]] auto&            x = model.create_variable("x");
         preprocess::Verifier<int, double> verifier(&model);
-        ASSERT_THROW(verifier.verify_problem(false), std::logic_error);
+        ASSERT_THROW(verifier.verify_problem(false), std::runtime_error);
     }
 }
 
@@ -90,7 +90,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         ASSERT_THROW(
             verifier.verify_and_correct_selection_variables_initial_values(
                 true, false),
-            std::logic_error);
+            std::runtime_error);
     }
 
     /// There is a fixed variable with an invalid initial value.
@@ -109,7 +109,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         ASSERT_THROW(
             verifier.verify_and_correct_selection_variables_initial_values(
                 false, false),
-            std::logic_error);
+            std::runtime_error);
     }
 
     /// There is one fixed selected variable.
@@ -165,7 +165,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         ASSERT_THROW(
             verifier.verify_and_correct_selection_variables_initial_values(
                 true, false),
-            std::logic_error);
+            std::runtime_error);
     }
 
     /// There are two fixed selected variables.
@@ -185,7 +185,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         ASSERT_THROW(
             verifier.verify_and_correct_selection_variables_initial_values(
                 false, false),
-            std::logic_error);
+            std::runtime_error);
     }
 
     /// There are two variables with invalid initial values.
@@ -225,7 +225,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         ASSERT_THROW(
             verifier.verify_and_correct_selection_variables_initial_values(
                 false, false),
-            std::logic_error);
+            std::runtime_error);
     }
 
     /// There is no selected variable.
@@ -265,7 +265,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         ASSERT_THROW(
             verifier.verify_and_correct_selection_variables_initial_values(
                 false, false),
-            std::logic_error);
+            std::runtime_error);
     }
 
     /// There is one selected variable.
@@ -344,7 +344,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         ASSERT_THROW(
             verifier.verify_and_correct_selection_variables_initial_values(
                 false, false),
-            std::logic_error);
+            std::runtime_error);
     }
 
     /// There are 1 fixed and 1 unfixed selected variable.
@@ -385,7 +385,7 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         ASSERT_THROW(
             verifier.verify_and_correct_selection_variables_initial_values(
                 false, false),
-            std::logic_error);
+            std::runtime_error);
     }
 }
 
@@ -404,7 +404,7 @@ TEST_F(TestVerifier, verify_and_correct_binary_variables_initial_values) {
         ASSERT_THROW(
             verifier.verify_and_correct_binary_variables_initial_values(true,
                                                                         false),
-            std::logic_error);
+            std::runtime_error);
     }
 
     /// There is a fixed variable with an invalid initial value.
@@ -420,7 +420,7 @@ TEST_F(TestVerifier, verify_and_correct_binary_variables_initial_values) {
         ASSERT_THROW(
             verifier.verify_and_correct_binary_variables_initial_values(false,
                                                                         false),
-            std::logic_error);
+            std::runtime_error);
     }
 
     /// There is a variable with an invalid initial value.
@@ -454,7 +454,7 @@ TEST_F(TestVerifier, verify_and_correct_binary_variables_initial_values) {
         ASSERT_THROW(
             verifier.verify_and_correct_binary_variables_initial_values(false,
                                                                         false),
-            std::logic_error);
+            std::runtime_error);
     }
 }
 
@@ -473,7 +473,7 @@ TEST_F(TestVerifier, verify_and_correct_integer_variables_initial_values) {
         ASSERT_THROW(
             verifier.verify_and_correct_integer_variables_initial_values(true,
                                                                          false),
-            std::logic_error);
+            std::runtime_error);
     }
 
     /// There is a fixed variable with an invalid initial value.
@@ -489,7 +489,7 @@ TEST_F(TestVerifier, verify_and_correct_integer_variables_initial_values) {
         ASSERT_THROW(
             verifier.verify_and_correct_integer_variables_initial_values(false,
                                                                          false),
-            std::logic_error);
+            std::runtime_error);
     }
 
     /// There is a variable with an invalid initial value.
@@ -524,7 +524,7 @@ TEST_F(TestVerifier, verify_and_correct_integer_variables_initial_values) {
         ASSERT_THROW(
             verifier.verify_and_correct_integer_variables_initial_values(false,
                                                                          false),
-            std::logic_error);
+            std::runtime_error);
     }
 }
 }  // namespace

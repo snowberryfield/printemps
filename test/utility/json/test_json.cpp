@@ -29,10 +29,10 @@ TEST_F(TestJson, add_integer_item) {
     EXPECT_EQ(0, obj.get<int>("key"));
     EXPECT_EQ(0, std::any_cast<int>(obj["key"]));
 
-    ASSERT_THROW(obj.get<double>("key"), std::logic_error);
-    ASSERT_THROW(obj.get<std::string>("key"), std::logic_error);
-    ASSERT_THROW(obj.get<JsonArray>("key"), std::logic_error);
-    ASSERT_THROW(obj.get<JsonObject>("key"), std::logic_error);
+    ASSERT_THROW(obj.get<double>("key"), std::runtime_error);
+    ASSERT_THROW(obj.get<std::string>("key"), std::runtime_error);
+    ASSERT_THROW(obj.get<JsonArray>("key"), std::runtime_error);
+    ASSERT_THROW(obj.get<JsonObject>("key"), std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -45,10 +45,10 @@ TEST_F(TestJson, add_double_item) {
     EXPECT_FLOAT_EQ(3.14, obj.get<double>("key"));
     EXPECT_FLOAT_EQ(3.14, std::any_cast<double>(obj["key"]));
 
-    ASSERT_THROW(obj.get<int>("key"), std::logic_error);
-    ASSERT_THROW(obj.get<std::string>("key"), std::logic_error);
-    ASSERT_THROW(obj.get<JsonArray>("key"), std::logic_error);
-    ASSERT_THROW(obj.get<JsonObject>("key"), std::logic_error);
+    ASSERT_THROW(obj.get<int>("key"), std::runtime_error);
+    ASSERT_THROW(obj.get<std::string>("key"), std::runtime_error);
+    ASSERT_THROW(obj.get<JsonArray>("key"), std::runtime_error);
+    ASSERT_THROW(obj.get<JsonObject>("key"), std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -61,10 +61,10 @@ TEST_F(TestJson, add_string_item) {
     EXPECT_EQ("value", obj.get<std::string>("key"));
     EXPECT_EQ("value", std::any_cast<std::string>(obj["key"]));
 
-    ASSERT_THROW(obj.get<int>("key"), std::logic_error);
-    ASSERT_THROW(obj.get<double>("key"), std::logic_error);
-    ASSERT_THROW(obj.get<JsonArray>("key"), std::logic_error);
-    ASSERT_THROW(obj.get<JsonObject>("key"), std::logic_error);
+    ASSERT_THROW(obj.get<int>("key"), std::runtime_error);
+    ASSERT_THROW(obj.get<double>("key"), std::runtime_error);
+    ASSERT_THROW(obj.get<JsonArray>("key"), std::runtime_error);
+    ASSERT_THROW(obj.get<JsonObject>("key"), std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -82,10 +82,10 @@ TEST_F(TestJson, add_json_object_item) {
     EXPECT_FLOAT_EQ(3.14, obj.get<JsonObject>("key").get<double>("sub_1"));
     EXPECT_EQ("value", obj.get<JsonObject>("key").get<std::string>("sub_2"));
 
-    ASSERT_THROW(obj.get<int>("key"), std::logic_error);
-    ASSERT_THROW(obj.get<double>("key"), std::logic_error);
-    ASSERT_THROW(obj.get<std::string>("key"), std::logic_error);
-    ASSERT_THROW(obj.get<JsonArray>("key"), std::logic_error);
+    ASSERT_THROW(obj.get<int>("key"), std::runtime_error);
+    ASSERT_THROW(obj.get<double>("key"), std::runtime_error);
+    ASSERT_THROW(obj.get<std::string>("key"), std::runtime_error);
+    ASSERT_THROW(obj.get<JsonArray>("key"), std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -103,10 +103,10 @@ TEST_F(TestJson, add_json_array_item) {
     EXPECT_FLOAT_EQ(3.14, obj.get<JsonArray>("key").get<double>(1));
     EXPECT_EQ("value", obj.get<JsonArray>("key").get<std::string>(2));
 
-    ASSERT_THROW(obj.get<int>("key"), std::logic_error);
-    ASSERT_THROW(obj.get<double>("key"), std::logic_error);
-    ASSERT_THROW(obj.get<std::string>("key"), std::logic_error);
-    ASSERT_THROW(obj.get<JsonObject>("key"), std::logic_error);
+    ASSERT_THROW(obj.get<int>("key"), std::runtime_error);
+    ASSERT_THROW(obj.get<double>("key"), std::runtime_error);
+    ASSERT_THROW(obj.get<std::string>("key"), std::runtime_error);
+    ASSERT_THROW(obj.get<JsonObject>("key"), std::runtime_error);
 }
 
 /*****************************************************************************/

@@ -73,7 +73,7 @@ TEST_F(TestSimple2, simple_2) {
     EXPECT_EQ(1, result.solution.variables("y").values(1));
     EXPECT_EQ(16, result.solution.objective());
 
-    ASSERT_THROW(solver::solve(&model, option), std::logic_error);
+    ASSERT_THROW(solver::solve(&model, option), std::runtime_error);
 }
 }  // namespace
 /*****************************************************************************/

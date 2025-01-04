@@ -121,7 +121,7 @@ TEST_F(TestVariable, set_value) {
 
     variable.fix();
     EXPECT_EQ(value, (variable = value).value());
-    ASSERT_THROW(variable = value + 1, std::logic_error);
+    ASSERT_THROW(variable = value + 1, std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -170,7 +170,7 @@ TEST_F(TestVariable, set_bound) {
     EXPECT_EQ(upper_bound - lower_bound, variable.range());
 
     ASSERT_THROW(variable.set_bound(upper_bound, lower_bound),
-                 std::logic_error);
+                 std::runtime_error);
 
     variable.reset_bound();
     EXPECT_EQ(constant::INT_HALF_MIN, variable.lower_bound());
@@ -855,7 +855,7 @@ TEST_F(TestVariable, operator_equal_arg_t_variable) {
 
     variable.fix();
     EXPECT_EQ(value, (variable = value).value());
-    ASSERT_THROW(variable = value + 1, std::logic_error);
+    ASSERT_THROW(variable = value + 1, std::runtime_error);
 }
 
 }  // namespace

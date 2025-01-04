@@ -271,7 +271,7 @@ class Solver {
          * The model can be solved only once.
          */
         if (m_model_ptr->is_solved()) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "This model has already been solved."));
         } else {

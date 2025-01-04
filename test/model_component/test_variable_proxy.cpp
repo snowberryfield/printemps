@@ -181,7 +181,7 @@ TEST_F(TestVariableProxy, scaler_set_bound) {
     EXPECT_TRUE(variable_proxy.has_bounds());
 
     ASSERT_THROW(variable_proxy.set_bound(upper_bound, lower_bound),
-                 std::logic_error);
+                 std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -286,7 +286,7 @@ TEST_F(TestVariableProxy, scalar_sum_arg_indices) {
     EXPECT_EQ(1, expression.evaluate());
 
     ASSERT_THROW(variable_proxy.sum({model_component::Range::All, 0}),
-                 std::logic_error);
+                 std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -335,7 +335,7 @@ TEST_F(TestVariableProxy, scalar_dot_arg_indice_vector) {
 
     ASSERT_THROW(
         variable_proxy.dot({0, model_component::Range::All}, sensitivities),
-        std::logic_error);
+        std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -367,7 +367,7 @@ TEST_F(TestVariableProxy, scalar_selection_arg_indices) {
               constraint.expression().sensitivities().at(&(variable_proxy[0])));
     EXPECT_EQ(model_component::ConstraintSense::Equal, constraint.sense());
     ASSERT_THROW(variable_proxy.selection({model_component::Range::All, 0}),
-                 std::logic_error);
+                 std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -447,7 +447,7 @@ TEST_F(TestVariableProxy, one_dimensional_value) {
 
     auto& variable_proxy = model.create_variables("x", 2);
     auto  value          = random_integer();
-    ASSERT_THROW(variable_proxy = value, std::logic_error);
+    ASSERT_THROW(variable_proxy = value, std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -456,21 +456,21 @@ TEST_F(TestVariableProxy, one_dimensional_set_value) {
 
     auto& variable_proxy = model.create_variables("x", 2);
     auto  value          = random_integer();
-    ASSERT_THROW(variable_proxy.set_value(value), std::logic_error);
+    ASSERT_THROW(variable_proxy.set_value(value), std::runtime_error);
 }
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, one_dimensional_evaluate_arg_void) {
     model::Model<int, double> model;
     auto&                     variable_proxy = model.create_variables("x", 2);
-    ASSERT_THROW(variable_proxy.evaluate(), std::logic_error);
+    ASSERT_THROW(variable_proxy.evaluate(), std::runtime_error);
 }
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, one_dimensional_evaluate_arg_move) {
     model::Model<int, double> model;
     auto&                     variable_proxy = model.create_variables("x", 2);
-    ASSERT_THROW(variable_proxy.evaluate({}), std::logic_error);
+    ASSERT_THROW(variable_proxy.evaluate({}), std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -478,7 +478,7 @@ TEST_F(TestVariableProxy, one_dimensional_fix) {
     model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", 2);
-    ASSERT_THROW(variable_proxy.fix(), std::logic_error);
+    ASSERT_THROW(variable_proxy.fix(), std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -486,7 +486,7 @@ TEST_F(TestVariableProxy, one_dimensional_is_fixed) {
     model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", 2);
-    ASSERT_THROW(variable_proxy.is_fixed(), std::logic_error);
+    ASSERT_THROW(variable_proxy.is_fixed(), std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -494,7 +494,7 @@ TEST_F(TestVariableProxy, one_dimensional_unfix) {
     model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", 2);
-    ASSERT_THROW(variable_proxy.unfix(), std::logic_error);
+    ASSERT_THROW(variable_proxy.unfix(), std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -503,13 +503,13 @@ TEST_F(TestVariableProxy, one_dimensional_sense) {
         model::Model<int, double> model;
 
         auto& variable_proxy = model.create_variables("x", 2, 0, 1);
-        ASSERT_THROW(variable_proxy.sense(), std::logic_error);
+        ASSERT_THROW(variable_proxy.sense(), std::runtime_error);
     }
     {
         model::Model<int, double> model;
 
         auto& variable_proxy = model.create_variables("x", 2, 0, 10);
-        ASSERT_THROW(variable_proxy.sense(), std::logic_error);
+        ASSERT_THROW(variable_proxy.sense(), std::runtime_error);
     }
 }
 
@@ -519,7 +519,7 @@ TEST_F(TestVariableProxy, one_dimensional_fix_by) {
 
     auto& variable_proxy = model.create_variables("x", 2);
     auto  value          = random_integer();
-    ASSERT_THROW(variable_proxy.fix_by(value), std::logic_error);
+    ASSERT_THROW(variable_proxy.fix_by(value), std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -540,11 +540,11 @@ TEST_F(TestVariableProxy, one_dimensional_set_bound) {
     EXPECT_EQ(upper_bound, variable_proxy[1].upper_bound());
     EXPECT_TRUE(variable_proxy[0].has_bounds());
 
-    ASSERT_THROW(variable_proxy.lower_bound(), std::logic_error);
-    ASSERT_THROW(variable_proxy.upper_bound(), std::logic_error);
-    ASSERT_THROW(variable_proxy.has_bounds(), std::logic_error);
+    ASSERT_THROW(variable_proxy.lower_bound(), std::runtime_error);
+    ASSERT_THROW(variable_proxy.upper_bound(), std::runtime_error);
+    ASSERT_THROW(variable_proxy.has_bounds(), std::runtime_error);
     ASSERT_THROW(variable_proxy.set_bound(upper_bound, lower_bound),
-                 std::logic_error);
+                 std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -568,8 +568,8 @@ TEST_F(TestVariableProxy, one_dimensional_set_name) {
 
     auto& variable_proxy = model.create_variables("x", 2);
 
-    ASSERT_THROW(variable_proxy.set_name("_x"), std::logic_error);
-    ASSERT_THROW(variable_proxy.name(), std::logic_error);
+    ASSERT_THROW(variable_proxy.set_name("_x"), std::runtime_error);
+    ASSERT_THROW(variable_proxy.name(), std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -621,7 +621,7 @@ TEST_F(TestVariableProxy, one_dimensional_to_expression) {
     model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", 2);
-    ASSERT_THROW(variable_proxy.to_expression(), std::logic_error);
+    ASSERT_THROW(variable_proxy.to_expression(), std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -661,7 +661,7 @@ TEST_F(TestVariableProxy, one_dimensional_sum_arg_indices) {
     EXPECT_EQ(1, expression.sensitivities().at(&(variable_proxy[1])));
     EXPECT_EQ(2, expression.evaluate());
     ASSERT_THROW(variable_proxy.sum({model_component::Range::All, 0}),
-                 std::logic_error);
+                 std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -717,7 +717,7 @@ TEST_F(TestVariableProxy, one_dimensional_dot_arg_indice_vector) {
 
     ASSERT_THROW(
         variable_proxy.dot({0, model_component::Range::All}, sensitivities),
-        std::logic_error);
+        std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -753,7 +753,7 @@ TEST_F(TestVariableProxy, one_dimensional_selection_arg_indices) {
               constraint.expression().sensitivities().at(&(variable_proxy[1])));
     EXPECT_EQ(model_component::ConstraintSense::Equal, constraint.sense());
     ASSERT_THROW(variable_proxy.selection({model_component::Range::All, 0}),
-                 std::logic_error);
+                 std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -761,7 +761,7 @@ TEST_F(TestVariableProxy, one_dimensional_operator_plus) {
     model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", 2);
-    ASSERT_THROW(+variable_proxy, std::logic_error);
+    ASSERT_THROW(+variable_proxy, std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -769,7 +769,7 @@ TEST_F(TestVariableProxy, one_dimensional_operator_minus) {
     model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", 2);
-    ASSERT_THROW(-variable_proxy, std::logic_error);
+    ASSERT_THROW(-variable_proxy, std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -778,7 +778,7 @@ TEST_F(TestVariableProxy, one_dimensional_operator_equal_arg_t_variable) {
 
     auto& variable_proxy = model.create_variables("x", 2);
     auto  value          = random_integer();
-    ASSERT_THROW(variable_proxy = value, std::logic_error);
+    ASSERT_THROW(variable_proxy = value, std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -841,7 +841,7 @@ TEST_F(TestVariableProxy, two_dimensional_value) {
 
     auto& variable_proxy = model.create_variables("x", {2, 3});
     auto  value          = random_integer();
-    ASSERT_THROW(variable_proxy = value, std::logic_error);
+    ASSERT_THROW(variable_proxy = value, std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -850,21 +850,21 @@ TEST_F(TestVariableProxy, two_dimensional_set_value) {
 
     auto& variable_proxy = model.create_variables("x", {2, 3});
     auto  value          = random_integer();
-    ASSERT_THROW(variable_proxy.set_value(value), std::logic_error);
+    ASSERT_THROW(variable_proxy.set_value(value), std::runtime_error);
 }
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, two_evaluate_arg_void) {
     model::Model<int, double> model;
     auto& variable_proxy = model.create_variables("x", {2, 3});
-    ASSERT_THROW(variable_proxy.evaluate(), std::logic_error);
+    ASSERT_THROW(variable_proxy.evaluate(), std::runtime_error);
 }
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, two_evaluate_arg_move) {
     model::Model<int, double> model;
     auto& variable_proxy = model.create_variables("x", {2, 3});
-    ASSERT_THROW(variable_proxy.evaluate({}), std::logic_error);
+    ASSERT_THROW(variable_proxy.evaluate({}), std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -872,7 +872,7 @@ TEST_F(TestVariableProxy, two_dimensional_fix) {
     model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", {2, 3});
-    ASSERT_THROW(variable_proxy.fix(), std::logic_error);
+    ASSERT_THROW(variable_proxy.fix(), std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -880,7 +880,7 @@ TEST_F(TestVariableProxy, two_dimensional_is_fixed) {
     model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", {2, 3});
-    ASSERT_THROW(variable_proxy.is_fixed(), std::logic_error);
+    ASSERT_THROW(variable_proxy.is_fixed(), std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -888,7 +888,7 @@ TEST_F(TestVariableProxy, two_dimensional_unfix) {
     model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", {2, 3});
-    ASSERT_THROW(variable_proxy.unfix(), std::logic_error);
+    ASSERT_THROW(variable_proxy.unfix(), std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -897,7 +897,7 @@ TEST_F(TestVariableProxy, two_dimensional_fix_by) {
 
     auto& variable_proxy = model.create_variables("x", {2, 3});
     auto  value          = random_integer();
-    ASSERT_THROW(variable_proxy.fix_by(value), std::logic_error);
+    ASSERT_THROW(variable_proxy.fix_by(value), std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -906,13 +906,13 @@ TEST_F(TestVariableProxy, two_dimensional_sense) {
         model::Model<int, double> model;
 
         auto& variable_proxy = model.create_variables("x", {2, 3}, 0, 1);
-        ASSERT_THROW(variable_proxy.sense(), std::logic_error);
+        ASSERT_THROW(variable_proxy.sense(), std::runtime_error);
     }
     {
         model::Model<int, double> model;
 
         auto& variable_proxy = model.create_variables("x", {2, 3}, 0, 10);
-        ASSERT_THROW(variable_proxy.sense(), std::logic_error);
+        ASSERT_THROW(variable_proxy.sense(), std::runtime_error);
     }
 }
 
@@ -934,11 +934,11 @@ TEST_F(TestVariableProxy, two_dimensional_set_bound) {
     EXPECT_EQ(upper_bound, variable_proxy[2 * 3 - 1].upper_bound());
     EXPECT_TRUE(variable_proxy[2 * 3 - 1].has_bounds());
 
-    ASSERT_THROW(variable_proxy.lower_bound(), std::logic_error);
-    ASSERT_THROW(variable_proxy.upper_bound(), std::logic_error);
-    ASSERT_THROW(variable_proxy.has_bounds(), std::logic_error);
+    ASSERT_THROW(variable_proxy.lower_bound(), std::runtime_error);
+    ASSERT_THROW(variable_proxy.upper_bound(), std::runtime_error);
+    ASSERT_THROW(variable_proxy.has_bounds(), std::runtime_error);
     ASSERT_THROW(variable_proxy.set_bound(upper_bound, lower_bound),
-                 std::logic_error);
+                 std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -962,8 +962,8 @@ TEST_F(TestVariableProxy, two_dimensional_set_name) {
 
     auto& variable_proxy = model.create_variables("x", {2, 3});
 
-    ASSERT_THROW(variable_proxy.set_name("_x"), std::logic_error);
-    ASSERT_THROW(variable_proxy.name(), std::logic_error);
+    ASSERT_THROW(variable_proxy.set_name("_x"), std::runtime_error);
+    ASSERT_THROW(variable_proxy.name(), std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -1017,7 +1017,7 @@ TEST_F(TestVariableProxy, two_dimensional_to_expression) {
     model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", {2, 3});
-    ASSERT_THROW(variable_proxy.to_expression(), std::logic_error);
+    ASSERT_THROW(variable_proxy.to_expression(), std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -1075,9 +1075,9 @@ TEST_F(TestVariableProxy, two_dimensional_sum_arg_indices) {
     EXPECT_EQ(2 * 3, expression_01.evaluate());
 
     ASSERT_THROW(variable_proxy.sum({model_component::Range::All}),
-                 std::logic_error);
+                 std::runtime_error);
     ASSERT_THROW(variable_proxy.sum({model_component::Range::All, 0, 0}),
-                 std::logic_error);
+                 std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -1092,7 +1092,7 @@ TEST_F(TestVariableProxy, two_dimensional_dot_arg_vector) {
     for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
         sensitivities.push_back(random_integer());
     }
-    ASSERT_THROW(variable_proxy.dot(sensitivities), std::logic_error);
+    ASSERT_THROW(variable_proxy.dot(sensitivities), std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -1154,14 +1154,14 @@ TEST_F(TestVariableProxy, two_dimensional_dot_arg_indice_vector) {
 
     ASSERT_THROW(
         variable_proxy.dot({model_component::Range::All}, sensitivities_0),
-        std::logic_error);
+        std::runtime_error);
     ASSERT_THROW(variable_proxy.dot(
                      {model_component::Range::All, model_component::Range::All},
                      sensitivities_01),
-                 std::logic_error);
+                 std::runtime_error);
     ASSERT_THROW(variable_proxy.dot({model_component::Range::All, 0, 0},
                                     sensitivities_0),
-                 std::logic_error);
+                 std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -1218,9 +1218,9 @@ TEST_F(TestVariableProxy, two_dimensional_selection_arg_indices) {
     EXPECT_EQ(model_component::ConstraintSense::Equal, constraint_0.sense());
 
     ASSERT_THROW(variable_proxy.selection({model_component::Range::All}),
-                 std::logic_error);
+                 std::runtime_error);
     ASSERT_THROW(variable_proxy.selection({model_component::Range::All, 0, 0}),
-                 std::logic_error);
+                 std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -1228,7 +1228,7 @@ TEST_F(TestVariableProxy, two_dimensional_operator_plus) {
     model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", {2, 3});
-    ASSERT_THROW(+variable_proxy, std::logic_error);
+    ASSERT_THROW(+variable_proxy, std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -1236,7 +1236,7 @@ TEST_F(TestVariableProxy, two_dimensional_operator_minus) {
     model::Model<int, double> model;
 
     auto& variable_proxy = model.create_variables("x", {2, 3});
-    ASSERT_THROW(-variable_proxy, std::logic_error);
+    ASSERT_THROW(-variable_proxy, std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -1245,7 +1245,7 @@ TEST_F(TestVariableProxy, two_dimensional_operator_equal) {
 
     auto& variable_proxy = model.create_variables("x", {2, 3});
     auto  value          = random_integer();
-    ASSERT_THROW(variable_proxy = value, std::logic_error);
+    ASSERT_THROW(variable_proxy = value, std::runtime_error);
 }
 
 /*****************************************************************************/

@@ -86,7 +86,7 @@ class ValueProxy : public AbstractMultiArray {
     /*************************************************************************/
     inline T_Value &value(void) {
         if (this->number_of_elements() != 1) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of elements is not one."));
         }
@@ -96,7 +96,7 @@ class ValueProxy : public AbstractMultiArray {
     /*************************************************************************/
     inline T_Value value(void) const {
         if (this->number_of_elements() != 1) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of elements is not one."));
         }
@@ -108,7 +108,7 @@ class ValueProxy : public AbstractMultiArray {
         const int MULTI_DIMENSIONAL_INDEX_SIZE =
             a_MULTI_DIMENSIONAL_INDEX.size();
         if (this->number_of_dimensions() != MULTI_DIMENSIONAL_INDEX_SIZE) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of dimensions does not match."));
         }
@@ -125,7 +125,7 @@ class ValueProxy : public AbstractMultiArray {
         const int MULTI_DIMENSIONAL_INDEX_SIZE =
             a_MULTI_DIMENSIONAL_INDEX.size();
         if (this->number_of_dimensions() != MULTI_DIMENSIONAL_INDEX_SIZE) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of dimensions does not match."));
         }
@@ -151,7 +151,7 @@ class ValueProxy : public AbstractMultiArray {
     /*************************************************************************/
     inline std::string &name(void) {
         if (this->number_of_elements() != 1) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of elements is not one."));
         }
@@ -161,7 +161,7 @@ class ValueProxy : public AbstractMultiArray {
     /*************************************************************************/
     inline const std::string &name(void) const {
         if (this->number_of_elements() != 1) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of elements is not one."));
         }
@@ -174,7 +174,7 @@ class ValueProxy : public AbstractMultiArray {
         const int MULTI_DIMENSIONAL_INDEX_SIZE =
             a_MULTI_DIMENSIONAL_INDEX.size();
         if (this->number_of_dimensions() != MULTI_DIMENSIONAL_INDEX_SIZE) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of dimensions does not match."));
         }
@@ -191,7 +191,7 @@ class ValueProxy : public AbstractMultiArray {
         const int MULTI_DIMENSIONAL_INDEX_SIZE =
             a_MULTI_DIMENSIONAL_INDEX.size();
         if (this->number_of_dimensions() != MULTI_DIMENSIONAL_INDEX_SIZE) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of dimensions does not match."));
         }
@@ -224,7 +224,7 @@ class ValueProxy : public AbstractMultiArray {
     /*************************************************************************/
     inline ValueProxy<T_Value> operator=(const T_Value a_VALUE) {
         if (this->number_of_elements() != 1) {
-            throw std::logic_error(utility::format_error_location(
+            throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of elements is not one."));
         }
