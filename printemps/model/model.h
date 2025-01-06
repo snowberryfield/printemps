@@ -1711,6 +1711,8 @@ class Model {
             m_neighborhood.selection().setup(
                 this->variable_type_reference().selection_variable_ptrs);
             this->setup_positive_and_negative_coefficient_mutable_variable_ptrs();
+
+            m_neighborhood.chain().remove_moves_on_fixed_variables();
         }
     }
 
