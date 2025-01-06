@@ -47,10 +47,6 @@ class ChainMoveGenerator
                         (*a_flags)[i] = 0;
                         continue;
                     }
-                    if ((*a_moves_ptr)[i].has_fixed_variable()) {
-                        (*a_flags)[i] = 0;
-                        continue;
-                    }
                     for (const auto &alteration :
                          (*a_moves_ptr)[i].alterations) {
                         if (alteration.first->value() == alteration.second) {
@@ -202,6 +198,16 @@ class ChainMoveGenerator
 
         this->m_moves.resize(a_NUMBER_OF_MOVES);
         this->m_flags.resize(a_NUMBER_OF_MOVES);
+    }
+
+    /*************************************************************************/
+    inline void remove_moves_on_fixed_variables(void) {
+        this->m_moves.erase(
+            std::remove_if(
+                this->m_moves.begin(), this->m_moves.end(),
+                [](const auto &a_MOVE) { return a_MOVE.has_fixed_variable(); }),
+            this->m_moves.end());
+        this->m_flags.resize(this->m_moves.size());
     }
 };
 }  // namespace printemps::neighborhood
