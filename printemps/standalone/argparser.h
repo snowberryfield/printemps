@@ -16,6 +16,11 @@ struct ArgparserConstant {
     static constexpr bool DEFAULT_EXPORT_JSON_INSTANCE             = false;
     static constexpr bool DEFAULT_IS_MINIMIZATION_EXPLICIT         = false;
     static constexpr bool DEFAULT_IS_MAXIMIZATION_EXPLICIT         = false;
+    static constexpr bool DEFAULT_FIND_FEASIBLE                    = false;
+
+    static constexpr bool DEFAULT_IS_ITERATION_MAX_GIVEN = false;
+    static constexpr bool DEFAULT_IS_TIME_MAX_GIVEN      = false;
+    static constexpr bool DEFAULT_IS_VERBOSE_GIVEN       = false;
 };
 
 /*****************************************************************************/
@@ -34,6 +39,13 @@ struct Argparser {
     bool        export_json_instance;
     bool        is_minimization_explicit;
     bool        is_maximization_explicit;
+
+    double                   iteration_max;
+    double                   time_max;
+    option::verbose::Verbose verbose;
+    bool                     is_iteration_max_given;
+    bool                     is_time_max_given;
+    bool                     is_verbose_given;
 
     /*************************************************************************/
     Argparser(void) {
@@ -63,6 +75,16 @@ struct Argparser {
             ArgparserConstant::DEFAULT_IS_MINIMIZATION_EXPLICIT;
         this->is_maximization_explicit =
             ArgparserConstant::DEFAULT_IS_MAXIMIZATION_EXPLICIT;
+
+        this->iteration_max =
+            option::GeneralOptionConstant::DEFAULT_ITERATION_MAX;
+        this->time_max = option::GeneralOptionConstant::DEFAULT_TIME_MAX;
+        this->verbose  = option::OutputOptionConstant::DEFAULT_VERBOSE;
+
+        this->is_iteration_max_given =
+            ArgparserConstant::DEFAULT_IS_ITERATION_MAX_GIVEN;
+        this->is_time_max_given = ArgparserConstant::DEFAULT_IS_TIME_MAX_GIVEN;
+        this->is_verbose_given  = ArgparserConstant::DEFAULT_IS_VERBOSE_GIVEN;
     }
 
     /*************************************************************************/
@@ -81,12 +103,16 @@ struct Argparser {
                   << "[-s SELECTION_CONSTRAINT_FILE_NAME] "
                   << "[-x FLIPPABLE_VARIABLE_PAIR_FILE_NAME]"
                   << "[-c MINIMUM_COMMON_ELEMENT] "
+                  << "[-k ITERATION_MAX] "
+                  << "[-t TIME_MAX] "
+                  << "[-v VERVOSE] "
                   << "[--accept-continuous] "
                   << "[--extract-flippable-variable-pairs] "
                   << "[--include-mps-loading-time] "
                   << "[--export-json-instance] "
                   << "[--minimization] "
                   << "[--maximization] "
+                  << "[--find-feasible] "
                   << "mps_file" << std::endl;
         std::cout << std::endl;
         std::cout  //
@@ -118,6 +144,22 @@ struct Argparser {
             << ArgparserConstant::DEFAULT_MINIMUM_COMMON_ELEMENT << ")"
             << std::endl;
         std::cout  //
+            << "  -k ITERATION_MAX: Specify the allowed maximum number of "
+               "outer loop iterations. (default: "
+            << option::GeneralOptionConstant::DEFAULT_ITERATION_MAX << ")"
+            << std::endl;
+        std::cout  //
+            << "  -t TIME_MAX: Specity the allowed maximum computational time "
+               "for optimization calculation (specified in seconds). (default: "
+            << option::GeneralOptionConstant::DEFAULT_TIME_MAX << ")"
+            << std::endl;
+        std::cout  //
+            << "  -v VERBOSE: Specity the Log level of standard output (Off, "
+               "Warning, Outer, Inner, or Full). (default: "
+            << option::verbose::VerboseInverseMap.at(
+                   option::OutputOptionConstant::DEFAULT_VERBOSE)
+            << ")" << std::endl;
+        std::cout  //
             << "  --accept-continuous: Accept continuous variables as integer "
                "variables."
             << std::endl;
@@ -142,6 +184,10 @@ struct Argparser {
             << "  --maximization (or --maximize, --max): Maximize the "
                "objective function value regardless of the settings in the MPS "
                "file."
+            << std::endl;
+        std::cout  //
+            << "  --find-feasible: Terminate the computation when the solver "
+               "finds a feasible solution."
             << std::endl;
     }
 
@@ -170,6 +216,19 @@ struct Argparser {
                 i += 2;
             } else if (args[i] == "-c") {
                 this->minimum_common_element = atoi(args[i + 1].c_str());
+                i += 2;
+            } else if (args[i] == "-k") {
+                this->iteration_max          = atof(args[i + 1].c_str());
+                this->is_iteration_max_given = true;
+                i += 2;
+            } else if (args[i] == "-t") {
+                this->time_max          = atof(args[i + 1].c_str());
+                this->is_time_max_given = true;
+                i += 2;
+            } else if (args[i] == "-v") {
+                this->verbose =
+                    option::verbose::VerboseMap.at(args[i + 1].c_str());
+                this->is_verbose_given = true;
                 i += 2;
             } else if (args[i] == "--accept-continuous") {
                 this->accept_continuous_variables = true;
