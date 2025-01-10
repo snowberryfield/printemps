@@ -34,6 +34,13 @@ TEST_F(TestArgparser, constructor) {
     EXPECT_EQ(standalone::ArgparserConstant::DEFAULT_MINIMUM_COMMON_ELEMENT,
               argparser.minimum_common_element);
 
+    EXPECT_EQ(standalone::ArgparserConstant::DEFAULT_IS_ITERATION_MAX_GIVEN,
+              argparser.is_iteration_max_given);
+    EXPECT_EQ(standalone::ArgparserConstant::DEFAULT_IS_TIME_MAX_GIVEN,
+              argparser.is_time_max_given);
+    EXPECT_EQ(standalone::ArgparserConstant::DEFAULT_IS_VERBOSE_GIVEN,
+              argparser.is_verbose_given);
+
     EXPECT_EQ(
         standalone::ArgparserConstant::DEFAULT_ACCEPT_CONTINUOUS_VARIABLES,
         argparser.accept_continuous_variables);
@@ -94,6 +101,13 @@ TEST_F(TestArgparser, initialize) {
 
     EXPECT_EQ(standalone::ArgparserConstant::DEFAULT_MINIMUM_COMMON_ELEMENT,
               argparser.minimum_common_element);
+
+    EXPECT_EQ(standalone::ArgparserConstant::DEFAULT_IS_ITERATION_MAX_GIVEN,
+              argparser.is_iteration_max_given);
+    EXPECT_EQ(standalone::ArgparserConstant::DEFAULT_IS_TIME_MAX_GIVEN,
+              argparser.is_time_max_given);
+    EXPECT_EQ(standalone::ArgparserConstant::DEFAULT_IS_VERBOSE_GIVEN,
+              argparser.is_verbose_given);
 
     EXPECT_EQ(
         standalone::ArgparserConstant::DEFAULT_ACCEPT_CONTINUOUS_VARIABLES,
@@ -172,6 +186,62 @@ TEST_F(TestArgparser, parse) {
         const char*           argv[] = {"mps_solver", "-c", "10"};
         argparser.parse(3, argv);
         EXPECT_EQ(10, argparser.minimum_common_element);
+    }
+
+    {
+        standalone::Argparser argparser;
+        const char*           argv[] = {"mps_solver", "-k", "10"};
+        argparser.parse(3, argv);
+        EXPECT_EQ(10, argparser.iteration_max);
+    }
+
+    {
+        standalone::Argparser argparser;
+        const char*           argv[] = {"mps_solver", "-t", "10"};
+        argparser.parse(3, argv);
+        EXPECT_EQ(10, argparser.time_max);
+    }
+
+    {
+        standalone::Argparser argparser;
+        const char*           argv[] = {"mps_solver", "-v", "Off"};
+        argparser.parse(3, argv);
+        EXPECT_EQ(option::verbose::Off, argparser.verbose);
+    }
+
+    {
+        standalone::Argparser argparser;
+        const char*           argv[] = {"mps_solver", "-v", "Warning"};
+        argparser.parse(3, argv);
+        EXPECT_EQ(option::verbose::Warning, argparser.verbose);
+    }
+
+    {
+        standalone::Argparser argparser;
+        const char*           argv[] = {"mps_solver", "-v", "Outer"};
+        argparser.parse(3, argv);
+        EXPECT_EQ(option::verbose::Outer, argparser.verbose);
+    }
+
+    {
+        standalone::Argparser argparser;
+        const char*           argv[] = {"mps_solver", "-v", "Inner"};
+        argparser.parse(3, argv);
+        EXPECT_EQ(option::verbose::Inner, argparser.verbose);
+    }
+
+    {
+        standalone::Argparser argparser;
+        const char*           argv[] = {"mps_solver", "-v", "Full"};
+        argparser.parse(3, argv);
+        EXPECT_EQ(option::verbose::Full, argparser.verbose);
+    }
+
+    {
+        standalone::Argparser argparser;
+        const char*           argv[] = {"mps_solver", "-v", "Debug"};
+        argparser.parse(3, argv);
+        EXPECT_EQ(option::verbose::Debug, argparser.verbose);
     }
 
     {

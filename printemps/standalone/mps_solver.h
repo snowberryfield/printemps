@@ -100,6 +100,15 @@ class MPSSolver {
         if (!m_argparser.option_file_name.empty()) {
             m_option.setup(m_argparser.option_file_name);
         }
+        if (m_argparser.is_iteration_max_given) {
+            m_option.general.iteration_max = m_argparser.iteration_max;
+        }
+        if (m_argparser.is_time_max_given) {
+            m_option.general.time_max = m_argparser.time_max;
+        }
+        if (m_argparser.is_verbose_given) {
+            m_option.output.verbose = m_argparser.verbose;
+        }
 
         /**
          * If the mutable variable file is given, only the variables listed in
