@@ -18,8 +18,7 @@ __PRINTEMPS__ is a C++ metaheuristics modeler/solver library for general linear 
 ## News
 |     Date      | Update                                                                                            |
 |:-------------:|:--------------------------------------------------------------------------------------------------|
-| Dec 12, 2024 | [New benchmark results](./contents/benchmark/index.md) were added.                                |
-| Sep 29, 2024 | [PRINTEMPS v2.5.0](https://github.com/snowberryfield/printemps/releases/tag/v2.5.0) was released. |
+| Jan. 12, 2025 | [PRINTEMPS v2.6.0](https://github.com/snowberryfield/printemps/releases/tag/v2.6.0) was released. |
 | Feb. 8, 2024 | [Tabu Search-Based Heuristic Solver for General Integer Linear Programming Problems](https://ieeexplore.ieee.org/document/10418217), a paper on PRINTEMPS, has been published in IEEE Access. |
 
 ## Algorithm
@@ -85,7 +84,7 @@ Following additional examples are provided in [`example/`](https://github.com/sn
 ## Compilation
 A C++ program integrating PRINTEMPS can be compiled by C++17 standards compatible compilers with specifying include search path where it is installed. For instance, the example code [`example/knapsack.cpp`](https://github.com/snowberryfield/printemps/tree/master/example/knapsack.cpp) can be built by the following command using g++:
 ```
-$g++ -std=c++17 -O3 -I path/to/printemps [-fopenmp] sample/knapsack.cpp -o knapsack.exe
+$g++ -std=c++17 -O3 -I path/to/printemps [-fopenmp] sample/knapsack.cpp -o knapsack
 ```
 
 The option `-fopenmp` is required to activate parallel computation. See [Solver Option Guide](./contents/solver_option_guide.md) for details.
@@ -94,22 +93,23 @@ Following combinations of operating systems and compilers are confirmed compilat
 
 | Operating System | Compiler (version)                                                 |
 |:----------------:|:-------------------------------------------------------------------|
-|     macOS 12     | gcc (11.4.0, 12.4.0, 14.1.0_2)                                     |
-|     macOS 13     | gcc (11.4.0, 12.4.0, 14.1.0_2)                                     |
-|     macOS 12     | gcc (11.4.0, 12.4.0, 13.3.0, 14.1.0_2)                             |
+|     macOS 13     | gcc (12.4.0, 14.1.0_2)                                             |
+|     macOS 14     | gcc (12.4.0, 13.3.0, 14.1.0_2)                                     |
 |   Ubuntu 22.04   | gcc (10.5.0, 11.4.0, 12.3.0) <br /> clang (13.0.1, 14.0.0, 15.0.7) |
 |   Ubuntu 24.04   | gcc (12.3.0, 13.2.0, 14.0.1) <br /> clang (16.0.6, 17.0.6, 18.1.3) |
+|   Ubuntu 24.04   | gcc (12.3.0, 13.2.0, 14.0.1) <br /> clang (16.0.6, 17.0.6, 18.1.3) |
+|   Windows 2022   | gcc (14.2.0) on MSYS2                                              |
 
 ## Standalone Solver
 A standalone executable solver based on PRINTEMPS is also provided. It approximately solves a pure integer programming problem described as MPS (Mathematical Programming System) format file. The solver can be built by the following command:
 ```
 $make -f makefile/Makefile.application [CC=gcc CXX=g++]
 ```
-where the options `CC` and `CXX` respectively designate the paths of C and C++ compilers, which should be specified according to the user's development environment. The built solver will be generated at `build/application/Release/mps_solver.exe`.
+where the options `CC` and `CXX` respectively designate the paths of C and C++ compilers, which should be specified according to the user's development environment. The built solver will be generated at `build/application/Release/mps_solver`.
 
 The solver can be run by the following command:
 ```
-$./mps_solver.exe mps_file [-p option_file] [--accept-continuous] 
+$./mps_solver mps_file [-p option_file] [--accept-continuous] 
 ```
 where the argument `mps_file` is the path of the MPS file. The argument `-p option_file` is optional and it specifies solver options and parameters via a JSON file. If the optional flag `--accept-continuous` is activated, the solver accepts an MPS file which includes continuous variables. Then the continuous variables will be regarded as integer variables. An example of solver option JSON file is provided as [`application/dat/option.json`](https://github.com/snowberryfield/printemps/blob/master/application/dat/option.json).
 

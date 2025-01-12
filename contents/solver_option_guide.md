@@ -55,9 +55,6 @@ auto result = printemps::solver::solve(&model, option);
 |:-------------------------------------------------------|:------:|:-------:|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `is_enabled_move_evaluation_parallelization`           | `bool` | `true`  | If this option is set to `true`, evaluations of solutions will be parallelized using [OpenMP](https://www.openmp.org).                                                |
 | `is_enabled_move_update_parallelization`               | `bool` | `true`  | If this option is set to `true`, updating the neighborhood of the current solution will be parallelized using [OpenMP](https://www.openmp.org).                       |
-| `is_enabled_automatic_move_update_parallelization`     | `bool` | `true`  | If this option is set to `true`, parallelization of evaluating solutions are automatically enabled or disabled according to real-measured computational speed.        |
-| `is_enabled_automatic_move_evaluation_parallelization` | `bool` | `true`  | If this option is set to `true`, parallelization of updating neighborhood moves are automatically enabled or disabled according to real-measured computational speed. |
-
 
 ### Preprocess Options
 | Name                                                        |  Type  | Default | Description                                                                                                                                                                                                  |
