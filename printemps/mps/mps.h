@@ -307,26 +307,32 @@ struct MPS {
                                 this->constraints[name_new].sense =
                                     MPSConstraintSense::Greater;
                                 this->constraints[name_new].rhs =
-                                    this->constraints[name].rhs + fabs(range);
+                                    this->constraints[name].rhs - fabs(range);
                                 break;
                             }
                             case MPSConstraintSense::Greater: {
                                 this->constraints[name_new].sense =
                                     MPSConstraintSense::Less;
                                 this->constraints[name_new].rhs =
-                                    this->constraints[name].rhs - fabs(range);
+                                    this->constraints[name].rhs + fabs(range);
                                 break;
                             }
                             case MPSConstraintSense::Equal: {
                                 if (range > 0) {
-                                    this->constraints[name_new].sense =
+                                    this->constraints[name].sense =
                                         MPSConstraintSense::Greater;
+
+                                    this->constraints[name_new].sense =
+                                        MPSConstraintSense::Less;
                                     this->constraints[name_new].rhs =
                                         this->constraints[name].rhs +
                                         fabs(range);
                                 } else {
-                                    this->constraints[name_new].sense =
+                                    this->constraints[name].sense =
                                         MPSConstraintSense::Less;
+
+                                    this->constraints[name_new].sense =
+                                        MPSConstraintSense::Greater;
                                     this->constraints[name_new].rhs =
                                         this->constraints[name].rhs -
                                         fabs(range);
