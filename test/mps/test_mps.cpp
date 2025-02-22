@@ -38,7 +38,7 @@ TEST_F(TestMPS, initialize) {
 /*****************************************************************************/
 TEST_F(TestMPS, read_mps) {
     mps::MPS mps;
-    mps.read_mps("./test//dat/mps/test.mps");
+    mps.read_mps("./test/dat/mps/test.mps");
     EXPECT_EQ("problem", mps.name);
     EXPECT_EQ(60, mps.number_of_variables);
 
@@ -109,6 +109,66 @@ TEST_F(TestMPS, read_mps) {
     EXPECT_EQ(1, mps.number_of_lesser_constraints);
     EXPECT_EQ(1, mps.number_of_equal_constraints);
     EXPECT_EQ(1, mps.number_of_greater_constraints);
+}
+
+/*****************************************************************************/
+TEST_F(TestMPS, read_mps_with_ranges_section_plus) {
+    mps::MPS mps;
+    mps.read_mps("./test/dat/mps/test_ranges_plus.mps");
+
+    auto c_1 = mps.constraints["_C1"];
+    EXPECT_EQ(mps::MPSConstraintSense::Greater, c_1.sense);
+    EXPECT_EQ(1, c_1.rhs);
+
+    auto c_1_range = mps.constraints["_C1_range"];
+    EXPECT_EQ(mps::MPSConstraintSense::Less, c_1_range.sense);
+    EXPECT_EQ(1 + 10, c_1_range.rhs);
+
+    auto c_2 = mps.constraints["_C2"];
+    EXPECT_EQ(mps::MPSConstraintSense::Less, c_2.sense);
+    EXPECT_EQ(2, c_2.rhs);
+
+    auto c_2_range = mps.constraints["_C2_range"];
+    EXPECT_EQ(mps::MPSConstraintSense::Greater, c_2_range.sense);
+    EXPECT_EQ(2 - 10, c_2_range.rhs);
+
+    auto c_3 = mps.constraints["_C3"];
+    EXPECT_EQ(mps::MPSConstraintSense::Greater, c_3.sense);
+    EXPECT_EQ(3, c_3.rhs);
+
+    auto c_3_range = mps.constraints["_C3_range"];
+    EXPECT_EQ(mps::MPSConstraintSense::Less, c_3_range.sense);
+    EXPECT_EQ(3 + 10, c_3_range.rhs);
+}
+
+/*****************************************************************************/
+TEST_F(TestMPS, read_mps_with_ranges_section_minus) {
+    mps::MPS mps;
+    mps.read_mps("./test/dat/mps/test_ranges_minus.mps");
+
+    auto c_1 = mps.constraints["_C1"];
+    EXPECT_EQ(mps::MPSConstraintSense::Less, c_1.sense);
+    EXPECT_EQ(1, c_1.rhs);
+
+    auto c_1_range = mps.constraints["_C1_range"];
+    EXPECT_EQ(mps::MPSConstraintSense::Greater, c_1_range.sense);
+    EXPECT_EQ(1 + (-10), c_1_range.rhs);
+
+    auto c_2 = mps.constraints["_C2"];
+    EXPECT_EQ(mps::MPSConstraintSense::Less, c_2.sense);
+    EXPECT_EQ(2, c_2.rhs);
+
+    auto c_2_range = mps.constraints["_C2_range"];
+    EXPECT_EQ(mps::MPSConstraintSense::Greater, c_2_range.sense);
+    EXPECT_EQ(2 - 10, c_2_range.rhs);
+
+    auto c_3 = mps.constraints["_C3"];
+    EXPECT_EQ(mps::MPSConstraintSense::Greater, c_3.sense);
+    EXPECT_EQ(3, c_3.rhs);
+
+    auto c_3_range = mps.constraints["_C3_range"];
+    EXPECT_EQ(mps::MPSConstraintSense::Less, c_3_range.sense);
+    EXPECT_EQ(3 + 10, c_3_range.rhs);
 }
 
 }  // namespace

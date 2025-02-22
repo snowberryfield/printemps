@@ -154,7 +154,7 @@ struct Argparser {
             << option::GeneralOptionConstant::DEFAULT_TIME_MAX << ")"
             << std::endl;
         std::cout  //
-            << "  -v VERBOSE: Specity the Log level of standard output (Off, "
+            << "  -v VERBOSE: Specity the log level of standard output (Off, "
                "Warning, Outer, Inner, or Full). (default: "
             << option::verbose::VerboseInverseMap.at(
                    option::OutputOptionConstant::DEFAULT_VERBOSE)
