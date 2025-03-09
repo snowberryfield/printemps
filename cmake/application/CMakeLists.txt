@@ -20,9 +20,15 @@ if(${CMAKE_BUILD_TYPE} STREQUAL "Release")
         -Wextra
         -Wno-error=missing-field-initializers
         -pthread
-        -march=native
-        -mtune=native
     )
+
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES "arm64|aarch64")
+        # for Apple Silicon
+        add_compile_options(-mcpu=native)
+    else()
+        # for x86_64
+        add_compile_options(-march=native -mtune=native)
+    endif()
 else() # Debug
     add_compile_options(
         -std=c++17
