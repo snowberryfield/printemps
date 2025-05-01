@@ -340,7 +340,6 @@ def main() -> None:
     solution_file_name = args.input_file_name
     with open(solution_file_name, "r") as f:
         solution_object = json.load(f)
-        f.close()
 
     visualizer = Visualizer(
         solution_object,
