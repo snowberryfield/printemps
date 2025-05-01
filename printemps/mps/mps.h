@@ -252,7 +252,7 @@ struct MPS {
                                         __FILE__, __LINE__, __func__,
                                         "An undefined constraint or objective "
                                         "function "
-                                        "name is specified in RHS section."));
+                                        "name is specified in COLUMNS section."));
                             }
                         }
                     }
