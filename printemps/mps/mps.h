@@ -142,10 +142,7 @@ struct MPS {
             switch (read_mode) {
                 case MPSReadMode::Name: {
                     if (ITEMS_SIZE < 2) {
-                        throw std::runtime_error(utility::format_error_location(
-                            __FILE__, __LINE__, __func__,
-                            "The MPS file has something wrong in NAME "
-                            "section."));
+                        this->name = "";
                     } else {
                         this->name = items[1];
                     }
