@@ -28,11 +28,9 @@ def run_batch(executable: str, mps_list: list, option_file_name: str) -> list:
 
         with open("status.json", "r") as f:
             status = json.load(f)
-            f.close()
 
         with open("incumbent.json", "r") as f:
             incumbent = json.load(f)
-            f.close()
 
         result = {
             "instance": {
