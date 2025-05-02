@@ -364,10 +364,10 @@ struct MPS {
                     category = items.front();
                     name     = items[2];
                     if (this->variables.find(name) == this->variables.end()) {
-                        throw std::runtime_error(utility::format_error_location(
-                            __FILE__, __LINE__, __func__,
-                            "An undefined variable name is specified in RHS "
-                            "section."));
+                        this->variables[name].sense = MPSVariableSense::Continuous;
+                        this->variables[name].name  = name;
+                        this->variable_names.push_back(name);
+                        this->number_of_variables++;
                     }
                     if (ITEMS_SIZE == 3) {
                         if (category == "FR") {
