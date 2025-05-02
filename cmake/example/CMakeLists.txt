@@ -9,6 +9,8 @@ if(OpenMP_FOUND)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 endif()
 
+option(LINK_STATIC OFF)
+
 # ##############################################################################
 # switch compiler options according to CMAKE_BUILD_TYPE
 # ##############################################################################
@@ -86,6 +88,14 @@ target_include_directories(
     sudoku
     PRIVATE ${TOP_DIR}/printemps/
 )
+
+if(LINK_STATIC)
+    target_link_options(simple_1 PRIVATE -static-libgcc -static-libstdc++ -static)
+    target_link_options(simple_2 PRIVATE -static-libgcc -static-libstdc++ -static)
+    target_link_options(knapsack PRIVATE -static-libgcc -static-libstdc++ -static)
+    target_link_options(bin_packing PRIVATE -static-libgcc -static-libstdc++ -static)
+    target_link_options(sudoku PRIVATE -static-libgcc -static-libstdc++ -static)
+endif()
 
 # ##############################################################################
 # END
