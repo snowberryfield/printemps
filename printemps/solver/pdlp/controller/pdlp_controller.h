@@ -19,6 +19,7 @@ class PDLPController {
     GlobalState<T_Variable, T_Expression>*             m_global_state_ptr;
     solution::SparseSolution<T_Variable, T_Expression> m_initial_solution;
     utility::TimeKeeper                                m_time_keeper;
+    std::optional<std::function<bool()>>               m_check_interrupt;
     option::Option                                     m_option;
 
     PDLPControllerResult m_result;
@@ -76,12 +77,20 @@ class PDLPController {
         const solution::SparseSolution<T_Variable, T_Expression>&
                                    a_INITIAL_SOLUTION,  //
         const utility::TimeKeeper& a_TIME_KEEPER,       //
+        const std::optional<std::function<bool()>>&
+                                   a_CHECK_INTERRUPT,   //
         const option::Option&      a_OPTION) {
         m_model_ptr        = a_model_ptr;
         m_global_state_ptr = a_global_state_ptr;
         m_initial_solution = a_INITIAL_SOLUTION;
         m_time_keeper      = a_TIME_KEEPER;
+        m_check_interrupt  = a_CHECK_INTERRUPT;
         m_option           = a_OPTION;
+    }
+
+    /*************************************************************************/
+    inline bool check_interrupt(void) {
+        return m_check_interrupt.has_value() && m_check_interrupt.value()();
     }
 
     /*************************************************************************/
@@ -111,6 +120,18 @@ class PDLPController {
     }
 
     /*************************************************************************/
+    inline bool satisfy_interrupted_skip_condition(
+        const bool a_IS_ENABLED_PRINT) {
+        if (this->check_interrupt()) {
+            utility::print_message(  //
+                "PDLP was skipped because of interruption.",
+                a_IS_ENABLED_PRINT);
+            return true;
+        }
+        return false;
+    }
+
+    /*************************************************************************/
     inline bool satisfy_time_over_skip_condition(
         const double a_TOTAL_ELAPSED_TIME, const bool a_IS_ENABLED_PRINT) {
         if (a_TOTAL_ELAPSED_TIME > this->m_option.general.time_max) {
@@ -130,6 +151,15 @@ class PDLPController {
          * Skip PDLP if the problem has already been solved.
          */
         if (this->satisfy_solved_skip_condition(  //
+                this->m_option.output.verbose >= option::verbose::Outer)) {
+            m_result.initialize();
+            return;
+        }
+
+        /**
+         * Skip PDLP if interrupted.
+         */
+        if (this->satisfy_interrupted_skip_condition(
                 this->m_option.output.verbose >= option::verbose::Outer)) {
             m_result.initialize();
             return;
