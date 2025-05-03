@@ -64,7 +64,6 @@ TEST_F(TestConstraint, constructor_arg_expression) {
         EXPECT_TRUE(constraint.is_enabled());
         EXPECT_TRUE(constraint.is_less_or_equal());
         EXPECT_FALSE(constraint.is_greater_or_equal());
-        EXPECT_FALSE(constraint.has_margin());
     }
 
     /// Equal
@@ -86,7 +85,6 @@ TEST_F(TestConstraint, constructor_arg_expression) {
         EXPECT_TRUE(constraint.is_enabled());
         EXPECT_TRUE(constraint.is_less_or_equal());
         EXPECT_TRUE(constraint.is_greater_or_equal());
-        EXPECT_FALSE(constraint.has_margin());
     }
 
     /// Greater
@@ -109,7 +107,6 @@ TEST_F(TestConstraint, constructor_arg_expression) {
         EXPECT_TRUE(constraint.is_enabled());
         EXPECT_FALSE(constraint.is_less_or_equal());
         EXPECT_TRUE(constraint.is_greater_or_equal());
-        EXPECT_FALSE(constraint.has_margin());
     }
 
     /// Not Integer(1)
