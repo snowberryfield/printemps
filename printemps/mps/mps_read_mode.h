@@ -12,6 +12,7 @@ enum class MPSReadMode {
     Initial,
     Name,
     Objsense,
+    Objname,
     Rows,
     Columns,
     Rhs,

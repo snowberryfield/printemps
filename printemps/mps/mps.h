@@ -119,6 +119,9 @@ struct MPS {
             } else if (items.front() == "OBJSENSE" && ITEMS_SIZE == 1) {
                 read_mode = MPSReadMode::Objsense;
                 continue;
+            } else if (items.front() == "OBJNAME" && ITEMS_SIZE == 1) {
+                read_mode = MPSReadMode::Objname;
+                continue;
             } else if (items.front() == "ROWS" && ITEMS_SIZE == 1) {
                 read_mode = MPSReadMode::Rows;
                 continue;
@@ -180,8 +183,20 @@ struct MPS {
                     }
                     break;
                 }
+                case MPSReadMode::Objname: {
+                    if (ITEMS_SIZE > 1) {
+                        throw std::runtime_error(utility::format_error_location(
+                            __FILE__, __LINE__, __func__,
+                            "The MPS file has something wrong in OBJNAME "
+                            "section."));
+                    } else {
+                        this->objective.name = items.front();
+                    }
+                    break;
+                }
                 case MPSReadMode::Rows: {
-                    if (items.front() == "N") {
+                    if (items.front() == "N" &&
+                        (this->objective.name.empty() || this->objective.name == items[1])) {
                         name                 = items[1];
                         this->objective.name = name;
                     } else if (items.front() == "L") {
