@@ -9,6 +9,8 @@ if(OpenMP_FOUND)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 endif()
 
+option(LINK_STATIC OFF)
+
 # ##############################################################################
 # switch compiler options according to CMAKE_BUILD_TYPE
 # ##############################################################################
@@ -53,6 +55,10 @@ target_include_directories(
     PRIVATE ${TOP_DIR}/printemps/
     PRIVATE ${TOP_DIR}/external/include/
 )
+
+if(LINK_STATIC)
+    target_link_options(mps_solver PRIVATE -static-libgcc -static-libstdc++ -static)
+endif()
 
 # ##############################################################################
 # END
