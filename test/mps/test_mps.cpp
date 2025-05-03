@@ -36,9 +36,10 @@ TEST_F(TestMPS, initialize) {
 }
 
 /*****************************************************************************/
-TEST_F(TestMPS, read_mps) {
+TEST_F(TestMPS, read_mps_00) {
+    // Default case
     mps::MPS mps;
-    mps.read_mps("./test/dat/mps/test.mps");
+    mps.read_mps("./test/dat/mps/test_00.mps");
     EXPECT_EQ("problem", mps.name);
     EXPECT_EQ(60, mps.number_of_variables);
 
@@ -112,9 +113,9 @@ TEST_F(TestMPS, read_mps) {
 }
 
 /*****************************************************************************/
-TEST_F(TestMPS, read_mps_with_ranges_section_plus) {
-    mps::MPS mps;
-    mps.read_mps("./test/dat/mps/test_ranges_plus.mps");
+TEST_F(TestMPS, read_mps_01) {
+    // Parse a MPS file including the RANGE section with positive range values.
+    mps::MPS mps("./test/dat/mps/test_01.mps");
 
     auto c_1 = mps.constraints["_C1"];
     EXPECT_EQ(mps::MPSConstraintSense::Greater, c_1.sense);
@@ -142,9 +143,9 @@ TEST_F(TestMPS, read_mps_with_ranges_section_plus) {
 }
 
 /*****************************************************************************/
-TEST_F(TestMPS, read_mps_with_ranges_section_minus) {
-    mps::MPS mps;
-    mps.read_mps("./test/dat/mps/test_ranges_minus.mps");
+TEST_F(TestMPS, read_mps_02) {
+    // Parse a MPS file including the RANGE section with negative range values.
+    mps::MPS mps("./test/dat/mps/test_02.mps");
 
     auto c_1 = mps.constraints["_C1"];
     EXPECT_EQ(mps::MPSConstraintSense::Less, c_1.sense);
@@ -169,6 +170,108 @@ TEST_F(TestMPS, read_mps_with_ranges_section_minus) {
     auto c_3_range = mps.constraints["_C3_range"];
     EXPECT_EQ(mps::MPSConstraintSense::Less, c_3_range.sense);
     EXPECT_EQ(3 + 10, c_3_range.rhs);
+}
+
+/*****************************************************************************/
+TEST_F(TestMPS, read_mps_03) {
+    // Parse a MPS file including variables not appear in COLUMNS section but in
+    // the BOUNDS section.
+    mps::MPS mps("./test/dat/mps/test_03.mps");
+    EXPECT_EQ("problem", mps.name);
+
+    auto x = mps.variables["x"];
+    EXPECT_EQ("x", x.name);
+    EXPECT_EQ(mps::MPSVariableSense::Continuous, x.sense);
+}
+
+/*****************************************************************************/
+TEST_F(TestMPS, read_mps_04) {
+    // Parse a MPS file without problem name.
+    mps::MPS mps("./test/dat/mps/test_04.mps");
+    EXPECT_EQ("", mps.name);
+}
+
+/*****************************************************************************/
+TEST_F(TestMPS, read_mps_05) {
+    // Parse a MPS file including the OBJNAME section.
+    {
+        mps::MPS mps("./test/dat/mps/test_05a.mps");
+        EXPECT_EQ("foo", mps.objective.name);
+    }
+    {
+        // NG case
+        mps::MPS mps;
+        ASSERT_THROW(mps.read_mps("./test/dat/mps/test_05b.mps"),
+                     std::runtime_error);
+    }
+}
+
+/*****************************************************************************/
+TEST_F(TestMPS, read_mps_06a) {
+    // Parse a MPS file including the OBJSENSE section for minimization.
+    {
+        mps::MPS mps("./test/dat/mps/test_06a.mps");
+        EXPECT_TRUE(mps.is_minimization);
+    }
+
+    {
+        mps::MPS mps("./test/dat/mps/test_06b.mps");
+        EXPECT_TRUE(mps.is_minimization);
+    }
+
+    {
+        mps::MPS mps("./test/dat/mps/test_06c.mps");
+        EXPECT_TRUE(mps.is_minimization);
+    }
+
+    {
+        mps::MPS mps("./test/dat/mps/test_06d.mps");
+        EXPECT_TRUE(mps.is_minimization);
+    }
+
+    {
+        mps::MPS mps("./test/dat/mps/test_06e.mps");
+        EXPECT_TRUE(mps.is_minimization);
+    }
+
+    {
+        mps::MPS mps("./test/dat/mps/test_06f.mps");
+        EXPECT_TRUE(mps.is_minimization);
+    }
+}
+
+/*****************************************************************************/
+TEST_F(TestMPS, read_mps_07a) {
+    // Parse a MPS file including the OBJSENSE section for maximization.
+    {
+        mps::MPS mps("./test/dat/mps/test_07a.mps");
+        EXPECT_FALSE(mps.is_minimization);
+    }
+
+    {
+        mps::MPS mps("./test/dat/mps/test_07b.mps");
+        EXPECT_FALSE(mps.is_minimization);
+    }
+
+    {
+        mps::MPS mps("./test/dat/mps/test_07c.mps");
+        EXPECT_FALSE(mps.is_minimization);
+    }
+
+    {
+        mps::MPS mps("./test/dat/mps/test_07d.mps");
+        EXPECT_FALSE(mps.is_minimization);
+    }
+
+    {
+        mps::MPS mps("./test/dat/mps/test_07e.mps");
+        EXPECT_FALSE(mps.is_minimization);
+    }
+
+    {
+        mps::MPS mps("./test/dat/mps/test_07f.mps");
+        EXPECT_FALSE(mps.is_minimization);
+    }
 }
 
 }  // namespace

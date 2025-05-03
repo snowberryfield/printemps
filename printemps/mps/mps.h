@@ -177,8 +177,7 @@ struct MPS {
                                 utility::format_error_location(
                                     __FILE__, __LINE__, __func__,
                                     "The MPS file has something wrong in "
-                                    "OBJSENSE "
-                                    "section."));
+                                    "OBJSENSE section."));
                         }
                     }
                     break;
@@ -196,7 +195,8 @@ struct MPS {
                 }
                 case MPSReadMode::Rows: {
                     if (items.front() == "N" &&
-                        (this->objective.name.empty() || this->objective.name == items[1])) {
+                        (this->objective.name.empty() ||
+                         this->objective.name == items[1])) {
                         name                 = items[1];
                         this->objective.name = name;
                     } else if (items.front() == "L") {
@@ -263,8 +263,8 @@ struct MPS {
                                     utility::format_error_location(
                                         __FILE__, __LINE__, __func__,
                                         "An undefined constraint or objective "
-                                        "function "
-                                        "name is specified in COLUMNS section."));
+                                        "function name is specified in COLUMNS "
+                                        "section."));
                             }
                         }
                     }
@@ -376,8 +376,9 @@ struct MPS {
                     category = items.front();
                     name     = items[2];
                     if (this->variables.find(name) == this->variables.end()) {
-                        this->variables[name].sense = MPSVariableSense::Continuous;
-                        this->variables[name].name  = name;
+                        this->variables[name].sense =
+                            MPSVariableSense::Continuous;
+                        this->variables[name].name = name;
                         this->variable_names.push_back(name);
                         this->number_of_variables++;
                     }

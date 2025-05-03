@@ -1,0 +1,8 @@
+NAME          problem
+OBJSENSE
+ max
+ROWS
+COLUMNS
+RHS
+BOUNDS
+ENDATA

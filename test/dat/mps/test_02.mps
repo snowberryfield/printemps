@@ -1,4 +1,3 @@
-*SENSE:Minimize
 NAME          problem
 ROWS
  N  OBJ
