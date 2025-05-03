@@ -639,7 +639,6 @@ def main() -> None:
 
     with open(trend_file_name, "r") as f:
         instance_name = f.readline().split()[-1]
-        f.close()
 
     visualize_trend(trend_data, instance_name, output_file_name=args.output)
 
