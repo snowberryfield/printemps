@@ -24,6 +24,7 @@ class Solver {
     GlobalState<T_Variable, T_Expression>              m_global_state;
     solution::SparseSolution<T_Variable, T_Expression> m_current_solution;
     utility::TimeKeeper                                m_time_keeper;
+    std::optional<std::function<bool()>>               m_check_interrupt;
 
     option::Option m_option_original;
     option::Option m_option;
@@ -148,6 +149,7 @@ class Solver {
                                 &m_global_state,     //
                                 m_current_solution,  //
                                 m_time_keeper,       //
+                                m_check_interrupt,   //
                                 m_option);
         m_pdlp_controller.run();
     }
@@ -158,6 +160,7 @@ class Solver {
                                          &m_global_state,     //
                                          m_current_solution,  //
                                          m_time_keeper,       //
+                                         m_check_interrupt,   //
                                          m_option);
         m_lagrange_dual_controller.run();
         m_current_solution = m_global_state.incumbent_holder
@@ -171,6 +174,7 @@ class Solver {
                                         &m_global_state,     //
                                         m_current_solution,  //
                                         m_time_keeper,       //
+                                        m_check_interrupt,   //
                                         m_option);
         m_local_search_controller.run();
         m_current_solution = m_global_state.incumbent_holder
@@ -184,6 +188,7 @@ class Solver {
                                        &m_global_state,     //
                                        m_current_solution,  //
                                        m_time_keeper,       //
+                                       m_check_interrupt,   //
                                        m_option);
         m_tabu_search_controller.run();
         m_current_solution = m_global_state.incumbent_holder
@@ -213,6 +218,7 @@ class Solver {
     /*************************************************************************/
     inline void initialize(void) {
         m_model_ptr = nullptr;
+        m_check_interrupt = std::nullopt;
         m_global_state.initialize();
 
         m_current_solution.initialize();
@@ -248,6 +254,16 @@ class Solver {
         m_model_ptr       = a_model_ptr;
         m_option_original = a_OPTION;
         m_option          = a_OPTION;
+    }
+
+    /*************************************************************************/
+    inline void set_check_interrupt(const std::optional<std::function<bool(void)>>& a_check_interrupt) {
+        m_check_interrupt = a_check_interrupt;
+    }
+
+    /*************************************************************************/
+    inline void clear_check_interrupt(void) {
+        m_check_interrupt.reset();
     }
 
     /*************************************************************************/

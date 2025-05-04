@@ -39,12 +39,15 @@ class TabuSearchController
         const solution::SparseSolution<T_Variable, T_Expression>&
                                    a_INITIAL_SOLUTION,  //
         const utility::TimeKeeper& a_TIME_KEEPER,       //
+        const std::optional<std::function<bool()>>&
+                                   a_CHECK_INTERRUPT,   //
         const option::Option&      a_OPTION) {
         this->initialize();
         this->setup(a_model_ptr,         //
                     a_global_state_ptr,  //
                     a_INITIAL_SOLUTION,  //
                     a_TIME_KEEPER,       //
+                    a_CHECK_INTERRUPT,   //
                     a_OPTION);
     }
 
@@ -79,6 +82,18 @@ class TabuSearchController
     inline void postprocess(void) {
         m_result = TabuSearchControllerResult<T_Variable, T_Expression>(
             m_state_manager.state());
+    }
+
+    /*************************************************************************/
+    inline bool satisfy_interrupted_terminate_condition(
+        const bool a_IS_ENABLED_PRINT) {
+        if (this->check_interrupt()) {
+            utility::print_message(  //
+                "Outer loop was terminated because of interruption.",
+                a_IS_ENABLED_PRINT);
+            return true;
+        }
+        return false;
     }
 
     /*************************************************************************/
@@ -873,6 +888,15 @@ class TabuSearchController
 
         while (true) {
             m_state_manager.set_total_elapsed_time(this->m_time_keeper.clock());
+
+            /**
+             * Terminate the loop if interrupted
+             */
+            if (this->satisfy_interrupted_terminate_condition(
+                    this->m_option.output.verbose >= option::verbose::Outer)) {
+                break;
+            }
+
             /**
              * Terminate the loop if the time is over.
              */

@@ -7,8 +7,16 @@
 #define PRINTEMPS_STANDALONE_MPS_SOLVER_H__
 
 #include "argparser.h"
+#include <csignal>
 
 namespace printemps::standalone {
+
+inline bool interrupted = false;
+
+inline void interrupt_handler([[maybe_unused]] int signum) {
+    interrupted = true;
+}
+
 /*****************************************************************************/
 class MPSSolver {
    private:
@@ -165,6 +173,12 @@ class MPSSolver {
                     m_argparser.initial_solution_file_name);
             m_model.import_solution(INITIAL_SOLUTION);
         }
+
+        signal(SIGINT, interrupt_handler);
+        signal(SIGTERM, interrupt_handler);
+#ifndef _WIN32
+        signal(SIGXCPU, interrupt_handler);
+#endif
     }
 
     /*************************************************************************/
@@ -179,6 +193,7 @@ class MPSSolver {
         } else {
             solver.setup(&m_model, m_option);
         }
+        solver.set_check_interrupt([]() { return interrupted; } );
         auto result = solver.solve();
 
         /**

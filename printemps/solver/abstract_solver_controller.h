@@ -17,6 +17,7 @@ class AbstractSolverController {
     GlobalState<T_Variable, T_Expression>*             m_global_state_ptr;
     solution::SparseSolution<T_Variable, T_Expression> m_initial_solution;
     utility::TimeKeeper                                m_time_keeper;
+    std::optional<std::function<bool()>>               m_check_interrupt;
     option::Option                                     m_option;
 
     /*************************************************************************/
@@ -77,11 +78,14 @@ class AbstractSolverController {
         const solution::SparseSolution<T_Variable, T_Expression>&
                                    a_INITIAL_SOLUTION,  //
         const utility::TimeKeeper& a_TIME_KEEPER,       //
+        const std::optional<std::function<bool()>>&
+                                   a_CHECK_INTERRUPT,   //
         const option::Option&      a_OPTION) {
         this->setup(a_model_ptr,         //
                     a_global_state_ptr,  //
                     a_INITIAL_SOLUTION,  //
                     a_TIME_KEEPER,       //
+                    a_CHECK_INTERRUPT,   //
                     a_OPTION);
     }
 
@@ -101,11 +105,14 @@ class AbstractSolverController {
         const solution::SparseSolution<T_Variable, T_Expression>&
                                    a_INITIAL_SOLUTION,  //
         const utility::TimeKeeper& a_TIME_KEEPER,       //
+        const std::optional<std::function<bool()>>&
+                                   a_CHECK_INTERRUPT,   //
         const option::Option&      a_OPTION) {
         m_model_ptr        = a_model_ptr;
         m_global_state_ptr = a_global_state_ptr;
         m_initial_solution = a_INITIAL_SOLUTION;
         m_time_keeper      = a_TIME_KEEPER;
+        m_check_interrupt  = a_CHECK_INTERRUPT;
         m_option           = a_OPTION;
     }
 
@@ -144,6 +151,11 @@ class AbstractSolverController {
         search_tree.update(
             incumbent_solution_archive,
             incumbent_holder.global_augmented_incumbent_solution().to_sparse());
+    }
+
+    /*************************************************************************/
+    inline bool check_interrupt(void) {
+        return m_check_interrupt.has_value() && m_check_interrupt.value()();
     }
 
     /*************************************************************************/

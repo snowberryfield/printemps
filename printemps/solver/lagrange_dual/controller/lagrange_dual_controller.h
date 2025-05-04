@@ -31,12 +31,15 @@ class LagrangeDualController
         const solution::SparseSolution<T_Variable, T_Expression>&
                                    a_INITIAL_SOLUTION,  //
         const utility::TimeKeeper& a_TIME_KEEPER,       //
+        const std::optional<std::function<bool()>>&
+                                   a_CHECK_INTERRUPT,   //
         const option::Option&      a_OPTION) {
         this->initialize();
         this->setup(a_model_ptr,         //
                     a_global_state_ptr,  //
                     a_INITIAL_SOLUTION,  //
                     a_TIME_KEEPER,       //
+                    a_CHECK_INTERRUPT,   //
                     a_OPTION);
     }
 
@@ -56,6 +59,18 @@ class LagrangeDualController
                 "Lagrange dual was skipped because it is not applicable to "
                 "problems which include selection variables or dependent "
                 "variables.",
+                a_IS_ENABLED_PRINT);
+            return true;
+        }
+        return false;
+    }
+
+    /*************************************************************************/
+    inline bool satisfy_interrupted_skip_condition(
+        const bool a_IS_ENABLED_PRINT) {
+        if (this->check_interrupt()) {
+            utility::print_message(  //
+                "Solving Lagrange dual was skipped because of interruption.",
                 a_IS_ENABLED_PRINT);
             return true;
         }
@@ -97,6 +112,15 @@ class LagrangeDualController
          * Skip Lagrange dual if it is not applicable.
          */
         if (this->satisfy_not_applicable_skip_condition(  //
+                this->m_option.output.verbose >= option::verbose::Outer)) {
+            m_result.initialize();
+            return;
+        }
+
+        /**
+         * Skip Lagrange dual if interrupted.
+         */
+        if (this->satisfy_interrupted_skip_condition(
                 this->m_option.output.verbose >= option::verbose::Outer)) {
             m_result.initialize();
             return;
