@@ -3,12 +3,12 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_STANDALONE_ARG_PARSER_H__
-#define PRINTEMPS_STANDALONE_ARG_PARSER_H__
+#ifndef PRINTEMPS_STANDALONE_MPS_SOLVER_MPS_SOLVER_ARG_PARSER_H__
+#define PRINTEMPS_STANDALONE_MPS_SOLVER_MPS_SOLVER_ARG_PARSER_H__
 
-namespace printemps::standalone {
+namespace printemps::standalone::mps_solver {
 /*****************************************************************************/
-struct ArgparserConstant {
+struct MPSSolverArgparserConstant {
     static constexpr int  DEFAULT_MINIMUM_COMMON_ELEMENT           = 5;
     static constexpr bool DEFAULT_ACCEPT_CONTINUOUS_VARIABLES      = false;
     static constexpr bool DEFAULT_EXTRACT_FLIPPABLE_VARIABLE_PAIRS = false;
@@ -16,7 +16,6 @@ struct ArgparserConstant {
     static constexpr bool DEFAULT_EXPORT_JSON_INSTANCE             = false;
     static constexpr bool DEFAULT_IS_MINIMIZATION_EXPLICIT         = false;
     static constexpr bool DEFAULT_IS_MAXIMIZATION_EXPLICIT         = false;
-    static constexpr bool DEFAULT_FIND_FEASIBLE                    = false;
 
     static constexpr bool DEFAULT_IS_ITERATION_MAX_GIVEN = false;
     static constexpr bool DEFAULT_IS_TIME_MAX_GIVEN      = false;
@@ -24,7 +23,7 @@ struct ArgparserConstant {
 };
 
 /*****************************************************************************/
-struct Argparser {
+struct MPSSolverArgparser {
     std::string mps_file_name;
     std::string option_file_name;
     std::string initial_solution_file_name;
@@ -48,7 +47,7 @@ struct Argparser {
     bool                     is_verbose_given;
 
     /*************************************************************************/
-    Argparser(void) {
+    MPSSolverArgparser(void) {
         this->initialize();
     }
 
@@ -62,19 +61,19 @@ struct Argparser {
         this->selection_constraint_file_name.clear();
         this->flippable_variable_pair_file_name.clear();
         this->minimum_common_element =
-            ArgparserConstant::DEFAULT_MINIMUM_COMMON_ELEMENT;
+            MPSSolverArgparserConstant::DEFAULT_MINIMUM_COMMON_ELEMENT;
         this->accept_continuous_variables =
-            ArgparserConstant::DEFAULT_ACCEPT_CONTINUOUS_VARIABLES;
-        this->extract_flippable_variable_pairs =
-            ArgparserConstant::DEFAULT_EXTRACT_FLIPPABLE_VARIABLE_PAIRS;
+            MPSSolverArgparserConstant::DEFAULT_ACCEPT_CONTINUOUS_VARIABLES;
+        this->extract_flippable_variable_pairs = MPSSolverArgparserConstant::
+            DEFAULT_EXTRACT_FLIPPABLE_VARIABLE_PAIRS;
         this->include_mps_loading_time =
-            ArgparserConstant::DEFAULT_INCLUDE_MPS_LOADING_TIME;
+            MPSSolverArgparserConstant::DEFAULT_INCLUDE_MPS_LOADING_TIME;
         this->export_json_instance =
-            ArgparserConstant::DEFAULT_EXPORT_JSON_INSTANCE;
+            MPSSolverArgparserConstant::DEFAULT_EXPORT_JSON_INSTANCE;
         this->is_minimization_explicit =
-            ArgparserConstant::DEFAULT_IS_MINIMIZATION_EXPLICIT;
+            MPSSolverArgparserConstant::DEFAULT_IS_MINIMIZATION_EXPLICIT;
         this->is_maximization_explicit =
-            ArgparserConstant::DEFAULT_IS_MAXIMIZATION_EXPLICIT;
+            MPSSolverArgparserConstant::DEFAULT_IS_MAXIMIZATION_EXPLICIT;
 
         this->iteration_max =
             option::GeneralOptionConstant::DEFAULT_ITERATION_MAX;
@@ -82,9 +81,11 @@ struct Argparser {
         this->verbose  = option::OutputOptionConstant::DEFAULT_VERBOSE;
 
         this->is_iteration_max_given =
-            ArgparserConstant::DEFAULT_IS_ITERATION_MAX_GIVEN;
-        this->is_time_max_given = ArgparserConstant::DEFAULT_IS_TIME_MAX_GIVEN;
-        this->is_verbose_given  = ArgparserConstant::DEFAULT_IS_VERBOSE_GIVEN;
+            MPSSolverArgparserConstant::DEFAULT_IS_ITERATION_MAX_GIVEN;
+        this->is_time_max_given =
+            MPSSolverArgparserConstant::DEFAULT_IS_TIME_MAX_GIVEN;
+        this->is_verbose_given =
+            MPSSolverArgparserConstant::DEFAULT_IS_VERBOSE_GIVEN;
     }
 
     /*************************************************************************/
@@ -112,7 +113,6 @@ struct Argparser {
                   << "[--export-json-instance] "
                   << "[--minimization] "
                   << "[--maximization] "
-                  << "[--find-feasible] "
                   << "mps_file" << std::endl;
         std::cout << std::endl;
         std::cout  //
@@ -141,7 +141,7 @@ struct Argparser {
             << "  -c MINIMUM_COMMON_ELEMENT: Specify the number of minimum "
                "common element between two constraints, which is used as the "
                "threshold for extracting flippable variable pairs. (default: "
-            << ArgparserConstant::DEFAULT_MINIMUM_COMMON_ELEMENT << ")"
+            << MPSSolverArgparserConstant::DEFAULT_MINIMUM_COMMON_ELEMENT << ")"
             << std::endl;
         std::cout  //
             << "  -k ITERATION_MAX: Specify the allowed maximum number of "
@@ -184,10 +184,6 @@ struct Argparser {
             << "  --maximization (or --maximize, --max): Maximize the "
                "objective function value regardless of the settings in the MPS "
                "file."
-            << std::endl;
-        std::cout  //
-            << "  --find-feasible: Terminate the computation when the solver "
-               "finds a feasible solution."
             << std::endl;
     }
 
@@ -257,7 +253,7 @@ struct Argparser {
         }
     }
 };
-}  // namespace printemps::standalone
+}  // namespace printemps::standalone::mps_solver
 #endif
 /*****************************************************************************/
 // END

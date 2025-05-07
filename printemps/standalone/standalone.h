@@ -6,7 +6,7 @@
 #ifndef PRINTEMPS_STANDALONE_H__
 #define PRINTEMPS_STANDALONE_H__
 
-#include "mps_solver.h"
+#include "mps_solver/mps_solver.h"
 
 #endif
 /*****************************************************************************/
