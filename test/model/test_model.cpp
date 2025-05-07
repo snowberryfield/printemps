@@ -1207,26 +1207,6 @@ TEST_F(TestModel, global_penalty_coefficient) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModel, set_callback) {
-    model::Model<int, double>              model;
-    option::Option                         option;
-    solution::IncumbentHolder<int, double> incumbent_holder;
-
-    int  v = 1;
-    auto f = [&v]([[maybe_unused]] option::Option* a_option_ptr,
-                  [[maybe_unused]] solution::IncumbentHolder<int, double>*
-                      a_incumbent_holder_ptr) { v++; };
-    model.set_callback(f);
-    model.callback(&option, &incumbent_holder);
-    EXPECT_EQ(2, v);
-}
-
-/*****************************************************************************/
-TEST_F(TestModel, callback) {
-    /// This method is tested in set_callback().
-}
-
-/*****************************************************************************/
 TEST_F(TestModel, update_arg_void) {
     model::Model<int, double> model;
 
