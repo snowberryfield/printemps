@@ -7,7 +7,7 @@
 #include <printemps.h>
 
 int main(const int argc, const char *argv[]) {
-    printemps::standalone::MPSSolver(argc, argv).run();
+    printemps::standalone::mps_solver::MPSSolver(argc, argv).run();
     return 0;
 }
 /*****************************************************************************/

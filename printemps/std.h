@@ -12,6 +12,7 @@
 #include <cctype>
 #include <chrono>
 #include <cmath>
+#include <csignal>
 #include <cstdlib>
 #include <ctime>
 #include <deque>

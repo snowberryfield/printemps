@@ -3,16 +3,13 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_STANDALONE_MPS_SOLVER_H__
-#define PRINTEMPS_STANDALONE_MPS_SOLVER_H__
+#ifndef PRINTEMPS_STANDALONE_MPS_SOLVER_MPS_SOLVER_H__
+#define PRINTEMPS_STANDALONE_MPS_SOLVER_MPS_SOLVER_H__
 
-#include "argparser.h"
-#include <csignal>
+#include "mps_solver_argparser.h"
 
-namespace printemps::standalone {
-
+namespace printemps::standalone::mps_solver {
 inline bool interrupted = false;
-
 inline void interrupt_handler([[maybe_unused]] int signum) {
     interrupted = true;
 }
@@ -20,7 +17,7 @@ inline void interrupt_handler([[maybe_unused]] int signum) {
 /*****************************************************************************/
 class MPSSolver {
    private:
-    Argparser                 m_argparser;
+    MPSSolverArgparser        m_argparser;
     model::IPModel            m_model;
     printemps::option::Option m_option;
     utility::TimeKeeper       m_time_keeper;
@@ -193,7 +190,7 @@ class MPSSolver {
         } else {
             solver.setup(&m_model, m_option);
         }
-        solver.set_check_interrupt([]() { return interrupted; } );
+        solver.set_check_interrupt([]() { return interrupted; });
         auto result = solver.solve();
 
         /**
@@ -252,11 +249,11 @@ class MPSSolver {
     }
 
     /*************************************************************************/
-    inline const Argparser &argparser(void) const {
+    inline const MPSSolverArgparser &argparser(void) const {
         return m_argparser;
     }
 };
-}  // namespace printemps::standalone
+}  // namespace printemps::standalone::mps_solver
 #endif
 /*****************************************************************************/
 // END
