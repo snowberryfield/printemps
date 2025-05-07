@@ -39,6 +39,7 @@ class MPSSolver {
         m_argparser.initialize();
         m_model.initialize();
         m_option.initialize();
+        m_time_keeper.initialize();
     }
 
     /*************************************************************************/
@@ -181,7 +182,22 @@ class MPSSolver {
     /*************************************************************************/
     inline void solve(void) {
         /**
-         * Run the solver.
+         * Run the solver without callback function.
+         */
+        auto callback =
+            []([[maybe_unused]] model::IPModel        *a_model_ptr,
+               [[maybe_unused]] solver::IPGlobalState *a_global_state_ptr,
+               [[maybe_unused]] option::Option        *a_option_ptr) {};
+
+        this->solve(callback);
+    }
+
+    /*************************************************************************/
+    inline void solve(
+        const std::function<void(model::IPModel *, solver::IPGlobalState *,
+                                 option::Option *)> &a_CALLBACK) {
+        /**
+         * Run the solver with callback function
          */
         printemps::solver::IPSolver solver;
 
@@ -191,6 +207,8 @@ class MPSSolver {
             solver.setup(&m_model, m_option);
         }
         solver.set_check_interrupt([]() { return interrupted; });
+        solver.set_callback(a_CALLBACK);
+
         auto result = solver.solve();
 
         /**
@@ -243,6 +261,17 @@ class MPSSolver {
     inline void run(void) {
         if (!m_argparser.extract_flippable_variable_pairs) {
             this->solve();
+        } else {
+            this->extract_flippable_variable_pairs();
+        }
+    }
+
+    /*************************************************************************/
+    inline void run(
+        const std::function<void(model::IPModel *, solver::IPGlobalState *,
+                                 option::Option *)> &a_CALLBACK) {
+        if (!m_argparser.extract_flippable_variable_pairs) {
+            this->solve(a_CALLBACK);
         } else {
             this->extract_flippable_variable_pairs();
         }

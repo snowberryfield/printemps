@@ -38,6 +38,7 @@ struct GlobalState {
         search_tree.initialize();
     }
 };
+using IPGlobalState = GlobalState<int, double>;
 }  // namespace printemps::solver
 
 #endif
