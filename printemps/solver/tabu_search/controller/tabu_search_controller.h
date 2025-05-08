@@ -40,10 +40,9 @@ class TabuSearchController
                                                     a_INITIAL_SOLUTION,  //
         const utility::TimeKeeper&                  a_TIME_KEEPER,       //
         const std::optional<std::function<bool()>>& a_CHECK_INTERRUPT,   //
-        const std::function<void(model::Model<T_Variable, T_Expression>*,
-                                 solver::GlobalState<T_Variable, T_Expression>*,
-                                 option::Option*)>& a_CALLBACK,  //
-        const option::Option&                       a_OPTION) {
+        const std::function<void(
+            solver::GlobalState<T_Variable, T_Expression>*)>& a_CALLBACK,  //
+        const option::Option&                                 a_OPTION) {
         this->initialize();
         this->setup(a_model_ptr,         //
                     a_global_state_ptr,  //
@@ -1009,8 +1008,7 @@ class TabuSearchController
             /**
              * Run the call-back function if specified.
              */
-            this->m_callback(this->m_model_ptr, this->m_global_state_ptr,
-                             &this->m_option);
+            this->m_callback(this->m_global_state_ptr);
 
             m_state_manager.next_iteration();
         }
