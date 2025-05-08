@@ -184,18 +184,13 @@ class MPSSolver {
         /**
          * Run the solver without callback function.
          */
-        auto callback =
-            []([[maybe_unused]] model::IPModel        *a_model_ptr,
-               [[maybe_unused]] solver::IPGlobalState *a_global_state_ptr,
-               [[maybe_unused]] option::Option        *a_option_ptr) {};
-
+        auto callback = [](auto) {};
         this->solve(callback);
     }
 
     /*************************************************************************/
     inline void solve(
-        const std::function<void(model::IPModel *, solver::IPGlobalState *,
-                                 option::Option *)> &a_CALLBACK) {
+        const std::function<void(solver::IPGlobalState *)> &a_CALLBACK) {
         /**
          * Run the solver with callback function
          */
@@ -268,8 +263,7 @@ class MPSSolver {
 
     /*************************************************************************/
     inline void run(
-        const std::function<void(model::IPModel *, solver::IPGlobalState *,
-                                 option::Option *)> &a_CALLBACK) {
+        const std::function<void(solver::IPGlobalState *)> &a_CALLBACK) {
         if (!m_argparser.extract_flippable_variable_pairs) {
             this->solve(a_CALLBACK);
         } else {

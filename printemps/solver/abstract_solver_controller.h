@@ -19,9 +19,7 @@ class AbstractSolverController {
     utility::TimeKeeper                                m_time_keeper;
     std::optional<std::function<bool()>>               m_check_interrupt;
 
-    std::function<void(model::Model<T_Variable, T_Expression>*,
-                       solver::GlobalState<T_Variable, T_Expression>*,
-                       option::Option*)>
+    std::function<void(solver::GlobalState<T_Variable, T_Expression>*)>
         m_callback;
 
     option::Option m_option;
@@ -85,10 +83,9 @@ class AbstractSolverController {
                                                     a_INITIAL_SOLUTION,  //
         const utility::TimeKeeper&                  a_TIME_KEEPER,       //
         const std::optional<std::function<bool()>>& a_CHECK_INTERRUPT,   //
-        const std::function<void(model::Model<T_Variable, T_Expression>*,
-                                 solver::GlobalState<T_Variable, T_Expression>*,
-                                 option::Option*)>& a_CALLBACK,  //
-        const option::Option&                       a_OPTION) {
+        const std::function<void(
+            solver::GlobalState<T_Variable, T_Expression>*)>& a_CALLBACK,  //
+        const option::Option&                                 a_OPTION) {
         this->setup(a_model_ptr,         //
                     a_global_state_ptr,  //
                     a_INITIAL_SOLUTION,  //
@@ -104,12 +101,8 @@ class AbstractSolverController {
         m_global_state_ptr = nullptr;
         m_initial_solution.initialize();
         m_time_keeper.initialize();
-
         m_check_interrupt.reset();
-        m_callback = [](model::Model<T_Variable, T_Expression>*,
-                        solver::GlobalState<T_Variable, T_Expression>*,
-                        option::Option*) {};
-
+        m_callback = [](auto) {};
         m_option.initialize();
     }
 
@@ -121,10 +114,9 @@ class AbstractSolverController {
                                                     a_INITIAL_SOLUTION,  //
         const utility::TimeKeeper&                  a_TIME_KEEPER,       //
         const std::optional<std::function<bool()>>& a_CHECK_INTERRUPT,   //
-        const std::function<void(model::Model<T_Variable, T_Expression>*,
-                                 solver::GlobalState<T_Variable, T_Expression>*,
-                                 option::Option*)>& a_CALLBACK,  //
-        const option::Option&                       a_OPTION) {
+        const std::function<void(
+            solver::GlobalState<T_Variable, T_Expression>*)>& a_CALLBACK,  //
+        const option::Option&                                 a_OPTION) {
         m_model_ptr        = a_model_ptr;
         m_global_state_ptr = a_global_state_ptr;
         m_initial_solution = a_INITIAL_SOLUTION;

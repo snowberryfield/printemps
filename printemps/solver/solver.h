@@ -27,9 +27,7 @@ class Solver {
     utility::TimeKeeper                                m_time_keeper;
     std::optional<std::function<bool()>>               m_check_interrupt;
 
-    std::function<void(model::Model<T_Variable, T_Expression>*,
-                       solver::GlobalState<T_Variable, T_Expression>*,
-                       option::Option*)>
+    std::function<void(solver::GlobalState<T_Variable, T_Expression>*)>
         m_callback;
 
     option::Option m_option_original;
@@ -231,11 +229,8 @@ class Solver {
         m_global_state.initialize();
         m_current_solution.initialize();
         m_time_keeper.initialize();
-
         m_check_interrupt = std::nullopt;
-        m_callback        = [](model::Model<T_Variable, T_Expression>*,
-                        solver::GlobalState<T_Variable, T_Expression>*,
-                        option::Option*) {};
+        m_callback        = [](auto) {};
 
         m_option_original.initialize();
         m_option.initialize();
@@ -282,17 +277,14 @@ class Solver {
 
     /*************************************************************************/
     inline void set_callback(
-        const std::function<void(model::Model<T_Variable, T_Expression>*,
-                                 solver::GlobalState<T_Variable, T_Expression>*,
-                                 option::Option*)>& a_CALLBACK) {
+        const std::function<
+            void(solver::GlobalState<T_Variable, T_Expression>*)>& a_CALLBACK) {
         m_callback = a_CALLBACK;
     }
 
     /*************************************************************************/
     inline void clear_callback(void) {
-        m_callback = [](model::Model<T_Variable, T_Expression>*,
-                        solver::GlobalState<T_Variable, T_Expression>*,
-                        option::Option*) {};
+        m_callback = [](auto) {};
     }
 
     /*************************************************************************/
@@ -435,6 +427,13 @@ class Solver {
             m_model_ptr->name(),                 //
             m_model_ptr->number_of_variables(),  //
             m_model_ptr->number_of_constraints());
+
+        /**
+         * Set the references of the model and solver itself to the global
+         * state.
+         */
+        m_global_state.model_ptr  = m_model_ptr;
+        m_global_state.solver_ptr = this;
 
         /**
          * Compute the values of expressions, constraints, and the objective

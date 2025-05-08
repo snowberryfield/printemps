@@ -20,9 +20,7 @@ class PDLPController {
     solution::SparseSolution<T_Variable, T_Expression> m_initial_solution;
     utility::TimeKeeper                                m_time_keeper;
     std::optional<std::function<bool()>>               m_check_interrupt;
-    std::function<void(model::Model<T_Variable, T_Expression>*,
-                       solver::GlobalState<T_Variable, T_Expression>*,
-                       option::Option*)>
+    std::function<void(solver::GlobalState<T_Variable, T_Expression>*)>
         m_callback;
 
     option::Option m_option;
@@ -60,11 +58,10 @@ class PDLPController {
                                                     a_INITIAL_SOLUTION,  //
         const utility::TimeKeeper&                  a_TIME_KEEPER,       //
         const std::optional<std::function<bool()>>& a_CHECK_INTERRUPT,   //
-        const std::function<void(model::Model<T_Variable, T_Expression>*,
-                                 solver::GlobalState<T_Variable, T_Expression>*,
-                                 option::Option*)>& a_CALLBACK,  //
-        const option::Option&                       a_OPTION,    //
-        GlobalState<T_Variable, T_Expression>*      a_global_state_ptr) {
+        const std::function<void(
+            solver::GlobalState<T_Variable, T_Expression>*)>& a_CALLBACK,  //
+        const option::Option&                                 a_OPTION,    //
+        GlobalState<T_Variable, T_Expression>* a_global_state_ptr) {
         this->initialize();
         this->setup(a_model_ptr,         //
                     a_INITIAL_SOLUTION,  //
@@ -83,9 +80,7 @@ class PDLPController {
         m_time_keeper.initialize();
 
         m_check_interrupt.reset();
-        m_callback = [](model::Model<T_Variable, T_Expression>*,
-                        solver::GlobalState<T_Variable, T_Expression>*,
-                        option::Option*) {};
+        m_callback = [](auto) {};
 
         m_option.initialize();
         m_result.initialize();
@@ -99,10 +94,9 @@ class PDLPController {
                                                     a_INITIAL_SOLUTION,  //
         const utility::TimeKeeper&                  a_TIME_KEEPER,       //
         const std::optional<std::function<bool()>>& a_CHECK_INTERRUPT,   //
-        const std::function<void(model::Model<T_Variable, T_Expression>*,
-                                 solver::GlobalState<T_Variable, T_Expression>*,
-                                 option::Option*)>& a_CALLBACK,  //
-        const option::Option&                       a_OPTION) {
+        const std::function<void(
+            solver::GlobalState<T_Variable, T_Expression>*)>& a_CALLBACK,  //
+        const option::Option&                                 a_OPTION) {
         m_model_ptr        = a_model_ptr;
         m_global_state_ptr = a_global_state_ptr;
         m_initial_solution = a_INITIAL_SOLUTION;
@@ -279,8 +273,7 @@ class PDLPController {
         /**
          * Run the call-back function if specified.
          */
-        this->m_callback(this->m_model_ptr, this->m_global_state_ptr,
-                         &this->m_option);
+        this->m_callback(this->m_global_state_ptr);
     }
 
     /*************************************************************************/
