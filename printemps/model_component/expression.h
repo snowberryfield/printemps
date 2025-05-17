@@ -107,7 +107,7 @@ class Expression : public multi_array::AbstractMultiArrayElement {
      * copy assignment and related methods. It's not a problem because the
      * program does not use flat_index at the moment.
      */
-    Expression<T_Variable, T_Expression> &operator    =(
+    Expression<T_Variable, T_Expression> &operator=(
         const Expression<T_Variable, T_Expression> &) = default;
 
     /*************************************************************************/
@@ -170,15 +170,15 @@ class Expression : public multi_array::AbstractMultiArrayElement {
 
     /*************************************************************************/
     inline std::unordered_map<Variable<T_Variable, T_Expression> *,
-                              T_Expression>
-        &sensitivities(void) {
+                              T_Expression> &
+    sensitivities(void) {
         return m_sensitivities;
     }
 
     /*************************************************************************/
     inline const std::unordered_map<Variable<T_Variable, T_Expression> *,
-                                    T_Expression>
-        &sensitivities(void) const {
+                                    T_Expression> &
+    sensitivities(void) const {
         return m_sensitivities;
     }
 
@@ -279,8 +279,8 @@ class Expression : public multi_array::AbstractMultiArrayElement {
 
     /*************************************************************************/
     inline T_Expression evaluate(
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
-        noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
+        const noexcept {
         T_Expression new_value = m_value;
         for (const auto &alteration : a_MOVE.alterations) {
             new_value += m_fixed_sensitivities.at(alteration.first) *
@@ -350,7 +350,7 @@ class Expression : public multi_array::AbstractMultiArrayElement {
 
     /*************************************************************************/
     inline void substitute(
-        Variable<T_Variable, T_Expression> *        a_variable_ptr,
+        Variable<T_Variable, T_Expression>         *a_variable_ptr,
         const Expression<T_Variable, T_Expression> &a_EXPRESSION) {
         *this += m_sensitivities[a_variable_ptr] * a_EXPRESSION;
         m_sensitivities.erase(a_variable_ptr);
@@ -404,36 +404,36 @@ class Expression : public multi_array::AbstractMultiArrayElement {
 
     /*************************************************************************/
     inline const std::unordered_map<
-        model_component::Variable<T_Variable, T_Expression> *, T_Expression>
-        &mutable_variable_sensitivities(void) const {
+        model_component::Variable<T_Variable, T_Expression> *, T_Expression> &
+    mutable_variable_sensitivities(void) const {
         return m_mutable_variable_sensitivities;
     }
 
     /*************************************************************************/
     inline const std::unordered_map<
-        model_component::Variable<T_Variable, T_Expression> *, T_Expression>
-        &positive_coefficient_mutable_variable_sensitivities(void) const {
+        model_component::Variable<T_Variable, T_Expression> *, T_Expression> &
+    positive_coefficient_mutable_variable_sensitivities(void) const {
         return m_positive_coefficient_mutable_variable_sensitivities;
     }
 
     /*************************************************************************/
     inline const std::unordered_map<
-        model_component::Variable<T_Variable, T_Expression> *, T_Expression>
-        &negative_coefficient_mutable_variable_sensitivities(void) const {
+        model_component::Variable<T_Variable, T_Expression> *, T_Expression> &
+    negative_coefficient_mutable_variable_sensitivities(void) const {
         return m_negative_coefficient_mutable_variable_sensitivities;
     }
 
     /*************************************************************************/
     inline const std::vector<
-        model_component::Variable<T_Variable, T_Expression> *>
-        &positive_coefficient_mutable_variable_ptrs(void) const {
+        model_component::Variable<T_Variable, T_Expression> *> &
+    positive_coefficient_mutable_variable_ptrs(void) const {
         return m_positive_coefficient_mutable_variable_ptrs;
     }
 
     /*************************************************************************/
     inline const std::vector<
-        model_component::Variable<T_Variable, T_Expression> *>
-        &negative_coefficient_mutable_variable_ptrs(void) const {
+        model_component::Variable<T_Variable, T_Expression> *> &
+    negative_coefficient_mutable_variable_ptrs(void) const {
         return m_negative_coefficient_mutable_variable_ptrs;
     }
 
@@ -450,7 +450,8 @@ class Expression : public multi_array::AbstractMultiArrayElement {
     /*************************************************************************/
     inline bool equal(
         const Expression<T_Variable, T_Expression> &a_EXPRESSION) noexcept {
-        if (m_hash != a_EXPRESSION.hash()) {
+        if (m_hash > 0 && a_EXPRESSION.hash() > 0 &&
+            m_hash != a_EXPRESSION.hash()) {
             return false;
         }
 
