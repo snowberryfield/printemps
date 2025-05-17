@@ -20,11 +20,11 @@ namespace printemps::solver::tabu_search::core {
 template <class T_Variable, class T_Expression>
 class TabuSearchCore {
    private:
-    model::Model<T_Variable, T_Expression>*              m_model_ptr;
-    GlobalState<T_Variable, T_Expression>*               m_global_state_ptr;
-    solution::DenseSolution<T_Variable, T_Expression>    m_initial_solution;
-    solution::IncumbentHolder<T_Variable, T_Expression>* m_incumbent_holder_ptr;
-    option::Option                                       m_option;
+    model::Model<T_Variable, T_Expression>*           m_model_ptr;
+    GlobalState<T_Variable, T_Expression>*            m_global_state_ptr;
+    solution::DenseSolution<T_Variable, T_Expression> m_initial_solution;
+    std::optional<std::function<bool()>>              m_check_interrupt;
+    option::Option                                    m_option;
 
     std::vector<solution::SparseSolution<T_Variable, T_Expression>>
         m_feasible_solutions;
@@ -86,6 +86,16 @@ class TabuSearchCore {
          */
         m_result = TabuSearchCoreResult<T_Variable, T_Expression>(
             m_state_manager.state(), m_option);
+    }
+
+    /*************************************************************************/
+    inline bool satisfy_interrupted_terminate_condition(void) {
+        if (this->check_interrupt()) {
+            m_state_manager.set_termination_status(
+                TabuSearchCoreTerminationStatus::INTERRUPTION);
+            return true;
+        }
+        return false;
     }
 
     /*************************************************************************/
@@ -772,15 +782,17 @@ class TabuSearchCore {
 
     /*************************************************************************/
     TabuSearchCore(
-        model::Model<T_Variable, T_Expression>* a_model_ptr,         //
-        GlobalState<T_Variable, T_Expression>*  a_global_state_ptr,  //
-        const solution::SparseSolution<T_Variable, T_Expression>&    //
-                              a_INITIAL_SOLUTION,                    //
-        const option::Option& a_OPTION) {
+        model::Model<T_Variable, T_Expression>* a_model_ptr,             //
+        GlobalState<T_Variable, T_Expression>*  a_global_state_ptr,      //
+        const solution::SparseSolution<T_Variable, T_Expression>&        //
+                                                    a_INITIAL_SOLUTION,  //
+        const std::optional<std::function<bool()>>& a_CHECK_INTERRUPT,   //
+        const option::Option&                       a_OPTION) {
         this->initialize();
         this->setup(a_model_ptr,         //
                     a_global_state_ptr,  //
                     a_INITIAL_SOLUTION,  //
+                    a_CHECK_INTERRUPT,   //
                     a_OPTION);
     }
 
@@ -790,6 +802,7 @@ class TabuSearchCore {
         m_global_state_ptr = nullptr;
 
         m_initial_solution.initialize();
+        m_check_interrupt.reset();
         m_option.initialize();
 
         m_feasible_solutions.clear();
@@ -801,16 +814,18 @@ class TabuSearchCore {
     }
 
     /*************************************************************************/
-    inline void setup(                                               //
-        model::Model<T_Variable, T_Expression>* a_model_ptr,         //
-        GlobalState<T_Variable, T_Expression>*  a_global_state_ptr,  //
-        const solution::SparseSolution<T_Variable, T_Expression>&    //
-                              a_INITIAL_SOLUTION,                    //
-        const option::Option& a_OPTION) {
+    inline void setup(                                                   //
+        model::Model<T_Variable, T_Expression>* a_model_ptr,             //
+        GlobalState<T_Variable, T_Expression>*  a_global_state_ptr,      //
+        const solution::SparseSolution<T_Variable, T_Expression>&        //
+                                                    a_INITIAL_SOLUTION,  //
+        const std::optional<std::function<bool()>>& a_CHECK_INTERRUPT,   //
+        const option::Option&                       a_OPTION) {
         m_model_ptr        = a_model_ptr;
         m_global_state_ptr = a_global_state_ptr;
         m_model_ptr->import_solution(a_INITIAL_SOLUTION);
         m_initial_solution = m_model_ptr->export_dense_solution();
+        m_check_interrupt  = a_CHECK_INTERRUPT;
         m_option           = a_OPTION;
 
         m_feasible_solutions.clear();
@@ -868,6 +883,13 @@ class TabuSearchCore {
 
         while (true) {
             m_state_manager.set_elapsed_time(time_keeper.clock());
+
+            /**
+             * Terminate the loop if interrupted
+             */
+            if (this->satisfy_interrupted_terminate_condition()) {
+                break;
+            }
 
             /**
              * Terminate the loop if the time is over.
@@ -946,7 +968,7 @@ class TabuSearchCore {
 #pragma omp parallel for if (m_option.parallel                                \
                                  .is_enabled_move_evaluation_parallelization) \
     schedule(static)                                                          \
-        num_threads(m_option.parallel.number_of_threads_move_evaluation)
+    num_threads(m_option.parallel.number_of_threads_move_evaluation)
 #endif
             for (auto i = 0; i < NUMBER_OF_MOVES; i++) {
                 /**
@@ -1147,6 +1169,11 @@ class TabuSearchCore {
         solution::SparseSolution<T_Variable, T_Expression>>&
     incumbent_solutions(void) const {
         return m_incumbent_solutions;
+    }
+
+    /*************************************************************************/
+    inline bool check_interrupt(void) {
+        return m_check_interrupt.has_value() && m_check_interrupt.value()();
     }
 
     /*************************************************************************/

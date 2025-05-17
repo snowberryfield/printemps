@@ -9,6 +9,7 @@
 namespace printemps::solver::tabu_search::core {
 /*****************************************************************************/
 enum class TabuSearchCoreTerminationStatus {
+    INTERRUPTION,
     TIME_OVER,
     ITERATION_OVER,
     NO_MOVE,
@@ -20,7 +21,8 @@ enum class TabuSearchCoreTerminationStatus {
 
 /*****************************************************************************/
 static std::unordered_map<std::string, TabuSearchCoreTerminationStatus>
-    TabuSearchCoreTerminationStatusMap = {  //
+    TabuSearchCoreTerminationStatusMap = {
+        {"INTERRUPTION", TabuSearchCoreTerminationStatus::INTERRUPTION},
         {"TIME_OVER", TabuSearchCoreTerminationStatus::TIME_OVER},
         {"ITERATION_OVER", TabuSearchCoreTerminationStatus::ITERATION_OVER},
         {"NO_MOVE", TabuSearchCoreTerminationStatus::NO_MOVE},
@@ -32,7 +34,8 @@ static std::unordered_map<std::string, TabuSearchCoreTerminationStatus>
 
 /*****************************************************************************/
 static std::unordered_map<TabuSearchCoreTerminationStatus, std::string>
-    TabuSearchCoreTerminationStatusInverseMap = {  //
+    TabuSearchCoreTerminationStatusInverseMap = {
+        {TabuSearchCoreTerminationStatus::INTERRUPTION, "INTERRUPTION"},
         {TabuSearchCoreTerminationStatus::TIME_OVER, "TIME_OVER"},
         {TabuSearchCoreTerminationStatus::ITERATION_OVER, "ITERATION_OVER"},
         {TabuSearchCoreTerminationStatus::NO_MOVE, "NO_MOVE"},

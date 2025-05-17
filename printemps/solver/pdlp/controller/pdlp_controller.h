@@ -219,7 +219,7 @@ class PDLPController {
         lp_instance.scaling(m_option.pdlp.counts_of_ruiz_scaling,
                             m_option.pdlp.is_enabled_pock_chambolle_scaling);
 
-        pdlp::core::PDLPCore pdlp_core(&lp_instance, option);
+        pdlp::core::PDLPCore pdlp_core(&lp_instance, m_check_interrupt, option);
         pdlp_core.run();
 
         auto pdlp_result = pdlp_core.result();

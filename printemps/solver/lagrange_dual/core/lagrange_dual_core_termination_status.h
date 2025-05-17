@@ -9,6 +9,7 @@
 namespace printemps::solver::lagrange_dual::core {
 /*****************************************************************************/
 enum class LagrangeDualCoreTerminationStatus {
+    INTERRUPTION,
     TIME_OVER,
     ITERATION_OVER,
     CONVERGE,
@@ -17,7 +18,8 @@ enum class LagrangeDualCoreTerminationStatus {
 
 /*****************************************************************************/
 static std::unordered_map<std::string, LagrangeDualCoreTerminationStatus>
-    LagrangeDualCoreTerminationStatusMap = {  //
+    LagrangeDualCoreTerminationStatusMap = {
+        {"INTERRUPTION", LagrangeDualCoreTerminationStatus::INTERRUPTION},
         {"TIME_OVER", LagrangeDualCoreTerminationStatus::TIME_OVER},
         {"ITERATION_OVER", LagrangeDualCoreTerminationStatus::ITERATION_OVER},
         {"CONVERGE", LagrangeDualCoreTerminationStatus::CONVERGE},
@@ -25,7 +27,8 @@ static std::unordered_map<std::string, LagrangeDualCoreTerminationStatus>
 
 /*****************************************************************************/
 static std::unordered_map<LagrangeDualCoreTerminationStatus, std::string>
-    LagrangeDualCoreTerminationStatusInverseMap = {  //
+    LagrangeDualCoreTerminationStatusInverseMap = {
+        {LagrangeDualCoreTerminationStatus::INTERRUPTION, "INTERRUPTION"},
         {LagrangeDualCoreTerminationStatus::TIME_OVER, "TIME_OVER"},
         {LagrangeDualCoreTerminationStatus::ITERATION_OVER, "ITERATION_OVER"},
         {LagrangeDualCoreTerminationStatus::CONVERGE, "CONVERGE"},

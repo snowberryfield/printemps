@@ -16,10 +16,10 @@ namespace printemps::solver::pdlp::core {
 class PDLPCore {
    private:
     linear_programming::LinearProgramming* m_instance_ptr;
-
-    option::Option       m_option;
-    PDLPCoreStateManager m_state_manager;
-    PDLPCoreResult       m_result;
+    std::optional<std::function<bool()>>   m_check_interrupt;
+    option::Option                         m_option;
+    PDLPCoreStateManager                   m_state_manager;
+    PDLPCoreResult                         m_result;
 
     /*************************************************************************/
     inline void preprocess(void) {
@@ -32,6 +32,16 @@ class PDLPCore {
          * Prepare the result.
          */
         m_result = PDLPCoreResult(m_state_manager.state(), m_option);
+    }
+
+    /*************************************************************************/
+    inline bool satisfy_interrupted_terminate_condition(void) {
+        if (this->check_interrupt()) {
+            m_state_manager.set_termination_status(
+                PDLPCoreTerminationStatus::INTERRUPTION);
+            return true;
+        }
+        return false;
     }
 
     /*************************************************************************/
@@ -251,25 +261,30 @@ class PDLPCore {
     }
 
     /*************************************************************************/
-    PDLPCore(linear_programming::LinearProgramming* a_instance_ptr,
-             const option::Option&                  a_OPTION) {
+    PDLPCore(linear_programming::LinearProgramming*      a_instance_ptr,
+             const std::optional<std::function<bool()>>& a_CHECK_INTERRUPT,
+             const option::Option&                       a_OPTION) {
         this->initialize();
-        this->setup(a_instance_ptr, a_OPTION);
+        this->setup(a_instance_ptr, a_CHECK_INTERRUPT, a_OPTION);
     }
 
     /*************************************************************************/
     inline void initialize(void) {
         m_instance_ptr = nullptr;
+        m_check_interrupt.reset();
         m_option.initialize();
         m_state_manager.initialize();
         m_result.initialize();
     }
 
     /*************************************************************************/
-    inline void setup(linear_programming::LinearProgramming* a_instance_ptr,
-                      const option::Option&                  a_OPTION) {
-        m_instance_ptr = a_instance_ptr;
-        m_option       = a_OPTION;
+    inline void setup(
+        linear_programming::LinearProgramming*      a_instance_ptr,
+        const std::optional<std::function<bool()>>& a_CHECK_INTERRUPT,
+        const option::Option&                       a_OPTION) {
+        m_instance_ptr    = a_instance_ptr;
+        m_check_interrupt = a_CHECK_INTERRUPT;
+        m_option          = a_OPTION;
     }
 
     /*************************************************************************/
@@ -315,6 +330,12 @@ class PDLPCore {
         while (true) {
             m_state_manager.set_elapsed_time(time_keeper.clock());
 
+            /**
+             * Terminate the loop if interrupted
+             */
+            if (this->satisfy_interrupted_terminate_condition()) {
+                break;
+            }
             /**
              * Terminate the loop if the time is over.
              */
@@ -394,6 +415,11 @@ class PDLPCore {
         this->print_table_footer(m_option.output.verbose >=
                                  option::verbose::Inner);
         this->postprocess();
+    }
+
+    /*************************************************************************/
+    inline bool check_interrupt(void) {
+        return m_check_interrupt.has_value() && m_check_interrupt.value()();
     }
 
     /*************************************************************************/

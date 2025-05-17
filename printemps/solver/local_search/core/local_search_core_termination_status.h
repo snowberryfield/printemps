@@ -9,6 +9,7 @@
 namespace printemps::solver::local_search::core {
 /*****************************************************************************/
 enum class LocalSearchCoreTerminationStatus {
+    INTERRUPTION,
     TIME_OVER,
     ITERATION_OVER,
     NO_MOVE,
@@ -20,6 +21,7 @@ enum class LocalSearchCoreTerminationStatus {
 /*****************************************************************************/
 static std::unordered_map<std::string, LocalSearchCoreTerminationStatus>
     LocalSearchCoreTerminationStatusMap = {  //
+        {"INTERRUPTION", LocalSearchCoreTerminationStatus::INTERRUPTION},
         {"TIME_OVER", LocalSearchCoreTerminationStatus::TIME_OVER},
         {"ITERATION_OVER", LocalSearchCoreTerminationStatus::ITERATION_OVER},
         {"NO_MOVE", LocalSearchCoreTerminationStatus::NO_MOVE},
@@ -30,6 +32,7 @@ static std::unordered_map<std::string, LocalSearchCoreTerminationStatus>
 /*****************************************************************************/
 static std::unordered_map<LocalSearchCoreTerminationStatus, std::string>
     LocalSearchCoreTerminationStatusInverseMap = {  //
+        {LocalSearchCoreTerminationStatus::INTERRUPTION, "INTERRUPTION"},
         {LocalSearchCoreTerminationStatus::TIME_OVER, "TIME_OVER"},
         {LocalSearchCoreTerminationStatus::ITERATION_OVER, "ITERATION_OVER"},
         {LocalSearchCoreTerminationStatus::NO_MOVE, "NO_MOVE"},
