@@ -892,7 +892,7 @@ class TabuSearchController
             m_state_manager.set_total_elapsed_time(this->m_time_keeper.clock());
 
             /**
-             * Terminate the loop if interrupted
+             * Terminate the loop if interrupted.
              */
             if (this->satisfy_interrupted_terminate_condition(
                     this->m_option.output.verbose >= option::verbose::Outer)) {
@@ -944,6 +944,7 @@ class TabuSearchController
                 this->m_model_ptr,         //
                 this->m_global_state_ptr,  //
                 state.current_solution,    //
+                this->m_check_interrupt,   //
                 option);
 
             tabu_search.run();

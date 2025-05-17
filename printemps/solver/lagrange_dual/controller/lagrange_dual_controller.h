@@ -161,6 +161,7 @@ class LagrangeDualController
             this->m_model_ptr,         //
             this->m_global_state_ptr,  //
             this->m_initial_solution,  //
+            this->m_check_interrupt,   //
             option);
 
         lagrange_dual.run();
