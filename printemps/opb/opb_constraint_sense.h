@@ -3,27 +3,17 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_PB_TOP_COST_H__
-#define PRINTEMPS_PB_TOP_COST_H__
+#ifndef PRINTEMPS_OPB_OPB_CONSTRAINT_SENSE_H__
+#define PRINTEMPS_OPB_OPB_CONSTRAINT_SENSE_H__
 
-namespace printemps::pb {
+namespace printemps::opb {
 /*****************************************************************************/
-struct PBTopCost {
-    bool is_defined;
-    int  value;
-
-    /*************************************************************************/
-    PBTopCost(void) {
-        this->initialize();
-    }
-
-    /*************************************************************************/
-    inline void initialize(void) {
-        this->is_defined = false;
-        this->value      = std::numeric_limits<int>::max();
-    }
+enum class OPBConstraintSense {
+    Less,   //
+    Equal,  //
+    Greater
 };
-}  // namespace printemps::pb
+}  // namespace printemps::opb
 #endif
 /*****************************************************************************/
 // END

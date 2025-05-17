@@ -1,25 +1,25 @@
 
-file(GLOB TEST_SOURCE ${TOP_DIR}/test/pb/*.cpp)
+file(GLOB TEST_SOURCE ${TOP_DIR}/test/opb/*.cpp)
 
 add_executable(
-    test_pb
+    test_opb
     ${TEST_SOURCE}
 )
 
 target_include_directories(
-    test_pb
+    test_opb
     PUBLIC ${TOP_DIR}/printemps/
     PUBLIC ${TOP_DIR}/external/include/
 )
 
 target_link_libraries(
-    test_pb
+    test_opb
     PUBLIC gtest
     PUBLIC gtest_main
     PUBLIC pthread
 )
 
 add_test(
-    NAME test_pb
-    COMMAND test_pb --gtest_output=xml
+    NAME test_opb
+    COMMAND test_opb --gtest_output=xml
 )

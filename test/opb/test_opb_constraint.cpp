@@ -9,7 +9,7 @@
 namespace {
 using namespace printemps;
 /*****************************************************************************/
-class TestPBObjective : public ::testing::Test {
+class TestOPBConstraint : public ::testing::Test {
    protected:
     virtual void SetUp(void) {
         /// nothing to do
@@ -20,11 +20,12 @@ class TestPBObjective : public ::testing::Test {
 };
 
 /*****************************************************************************/
-TEST_F(TestPBObjective, initialize) {
-    pb::PBObjective objective;
-    EXPECT_TRUE(objective.is_minimization);
-    EXPECT_EQ("", objective.name);
-    EXPECT_TRUE(objective.terms.empty());
+TEST_F(TestOPBConstraint, initialize) {
+    opb::OPBConstraint constraint;
+    EXPECT_EQ(opb::OPBConstraintSense::Less, constraint.sense);
+    EXPECT_EQ("", constraint.name);
+    EXPECT_TRUE(constraint.terms.empty());
+    EXPECT_EQ(0.0, constraint.rhs);
 }
 
 }  // namespace

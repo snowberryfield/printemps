@@ -18,27 +18,27 @@ inline void interrupt_handler([[maybe_unused]] int signum) {
 class PBCompetition2025Solver {
    private:
     PBCompetition2025SolverArgparser m_argparser;
-    pb::PB                           m_pb;
+    opb::OPB                         m_opb;
     model::IPModel                   m_model;
     option::Option                   m_option;
     utility::TimeKeeper              m_time_keeper;
 
     /*************************************************************************/
     inline void print_metadata(void) const {
-        std::cout << "c #variable: " << m_pb.metadata.number_of_variables
+        std::cout << "c #variable: " << m_opb.metadata.number_of_variables
                   << std::endl;
-        std::cout << "c #constraint: " << m_pb.metadata.number_of_constraints
+        std::cout << "c #constraint: " << m_opb.metadata.number_of_constraints
                   << std::endl;
-        std::cout << "c #equal: " << m_pb.metadata.number_of_equals
+        std::cout << "c #equal: " << m_opb.metadata.number_of_equals
                   << std::endl;
-        std::cout << "c intsize: " << m_pb.metadata.intsize << std::endl;
-        std::cout << "c sizeproduct: " << m_pb.metadata.sizeproduct
+        std::cout << "c intsize: " << m_opb.metadata.intsize << std::endl;
+        std::cout << "c sizeproduct: " << m_opb.metadata.sizeproduct
                   << std::endl;
-        std::cout << "c #soft: " << m_pb.metadata.number_of_soft_constraints
+        std::cout << "c #soft: " << m_opb.metadata.number_of_soft_constraints
                   << std::endl;
-        std::cout << "c mincost: " << m_pb.metadata.mincost << std::endl;
-        std::cout << "c maxcost: " << m_pb.metadata.maxcost << std::endl;
-        std::cout << "c sumcost: " << m_pb.metadata.sumcost << std::endl;
+        std::cout << "c mincost: " << m_opb.metadata.mincost << std::endl;
+        std::cout << "c maxcost: " << m_opb.metadata.maxcost << std::endl;
+        std::cout << "c sumcost: " << m_opb.metadata.sumcost << std::endl;
     }
 
     /*************************************************************************/
@@ -80,7 +80,7 @@ class PBCompetition2025Solver {
     /*************************************************************************/
     inline void initialize(void) {
         m_argparser.initialize();
-        m_pb.initialize();
+        m_opb.initialize();
         m_model.initialize();
         m_option.initialize();
         m_time_keeper.initialize();
@@ -107,15 +107,15 @@ class PBCompetition2025Solver {
         /**
          * Read the specified PB file and convert to the model.
          */
-        m_pb.read_pb(m_argparser.pb_file_name);
+        m_opb.read_opb(m_argparser.pb_file_name);
 
-        if (m_pb.metadata.intsize >= 53) {
+        if (m_opb.metadata.intsize >= 53) {
             std::cout << "s UNSUPPORTED" << std::endl;
             exit(0);
         }
         this->print_metadata();
 
-        m_model.import_pb(m_pb);
+        m_model.import_opb(m_opb);
         m_model.set_name(
             printemps::utility::base_name(m_argparser.pb_file_name));
 
@@ -127,14 +127,20 @@ class PBCompetition2025Solver {
         if (!m_argparser.option_file_name.empty()) {
             m_option.setup(m_argparser.option_file_name);
         }
-        if (m_argparser.is_iteration_max_given) {
+        if (m_argparser.is_specified_iteration_max) {
             m_option.general.iteration_max = m_argparser.iteration_max;
         }
-        if (m_argparser.is_time_max_given) {
+        if (m_argparser.is_specified_time_max) {
             m_option.general.time_max = m_argparser.time_max;
         }
-        if (m_argparser.is_verbose_given) {
+        if (m_argparser.is_specified_verbose) {
             m_option.output.verbose = m_argparser.verbose;
+        }
+        if (m_argparser.is_specified_number_of_threads) {
+            m_option.parallel.number_of_threads_move_evaluation =
+                m_argparser.number_of_threads;
+            m_option.parallel.number_of_threads_move_update =
+                m_argparser.number_of_threads;
         }
 
         signal(SIGINT, interrupt_handler);
@@ -151,7 +157,7 @@ class PBCompetition2025Solver {
          */
         printemps::solver::IPSolver solver;
 
-        if (m_argparser.include_pb_loading_time) {
+        if (m_argparser.include_opb_loading_time) {
             solver.setup(&m_model, m_option, m_time_keeper);
         } else {
             solver.setup(&m_model, m_option);

@@ -9,7 +9,7 @@
 namespace {
 using namespace printemps;
 /*****************************************************************************/
-class TestTerm : public ::testing::Test {
+class TestOPBTopCost : public ::testing::Test {
    protected:
     virtual void SetUp(void) {
         /// nothing to do
@@ -20,20 +20,10 @@ class TestTerm : public ::testing::Test {
 };
 
 /*****************************************************************************/
-TEST_F(TestTerm, initialize) {
-    pb::PBTerm term;
-    EXPECT_EQ(0, term.coefficient);
-    EXPECT_TRUE(term.variable_names.empty());
-}
-
-/*****************************************************************************/
-TEST_F(TestTerm, concated_variable_name) {
-    pb::PBTerm term;
-    term.variable_names.push_back("x0");
-    EXPECT_EQ("x0", term.concated_variable_name());
-
-    term.variable_names.push_back("x1");
-    EXPECT_EQ("x0x1", term.concated_variable_name());
+TEST_F(TestOPBTopCost, initialize) {
+    opb::OPBTopCost top_cost;
+    EXPECT_FALSE(top_cost.is_defined);
+    EXPECT_EQ(std::numeric_limits<int>::max(), top_cost.value);
 }
 
 }  // namespace

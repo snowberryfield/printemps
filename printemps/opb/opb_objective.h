@@ -3,20 +3,20 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_PB_PB_OBJECTIVE_H__
-#define PRINTEMPS_PB_PB_OBJECTIVE_H__
+#ifndef PRINTEMPS_OPB_OPB_OBJECTIVE_H__
+#define PRINTEMPS_OPB_OPB_OBJECTIVE_H__
 
-#include "pb_term.h"
+#include "opb_term.h"
 
-namespace printemps::pb {
+namespace printemps::opb {
 /*****************************************************************************/
-struct PBObjective {
-    bool                is_minimization;
-    std::string         name;
-    std::vector<PBTerm> terms;
+struct OPBObjective {
+    bool                 is_minimization;
+    std::string          name;
+    std::vector<OPBTerm> terms;
 
     /*************************************************************************/
-    PBObjective(void) {
+    OPBObjective(void) {
         this->initialize();
     }
 
@@ -27,7 +27,7 @@ struct PBObjective {
         this->terms.clear();
     }
 };
-}  // namespace printemps::pb
+}  // namespace printemps::opb
 #endif
 /*****************************************************************************/
 // END

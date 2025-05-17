@@ -3,12 +3,12 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_PB_PB_METADATA_H__
-#define PRINTEMPS_PB_PB_METADATA_H__
+#ifndef PRINTEMPS_OPB_OPB_METADATA_H__
+#define PRINTEMPS_OPB_OPB_METADATA_H__
 
-namespace printemps::pb {
+namespace printemps::opb {
 /*****************************************************************************/
-struct PBMetadata {
+struct OPBMetadata {
     int number_of_variables;
     int number_of_constraints;
     int number_of_equals;
@@ -25,7 +25,7 @@ struct PBMetadata {
     int sumcost;
 
     /*************************************************************************/
-    PBMetadata(void) {
+    OPBMetadata(void) {
         this->initialize();
     }
 
@@ -44,7 +44,7 @@ struct PBMetadata {
         this->sumcost                    = 0;
     }
 };
-}  // namespace printemps::pb
+}  // namespace printemps::opb
 #endif
 /*****************************************************************************/
 // END
