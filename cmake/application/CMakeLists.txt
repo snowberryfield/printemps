@@ -56,8 +56,22 @@ target_include_directories(
     PRIVATE ${TOP_DIR}/external/include/
 )
 
+
+# pb_solver
+add_executable(
+    pb_solver ${TOP_DIR}/application/pb_solver/main.cpp
+)
+
+target_include_directories(
+    pb_solver
+    PRIVATE ${TOP_DIR}/printemps/
+    PRIVATE ${TOP_DIR}/external/include/
+)
+
+
 if(LINK_STATIC)
     target_link_options(mps_solver PRIVATE -static-libgcc -static-libstdc++ -static)
+    target_link_options(pb_solver PRIVATE -static-libgcc -static-libstdc++ -static)
 endif()
 
 # ##############################################################################

@@ -3,12 +3,17 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_STANDALONE_H__
-#define PRINTEMPS_STANDALONE_H__
+#ifndef PRINTEMPS_PB_PB_CONSTRAINT_SENSE_H__
+#define PRINTEMPS_PB_PB_CONSTRAINT_SENSE_H__
 
-#include "mps_solver/mps_solver.h"
-#include "pb_solver/pb_solver.h"
-
+namespace printemps::pb {
+/*****************************************************************************/
+enum class PBConstraintSense {
+    Less,   //
+    Equal,  //
+    Greater
+};
+}  // namespace printemps::pb
 #endif
 /*****************************************************************************/
 // END

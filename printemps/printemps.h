@@ -13,6 +13,7 @@
 #include "multi_array/multi_array.h"
 #include "helper/helper.h"
 #include "mps/mps.h"
+#include "pb/pb.h"
 #include "option/option.h"
 #include "model_component/model_component.h"
 #include "neighborhood/neighborhood.h"

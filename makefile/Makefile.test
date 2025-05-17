@@ -16,6 +16,7 @@ test: build
 	$(BUILD_DIR)/test_neighborhood; \
 	$(BUILD_DIR)/test_option; \
 	$(BUILD_DIR)/test_option_enumerate; \
+	$(BUILD_DIR)/test_pb; \
 	$(BUILD_DIR)/test_preprocess; \
 	$(BUILD_DIR)/test_solution; \
 	$(BUILD_DIR)/test_standalone; \
