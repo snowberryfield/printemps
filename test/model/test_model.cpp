@@ -2961,6 +2961,36 @@ TEST_F(TestModel, unfix_variables) {
 }
 
 /*****************************************************************************/
+TEST_F(TestModel, set_user_defined_selection_constraints) {
+    /// To be implemented.
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, setup_flippable_variable_ptr_pairs) {
+    /// To be implemented.
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, import_mps) {
+    /// To be implemented.
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, import_pb) {
+    /// To be implemented.
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, write_mps) {
+    /// To be implemented.
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, write_json) {
+    /// To be implemented.
+}
+
+/*****************************************************************************/
 TEST_F(TestModel, variable_proxies) {
     /// This method is tested in create_variable_scaler and so on.
 }
@@ -3206,6 +3236,11 @@ TEST_F(TestModel, has_chain_move_effective_constraints) {
 /*****************************************************************************/
 TEST_F(TestModel, neighborhood) {
     /// This method is tested in test_neighborhood.h
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, problem_size_reducer) {
+    /// To be implemented.
 }
 
 }  // namespace

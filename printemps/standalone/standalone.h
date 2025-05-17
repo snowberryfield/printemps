@@ -7,7 +7,7 @@
 #define PRINTEMPS_STANDALONE_H__
 
 #include "mps_solver/mps_solver.h"
-#include "pb_solver/pb_solver.h"
+#include "opb_solver/opb_solver.h"
 
 #endif
 /*****************************************************************************/

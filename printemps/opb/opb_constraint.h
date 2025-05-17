@@ -3,40 +3,46 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_PB_PB_TERM_H__
-#define PRINTEMPS_PB_PB_TERM_H__
+#ifndef PRINTEMPS_OPB_OPB_CONSTRAINT_H__
+#define PRINTEMPS_OPB_OPB_CONSTRAINT_H__
 
-namespace printemps::pb {
+#include "opb_constraint_sense.h"
+#include "opb_term.h"
+
+namespace printemps::opb {
 /*****************************************************************************/
-struct PBTerm {
-    int                      coefficient;
-    std::vector<std::string> variable_names;
+struct OPBConstraint {
+    int                  weight;
+    OPBConstraintSense   sense;
+    std::string          name;
+    std::vector<OPBTerm> terms;
+    int                  rhs;
 
     /*************************************************************************/
-    PBTerm(void) {
+    OPBConstraint(void) {
         this->initialize();
     }
 
     /*************************************************************************/
     inline void initialize(void) {
-        this->coefficient = 0;
-        this->variable_names.clear();
+        this->weight = std::numeric_limits<int>::max();
+        this->sense  = OPBConstraintSense::Less;
+        this->name   = "";
+        this->terms.clear();
+        this->rhs = 0.0;
     }
 
     /*************************************************************************/
-    inline std::string concated_variable_name(void) const {
-        if (this->variable_names.size() == 1) {
-            return this->variable_names.front();
+    inline bool is_all_coefficient_negative(void) const {
+        for (const auto &term : this->terms) {
+            if (term.coefficient > 0) {
+                return false;
+            }
         }
-
-        std::string concated_variable_name = "";
-        for (const auto& variable_name : this->variable_names) {
-            concated_variable_name += variable_name;
-        }
-        return concated_variable_name;
+        return true;
     }
 };
-}  // namespace printemps::pb
+}  // namespace printemps::opb
 #endif
 /*****************************************************************************/
 // END

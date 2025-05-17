@@ -3565,7 +3565,7 @@ class Model {
     }
 
     /*********************************************************************/
-    void import_pb(const pb::PB &a_PB) {
+    void import_opb(const opb::OPB &a_OPB) {
         using VariableMap = std::unordered_map<
             std::string, model_component::Variable<T_Variable, T_Expression> *>;
         using Sensitivities = std::unordered_map<
@@ -3573,41 +3573,41 @@ class Model {
             T_Expression>;
 
         VariableMap variable_ptrs;
-        m_is_minimization = a_PB.objective.is_minimization;
+        m_is_minimization = a_OPB.objective.is_minimization;
 
         /**
          * Set up variables.
          */
-        const int NUMBER_OF_VARIABLES = a_PB.variable_names.size();
+        const int NUMBER_OF_VARIABLES = a_OPB.variable_names.size();
         auto     &variable_proxy =
             this->create_variables("variables", NUMBER_OF_VARIABLES);
         for (auto i = 0; i < NUMBER_OF_VARIABLES; i++) {
-            const auto &VARIABLE_NAME = a_PB.variable_names[i];
+            const auto &VARIABLE_NAME = a_OPB.variable_names[i];
             variable_proxy(i).set_bound(0, 1);
             variable_proxy(i).set_name(VARIABLE_NAME);
             variable_ptrs[VARIABLE_NAME] = &variable_proxy(i);
         }
 
         const int NUMBER_OF_NEGATED_VARIABLES =
-            a_PB.negated_variable_names.size();
+            a_OPB.negated_variable_names.size();
         auto &negated_variable_proxy = this->create_variables(
             "negated_variables", NUMBER_OF_NEGATED_VARIABLES);
         for (auto i = 0; i < NUMBER_OF_NEGATED_VARIABLES; i++) {
             const auto &NEGATED_VARIABLE_NAME =
-                "~" + a_PB.negated_variable_names[i];
+                "~" + a_OPB.negated_variable_names[i];
             negated_variable_proxy(i).set_bound(0, 1);
             negated_variable_proxy(i).set_name(NEGATED_VARIABLE_NAME);
             variable_ptrs[NEGATED_VARIABLE_NAME] = &negated_variable_proxy(i);
         }
 
         const int NUMBER_OF_PRODUCT_VARIABLES =
-            a_PB.product_variable_names.size();
+            a_OPB.product_variable_names.size();
         auto &product_variable_proxy = this->create_variables(
             "product_variables", NUMBER_OF_PRODUCT_VARIABLES);
 
         for (auto i = 0; i < NUMBER_OF_PRODUCT_VARIABLES; i++) {
             const auto &PRODUCT_VARIABLE_NAME =
-                a_PB.product_variable_names[i].first;
+                a_OPB.product_variable_names[i].first;
             product_variable_proxy(i).set_bound(0, 1);
             product_variable_proxy(i).set_name(PRODUCT_VARIABLE_NAME);
             variable_ptrs[PRODUCT_VARIABLE_NAME] = &product_variable_proxy(i);
@@ -3621,22 +3621,22 @@ class Model {
         std::unordered_map<int, int> soft_constraint_indices_equal;
         std::unordered_map<int, int> soft_constraint_indices_greater;
 
-        const int NUMBER_OF_SOFT_CONSTRAINTS = a_PB.soft_constraints.size();
+        const int NUMBER_OF_SOFT_CONSTRAINTS = a_OPB.soft_constraints.size();
 
         for (auto i = 0; i < NUMBER_OF_SOFT_CONSTRAINTS; i++) {
-            const auto &SOFT_CONSTRAINT = a_PB.soft_constraints[i];
+            const auto &SOFT_CONSTRAINT = a_OPB.soft_constraints[i];
             switch (SOFT_CONSTRAINT.sense) {
-                case pb::PBConstraintSense::Less: {
+                case opb::OPBConstraintSense::Less: {
                     soft_constraint_indices_less[i] =
                         number_of_soft_constraints_less++;
                     break;
                 }
-                case pb::PBConstraintSense::Equal: {
+                case opb::OPBConstraintSense::Equal: {
                     soft_constraint_indices_equal[i] =
                         number_of_soft_constraints_equal++;
                     break;
                 }
-                case pb::PBConstraintSense::Greater: {
+                case opb::OPBConstraintSense::Greater: {
                     soft_constraint_indices_greater[i] =
                         number_of_soft_constraints_greater++;
                     break;
@@ -3649,7 +3649,7 @@ class Model {
 
         for (auto i = 0; i < number_of_soft_constraints_less; i++) {
             const auto &SLACK_VARIABLE_NAME_LESS_PLUS =
-                a_PB.soft_constraints[i].name + "_less_plus";
+                a_OPB.soft_constraints[i].name + "_less_plus";
             soft_constraint_slack_proxy_less_plus(i).set_bound(0, 1);
             soft_constraint_slack_proxy_less_plus(i).set_name(
                 SLACK_VARIABLE_NAME_LESS_PLUS);
@@ -3664,7 +3664,7 @@ class Model {
 
         for (auto i = 0; i < number_of_soft_constraints_equal; i++) {
             const auto &SLACK_VARIABLE_NAME_EQUAL_PLUS =
-                a_PB.soft_constraints[i].name + "_equal_plus";
+                a_OPB.soft_constraints[i].name + "_equal_plus";
             soft_constraint_slack_proxy_equal_plus(i).set_bound(0, 1);
             soft_constraint_slack_proxy_equal_plus(i).set_name(
                 SLACK_VARIABLE_NAME_EQUAL_PLUS);
@@ -3672,7 +3672,7 @@ class Model {
                 &soft_constraint_slack_proxy_equal_plus(i);
 
             const auto &SLACK_VARIABLE_NAME_EQUAL_MINUS =
-                a_PB.soft_constraints[i].name + "_equal_minus";
+                a_OPB.soft_constraints[i].name + "_equal_minus";
             soft_constraint_slack_proxy_equal_minus(i).set_bound(0, 1);
             soft_constraint_slack_proxy_equal_minus(i).set_name(
                 SLACK_VARIABLE_NAME_EQUAL_MINUS);
@@ -3686,7 +3686,7 @@ class Model {
 
         for (auto i = 0; i < number_of_soft_constraints_greater; i++) {
             const auto &SLACK_VARIABLE_NAME_GREATER_MINUS =
-                a_PB.soft_constraints[i].name + "_greater_minus";
+                a_OPB.soft_constraints[i].name + "_greater_minus";
             soft_constraint_slack_proxy_greater_minus(i).set_bound(0, 1);
             soft_constraint_slack_proxy_greater_minus(i).set_name(
                 SLACK_VARIABLE_NAME_GREATER_MINUS);
@@ -3715,7 +3715,7 @@ class Model {
 #pragma omp parallel for schedule(static)
 #endif
         for (auto i = 0; i < NUMBER_OF_SOFT_CONSTRAINTS; i++) {
-            const auto &SOFT_CONSTRAINT = a_PB.soft_constraints[i];
+            const auto &SOFT_CONSTRAINT = a_OPB.soft_constraints[i];
             auto        expression =
                 model_component::Expression<T_Variable,
                                             T_Expression>::create_instance();
@@ -3734,7 +3734,7 @@ class Model {
             const auto UPPER_BOUND = expression.upper_bound();
 
             switch (SOFT_CONSTRAINT.sense) {
-                case pb::PBConstraintSense::Less: {
+                case opb::OPBConstraintSense::Less: {
                     const auto INDEX = soft_constraint_indices_less[i];
                     if (SOFT_CONSTRAINT.is_all_coefficient_negative()) {
                         soft_constraint_proxy_less_plus(INDEX) =
@@ -3753,7 +3753,7 @@ class Model {
                     break;
                 }
 
-                case pb::PBConstraintSense::Equal: {
+                case opb::OPBConstraintSense::Equal: {
                     const auto INDEX = soft_constraint_indices_equal[i];
                     if (SOFT_CONSTRAINT.is_all_coefficient_negative()) {
                         soft_constraint_proxy_equal_plus(INDEX) =
@@ -3784,7 +3784,7 @@ class Model {
                     break;
                 }
 
-                case pb::PBConstraintSense::Greater: {
+                case opb::OPBConstraintSense::Greater: {
                     const auto INDEX = soft_constraint_indices_greater[i];
                     if (SOFT_CONSTRAINT.is_all_coefficient_negative()) {
                         soft_constraint_proxy_greater_minus(INDEX) =
@@ -3808,9 +3808,9 @@ class Model {
         }
 
         for (auto i = 0; i < NUMBER_OF_SOFT_CONSTRAINTS; i++) {
-            const auto &SOFT_CONSTRAINT = a_PB.soft_constraints[i];
+            const auto &SOFT_CONSTRAINT = a_OPB.soft_constraints[i];
             switch (SOFT_CONSTRAINT.sense) {
-                case pb::PBConstraintSense::Less: {
+                case opb::OPBConstraintSense::Less: {
                     const auto INDEX = soft_constraint_indices_less[i];
                     objective_penalty +=
                         SOFT_CONSTRAINT.weight *
@@ -3819,7 +3819,7 @@ class Model {
                     break;
                 }
 
-                case pb::PBConstraintSense::Equal: {
+                case opb::OPBConstraintSense::Equal: {
                     const auto INDEX = soft_constraint_indices_equal[i];
                     objective_penalty +=
                         SOFT_CONSTRAINT.weight *
@@ -3829,7 +3829,7 @@ class Model {
                     break;
                 }
 
-                case pb::PBConstraintSense::Greater: {
+                case opb::OPBConstraintSense::Greater: {
                     const auto INDEX = soft_constraint_indices_greater[i];
                     objective_penalty +=
                         SOFT_CONSTRAINT.weight *
@@ -3843,7 +3843,7 @@ class Model {
         /**
          * Set up hard constraints.
          */
-        const int NUMBER_OF_HARD_CONSTRAINTS = a_PB.hard_constraints.size();
+        const int NUMBER_OF_HARD_CONSTRAINTS = a_OPB.hard_constraints.size();
 
         auto &hard_constraint_proxy = this->create_constraints(
             "hard_constraints", NUMBER_OF_HARD_CONSTRAINTS);
@@ -3851,7 +3851,7 @@ class Model {
 #pragma omp parallel for schedule(static)
 #endif
         for (auto i = 0; i < NUMBER_OF_HARD_CONSTRAINTS; i++) {
-            const auto &HARD_CONSTRAINT = a_PB.hard_constraints[i];
+            const auto &HARD_CONSTRAINT = a_OPB.hard_constraints[i];
             auto        expression =
                 model_component::Expression<T_Variable,
                                             T_Expression>::create_instance();
@@ -3867,7 +3867,7 @@ class Model {
             expression.set_sensitivities(expression_sensitivities);
 
             switch (HARD_CONSTRAINT.sense) {
-                case pb::PBConstraintSense::Less: {
+                case opb::OPBConstraintSense::Less: {
                     if (HARD_CONSTRAINT.is_all_coefficient_negative()) {
                         hard_constraint_proxy(i) =
                             (-expression >= -HARD_CONSTRAINT.rhs);
@@ -3878,7 +3878,7 @@ class Model {
                     break;
                 }
 
-                case pb::PBConstraintSense::Equal: {
+                case opb::OPBConstraintSense::Equal: {
                     if (HARD_CONSTRAINT.is_all_coefficient_negative()) {
                         hard_constraint_proxy(i) =
                             (-expression == -HARD_CONSTRAINT.rhs);
@@ -3889,7 +3889,7 @@ class Model {
                     break;
                 }
 
-                case pb::PBConstraintSense::Greater: {
+                case opb::OPBConstraintSense::Greater: {
                     if (HARD_CONSTRAINT.is_all_coefficient_negative()) {
                         hard_constraint_proxy(i) =
                             (-expression <= -HARD_CONSTRAINT.rhs);
@@ -3907,7 +3907,7 @@ class Model {
          * Set up constraints for nagated variables.
          */
         const int NUMBER_OF_NEGATED_VARIABLE_CONSTRAINTS =
-            a_PB.negated_variable_names.size();
+            a_OPB.negated_variable_names.size();
         if (NUMBER_OF_NEGATED_VARIABLE_CONSTRAINTS > 0) {
             auto &negated_variable_constraint_proxy = this->create_constraints(
                 "negated_variable_constraints",
@@ -3917,7 +3917,7 @@ class Model {
 #endif
             for (auto i = 0; i < NUMBER_OF_NEGATED_VARIABLE_CONSTRAINTS; i++) {
                 const auto &NEGATED_VARIABLE_NAME =
-                    a_PB.negated_variable_names[i];
+                    a_OPB.negated_variable_names[i];
                 negated_variable_constraint_proxy(i) =
                     *variable_ptrs[NEGATED_VARIABLE_NAME] +
                         *variable_ptrs["~" + NEGATED_VARIABLE_NAME] ==
@@ -3931,7 +3931,7 @@ class Model {
          * Set up constraints for product variables.
          */
         const int NUMBER_OF_PRODUCT_VARIABLE_CONSTRAINTS =
-            a_PB.product_variable_names.size();
+            a_OPB.product_variable_names.size();
         if (NUMBER_OF_PRODUCT_VARIABLE_CONSTRAINTS > 0) {
             auto &product_variable_constraint_proxy = this->create_constraints(
                 "product_variable_constraints",
@@ -3941,9 +3941,9 @@ class Model {
 #endif
             for (auto i = 0; i < NUMBER_OF_PRODUCT_VARIABLE_CONSTRAINTS; i++) {
                 const auto &PRODUCT_VARIABLE_NAME =
-                    a_PB.product_variable_names[i].first;
+                    a_OPB.product_variable_names[i].first;
                 const int PRODUCT_SIZE =
-                    a_PB.product_variable_names[i].second.size();
+                    a_OPB.product_variable_names[i].second.size();
 
                 auto expression_lower = model_component::Expression<
                     T_Variable, T_Expression>::create_instance();
@@ -3952,7 +3952,7 @@ class Model {
                     [variable_ptrs[PRODUCT_VARIABLE_NAME]] = 1;
 
                 for (const auto &variable_name :
-                     a_PB.product_variable_names[i].second) {
+                     a_OPB.product_variable_names[i].second) {
                     expression_sensitivities_lower
                         [variable_ptrs[variable_name]] = -1;
                 }
@@ -3973,7 +3973,7 @@ class Model {
                     [variable_ptrs[PRODUCT_VARIABLE_NAME]] = PRODUCT_SIZE;
 
                 for (const auto &variable_name :
-                     a_PB.product_variable_names[i].second) {
+                     a_OPB.product_variable_names[i].second) {
                     expression_sensitivities_upper
                         [variable_ptrs[variable_name]] = -1;
                 }
@@ -3991,12 +3991,12 @@ class Model {
         /**
          * Set up top cost constraint for wbo instances.
          */
-        if (a_PB.top_cost.is_defined) {
+        if (a_OPB.top_cost.is_defined) {
             auto &top_cost_constraint_proxy =
                 this->create_constraints("top_cost_constraint", 1);
 
             top_cost_constraint_proxy(0) =
-                objective_penalty <= a_PB.top_cost.value - 1;
+                objective_penalty <= a_OPB.top_cost.value - 1;
         }
 
         /**
@@ -4006,7 +4006,7 @@ class Model {
             model_component::Expression<T_Variable,
                                         T_Expression>::create_instance();
         Sensitivities objective_sensitivities;
-        for (const auto &term : a_PB.objective.terms) {
+        for (const auto &term : a_OPB.objective.terms) {
             const std::string  VARIABLE_NAME = term.concated_variable_name();
             const T_Expression COEFFICIENT =
                 static_cast<T_Expression>(term.coefficient);

@@ -9,7 +9,7 @@
 namespace {
 using namespace printemps;
 /*****************************************************************************/
-class TestPBMetadata : public ::testing::Test {
+class TestOPBMetadata : public ::testing::Test {
    protected:
     virtual void SetUp(void) {
         /// nothing to do
@@ -20,8 +20,8 @@ class TestPBMetadata : public ::testing::Test {
 };
 
 /*****************************************************************************/
-TEST_F(TestPBMetadata, initialize) {
-    pb::PBMetadata metadata;
+TEST_F(TestOPBMetadata, initialize) {
+    opb::OPBMetadata metadata;
     EXPECT_EQ(0, metadata.number_of_variables);
     EXPECT_EQ(0, metadata.number_of_constraints);
     EXPECT_EQ(0, metadata.number_of_equals);

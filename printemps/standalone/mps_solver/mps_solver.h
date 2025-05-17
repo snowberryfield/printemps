@@ -106,14 +106,20 @@ class MPSSolver {
         if (!m_argparser.option_file_name.empty()) {
             m_option.setup(m_argparser.option_file_name);
         }
-        if (m_argparser.is_iteration_max_given) {
+        if (m_argparser.is_specified_iteration_max) {
             m_option.general.iteration_max = m_argparser.iteration_max;
         }
-        if (m_argparser.is_time_max_given) {
+        if (m_argparser.is_specified_time_max) {
             m_option.general.time_max = m_argparser.time_max;
         }
-        if (m_argparser.is_verbose_given) {
+        if (m_argparser.is_specified_verbose) {
             m_option.output.verbose = m_argparser.verbose;
+        }
+        if (m_argparser.is_specified_number_of_threads) {
+            m_option.parallel.number_of_threads_move_evaluation =
+                m_argparser.number_of_threads;
+            m_option.parallel.number_of_threads_move_update =
+                m_argparser.number_of_threads;
         }
 
         /**

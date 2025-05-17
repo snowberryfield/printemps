@@ -7,7 +7,7 @@
 #include <printemps.h>
 
 int main(const int argc, const char *argv[]) {
-    printemps::standalone::pb_solver::PBSolver(argc, argv).run();
+    printemps::standalone::opb_solver::OPBSolver(argc, argv).run();
     return 0;
 }
 /*****************************************************************************/

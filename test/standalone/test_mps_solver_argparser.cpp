@@ -36,16 +36,6 @@ TEST_F(TestMPSSolverArgparser, constructor) {
               argparser.minimum_common_element);
 
     EXPECT_EQ(standalone::mps_solver::MPSSolverArgparserConstant::
-                  DEFAULT_IS_ITERATION_MAX_GIVEN,
-              argparser.is_iteration_max_given);
-    EXPECT_EQ(standalone::mps_solver::MPSSolverArgparserConstant::
-                  DEFAULT_IS_TIME_MAX_GIVEN,
-              argparser.is_time_max_given);
-    EXPECT_EQ(standalone::mps_solver::MPSSolverArgparserConstant::
-                  DEFAULT_IS_VERBOSE_GIVEN,
-              argparser.is_verbose_given);
-
-    EXPECT_EQ(standalone::mps_solver::MPSSolverArgparserConstant::
                   DEFAULT_ACCEPT_CONTINUOUS_VARIABLES,
               argparser.accept_continuous_variables);
 
@@ -68,6 +58,27 @@ TEST_F(TestMPSSolverArgparser, constructor) {
     EXPECT_EQ(standalone::mps_solver::MPSSolverArgparserConstant::
                   DEFAULT_IS_MAXIMIZATION_EXPLICIT,
               argparser.is_maximization_explicit);
+
+    EXPECT_FLOAT_EQ(option::GeneralOptionConstant::  //
+                    DEFAULT_ITERATION_MAX,
+                    argparser.iteration_max);
+
+    EXPECT_FLOAT_EQ(option::GeneralOptionConstant::  //
+                    DEFAULT_TIME_MAX,
+                    argparser.time_max);
+
+    EXPECT_EQ(option::OutputOptionConstant::  //
+              DEFAULT_VERBOSE,
+              argparser.verbose);
+
+    EXPECT_EQ(standalone::mps_solver::MPSSolverArgparserConstant::  //
+              DEFAULT_NUMBER_OF_THREADS,
+              argparser.number_of_threads);
+
+    EXPECT_FALSE(argparser.is_specified_iteration_max);
+    EXPECT_FALSE(argparser.is_specified_time_max);
+    EXPECT_FALSE(argparser.is_specified_verbose);
+    EXPECT_FALSE(argparser.is_specified_number_of_threads);
 }
 
 /*****************************************************************************/
@@ -118,15 +129,7 @@ TEST_F(TestMPSSolverArgparser, initialize) {
                   DEFAULT_MINIMUM_COMMON_ELEMENT,
               argparser.minimum_common_element);
 
-    EXPECT_EQ(standalone::mps_solver::MPSSolverArgparserConstant::
-                  DEFAULT_IS_ITERATION_MAX_GIVEN,
-              argparser.is_iteration_max_given);
-    EXPECT_EQ(standalone::mps_solver::MPSSolverArgparserConstant::
-                  DEFAULT_IS_TIME_MAX_GIVEN,
-              argparser.is_time_max_given);
-    EXPECT_EQ(standalone::mps_solver::MPSSolverArgparserConstant::
-                  DEFAULT_IS_VERBOSE_GIVEN,
-              argparser.is_verbose_given);
+    EXPECT_FALSE(argparser.is_specified_number_of_threads);
 
     EXPECT_EQ(standalone::mps_solver::MPSSolverArgparserConstant::
                   DEFAULT_ACCEPT_CONTINUOUS_VARIABLES,
@@ -151,6 +154,27 @@ TEST_F(TestMPSSolverArgparser, initialize) {
     EXPECT_EQ(standalone::mps_solver::MPSSolverArgparserConstant::
                   DEFAULT_IS_MAXIMIZATION_EXPLICIT,
               argparser.is_maximization_explicit);
+
+    EXPECT_FLOAT_EQ(option::GeneralOptionConstant::  //
+                    DEFAULT_ITERATION_MAX,
+                    argparser.iteration_max);
+
+    EXPECT_FLOAT_EQ(option::GeneralOptionConstant::  //
+                    DEFAULT_TIME_MAX,
+                    argparser.time_max);
+
+    EXPECT_EQ(option::OutputOptionConstant::  //
+              DEFAULT_VERBOSE,
+              argparser.verbose);
+
+    EXPECT_EQ(standalone::mps_solver::MPSSolverArgparserConstant::  //
+              DEFAULT_NUMBER_OF_THREADS,
+              argparser.number_of_threads);
+
+    EXPECT_FALSE(argparser.is_specified_iteration_max);
+    EXPECT_FALSE(argparser.is_specified_time_max);
+    EXPECT_FALSE(argparser.is_specified_verbose);
+    EXPECT_FALSE(argparser.is_specified_number_of_threads);
 }
 
 /*****************************************************************************/
@@ -269,6 +293,13 @@ TEST_F(TestMPSSolverArgparser, parse) {
 
     {
         standalone::mps_solver::MPSSolverArgparser argparser;
+        const char* argv[] = {"mps_solver", "-j", "10"};
+        argparser.parse(3, argv);
+        EXPECT_EQ(10, argparser.number_of_threads);
+    }
+
+    {
+        standalone::mps_solver::MPSSolverArgparser argparser;
         const char* argv[] = {"mps_solver", "--accept-continuous"};
         argparser.parse(2, argv);
         EXPECT_TRUE(argparser.accept_continuous_variables);
@@ -323,6 +354,7 @@ TEST_F(TestMPSSolverArgparser, parse) {
         argparser.parse(2, argv);
         EXPECT_TRUE(argparser.is_maximization_explicit);
     }
+
     {
         standalone::mps_solver::MPSSolverArgparser argparser;
         const char* argv[] = {"mps_solver", "--maximize"};

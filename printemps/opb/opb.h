@@ -3,24 +3,24 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_PB_PB_H__
-#define PRINTEMPS_PB_PB_H__
+#ifndef PRINTEMPS_OPB_OPB_H__
+#define PRINTEMPS_OPB_OPB_H__
 
-#include "pb_objective.h"
-#include "pb_constraint.h"
-#include "pb_metadata.h"
-#include "pb_top_cost.h"
+#include "opb_objective.h"
+#include "opb_constraint.h"
+#include "opb_metadata.h"
+#include "opb_top_cost.h"
 
-namespace printemps::pb {
+namespace printemps::opb {
 /*****************************************************************************/
-struct PB {
-    std::string               name;
-    PBObjective               objective;
-    std::vector<PBConstraint> soft_constraints;
-    std::vector<PBConstraint> hard_constraints;
+struct OPB {
+    std::string                name;
+    OPBObjective               objective;
+    std::vector<OPBConstraint> soft_constraints;
+    std::vector<OPBConstraint> hard_constraints;
 
-    PBMetadata metadata;
-    PBTopCost  top_cost;
+    OPBMetadata metadata;
+    OPBTopCost  top_cost;
 
     std::vector<std::string> variable_names;
     std::vector<std::string> negated_variable_names;
@@ -28,14 +28,14 @@ struct PB {
         product_variable_names;
 
     /*************************************************************************/
-    PB(void) {
+    OPB(void) {
         this->initialize();
     }
 
     /*************************************************************************/
-    PB(const std::string &a_FILE_NAME) {
+    OPB(const std::string &a_FILE_NAME) {
         this->initialize();
-        this->read_pb(a_FILE_NAME);
+        this->read_opb(a_FILE_NAME);
     }
 
     /*************************************************************************/
@@ -87,15 +87,15 @@ struct PB {
                           << term.concated_variable_name();
             }
             switch (constraint.sense) {
-                case PBConstraintSense::Less: {
+                case OPBConstraintSense::Less: {
                     std::cout << " <= ";
                     break;
                 }
-                case PBConstraintSense::Equal: {
+                case OPBConstraintSense::Equal: {
                     std::cout << " <= ";
                     break;
                 }
-                case PBConstraintSense::Greater: {
+                case OPBConstraintSense::Greater: {
                     std::cout << " >= ";
                     break;
                 }
@@ -112,15 +112,15 @@ struct PB {
                           << term.concated_variable_name();
             }
             switch (constraint.sense) {
-                case PBConstraintSense::Less: {
+                case OPBConstraintSense::Less: {
                     std::cout << " <= ";
                     break;
                 }
-                case PBConstraintSense::Equal: {
+                case OPBConstraintSense::Equal: {
                     std::cout << " = ";
                     break;
                 }
-                case PBConstraintSense::Greater: {
+                case OPBConstraintSense::Greater: {
                     std::cout << " >= ";
                     break;
                 }
@@ -153,8 +153,8 @@ struct PB {
     }
 
     /*************************************************************************/
-    inline static PBMetadata parse_metadata(const std::string &a_LINE) {
-        PBMetadata metadata;
+    inline static OPBMetadata parse_metadata(const std::string &a_LINE) {
+        OPBMetadata metadata;
         if (a_LINE.size() <= 1) {
             return metadata;
         }
@@ -229,21 +229,21 @@ struct PB {
             if (!is_valid) {
                 throw std::runtime_error(utility::format_error_location(
                     __FILE__, __LINE__, __func__,
-                    "The PB file has something wrong in metadata."));
+                    "The OPB file has something wrong in metadata."));
             }
         }
         return metadata;
     }
 
     /*************************************************************************/
-    inline static PBTopCost parse_top_cost(const std::string &a_LINE) {
-        PBTopCost top_cost;
+    inline static OPBTopCost parse_top_cost(const std::string &a_LINE) {
+        OPBTopCost top_cost;
 
         if (a_LINE.size() < 5 || (a_LINE.substr(0, 5) != "soft:" &&
                                   a_LINE.substr(0, 5) != "Soft:")) {
             throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
-                "The PB file has something wrong in top cost definition."));
+                "The OPB file has something wrong in top cost definition."));
         }
 
         const std::string        LINE_REST_PART = a_LINE.substr(5);
@@ -263,15 +263,15 @@ struct PB {
         } else {
             throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
-                "The PB file has something wrong in top cost definition."));
+                "The OPB file has something wrong in top cost definition."));
         }
         return top_cost;
     }
 
     /*************************************************************************/
-    inline static PBObjective parse_objective(const std::string &a_LINE) {
-        PBObjective objective;
-        bool        is_valid = false;
+    inline static OPBObjective parse_objective(const std::string &a_LINE) {
+        OPBObjective objective;
+        bool         is_valid = false;
         if (a_LINE.size() >= 4) {
             const auto SENSE = a_LINE.substr(0, 4);
             if (SENSE == "min:" || SENSE == "Min:") {
@@ -286,19 +286,19 @@ struct PB {
         if (!is_valid) {
             throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
-                "The PB file has something wrong in objective function "
+                "The OPB file has something wrong in objective function "
                 "definition."));
         }
 
         objective.name  = "objective";
-        objective.terms = PB::parse_terms(a_LINE.substr(4));
+        objective.terms = OPB::parse_terms(a_LINE.substr(4));
 
         return objective;
     }
 
     /*************************************************************************/
-    inline static PBConstraint parse_soft_constraint(const std::string &a_LINE,
-                                                     const int a_INDEX) {
+    inline static OPBConstraint parse_soft_constraint(const std::string &a_LINE,
+                                                      const int a_INDEX) {
         const size_t SQUARE_BRACKET_START = a_LINE.find('[');
         const size_t SQUARE_BRACKET_END   = a_LINE.find(']');
 
@@ -313,65 +313,65 @@ struct PB {
         } else {
             throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
-                "The PB file has something wrong in soft constraint "
+                "The OPB file has something wrong in soft constraint "
                 "definition."));
         }
 
         const std::string LINE_REST_PART =
             a_LINE.substr(SQUARE_BRACKET_END + 1);
-        PBConstraint soft_constraint = PB::parse_constraint(LINE_REST_PART);
-        soft_constraint.weight       = weight;
+        OPBConstraint soft_constraint = OPB::parse_constraint(LINE_REST_PART);
+        soft_constraint.weight        = weight;
         soft_constraint.name = "soft_constraint_" + std::to_string(a_INDEX);
 
         return soft_constraint;
     }
 
     /*************************************************************************/
-    inline static PBConstraint parse_hard_constraint(const std::string &a_LINE,
-                                                     const int a_INDEX) {
-        PBConstraint hard_constraint = PB::parse_constraint(a_LINE);
-        hard_constraint.weight       = std::numeric_limits<int>::max();
+    inline static OPBConstraint parse_hard_constraint(const std::string &a_LINE,
+                                                      const int a_INDEX) {
+        OPBConstraint hard_constraint = OPB::parse_constraint(a_LINE);
+        hard_constraint.weight        = std::numeric_limits<int>::max();
         hard_constraint.name = "hard_constraint_" + std::to_string(a_INDEX);
         return hard_constraint;
     }
 
     /*************************************************************************/
-    inline static PBConstraint parse_constraint(
+    inline static OPBConstraint parse_constraint(
         const std::string &a_CONSTRAINT_STRING) {
-        size_t            pos;
-        std::string       op;
-        PBConstraintSense sense;
+        size_t             pos;
+        std::string        op;
+        OPBConstraintSense sense;
 
         if ((pos = a_CONSTRAINT_STRING.find("<=")) != std::string::npos) {
             op    = "<=";
-            sense = PBConstraintSense::Less;
+            sense = OPBConstraintSense::Less;
         } else if ((pos = a_CONSTRAINT_STRING.find(">=")) !=
                    std::string::npos) {
             op    = ">=";
-            sense = PBConstraintSense::Greater;
+            sense = OPBConstraintSense::Greater;
         } else if ((pos = a_CONSTRAINT_STRING.find("=")) != std::string::npos) {
             op    = "=";
-            sense = PBConstraintSense::Equal;
+            sense = OPBConstraintSense::Equal;
         } else {
             throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
-                "The PB file has something wrong in constraint definition."));
+                "The OPB file has something wrong in constraint definition."));
         }
 
         const std::string LHS_STRING = a_CONSTRAINT_STRING.substr(0, pos);
         const std::string RHS_STRING =
             a_CONSTRAINT_STRING.substr(pos + op.size());
-        PBConstraint constraint;
+        OPBConstraint constraint;
         constraint.weight = std::numeric_limits<int>::max();
         constraint.sense  = sense;
         constraint.name   = "";
-        constraint.terms  = PB::parse_terms(LHS_STRING);
+        constraint.terms  = OPB::parse_terms(LHS_STRING);
         constraint.rhs    = std::stoi(RHS_STRING);
         return constraint;
     }
 
     /*************************************************************************/
-    inline static std::vector<PBTerm> parse_terms(
+    inline static std::vector<OPBTerm> parse_terms(
         const std::string &a_TERM_STRING) {
         std::stringstream        stream(a_TERM_STRING);
         std::string              token;
@@ -381,8 +381,8 @@ struct PB {
             tokens.push_back(token);
         }
 
-        PBTerm              term;
-        std::vector<PBTerm> terms;
+        OPBTerm              term;
+        std::vector<OPBTerm> terms;
 
         bool   is_number_last_read  = false;
         double previous_coefficient = 0.0;
@@ -517,10 +517,10 @@ struct PB {
     }
 
     /*************************************************************************/
-    inline void read_pb(const std::string &a_FILE_NAME) {
+    inline void read_opb(const std::string &a_FILE_NAME) {
         std::vector<std::string> lines;
         /**
-         * Read and store entire part of the pb file.
+         * Read and store entire part of the opb file.
          */
         {
             std::ifstream ifs;
@@ -530,7 +530,7 @@ struct PB {
             if (ifs.fail()) {
                 throw std::runtime_error(utility::format_error_location(
                     __FILE__, __LINE__, __func__,
-                    "Cannot open the specified PB file: " + a_FILE_NAME));
+                    "Cannot open the specified OPB file: " + a_FILE_NAME));
             }
             while (std::getline(ifs, buffer)) {
                 if (!buffer.empty() && buffer.back() == ';') {
@@ -557,15 +557,15 @@ struct PB {
 
             if (line.front() == '*') {
                 if (i == 0) {
-                    this->metadata = PB::parse_metadata(line);
+                    this->metadata = OPB::parse_metadata(line);
                 }
                 continue;
             }
 
             if (line.front() == 's' || line.front() == 'S') {
-                this->top_cost = PB::parse_top_cost(line);
+                this->top_cost = OPB::parse_top_cost(line);
             } else if (line.front() == 'm' || line.front() == 'M') {
-                this->objective = PB::parse_objective(line);
+                this->objective = OPB::parse_objective(line);
             } else if (line.front() == '[') {
                 soft_constraint_lines.push_back(i);
             } else {
@@ -582,7 +582,7 @@ struct PB {
 #endif
         for (auto i = 0; i < SOFT_CONSTRAINTS_SIZE; i++) {
             this->soft_constraints[i] =
-                PB::parse_soft_constraint(lines[soft_constraint_lines[i]], i);
+                OPB::parse_soft_constraint(lines[soft_constraint_lines[i]], i);
         }
         const int HARD_CONSTRAINTS_SIZE = hard_constraints.size();
 #ifdef _OPENMP
@@ -590,13 +590,13 @@ struct PB {
 #endif
         for (auto i = 0; i < HARD_CONSTRAINTS_SIZE; i++) {
             this->hard_constraints[i] =
-                PB::parse_hard_constraint(lines[hard_constraint_lines[i]], i);
+                OPB::parse_hard_constraint(lines[hard_constraint_lines[i]], i);
         }
 
         this->setup_variable_information();
     }
 };
-}  // namespace printemps::pb
+}  // namespace printemps::opb
 #endif
 /*****************************************************************************/
 // END

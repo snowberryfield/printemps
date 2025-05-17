@@ -3,16 +3,15 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_STANDALONE_MPS_SOLVER_MPS_SOLVER_ARGPARSER_H__
-#define PRINTEMPS_STANDALONE_MPS_SOLVER_MPS_SOLVER_ARGPARSER_H__
+#ifndef PRINTEMPS_STANDALONE_OPB_SOLVER_OPB_SOLVER_ARGPARSER_H__
+#define PRINTEMPS_STANDALONE_OPB_SOLVER_OPB_SOLVER_ARGPARSER_H__
 
-namespace printemps::standalone::mps_solver {
+namespace printemps::standalone::opb_solver {
 /*****************************************************************************/
-struct MPSSolverArgparserConstant {
+struct OPBSolverArgparserConstant {
     static constexpr int  DEFAULT_MINIMUM_COMMON_ELEMENT           = 5;
-    static constexpr bool DEFAULT_ACCEPT_CONTINUOUS_VARIABLES      = false;
     static constexpr bool DEFAULT_EXTRACT_FLIPPABLE_VARIABLE_PAIRS = false;
-    static constexpr bool DEFAULT_INCLUDE_MPS_LOADING_TIME         = false;
+    static constexpr bool DEFAULT_INCLUDE_OPB_LOADING_TIME         = false;
     static constexpr bool DEFAULT_EXPORT_JSON_INSTANCE             = false;
     static constexpr bool DEFAULT_IS_MINIMIZATION_EXPLICIT         = false;
     static constexpr bool DEFAULT_IS_MAXIMIZATION_EXPLICIT         = false;
@@ -20,8 +19,8 @@ struct MPSSolverArgparserConstant {
 };
 
 /*****************************************************************************/
-struct MPSSolverArgparser {
-    std::string mps_file_name;
+struct OPBSolverArgparser {
+    std::string opb_file_name;
     std::string option_file_name;
     std::string initial_solution_file_name;
     std::string mutable_variable_file_name;
@@ -30,9 +29,8 @@ struct MPSSolverArgparser {
     std::string flippable_variable_pair_file_name;
 
     int  minimum_common_element;
-    bool accept_continuous_variables;
     bool extract_flippable_variable_pairs;
-    bool include_mps_loading_time;
+    bool include_opb_loading_time;
     bool export_json_instance;
     bool is_minimization_explicit;
     bool is_maximization_explicit;
@@ -48,13 +46,13 @@ struct MPSSolverArgparser {
     bool is_specified_number_of_threads;
 
     /*************************************************************************/
-    MPSSolverArgparser(void) {
+    OPBSolverArgparser(void) {
         this->initialize();
     }
 
     /*************************************************************************/
     inline void initialize(void) {
-        this->mps_file_name.clear();
+        this->opb_file_name.clear();
         this->option_file_name.clear();
         this->initial_solution_file_name.clear();
         this->mutable_variable_file_name.clear();
@@ -62,26 +60,24 @@ struct MPSSolverArgparser {
         this->selection_constraint_file_name.clear();
         this->flippable_variable_pair_file_name.clear();
         this->minimum_common_element =
-            MPSSolverArgparserConstant::DEFAULT_MINIMUM_COMMON_ELEMENT;
-        this->accept_continuous_variables =
-            MPSSolverArgparserConstant::DEFAULT_ACCEPT_CONTINUOUS_VARIABLES;
-        this->extract_flippable_variable_pairs = MPSSolverArgparserConstant::
+            OPBSolverArgparserConstant::DEFAULT_MINIMUM_COMMON_ELEMENT;
+        this->extract_flippable_variable_pairs = OPBSolverArgparserConstant::
             DEFAULT_EXTRACT_FLIPPABLE_VARIABLE_PAIRS;
-        this->include_mps_loading_time =
-            MPSSolverArgparserConstant::DEFAULT_INCLUDE_MPS_LOADING_TIME;
+        this->include_opb_loading_time =
+            OPBSolverArgparserConstant::DEFAULT_INCLUDE_OPB_LOADING_TIME;
         this->export_json_instance =
-            MPSSolverArgparserConstant::DEFAULT_EXPORT_JSON_INSTANCE;
+            OPBSolverArgparserConstant::DEFAULT_EXPORT_JSON_INSTANCE;
         this->is_minimization_explicit =
-            MPSSolverArgparserConstant::DEFAULT_IS_MINIMIZATION_EXPLICIT;
+            OPBSolverArgparserConstant::DEFAULT_IS_MINIMIZATION_EXPLICIT;
         this->is_maximization_explicit =
-            MPSSolverArgparserConstant::DEFAULT_IS_MAXIMIZATION_EXPLICIT;
+            OPBSolverArgparserConstant::DEFAULT_IS_MAXIMIZATION_EXPLICIT;
 
         this->iteration_max =
             option::GeneralOptionConstant::DEFAULT_ITERATION_MAX;
         this->time_max = option::GeneralOptionConstant::DEFAULT_TIME_MAX;
         this->verbose  = option::OutputOptionConstant::DEFAULT_VERBOSE;
         this->number_of_threads =
-            MPSSolverArgparserConstant::DEFAULT_NUMBER_OF_THREADS;
+            OPBSolverArgparserConstant::DEFAULT_NUMBER_OF_THREADS;
 
         this->is_specified_iteration_max     = false;
         this->is_specified_time_max          = false;
@@ -97,7 +93,7 @@ struct MPSSolverArgparser {
                   << std::endl;
         std::cout << std::endl;
 
-        std::cout << "Usage: ./mps_solver "
+        std::cout << "Usage: ./opb_solver "
                   << "[-p OPTION_FILE_NAME] "
                   << "[-i INITIAL_SOLUTION_FILE_NAME] "
                   << "[-m MUTABLE_VARIABLE_FILE_NAME] "
@@ -109,13 +105,12 @@ struct MPSSolverArgparser {
                   << "[-t TIME_MAX] "
                   << "[-v VERVOSE] "
                   << "[-j NUMBER_OF_THREADS] "
-                  << "[--accept-continuous] "
                   << "[--extract-flippable-variable-pairs] "
-                  << "[--include-mps-loading-time] "
+                  << "[--include-opb-loading-time] "
                   << "[--export-json-instance] "
                   << "[--minimization] "
                   << "[--maximization] "
-                  << "mps_file" << std::endl;
+                  << "opb_file" << std::endl;
         std::cout << std::endl;
         std::cout  //
             << "  -p OPTION_FILE_NAME: Specify option file name." << std::endl;
@@ -143,7 +138,7 @@ struct MPSSolverArgparser {
             << "  -c MINIMUM_COMMON_ELEMENT: Specify the number of minimum "
                "common element between two constraints, which is used as the "
                "threshold for extracting flippable variable pairs. (default: "
-            << MPSSolverArgparserConstant::DEFAULT_MINIMUM_COMMON_ELEMENT << ")"
+            << OPBSolverArgparserConstant::DEFAULT_MINIMUM_COMMON_ELEMENT << ")"
             << std::endl;
         std::cout  //
             << "  -k ITERATION_MAX: Specify the allowed maximum number of "
@@ -164,18 +159,15 @@ struct MPSSolverArgparser {
         std::cout  //
             << "  -j NUMBER_OF_THREADS: Specity the number of threads for "
                "parallelization. (default: "
-            << MPSSolverArgparserConstant::DEFAULT_NUMBER_OF_THREADS
+            << OPBSolverArgparserConstant::DEFAULT_NUMBER_OF_THREADS
             << ", maximum value avaiable)" << std::endl;
-        std::cout  //
-            << "  --accept-continuous: Accept continuous variables as integer "
-               "variables."
-            << std::endl;
         std::cout  //
             << "  --extract-flippable-variable-pairs: Extract 2-flippable "
                "variable pairs."
             << std::endl;
         std::cout  //
-            << "  --include-mps-loading-time: Include MPS file loading time in "
+            << "  --include-opb-loading-time: Include OPB file loading time "
+               "in "
                "the calculation time. "
             << std::endl;
         std::cout  //
@@ -184,12 +176,12 @@ struct MPSSolverArgparser {
             << std::endl;
         std::cout  //
             << "  --minimization (or --minimize, --min): Minimize the "
-               "objective function value regardless of the settings in the MPS "
+               "objective function value regardless of the settings in the OPB "
                "file."
             << std::endl;
         std::cout  //
             << "  --maximization (or --maximize, --max): Maximize the "
-               "objective function value regardless of the settings in the MPS "
+               "objective function value regardless of the settings in the OPB "
                "file."
             << std::endl;
     }
@@ -237,14 +229,11 @@ struct MPSSolverArgparser {
                 this->number_of_threads = atof(args[i + 1].c_str());
                 this->is_specified_number_of_threads = true;
                 i += 2;
-            } else if (args[i] == "--accept-continuous") {
-                this->accept_continuous_variables = true;
-                i++;
             } else if (args[i] == "--extract-flippable-variable-pairs") {
                 this->extract_flippable_variable_pairs = true;
                 i++;
-            } else if (args[i] == "--include-mps-loading-time") {
-                this->include_mps_loading_time = true;
+            } else if (args[i] == "--include-opb-loading-time") {
+                this->include_opb_loading_time = true;
                 i++;
             } else if (args[i] == "--export-json-instance") {
                 this->export_json_instance = true;
@@ -258,13 +247,13 @@ struct MPSSolverArgparser {
                 this->is_maximization_explicit = true;
                 i++;
             } else {
-                this->mps_file_name = args[i];
+                this->opb_file_name = args[i];
                 i++;
             }
         }
     }
 };
-}  // namespace printemps::standalone::mps_solver
+}  // namespace printemps::standalone::opb_solver
 #endif
 /*****************************************************************************/
 // END
