@@ -17,7 +17,7 @@ struct Result {
 
     /*************************************************************************/
     Result(solution::NamedSolution<T_Variable, T_Expression> &a_SOLUTION,
-           Status<T_Variable, T_Expression> &                 a_STATUS,
+           Status<T_Variable, T_Expression>                  &a_STATUS,
            solution::SolutionArchive<T_Variable, T_Expression>
                &a_FEASIBLE_SOLUTION_ARCHIVE)
         : solution(a_SOLUTION),
@@ -38,6 +38,7 @@ struct Result {
         this->feasible_solution_archive.initialize();
     }
 };
+using IPResult = Result<int, double>;
 }  // namespace printemps::solver
 
 #endif
