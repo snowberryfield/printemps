@@ -22,7 +22,7 @@ struct MPSConstraint {
     }
 
     /*************************************************************************/
-    void initialize(void) {
+    inline void initialize(void) {
         this->sense = MPSConstraintSense::Less;
         this->name  = "";
         this->sensitivities.clear();

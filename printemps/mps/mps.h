@@ -22,13 +22,6 @@ struct MPS {
     std::vector<std::string> variable_names;
     std::vector<std::string> constraint_names;
 
-    int number_of_variables;
-    int number_of_lesser_constraints;
-    int number_of_equal_constraints;
-    int number_of_greater_constraints;
-
-    bool is_minimization;
-
     /*************************************************************************/
     MPS(void) {
         this->initialize();
@@ -41,7 +34,7 @@ struct MPS {
     }
 
     /*************************************************************************/
-    void initialize(void) {
+    inline void initialize(void) {
         this->name = "";
         this->variables.clear();
         this->constraints.clear();
@@ -49,13 +42,6 @@ struct MPS {
 
         this->variable_names.clear();
         this->constraint_names.clear();
-
-        this->number_of_variables           = 0;
-        this->number_of_lesser_constraints  = 0;
-        this->number_of_equal_constraints   = 0;
-        this->number_of_greater_constraints = 0;
-
-        this->is_minimization = true;
     }
 
     /*************************************************************************/
@@ -97,9 +83,9 @@ struct MPS {
          * Parse the mps file.
          */
         for (const auto &line : lines) {
-            stream.str(line);
-            stream.clear(std::stringstream::goodbit);
+            stream.clear();
             items.clear();
+            stream.str(line);
 
             while (stream >> item) {
                 items.push_back(item);
@@ -164,14 +150,15 @@ struct MPS {
                             items.front() == "minimization" ||
                             items.front() == "minimize" ||
                             items.front() == "min") {
-                            this->is_minimization = true;
-                        } else if (items.front() == "MAXIMIZATION" ||
-                                   items.front() == "MAXIMIZE" ||
-                                   items.front() == "MAX" ||
-                                   items.front() == "maximization" ||
-                                   items.front() == "maximize" ||
-                                   items.front() == "max") {
-                            this->is_minimization = false;
+                            this->objective.is_minimization = true;
+                        } else if (  //
+                            items.front() == "MAXIMIZATION" ||
+                            items.front() == "MAXIMIZE" ||
+                            items.front() == "MAX" ||
+                            items.front() == "maximization" ||
+                            items.front() == "maximize" ||
+                            items.front() == "max") {
+                            this->objective.is_minimization = false;
                         } else {
                             throw std::runtime_error(
                                 utility::format_error_location(
@@ -205,21 +192,18 @@ struct MPS {
                             MPSConstraintSense::Less;
                         this->constraints[name].name = name;
                         this->constraint_names.push_back(name);
-                        this->number_of_lesser_constraints++;
                     } else if (items.front() == "E") {
                         name = items[1];
                         this->constraints[name].sense =
                             MPSConstraintSense::Equal;
                         this->constraints[name].name = name;
                         this->constraint_names.push_back(name);
-                        this->number_of_equal_constraints++;
                     } else if (items.front() == "G") {
                         name = items[1];
                         this->constraints[name].sense =
                             MPSConstraintSense::Greater;
                         this->constraints[name].name = name;
                         this->constraint_names.push_back(name);
-                        this->number_of_greater_constraints++;
                     } else {
                         throw std::runtime_error(utility::format_error_location(
                             __FILE__, __LINE__, __func__,
@@ -272,7 +256,6 @@ struct MPS {
                         this->variables[name].sense = variable_sense;
                         this->variables[name].name  = name;
                         this->variable_names.push_back(name);
-                        this->number_of_variables++;
                     }
 
                     break;
@@ -361,7 +344,6 @@ struct MPS {
                         }
 
                         this->constraint_names.push_back(name_new);
-                        this->number_of_lesser_constraints++;
                     }
                     break;
                 }
@@ -380,7 +362,6 @@ struct MPS {
                             MPSVariableSense::Continuous;
                         this->variables[name].name = name;
                         this->variable_names.push_back(name);
-                        this->number_of_variables++;
                     }
                     if (ITEMS_SIZE == 3) {
                         if (category == "FR") {

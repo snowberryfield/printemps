@@ -28,11 +28,6 @@ TEST_F(TestMPS, initialize) {
     EXPECT_TRUE(mps.variables.empty());
     EXPECT_TRUE(mps.variable_names.empty());
     EXPECT_TRUE(mps.constraint_names.empty());
-
-    EXPECT_EQ(0, mps.number_of_variables);
-    EXPECT_EQ(0, mps.number_of_lesser_constraints);
-    EXPECT_EQ(0, mps.number_of_equal_constraints);
-    EXPECT_EQ(0, mps.number_of_greater_constraints);
 }
 
 /*****************************************************************************/
@@ -41,7 +36,6 @@ TEST_F(TestMPS, read_mps_00) {
     mps::MPS mps;
     mps.read_mps("./test/dat/mps/test_00.mps");
     EXPECT_EQ("problem", mps.name);
-    EXPECT_EQ(60, mps.number_of_variables);
 
     {
         auto x_0 = mps.variables["x_0"];
@@ -106,10 +100,6 @@ TEST_F(TestMPS, read_mps_00) {
         EXPECT_EQ(1, mps.objective.sensitivities["x_0"]);
         EXPECT_EQ(10, mps.objective.sensitivities["x_9"]);
     }
-
-    EXPECT_EQ(1, mps.number_of_lesser_constraints);
-    EXPECT_EQ(1, mps.number_of_equal_constraints);
-    EXPECT_EQ(1, mps.number_of_greater_constraints);
 }
 
 /*****************************************************************************/
@@ -211,32 +201,32 @@ TEST_F(TestMPS, read_mps_06a) {
     // Parse a MPS file including the OBJSENSE section for minimization.
     {
         mps::MPS mps("./test/dat/mps/test_06a.mps");
-        EXPECT_TRUE(mps.is_minimization);
+        EXPECT_TRUE(mps.objective.is_minimization);
     }
 
     {
         mps::MPS mps("./test/dat/mps/test_06b.mps");
-        EXPECT_TRUE(mps.is_minimization);
+        EXPECT_TRUE(mps.objective.is_minimization);
     }
 
     {
         mps::MPS mps("./test/dat/mps/test_06c.mps");
-        EXPECT_TRUE(mps.is_minimization);
+        EXPECT_TRUE(mps.objective.is_minimization);
     }
 
     {
         mps::MPS mps("./test/dat/mps/test_06d.mps");
-        EXPECT_TRUE(mps.is_minimization);
+        EXPECT_TRUE(mps.objective.is_minimization);
     }
 
     {
         mps::MPS mps("./test/dat/mps/test_06e.mps");
-        EXPECT_TRUE(mps.is_minimization);
+        EXPECT_TRUE(mps.objective.is_minimization);
     }
 
     {
         mps::MPS mps("./test/dat/mps/test_06f.mps");
-        EXPECT_TRUE(mps.is_minimization);
+        EXPECT_TRUE(mps.objective.is_minimization);
     }
 }
 
@@ -245,32 +235,32 @@ TEST_F(TestMPS, read_mps_07a) {
     // Parse a MPS file including the OBJSENSE section for maximization.
     {
         mps::MPS mps("./test/dat/mps/test_07a.mps");
-        EXPECT_FALSE(mps.is_minimization);
+        EXPECT_FALSE(mps.objective.is_minimization);
     }
 
     {
         mps::MPS mps("./test/dat/mps/test_07b.mps");
-        EXPECT_FALSE(mps.is_minimization);
+        EXPECT_FALSE(mps.objective.is_minimization);
     }
 
     {
         mps::MPS mps("./test/dat/mps/test_07c.mps");
-        EXPECT_FALSE(mps.is_minimization);
+        EXPECT_FALSE(mps.objective.is_minimization);
     }
 
     {
         mps::MPS mps("./test/dat/mps/test_07d.mps");
-        EXPECT_FALSE(mps.is_minimization);
+        EXPECT_FALSE(mps.objective.is_minimization);
     }
 
     {
         mps::MPS mps("./test/dat/mps/test_07e.mps");
-        EXPECT_FALSE(mps.is_minimization);
+        EXPECT_FALSE(mps.objective.is_minimization);
     }
 
     {
         mps::MPS mps("./test/dat/mps/test_07f.mps");
-        EXPECT_FALSE(mps.is_minimization);
+        EXPECT_FALSE(mps.objective.is_minimization);
     }
 }
 

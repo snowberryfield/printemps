@@ -6,12 +6,10 @@
 #ifndef PRINTEMPS_MPS_MPS_OBJECTIVE_H__
 #define PRINTEMPS_MPS_MPS_OBJECTIVE_H__
 
-#include "mps_objective_sense.h"
-
 namespace printemps::mps {
 /*****************************************************************************/
 struct MPSObjective {
-    MPSObjectiveSense                       sense;
+    bool                                    is_minimization;
     std::string                             name;
     std::unordered_map<std::string, double> sensitivities;
 
@@ -21,9 +19,9 @@ struct MPSObjective {
     }
 
     /*************************************************************************/
-    void initialize(void) {
-        this->sense = MPSObjectiveSense::Minimize;
-        this->name  = "";
+    inline void initialize(void) {
+        this->is_minimization = true;
+        this->name            = "";
         this->sensitivities.clear();
     }
 };

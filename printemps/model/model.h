@@ -3463,14 +3463,13 @@ class Model {
             T_Expression>;
 
         VariableMap variable_ptrs;
-
-        m_is_minimization = a_MPS.is_minimization;
+        m_is_minimization = a_MPS.objective.is_minimization;
 
         auto &variable_proxy =
             this->create_variables("variables", a_MPS.variables.size());
 
         /**
-         * Set up the variables.
+         * Set up variables.
          */
         const int NUMBER_OF_VARIABLES = a_MPS.variable_names.size();
 
@@ -3503,12 +3502,10 @@ class Model {
         }
 
         /**
-         * Set up the constraints.
+         * Set up constraints.
          */
-        const int        NUMBER_OF_CONSTRAINTS = a_MPS.constraint_names.size();
-        std::vector<int> offsets(NUMBER_OF_CONSTRAINTS);
-
-        auto &constraint_proxy =
+        const int NUMBER_OF_CONSTRAINTS = a_MPS.constraint_names.size();
+        auto     &constraint_proxy =
             this->create_constraints("constraints", NUMBER_OF_CONSTRAINTS);
 
 #ifdef _OPENMP
