@@ -29,7 +29,7 @@ struct MPSVariable {
     }
 
     /*************************************************************************/
-    void initialize(void) {
+    inline void initialize(void) {
         this->sense                  = MPSVariableSense::Continuous;
         this->name                   = "";
         this->integer_lower_bound    = 0;

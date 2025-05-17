@@ -22,7 +22,7 @@ class TestMPSObjective : public ::testing::Test {
 /*****************************************************************************/
 TEST_F(TestMPSObjective, initialize) {
     mps::MPSObjective objective;
-    EXPECT_EQ(mps::MPSObjectiveSense::Minimize, objective.sense);
+    EXPECT_TRUE(objective.is_minimization);
     EXPECT_EQ("", objective.name);
     EXPECT_TRUE(objective.sensitivities.empty());
 }

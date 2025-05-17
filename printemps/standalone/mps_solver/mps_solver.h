@@ -17,10 +17,11 @@ inline void interrupt_handler([[maybe_unused]] int signum) {
 /*****************************************************************************/
 class MPSSolver {
    private:
-    MPSSolverArgparser        m_argparser;
-    model::IPModel            m_model;
-    printemps::option::Option m_option;
-    utility::TimeKeeper       m_time_keeper;
+    MPSSolverArgparser  m_argparser;
+    mps::MPS            m_mps;
+    model::IPModel      m_model;
+    option::Option      m_option;
+    utility::TimeKeeper m_time_keeper;
 
    public:
     /*************************************************************************/
@@ -37,6 +38,7 @@ class MPSSolver {
     /*************************************************************************/
     inline void initialize(void) {
         m_argparser.initialize();
+        m_mps.initialize();
         m_model.initialize();
         m_option.initialize();
         m_time_keeper.initialize();
@@ -85,17 +87,15 @@ class MPSSolver {
         /**
          * Read the specified MPS file and convert to the model.
          */
-        {
-            printemps::mps::MPS mps(m_argparser.mps_file_name);
-            m_model.import_mps(mps, m_argparser.accept_continuous_variables);
-            m_model.set_name(
-                printemps::utility::base_name(m_argparser.mps_file_name));
+        m_mps.read_mps(m_argparser.mps_file_name);
+        m_model.import_mps(m_mps, m_argparser.accept_continuous_variables);
+        m_model.set_name(
+            printemps::utility::base_name(m_argparser.mps_file_name));
 
-            if (m_argparser.is_minimization_explicit) {
-                m_model.set_is_minimization(true);
-            } else if (m_argparser.is_maximization_explicit) {
-                m_model.set_is_minimization(false);
-            }
+        if (m_argparser.is_minimization_explicit) {
+            m_model.set_is_minimization(true);
+        } else if (m_argparser.is_maximization_explicit) {
+            m_model.set_is_minimization(false);
         }
 
         /**
@@ -182,16 +182,6 @@ class MPSSolver {
     /*************************************************************************/
     inline void solve(void) {
         /**
-         * Run the solver without callback function.
-         */
-        auto callback = [](auto) {};
-        this->solve(callback);
-    }
-
-    /*************************************************************************/
-    inline void solve(
-        const std::function<void(solver::IPGlobalState *)> &a_CALLBACK) {
-        /**
          * Run the solver with callback function
          */
         printemps::solver::IPSolver solver;
@@ -202,32 +192,31 @@ class MPSSolver {
             solver.setup(&m_model, m_option);
         }
         solver.set_check_interrupt([]() { return interrupted; });
-        solver.set_callback(a_CALLBACK);
 
-        auto result = solver.solve();
+        const auto RESULT = solver.solve();
 
         /**
          * Print the result summary.
          */
         printemps::utility::print_info(
-            "status: " + std::to_string(result.solution.is_feasible()),
+            "status: " + std::to_string(RESULT.solution.is_feasible()),
             m_option.output.verbose >= printemps::option::verbose::Warning);
 
         printemps::utility::print_info(
-            "objective: " + std::to_string(result.solution.objective()),
+            "objective: " + std::to_string(RESULT.solution.objective()),
             m_option.output.verbose >= printemps::option::verbose::Warning);
 
         printemps::utility::print_info(
             "total violation: " +
-                std::to_string(result.solution.total_violation()),
+                std::to_string(RESULT.solution.total_violation()),
             m_option.output.verbose >= printemps::option::verbose::Warning);
 
-        result.solution.write_json_by_name("incumbent.json");
-        result.solution.write_solution("incumbent.sol");
-        result.status.write_json_by_name("status.json");
+        RESULT.solution.write_json_by_name("incumbent.json");
+        RESULT.solution.write_solution("incumbent.sol");
+        RESULT.status.write_json_by_name("status.json");
 
         if (m_option.output.is_enabled_store_feasible_solutions) {
-            result.feasible_solution_archive.write_solutions_json(
+            RESULT.feasible_solution_archive.write_solutions_json(
                 "feasible.json");
         }
 
@@ -259,21 +248,6 @@ class MPSSolver {
         } else {
             this->extract_flippable_variable_pairs();
         }
-    }
-
-    /*************************************************************************/
-    inline void run(
-        const std::function<void(solver::IPGlobalState *)> &a_CALLBACK) {
-        if (!m_argparser.extract_flippable_variable_pairs) {
-            this->solve(a_CALLBACK);
-        } else {
-            this->extract_flippable_variable_pairs();
-        }
-    }
-
-    /*************************************************************************/
-    inline const MPSSolverArgparser &argparser(void) const {
-        return m_argparser;
     }
 };
 }  // namespace printemps::standalone::mps_solver
