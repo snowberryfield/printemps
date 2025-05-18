@@ -12,6 +12,7 @@ int main(const int argc, const char *argv[]) {
                                                                        argv)
             .run();
     } catch (const std::exception &e) {
+        std::cout << "c Unsupported file format or missing file." << std::endl;
         std::cout << "s UNSUPPORTED" << std::endl;
     }
     return 0;

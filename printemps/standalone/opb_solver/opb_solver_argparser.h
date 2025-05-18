@@ -167,8 +167,7 @@ struct OPBSolverArgparser {
             << std::endl;
         std::cout  //
             << "  --include-opb-loading-time: Include OPB file loading time "
-               "in "
-               "the calculation time. "
+               "in the calculation time. "
             << std::endl;
         std::cout  //
             << "  --export-json-instance: Export the target instance as JSON "
