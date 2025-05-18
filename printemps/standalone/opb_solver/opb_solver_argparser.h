@@ -39,11 +39,13 @@ struct OPBSolverArgparser {
     double                   time_max;
     option::verbose::Verbose verbose;
     int                      number_of_threads;
+    int                      seed;
 
     bool is_specified_iteration_max;
     bool is_specified_time_max;
     bool is_specified_verbose;
     bool is_specified_number_of_threads;
+    bool is_specified_seed;
 
     /*************************************************************************/
     OPBSolverArgparser(void) {
@@ -78,11 +80,13 @@ struct OPBSolverArgparser {
         this->verbose  = option::OutputOptionConstant::DEFAULT_VERBOSE;
         this->number_of_threads =
             OPBSolverArgparserConstant::DEFAULT_NUMBER_OF_THREADS;
+        this->seed = option::GeneralOptionConstant::DEFAULT_SEED;
 
         this->is_specified_iteration_max     = false;
         this->is_specified_time_max          = false;
         this->is_specified_verbose           = false;
         this->is_specified_number_of_threads = false;
+        this->is_specified_seed              = false;
     }
 
     /*************************************************************************/
@@ -99,12 +103,13 @@ struct OPBSolverArgparser {
                   << "[-m MUTABLE_VARIABLE_FILE_NAME] "
                   << "[-f FIXED_VARIABLE_FILE_NAME] "
                   << "[-s SELECTION_CONSTRAINT_FILE_NAME] "
-                  << "[-x FLIPPABLE_VARIABLE_PAIR_FILE_NAME]"
+                  << "[-x FLIPPABLE_VARIABLE_PAIR_FILE_NAME] "
                   << "[-c MINIMUM_COMMON_ELEMENT] "
                   << "[-k ITERATION_MAX] "
                   << "[-t TIME_MAX] "
                   << "[-v VERVOSE] "
                   << "[-j NUMBER_OF_THREADS] "
+                  << "[-r SEED] "
                   << "[--extract-flippable-variable-pairs] "
                   << "[--include-opb-loading-time] "
                   << "[--export-json-instance] "
@@ -161,6 +166,9 @@ struct OPBSolverArgparser {
                "parallelization. (default: "
             << OPBSolverArgparserConstant::DEFAULT_NUMBER_OF_THREADS
             << ", maximum value avaiable)" << std::endl;
+        std::cout  //
+            << "  -r SEED: Specity the random seed. (default: "
+            << option::GeneralOptionConstant::DEFAULT_SEED << ")" << std::endl;
         std::cout  //
             << "  --extract-flippable-variable-pairs: Extract 2-flippable "
                "variable pairs."
@@ -227,6 +235,11 @@ struct OPBSolverArgparser {
             } else if (args[i] == "-j") {
                 this->number_of_threads = atof(args[i + 1].c_str());
                 this->is_specified_number_of_threads = true;
+                i += 2;
+            } else if (args[i] == "-r") {
+                this->seed = static_cast<int32_t>(
+                    static_cast<uint32_t>(atol(args[i + 1].c_str())));
+                this->is_specified_seed = true;
                 i += 2;
             } else if (args[i] == "--extract-flippable-variable-pairs") {
                 this->extract_flippable_variable_pairs = true;

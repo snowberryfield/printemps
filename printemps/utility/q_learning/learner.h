@@ -22,7 +22,7 @@ class Learner {
     friend State<T_StateBody, T_ActionBody>;
     std::vector<State<T_StateBody, T_ActionBody>> m_states;
 
-    State<T_StateBody, T_ActionBody> * m_current_state_ptr;
+    State<T_StateBody, T_ActionBody>  *m_current_state_ptr;
     Action<T_StateBody, T_ActionBody> *m_current_action_ptr;
     std::mt19937                       m_get_rand_mt;
 
@@ -33,7 +33,12 @@ class Learner {
     }
 
     /*************************************************************************/
-    void set_seed(const std::uint_fast32_t &a_SEED) {
+    void set_seed(const int a_SEED) {
+        m_get_rand_mt.seed(static_cast<unsigned int>(a_SEED));
+    }
+
+    /*************************************************************************/
+    void set_seed(const unsigned int a_SEED) {
         m_get_rand_mt.seed(a_SEED);
     }
 
