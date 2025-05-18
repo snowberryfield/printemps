@@ -517,6 +517,29 @@ struct OPB {
     }
 
     /*************************************************************************/
+    inline static OPBMetadata check_metadata(const std::string &a_FILE_NAME) {
+        std::ifstream ifs;
+        std::string   line;
+
+        ifs.open(a_FILE_NAME.c_str());
+        if (ifs.fail()) {
+            throw std::runtime_error(utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "Cannot open the specified OPB file: " + a_FILE_NAME));
+        }
+        std::getline(ifs, line);
+        if (!line.empty() && line.back() == ';') {
+            line.pop_back();
+        }
+        utility::trim(line);
+        if (line.front() == '*') {
+            return OPB::parse_metadata(line);
+        } else {
+            return OPBMetadata();
+        }
+    }
+
+    /*************************************************************************/
     inline void read_opb(const std::string &a_FILE_NAME) {
         std::vector<std::string> lines;
         /**

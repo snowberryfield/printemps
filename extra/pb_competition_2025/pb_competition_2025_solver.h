@@ -105,14 +105,18 @@ class PBCompetition2025Solver {
         m_argparser.parse(argc, argv);
 
         /**
-         * Read the specified PB file and convert to the model.
+         * Check the metadata of the specified OPB file.
          */
-        m_opb.read_opb(m_argparser.pb_file_name);
-
-        if (m_opb.metadata.intsize >= 53) {
+        auto metadata = opb::OPB::check_metadata(m_argparser.pb_file_name);
+        if (metadata.intsize >= 32) {
             std::cout << "s UNSUPPORTED" << std::endl;
             exit(0);
         }
+
+        /**
+         * Read the specified OPB file and convert to the model.
+         */
+        m_opb.read_opb(m_argparser.pb_file_name);
         this->print_metadata();
 
         m_model.import_opb(m_opb);
