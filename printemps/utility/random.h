@@ -22,13 +22,27 @@ class UniformRandom {
 
     /*************************************************************************/
     UniformRandom(const T_Value a_MIN, const T_Value a_MAX, const int a_SEED) {
-        this->setup(a_MIN, a_MAX, static_cast<unsigned int>(a_SEED));
+        this->setup(a_MIN, a_MAX, a_SEED);
     }
 
     /*************************************************************************/
     UniformRandom(const T_Value a_MIN, const T_Value a_MAX,
                   const unsigned int a_SEED) {
         this->setup(a_MIN, a_MAX, a_SEED);
+    }
+
+    /*************************************************************************/
+    inline void setup(const T_Value a_MIN, const T_Value a_MAX,
+                      const int a_SEED) {
+        m_distribution = T_Generator(a_MIN, a_MAX);
+        m_engine.seed(static_cast<unsigned int>(a_SEED));
+    }
+
+    /*************************************************************************/
+    inline void setup(const T_Value a_MIN, const T_Value a_MAX,
+                      const unsigned int a_SEED) {
+        m_distribution = T_Generator(a_MIN, a_MAX);
+        m_engine.seed(a_SEED);
     }
 
     /*************************************************************************/
