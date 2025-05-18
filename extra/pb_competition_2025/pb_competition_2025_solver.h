@@ -149,6 +149,9 @@ class PBCompetition2025Solver {
             omp_set_num_threads(m_argparser.number_of_threads);
 #endif
         }
+        if (m_argparser.is_specified_seed) {
+            m_option.general.seed = m_argparser.seed;
+        }
 
         signal(SIGINT, interrupt_handler);
         signal(SIGTERM, interrupt_handler);

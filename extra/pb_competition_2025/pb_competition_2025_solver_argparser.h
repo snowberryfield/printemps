@@ -24,11 +24,13 @@ struct PBCompetition2025SolverArgparser {
     double                   time_max;
     option::verbose::Verbose verbose;
     int                      number_of_threads;
+    int                      seed;
 
     bool is_specified_iteration_max;
     bool is_specified_time_max;
     bool is_specified_verbose;
     bool is_specified_number_of_threads;
+    bool is_specified_seed;
 
     /*************************************************************************/
     PBCompetition2025SolverArgparser(void) {
@@ -49,11 +51,13 @@ struct PBCompetition2025SolverArgparser {
         this->verbose  = option::OutputOptionConstant::DEFAULT_VERBOSE;
         this->number_of_threads =
             PBCompetition2025SolverArgparserConstant::DEFAULT_NUMBER_OF_THREADS;
+        this->seed = option::GeneralOptionConstant::DEFAULT_SEED;
 
         this->is_specified_iteration_max     = false;
         this->is_specified_time_max          = false;
         this->is_specified_verbose           = false;
         this->is_specified_number_of_threads = false;
+        this->is_specified_seed              = false;
     }
 
     /*************************************************************************/
@@ -70,6 +74,7 @@ struct PBCompetition2025SolverArgparser {
                   << "[-t TIME_MAX] "
                   << "[-v VERVOSE] "
                   << "[-j NUMBER_OF_THREADS] "
+                  << "[-r SEED] "
                   << "opb_file" << std::endl;
         std::cout << std::endl;
         std::cout  //
@@ -97,6 +102,9 @@ struct PBCompetition2025SolverArgparser {
             << PBCompetition2025SolverArgparserConstant::
                    DEFAULT_NUMBER_OF_THREADS
             << ", maximum value avaiable)" << std::endl;
+        std::cout  //
+            << "  -r SEED: Specity the random seed. (default: "
+            << option::GeneralOptionConstant::DEFAULT_SEED << ")" << std::endl;
         std::cout  //
             << "  --include-opb-loading-time: Include OPB file loading time "
                "in the calculation time. "
@@ -127,6 +135,11 @@ struct PBCompetition2025SolverArgparser {
             } else if (args[i] == "-j") {
                 this->number_of_threads = atof(args[i + 1].c_str());
                 this->is_specified_number_of_threads = true;
+            } else if (args[i] == "-r") {
+                this->seed = static_cast<int32_t>(
+                    static_cast<uint32_t>(atol(args[i + 1].c_str())));
+                this->is_specified_seed = true;
+                i += 2;
             } else {
                 this->pb_file_name = args[i];
                 i++;
