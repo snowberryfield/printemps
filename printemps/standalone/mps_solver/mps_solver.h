@@ -120,6 +120,9 @@ class MPSSolver {
                 m_argparser.number_of_threads;
             m_option.parallel.number_of_threads_move_update =
                 m_argparser.number_of_threads;
+#ifdef _OPENMP
+            omp_set_num_threads(m_argparser.number_of_threads);
+#endif
         }
 
         /**
