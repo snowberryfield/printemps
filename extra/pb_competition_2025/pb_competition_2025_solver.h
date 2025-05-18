@@ -184,8 +184,10 @@ class PBCompetition2025Solver {
                     feasible_incumbent_objective) {
                     feasible_incumbent_objective =
                         current_feasible_incumbent_objective;
-                    std::cout << "o " << current_feasible_incumbent_objective
-                              << std::endl;
+                    std::cout << "o " << std::fixed << std::setprecision(0)
+                              << current_feasible_incumbent_objective
+                              << std::endl
+                              << std::flush;
                 }
             };
 
