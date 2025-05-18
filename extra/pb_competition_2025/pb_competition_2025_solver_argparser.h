@@ -70,7 +70,7 @@ struct PBCompetition2025SolverArgparser {
                   << "[-t TIME_MAX] "
                   << "[-v VERVOSE] "
                   << "[-j NUMBER_OF_THREADS] "
-                  << "pb_file" << std::endl;
+                  << "opb_file" << std::endl;
         std::cout << std::endl;
         std::cout  //
             << "  -p OPTION_FILE_NAME: Specify option file name." << std::endl;
@@ -81,15 +81,13 @@ struct PBCompetition2025SolverArgparser {
             << std::endl;
         std::cout  //
             << "  -t TIME_MAX: Specity the allowed maximum computational "
-               "time "
-               "for optimization calculation (specified in seconds). "
+               "time for optimization calculation (specified in seconds). "
                "(default: "
             << option::GeneralOptionConstant::DEFAULT_TIME_MAX << ")"
             << std::endl;
         std::cout  //
             << "  -v VERBOSE: Specity the log level of standard output "
-               "(Off, "
-               "Warning, Outer, Inner, or Full). (default: "
+               "(Off, Warning, Outer, Inner, or Full). (default: "
             << option::verbose::VerboseInverseMap.at(
                    option::OutputOptionConstant::DEFAULT_VERBOSE)
             << ")" << std::endl;
