@@ -293,7 +293,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
             }
 
             if (is_valid) {
-                auto &     sensitivities  = m_expression.sensitivities();
+                auto      &sensitivities  = m_expression.sensitivities();
                 const auto CONSTANT_VALUE = m_expression.constant_value();
                 std::vector<Variable<T_Variable, T_Expression> *> variable_ptrs;
                 std::vector<T_Expression>                         coefficients;
@@ -377,25 +377,25 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
                                CONSTANT_VALUE != 0) {
                         m_is_constant_difference_integers = true;
                         return;
-                    } else if (fabs(coefficients[0]) == 1 &&
-                               fabs(coefficients[1]) != 1 &&
+                    } else if (std::abs(coefficients[0]) == 1 &&
+                               std::abs(coefficients[1]) != 1 &&
                                CONSTANT_VALUE == 0) {
                         m_is_constant_ratio_integers = true;
                         m_key_variable_ptr           = variable_ptrs[0];
                         return;
-                    } else if (fabs(coefficients[0]) != 1 &&
-                               fabs(coefficients[1]) == 1 &&
+                    } else if (std::abs(coefficients[0]) != 1 &&
+                               std::abs(coefficients[1]) == 1 &&
                                CONSTANT_VALUE == 0) {
                         m_is_constant_ratio_integers = true;
                         m_key_variable_ptr           = variable_ptrs[1];
                         return;
-                    } else if (fabs(coefficients[0]) == 1 &&
-                               fabs(coefficients[1]) != 1 && m_is_integer) {
+                    } else if (std::abs(coefficients[0]) == 1 &&
+                               std::abs(coefficients[1]) != 1 && m_is_integer) {
                         m_is_intermediate  = true;
                         m_key_variable_ptr = variable_ptrs[0];
                         return;
-                    } else if (fabs(coefficients[0]) != 1 &&
-                               fabs(coefficients[1]) == 1 && m_is_integer) {
+                    } else if (std::abs(coefficients[0]) != 1 &&
+                               std::abs(coefficients[1]) == 1 && m_is_integer) {
                         m_is_intermediate  = true;
                         m_key_variable_ptr = variable_ptrs[1];
                         return;
@@ -869,8 +869,8 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
 
     /*************************************************************************/
     inline T_Expression evaluate_constraint(
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
-        noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
+        const noexcept {
         return m_expression.evaluate(a_MOVE);
     }
 
@@ -953,8 +953,8 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline const Expression<T_Variable, T_Expression> &expression(void) const
-        noexcept {
+    inline const Expression<T_Variable, T_Expression> &expression(
+        void) const noexcept {
         return m_expression;
     }
 

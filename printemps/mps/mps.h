@@ -233,7 +233,7 @@ struct MPS {
                         std::string expression_name = items[2 * i + 1];
                         double sensitivity = atof(items[2 * i + 2].c_str());
 
-                        if (fabs(sensitivity) > constant::EPSILON_10) {
+                        if (std::fabs(sensitivity) > constant::EPSILON_10) {
                             if (expression_name == this->objective.name) {
                                 this->objective.sensitivities[name] =
                                     sensitivity;
@@ -302,14 +302,16 @@ struct MPS {
                                 this->constraints[name_new].sense =
                                     MPSConstraintSense::Greater;
                                 this->constraints[name_new].rhs =
-                                    this->constraints[name].rhs - fabs(range);
+                                    this->constraints[name].rhs -
+                                    std::fabs(range);
                                 break;
                             }
                             case MPSConstraintSense::Greater: {
                                 this->constraints[name_new].sense =
                                     MPSConstraintSense::Less;
                                 this->constraints[name_new].rhs =
-                                    this->constraints[name].rhs + fabs(range);
+                                    this->constraints[name].rhs +
+                                    std::fabs(range);
                                 break;
                             }
                             case MPSConstraintSense::Equal: {
@@ -321,7 +323,7 @@ struct MPS {
                                         MPSConstraintSense::Less;
                                     this->constraints[name_new].rhs =
                                         this->constraints[name].rhs +
-                                        fabs(range);
+                                        std::fabs(range);
                                 } else {
                                     this->constraints[name].sense =
                                         MPSConstraintSense::Less;
@@ -330,7 +332,7 @@ struct MPS {
                                         MPSConstraintSense::Greater;
                                     this->constraints[name_new].rhs =
                                         this->constraints[name].rhs -
-                                        fabs(range);
+                                        std::fabs(range);
                                 }
                                 break;
                             }

@@ -160,9 +160,9 @@ class TabuSearchCore {
         const auto& STATE = m_state_manager.state();
 
         if (STATE.number_of_moves > 0) {
-            if (fabs(m_global_state_ptr->incumbent_holder
-                         .feasible_incumbent_objective() -
-                     m_global_state_ptr->incumbent_holder.dual_bound()) <
+            if (std::fabs(m_global_state_ptr->incumbent_holder
+                              .feasible_incumbent_objective() -
+                          m_global_state_ptr->incumbent_holder.dual_bound()) <
                 constant::EPSILON) {
                 m_state_manager.set_termination_status(
                     TabuSearchCoreTerminationStatus::OPTIMAL);

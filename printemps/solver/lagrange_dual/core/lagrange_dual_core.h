@@ -134,8 +134,8 @@ class LagrangeDualCore {
         const auto&  m_option      = this->m_option;
         const double QUEUE_AVERAGE = STATE.queue.average();
         if (STATE.queue.size() == m_option.lagrange_dual.queue_size &&
-            fabs(STATE.lagrangian - QUEUE_AVERAGE) <
-                std::max(1.0, fabs(QUEUE_AVERAGE)) *
+            std::fabs(STATE.lagrangian - QUEUE_AVERAGE) <
+                std::max(1.0, std::fabs(QUEUE_AVERAGE)) *
                     m_option.lagrange_dual.tolerance) {
             m_state_manager.set_termination_status(
                 LagrangeDualCoreTerminationStatus::CONVERGE);
