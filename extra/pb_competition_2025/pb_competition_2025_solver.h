@@ -43,12 +43,16 @@ class PBCompetition2025Solver {
 
     /*************************************************************************/
     inline void print_result(
-        const printemps::solver::IPResult &a_RESULT) const {
-        if (a_RESULT.status.is_found_feasible_solution) {
+        const printemps::solver::IPSolver &a_SOLVER) const {
+        if (a_SOLVER.global_state()
+                .incumbent_holder.is_found_feasible_solution()) {
             std::cout << "s SATISFIABLE" << std::endl;
             std::cout << "v ";
 
-            const auto &VALUE_PRROXY = a_RESULT.solution.variables("variables");
+            const auto &SOLUTION =
+                a_SOLVER.global_state()
+                    .incumbent_holder.feasible_incumbent_solution();
+            const auto &VALUE_PRROXY = SOLUTION.variable_value_proxies.front();
             const int   NUMBER_OF_VARIABLES = VALUE_PRROXY.number_of_elements();
             for (auto i = 0; i < NUMBER_OF_VARIABLES; i++) {
                 if (VALUE_PRROXY.flat_indexed_values(i) == 1) {
@@ -59,7 +63,6 @@ class PBCompetition2025Solver {
                 }
             }
             std::cout << std::endl;
-
         } else {
             std::cout << "s UNKNOWN" << std::endl;
         }
@@ -196,8 +199,8 @@ class PBCompetition2025Solver {
 
         solver.set_check_interrupt([]() { return interrupted; });
         solver.set_callback(callback);
-        const auto RESULT = solver.solve();
-        this->print_result(RESULT);
+        solver.solve_without_postprocess();
+        this->print_result(solver);
     }
 
     /*************************************************************************/

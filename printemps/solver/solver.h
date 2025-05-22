@@ -505,6 +505,50 @@ class Solver {
     }
 
     /*************************************************************************/
+    inline void solve_without_postprocess(void) {
+        /**
+         * Preprocessing; setup the model and the solver.
+         */
+        this->preprocess();
+
+        /**
+         * Start optimization.
+         */
+        utility::print_single_line(  //
+            m_option.output.verbose >= option::verbose::Outer);
+
+        utility::print_message(  //
+            "Optimization starts.",
+            m_option.output.verbose >= option::verbose::Outer);
+
+        /**
+         * Solve relaxed LP to obtain a dual bound (Optional).
+         */
+        if (m_option.pdlp.is_enabled) {
+            this->run_pdlp();
+        }
+
+        /**
+         * Solve Lagrange dual to obtain a better initial solution (Optional).
+         */
+        if (m_option.lagrange_dual.is_enabled) {
+            this->run_lagrange_dual();
+        }
+
+        /**
+         * Run a local search to improve the initial solution (optional).
+         */
+        if (m_option.local_search.is_enabled) {
+            this->run_local_search();
+        }
+
+        /**
+         * Run tabu searches to find better solutions.
+         */
+        this->run_tabu_search();
+    }
+
+    /*************************************************************************/
     inline model::Model<T_Variable, T_Expression>* model_ptr(void) {
         return m_model_ptr;
     }
