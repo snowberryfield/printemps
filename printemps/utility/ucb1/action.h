@@ -52,7 +52,7 @@ struct Action {
             this->mean  = a_SCORE;
             this->max   = a_SCORE;
             this->min   = a_SCORE;
-            this->range = fabs(a_SCORE);
+            this->range = std::fabs(a_SCORE);
             return;
         }
 

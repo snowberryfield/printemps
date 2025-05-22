@@ -91,7 +91,7 @@ class ProblemSizeReducer {
         }
 
         const auto SENSITIVITY = a_variable_ptr->objective_sensitivity();
-        if (fabs(SENSITIVITY) < constant::EPSILON_10) {
+        if (std::fabs(SENSITIVITY) < constant::EPSILON_10) {
             utility::print_message(
                 "The value of the variable " + a_variable_ptr->name() +
                     " was fixed at " + std::to_string(0) +
@@ -212,7 +212,7 @@ class ProblemSizeReducer {
     inline std::pair<bool, bool>
     remove_redundant_constraint_with_tightening_variable_bound(
         model_component::Constraint<T_Variable, T_Expression>
-            *      a_constraint_ptr,  //
+                  *a_constraint_ptr,  //
         const bool a_IS_ENABLED_PRINT) {
         const int BOUND_LIMIT = 100000;
         /**

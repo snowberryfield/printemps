@@ -317,7 +317,7 @@ inline bool operator==(const Move<T_Variable, T_Expression> &a_MOVE_FIRST,
      * If the overlap_rates including hashes of two moves are different, they
      * are likely to be different. See compute_hash() for detail.
      */
-    if (fabs(a_MOVE_FIRST.overlap_rate - a_MOVE_SECOND.overlap_rate) >
+    if (std::fabs(a_MOVE_FIRST.overlap_rate - a_MOVE_SECOND.overlap_rate) >
         constant::EPSILON_10) {
         return false;
     }

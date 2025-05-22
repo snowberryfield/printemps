@@ -86,7 +86,7 @@ struct SparseMatrix {
         double              norm_infty = 0.0;
 
         for (auto i = 0; i < NONZERO_SIZE; i++) {
-            const auto VALUE = fabs(this->values[i]);
+            const auto VALUE = std::fabs(this->values[i]);
             r_temp[this->row_indices[i]] += VALUE;
             c_temp[this->column_indices[i]] += VALUE;
             norm_infty = std::max(norm_infty, VALUE);
@@ -102,7 +102,7 @@ struct SparseMatrix {
         Diagonal  column_scaler(this->number_of_columns);
 
         for (auto i = 0; i < NONZERO_SIZE; i++) {
-            const auto VALUE = fabs(this->values[i]);
+            const auto VALUE = std::fabs(this->values[i]);
             row_scaler[this->row_indices[i]] += VALUE;
             column_scaler[this->column_indices[i]] += VALUE;
         }
@@ -141,7 +141,7 @@ struct SparseMatrix {
 
         for (auto k = 0; k < a_NUMBER_OF_ITERATIONS; k++) {
             for (auto i = 0; i < NONZERO_SIZE; i++) {
-                const auto VALUE = fabs(this->values[i]);
+                const auto VALUE = std::fabs(this->values[i]);
                 row_scaler[this->row_indices[i]] =
                     std::max(row_scaler[this->row_indices[i]], VALUE);
                 column_scaler[this->column_indices[i]] =

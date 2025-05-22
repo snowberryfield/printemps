@@ -2919,8 +2919,8 @@ class Model {
                     constraint_value =
                         constraint_ptr->evaluate_constraint(a_MOVE);
 
-                    if (fabs(constraint_value -
-                             constraint_ptr->constraint_value()) <
+                    if (std::fabs(constraint_value -
+                                  constraint_ptr->constraint_value()) <
                         constant::EPSILON_10) {
                         continue;
                     }
@@ -2995,7 +2995,8 @@ class Model {
 
             constraint_value = constraint_ptr->evaluate_constraint(a_MOVE);
 
-            if (fabs(constraint_value - constraint_ptr->constraint_value()) <
+            if (std::fabs(constraint_value -
+                          constraint_ptr->constraint_value()) <
                 constant::EPSILON_10) {
                 continue;
             }
@@ -4165,7 +4166,7 @@ class Model {
                 const auto VARIABLE_NAME =
                     utility::delete_space(variable.name());
                 /// Objective
-                if (fabs(variable.objective_sensitivity()) >
+                if (std::fabs(variable.objective_sensitivity()) >
                     constant::EPSILON_10) {
                     if (m_is_minimization) {
                         ofs << "    " << VARIABLE_NAME << "     obj    "

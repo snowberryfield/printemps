@@ -70,11 +70,11 @@ class Solver {
                 option::GeneralOptionConstant::DEFAULT_TARGET_OBJECTIVE_VALUE -
             1.0;
 
-        if (fabs(target_objective_changed_rate) > constant::EPSILON) {
+        if (std::fabs(target_objective_changed_rate) > constant::EPSILON) {
             m_option.general.target_objective_value *= m_model_ptr->sign();
         }
 
-        if (fabs(target_objective_changed_rate) < constant::EPSILON) {
+        if (std::fabs(target_objective_changed_rate) < constant::EPSILON) {
             if (!m_model_ptr->is_defined_objective()) {
                 m_option.general.target_objective_value = 0.0;
             }

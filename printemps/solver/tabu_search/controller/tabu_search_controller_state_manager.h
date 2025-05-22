@@ -632,7 +632,8 @@ class TabuSearchControllerStateManager {
         void) {
         const double RELATIVE_RANGE =
             m_state.tabu_search_result.global_augmented_objective_range /
-            std::max(1.0, fabs(m_global_state_ptr->incumbent_holder
+            std::max(1.0,
+                     std::fabs(m_global_state_ptr->incumbent_holder
                                    .global_augmented_incumbent_objective()));
 
         m_state.employing_local_solution_flag = true;
@@ -681,7 +682,8 @@ class TabuSearchControllerStateManager {
                                .local_augmented_incumbent_objective();
         const double RELATIVE_RANGE =
             m_state.tabu_search_result.global_augmented_objective_range /
-            std::max(1.0, fabs(m_global_state_ptr->incumbent_holder
+            std::max(1.0,
+                     std::fabs(m_global_state_ptr->incumbent_holder
                                    .global_augmented_incumbent_objective()));
 
         if (m_state.is_global_augmented_incumbent_updated) {

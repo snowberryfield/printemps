@@ -322,7 +322,7 @@ class PDLPCoreStateManager {
                 &m_state.dual.buffer, m_state.primal.move);
 
             const double INTERACTION =
-                fabs(m_state.dual.move.dot(m_state.dual.buffer));
+                std::fabs(m_state.dual.move.dot(m_state.dual.buffer));
 
             const double STEP_SIZE_LIMIT =
                 INTERACTION > constant::EPSILON
@@ -559,10 +559,10 @@ class PDLPCoreStateManager {
     /*************************************************************************/
     inline void update_gap(void) {
         m_state.absolute_gap =
-            fabs(m_state.primal.objective - m_state.dual.objective);
+            std::fabs(m_state.primal.objective - m_state.dual.objective);
         m_state.relative_gap =
-            m_state.absolute_gap / (1.0 + fabs(m_state.dual.objective) +
-                                    fabs(m_state.primal.objective));
+            m_state.absolute_gap / (1.0 + std::fabs(m_state.dual.objective) +
+                                    std::fabs(m_state.primal.objective));
     }
 
     /*************************************************************************/

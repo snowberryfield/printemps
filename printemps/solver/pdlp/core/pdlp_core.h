@@ -107,7 +107,7 @@ class PDLPCore {
 
         if (STATE.dual.objective <
             STATE.primal.objective_upper_bound +
-                std::max(1.0, fabs(STATE.primal.objective_upper_bound) *
+                std::max(1.0, std::fabs(STATE.primal.objective_upper_bound) *
                                   constant::EPSILON)) {
             return false;
         }

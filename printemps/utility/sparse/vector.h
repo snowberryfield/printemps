@@ -71,7 +71,7 @@ struct Vector {
     inline double norm(const double a_P) const noexcept {
         double result = 0.0;
         for (const auto& v : this->values) {
-            result += std::pow(fabs(v), a_P);
+            result += std::pow(std::fabs(v), a_P);
         }
         return std::pow(result, 1.0 / a_P);
     }

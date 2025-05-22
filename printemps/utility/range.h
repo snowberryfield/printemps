@@ -45,7 +45,7 @@ class Range {
 
     /*************************************************************************/
     inline T max_abs(void) const noexcept {
-        return std::max(fabs(m_max), fabs(m_min));
+        return std::max(std::fabs(m_max), std::fabs(m_min));
     }
 
     /*************************************************************************/
