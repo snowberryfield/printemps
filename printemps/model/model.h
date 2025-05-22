@@ -3866,7 +3866,7 @@ class Model {
                     const auto INDEX = soft_constraint_indices_greater[i];
                     if (SOFT_CONSTRAINT.is_all_coefficient_negative()) {
                         soft_constraint_proxy_greater_minus(INDEX) =
-                            (-expression >=
+                            (-expression <=
                              -LOWER_BOUND *
                                  soft_constraint_slack_proxy_greater_minus(
                                      INDEX));
