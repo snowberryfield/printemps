@@ -12,6 +12,7 @@
 #include "unordered_set_utility.h"
 #include "string_utility.h"
 #include "date_time_utility.h"
+#include "integer_utility.h"
 #include "random.h"
 #include "time_keeper.h"
 #include "fixed_size_hash_map.h"
