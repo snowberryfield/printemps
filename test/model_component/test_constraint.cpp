@@ -425,13 +425,14 @@ TEST_F(TestConstraint, setup_arg_expression) {
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraint, setup_constraint_type_singleton) {
+TEST_F(TestConstraint, update_constraint_type_singleton) {
     model::Model<int, double> model;
     auto&                     x = model.create_variable("x", -10, 10);
     auto                      constraint =
         model_component::Constraint<int, double>::create_instance();
     constraint.setup(2 * x - 10, model_component::ConstraintSense::Less);
-    constraint.setup_constraint_type();
+    constraint.update_basic_structure();
+    constraint.update_constraint_type();
     EXPECT_TRUE(constraint.is_singleton());
     EXPECT_EQ("Singleton", constraint.type());
     constraint.clear_constraint_type();
@@ -439,7 +440,7 @@ TEST_F(TestConstraint, setup_constraint_type_singleton) {
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraint, setup_constraint_type_exclusive_or) {
+TEST_F(TestConstraint, update_constraint_type_exclusive_or) {
     model::Model<int, double> model;
     auto&                     x = model.create_variables("x", 2, 0, 1);
 
@@ -447,7 +448,8 @@ TEST_F(TestConstraint, setup_constraint_type_exclusive_or) {
         auto constraint =
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(x.sum() - 1, model_component::ConstraintSense::Equal);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_TRUE(constraint.is_exclusive_or());
         EXPECT_EQ("Exclusive OR", constraint.type());
         constraint.clear_constraint_type();
@@ -458,7 +460,8 @@ TEST_F(TestConstraint, setup_constraint_type_exclusive_or) {
         auto constraint =
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(-x.sum() + 1, model_component::ConstraintSense::Equal);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_TRUE(constraint.is_exclusive_or());
         EXPECT_EQ("Exclusive OR", constraint.type());
         constraint.clear_constraint_type();
@@ -467,14 +470,15 @@ TEST_F(TestConstraint, setup_constraint_type_exclusive_or) {
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraint, setup_constraint_type_exclusive_nor) {
+TEST_F(TestConstraint, update_constraint_type_exclusive_nor) {
     model::Model<int, double> model;
     auto&                     x = model.create_variables("x", 2, 0, 1);
     {
         auto constraint =
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(x(0) - x(1), model_component::ConstraintSense::Equal);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_TRUE(constraint.is_exclusive_nor());
         EXPECT_EQ("Exclusive NOR", constraint.type());
         constraint.clear_constraint_type();
@@ -485,7 +489,8 @@ TEST_F(TestConstraint, setup_constraint_type_exclusive_nor) {
         auto constraint =
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(-x(0) + x(1), model_component::ConstraintSense::Equal);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_TRUE(constraint.is_exclusive_nor());
         EXPECT_EQ("Exclusive NOR", constraint.type());
         constraint.clear_constraint_type();
@@ -494,7 +499,7 @@ TEST_F(TestConstraint, setup_constraint_type_exclusive_nor) {
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraint, setup_constraint_type_inverted_integers) {
+TEST_F(TestConstraint, update_constraint_type_inverted_integers) {
     model::Model<int, double> model;
     auto&                     x = model.create_variables("x", 2, 0, 10);
 
@@ -502,7 +507,8 @@ TEST_F(TestConstraint, setup_constraint_type_inverted_integers) {
         auto constraint =
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(x(0) + x(1), model_component::ConstraintSense::Equal);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_TRUE(constraint.is_inverted_integers());
         EXPECT_EQ("Inverted Integers", constraint.type());
         constraint.clear_constraint_type();
@@ -513,7 +519,8 @@ TEST_F(TestConstraint, setup_constraint_type_inverted_integers) {
         auto constraint =
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(-x(0) - x(1), model_component::ConstraintSense::Equal);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_TRUE(constraint.is_inverted_integers());
         EXPECT_EQ("Inverted Integers", constraint.type());
         constraint.clear_constraint_type();
@@ -522,7 +529,7 @@ TEST_F(TestConstraint, setup_constraint_type_inverted_integers) {
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraint, setup_constraint_type_balanced_integers) {
+TEST_F(TestConstraint, update_constraint_type_balanced_integers) {
     model::Model<int, double> model;
     auto&                     x = model.create_variables("x", 2, 0, 10);
 
@@ -530,7 +537,8 @@ TEST_F(TestConstraint, setup_constraint_type_balanced_integers) {
         auto constraint =
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(x(0) - x(1), model_component::ConstraintSense::Equal);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_TRUE(constraint.is_balanced_integers());
         EXPECT_EQ("Balanced Integers", constraint.type());
         constraint.clear_constraint_type();
@@ -541,7 +549,8 @@ TEST_F(TestConstraint, setup_constraint_type_balanced_integers) {
         auto constraint =
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(-x(0) + x(1), model_component::ConstraintSense::Equal);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_TRUE(constraint.is_balanced_integers());
         EXPECT_EQ("Balanced Integers", constraint.type());
         constraint.clear_constraint_type();
@@ -550,7 +559,7 @@ TEST_F(TestConstraint, setup_constraint_type_balanced_integers) {
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraint, setup_constraint_type_constant_sum_integers) {
+TEST_F(TestConstraint, update_constraint_type_constant_sum_integers) {
     model::Model<int, double> model;
     auto&                     x = model.create_variables("x", 2, 0, 10);
     {
@@ -558,7 +567,8 @@ TEST_F(TestConstraint, setup_constraint_type_constant_sum_integers) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(x(0) + x(1) - 1,
                          model_component::ConstraintSense::Equal);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_TRUE(constraint.is_constant_sum_integers());
         EXPECT_EQ("Constant Sum Integers", constraint.type());
         constraint.clear_constraint_type();
@@ -570,7 +580,8 @@ TEST_F(TestConstraint, setup_constraint_type_constant_sum_integers) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(-x(0) - x(1) + 1,
                          model_component::ConstraintSense::Equal);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_TRUE(constraint.is_constant_sum_integers());
         EXPECT_EQ("Constant Sum Integers", constraint.type());
         constraint.clear_constraint_type();
@@ -579,7 +590,7 @@ TEST_F(TestConstraint, setup_constraint_type_constant_sum_integers) {
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraint, setup_constraint_type_constant_difference_integers) {
+TEST_F(TestConstraint, update_constraint_type_constant_difference_integers) {
     model::Model<int, double> model;
     auto&                     x = model.create_variables("x", 2, 0, 10);
     {
@@ -587,7 +598,8 @@ TEST_F(TestConstraint, setup_constraint_type_constant_difference_integers) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(x(0) - x(1) - 1,
                          model_component::ConstraintSense::Equal);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_TRUE(constraint.is_constant_difference_integers());
         EXPECT_EQ("Constant Difference Integers", constraint.type());
         constraint.clear_constraint_type();
@@ -599,7 +611,8 @@ TEST_F(TestConstraint, setup_constraint_type_constant_difference_integers) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(-x(0) + x(1) + 1,
                          model_component::ConstraintSense::Equal);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_TRUE(constraint.is_constant_difference_integers());
         EXPECT_EQ("Constant Difference Integers", constraint.type());
         constraint.clear_constraint_type();
@@ -608,7 +621,7 @@ TEST_F(TestConstraint, setup_constraint_type_constant_difference_integers) {
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraint, setup_constraint_type_constant_ratio_integers) {
+TEST_F(TestConstraint, update_constraint_type_constant_ratio_integers) {
     model::Model<int, double> model;
     auto&                     x = model.create_variables("x", 2, 0, 10);
     {
@@ -616,7 +629,8 @@ TEST_F(TestConstraint, setup_constraint_type_constant_ratio_integers) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(2 * x(0) - x(1),
                          model_component::ConstraintSense::Equal);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_TRUE(constraint.is_constant_ratio_integers());
         EXPECT_EQ("Constant Ratio Integers", constraint.type());
         constraint.clear_constraint_type();
@@ -628,7 +642,8 @@ TEST_F(TestConstraint, setup_constraint_type_constant_ratio_integers) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(x(0) + 2 * x(1),
                          model_component::ConstraintSense::Equal);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_TRUE(constraint.is_constant_ratio_integers());
         EXPECT_EQ("Constant Ratio Integers", constraint.type());
         constraint.clear_constraint_type();
@@ -637,7 +652,7 @@ TEST_F(TestConstraint, setup_constraint_type_constant_ratio_integers) {
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraint, setup_constraint_type_aggregation) {
+TEST_F(TestConstraint, update_constraint_type_aggregation) {
     model::Model<int, double> model;
     auto&                     x = model.create_variable("x", -10, 10);
     auto&                     y = model.create_variable("y", -10, 10);
@@ -645,7 +660,8 @@ TEST_F(TestConstraint, setup_constraint_type_aggregation) {
         model_component::Constraint<int, double>::create_instance();
     constraint.setup(2 * x + 3 * y - 10,
                      model_component::ConstraintSense::Equal);
-    constraint.setup_constraint_type();
+    constraint.update_basic_structure();
+    constraint.update_constraint_type();
     EXPECT_TRUE(constraint.is_aggregation());
     EXPECT_EQ("Aggregation", constraint.type());
     constraint.clear_constraint_type();
@@ -653,7 +669,7 @@ TEST_F(TestConstraint, setup_constraint_type_aggregation) {
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraint, setup_constraint_type_precedence) {
+TEST_F(TestConstraint, update_constraint_type_precedence) {
     model::Model<int, double> model;
     auto&                     x = model.create_variable("x", -10, 10);
     auto&                     y = model.create_variable("y", -10, 10);
@@ -662,7 +678,8 @@ TEST_F(TestConstraint, setup_constraint_type_precedence) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(2 * x - 2 * y - 5,
                          model_component::ConstraintSense::Less);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_TRUE(constraint.is_precedence());
         EXPECT_EQ("Precedence", constraint.type());
         constraint.clear_constraint_type();
@@ -673,7 +690,8 @@ TEST_F(TestConstraint, setup_constraint_type_precedence) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(-2 * x + 2 * y - 5,
                          model_component::ConstraintSense::Less);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_TRUE(constraint.is_precedence());
         EXPECT_EQ("Precedence", constraint.type());
         constraint.clear_constraint_type();
@@ -684,7 +702,8 @@ TEST_F(TestConstraint, setup_constraint_type_precedence) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(2 * x - 2 * y - 5,
                          model_component::ConstraintSense::Greater);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_TRUE(constraint.is_precedence());
         EXPECT_EQ("Precedence", constraint.type());
         constraint.clear_constraint_type();
@@ -695,7 +714,8 @@ TEST_F(TestConstraint, setup_constraint_type_precedence) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(-2 * x + 2 * y - 5,
                          model_component::ConstraintSense::Greater);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_TRUE(constraint.is_precedence());
         EXPECT_EQ("Precedence", constraint.type());
         constraint.clear_constraint_type();
@@ -704,7 +724,7 @@ TEST_F(TestConstraint, setup_constraint_type_precedence) {
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraint, setup_constraint_type_variable_bound) {
+TEST_F(TestConstraint, update_constraint_type_variable_bound) {
     model::Model<int, double> model;
 
     auto& x = model.create_variable("x", 0, 1);
@@ -715,7 +735,8 @@ TEST_F(TestConstraint, setup_constraint_type_variable_bound) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(2 * x + 3 * y - 5,
                          model_component::ConstraintSense::Less);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_TRUE(constraint.is_variable_bound());
         EXPECT_EQ("Variable Bound", constraint.type());
         constraint.clear_constraint_type();
@@ -726,7 +747,8 @@ TEST_F(TestConstraint, setup_constraint_type_variable_bound) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(2 * x + 3 * y - 5,
                          model_component::ConstraintSense::Greater);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_TRUE(constraint.is_variable_bound());
         EXPECT_EQ("Variable Bound", constraint.type());
         constraint.clear_constraint_type();
@@ -735,7 +757,7 @@ TEST_F(TestConstraint, setup_constraint_type_variable_bound) {
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraint, setup_constraint_type_trinomial_exclusive_nor) {
+TEST_F(TestConstraint, update_constraint_type_trinomial_exclusive_nor) {
     model::Model<int, double> model;
 
     auto& x = model.create_variable("x", 0, 1);
@@ -747,7 +769,8 @@ TEST_F(TestConstraint, setup_constraint_type_trinomial_exclusive_nor) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(x + y - 2 * z,
                          model_component::ConstraintSense::Equal);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_TRUE(constraint.is_trinomial_exclusive_nor());
         EXPECT_EQ("Trinomial Exclusive NOR", constraint.type());
         constraint.clear_constraint_type();
@@ -758,7 +781,8 @@ TEST_F(TestConstraint, setup_constraint_type_trinomial_exclusive_nor) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(-x - y + 2 * z,
                          model_component::ConstraintSense::Equal);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_TRUE(constraint.is_trinomial_exclusive_nor());
         EXPECT_EQ("Trinomial Exclusive NOR", constraint.type());
         constraint.clear_constraint_type();
@@ -767,14 +791,15 @@ TEST_F(TestConstraint, setup_constraint_type_trinomial_exclusive_nor) {
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraint, setup_constraint_type_set_partitioning) {
+TEST_F(TestConstraint, update_constraint_type_set_partitioning) {
     model::Model<int, double> model;
     {
         auto& x = model.create_variables("x", 10, 0, 1);
         auto  constraint =
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(x.sum() - 1, model_component::ConstraintSense::Equal);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_TRUE(constraint.is_set_partitioning());
         EXPECT_EQ("Set Partitioning", constraint.type());
         constraint.clear_constraint_type();
@@ -783,13 +808,14 @@ TEST_F(TestConstraint, setup_constraint_type_set_partitioning) {
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraint, setup_constraint_type_set_packing) {
+TEST_F(TestConstraint, update_constraint_type_set_packing) {
     model::Model<int, double> model;
     auto&                     x = model.create_variables("x", 10, 0, 1);
     auto                      constraint =
         model_component::Constraint<int, double>::create_instance();
     constraint.setup(x.sum() - 1, model_component::ConstraintSense::Less);
-    constraint.setup_constraint_type();
+    constraint.update_basic_structure();
+    constraint.update_constraint_type();
     EXPECT_TRUE(constraint.is_set_packing());
     EXPECT_EQ("Set Packing", constraint.type());
     constraint.clear_constraint_type();
@@ -797,25 +823,27 @@ TEST_F(TestConstraint, setup_constraint_type_set_packing) {
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraint, setup_constraint_type_set_covering) {
+TEST_F(TestConstraint, update_constraint_type_set_covering) {
     model::Model<int, double> model;
     auto&                     x = model.create_variables("x", 10, 0, 1);
     auto                      constraint =
         model_component::Constraint<int, double>::create_instance();
     constraint.setup(x.sum() - 1, model_component::ConstraintSense::Greater);
-    constraint.setup_constraint_type();
+    constraint.update_basic_structure();
+    constraint.update_constraint_type();
     EXPECT_TRUE(constraint.is_set_covering());
     EXPECT_EQ("Set Covering", constraint.type());
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraint, setup_constraint_type_cardinality) {
+TEST_F(TestConstraint, update_constraint_type_cardinality) {
     model::Model<int, double> model;
     auto&                     x = model.create_variables("x", 10, 0, 1);
     auto                      constraint =
         model_component::Constraint<int, double>::create_instance();
     constraint.setup(x.sum() - 5, model_component::ConstraintSense::Equal);
-    constraint.setup_constraint_type();
+    constraint.update_basic_structure();
+    constraint.update_constraint_type();
     EXPECT_TRUE(constraint.is_cardinality());
     EXPECT_EQ("Cardinality", constraint.type());
     constraint.clear_constraint_type();
@@ -823,13 +851,14 @@ TEST_F(TestConstraint, setup_constraint_type_cardinality) {
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraint, setup_constraint_type_invariant_knapsack) {
+TEST_F(TestConstraint, update_constraint_type_invariant_knapsack) {
     model::Model<int, double> model;
     auto&                     x = model.create_variables("x", 10, 0, 1);
     auto                      constraint =
         model_component::Constraint<int, double>::create_instance();
     constraint.setup(x.sum() - 5, model_component::ConstraintSense::Less);
-    constraint.setup_constraint_type();
+    constraint.update_basic_structure();
+    constraint.update_constraint_type();
     EXPECT_TRUE(constraint.is_invariant_knapsack());
     EXPECT_EQ("Invariant Knapsack", constraint.type());
     constraint.clear_constraint_type();
@@ -837,13 +866,14 @@ TEST_F(TestConstraint, setup_constraint_type_invariant_knapsack) {
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraint, setup_constraint_type_multiple_covering) {
+TEST_F(TestConstraint, update_constraint_type_multiple_covering) {
     model::Model<int, double> model;
     auto&                     x = model.create_variables("x", 10, 0, 1);
     auto                      constraint =
         model_component::Constraint<int, double>::create_instance();
     constraint.setup(x.sum() - 5, model_component::ConstraintSense::Greater);
-    constraint.setup_constraint_type();
+    constraint.update_basic_structure();
+    constraint.update_constraint_type();
     EXPECT_TRUE(constraint.is_multiple_covering());
     EXPECT_EQ("Multiple Covering", constraint.type());
     constraint.clear_constraint_type();
@@ -851,14 +881,15 @@ TEST_F(TestConstraint, setup_constraint_type_multiple_covering) {
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraint, setup_constraint_type_binary_flow) {
+TEST_F(TestConstraint, update_constraint_type_binary_flow) {
     model::Model<int, double> model;
     auto&                     x = model.create_variables("x", 10, 0, 1);
     auto                      constraint =
         model_component::Constraint<int, double>::create_instance();
     constraint.setup(x(0) + x(1) + x(2) - x(3) - x(4) - x(5),
                      model_component::ConstraintSense::Equal);
-    constraint.setup_constraint_type();
+    constraint.update_basic_structure();
+    constraint.update_constraint_type();
     EXPECT_TRUE(constraint.is_binary_flow());
     EXPECT_EQ("Binary Flow", constraint.type());
     constraint.clear_constraint_type();
@@ -866,14 +897,15 @@ TEST_F(TestConstraint, setup_constraint_type_binary_flow) {
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraint, setup_constraint_type_integer_flow) {
+TEST_F(TestConstraint, update_constraint_type_integer_flow) {
     model::Model<int, double> model;
     auto&                     x = model.create_variables("x", 10, 0, 10);
     auto                      constraint =
         model_component::Constraint<int, double>::create_instance();
     constraint.setup(x(0) + x(1) + x(2) - x(3) - x(4) - x(5),
                      model_component::ConstraintSense::Equal);
-    constraint.setup_constraint_type();
+    constraint.update_basic_structure();
+    constraint.update_constraint_type();
     EXPECT_TRUE(constraint.is_integer_flow());
     EXPECT_EQ("Integer Flow", constraint.type());
     constraint.clear_constraint_type();
@@ -881,20 +913,21 @@ TEST_F(TestConstraint, setup_constraint_type_integer_flow) {
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraint, setup_constraint_type_soft_selection) {
+TEST_F(TestConstraint, update_constraint_type_soft_selection) {
     model::Model<int, double> model;
     auto&                     x = model.create_variables("x", 10, 0, 1);
     auto                      constraint =
         model_component::Constraint<int, double>::create_instance();
     constraint.setup(x(0) + x(1) + x(2) + x(3) + x(4) - x(5),
                      model_component::ConstraintSense::Equal);
-    constraint.setup_constraint_type();
+    constraint.update_basic_structure();
+    constraint.update_constraint_type();
     EXPECT_TRUE(constraint.is_soft_selection());
     EXPECT_EQ("Soft Selection", constraint.type());
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraint, setup_constraint_type_min_max) {
+TEST_F(TestConstraint, update_constraint_type_min_max) {
     model::Model<int, double> model;
 
     auto& x = model.create_variable("x", -10, 10);
@@ -905,7 +938,8 @@ TEST_F(TestConstraint, setup_constraint_type_min_max) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(-x + y + 2 * z + 5,
                          model_component::ConstraintSense::Less);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_TRUE(constraint.is_min_max());
         EXPECT_EQ("Min-Max", constraint.type());
         constraint.clear_constraint_type();
@@ -917,7 +951,8 @@ TEST_F(TestConstraint, setup_constraint_type_min_max) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(x - y - 2 * z - 5,
                          model_component::ConstraintSense::Greater);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_TRUE(constraint.is_min_max());
         EXPECT_EQ("Min-Max", constraint.type());
         constraint.clear_constraint_type();
@@ -929,7 +964,8 @@ TEST_F(TestConstraint, setup_constraint_type_min_max) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(-x + 20 * y + 20 * z,
                          model_component::ConstraintSense::Less);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_TRUE(constraint.is_min_max());
         EXPECT_EQ("Min-Max", constraint.type());
         constraint.clear_constraint_type();
@@ -941,7 +977,8 @@ TEST_F(TestConstraint, setup_constraint_type_min_max) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(-x - 20 * y - 20 * z,
                          model_component::ConstraintSense::Less);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_TRUE(constraint.is_min_max());
         EXPECT_EQ("Min-Max", constraint.type());
         constraint.clear_constraint_type();
@@ -953,7 +990,8 @@ TEST_F(TestConstraint, setup_constraint_type_min_max) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(-x - 20 * y + 20 * z,
                          model_component::ConstraintSense::Less);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_TRUE(constraint.is_min_max());
         EXPECT_EQ("Min-Max", constraint.type());
         constraint.clear_constraint_type();
@@ -965,7 +1003,8 @@ TEST_F(TestConstraint, setup_constraint_type_min_max) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(x + 20 * y - 20 * z,
                          model_component::ConstraintSense::Greater);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_TRUE(constraint.is_min_max());
         EXPECT_EQ("Min-Max", constraint.type());
         constraint.clear_constraint_type();
@@ -977,7 +1016,8 @@ TEST_F(TestConstraint, setup_constraint_type_min_max) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(-x + y + z + 5,
                          model_component::ConstraintSense::Less);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_FALSE(constraint.is_min_max());
     }
 
@@ -986,7 +1026,8 @@ TEST_F(TestConstraint, setup_constraint_type_min_max) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(-x + 1.5 * y + 2 * z + 5,
                          model_component::ConstraintSense::Less);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_FALSE(constraint.is_min_max());
     }
 
@@ -995,13 +1036,14 @@ TEST_F(TestConstraint, setup_constraint_type_min_max) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(-x + y + 2 * z + 5.5,
                          model_component::ConstraintSense::Less);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_FALSE(constraint.is_min_max());
     }
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraint, setup_constraint_type_max_min) {
+TEST_F(TestConstraint, update_constraint_type_max_min) {
     model::Model<int, double> model;
 
     auto& x = model.create_variable("x", -10, 10);
@@ -1012,7 +1054,8 @@ TEST_F(TestConstraint, setup_constraint_type_max_min) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(-x + y + 2 * z - 5,
                          model_component::ConstraintSense::Greater);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_TRUE(constraint.is_max_min());
         EXPECT_EQ("Max-Min", constraint.type());
         constraint.clear_constraint_type();
@@ -1024,7 +1067,8 @@ TEST_F(TestConstraint, setup_constraint_type_max_min) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(x - y - 2 * z + 5,
                          model_component::ConstraintSense::Less);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_TRUE(constraint.is_max_min());
         EXPECT_EQ("Max-Min", constraint.type());
         constraint.clear_constraint_type();
@@ -1036,7 +1080,8 @@ TEST_F(TestConstraint, setup_constraint_type_max_min) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(-x + 20 * y + 20 * z,
                          model_component::ConstraintSense::Greater);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_TRUE(constraint.is_max_min());
         EXPECT_EQ("Max-Min", constraint.type());
         constraint.clear_constraint_type();
@@ -1048,7 +1093,8 @@ TEST_F(TestConstraint, setup_constraint_type_max_min) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(-x - 20 * y - 20 * z,
                          model_component::ConstraintSense::Greater);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_TRUE(constraint.is_max_min());
         EXPECT_EQ("Max-Min", constraint.type());
         constraint.clear_constraint_type();
@@ -1060,7 +1106,8 @@ TEST_F(TestConstraint, setup_constraint_type_max_min) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(-x - 20 * y + 20 * z,
                          model_component::ConstraintSense::Greater);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_TRUE(constraint.is_max_min());
         EXPECT_EQ("Max-Min", constraint.type());
     }
@@ -1070,7 +1117,8 @@ TEST_F(TestConstraint, setup_constraint_type_max_min) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(x + 20 * y - 20 * z,
                          model_component::ConstraintSense::Less);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_TRUE(constraint.is_max_min());
         EXPECT_EQ("Max-Min", constraint.type());
         constraint.clear_constraint_type();
@@ -1082,7 +1130,8 @@ TEST_F(TestConstraint, setup_constraint_type_max_min) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(-x + y + z - 5,
                          model_component::ConstraintSense::Greater);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_FALSE(constraint.is_max_min());
     }
 
@@ -1091,7 +1140,8 @@ TEST_F(TestConstraint, setup_constraint_type_max_min) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(-x + 1.5 * y + 2 * z - 5,
                          model_component::ConstraintSense::Greater);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_FALSE(constraint.is_max_min());
     }
 
@@ -1100,13 +1150,14 @@ TEST_F(TestConstraint, setup_constraint_type_max_min) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(-x + y + 2 * z - 5.5,
                          model_component::ConstraintSense::Greater);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_FALSE(constraint.is_max_min());
     }
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraint, setup_constraint_type_intermediate) {
+TEST_F(TestConstraint, update_constraint_type_intermediate) {
     model::Model<int, double> model;
 
     auto& x = model.create_variable("x", -10, 10);
@@ -1118,7 +1169,8 @@ TEST_F(TestConstraint, setup_constraint_type_intermediate) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(-x + y + 2 * z + 5,
                          model_component::ConstraintSense::Equal);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_TRUE(constraint.is_intermediate());
         EXPECT_EQ(&x(0), constraint.key_variable_ptr());
         EXPECT_EQ("Intermediate", constraint.type());
@@ -1132,7 +1184,8 @@ TEST_F(TestConstraint, setup_constraint_type_intermediate) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(x + y + 2 * z + 5,
                          model_component::ConstraintSense::Equal);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_TRUE(constraint.is_intermediate());
         EXPECT_EQ(&x(0), constraint.key_variable_ptr());
         EXPECT_EQ("Intermediate", constraint.type());
@@ -1146,7 +1199,8 @@ TEST_F(TestConstraint, setup_constraint_type_intermediate) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(x + 20 * y + 20 * z,
                          model_component::ConstraintSense::Equal);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_TRUE(constraint.is_intermediate());
         EXPECT_EQ(&x(0), constraint.key_variable_ptr());
         EXPECT_EQ("Intermediate", constraint.type());
@@ -1160,7 +1214,8 @@ TEST_F(TestConstraint, setup_constraint_type_intermediate) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(x + 20 * y - 20 * z,
                          model_component::ConstraintSense::Equal);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_TRUE(constraint.is_intermediate());
         EXPECT_EQ(&x(0), constraint.key_variable_ptr());
         EXPECT_EQ("Intermediate", constraint.type());
@@ -1174,7 +1229,8 @@ TEST_F(TestConstraint, setup_constraint_type_intermediate) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(-x + y + z + 5,
                          model_component::ConstraintSense::Equal);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_FALSE(constraint.is_intermediate());
         EXPECT_EQ(nullptr, constraint.key_variable_ptr());
     }
@@ -1184,7 +1240,8 @@ TEST_F(TestConstraint, setup_constraint_type_intermediate) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(-x + 1.5 * y + 2 * z + 5,
                          model_component::ConstraintSense::Equal);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_FALSE(constraint.is_intermediate());
         EXPECT_EQ(nullptr, constraint.key_variable_ptr());
     }
@@ -1194,7 +1251,8 @@ TEST_F(TestConstraint, setup_constraint_type_intermediate) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(-x + y + 2 * z + 5.5,
                          model_component::ConstraintSense::Equal);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_FALSE(constraint.is_intermediate());
         EXPECT_EQ(nullptr, constraint.key_variable_ptr());
     }
@@ -1204,14 +1262,15 @@ TEST_F(TestConstraint, setup_constraint_type_intermediate) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(-2 * x + y + 2 * z + 5,
                          model_component::ConstraintSense::Equal);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_FALSE(constraint.is_intermediate());
         EXPECT_EQ(nullptr, constraint.key_variable_ptr());
     }
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraint, setup_constraint_type_equation_knapsack) {
+TEST_F(TestConstraint, update_constraint_type_equation_knapsack) {
     model::Model<int, double> model;
     auto                      coefficients = utility::sequence(10);
 
@@ -1220,7 +1279,8 @@ TEST_F(TestConstraint, setup_constraint_type_equation_knapsack) {
         model_component::Constraint<int, double>::create_instance();
     constraint.setup(x.dot(coefficients) - 30,
                      model_component::ConstraintSense::Equal);
-    constraint.setup_constraint_type();
+    constraint.update_basic_structure();
+    constraint.update_constraint_type();
     EXPECT_TRUE(constraint.is_equation_knapsack());
     EXPECT_EQ("Equation Knapsack", constraint.type());
     constraint.clear_constraint_type();
@@ -1228,7 +1288,7 @@ TEST_F(TestConstraint, setup_constraint_type_equation_knapsack) {
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraint, setup_constraint_type_bin_packing) {
+TEST_F(TestConstraint, update_constraint_type_bin_packing) {
     model::Model<int, double> model;
     auto                      coefficients = utility::sequence(10);
 
@@ -1239,7 +1299,8 @@ TEST_F(TestConstraint, setup_constraint_type_bin_packing) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(x.dot(coefficients) + 5 * y - 5,
                          model_component::ConstraintSense::Less);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_TRUE(constraint.is_bin_packing());
         EXPECT_EQ("Bin Packing", constraint.type());
         constraint.clear_constraint_type();
@@ -1251,7 +1312,8 @@ TEST_F(TestConstraint, setup_constraint_type_bin_packing) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(-x.dot(coefficients) - 5 * y + 5,
                          model_component::ConstraintSense::Greater);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_TRUE(constraint.is_bin_packing());
         EXPECT_EQ("Bin Packing", constraint.type());
         constraint.clear_constraint_type();
@@ -1260,7 +1322,7 @@ TEST_F(TestConstraint, setup_constraint_type_bin_packing) {
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraint, setup_constraint_type_knapsack) {
+TEST_F(TestConstraint, update_constraint_type_knapsack) {
     model::Model<int, double> model;
     auto                      coefficients = utility::sequence(10);
 
@@ -1270,7 +1332,8 @@ TEST_F(TestConstraint, setup_constraint_type_knapsack) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(x.dot(coefficients) - 50,
                          model_component::ConstraintSense::Less);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_TRUE(constraint.is_knapsack());
         EXPECT_EQ("Knapsack", constraint.type());
         constraint.clear_constraint_type();
@@ -1282,7 +1345,8 @@ TEST_F(TestConstraint, setup_constraint_type_knapsack) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(-x.dot(coefficients) + 50,
                          model_component::ConstraintSense::Greater);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_TRUE(constraint.is_knapsack());
         EXPECT_EQ("Knapsack", constraint.type());
         constraint.clear_constraint_type();
@@ -1291,7 +1355,7 @@ TEST_F(TestConstraint, setup_constraint_type_knapsack) {
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraint, setup_constraint_type_integer_knapsack) {
+TEST_F(TestConstraint, update_constraint_type_integer_knapsack) {
     model::Model<int, double> model;
     auto                      coefficients = utility::sequence(10, 20);
 
@@ -1301,7 +1365,8 @@ TEST_F(TestConstraint, setup_constraint_type_integer_knapsack) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(x.dot(coefficients) - 50,
                          model_component::ConstraintSense::Less);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_TRUE(constraint.is_integer_knapsack());
         EXPECT_EQ("Integer Knapsack", constraint.type());
         constraint.clear_constraint_type();
@@ -1313,7 +1378,8 @@ TEST_F(TestConstraint, setup_constraint_type_integer_knapsack) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(-x.dot(coefficients) + 50,
                          model_component::ConstraintSense::Greater);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_TRUE(constraint.is_integer_knapsack());
         EXPECT_EQ("Integer Knapsack", constraint.type());
         constraint.clear_constraint_type();
@@ -1322,7 +1388,7 @@ TEST_F(TestConstraint, setup_constraint_type_integer_knapsack) {
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraint, setup_constraint_type_gf2) {
+TEST_F(TestConstraint, update_constraint_type_gf2) {
     model::Model<int, double> model;
 
     auto& x = model.create_variables("x", 10, 0, 1);
@@ -1334,7 +1400,8 @@ TEST_F(TestConstraint, setup_constraint_type_gf2) {
         constraint.setup(x.sum() - 2 * y,
                          model_component::ConstraintSense::Equal);
 
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_TRUE(constraint.is_gf2());
         EXPECT_EQ(&y(0), constraint.key_variable_ptr());
         EXPECT_EQ("GF(2)", constraint.type());
@@ -1348,7 +1415,8 @@ TEST_F(TestConstraint, setup_constraint_type_gf2) {
         constraint.setup(-x.sum() + 2 * y,
                          model_component::ConstraintSense::Equal);
 
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_TRUE(constraint.is_gf2());
         EXPECT_EQ(&y(0), constraint.key_variable_ptr());
         EXPECT_EQ("GF(2)", constraint.type());
@@ -1361,7 +1429,8 @@ TEST_F(TestConstraint, setup_constraint_type_gf2) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(x.sum() + 1 - 2 * y,
                          model_component::ConstraintSense::Equal);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_TRUE(constraint.is_gf2());
         EXPECT_EQ(&y(0), constraint.key_variable_ptr());
         EXPECT_EQ("GF(2)", constraint.type());
@@ -1374,7 +1443,8 @@ TEST_F(TestConstraint, setup_constraint_type_gf2) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(-x.sum() - 1 + 2 * y,
                          model_component::ConstraintSense::Equal);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_TRUE(constraint.is_gf2());
         EXPECT_EQ(&y(0), constraint.key_variable_ptr());
         EXPECT_EQ("GF(2)", constraint.type());
@@ -1387,7 +1457,8 @@ TEST_F(TestConstraint, setup_constraint_type_gf2) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(x.sum() - 1 - 2 * y,
                          model_component::ConstraintSense::Equal);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_TRUE(constraint.is_gf2());
         EXPECT_EQ(&y(0), constraint.key_variable_ptr());
         EXPECT_EQ("GF(2)", constraint.type());
@@ -1400,7 +1471,8 @@ TEST_F(TestConstraint, setup_constraint_type_gf2) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(-x.sum() + 1 + 2 * y,
                          model_component::ConstraintSense::Equal);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_TRUE(constraint.is_gf2());
         EXPECT_EQ(&y(0), constraint.key_variable_ptr());
         EXPECT_EQ("GF(2)", constraint.type());
@@ -1411,7 +1483,8 @@ TEST_F(TestConstraint, setup_constraint_type_gf2) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(x.sum() + 2 - 2 * y,
                          model_component::ConstraintSense::Equal);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_FALSE(constraint.is_gf2());
     }
 
@@ -1420,7 +1493,8 @@ TEST_F(TestConstraint, setup_constraint_type_gf2) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(-x.sum() - 2 + 2 * y,
                          model_component::ConstraintSense::Equal);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_FALSE(constraint.is_gf2());
     }
 
@@ -1429,7 +1503,8 @@ TEST_F(TestConstraint, setup_constraint_type_gf2) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(x.sum() - 2 - 2 * y,
                          model_component::ConstraintSense::Equal);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_FALSE(constraint.is_gf2());
     }
 
@@ -1438,13 +1513,14 @@ TEST_F(TestConstraint, setup_constraint_type_gf2) {
             model_component::Constraint<int, double>::create_instance();
         constraint.setup(-x.sum() + 2 + 2 * y,
                          model_component::ConstraintSense::Equal);
-        constraint.setup_constraint_type();
+        constraint.update_basic_structure();
+        constraint.update_constraint_type();
         EXPECT_FALSE(constraint.is_gf2());
     }
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraint, setup_constraint_type_general_linear) {
+TEST_F(TestConstraint, update_constraint_type_general_linear) {
     model::Model<int, double> model;
     auto                      coefficients = utility::sequence(10);
 
@@ -1455,7 +1531,8 @@ TEST_F(TestConstraint, setup_constraint_type_general_linear) {
         model_component::Constraint<int, double>::create_instance();
     constraint.setup(2 * x + 2 * y.sum() - 50,
                      model_component::ConstraintSense::Equal);
-    constraint.setup_constraint_type();
+    constraint.update_basic_structure();
+    constraint.update_constraint_type();
     EXPECT_TRUE(constraint.is_general_linear());
     EXPECT_EQ("General Linear", constraint.type());
     constraint.clear_constraint_type();
@@ -1638,7 +1715,7 @@ TEST_F(TestConstraint, reset_local_penalty_coefficient) {
 
 /*****************************************************************************/
 TEST_F(TestConstraint, key_variable_ptr) {
-    /// This method is tested in setup_constraint_type_intermediate().
+    /// This method is tested in update_constraint_type_intermediate().
 }
 
 /*****************************************************************************/
@@ -1817,113 +1894,113 @@ TEST_F(TestConstraint, is_greater_or_equal) {
 
 /*****************************************************************************/
 TEST_F(TestConstraint, is_singleton) {
-    /// This method is tested in setup_constraint_type_singleton().
+    /// This method is tested in update_constraint_type_singleton().
 }
 
 /*****************************************************************************/
 TEST_F(TestConstraint, is_aggregation) {
-    /// This method is tested in setup_constraint_type_aggregation().
+    /// This method is tested in update_constraint_type_aggregation().
 }
 
 /*****************************************************************************/
 TEST_F(TestConstraint, is_precedence) {
-    /// This method is tested in setup_constraint_type_precedence().
+    /// This method is tested in update_constraint_type_precedence().
 }
 
 /*****************************************************************************/
 TEST_F(TestConstraint, is_variable_bound) {
-    /// This method is tested in setup_constraint_type_variable_bound().
+    /// This method is tested in update_constraint_type_variable_bound().
 }
 
 /*****************************************************************************/
 TEST_F(TestConstraint, is_set_partitioning) {
-    /// This method is tested in setup_constraint_type_set_partitioning().
+    /// This method is tested in update_constraint_type_set_partitioning().
 }
 
 /*****************************************************************************/
 TEST_F(TestConstraint, is_set_packing) {
-    /// This method is tested in setup_constraint_type_set_packing().
+    /// This method is tested in update_constraint_type_set_packing().
 }
 
 /*****************************************************************************/
 TEST_F(TestConstraint, is_set_covering) {
-    /// This method is tested in setup_constraint_type_set_covering().
+    /// This method is tested in update_constraint_type_set_covering().
 }
 
 /*****************************************************************************/
 TEST_F(TestConstraint, is_cardinality) {
-    /// This method is tested in setup_constraint_type_cardinality().
+    /// This method is tested in update_constraint_type_cardinality().
 }
 
 /*****************************************************************************/
 TEST_F(TestConstraint, is_invariant_knapsack) {
-    /// This method is tested in setup_constraint_type_invariant_knapsack().
+    /// This method is tested in update_constraint_type_invariant_knapsack().
 }
 
 /*****************************************************************************/
 TEST_F(TestConstraint, is_multiple_covering) {
-    /// This method is tested in setup_constraint_type_multiple_covering().
+    /// This method is tested in update_constraint_type_multiple_covering().
 }
 
 /*****************************************************************************/
 TEST_F(TestConstraint, is_binary_flow) {
-    /// This method is tested in setup_constraint_type_binary_flow().
+    /// This method is tested in update_constraint_type_binary_flow().
 }
 
 /*****************************************************************************/
 TEST_F(TestConstraint, is_integer_flow) {
-    /// This method is tested in setup_constraint_type_integer_flow().
+    /// This method is tested in update_constraint_type_integer_flow().
 }
 
 /*****************************************************************************/
 TEST_F(TestConstraint, is_soft_selection) {
     /// This method is tested in
-    /// setup_constraint_type_soft_selection().
+    /// update_constraint_type_soft_selection().
 }
 
 /*****************************************************************************/
 TEST_F(TestConstraint, is_min_max) {
-    /// This method is tested in setup_constraint_type_min_max().
+    /// This method is tested in update_constraint_type_min_max().
 }
 
 /*****************************************************************************/
 TEST_F(TestConstraint, is_max_min) {
-    /// This method is tested in setup_constraint_type_max_min().
+    /// This method is tested in update_constraint_type_max_min().
 }
 
 /*****************************************************************************/
 TEST_F(TestConstraint, is_intermediate) {
-    /// This method is tested in setup_constraint_type_intermediate().
+    /// This method is tested in update_constraint_type_intermediate().
 }
 
 /*****************************************************************************/
 TEST_F(TestConstraint, is_equation_knapsack) {
-    /// This method is tested in setup_constraint_type_equation_knapsack().
+    /// This method is tested in update_constraint_type_equation_knapsack().
 }
 
 /*****************************************************************************/
 TEST_F(TestConstraint, is_bin_packing) {
-    /// This method is tested in setup_constraint_type_bin_packing().
+    /// This method is tested in update_constraint_type_bin_packing().
 }
 
 /*****************************************************************************/
 TEST_F(TestConstraint, is_knapsack) {
-    /// This method is tested in setup_constraint_type_knapsack().
+    /// This method is tested in update_constraint_type_knapsack().
 }
 
 /*****************************************************************************/
 TEST_F(TestConstraint, is_integer_knapsack) {
-    /// This method is tested in setup_constraint_type_integer_knapsack().
+    /// This method is tested in update_constraint_type_integer_knapsack().
 }
 
 /*****************************************************************************/
 TEST_F(TestConstraint, is_gf2) {
-    /// This method is tested in setup_constraint_type_gf2().
+    /// This method is tested in update_constraint_type_gf2().
 }
 
 /*****************************************************************************/
 TEST_F(TestConstraint, is_general_linear) {
-    /// This method is tested in setup_constraint_type_general_linear().
+    /// This method is tested in update_constraint_type_general_linear().
 }
 
 /*****************************************************************************/

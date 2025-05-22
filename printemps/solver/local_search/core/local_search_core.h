@@ -574,9 +574,10 @@ class LocalSearchCore {
                  * fast or ordinary(slow) evaluation methods.
                  */
                 if (TRIAL_MOVE_PTRS[i]->is_univariable_move) {
-                    m_model_ptr->evaluate_single(&trial_solution_scores[i],  //
-                                                 *TRIAL_MOVE_PTRS[i],        //
-                                                 CURRENT_SOLUTION_SCORE);
+                    m_model_ptr->evaluate_single_no_ignore(
+                        &trial_solution_scores[i],  //
+                        *TRIAL_MOVE_PTRS[i],        //
+                        CURRENT_SOLUTION_SCORE);
                 } else if (TRIAL_MOVE_PTRS[i]->is_selection_move) {
                     m_model_ptr->evaluate_selection(  //
                         &trial_solution_scores[i],    //

@@ -1076,7 +1076,8 @@ class Model {
 
         for (auto &&proxy : m_constraint_proxies) {
             for (auto &&constraint : proxy.flat_indexed_constraints()) {
-                constraint.setup_constraint_type();
+                constraint.update_basic_structure();
+                constraint.update_constraint_type();
             }
         }
 
@@ -2690,7 +2691,83 @@ class Model {
             if (constraint_ptr->is_evaluation_ignorable()) {
                 continue;
             }
+            constraint_value = constraint_ptr->constraint_value() +
+                               sensitivity.second * variable_value_diff;
 
+            if (constraint_ptr->is_less_or_equal()) {
+                total_violation +=
+                    (violation_diff = std::max(constraint_value, 0.0) -
+                                      constraint_ptr->positive_part());
+
+                local_penalty +=
+                    violation_diff *
+                    constraint_ptr->local_penalty_coefficient_less();
+            }
+
+            if (constraint_ptr->is_greater_or_equal()) {
+                total_violation -=
+                    (violation_diff = std::min(constraint_value, 0.0) +
+                                      constraint_ptr->negative_part());
+
+                local_penalty -=
+                    violation_diff *
+                    constraint_ptr->local_penalty_coefficient_greater();
+            }
+        }
+
+        const double OBJECTIVE =
+            m_is_defined_objective ? m_objective.evaluate(a_MOVE) * this->sign()
+                                   : 0.0;
+
+        const double OBJECTIVE_IMPROVEMENT =
+            m_objective.value() * this->sign() - OBJECTIVE;
+
+        const double GLOBAL_PENALTY =
+            total_violation * m_global_penalty_coefficient;
+
+        a_score_ptr->objective                  = OBJECTIVE;
+        a_score_ptr->objective_improvement      = OBJECTIVE_IMPROVEMENT;
+        a_score_ptr->total_violation            = total_violation;
+        a_score_ptr->local_penalty              = local_penalty;
+        a_score_ptr->global_penalty             = GLOBAL_PENALTY;
+        a_score_ptr->local_augmented_objective  = OBJECTIVE + local_penalty;
+        a_score_ptr->global_augmented_objective = OBJECTIVE + GLOBAL_PENALTY;
+        a_score_ptr->is_feasible = !(total_violation > constant::EPSILON);
+        a_score_ptr->is_objective_improvable =
+            OBJECTIVE_IMPROVEMENT > constant::EPSILON;
+        a_score_ptr->is_feasibility_improvable = true;  /// do not care.
+    }
+
+    /*************************************************************************/
+    inline void evaluate_single_no_ignore(
+        solution::SolutionScore                            *a_score_ptr,  //
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE,
+        const solution::SolutionScore &a_CURRENT_SCORE) const noexcept {
+        double total_violation  = a_CURRENT_SCORE.total_violation;
+        double local_penalty    = a_CURRENT_SCORE.local_penalty;
+        double constraint_value = 0.0;
+        double violation_diff   = 0.0;
+
+        const auto &variable_ptr = a_MOVE.alterations.front().first;
+        const auto  variable_value_diff =
+            a_MOVE.alterations.front().second - variable_ptr->value();
+        const auto &constraint_sensitivities =
+            variable_ptr->constraint_sensitivities();
+
+        for (const auto &sensitivity : constraint_sensitivities) {
+            /**
+             * NOTE: The difference from evaluate_single() is that this method
+             * does not skip the evaluation of constraint function values based
+             * on the value of constraint_ptr->is_evaluation_ignorable(). In the
+             * local_search method that calls this function, the final move is
+             * constructed by combining multiple moves evaluated by this method.
+             * For such combined moves,constraint_ptr->is_evaluation_ignorable()
+             * does not function correctly.
+             */
+            const auto &constraint_ptr = sensitivity.first;
+            if (!constraint_ptr->is_enabled()) {
+                continue;
+            }
             constraint_value = constraint_ptr->constraint_value() +
                                sensitivity.second * variable_value_diff;
 

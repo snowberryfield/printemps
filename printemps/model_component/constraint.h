@@ -234,46 +234,17 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         m_negative_part    = 0;
         m_is_enabled       = true;
 
-        m_is_integer    = true;
-        auto is_integer = [](const T_Expression a_VALUE) {
-            return fabs(a_VALUE - floor(a_VALUE)) < constant::EPSILON_10;
-        };
+        this->update_basic_structure();
+        this->update_constraint_type();
+    }
 
-        if (!is_integer(m_expression.constant_value())) {
-            m_is_integer = false;
-        }
-
-        for (const auto &SENSITIVITY : m_expression.sensitivities()) {
-            if (!is_integer(SENSITIVITY.second)) {
-                m_is_integer = false;
-                break;
-            }
-        }
-
-        m_max_abs_coefficient = 0;
-        for (const auto &SENSITIVITY : m_expression.sensitivities()) {
-            m_max_abs_coefficient =
-                std::max(m_max_abs_coefficient, std::fabs(SENSITIVITY.second));
-        }
-
-        m_has_only_binary_coefficient = true;
-        for (const auto &sensitivity : m_expression.sensitivities()) {
-            if (sensitivity.second != 1) {
-                m_has_only_binary_coefficient = false;
-                break;
-            }
-        }
-
-        m_has_only_binary_variable = true;
-        for (const auto &sensitivity : m_expression.sensitivities()) {
-            if ((sensitivity.first->sense() != VariableSense::Binary) &&
-                (sensitivity.first->sense() != VariableSense::Selection)) {
-                m_has_only_binary_variable = false;
-                break;
-            }
-        }
-
-        this->clear_constraint_type();
+    /*************************************************************************/
+    inline void update_basic_structure(void) {
+        m_is_integer          = m_expression.is_integer();
+        m_max_abs_coefficient = m_expression.max_abs_coefficient();
+        m_has_only_binary_coefficient =
+            m_expression.has_only_binary_coefficient();
+        m_has_only_binary_variable = m_expression.has_only_binary_variable();
 
         switch (m_sense) {
             case ConstraintSense::Less: {
@@ -300,7 +271,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline void setup_constraint_type(void) {
+    inline void update_constraint_type(void) {
         this->clear_constraint_type();
         /// Singleton
         if (m_expression.sensitivities().size() == 1) {

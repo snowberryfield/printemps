@@ -471,6 +471,52 @@ class Expression : public multi_array::AbstractMultiArrayElement {
         const Expression<T_Variable, T_Expression> &a_EXPRESSION) noexcept {
         return !this->equal(a_EXPRESSION);
     }
+
+    /*********************************************************************/
+    inline bool is_integer(void) const noexcept {
+        if (!utility::is_integer(m_constant_value)) {
+            return false;
+        }
+
+        for (const auto &sensitivity : m_sensitivities) {
+            if (!utility::is_integer(sensitivity.second)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /*********************************************************************/
+    inline T_Expression max_abs_coefficient(void) const noexcept {
+        T_Expression max_abs_coefficient = 0;
+        for (const auto &sensitivity : m_sensitivities) {
+            max_abs_coefficient =
+                std::max(max_abs_coefficient, std::abs(sensitivity.second));
+        }
+        return max_abs_coefficient;
+    }
+
+    /*********************************************************************/
+    inline bool has_only_binary_coefficient(void) const noexcept {
+        for (const auto &sensitivity : m_sensitivities) {
+            if (sensitivity.second != 1) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /*********************************************************************/
+    inline bool has_only_binary_variable(void) const noexcept {
+        for (const auto &sensitivity : m_sensitivities) {
+            if ((sensitivity.first->sense() != VariableSense::Binary) &&
+                (sensitivity.first->sense() != VariableSense::Selection)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     /*************************************************************************/
     inline Expression<T_Variable, T_Expression> operator+(void) const {
         return create_instance(this->sensitivities(), this->constant_value());
