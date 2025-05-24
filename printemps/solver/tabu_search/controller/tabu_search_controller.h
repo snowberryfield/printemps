@@ -103,7 +103,8 @@ class TabuSearchController
         const bool a_IS_ENABLED_PRINT) {
         const auto& STATE = m_state_manager.state();
 
-        if (STATE.total_elapsed_time > this->m_option.general.time_max) {
+        if (this->m_option.general.time_max >= 0 &&
+            STATE.total_elapsed_time > this->m_option.general.time_max) {
             utility::print_message(  //
                 "Outer loop was terminated because of time-over (" +
                     utility::to_string(STATE.total_elapsed_time, "%.3f") +
@@ -118,7 +119,8 @@ class TabuSearchController
     inline bool satisfy_iteration_over_terminate_condition(
         const bool a_IS_ENABLED_PRINT) {
         const auto& STATE = m_state_manager.state();
-        if (STATE.iteration >= this->m_option.general.iteration_max) {
+        if (this->m_option.general.iteration_max >= 0 &&
+            STATE.iteration >= this->m_option.general.iteration_max) {
             utility::print_message(  //
                 "Outer loop was terminated because of iteration limit (" +
                     utility::to_string(STATE.iteration, "%d") + " iterations).",

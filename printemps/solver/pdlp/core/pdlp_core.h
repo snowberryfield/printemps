@@ -54,8 +54,9 @@ class PDLPCore {
             return true;
         }
 
-        if (STATE.elapsed_time + m_option.pdlp.time_offset >
-            m_option.general.time_max) {
+        if (m_option.general.time_max >= 0 &&
+            STATE.elapsed_time + m_option.pdlp.time_offset >
+                m_option.general.time_max) {
             m_state_manager.set_termination_status(
                 PDLPCoreTerminationStatus::TIME_OVER);
             return true;

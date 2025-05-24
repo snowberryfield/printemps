@@ -103,8 +103,9 @@ class LocalSearchCore {
             return true;
         }
 
-        if (STATE.elapsed_time + m_option.local_search.time_offset >
-            m_option.general.time_max) {
+        if (m_option.general.time_max >= 0 &&
+            STATE.elapsed_time + m_option.local_search.time_offset >
+                m_option.general.time_max) {
             m_state_manager.set_termination_status(
                 LocalSearchCoreTerminationStatus::TIME_OVER);
             return true;
