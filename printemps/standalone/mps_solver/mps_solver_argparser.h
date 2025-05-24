@@ -226,28 +226,27 @@ struct MPSSolverArgparser {
                 this->flippable_variable_pair_file_name = args[i + 1];
                 i += 2;
             } else if (args[i] == "-c") {
-                this->minimum_common_element = atoi(args[i + 1].c_str());
+                this->minimum_common_element = std::stoi(args[i + 1]);
                 i += 2;
             } else if (args[i] == "-k") {
-                this->iteration_max              = atof(args[i + 1].c_str());
+                this->iteration_max              = std::stoi(args[i + 1]);
                 this->is_specified_iteration_max = true;
                 i += 2;
             } else if (args[i] == "-t") {
-                this->time_max              = atof(args[i + 1].c_str());
+                this->time_max              = std::stod(args[i + 1]);
                 this->is_specified_time_max = true;
                 i += 2;
             } else if (args[i] == "-v") {
-                this->verbose =
-                    option::verbose::VerboseMap.at(args[i + 1].c_str());
+                this->verbose = option::verbose::VerboseMap.at(args[i + 1]);
                 this->is_specified_verbose = true;
                 i += 2;
             } else if (args[i] == "-j") {
-                this->number_of_threads = atof(args[i + 1].c_str());
+                this->number_of_threads              = std::stoi(args[i + 1]);
                 this->is_specified_number_of_threads = true;
                 i += 2;
             } else if (args[i] == "-r") {
                 this->seed = static_cast<int32_t>(
-                    static_cast<uint32_t>(atol(args[i + 1].c_str())));
+                    static_cast<uint32_t>(std::stol(args[i + 1])));
                 this->is_specified_seed = true;
                 i += 2;
             } else if (args[i] == "--accept-continuous") {
