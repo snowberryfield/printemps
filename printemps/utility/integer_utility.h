@@ -10,7 +10,7 @@ namespace printemps::utility {
 /******************************************************************************/
 template <class T>
 inline bool is_integer(const T a_VALUE) {
-    return std::abs(a_VALUE - floor(a_VALUE)) < constant::EPSILON_10;
+    return std::abs(a_VALUE - std::floor(a_VALUE)) < constant::EPSILON_10;
 };
 }  // namespace printemps::utility
 

@@ -32,14 +32,14 @@ struct VariableConstant {
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-struct VariableExtention {
+struct VariableExtension {
     VariableSense                        sense;
     double                               lagrangian_coefficient;
     Selection<T_Variable, T_Expression> *selection_ptr;
 
     std::vector<Constraint<T_Variable, T_Expression> *> related_constraint_ptrs;
     std::vector<Constraint<T_Variable, T_Expression> *>
-                                          related_binary_coefficient_constraint_ptrs;
+        related_binary_coefficient_constraint_ptrs;
     Expression<T_Variable, T_Expression> *dependent_expression_ptr;
     std::vector<std::pair<Constraint<T_Variable, T_Expression> *, T_Expression>>
         constraint_sensitivities;
@@ -71,7 +71,7 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     int        m_global_last_update_iteration;
     long       m_update_count;
 
-    std::unique_ptr<VariableExtention<T_Variable, T_Expression>> m_extension;
+    std::unique_ptr<VariableExtension<T_Variable, T_Expression>> m_extension;
 
     bool m_has_bounds;
     bool m_is_fixed;
@@ -84,7 +84,7 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     /// Default constructor
     Variable(void)
         : m_extension(
-              std::make_unique<VariableExtention<T_Variable, T_Expression>>()) {
+              std::make_unique<VariableExtension<T_Variable, T_Expression>>()) {
         this->initialize();
     }
 
@@ -94,7 +94,7 @@ class Variable : public multi_array::AbstractMultiArrayElement {
 
     /*************************************************************************/
     /// Copy assignment
-    Variable<T_Variable, T_Expression> &operator    =(
+    Variable<T_Variable, T_Expression> &operator=(
         const Variable<T_Variable, T_Expression> &) = delete;
 
    public:
@@ -193,8 +193,8 @@ class Variable : public multi_array::AbstractMultiArrayElement {
 
     /*************************************************************************/
     inline T_Expression evaluate(
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
-        noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
+        const noexcept {
         if (a_MOVE.alterations.size() == 0) {
             return this->value();
         }
@@ -517,14 +517,14 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline std::vector<Constraint<T_Variable, T_Expression> *>
-        &related_constraint_ptrs(void) {
+    inline std::vector<Constraint<T_Variable, T_Expression> *> &
+    related_constraint_ptrs(void) {
         return m_extension->related_constraint_ptrs;
     }
 
     /*************************************************************************/
-    inline const std::vector<Constraint<T_Variable, T_Expression> *>
-        &related_constraint_ptrs(void) const {
+    inline const std::vector<Constraint<T_Variable, T_Expression> *> &
+    related_constraint_ptrs(void) const {
         return m_extension->related_constraint_ptrs;
     }
 
@@ -567,14 +567,14 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline std::vector<Constraint<T_Variable, T_Expression> *>
-        &related_binary_coefficient_constraint_ptrs(void) {
+    inline std::vector<Constraint<T_Variable, T_Expression> *> &
+    related_binary_coefficient_constraint_ptrs(void) {
         return m_extension->related_binary_coefficient_constraint_ptrs;
     }
 
     /*************************************************************************/
-    inline const std::vector<Constraint<T_Variable, T_Expression> *>
-        &related_binary_coefficient_constraint_ptrs(void) const {
+    inline const std::vector<Constraint<T_Variable, T_Expression> *> &
+    related_binary_coefficient_constraint_ptrs(void) const {
         return m_extension->related_binary_coefficient_constraint_ptrs;
     }
 
@@ -629,15 +629,15 @@ class Variable : public multi_array::AbstractMultiArrayElement {
 
     /*************************************************************************/
     inline std::vector<
-        std::pair<Constraint<T_Variable, T_Expression> *, T_Expression>>
-        &constraint_sensitivities(void) {
+        std::pair<Constraint<T_Variable, T_Expression> *, T_Expression>> &
+    constraint_sensitivities(void) {
         return m_extension->constraint_sensitivities;
     }
 
     /*************************************************************************/
     inline const std::vector<
-        std::pair<Constraint<T_Variable, T_Expression> *, T_Expression>>
-        &constraint_sensitivities(void) const {
+        std::pair<Constraint<T_Variable, T_Expression> *, T_Expression>> &
+    constraint_sensitivities(void) const {
         return m_extension->constraint_sensitivities;
     }
 
