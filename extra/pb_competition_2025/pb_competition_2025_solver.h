@@ -24,6 +24,13 @@ class PBCompetition2025Solver {
     utility::TimeKeeper              m_time_keeper;
 
     /*************************************************************************/
+    inline void print_program_name(void) const {
+        std::cout << "c PRINTEMPS " + constant::VERSION + " (" +
+                         constant::PROJECT_URL + ")"
+                  << std::endl;
+    }
+
+    /*************************************************************************/
     inline void print_metadata(void) const {
         std::cout << "c #variable: " << m_opb.metadata.number_of_variables
                   << std::endl;
@@ -39,6 +46,20 @@ class PBCompetition2025Solver {
         std::cout << "c mincost: " << m_opb.metadata.mincost << std::endl;
         std::cout << "c maxcost: " << m_opb.metadata.maxcost << std::endl;
         std::cout << "c sumcost: " << m_opb.metadata.sumcost << std::endl;
+    }
+
+    /*************************************************************************/
+    inline void print_option(void) const {
+        std::cout << "c iteration_max: " << m_option.general.iteration_max
+                  << std::endl;
+        std::cout << "c time_max: " << m_option.general.time_max << std::endl;
+        std::cout << "c number_of_threads(move update): "
+                  << m_option.parallel.number_of_threads_move_update
+                  << std::endl;
+        std::cout << "c number_of_threads(move evaluation): "
+                  << m_option.parallel.number_of_threads_move_evaluation
+                  << std::endl;
+        std::cout << "c seed: " << m_option.general.seed << std::endl;
     }
 
     /*************************************************************************/
@@ -87,6 +108,9 @@ class PBCompetition2025Solver {
         m_model.initialize();
         m_option.initialize();
         m_time_keeper.initialize();
+
+        m_option.general.iteration_max = -1;
+        m_option.general.time_max      = -1.0;
     }
 
     /*************************************************************************/
@@ -107,6 +131,8 @@ class PBCompetition2025Solver {
          */
         m_argparser.parse(argc, argv);
 
+        this->print_program_name();
+
         /**
          * Check the metadata of the specified OPB file.
          */
@@ -120,28 +146,16 @@ class PBCompetition2025Solver {
          * Read the specified OPB file and convert to the model.
          */
         m_opb.read_opb(m_argparser.pb_file_name);
-        this->print_metadata();
 
         m_model.import_opb(m_opb);
         m_model.set_name(
             printemps::utility::base_name(m_argparser.pb_file_name));
 
-        /**
-         * If the option file is given, the option values specified in the file
-         * will be used for the calculation. Otherwise, the default values will
-         * be used.
-         */
-        if (!m_argparser.option_file_name.empty()) {
-            m_option.setup(m_argparser.option_file_name);
-        }
         if (m_argparser.is_specified_iteration_max) {
             m_option.general.iteration_max = m_argparser.iteration_max;
         }
         if (m_argparser.is_specified_time_max) {
             m_option.general.time_max = m_argparser.time_max;
-        }
-        if (m_argparser.is_specified_verbose) {
-            m_option.output.verbose = m_argparser.verbose;
         }
         if (m_argparser.is_specified_number_of_threads) {
             m_option.parallel.number_of_threads_move_evaluation =
@@ -155,6 +169,9 @@ class PBCompetition2025Solver {
         if (m_argparser.is_specified_seed) {
             m_option.general.seed = m_argparser.seed;
         }
+
+        this->print_metadata();
+        this->print_option();
 
         signal(SIGINT, interrupt_handler);
         signal(SIGTERM, interrupt_handler);
@@ -170,11 +187,7 @@ class PBCompetition2025Solver {
          */
         printemps::solver::IPSolver solver;
 
-        if (m_argparser.include_opb_loading_time) {
-            solver.setup(&m_model, m_option, m_time_keeper);
-        } else {
-            solver.setup(&m_model, m_option);
-        }
+        solver.setup(&m_model, m_option, m_time_keeper);
 
         double feasible_incumbent_objective =
             std::numeric_limits<double>::max();

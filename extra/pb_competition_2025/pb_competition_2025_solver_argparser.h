@@ -16,19 +16,14 @@ struct PBCompetition2025SolverArgparserConstant {
 /*****************************************************************************/
 struct PBCompetition2025SolverArgparser {
     std::string pb_file_name;
-    std::string option_file_name;
 
-    bool include_opb_loading_time;
-
-    double                   iteration_max;
-    double                   time_max;
-    option::verbose::Verbose verbose;
-    int                      number_of_threads;
-    int                      seed;
+    double iteration_max;
+    double time_max;
+    int    number_of_threads;
+    int    seed;
 
     bool is_specified_iteration_max;
     bool is_specified_time_max;
-    bool is_specified_verbose;
     bool is_specified_number_of_threads;
     bool is_specified_seed;
 
@@ -40,22 +35,15 @@ struct PBCompetition2025SolverArgparser {
     /*************************************************************************/
     inline void initialize(void) {
         this->pb_file_name.clear();
-        this->option_file_name.clear();
-        this->include_opb_loading_time =
-            PBCompetition2025SolverArgparserConstant::
-                DEFAULT_INCLUDE_OPB_LOADING_TIME;
 
-        this->iteration_max =
-            option::GeneralOptionConstant::DEFAULT_ITERATION_MAX;
-        this->time_max = option::GeneralOptionConstant::DEFAULT_TIME_MAX;
-        this->verbose  = option::OutputOptionConstant::DEFAULT_VERBOSE;
+        this->iteration_max = -1;
+        this->time_max      = -1.0;
         this->number_of_threads =
             PBCompetition2025SolverArgparserConstant::DEFAULT_NUMBER_OF_THREADS;
         this->seed = option::GeneralOptionConstant::DEFAULT_SEED;
 
         this->is_specified_iteration_max     = false;
         this->is_specified_time_max          = false;
-        this->is_specified_verbose           = false;
         this->is_specified_number_of_threads = false;
         this->is_specified_seed              = false;
     }
@@ -69,33 +57,21 @@ struct PBCompetition2025SolverArgparser {
         std::cout << std::endl;
 
         std::cout << "Usage: ./pb_competition_2025_solver "
-                  << "[-p OPTION_FILE_NAME] "
                   << "[-k ITERATION_MAX] "
                   << "[-t TIME_MAX] "
-                  << "[-v VERVOSE] "
                   << "[-j NUMBER_OF_THREADS] "
                   << "[-r SEED] "
                   << "opb_file" << std::endl;
         std::cout << std::endl;
         std::cout  //
-            << "  -p OPTION_FILE_NAME: Specify option file name." << std::endl;
-        std::cout  //
             << "  -k ITERATION_MAX: Specify the allowed maximum number of "
-               "outer loop iterations. (default: "
-            << option::GeneralOptionConstant::DEFAULT_ITERATION_MAX << ")"
+               "outer loop iterations. (default: -1, unlimited)"
             << std::endl;
         std::cout  //
             << "  -t TIME_MAX: Specity the allowed maximum computational "
                "time for optimization calculation (specified in seconds). "
-               "(default: "
-            << option::GeneralOptionConstant::DEFAULT_TIME_MAX << ")"
+               "(default: -1.0, unlimited)"
             << std::endl;
-        std::cout  //
-            << "  -v VERBOSE: Specity the log level of standard output "
-               "(Off, Warning, Outer, Inner, or Full). (default: "
-            << option::verbose::VerboseInverseMap.at(
-                   option::OutputOptionConstant::DEFAULT_VERBOSE)
-            << ")" << std::endl;
         std::cout  //
             << "  -j NUMBER_OF_THREADS: Specity the number of threads for "
                "parallelization. (default: "
@@ -105,10 +81,6 @@ struct PBCompetition2025SolverArgparser {
         std::cout  //
             << "  -r SEED: Specity the random seed. (default: "
             << option::GeneralOptionConstant::DEFAULT_SEED << ")" << std::endl;
-        std::cout  //
-            << "  --include-opb-loading-time: Include OPB file loading time "
-               "in the calculation time. "
-            << std::endl;
     }
 
     /*************************************************************************/
@@ -116,28 +88,20 @@ struct PBCompetition2025SolverArgparser {
         std::vector<std::string> args(argv, argv + argc);
         int                      i = 1;
         while (i < static_cast<int>(args.size())) {
-            if (args[i] == "-p") {
-                this->option_file_name = args[i + 1];
-                i += 2;
-            } else if (args[i] == "-k") {
-                this->iteration_max              = atof(args[i + 1].c_str());
+            if (args[i] == "-k") {
+                this->iteration_max              = std::stoi(args[i + 1]);
                 this->is_specified_iteration_max = true;
                 i += 2;
             } else if (args[i] == "-t") {
-                this->time_max              = atof(args[i + 1].c_str());
+                this->time_max              = std::stod(args[i + 1]);
                 this->is_specified_time_max = true;
                 i += 2;
-            } else if (args[i] == "-v") {
-                this->verbose =
-                    option::verbose::VerboseMap.at(args[i + 1].c_str());
-                this->is_specified_verbose = true;
-                i += 2;
             } else if (args[i] == "-j") {
-                this->number_of_threads = atof(args[i + 1].c_str());
+                this->number_of_threads              = std::stoi(args[i + 1]);
                 this->is_specified_number_of_threads = true;
             } else if (args[i] == "-r") {
                 this->seed = static_cast<int32_t>(
-                    static_cast<uint32_t>(atol(args[i + 1].c_str())));
+                    static_cast<uint32_t>(std::stol(args[i + 1])));
                 this->is_specified_seed = true;
                 i += 2;
             } else {
