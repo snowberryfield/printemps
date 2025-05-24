@@ -152,7 +152,8 @@ class PDLPController {
     /*************************************************************************/
     inline bool satisfy_time_over_skip_condition(
         const double a_TOTAL_ELAPSED_TIME, const bool a_IS_ENABLED_PRINT) {
-        if (a_TOTAL_ELAPSED_TIME > this->m_option.general.time_max) {
+        if (this->m_option.general.time_max >= 0 &&
+            a_TOTAL_ELAPSED_TIME > this->m_option.general.time_max) {
             utility::print_message(
                 "PDLP was skipped because of time-over (" +
                     utility::to_string(a_TOTAL_ELAPSED_TIME, "%.3f") + "sec).",

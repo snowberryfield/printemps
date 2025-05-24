@@ -82,8 +82,9 @@ class LagrangeDualCore {
             return true;
         }
 
-        if (STATE.elapsed_time + m_option.lagrange_dual.time_offset >
-            m_option.general.time_max) {
+        if (m_option.general.time_max >= 0 &&
+            STATE.elapsed_time + m_option.lagrange_dual.time_offset >
+                m_option.general.time_max) {
             m_state_manager.set_termination_status(
                 LagrangeDualCoreTerminationStatus::TIME_OVER);
             return true;
