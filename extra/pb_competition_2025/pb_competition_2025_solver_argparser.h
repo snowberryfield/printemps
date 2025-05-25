@@ -36,8 +36,9 @@ struct PBCompetition2025SolverArgparser {
     inline void initialize(void) {
         this->pb_file_name.clear();
 
-        this->iteration_max = -1;
-        this->time_max      = -1.0;
+        this->iteration_max =
+            option::GeneralOptionConstant::DEFAULT_ITERATION_MAX;
+        this->time_max = option::GeneralOptionConstant::DEFAULT_TIME_MAX;
         this->number_of_threads =
             PBCompetition2025SolverArgparserConstant::DEFAULT_NUMBER_OF_THREADS;
         this->seed = option::GeneralOptionConstant::DEFAULT_SEED;
@@ -65,21 +66,23 @@ struct PBCompetition2025SolverArgparser {
         std::cout << std::endl;
         std::cout  //
             << "  -k ITERATION_MAX: Specify the allowed maximum number of "
-               "outer loop iterations. (default: -1, unlimited)"
-            << std::endl;
+               "outer loop iterations. (default: "
+            << option::GeneralOptionConstant::DEFAULT_ITERATION_MAX
+            << "; negative value indicates no limit)" << std::endl;
         std::cout  //
-            << "  -t TIME_MAX: Specity the allowed maximum computational "
+            << "  -t TIME_MAX: Specify the allowed maximum computational "
                "time for optimization calculation (specified in seconds). "
-               "(default: -1.0, unlimited)"
-            << std::endl;
+               "(default: "
+            << option::GeneralOptionConstant::DEFAULT_TIME_MAX
+            << "; negative value indicates no limit)" << std::endl;
         std::cout  //
-            << "  -j NUMBER_OF_THREADS: Specity the number of threads for "
+            << "  -j NUMBER_OF_THREADS: Specify the number of threads for "
                "parallelization. (default: "
             << PBCompetition2025SolverArgparserConstant::
                    DEFAULT_NUMBER_OF_THREADS
             << ", maximum value avaiable)" << std::endl;
         std::cout  //
-            << "  -r SEED: Specity the random seed. (default: "
+            << "  -r SEED: Specify the random seed. (default: "
             << option::GeneralOptionConstant::DEFAULT_SEED << ")" << std::endl;
     }
 
