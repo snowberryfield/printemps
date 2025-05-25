@@ -108,9 +108,6 @@ class PBCompetition2025Solver {
         m_model.initialize();
         m_option.initialize();
         m_time_keeper.initialize();
-
-        m_option.general.iteration_max = -1;
-        m_option.general.time_max      = -1.0;
     }
 
     /*************************************************************************/

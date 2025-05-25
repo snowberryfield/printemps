@@ -148,26 +148,27 @@ struct OPBSolverArgparser {
         std::cout  //
             << "  -k ITERATION_MAX: Specify the allowed maximum number of "
                "outer loop iterations. (default: "
-            << option::GeneralOptionConstant::DEFAULT_ITERATION_MAX << ")"
-            << std::endl;
+            << option::GeneralOptionConstant::DEFAULT_ITERATION_MAX
+            << "; negative value indicates no limit)" << std::endl;
         std::cout  //
-            << "  -t TIME_MAX: Specity the allowed maximum computational time "
-               "for optimization calculation (specified in seconds). (default: "
-            << option::GeneralOptionConstant::DEFAULT_TIME_MAX << ")"
-            << std::endl;
+            << "  -t TIME_MAX: Specify the allowed maximum computational "
+               "time for optimization calculation (specified in seconds). "
+               "(default: "
+            << option::GeneralOptionConstant::DEFAULT_TIME_MAX
+            << "; negative value indicates no limit)" << std::endl;
         std::cout  //
-            << "  -v VERBOSE: Specity the log level of standard output (Off, "
+            << "  -v VERBOSE: Specify the log level of standard output (Off, "
                "Warning, Outer, Inner, or Full). (default: "
             << option::verbose::VerboseInverseMap.at(
                    option::OutputOptionConstant::DEFAULT_VERBOSE)
             << ")" << std::endl;
         std::cout  //
-            << "  -j NUMBER_OF_THREADS: Specity the number of threads for "
+            << "  -j NUMBER_OF_THREADS: Specify the number of threads for "
                "parallelization. (default: "
             << OPBSolverArgparserConstant::DEFAULT_NUMBER_OF_THREADS
             << ", maximum value avaiable)" << std::endl;
         std::cout  //
-            << "  -r SEED: Specity the random seed. (default: "
+            << "  -r SEED: Specify the random seed. (default: "
             << option::GeneralOptionConstant::DEFAULT_SEED << ")" << std::endl;
         std::cout  //
             << "  --extract-flippable-variable-pairs: Extract 2-flippable "
