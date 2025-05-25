@@ -507,6 +507,235 @@ TEST_F(TestExpression, hash) {
 }
 
 /*****************************************************************************/
+TEST_F(TestExpression, equal) {
+    auto variable_0 = model_component::Variable<int, double>::create_instance();
+    auto variable_1 = model_component::Variable<int, double>::create_instance();
+    {
+        auto expression_0 =
+            model_component::Expression<int, double>::create_instance();
+        auto expression_1 =
+            model_component::Expression<int, double>::create_instance();
+        expression_0 = variable_0 + variable_1 + 1;
+        expression_1 = variable_0 + variable_1 + 1;
+
+        EXPECT_TRUE(expression_0.equal(expression_1));
+        EXPECT_TRUE(expression_1.equal(expression_0));
+        EXPECT_FALSE(expression_0.not_equal(expression_1));
+        EXPECT_FALSE(expression_1.not_equal(expression_0));
+
+        expression_0.setup_hash();
+        EXPECT_TRUE(expression_0.equal(expression_1));
+        EXPECT_TRUE(expression_1.equal(expression_0));
+        EXPECT_FALSE(expression_0.not_equal(expression_1));
+        EXPECT_FALSE(expression_1.not_equal(expression_0));
+
+        expression_1.setup_hash();
+        EXPECT_TRUE(expression_0.equal(expression_1));
+        EXPECT_TRUE(expression_1.equal(expression_0));
+        EXPECT_FALSE(expression_0.not_equal(expression_1));
+        EXPECT_FALSE(expression_1.not_equal(expression_0));
+    }
+
+    {
+        auto expression_0 =
+            model_component::Expression<int, double>::create_instance();
+        auto expression_1 =
+            model_component::Expression<int, double>::create_instance();
+        expression_0 = variable_0 + variable_1 + 1;
+        expression_1 = variable_0 - variable_1 + 1;
+
+        EXPECT_FALSE(expression_0.equal(expression_1));
+        EXPECT_FALSE(expression_1.equal(expression_0));
+        EXPECT_TRUE(expression_0.not_equal(expression_1));
+        EXPECT_TRUE(expression_1.not_equal(expression_0));
+
+        expression_0.setup_hash();
+        EXPECT_FALSE(expression_0.equal(expression_1));
+        EXPECT_FALSE(expression_1.equal(expression_0));
+        EXPECT_TRUE(expression_0.not_equal(expression_1));
+        EXPECT_TRUE(expression_1.not_equal(expression_0));
+
+        expression_1.setup_hash();
+        EXPECT_FALSE(expression_0.equal(expression_1));
+        EXPECT_FALSE(expression_1.equal(expression_0));
+        EXPECT_TRUE(expression_0.not_equal(expression_1));
+        EXPECT_TRUE(expression_1.not_equal(expression_0));
+    }
+
+    {
+        auto expression_0 =
+            model_component::Expression<int, double>::create_instance();
+        auto expression_1 =
+            model_component::Expression<int, double>::create_instance();
+        expression_0 = variable_0 + variable_1 + 1;
+        expression_1 = variable_0 + variable_1 - 1;
+
+        EXPECT_FALSE(expression_0.equal(expression_1));
+        EXPECT_FALSE(expression_1.equal(expression_0));
+        EXPECT_TRUE(expression_0.not_equal(expression_1));
+        EXPECT_TRUE(expression_1.not_equal(expression_0));
+
+        expression_0.setup_hash();
+        EXPECT_FALSE(expression_0.equal(expression_1));
+        EXPECT_FALSE(expression_1.equal(expression_0));
+        EXPECT_TRUE(expression_0.not_equal(expression_1));
+        EXPECT_TRUE(expression_1.not_equal(expression_0));
+
+        expression_1.setup_hash();
+        EXPECT_FALSE(expression_0.equal(expression_1));
+        EXPECT_FALSE(expression_1.equal(expression_0));
+        EXPECT_TRUE(expression_0.not_equal(expression_1));
+        EXPECT_TRUE(expression_1.not_equal(expression_0));
+    }
+
+    {
+        auto expression_0 =
+            model_component::Expression<int, double>::create_instance();
+        auto expression_1 =
+            model_component::Expression<int, double>::create_instance();
+        expression_0 = 2 * variable_0 + variable_1 + 1;
+        expression_1 = variable_0 + variable_1 + 1;
+
+        EXPECT_FALSE(expression_0.equal(expression_1));
+        EXPECT_FALSE(expression_1.equal(expression_0));
+        EXPECT_TRUE(expression_0.not_equal(expression_1));
+        EXPECT_TRUE(expression_1.not_equal(expression_0));
+
+        expression_0.setup_hash();
+        EXPECT_FALSE(expression_0.equal(expression_1));
+        EXPECT_FALSE(expression_1.equal(expression_0));
+        EXPECT_TRUE(expression_0.not_equal(expression_1));
+        EXPECT_TRUE(expression_1.not_equal(expression_0));
+
+        expression_1.setup_hash();
+        EXPECT_FALSE(expression_0.equal(expression_1));
+        EXPECT_FALSE(expression_1.equal(expression_0));
+        EXPECT_TRUE(expression_0.not_equal(expression_1));
+        EXPECT_TRUE(expression_1.not_equal(expression_0));
+    }
+}
+
+/*****************************************************************************/
+TEST_F(TestExpression, not_equal) {
+    /// This method is tested in equal().
+}
+
+/*****************************************************************************/
+TEST_F(TestExpression, is_integer) {
+    auto variable_0 = model_component::Variable<int, double>::create_instance();
+    auto variable_1 = model_component::Variable<int, double>::create_instance();
+    {
+        auto expression =
+            model_component::Expression<int, double>::create_instance();
+        expression = variable_0 + variable_1 + 1;
+
+        EXPECT_TRUE(expression.is_integer());
+    }
+
+    {
+        auto expression =
+            model_component::Expression<int, double>::create_instance();
+        expression = 2 * variable_0 - 3 * variable_1 + 1;
+
+        EXPECT_TRUE(expression.is_integer());
+    }
+
+    {
+        auto expression =
+            model_component::Expression<int, double>::create_instance();
+        expression = variable_0 + variable_1 + 1.1;
+
+        EXPECT_FALSE(expression.is_integer());
+    }
+
+    {
+        auto expression =
+            model_component::Expression<int, double>::create_instance();
+        expression = 1.1 * variable_0 + variable_1;
+
+        EXPECT_FALSE(expression.is_integer());
+    }
+}
+
+/*****************************************************************************/
+TEST_F(TestExpression, max_abs_coefficient) {
+    auto variable_0 = model_component::Variable<int, double>::create_instance();
+    auto variable_1 = model_component::Variable<int, double>::create_instance();
+    {
+        auto expression =
+            model_component::Expression<int, double>::create_instance();
+        expression = -10 * variable_0 + 20 * variable_1 + 30;
+
+        EXPECT_FLOAT_EQ(20, expression.max_abs_coefficient());
+    }
+
+    {
+        auto expression =
+            model_component::Expression<int, double>::create_instance();
+        expression = 10 * variable_0 - 20 * variable_1 + 30;
+
+        EXPECT_FLOAT_EQ(20, expression.max_abs_coefficient());
+    }
+}
+
+/*****************************************************************************/
+TEST_F(TestExpression, has_only_binary_coefficient) {
+    auto variable_0 = model_component::Variable<int, double>::create_instance();
+    auto variable_1 = model_component::Variable<int, double>::create_instance();
+    {
+        auto expression =
+            model_component::Expression<int, double>::create_instance();
+        expression = variable_0 + variable_1 + 10;
+
+        EXPECT_TRUE(expression.has_only_binary_coefficient());
+    }
+
+    {
+        auto expression =
+            model_component::Expression<int, double>::create_instance();
+        expression = 1.0 * variable_0 + 1.0 * variable_1 + 10;
+
+        EXPECT_TRUE(expression.has_only_binary_coefficient());
+    }
+
+    {
+        auto expression =
+            model_component::Expression<int, double>::create_instance();
+        expression = -1.0 * variable_0 + variable_1 + 10;
+
+        EXPECT_FALSE(expression.has_only_binary_coefficient());
+    }
+}
+
+/*****************************************************************************/
+TEST_F(TestExpression, has_only_binary_variable) {
+    auto variable_0 = model_component::Variable<int, double>::create_instance();
+    auto variable_1 = model_component::Variable<int, double>::create_instance();
+    variable_0.set_bound(0, 1);
+    variable_1.set_bound(0, 1);
+
+    auto variable_2 = model_component::Variable<int, double>::create_instance();
+    auto variable_3 = model_component::Variable<int, double>::create_instance();
+    variable_2.set_bound(0, 10);
+    variable_3.set_bound(0, 10);
+    {
+        auto expression =
+            model_component::Expression<int, double>::create_instance();
+        expression = 2 * variable_0 - 3 * variable_1 + 10;
+
+        EXPECT_TRUE(expression.has_only_binary_variable());
+    }
+
+    {
+        auto expression =
+            model_component::Expression<int, double>::create_instance();
+        expression = 2 * variable_2 - 3 * variable_3 + 10;
+
+        EXPECT_FALSE(expression.has_only_binary_variable());
+    }
+}
+
+/*****************************************************************************/
 TEST_F(TestExpression, operator_plus) {
     auto expression =
         model_component::Expression<int, double>::create_instance();
