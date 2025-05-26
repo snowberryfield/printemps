@@ -102,6 +102,7 @@ struct PBCompetition2025SolverArgparser {
             } else if (args[i] == "-j") {
                 this->number_of_threads              = std::stoi(args[i + 1]);
                 this->is_specified_number_of_threads = true;
+                i += 2;
             } else if (args[i] == "-r") {
                 this->seed = static_cast<int32_t>(
                     static_cast<uint32_t>(std::stol(args[i + 1])));
