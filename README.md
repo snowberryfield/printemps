@@ -1,7 +1,7 @@
 # PRINTEMPS
 ![GitHub Actions](https://github.com/snowberryfield/printemps/workflows/GitHub%20Actions/badge.svg) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-__PRINTEMPS__ is a C++ metaheuristics modeler/solver library for general integer linear optimization problems. PRINTEMPS emphasizes the following aspects:
+__PRINTEMPS__(PoRtable INTEger Mathematical Programming Solver) is a C++ metaheuristics modeler/solver library for general integer linear optimization problems. PRINTEMPS emphasizes the following aspects:
 - __Portability.__ It is implemented as a header-only library which does not depend on any other proprietary or open-source libraries. Users can integrate it into their own codes by just copying the necessary files. 
 
 - __Intuitiveness in modeling.__ It provides an intuitive modeling environment to define an optimization model as a program code. Users can define constraint and objective functions using arithmetic operations on decision variables.
