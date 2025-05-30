@@ -8,7 +8,7 @@ layout: default
 
 
 ## Abstract
-__PRINTEMPS__ is a C++ metaheuristics modeler/solver library for general linear integer optimization problems. PRINTEMPS emphasizes the following aspects:
+__PRINTEMPS__ (PoRtable INTEger Mathematical Programming Solver)  is a C++ metaheuristics modeler/solver library for general linear integer optimization problems. PRINTEMPS emphasizes the following aspects:
 - __Portability.__ It is implemented as a header-only library which does not depend on any other proprietary or open-source libraries. Users can integrate it into their own codes by just copying the necessary files. 
 
 - __Intuitiveness in modeling.__ It provides an intuitive modeling environment to define an optimization model as a program code. Users can define constraint and objective functions using arithmetic operations on decision variables.
@@ -18,7 +18,7 @@ __PRINTEMPS__ is a C++ metaheuristics modeler/solver library for general linear 
 ## News
 |     Date      | Update                                                                                            |
 |:-------------:|:--------------------------------------------------------------------------------------------------|
-| Jan. 12, 2025 | [PRINTEMPS v2.6.0](https://github.com/snowberryfield/printemps/releases/tag/v2.6.0) was released. |
+| May. 30, 2025 | [PRINTEMPS v2.7.0](https://github.com/snowberryfield/printemps/releases/tag/v2.7.0) was released. |
 | Feb. 8, 2024 | [Tabu Search-Based Heuristic Solver for General Integer Linear Programming Problems](https://ieeexplore.ieee.org/document/10418217), a paper on PRINTEMPS, has been published in IEEE Access. |
 
 ## Algorithm
