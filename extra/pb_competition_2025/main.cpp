@@ -6,13 +6,21 @@
 #include <printemps.h>
 #include "pb_competition_2025_solver.h"
 
+static void print_comment_lines(const char *msg) {
+    std::istringstream iss(msg);
+    std::string line;
+    while (std::getline(iss, line)) {
+        std::cout << "c " << line << std::endl;
+    }
+}
+
 int main(const int argc, const char *argv[]) {
     try {
         printemps::extra::pb_competition_2025::PBCompetition2025Solver(argc,
                                                                        argv)
             .run();
     } catch (const std::exception &e) {
-        std::cout << "c Unsupported file format or missing file." << std::endl;
+        print_comment_lines(e.what());
         std::cout << "s UNSUPPORTED" << std::endl;
     }
     return 0;
