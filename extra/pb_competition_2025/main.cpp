@@ -19,6 +19,9 @@ int main(const int argc, const char *argv[]) {
         printemps::extra::pb_competition_2025::PBCompetition2025Solver(argc,
                                                                        argv)
             .run();
+    } catch (const printemps::model::InfeasibleError &e) {
+        print_comment_lines(e.what());
+        std::cout << "s UNSATISFIABLE" << std::endl;
     } catch (const std::exception &e) {
         print_comment_lines(e.what());
         std::cout << "s UNSUPPORTED" << std::endl;
