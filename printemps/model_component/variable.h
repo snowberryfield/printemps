@@ -52,6 +52,14 @@ struct VariableExtension {
 };
 
 /*****************************************************************************/
+
+class InfeasibleError : public std::runtime_error {
+public:
+    explicit InfeasibleError(const std::string& msg)
+        : std::runtime_error(msg) {}
+};
+
+/*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class Variable : public multi_array::AbstractMultiArrayElement {
     /**
@@ -211,7 +219,7 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     inline void set_bound(const T_Variable a_LOWER_BOUND,
                           const T_Variable a_UPPER_BOUND) {
         if (a_LOWER_BOUND > a_UPPER_BOUND) {
-            throw std::runtime_error(utility::format_error_location(
+            throw InfeasibleError(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The specified lower bound is bigger than the specified upper "
                 "bound. lower bound: " +
