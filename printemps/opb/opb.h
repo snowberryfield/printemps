@@ -220,7 +220,7 @@ struct OPB {
                 }
             } else if (token == "sumcost=") {
                 if (stream >> token) {
-                    metadata.sumcost = std::stoi(token);
+                    metadata.sumcost = std::stoll(token);
                 } else {
                     is_valid = false;
                 }
