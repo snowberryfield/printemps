@@ -11,7 +11,7 @@ layout: sub
     - [Decision Variable](#decision-variable)
         - [Creating Decision Variables](#creating-decision-variables)
         - [Setting Lower and Upper Bounds for Decision Variables](#setting-lower-and-upper-bounds-for-decision-variables)
-        - [Setting Initial values for Decision Variables](#setting-initial-values-for-decision-variables)
+        - [Setting Initial Values for Decision Variables](#setting-initial-values-for-decision-variables)
         - [Fixing Decision Variable Values](#fixing-decision-variable-values)
     - [Expression](#expression)
         - [Creating Expression](#creating-expression)
@@ -22,7 +22,7 @@ layout: sub
     - [Objective Function](#objective-function)
     - [Special Methods for Practical Modeling](#special-methods-for-practical-modeling)
         - [Sum of Indexed Components](#sum-of-indexed-components)
-        - [Innder Product](#innder-product)
+        - [Inner Product](#inner-product)
         - [Selection Constraint](#selection-constraint)
 - [Optimization](#optimization)
 - [Accessing the Result](#accessing-the-result)
@@ -44,7 +44,7 @@ __The flow-chart of the optimization algorithm of PRINTEMPS.__
 
 Let us consider a simple linear integer optimization problem [3]:
 ```
-(P1):  minimize       x_1 + 10 x_2
+(P):   minimize       x_1 + 10 x_2
           x
       subject to   66 x_1 + 14 x_2 >= 1430,
                   -82 x_1 + 28 x_2 >= 1306,
@@ -130,7 +130,7 @@ f_1 = 2 * x_1 + 7 * x_2 + 9 * x_3 + 1;
 f_2 = 5 * y_1 + 6 * y_2;
 
 // Define constraints.
-g_1 = x_1 + x_2 + x_3 >= 1;
+g_1 = x_1 + x_2 + x_3 >= 2;
 g_2 = y_1 + y_2 == 1;
 g_3 = x_1 + y_1 == 1;
 
@@ -151,7 +151,7 @@ printemps::model::IPModel model;
 
 // Create indexed binary decision variables x(0), x(1), x(2), y(0), y(1).
 auto& x = model.create_variables("x", 3, 0, 1);
-auto& y = model.create_constraints("y", 2);
+auto& y = model.create_variables("y", 2);
 
 // Create indexed expressions f(0), f(1).
 auto& f = model.create_expressions("f", 2);
@@ -164,7 +164,7 @@ f(0) = 2 * x(0) + 7 * x(1) + 9 * x(2) + 1;
 f(1) = 5 * y(0) + 6 * y(1);
 
 // Define constraints.
-g(0) = x(0) + x(1) + x(2) >= 1;
+g(0) = x(0) + x(1) + x(2) >= 2;
 g(1) = y(0) + y(1) == 1;
 g(2) = x(0) + y(0) == 1;
 
@@ -174,7 +174,7 @@ model.minimize(f(0) + f(1));
 
 In addition, following special methods are provided to define a problem simply:
 - The method `sum()` to express a sum of decision variables or expressions.
-- The method `dot()` to express a inner product of coefficients and decision variables.
+- The method `dot()` to express an inner product of coefficients and decision variables.
 - The method `selection()` to express a selection constraint that just one component takes value 1 in indexed decision variables.
 
 With these methods, the problem (P2) can be simplified as follows:
@@ -242,7 +242,7 @@ Each variable can be accessed by like as `w(0, 0)`.
 As optional, lower and upper bounds can be set through the arguments `lb` and `ub`, respectively, and they will be commonly set for all variables. 
 
 #### Setting Lower and Upper Bounds for Decision Variables
-The lower and upper bounds of a decision variable can be specified after creation of the decision variable by the method `set_bounds(lb, ub)`. 
+The lower and upper bounds of a decision variable can be specified after creation of the decision variable by the method `set_bound(lb, ub)`. 
 In the following code, the lower and upper bounds of `x(1)` to `x(9)` are commonly set as `-5` and `5`, respectively, while those of `x(0)` are set as `0` and `20`, respectively.
 
 ```c++
@@ -256,7 +256,7 @@ auto& x = model.create_variables("x", 10, -5, 5);
 x(0).set_bound(0, 20);
 ```
 
-#### Setting Initial values for Decision Variables
+#### Setting Initial Values for Decision Variables
 The default initial value of decision variable is `0`. 
 Users can specify initial values by the operator `=`, and the current value of the decision variable can be accessed by the method `value()`. In the following code, the initial value for `x(0)` is set as `1`, while as those of `x(1)` to `x(9)` are still `0`.
 
@@ -289,7 +289,7 @@ auto& x = model.create_variables("x", 10);
 x(0).fix_by(1);
 ```
 
-There are some other method related to the fixing. 
+There are some other methods related to fixing. 
 The method `unfix()` cancels the fixing, and the method `set_value_if_not_fixed(value)` tries to override the value of the decision variable if it is not fixed. 
 If the decision variable is fixed, initialization by the operator `=` discussed above will throw an error. 
 Users can check whether the decision variable is fixed or not by the method `is_fixed()`, which returns true if and only if the decision variable is fixed. 
@@ -322,10 +322,10 @@ As optional, the created expression can be directly defined by  `expression`.
 
 The methods `create_expressions(name, n)` creates `n` expressions named `name` with one-dimensional index. Each expression can be accessed by like as `r(0)`.
 
-The `create_expressions("name", {n_1, ..., n_m})` method creates `n_1 * ... * n_m` expressions named `name` with `m`-dimensional index. Each constraint can be accessed by like as `s(0, 0)`.
+The `create_expressions("name", {n_1, ..., n_m})` method creates `n_1 * ... * n_m` expressions named `name` with `m`-dimensional index. Each expression can be accessed as `s(0, 0)`.
 
 #### Defining Expression
-An expression can be defined as a first-order functions on decision variables and other expressions.
+An expression can be defined as a first-order function on decision variables and other expressions.
 The following code shows examples of expression definitions.
 
 ```c++
@@ -345,7 +345,7 @@ p       = 2 * x + 3 * y + 4;
 
 // OK. A decision variable itself can be accepted as an expression.
 auto &q = model.create_expression("q");
-p       = x;
+q       = x;
 
 // OK. A numerical constant can be accepted as an expression.
 auto &r = model.create_expression("r");
@@ -365,12 +365,12 @@ t(0) = x + 3 * (y * z(0));
 // OK. A first-order function on expressions can be accepted as an expression.
 t(1) = 5 * s(0) + 6 * s(1) + 6;
 
-auto &t = model.create_expression("u");
-// NG. Multiplication and division which produce nonlinear terms are not
+auto &u = model.create_expression("u");
+// Invalid. Multiplication and division which produce nonlinear terms are not
 // possible. 
 // u = x * x + x / y;
 
-// NG. Nonlinear function is not possible.
+// Invalid. Nonlinear function is not possible.
 // u = sin(x);
 ```
 
@@ -385,16 +385,16 @@ auto& x = model.create_variable("x");
 auto& y = model.create_variable("y");
 
 // Create scalar (no-indexed) constraint g.
-auto& g = model.create_expression("p");
+auto& g = model.create_constraint("g");
 
 // Create scalar (no-indexed) constraint h by given constraint x + y = 1.
-auto& h = model.create_expression("h", x + y == 1);
+auto& h = model.create_constraint("h", x + y == 1);
 
-// Create one-dimensional constraints u(0), ..., r(9).
-auto& u = model.create_expressions("u", 10);
+// Create one-dimensional constraints u(0), ..., u(9).
+auto& u = model.create_constraints("u", 10);
 
 // Create two-dimensional constraints v(0,0), ..., v(19, 29).
-auto& v = model.create_expressions("v", {20, 30});
+auto& v = model.create_constraints("v", {20, 30});
 ```
 
 The methods `create_constraint(name)` and `create_constraint(name, constraint)` create scalar (no-indexed) constraint named `name`. 
@@ -421,16 +421,16 @@ auto& z = model.create_variables("z", {10, 10});
 auto& p = model.create_expression("p", x + y);
 
 // Create and define constraints.
-auto& g = model.create_expression("g");
-g       = (2 * x + 3 * y + 5<= 10); // OK
+auto& g = model.create_constraint("g");
+g       = (2 * x + 3 * y + 5 <= 10); // OK
 
-auto& h = model.create_expression("h", p >= 7 + 2); // OK
+auto& h = model.create_constraint("h", p >= 7 + 2); // OK
 
-auto& u = model.create_expression("u");
-// NG. Both sides are constants.
+auto& u = model.create_constraint("u");
+// Invalid. Both sides are constants.
 // u = 4 <= 5;
 
-auto& v = model.create_expressions("v", 10);
+auto& v = model.create_constraints("v", 10);
 for (auto i = 0; i < 10; i++) {
     // OK. This code is identical to the following code:
     // u(i) = z.sum({i, printemps::model_component::All}) == 1;
@@ -463,7 +463,7 @@ model.maximize(p);
 // OK. A formula to define an expression can also be the objective function.
 model.minimize(5 * x - 6 * y + 7);
 
-// NG. The arguments of minimize() and maximize() must not be a constant.
+// Invalid. The arguments of minimize() and maximize() must not be a constant.
 // model.maximize(5);
 ```
 
@@ -534,7 +534,7 @@ for (auto i = 0; i < 10; i++) {
 }
 ```
 
-#### Innder Product 
+#### Inner Product 
 The method `dot()` gives an expression of an inner product between indexed variables or expressions and a numerical array with the same number of components.
 The code
 
@@ -588,7 +588,7 @@ auto& p = model.create_expressions("p", 10);
 //    }
 // }
 for (auto i = 0; i < 10; i++) {
-    p[i] = x.dot(a, {i, printemps::model_component::All});
+    p(i) = x.dot(a, {i, printemps::model_component::All});
 }
 
 auto& q = model.create_expressions("q", 10);
@@ -599,11 +599,11 @@ auto& q = model.create_expressions("q", 10);
 //    }
 // }
 for (auto i = 0; i < 10; i++) {
-    q[i] = x.dot(a, {printemps::model_component::All, i});
+    q(i) = x.dot(a, {printemps::model_component::All, i});
 }
 
 auto& r = model.create_expressions("r", 10);
-// NG. The number of indices for summation must be one.
+// Invalid. The number of indices for summation must be one.
 // for(auto i=0; i<10; i++){
 //     r[i] = x.dot(a, {printemps::model_component::All, printemps::model_component::All});
 // }
@@ -654,7 +654,7 @@ auto& x = model.create_variables("x", {10, 20}, 0, 1);
 auto& g = model.create_constraints("g", 10);
 
 for (auto i = 0; i < 10; i++) {
-    g(i) += x.selection({i, printemps::model_component::All});
+    g(i) = x.selection({i, printemps::model_component::All});
 }
 ```
 
@@ -663,8 +663,8 @@ is identical to the following code:
 ```c++
 printemps::model::IPModel model;
 
-// Create binary decision variables.
 auto& x = model.create_variables("x", {10, 20}, 0, 1);
+auto& g = model.create_constraints("g", 10);
 
 // Create and define an expression for temporary.
 auto& p = model.create_expressions("p", 10);
@@ -676,9 +676,7 @@ for (auto i = 0; i < 10; i++) {
 
 // Create and define constraints.
 for (auto i = 0; i < 10; i++) {
-    for (auto j = 0; j < 20; j++) {
-        g(i) += (p(i) == 1);
-    }
+    g(i) = (p(i) == 1);
 }
 ```
 
@@ -750,7 +748,7 @@ For accessing the result, the following methods are provided by the member `solu
     -  The method `objective()` returns the objective function value of the final best solution.                                                                            
         
 - __Methods for accessing the values of decision variables:__ 
-    - The method `variables(name).value()`  returns the value of the scalar (no-indexed) decision variable named `name` in the final best solution. The string `name` must correspond to the name given in the declaration; it also applies to expressions and constraints which are described below.
+    - The method `variables(name).value()` returns the value of the scalar (no-indexed) decision variable named `name` in the final best solution. The string `name` must correspond to the name given in the declaration.
   
     - The method `variables(name).values(n_1, ..., n_m)` returns the value of the component indexed by `n_1, ..., n_m` of the multi-dimensional indexed decision variable named `name` in the final best solution.
 
@@ -759,7 +757,7 @@ For accessing the result, the following methods are provided by the member `solu
     - The method `expressions(name).values(n_1, ..., n_m)` returns the value of the component indexed by `n_1, ..., n_m` of the multi-dimensional indexed expression named `name` in the final solution.
 
 - __Methods for accessing the values and violations of constraints:__
-    - The methods `constraints(name).value()` returns the value of the scalar constraint named `name` in the final solution. The value obtained by this method is the left side when the constraint is expressed as `g(x) <=(=,>=) 0`.
+    - The method `constraints(name).value()` returns the value of the scalar constraint named `name` in the final solution. The value obtained by this method is the left-hand side of the constraint when it is written in the form `g(x) <= 0`, `g(x) == 0`, or `g(x) >= 0`.
     - The method `constraints(name).values(n_1, ..., n_m)`  returns the value of the component indexed by `n_1, ..., n_m` of the multi-dimensional indexed constraint named `name` in the final solution.
     - The method `violations(name).value()` method returns the violation for the scalar (no-indexed) constraint named `name` in the final solution. The value of the violation is non-negative.
     - The method `violations(name).values(n_1, ..., n_m)` method returns the violation for the component indexed by `n_1, ..., n_m` of the multi-dimensional indexed constraint named `name` in the final solution.
