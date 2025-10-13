@@ -116,6 +116,15 @@ inline std::string remove_extension(const std::string &a_ORIGINAL) {
 }
 
 /*****************************************************************************/
+inline std::string extract_extension(const std::string &a_ORIGINAL) {
+    auto position = a_ORIGINAL.find_last_of('.');
+    if (position == std::string::npos || position == a_ORIGINAL.size() - 1) {
+        return "";
+    }
+    return a_ORIGINAL.substr(position + 1);
+}
+
+/*****************************************************************************/
 inline std::string remove_path(const std::string &a_ORIGINAL) {
     auto position = a_ORIGINAL.find_last_of("/\\");
     return a_ORIGINAL.substr(position + 1);
