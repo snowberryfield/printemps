@@ -457,9 +457,6 @@ struct MPS {
 
     /*************************************************************************/
     inline void read_mps(const std::string &a_FILE_NAME) {
-        utility::TimeKeeper time_keeper;
-        time_keeper.set_start_time();
-
         std::ifstream ifs(a_FILE_NAME, std::ios::binary | std::ios::in);
         if (!ifs) {
             throw std::runtime_error(utility::format_error_location(
@@ -622,11 +619,6 @@ struct MPS {
                 variable.second.integer_upper_bound = 1;
             }
         }
-
-        time_keeper.clock();
-
-        std::cout << "MPS file reading time: " << time_keeper.elapsed_time()
-                  << " seconds." << std::endl;
     }
 };
 }  // namespace printemps::mps
