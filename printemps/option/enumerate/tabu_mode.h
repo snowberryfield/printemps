@@ -16,8 +16,7 @@ enum TabuMode : int {
 /*****************************************************************************/
 static std::unordered_map<std::string, TabuMode> TabuModeMap = {
     {"All", TabuMode::All},  //
-    {"Any", TabuMode::Any}   //
-};
+    {"Any", TabuMode::Any}};
 
 /*****************************************************************************/
 static std::unordered_map<TabuMode, std::string> TabuModeInverseMap = {

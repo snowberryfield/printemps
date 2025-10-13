@@ -135,6 +135,68 @@ inline std::string bold(const std::string &a_ORIGINAL) {
 #endif
 }
 
+/*****************************************************************************/
+inline bool is_space_or_tab(unsigned char c) noexcept {
+    constexpr uint64_t MASK = (1ull << ' ') | (1ull << '\t');
+    return c < 64 && (MASK & (1ull << c));
+}
+
+/*****************************************************************************/
+inline void split_items(const std::string_view        &a_LINE_SV,
+                        std::vector<std::string_view> *a_items_ptr) noexcept {
+    a_items_ptr->clear();
+
+    const char *data   = a_LINE_SV.data();
+    std::size_t LENGTH = a_LINE_SV.size();
+    std::size_t start  = 0;
+    std::size_t end    = 0;
+
+    while (start < LENGTH) {
+        while (
+            start < LENGTH &&  //
+            utility::is_space_or_tab(static_cast<unsigned char>(data[start]))) {
+            start++;
+        }
+        if (start >= LENGTH)
+            break;
+
+        end = start;
+        while (
+            end < LENGTH &&  //
+            !utility::is_space_or_tab(static_cast<unsigned char>(data[end]))) {
+            end++;
+        }
+
+        a_items_ptr->emplace_back(data + start, end - start);
+        start = end;
+    }
+}
+
+/******************************************************************************/
+template <typename T>
+inline std::string to_uppercase(const T &a_STRING_LIKE) {
+    static_assert(
+        std::is_same_v<T, std::string> || std::is_same_v<T, std::string_view>,
+        "T must be std::string or std::string_view");
+
+    std::string result(a_STRING_LIKE);
+    std::transform(result.begin(), result.end(), result.begin(),
+                   [](unsigned char c) { return std::toupper(c); });
+    return result;
+}
+
+/******************************************************************************/
+template <typename T>
+inline std::string to_lowercase(const T &a_STRING_LIKE) {
+    static_assert(
+        std::is_same_v<T, std::string> || std::is_same_v<T, std::string_view>,
+        "T must be std::string or std::string_view");
+
+    std::string result(a_STRING_LIKE);
+    std::transform(result.begin(), result.end(), result.begin(),
+                   [](unsigned char c) { return std::tolower(c); });
+    return result;
+}
 }  // namespace printemps::utility
 
 /******************************************************************************/

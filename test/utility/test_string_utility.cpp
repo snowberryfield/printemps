@@ -91,6 +91,66 @@ TEST_F(TestStringUtility, base_name) {
     EXPECT_EQ("hogehoge", utility::base_name("path\\to\\hogehoge"));
     EXPECT_EQ("hogehoge", utility::base_name("path\\to\\hogehoge.txt"));
 }
+
+/*****************************************************************************/
+TEST_F(TestStringUtility, is_space_or_tab) {
+    EXPECT_TRUE(utility::is_space_or_tab(' '));
+    EXPECT_TRUE(utility::is_space_or_tab('\t'));
+    EXPECT_FALSE(utility::is_space_or_tab('a'));
+    EXPECT_FALSE(utility::is_space_or_tab('1'));
+    EXPECT_FALSE(utility::is_space_or_tab('\n'));
+    EXPECT_FALSE(utility::is_space_or_tab('\r'));
+}
+
+/*****************************************************************************/
+TEST_F(TestStringUtility, split_items) {
+    std::vector<std::string_view> items;
+
+    utility::split_items("  hoge   hoge  ", &items);
+    EXPECT_EQ(2, static_cast<int>(items.size()));
+    EXPECT_EQ("hoge", items[0]);
+    EXPECT_EQ("hoge", items[1]);
+
+    utility::split_items("  hoge   hoge   hoge  ", &items);
+    EXPECT_EQ(3, static_cast<int>(items.size()));
+    EXPECT_EQ("hoge", items[0]);
+    EXPECT_EQ("hoge", items[1]);
+    EXPECT_EQ("hoge", items[2]);
+
+    utility::split_items("  hoge   hoge   hoge   hoge  ", &items);
+    EXPECT_EQ(4, static_cast<int>(items.size()));
+    EXPECT_EQ("hoge", items[0]);
+    EXPECT_EQ("hoge", items[1]);
+    EXPECT_EQ("hoge", items[2]);
+    EXPECT_EQ("hoge", items[3]);
+
+    utility::split_items("hoge", &items);
+    EXPECT_EQ(1, static_cast<int>(items.size()));
+    EXPECT_EQ("hoge", items[0]);
+
+    utility::split_items("   ", &items);
+    EXPECT_EQ(0, static_cast<int>(items.size()));
+
+    utility::split_items("", &items);
+    EXPECT_EQ(0, static_cast<int>(items.size()));
+}
+
+/*****************************************************************************/
+TEST_F(TestStringUtility, to_uppercase) {
+    EXPECT_EQ("HOGEHOGE", utility::to_uppercase(std::string("hogehoge")));
+    EXPECT_EQ("HOGEHOGE", utility::to_uppercase(std::string("HOGEHOGE")));
+    EXPECT_EQ("HOGEHOGE", utility::to_uppercase(std::string("HoGeHoGe")));
+    EXPECT_EQ("1234!@#$", utility::to_uppercase(std::string("1234!@#$")));
+}
+
+/*****************************************************************************/
+TEST_F(TestStringUtility, to_lowercase) {
+    EXPECT_EQ("hogehoge", utility::to_lowercase(std::string("hogehoge")));
+    EXPECT_EQ("hogehoge", utility::to_lowercase(std::string("HOGEHOGE")));
+    EXPECT_EQ("hogehoge", utility::to_lowercase(std::string("HoGeHoGe")));
+    EXPECT_EQ("1234!@#$", utility::to_lowercase(std::string("1234!@#$")));
+}
+
 }  // namespace
 /*****************************************************************************/
 // END
