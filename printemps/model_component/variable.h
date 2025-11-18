@@ -33,7 +33,7 @@ struct VariableConstant {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 struct VariableExtension {
-    VariableSense                        sense;
+    VariableType                         type;
     double                               lagrangian_coefficient;
     Selection<T_Variable, T_Expression> *selection_ptr;
 
@@ -151,7 +151,7 @@ class Variable : public multi_array::AbstractMultiArrayElement {
         m_global_last_update_iteration = 0;
         m_update_count                 = 0;
 
-        m_extension->sense                  = VariableSense::Integer;
+        m_extension->type                   = VariableType::Integer;
         m_extension->lagrangian_coefficient = 0.0;
         m_extension->selection_ptr          = nullptr;
         m_extension->related_constraint_ptrs.clear();
@@ -232,7 +232,7 @@ class Variable : public multi_array::AbstractMultiArrayElement {
         m_value       = std::min(m_value, m_upper_bound);
         m_value       = std::max(m_value, m_lower_bound);
 
-        this->setup_sense_binary_or_integer();
+        this->setup_type_binary_or_integer();
         this->update_margin();
     }
 
@@ -241,7 +241,7 @@ class Variable : public multi_array::AbstractMultiArrayElement {
         m_lower_bound              = constant::INT_HALF_MIN;
         m_upper_bound              = constant::INT_HALF_MAX;
         m_has_bounds               = false;
-        m_extension->sense         = VariableSense::Integer;
+        m_extension->type          = VariableType::Integer;
         m_extension->selection_ptr = nullptr;
         this->update_margin();
     }
@@ -421,42 +421,42 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline void set_sense(const VariableSense &a_SENSE) noexcept {
-        m_extension->sense = a_SENSE;
+    inline void set_type(const VariableType &a_TYPE) noexcept {
+        m_extension->type = a_TYPE;
     }
 
     /*************************************************************************/
-    inline void setup_sense_binary_or_integer(void) {
+    inline void setup_type_binary_or_integer(void) {
         if ((m_lower_bound == 0 && m_upper_bound == 1) ||
             (m_lower_bound == 0 && m_upper_bound == 0) ||
             (m_lower_bound == 1 && m_upper_bound == 1)) {
-            m_extension->sense = VariableSense::Binary;
+            m_extension->type = VariableType::Binary;
         } else {
-            m_extension->sense = VariableSense::Integer;
+            m_extension->type = VariableType::Integer;
         }
     }
 
     /*************************************************************************/
-    inline VariableSense sense(void) const noexcept {
-        return m_extension->sense;
+    inline VariableType type(void) const noexcept {
+        return m_extension->type;
     }
 
     /*************************************************************************/
-    inline std::string sense_label(void) const noexcept {
-        switch (m_extension->sense) {
-            case VariableSense::Binary: {
+    inline std::string type_label(void) const noexcept {
+        switch (m_extension->type) {
+            case VariableType::Binary: {
                 return "Binary";
             }
-            case VariableSense::Integer: {
+            case VariableType::Integer: {
                 return "Integer";
             }
-            case VariableSense::Selection: {
+            case VariableType::Selection: {
                 return "Selection";
             }
-            case VariableSense::DependentBinary: {
+            case VariableType::DependentBinary: {
                 return "DependentBinary";
             }
-            case VariableSense::DependentInteger: {
+            case VariableType::DependentInteger: {
                 return "DependentInteger";
             }
             default: {
@@ -481,7 +481,7 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     inline void set_selection_ptr(
         Selection<T_Variable, T_Expression> *a_SELECTION) {
         m_extension->selection_ptr = a_SELECTION;
-        m_extension->sense         = VariableSense::Selection;
+        m_extension->type          = VariableType::Selection;
     }
 
     /*************************************************************************/
@@ -590,11 +590,11 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     inline void set_dependent_expression_ptr(
         Expression<T_Variable, T_Expression> *a_expression_ptr) {
         m_extension->dependent_expression_ptr = a_expression_ptr;
-        setup_sense_binary_or_integer();
-        if (m_extension->sense == VariableSense::Binary) {
-            m_extension->sense = VariableSense::DependentBinary;
-        } else if (m_extension->sense == VariableSense::Integer) {
-            m_extension->sense = VariableSense::DependentInteger;
+        setup_type_binary_or_integer();
+        if (m_extension->type == VariableType::Binary) {
+            m_extension->type = VariableType::DependentBinary;
+        } else if (m_extension->type == VariableType::Integer) {
+            m_extension->type = VariableType::DependentInteger;
         } else {
         }
     }
@@ -602,7 +602,7 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     /*************************************************************************/
     inline void reset_dependent_expression_ptr(void) {
         m_extension->dependent_expression_ptr = nullptr;
-        this->setup_sense_binary_or_integer();
+        this->setup_type_binary_or_integer();
     }
 
     /*************************************************************************/

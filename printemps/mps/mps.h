@@ -186,7 +186,7 @@ struct MPS {
 
     /*************************************************************************/
     inline void parse_columns(const std::vector<std::string_view> &a_ITEMS,
-                              MPSVariableSense *a_variable_sense_ptr) {
+                              MPSVariableType *a_variable_type_ptr) {
         const std::size_t ITEMS_SIZE = a_ITEMS.size();
 
         if (ITEMS_SIZE < 3 || (ITEMS_SIZE & 1) == 0) {
@@ -197,10 +197,10 @@ struct MPS {
 
         if (a_ITEMS[2].size() > 0 && a_ITEMS[2].front() == '\'') {
             if (a_ITEMS[2] == "'INTORG'") {
-                *a_variable_sense_ptr = MPSVariableSense::Integer;
+                *a_variable_type_ptr = MPSVariableType::Integer;
                 return;
             } else if (a_ITEMS[2] == "'INTEND'") {
-                *a_variable_sense_ptr = MPSVariableSense::Continuous;
+                *a_variable_type_ptr = MPSVariableType::Continuous;
                 return;
             }
         }
@@ -239,7 +239,7 @@ struct MPS {
         auto [it, inserted] = this->variables.try_emplace(COLUMN_NAME);
         if (inserted) {
             auto &variable = it->second;
-            variable.sense = *a_variable_sense_ptr;
+            variable.type  = *a_variable_type_ptr;
             variable.name  = it->first;
             this->variable_names.emplace_back(it->first);
         }
@@ -352,7 +352,7 @@ struct MPS {
 
         if (inserted) {
             auto &variable = it->second;
-            variable.sense = MPSVariableSense::Continuous;
+            variable.type  = MPSVariableType::Continuous;
             variable.name  = it->first;
             this->variable_names.emplace_back(it->first);
         }
@@ -371,7 +371,7 @@ struct MPS {
                     break;
 
                 case MPSBoundSense::BV:
-                    variable.sense                  = MPSVariableSense::Integer;
+                    variable.type                   = MPSVariableType::Integer;
                     variable.is_bound_defined       = true;
                     variable.integer_lower_bound    = 0;
                     variable.integer_upper_bound    = 1;
@@ -413,7 +413,7 @@ struct MPS {
                     break;
 
                 case MPSBoundSense::LI:
-                    variable.sense                  = MPSVariableSense::Integer;
+                    variable.type                   = MPSVariableType::Integer;
                     variable.is_bound_defined       = true;
                     variable.integer_lower_bound    = INTEGER_VALUE;
                     variable.continuous_lower_bound = CONTINUOUS_VALUE;
@@ -426,7 +426,7 @@ struct MPS {
                     break;
 
                 case MPSBoundSense::UI:
-                    variable.sense                  = MPSVariableSense::Integer;
+                    variable.type                   = MPSVariableType::Integer;
                     variable.is_bound_defined       = true;
                     variable.integer_upper_bound    = INTEGER_VALUE;
                     variable.continuous_upper_bound = CONTINUOUS_VALUE;
@@ -486,8 +486,8 @@ struct MPS {
         this->variable_names.reserve(estimated_lines / 10 + 16);
         this->constraint_names.reserve(estimated_lines / 10 + 16);
 
-        MPSReadMode      read_mode      = MPSReadMode::Initial;
-        MPSVariableSense variable_sense = MPSVariableSense::Continuous;
+        MPSReadMode     read_mode     = MPSReadMode::Initial;
+        MPSVariableType variable_type = MPSVariableType::Continuous;
 
         bool is_valid         = false;
         bool is_read_name     = false;
@@ -584,7 +584,7 @@ struct MPS {
                     break;
                 }
                 case MPSReadMode::Columns: {
-                    this->parse_columns(items, &variable_sense);
+                    this->parse_columns(items, &variable_type);
                     break;
                 }
                 case MPSReadMode::Rhs: {
@@ -613,7 +613,7 @@ struct MPS {
         // default bounds for integer variables
         for (auto &&variable : this->variables) {
             if (!variable.second.is_bound_defined &&
-                variable.second.sense == MPSVariableSense::Integer) {
+                variable.second.type == MPSVariableType::Integer) {
                 variable.second.is_bounded          = true;
                 variable.second.integer_lower_bound = 0;
                 variable.second.integer_upper_bound = 1;

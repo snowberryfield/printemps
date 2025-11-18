@@ -114,8 +114,8 @@ struct Move {
     /*****************************************************************************/
     inline bool has_selection_variable(void) const {
         for (const auto &alteration : this->alterations) {
-            if (alteration.first->sense() ==
-                model_component::VariableSense::Selection) {
+            if (alteration.first->type() ==
+                model_component::VariableType::Selection) {
                 return true;
             }
         }

@@ -6,7 +6,7 @@
 #ifndef PRINTEMPS_MODEL_COMPONENT_MODEL_COMPONENT_H__
 #define PRINTEMPS_MODEL_COMPONENT_MODEL_COMPONENT_H__
 
-#include "variable_sense.h"
+#include "variable_type.h"
 #include "constraint_sense.h"
 #include "constraint_type.h"
 #include "range.h"

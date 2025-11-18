@@ -3,19 +3,16 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_MODEL_COMPONENT_VARIABLE_SENSE_H__
-#define PRINTEMPS_MODEL_COMPONENT_VARIABLE_SENSE_H__
+#ifndef PRINTEMPS_MPS_MPS_VARIABLE_TYPE_H__
+#define PRINTEMPS_MPS_MPS_VARIABLE_TYPE_H__
 
-namespace printemps::model_component {
+namespace printemps::mps {
 /*****************************************************************************/
-enum class VariableSense {
-    Binary,           //
-    Integer,          //
-    Selection,        //
-    DependentBinary,  //
-    DependentInteger  //
+enum class MPSVariableType {
+    Integer,  //
+    Continuous
 };
-}  // namespace printemps::model_component
+}  // namespace printemps::mps
 #endif
 /*****************************************************************************/
 // END

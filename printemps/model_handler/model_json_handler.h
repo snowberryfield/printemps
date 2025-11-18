@@ -79,10 +79,9 @@ class ModelJSONHandler {
                 v_object.emplace_back("is_fixed", variable.is_fixed());
                 v_object.emplace_back("lower_bound", variable.lower_bound());
                 v_object.emplace_back("upper_bound", variable.upper_bound());
-                if (variable.sense() ==
-                        model_component::VariableSense::Binary ||
-                    variable.sense() ==
-                        model_component::VariableSense::Selection) {
+                if (variable.type() == model_component::VariableType::Binary ||
+                    variable.type() ==
+                        model_component::VariableType::Selection) {
                     v_object.emplace_back("sense", std::string("Binary"));
                 } else {
                     v_object.emplace_back("sense", std::string("Integer"));

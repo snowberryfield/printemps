@@ -701,8 +701,8 @@ class LocalSearchCore {
             m_model_ptr->updater().update(move);
 
             for (auto&& alteration : move.alterations) {
-                if (alteration.first->sense() ==
-                        model_component::VariableSense::Selection &&
+                if (alteration.first->type() ==
+                        model_component::VariableType::Selection &&
                     alteration.second == 1) {
                     alteration.first->select();
                 }

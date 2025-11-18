@@ -61,7 +61,7 @@ class ModelMPSHandler {
             const auto &VARIABLE_NAME = a_MPS.variable_names[i];
             const auto &VARIABLE      = a_MPS.variables.at(VARIABLE_NAME);
 
-            if (VARIABLE.sense == mps::MPSVariableSense::Continuous) {
+            if (VARIABLE.type == mps::MPSVariableType::Continuous) {
                 if (a_ACCEPT_CONTINUOUS) {
                     utility::print_warning(
                         "The continuous variable " + VARIABLE_NAME +

@@ -33,7 +33,7 @@ TEST_F(TestModelComponentCreator, create_variable_scalar_without_bound) {
             EXPECT_EQ(constant::INT_HALF_MIN, x.lower_bound());
             EXPECT_EQ(constant::INT_HALF_MAX, x.upper_bound());
             EXPECT_FALSE(x.has_bounds());
-            EXPECT_EQ(model_component::VariableSense::Integer, x.sense());
+            EXPECT_EQ(model_component::VariableType::Integer, x.type());
             EXPECT_EQ(&x, &model.variable_proxies().back());
             EXPECT_EQ(name, model.variable_names().back());
         }
@@ -59,7 +59,7 @@ TEST_F(TestModelComponentCreator, create_variable_scalar_with_bound) {
             EXPECT_EQ(0, x.lower_bound());
             EXPECT_EQ(1, x.upper_bound());
             EXPECT_TRUE(x.has_bounds());
-            EXPECT_EQ(model_component::VariableSense::Binary, x.sense());
+            EXPECT_EQ(model_component::VariableType::Binary, x.type());
             EXPECT_EQ(&x, &model.variable_proxies().back());
             EXPECT_EQ(name, model.variable_names().back());
         }
@@ -87,7 +87,7 @@ TEST_F(TestModelComponentCreator,
             EXPECT_EQ(constant::INT_HALF_MIN, x(0).lower_bound());
             EXPECT_EQ(constant::INT_HALF_MAX, x(0).upper_bound());
             EXPECT_FALSE(x(0).has_bounds());
-            EXPECT_EQ(model_component::VariableSense::Integer, x(0).sense());
+            EXPECT_EQ(model_component::VariableType::Integer, x(0).type());
             EXPECT_EQ(&x, &model.variable_proxies().back());
             EXPECT_EQ(name, model.variable_names().back());
         }
@@ -114,7 +114,7 @@ TEST_F(TestModelComponentCreator, create_variable_one_dimensional_with_bound) {
             EXPECT_EQ(0, x(0).lower_bound());
             EXPECT_EQ(1, x(0).upper_bound());
             EXPECT_TRUE(x(0).has_bounds());
-            EXPECT_EQ(model_component::VariableSense::Binary, x(0).sense());
+            EXPECT_EQ(model_component::VariableType::Binary, x(0).type());
             EXPECT_EQ(&x, &model.variable_proxies().back());
             EXPECT_EQ(name, model.variable_names().back());
         }
@@ -143,7 +143,7 @@ TEST_F(TestModelComponentCreator,
             EXPECT_EQ(constant::INT_HALF_MIN, x(0, 0).lower_bound());
             EXPECT_EQ(constant::INT_HALF_MAX, x(0, 0).upper_bound());
             EXPECT_FALSE(x(0, 0).has_bounds());
-            EXPECT_EQ(model_component::VariableSense::Integer, x(0, 0).sense());
+            EXPECT_EQ(model_component::VariableType::Integer, x(0, 0).type());
             EXPECT_EQ(&x, &model.variable_proxies().back());
             EXPECT_EQ(name, model.variable_names().back());
         }
@@ -171,7 +171,7 @@ TEST_F(TestModelComponentCreator, create_variable_two_dimensional_with_bound) {
             EXPECT_EQ(0, x(0, 0).lower_bound());
             EXPECT_EQ(1, x(0, 0).upper_bound());
             EXPECT_TRUE(x(0, 0).has_bounds());
-            EXPECT_EQ(model_component::VariableSense::Binary, x(0, 0).sense());
+            EXPECT_EQ(model_component::VariableType::Binary, x(0, 0).type());
             EXPECT_EQ(&x, &model.variable_proxies().back());
             EXPECT_EQ(name, model.variable_names().back());
         }

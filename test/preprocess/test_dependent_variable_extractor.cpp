@@ -55,16 +55,16 @@ TEST_F(TestDependentVariableExtractor, extract) {
 
             model.builder().setup_structure();
 
-            EXPECT_EQ(model_component::VariableSense::DependentInteger,
-                      z(0).sense());
+            EXPECT_EQ(model_component::VariableType::DependentInteger,
+                      z(0).type());
             EXPECT_FALSE(f.is_enabled());
 
-            EXPECT_EQ(model_component::VariableSense::DependentInteger,
-                      w(0).sense());
+            EXPECT_EQ(model_component::VariableType::DependentInteger,
+                      w(0).type());
             EXPECT_FALSE(g.is_enabled());
 
-            EXPECT_EQ(model_component::VariableSense::DependentInteger,
-                      v(0).sense());
+            EXPECT_EQ(model_component::VariableType::DependentInteger,
+                      v(0).type());
             EXPECT_FALSE(h.is_enabled());
         }
 
@@ -138,12 +138,12 @@ TEST_F(TestDependentVariableExtractor, extract) {
 
             model.builder().setup_structure();
 
-            EXPECT_EQ(model_component::VariableSense::DependentInteger,
-                      z(0).sense());
+            EXPECT_EQ(model_component::VariableType::DependentInteger,
+                      z(0).type());
             EXPECT_FALSE(f.is_enabled());
 
-            EXPECT_EQ(model_component::VariableSense::DependentInteger,
-                      w(0).sense());
+            EXPECT_EQ(model_component::VariableType::DependentInteger,
+                      w(0).type());
             EXPECT_FALSE(g.is_enabled());
 
             auto& constraint_proxies = model.constraint_proxies();

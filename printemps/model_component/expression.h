@@ -509,8 +509,8 @@ class Expression : public multi_array::AbstractMultiArrayElement {
     /*********************************************************************/
     inline bool has_only_binary_variable(void) const noexcept {
         for (const auto &sensitivity : m_sensitivities) {
-            if ((sensitivity.first->sense() != VariableSense::Binary) &&
-                (sensitivity.first->sense() != VariableSense::Selection)) {
+            if ((sensitivity.first->type() != VariableType::Binary) &&
+                (sensitivity.first->type() != VariableType::Selection)) {
                 return false;
             }
         }

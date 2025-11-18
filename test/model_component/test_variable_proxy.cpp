@@ -146,22 +146,21 @@ TEST_F(TestVariableProxy, scalar_sense) {
         model::Model<int, double> model;
 
         auto& variable_proxy = model.create_variable("x");
-        EXPECT_EQ(model_component::VariableSense::Integer,
-                  variable_proxy.sense());
+        EXPECT_EQ(model_component::VariableType::Integer,
+                  variable_proxy.type());
     }
     {
         model::Model<int, double> model;
 
         auto& variable_proxy = model.create_variable("x", 0, 1);
-        EXPECT_EQ(model_component::VariableSense::Binary,
-                  variable_proxy.sense());
+        EXPECT_EQ(model_component::VariableType::Binary, variable_proxy.type());
     }
     {
         model::Model<int, double> model;
 
         auto& variable_proxy = model.create_variable("x", 0, 10);
-        EXPECT_EQ(model_component::VariableSense::Integer,
-                  variable_proxy.sense());
+        EXPECT_EQ(model_component::VariableType::Integer,
+                  variable_proxy.type());
     }
 }
 
@@ -503,13 +502,13 @@ TEST_F(TestVariableProxy, one_dimensional_sense) {
         model::Model<int, double> model;
 
         auto& variable_proxy = model.create_variables("x", 2, 0, 1);
-        ASSERT_THROW(variable_proxy.sense(), std::runtime_error);
+        ASSERT_THROW(variable_proxy.type(), std::runtime_error);
     }
     {
         model::Model<int, double> model;
 
         auto& variable_proxy = model.create_variables("x", 2, 0, 10);
-        ASSERT_THROW(variable_proxy.sense(), std::runtime_error);
+        ASSERT_THROW(variable_proxy.type(), std::runtime_error);
     }
 }
 
@@ -906,13 +905,13 @@ TEST_F(TestVariableProxy, two_dimensional_sense) {
         model::Model<int, double> model;
 
         auto& variable_proxy = model.create_variables("x", {2, 3}, 0, 1);
-        ASSERT_THROW(variable_proxy.sense(), std::runtime_error);
+        ASSERT_THROW(variable_proxy.type(), std::runtime_error);
     }
     {
         model::Model<int, double> model;
 
         auto& variable_proxy = model.create_variables("x", {2, 3}, 0, 10);
-        ASSERT_THROW(variable_proxy.sense(), std::runtime_error);
+        ASSERT_THROW(variable_proxy.type(), std::runtime_error);
     }
 }
 

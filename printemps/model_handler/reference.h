@@ -73,30 +73,28 @@ struct Reference {
                     variable_reference.mutable_variable_ptrs.push_back(
                         variable_ptr);
                 }
-                if (variable.sense() ==
-                    model_component::VariableSense::Binary) {
+                if (variable.type() == model_component::VariableType::Binary) {
                     reference_variable_type.binary_variable_ptrs.push_back(
                         variable_ptr);
                 }
-                if (variable.sense() ==
-                    model_component::VariableSense::Integer) {
+                if (variable.type() == model_component::VariableType::Integer) {
                     reference_variable_type.integer_variable_ptrs.push_back(
                         variable_ptr);
                 }
-                if (variable.sense() ==
-                    model_component::VariableSense::Selection) {
+                if (variable.type() ==
+                    model_component::VariableType::Selection) {
                     reference_variable_type.selection_variable_ptrs.push_back(
                         variable_ptr);
                 }
 
-                if (variable.sense() ==
-                    model_component::VariableSense::DependentBinary) {
+                if (variable.type() ==
+                    model_component::VariableType::DependentBinary) {
                     reference_variable_type.dependent_binary_variable_ptrs
                         .push_back(variable_ptr);
                 }
 
-                if (variable.sense() ==
-                    model_component::VariableSense::DependentInteger) {
+                if (variable.type() ==
+                    model_component::VariableType::DependentInteger) {
                     reference_variable_type.dependent_integer_variable_ptrs
                         .push_back(variable_ptr);
                 }

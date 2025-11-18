@@ -256,8 +256,7 @@ TEST_F(TestMPS, parse_columns) {
     {
         mps::MPS mps;
 
-        mps::MPSVariableSense variable_sense =
-            mps::MPSVariableSense::Continuous;
+        mps::MPSVariableType variable_type = mps::MPSVariableType::Continuous;
 
         std::vector<std::string_view> items;
         items = {"E", "c1"};
@@ -267,10 +266,10 @@ TEST_F(TestMPS, parse_columns) {
         mps.parse_rows(items);
 
         items = {"x1", "c1", "1.0", "c2", "2.0"};
-        mps.parse_columns(items, &variable_sense);
+        mps.parse_columns(items, &variable_type);
 
         EXPECT_EQ("x1", mps.variables["x1"].name);
-        EXPECT_EQ(mps::MPSVariableSense::Continuous, mps.variables["x1"].sense);
+        EXPECT_EQ(mps::MPSVariableType::Continuous, mps.variables["x1"].type);
         EXPECT_FLOAT_EQ(1.0, mps.constraints["c1"].sensitivities["x1"]);
         EXPECT_FLOAT_EQ(2.0, mps.constraints["c2"].sensitivities["x1"]);
     }
@@ -278,8 +277,7 @@ TEST_F(TestMPS, parse_columns) {
     {
         mps::MPS mps;
 
-        mps::MPSVariableSense variable_sense =
-            mps::MPSVariableSense::Continuous;
+        mps::MPSVariableType variable_type = mps::MPSVariableType::Continuous;
 
         std::vector<std::string_view> items;
         items = {"E", "c1"};
@@ -289,32 +287,31 @@ TEST_F(TestMPS, parse_columns) {
         mps.parse_rows(items);
 
         items = {"MARK", "'MARKER'", "'INTORG'"};
-        mps.parse_columns(items, &variable_sense);
+        mps.parse_columns(items, &variable_type);
 
         items = {"x1", "c1", "1.0", "c2", "2.0"};
-        mps.parse_columns(items, &variable_sense);
+        mps.parse_columns(items, &variable_type);
 
         items = {"MARK", "'MARKER'", "'INTEND'"};
-        mps.parse_columns(items, &variable_sense);
+        mps.parse_columns(items, &variable_type);
 
         items = {"x2", "c1", "1.0", "c2", "2.0"};
-        mps.parse_columns(items, &variable_sense);
+        mps.parse_columns(items, &variable_type);
 
         EXPECT_EQ("x1", mps.variables["x1"].name);
-        EXPECT_EQ(mps::MPSVariableSense::Integer, mps.variables["x1"].sense);
+        EXPECT_EQ(mps::MPSVariableType::Integer, mps.variables["x1"].type);
         EXPECT_FLOAT_EQ(1.0, mps.constraints["c1"].sensitivities["x1"]);
         EXPECT_FLOAT_EQ(2.0, mps.constraints["c2"].sensitivities["x1"]);
 
         EXPECT_EQ("x2", mps.variables["x2"].name);
-        EXPECT_EQ(mps::MPSVariableSense::Continuous, mps.variables["x2"].sense);
+        EXPECT_EQ(mps::MPSVariableType::Continuous, mps.variables["x2"].type);
         EXPECT_FLOAT_EQ(1.0, mps.constraints["c1"].sensitivities["x2"]);
         EXPECT_FLOAT_EQ(2.0, mps.constraints["c2"].sensitivities["x2"]);
     }
 
     {
-        mps::MPS              mps;
-        mps::MPSVariableSense variable_sense =
-            mps::MPSVariableSense::Continuous;
+        mps::MPS             mps;
+        mps::MPSVariableType variable_type = mps::MPSVariableType::Continuous;
 
         std::vector<std::string_view> items;
         items = {"E", "c1"};
@@ -324,14 +321,13 @@ TEST_F(TestMPS, parse_columns) {
         mps.parse_rows(items);
 
         items = {"x1", "c1", "1.0", "c2"};
-        ASSERT_THROW(mps.parse_columns(items, &variable_sense),
+        ASSERT_THROW(mps.parse_columns(items, &variable_type),
                      std::runtime_error);
     }
 
     {
-        mps::MPS              mps;
-        mps::MPSVariableSense variable_sense =
-            mps::MPSVariableSense::Continuous;
+        mps::MPS             mps;
+        mps::MPSVariableType variable_type = mps::MPSVariableType::Continuous;
 
         std::vector<std::string_view> items;
         items = {"E", "c1"};
@@ -341,14 +337,13 @@ TEST_F(TestMPS, parse_columns) {
         mps.parse_rows(items);
 
         items = {"x1", "c1", "one", "c2", "2.0"};
-        ASSERT_THROW(mps.parse_columns(items, &variable_sense),
+        ASSERT_THROW(mps.parse_columns(items, &variable_type),
                      std::runtime_error);
     }
 
     {
-        mps::MPS              mps;
-        mps::MPSVariableSense variable_sense =
-            mps::MPSVariableSense::Continuous;
+        mps::MPS             mps;
+        mps::MPSVariableType variable_type = mps::MPSVariableType::Continuous;
 
         std::vector<std::string_view> items;
         items = {"E", "c1"};
@@ -358,7 +353,7 @@ TEST_F(TestMPS, parse_columns) {
         mps.parse_rows(items);
 
         items = {"x1", "c3", "1.0", "c4", "2.0"};
-        ASSERT_THROW(mps.parse_columns(items, &variable_sense),
+        ASSERT_THROW(mps.parse_columns(items, &variable_type),
                      std::runtime_error);
     }
 }
@@ -403,7 +398,7 @@ TEST_F(TestMPS, parse_bounds) {
         EXPECT_EQ("x_0", x_0.name);
         EXPECT_TRUE(x_0.is_bound_defined);
         EXPECT_FALSE(x_0.is_fixed);
-        EXPECT_EQ(mps::MPSVariableSense::Continuous, x_0.sense);
+        EXPECT_EQ(mps::MPSVariableType::Continuous, x_0.type);
         EXPECT_EQ(constant::INT_HALF_MIN, x_0.integer_lower_bound);
         EXPECT_EQ(constant::INT_HALF_MAX, x_0.integer_upper_bound);
         EXPECT_FLOAT_EQ(-HUGE_VAL, x_0.continuous_lower_bound);
@@ -418,7 +413,7 @@ TEST_F(TestMPS, parse_bounds) {
         EXPECT_EQ("x", x.name);
         EXPECT_TRUE(x.is_bound_defined);
         EXPECT_FALSE(x.is_fixed);
-        EXPECT_EQ(mps::MPSVariableSense::Integer, x.sense);
+        EXPECT_EQ(mps::MPSVariableType::Integer, x.type);
         EXPECT_EQ(0, x.integer_lower_bound);
         EXPECT_EQ(1, x.integer_upper_bound);
         EXPECT_FLOAT_EQ(0, x.continuous_lower_bound);
@@ -433,7 +428,7 @@ TEST_F(TestMPS, parse_bounds) {
         EXPECT_EQ("x", x.name);
         EXPECT_TRUE(x.is_bound_defined);
         EXPECT_FALSE(x.is_fixed);
-        EXPECT_EQ(mps::MPSVariableSense::Continuous, x.sense);
+        EXPECT_EQ(mps::MPSVariableType::Continuous, x.type);
         EXPECT_EQ(constant::INT_HALF_MIN, x.integer_lower_bound);
         EXPECT_EQ(0, x.integer_upper_bound);
         EXPECT_FLOAT_EQ(-HUGE_VAL, x.continuous_lower_bound);
@@ -448,7 +443,7 @@ TEST_F(TestMPS, parse_bounds) {
         EXPECT_EQ("x", x.name);
         EXPECT_TRUE(x.is_bound_defined);
         EXPECT_FALSE(x.is_fixed);
-        EXPECT_EQ(mps::MPSVariableSense::Continuous, x.sense);
+        EXPECT_EQ(mps::MPSVariableType::Continuous, x.type);
         EXPECT_EQ(0, x.integer_lower_bound);
         EXPECT_EQ(constant::INT_HALF_MAX, x.integer_upper_bound);
         EXPECT_FLOAT_EQ(0, x.continuous_lower_bound);
@@ -463,7 +458,7 @@ TEST_F(TestMPS, parse_bounds) {
         EXPECT_EQ("x", x.name);
         EXPECT_TRUE(x.is_bound_defined);
         EXPECT_FALSE(x.is_fixed);
-        EXPECT_EQ(mps::MPSVariableSense::Continuous, x.sense);
+        EXPECT_EQ(mps::MPSVariableType::Continuous, x.type);
         EXPECT_EQ(0, x.integer_lower_bound);
         EXPECT_EQ(constant::INT_HALF_MAX, x.integer_upper_bound);
         EXPECT_FLOAT_EQ(0, x.continuous_lower_bound);
@@ -478,7 +473,7 @@ TEST_F(TestMPS, parse_bounds) {
         EXPECT_EQ("x", x.name);
         EXPECT_TRUE(x.is_bound_defined);
         EXPECT_FALSE(x.is_fixed);
-        EXPECT_EQ(mps::MPSVariableSense::Integer, x.sense);
+        EXPECT_EQ(mps::MPSVariableType::Integer, x.type);
         EXPECT_EQ(0, x.integer_lower_bound);
         EXPECT_EQ(constant::INT_HALF_MAX, x.integer_upper_bound);
         EXPECT_FLOAT_EQ(0, x.continuous_lower_bound);
@@ -493,7 +488,7 @@ TEST_F(TestMPS, parse_bounds) {
         EXPECT_EQ("x", x.name);
         EXPECT_TRUE(x.is_bound_defined);
         EXPECT_FALSE(x.is_fixed);
-        EXPECT_EQ(mps::MPSVariableSense::Continuous, x.sense);
+        EXPECT_EQ(mps::MPSVariableType::Continuous, x.type);
         EXPECT_EQ(0, x.integer_lower_bound);
         EXPECT_EQ(100, x.integer_upper_bound);
         EXPECT_FLOAT_EQ(0.0, x.continuous_lower_bound);
@@ -508,7 +503,7 @@ TEST_F(TestMPS, parse_bounds) {
         EXPECT_EQ("x", x.name);
         EXPECT_TRUE(x.is_bound_defined);
         EXPECT_FALSE(x.is_fixed);
-        EXPECT_EQ(mps::MPSVariableSense::Integer, x.sense);
+        EXPECT_EQ(mps::MPSVariableType::Integer, x.type);
         EXPECT_EQ(0, x.integer_lower_bound);
         EXPECT_EQ(100, x.integer_upper_bound);
         EXPECT_FLOAT_EQ(0.0, x.continuous_lower_bound);
@@ -523,7 +518,7 @@ TEST_F(TestMPS, parse_bounds) {
         EXPECT_EQ("x", x.name);
         EXPECT_TRUE(x.is_bound_defined);
         EXPECT_TRUE(x.is_fixed);
-        EXPECT_EQ(mps::MPSVariableSense::Continuous, x.sense);
+        EXPECT_EQ(mps::MPSVariableType::Continuous, x.type);
         EXPECT_EQ(10, x.integer_lower_bound);
         EXPECT_EQ(10, x.integer_upper_bound);
         EXPECT_FLOAT_EQ(10, x.continuous_lower_bound);
@@ -559,7 +554,7 @@ TEST_F(TestMPS, read_mps_00) {
     {
         auto x_0 = mps.variables["x_0"];
         EXPECT_EQ("x_0", x_0.name);
-        EXPECT_EQ(mps::MPSVariableSense::Integer, x_0.sense);
+        EXPECT_EQ(mps::MPSVariableType::Integer, x_0.type);
         EXPECT_EQ(0, x_0.integer_lower_bound);
         EXPECT_EQ(1, x_0.integer_upper_bound);
         EXPECT_TRUE(x_0.is_bound_defined);
@@ -569,7 +564,7 @@ TEST_F(TestMPS, read_mps_00) {
     {
         auto y_0 = mps.variables["y_0"];
         EXPECT_EQ("y_0", y_0.name);
-        EXPECT_EQ(mps::MPSVariableSense::Continuous, y_0.sense);
+        EXPECT_EQ(mps::MPSVariableType::Continuous, y_0.type);
         EXPECT_EQ(constant::INT_HALF_MIN, y_0.integer_lower_bound);
         EXPECT_EQ(constant::INT_HALF_MAX, y_0.integer_upper_bound);
         EXPECT_FLOAT_EQ(-HUGE_VAL, y_0.continuous_lower_bound);
@@ -581,7 +576,7 @@ TEST_F(TestMPS, read_mps_00) {
     {
         auto z_0 = mps.variables["z_0"];
         EXPECT_EQ("z_0", z_0.name);
-        EXPECT_EQ(mps::MPSVariableSense::Integer, z_0.sense);
+        EXPECT_EQ(mps::MPSVariableType::Integer, z_0.type);
         EXPECT_EQ(-100, z_0.integer_lower_bound);
         EXPECT_EQ(100, z_0.integer_upper_bound);
         EXPECT_TRUE(z_0.is_bound_defined);
@@ -692,7 +687,7 @@ TEST_F(TestMPS, read_mps_03) {
 
     auto x = mps.variables["x"];
     EXPECT_EQ("x", x.name);
-    EXPECT_EQ(mps::MPSVariableSense::Continuous, x.sense);
+    EXPECT_EQ(mps::MPSVariableType::Continuous, x.type);
 }
 
 /*****************************************************************************/

@@ -243,12 +243,12 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
                     coefficients.push_back(sensitivity.second);
                 }
 
-                if ((variable_ptrs[0]->sense() == VariableSense::Binary ||
-                     variable_ptrs[0]->sense() ==
-                         VariableSense::DependentBinary) &&
-                    (variable_ptrs[1]->sense() == VariableSense::Binary ||
-                     variable_ptrs[1]->sense() ==
-                         VariableSense::DependentBinary)) {
+                if ((variable_ptrs[0]->type() == VariableType::Binary ||
+                     variable_ptrs[0]->type() ==
+                         VariableType::DependentBinary) &&
+                    (variable_ptrs[1]->type() == VariableType::Binary ||
+                     variable_ptrs[1]->type() ==
+                         VariableType::DependentBinary)) {
                     if (variable_ptrs[0]->name() < variable_ptrs[1]->name()) {
                         m_key_variable_ptr = variable_ptrs[0];
                     } else {
@@ -274,12 +274,12 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
                     m_key_variable_ptr = nullptr;
                 }
 
-                if ((variable_ptrs[0]->sense() == VariableSense::Integer ||
-                     variable_ptrs[0]->sense() ==
-                         VariableSense::DependentInteger) &&
-                    (variable_ptrs[1]->sense() == VariableSense::Integer ||
-                     variable_ptrs[1]->sense() ==
-                         VariableSense::DependentInteger)) {
+                if ((variable_ptrs[0]->type() == VariableType::Integer ||
+                     variable_ptrs[0]->type() ==
+                         VariableType::DependentInteger) &&
+                    (variable_ptrs[1]->type() == VariableType::Integer ||
+                     variable_ptrs[1]->type() ==
+                         VariableType::DependentInteger)) {
                     if (variable_ptrs[0]->name() < variable_ptrs[1]->name()) {
                         m_key_variable_ptr = variable_ptrs[0];
                     } else {
@@ -369,7 +369,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
                 }
 
                 /// Precedence
-                if ((variable_ptrs[0]->sense() == variable_ptrs[1]->sense()) &&
+                if ((variable_ptrs[0]->type() == variable_ptrs[1]->type()) &&
                     (coefficients[0] == -coefficients[1])) {
                     m_type = ConstraintType::Precedence;
                     return;
@@ -410,9 +410,9 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
                     minus_two_binary_variable_ptrs;
 
                 for (const auto &sensitivity : sensitivities) {
-                    if (sensitivity.first->sense() != VariableSense::Binary &&
-                        sensitivity.first->sense() !=
-                            VariableSense::DependentBinary) {
+                    if (sensitivity.first->type() != VariableType::Binary &&
+                        sensitivity.first->type() !=
+                            VariableType::DependentBinary) {
                         is_valid = false;
                         break;
                     }
@@ -523,14 +523,14 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
 
                     for (const auto &sensitivity :
                          m_expression.sensitivities()) {
-                        if ((sensitivity.first->sense() !=
-                             VariableSense::Binary) &&
-                            (sensitivity.first->sense() !=
-                             VariableSense::Selection)) {
+                        if ((sensitivity.first->type() !=
+                             VariableType::Binary) &&
+                            (sensitivity.first->type() !=
+                             VariableType::Selection)) {
                             has_only_binary_variables = false;
                         }
-                        if (sensitivity.first->sense() !=
-                            VariableSense::Integer) {
+                        if (sensitivity.first->type() !=
+                            VariableType::Integer) {
                             has_only_integer_variables = false;
                         }
                         if (!has_only_binary_variables &&
@@ -581,9 +581,9 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
                     auto variable_ptr = sensitivity.first;
                     auto coefficient  = sensitivity.second;
 
-                    if ((variable_ptr->sense() == VariableSense::Integer ||
-                         variable_ptr->sense() ==
-                             VariableSense::DependentInteger) &&
+                    if ((variable_ptr->type() == VariableType::Integer ||
+                         variable_ptr->type() ==
+                             VariableType::DependentInteger) &&
                         !variable_ptr->is_fixed()) {
                         if (coefficient == 1) {
                             plus_one_integer_variable_ptrs.push_back(
@@ -661,8 +661,8 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
             bool has_only_negative_coefficients = true;
 
             for (const auto &sensitivity : m_expression.sensitivities()) {
-                if ((sensitivity.first->sense() != VariableSense::Binary) &&
-                    (sensitivity.first->sense() != VariableSense::Selection)) {
+                if ((sensitivity.first->type() != VariableType::Binary) &&
+                    (sensitivity.first->type() != VariableType::Selection)) {
                     has_only_binary_variables = false;
                 }
                 if (sensitivity.second == -m_expression.constant_value()) {
@@ -744,13 +744,13 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
                         break;
                     }
 
-                    if ((variable_ptr->sense() == VariableSense::Integer ||
-                         variable_ptr->sense() == VariableSense::Binary) &&
+                    if ((variable_ptr->type() == VariableType::Integer ||
+                         variable_ptr->type() == VariableType::Binary) &&
                         abs(coefficient) == 2) {
                         key_variable_ptr         = variable_ptr;
                         key_variable_coefficient = coefficient;
                         number_of_integer_variables_coefficient_two++;
-                    } else if (variable_ptr->sense() != VariableSense::Binary ||
+                    } else if (variable_ptr->type() != VariableType::Binary ||
                                abs(coefficient) != 1) {
                         is_valid = false;
                         break;

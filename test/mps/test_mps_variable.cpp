@@ -22,7 +22,7 @@ class TestMPSVariable : public ::testing::Test {
 /*****************************************************************************/
 TEST_F(TestMPSVariable, initialize) {
     mps::MPSVariable variable;
-    EXPECT_EQ(mps::MPSVariableSense::Continuous, variable.sense);
+    EXPECT_EQ(mps::MPSVariableType::Continuous, variable.type);
     EXPECT_EQ("", variable.name);
     EXPECT_EQ(0, variable.integer_lower_bound);
     EXPECT_EQ(constant::INT_HALF_MAX, variable.integer_upper_bound);

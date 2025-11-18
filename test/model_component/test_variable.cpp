@@ -60,7 +60,7 @@ TEST_F(TestVariable, initialize) {
     EXPECT_EQ(0, variable.global_last_update_iteration());
     EXPECT_EQ(0, variable.update_count());
 
-    EXPECT_EQ(model_component::VariableSense::Integer, variable.sense());
+    EXPECT_EQ(model_component::VariableType::Integer, variable.type());
     EXPECT_EQ(0.0, variable.lagrangian_coefficient());
     EXPECT_EQ(nullptr, variable.selection_ptr());
     EXPECT_TRUE(variable.related_constraint_ptrs().empty());
@@ -476,50 +476,48 @@ TEST_F(TestVariable, has_upper_bound_margin) {
 }
 
 /*****************************************************************************/
-TEST_F(TestVariable, set_sense) {
+TEST_F(TestVariable, set_type) {
     auto variable = model_component::Variable<int, double>::create_instance();
-    variable.set_sense(model_component::VariableSense::Binary);
-    EXPECT_EQ(model_component::VariableSense::Binary, variable.sense());
-    EXPECT_EQ("Binary", variable.sense_label());
+    variable.set_type(model_component::VariableType::Binary);
+    EXPECT_EQ(model_component::VariableType::Binary, variable.type());
+    EXPECT_EQ("Binary", variable.type_label());
 
-    variable.set_sense(model_component::VariableSense::Integer);
-    EXPECT_EQ(model_component::VariableSense::Integer, variable.sense());
-    EXPECT_EQ("Integer", variable.sense_label());
+    variable.set_type(model_component::VariableType::Integer);
+    EXPECT_EQ(model_component::VariableType::Integer, variable.type());
+    EXPECT_EQ("Integer", variable.type_label());
 
-    variable.set_sense(model_component::VariableSense::Selection);
-    EXPECT_EQ(model_component::VariableSense::Selection, variable.sense());
-    EXPECT_EQ("Selection", variable.sense_label());
+    variable.set_type(model_component::VariableType::Selection);
+    EXPECT_EQ(model_component::VariableType::Selection, variable.type());
+    EXPECT_EQ("Selection", variable.type_label());
 
-    variable.set_sense(model_component::VariableSense::DependentBinary);
-    EXPECT_EQ(model_component::VariableSense::DependentBinary,
-              variable.sense());
-    EXPECT_EQ("DependentBinary", variable.sense_label());
+    variable.set_type(model_component::VariableType::DependentBinary);
+    EXPECT_EQ(model_component::VariableType::DependentBinary, variable.type());
+    EXPECT_EQ("DependentBinary", variable.type_label());
 
-    variable.set_sense(model_component::VariableSense::DependentInteger);
-    EXPECT_EQ(model_component::VariableSense::DependentInteger,
-              variable.sense());
-    EXPECT_EQ("DependentInteger", variable.sense_label());
+    variable.set_type(model_component::VariableType::DependentInteger);
+    EXPECT_EQ(model_component::VariableType::DependentInteger, variable.type());
+    EXPECT_EQ("DependentInteger", variable.type_label());
 }
 
 /*****************************************************************************/
-TEST_F(TestVariable, setup_sense_binary_or_integer) {
+TEST_F(TestVariable, setup_type_binary_or_integer) {
     auto variable = model_component::Variable<int, double>::create_instance();
     variable.set_bound(0, 1);
     model_component::Selection<int, double> selection;
     variable.set_selection_ptr(&selection);
-    EXPECT_EQ(model_component::VariableSense::Selection, variable.sense());
-    variable.setup_sense_binary_or_integer();
-    EXPECT_EQ(model_component::VariableSense::Binary, variable.sense());
+    EXPECT_EQ(model_component::VariableType::Selection, variable.type());
+    variable.setup_type_binary_or_integer();
+    EXPECT_EQ(model_component::VariableType::Binary, variable.type());
 }
 
 /*****************************************************************************/
-TEST_F(TestVariable, sense) {
-    /// This test is covered by set_sense().
+TEST_F(TestVariable, type) {
+    /// This test is covered by set_type().
 }
 
 /*****************************************************************************/
-TEST_F(TestVariable, sense_label) {
-    /// This test is covered by set_sense().
+TEST_F(TestVariable, type_label) {
+    /// This test is covered by set_type().
 }
 
 /*****************************************************************************/
@@ -681,17 +679,16 @@ TEST_F(TestVariable, set_dependent_expression_ptr) {
     auto expression =
         model_component::Expression<int, double>::create_instance();
 
-    EXPECT_EQ(model_component::VariableSense::Integer, variable.sense());
+    EXPECT_EQ(model_component::VariableType::Integer, variable.type());
     EXPECT_EQ(nullptr, variable.dependent_expression_ptr());
 
     variable.set_dependent_expression_ptr(&expression);
 
-    EXPECT_EQ(model_component::VariableSense::DependentInteger,
-              variable.sense());
+    EXPECT_EQ(model_component::VariableType::DependentInteger, variable.type());
     EXPECT_EQ(&expression, variable.dependent_expression_ptr());
 
     variable.reset_dependent_expression_ptr();
-    EXPECT_EQ(model_component::VariableSense::Integer, variable.sense());
+    EXPECT_EQ(model_component::VariableType::Integer, variable.type());
     EXPECT_EQ(nullptr, variable.dependent_expression_ptr());
 }
 

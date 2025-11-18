@@ -147,8 +147,8 @@ extract_effective_constraint_ptrs(
         auto &expression                       = constraint_ptr->expression();
         for (const auto &sensitivity : expression.sensitivities()) {
             if (sensitivity.first->is_fixed() ||
-                sensitivity.first->sense() ==
-                    model_component::VariableSense::Selection) {
+                sensitivity.first->type() ==
+                    model_component::VariableType::Selection) {
                 has_fixed_or_selection_variables = true;
                 break;
             }

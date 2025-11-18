@@ -537,7 +537,7 @@ class TabuSearchController
 
             utility::print_info(
                 " -- " + mutable_variable_ptrs[i]->name()  //
-                    + " (" + mutable_variable_ptrs[i]->sense_label() +
+                    + " (" + mutable_variable_ptrs[i]->type_label() +
                     ", Freq.: " + utility::to_string(update_rate, "%.3e") +
                     ", Dens.: " + utility::to_string(density, "%.3e") + ")",
                 a_IS_ENABLED_PRINT);
@@ -570,7 +570,7 @@ class TabuSearchController
 
             utility::print_info(
                 " -- " + mutable_variable_ptrs[i]->name()  //
-                    + " (" + mutable_variable_ptrs[i]->sense_label() +
+                    + " (" + mutable_variable_ptrs[i]->type_label() +
                     ", Freq.: " + utility::to_string(update_rate, "%.3e") +
                     ", Dens.: " + utility::to_string(density, "%.3e") + ")",
                 a_IS_ENABLED_PRINT);

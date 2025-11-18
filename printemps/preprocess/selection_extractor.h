@@ -31,8 +31,8 @@ class SelectionExtractor {
 
             for (auto &&sensitivity :
                  constraint_ptr->expression().sensitivities()) {
-                if (sensitivity.first->sense() !=
-                    model_component::VariableSense::Binary) {
+                if (sensitivity.first->type() !=
+                    model_component::VariableType::Binary) {
                     is_valid = false;
                     break;
                 }
