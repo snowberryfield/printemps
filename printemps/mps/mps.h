@@ -10,7 +10,7 @@
 #include "mps_constraint.h"
 #include "mps_objective.h"
 #include "mps_read_mode.h"
-#include "mps_bound_sense.h"
+#include "mps_bound_type.h"
 
 namespace printemps::mps {
 /*****************************************************************************/
@@ -346,7 +346,7 @@ struct MPS {
         }
 
         const std::string COLUMN_NAME(a_ITEMS[2]);
-        const auto       &BOUND_SENSE_SV = a_ITEMS.front();
+        const auto       &BOUND_TYPE_SV = a_ITEMS.front();
 
         auto [it, inserted] = this->variables.try_emplace(COLUMN_NAME);
 
@@ -357,12 +357,12 @@ struct MPS {
             this->variable_names.emplace_back(it->first);
         }
 
-        const auto BOUND_SENSE = bound_sense_map(BOUND_SENSE_SV);
-        auto      &variable    = this->variables[COLUMN_NAME];
+        const auto BOUND_TYPE = bound_type_map(BOUND_TYPE_SV);
+        auto      &variable   = this->variables[COLUMN_NAME];
 
         if (a_ITEMS.size() == 3) {
-            switch (BOUND_SENSE) {
-                case MPSBoundSense::FR:
+            switch (BOUND_TYPE) {
+                case MPSBoundType::FR:
                     variable.is_bound_defined       = true;
                     variable.integer_lower_bound    = constant::INT_HALF_MIN;
                     variable.integer_upper_bound    = constant::INT_HALF_MAX;
@@ -370,7 +370,7 @@ struct MPS {
                     variable.continuous_upper_bound = HUGE_VAL;
                     break;
 
-                case MPSBoundSense::BV:
+                case MPSBoundType::BV:
                     variable.type                   = MPSVariableType::Integer;
                     variable.is_bound_defined       = true;
                     variable.integer_lower_bound    = 0;
@@ -379,7 +379,7 @@ struct MPS {
                     variable.continuous_upper_bound = 1;
                     break;
 
-                case MPSBoundSense::MI:
+                case MPSBoundType::MI:
                     variable.is_bound_defined       = true;
                     variable.integer_lower_bound    = constant::INT_HALF_MIN;
                     variable.integer_upper_bound    = 0;
@@ -387,7 +387,7 @@ struct MPS {
                     variable.continuous_upper_bound = 0.0;
                     break;
 
-                case MPSBoundSense::PL:
+                case MPSBoundType::PL:
                     variable.is_bound_defined       = true;
                     variable.integer_lower_bound    = 0;
                     variable.integer_upper_bound    = constant::INT_HALF_MAX;
@@ -405,34 +405,34 @@ struct MPS {
             const double CONTINUOUS_VALUE = this->parse_value(VALUE_SV);
             const int    INTEGER_VALUE    = static_cast<int>(CONTINUOUS_VALUE);
 
-            switch (BOUND_SENSE) {
-                case MPSBoundSense::LO:
+            switch (BOUND_TYPE) {
+                case MPSBoundType::LO:
                     variable.is_bound_defined       = true;
                     variable.integer_lower_bound    = INTEGER_VALUE;
                     variable.continuous_lower_bound = CONTINUOUS_VALUE;
                     break;
 
-                case MPSBoundSense::LI:
+                case MPSBoundType::LI:
                     variable.type                   = MPSVariableType::Integer;
                     variable.is_bound_defined       = true;
                     variable.integer_lower_bound    = INTEGER_VALUE;
                     variable.continuous_lower_bound = CONTINUOUS_VALUE;
                     break;
 
-                case MPSBoundSense::UP:
+                case MPSBoundType::UP:
                     variable.is_bound_defined       = true;
                     variable.integer_upper_bound    = INTEGER_VALUE;
                     variable.continuous_upper_bound = CONTINUOUS_VALUE;
                     break;
 
-                case MPSBoundSense::UI:
+                case MPSBoundType::UI:
                     variable.type                   = MPSVariableType::Integer;
                     variable.is_bound_defined       = true;
                     variable.integer_upper_bound    = INTEGER_VALUE;
                     variable.continuous_upper_bound = CONTINUOUS_VALUE;
                     break;
 
-                case MPSBoundSense::FX:
+                case MPSBoundType::FX:
                     variable.is_bound_defined       = true;
                     variable.is_fixed               = true;
                     variable.integer_fixed_value    = INTEGER_VALUE;
