@@ -26,11 +26,11 @@ TEST_F(TestExclusiveOrMoveGenerator, setup) {
     auto& x = model.create_variables("x", 2, 0, 1);
     auto& c = model.create_constraint("c", x[0] + x[1] == 1);
 
-    model.setup_unique_names();
-    model.setup_structure();
+    model.builder().setup_unique_names();
+    model.builder().setup_structure();
 
     auto& exclusive_or_ptrs =
-        model.constraint_type_reference().exclusive_or_ptrs;
+        model.reference().constraint_type.exclusive_or_ptrs;
 
     model.neighborhood().exclusive_or().setup(exclusive_or_ptrs);
     model.neighborhood().exclusive_or().update_moves(true, false, false, false,

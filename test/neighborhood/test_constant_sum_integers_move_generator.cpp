@@ -26,11 +26,11 @@ TEST_F(TestConstantSumIntegersMoveGenerator, setup) {
     auto& x = model.create_variables("x", 2, -10, 10);
     auto& c = model.create_constraint("c", x[0] + x[1] == 5);
 
-    model.setup_unique_names();
-    model.setup_structure();
+    model.builder().setup_unique_names();
+    model.builder().setup_structure();
 
     auto& constant_sum_integers_ptrs =
-        model.constraint_type_reference().constant_sum_integers_ptrs;
+        model.reference().constraint_type.constant_sum_integers_ptrs;
 
     model.neighborhood().constant_sum_integers().setup(  //
         constant_sum_integers_ptrs);

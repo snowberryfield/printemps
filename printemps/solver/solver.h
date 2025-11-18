@@ -131,10 +131,12 @@ class Solver {
          * All value of the expressions and the constraints are updated forcibly
          * to take into account the cases they are disabled.
          */
-        m_model_ptr->import_solution(incumbent);
-        m_model_ptr->update();
+        m_model_ptr->initial_solution_handler().import_solution(incumbent,
+                                                                true);
+        m_model_ptr->updater().update();
 
-        auto named_solution = m_model_ptr->export_named_solution();
+        auto named_solution =
+            m_model_ptr->state_inspector().export_named_solution();
 
         /**
          * Prepare the result object to return.
@@ -325,17 +327,17 @@ class Solver {
         }
 
         /**
-         * Setup the model.
+         * Build the model.
          */
-        m_model_ptr->setup(m_option,
+        m_model_ptr->build(m_option,
                            m_option.output.verbose >= option::verbose::Outer);
 
         /**
          * Print the problem size.
          */
         if (m_option.output.verbose >= option::verbose::Outer) {
-            m_model_ptr->print_number_of_variables();
-            m_model_ptr->print_number_of_constraints();
+            m_model_ptr->printer().print_number_of_variables();
+            m_model_ptr->printer().print_number_of_constraints();
         }
 
         /**
@@ -344,7 +346,8 @@ class Solver {
          * cardinality, and invariant knapsack).
          */
         if (m_option.neighborhood.is_enabled_chain_move &&
-            !m_model_ptr->has_chain_move_effective_constraints()) {
+            !m_model_ptr->reference()
+                 .constraint_type.has_chain_move_effective_constraints()) {
             m_option.neighborhood.is_enabled_chain_move = false;
             utility::print_warning(
                 "Chain move was disabled because the problem does not include "
@@ -400,7 +403,7 @@ class Solver {
          * Compute the initial dual bound by naive method.
          */
         m_global_state.incumbent_holder.update_dual_bound(
-            m_model_ptr->compute_naive_dual_bound());
+            m_model_ptr->evaluator().compute_naive_dual_bound());
 
         /**
          * Create memory which stores update count for each variable.
@@ -415,8 +418,8 @@ class Solver {
             m_model_ptr->is_minimization() ? solution::SortMode::Ascending
                                            : solution::SortMode::Descending,  //
             m_model_ptr->name(),                                              //
-            m_model_ptr->number_of_variables(),                               //
-            m_model_ptr->number_of_constraints());
+            m_model_ptr->reference().number_of_variables(),                   //
+            m_model_ptr->reference().number_of_constraints());
 
         /**
          * Prepare incumbent solutions archive.
@@ -424,9 +427,9 @@ class Solver {
         m_global_state.incumbent_solution_archive.setup(
             -1,  //
             solution::SortMode::Off,
-            m_model_ptr->name(),                 //
-            m_model_ptr->number_of_variables(),  //
-            m_model_ptr->number_of_constraints());
+            m_model_ptr->name(),                             //
+            m_model_ptr->reference().number_of_variables(),  //
+            m_model_ptr->reference().number_of_constraints());
 
         /**
          * Set the references of the model and solver itself to the global
@@ -439,18 +442,19 @@ class Solver {
          * Compute the values of expressions, constraints, and the objective
          * function according to the initial solution.
          */
-        m_model_ptr->update();
+        m_model_ptr->updater().update();
 
         /**
          * Update the state.
          */
-        auto initial_solution = m_model_ptr->export_dense_solution();
+        auto initial_solution =
+            m_model_ptr->state_inspector().export_dense_solution();
         m_global_state.incumbent_holder.try_update_incumbent(
-            initial_solution, m_model_ptr->evaluate({}));
+            initial_solution, m_model_ptr->evaluator().evaluate({}));
         m_current_solution = initial_solution.to_sparse();
 
         m_global_state.incumbent_solution_archive.push(
-            m_model_ptr->export_sparse_solution());
+            m_model_ptr->state_inspector().export_sparse_solution());
     }
 
     /*************************************************************************/

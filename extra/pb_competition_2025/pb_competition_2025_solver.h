@@ -144,7 +144,7 @@ class PBCompetition2025Solver {
          */
         m_opb.read_opb(m_argparser.pb_file_name);
 
-        m_model.import_opb(m_opb);
+        m_model.opb_handler().import(m_opb);
         m_model.set_name(
             printemps::utility::base_name(m_argparser.pb_file_name));
 

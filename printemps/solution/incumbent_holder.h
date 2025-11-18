@@ -27,7 +27,7 @@ class IncumbentHolder {
     DenseSolution<T_Variable, T_Expression>
         m_local_augmented_incumbent_solution;
     DenseSolution<T_Variable, T_Expression>
-                                            m_global_augmented_incumbent_solution;
+        m_global_augmented_incumbent_solution;
     DenseSolution<T_Variable, T_Expression> m_feasible_incumbent_solution;
 
     double m_dual_bound;
@@ -70,7 +70,7 @@ class IncumbentHolder {
     /*************************************************************************/
     inline int try_update_incumbent(
         const DenseSolution<T_Variable, T_Expression> &a_SOLUTION,
-        const SolutionScore &                          a_SCORE) {
+        const SolutionScore                           &a_SCORE) {
         int status = IncumbentHolderConstant::STATUS_NOT_UPDATED;
 
         /**
@@ -117,7 +117,7 @@ class IncumbentHolder {
     /*************************************************************************/
     inline int try_update_incumbent(
         model::Model<T_Variable, T_Expression> *a_model_ptr,
-        const SolutionScore &                   a_SCORE) {
+        const SolutionScore                    &a_SCORE) {
         /// solution here defined is not substituted when no improvement
         DenseSolution<T_Variable, T_Expression> solution;
 
@@ -130,9 +130,10 @@ class IncumbentHolder {
                 STATUS_LOCAL_AUGMENTED_INCUMBENT_UPDATE;
 
             if (!is_solution_updated) {
-                a_model_ptr
-                    ->update_dependent_variables_and_disabled_constraints();
-                solution            = a_model_ptr->export_dense_solution();
+                a_model_ptr->updater()
+                    .update_dependent_variables_and_disabled_constraints();
+                solution =
+                    a_model_ptr->state_inspector().export_dense_solution();
                 is_solution_updated = true;
             }
 
@@ -148,9 +149,10 @@ class IncumbentHolder {
                 STATUS_GLOBAL_AUGMENTED_INCUMBENT_UPDATE;
 
             if (!is_solution_updated) {
-                a_model_ptr
-                    ->update_dependent_variables_and_disabled_constraints();
-                solution            = a_model_ptr->export_dense_solution();
+                a_model_ptr->updater()
+                    .update_dependent_variables_and_disabled_constraints();
+                solution =
+                    a_model_ptr->state_inspector().export_dense_solution();
                 is_solution_updated = true;
             }
 
@@ -169,9 +171,10 @@ class IncumbentHolder {
                     IncumbentHolderConstant::STATUS_FEASIBLE_INCUMBENT_UPDATE;
 
                 if (!is_solution_updated) {
-                    a_model_ptr
-                        ->update_dependent_variables_and_disabled_constraints();
-                    solution            = a_model_ptr->export_dense_solution();
+                    a_model_ptr->updater()
+                        .update_dependent_variables_and_disabled_constraints();
+                    solution =
+                        a_model_ptr->state_inspector().export_dense_solution();
                     is_solution_updated = true;
                 }
 
@@ -195,20 +198,20 @@ class IncumbentHolder {
     }
 
     /*************************************************************************/
-    inline const DenseSolution<T_Variable, T_Expression>
-        &local_augmented_incumbent_solution(void) const {
+    inline const DenseSolution<T_Variable, T_Expression> &
+    local_augmented_incumbent_solution(void) const {
         return m_local_augmented_incumbent_solution;
     }
 
     /*************************************************************************/
-    inline const DenseSolution<T_Variable, T_Expression>
-        &global_augmented_incumbent_solution(void) const {
+    inline const DenseSolution<T_Variable, T_Expression> &
+    global_augmented_incumbent_solution(void) const {
         return m_global_augmented_incumbent_solution;
     }
 
     /*************************************************************************/
-    inline const DenseSolution<T_Variable, T_Expression>
-        &feasible_incumbent_solution(void) const {
+    inline const DenseSolution<T_Variable, T_Expression> &
+    feasible_incumbent_solution(void) const {
         return m_feasible_incumbent_solution;
     }
 

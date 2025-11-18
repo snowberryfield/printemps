@@ -65,7 +65,7 @@ TEST_F(TestSparseDiagonal, inverse) {
 
 /*****************************************************************************/
 TEST_F(TestSparseDiagonal, size) {
-    /// This method is tested in constructor_with_arg().
+    /// This test is covered by constructor_with_arg().
 }
 
 /*****************************************************************************/

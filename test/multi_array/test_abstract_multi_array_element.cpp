@@ -56,7 +56,7 @@ TEST_F(TestAbstractMultiArrayElement, set_proxy_index) {
 
 /*****************************************************************************/
 TEST_F(TestAbstractMultiArrayElement, proxy_index) {
-    /// This method is tested in set_proxy_index().
+    /// This test is covered by set_proxy_index().
 }
 
 /*****************************************************************************/
@@ -70,7 +70,7 @@ TEST_F(TestAbstractMultiArrayElement, set_flat_index) {
 
 /*****************************************************************************/
 TEST_F(TestAbstractMultiArrayElement, flat_index) {
-    /// This method is tested in set_flat_index().
+    /// This test is covered by set_flat_index().
 }
 
 /*****************************************************************************/
@@ -99,7 +99,7 @@ TEST_F(TestAbstractMultiArrayElement, set_name) {
 
 /*****************************************************************************/
 TEST_F(TestAbstractMultiArrayElement, name) {
-    /// This method is tested in set_name().
+    /// This test is covered by set_name().
 }
 
 }  // namespace

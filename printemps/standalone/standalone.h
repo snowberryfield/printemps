@@ -103,7 +103,7 @@ class Standalone {
             m_model.import_mps(m_mps, m_argparser.accept_continuous_variables);
         } else if (EXTENSION == "opb" || EXTENSION == "wbo") {
             m_opb.read_opb(m_argparser.instance_file_name);
-            m_model.import_opb(m_opb);
+            m_model.opb_handler().import(m_opb);
         } else {
             throw std::runtime_error(printemps::utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -156,7 +156,8 @@ class Standalone {
         if (!m_argparser.mutable_variable_file_name.empty()) {
             const auto MUTABLE_VARIABLE_NAMES = printemps::helper::read_names(
                 m_argparser.mutable_variable_file_name);
-            m_model.unfix_variables(MUTABLE_VARIABLE_NAMES);
+            m_model.initial_solution_handler().unfix_variables(
+                MUTABLE_VARIABLE_NAMES);
         }
 
         /**
@@ -167,7 +168,8 @@ class Standalone {
             const auto FIXED_VARIABLES_AND_VALUES =
                 printemps::helper::read_names_and_values(
                     m_argparser.fixed_variable_file_name);
-            m_model.fix_variables(FIXED_VARIABLES_AND_VALUES);
+            m_model.initial_solution_handler().fix_variables(
+                FIXED_VARIABLES_AND_VALUES);
         }
 
         /**
@@ -178,7 +180,7 @@ class Standalone {
             const auto SELECTION_CONSTRAINT_NAMES =
                 printemps::helper::read_names(
                     m_argparser.selection_constraint_file_name);
-            m_model.set_user_defined_selection_constraints(
+            m_model.builder().setup_user_defined_selection_constraints(
                 SELECTION_CONSTRAINT_NAMES);
         }
 
@@ -190,7 +192,8 @@ class Standalone {
             const auto VARIABLE_NAME_PAIRS = printemps::helper::read_name_pairs(
                 m_argparser.flippable_variable_pair_file_name);
             m_option.neighborhood.is_enabled_two_flip_move = true;
-            m_model.setup_flippable_variable_ptr_pairs(VARIABLE_NAME_PAIRS);
+            m_model.builder().setup_flippable_variable_ptr_pairs(
+                VARIABLE_NAME_PAIRS);
         }
 
         /**
@@ -202,7 +205,8 @@ class Standalone {
             const auto INITIAL_SOLUTION =
                 printemps::helper::read_names_and_values(
                     m_argparser.initial_solution_file_name);
-            m_model.import_solution(INITIAL_SOLUTION);
+            m_model.initial_solution_handler().import_solution(INITIAL_SOLUTION,
+                                                               false);
         }
 
         signal(SIGINT, interrupt_handler);
@@ -254,7 +258,7 @@ class Standalone {
         }
 
         if (m_argparser.export_json_instance) {
-            m_model.write_json(m_model.name() + ".json");
+            m_model.json_handler().write(m_model.name() + ".json");
         }
     }
 

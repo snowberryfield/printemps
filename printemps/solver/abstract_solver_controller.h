@@ -65,8 +65,8 @@ class AbstractSolverController {
     inline void update_variable_bounds(const double a_OBJECTIVE,
                                        const bool   a_IS_PRIMAL,
                                        const bool   a_IS_ENABLED_PRINT) {
-        m_model_ptr->update_variable_bounds(a_OBJECTIVE, a_IS_PRIMAL,
-                                            a_IS_ENABLED_PRINT);
+        m_model_ptr->updater().update_variable_bounds(a_OBJECTIVE, a_IS_PRIMAL,
+                                                      a_IS_ENABLED_PRINT);
     }
 
    public:

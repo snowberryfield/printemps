@@ -79,7 +79,7 @@ TEST_F(TestExpression, set_sensitivities) {
 
 /*****************************************************************************/
 TEST_F(TestExpression, sensitivities) {
-    /// This method is tested in set_sensitivities().
+    /// This test is covered by set_sensitivities().
 }
 
 /*****************************************************************************/
@@ -160,7 +160,7 @@ TEST_F(TestExpression,
 
 /*****************************************************************************/
 TEST_F(TestExpression, setup_fixed_sensitivities) {
-    /// This method is tested in test_fixed_size_hash_map().
+    /// This test is covered by test_fixed_size_hash_map().
 }
 
 /*****************************************************************************/
@@ -385,12 +385,12 @@ TEST_F(TestExpression, is_enabled) {
 
 /*****************************************************************************/
 TEST_F(TestExpression, enable) {
-    /// This method is tested in is_enabled().
+    /// This test is covered by is_enabled().
 }
 
 /*****************************************************************************/
 TEST_F(TestExpression, disable) {
-    /// This method is tested in is_enabled().
+    /// This test is covered by is_enabled().
 }
 
 /*****************************************************************************/
@@ -467,43 +467,43 @@ TEST_F(TestExpression, lower_bound) {
 
 /*****************************************************************************/
 TEST_F(TestExpression, upper_bound) {
-    /// This method is tested in lower_bound().
+    /// This test is covered by lower_bound().
 }
 
 /*****************************************************************************/
 TEST_F(TestExpression, fixed_term_value) {
-    /// This method is tested in lower_bound().
+    /// This test is covered by lower_bound().
 }
 
 /*****************************************************************************/
 TEST_F(TestExpression, positive_coefficient_mutable_variable_sensitivities) {
-    /// This method is tested in setup_mutable_variable_sensitivities().
+    /// This test is covered by setup_mutable_variable_sensitivities().
 }
 
 /*****************************************************************************/
 TEST_F(TestExpression, negative_coefficient_mutable_variable_sensitivities) {
-    /// This method is tested in setup_mutable_variable_sensitivities().
+    /// This test is covered by setup_mutable_variable_sensitivities().
 }
 /*****************************************************************************/
 TEST_F(TestExpression, positive_coefficient_mutable_variable_ptrs) {
-    /// This method is tested in
+    /// This test is covered by
     /// setup_positive_and_negative_coefficient_mutable_variable_ptrs().
 }
 
 /*****************************************************************************/
 TEST_F(TestExpression, negative_coefficient_mutable_variable_ptrs) {
-    /// This method is tested in
+    /// This test is covered by
     /// setup_positive_and_negative_coefficient_mutable_variable_ptrs().
 }
 
 /*****************************************************************************/
 TEST_F(TestExpression, selection_mask) {
-    /// This method is tested in setup_selection_mask().
+    /// This test is covered by setup_selection_mask().
 }
 
 /*****************************************************************************/
 TEST_F(TestExpression, hash) {
-    /// This method is tested in setup_hash().
+    /// This test is covered by setup_hash().
 }
 
 /*****************************************************************************/
@@ -617,7 +617,7 @@ TEST_F(TestExpression, equal) {
 
 /*****************************************************************************/
 TEST_F(TestExpression, not_equal) {
-    /// This method is tested in equal().
+    /// This test is covered by equal().
 }
 
 /*****************************************************************************/

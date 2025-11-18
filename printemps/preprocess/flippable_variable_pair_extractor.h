@@ -13,7 +13,7 @@ namespace printemps::preprocess {
 template <class T_Variable, class T_Expression>
 class FlippableVariablePairExtractor {
    private:
-    model::Model<T_Variable, T_Expression> *                     m_model_ptr;
+    model::Model<T_Variable, T_Expression>                      *m_model_ptr;
     std::vector<FlippableVariablePair<T_Variable, T_Expression>> m_pairs;
 
    public:
@@ -48,7 +48,7 @@ class FlippableVariablePairExtractor {
                                a_IS_ENABLED_PRINT);
 
         const auto &a_CONSTRAINT_PTRS =
-            m_model_ptr->constraint_reference().enabled_constraint_ptrs;
+            m_model_ptr->reference().constraint.enabled_constraint_ptrs;
 
         std::unordered_set<
             model_component::Variable<T_Variable, T_Expression> *>
@@ -141,8 +141,8 @@ class FlippableVariablePairExtractor {
     }
 
     /*************************************************************************/
-    inline const std::vector<FlippableVariablePair<T_Variable, T_Expression>>
-        &pairs(void) const {
+    inline const std::vector<FlippableVariablePair<T_Variable, T_Expression>> &
+    pairs(void) const {
         return this->m_pairs;
     }
 };

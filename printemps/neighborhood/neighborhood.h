@@ -55,16 +55,16 @@ class Neighborhood {
     VariableBoundMoveGenerator<T_Variable, T_Expression> m_variable_bound;
     SoftSelectionMoveGenerator<T_Variable, T_Expression> m_soft_selection;
     TrinomialExclusiveNorMoveGenerator<T_Variable, T_Expression>
-                                                       m_trinomial_exclusive_nor;
-    ChainMoveGenerator<T_Variable, T_Expression>       m_chain;
-    TwoFlipMoveGenerator<T_Variable, T_Expression>     m_two_flip;
+                                                   m_trinomial_exclusive_nor;
+    ChainMoveGenerator<T_Variable, T_Expression>   m_chain;
+    TwoFlipMoveGenerator<T_Variable, T_Expression> m_two_flip;
     UserDefinedMoveGenerator<T_Variable, T_Expression> m_user_defined;
 
     std::vector<AbstractMoveGenerator<T_Variable, T_Expression> *>
                                                   m_move_generator_ptrs;
     std::vector<Move<T_Variable, T_Expression> *> m_move_ptrs;
 
-    long m_number_of_updated_moves;
+    int m_number_of_updated_moves;
 
    public:
     /*************************************************************************/
@@ -118,13 +118,89 @@ class Neighborhood {
     }
 
     /*************************************************************************/
+    inline void setup(model::Model<T_Variable, T_Expression> *a_model_ptr,
+                      const option::Option                   &a_OPTION) {
+        auto &variable_type   = a_model_ptr->reference().variable_type;
+        auto &constraint_type = a_model_ptr->reference().constraint_type;
+
+        m_binary.setup(variable_type.binary_variable_ptrs);
+        m_integer.setup(variable_type.integer_variable_ptrs);
+        m_selection.setup(variable_type.selection_variable_ptrs);
+
+        if (a_OPTION.neighborhood.is_enabled_exclusive_or_move) {
+            m_exclusive_or.setup(constraint_type.exclusive_or_ptrs);
+        }
+
+        if (a_OPTION.neighborhood.is_enabled_exclusive_nor_move) {
+            m_exclusive_nor.setup(constraint_type.exclusive_nor_ptrs);
+        }
+
+        if (a_OPTION.neighborhood.is_enabled_inverted_integers_move) {
+            m_inverted_integers.setup(constraint_type.inverted_integers_ptrs);
+        }
+
+        if (a_OPTION.neighborhood.is_enabled_balanced_integers_move) {
+            m_balanced_integers.setup(constraint_type.balanced_integers_ptrs);
+        }
+
+        if (a_OPTION.neighborhood.is_enabled_constant_sum_integers_move) {
+            m_constant_sum_integers.setup(
+                constraint_type.constant_sum_integers_ptrs);
+        }
+
+        if (a_OPTION.neighborhood
+                .is_enabled_constant_difference_integers_move) {
+            m_constant_difference_integers.setup(
+                constraint_type.constant_difference_integers_ptrs);
+        }
+
+        if (a_OPTION.neighborhood.is_enabled_constant_ratio_integers_move) {
+            m_constant_ratio_integers.setup(
+                constraint_type.constant_ratio_integers_ptrs);
+        }
+
+        if (a_OPTION.neighborhood.is_enabled_aggregation_move) {
+            m_aggregation.setup(constraint_type.aggregation_ptrs);
+        }
+
+        if (a_OPTION.neighborhood.is_enabled_precedence_move) {
+            m_precedence.setup(constraint_type.precedence_ptrs);
+        }
+
+        if (a_OPTION.neighborhood.is_enabled_variable_bound_move) {
+            m_variable_bound.setup(constraint_type.variable_bound_ptrs);
+        }
+
+        if (a_OPTION.neighborhood.is_enabled_trinomial_exclusive_nor_move) {
+            m_trinomial_exclusive_nor.setup(
+                constraint_type.trinomial_exclusive_nor_ptrs);
+        }
+
+        if (a_OPTION.neighborhood.is_enabled_soft_selection_move) {
+            m_soft_selection.setup(constraint_type.soft_selection_ptrs);
+        }
+
+        if (a_OPTION.neighborhood.is_enabled_chain_move) {
+            m_chain.setup();
+        }
+
+        if (a_OPTION.neighborhood.is_enabled_two_flip_move &&
+            a_model_ptr->flippable_variable_ptr_pairs().size() > 0) {
+            m_two_flip.setup(a_model_ptr->flippable_variable_ptr_pairs());
+        }
+
+        if (a_OPTION.neighborhood.is_enabled_user_defined_move) {
+            m_user_defined.setup();
+        }
+    }
+
+    /*************************************************************************/
     inline void update_moves(const bool a_ACCEPT_ALL,                     //
                              const bool a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
                              const bool a_ACCEPT_FEASIBILITY_IMPROVABLE,  //
                              const bool a_IS_ENABLED_PARALLEL,            //
                              const int  a_NUMBER_OF_THREADS) {
         auto number_of_candidate_moves = 0;
-
         for (auto &&move_generator_ptr : m_move_generator_ptrs) {
             if (move_generator_ptr->is_enabled()) {
                 move_generator_ptr->update_moves(
@@ -138,16 +214,14 @@ class Neighborhood {
                     std::accumulate(flags.begin(), flags.end(), 0);
             }
         }
-
         auto &move_ptrs = m_move_ptrs;
         move_ptrs.resize(number_of_candidate_moves);
         auto index                = 0;
         m_number_of_updated_moves = 0;
-
         for (const auto &move_generator_ptr : m_move_generator_ptrs) {
             if (move_generator_ptr->is_enabled()) {
-                auto &    moves     = move_generator_ptr->moves();
-                auto &    flags     = move_generator_ptr->flags();
+                auto     &moves     = move_generator_ptr->moves();
+                auto     &flags     = move_generator_ptr->flags();
                 const int MOVE_SIZE = move_generator_ptr->moves().size();
 
                 for (auto i = 0; i < MOVE_SIZE; i++) {
@@ -433,8 +507,8 @@ class Neighborhood {
 
     /*************************************************************************/
     inline const VariableBoundMoveGenerator  //
-        <T_Variable, T_Expression>
-            &variable_bound(void) const noexcept {
+        <T_Variable, T_Expression> &
+        variable_bound(void) const noexcept {
         return m_variable_bound;
     }
 
@@ -503,8 +577,8 @@ class Neighborhood {
 
     /*************************************************************************/
     inline const UserDefinedMoveGenerator  //
-        <T_Variable, T_Expression>
-            &user_defined(void) const noexcept {
+        <T_Variable, T_Expression> &
+        user_defined(void) const noexcept {
         return m_user_defined;
     }
 
@@ -527,7 +601,7 @@ class Neighborhood {
     }
 
     /*************************************************************************/
-    inline long number_of_updated_moves(void) const noexcept {
+    inline int number_of_updated_moves(void) const noexcept {
         return m_number_of_updated_moves;
     }
 };

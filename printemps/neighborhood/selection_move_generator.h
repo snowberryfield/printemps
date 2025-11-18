@@ -22,7 +22,7 @@ class SelectionMoveGenerator
 
     /*************************************************************************/
     inline void setup(
-        std::vector<model_component::Variable<T_Variable, T_Expression> *>
+        const std::vector<model_component::Variable<T_Variable, T_Expression> *>
             &a_RAW_VARIABLE_PTRS) {
         /**
          *  "Swap" move for binary variables in selection
@@ -69,8 +69,8 @@ class SelectionMoveGenerator
          */
         auto move_updater =  //
             [mutable_variable_ptrs, VARIABLES_SIZE](
-                auto *     a_moves_ptr,                      //
-                auto *     a_flags,                          //
+                auto      *a_moves_ptr,                      //
+                auto      *a_flags,                          //
                 const bool a_ACCEPT_ALL,                     //
                 const bool a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
                 const bool a_ACCEPT_FEASIBILITY_IMPROVABLE,  //

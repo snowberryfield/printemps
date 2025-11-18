@@ -43,12 +43,12 @@ TEST_F(TestNamedSolution, initialize) {
     g(0) = x(0) + x(1) <= 1;
     g(1) = x(0) - x(1) == 1;
     model.minimize(x(0) + x(1));
-    model.setup_structure();
+    model.builder().setup_structure();
     x(0) = 1;
     x(1) = 1;
 
-    model.update();
-    auto solution = model.export_named_solution();
+    model.updater().update();
+    auto solution = model.state_inspector().export_named_solution();
 
     EXPECT_EQ("name", solution.name());
     EXPECT_EQ(2, solution.number_of_variables());
@@ -80,72 +80,72 @@ TEST_F(TestNamedSolution, initialize) {
 
 /*****************************************************************************/
 TEST_F(TestNamedSolution, variables_without_arguments) {
-    /// This method is tested in initialize().
+    /// This test is covered by initialize().
 }
 
 /*****************************************************************************/
 TEST_F(TestNamedSolution, variables_with_arguments) {
-    /// This method is tested in initialize().
+    /// This test is covered by initialize().
 }
 
 /*****************************************************************************/
 TEST_F(TestNamedSolution, expressions_without_arguments) {
-    /// This method is tested in initialize().
+    /// This test is covered by initialize().
 }
 
 /*****************************************************************************/
 TEST_F(TestNamedSolution, expressions_with_arguments) {
-    /// This method is tested in initialize().
+    /// This test is covered by initialize().
 }
 
 /*****************************************************************************/
 TEST_F(TestNamedSolution, constraints_without_arguments) {
-    /// This method is tested in initialize().
+    /// This test is covered by initialize().
 }
 
 /*****************************************************************************/
 TEST_F(TestNamedSolution, constraints_with_arguments) {
-    /// This method is tested in initialize().
+    /// This test is covered by initialize().
 }
 
 /*****************************************************************************/
 TEST_F(TestNamedSolution, violations_without_arguments) {
-    /// This method is tested in initialize().
+    /// This test is covered by initialize().
 }
 
 /*****************************************************************************/
 TEST_F(TestNamedSolution, violations_with_arguments) {
-    /// This method is tested in initialize().
+    /// This test is covered by initialize().
 }
 
 /*****************************************************************************/
 TEST_F(TestNamedSolution, name) {
-    /// This method is tested in initialize().
+    /// This test is covered by initialize().
 }
 
 /*****************************************************************************/
 TEST_F(TestNamedSolution, number_of_variables) {
-    /// This method is tested in initialize().
+    /// This test is covered by initialize().
 }
 
 /*****************************************************************************/
 TEST_F(TestNamedSolution, number_of_constraints) {
-    /// This method is tested in initialize().
+    /// This test is covered by initialize().
 }
 
 /*****************************************************************************/
 TEST_F(TestNamedSolution, objective) {
-    /// This method is tested in initialize().
+    /// This test is covered by initialize().
 }
 
 /*****************************************************************************/
 TEST_F(TestNamedSolution, total_violation) {
-    /// This method is tested in initialize().
+    /// This test is covered by initialize().
 }
 
 /*****************************************************************************/
 TEST_F(TestNamedSolution, is_feasible) {
-    /// This method is tested in initialize().
+    /// This test is covered by initialize().
 }
 
 }  // namespace

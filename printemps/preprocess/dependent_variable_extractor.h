@@ -45,7 +45,7 @@ class DependentVariableExtractor {
 
         int number_of_newly_extracted_dependent_variables = 0;
 
-        auto &reference = m_model_ptr->constraint_type_reference();
+        auto &reference = m_model_ptr->reference().constraint_type;
 
         auto &exclusive_or_ptrs          = reference.exclusive_or_ptrs;
         auto &exclusive_nor_ptrs         = reference.exclusive_nor_ptrs;
@@ -265,8 +265,9 @@ class DependentVariableExtractor {
                 }
             }
 
-            auto &additional_expression_proxy = m_model_ptr->create_expressions(
-                "additional", number_of_new_expressions);
+            auto &additional_expression_proxy =
+                m_model_ptr->component_creator().create_expressions(
+                    "additional", number_of_new_expressions);
 
             const int DEPENDENT_VARIABLES_SIZE = dependent_variable_ptrs.size();
             auto      count                    = 0;
@@ -292,8 +293,9 @@ class DependentVariableExtractor {
         if (additional_constraints.size() > 0) {
             const int ADDITIONAL_CONSTRAINTS_SIZE =
                 additional_constraints.size();
-            auto &additional_constraint_proxy = m_model_ptr->create_constraints(
-                "additional", ADDITIONAL_CONSTRAINTS_SIZE);
+            auto &additional_constraint_proxy =
+                m_model_ptr->component_creator().create_constraints(
+                    "additional", ADDITIONAL_CONSTRAINTS_SIZE);
 
             for (auto i = 0; i < ADDITIONAL_CONSTRAINTS_SIZE; i++) {
                 auto &constraint               = additional_constraints[i];
@@ -317,10 +319,10 @@ class DependentVariableExtractor {
 
         int number_of_newly_eliminated_dependent_integer_variables = 0;
 
-        auto &binary_ptrs = m_model_ptr->variable_type_reference()
-                                .dependent_binary_variable_ptrs;
-        auto &integer_ptrs = m_model_ptr->variable_type_reference()
-                                 .dependent_integer_variable_ptrs;
+        auto &binary_ptrs = m_model_ptr->reference()
+                                .variable_type.dependent_binary_variable_ptrs;
+        auto &integer_ptrs = m_model_ptr->reference()
+                                 .variable_type.dependent_integer_variable_ptrs;
 
         std::vector<model_component::Variable<T_Variable, T_Expression> *>
             variable_ptrs;

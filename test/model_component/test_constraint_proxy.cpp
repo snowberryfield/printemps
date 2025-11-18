@@ -56,7 +56,7 @@ TEST_F(TestConstraintProxy, scalar_set_name) {
 
 /*****************************************************************************/
 TEST_F(TestConstraintProxy, scalar_name) {
-    /// This method is tested in scalar_set_name().
+    /// This test is covered by scalar_set_name().
 }
 
 /*****************************************************************************/
@@ -126,7 +126,7 @@ TEST_F(TestConstraintProxy, scalar_constraint_value) {
     auto violation_expected_value =
         std::max(sensitivity * value + constant - target, 0);
 
-    model.update();
+    model.updater().update();
 
     EXPECT_EQ(constraint_expected_value, constraint_proxy.constraint_value());
     EXPECT_EQ(violation_expected_value, constraint_proxy.violation_value());
@@ -134,7 +134,7 @@ TEST_F(TestConstraintProxy, scalar_constraint_value) {
 
 /*****************************************************************************/
 TEST_F(TestConstraintProxy, scalar_violation_value) {
-    /// This method is tested in scalar_constraint_value.
+    /// This test is covered by scalar_constraint_value.
 }
 
 /*****************************************************************************/
@@ -199,12 +199,12 @@ TEST_F(TestConstraintProxy, scalar_is_enabled) {
 
 /*****************************************************************************/
 TEST_F(TestConstraintProxy, scalar_enable) {
-    /// This method is tested in scalar_is_enabled().
+    /// This test is covered by scalar_is_enabled().
 }
 
 /*****************************************************************************/
 TEST_F(TestConstraintProxy, scalar_disable) {
-    /// This method is tested in scalar_is_enabled().
+    /// This test is covered by scalar_is_enabled().
 }
 
 /*****************************************************************************/
@@ -296,7 +296,7 @@ TEST_F(TestConstraintProxy, one_dimensional_set_name) {
 
 /*****************************************************************************/
 TEST_F(TestConstraintProxy, one_dimensional_name) {
-    /// This method is tested in one_dimensional_set_name().
+    /// This test is covered by one_dimensional_set_name().
 }
 
 /*****************************************************************************/
@@ -376,7 +376,7 @@ TEST_F(TestConstraintProxy, one_dimensional_constraint_value) {
 
 /*****************************************************************************/
 TEST_F(TestConstraintProxy, one_dimensional_violation_value) {
-    /// This method is tested in one_dimensional_constraint_value.
+    /// This test is covered by one_dimensional_constraint_value().
 }
 
 /*****************************************************************************/
@@ -467,12 +467,12 @@ TEST_F(TestConstraintProxy, one_dimensional_is_enabled) {
 
 /*****************************************************************************/
 TEST_F(TestConstraintProxy, one_dimensional_enable) {
-    /// This method is tested in one_dimensional_is_enabled().
+    /// This test is covered by one_dimensional_is_enabled().
 }
 
 /*****************************************************************************/
 TEST_F(TestConstraintProxy, one_dimensional_disable) {
-    /// This method is tested in one_dimensional_is_enabled().
+    /// This test is covered by one_dimensional_is_enabled().
 }
 
 /*****************************************************************************/
@@ -568,7 +568,7 @@ TEST_F(TestConstraintProxy, two_dimensional_set_name) {
 
 /*****************************************************************************/
 TEST_F(TestConstraintProxy, two_dimensional_name) {
-    /// This method is tested in two_dimensional_set_name().
+    /// This test is covered by two_dimensional_set_name().
 }
 
 /*****************************************************************************/
@@ -651,7 +651,7 @@ TEST_F(TestConstraintProxy, two_dimensional_constraint_value) {
 
 /*****************************************************************************/
 TEST_F(TestConstraintProxy, two_dimensional_violation_value) {
-    /// This method is tested in two_dimensional_constraint_value.
+    /// This test is covered by two_dimensional_constraint_value().
 }
 
 /*****************************************************************************/
@@ -742,12 +742,12 @@ TEST_F(TestConstraintProxy, two_dimensional_is_enabled) {
 
 /*****************************************************************************/
 TEST_F(TestConstraintProxy, two_dimensional_enable) {
-    /// This method is tested in two_dimensional_is_enabled().
+    /// This test is covered by two_dimensional_is_enabled().
 }
 
 /*****************************************************************************/
 TEST_F(TestConstraintProxy, two_dimensional_disable) {
-    /// This method is tested in two_dimensional_is_enabled().
+    /// This test is covered by two_dimensional_is_enabled().
 }
 
 /*****************************************************************************/

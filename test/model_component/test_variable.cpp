@@ -180,22 +180,22 @@ TEST_F(TestVariable, set_bound) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, reset_bound) {
-    /// This method is tested in set_bound().
+    /// This test is covered by set_bound().
 }
 
 /*****************************************************************************/
 TEST_F(TestVariable, lower_bound) {
-    /// This method is tested in set_bound().
+    /// This test is covered by set_bound().
 }
 
 /*****************************************************************************/
 TEST_F(TestVariable, upper_bound) {
-    /// This method is tested in set_bound().
+    /// This test is covered by set_bound().
 }
 
 /*****************************************************************************/
 TEST_F(TestVariable, has_bounds) {
-    /// This method is tested in set_bound().
+    /// This test is covered by set_bound().
 }
 
 /*****************************************************************************/
@@ -210,7 +210,7 @@ TEST_F(TestVariable, set_lower_or_upper_bound) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, range) {
-    /// This method is tested in set_bound().
+    /// This test is covered by set_bound().
 }
 
 /*****************************************************************************/
@@ -228,12 +228,12 @@ TEST_F(TestVariable, set_local_last_update_iteration) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, reset_local_last_update_iteration) {
-    /// This method is tested in set_local_last_update_iteration().
+    /// This test is covered by set_local_last_update_iteration().
 }
 
 /*****************************************************************************/
 TEST_F(TestVariable, local_last_update_iteration) {
-    /// This method is tested in set_local_last_update_iteration().
+    /// This test is covered by set_local_last_update_iteration().
 }
 
 /*****************************************************************************/
@@ -249,12 +249,12 @@ TEST_F(TestVariable, set_global_last_update_iteration) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, reset_global_last_update_iteration) {
-    /// This method is tested in set_global_last_update_iteration().
+    /// This test is covered by set_global_last_update_iteration().
 }
 
 /*****************************************************************************/
 TEST_F(TestVariable, global_last_update_iteration) {
-    /// This method is tested in set_global_last_update_iteration().
+    /// This test is covered by set_global_last_update_iteration().
 }
 
 /*****************************************************************************/
@@ -272,12 +272,12 @@ TEST_F(TestVariable, increment_update_count) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, reset_update_count) {
-    /// This method is tested in increment_update_count().
+    /// This test is covered by increment_update_count().
 }
 
 /*****************************************************************************/
 TEST_F(TestVariable, update_count) {
-    /// This method is tested in increment_update_count().
+    /// This test is covered by increment_update_count().
 }
 
 /*****************************************************************************/
@@ -291,12 +291,12 @@ TEST_F(TestVariable, fix) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, is_fixed) {
-    /// This method is tested in fix().
+    /// This test is covered by fix().
 }
 
 /*****************************************************************************/
 TEST_F(TestVariable, unfix) {
-    /// This method is tested in fix().
+    /// This test is covered by fix().
 }
 
 /*****************************************************************************/
@@ -341,7 +341,7 @@ TEST_F(TestVariable, set_is_objective_improvable_and) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, is_objective_improvable) {
-    /// This method is tested in set_is_objective_improvable().
+    /// This test is covered by set_is_objective_improvable().
 }
 
 /*****************************************************************************/
@@ -402,7 +402,7 @@ TEST_F(TestVariable, set_is_feasibility_improvable_if_has_upper_bound_margin) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, is_feasibility_improvable) {
-    /// This method is tested in set_is_feasibility_improvable().
+    /// This test is covered by set_is_feasibility_improvable().
 }
 
 /*****************************************************************************/
@@ -467,12 +467,12 @@ TEST_F(TestVariable, update_margin) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, has_lower_bound_margin) {
-    /// This method is tested in update_margin().
+    /// This test is covered by update_margin().
 }
 
 /*****************************************************************************/
 TEST_F(TestVariable, has_upper_bound_margin) {
-    /// This method is tested in update_margin().
+    /// This test is covered by update_margin().
 }
 
 /*****************************************************************************/
@@ -514,12 +514,12 @@ TEST_F(TestVariable, setup_sense_binary_or_integer) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, sense) {
-    /// This method is tested in set_sense().
+    /// This test is covered by set_sense().
 }
 
 /*****************************************************************************/
 TEST_F(TestVariable, sense_label) {
-    /// This method is tested in set_sense().
+    /// This test is covered by set_sense().
 }
 
 /*****************************************************************************/
@@ -530,7 +530,7 @@ TEST_F(TestVariable, set_lagrangian_coefficient) {
 }
 /*****************************************************************************/
 TEST_F(TestVariable, lagrangian_coefficient) {
-    /// This method is tested in lagrangian_coefficient().
+    /// This test is covered by lagrangian_coefficient().
 }
 
 /*****************************************************************************/
@@ -554,12 +554,12 @@ TEST_F(TestVariable, set_selection_ptr) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, selection_ptr) {
-    /// This method is tested in set_selection_ptr().
+    /// This test is covered by set_selection_ptr().
 }
 
 /*****************************************************************************/
 TEST_F(TestVariable, select) {
-    /// This method is tested in set_selection_ptr().
+    /// This test is covered by set_selection_ptr().
 }
 
 /*****************************************************************************/
@@ -644,34 +644,34 @@ TEST_F(TestVariable, register_related_constraint_ptr) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, reset_related_constraint_ptrs) {
-    /// This method is tested in register_related_constraint_ptr().
+    /// This test is covered by register_related_constraint_ptr().
 }
 
 /*****************************************************************************/
 TEST_F(TestVariable, sort_and_unique_related_constraint_ptrs) {
-    /// This method is tested in register_related_constraint_ptr().
+    /// This test is covered by register_related_constraint_ptr().
 }
 
 /*****************************************************************************/
 TEST_F(TestVariable, related_constraint_ptrs) {
-    /// This method is tested in register_related_constraint_ptr().
+    /// This test is covered by register_related_constraint_ptr().
 }
 
 /*****************************************************************************/
 TEST_F(TestVariable, setup_related_binary_coefficient_constraint_ptrs) {
-    /// This method is tested in
+    /// This test is covered by
     /// Model.setup_variable_related_binary_coefficient_constraint_ptrs().
 }
 
 /*****************************************************************************/
 TEST_F(TestVariable, reset_setup_binary_coefficient_constraint_ptrs) {
-    /// This method is tested in
+    /// This test is covered by
     /// Model.setup_variable_related_binary_coefficient_constraint_ptrs().
 }
 
 /*****************************************************************************/
 TEST_F(TestVariable, related_binary_coefficient_constraint_ptrs) {
-    /// This method is tested in
+    /// This test is covered by
     /// Model.setup_variable_related_binary_coefficient_constraint_ptrs().
 }
 
@@ -697,12 +697,12 @@ TEST_F(TestVariable, set_dependent_expression_ptr) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, reset_dependent_constraint_ptr) {
-    /// This method is tested in setup_uniform_sensitivity().
+    /// This test is covered by setup_uniform_sensitivity().
 }
 
 /*****************************************************************************/
 TEST_F(TestVariable, dependent_constraint_ptr) {
-    /// This method is tested in setup_uniform_sensitivity().
+    /// This test is covered by setup_uniform_sensitivity().
 }
 
 /*****************************************************************************/
@@ -735,17 +735,17 @@ TEST_F(TestVariable, register_constraint_sensitivity) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, reset_constraint_sensitivities) {
-    /// This method is tested in register_constraint_sensitivity().
+    /// This test is covered by register_constraint_sensitivity().
 }
 
 /*****************************************************************************/
 TEST_F(TestVariable, sort_constraint_sensitivities) {
-    /// This method is tested in register_related_constraint_ptr().
+    /// This test is covered by register_related_constraint_ptr().
 }
 
 /*****************************************************************************/
 TEST_F(TestVariable, constraint_sensitivities) {
-    /// This method is tested in register_constraint_sensitivity().
+    /// This test is covered by register_constraint_sensitivity().
 }
 
 /*****************************************************************************/
@@ -758,7 +758,7 @@ TEST_F(TestVariable, set_objective_sensitivity) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, objective_sensitivity) {
-    /// This method is tested in set_objective_sensitivity().
+    /// This test is covered by set_objective_sensitivity().
 }
 
 /*****************************************************************************/
@@ -771,7 +771,7 @@ TEST_F(TestVariable, setup_hash) {
     g(0) = x(0) + x(1) == 1;
     g(1) = x(0) == 1;
 
-    model.setup_structure();
+    model.builder().setup_structure();
     {
         x(0).setup_hash();
         std::uint64_t hash = reinterpret_cast<std::uint64_t>(&g(0)) +
@@ -788,7 +788,7 @@ TEST_F(TestVariable, setup_hash) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, hash) {
-    /// This method is tested in setup_hash().
+    /// This test is covered by setup_hash().
 }
 
 /*****************************************************************************/
@@ -801,19 +801,19 @@ TEST_F(TestVariable, reset_related_selection_constraint_ptr_index) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, setup_related_selection_constraint_ptr_index) {
-    /// This method is tested in
+    /// This test is covered by
     /// TestModel.setup_related_selection_constraint_ptr_index().
 }
 
 /*****************************************************************************/
 TEST_F(TestVariable, related_selection_constraint_ptr_index_min) {
-    /// This method is tested in
+    /// This test is covered by
     /// TestModel.setup_related_selection_constraint_ptr_index().
 }
 
 /*****************************************************************************/
 TEST_F(TestVariable, related_selection_constraint_ptr_index_max) {
-    /// This method is tested in
+    /// This test is covered by
     /// TestModel.setup_related_selection_constraint_ptr_index().
 }
 

@@ -30,16 +30,16 @@ TEST_F(TestSelectionMoveGenerator, setup) {
 
     x(0) = 1;
 
-    model.setup_unique_names();
-    model.setup_structure();
+    model.builder().setup_unique_names();
+    model.builder().setup_structure();
 
     preprocess::SelectionExtractor<int, double> selection_extractor(&model);
     selection_extractor.extract_by_number_of_variables_order(false, false);
     x(0).select();
-    model.setup_structure();
+    model.builder().setup_structure();
 
     auto selection_variable_ptrs =
-        model.variable_type_reference().selection_variable_ptrs;
+        model.reference().variable_type.selection_variable_ptrs;
 
     model.neighborhood().selection().setup(selection_variable_ptrs);
     model.neighborhood().selection().update_moves(true, false, false, false, 1);

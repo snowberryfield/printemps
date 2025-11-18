@@ -75,12 +75,12 @@ TEST_F(TestIncumbentHolder, try_update_incumbent_arg_model_ptr) {
     g(0) = x(0) + x(1) <= 1;
     g(1) = x(0) - x(1) == 1;
     model.minimize(x(0) + x(1));
-    model.setup_structure();
+    model.builder().setup_structure();
 
     {
         x(0) = 1;
         x(1) = 1;
-        model.update();
+        model.updater().update();
 
         solution::SolutionScore score;
         score.is_feasible                = false;
@@ -126,7 +126,7 @@ TEST_F(TestIncumbentHolder, try_update_incumbent_arg_model_ptr) {
     {
         x(0) = 1;
         x(1) = 0;
-        model.update();
+        model.updater().update();
 
         solution::SolutionScore score;
         score.is_feasible                = true;
@@ -289,62 +289,62 @@ TEST_F(TestIncumbentHolder, reset_local_augmented_incumbent) {
 
 /*****************************************************************************/
 TEST_F(TestIncumbentHolder, is_found_feasible_solution) {
-    /// This method is tested in try_update_incumbent_arg_solution().
+    /// This test is covered by try_update_incumbent_arg_solution().
 }
 
 /*****************************************************************************/
 TEST_F(TestIncumbentHolder, local_augmented_incumbent_solution) {
-    /// This method is tested in try_update_incumbent_arg_solution().
+    /// This test is covered by try_update_incumbent_arg_solution().
 }
 
 /*****************************************************************************/
 TEST_F(TestIncumbentHolder, global_augmented_incumbent_solution) {
-    /// This method is tested in try_update_incumbent_arg_solution().
+    /// This test is covered by try_update_incumbent_arg_solution().
 }
 
 /*****************************************************************************/
 TEST_F(TestIncumbentHolder, feasible_incumbent_solution) {
-    /// This method is tested in try_update_incumbent_arg_solution().
+    /// This test is covered by try_update_incumbent_arg_solution().
 }
 
 /*****************************************************************************/
 TEST_F(TestIncumbentHolder, update_dual_bound) {
-    /// This method is tested in initialize().
+    /// This test is covered by initialize().
 }
 
 /*****************************************************************************/
 TEST_F(TestIncumbentHolder, dual_bound) {
-    /// This method is tested in initialize().
+    /// This test is covered by initialize().
 }
 
 /*****************************************************************************/
 TEST_F(TestIncumbentHolder, local_augmented_incumbent_objective) {
-    /// This method is tested in initialize().
+    /// This test is covered by initialize().
 }
 
 /*****************************************************************************/
 TEST_F(TestIncumbentHolder, global_augmented_incumbent_objective) {
-    /// This method is tested in initialize().
+    /// This test is covered by initialize().
 }
 
 /*****************************************************************************/
 TEST_F(TestIncumbentHolder, feasible_incumbent_objective) {
-    /// This method is tested in initialize().
+    /// This test is covered by initialize().
 }
 
 /*****************************************************************************/
 TEST_F(TestIncumbentHolder, local_augmented_incumbent_score) {
-    /// This method is tested in try_update_incumbent_arg_solution().
+    /// This test is covered by try_update_incumbent_arg_solution().
 }
 
 /*****************************************************************************/
 TEST_F(TestIncumbentHolder, global_augmented_incumbent_score) {
-    /// This method is tested in try_update_incumbent_arg_solution().
+    /// This test is covered by try_update_incumbent_arg_solution().
 }
 
 /*****************************************************************************/
 TEST_F(TestIncumbentHolder, feasible_incumbent_score) {
-    /// This method is tested in try_update_incumbent_arg_solution().
+    /// This test is covered by try_update_incumbent_arg_solution().
 }
 
 }  // namespace

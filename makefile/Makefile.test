@@ -7,26 +7,14 @@ CC = gcc
 
 .PHOBY: test
 test: build
-	$(BUILD_DIR)/test_example; \
-	$(BUILD_DIR)/test_helper; \
-	$(BUILD_DIR)/test_mps; \
-	$(BUILD_DIR)/test_model_component; \
-	$(BUILD_DIR)/test_model; \
-	$(BUILD_DIR)/test_multi_array; \
-	$(BUILD_DIR)/test_neighborhood; \
-	$(BUILD_DIR)/test_option; \
-	$(BUILD_DIR)/test_option_enumerate; \
-	$(BUILD_DIR)/test_opb; \
-	$(BUILD_DIR)/test_preprocess; \
-	$(BUILD_DIR)/test_solution; \
-	$(BUILD_DIR)/test_standalone; \
-	$(BUILD_DIR)/test_utility; \
-	$(BUILD_DIR)/test_utility_graph; \
-	$(BUILD_DIR)/test_utility_json; \
-	$(BUILD_DIR)/test_utility_ucb1; \
-	$(BUILD_DIR)/test_utility_sparse;
+	@echo "Running all test executables..."
+	@for t in $(BUILD_DIR)/test_*; do \
+		if [ -x $$t ]; then \
+			echo "---- $$t ----"; \
+			$$t || exit 1; \
+		fi; \
+	done
 	
-
 .PHONY: build
 build:
 	mkdir -p $(BUILD_DIR) && \

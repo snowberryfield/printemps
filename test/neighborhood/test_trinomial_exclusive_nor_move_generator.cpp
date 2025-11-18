@@ -26,11 +26,11 @@ TEST_F(TestTrinomialExclusiveNorMoveGenerator, setup) {
     auto& x = model.create_variables("x", 3, 0, 1);
     auto& c = model.create_constraint("c", x[0] + x[1] == 2 * x[2]);
 
-    model.setup_unique_names();
-    model.setup_structure();
+    model.builder().setup_unique_names();
+    model.builder().setup_structure();
 
     auto& trinomial_exclusive_nor_ptrs =
-        model.constraint_type_reference().trinomial_exclusive_nor_ptrs;
+        model.reference().constraint_type.trinomial_exclusive_nor_ptrs;
 
     model.neighborhood().trinomial_exclusive_nor().setup(
         trinomial_exclusive_nor_ptrs);

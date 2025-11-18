@@ -17,7 +17,7 @@ class TabuSearchControllerLogger {
     std::string   m_file_name;
     std::ofstream m_ofstream;
 
-    TabuSearchController<T_Variable, T_Expression> *     m_controller_ptr;
+    TabuSearchController<T_Variable, T_Expression>      *m_controller_ptr;
     TabuSearchControllerState<T_Variable, T_Expression> *m_state_ptr;
 
     /*************************************************************************/
@@ -31,8 +31,8 @@ class TabuSearchControllerLogger {
     }
     /*************************************************************************/
     TabuSearchControllerLogger(
-        const std::string &                                  a_FILE_NAME,
-        TabuSearchController<T_Variable, T_Expression> *     a_controller_ptr,
+        const std::string                                   &a_FILE_NAME,
+        TabuSearchController<T_Variable, T_Expression>      *a_controller_ptr,
         TabuSearchControllerState<T_Variable, T_Expression> *a_state_ptr) {
         this->setup(a_FILE_NAME, a_controller_ptr, a_state_ptr);
     }
@@ -49,8 +49,8 @@ class TabuSearchControllerLogger {
 
     /*************************************************************************/
     void setup(
-        const std::string &                                  a_FILE_NAME,
-        TabuSearchController<T_Variable, T_Expression> *     a_controller_ptr,
+        const std::string                                   &a_FILE_NAME,
+        TabuSearchController<T_Variable, T_Expression>      *a_controller_ptr,
         TabuSearchControllerState<T_Variable, T_Expression> *a_state_ptr) {
         this->initialize();
         m_file_name = a_FILE_NAME;
@@ -65,9 +65,10 @@ class TabuSearchControllerLogger {
         auto model_ptr = m_controller_ptr->model_ptr();
         m_ofstream << "#instance_name: " << model_ptr->name() << std::endl;
         m_ofstream << "#number_of_variables: "
-                   << model_ptr->number_of_variables() << std::endl;
+                   << model_ptr->reference().number_of_variables() << std::endl;
         m_ofstream << "#number_of_Constraints: "
-                   << model_ptr->number_of_constraints() << std::endl;
+                   << model_ptr->reference().number_of_constraints()
+                   << std::endl;
     }
 
     /*************************************************************************/

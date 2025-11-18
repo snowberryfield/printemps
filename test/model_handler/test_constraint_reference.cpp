@@ -21,7 +21,7 @@ class TestConstraintReference : public ::testing::Test {
 
 /*****************************************************************************/
 TEST_F(TestConstraintReference, initialize) {
-    model_component::ConstraintReference<int, double> reference;
+    model_handler::ConstraintReference<int, double> reference;
 
     EXPECT_TRUE(reference.constraint_ptrs.empty());
     EXPECT_TRUE(reference.enabled_constraint_ptrs.empty());

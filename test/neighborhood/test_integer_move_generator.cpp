@@ -31,11 +31,11 @@ TEST_F(TestIntegerMoveGenerator, setup) {
     x(0).fix();
     x(9).fix();
 
-    model.setup_unique_names();
-    model.setup_structure();
+    model.builder().setup_unique_names();
+    model.builder().setup_structure();
 
     auto integer_variable_ptrs =
-        model.variable_type_reference().integer_variable_ptrs;
+        model.reference().variable_type.integer_variable_ptrs;
 
     model.neighborhood().integer().setup(integer_variable_ptrs);
     model.neighborhood().integer().update_moves(true, false, false, false, 1);

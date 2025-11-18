@@ -53,12 +53,11 @@ TEST_F(TestSelectionExtractor, extract_by_defined_order) {
      */
     model.create_constraint("c_3", x_2.selection());
 
-    model.setup_structure();
+    model.builder().setup_structure();
     preprocess::SelectionExtractor<int, double> selection_extractor(&model);
     selection_extractor.extract_by_defined_order(false);
-    model.setup_structure();
+    model.builder().setup_structure();
 
-    EXPECT_EQ(2, model.number_of_selection_constraints());
     EXPECT_EQ(2, static_cast<int>(model.selections().size()));
 
     /**
@@ -104,16 +103,17 @@ TEST_F(TestSelectionExtractor, extract_by_defined_order) {
     /// Selection
     {
         auto variable_ptrs =
-            model.variable_type_reference().selection_variable_ptrs;
-        EXPECT_EQ(10 + 20 * 20, model.number_of_selection_variables());
+            model.reference().variable_type.selection_variable_ptrs;
+        EXPECT_EQ(10 + 20 * 20,
+                  model.reference().number_of_selection_variables());
     }
 
     /// Binary
     {
         auto variable_ptrs =
-            model.variable_type_reference().binary_variable_ptrs;
+            model.reference().variable_type.binary_variable_ptrs;
         EXPECT_EQ(10 * 10 + 20 * 20 + 2 - (10 + 20 * 20),
-                  model.number_of_binary_variables());
+                  model.reference().number_of_binary_variables());
     }
 }
 
@@ -151,13 +151,12 @@ TEST_F(TestSelectionExtractor, extract_by_number_of_variables_smaller_order) {
      */
     model.create_constraint("c_3", x_2.selection());
 
-    model.setup_structure();
+    model.builder().setup_structure();
 
     preprocess::SelectionExtractor<int, double> selection_extractor(&model);
     selection_extractor.extract_by_number_of_variables_order(true, false);
-    model.setup_structure();
+    model.builder().setup_structure();
 
-    EXPECT_EQ(2, model.number_of_selection_constraints());
     EXPECT_EQ(2, static_cast<int>(model.selections().size()));
 
     /**
@@ -207,16 +206,16 @@ TEST_F(TestSelectionExtractor, extract_by_number_of_variables_smaller_order) {
     /// Selection
     {
         auto variable_ptrs =
-            model.variable_type_reference().selection_variable_ptrs;
-        EXPECT_EQ(10 + 31, model.number_of_selection_variables());
+            model.reference().variable_type.selection_variable_ptrs;
+        EXPECT_EQ(10 + 31, model.reference().number_of_selection_variables());
     }
 
     /// Binary
     {
         auto variable_ptrs =
-            model.variable_type_reference().binary_variable_ptrs;
+            model.reference().variable_type.binary_variable_ptrs;
         EXPECT_EQ(10 * 10 + 20 * 20 + 2 - (10 + 31),
-                  model.number_of_binary_variables());
+                  model.reference().number_of_binary_variables());
     }
 }
 
@@ -255,14 +254,13 @@ TEST_F(TestSelectionExtractor, extract_by_number_of_variables_larger_order) {
      */
     model.create_constraint("c_3", x_2.selection());
 
-    model.setup_structure();
+    model.builder().setup_structure();
     preprocess::SelectionExtractor<int, double> selection_extractor(&model);
     selection_extractor.extract_by_number_of_variables_order(false, false);
-    model.setup_structure();
+    model.builder().setup_structure();
 
-    model.setup_structure();
+    model.builder().setup_structure();
 
-    EXPECT_EQ(2, model.number_of_selection_constraints());
     EXPECT_EQ(2, static_cast<int>(model.selections().size()));
 
     /**
@@ -308,16 +306,17 @@ TEST_F(TestSelectionExtractor, extract_by_number_of_variables_larger_order) {
     /// Selection
     {
         auto variable_ptrs =
-            model.variable_type_reference().selection_variable_ptrs;
-        EXPECT_EQ(20 * 20 + 1 * 10, model.number_of_selection_variables());
+            model.reference().variable_type.selection_variable_ptrs;
+        EXPECT_EQ(20 * 20 + 1 * 10,
+                  model.reference().number_of_selection_variables());
     }
 
     /// Binary
     {
         auto variable_ptrs =
-            model.variable_type_reference().binary_variable_ptrs;
+            model.reference().variable_type.binary_variable_ptrs;
         EXPECT_EQ(10 * 10 + 20 * 20 + 2 - (20 * 20 + 1 * 10),
-                  model.number_of_binary_variables());
+                  model.reference().number_of_binary_variables());
     }
 }
 
@@ -352,12 +351,11 @@ TEST_F(TestSelectionExtractor, extract_by_independent) {
      */
     model.create_constraint("c_3", x_2.selection());
 
-    model.setup_structure();
+    model.builder().setup_structure();
     preprocess::SelectionExtractor<int, double> selection_extractor(&model);
     selection_extractor.extract_by_independent(false);
-    model.setup_structure();
+    model.builder().setup_structure();
 
-    EXPECT_EQ(1, model.number_of_selection_constraints());
     EXPECT_EQ(1, static_cast<int>(model.selections().size()));
 
     /**
@@ -389,16 +387,16 @@ TEST_F(TestSelectionExtractor, extract_by_independent) {
     /// Selection
     {
         auto variable_ptrs =
-            model.variable_type_reference().selection_variable_ptrs;
-        EXPECT_EQ(10, model.number_of_selection_variables());
+            model.reference().variable_type.selection_variable_ptrs;
+        EXPECT_EQ(10, model.reference().number_of_selection_variables());
     }
 
     /// Binary
     {
         auto variable_ptrs =
-            model.variable_type_reference().binary_variable_ptrs;
+            model.reference().variable_type.binary_variable_ptrs;
         EXPECT_EQ(10 * 10 + 20 * 20 + 2 - 10,
-                  model.number_of_binary_variables());
+                  model.reference().number_of_binary_variables());
     }
 }
 
@@ -435,12 +433,11 @@ TEST_F(TestSelectionExtractor, extract_by_user_defined) {
 
     c_1[0].set_is_user_defined_selection(true);
 
-    model.setup_structure();
+    model.builder().setup_structure();
     preprocess::SelectionExtractor<int, double> selection_extractor(&model);
     selection_extractor.extract_by_user_defined(false);
-    model.setup_structure();
+    model.builder().setup_structure();
 
-    EXPECT_EQ(1, model.number_of_selection_constraints());
     EXPECT_EQ(1, static_cast<int>(model.selections().size()));
 
     /**
@@ -480,16 +477,16 @@ TEST_F(TestSelectionExtractor, extract_by_user_defined) {
     /// Selection
     {
         auto variable_ptrs =
-            model.variable_type_reference().selection_variable_ptrs;
-        EXPECT_EQ(31, model.number_of_selection_variables());
+            model.reference().variable_type.selection_variable_ptrs;
+        EXPECT_EQ(31, model.reference().number_of_selection_variables());
     }
 
     /// Binary
     {
         auto variable_ptrs =
-            model.variable_type_reference().binary_variable_ptrs;
+            model.reference().variable_type.binary_variable_ptrs;
         EXPECT_EQ(10 * 10 + 20 * 20 + 2 - 31,
-                  model.number_of_binary_variables());
+                  model.reference().number_of_binary_variables());
     }
 }
 }  // namespace

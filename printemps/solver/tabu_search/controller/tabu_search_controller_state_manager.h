@@ -1033,25 +1033,26 @@ class TabuSearchControllerStateManager {
     /*************************************************************************/
     inline void update_initial_tabu_tenure(void) {
         if (m_state.is_global_augmented_incumbent_updated) {
-            m_state.initial_tabu_tenure =
-                std::min(m_option.tabu_search.initial_tabu_tenure,
-                         m_model_ptr->number_of_mutable_variables());
+            m_state.initial_tabu_tenure = std::min(
+                m_option.tabu_search.initial_tabu_tenure,
+                m_model_ptr->reference().number_of_mutable_variables());
             return;
         }
 
         if (m_state.is_not_updated) {
-            m_state.initial_tabu_tenure =
-                std::max(m_state.initial_tabu_tenure - 1,
-                         std::min(m_option.tabu_search.initial_tabu_tenure,
-                                  m_model_ptr->number_of_mutable_variables()));
+            m_state.initial_tabu_tenure = std::max(
+                m_state.initial_tabu_tenure - 1,
+                std::min(
+                    m_option.tabu_search.initial_tabu_tenure,
+                    m_model_ptr->reference().number_of_mutable_variables()));
             return;
         }
 
         const auto LAST_TABU_TENURE = m_state.tabu_search_result.tabu_tenure;
         if (LAST_TABU_TENURE > m_state.initial_tabu_tenure) {
-            m_state.initial_tabu_tenure =
-                std::min(m_state.initial_tabu_tenure + 1,
-                         this->m_model_ptr->number_of_mutable_variables());
+            m_state.initial_tabu_tenure = std::min(
+                m_state.initial_tabu_tenure + 1,
+                this->m_model_ptr->reference().number_of_mutable_variables());
             return;
         }
 
@@ -1063,10 +1064,10 @@ class TabuSearchControllerStateManager {
             return;
         }
 
-        m_state.initial_tabu_tenure =
-            std::max(m_state.initial_tabu_tenure - 1,
-                     std::min(m_option.tabu_search.initial_tabu_tenure,
-                              m_model_ptr->number_of_mutable_variables()));
+        m_state.initial_tabu_tenure = std::max(
+            m_state.initial_tabu_tenure - 1,
+            std::min(m_option.tabu_search.initial_tabu_tenure,
+                     m_model_ptr->reference().number_of_mutable_variables()));
     }
 
     /*************************************************************************/

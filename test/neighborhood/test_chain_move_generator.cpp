@@ -40,7 +40,7 @@ TEST_F(TestChainMoveGenerator, register_move) {
 
 /*****************************************************************************/
 TEST_F(TestChainMoveGenerator, clear_moves) {
-    /// This method is tested in register_move().
+    /// This test is covered by register_move().
 }
 
 /*****************************************************************************/
@@ -83,7 +83,7 @@ TEST_F(TestChainMoveGenerator, deduplicate_moves) {
 
 /*****************************************************************************/
 TEST_F(TestChainMoveGenerator, sort_moves) {
-    /// This method is tested in deduplicate_moves().
+    /// This test is covered by deduplicate_moves().
 }
 
 /*****************************************************************************/

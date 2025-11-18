@@ -18,11 +18,11 @@ class Memory {
    private:
     model::Model<T_Variable, T_Expression> *m_model_ptr;
 
-    long   m_total_update_count;
-    double m_total_update_count_reciprocal;
+    long long m_total_update_count;
+    double    m_total_update_count_reciprocal;
 
-    long   m_total_violation_count;
-    double m_total_violation_count_reciprocal;
+    long long m_total_violation_count;
+    double    m_total_violation_count_reciprocal;
 
     double m_primal_intensity_numerator;
     double m_primal_intensity_denominator_reciprocal;
@@ -67,14 +67,14 @@ class Memory {
         this->initialize();
         m_model_ptr = a_model_ptr;
 
-        auto &variable_ptrs = m_model_ptr->variable_reference().variable_ptrs;
+        auto &variable_ptrs = m_model_ptr->reference().variable.variable_ptrs;
         for (auto &&variable_ptr : variable_ptrs) {
             variable_ptr->reset_local_last_update_iteration();
             variable_ptr->reset_update_count();
         }
 
         auto &constraint_ptrs =
-            m_model_ptr->constraint_reference().constraint_ptrs;
+            m_model_ptr->reference().constraint.constraint_ptrs;
         for (auto &&constraint_ptr : constraint_ptrs) {
             constraint_ptr->reset_violation_count();
         }
@@ -130,14 +130,14 @@ class Memory {
         }
 
         m_total_update_count_reciprocal =
-            1.0 / static_cast<double>(std::max(1L, m_total_update_count));
+            1.0 / static_cast<double>(std::max(1LL, m_total_update_count));
         m_primal_intensity_denominator_reciprocal =
             m_total_update_count_reciprocal * m_total_update_count_reciprocal;
         m_primal_intensity = m_primal_intensity_numerator *
                              m_primal_intensity_denominator_reciprocal;
 
         m_total_violation_count_reciprocal =
-            1.0 / static_cast<double>(std::max(1L, m_total_violation_count));
+            1.0 / static_cast<double>(std::max(1LL, m_total_violation_count));
         m_dual_intensity_denominator_reciprocal =
             m_total_violation_count_reciprocal *
             m_total_violation_count_reciprocal;
@@ -147,7 +147,7 @@ class Memory {
 
     /*************************************************************************/
     inline void reset_local_last_update_iterations(void) {
-        auto &variable_ptrs = m_model_ptr->variable_reference().variable_ptrs;
+        auto &variable_ptrs = m_model_ptr->reference().variable.variable_ptrs;
         for (auto &&variable_ptr : variable_ptrs) {
             variable_ptr->reset_local_last_update_iteration();
         }

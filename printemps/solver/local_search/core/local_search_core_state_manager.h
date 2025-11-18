@@ -53,7 +53,7 @@ class LocalSearchCoreStateManager {
         /**
          * Evaluate the initial solution score.
          */
-        m_state.current_solution_score  = m_model_ptr->evaluate({});
+        m_state.current_solution_score  = m_model_ptr->evaluator().evaluate({});
         m_state.previous_solution_score = m_state.current_solution_score;
         m_state.update_status =
             m_global_state_ptr->incumbent_holder.try_update_incumbent(

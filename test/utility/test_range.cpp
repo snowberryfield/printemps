@@ -61,22 +61,22 @@ TEST_F(TestRange, update) {
 
 /*****************************************************************************/
 TEST_F(TestRange, min) {
-    /// This method is tested in update().
+    /// This test is covered by update().
 }
 
 /*****************************************************************************/
 TEST_F(TestRange, max) {
-    /// This method is tested in update().
+    /// This test is covered by update().
 }
 
 /*****************************************************************************/
 TEST_F(TestRange, max_abs) {
-    /// This method is tested in update().
+    /// This test is covered by update().
 }
 
 /*****************************************************************************/
 TEST_F(TestRange, range) {
-    /// This method is tested in update().
+    /// This test is covered by update().
 }
 }  // namespace
 /*****************************************************************************/

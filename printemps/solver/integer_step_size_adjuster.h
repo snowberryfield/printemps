@@ -17,7 +17,7 @@ class IntegerStepSizeAdjuster {
    public:
     /*************************************************************************/
     IntegerStepSizeAdjuster(model::Model<T_Variable, T_Expression> *a_model_ptr,
-                            const option::Option &                  a_OPTION) {
+                            const option::Option                   &a_OPTION) {
         this->setup(a_model_ptr, a_OPTION);
     }
 
@@ -34,7 +34,7 @@ class IntegerStepSizeAdjuster {
 
     /*************************************************************************/
     void setup(model::Model<T_Variable, T_Expression> *a_model_ptr,
-               const option::Option &                  a_OPTION) {
+               const option::Option                   &a_OPTION) {
         m_model_ptr = a_model_ptr;
         m_option    = a_OPTION;
     }
@@ -43,7 +43,7 @@ class IntegerStepSizeAdjuster {
     inline void adjust(
         neighborhood::Move<T_Variable, T_Expression> *a_move_ptr,
         const solution::SolutionScore &a_REFERENCE_SOLUTION_SCORE) const {
-        auto &    variable_ptr   = a_move_ptr->alterations.back().first;
+        auto     &variable_ptr   = a_move_ptr->alterations.back().first;
         const int ORIGINAL       = variable_ptr->value();
         const int INITIAL_TARGET = a_move_ptr->alterations.back().second;
         const int DIRECTION      = INITIAL_TARGET - ORIGINAL > 0 ? 1 : -1;
@@ -58,9 +58,10 @@ class IntegerStepSizeAdjuster {
         }
 
         solution::SolutionScore solution_score_trial;
+        const auto             &EVALUATOR = m_model_ptr->evaluator();
 
-        m_model_ptr->evaluate_multi(&solution_score_trial, move_trial,
-                                    a_REFERENCE_SOLUTION_SCORE);
+        EVALUATOR.evaluate_multi(&solution_score_trial, move_trial,
+                                 a_REFERENCE_SOLUTION_SCORE);
 
         int    target_candidate = INITIAL_TARGET;
         double score_min = solution_score_trial.global_augmented_objective;
@@ -72,8 +73,8 @@ class IntegerStepSizeAdjuster {
 
         while (true) {
             move_trial.alterations.back().second = target;
-            m_model_ptr->evaluate_multi(&solution_score_trial, move_trial,
-                                        a_REFERENCE_SOLUTION_SCORE);
+            EVALUATOR.evaluate_multi(&solution_score_trial, move_trial,
+                                     a_REFERENCE_SOLUTION_SCORE);
 
             if (solution_score_trial.global_augmented_objective < score_min) {
                 if (DIRECTION > 0) {
@@ -107,8 +108,8 @@ class IntegerStepSizeAdjuster {
         while (upper_bound - lower_bound > 1) {
             target = (lower_bound + upper_bound) / 2;
             move_trial.alterations.back().second = target;
-            m_model_ptr->evaluate_multi(&solution_score_trial, move_trial,
-                                        a_REFERENCE_SOLUTION_SCORE);
+            EVALUATOR.evaluate_multi(&solution_score_trial, move_trial,
+                                     a_REFERENCE_SOLUTION_SCORE);
 
             if (solution_score_trial.global_augmented_objective < score_min) {
                 if (DIRECTION > 0) {

@@ -26,11 +26,11 @@ TEST_F(TestInvertedIntegersMoveGenerator, setup) {
     auto& x = model.create_variables("x", 2, -10, 10);
     auto& c = model.create_constraint("c", x[0] + x[1] == 0);
 
-    model.setup_unique_names();
-    model.setup_structure();
+    model.builder().setup_unique_names();
+    model.builder().setup_structure();
 
     auto& inverted_integers_ptrs =
-        model.constraint_type_reference().inverted_integers_ptrs;
+        model.reference().constraint_type.inverted_integers_ptrs;
 
     model.neighborhood().inverted_integers().setup(  //
         inverted_integers_ptrs);

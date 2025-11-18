@@ -145,37 +145,37 @@ TEST_F(TestSolutionArchive, push) {
 
 /*****************************************************************************/
 TEST_F(TestSolutionArchive, size) {
-    /// This method is tested in push();
+    /// This test is covered by push();
 }
 
 /*****************************************************************************/
 TEST_F(TestSolutionArchive, max_size) {
-    /// This method is tested in setup().
+    /// This test is covered by setup().
 }
 
 /*****************************************************************************/
 TEST_F(TestSolutionArchive, is_ascending) {
-    /// This method is tested in setup().
+    /// This test is covered by setup().
 }
 
 /*****************************************************************************/
 TEST_F(TestSolutionArchive, solutions) {
-    /// This method is tested in push().
+    /// This test is covered by push().
 }
 
 /*****************************************************************************/
 TEST_F(TestSolutionArchive, name) {
-    /// This method is tested in setup().
+    /// This test is covered by setup().
 }
 
 /*****************************************************************************/
 TEST_F(TestSolutionArchive, number_of_variables) {
-    /// This method is tested in setup().
+    /// This test is covered by setup().
 }
 
 /*****************************************************************************/
 TEST_F(TestSolutionArchive, number_of_constraints) {
-    /// This method is tested in push().
+    /// This test is covered by push().
 }
 }  // namespace
 /*****************************************************************************/

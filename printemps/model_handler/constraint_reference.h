@@ -3,33 +3,34 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_MODEL_COMPONENT_CONSTRAINT_REFERENCE_H__
-#define PRINTEMPS_MODEL_COMPONENT_CONSTRAINT_REFERENCE_H__
+#ifndef PRINTEMPS_MODEL_HANDLER_CONSTRAINT_REFERENCE_H__
+#define PRINTEMPS_MODEL_HANDLER_CONSTRAINT_REFERENCE_H__
 
-namespace printemps::model_component {
-/*****************************************************************************/
-template <class T_Variable, class T_Expression>
-class Constraint;
-
+namespace printemps::model_handler {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 struct ConstraintReference {
-    std::vector<Constraint<T_Variable, T_Expression> *> constraint_ptrs;
-    std::vector<Constraint<T_Variable, T_Expression> *> enabled_constraint_ptrs;
-    std::vector<Constraint<T_Variable, T_Expression> *>
+    std::vector<model_component::Constraint<T_Variable, T_Expression> *>
+        constraint_ptrs;
+    std::vector<model_component::Constraint<T_Variable, T_Expression> *>
+        enabled_constraint_ptrs;
+    std::vector<model_component::Constraint<T_Variable, T_Expression> *>
         disabled_constraint_ptrs;
 
-    std::vector<Constraint<T_Variable, T_Expression> *> less_ptrs;
-    std::vector<Constraint<T_Variable, T_Expression> *> equal_ptrs;
-    std::vector<Constraint<T_Variable, T_Expression> *> greater_ptrs;
+    std::vector<model_component::Constraint<T_Variable, T_Expression> *>
+        less_ptrs;
+    std::vector<model_component::Constraint<T_Variable, T_Expression> *>
+        equal_ptrs;
+    std::vector<model_component::Constraint<T_Variable, T_Expression> *>
+        greater_ptrs;
 
     /*************************************************************************/
-    ConstraintReference(void) {
+    ConstraintReference(void) noexcept {
         this->initialize();
     }
 
     /*************************************************************************/
-    void initialize(void) {
+    void initialize(void) noexcept {
         this->constraint_ptrs.clear();
         this->enabled_constraint_ptrs.clear();
         this->disabled_constraint_ptrs.clear();
@@ -38,7 +39,7 @@ struct ConstraintReference {
         this->greater_ptrs.clear();
     }
 };
-}  // namespace printemps::model_component
+}  // namespace printemps::model_handler
 #endif
 /*****************************************************************************/
 // END

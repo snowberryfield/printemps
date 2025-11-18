@@ -43,7 +43,7 @@ TEST_F(TestAbstractMoveGenerator, moves) {
 
 /*****************************************************************************/
 TEST_F(TestAbstractMoveGenerator, set_moves) {
-    /// This method is tested in moves().
+    /// This test is covered by moves().
 }
 
 /*****************************************************************************/
@@ -56,7 +56,7 @@ TEST_F(TestAbstractMoveGenerator, flags) {
 
 /*****************************************************************************/
 TEST_F(TestAbstractMoveGenerator, set_flags) {
-    /// This method is tested in flags().
+    /// This test is covered by flags().
 }
 
 /*****************************************************************************/
@@ -71,12 +71,12 @@ TEST_F(TestAbstractMoveGenerator, is_enabled) {
 
 /*****************************************************************************/
 TEST_F(TestAbstractMoveGenerator, enable) {
-    /// This method is tested in is_enabled().
+    /// This test is covered by is_enabled().
 }
 
 /*****************************************************************************/
 TEST_F(TestAbstractMoveGenerator, disable) {
-    /// This method is tested in is_enabled().
+    /// This test is covered by is_enabled().
 }
 
 /*****************************************************************************/

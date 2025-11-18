@@ -26,10 +26,10 @@ TEST_F(TestAggregationMoveGenerator, setup) {
     auto& x = model.create_variables("x", 2, -10, 10);
     auto& c = model.create_constraint("c", 2 * x[0] + 4 * x[1] == 10);
 
-    model.setup_unique_names();
-    model.setup_structure();
+    model.builder().setup_unique_names();
+    model.builder().setup_structure();
 
-    auto aggregation_ptrs = model.constraint_type_reference().aggregation_ptrs;
+    auto aggregation_ptrs = model.reference().constraint_type.aggregation_ptrs;
 
     model.neighborhood().aggregation().setup(aggregation_ptrs);
     model.neighborhood().aggregation().update_moves(  //

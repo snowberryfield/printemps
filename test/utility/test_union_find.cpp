@@ -41,7 +41,7 @@ TEST_F(TestUnionFind, initialize) {
 
 /*****************************************************************************/
 TEST_F(TestUnionFind, setup) {
-    /// This method is tested in initialize();
+    /// This test is covered by initialize();
 }
 
 /*****************************************************************************/
@@ -83,12 +83,12 @@ TEST_F(TestUnionFind, is_same) {
 
 /*****************************************************************************/
 TEST_F(TestUnionFind, unite) {
-    /// This method is tested in is_same();
+    /// This test is covered by is_same();
 }
 
 /*****************************************************************************/
 TEST_F(TestUnionFind, sizes) {
-    /// This method is tested in is_same();
+    /// This test is covered by is_same();
 }
 
 }  // namespace

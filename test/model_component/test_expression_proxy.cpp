@@ -206,7 +206,7 @@ TEST_F(TestExpressionProxy, scalar_update_arg_move) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, scalar_value) {
-    /// This method is tested in other cases.
+    /// This test is covered by other cases.
 }
 
 /*****************************************************************************/
@@ -220,7 +220,7 @@ TEST_F(TestExpressionProxy, scalar_set_name) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, scalar_name) {
-    /// This method is tested in scalar_set_name().
+    /// This test is covered by scalar_set_name().
 }
 
 /*****************************************************************************/
@@ -446,12 +446,12 @@ TEST_F(TestExpressionProxy, scalar_is_enabled) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, scalar_enable) {
-    /// This method is tested in scalar_is_enabled().
+    /// This test is covered by scalar_is_enabled().
 }
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, scalar_disable) {
-    /// This method is tested in scalar_is_enabled().
+    /// This test is covered by scalar_is_enabled().
 }
 
 /*****************************************************************************/
@@ -837,7 +837,7 @@ TEST_F(TestExpressionProxy, one_dimensional_set_name) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, one_dimensional_name) {
-    /// This method is tested in two_dimensional_set_name().
+    /// This test is covered by two_dimensional_set_name().
 }
 
 /*****************************************************************************/
@@ -1106,12 +1106,12 @@ TEST_F(TestExpressionProxy, one_dimensional_is_enabled) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, one_dimensional_enable) {
-    /// This method is tested in one_dimensional_is_enabled().
+    /// This test is covered by one_dimensional_is_enabled().
 }
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, one_dimensional_disable) {
-    /// This method is tested in one_dimensional_is_enabled().
+    /// This test is covered by one_dimensional_is_enabled().
 }
 
 /*****************************************************************************/
@@ -1381,7 +1381,7 @@ TEST_F(TestExpressionProxy, two_dimensional_set_name) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, two_dimensional_name) {
-    /// This method is tested in two_dimensional_set_name().
+    /// This test is covered by two_dimensional_set_name().
 }
 
 /*****************************************************************************/
@@ -1700,12 +1700,12 @@ TEST_F(TestExpressionProxy, two_dimensional_is_enabled) {
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, two_dimensional_enable) {
-    /// This method is tested in two_dimensional_is_enabled().
+    /// This test is covered by two_dimensional_is_enabled().
 }
 
 /*****************************************************************************/
 TEST_F(TestExpressionProxy, two_dimensional_disable) {
-    /// This method is tested in two_dimensional_is_enabled().
+    /// This test is covered by two_dimensional_is_enabled().
 }
 
 /*****************************************************************************/

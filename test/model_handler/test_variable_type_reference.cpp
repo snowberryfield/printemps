@@ -21,7 +21,7 @@ class TestVariableTypeReference : public ::testing::Test {
 
 /*****************************************************************************/
 TEST_F(TestVariableTypeReference, initialize) {
-    model_component::VariableTypeReference<int, double> reference;
+    model_handler::VariableTypeReference<int, double> reference;
 
     EXPECT_TRUE(reference.binary_variable_ptrs.empty());
     EXPECT_TRUE(reference.integer_variable_ptrs.empty());

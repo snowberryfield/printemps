@@ -99,22 +99,22 @@ TEST_F(TestUCB1Learner, learn) {
 
 /*****************************************************************************/
 TEST_F(TestUCB1Learner, actions) {
-    /// This method is tested in constructor_with_arg().
+    /// This test is covered by constructor_with_arg().
 }
 
 /*****************************************************************************/
 TEST_F(TestUCB1Learner, best_action) {
-    /// This method is tested in constructor_with_arg().
+    /// This test is covered by constructor_with_arg().
 }
 
 /*****************************************************************************/
 TEST_F(TestUCB1Learner, total_number_of_samples) {
-    /// This method is tested in constructor_with_arg().
+    /// This test is covered by constructor_with_arg().
 }
 
 /*****************************************************************************/
 TEST_F(TestUCB1Learner, decay_factor) {
-    /// This method is tested in constructor_with_arg().
+    /// This test is covered by constructor_with_arg().
 }
 
 }  // namespace

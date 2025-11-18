@@ -27,11 +27,11 @@ TEST_F(TestConstantRatioIntegersMoveGenerator, setup) {
         auto& x = model.create_variables("x", 2, -10, 10);
         auto& c = model.create_constraint("c", 2 * x[0] - x[1] == 0);
 
-        model.setup_unique_names();
-        model.setup_structure();
+        model.builder().setup_unique_names();
+        model.builder().setup_structure();
 
         auto& constant_ratio_integers_ptrs =
-            model.constraint_type_reference().constant_ratio_integers_ptrs;
+            model.reference().constraint_type.constant_ratio_integers_ptrs;
         model.neighborhood().constant_ratio_integers().setup(  //
             constant_ratio_integers_ptrs);
         model.neighborhood().constant_ratio_integers().update_moves(  //
@@ -75,11 +75,11 @@ TEST_F(TestConstantRatioIntegersMoveGenerator, setup) {
         auto& x = model.create_variables("x", 2, -10, 10);
         auto& c = model.create_constraint("c", 2 * x[0] + x[1] == 0);
 
-        model.setup_unique_names();
-        model.setup_structure();
+        model.builder().setup_unique_names();
+        model.builder().setup_structure();
 
         auto& constant_ratio_integers_ptrs =
-            model.constraint_type_reference().constant_ratio_integers_ptrs;
+            model.reference().constraint_type.constant_ratio_integers_ptrs;
         model.neighborhood().constant_ratio_integers().setup(  //
             constant_ratio_integers_ptrs);
         model.neighborhood().constant_ratio_integers().update_moves(  //

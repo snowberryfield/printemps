@@ -27,11 +27,11 @@ TEST_F(TestSoftSelectionMoveGenerator, setup) {
     auto& y = model.create_variable("y", 0, 1);
     auto& c = model.create_constraint("c", -x.sum() == -y);
 
-    model.setup_unique_names();
-    model.setup_structure();
+    model.builder().setup_unique_names();
+    model.builder().setup_structure();
 
     auto soft_selection_ptrs =
-        model.constraint_type_reference().soft_selection_ptrs;
+        model.reference().constraint_type.soft_selection_ptrs;
 
     model.neighborhood().soft_selection().setup(soft_selection_ptrs);
 

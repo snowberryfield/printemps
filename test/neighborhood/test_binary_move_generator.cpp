@@ -26,11 +26,11 @@ TEST_F(TestBinaryMoveGenerator, setup) {
     auto& x = model.create_variables("x", 10, 0, 1);
     x(0).fix_by(0);
 
-    model.setup_unique_names();
-    model.setup_structure();
+    model.builder().setup_unique_names();
+    model.builder().setup_structure();
 
     auto binary_variable_ptrs =
-        model.variable_type_reference().binary_variable_ptrs;
+        model.reference().variable_type.binary_variable_ptrs;
 
     model.neighborhood().binary().setup(binary_variable_ptrs);
     model.neighborhood().binary().update_moves(  //

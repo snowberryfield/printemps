@@ -26,11 +26,11 @@ TEST_F(TestExclusiveNorMoveGenerator, setup) {
     auto& x = model.create_variables("x", 2, 0, 1);
     auto& c = model.create_constraint("c", x[0] - x[1] == 0);
 
-    model.setup_unique_names();
-    model.setup_structure();
+    model.builder().setup_unique_names();
+    model.builder().setup_structure();
 
     auto& exclusive_nor_ptrs =
-        model.constraint_type_reference().exclusive_nor_ptrs;
+        model.reference().constraint_type.exclusive_nor_ptrs;
 
     model.neighborhood().exclusive_nor().setup(exclusive_nor_ptrs);
     model.neighborhood().exclusive_nor().update_moves(  //

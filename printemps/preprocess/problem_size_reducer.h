@@ -568,12 +568,12 @@ class ProblemSizeReducer {
             a_IS_ENABLED_PRINT);
 
         const int SET_PARTITIONINGS_SIZE =
-            m_model_ptr->constraint_type_reference()
-                .set_partitioning_ptrs.size();
+            m_model_ptr->reference()
+                .constraint_type.set_partitioning_ptrs.size();
         const int SET_COVERINGS_SIZE =
-            m_model_ptr->constraint_type_reference().set_covering_ptrs.size();
+            m_model_ptr->reference().constraint_type.set_covering_ptrs.size();
         const int SET_PACKINGS_SIZE =
-            m_model_ptr->constraint_type_reference().set_packing_ptrs.size();
+            m_model_ptr->reference().constraint_type.set_packing_ptrs.size();
 
         int number_of_newly_fixed_variables = 0;
 
@@ -581,7 +581,7 @@ class ProblemSizeReducer {
          * If the problem is unconstrained, the following procedures will be
          * skipped.
          */
-        if (m_model_ptr->number_of_constraints() == 0) {
+        if (m_model_ptr->reference().number_of_constraints() == 0) {
             return number_of_newly_fixed_variables;
         }
 
@@ -589,12 +589,12 @@ class ProblemSizeReducer {
          * If the problem is not pure set partitioning/covering/packing problem,
          * the following procedures will be skipped.
          */
-        if (m_model_ptr->number_of_constraints() !=
+        if (m_model_ptr->reference().number_of_constraints() !=
             (SET_PARTITIONINGS_SIZE + SET_COVERINGS_SIZE + SET_PACKINGS_SIZE)) {
             return number_of_newly_fixed_variables;
         }
 
-        auto variable_ptrs = m_model_ptr->variable_reference().variable_ptrs;
+        auto variable_ptrs = m_model_ptr->reference().variable.variable_ptrs;
         const int VARIABLES_SIZE = variable_ptrs.size();
 
         /**
@@ -709,7 +709,7 @@ class ProblemSizeReducer {
         utility::print_message("Removing implicit equality constraints...",
                                a_IS_ENABLED_PRINT);
 
-        auto &reference = m_model_ptr->constraint_type_reference();
+        auto &reference = m_model_ptr->reference().constraint_type;
         int   number_of_newly_disabled_constraints = 0;
         std::vector<model_component::Constraint<T_Variable, T_Expression> *>
             constraint_ptrs;
@@ -876,8 +876,9 @@ class ProblemSizeReducer {
             }
         }
         if (number_of_newly_disabled_constraints > 0) {
-            auto &additional_constraint_proxy = m_model_ptr->create_constraints(
-                "additional", number_of_newly_disabled_constraints);
+            auto &additional_constraint_proxy =
+                m_model_ptr->component_creator().create_constraints(
+                    "additional", number_of_newly_disabled_constraints);
             for (auto i = 0; i < number_of_newly_disabled_constraints; i++) {
                 additional_constraint_proxy(i) = additional_constraints[i];
                 additional_constraint_proxy(i).set_name(
@@ -895,7 +896,7 @@ class ProblemSizeReducer {
         utility::print_message("Removing duplicated constraints...",
                                a_IS_ENABLED_PRINT);
 
-        auto &reference = m_model_ptr->constraint_type_reference();
+        auto &reference = m_model_ptr->reference().constraint_type;
         int   number_of_newly_disabled_constraints = 0;
 
         number_of_newly_disabled_constraints +=
@@ -1117,9 +1118,9 @@ class ProblemSizeReducer {
             a_IS_ENABLED_PRINT);
 
         auto &exclusive_or_ptrs =
-            m_model_ptr->constraint_type_reference().exclusive_or_ptrs;
+            m_model_ptr->reference().constraint_type.exclusive_or_ptrs;
         auto &set_partitioning_constraint_ptrs =
-            m_model_ptr->constraint_type_reference().set_partitioning_ptrs;
+            m_model_ptr->reference().constraint_type.set_partitioning_ptrs;
         auto constraint_ptrs = exclusive_or_ptrs;
         constraint_ptrs.insert(constraint_ptrs.end(),
                                set_partitioning_constraint_ptrs.begin(),

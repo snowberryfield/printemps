@@ -186,17 +186,17 @@ TEST_F(TestVariableProxy, scaler_set_bound) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, scaler_lower_bound) {
-    /// This method is tested in scaler_set_bound().
+    /// This test is covered by scaler_set_bound().
 }
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, scaler_upper_bound) {
-    /// This method is tested in scaler_set_bound().
+    /// This test is covered by scaler_set_bound().
 }
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, scaler_has_bounds) {
-    /// This method is tested in scaler_set_bound().
+    /// This test is covered by scaler_set_bound().
 }
 
 /*****************************************************************************/
@@ -210,7 +210,7 @@ TEST_F(TestVariableProxy, scalar_set_name) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, scalar_name) {
-    /// This method is tested in scalar_set_name().
+    /// This test is covered by scalar_set_name().
 }
 
 /*****************************************************************************/
@@ -549,17 +549,17 @@ TEST_F(TestVariableProxy, one_dimensional_set_bound) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, one_dimensional_lower_bound) {
-    /// This method is tested in scaler_set_bound.
+    /// This test is covered by scaler_set_bound.
 }
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, one_dimensional_upper_bound) {
-    /// This method is tested in scaler_set_bound.
+    /// This test is covered by scaler_set_bound.
 }
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, one_dimensional_has_bounds) {
-    /// This method is tested in one_dimensional_set_bound.
+    /// This test is covered by one_dimensional_set_bound.
 }
 
 /*****************************************************************************/
@@ -574,7 +574,7 @@ TEST_F(TestVariableProxy, one_dimensional_set_name) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, one_dimensional_name) {
-    /// This method is tested in one_dimensional_set_name().
+    /// This test is covered by one_dimensional_set_name().
 }
 
 /*****************************************************************************/
@@ -943,17 +943,17 @@ TEST_F(TestVariableProxy, two_dimensional_set_bound) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, two_dimensional_lower_bound) {
-    /// This method is tested in two_dimensional_set_bound.
+    /// This test is covered by two_dimensional_set_bound.
 }
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, two_dimensional_upper_bound) {
-    /// This method is tested in two_dimensional_set_bound.
+    /// This test is covered by two_dimensional_set_bound.
 }
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, two_dimensional_has_bounds) {
-    /// This method is tested in two_dimensional_set_bound.
+    /// This test is covered by two_dimensional_set_bound.
 }
 
 /*****************************************************************************/
@@ -968,7 +968,7 @@ TEST_F(TestVariableProxy, two_dimensional_set_name) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, two_dimensional_name) {
-    /// This method is tested in two_dimensional_set_name().
+    /// This test is covered by two_dimensional_set_name().
 }
 
 /*****************************************************************************/

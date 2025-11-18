@@ -15,7 +15,7 @@ class Solver;
 template <class T_Variable, class T_Expression>
 struct Status {
     solver::Solver<T_Variable, T_Expression> *solver_ptr;
-    model::Model<T_Variable, T_Expression> *  model_ptr;
+    model::Model<T_Variable, T_Expression>   *model_ptr;
     option::Option                            option;
 
     T_Expression objective;
@@ -116,9 +116,11 @@ struct Status {
         this->start_date_time  = a_solver_ptr->start_date_time();
         this->finish_date_time = a_solver_ptr->finish_date_time();
 
-        this->name                  = this->model_ptr->name();
-        this->number_of_variables   = this->model_ptr->number_of_variables();
-        this->number_of_constraints = this->model_ptr->number_of_constraints();
+        this->name = this->model_ptr->name();
+        this->number_of_variables =
+            this->model_ptr->reference().number_of_variables();
+        this->number_of_constraints =
+            this->model_ptr->reference().number_of_constraints();
         this->elapsed_time = a_solver_ptr->time_keeper().elapsed_time();
 
         this->number_of_local_search_iterations =
@@ -140,11 +142,12 @@ struct Status {
         this->averaged_number_of_threads_move_evaluation =
             TABU_SEARCH_RESULT.state.averaged_number_of_threads_move_evaluation;
 
-        this->penalty_coefficients =
-            this->model_ptr->export_named_penalty_coefficients();
-        this->update_counts = this->model_ptr->export_named_update_counts();
+        this->penalty_coefficients = this->model_ptr->state_inspector()
+                                         .export_named_penalty_coefficients();
+        this->update_counts =
+            this->model_ptr->state_inspector().export_named_update_counts();
         this->violation_counts =
-            this->model_ptr->export_named_violation_counts();
+            this->model_ptr->state_inspector().export_named_violation_counts();
     }
 
     /*************************************************************************/
@@ -250,17 +253,18 @@ struct Status {
 
     /*************************************************************************/
     inline void add_nonzero_detail(utility::json::JsonObject *a_object) const {
+        using namespace model_handler;
         const std::array<std::string, 2> LABELS = {"original", "presolved"};
-        const std::array<
-            model_component::VariableReference<T_Variable, T_Expression> *, 2>
+        const std::array<  //
+            const VariableReference<T_Variable, T_Expression> *, 2>
             VARIABLE_REFERENCE_PTRS = {
-                &(this->model_ptr->variable_reference_original()),
-                &(this->model_ptr->variable_reference())};
-        const std::array<
-            model_component::ConstraintReference<T_Variable, T_Expression> *, 2>
+                &(this->model_ptr->reference_original().variable),
+                &(this->model_ptr->reference().variable)};
+        const std::array<  //
+            const ConstraintReference<T_Variable, T_Expression> *, 2>
             CONSTRAINT_REFERENCE_PTRS = {
-                &(this->model_ptr->constraint_reference_original()),
-                &(this->model_ptr->constraint_reference())};
+                &(this->model_ptr->reference_original().constraint),
+                &(this->model_ptr->reference().constraint)};
 
         utility::json::JsonObject nonzero_detail;
 
@@ -340,12 +344,12 @@ struct Status {
 
     /*************************************************************************/
     inline void add_variable_detail(utility::json::JsonObject *a_object) const {
+        using namespace model_handler;
         const std::array<std::string, 2> LABELS = {"original", "presolved"};
-        const std::array<
-            model_component::VariableReference<T_Variable, T_Expression> *, 2>
+        const std::array<const VariableReference<T_Variable, T_Expression> *, 2>
             VARIABLE_REFERENCE_PTRS = {
-                &(this->model_ptr->variable_reference_original()),
-                &(this->model_ptr->variable_reference())};
+                &(this->model_ptr->reference_original().variable),
+                &(this->model_ptr->reference().variable)};
 
         utility::json::JsonObject variable_detail;
 
@@ -367,13 +371,13 @@ struct Status {
     /*************************************************************************/
     inline void add_variable_type_detail(
         utility::json::JsonObject *a_object) const {
+        using namespace model_handler;
         const std::array<std::string, 2> LABELS = {"original", "presolved"};
         const std::array<
-            model_component::VariableTypeReference<T_Variable, T_Expression> *,
-            2>
+            const VariableTypeReference<T_Variable, T_Expression> *, 2>
             VARIABLE_TYPE_REFERENCE_PTRS = {
-                &(this->model_ptr->variable_type_reference_original()),
-                &(this->model_ptr->variable_type_reference())};
+                &(this->model_ptr->reference_original().variable_type),
+                &(this->model_ptr->reference().variable_type)};
 
         std::function<std::size_t(const std::vector<model_component::Variable<
                                       T_Variable, T_Expression> *> &)>
@@ -434,12 +438,13 @@ struct Status {
     /*************************************************************************/
     inline void add_constraint_detail(
         utility::json::JsonObject *a_object) const {
+        using namespace model_handler;
         const std::array<std::string, 2> LABELS = {"original", "presolved"};
-        const std::array<
-            model_component::ConstraintReference<T_Variable, T_Expression> *, 2>
+        const std::array<  //
+            const ConstraintReference<T_Variable, T_Expression> *, 2>
             CONSTRAINT_REFERENCE_PTRS = {
-                &(this->model_ptr->constraint_reference_original()),
-                &(this->model_ptr->constraint_reference())};
+                &(this->model_ptr->reference_original().constraint),
+                &(this->model_ptr->reference().constraint)};
 
         utility::json::JsonObject constraint_detail;
 
@@ -467,13 +472,13 @@ struct Status {
     /*************************************************************************/
     inline void add_constraint_type_detail(
         utility::json::JsonObject *a_object) const {
+        using namespace model_handler;
         const std::array<std::string, 2> LABELS = {"original", "presolved"};
-        const std::array<model_component::ConstraintTypeReference<
-                             T_Variable, T_Expression> *,
-                         2>
+        const std::array<  //
+            const ConstraintTypeReference<T_Variable, T_Expression> *, 2>
             CONSTRAINT_TYPE_REFERENCE_PTRS = {
-                &(this->model_ptr->constraint_type_reference_original()),
-                &(this->model_ptr->constraint_type_reference())};
+                &(this->model_ptr->reference_original().constraint_type),
+                &(this->model_ptr->reference().constraint_type)};
 
         utility::json::JsonObject constraint_type_detail;
 

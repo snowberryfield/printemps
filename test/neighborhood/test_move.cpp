@@ -241,9 +241,9 @@ TEST_F(TestMove, compute_overlap_rate) {
     g(1) = x(0) + x(1) + x(3) <= 1;
     g(2) = x(0) + x(2) + x(3) <= 1;
 
-    model.categorize_constraints();
-    model.setup_variable_related_constraints();
-    model.setup_variable_related_binary_coefficient_constraints();
+    model.reference().update_constraint_reference();
+    model.builder().setup_variable_related_constraints();
+    model.builder().setup_variable_related_binary_coefficient_constraints();
 
     /// x(0) and x(1) have two common constraints.
     {
@@ -284,7 +284,7 @@ TEST_F(TestMove, compute_hash) {
     model::Model<int, double> model;
     auto&                     x = model.create_variables("x", 4, 0, 1);
 
-    model.setup_structure();
+    model.builder().setup_structure();
 
     /// Case 1
     {
@@ -350,10 +350,10 @@ TEST_F(TestMove, operator_plus) {
     [[maybe_unused]] auto& h = model.create_constraint("h", y + z <= 10);
     [[maybe_unused]] auto& v = model.create_constraint("v", x + z <= 10);
 
-    model.setup_unique_names();
-    model.setup_structure();
+    model.builder().setup_unique_names();
+    model.builder().setup_structure();
 
-    auto variable_ptrs = model.variable_reference().variable_ptrs;
+    auto variable_ptrs = model.reference().variable.variable_ptrs;
 
     /// Single moves.
     neighborhood::Move<int, double> move_x;

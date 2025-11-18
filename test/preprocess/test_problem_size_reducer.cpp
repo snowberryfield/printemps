@@ -37,7 +37,7 @@ TEST_F(TestVariableFixer, remove_independent_variables) {
 
         auto& x = model.create_variables("x", 10, 0, 1);
         model.minimize(x.sum());
-        model.setup_structure();
+        model.builder().setup_structure();
 
         preprocess::ProblemSizeReducer<int, double> problem_size_reducer(
             &model);
@@ -53,7 +53,7 @@ TEST_F(TestVariableFixer, remove_independent_variables) {
 
         auto& x = model.create_variables("x", 10, 0, 1);
         model.maximize(x.sum());
-        model.setup_structure();
+        model.builder().setup_structure();
 
         preprocess::ProblemSizeReducer<int, double> problem_size_reducer(
             &model);
@@ -69,7 +69,7 @@ TEST_F(TestVariableFixer, remove_independent_variables) {
 
         auto& x = model.create_variables("x", 10, 0, 1);
         model.minimize(-x.sum());
-        model.setup_structure();
+        model.builder().setup_structure();
 
         preprocess::ProblemSizeReducer<int, double> problem_size_reducer(
             &model);
@@ -85,7 +85,7 @@ TEST_F(TestVariableFixer, remove_independent_variables) {
 
         auto& x = model.create_variables("x", 10, 0, 1);
         model.maximize(-x.sum());
-        model.setup_structure();
+        model.builder().setup_structure();
 
         preprocess::ProblemSizeReducer<int, double> problem_size_reducer(
             &model);
@@ -139,7 +139,7 @@ TEST_F(TestVariableFixer, remove_redundant_set_variables) {
                        + x(3) - x(4) - 2 * x(5)  //
                        + x(6) + x(7) + 2 * x(8));
 
-        model.setup_structure();
+        model.builder().setup_structure();
 
         preprocess::ProblemSizeReducer<int, double>  //
             problem_size_reducer(&model);
@@ -170,7 +170,7 @@ TEST_F(TestVariableFixer, remove_redundant_set_variables) {
                        + x(3) - x(4) - 2 * x(5)  //
                        + x(6) + x(7) + 2 * x(8));
 
-        model.setup_structure();
+        model.builder().setup_structure();
 
         preprocess::ProblemSizeReducer<int, double>  //
             problem_size_reducer(&model);
@@ -584,7 +584,7 @@ TEST_F(TestProblemSizeReducer, remove_duplicated_constraints) {
     model.create_constraint("g_2", 2 * x(0) + x(1) <= 10);
     model.create_constraint("g_3", 2 * x(0) + x(1) == 20);
 
-    model.setup_structure();
+    model.builder().setup_structure();
 
     preprocess::ProblemSizeReducer<int, double>  //
          problem_size_reducer(&model);
@@ -601,7 +601,7 @@ TEST_F(TestProblemSizeReducer, remove_redundant_set_constraints) {
     model.create_constraint("g_0", x(0) + x(1) == 1);
     model.create_constraint("g_1", x.selection());
 
-    model.setup_structure();
+    model.builder().setup_structure();
 
     preprocess::ProblemSizeReducer<int, double>  //
          problem_size_reducer(&model);
@@ -624,7 +624,7 @@ TEST_F(TestProblemSizeReducer, extract_implicit_equality_constraints) {
     model.create_constraint("g_2", -2 * x(0) - x(1) <= -10);
     model.create_constraint("g_2", 2 * x(0) + x(1) <= 10);
 
-    model.setup_structure();
+    model.builder().setup_structure();
 
     preprocess::ProblemSizeReducer<int, double>  //
          problem_size_reducer(&model);
@@ -644,15 +644,15 @@ TEST_F(TestProblemSizeReducer, reduce_problem_size) {
     model.create_constraint("g_2", 8 * x(1) >= 20);
     model.create_constraint("g_3", x(1) + x(2) + 1 == 8);
 
-    model.setup_structure();
+    model.builder().setup_structure();
 
     preprocess::ProblemSizeReducer<int, double>  //
         problem_size_reducer(&model);
     problem_size_reducer.reduce_problem_size(false);
-    model.setup_structure();
+    model.builder().setup_structure();
 
-    EXPECT_EQ(10, model.number_of_fixed_variables());
-    EXPECT_EQ(4, model.number_of_disabled_constraints());
+    EXPECT_EQ(10, model.reference().number_of_fixed_variables());
+    EXPECT_EQ(4, model.reference().number_of_disabled_constraints());
     EXPECT_TRUE(x(0).is_fixed());
     EXPECT_EQ(2, x(0).value());
     EXPECT_TRUE(x(1).is_fixed());

@@ -43,6 +43,23 @@ TEST_F(TestUnorderedMapUtility, to_vector_pair) {
 }
 
 /*****************************************************************************/
+TEST_F(TestUnorderedMapUtility, to_pair_vector) {
+    std::unordered_map<int, double>         umap_int;
+    std::unordered_map<std::string, double> umap_str;
+
+    umap_int[0]   = 1.1;
+    umap_int[1]   = 2.2;
+    umap_str["a"] = 3.3;
+    umap_str["b"] = 4.4;
+    umap_str["c"] = 5.5;
+
+    auto pair_vector_int = utility::to_pair_vector(umap_int);
+    auto pair_vector_str = utility::to_pair_vector(umap_str);
+    EXPECT_EQ(2, static_cast<int>(pair_vector_int.size()));
+    EXPECT_EQ(3, static_cast<int>(pair_vector_str.size()));
+}
+
+/*****************************************************************************/
 TEST_F(TestUnorderedMapUtility, distance_l1) {
     {
         std::unordered_map<std::string, int> first;

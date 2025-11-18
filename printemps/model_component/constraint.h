@@ -52,42 +52,14 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     bool m_is_enabled;
     bool m_is_less_or_equal;     /// <= or ==
     bool m_is_greater_or_equal;  /// >= or ==
+    bool m_is_selection;
     bool m_has_margin;
 
     bool m_is_user_defined_selection;
     bool m_has_only_binary_coefficient;
     bool m_has_only_binary_variable;
 
-    bool m_is_singleton;
-    bool m_is_exclusive_or;
-    bool m_is_exclusive_nor;
-    bool m_is_inverted_integers;
-    bool m_is_balanced_integers;
-    bool m_is_constant_sum_integers;
-    bool m_is_constant_difference_integers;
-    bool m_is_constant_ratio_integers;
-    bool m_is_aggregation;
-    bool m_is_precedence;
-    bool m_is_variable_bound;
-    bool m_is_trinomial_exclusive_nor;
-    bool m_is_set_partitioning;
-    bool m_is_set_packing;
-    bool m_is_set_covering;
-    bool m_is_cardinality;
-    bool m_is_invariant_knapsack;
-    bool m_is_multiple_covering;
-    bool m_is_binary_flow;
-    bool m_is_integer_flow;
-    bool m_is_soft_selection;
-    bool m_is_min_max;
-    bool m_is_max_min;
-    bool m_is_intermediate;
-    bool m_is_equation_knapsack;
-    bool m_is_bin_packing;
-    bool m_is_knapsack;
-    bool m_is_integer_knapsack;
-    bool m_is_gf2;
-    bool m_is_general_linear;
+    ConstraintType m_type;
 
     /*************************************************************************/
     /// Default constructor
@@ -177,48 +149,14 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         m_is_enabled          = true;
         m_is_less_or_equal    = false;
         m_is_greater_or_equal = false;
+        m_is_selection        = false;
         m_has_margin          = false;
 
         m_is_user_defined_selection   = false;
         m_has_only_binary_coefficient = false;
         m_has_only_binary_variable    = false;
 
-        this->clear_constraint_type();
-    }
-
-    /*************************************************************************/
-    inline void clear_constraint_type(void) {
-        m_is_singleton                    = false;
-        m_is_exclusive_or                 = false;
-        m_is_exclusive_nor                = false;
-        m_is_inverted_integers            = false;
-        m_is_balanced_integers            = false;
-        m_is_constant_sum_integers        = false;
-        m_is_constant_difference_integers = false;
-        m_is_constant_ratio_integers      = false;
-        m_is_aggregation                  = false;
-        m_is_precedence                   = false;
-        m_is_variable_bound               = false;
-        m_is_trinomial_exclusive_nor      = false;
-        m_is_set_partitioning             = false;
-        m_is_set_packing                  = false;
-        m_is_set_covering                 = false;
-        m_is_cardinality                  = false;
-        m_is_invariant_knapsack           = false;
-        m_is_multiple_covering            = false;
-        m_is_binary_flow                  = false;
-        m_is_integer_flow                 = false;
-        m_is_soft_selection               = false;
-        m_is_min_max                      = false;
-        m_is_max_min                      = false;
-        m_is_intermediate                 = false;
-        m_is_equation_knapsack            = false;
-        m_is_bin_packing                  = false;
-        m_is_knapsack                     = false;
-        m_is_integer_knapsack             = false;
-        m_is_gf2                          = false;
-        m_is_general_linear               = false;
-
+        m_type             = ConstraintType::Unknown;
         m_key_variable_ptr = nullptr;
     }
 
@@ -272,10 +210,12 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
 
     /*************************************************************************/
     inline void update_constraint_type(void) {
-        this->clear_constraint_type();
+        m_type             = ConstraintType::Unknown;
+        m_key_variable_ptr = nullptr;
+
         /// Singleton
         if (m_expression.sensitivities().size() == 1) {
-            m_is_singleton = true;
+            m_type = ConstraintType::Singleton;
             return;
         }
 
@@ -316,19 +256,19 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
                     }
                     if (coefficients[0] == 1 && coefficients[1] == 1 &&
                         CONSTANT_VALUE == -1) {
-                        m_is_exclusive_or = true;
+                        m_type = ConstraintType::ExclusiveOR;
                         return;
                     } else if (coefficients[0] == -1 && coefficients[1] == -1 &&
                                CONSTANT_VALUE == 1) {
-                        m_is_exclusive_or = true;
+                        m_type = ConstraintType::ExclusiveOR;
                         return;
                     } else if (coefficients[0] == 1 && coefficients[1] == -1 &&
                                CONSTANT_VALUE == 0) {
-                        m_is_exclusive_nor = true;
+                        m_type = ConstraintType::ExclusiveNOR;
                         return;
                     } else if (coefficients[0] == -1 && coefficients[1] == 1 &&
                                CONSTANT_VALUE == 0) {
-                        m_is_exclusive_nor = true;
+                        m_type = ConstraintType::ExclusiveNOR;
                         return;
                     }
                     m_key_variable_ptr = nullptr;
@@ -347,63 +287,63 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
                     }
                     if (coefficients[0] == 1 && coefficients[1] == 1 &&
                         CONSTANT_VALUE == 0) {
-                        m_is_inverted_integers = true;
+                        m_type = ConstraintType::InvertedIntegers;
                         return;
                     } else if (coefficients[0] == -1 && coefficients[1] == -1 &&
                                CONSTANT_VALUE == 0) {
-                        m_is_inverted_integers = true;
+                        m_type = ConstraintType::InvertedIntegers;
                         return;
                     } else if (coefficients[0] == 1 && coefficients[1] == -1 &&
                                CONSTANT_VALUE == 0) {
-                        m_is_balanced_integers = true;
+                        m_type = ConstraintType::BalancedIntegers;
                         return;
                     } else if (coefficients[0] == -1 && coefficients[1] == 1 &&
                                CONSTANT_VALUE == 0) {
-                        m_is_balanced_integers = true;
+                        m_type = ConstraintType::BalancedIntegers;
                         return;
                     } else if (coefficients[0] == 1 && coefficients[1] == 1 &&
                                CONSTANT_VALUE != 0) {
-                        m_is_constant_sum_integers = true;
+                        m_type = ConstraintType::ConstantSumIntegers;
                         return;
                     } else if (coefficients[0] == -1 && coefficients[1] == -1 &&
                                CONSTANT_VALUE != 0) {
-                        m_is_constant_sum_integers = true;
+                        m_type = ConstraintType::ConstantSumIntegers;
                         return;
                     } else if (coefficients[0] == 1 && coefficients[1] == -1 &&
                                CONSTANT_VALUE != 0) {
-                        m_is_constant_difference_integers = true;
+                        m_type = ConstraintType::ConstantDifferenceIntegers;
                         return;
                     } else if (coefficients[0] == -1 && coefficients[1] == 1 &&
                                CONSTANT_VALUE != 0) {
-                        m_is_constant_difference_integers = true;
+                        m_type = ConstraintType::ConstantDifferenceIntegers;
                         return;
                     } else if (std::abs(coefficients[0]) == 1 &&
                                std::abs(coefficients[1]) != 1 &&
                                CONSTANT_VALUE == 0) {
-                        m_is_constant_ratio_integers = true;
-                        m_key_variable_ptr           = variable_ptrs[0];
+                        m_type = ConstraintType::ConstantRatioIntegers;
+                        m_key_variable_ptr = variable_ptrs[0];
                         return;
                     } else if (std::abs(coefficients[0]) != 1 &&
                                std::abs(coefficients[1]) == 1 &&
                                CONSTANT_VALUE == 0) {
-                        m_is_constant_ratio_integers = true;
-                        m_key_variable_ptr           = variable_ptrs[1];
+                        m_type = ConstraintType::ConstantRatioIntegers;
+                        m_key_variable_ptr = variable_ptrs[1];
                         return;
                     } else if (std::abs(coefficients[0]) == 1 &&
                                std::abs(coefficients[1]) != 1 && m_is_integer) {
-                        m_is_intermediate  = true;
+                        m_type             = ConstraintType::Intermediate;
                         m_key_variable_ptr = variable_ptrs[0];
                         return;
                     } else if (std::abs(coefficients[0]) != 1 &&
                                std::abs(coefficients[1]) == 1 && m_is_integer) {
-                        m_is_intermediate  = true;
+                        m_type             = ConstraintType::Intermediate;
                         m_key_variable_ptr = variable_ptrs[1];
                         return;
                     }
                     m_key_variable_ptr = nullptr;
                 }
 
-                m_is_aggregation = true;
+                m_type = ConstraintType::Aggregation;
                 return;
             }
         }
@@ -431,7 +371,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
                 /// Precedence
                 if ((variable_ptrs[0]->sense() == variable_ptrs[1]->sense()) &&
                     (coefficients[0] == -coefficients[1])) {
-                    m_is_precedence = true;
+                    m_type = ConstraintType::Precedence;
                     return;
                 }
 
@@ -442,7 +382,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
                  * for convenience of the neighborhood definition, both of them
                  * can be integer(non-binary) variable.
                  */
-                m_is_variable_bound = true;
+                m_type = ConstraintType::VariableBound;
                 return;
             }
         }
@@ -493,13 +433,13 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
 
                 if (is_valid && plus_one_binary_variable_ptrs.size() == 2 &&
                     minus_two_binary_variable_ptrs.size() == 1) {
-                    m_is_trinomial_exclusive_nor = true;
+                    m_type             = ConstraintType::TrinomialExclusiveNOR;
                     m_key_variable_ptr = minus_two_binary_variable_ptrs[0];
                     return;
                 } else if (is_valid &&
                            minus_one_binary_variable_ptrs.size() == 2 &&
                            plus_two_binary_variable_ptrs.size() == 1) {
-                    m_is_trinomial_exclusive_nor = true;
+                    m_type             = ConstraintType::TrinomialExclusiveNOR;
                     m_key_variable_ptr = plus_two_binary_variable_ptrs[0];
                     return;
                 }
@@ -513,42 +453,42 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
                 /// Set Partitioning
                 if (m_expression.constant_value() == -1 &&
                     m_sense == ConstraintSense::Equal) {
-                    m_is_set_partitioning = true;
+                    m_type = ConstraintType::SetPartitioning;
                     return;
                 }
 
                 /// Set Packing
                 if (m_expression.constant_value() == -1 &&
                     m_sense == ConstraintSense::Less) {
-                    m_is_set_packing = true;
+                    m_type = ConstraintType::SetPacking;
                     return;
                 }
 
                 /// Set Covering
                 if (m_expression.constant_value() == -1 &&
                     m_sense == ConstraintSense::Greater) {
-                    m_is_set_covering = true;
+                    m_type = ConstraintType::SetCovering;
                     return;
                 }
 
                 /// Cardinality
                 if (m_expression.constant_value() <= -2 &&
                     m_sense == ConstraintSense::Equal) {
-                    m_is_cardinality = true;
+                    m_type = ConstraintType::Cardinality;
                     return;
                 }
 
                 /// Invariant Knapsack
                 if (m_expression.constant_value() <= -2 &&
                     m_sense == ConstraintSense::Less) {
-                    m_is_invariant_knapsack = true;
+                    m_type = ConstraintType::InvariantKnapsack;
                     return;
                 }
 
                 /// Multiple Covering
                 if (m_expression.constant_value() <= -2 &&
                     m_sense == ConstraintSense::Greater) {
-                    m_is_multiple_covering = true;
+                    m_type = ConstraintType::MultipleCovering;
                     return;
                 }
             }
@@ -602,22 +542,22 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
                         if (PLUS_ONE_SIZE == 1 && MINUS_ONE_SIZE > 0 &&
                             !plus_one_variable_ptrs[0]->is_fixed() &&
                             m_expression.constant_value() == 0) {
-                            m_is_soft_selection = true;
-                            m_key_variable_ptr  = plus_one_variable_ptrs[0];
+                            m_type             = ConstraintType::SoftSelection;
+                            m_key_variable_ptr = plus_one_variable_ptrs[0];
                         } else if  //
                             (PLUS_ONE_SIZE > 0 && MINUS_ONE_SIZE == 1 &&
                              !minus_one_variable_ptrs[0]->is_fixed() &&
                              m_expression.constant_value() == 0) {
-                            m_is_soft_selection = true;
-                            m_key_variable_ptr  = minus_one_variable_ptrs[0];
+                            m_type             = ConstraintType::SoftSelection;
+                            m_key_variable_ptr = minus_one_variable_ptrs[0];
                         } else {
-                            m_is_binary_flow = true;
+                            m_type = ConstraintType::BinaryFlow;
                         }
 
                         return;
                     } else if (has_only_integer_variables &&
                                PLUS_ONE_SIZE > 1 && MINUS_ONE_SIZE > 1) {
-                        m_is_integer_flow = true;
+                        m_type = ConstraintType::IntegerFlow;
                         return;
                     }
                 }
@@ -666,7 +606,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
                 if (m_sense == ConstraintSense::Less &&  //
                     MINUS_ONE_SIZE == 1 && PLUS_ONE_SIZE == 0 &&
                     SENSITIVITIES.at(minus_one_integer_variable_ptrs[0]) < 0) {
-                    m_is_min_max       = true;
+                    m_type             = ConstraintType::MinMax;
                     m_key_variable_ptr = minus_one_integer_variable_ptrs[0];
                     return;
                 }
@@ -674,7 +614,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
                 if (m_sense == ConstraintSense::Greater &&  //
                     PLUS_ONE_SIZE == 1 && MINUS_ONE_SIZE == 0 &&
                     SENSITIVITIES.at(plus_one_integer_variable_ptrs[0]) > 0) {
-                    m_is_min_max       = true;
+                    m_type             = ConstraintType::MinMax;
                     m_key_variable_ptr = plus_one_integer_variable_ptrs[0];
                     return;
                 }
@@ -682,7 +622,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
                 if (m_sense == ConstraintSense::Greater &&  //
                     MINUS_ONE_SIZE == 1 && PLUS_ONE_SIZE == 0 &&
                     SENSITIVITIES.at(minus_one_integer_variable_ptrs[0]) < 0) {
-                    m_is_max_min       = true;
+                    m_type             = ConstraintType::MaxMin;
                     m_key_variable_ptr = minus_one_integer_variable_ptrs[0];
                     return;
                 }
@@ -690,21 +630,21 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
                 if (m_sense == ConstraintSense::Less &&  //
                     PLUS_ONE_SIZE == 1 && MINUS_ONE_SIZE == 0 &&
                     SENSITIVITIES.at(plus_one_integer_variable_ptrs[0]) > 0) {
-                    m_is_max_min       = true;
+                    m_type             = ConstraintType::MaxMin;
                     m_key_variable_ptr = plus_one_integer_variable_ptrs[0];
                     return;
                 }
 
                 if (m_sense == ConstraintSense::Equal &&  //
                     MINUS_ONE_SIZE == 1 && PLUS_ONE_SIZE != 1) {
-                    m_is_intermediate  = true;
+                    m_type             = ConstraintType::Intermediate;
                     m_key_variable_ptr = minus_one_integer_variable_ptrs[0];
                     return;
                 }
 
                 if (m_sense == ConstraintSense::Equal &&  //
                     PLUS_ONE_SIZE == 1 && MINUS_ONE_SIZE != 1) {
-                    m_is_intermediate  = true;
+                    m_type             = ConstraintType::Intermediate;
                     m_key_variable_ptr = plus_one_integer_variable_ptrs[0];
                     return;
                 }
@@ -743,7 +683,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
                 if (m_sense == ConstraintSense::Equal &&
                     (has_only_positive_coefficients ||
                      has_only_negative_coefficients)) {
-                    m_is_equation_knapsack = true;
+                    m_type = ConstraintType::EquationKnapsack;
                     return;
                 }
 
@@ -753,7 +693,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
                       m_sense == ConstraintSense::Less) ||
                      (has_only_negative_coefficients &&
                       m_sense == ConstraintSense::Greater))) {
-                    m_is_bin_packing = true;
+                    m_type = ConstraintType::BinPacking;
                     return;
                 }
 
@@ -762,7 +702,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
                      m_sense == ConstraintSense::Less) ||
                     (has_only_negative_coefficients &&
                      m_sense == ConstraintSense::Greater)) {
-                    m_is_knapsack = true;
+                    m_type = ConstraintType::Knapsack;
                     return;
                 }
             } else {
@@ -771,7 +711,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
                      m_sense == ConstraintSense::Less) ||
                     (has_only_negative_coefficients &&
                      m_sense == ConstraintSense::Greater)) {
-                    m_is_integer_knapsack = true;
+                    m_type = ConstraintType::IntegerKnapsack;
                     return;
                 }
             }
@@ -852,14 +792,14 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
             }
 
             if (is_valid) {
-                m_is_gf2           = true;
+                m_type             = ConstraintType::GF2;
                 m_key_variable_ptr = key_variable_ptr;
                 return;
             }
         }
 
         /// Otherwise, the constraint type is set to general linear.
-        m_is_general_linear = true;
+        m_type = ConstraintType::GeneralLinear;
     }
 
     /*************************************************************************/
@@ -1119,283 +1059,33 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
+    inline void set_is_selection(const bool a_IS_SELECTION) noexcept {
+        m_is_selection = a_IS_SELECTION;
+    }
+
+    /*************************************************************************/
+    inline bool is_selection(void) const noexcept {
+        return m_is_selection;
+    }
+
+    /*************************************************************************/
     inline bool has_margin(void) const noexcept {
         return m_has_margin;
     }
 
     /*************************************************************************/
-    inline bool is_singleton(void) const noexcept {
-        return m_is_singleton;
+    inline bool is_type(const ConstraintType &a_TYPE) const noexcept {
+        return m_type == a_TYPE;
     }
 
     /*************************************************************************/
-    inline bool is_exclusive_or(void) const noexcept {
-        return m_is_exclusive_or;
+    inline ConstraintType type(void) const noexcept {
+        return m_type;
     }
 
     /*************************************************************************/
-    inline bool is_exclusive_nor(void) const noexcept {
-        return m_is_exclusive_nor;
-    }
-
-    /*************************************************************************/
-    inline bool is_inverted_integers(void) const noexcept {
-        return m_is_inverted_integers;
-    }
-
-    /*************************************************************************/
-    inline bool is_balanced_integers(void) const noexcept {
-        return m_is_balanced_integers;
-    }
-
-    /*************************************************************************/
-    inline bool is_constant_sum_integers(void) const noexcept {
-        return m_is_constant_sum_integers;
-    }
-
-    /*************************************************************************/
-    inline bool is_constant_difference_integers(void) const noexcept {
-        return m_is_constant_difference_integers;
-    }
-
-    /*************************************************************************/
-    inline bool is_constant_ratio_integers(void) const noexcept {
-        return m_is_constant_ratio_integers;
-    }
-
-    /*************************************************************************/
-    inline bool is_aggregation(void) const noexcept {
-        return m_is_aggregation;
-    }
-
-    /*************************************************************************/
-    inline bool is_precedence(void) const noexcept {
-        return m_is_precedence;
-    }
-
-    /*************************************************************************/
-    inline bool is_variable_bound(void) const noexcept {
-        return m_is_variable_bound;
-    }
-
-    /*************************************************************************/
-    inline bool is_trinomial_exclusive_nor(void) const noexcept {
-        return m_is_trinomial_exclusive_nor;
-    }
-
-    /*************************************************************************/
-    inline bool is_set_partitioning(void) const noexcept {
-        return m_is_set_partitioning;
-    }
-
-    /*************************************************************************/
-    inline bool is_set_packing(void) const noexcept {
-        return m_is_set_packing;
-    }
-
-    /*************************************************************************/
-    inline bool is_set_covering(void) const noexcept {
-        return m_is_set_covering;
-    }
-
-    /*************************************************************************/
-    inline bool is_cardinality(void) const noexcept {
-        return m_is_cardinality;
-    }
-
-    /*************************************************************************/
-    inline bool is_invariant_knapsack(void) const noexcept {
-        return m_is_invariant_knapsack;
-    }
-
-    /*************************************************************************/
-    inline bool is_multiple_covering(void) const noexcept {
-        return m_is_multiple_covering;
-    }
-
-    /*************************************************************************/
-    inline bool is_binary_flow(void) const noexcept {
-        return m_is_binary_flow;
-    }
-
-    /*************************************************************************/
-    inline bool is_integer_flow(void) const noexcept {
-        return m_is_integer_flow;
-    }
-
-    /*************************************************************************/
-    inline bool is_soft_selection(void) const noexcept {
-        return m_is_soft_selection;
-    }
-
-    /*************************************************************************/
-    inline bool is_min_max(void) const noexcept {
-        return m_is_min_max;
-    }
-
-    /*************************************************************************/
-    inline bool is_max_min(void) const noexcept {
-        return m_is_max_min;
-    }
-
-    /*************************************************************************/
-    inline bool is_intermediate(void) const noexcept {
-        return m_is_intermediate;
-    }
-
-    /*************************************************************************/
-    inline bool is_equation_knapsack(void) const noexcept {
-        return m_is_equation_knapsack;
-    }
-
-    /*************************************************************************/
-    inline bool is_bin_packing(void) const noexcept {
-        return m_is_bin_packing;
-    }
-
-    /*************************************************************************/
-    inline bool is_knapsack(void) const noexcept {
-        return m_is_knapsack;
-    }
-
-    /*************************************************************************/
-    inline bool is_integer_knapsack(void) const noexcept {
-        return m_is_integer_knapsack;
-    }
-
-    /*************************************************************************/
-    inline bool is_gf2(void) const noexcept {
-        return m_is_gf2;
-    }
-
-    /*************************************************************************/
-    inline bool is_general_linear(void) const noexcept {
-        return m_is_general_linear;
-    }
-
-    /*************************************************************************/
-    inline std::string type(void) const noexcept {
-        if (m_is_singleton) {
-            return "Singleton";
-        }
-
-        if (m_is_exclusive_or) {
-            return "Exclusive OR";
-        }
-
-        if (m_is_exclusive_nor) {
-            return "Exclusive NOR";
-        }
-
-        if (m_is_inverted_integers) {
-            return "Inverted Integers";
-        }
-
-        if (m_is_balanced_integers) {
-            return "Balanced Integers";
-        }
-
-        if (m_is_constant_sum_integers) {
-            return "Constant Sum Integers";
-        }
-
-        if (m_is_constant_difference_integers) {
-            return "Constant Difference Integers";
-        }
-
-        if (m_is_constant_ratio_integers) {
-            return "Constant Ratio Integers";
-        }
-
-        if (m_is_aggregation) {
-            return "Aggregation";
-        }
-
-        if (m_is_precedence) {
-            return "Precedence";
-        }
-
-        if (m_is_variable_bound) {
-            return "Variable Bound";
-        }
-
-        if (m_is_trinomial_exclusive_nor) {
-            return "Trinomial Exclusive NOR";
-        }
-
-        if (m_is_set_partitioning) {
-            return "Set Partitioning";
-        }
-
-        if (m_is_set_packing) {
-            return "Set Packing";
-        }
-
-        if (m_is_set_covering) {
-            return "Set Covering";
-        }
-
-        if (m_is_cardinality) {
-            return "Cardinality";
-        }
-
-        if (m_is_invariant_knapsack) {
-            return "Invariant Knapsack";
-        }
-
-        if (m_is_multiple_covering) {
-            return "Multiple Covering";
-        }
-
-        if (m_is_binary_flow) {
-            return "Binary Flow";
-        }
-
-        if (m_is_integer_flow) {
-            return "Integer Flow";
-        }
-
-        if (m_is_soft_selection) {
-            return "Soft Selection";
-        }
-
-        if (m_is_min_max) {
-            return "Min-Max";
-        }
-
-        if (m_is_max_min) {
-            return "Max-Min";
-        }
-
-        if (m_is_intermediate) {
-            return "Intermediate";
-        }
-
-        if (m_is_equation_knapsack) {
-            return "Equation Knapsack";
-        }
-
-        if (m_is_bin_packing) {
-            return "Bin Packing";
-        }
-
-        if (m_is_knapsack) {
-            return "Knapsack";
-        }
-
-        if (m_is_integer_knapsack) {
-            return "Integer Knapsack";
-        }
-
-        if (m_is_gf2) {
-            return "GF(2)";
-        }
-
-        if (m_is_general_linear) {
-            return "General Linear";
-        }
-
-        return "Unknown";
+    inline std::string type_label(void) const noexcept {
+        return ConstraintTypeInverseMap[m_type];
     }
 };
 using IPConstraint = Constraint<int, double>;

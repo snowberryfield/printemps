@@ -19,7 +19,7 @@ class SelectionExtractor {
     inline std::vector<model_component::Selection<T_Variable, T_Expression>>
     extract_raw_selections(void) {
         auto &set_patritioning_ptrs =
-            m_model_ptr->constraint_type_reference().set_partitioning_ptrs;
+            m_model_ptr->reference().constraint_type.set_partitioning_ptrs;
 
         std::vector<model_component::Selection<T_Variable, T_Expression>>
             raw_selections;
@@ -149,7 +149,7 @@ class SelectionExtractor {
         }
 
         m_selections = selections;
-        m_model_ptr->set_selections(selections);
+        m_model_ptr->builder().setup_selections(selections);
 
         utility::print_message("Done.", a_IS_ENABLED_PRINT);
     }
@@ -222,7 +222,7 @@ class SelectionExtractor {
         }
 
         m_selections = selections;
-        m_model_ptr->set_selections(selections);
+        m_model_ptr->builder().setup_selections(selections);
 
         utility::print_message("Done.", a_IS_ENABLED_PRINT);
     }
@@ -281,7 +281,7 @@ class SelectionExtractor {
         }
 
         m_selections = selections;
-        m_model_ptr->set_selections(selections);
+        m_model_ptr->builder().setup_selections(selections);
 
         utility::print_message("Done.", a_IS_ENABLED_PRINT);
     }
@@ -335,21 +335,21 @@ class SelectionExtractor {
         }
 
         m_selections = selections;
-        m_model_ptr->set_selections(selections);
+        m_model_ptr->builder().setup_selections(selections);
 
         utility::print_message("Done.", a_IS_ENABLED_PRINT);
     }
 
     /*************************************************************************/
     inline const std::vector<
-        model_component::Selection<T_Variable, T_Expression>>
-        &selections(void) const {
+        model_component::Selection<T_Variable, T_Expression>> &
+    selections(void) const {
         return m_selections;
     }
 
     /*************************************************************************/
-    inline std::vector<model_component::Selection<T_Variable, T_Expression>>
-        &selections(void) {
+    inline std::vector<model_component::Selection<T_Variable, T_Expression>> &
+    selections(void) {
         return m_selections;
     }
 };
