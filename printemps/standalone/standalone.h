@@ -100,8 +100,10 @@ class Standalone {
 
         if (EXTENSION == "mps") {
             m_mps.read_mps(m_argparser.instance_file_name);
-            m_model.import_mps(m_mps, m_argparser.accept_continuous_variables);
-        } else if (EXTENSION == "opb" || EXTENSION == "wbo") {
+            m_model.mps_handler().import(
+                m_mps, m_argparser.accept_continuous_variables);
+        } else if (EXTENSION == "opb" || EXTENSION == "wbo" ||
+                   EXTENSION == "pb") {
             m_opb.read_opb(m_argparser.instance_file_name);
             m_model.opb_handler().import(m_opb);
         } else {
