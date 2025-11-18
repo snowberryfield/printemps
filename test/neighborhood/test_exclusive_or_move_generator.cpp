@@ -9,7 +9,7 @@
 namespace {
 using namespace printemps;
 /*****************************************************************************/
-class TestExclusiveOrMoveGenerator : public ::testing::Test {
+class TestExclusiveORMoveGenerator : public ::testing::Test {
    protected:
     virtual void SetUp(void) {
         /// nothing to do
@@ -20,7 +20,7 @@ class TestExclusiveOrMoveGenerator : public ::testing::Test {
 };
 
 /*****************************************************************************/
-TEST_F(TestExclusiveOrMoveGenerator, setup) {
+TEST_F(TestExclusiveORMoveGenerator, setup) {
     model::Model<int, double> model;
 
     auto& x = model.create_variables("x", 2, 0, 1);
@@ -48,7 +48,7 @@ TEST_F(TestExclusiveOrMoveGenerator, setup) {
     EXPECT_EQ(2, static_cast<int>(moves[0].alterations.size()));
     EXPECT_EQ(0, moves[0].alterations[0].second);
     EXPECT_EQ(1, moves[0].alterations[1].second);
-    EXPECT_EQ(neighborhood::MoveSense::ExclusiveOr, moves[0].sense);
+    EXPECT_EQ(neighborhood::MoveType::ExclusiveOR, moves[0].type);
     EXPECT_TRUE(std::find(moves[0].related_constraint_ptrs.begin(),
                           moves[0].related_constraint_ptrs.end(),
                           &c[0]) != moves[0].related_constraint_ptrs.end());
@@ -60,7 +60,7 @@ TEST_F(TestExclusiveOrMoveGenerator, setup) {
     EXPECT_EQ(2, static_cast<int>(moves[0].alterations.size()));
     EXPECT_EQ(1, moves[1].alterations[0].second);
     EXPECT_EQ(0, moves[1].alterations[1].second);
-    EXPECT_EQ(neighborhood::MoveSense::ExclusiveOr, moves[1].sense);
+    EXPECT_EQ(neighborhood::MoveType::ExclusiveOR, moves[1].type);
     EXPECT_TRUE(std::find(moves[1].related_constraint_ptrs.begin(),
                           moves[1].related_constraint_ptrs.end(),
                           &c[0]) != moves[1].related_constraint_ptrs.end());

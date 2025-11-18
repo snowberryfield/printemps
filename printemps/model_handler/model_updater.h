@@ -112,7 +112,7 @@ class ModelUpdater {
             alteration.first->set_value_if_mutable(alteration.second);
         }
 
-        if (a_MOVE.sense == neighborhood::MoveSense::Selection) {
+        if (a_MOVE.type == neighborhood::MoveType::Selection) {
             a_MOVE.alterations[1].first->select();
         }
 

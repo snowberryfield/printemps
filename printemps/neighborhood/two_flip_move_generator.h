@@ -38,7 +38,7 @@ class TwoFlipMoveGenerator
 
         for (auto i = 0; i < PAIRS_SIZE; i++) {
             auto &move = this->m_moves[2 * i];
-            move.sense = MoveSense::TwoFlip;
+            move.type  = MoveType::TwoFlip;
             move.alterations.emplace_back(
                 a_FLIPPABLE_VARIABLE_PTR_PAIRS[i].first, 1);
             move.alterations.emplace_back(
@@ -79,8 +79,8 @@ class TwoFlipMoveGenerator
          * Setup move objects.
          */
         auto move_updater =                                 //
-            [](auto *     a_moves_ptr,                      //
-               auto *     a_flags,                          //
+            [](auto      *a_moves_ptr,                      //
+               auto      *a_flags,                          //
                const bool a_ACCEPT_ALL,                     //
                const bool a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
                const bool a_ACCEPT_FEASIBILITY_IMPROVABLE,  //

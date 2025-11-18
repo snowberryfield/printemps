@@ -46,7 +46,7 @@ TEST_F(TestIntegerMoveGenerator, setup) {
     EXPECT_EQ(32, static_cast<int>(flags.size()));
 
     for (const auto& move : moves) {
-        EXPECT_EQ(neighborhood::MoveSense::Integer, move.sense);
+        EXPECT_EQ(neighborhood::MoveType::Integer, move.type);
         EXPECT_FALSE(move.alterations.front().first->is_fixed());
         EXPECT_EQ(1, static_cast<int>(move.alterations.size()));
         EXPECT_TRUE(move.is_univariable_move);

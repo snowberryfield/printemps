@@ -48,7 +48,7 @@ class PrecedenceMoveGenerator
 
         for (auto i = 0; i < BINOMIALS_SIZE; i++) {
             auto &move = this->m_moves[2 * i];
-            move.sense = MoveSense::Precedence;
+            move.type  = MoveType::Precedence;
             move.alterations.emplace_back(binomials[i].variable_ptr_first, 0);
             move.alterations.emplace_back(binomials[i].variable_ptr_second, 0);
             move.is_univariable_move          = false;
@@ -85,8 +85,8 @@ class PrecedenceMoveGenerator
          */
         auto move_updater =  //
             [binomials, BINOMIALS_SIZE](
-                auto *     a_moves_ptr,                      //
-                auto *     a_flags,                          //
+                auto      *a_moves_ptr,                      //
+                auto      *a_flags,                          //
                 const bool a_ACCEPT_ALL,                     //
                 const bool a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
                 const bool a_ACCEPT_FEASIBILITY_IMPROVABLE,  //

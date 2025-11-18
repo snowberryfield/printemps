@@ -11,12 +11,12 @@
 namespace printemps::neighborhood {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-class ExclusiveOrMoveGenerator
+class ExclusiveORMoveGenerator
     : public AbstractMoveGenerator<T_Variable, T_Expression> {
    private:
    public:
     /*************************************************************************/
-    ExclusiveOrMoveGenerator(void) {
+    ExclusiveORMoveGenerator(void) {
         /// nothing to do
     }
 
@@ -48,7 +48,7 @@ class ExclusiveOrMoveGenerator
 
         for (auto i = 0; i < BINOMIALS_SIZE; i++) {
             auto &move = this->m_moves[2 * i];
-            move.sense = MoveSense::ExclusiveOr;
+            move.type  = MoveType::ExclusiveOR;
             move.alterations.emplace_back(binomials[i].variable_ptr_first, 0);
             move.alterations.emplace_back(binomials[i].variable_ptr_second, 1);
             move.is_univariable_move          = false;
@@ -85,8 +85,8 @@ class ExclusiveOrMoveGenerator
          * Setup move updater.
          */
         auto move_updater =                                 //
-            [](auto *     a_moves_ptr,                      //
-               auto *     a_flags,                          //
+            [](auto      *a_moves_ptr,                      //
+               auto      *a_flags,                          //
                const bool a_ACCEPT_ALL,                     //
                const bool a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
                const bool a_ACCEPT_FEASIBILITY_IMPROVABLE,  //

@@ -24,7 +24,7 @@ TEST_F(TestMove, constructor) {
     neighborhood::Move<int, double> move;
 
     EXPECT_TRUE(move.alterations.empty());
-    EXPECT_EQ(neighborhood::MoveSense::General, move.sense);
+    EXPECT_EQ(neighborhood::MoveType::General, move.type);
     EXPECT_TRUE(move.related_constraint_ptrs.empty());
     EXPECT_FALSE(move.is_univariable_move);
     EXPECT_FALSE(move.is_special_neighborhood_move);
@@ -35,63 +35,7 @@ TEST_F(TestMove, constructor) {
 
 /*****************************************************************************/
 TEST_F(TestMove, sense_label) {
-    neighborhood::Move<int, double> move;
-    move.sense = neighborhood::MoveSense::Binary;
-    EXPECT_EQ("Binary", move.sense_label());
-
-    move.sense = neighborhood::MoveSense::Integer;
-    EXPECT_EQ("Integer", move.sense_label());
-
-    move.sense = neighborhood::MoveSense::Selection;
-    EXPECT_EQ("Selection", move.sense_label());
-
-    move.sense = neighborhood::MoveSense::ExclusiveOr;
-    EXPECT_EQ("ExclusiveOr", move.sense_label());
-
-    move.sense = neighborhood::MoveSense::ExclusiveNor;
-    EXPECT_EQ("ExclusiveNor", move.sense_label());
-
-    move.sense = neighborhood::MoveSense::InvertedIntegers;
-    EXPECT_EQ("InvertedIntegers", move.sense_label());
-
-    move.sense = neighborhood::MoveSense::BalancedIntegers;
-    EXPECT_EQ("BalancedIntegers", move.sense_label());
-
-    move.sense = neighborhood::MoveSense::ConstantSumIntegers;
-    EXPECT_EQ("ConstantSumIntegers", move.sense_label());
-
-    move.sense = neighborhood::MoveSense::ConstantDifferenceIntegers;
-    EXPECT_EQ("ConstantDifferenceIntegers", move.sense_label());
-
-    move.sense = neighborhood::MoveSense::ConstantRatioIntegers;
-    EXPECT_EQ("ConstantRatioIntegers", move.sense_label());
-
-    move.sense = neighborhood::MoveSense::Aggregation;
-    EXPECT_EQ("Aggregation", move.sense_label());
-
-    move.sense = neighborhood::MoveSense::Precedence;
-    EXPECT_EQ("Precedence", move.sense_label());
-
-    move.sense = neighborhood::MoveSense::VariableBound;
-    EXPECT_EQ("VariableBound", move.sense_label());
-
-    move.sense = neighborhood::MoveSense::SoftSelection;
-    EXPECT_EQ("SoftSelection", move.sense_label());
-
-    move.sense = neighborhood::MoveSense::TrinomialExclusiveNor;
-    EXPECT_EQ("TrinomialExclusiveNor", move.sense_label());
-
-    move.sense = neighborhood::MoveSense::Chain;
-    EXPECT_EQ("Chain", move.sense_label());
-
-    move.sense = neighborhood::MoveSense::TwoFlip;
-    EXPECT_EQ("TwoFlip", move.sense_label());
-
-    move.sense = neighborhood::MoveSense::UserDefined;
-    EXPECT_EQ("UserDefined", move.sense_label());
-
-    move.sense = neighborhood::MoveSense::General;
-    EXPECT_EQ("General", move.sense_label());
+    /// This test is covered by other methods.
 }
 
 /*****************************************************************************/
@@ -376,7 +320,7 @@ TEST_F(TestMove, operator_plus) {
     EXPECT_FALSE(move_x_y.has_duplicate_variable());
     EXPECT_EQ(2, static_cast<int>(move_x_y.alterations.size()));
     EXPECT_EQ(3, static_cast<int>(move_x_y.related_constraint_ptrs.size()));
-    EXPECT_EQ(neighborhood::MoveSense::Chain, move_x_y.sense);
+    EXPECT_EQ(neighborhood::MoveType::Chain, move_x_y.type);
 
     EXPECT_EQ(variable_ptrs[0], move_x_y.alterations[0].first);
     EXPECT_EQ(1, move_x_y.alterations[0].second);
@@ -389,7 +333,7 @@ TEST_F(TestMove, operator_plus) {
     EXPECT_FALSE(move_x_y_z.has_duplicate_variable());
     EXPECT_EQ(3, static_cast<int>(move_x_y_z.alterations.size()));
     EXPECT_EQ(3, static_cast<int>(move_x_y_z.related_constraint_ptrs.size()));
-    EXPECT_EQ(neighborhood::MoveSense::Chain, move_x_y_z.sense);
+    EXPECT_EQ(neighborhood::MoveType::Chain, move_x_y_z.type);
 
     EXPECT_EQ(variable_ptrs[0], move_x_y_z.alterations[0].first);
     EXPECT_EQ(1, move_x_y_z.alterations[0].second);
@@ -405,7 +349,7 @@ TEST_F(TestMove, operator_plus) {
     EXPECT_TRUE(move_x_y_z_z.has_duplicate_variable());
     EXPECT_EQ(4, static_cast<int>(move_x_y_z_z.alterations.size()));
     EXPECT_EQ(3, static_cast<int>(move_x_y_z_z.related_constraint_ptrs.size()));
-    EXPECT_EQ(neighborhood::MoveSense::Chain, move_x_y_z_z.sense);
+    EXPECT_EQ(neighborhood::MoveType::Chain, move_x_y_z_z.type);
 
     EXPECT_EQ(variable_ptrs[0], move_x_y_z_z.alterations[0].first);
     EXPECT_EQ(1, move_x_y_z_z.alterations[0].second);

@@ -58,7 +58,7 @@ TEST_F(TestSelectionMoveGenerator, setup) {
     }
 
     for (auto& move : moves) {
-        EXPECT_EQ(neighborhood::MoveSense::Selection, move.sense);
+        EXPECT_EQ(neighborhood::MoveType::Selection, move.type);
         EXPECT_EQ(2, static_cast<int>(move.alterations.size()));
 
         EXPECT_EQ(1, move.alterations.front().first->value());

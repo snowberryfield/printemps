@@ -289,8 +289,8 @@ class TabuSearchCore {
                     continue;
                 }
 
-                if (trial_move_ptrs[j]->sense ==
-                    neighborhood::MoveSense::Integer) {
+                if (trial_move_ptrs[j]->type ==
+                    neighborhood::MoveType::Integer) {
                     auto variable_ptr =
                         trial_move_ptrs[j]->alterations.front().first;
                     const T_Variable CURRENT_VALUE = variable_ptr->value();
@@ -549,14 +549,14 @@ class TabuSearchCore {
     inline void update_chain_moves(void) {
         auto& STATE = m_state_manager.state();
 
-        if ((STATE.previous_move.sense == neighborhood::MoveSense::Binary &&
-             STATE.current_move.sense == neighborhood::MoveSense::Binary &&
+        if ((STATE.previous_move.type == neighborhood::MoveType::Binary &&
+             STATE.current_move.type == neighborhood::MoveType::Binary &&
              STATE.previous_move.alterations.front().second !=
                  STATE.current_move.alterations.front().second) ||
-            (STATE.previous_move.sense == neighborhood::MoveSense::Chain &&
-             STATE.current_move.sense == neighborhood::MoveSense::Chain) ||
-            (STATE.previous_move.sense == neighborhood::MoveSense::TwoFlip &&
-             STATE.current_move.sense == neighborhood::MoveSense::TwoFlip)) {
+            (STATE.previous_move.type == neighborhood::MoveType::Chain &&
+             STATE.current_move.type == neighborhood::MoveType::Chain) ||
+            (STATE.previous_move.type == neighborhood::MoveType::TwoFlip &&
+             STATE.current_move.type == neighborhood::MoveType::TwoFlip)) {
             neighborhood::Move<T_Variable, T_Expression> chain_move;
             if (STATE.previous_move.alterations.front().first <
                 STATE.current_move.alterations.front().first)
@@ -1062,7 +1062,7 @@ class TabuSearchCore {
              * solution.
              */
             if (m_option.neighborhood.is_enabled_integer_step_size_adjuster &&
-                move_ptr->sense == neighborhood::MoveSense::Integer &&
+                move_ptr->type == neighborhood::MoveType::Integer &&
                 trial_solution_scores[SELECTED_INDEX]
                         .global_augmented_objective <
                     m_global_state_ptr->incumbent_holder

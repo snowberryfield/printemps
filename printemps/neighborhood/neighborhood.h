@@ -6,7 +6,7 @@
 #ifndef PRINTEMPS_NEIGHBORHOOD_NEIGHBORHOOD_H__
 #define PRINTEMPS_NEIGHBORHOOD_NEIGHBORHOOD_H__
 
-#include "move_sense.h"
+#include "move_type.h"
 #include "move.h"
 #include "binomial_constraint.h"
 #include "trinomial_constraint.h"
@@ -39,8 +39,8 @@ class Neighborhood {
     IntegerMoveGenerator<T_Variable, T_Expression>   m_integer;
     SelectionMoveGenerator<T_Variable, T_Expression> m_selection;
 
-    ExclusiveOrMoveGenerator<T_Variable, T_Expression>      m_exclusive_or;
-    ExclusiveNorMoveGenerator<T_Variable, T_Expression>     m_exclusive_nor;
+    ExclusiveORMoveGenerator<T_Variable, T_Expression>      m_exclusive_or;
+    ExclusiveNORMoveGenerator<T_Variable, T_Expression>     m_exclusive_nor;
     InvertedIntegersMoveGenerator<T_Variable, T_Expression> m_inverted_integers;
     BalancedIntegersMoveGenerator<T_Variable, T_Expression> m_balanced_integers;
     ConstantSumIntegersMoveGenerator<T_Variable, T_Expression>
@@ -54,7 +54,7 @@ class Neighborhood {
     PrecedenceMoveGenerator<T_Variable, T_Expression>    m_precedence;
     VariableBoundMoveGenerator<T_Variable, T_Expression> m_variable_bound;
     SoftSelectionMoveGenerator<T_Variable, T_Expression> m_soft_selection;
-    TrinomialExclusiveNorMoveGenerator<T_Variable, T_Expression>
+    TrinomialExclusiveNORMoveGenerator<T_Variable, T_Expression>
                                                    m_trinomial_exclusive_nor;
     ChainMoveGenerator<T_Variable, T_Expression>   m_chain;
     TwoFlipMoveGenerator<T_Variable, T_Expression> m_two_flip;
@@ -373,28 +373,28 @@ class Neighborhood {
     }
 
     /*************************************************************************/
-    inline ExclusiveOrMoveGenerator  //
+    inline ExclusiveORMoveGenerator  //
         <T_Variable, T_Expression>   //
             &exclusive_or(void) noexcept {
         return m_exclusive_or;
     }
 
     /*************************************************************************/
-    inline const ExclusiveOrMoveGenerator  //
+    inline const ExclusiveORMoveGenerator  //
         <T_Variable, T_Expression>         //
             &exclusive_or(void) const noexcept {
         return m_exclusive_or;
     }
 
     /*************************************************************************/
-    inline ExclusiveNorMoveGenerator  //
+    inline ExclusiveNORMoveGenerator  //
         <T_Variable, T_Expression>    //
             &exclusive_nor(void) noexcept {
         return m_exclusive_nor;
     }
 
     /*************************************************************************/
-    inline const ExclusiveNorMoveGenerator  //
+    inline const ExclusiveNORMoveGenerator  //
         <T_Variable, T_Expression>          //
             &exclusive_nor(void) const noexcept {
         return m_exclusive_nor;
@@ -527,14 +527,14 @@ class Neighborhood {
     }
 
     /*************************************************************************/
-    inline TrinomialExclusiveNorMoveGenerator  //
+    inline TrinomialExclusiveNORMoveGenerator  //
         <T_Variable, T_Expression>             //
             &trinomial_exclusive_nor(void) noexcept {
         return m_trinomial_exclusive_nor;
     }
 
     /*************************************************************************/
-    inline const TrinomialExclusiveNorMoveGenerator  //
+    inline const TrinomialExclusiveNORMoveGenerator  //
         <T_Variable, T_Expression>                   //
             &trinomial_exclusive_nor(void) const noexcept {
         return m_trinomial_exclusive_nor;

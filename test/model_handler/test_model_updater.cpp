@@ -62,7 +62,7 @@ TEST_F(TestModelUpdater, update_arg_move) {
     model.updater().update();
 
     neighborhood::Move<int, double> move;
-    move.sense = neighborhood::MoveSense::Selection;
+    move.type = neighborhood::MoveType::Selection;
     move.alterations.emplace_back(&x(0), 0);
     move.alterations.emplace_back(&x(9), 1);
 

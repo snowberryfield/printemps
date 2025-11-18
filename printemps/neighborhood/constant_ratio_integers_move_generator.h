@@ -50,7 +50,7 @@ class ConstantRatioIntegersMoveGenerator
 
         for (auto i = 0; i < BINOMIALS_SIZE; i++) {
             auto &move = this->m_moves[2 * i];
-            move.sense = MoveSense::ConstantRatioIntegers;
+            move.type  = MoveType::ConstantRatioIntegers;
 
             auto &sensitivities =
                 constraint_ptrs[i]->expression().sensitivities();
@@ -108,8 +108,8 @@ class ConstantRatioIntegersMoveGenerator
          */
         auto move_updater =  //
             [binomials, coefficients, BINOMIALS_SIZE](
-                auto *     a_moves_ptr,                      //
-                auto *     a_flags,                          //
+                auto      *a_moves_ptr,                      //
+                auto      *a_flags,                          //
                 const bool a_ACCEPT_ALL,                     //
                 const bool a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
                 const bool a_ACCEPT_FEASIBILITY_IMPROVABLE,  //

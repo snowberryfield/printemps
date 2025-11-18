@@ -50,7 +50,7 @@ class BinaryMoveGenerator
 
         for (auto i = 0; i < VARIABLES_SIZE; i++) {
             auto &move = this->m_moves[i];
-            move.sense = MoveSense::Binary;
+            move.type  = MoveType::Binary;
             move.alterations.emplace_back(mutable_variable_ptrs[i], 0);
             move.is_univariable_move          = true;
             move.is_selection_move            = false;
@@ -67,8 +67,8 @@ class BinaryMoveGenerator
          */
         auto move_updater =  //
             [mutable_variable_ptrs, VARIABLES_SIZE](
-                auto *     a_moves_ptr,                      //
-                auto *     a_flags,                          //
+                auto      *a_moves_ptr,                      //
+                auto      *a_flags,                          //
                 const bool a_ACCEPT_ALL,                     //
                 const bool a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
                 const bool a_ACCEPT_FEASIBILITY_IMPROVABLE,  //

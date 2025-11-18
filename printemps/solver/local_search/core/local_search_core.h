@@ -670,7 +670,7 @@ class LocalSearchCore {
 
                 if (m_option.neighborhood
                         .is_enabled_integer_step_size_adjuster &&
-                    move_ptr->sense == neighborhood::MoveSense::Integer) {
+                    move_ptr->type == neighborhood::MoveType::Integer) {
                     integer_step_size_adjuster.adjust(&move,
                                                       CURRENT_SOLUTION_SCORE);
                 }

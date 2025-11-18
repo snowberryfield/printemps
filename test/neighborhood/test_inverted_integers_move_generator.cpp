@@ -49,7 +49,7 @@ TEST_F(TestInvertedIntegersMoveGenerator, setup) {
     EXPECT_EQ(2, static_cast<int>(moves[0].alterations.size()));
     EXPECT_EQ(1, moves[0].alterations[0].second);
     EXPECT_EQ(-1, moves[0].alterations[1].second);
-    EXPECT_EQ(neighborhood::MoveSense::InvertedIntegers, moves[0].sense);
+    EXPECT_EQ(neighborhood::MoveType::InvertedIntegers, moves[0].type);
     EXPECT_TRUE(std::find(moves[0].related_constraint_ptrs.begin(),
                           moves[0].related_constraint_ptrs.end(),
                           &c[0]) != moves[0].related_constraint_ptrs.end());
@@ -61,7 +61,7 @@ TEST_F(TestInvertedIntegersMoveGenerator, setup) {
     EXPECT_EQ(2, static_cast<int>(moves[0].alterations.size()));
     EXPECT_EQ(-1, moves[1].alterations[0].second);
     EXPECT_EQ(1, moves[1].alterations[1].second);
-    EXPECT_EQ(neighborhood::MoveSense::InvertedIntegers, moves[1].sense);
+    EXPECT_EQ(neighborhood::MoveType::InvertedIntegers, moves[1].type);
     EXPECT_TRUE(std::find(moves[1].related_constraint_ptrs.begin(),
                           moves[1].related_constraint_ptrs.end(),
                           &c[0]) != moves[1].related_constraint_ptrs.end());

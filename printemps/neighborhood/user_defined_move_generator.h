@@ -39,8 +39,8 @@ class UserDefinedMoveGenerator
     /*************************************************************************/
     void setup(void) {
         auto move_updater =                                     //
-            [this](auto *     a_moves_ptr,                      //
-                   auto *     a_flags,                          //
+            [this](auto      *a_moves_ptr,                      //
+                   auto      *a_flags,                          //
                    const bool a_ACCEPT_ALL,                     //
                    const bool a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
                    const bool a_ACCEPT_FEASIBILITY_IMPROVABLE,  //
@@ -60,8 +60,8 @@ class UserDefinedMoveGenerator
     num_threads(a_NUMBER_OF_THREADS)
 #endif
                 for (auto i = 0; i < MOVES_SIZE; i++) {
-                    (*a_moves_ptr)[i].sense = MoveSense::UserDefined;
-                    (*a_flags)[i]           = 1;
+                    (*a_moves_ptr)[i].type = MoveType::UserDefined;
+                    (*a_flags)[i]          = 1;
                     if ((*a_moves_ptr)[i].has_fixed_variable()) {
                         (*a_flags)[i] = 0;
                         continue;

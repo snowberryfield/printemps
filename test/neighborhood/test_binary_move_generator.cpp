@@ -46,7 +46,7 @@ TEST_F(TestBinaryMoveGenerator, setup) {
     }
 
     for (const auto& move : moves) {
-        EXPECT_EQ(neighborhood::MoveSense::Binary, move.sense);
+        EXPECT_EQ(neighborhood::MoveType::Binary, move.type);
         EXPECT_FALSE(move.alterations.front().first->is_fixed());
         EXPECT_EQ(move.alterations.front().second,
                   1 - move.alterations.front().first->value());

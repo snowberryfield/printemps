@@ -50,7 +50,7 @@ class SelectionMoveGenerator
 
         for (auto i = 0; i < VARIABLES_SIZE; i++) {
             auto &move                        = this->m_moves[i];
-            move.sense                        = MoveSense::Selection;
+            move.type                         = MoveType::Selection;
             move.is_univariable_move          = false;
             move.is_selection_move            = true;
             move.is_special_neighborhood_move = false;

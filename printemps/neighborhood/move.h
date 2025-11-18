@@ -17,7 +17,7 @@ using Alteration =
 template <class T_Variable, class T_Expression>
 struct Move {
     std::vector<Alteration<T_Variable, T_Expression>> alterations;
-    MoveSense                                         sense;
+    MoveType                                          type;
     std::vector<model_component::Constraint<T_Variable, T_Expression> *>
         related_constraint_ptrs;
 
@@ -45,7 +45,7 @@ struct Move {
     inline void initialize(void) {
         this->alterations.clear();
         this->related_constraint_ptrs.clear();
-        this->sense                        = MoveSense::General;
+        this->type                         = MoveType::General;
         this->hash                         = 0;
         this->overlap_rate                 = 0.0;
         this->is_univariable_move          = false;
@@ -55,50 +55,8 @@ struct Move {
     }
 
     /*************************************************************************/
-    inline std::string sense_label(void) const {
-        switch (this->sense) {
-            case MoveSense::Binary:
-                return "Binary";
-            case MoveSense::Integer:
-                return "Integer";
-            case MoveSense::Selection:
-                return "Selection";
-            case MoveSense::ExclusiveOr:
-                return "ExclusiveOr";
-            case MoveSense::ExclusiveNor:
-                return "ExclusiveNor";
-            case MoveSense::InvertedIntegers:
-                return "InvertedIntegers";
-            case MoveSense::BalancedIntegers:
-                return "BalancedIntegers";
-            case MoveSense::ConstantSumIntegers:
-                return "ConstantSumIntegers";
-            case MoveSense::ConstantDifferenceIntegers:
-                return "ConstantDifferenceIntegers";
-            case MoveSense::ConstantRatioIntegers:
-                return "ConstantRatioIntegers";
-            case MoveSense::Aggregation:
-                return "Aggregation";
-            case MoveSense::Precedence:
-                return "Precedence";
-            case MoveSense::VariableBound:
-                return "VariableBound";
-            case MoveSense::SoftSelection:
-                return "SoftSelection";
-            case MoveSense::TrinomialExclusiveNor:
-                return "TrinomialExclusiveNor";
-            case MoveSense::Chain:
-                return "Chain";
-            case MoveSense::TwoFlip:
-                return "TwoFlip";
-            case MoveSense::UserDefined:
-                return "UserDefined";
-            case MoveSense::General:
-                return "General";
-            default:
-                return "Unknown";
-        }
-        return "Unknown";
+    inline std::string type_label(void) const {
+        return MoveTypeInverseMap[this->type];
     }
 
     /*************************************************************************/
@@ -273,7 +231,7 @@ inline Move<T_Variable, T_Expression> operator+(
         a_MOVE_SECOND.related_constraint_ptrs.begin(),
         a_MOVE_SECOND.related_constraint_ptrs.end());
 
-    result.sense                        = MoveSense::Chain;
+    result.type                         = MoveType::Chain;
     result.is_univariable_move          = false;
     result.is_available                 = false;
     result.is_special_neighborhood_move = true;

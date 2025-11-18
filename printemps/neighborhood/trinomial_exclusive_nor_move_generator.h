@@ -11,12 +11,12 @@
 namespace printemps::neighborhood {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-class TrinomialExclusiveNorMoveGenerator
+class TrinomialExclusiveNORMoveGenerator
     : public AbstractMoveGenerator<T_Variable, T_Expression> {
    private:
    public:
     /*************************************************************************/
-    TrinomialExclusiveNorMoveGenerator(void) {
+    TrinomialExclusiveNORMoveGenerator(void) {
         /// nothing to do
     }
 
@@ -48,7 +48,7 @@ class TrinomialExclusiveNorMoveGenerator
 
         for (auto i = 0; i < TRINOMIALS_SIZE; i++) {
             auto &move = this->m_moves[2 * i];
-            move.sense = MoveSense::TrinomialExclusiveNor;
+            move.type  = MoveType::TrinomialExclusiveNOR;
             move.alterations.emplace_back(trinomial[i].variable_ptr_first, 0);
             move.alterations.emplace_back(trinomial[i].variable_ptr_second, 0);
             move.alterations.emplace_back(trinomial[i].variable_ptr_third, 0);
@@ -98,8 +98,8 @@ class TrinomialExclusiveNorMoveGenerator
          * Setup move updater.
          */
         auto move_updater =                                 //
-            [](auto *     a_moves_ptr,                      //
-               auto *     a_flags,                          //
+            [](auto      *a_moves_ptr,                      //
+               auto      *a_flags,                          //
                const bool a_ACCEPT_ALL,                     //
                const bool a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
                const bool a_ACCEPT_FEASIBILITY_IMPROVABLE,  //

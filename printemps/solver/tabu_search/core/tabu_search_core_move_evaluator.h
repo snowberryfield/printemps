@@ -12,7 +12,7 @@ template <class T_Variable, class T_Expression>
 class TabuSearchCoreMoveEvaluator {
    private:
     model::Model<T_Variable, T_Expression> *m_model_ptr;
-    Memory<T_Variable, T_Expression> *      m_memory_ptr;
+    Memory<T_Variable, T_Expression>       *m_memory_ptr;
     option::Option                          m_option;
 
    public:
@@ -24,15 +24,15 @@ class TabuSearchCoreMoveEvaluator {
     /*************************************************************************/
     TabuSearchCoreMoveEvaluator(
         model::Model<T_Variable, T_Expression> *a_model_ptr,
-        Memory<T_Variable, T_Expression> *      a_memory_ptr,
-        const option::Option &                  a_option) {
+        Memory<T_Variable, T_Expression>       *a_memory_ptr,
+        const option::Option                   &a_option) {
         this->setup(a_model_ptr, a_memory_ptr, a_option);
     }
 
     /*************************************************************************/
     inline void setup(model::Model<T_Variable, T_Expression> *a_model_ptr,
-                      Memory<T_Variable, T_Expression> *      a_memory_ptr,
-                      const option::Option &                  a_option) {
+                      Memory<T_Variable, T_Expression>       *a_memory_ptr,
+                      const option::Option                   &a_option) {
         this->initialize();
         m_model_ptr  = a_model_ptr;
         m_memory_ptr = a_memory_ptr;
@@ -51,7 +51,7 @@ class TabuSearchCoreMoveEvaluator {
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE,  //
         const int a_DURATION) const noexcept {
         if (m_option.tabu_search.tabu_mode == option::tabu_mode::All &&
-            a_MOVE.sense != neighborhood::MoveSense::Selection) {
+            a_MOVE.type != neighborhood::MoveType::Selection) {
             /**
              * "All" tabu mode
              * The move is regarded as "tabu" if all of the variable to
@@ -86,8 +86,8 @@ class TabuSearchCoreMoveEvaluator {
 
     /*************************************************************************/
     inline long compute_total_update_count(
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
-        noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
+        const noexcept {
         long total_update_count = 0;
         for (const auto &alteration : a_MOVE.alterations) {
             total_update_count += alteration.first->update_count();
@@ -98,8 +98,8 @@ class TabuSearchCoreMoveEvaluator {
 
     /*************************************************************************/
     inline long compute_minimum_update_count(
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
-        noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
+        const noexcept {
         long minimum_update_count = std::numeric_limits<long>::max();
         for (const auto &alteration : a_MOVE.alterations) {
             minimum_update_count = std::min(minimum_update_count,
@@ -129,8 +129,8 @@ class TabuSearchCoreMoveEvaluator {
 
     /*************************************************************************/
     inline double compute_lagrangian_penalty(
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
-        noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
+        const noexcept {
         double lagrangian_penalty = 0.0;
         for (const auto &alteration : a_MOVE.alterations) {
             lagrangian_penalty +=
@@ -142,7 +142,7 @@ class TabuSearchCoreMoveEvaluator {
 
     /*************************************************************************/
     inline void evaluate(
-        TabuSearchCoreMoveScore *                           a_score_ptr,  //
+        TabuSearchCoreMoveScore                            *a_score_ptr,  //
         const neighborhood::Move<T_Variable, T_Expression> &a_MOVE,       //
         const int                                           a_ITERATION,  //
         const int a_DURATION) const noexcept {

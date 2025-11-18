@@ -50,7 +50,7 @@ class SoftSelectionMoveGenerator
                 Move<T_Variable, T_Expression> move_first;
                 Move<T_Variable, T_Expression> move_second;
 
-                move_first.sense               = MoveSense::SoftSelection;
+                move_first.type                = MoveType::SoftSelection;
                 move_first.is_univariable_move = false;
                 move_first.is_selection_move   = false;
                 move_first.is_special_neighborhood_move = true;
@@ -88,8 +88,8 @@ class SoftSelectionMoveGenerator
          * Setup move updater
          */
         auto move_updater =                                 //
-            [](auto *     a_moves_ptr,                      //
-               auto *     a_flags,                          //
+            [](auto      *a_moves_ptr,                      //
+               auto      *a_flags,                          //
                const bool a_ACCEPT_ALL,                     //
                const bool a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
                const bool a_ACCEPT_FEASIBILITY_IMPROVABLE,  //
