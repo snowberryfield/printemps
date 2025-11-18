@@ -765,7 +765,7 @@ class TabuSearchController
             a_IS_ENABLED_PRINT);
 
         utility::print_info(  //
-            " -- Current Penalty coefficients (Min / Max) : " +
+            " -- Current penalty coefficients (Min / Max) : " +
                 utility::to_string(STATE.local_penalty_coefficient_range.min(),
                                    "%.3e") +
                 " / " +

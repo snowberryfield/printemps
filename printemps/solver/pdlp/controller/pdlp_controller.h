@@ -39,7 +39,7 @@ class PDLPController {
     /*************************************************************************/
     inline void print_dual_bound(const bool a_IS_ENABLED_PRINT) {
         utility::print_info(
-            " -- Dual Bound: " +
+            " -- Dual bound: " +
                 utility::to_string(
                     m_global_state_ptr->incumbent_holder.dual_bound(), "%.5e"),
             a_IS_ENABLED_PRINT);
