@@ -146,7 +146,7 @@ struct MPS {
     inline void parse_rows(const std::vector<std::string_view> &a_ITEMS) {
         const std::size_t ITEMS_SIZE = a_ITEMS.size();
 
-        if (ITEMS_SIZE != 2) {
+        if (ITEMS_SIZE < 2) {
             throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The MPS file has something wrong in ROWS section."));
