@@ -199,6 +199,16 @@ TEST_F(TestMPS, parse_rows) {
         EXPECT_EQ(mps::MPSConstraintSense::Equal, mps.constraints["c1"].sense);
         EXPECT_TRUE(mps.objective.name.empty());
     }
+
+    {
+        mps::MPS                      mps;
+        std::vector<std::string_view> items = {"E", "c1", "extra"};
+        mps.parse_rows(items);
+        EXPECT_EQ("c1", mps.constraints["c1"].name);
+        EXPECT_EQ(mps::MPSConstraintSense::Equal, mps.constraints["c1"].sense);
+        EXPECT_TRUE(mps.objective.name.empty());
+    }
+
     {
         mps::MPS                      mps;
         std::vector<std::string_view> items = {"L", "c2"};
@@ -229,7 +239,9 @@ TEST_F(TestMPS, parse_rows) {
     {
         mps::MPS                      mps;
         std::vector<std::string_view> items = {"N", "obj", "extra"};
-        ASSERT_THROW(mps.parse_rows(items), std::runtime_error);
+        mps.parse_rows(items);
+        EXPECT_EQ("obj", mps.objective.name);
+        EXPECT_TRUE(mps.constraints.find("obj") == mps.constraints.end());
     }
 
     {
@@ -241,12 +253,6 @@ TEST_F(TestMPS, parse_rows) {
     {
         mps::MPS                      mps;
         std::vector<std::string_view> items = {"E"};
-        ASSERT_THROW(mps.parse_rows(items), std::runtime_error);
-    }
-
-    {
-        mps::MPS                      mps;
-        std::vector<std::string_view> items = {"E", "c1", "extra"};
         ASSERT_THROW(mps.parse_rows(items), std::runtime_error);
     }
 }
