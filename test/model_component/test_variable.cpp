@@ -492,11 +492,11 @@ TEST_F(TestVariable, set_type) {
 
     variable.set_type(model_component::VariableType::DependentBinary);
     EXPECT_EQ(model_component::VariableType::DependentBinary, variable.type());
-    EXPECT_EQ("DependentBinary", variable.type_label());
+    EXPECT_EQ("Dependent Binary", variable.type_label());
 
     variable.set_type(model_component::VariableType::DependentInteger);
     EXPECT_EQ(model_component::VariableType::DependentInteger, variable.type());
-    EXPECT_EQ("DependentInteger", variable.type_label());
+    EXPECT_EQ("Dependent Integer", variable.type_label());
 }
 
 /*****************************************************************************/

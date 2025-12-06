@@ -32,7 +32,7 @@ TEST_F(TestReference, update_variable_reference) {
     y(0).fix_by(0);
     z(0, 0).fix_by(0);
     model.create_constraint("f", y.selection());
-    model.create_constraint("g", w == 2 * x + 3 * z(0, 0));
+    model.create_constraint("g", w == 2 * x + 3 * z(0, 0) + 5 * z(0, 1));
 
     model.builder().setup_structure();
 

@@ -171,7 +171,7 @@ convert_to_binomial_constraints(
     for (const auto &constraint_ptr : a_CONSTRAINT_PTRS) {
         auto &expression = constraint_ptr->expression();
 
-        if (expression.sensitivities().size() != 2) {
+        if (expression.number_of_mutable_variables() != 2) {
             throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The constraint is not binomial."));
@@ -208,7 +208,7 @@ convert_to_trinomial_constraints(
     for (const auto &constraint_ptr : a_CONSTRAINT_PTRS) {
         auto &expression = constraint_ptr->expression();
 
-        if (expression.sensitivities().size() != 3) {
+        if (expression.number_of_mutable_variables() != 3) {
             throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The constraint is not trinomial."));

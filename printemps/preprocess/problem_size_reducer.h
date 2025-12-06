@@ -90,6 +90,17 @@ class ProblemSizeReducer {
             return false;
         }
 
+        /**
+         * NOTE: Dependent variables cannot be fixed here because their values
+         * are computed by other dependent expressions.
+         */
+        if (a_variable_ptr->type() ==
+                model_component::VariableType::DependentBinary ||
+            a_variable_ptr->type() ==
+                model_component::VariableType::DependentInteger) {
+            return false;
+        }
+
         const auto SENSITIVITY = a_variable_ptr->objective_sensitivity();
         if (std::fabs(SENSITIVITY) < constant::EPSILON_10) {
             utility::print_message(

@@ -118,7 +118,7 @@ class PDLPCore {
         return true;
     }
 
-    /*****************************************************************************/
+    /*************************************************************************/
     inline void print_table_header(const bool a_IS_ENABLED_PRINT) {
         if (!a_IS_ENABLED_PRINT) {
             return;
@@ -142,7 +142,7 @@ class PDLPCore {
             true);
     }
 
-    /*****************************************************************************/
+    /*************************************************************************/
     inline void print_table_initial(const bool a_IS_ENABLED_PRINT) {
         if (!a_IS_ENABLED_PRINT) {
             return;
@@ -184,7 +184,7 @@ class PDLPCore {
             state.relative_gap);
     }
 
-    /*****************************************************************************/
+    /*************************************************************************/
     inline void print_table_body(const bool a_IS_ENABLED_PRINT) {
         if (!a_IS_ENABLED_PRINT) {
             return;
@@ -236,7 +236,7 @@ class PDLPCore {
             state.relative_gap);
     }
 
-    /*****************************************************************************/
+    /*************************************************************************/
     inline void print_table_footer(const bool a_IS_ENABLED_PRINT) {
         if (!a_IS_ENABLED_PRINT) {
             return;

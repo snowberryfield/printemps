@@ -7,8 +7,11 @@
 #define PRINTEMPS_MODEL_COMPONENT_MODEL_COMPONENT_H__
 
 #include "variable_type.h"
+#include "expression_structure.h"
 #include "constraint_sense.h"
 #include "constraint_type.h"
+#include "constraint_type_classifier.h"
+
 #include "range.h"
 
 #include "variable_proxy.h"

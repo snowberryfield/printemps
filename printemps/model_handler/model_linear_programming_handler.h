@@ -85,9 +85,9 @@ class ModelLinearProgrammingHandler {
         int offset           = 0;
         for (auto &&constraint_ptr : REFERENCE.constraint.less_ptrs) {
             if (constraint_ptr->is_enabled()) {
-                enabled_constraint_index_map.insert(constraint_ptr,
-                                                    constraint_index++);
-            }
+            enabled_constraint_index_map.insert(constraint_ptr,
+                                                constraint_index++);
+        }
         }
         less_enabled_constraint_index_range = {offset, constraint_index};
         offset                              = constraint_index;
@@ -101,9 +101,9 @@ class ModelLinearProgrammingHandler {
 
         for (auto &&constraint_ptr : REFERENCE.constraint.equal_ptrs) {
             if (constraint_ptr->is_enabled()) {
-                enabled_constraint_index_map.insert(constraint_ptr,
-                                                    constraint_index++);
-            }
+            enabled_constraint_index_map.insert(constraint_ptr,
+                                                constraint_index++);
+        }
         }
 
         equal_enabled_constraint_index_range = {offset, constraint_index};
@@ -111,9 +111,9 @@ class ModelLinearProgrammingHandler {
 
         for (auto &&constraint_ptr : REFERENCE.constraint.greater_ptrs) {
             if (constraint_ptr->is_enabled()) {
-                enabled_constraint_index_map.insert(constraint_ptr,
-                                                    constraint_index++);
-            }
+            enabled_constraint_index_map.insert(constraint_ptr,
+                                                constraint_index++);
+        }
         }
         greater_enabled_constraint_index_range = {offset, constraint_index};
         offset += constraint_index;

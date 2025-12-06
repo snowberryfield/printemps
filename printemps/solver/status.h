@@ -379,24 +379,24 @@ struct Status {
                 &(this->model_ptr->reference_original().variable_type),
                 &(this->model_ptr->reference().variable_type)};
 
+        utility::json::JsonObject variable_type_detail;
+
         std::function<std::size_t(const std::vector<model_component::Variable<
                                       T_Variable, T_Expression> *> &)>
-            compute_number_of_all_variables =
-                [](const auto &a_VARIABLE_PTRS) -> std::size_t {
-            return a_VARIABLE_PTRS.size();
-        };
+            compute_number_of_all_variables = [](const auto &a_VARIABLE_PTRS) {
+                return a_VARIABLE_PTRS.size();
+            };
 
         std::function<std::size_t(const std::vector<model_component::Variable<
                                       T_Variable, T_Expression> *> &)>
             compute_number_of_mutable_variables =
-                [](const auto &a_VARIABLE_PTRS) -> std::size_t {
-            return std::count_if(a_VARIABLE_PTRS.begin(), a_VARIABLE_PTRS.end(),
-                                 [](const auto *a_VARIABLE_PTR) {
-                                     return !a_VARIABLE_PTR->is_fixed();
-                                 });
-        };
-
-        utility::json::JsonObject variable_type_detail;
+                [](const auto &a_VARIABLE_PTRS) {
+                    return std::count_if(a_VARIABLE_PTRS.begin(),
+                                         a_VARIABLE_PTRS.end(),
+                                         [](const auto *a_VARIABLE_PTR) {
+                                             return !a_VARIABLE_PTR->is_fixed();
+                                         });
+                };
 
         for (auto i = 0; i < 2; i++) {
             const auto  LABEL     = LABELS[i];
@@ -420,8 +420,8 @@ struct Status {
                 "selection",   //
                 compute_number_of_variables(REFERENCE.selection_variable_ptrs));
 
-            obj.emplace_back(        //
-                "dependent_binary",  //
+            obj.emplace_back(  //
+                "dependent_binary",
                 compute_number_of_variables(
                     REFERENCE.dependent_binary_variable_ptrs));
 
@@ -509,6 +509,10 @@ struct Status {
                          : compute_number_of_enabled_constraints;
 
             utility::json::JsonObject obj;
+
+            obj.emplace_back(  //
+                "empty",       //
+                compute_number_of_constraints(REFERENCE.empty_ptrs));
 
             obj.emplace_back(  //
                 "singleton",   //

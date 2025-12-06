@@ -579,7 +579,7 @@ class TabuSearchCore {
         }
     }
 
-    /*****************************************************************************/
+    /*************************************************************************/
     inline void print_table_header(const bool a_IS_ENABLED_PRINT) {
         if (!a_IS_ENABLED_PRINT) {
             return;

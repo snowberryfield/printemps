@@ -11,6 +11,8 @@ namespace printemps::model_handler {
 template <class T_Variable, class T_Expression>
 struct ConstraintTypeReference {
     std::vector<model_component::Constraint<T_Variable, T_Expression> *>
+        empty_ptrs;
+    std::vector<model_component::Constraint<T_Variable, T_Expression> *>
         singleton_ptrs;
     std::vector<model_component::Constraint<T_Variable, T_Expression> *>
         exclusive_or_ptrs;
@@ -78,6 +80,7 @@ struct ConstraintTypeReference {
 
     /*************************************************************************/
     void initialize(void) noexcept {
+        this->empty_ptrs.clear();
         this->singleton_ptrs.clear();
         this->exclusive_or_ptrs.clear();
         this->exclusive_nor_ptrs.clear();

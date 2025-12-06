@@ -21,8 +21,8 @@ static std::unordered_map<std::string, VariableType> VariableTypeMap = {
     {"Binary", VariableType::Binary},
     {"Integer", VariableType::Integer},
     {"Selection", VariableType::Selection},
-    {"DependentBinary", VariableType::DependentBinary},
-    {"DependentInteger", VariableType::DependentInteger},
+    {"Dependent Binary", VariableType::DependentBinary},
+    {"Dependent Integer", VariableType::DependentInteger},
 
 };
 
@@ -31,8 +31,8 @@ static std::unordered_map<VariableType, std::string> VariableTypeInverseMap = {
     {VariableType::Binary, "Binary"},
     {VariableType::Integer, "Integer"},
     {VariableType::Selection, "Selection"},
-    {VariableType::DependentBinary, "DependentBinary"},
-    {VariableType::DependentInteger, "DependentInteger"},
+    {VariableType::DependentBinary, "Dependent Binary"},
+    {VariableType::DependentInteger, "Dependent Integer"},
 };
 
 }  // namespace printemps::model_component

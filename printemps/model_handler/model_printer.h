@@ -45,105 +45,71 @@ class ModelPrinter {
         const auto &PRESOLVED = MODEL.reference().variable;
 
         const auto &ORIGINAL_TYPE  = MODEL.reference_original().variable_type;
-        const auto &PRESOLVED_TYPE =  //
-            MODEL.reference().variable_type;
+        const auto &PRESOLVED_TYPE = MODEL.reference().variable_type;
 
-        auto compute_number_of_variables = [](const auto &a_VARIABLE_PTRS) {
-            return a_VARIABLE_PTRS.size();
-        };
-
-        auto compute_number_of_mutable_variables =
-            [](const auto &a_VARIABLE_PTRS) {
-                return std::count_if(a_VARIABLE_PTRS.begin(),
-                                     a_VARIABLE_PTRS.end(),
-                                     [](const auto *a_VARIABLE_PTR) {
-                                         return !a_VARIABLE_PTR->is_fixed();
-                                     });
+        std::function<std::size_t(const std::vector<model_component::Variable<
+                                      T_Variable, T_Expression> *> &)>
+            compute_number_of_all_variables = [](const auto &a_VARIABLE_PTRS) {
+                return a_VARIABLE_PTRS.size();
             };
+
+        std::function<std::size_t(const std::vector<model_component::Variable<
+                                      T_Variable, T_Expression> *> &)>
+            compute_number_of_mutable_variables =
+                [](const auto &a_VARIABLE_PTRS) {
+                    return std::count_if(a_VARIABLE_PTRS.begin(),
+                                         a_VARIABLE_PTRS.end(),
+                                         [](const auto *a_VARIABLE_PTR) {
+                                             return !a_VARIABLE_PTR->is_fixed();
+                                         });
+                };
 
         utility::print_info(  //
             "The number of variables: " +
-                utility::to_string(               //
-                    compute_number_of_variables(  //
-                        ORIGINAL.variable_ptrs),
+                utility::to_string(  //
+                    compute_number_of_all_variables(
+                        ORIGINAL.mutable_variable_ptrs),
                     "%d") +
-                " (" +
-                utility::to_string(                       //
-                    compute_number_of_mutable_variables(  //
-                        PRESOLVED.variable_ptrs),
-                    "%d") +
-                ")",
-            true);
-
-        utility::print_info(  //
-            " -- Binary: " +
-                utility::to_string(               //
-                    compute_number_of_variables(  //
-                        ORIGINAL_TYPE.binary_variable_ptrs),
-                    "%d") +
-                " (" +
-                utility::to_string(                       //
-                    compute_number_of_mutable_variables(  //
-                        PRESOLVED_TYPE.binary_variable_ptrs),
-                    "%d") +
-                ")",
-            true);
-
-        utility::print_info(  //
-            " -- Integer: " +
-                utility::to_string(               //
-                    compute_number_of_variables(  //
-                        ORIGINAL_TYPE.integer_variable_ptrs),
-                    "%d") +
-                " (" +
                 utility::to_string(  //
                     compute_number_of_mutable_variables(
-                        PRESOLVED_TYPE.integer_variable_ptrs),
-                    "%d") +
-                ")",
+                        PRESOLVED.mutable_variable_ptrs),
+                    " (%d)"),
             true);
 
-        utility::print_info(  //
-            " -- Selection: " +
-                utility::to_string(  //
-                    compute_number_of_variables(
-                        ORIGINAL_TYPE.selection_variable_ptrs),
-                    "%d") +
-                " (" +
-                utility::to_string(  //
-                    compute_number_of_mutable_variables(
-                        PRESOLVED_TYPE.selection_variable_ptrs),
-                    "%d") +
-                ")",
-            true);
+        const struct {
+            std::string name;
+            const std::vector<
+                model_component::Variable<T_Variable, T_Expression> *>
+                *original_ptrs_ptr;
+            const std::vector<
+                model_component::Variable<T_Variable, T_Expression> *>
+                *presolved_ptrs_ptr;
+        } TABLE[] = {
+            {"Binary", &ORIGINAL_TYPE.binary_variable_ptrs,
+             &PRESOLVED_TYPE.binary_variable_ptrs},
+            {"Integer", &ORIGINAL_TYPE.integer_variable_ptrs,
+             &PRESOLVED_TYPE.integer_variable_ptrs},
+            {"Selection", &ORIGINAL_TYPE.selection_variable_ptrs,
+             &PRESOLVED_TYPE.selection_variable_ptrs},
+            {"Dependent Binary", &ORIGINAL_TYPE.dependent_binary_variable_ptrs,
+             &PRESOLVED_TYPE.dependent_binary_variable_ptrs},
+            {"Dependent Integer",
+             &ORIGINAL_TYPE.dependent_integer_variable_ptrs,
+             &PRESOLVED_TYPE.dependent_integer_variable_ptrs},
 
-        utility::print_info(  //
-            " -- Dependent Binary: " +
-                utility::to_string(  //
-                    compute_number_of_variables(
-                        ORIGINAL_TYPE.dependent_binary_variable_ptrs),
-                    "%d") +
-                " (" +
-                utility::to_string(  //
-                    compute_number_of_mutable_variables(
-                        PRESOLVED_TYPE.dependent_binary_variable_ptrs),
-                    "%d") +
-                ")",
-            true);
+        };
 
-        utility::print_info(  //
-            " -- Dependent Integer: " +
-                utility::to_string(  //
-                    compute_number_of_variables(
-                        ORIGINAL_TYPE.dependent_integer_variable_ptrs),
-                    "%d") +
-                " (" +
-                utility::to_string(  //
-                    compute_number_of_mutable_variables(
-                        PRESOLVED_TYPE.dependent_integer_variable_ptrs),
-                    "%d") +
-                ")",
-            true);
+        for (const auto &row : TABLE) {
+            utility::print_info(
+                " -- " + row.name + ": " +
+                    utility::to_string(compute_number_of_mutable_variables(
+                                           *row.original_ptrs_ptr),
+                                       "%d") +
+                    utility::to_string(compute_number_of_mutable_variables(
+                                           *row.presolved_ptrs_ptr),
+                                       " (%d)"),
+                true);
+        }
 
         utility::print(  //
             "          ( ) : Number of mutable variables after presolve.",
@@ -159,489 +125,148 @@ class ModelPrinter {
         const auto &PRESOLVED = MODEL.reference().constraint;
 
         const auto &ORIGINAL_TYPE  = MODEL.reference_original().constraint_type;
-        const auto &PRESOLVED_TYPE =  //
-            MODEL.reference().constraint_type;
+        const auto &PRESOLVED_TYPE = MODEL.reference().constraint_type;
 
-        auto compute_number_of_constraints = [](const auto &a_CONSTRAINT_PTRS) {
-            return a_CONSTRAINT_PTRS.size();
-        };
+        std::function<std::size_t(const std::vector<model_component::Constraint<
+                                      T_Variable, T_Expression> *> &)>
+            compute_number_of_all_constraints =
+                [](const auto &a_CONSTRAINT_PTRS) {
+                    return a_CONSTRAINT_PTRS.size();
+                };
 
-        auto compute_number_of_enabled_constraints =
-            [](const auto &a_CONSTRAINT_PTRS) {
-                return std::count_if(a_CONSTRAINT_PTRS.begin(),
-                                     a_CONSTRAINT_PTRS.end(),
-                                     [](const auto *a_CONSTRAINT_PTR) {
-                                         return a_CONSTRAINT_PTR->is_enabled();
-                                     });
-            };
+        std::function<std::size_t(const std::vector<model_component::Constraint<
+                                      T_Variable, T_Expression> *> &)>
+            compute_number_of_enabled_constraints =
+                [](const auto &a_CONSTRAINT_PTRS) {
+                    return std::count_if(
+                        a_CONSTRAINT_PTRS.begin(), a_CONSTRAINT_PTRS.end(),
+                        [](const auto *a_CONSTRAINT_PTR) {
+                            return a_CONSTRAINT_PTR->is_enabled();
+                        });
+                };
 
         utility::print_info(  //
             "The number of constraints: " +
-                utility::to_string(                 //
-                    compute_number_of_constraints(  //
-                        ORIGINAL.constraint_ptrs),
+                utility::to_string(  //
+                    compute_number_of_all_constraints(
+                        ORIGINAL.enabled_constraint_ptrs),
                     "%d") +
-                " (" +
-                utility::to_string(                         //
-                    compute_number_of_enabled_constraints(  //
-                        PRESOLVED.constraint_ptrs),
-                    "%d") +
-                ")",
+                utility::to_string(  //
+                    compute_number_of_enabled_constraints(
+                        PRESOLVED.enabled_constraint_ptrs),
+                    " (%d)"),
             true);
 
-        utility::print_info(                        //
-            "[<= : " +                              //
-                utility::to_string(                 //
-                    compute_number_of_constraints(  //
-                        ORIGINAL.less_ptrs),
+        utility::print_info(  //
+            "[<= : " +
+                utility::to_string(  //
+                    compute_number_of_all_constraints(ORIGINAL.less_ptrs),
                     "%d") +
-                " (" +
-                utility::to_string(                         //
-                    compute_number_of_enabled_constraints(  //
-                        PRESOLVED.less_ptrs),
+                utility::to_string(  //
+                    compute_number_of_enabled_constraints(PRESOLVED.less_ptrs),
+                    " (%d), ") +
+                "== : " +            //
+                utility::to_string(  //
+                    compute_number_of_all_constraints(ORIGINAL.equal_ptrs),
                     "%d") +
-                "), " + "== : " +                   //
-                utility::to_string(                 //
-                    compute_number_of_constraints(  //
-                        ORIGINAL.equal_ptrs),
+                utility::to_string(  //
+                    compute_number_of_enabled_constraints(PRESOLVED.equal_ptrs),
+                    " (%d), ") +
+                ">= : " +            //
+                utility::to_string(  //
+                    compute_number_of_all_constraints(ORIGINAL.greater_ptrs),
                     "%d") +
-                " (" +
-                utility::to_string(                         //
-                    compute_number_of_enabled_constraints(  //
-                        PRESOLVED.equal_ptrs),
-                    "%d") +
-                "), " + ">= : " +                   //
-                utility::to_string(                 //
-                    compute_number_of_constraints(  //
-                        ORIGINAL.greater_ptrs),
-                    "%d") +
-                " (" +
-                utility::to_string(                         //
-                    compute_number_of_enabled_constraints(  //
+                utility::to_string(  //
+                    compute_number_of_enabled_constraints(
                         PRESOLVED.greater_ptrs),
-                    "%d") +
-                ")]",
+                    " (%d)]"),
             true);
 
-        utility::print_info(                        //
-            " -- Singleton: " +                     //
-                utility::to_string(                 //
-                    compute_number_of_constraints(  //
-                        ORIGINAL_TYPE.singleton_ptrs),
-                    "%d") +
-                " (" +
-                utility::to_string(                         //
-                    compute_number_of_enabled_constraints(  //
-                        PRESOLVED_TYPE.singleton_ptrs),
-                    "%d") +
-                ")",
-            true);
+        const struct {
+            std::string name;
+            const std::vector<
+                model_component::Constraint<T_Variable, T_Expression> *>
+                *original_ptrs_ptr;
+            const std::vector<
+                model_component::Constraint<T_Variable, T_Expression> *>
+                *presolved_ptrs_ptr;
+        } TABLE[] = {
+            {"Empty", &ORIGINAL_TYPE.empty_ptrs, &PRESOLVED_TYPE.empty_ptrs},
+            {"Singleton", &ORIGINAL_TYPE.singleton_ptrs,
+             &PRESOLVED_TYPE.singleton_ptrs},
+            {"Exclusive OR", &ORIGINAL_TYPE.exclusive_or_ptrs,
+             &PRESOLVED_TYPE.exclusive_or_ptrs},
+            {"Exclusive NOR", &ORIGINAL_TYPE.exclusive_nor_ptrs,
+             &PRESOLVED_TYPE.exclusive_nor_ptrs},
+            {"Inverted Integers", &ORIGINAL_TYPE.inverted_integers_ptrs,
+             &PRESOLVED_TYPE.inverted_integers_ptrs},
+            {"Balanced Integers", &ORIGINAL_TYPE.balanced_integers_ptrs,
+             &PRESOLVED_TYPE.balanced_integers_ptrs},
+            {"Constant Sum Integers", &ORIGINAL_TYPE.constant_sum_integers_ptrs,
+             &PRESOLVED_TYPE.constant_sum_integers_ptrs},
+            {"Constant Difference Integers",
+             &ORIGINAL_TYPE.constant_difference_integers_ptrs,
+             &PRESOLVED_TYPE.constant_difference_integers_ptrs},
+            {"Constant Ratio Integers",
+             &ORIGINAL_TYPE.constant_ratio_integers_ptrs,
+             &PRESOLVED_TYPE.constant_ratio_integers_ptrs},
+            {"Aggregation", &ORIGINAL_TYPE.aggregation_ptrs,
+             &PRESOLVED_TYPE.aggregation_ptrs},
+            {"Precedence", &ORIGINAL_TYPE.precedence_ptrs,
+             &PRESOLVED_TYPE.precedence_ptrs},
+            {"Variable Bound", &ORIGINAL_TYPE.variable_bound_ptrs,
+             &PRESOLVED_TYPE.variable_bound_ptrs},
+            {"Trinomial Exclusive NOR",
+             &ORIGINAL_TYPE.trinomial_exclusive_nor_ptrs,
+             &PRESOLVED_TYPE.trinomial_exclusive_nor_ptrs},
+            {"Set Partitioning", &ORIGINAL_TYPE.set_partitioning_ptrs,
+             &PRESOLVED_TYPE.set_partitioning_ptrs},
+            {"Set Packing", &ORIGINAL_TYPE.set_packing_ptrs,
+             &PRESOLVED_TYPE.set_packing_ptrs},
+            {"Set Covering", &ORIGINAL_TYPE.set_covering_ptrs,
+             &PRESOLVED_TYPE.set_covering_ptrs},
+            {"Cardinality", &ORIGINAL_TYPE.cardinality_ptrs,
+             &PRESOLVED_TYPE.cardinality_ptrs},
+            {"Invariant Knapsack", &ORIGINAL_TYPE.invariant_knapsack_ptrs,
+             &PRESOLVED_TYPE.invariant_knapsack_ptrs},
+            {"Multiple Covering", &ORIGINAL_TYPE.multiple_covering_ptrs,
+             &PRESOLVED_TYPE.multiple_covering_ptrs},
+            {"Binary Flow", &ORIGINAL_TYPE.binary_flow_ptrs,
+             &PRESOLVED_TYPE.binary_flow_ptrs},
+            {"Integer Flow", &ORIGINAL_TYPE.integer_flow_ptrs,
+             &PRESOLVED_TYPE.integer_flow_ptrs},
+            {"Soft Selection", &ORIGINAL_TYPE.soft_selection_ptrs,
+             &PRESOLVED_TYPE.soft_selection_ptrs},
+            {"Min-Max", &ORIGINAL_TYPE.min_max_ptrs,
+             &PRESOLVED_TYPE.min_max_ptrs},
+            {"Max-Min", &ORIGINAL_TYPE.max_min_ptrs,
+             &PRESOLVED_TYPE.max_min_ptrs},
+            {"Intermediate", &ORIGINAL_TYPE.intermediate_ptrs,
+             &PRESOLVED_TYPE.intermediate_ptrs},
+            {"Equation Knapsack", &ORIGINAL_TYPE.equation_knapsack_ptrs,
+             &PRESOLVED_TYPE.equation_knapsack_ptrs},
+            {"Bin Packing", &ORIGINAL_TYPE.bin_packing_ptrs,
+             &PRESOLVED_TYPE.bin_packing_ptrs},
+            {"Knapsack", &ORIGINAL_TYPE.knapsack_ptrs,
+             &PRESOLVED_TYPE.knapsack_ptrs},
+            {"Integer Knapsack", &ORIGINAL_TYPE.integer_knapsack_ptrs,
+             &PRESOLVED_TYPE.integer_knapsack_ptrs},
+            {"GF(2)", &ORIGINAL_TYPE.gf2_ptrs, &PRESOLVED_TYPE.gf2_ptrs},
+            {"General Linear", &ORIGINAL_TYPE.general_linear_ptrs,
+             &PRESOLVED_TYPE.general_linear_ptrs},
+        };
 
-        utility::print_info(                        //
-            " -- Exclusive OR: " +                  //
-                utility::to_string(                 //
-                    compute_number_of_constraints(  //
-                        ORIGINAL_TYPE.exclusive_or_ptrs),
-                    "%d") +
-                " (" +
-                utility::to_string(                         //
-                    compute_number_of_enabled_constraints(  //
-                        PRESOLVED_TYPE.exclusive_or_ptrs),
-                    "%d") +
-                ")",
-            true);
-
-        utility::print_info(                        //
-            " -- Exclusive NOR: " +                 //
-                utility::to_string(                 //
-                    compute_number_of_constraints(  //
-                        ORIGINAL_TYPE.exclusive_nor_ptrs),
-                    "%d") +
-                " (" +
-                utility::to_string(                         //
-                    compute_number_of_enabled_constraints(  //
-                        PRESOLVED_TYPE.exclusive_nor_ptrs),
-                    "%d") +
-                ")",
-            true);
-
-        utility::print_info(                        //
-            " -- Inverted Integers: " +             //
-                utility::to_string(                 //
-                    compute_number_of_constraints(  //
-                        ORIGINAL_TYPE.inverted_integers_ptrs),
-                    "%d") +
-                " (" +
-                utility::to_string(                         //
-                    compute_number_of_enabled_constraints(  //
-                        PRESOLVED_TYPE.inverted_integers_ptrs),
-                    "%d") +
-                ")",
-            true);
-
-        utility::print_info(                        //
-            " -- Balanced Integers: " +             //
-                utility::to_string(                 //
-                    compute_number_of_constraints(  //
-                        ORIGINAL_TYPE.balanced_integers_ptrs),
-                    "%d") +
-                " (" +
-                utility::to_string(                         //
-                    compute_number_of_enabled_constraints(  //
-                        PRESOLVED_TYPE.balanced_integers_ptrs),
-                    "%d") +
-                ")",
-            true);
-
-        utility::print_info(                        //
-            " -- Constant Sum Integers: " +         //
-                utility::to_string(                 //
-                    compute_number_of_constraints(  //
-                        ORIGINAL_TYPE.constant_sum_integers_ptrs),
-                    "%d") +
-                " (" +
-                utility::to_string(                         //
-                    compute_number_of_enabled_constraints(  //
-                        PRESOLVED_TYPE.constant_sum_integers_ptrs),
-                    "%d") +
-                ")",
-            true);
-
-        utility::print_info(                        //
-            " -- Constant Difference Integers: " +  //
-                utility::to_string(                 //
-                    compute_number_of_constraints(  //
-                        ORIGINAL_TYPE.constant_difference_integers_ptrs),
-                    "%d") +
-                " (" +
-                utility::to_string(                         //
-                    compute_number_of_enabled_constraints(  //
-                        PRESOLVED_TYPE.constant_difference_integers_ptrs),
-                    "%d") +
-                ")",
-            true);
-
-        utility::print_info(                        //
-            " -- Constant Ratio Integers: " +       //
-                utility::to_string(                 //
-                    compute_number_of_constraints(  //
-                        ORIGINAL_TYPE.constant_ratio_integers_ptrs),
-                    "%d") +
-                " (" +
-                utility::to_string(                         //
-                    compute_number_of_enabled_constraints(  //
-                        PRESOLVED_TYPE.constant_ratio_integers_ptrs),
-                    "%d") +
-                ")",
-            true);
-
-        utility::print_info(                        //
-            " -- Aggregation: " +                   //
-                utility::to_string(                 //
-                    compute_number_of_constraints(  //
-                        ORIGINAL_TYPE.aggregation_ptrs),
-                    "%d") +
-                " (" +
-                utility::to_string(                         //
-                    compute_number_of_enabled_constraints(  //
-                        PRESOLVED_TYPE.aggregation_ptrs),
-                    "%d") +
-                ")",
-            true);
-
-        utility::print_info(                        //
-            " -- Precedence: " +                    //
-                utility::to_string(                 //
-                    compute_number_of_constraints(  //
-                        ORIGINAL_TYPE.precedence_ptrs),
-                    "%d") +
-                " (" +
-                utility::to_string(                         //
-                    compute_number_of_enabled_constraints(  //
-                        PRESOLVED_TYPE.precedence_ptrs),
-                    "%d") +
-                ")",
-            true);
-
-        utility::print_info(                        //
-            " -- Variable Bound: " +                //
-                utility::to_string(                 //
-                    compute_number_of_constraints(  //
-                        ORIGINAL_TYPE.variable_bound_ptrs),
-                    "%d") +
-                " (" +
-                utility::to_string(                         //
-                    compute_number_of_enabled_constraints(  //
-                        PRESOLVED_TYPE.variable_bound_ptrs),
-                    "%d") +
-                ")",
-            true);
-
-        utility::print_info(                        //
-            " -- Trinomial Exclusive NOR: " +       //
-                utility::to_string(                 //
-                    compute_number_of_constraints(  //
-                        ORIGINAL_TYPE.trinomial_exclusive_nor_ptrs),
-                    "%d") +
-                " (" +
-                utility::to_string(                         //
-                    compute_number_of_enabled_constraints(  //
-                        PRESOLVED_TYPE.trinomial_exclusive_nor_ptrs),
-                    "%d") +
-                ")",
-            true);
-
-        utility::print_info(                        //
-            " -- Set Partitioning: " +              //
-                utility::to_string(                 //
-                    compute_number_of_constraints(  //
-                        ORIGINAL_TYPE.set_partitioning_ptrs),
-                    "%d") +
-                " (" +
-                utility::to_string(                         //
-                    compute_number_of_enabled_constraints(  //
-                        PRESOLVED_TYPE.set_partitioning_ptrs),
-                    "%d") +
-                ")",
-            true);
-
-        utility::print_info(                        //
-            " -- Set Packing: " +                   //
-                utility::to_string(                 //
-                    compute_number_of_constraints(  //
-                        ORIGINAL_TYPE.set_packing_ptrs),
-                    "%d") +
-                " (" +
-                utility::to_string(                         //
-                    compute_number_of_enabled_constraints(  //
-                        PRESOLVED_TYPE.set_packing_ptrs),
-                    "%d") +
-                ")",
-            true);
-
-        utility::print_info(                        //
-            " -- Set Covering: " +                  //
-                utility::to_string(                 //
-                    compute_number_of_constraints(  //
-                        ORIGINAL_TYPE.set_covering_ptrs),
-                    "%d") +
-                " (" +
-                utility::to_string(                         //
-                    compute_number_of_enabled_constraints(  //
-                        PRESOLVED_TYPE.set_covering_ptrs),
-                    "%d") +
-                ")",
-            true);
-
-        utility::print_info(                        //
-            " -- Cardinality: " +                   //
-                utility::to_string(                 //
-                    compute_number_of_constraints(  //
-                        ORIGINAL_TYPE.cardinality_ptrs),
-                    "%d") +
-                " (" +
-                utility::to_string(                         //
-                    compute_number_of_enabled_constraints(  //
-                        PRESOLVED_TYPE.cardinality_ptrs),
-                    "%d") +
-                ")",
-            true);
-
-        utility::print_info(                        //
-            " -- Invariant Knapsack: " +            //
-                utility::to_string(                 //
-                    compute_number_of_constraints(  //
-                        ORIGINAL_TYPE.invariant_knapsack_ptrs),
-                    "%d") +
-                " (" +
-                utility::to_string(                         //
-                    compute_number_of_enabled_constraints(  //
-                        PRESOLVED_TYPE.invariant_knapsack_ptrs),
-                    "%d") +
-                ")",
-            true);
-
-        utility::print_info(                        //
-            " -- Multiple Covering: " +             //
-                utility::to_string(                 //
-                    compute_number_of_constraints(  //
-                        ORIGINAL_TYPE.multiple_covering_ptrs),
-                    "%d") +
-                " (" +
-                utility::to_string(                         //
-                    compute_number_of_enabled_constraints(  //
-                        PRESOLVED_TYPE.multiple_covering_ptrs),
-                    "%d") +
-                ")",
-            true);
-
-        utility::print_info(                        //
-            " -- Binary Flow: " +                   //
-                utility::to_string(                 //
-                    compute_number_of_constraints(  //
-                        ORIGINAL_TYPE.binary_flow_ptrs),
-                    "%d") +
-                " (" +
-                utility::to_string(                         //
-                    compute_number_of_enabled_constraints(  //
-                        PRESOLVED_TYPE.binary_flow_ptrs),
-                    "%d") +
-                ")",
-            true);
-
-        utility::print_info(                        //
-            " -- Integer Flow: " +                  //
-                utility::to_string(                 //
-                    compute_number_of_constraints(  //
-                        ORIGINAL_TYPE.integer_flow_ptrs),
-                    "%d") +
-                " (" +
-                utility::to_string(                         //
-                    compute_number_of_enabled_constraints(  //
-                        PRESOLVED_TYPE.integer_flow_ptrs),
-                    "%d") +
-                ")",
-            true);
-
-        utility::print_info(                        //
-            " -- Soft Selection: " +                //
-                utility::to_string(                 //
-                    compute_number_of_constraints(  //
-                        ORIGINAL_TYPE.soft_selection_ptrs),
-                    "%d") +
-                " (" +
-                utility::to_string(                         //
-                    compute_number_of_enabled_constraints(  //
-                        PRESOLVED_TYPE.soft_selection_ptrs),
-                    "%d") +
-                ")",
-            true);
-
-        utility::print_info(                        //
-            " -- Min-Max: " +                       //
-                utility::to_string(                 //
-                    compute_number_of_constraints(  //
-                        ORIGINAL_TYPE.min_max_ptrs),
-                    "%d") +
-                " (" +
-                utility::to_string(                         //
-                    compute_number_of_enabled_constraints(  //
-                        PRESOLVED_TYPE.min_max_ptrs),
-                    "%d") +
-                ")",
-            true);
-
-        utility::print_info(                        //
-            " -- Max-Min: " +                       //
-                utility::to_string(                 //
-                    compute_number_of_constraints(  //
-                        ORIGINAL_TYPE.max_min_ptrs),
-                    "%d") +
-                " (" +
-                utility::to_string(                         //
-                    compute_number_of_enabled_constraints(  //
-                        PRESOLVED_TYPE.max_min_ptrs),
-                    "%d") +
-                ")",
-            true);
-
-        utility::print_info(                        //
-            " -- Intermediate: " +                  //
-                utility::to_string(                 //
-                    compute_number_of_constraints(  //
-                        ORIGINAL_TYPE.intermediate_ptrs),
-                    "%d") +
-                " (" +
-                utility::to_string(                         //
-                    compute_number_of_enabled_constraints(  //
-                        PRESOLVED_TYPE.intermediate_ptrs),
-                    "%d") +
-                ")",
-            true);
-
-        utility::print_info(                        //
-            " -- Equation Knapsack: " +             //
-                utility::to_string(                 //
-                    compute_number_of_constraints(  //
-                        ORIGINAL_TYPE.equation_knapsack_ptrs),
-                    "%d") +
-                " (" +
-                utility::to_string(                         //
-                    compute_number_of_enabled_constraints(  //
-                        PRESOLVED_TYPE.equation_knapsack_ptrs),
-                    "%d") +
-                ")",
-            true);
-
-        utility::print_info(                        //
-            " -- Bin Packing: " +                   //
-                utility::to_string(                 //
-                    compute_number_of_constraints(  //
-                        ORIGINAL_TYPE.bin_packing_ptrs),
-                    "%d") +
-                " (" +
-                utility::to_string(                         //
-                    compute_number_of_enabled_constraints(  //
-                        PRESOLVED_TYPE.bin_packing_ptrs),
-                    "%d") +
-                ")",
-            true);
-
-        utility::print_info(                        //
-            " -- Knapsack: " +                      //
-                utility::to_string(                 //
-                    compute_number_of_constraints(  //
-                        ORIGINAL_TYPE.knapsack_ptrs),
-                    "%d") +
-                " (" +
-                utility::to_string(                         //
-                    compute_number_of_enabled_constraints(  //
-                        PRESOLVED_TYPE.knapsack_ptrs),
-                    "%d") +
-                ")",
-            true);
-
-        utility::print_info(                        //
-            " -- Integer Knapsack: " +              //
-                utility::to_string(                 //
-                    compute_number_of_constraints(  //
-                        ORIGINAL_TYPE.integer_knapsack_ptrs),
-                    "%d") +
-                " (" +
-                utility::to_string(                         //
-                    compute_number_of_enabled_constraints(  //
-                        PRESOLVED_TYPE.integer_knapsack_ptrs),
-                    "%d") +
-                ")",
-            true);
-
-        utility::print_info(                        //
-            " -- GF(2): " +                         //
-                utility::to_string(                 //
-                    compute_number_of_constraints(  //
-                        ORIGINAL_TYPE.gf2_ptrs),
-                    "%d") +
-                " (" +
-                utility::to_string(                         //
-                    compute_number_of_enabled_constraints(  //
-                        PRESOLVED_TYPE.gf2_ptrs),
-                    "%d") +
-                ")",
-            true);
-
-        utility::print_info(                        //
-            " -- General Linear: " +                //
-                utility::to_string(                 //
-                    compute_number_of_constraints(  //
-                        ORIGINAL_TYPE.general_linear_ptrs),
-                    "%d") +
-                " (" +
-                utility::to_string(                         //
-                    compute_number_of_enabled_constraints(  //
-                        PRESOLVED_TYPE.general_linear_ptrs),
-                    "%d") +
-                ")",
-            true);
+        for (const auto &row : TABLE) {
+            utility::print_info(
+                " -- " + row.name + ": " +
+                    utility::to_string(compute_number_of_all_constraints(
+                                           *row.original_ptrs_ptr),
+                                       "%d") +
+                    utility::to_string(compute_number_of_enabled_constraints(
+                                           *row.presolved_ptrs_ptr),
+                                       " (%d)"),
+                true);
+        }
 
         utility::print(  //
             "          ( ) : Number of enabled constraints after presolve.",

@@ -249,7 +249,7 @@ class ModelBuilder {
 
         for (auto &&proxy : model.constraint_proxies()) {
             for (auto &&constraint : proxy.flat_indexed_constraints()) {
-                constraint.update_basic_structure();
+                constraint.update_structure();
                 constraint.update_constraint_type();
             }
         }
@@ -333,7 +333,7 @@ class ModelBuilder {
         model.m_is_integer = true;
         for (auto &&proxy : model.constraint_proxies()) {
             for (auto &&constraint : proxy.flat_indexed_constraints()) {
-                if (!constraint.is_integer()) {
+                if (!constraint.structure().is_integer) {
                     model.m_is_integer = false;
                     return;
                 }

@@ -50,7 +50,6 @@ TEST_F(TestExpression, initialize) {
     EXPECT_TRUE(expression.is_enabled());
     EXPECT_TRUE(expression.sensitivities().empty());
 
-    EXPECT_EQ(static_cast<std::uint64_t>(0), expression.selection_mask());
     EXPECT_EQ(static_cast<std::uint64_t>(0), expression.hash());
 }
 
@@ -161,19 +160,6 @@ TEST_F(TestExpression,
 /*****************************************************************************/
 TEST_F(TestExpression, setup_fixed_sensitivities) {
     /// This test is covered by test_fixed_size_hash_map().
-}
-
-/*****************************************************************************/
-TEST_F(TestExpression, setup_selection_mask) {
-    auto expression =
-        model_component::Expression<int, double>::create_instance();
-    auto variable_0 = model_component::Variable<int, double>::create_instance();
-    auto variable_1 = model_component::Variable<int, double>::create_instance();
-    expression      = variable_0 + variable_1;
-    expression.setup_selection_mask();
-    auto selection_mask = ~(reinterpret_cast<std::uint64_t>(&variable_0) |
-                            reinterpret_cast<std::uint64_t>(&variable_1));
-    EXPECT_EQ(selection_mask, expression.selection_mask());
 }
 
 /*****************************************************************************/
@@ -497,11 +483,6 @@ TEST_F(TestExpression, negative_coefficient_mutable_variable_ptrs) {
 }
 
 /*****************************************************************************/
-TEST_F(TestExpression, selection_mask) {
-    /// This test is covered by setup_selection_mask().
-}
-
-/*****************************************************************************/
 TEST_F(TestExpression, hash) {
     /// This test is covered by setup_hash().
 }
@@ -621,117 +602,242 @@ TEST_F(TestExpression, not_equal) {
 }
 
 /*****************************************************************************/
-TEST_F(TestExpression, is_integer) {
-    auto variable_0 = model_component::Variable<int, double>::create_instance();
-    auto variable_1 = model_component::Variable<int, double>::create_instance();
+TEST_F(TestExpression, structure) {
     {
+        /// x_0 + x_1 + 1, x_0 and x_1 are binary.
         auto expression =
             model_component::Expression<int, double>::create_instance();
-        expression = variable_0 + variable_1 + 1;
 
-        EXPECT_TRUE(expression.is_integer());
+        auto variable_0 =
+            model_component::Variable<int, double>::create_instance();
+        auto variable_1 =
+            model_component::Variable<int, double>::create_instance();
+
+        variable_0.set_bound(0, 1);
+        variable_1.set_bound(0, 1);
+
+        expression     = variable_0 + variable_1 + 1;
+        auto structure = expression.structure();
+
+        EXPECT_EQ(1, structure.constant_value);
+        EXPECT_TRUE(structure.is_integer);
+        EXPECT_TRUE(structure.has_only_binary_coefficient);
+        EXPECT_TRUE(structure.has_only_binary_or_selection_variable);
+        EXPECT_TRUE(structure.has_only_plus_or_minus_one_coefficient);
+        EXPECT_FALSE(structure.has_bin_packing_variable);
+
+        EXPECT_EQ(1, structure.max_abs_coefficient);
+
+        EXPECT_EQ(2, static_cast<int>(
+                         structure.plus_one_coefficient_variable_ptrs.size()));
+        EXPECT_EQ(0, static_cast<int>(
+                         structure.minus_one_coefficient_variable_ptrs.size()));
+
+        EXPECT_EQ(
+            0,
+            static_cast<int>(
+                structure.plus_one_coefficient_integer_variable_ptrs.size()));
+        EXPECT_EQ(
+            0,
+            static_cast<int>(
+                structure.minus_one_coefficient_integer_variable_ptrs.size()));
+
+        EXPECT_EQ(2, static_cast<int>(
+                         structure.positive_coefficient_variable_ptrs.size()));
+        EXPECT_EQ(0, static_cast<int>(
+                         structure.negative_coefficient_variable_ptrs.size()));
+
+        EXPECT_EQ(2, static_cast<int>(structure.variable_ptrs.size()));
+        EXPECT_EQ(2, static_cast<int>(structure.coefficients.size()));
     }
 
     {
+        /// x_0 + x_1 + 1, x_0 and x_1 are binary (x_0 is fixed by 1).
         auto expression =
             model_component::Expression<int, double>::create_instance();
-        expression = 2 * variable_0 - 3 * variable_1 + 1;
 
-        EXPECT_TRUE(expression.is_integer());
+        auto variable_0 =
+            model_component::Variable<int, double>::create_instance();
+        auto variable_1 =
+            model_component::Variable<int, double>::create_instance();
+
+        variable_0.set_bound(0, 1);
+        variable_1.set_bound(0, 1);
+        variable_0.fix_by(1);
+
+        expression     = variable_0 + variable_1 + 1;
+        auto structure = expression.structure();
+
+        EXPECT_EQ(2, structure.constant_value);
+        EXPECT_TRUE(structure.is_integer);
+        EXPECT_TRUE(structure.has_only_binary_coefficient);
+        EXPECT_TRUE(structure.has_only_binary_or_selection_variable);
+        EXPECT_TRUE(structure.has_only_plus_or_minus_one_coefficient);
+        EXPECT_FALSE(structure.has_bin_packing_variable);
+
+        EXPECT_EQ(1, structure.max_abs_coefficient);
+
+        EXPECT_EQ(1, static_cast<int>(
+                         structure.plus_one_coefficient_variable_ptrs.size()));
+        EXPECT_EQ(0, static_cast<int>(
+                         structure.minus_one_coefficient_variable_ptrs.size()));
+
+        EXPECT_EQ(
+            0,
+            static_cast<int>(
+                structure.plus_one_coefficient_integer_variable_ptrs.size()));
+        EXPECT_EQ(
+            0,
+            static_cast<int>(
+                structure.minus_one_coefficient_integer_variable_ptrs.size()));
+
+        EXPECT_EQ(1, static_cast<int>(
+                         structure.positive_coefficient_variable_ptrs.size()));
+        EXPECT_EQ(0, static_cast<int>(
+                         structure.negative_coefficient_variable_ptrs.size()));
+
+        EXPECT_EQ(1, static_cast<int>(structure.variable_ptrs.size()));
+        EXPECT_EQ(1, static_cast<int>(structure.coefficients.size()));
     }
 
     {
+        /// x_0 - 1.5 * x_1 + 1, x_0 and x_1 are binary.
         auto expression =
             model_component::Expression<int, double>::create_instance();
-        expression = variable_0 + variable_1 + 1.1;
 
-        EXPECT_FALSE(expression.is_integer());
+        auto variable_0 =
+            model_component::Variable<int, double>::create_instance();
+        auto variable_1 =
+            model_component::Variable<int, double>::create_instance();
+
+        variable_0.set_bound(0, 1);
+        variable_1.set_bound(0, 1);
+
+        expression     = variable_0 + 1.5 * variable_1 + 1;
+        auto structure = expression.structure();
+
+        EXPECT_FALSE(structure.is_integer);
+        EXPECT_FALSE(structure.has_only_binary_coefficient);
+        EXPECT_FALSE(structure.has_only_plus_or_minus_one_coefficient);
+        EXPECT_FLOAT_EQ(1.5, structure.max_abs_coefficient);
+
+        EXPECT_EQ(1, static_cast<int>(
+                         structure.plus_one_coefficient_variable_ptrs.size()));
+        EXPECT_EQ(0, static_cast<int>(
+                         structure.minus_one_coefficient_variable_ptrs.size()));
+
+        EXPECT_EQ(
+            0,
+            static_cast<int>(
+                structure.plus_one_coefficient_integer_variable_ptrs.size()));
+        EXPECT_EQ(
+            0,
+            static_cast<int>(
+                structure.minus_one_coefficient_integer_variable_ptrs.size()));
+
+        EXPECT_EQ(2, static_cast<int>(
+                         structure.positive_coefficient_variable_ptrs.size()));
+        EXPECT_EQ(0, static_cast<int>(
+                         structure.negative_coefficient_variable_ptrs.size()));
     }
 
     {
+        /// x_0 + x_1 + 1.5, x_0 and x_1 are binary.
         auto expression =
             model_component::Expression<int, double>::create_instance();
-        expression = 1.1 * variable_0 + variable_1;
 
-        EXPECT_FALSE(expression.is_integer());
-    }
-}
+        auto variable_0 =
+            model_component::Variable<int, double>::create_instance();
+        auto variable_1 =
+            model_component::Variable<int, double>::create_instance();
 
-/*****************************************************************************/
-TEST_F(TestExpression, max_abs_coefficient) {
-    auto variable_0 = model_component::Variable<int, double>::create_instance();
-    auto variable_1 = model_component::Variable<int, double>::create_instance();
-    {
-        auto expression =
-            model_component::Expression<int, double>::create_instance();
-        expression = -10 * variable_0 + 20 * variable_1 + 30;
+        variable_0.set_bound(0, 1);
+        variable_1.set_bound(0, 1);
 
-        EXPECT_FLOAT_EQ(20, expression.max_abs_coefficient());
-    }
+        expression     = variable_0 + variable_1 + 1.5;
+        auto structure = expression.structure();
 
-    {
-        auto expression =
-            model_component::Expression<int, double>::create_instance();
-        expression = 10 * variable_0 - 20 * variable_1 + 30;
-
-        EXPECT_FLOAT_EQ(20, expression.max_abs_coefficient());
-    }
-}
-
-/*****************************************************************************/
-TEST_F(TestExpression, has_only_binary_coefficient) {
-    auto variable_0 = model_component::Variable<int, double>::create_instance();
-    auto variable_1 = model_component::Variable<int, double>::create_instance();
-    {
-        auto expression =
-            model_component::Expression<int, double>::create_instance();
-        expression = variable_0 + variable_1 + 10;
-
-        EXPECT_TRUE(expression.has_only_binary_coefficient());
+        EXPECT_FALSE(structure.is_integer);
+        EXPECT_TRUE(structure.has_only_binary_coefficient);
+        EXPECT_TRUE(structure.has_only_plus_or_minus_one_coefficient);
     }
 
     {
+        /// x_0 - x_1 + 1, x_0 and x_1 are binary.
         auto expression =
             model_component::Expression<int, double>::create_instance();
-        expression = 1.0 * variable_0 + 1.0 * variable_1 + 10;
 
-        EXPECT_TRUE(expression.has_only_binary_coefficient());
+        auto variable_0 =
+            model_component::Variable<int, double>::create_instance();
+        auto variable_1 =
+            model_component::Variable<int, double>::create_instance();
+
+        variable_0.set_bound(0, 1);
+        variable_1.set_bound(0, 1);
+
+        expression     = variable_0 - variable_1 + 1;
+        auto structure = expression.structure();
+
+        EXPECT_FALSE(structure.has_only_binary_coefficient);
+        EXPECT_TRUE(structure.has_only_plus_or_minus_one_coefficient);
+        EXPECT_TRUE(structure.has_bin_packing_variable);
+
+        EXPECT_EQ(1, static_cast<int>(
+                         structure.plus_one_coefficient_variable_ptrs.size()));
+        EXPECT_EQ(1, static_cast<int>(
+                         structure.minus_one_coefficient_variable_ptrs.size()));
+
+        EXPECT_EQ(
+            0,
+            static_cast<int>(
+                structure.plus_one_coefficient_integer_variable_ptrs.size()));
+        EXPECT_EQ(
+            0,
+            static_cast<int>(
+                structure.minus_one_coefficient_integer_variable_ptrs.size()));
+
+        EXPECT_EQ(1, static_cast<int>(
+                         structure.positive_coefficient_variable_ptrs.size()));
+        EXPECT_EQ(1, static_cast<int>(
+                         structure.negative_coefficient_variable_ptrs.size()));
     }
 
     {
+        /// x_0 - x_1 + 1, x_0 and x_1 are integer.
         auto expression =
             model_component::Expression<int, double>::create_instance();
-        expression = -1.0 * variable_0 + variable_1 + 10;
 
-        EXPECT_FALSE(expression.has_only_binary_coefficient());
-    }
-}
+        auto variable_0 =
+            model_component::Variable<int, double>::create_instance();
+        auto variable_1 =
+            model_component::Variable<int, double>::create_instance();
 
-/*****************************************************************************/
-TEST_F(TestExpression, has_only_binary_variable) {
-    auto variable_0 = model_component::Variable<int, double>::create_instance();
-    auto variable_1 = model_component::Variable<int, double>::create_instance();
-    variable_0.set_bound(0, 1);
-    variable_1.set_bound(0, 1);
+        variable_0.set_bound(0, 100);
+        variable_1.set_bound(0, 100);
 
-    auto variable_2 = model_component::Variable<int, double>::create_instance();
-    auto variable_3 = model_component::Variable<int, double>::create_instance();
-    variable_2.set_bound(0, 10);
-    variable_3.set_bound(0, 10);
-    {
-        auto expression =
-            model_component::Expression<int, double>::create_instance();
-        expression = 2 * variable_0 - 3 * variable_1 + 10;
+        expression     = variable_0 - variable_1 + 1;
+        auto structure = expression.structure();
 
-        EXPECT_TRUE(expression.has_only_binary_variable());
-    }
+        EXPECT_FALSE(structure.has_only_binary_or_selection_variable);
 
-    {
-        auto expression =
-            model_component::Expression<int, double>::create_instance();
-        expression = 2 * variable_2 - 3 * variable_3 + 10;
+        EXPECT_EQ(1, static_cast<int>(
+                         structure.plus_one_coefficient_variable_ptrs.size()));
+        EXPECT_EQ(1, static_cast<int>(
+                         structure.minus_one_coefficient_variable_ptrs.size()));
 
-        EXPECT_FALSE(expression.has_only_binary_variable());
+        EXPECT_EQ(
+            1,
+            static_cast<int>(
+                structure.plus_one_coefficient_integer_variable_ptrs.size()));
+        EXPECT_EQ(
+            1,
+            static_cast<int>(
+                structure.minus_one_coefficient_integer_variable_ptrs.size()));
+
+        EXPECT_EQ(1, static_cast<int>(
+                         structure.positive_coefficient_variable_ptrs.size()));
+        EXPECT_EQ(1, static_cast<int>(
+                         structure.negative_coefficient_variable_ptrs.size()));
     }
 }
 

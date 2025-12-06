@@ -66,37 +66,51 @@ struct Reference {
                     model_component::Variable<T_Variable, T_Expression> *>(
                     &variable);
                 variable_reference.variable_ptrs.push_back(variable_ptr);
+
                 if (variable.is_fixed()) {
                     variable_reference.fixed_variable_ptrs.push_back(
                         variable_ptr);
+
                 } else {
                     variable_reference.mutable_variable_ptrs.push_back(
                         variable_ptr);
                 }
-                if (variable.type() == model_component::VariableType::Binary) {
-                    reference_variable_type.binary_variable_ptrs.push_back(
-                        variable_ptr);
-                }
-                if (variable.type() == model_component::VariableType::Integer) {
-                    reference_variable_type.integer_variable_ptrs.push_back(
-                        variable_ptr);
-                }
-                if (variable.type() ==
-                    model_component::VariableType::Selection) {
-                    reference_variable_type.selection_variable_ptrs.push_back(
-                        variable_ptr);
-                }
 
-                if (variable.type() ==
-                    model_component::VariableType::DependentBinary) {
-                    reference_variable_type.dependent_binary_variable_ptrs
-                        .push_back(variable_ptr);
-                }
+                switch (variable.type()) {
+                    case model_component::VariableType::Binary: {
+                        reference_variable_type.binary_variable_ptrs.push_back(
+                            variable_ptr);
+                        break;
+                    }
 
-                if (variable.type() ==
-                    model_component::VariableType::DependentInteger) {
-                    reference_variable_type.dependent_integer_variable_ptrs
-                        .push_back(variable_ptr);
+                    case model_component::VariableType::Integer: {
+                        reference_variable_type.integer_variable_ptrs.push_back(
+                            variable_ptr);
+                        break;
+                    }
+
+                    case model_component::VariableType::Selection: {
+                        reference_variable_type.selection_variable_ptrs
+                            .push_back(variable_ptr);
+                        break;
+                    }
+
+                    case model_component::VariableType::DependentBinary: {
+                        reference_variable_type.dependent_binary_variable_ptrs
+                            .push_back(variable_ptr);
+                        break;
+                    }
+
+                    case model_component::VariableType::DependentInteger: {
+                        reference_variable_type.dependent_integer_variable_ptrs
+                            .push_back(variable_ptr);
+                        break;
+                    }
+                    default: {
+                        throw std::runtime_error(utility::format_error_location(
+                            __FILE__, __LINE__, __func__,
+                            "Unknown-Type variable was found."));
+                    }
                 }
             }
         }
@@ -117,38 +131,45 @@ struct Reference {
                     &constraint);
 
                 constraint_reference.constraint_ptrs.push_back(constraint_ptr);
+
                 if (constraint.is_enabled()) {
                     constraint_reference.enabled_constraint_ptrs.push_back(
                         constraint_ptr);
 
-                    switch (constraint.sense()) {
-                        case model_component::ConstraintSense::Less: {
-                            constraint_reference.less_ptrs.push_back(
-                                constraint_ptr);
-                            break;
-                        }
-                        case model_component::ConstraintSense::Equal: {
-                            constraint_reference.equal_ptrs.push_back(
-                                constraint_ptr);
-                            break;
-                        }
-                        case model_component::ConstraintSense::Greater: {
-                            constraint_reference.greater_ptrs.push_back(
-                                constraint_ptr);
-                            break;
-                        }
-                        default: {
-                            /** nothing to do*/
-                        }
-                    }
                 } else {
                     constraint_reference.disabled_constraint_ptrs.push_back(
                         constraint_ptr);
                 }
 
-                auto type = constraint.type();
+                switch (constraint.sense()) {
+                    case model_component::ConstraintSense::Less: {
+                        constraint_reference.less_ptrs.push_back(
+                            constraint_ptr);
+                        break;
+                    }
+                    case model_component::ConstraintSense::Equal: {
+                        constraint_reference.equal_ptrs.push_back(
+                            constraint_ptr);
+                        break;
+                    }
+                    case model_component::ConstraintSense::Greater: {
+                        constraint_reference.greater_ptrs.push_back(
+                            constraint_ptr);
+                        break;
+                    }
+                    default: {
+                        throw std::runtime_error(utility::format_error_location(
+                            __FILE__, __LINE__, __func__,
+                            "Unknown-Sense constraint was "
+                            "found."));
+                    }
+                }
 
-                switch (type) {
+                switch (constraint.type()) {
+                    case model_component::ConstraintType::Empty:
+                        constraint_type_reference.empty_ptrs.push_back(
+                            constraint_ptr);
+                        break;
                     case model_component::ConstraintType::Singleton:
                         constraint_type_reference.singleton_ptrs.push_back(
                             constraint_ptr);
@@ -300,7 +321,9 @@ struct Reference {
                         constraint_type_reference.general_linear_ptrs.push_back(
                             constraint_ptr);
                         break;
+
                     case model_component::ConstraintType::Unknown:
+                    default:
                         throw std::runtime_error(utility::format_error_location(
                             __FILE__, __LINE__, __func__,
                             "Unknown-Type constraint was found."));

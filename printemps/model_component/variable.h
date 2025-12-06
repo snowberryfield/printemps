@@ -90,9 +90,7 @@ class Variable : public multi_array::AbstractMultiArrayElement {
 
     /*************************************************************************/
     /// Default constructor
-    Variable(void)
-        : m_extension(
-              std::make_unique<VariableExtension<T_Variable, T_Expression>>()) {
+    Variable(void) {
         this->initialize();
     }
 
@@ -150,6 +148,9 @@ class Variable : public multi_array::AbstractMultiArrayElement {
             VariableConstant::INITIAL_LOCAL_LAST_UPDATE_ITERATION;
         m_global_last_update_iteration = 0;
         m_update_count                 = 0;
+
+        m_extension =
+            std::make_unique<VariableExtension<T_Variable, T_Expression>>();
 
         m_extension->type                   = VariableType::Integer;
         m_extension->lagrangian_coefficient = 0.0;
@@ -342,6 +343,11 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
+    inline bool is_fixed_at(const T_Variable a_VALUE) const {
+        return m_is_fixed && m_value == a_VALUE;
+    }
+
+    /*************************************************************************/
     inline void set_is_objective_improvable(
         const bool a_IS_OBJECTIVE_IMPROVABLE) noexcept {
         m_is_objective_improvable = a_IS_OBJECTIVE_IMPROVABLE;
@@ -443,27 +449,7 @@ class Variable : public multi_array::AbstractMultiArrayElement {
 
     /*************************************************************************/
     inline std::string type_label(void) const noexcept {
-        switch (m_extension->type) {
-            case VariableType::Binary: {
-                return "Binary";
-            }
-            case VariableType::Integer: {
-                return "Integer";
-            }
-            case VariableType::Selection: {
-                return "Selection";
-            }
-            case VariableType::DependentBinary: {
-                return "DependentBinary";
-            }
-            case VariableType::DependentInteger: {
-                return "DependentInteger";
-            }
-            default: {
-                return "Undefined";
-            }
-        }
-        return "Undefined";
+        return VariableTypeInverseMap[m_extension->type];
     }
 
     /*************************************************************************/

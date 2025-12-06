@@ -9,6 +9,7 @@
 namespace printemps::model_component {
 /*****************************************************************************/
 enum class ConstraintType {
+    Empty,
     Singleton,
     ExclusiveOR,
     ExclusiveNOR,
@@ -44,6 +45,7 @@ enum class ConstraintType {
 
 /*****************************************************************************/
 static std::unordered_map<std::string, ConstraintType> ConstraintTypeMap = {
+    {"Empty", ConstraintType::Empty},
     {"Singleton", ConstraintType::Singleton},
     {"Exclusive OR", ConstraintType::ExclusiveOR},
     {"Exclusive NOR", ConstraintType::ExclusiveNOR},
@@ -81,6 +83,7 @@ static std::unordered_map<std::string, ConstraintType> ConstraintTypeMap = {
 /*****************************************************************************/
 static std::unordered_map<ConstraintType, std::string>
     ConstraintTypeInverseMap = {
+        {ConstraintType::Empty, "Empty"},
         {ConstraintType::Singleton, "Singleton"},
         {ConstraintType::ExclusiveOR, "Exclusive OR"},
         {ConstraintType::ExclusiveNOR, "Exclusive NOR"},

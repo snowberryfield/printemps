@@ -67,9 +67,9 @@ struct Move {
             }
         }
         return false;
-    };
+    }
 
-    /*****************************************************************************/
+    /*************************************************************************/
     inline bool has_selection_variable(void) const {
         for (const auto &alteration : this->alterations) {
             if (alteration.first->type() ==
@@ -78,9 +78,9 @@ struct Move {
             }
         }
         return false;
-    };
+    }
 
-    /*****************************************************************************/
+    /*************************************************************************/
     inline bool has_bound_violation(void) const {
         for (const auto &alteration : this->alterations) {
             if (alteration.second < alteration.first->lower_bound()) {
@@ -91,9 +91,9 @@ struct Move {
             }
         }
         return false;
-    };
+    }
 
-    /*****************************************************************************/
+    /*************************************************************************/
     inline bool has_objective_improvable_variable(void) const {
         for (const auto &alteration : this->alterations) {
             if (alteration.first->is_objective_improvable()) {
@@ -101,9 +101,9 @@ struct Move {
             }
         }
         return false;
-    };
+    }
 
-    /*****************************************************************************/
+    /*************************************************************************/
     inline bool has_feasibility_improvable_variable(void) const {
         for (const auto &alteration : this->alterations) {
             if (alteration.first->is_feasibility_improvable()) {
@@ -111,9 +111,9 @@ struct Move {
             }
         }
         return false;
-    };
+    }
 
-    /*****************************************************************************/
+    /*************************************************************************/
     inline bool has_duplicate_variable(void) const {
         const int ALTERATIONS_SIZE = this->alterations.size();
         for (auto i = 0; i < ALTERATIONS_SIZE; i++) {
@@ -126,7 +126,7 @@ struct Move {
         return false;
     }
 
-    /*****************************************************************************/
+    /*************************************************************************/
     inline std::vector<model_component::Variable<T_Variable, T_Expression> *>
     related_variable_ptrs_vector(void) const {
         std::vector<model_component::Variable<T_Variable, T_Expression> *>
@@ -137,7 +137,7 @@ struct Move {
         return result;
     }
 
-    /*****************************************************************************/
+    /*************************************************************************/
     inline void setup_overlap_rate(void) {
         auto &union_ptrs_vector =
             this->alterations.front()
@@ -181,9 +181,9 @@ struct Move {
             pow(static_cast<double>(intersection_ptrs.size()) /
                     static_cast<double>(union_ptrs.size()),
                 1.0 / static_cast<double>(ALTERATIONS_SIZE - 1));
-    };
+    }
 
-    /*****************************************************************************/
+    /*************************************************************************/
     inline void setup_hash(void) {
         /**
          * NOTE: Chain moves will be sorted in descending order by overlap_ratio
@@ -198,9 +198,9 @@ struct Move {
                 hash ^ reinterpret_cast<std::uint_fast64_t>(alteration.first);
         }
         this->hash = hash;
-    };
+    }
 
-    /*****************************************************************************/
+    /*************************************************************************/
     void sort_and_unique_related_constraint_ptrs(void) {
         std::stable_sort(this->related_constraint_ptrs.begin(),
                          this->related_constraint_ptrs.end(),
@@ -241,7 +241,7 @@ inline Move<T_Variable, T_Expression> operator+(
     result.sort_and_unique_related_constraint_ptrs();
 
     return result;
-};
+}
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
@@ -294,14 +294,14 @@ inline bool operator==(const Move<T_Variable, T_Expression> &a_MOVE_FIRST,
     }
 
     return true;
-};
+}
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 inline bool operator!=(const Move<T_Variable, T_Expression> &a_MOVE_FIRST,
                        const Move<T_Variable, T_Expression> &a_MOVE_SECOND) {
     return !(a_MOVE_FIRST == a_MOVE_SECOND);
-};
+}
 
 using IPMove = Move<int, double>;
 }  // namespace printemps::neighborhood

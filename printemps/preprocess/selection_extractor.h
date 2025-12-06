@@ -27,12 +27,27 @@ class SelectionExtractor {
             if (!constraint_ptr->is_enabled()) {
                 continue;
             }
+            /**
+             * NOTE: "Selection" applies only to set-partitioning constraints
+             * whose original form is exactly Σ x_i = 1. For example, a
+             * constraint Σ x_i = y with y fixed to 1 is mathematically a
+             * set-partitioning constraint, but it is NOT treated as
+             * "Selection".
+             */
+            if (constraint_ptr->expression().constant_value() != -1) {
+                continue;
+            }
             bool is_valid = true;
 
             for (auto &&sensitivity :
                  constraint_ptr->expression().sensitivities()) {
                 if (sensitivity.first->type() !=
                     model_component::VariableType::Binary) {
+                    is_valid = false;
+                    break;
+                }
+
+                if (sensitivity.second != 1) {
                     is_valid = false;
                     break;
                 }
@@ -121,6 +136,9 @@ class SelectionExtractor {
         for (auto &&selection : raw_selections) {
             bool has_overlap = false;
             for (auto &&variable_ptr : selection.variable_ptrs) {
+                if (variable_ptr->is_fixed_at(0)) {
+                    continue;
+                }
                 if (std::find(extracted_variable_ptrs.begin(),
                               extracted_variable_ptrs.end(),
                               variable_ptr) != extracted_variable_ptrs.end()) {
@@ -194,6 +212,9 @@ class SelectionExtractor {
         for (auto &&selection : raw_selections) {
             bool has_overlap = false;
             for (auto &&variable_ptr : selection.variable_ptrs) {
+                if (variable_ptr->is_fixed_at(0)) {
+                    continue;
+                }
                 if (std::find(extracted_variable_ptrs.begin(),
                               extracted_variable_ptrs.end(),
                               variable_ptr) != extracted_variable_ptrs.end()) {
@@ -245,6 +266,9 @@ class SelectionExtractor {
         for (auto i = 0; i < RAW_SELECTIONS_SIZE; i++) {
             bool has_overlap = false;
             for (auto &&variable_ptr : raw_selections[i].variable_ptrs) {
+                if (variable_ptr->is_fixed_at(0)) {
+                    continue;
+                }
                 for (auto j = 0; j < RAW_SELECTIONS_SIZE; j++) {
                     if (j != i &&
                         std::find(raw_selections[j].variable_ptrs.begin(),
@@ -307,6 +331,9 @@ class SelectionExtractor {
 
             bool has_overlap = false;
             for (auto &&variable_ptr : selection.variable_ptrs) {
+                if (variable_ptr->is_fixed_at(0)) {
+                    continue;
+                }
                 if (std::find(extracted_variable_ptrs.begin(),
                               extracted_variable_ptrs.end(),
                               variable_ptr) != extracted_variable_ptrs.end()) {

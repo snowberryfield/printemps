@@ -62,9 +62,17 @@ class DependentVariableExtractor {
         std::vector<model_component::Constraint<T_Variable, T_Expression> *>
             constraint_ptrs;
 
+        std::vector<model_component::Constraint<T_Variable, T_Expression> *>
+            candidate_constraint_ptrs;
+
         std::unordered_set<
             model_component::Variable<T_Variable, T_Expression> *>
             set_partitioning_variable_ptrs;
+
+        std::unordered_map<
+            model_component::Variable<T_Variable, T_Expression> *, int>
+            key_variable_ptr_counts;
+
         for (auto &&set_partitioning_ptr : set_partitioning_ptrs) {
             for (auto &&sensitivity :
                  set_partitioning_ptr->expression().sensitivities()) {
@@ -86,7 +94,7 @@ class DependentVariableExtractor {
                     }
                 }
                 if (is_valid) {
-                    constraint_ptrs.push_back(exclusive_or_ptr);
+                    candidate_constraint_ptrs.push_back(exclusive_or_ptr);
                 }
             }
         }
@@ -105,7 +113,7 @@ class DependentVariableExtractor {
                     }
                 }
                 if (is_valid) {
-                    constraint_ptrs.push_back(exclusive_nor_ptr);
+                    candidate_constraint_ptrs.push_back(exclusive_nor_ptr);
                 }
             }
         }
@@ -113,92 +121,116 @@ class DependentVariableExtractor {
         /// Inverted Integers
         if (a_OPTION.preprocess
                 .is_enabled_extract_dependent_inverted_integers) {
-            constraint_ptrs.insert(constraint_ptrs.end(),
-                                   inverted_integers_ptrs.begin(),
-                                   inverted_integers_ptrs.end());
+            candidate_constraint_ptrs.insert(candidate_constraint_ptrs.end(),
+                                             inverted_integers_ptrs.begin(),
+                                             inverted_integers_ptrs.end());
         }
 
         /// Balanced Integers
         if (a_OPTION.preprocess
                 .is_enabled_extract_dependent_balanced_integers) {
-            constraint_ptrs.insert(constraint_ptrs.end(),
-                                   balanced_integers_ptrs.begin(),
-                                   balanced_integers_ptrs.end());
+            candidate_constraint_ptrs.insert(candidate_constraint_ptrs.end(),
+                                             balanced_integers_ptrs.begin(),
+                                             balanced_integers_ptrs.end());
         }
 
         /// Constant Sum Integers
         if (a_OPTION.preprocess
                 .is_enabled_extract_dependent_constant_sum_integers) {
-            constraint_ptrs.insert(constraint_ptrs.end(),
-                                   constant_sum_integers_ptrs.begin(),
-                                   constant_sum_integers_ptrs.end());
+            candidate_constraint_ptrs.insert(candidate_constraint_ptrs.end(),
+                                             constant_sum_integers_ptrs.begin(),
+                                             constant_sum_integers_ptrs.end());
         }
 
         /// Constant Difference Integers
         if (a_OPTION.preprocess
                 .is_enabled_extract_dependent_constant_difference_integers) {
-            constraint_ptrs.insert(constraint_ptrs.end(),
-                                   constant_difference_integers_ptrs.begin(),
-                                   constant_difference_integers_ptrs.end());
+            candidate_constraint_ptrs.insert(
+                candidate_constraint_ptrs.end(),
+                constant_difference_integers_ptrs.begin(),
+                constant_difference_integers_ptrs.end());
         }
 
         /// Constant Ratio Integers
         if (a_OPTION.preprocess
                 .is_enabled_extract_dependent_constant_ratio_integers) {
-            constraint_ptrs.insert(constraint_ptrs.end(),
-                                   constant_ratio_integers_ptrs.begin(),
-                                   constant_ratio_integers_ptrs.end());
+            candidate_constraint_ptrs.insert(
+                candidate_constraint_ptrs.end(),
+                constant_ratio_integers_ptrs.begin(),
+                constant_ratio_integers_ptrs.end());
         }
 
-        /// Constant Intermediate Integers
+        /// Intermediate Integers
         if (a_OPTION.preprocess.is_enabled_extract_dependent_intermediate) {
-            constraint_ptrs.insert(constraint_ptrs.end(),  //
-                                   intermediate_ptrs.begin(),
-                                   intermediate_ptrs.end());
+            candidate_constraint_ptrs.insert(
+                candidate_constraint_ptrs.end(),  //
+                intermediate_ptrs.begin(), intermediate_ptrs.end());
         }
 
-        const int CONSTRAINTS_SIZE = constraint_ptrs.size();
+        const int CANDIDATE_CONSTRAINTS_SIZE = candidate_constraint_ptrs.size();
 
-        if (CONSTRAINTS_SIZE == 0) {
+        if (CANDIDATE_CONSTRAINTS_SIZE == 0) {
             return number_of_newly_extracted_dependent_variables;
         }
 
-        auto adj = utility::BinaryMatrix::identity(CONSTRAINTS_SIZE);
+        constraint_ptrs.insert(constraint_ptrs.end(), exclusive_or_ptrs.begin(),
+                               exclusive_or_ptrs.end());
+        constraint_ptrs.insert(constraint_ptrs.end(),
+                               exclusive_nor_ptrs.begin(),
+                               exclusive_nor_ptrs.end());
+        constraint_ptrs.insert(constraint_ptrs.end(),
+                               inverted_integers_ptrs.begin(),
+                               inverted_integers_ptrs.end());
+        constraint_ptrs.insert(constraint_ptrs.end(),
+                               balanced_integers_ptrs.begin(),
+                               balanced_integers_ptrs.end());
+        constraint_ptrs.insert(constraint_ptrs.end(),
+                               constant_sum_integers_ptrs.begin(),
+                               constant_sum_integers_ptrs.end());
+        constraint_ptrs.insert(constraint_ptrs.end(),
+                               constant_difference_integers_ptrs.begin(),
+                               constant_difference_integers_ptrs.end());
+        constraint_ptrs.insert(constraint_ptrs.end(),
+                               constant_ratio_integers_ptrs.begin(),
+                               constant_ratio_integers_ptrs.end());
+        constraint_ptrs.insert(constraint_ptrs.end(), intermediate_ptrs.begin(),
+                               intermediate_ptrs.end());
 
+        const int CONSTRAINTS_SIZE = constraint_ptrs.size();
         for (auto i = 0; i < CONSTRAINTS_SIZE; i++) {
-            auto key = constraint_ptrs[i]->key_variable_ptr();
-            for (auto j = 0; j < CONSTRAINTS_SIZE; j++) {
+            auto key_variable_ptr = constraint_ptrs[i]->key_variable_ptr();
+            key_variable_ptr_counts[key_variable_ptr]++;
+        }
+
+        auto adj = utility::BinaryMatrix::identity(CANDIDATE_CONSTRAINTS_SIZE);
+
+        for (auto i = 0; i < CANDIDATE_CONSTRAINTS_SIZE; i++) {
+            auto key = candidate_constraint_ptrs[i]->key_variable_ptr();
+            for (auto j = 0; j < CANDIDATE_CONSTRAINTS_SIZE; j++) {
                 auto &sensitivities =
-                    constraint_ptrs[j]->expression().sensitivities();
+                    candidate_constraint_ptrs[j]->expression().sensitivities();
                 if (i != j && sensitivities.find(key) != sensitivities.end()) {
                     adj[i][j] = 1;
                 }
             }
         }
-        std::vector<bool> flags(CONSTRAINTS_SIZE, true);
-        std::unordered_map<
-            model_component::Variable<T_Variable, T_Expression> *, int>
-            key_variable_ptr_counts;
+        const auto        REACHABILITY = adj.reachability();
+        std::vector<bool> flags(CANDIDATE_CONSTRAINTS_SIZE, true);
 
-        for (auto i = 0; i < CONSTRAINTS_SIZE; i++) {
-            if (!constraint_ptrs[i]->is_enabled()) {
+        for (auto i = 0; i < CANDIDATE_CONSTRAINTS_SIZE; i++) {
+            if (!candidate_constraint_ptrs[i]->is_enabled()) {
                 flags[i] = false;
-                continue;
             }
+
             if (!flags[i]) {
                 continue;
             }
-            for (auto j = i + 1; j < CONSTRAINTS_SIZE; j++) {
-                if (adj[i][j] > 0 && adj[j][i] > 0) {
+
+            for (auto j = i + 1; j < CANDIDATE_CONSTRAINTS_SIZE; j++) {
+                if (REACHABILITY[i][j] > 0 && REACHABILITY[j][i] > 0) {
+                    flags[i] = false;
                     flags[j] = false;
                 }
-            }
-            auto key_variable_ptr = constraint_ptrs[i]->key_variable_ptr();
-            if (key_variable_ptr_counts.find(key_variable_ptr) !=
-                key_variable_ptr_counts.end()) {
-                key_variable_ptr_counts[key_variable_ptr] = 0;
-            } else {
-                key_variable_ptr_counts[key_variable_ptr] += 1;
             }
         }
 
@@ -209,8 +241,8 @@ class DependentVariableExtractor {
         std::vector<model_component::Constraint<T_Variable, T_Expression>>
             additional_constraints;
 
-        for (auto i = 0; i < CONSTRAINTS_SIZE; i++) {
-            auto constraint_ptr = constraint_ptrs[i];
+        for (auto i = 0; i < CANDIDATE_CONSTRAINTS_SIZE; i++) {
+            auto constraint_ptr = candidate_constraint_ptrs[i];
             if (!constraint_ptr->is_enabled()) {
                 continue;
             }
@@ -291,13 +323,13 @@ class DependentVariableExtractor {
         }
 
         if (additional_constraints.size() > 0) {
-            const int ADDITIONAL_CONSTRAINTS_SIZE =
+            const int ADDITIONAL_CANDIDATE_CONSTRAINTS_SIZE =
                 additional_constraints.size();
             auto &additional_constraint_proxy =
                 m_model_ptr->component_creator().create_constraints(
-                    "additional", ADDITIONAL_CONSTRAINTS_SIZE);
+                    "additional", ADDITIONAL_CANDIDATE_CONSTRAINTS_SIZE);
 
-            for (auto i = 0; i < ADDITIONAL_CONSTRAINTS_SIZE; i++) {
+            for (auto i = 0; i < ADDITIONAL_CANDIDATE_CONSTRAINTS_SIZE; i++) {
                 auto &constraint               = additional_constraints[i];
                 additional_constraint_proxy(i) = constraint;
                 additional_constraint_proxy(i).set_name(constraint.name());
@@ -358,10 +390,6 @@ class DependentVariableExtractor {
         for (auto &&variable_ptr : variable_ptrs) {
             for (auto &&constraint_ptr :
                  variable_ptr->related_constraint_ptrs()) {
-                if (!constraint_ptr->is_enabled()) {
-                    continue;
-                }
-
                 constraint_ptr->expression().substitute(
                     variable_ptr,  //
                     *(variable_ptr->dependent_expression_ptr()));

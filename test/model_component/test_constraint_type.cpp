@@ -22,7 +22,7 @@ class TestConstraintType : public ::testing::Test {
 /*****************************************************************************/
 TEST_F(TestConstraintType, ConstraintTypeMap) {
     using namespace printemps::model_component;
-
+    EXPECT_EQ(ConstraintType::Empty, ConstraintTypeMap.at("Empty"));
     EXPECT_EQ(ConstraintType::Singleton, ConstraintTypeMap.at("Singleton"));
     EXPECT_EQ(ConstraintType::ExclusiveOR,
               ConstraintTypeMap.at("Exclusive OR"));
@@ -78,6 +78,8 @@ TEST_F(TestConstraintType, ConstraintTypeMap) {
 /*****************************************************************************/
 TEST_F(TestConstraintType, ConstraintTypeInverseMap) {
     using namespace printemps::model_component;
+
+    EXPECT_EQ("Empty", ConstraintTypeInverseMap.at(ConstraintType::Empty));
 
     EXPECT_EQ("Singleton",
               ConstraintTypeInverseMap.at(ConstraintType::Singleton));
