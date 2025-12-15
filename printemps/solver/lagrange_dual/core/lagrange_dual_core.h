@@ -16,11 +16,11 @@ namespace printemps::solver::lagrange_dual::core {
 template <class T_Variable, class T_Expression>
 class LagrangeDualCore {
    private:
-    model::Model<T_Variable, T_Expression>*           m_model_ptr;
-    GlobalState<T_Variable, T_Expression>*            m_global_state_ptr;
-    solution::DenseSolution<T_Variable, T_Expression> m_initial_solution;
-    std::optional<std::function<bool()>>              m_check_interrupt;
-    option::Option                                    m_option;
+    model::Model<T_Variable, T_Expression>*            m_model_ptr;
+    GlobalState<T_Variable, T_Expression>*             m_global_state_ptr;
+    solution::SparseSolution<T_Variable, T_Expression> m_initial_solution;
+    std::optional<std::function<bool()>>               m_check_interrupt;
+    option::Option                                     m_option;
 
     std::vector<solution::SparseSolution<T_Variable, T_Expression>>
         m_feasible_solutions;
@@ -366,12 +366,9 @@ class LagrangeDualCore {
         const option::Option&                       a_OPTION) {
         m_model_ptr        = a_model_ptr;
         m_global_state_ptr = a_global_state_ptr;
-        m_model_ptr->initial_solution_handler().import_solution(
-            a_INITIAL_SOLUTION, true);
-        m_initial_solution =
-            m_model_ptr->state_inspector().export_dense_solution();
-        m_check_interrupt = a_CHECK_INTERRUPT;
-        m_option          = a_OPTION;
+        m_initial_solution = a_INITIAL_SOLUTION;
+        m_check_interrupt  = a_CHECK_INTERRUPT;
+        m_option           = a_OPTION;
 
         m_feasible_solutions.clear();
         m_incumbent_solutions.clear();

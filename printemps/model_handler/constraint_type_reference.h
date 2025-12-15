@@ -115,25 +115,12 @@ struct ConstraintTypeReference {
 
     /*************************************************************************/
     inline bool has_chain_move_effective_constraints(void) const noexcept {
-        if (this->set_partitioning_ptrs.size() > 0) {
-            return true;
-        }
-        if (this->set_packing_ptrs.size() > 0) {
-            return true;
-        }
-        if (this->set_covering_ptrs.size() > 0) {
-            return true;
-        }
-        if (this->cardinality_ptrs.size() > 0) {
-            return true;
-        }
-        if (this->invariant_knapsack_ptrs.size() > 0) {
-            return true;
-        }
-        if (this->multiple_covering_ptrs.size() > 0) {
-            return true;
-        }
-        return false;
+        const auto CONTAINERS = {
+            &this->set_partitioning_ptrs,   &this->set_packing_ptrs,
+            &this->set_covering_ptrs,       &this->cardinality_ptrs,
+            &this->invariant_knapsack_ptrs, &this->multiple_covering_ptrs};
+        return std::any_of(CONTAINERS.begin(), CONTAINERS.end(),
+                           [](const auto *v) { return !v->empty(); });
     }
 };
 }  // namespace printemps::model_handler
