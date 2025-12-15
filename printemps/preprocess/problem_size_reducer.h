@@ -894,6 +894,7 @@ class ProblemSizeReducer {
                 additional_constraint_proxy(i) = additional_constraints[i];
                 additional_constraint_proxy(i).set_name(
                     additional_constraints[i].name());
+                additional_constraint_proxy(i).set_flat_index(i);
             }
         }
 
