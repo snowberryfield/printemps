@@ -420,6 +420,7 @@ class Model {
     /*************************************************************************/
     inline void set_is_minimization(const bool a_IS_MINIMIZATION) noexcept {
         m_is_minimization = a_IS_MINIMIZATION;
+        m_sign            = a_IS_MINIMIZATION ? 1.0 : -1.0;
     }
 
     /*************************************************************************/
