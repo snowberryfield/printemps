@@ -219,6 +219,8 @@ class ModelPrinter {
             {"Trinomial Exclusive NOR",
              &ORIGINAL_TYPE.trinomial_exclusive_nor_ptrs,
              &PRESOLVED_TYPE.trinomial_exclusive_nor_ptrs},
+            {"All Or Nothing", &ORIGINAL_TYPE.all_or_nothing_ptrs,
+             &PRESOLVED_TYPE.all_or_nothing_ptrs},
             {"Set Partitioning", &ORIGINAL_TYPE.set_partitioning_ptrs,
              &PRESOLVED_TYPE.set_partitioning_ptrs},
             {"Set Packing", &ORIGINAL_TYPE.set_packing_ptrs,

@@ -568,6 +568,10 @@ struct Status {
                 compute_number_of_constraints(
                     REFERENCE.trinomial_exclusive_nor_ptrs));
 
+            obj.emplace_back(      //
+                "all_or_nothing",  //
+                compute_number_of_constraints(REFERENCE.all_or_nothing_ptrs));
+
             obj.emplace_back(        //
                 "set_partitioning",  //
                 compute_number_of_constraints(REFERENCE.set_partitioning_ptrs));

@@ -37,6 +37,11 @@ struct ExpressionStructure {
         minus_one_coefficient_integer_variable_ptrs;
 
     std::vector<Variable<T_Variable, T_Expression> *>
+        plus_n_minus_one_coefficient_integer_variable_ptrs;
+    std::vector<Variable<T_Variable, T_Expression> *>
+        minus_n_minus_one_coefficient_integer_variable_ptrs;
+
+    std::vector<Variable<T_Variable, T_Expression> *>
         positive_coefficient_variable_ptrs;
     std::vector<Variable<T_Variable, T_Expression> *>
         negative_coefficient_variable_ptrs;
@@ -64,6 +69,9 @@ struct ExpressionStructure {
 
         this->plus_one_coefficient_variable_ptrs.clear();
         this->minus_one_coefficient_variable_ptrs.clear();
+
+        this->plus_n_minus_one_coefficient_integer_variable_ptrs.clear();
+        this->minus_n_minus_one_coefficient_integer_variable_ptrs.clear();
 
         this->plus_one_coefficient_integer_variable_ptrs.clear();
         this->minus_one_coefficient_integer_variable_ptrs.clear();

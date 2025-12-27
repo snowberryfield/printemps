@@ -146,16 +146,16 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         m_global_penalty_coefficient        = HUGE_VALF;
 
         m_key_variable_ptr = nullptr;
-        m_violation_count  = 0;
+        m_violation_count = 0;
 
-        m_is_enabled                = true;
-        m_is_less_or_equal          = false;
-        m_is_greater_or_equal       = false;
-        m_is_selection              = false;
-        m_has_margin                = false;
-        m_is_user_defined_selection = false;
+        m_is_enabled                     = true;
+        m_is_less_or_equal               = false;
+        m_is_greater_or_equal            = false;
+        m_is_selection                   = false;
+        m_has_margin                     = false;
+        m_is_user_defined_selection      = false;
 
-        m_type             = ConstraintType::Unknown;
+        m_type = ConstraintType::Unknown;
         m_key_variable_ptr = nullptr;
 
         m_structure =
@@ -221,8 +221,8 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         ConstraintTypeClassifier classifier(this);
         auto [type, key_variable_ptr] = classifier.classify_type();
 
-        m_type                        = type;
-        m_key_variable_ptr            = key_variable_ptr;
+        m_type             = type;
+        m_key_variable_ptr = key_variable_ptr;
     }
 
     /*************************************************************************/

@@ -552,6 +552,14 @@ class Expression : public multi_array::AbstractMultiArrayElement {
                 }
             }
 
+            if (coefficient == structure.number_of_variables - 1) {
+                structure.plus_n_minus_one_coefficient_integer_variable_ptrs
+                    .push_back(variable_ptr);
+            } else if (coefficient == -(structure.number_of_variables - 1)) {
+                structure.minus_n_minus_one_coefficient_integer_variable_ptrs
+                    .push_back(variable_ptr);
+            }
+
             if (coefficient > 0) {
                 structure.positive_coefficient_variable_ptrs.push_back(
                     variable_ptr);

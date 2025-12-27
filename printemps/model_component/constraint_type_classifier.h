@@ -348,49 +348,76 @@ class ConstraintTypeClassifier {
             return false;
         }
 
-        auto &variable_ptrs  = m_structure_ptr->variable_ptrs;
-        auto &coefficients   = m_structure_ptr->coefficients;
-        auto  constant_value = m_structure_ptr->constant_value;
-
-        if (constant_value != 0) {
+        if (m_structure_ptr->constant_value != 0) {
             return false;
         }
 
-        std::vector<Variable<T_Variable, T_Expression> *> plus_one_binary_ptrs;
-        std::vector<Variable<T_Variable, T_Expression> *> minus_one_binary_ptrs;
-        std::vector<Variable<T_Variable, T_Expression> *> plus_two_binary_ptrs;
-        std::vector<Variable<T_Variable, T_Expression> *> minus_two_binary_ptrs;
-
-        for (auto i = 0; i < m_structure_ptr->number_of_variables; i++) {
-            auto variable_ptr = variable_ptrs[i];
-            auto coefficient  = coefficients[i];
-
-            if (variable_ptr->type() != VariableType::Binary) {
-                return false;
-            }
-
-            if (coefficient == 1) {
-                plus_one_binary_ptrs.push_back(variable_ptr);
-            } else if (coefficient == -1) {
-                minus_one_binary_ptrs.push_back(variable_ptr);
-            } else if (coefficient == 2) {
-                plus_two_binary_ptrs.push_back(variable_ptr);
-            } else if (coefficient == -2) {
-                minus_two_binary_ptrs.push_back(variable_ptr);
-            } else {
-                return false;
-            }
+        if (!m_structure_ptr->has_only_binary_or_selection_variable) {
+            return false;
         }
 
-        if (plus_one_binary_ptrs.size() == 2 &&
-            minus_two_binary_ptrs.size() == 1) {
-            m_type             = ConstraintType::TrinomialExclusiveNOR;
-            m_key_variable_ptr = minus_two_binary_ptrs[0];
+        if (static_cast<int>(
+                m_structure_ptr->plus_one_coefficient_variable_ptrs.size()) ==
+                m_structure_ptr->number_of_variables - 1 &&
+            m_structure_ptr->minus_n_minus_one_coefficient_integer_variable_ptrs
+                    .size() == 1) {
+            m_type = ConstraintType::TrinomialExclusiveNOR;
+            m_key_variable_ptr =
+                m_structure_ptr
+                    ->minus_n_minus_one_coefficient_integer_variable_ptrs[0];
             return true;
-        } else if (minus_one_binary_ptrs.size() == 2 &&
-                   plus_two_binary_ptrs.size() == 1) {
-            m_type             = ConstraintType::TrinomialExclusiveNOR;
-            m_key_variable_ptr = plus_two_binary_ptrs[0];
+        }
+
+        if (static_cast<int>(
+                m_structure_ptr->minus_one_coefficient_variable_ptrs.size()) ==
+                m_structure_ptr->number_of_variables - 1 &&
+            m_structure_ptr->plus_n_minus_one_coefficient_integer_variable_ptrs
+                    .size() == 1) {
+            m_type = ConstraintType::TrinomialExclusiveNOR;
+            m_key_variable_ptr =
+                m_structure_ptr
+                    ->plus_n_minus_one_coefficient_integer_variable_ptrs[0];
+            return true;
+        }
+
+        return false;
+    }
+
+    /**************************************************************************/
+    inline bool check_all_or_nothing(void) {
+        if (m_sense != ConstraintSense::Equal) {
+            return false;
+        }
+
+        if (m_structure_ptr->constant_value != 0) {
+            return false;
+        }
+
+        if (!m_structure_ptr->has_only_binary_or_selection_variable) {
+            return false;
+        }
+
+        if (static_cast<int>(
+                m_structure_ptr->plus_one_coefficient_variable_ptrs.size()) ==
+                m_structure_ptr->number_of_variables - 1 &&
+            m_structure_ptr->minus_n_minus_one_coefficient_integer_variable_ptrs
+                    .size() == 1) {
+            m_type = ConstraintType::AllOrNothing;
+            m_key_variable_ptr =
+                m_structure_ptr
+                    ->minus_n_minus_one_coefficient_integer_variable_ptrs[0];
+            return true;
+        }
+
+        if (static_cast<int>(
+                m_structure_ptr->minus_one_coefficient_variable_ptrs.size()) ==
+                m_structure_ptr->number_of_variables - 1 &&
+            m_structure_ptr->plus_n_minus_one_coefficient_integer_variable_ptrs
+                    .size() == 1) {
+            m_type = ConstraintType::AllOrNothing;
+            m_key_variable_ptr =
+                m_structure_ptr
+                    ->plus_n_minus_one_coefficient_integer_variable_ptrs[0];
             return true;
         }
 
@@ -878,10 +905,11 @@ class ConstraintTypeClassifier {
             &ConstraintTypeClassifier::check_constant_difference_integers,
             &ConstraintTypeClassifier::check_constant_ratio_integers,
             &ConstraintTypeClassifier::check_intermediate_two_term,
-            &ConstraintTypeClassifier::check_trinomial_exclusive_nor,
             &ConstraintTypeClassifier::check_aggregation,
             &ConstraintTypeClassifier::check_precedence,
             &ConstraintTypeClassifier::check_variable_bound,
+            &ConstraintTypeClassifier::check_trinomial_exclusive_nor,
+            &ConstraintTypeClassifier::check_all_or_nothing,
             &ConstraintTypeClassifier::check_set_partitioning,
             &ConstraintTypeClassifier::check_set_packing,
             &ConstraintTypeClassifier::check_set_covering,

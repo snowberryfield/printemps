@@ -37,6 +37,8 @@ struct ConstraintTypeReference {
     std::vector<model_component::Constraint<T_Variable, T_Expression> *>
         trinomial_exclusive_nor_ptrs;
     std::vector<model_component::Constraint<T_Variable, T_Expression> *>
+        all_or_nothing_ptrs;
+    std::vector<model_component::Constraint<T_Variable, T_Expression> *>
         set_partitioning_ptrs;
     std::vector<model_component::Constraint<T_Variable, T_Expression> *>
         set_packing_ptrs;
@@ -93,6 +95,7 @@ struct ConstraintTypeReference {
         this->precedence_ptrs.clear();
         this->variable_bound_ptrs.clear();
         this->trinomial_exclusive_nor_ptrs.clear();
+        this->all_or_nothing_ptrs.clear();
         this->set_partitioning_ptrs.clear();
         this->set_packing_ptrs.clear();
         this->set_covering_ptrs.clear();

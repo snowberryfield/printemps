@@ -232,6 +232,11 @@ struct Reference {
                             .push_back(constraint_ptr);
                         break;
 
+                    case model_component::ConstraintType::AllOrNothing:
+                        constraint_type_reference.all_or_nothing_ptrs.push_back(
+                            constraint_ptr);
+                        break;
+
                     case model_component::ConstraintType::SetPartitioning:
                         constraint_type_reference.set_partitioning_ptrs
                             .push_back(constraint_ptr);

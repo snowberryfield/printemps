@@ -473,6 +473,45 @@ TEST_F(TestConstraintTypeClassifier, check_trinomial_exclusive_nor) {
 }
 
 /*****************************************************************************/
+TEST_F(TestConstraintTypeClassifier, check_all_or_nothing) {
+    model::Model<int, double> model;
+
+    auto& x = model.create_variables("x", 5, 0, 1);
+    auto& y = model.create_variable("y", 0, 1);
+
+    {
+        auto constraint =
+            model_component::Constraint<int, double>::create_instance();
+        constraint.setup(x.sum() - 5 * y,
+                         model_component::ConstraintSense::Equal);
+        constraint.update_structure();
+        constraint.update_constraint_type();
+
+        EXPECT_TRUE(
+            constraint.is_type(model_component::ConstraintType::AllOrNothing));
+        EXPECT_EQ(model_component::ConstraintType::AllOrNothing,
+                  constraint.type());
+        EXPECT_EQ("All Or Nothing", constraint.type_label());
+        EXPECT_EQ(&y(0), constraint.key_variable_ptr());
+    }
+    {
+        auto constraint =
+            model_component::Constraint<int, double>::create_instance();
+        constraint.setup(-x.sum() + 5 * y,
+                         model_component::ConstraintSense::Equal);
+        constraint.update_structure();
+        constraint.update_constraint_type();
+
+        EXPECT_TRUE(
+            constraint.is_type(model_component::ConstraintType::AllOrNothing));
+        EXPECT_EQ(model_component::ConstraintType::AllOrNothing,
+                  constraint.type());
+        EXPECT_EQ("All Or Nothing", constraint.type_label());
+        EXPECT_EQ(&y(0), constraint.key_variable_ptr());
+    }
+}
+
+/*****************************************************************************/
 TEST_F(TestConstraintTypeClassifier, check_set_partitioning) {
     model::Model<int, double> model;
     auto&                     x = model.create_variables("x", 10, 0, 1);
