@@ -39,6 +39,10 @@ struct PreprocessOptionConstant {
     static constexpr bool  //
         DEFAULT_IS_ENABLED_EXTRACT_DEPENDENT_CONSTANT_RATIO_INTEGERS = true;
     static constexpr bool  //
+        DEFAULT_IS_ENABLED_EXTRACT_DEPENDENT_TRINOMIAL_EXCLUSIVE_NOR = true;
+    static constexpr bool  //
+        DEFAULT_IS_ENABLED_EXTRACT_DEPENDENT_ALL_OR_NOTHING = true;
+    static constexpr bool  //
         DEFAULT_IS_ENABLED_EXTRACT_DEPENDENT_INTERMEDIATE = true;
 };
 
@@ -58,6 +62,8 @@ struct PreprocessOption {
     bool is_enabled_extract_dependent_constant_sum_integers;
     bool is_enabled_extract_dependent_constant_difference_integers;
     bool is_enabled_extract_dependent_constant_ratio_integers;
+    bool is_enabled_extract_dependent_trinomial_exclusive_nor;
+    bool is_enabled_extract_dependent_all_or_nothing;
     bool is_enabled_extract_dependent_intermediate;
 
     /*************************************************************************/
@@ -125,6 +131,14 @@ struct PreprocessOption {
             PreprocessOptionConstant::
                 DEFAULT_IS_ENABLED_EXTRACT_DEPENDENT_CONSTANT_RATIO_INTEGERS;
 
+        this->is_enabled_extract_dependent_trinomial_exclusive_nor =
+            PreprocessOptionConstant::
+                DEFAULT_IS_ENABLED_EXTRACT_DEPENDENT_TRINOMIAL_EXCLUSIVE_NOR;
+
+        this->is_enabled_extract_dependent_all_or_nothing =
+            PreprocessOptionConstant::
+                DEFAULT_IS_ENABLED_EXTRACT_DEPENDENT_ALL_OR_NOTHING;
+
         this->is_enabled_extract_dependent_intermediate =
             PreprocessOptionConstant::
                 DEFAULT_IS_ENABLED_EXTRACT_DEPENDENT_INTERMEDIATE;
@@ -191,7 +205,7 @@ struct PreprocessOption {
 
         utility::print(  //
             " -- "
-            "preprocess.is_enabled_extract_dependent_constant_sum_integers:"
+            "preprocess.is_enabled_extract_dependent_constant_sum_integers: "
             " " +                       //
             utility::to_true_or_false(  //
                 this->is_enabled_extract_dependent_constant_sum_integers));
@@ -209,6 +223,20 @@ struct PreprocessOption {
             " " +                       //
             utility::to_true_or_false(  //
                 this->is_enabled_extract_dependent_constant_ratio_integers));
+
+        utility::print(  //
+            " -- "
+            "preprocess.is_enabled_extract_dependent_trinomial_exclusive_nor:"
+            " " +                       //
+            utility::to_true_or_false(  //
+                this->is_enabled_extract_dependent_trinomial_exclusive_nor));
+
+        utility::print(  //
+            " -- "
+            "preprocess.is_enabled_extract_dependent_all_or_nothing:"
+            " " +                       //
+            utility::to_true_or_false(  //
+                this->is_enabled_extract_dependent_all_or_nothing));
 
         utility::print(                                                     //
             " -- preprocess.is_enabled_extract_dependent_intermediate: " +  //
@@ -277,38 +305,17 @@ struct PreprocessOption {
             &this->is_enabled_extract_dependent_constant_ratio_integers,  //
             "is_enabled_extract_dependent_constant_ratio_integers", a_OBJECT);
 
+        read_json(                                                        //
+            &this->is_enabled_extract_dependent_trinomial_exclusive_nor,  //
+            "is_enabled_extract_dependent_trinomial_exclusive_nor", a_OBJECT);
+
+        read_json(                                               //
+            &this->is_enabled_extract_dependent_all_or_nothing,  //
+            "is_enabled_extract_dependent_all_or_nothing", a_OBJECT);
+
         read_json(                                             //
             &this->is_enabled_extract_dependent_intermediate,  //
             "is_enabled_extract_dependent_intermediate", a_OBJECT);
-    }
-
-    /**************************************************************************/
-    inline bool is_enabled_extract_dependent(void) const {
-        if (is_enabled_extract_dependent_exclusive_or) {
-            return true;
-        }
-        if (is_enabled_extract_dependent_exclusive_nor) {
-            return true;
-        }
-        if (is_enabled_extract_dependent_inverted_integers) {
-            return true;
-        }
-        if (is_enabled_extract_dependent_balanced_integers) {
-            return true;
-        }
-        if (is_enabled_extract_dependent_constant_sum_integers) {
-            return true;
-        }
-        if (is_enabled_extract_dependent_constant_difference_integers) {
-            return true;
-        }
-        if (is_enabled_extract_dependent_constant_ratio_integers) {
-            return true;
-        }
-        if (is_enabled_extract_dependent_intermediate) {
-            return true;
-        }
-        return false;
     }
 
     /**************************************************************************/
@@ -370,11 +377,42 @@ struct PreprocessOption {
             "is_enabled_extract_dependent_constant_ratio_integers",  //
             this->is_enabled_extract_dependent_constant_ratio_integers);
 
+        obj.emplace_back(                                            //
+            "is_enabled_extract_dependent_trinomial_exclusive_nor",  //
+            this->is_enabled_extract_dependent_trinomial_exclusive_nor);
+
+        obj.emplace_back(                                   //
+            "is_enabled_extract_dependent_all_or_nothing",  //
+            this->is_enabled_extract_dependent_all_or_nothing);
+
         obj.emplace_back(                                 //
             "is_enabled_extract_dependent_intermediate",  //
             this->is_enabled_extract_dependent_intermediate);
 
         return obj;
+    }
+
+    /**************************************************************************/
+    inline bool is_enabled_extract_dependent(void) const {
+        std::vector<bool> flags = {
+            this->is_enabled_extract_dependent_exclusive_or,
+            this->is_enabled_extract_dependent_exclusive_nor,
+            this->is_enabled_extract_dependent_inverted_integers,
+            this->is_enabled_extract_dependent_balanced_integers,
+            this->is_enabled_extract_dependent_constant_sum_integers,
+            this->is_enabled_extract_dependent_constant_difference_integers,
+            this->is_enabled_extract_dependent_constant_ratio_integers,
+            this->is_enabled_extract_dependent_trinomial_exclusive_nor,
+            this->is_enabled_extract_dependent_all_or_nothing,
+            this->is_enabled_extract_dependent_intermediate};
+
+        for (auto flag : flags) {
+            if (flag) {
+                return true;
+            }
+        }
+
+        return false;
     }
 };
 }  // namespace printemps::option

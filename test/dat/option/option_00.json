@@ -46,6 +46,8 @@
         "is_enabled_extract_dependent_constant_sum_integers": false,
         "is_enabled_extract_dependent_constant_difference_integers": false,
         "is_enabled_extract_dependent_constant_ratio_integers": false,
+        "is_enabled_extract_dependent_trinomial_exclusive_nor" : false,
+        "is_enabled_extract_dependent_all_or_nothing" : false,
         "is_enabled_extract_dependent_intermediate": false
     },
     "neighborhood": {

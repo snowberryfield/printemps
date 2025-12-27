@@ -93,6 +93,16 @@ TEST_F(TestPreprocessOption, initialize) {
 
     EXPECT_EQ(  //
         PreprocessOptionConstant::
+            DEFAULT_IS_ENABLED_EXTRACT_DEPENDENT_TRINOMIAL_EXCLUSIVE_NOR,  //
+        option.is_enabled_extract_dependent_trinomial_exclusive_nor);
+
+    EXPECT_EQ(  //
+        PreprocessOptionConstant::
+            DEFAULT_IS_ENABLED_EXTRACT_DEPENDENT_ALL_OR_NOTHING,  //
+        option.is_enabled_extract_dependent_all_or_nothing);
+
+    EXPECT_EQ(  //
+        PreprocessOptionConstant::
             DEFAULT_IS_ENABLED_EXTRACT_DEPENDENT_INTERMEDIATE,  //
         option.is_enabled_extract_dependent_intermediate);
 }

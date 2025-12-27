@@ -93,6 +93,8 @@ class ModelBuilder {
             a_OPTION.preprocess.is_enabled_extract_dependent()) {
             preprocess::DependentVariableExtractor<T_Variable, T_Expression>
                 dependent_variable_extractor(m_model_ptr);
+            preprocess::DependentVariableEliminator<T_Variable, T_Expression>
+                dependent_variable_eliminator(m_model_ptr);
             while (true) {
                 if (dependent_variable_extractor.extract(
                         a_OPTION, a_IS_ENABLED_PRINT) == 0) {
@@ -101,7 +103,7 @@ class ModelBuilder {
 
                 while (true) {
                     this->setup_structure();
-                    if (dependent_variable_extractor.eliminate(
+                    if (dependent_variable_eliminator.eliminate(
                             a_IS_ENABLED_PRINT) == 0) {
                         break;
                     }

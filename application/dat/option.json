@@ -17,7 +17,7 @@
         "is_enabled_remove_duplicated_constraints": true,
         "is_enabled_remove_redundant_set_variables": true,
         "is_enabled_remove_redundant_set_constraints": true,
-        "is_enabled_extract_implicit_equality_constraint": true,
+        "is_enabled_extract_implicit_equality_constraints": true,
         "is_enabled_online_bounding": true,
         "is_enabled_initial_value_correction": true,
         "is_enabled_extract_dependent_exclusive_or": true,
@@ -27,6 +27,8 @@
         "is_enabled_extract_dependent_constant_sum_integers": true,
         "is_enabled_extract_dependent_constant_difference_integers": true,
         "is_enabled_extract_dependent_constant_ratio_integers": true,
+        "is_enabled_extract_dependent_trinomial_exclusive_nor" : true,
+        "is_enabled_extract_dependent_all_or_nothing": true,
         "is_enabled_extract_dependent_intermediate": true
     },
     "neighborhood": {

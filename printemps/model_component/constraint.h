@@ -57,7 +57,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     bool m_has_margin;
 
     bool m_is_user_defined_selection;
-    bool m_has_only_binary_or_selection_variable;
+    bool m_is_defining_dependent_variable;
 
     ConstraintType m_type;
 
@@ -146,6 +146,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         m_global_penalty_coefficient        = HUGE_VALF;
 
         m_key_variable_ptr = nullptr;
+
         m_violation_count = 0;
 
         m_is_enabled                     = true;
@@ -154,9 +155,9 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         m_is_selection                   = false;
         m_has_margin                     = false;
         m_is_user_defined_selection      = false;
+        m_is_defining_dependent_variable = false;
 
         m_type = ConstraintType::Unknown;
-        m_key_variable_ptr = nullptr;
 
         m_structure =
             std::make_unique<ExpressionStructure<T_Variable, T_Expression>>();
@@ -212,9 +213,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
          * Skip updating the constraint type if it has already been extracted as
          * a dependency-defining constraint (and thus deactivated).
          */
-        if (m_key_variable_ptr != nullptr && !m_is_enabled &&
-            (m_key_variable_ptr->type() == VariableType::DependentBinary ||
-             m_key_variable_ptr->type() == VariableType::DependentInteger)) {
+        if (m_is_defining_dependent_variable) {
             return;
         }
 
@@ -430,6 +429,24 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     inline void set_is_user_defined_selection(
         const bool a_IS_USER_DEFINED_SELECTION) noexcept {
         m_is_user_defined_selection = a_IS_USER_DEFINED_SELECTION;
+    }
+
+    /*************************************************************************/
+    inline bool is_defining_dependent_variable(void) const noexcept {
+        return m_is_defining_dependent_variable;
+    }
+
+    /*************************************************************************/
+    inline void set_is_defining_dependent_variable(
+        const bool a_IS_DEFINING_DEPENDENT_VARIABLE) noexcept {
+        m_is_defining_dependent_variable = a_IS_DEFINING_DEPENDENT_VARIABLE;
+    }
+
+    /*************************************************************************/
+    inline bool has_representative_variable(void) noexcept {
+        return (m_type ==
+                model_component::ConstraintType::TrinomialExclusiveNOR) ||
+               (m_type == model_component::ConstraintType::AllOrNothing);
     }
 
     /*************************************************************************/

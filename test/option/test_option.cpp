@@ -196,6 +196,14 @@ TEST_F(TestOption, setup) {
                 .is_enabled_extract_dependent_constant_ratio_integers);
 
         EXPECT_EQ(  //
+            false, option.preprocess
+                       .is_enabled_extract_dependent_trinomial_exclusive_nor);
+
+        EXPECT_EQ(  //
+            false,
+            option.preprocess.is_enabled_extract_dependent_all_or_nothing);
+
+        EXPECT_EQ(  //
             false, option.preprocess.is_enabled_extract_dependent_intermediate);
 
         /// neighborhood
@@ -762,6 +770,15 @@ TEST_F(TestOption, to_json) {
         false,  //
         to_bool(preprocess.at(
             "is_enabled_extract_dependent_constant_ratio_integers")));
+
+    EXPECT_EQ(  //
+        false,  //
+        to_bool(preprocess.at(
+            "is_enabled_extract_dependent_trinomial_exclusive_nor")));
+
+    EXPECT_EQ(  //
+        false,  //
+        to_bool(preprocess.at("is_enabled_extract_dependent_all_or_nothing")));
 
     EXPECT_EQ(  //
         false,  //
