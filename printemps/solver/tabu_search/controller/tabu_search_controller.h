@@ -497,9 +497,9 @@ class TabuSearchController
     /*************************************************************************/
     inline void print_variable_update_frequency(
         const bool a_IS_ENABLED_PRINT) const {
-        auto mutable_variable_ptrs =
-            this->m_model_ptr->reference().variable.mutable_variable_ptrs;
-        if (mutable_variable_ptrs.size() == 0) {
+        auto variable_ptrs = this->m_model_ptr->reference()
+                                 .variable.mutable_independent_variable_ptrs;
+        if (variable_ptrs.size() == 0) {
             return;
         }
 
@@ -508,21 +508,21 @@ class TabuSearchController
             1.0, static_cast<double>(
                      this->m_global_state_ptr->memory.total_update_count()));
 
-        const int MUTABLE_VARIABLES_SIZE = mutable_variable_ptrs.size();
+        const int VARIABLES_SIZE = variable_ptrs.size();
 
-        std::stable_sort(
-            mutable_variable_ptrs.begin(), mutable_variable_ptrs.end(),
-            [](const auto& a_FIRST, const auto& a_SECOND) {
-                return a_FIRST->update_count() < a_SECOND->update_count();
-            });
+        std::stable_sort(variable_ptrs.begin(), variable_ptrs.end(),
+                         [](const auto& a_FIRST, const auto& a_SECOND) {
+                             return a_FIRST->update_count() <
+                                    a_SECOND->update_count();
+                         });
 
         int count = 0;
-        for (auto i = 0; i < MUTABLE_VARIABLES_SIZE; i++) {
+        for (auto i = 0; i < VARIABLES_SIZE; i++) {
             double update_rate =
-                mutable_variable_ptrs[i]->update_count() / TOTAL_UPDATE_COUNT;
+                variable_ptrs[i]->update_count() / TOTAL_UPDATE_COUNT;
             update_rate = std::max(0.0, std::min(1.0, update_rate));
             double density =
-                mutable_variable_ptrs[i]->related_constraint_ptrs().size() /
+                variable_ptrs[i]->related_constraint_ptrs().size() /
                 static_cast<double>(std::max(
                     1, this->m_model_ptr->reference().number_of_constraints()));
 
@@ -536,8 +536,8 @@ class TabuSearchController
             }
 
             utility::print_info(
-                " -- " + mutable_variable_ptrs[i]->name()  //
-                    + " (" + mutable_variable_ptrs[i]->type_label() +
+                " -- " + variable_ptrs[i]->name()  //
+                    + " (" + variable_ptrs[i]->type_label() +
                     ", Freq.: " + utility::to_string(update_rate, "%.3e") +
                     ", Dens.: " + utility::to_string(density, "%.3e") + ")",
                 a_IS_ENABLED_PRINT);
@@ -546,12 +546,12 @@ class TabuSearchController
         }
 
         count = 0;
-        for (auto i = MUTABLE_VARIABLES_SIZE - 1; i >= 0; i--) {
+        for (auto i = VARIABLES_SIZE - 1; i >= 0; i--) {
             double update_rate =
-                mutable_variable_ptrs[i]->update_count() / TOTAL_UPDATE_COUNT;
+                variable_ptrs[i]->update_count() / TOTAL_UPDATE_COUNT;
             update_rate = std::max(0.0, std::min(1.0, update_rate));
             double density =
-                mutable_variable_ptrs[i]->related_constraint_ptrs().size() /
+                variable_ptrs[i]->related_constraint_ptrs().size() /
                 static_cast<double>(std::max(
                     1, this->m_model_ptr->reference().number_of_constraints()));
 
@@ -569,8 +569,8 @@ class TabuSearchController
             }
 
             utility::print_info(
-                " -- " + mutable_variable_ptrs[i]->name()  //
-                    + " (" + mutable_variable_ptrs[i]->type_label() +
+                " -- " + variable_ptrs[i]->name()  //
+                    + " (" + variable_ptrs[i]->type_label() +
                     ", Freq.: " + utility::to_string(update_rate, "%.3e") +
                     ", Dens.: " + utility::to_string(density, "%.3e") + ")",
                 a_IS_ENABLED_PRINT);
