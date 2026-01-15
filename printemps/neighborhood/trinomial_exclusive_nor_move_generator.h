@@ -48,7 +48,9 @@ class TrinomialExclusiveNORMoveGenerator
 
         for (auto i = 0; i < TRINOMIALS_SIZE; i++) {
             auto &move = this->m_moves[2 * i];
-            move.type  = MoveType::TrinomialExclusiveNOR;
+
+            move.associated_constraint_ptr = constraint_ptrs[i];
+            move.type                      = MoveType::TrinomialExclusiveNOR;
             move.alterations.emplace_back(trinomial[i].variable_ptr_first, 0);
             move.alterations.emplace_back(trinomial[i].variable_ptr_second, 0);
             move.alterations.emplace_back(trinomial[i].variable_ptr_third, 0);
@@ -117,7 +119,14 @@ class TrinomialExclusiveNORMoveGenerator
     num_threads(a_NUMBER_OF_THREADS)
 #endif
                 for (auto i = 0; i < MOVES_SIZE; i++) {
+                    if (!(*a_moves_ptr)[i]
+                             .associated_constraint_ptr->is_feasible()) {
+                        (*a_flags)[i] = 0;
+                        continue;
+                    }
+
                     (*a_flags)[i] = 1;
+
                     if (!(*a_moves_ptr)[i].is_available) {
                         (*a_flags)[i] = 0;
                         continue;

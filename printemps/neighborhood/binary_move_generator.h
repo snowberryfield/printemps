@@ -50,7 +50,9 @@ class BinaryMoveGenerator
 
         for (auto i = 0; i < VARIABLES_SIZE; i++) {
             auto &move = this->m_moves[i];
-            move.type  = MoveType::Binary;
+
+            move.associated_constraint_ptr = nullptr;
+            move.type                      = MoveType::Binary;
             move.alterations.emplace_back(mutable_variable_ptrs[i], 0);
             move.is_univariable_move          = true;
             move.is_selection_move            = false;

@@ -49,7 +49,9 @@ class SelectionMoveGenerator
         this->m_flags.resize(VARIABLES_SIZE);
 
         for (auto i = 0; i < VARIABLES_SIZE; i++) {
-            auto &move                        = this->m_moves[i];
+            auto &move = this->m_moves[i];
+
+            move.associated_constraint_ptr    = nullptr;
             move.type                         = MoveType::Selection;
             move.is_univariable_move          = false;
             move.is_selection_move            = true;

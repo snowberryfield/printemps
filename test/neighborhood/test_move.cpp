@@ -24,13 +24,16 @@ TEST_F(TestMove, constructor) {
     neighborhood::Move<int, double> move;
 
     EXPECT_TRUE(move.alterations.empty());
-    EXPECT_EQ(neighborhood::MoveType::General, move.type);
     EXPECT_TRUE(move.related_constraint_ptrs.empty());
+    EXPECT_EQ(nullptr, move.associated_constraint_ptr);
+    EXPECT_EQ(0, static_cast<int>(move.hash));
+    EXPECT_EQ(0.0, move.overlap_rate);
+
+    EXPECT_EQ(neighborhood::MoveType::General, move.type);
+    EXPECT_FALSE(move.is_selection_move);
     EXPECT_FALSE(move.is_univariable_move);
     EXPECT_FALSE(move.is_special_neighborhood_move);
     EXPECT_TRUE(move.is_available);
-    EXPECT_EQ(0, static_cast<int>(move.hash));
-    EXPECT_EQ(0.0, move.overlap_rate);
 }
 
 /*****************************************************************************/
@@ -186,8 +189,9 @@ TEST_F(TestMove, compute_overlap_rate) {
     g(2) = x(0) + x(2) + x(3) <= 1;
 
     model.reference().update_constraint_reference();
-    model.builder().setup_variable_related_constraints();
-    model.builder().setup_variable_related_binary_coefficient_constraints();
+    model.builder().setup_variable_constraint_sensitivities();
+    model.builder().setup_variable_related_constraint_ptrs();
+    model.builder().setup_variable_related_binary_coefficient_constraint_ptrs();
 
     /// x(0) and x(1) have two common constraints.
     {

@@ -62,18 +62,22 @@ class UserDefinedMoveGenerator
                 for (auto i = 0; i < MOVES_SIZE; i++) {
                     (*a_moves_ptr)[i].type = MoveType::UserDefined;
                     (*a_flags)[i]          = 1;
+
                     if ((*a_moves_ptr)[i].has_fixed_variable()) {
                         (*a_flags)[i] = 0;
                         continue;
                     }
+
                     if ((*a_moves_ptr)[i].has_selection_variable()) {
                         (*a_flags)[i] = 0;
                         continue;
                     }
+
                     if ((*a_moves_ptr)[i].has_bound_violation()) {
                         (*a_flags)[i] = 0;
                         continue;
                     }
+
                     if (a_ACCEPT_ALL) {
                         /** nothing to do */
                     } else {

@@ -46,8 +46,9 @@ class AggregationMoveGenerator
         this->m_flags.resize(4 * BINOMIALS_SIZE);
 
         for (auto i = 0; i < BINOMIALS_SIZE; i++) {
-            auto &move = this->m_moves[4 * i];
-            move.type  = MoveType::Aggregation;
+            auto &move                     = this->m_moves[4 * i];
+            move.associated_constraint_ptr = constraint_ptrs[i];
+            move.type                      = MoveType::Aggregation;
             move.alterations.emplace_back(binomials[i].variable_ptr_first, 0);
             move.alterations.emplace_back(binomials[i].variable_ptr_second, 0);
             move.is_univariable_move          = false;
@@ -172,19 +173,29 @@ class AggregationMoveGenerator
     num_threads(a_NUMBER_OF_THREADS)
 #endif
                 for (auto i = 0; i < MOVES_SIZE; i++) {
+                    if (!(*a_moves_ptr)[i]
+                             .associated_constraint_ptr->is_feasible()) {
+                        (*a_flags)[i] = 0;
+                        continue;
+                    }
+
                     (*a_flags)[i] = 1;
+
                     if (!(*a_moves_ptr)[i].is_available) {
                         (*a_flags)[i] = 0;
                         continue;
                     }
+
                     if ((*a_moves_ptr)[i].has_fixed_variable()) {
                         (*a_flags)[i] = 0;
                         continue;
                     }
+
                     if ((*a_moves_ptr)[i].has_bound_violation()) {
                         (*a_flags)[i] = 0;
                         continue;
                     }
+
                     if (a_ACCEPT_ALL) {
                         /** nothing to do */
                     } else {

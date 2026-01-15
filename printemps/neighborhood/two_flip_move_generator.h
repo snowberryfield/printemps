@@ -38,7 +38,9 @@ class TwoFlipMoveGenerator
 
         for (auto i = 0; i < PAIRS_SIZE; i++) {
             auto &move = this->m_moves[2 * i];
-            move.type  = MoveType::TwoFlip;
+
+            move.associated_constraint_ptr = nullptr;
+            move.type                      = MoveType::TwoFlip;
             move.alterations.emplace_back(
                 a_FLIPPABLE_VARIABLE_PTR_PAIRS[i].first, 1);
             move.alterations.emplace_back(
@@ -99,18 +101,22 @@ class TwoFlipMoveGenerator
 #endif
                 for (auto i = 0; i < MOVES_SIZE; i++) {
                     (*a_flags)[i] = 1;
+
                     if (!(*a_moves_ptr)[i].is_available) {
                         (*a_flags)[i] = 0;
                         continue;
                     }
+
                     if ((*a_moves_ptr)[i].has_selection_variable()) {
                         (*a_flags)[i] = 0;
                         continue;
                     }
+
                     if ((*a_moves_ptr)[i].has_fixed_variable()) {
                         (*a_flags)[i] = 0;
                         continue;
                     }
+
                     for (const auto &alteration :
                          (*a_moves_ptr)[i].alterations) {
                         if (alteration.first->value() == alteration.second) {
@@ -118,6 +124,7 @@ class TwoFlipMoveGenerator
                             break;
                         }
                     }
+
                     if ((*a_flags)[i] == 0) {
                         continue;
                     }

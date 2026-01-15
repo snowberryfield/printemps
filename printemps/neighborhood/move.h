@@ -17,22 +17,18 @@ using Alteration =
 template <class T_Variable, class T_Expression>
 struct Move {
     std::vector<Alteration<T_Variable, T_Expression>> alterations;
-    MoveType                                          type;
     std::vector<model_component::Constraint<T_Variable, T_Expression> *>
         related_constraint_ptrs;
+    model_component::Constraint<T_Variable, T_Expression>
+        *associated_constraint_ptr;
 
-    /**
-     * The following two members are for Chain moves.
-     */
     std::uint_fast64_t hash;
     double             overlap_rate;
 
+    MoveType type;
+
     bool is_univariable_move;
     bool is_selection_move;
-
-    /**
-     * The following two members are for special neighborhood moves.
-     */
     bool is_special_neighborhood_move;
     bool is_available;
 
@@ -45,9 +41,10 @@ struct Move {
     inline void initialize(void) {
         this->alterations.clear();
         this->related_constraint_ptrs.clear();
-        this->type                         = MoveType::General;
+        this->associated_constraint_ptr    = nullptr;
         this->hash                         = 0;
         this->overlap_rate                 = 0.0;
+        this->type                         = MoveType::General;
         this->is_univariable_move          = false;
         this->is_selection_move            = false;
         this->is_special_neighborhood_move = false;
@@ -231,6 +228,7 @@ inline Move<T_Variable, T_Expression> operator+(
         a_MOVE_SECOND.related_constraint_ptrs.begin(),
         a_MOVE_SECOND.related_constraint_ptrs.end());
 
+    result.associated_constraint_ptr    = nullptr;
     result.type                         = MoveType::Chain;
     result.is_univariable_move          = false;
     result.is_available                 = false;

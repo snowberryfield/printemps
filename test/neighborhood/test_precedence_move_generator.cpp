@@ -40,6 +40,9 @@ TEST_F(TestPrecedenceMoveGenerator, setup) {
     EXPECT_EQ(2, static_cast<int>(moves.size()));
     EXPECT_EQ(2, static_cast<int>(flags.size()));
 
+    EXPECT_EQ(&c[0], moves[0].associated_constraint_ptr);
+    EXPECT_EQ(&c[0], moves[1].associated_constraint_ptr);
+
     /// (x,y) = (0,0) -> (1,1)
     EXPECT_TRUE(moves[0].is_special_neighborhood_move);
     EXPECT_EQ(0, moves[0].overlap_rate);

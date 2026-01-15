@@ -52,7 +52,8 @@ class IntegerMoveGenerator
         for (auto i = 0; i < VARIABLES_SIZE; i++) {
             auto &move = this->m_moves[4 * i];
 
-            move.type = MoveType::Integer;
+            move.associated_constraint_ptr = nullptr;
+            move.type                      = MoveType::Integer;
             move.alterations.emplace_back(mutable_variable_ptrs[i], 0);
             move.is_univariable_move          = true;
             move.is_selection_move            = false;

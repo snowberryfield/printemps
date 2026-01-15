@@ -50,7 +50,9 @@ class ConstantDifferenceIntegersMoveGenerator
 
         for (auto i = 0; i < BINOMIALS_SIZE; i++) {
             auto &move = this->m_moves[2 * i];
-            move.type  = MoveType::ConstantDifferenceIntegers;
+
+            move.associated_constraint_ptr = constraint_ptrs[i];
+            move.type = MoveType::ConstantDifferenceIntegers;
             move.alterations.emplace_back(binomials[i].variable_ptr_first, 0);
             move.alterations.emplace_back(binomials[i].variable_ptr_second, 0);
             move.is_univariable_move          = false;
@@ -134,7 +136,14 @@ class ConstantDifferenceIntegersMoveGenerator
     num_threads(a_NUMBER_OF_THREADS)
 #endif
                 for (auto i = 0; i < MOVES_SIZE; i++) {
+                    if (!(*a_moves_ptr)[i]
+                             .associated_constraint_ptr->is_feasible()) {
+                        (*a_flags)[i] = 0;
+                        continue;
+                    }
+
                     (*a_flags)[i] = 1;
+
                     if (!(*a_moves_ptr)[i].is_available) {
                         (*a_flags)[i] = 0;
                         continue;

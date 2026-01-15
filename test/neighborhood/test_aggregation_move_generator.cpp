@@ -40,6 +40,11 @@ TEST_F(TestAggregationMoveGenerator, setup) {
     EXPECT_EQ(4, static_cast<int>(moves.size()));
     EXPECT_EQ(4, static_cast<int>(flags.size()));
 
+    EXPECT_EQ(&c[0], moves[0].associated_constraint_ptr);
+    EXPECT_EQ(&c[0], moves[1].associated_constraint_ptr);
+    EXPECT_EQ(&c[0], moves[2].associated_constraint_ptr);
+    EXPECT_EQ(&c[0], moves[3].associated_constraint_ptr);
+
     /// (x,y) = (0,0) -> (1,2)
     EXPECT_FALSE(moves[0].is_univariable_move);
     EXPECT_TRUE(moves[0].is_special_neighborhood_move);
