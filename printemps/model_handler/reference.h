@@ -58,7 +58,7 @@ struct Reference {
     /*************************************************************************/
     inline void update_variable_reference() {
         VariableReference<T_Variable, T_Expression>     variable_reference;
-        VariableTypeReference<T_Variable, T_Expression> reference_variable_type;
+        VariableTypeReference<T_Variable, T_Expression> variable_type_reference;
 
         for (auto &&proxy : m_model_ptr->variable_proxies()) {
             for (auto &&variable : proxy.flat_indexed_variables()) {
@@ -70,39 +70,45 @@ struct Reference {
                 if (variable.is_fixed()) {
                     variable_reference.fixed_variable_ptrs.push_back(
                         variable_ptr);
-
                 } else {
                     variable_reference.mutable_variable_ptrs.push_back(
                         variable_ptr);
+                    if (variable.is_independent()) {
+                        variable_reference.mutable_independent_variable_ptrs
+                            .push_back(variable_ptr);
+                    } else {
+                        variable_reference.mutable_dependent_variable_ptrs
+                            .push_back(variable_ptr);
+                    }
                 }
 
                 switch (variable.type()) {
                     case model_component::VariableType::Binary: {
-                        reference_variable_type.binary_variable_ptrs.push_back(
+                        variable_type_reference.binary_variable_ptrs.push_back(
                             variable_ptr);
                         break;
                     }
 
                     case model_component::VariableType::Integer: {
-                        reference_variable_type.integer_variable_ptrs.push_back(
+                        variable_type_reference.integer_variable_ptrs.push_back(
                             variable_ptr);
                         break;
                     }
 
                     case model_component::VariableType::Selection: {
-                        reference_variable_type.selection_variable_ptrs
+                        variable_type_reference.selection_variable_ptrs
                             .push_back(variable_ptr);
                         break;
                     }
 
                     case model_component::VariableType::DependentBinary: {
-                        reference_variable_type.dependent_binary_variable_ptrs
+                        variable_type_reference.dependent_binary_variable_ptrs
                             .push_back(variable_ptr);
                         break;
                     }
 
                     case model_component::VariableType::DependentInteger: {
-                        reference_variable_type.dependent_integer_variable_ptrs
+                        variable_type_reference.dependent_integer_variable_ptrs
                             .push_back(variable_ptr);
                         break;
                     }
@@ -115,7 +121,7 @@ struct Reference {
             }
         }
         this->variable      = variable_reference;
-        this->variable_type = reference_variable_type;
+        this->variable_type = variable_type_reference;
     }
 
     /*************************************************************************/

@@ -16,6 +16,10 @@ struct VariableReference {
         fixed_variable_ptrs;
     std::vector<model_component::Variable<T_Variable, T_Expression> *>
         mutable_variable_ptrs;
+    std::vector<model_component::Variable<T_Variable, T_Expression> *>
+        mutable_independent_variable_ptrs;
+    std::vector<model_component::Variable<T_Variable, T_Expression> *>
+        mutable_dependent_variable_ptrs;
 
     /*************************************************************************/
     VariableReference(void) noexcept {
@@ -27,6 +31,8 @@ struct VariableReference {
         this->variable_ptrs.clear();
         this->fixed_variable_ptrs.clear();
         this->mutable_variable_ptrs.clear();
+        this->mutable_independent_variable_ptrs.clear();
+        this->mutable_dependent_variable_ptrs.clear();
     }
 };
 }  // namespace printemps::model_handler

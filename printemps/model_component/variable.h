@@ -680,6 +680,21 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
+    inline bool is_independent(void) const noexcept {
+        if (m_extension->type == VariableType::Binary ||
+            m_extension->type == VariableType::Integer ||
+            m_extension->type == VariableType::Selection) {
+            return true;
+        }
+        return false;
+    }
+
+    /*************************************************************************/
+    inline bool is_dependent(void) const noexcept {
+        return !this->is_independent();
+    }
+
+    /*************************************************************************/
     inline Expression<T_Variable, T_Expression> to_expression(void) const {
         std::unordered_map<Variable<T_Variable, T_Expression> *, T_Expression>
             sensitivity;
