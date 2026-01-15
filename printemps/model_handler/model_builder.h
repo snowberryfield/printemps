@@ -147,14 +147,10 @@ class ModelBuilder {
         }
 
         /**
-         * Extract selection constraints. If the number of constraints is bigger
-         * than that of variables, this process will be skipped because it would
-         * affect computational efficiency.
+         * Extract selection constraints.
          */
         if (a_OPTION.neighborhood.selection_mode !=
-                option::selection_mode::Off &&
-            model.reference().number_of_variables() >
-                model.reference().number_of_constraints()) {
+            option::selection_mode::Off) {
             preprocess::SelectionExtractor<T_Variable, T_Expression>
                 selection_extractor(m_model_ptr);
             selection_extractor.extract(a_OPTION.neighborhood.selection_mode,
