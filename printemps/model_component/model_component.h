@@ -11,6 +11,7 @@
 #include "constraint_sense.h"
 #include "constraint_type.h"
 #include "constraint_type_classifier.h"
+#include "constraint_compact.h"
 
 #include "range.h"
 

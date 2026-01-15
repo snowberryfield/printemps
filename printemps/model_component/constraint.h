@@ -62,6 +62,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     ConstraintType m_type;
 
     std::unique_ptr<ExpressionStructure<T_Variable, T_Expression>> m_structure;
+    ConstraintCompact<T_Variable, T_Expression> *m_compact_ptr;
 
     /*************************************************************************/
     /// Default constructor
@@ -135,11 +136,11 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         multi_array::AbstractMultiArrayElement::initialize();
         m_expression.initialize();
         m_sense            = ConstraintSense::Less;
-        m_constraint_value = 0;
-        m_violation_value  = 0;
-        m_margin_value     = 0;
-        m_positive_part    = 0;
-        m_negative_part    = 0;
+        m_constraint_value = static_cast<T_Expression>(0);
+        m_violation_value  = static_cast<T_Expression>(0);
+        m_margin_value     = static_cast<T_Expression>(0);
+        m_positive_part    = static_cast<T_Expression>(0);
+        m_negative_part    = static_cast<T_Expression>(0);
 
         m_local_penalty_coefficient_less    = HUGE_VALF;
         m_local_penalty_coefficient_greater = HUGE_VALF;
@@ -161,6 +162,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
 
         m_structure =
             std::make_unique<ExpressionStructure<T_Variable, T_Expression>>();
+        m_compact_ptr = nullptr;
     }
 
     /*************************************************************************/
@@ -168,12 +170,13 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
                       const ConstraintSense                       a_SENSE) {
         m_expression       = a_EXPRESSION;
         m_sense            = a_SENSE;
-        m_constraint_value = 0;
-        m_violation_value  = 0;
-        m_margin_value     = 0;
-        m_positive_part    = 0;
-        m_negative_part    = 0;
+        m_constraint_value = static_cast<T_Expression>(0);
+        m_violation_value  = static_cast<T_Expression>(0);
+        m_margin_value     = static_cast<T_Expression>(0);
+        m_positive_part    = static_cast<T_Expression>(0);
+        m_negative_part    = static_cast<T_Expression>(0);
         m_is_enabled       = true;
+        m_compact_ptr      = nullptr;
 
         this->update_structure();
         this->update_constraint_type();
@@ -205,6 +208,19 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
                     "Constraint sense is invalid."));
             }
         }
+        if (m_compact_ptr != nullptr) {
+            uint8_t flags = m_compact_ptr->flags;
+
+            flags = (flags & ~CONSTRAINT_COMPACT_LESS_OR_EQUAL) |
+                    (m_is_less_or_equal ? CONSTRAINT_COMPACT_LESS_OR_EQUAL : 0);
+
+            flags = (flags & ~CONSTRAINT_COMPACT_GREATER_OR_EQUAL) |
+                    (m_is_greater_or_equal ? CONSTRAINT_COMPACT_GREATER_OR_EQUAL
+                                           : 0);
+
+            m_compact_ptr->flags = flags;
+        }
+
     }
 
     /*************************************************************************/
@@ -268,6 +284,24 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
         m_has_margin = m_structure->has_only_binary_or_selection_variable &
                        (m_margin_value >= m_structure->max_abs_coefficient -
                                               constant::EPSILON_10);
+
+        if (m_compact_ptr != nullptr) {
+            m_compact_ptr->constraint_value = m_constraint_value;
+            m_compact_ptr->local_penalty_coefficient_less =
+                m_local_penalty_coefficient_less;
+            m_compact_ptr->local_penalty_coefficient_greater =
+                m_local_penalty_coefficient_greater;
+
+            constexpr uint8_t MASK = CONSTRAINT_COMPACT_ENABLED |
+                                     CONSTRAINT_COMPACT_EVALUATION_IGNORABLE;
+
+            m_compact_ptr->flags =
+                (m_compact_ptr->flags & ~MASK) |
+                (m_is_enabled ? CONSTRAINT_COMPACT_ENABLED : 0) |
+                (this->is_evaluation_ignorable()
+                     ? CONSTRAINT_COMPACT_EVALUATION_IGNORABLE
+                     : 0);
+        }
     }
 
     /*************************************************************************/
@@ -290,7 +324,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
             }
             case ConstraintSense::Equal: {
                 m_violation_value = m_positive_part + m_negative_part;
-                m_margin_value    = 0;
+                m_margin_value    = static_cast<T_Expression>(0);
                 break;
             }
             case ConstraintSense::Greater: {
@@ -308,6 +342,37 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
                        (m_margin_value >= m_structure->max_abs_coefficient -
                                               constant::EPSILON_10);
         m_expression.update(a_MOVE);
+
+        if (m_compact_ptr != nullptr) {
+            m_compact_ptr->constraint_value = m_constraint_value;
+            m_compact_ptr->local_penalty_coefficient_less =
+                m_local_penalty_coefficient_less;
+            m_compact_ptr->local_penalty_coefficient_greater =
+                m_local_penalty_coefficient_greater;
+
+            constexpr uint8_t MASK = CONSTRAINT_COMPACT_ENABLED |
+                                     CONSTRAINT_COMPACT_EVALUATION_IGNORABLE;
+
+            m_compact_ptr->flags =
+                (m_compact_ptr->flags & ~MASK) |
+                (m_is_enabled ? CONSTRAINT_COMPACT_ENABLED : 0) |
+                (this->is_evaluation_ignorable()
+                     ? CONSTRAINT_COMPACT_EVALUATION_IGNORABLE
+                     : 0);
+        }
+    }
+
+    /*************************************************************************/
+    inline void set_compact_ptr(
+        ConstraintCompact<T_Variable, T_Expression> *a_compact_ptr) noexcept {
+        m_compact_ptr = a_compact_ptr;
+        this->update_structure();
+    }
+
+    /*************************************************************************/
+    inline ConstraintCompact<T_Variable, T_Expression> *compact_ptr(
+        void) noexcept {
+        return m_compact_ptr;
     }
 
     /*************************************************************************/

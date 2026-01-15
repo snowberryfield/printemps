@@ -119,8 +119,8 @@ class Objective {
 
     /*************************************************************************/
     inline T_Expression evaluate(
-        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE) const
-        noexcept {
+        const neighborhood::Move<T_Variable, T_Expression> &a_MOVE)
+        const noexcept {
         return m_expression.evaluate(a_MOVE);
     }
 

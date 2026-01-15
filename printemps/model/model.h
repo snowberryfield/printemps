@@ -32,6 +32,9 @@ class Model {
                        model_component::Expression<T_Variable, T_Expression> *>
         m_dependent_expression_map;
 
+    std::vector<model_component::ConstraintCompact<T_Variable, T_Expression>>
+        m_constraint_compacts;
+
     std::vector<std::string> m_variable_names;
     std::vector<std::string> m_expression_names;
     std::vector<std::string> m_constraint_names;
@@ -117,6 +120,7 @@ class Model {
                 MAX_NUMBER_OF_CONSTRAINT_PROXIES);
         m_objective.initialize();
         m_dependent_expression_map.clear();
+        m_constraint_compacts.clear();
 
         m_variable_names.clear();
         m_expression_names.clear();
@@ -393,6 +397,20 @@ class Model {
         model_component::Expression<T_Variable, T_Expression> *> &
     dependent_expression_map(void) noexcept {
         return m_dependent_expression_map;
+    }
+
+    /*************************************************************************/
+    inline const std::vector<
+        model_component::ConstraintCompact<T_Variable, T_Expression>> &
+    constraint_compacts(void) const noexcept {
+        return m_constraint_compacts;
+    }
+
+    /*************************************************************************/
+    inline std::vector<
+        model_component::ConstraintCompact<T_Variable, T_Expression>> &
+    constraint_compacts(void) noexcept {
+        return m_constraint_compacts;
     }
 
     /*************************************************************************/

@@ -93,8 +93,9 @@ TEST_F(TestModelBuilder, setup_variable_related_constraints) {
     g(2)    = x(0) + 2 * y.sum({0, model_component::Range::All}) >= 1;
 
     model.reference().update_constraint_reference();
-    model.builder().setup_variable_related_constraints();
-    model.builder().setup_variable_related_binary_coefficient_constraints();
+    model.builder().setup_variable_constraint_sensitivities();
+    model.builder().setup_variable_related_constraint_ptrs();
+    model.builder().setup_variable_related_binary_coefficient_constraint_ptrs();
 
     for (auto i = 0; i < 10; i++) {
         EXPECT_TRUE(std::find(x(i).related_constraint_ptrs().begin(),
@@ -286,7 +287,7 @@ TEST_F(TestModelBuilder, setup_related_selection_constraint_ptr_index) {
 /*****************************************************************************/
 TEST_F(TestModelBuilder,
        setup_variable_related_binary_coefficient_constraints) {
-    /// This test is covered by setup_variable_related_constraints().
+    /// This test is covered by setup_variable_related_constraint_ptrs().
 }
 
 /*****************************************************************************/

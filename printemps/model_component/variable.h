@@ -37,6 +37,8 @@ struct VariableExtension {
     double                               lagrangian_coefficient;
     Selection<T_Variable, T_Expression> *selection_ptr;
 
+    std::vector<std::pair<Constraint<T_Variable, T_Expression> *, T_Expression>>
+        constraint_sensitivities;
     std::vector<Constraint<T_Variable, T_Expression> *> related_constraint_ptrs;
     std::vector<Constraint<T_Variable, T_Expression> *>
         related_binary_coefficient_constraint_ptrs;
@@ -76,8 +78,9 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     int        m_global_last_update_iteration;
     long       m_update_count;
 
-    std::vector<std::pair<Constraint<T_Variable, T_Expression> *, T_Expression>>
-        m_constraint_sensitivities;
+    std::vector<
+        std::pair<ConstraintCompact<T_Variable, T_Expression> *, T_Expression>>
+        m_constraint_sensitivities_compact;
 
     std::unique_ptr<VariableExtension<T_Variable, T_Expression>> m_extension;
 
@@ -158,11 +161,13 @@ class Variable : public multi_array::AbstractMultiArrayElement {
         m_extension->related_constraint_ptrs.clear();
         m_extension->related_binary_coefficient_constraint_ptrs.clear();
         m_extension->dependent_expression_ptr = nullptr;
-        m_constraint_sensitivities.clear();
+        m_extension->constraint_sensitivities.clear();
         m_extension->objective_sensitivity                      = 0.0;
         m_extension->hash                                       = 0;
         m_extension->related_selection_constraint_ptr_index_min = -1;
         m_extension->related_selection_constraint_ptr_index_max = -1;
+
+        m_constraint_sensitivities_compact.clear();
     }
 
     /*************************************************************************/
@@ -486,34 +491,51 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline void register_related_constraint_ptr(
-        Constraint<T_Variable, T_Expression> *a_constraint_ptr) {
-        m_extension->related_constraint_ptrs.push_back(a_constraint_ptr);
+    inline void register_constraint_sensitivity(
+        Constraint<T_Variable, T_Expression> *a_constraint_ptr,
+        const T_Expression                    a_SENSITIVITY) {
+        m_extension->constraint_sensitivities.emplace_back(a_constraint_ptr,
+                                                           a_SENSITIVITY);
     }
 
     /*************************************************************************/
-    inline void reset_related_constraint_ptrs(void) {
-        m_extension->related_constraint_ptrs.clear();
+    inline void reset_constraint_sensitivities(void) {
+        m_extension->constraint_sensitivities.clear();
     }
 
     /*************************************************************************/
-    inline void sort_and_unique_related_constraint_ptrs(void) {
-        std::stable_sort(m_extension->related_constraint_ptrs.begin(),
-                         m_extension->related_constraint_ptrs.end(),
+    inline void sort_constraint_sensitivities(void) {
+        std::stable_sort(m_extension->constraint_sensitivities.begin(),
+                         m_extension->constraint_sensitivities.end(),
                          [](const auto &a_FIRST, const auto &a_SECOND) {
-                             return a_FIRST->name() < a_SECOND->name();
+                             return a_FIRST.first->name() <
+                                    a_SECOND.first->name();
                          });
-
-        m_extension->related_constraint_ptrs.erase(
-            std::unique(m_extension->related_constraint_ptrs.begin(),  //
-                        m_extension->related_constraint_ptrs.end()),
-            m_extension->related_constraint_ptrs.end());
     }
 
     /*************************************************************************/
-    inline std::vector<Constraint<T_Variable, T_Expression> *> &
-    related_constraint_ptrs(void) {
-        return m_extension->related_constraint_ptrs;
+    inline const std::vector<
+        std::pair<Constraint<T_Variable, T_Expression> *, T_Expression>> &
+    constraint_sensitivities(void) const {
+        return m_extension->constraint_sensitivities;
+    }
+
+    /*************************************************************************/
+    inline void set_objective_sensitivity(const T_Expression a_SENSITIVITY) {
+        m_extension->objective_sensitivity = a_SENSITIVITY;
+    }
+
+    /*************************************************************************/
+    inline T_Expression objective_sensitivity(void) const noexcept {
+        return m_extension->objective_sensitivity;
+    }
+
+    /*************************************************************************/
+    inline void setup_related_constraint_ptrs(void) {
+        m_extension->related_constraint_ptrs.clear();
+        for (auto &&sensitivity : m_extension->constraint_sensitivities) {
+            m_extension->related_constraint_ptrs.push_back(sensitivity.first);
+        }
     }
 
     /*************************************************************************/
@@ -527,8 +549,9 @@ class Variable : public multi_array::AbstractMultiArrayElement {
         /**
          * NOTE: This method must be called after constraint categorization.
          */
-        for (const auto &constraint_ptr :
-             m_extension->related_constraint_ptrs) {
+        m_extension->related_binary_coefficient_constraint_ptrs.clear();
+        for (const auto &sensitivity : m_extension->constraint_sensitivities) {
+            auto &constraint_ptr = sensitivity.first;
             if (constraint_ptr->is_type(ConstraintType::SetPartitioning) ||
                 constraint_ptr->is_type(ConstraintType::SetPacking) ||
                 constraint_ptr->is_type(ConstraintType::SetCovering) ||
@@ -539,31 +562,6 @@ class Variable : public multi_array::AbstractMultiArrayElement {
                     .push_back(constraint_ptr);
             }
         }
-
-        std::stable_sort(
-            m_extension->related_binary_coefficient_constraint_ptrs.begin(),
-            m_extension->related_binary_coefficient_constraint_ptrs.end(),
-            [](const auto &a_FIRST, const auto &a_SECOND) {
-                return a_FIRST->name() < a_SECOND->name();
-            });
-
-        m_extension->related_binary_coefficient_constraint_ptrs.erase(
-            std::unique(
-                m_extension->related_binary_coefficient_constraint_ptrs
-                    .begin(),  //
-                m_extension->related_binary_coefficient_constraint_ptrs.end()),
-            m_extension->related_binary_coefficient_constraint_ptrs.end());
-    }
-
-    /*************************************************************************/
-    inline void reset_related_binary_coefficient_constraint_ptrs(void) {
-        m_extension->related_binary_coefficient_constraint_ptrs.clear();
-    }
-
-    /*************************************************************************/
-    inline std::vector<Constraint<T_Variable, T_Expression> *> &
-    related_binary_coefficient_constraint_ptrs(void) {
-        return m_extension->related_binary_coefficient_constraint_ptrs;
     }
 
     /*************************************************************************/
@@ -573,15 +571,34 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
+    inline void setup_constraint_sensitivities_compact(void) {
+        m_constraint_sensitivities_compact.clear();
+        for (const auto &sensitivity : m_extension->constraint_sensitivities) {
+            m_constraint_sensitivities_compact.push_back(
+                {sensitivity.first->compact_ptr(), sensitivity.second});
+        }
+    }
+
+    /*************************************************************************/
+    inline const std::vector<std::pair<
+        ConstraintCompact<T_Variable, T_Expression> *, T_Expression>> &
+    constraint_sensitivities_compact(void) const {
+        return m_constraint_sensitivities_compact;
+    }
+
+    /*************************************************************************/
     inline void set_dependent_expression_ptr(
         Expression<T_Variable, T_Expression> *a_expression_ptr) {
         m_extension->dependent_expression_ptr = a_expression_ptr;
-        setup_type_binary_or_integer();
+
         if (m_extension->type == VariableType::Binary) {
             m_extension->type = VariableType::DependentBinary;
         } else if (m_extension->type == VariableType::Integer) {
             m_extension->type = VariableType::DependentInteger;
         } else {
+            throw std::runtime_error(utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "Candidate dependent variable must be Binary or Integer."));
         }
     }
 
@@ -599,60 +616,13 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline void register_constraint_sensitivity(
-        Constraint<T_Variable, T_Expression> *a_constraint_ptr,
-        const T_Expression                    a_SENSITIVITY) {
-        m_constraint_sensitivities.emplace_back(a_constraint_ptr,
-                                                a_SENSITIVITY);
-    }
-
-    /*************************************************************************/
-    inline void reset_constraint_sensitivities(void) {
-        m_constraint_sensitivities.clear();
-    }
-
-    /*************************************************************************/
-    inline void sort_constraint_sensitivities(void) {
-        std::stable_sort(m_constraint_sensitivities.begin(),
-                         m_constraint_sensitivities.end(),
-                         [](const auto &a_FIRST, const auto &a_SECOND) {
-                             return a_FIRST.first->name() <
-                                    a_SECOND.first->name();
-                         });
-    }
-
-    /*************************************************************************/
-    inline std::vector<
-        std::pair<Constraint<T_Variable, T_Expression> *, T_Expression>> &
-    constraint_sensitivities(void) {
-        return m_constraint_sensitivities;
-    }
-
-    /*************************************************************************/
-    inline const std::vector<
-        std::pair<Constraint<T_Variable, T_Expression> *, T_Expression>> &
-    constraint_sensitivities(void) const {
-        return m_constraint_sensitivities;
-    }
-
-    /*************************************************************************/
-    inline void set_objective_sensitivity(const T_Expression a_SENSITIVITY) {
-        m_extension->objective_sensitivity = a_SENSITIVITY;
-    }
-
-    /*************************************************************************/
-    inline T_Expression objective_sensitivity(void) const noexcept {
-        return m_extension->objective_sensitivity;
-    }
-
-    /*************************************************************************/
     inline void setup_hash(void) {
         /**
          * NOTE: This method is called in
          * preprocess::remove_redundant_set_variables().
          */
         std::uint64_t hash = 0;
-        for (const auto &sensitivity : m_constraint_sensitivities) {
+        for (const auto &sensitivity : m_extension->constraint_sensitivities) {
             hash += reinterpret_cast<std::uint64_t>(sensitivity.first);
         }
         m_extension->hash = hash;
@@ -661,12 +631,6 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     /*************************************************************************/
     inline std::uint64_t hash(void) const noexcept {
         return m_extension->hash;
-    }
-
-    /*************************************************************************/
-    inline void reset_related_selection_constraint_ptr_index(void) noexcept {
-        m_extension->related_selection_constraint_ptr_index_min = -1;
-        m_extension->related_selection_constraint_ptr_index_max = -1;
     }
 
     /*************************************************************************/
@@ -679,6 +643,8 @@ class Variable : public multi_array::AbstractMultiArrayElement {
             m_extension->selection_ptr->related_constraint_ptrs;
 
         const int CONSTRAINTS_SIZE = RELATED_SELECTION_CONSTRAINT_PTRS.size();
+        m_extension->related_selection_constraint_ptr_index_min = -1;
+        m_extension->related_selection_constraint_ptr_index_max = -1;
 
         for (auto i = 0; i < CONSTRAINTS_SIZE; i++) {
             if (RELATED_SELECTION_CONSTRAINT_PTRS[i]->is_enabled() &&

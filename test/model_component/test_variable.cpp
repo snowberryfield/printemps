@@ -575,79 +575,66 @@ TEST_F(TestVariable, update) {
 }
 
 /*****************************************************************************/
-TEST_F(TestVariable, register_related_constraint_ptr) {
+TEST_F(TestVariable, register_constraint_sensitivity) {
     auto variable = model_component::Variable<int, double>::create_instance();
     auto constraint_0 =
         model_component::Constraint<int, double>::create_instance();
     auto constraint_1 =
         model_component::Constraint<int, double>::create_instance();
+    constraint_0.set_name("bb");
+    constraint_1.set_name("aa");
 
-    EXPECT_TRUE(variable.related_constraint_ptrs().empty());
-    EXPECT_FALSE(std::find(variable.related_constraint_ptrs().begin(),
-                           variable.related_constraint_ptrs().end(),
-                           &constraint_0) !=
-                 variable.related_constraint_ptrs().end());
-    EXPECT_FALSE(std::find(variable.related_constraint_ptrs().begin(),
-                           variable.related_constraint_ptrs().end(),
-                           &constraint_1) !=
-                 variable.related_constraint_ptrs().end());
+    EXPECT_TRUE(variable.constraint_sensitivities().empty());
 
-    variable.register_related_constraint_ptr(&constraint_0);
-    variable.sort_and_unique_related_constraint_ptrs();
-    EXPECT_EQ(1, static_cast<int>(variable.related_constraint_ptrs().size()));
-    EXPECT_TRUE(std::find(variable.related_constraint_ptrs().begin(),
-                          variable.related_constraint_ptrs().end(),
-                          &constraint_0) !=
-                variable.related_constraint_ptrs().end());
-    EXPECT_FALSE(std::find(variable.related_constraint_ptrs().begin(),
-                           variable.related_constraint_ptrs().end(),
-                           &constraint_1) !=
-                 variable.related_constraint_ptrs().end());
+    variable.register_constraint_sensitivity(&constraint_0, 10);
+    EXPECT_EQ(1, static_cast<int>(variable.constraint_sensitivities().size()));
+    EXPECT_EQ(10, variable.constraint_sensitivities().back().second);
 
-    variable.register_related_constraint_ptr(&constraint_1);
-    variable.sort_and_unique_related_constraint_ptrs();
+    variable.register_constraint_sensitivity(&constraint_1, 20);
+    EXPECT_EQ(2, static_cast<int>(variable.constraint_sensitivities().size()));
+    EXPECT_EQ(20, variable.constraint_sensitivities().back().second);
+
+    variable.sort_constraint_sensitivities();
+    EXPECT_EQ("aa", variable.constraint_sensitivities()[0].first->name());
+    EXPECT_EQ("bb", variable.constraint_sensitivities()[1].first->name());
+
+    variable.setup_related_constraint_ptrs();
     EXPECT_EQ(2, static_cast<int>(variable.related_constraint_ptrs().size()));
-    EXPECT_TRUE(std::find(variable.related_constraint_ptrs().begin(),
-                          variable.related_constraint_ptrs().end(),
-                          &constraint_0) !=
-                variable.related_constraint_ptrs().end());
-    EXPECT_TRUE(std::find(variable.related_constraint_ptrs().begin(),
-                          variable.related_constraint_ptrs().end(),
-                          &constraint_1) !=
-                variable.related_constraint_ptrs().end());
+    EXPECT_EQ(&constraint_1, variable.related_constraint_ptrs()[0]);
+    EXPECT_EQ(&constraint_0, variable.related_constraint_ptrs()[1]);
 
-    variable.register_related_constraint_ptr(&constraint_1);
-    variable.sort_and_unique_related_constraint_ptrs();
-    EXPECT_EQ(2, static_cast<int>(variable.related_constraint_ptrs().size()));
-    EXPECT_TRUE(std::find(variable.related_constraint_ptrs().begin(),
-                          variable.related_constraint_ptrs().end(),
-                          &constraint_0) !=
-                variable.related_constraint_ptrs().end());
-    EXPECT_TRUE(std::find(variable.related_constraint_ptrs().begin(),
-                          variable.related_constraint_ptrs().end(),
-                          &constraint_1) !=
-                variable.related_constraint_ptrs().end());
+    variable.setup_constraint_sensitivities_compact();
+    EXPECT_EQ(2, static_cast<int>(
+                     variable.constraint_sensitivities_compact().size()));
+    EXPECT_EQ(constraint_1.compact_ptr(),
+              variable.constraint_sensitivities_compact()[0].first);
+    EXPECT_EQ(20, variable.constraint_sensitivities_compact()[0].second);
+    EXPECT_EQ(constraint_0.compact_ptr(),
+              variable.constraint_sensitivities_compact()[1].first);
+    EXPECT_EQ(10, variable.constraint_sensitivities_compact()[1].second);
 
-    variable.reset_related_constraint_ptrs();
-    EXPECT_TRUE(variable.related_constraint_ptrs().empty());
-    EXPECT_FALSE(std::find(variable.related_constraint_ptrs().begin(),
-                           variable.related_constraint_ptrs().end(),
-                           &constraint_0) !=
-                 variable.related_constraint_ptrs().end());
-    EXPECT_FALSE(std::find(variable.related_constraint_ptrs().begin(),
-                           variable.related_constraint_ptrs().end(),
-                           &constraint_1) !=
-                 variable.related_constraint_ptrs().end());
+    variable.reset_constraint_sensitivities();
+    EXPECT_TRUE(variable.constraint_sensitivities().empty());
 }
 
 /*****************************************************************************/
-TEST_F(TestVariable, reset_related_constraint_ptrs) {
+TEST_F(TestVariable, reset_constraint_sensitivities) {
+    /// This test is covered by register_constraint_sensitivity().
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, sort_constraint_sensitivities) {
     /// This test is covered by register_related_constraint_ptr().
 }
 
 /*****************************************************************************/
-TEST_F(TestVariable, sort_and_unique_related_constraint_ptrs) {
-    /// This test is covered by register_related_constraint_ptr().
+TEST_F(TestVariable, constraint_sensitivities) {
+    /// This test is covered by register_constraint_sensitivity().
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, setup_related_constraint_ptr) {
+    /// This test is covered by register_constraint_sensitivity().
 }
 
 /*****************************************************************************/
@@ -662,15 +649,13 @@ TEST_F(TestVariable, setup_related_binary_coefficient_constraint_ptrs) {
 }
 
 /*****************************************************************************/
-TEST_F(TestVariable, reset_setup_binary_coefficient_constraint_ptrs) {
-    /// This test is covered by
-    /// Model.setup_variable_related_binary_coefficient_constraint_ptrs().
+TEST_F(TestVariable, setup_constraint_sensitivities_compact) {
+    /// This test is covered by register_related_constraint_ptr().
 }
 
 /*****************************************************************************/
-TEST_F(TestVariable, related_binary_coefficient_constraint_ptrs) {
-    /// This test is covered by
-    /// Model.setup_variable_related_binary_coefficient_constraint_ptrs().
+TEST_F(TestVariable, constraint_sensitivities_compact) {
+    /// This test is covered by register_related_constraint_ptr().
 }
 
 /*****************************************************************************/
@@ -700,49 +685,6 @@ TEST_F(TestVariable, reset_dependent_constraint_ptr) {
 /*****************************************************************************/
 TEST_F(TestVariable, dependent_constraint_ptr) {
     /// This test is covered by setup_uniform_sensitivity().
-}
-
-/*****************************************************************************/
-TEST_F(TestVariable, register_constraint_sensitivity) {
-    auto variable = model_component::Variable<int, double>::create_instance();
-    auto constraint_0 =
-        model_component::Constraint<int, double>::create_instance();
-    auto constraint_1 =
-        model_component::Constraint<int, double>::create_instance();
-    constraint_0.set_name("bb");
-    constraint_1.set_name("aa");
-
-    EXPECT_TRUE(variable.constraint_sensitivities().empty());
-
-    variable.register_constraint_sensitivity(&constraint_0, 10);
-    EXPECT_EQ(1, static_cast<int>(variable.constraint_sensitivities().size()));
-    EXPECT_EQ(10, variable.constraint_sensitivities().back().second);
-
-    variable.register_constraint_sensitivity(&constraint_1, 20);
-    EXPECT_EQ(2, static_cast<int>(variable.constraint_sensitivities().size()));
-    EXPECT_EQ(20, variable.constraint_sensitivities().back().second);
-
-    variable.sort_constraint_sensitivities();
-    EXPECT_EQ("aa", variable.constraint_sensitivities()[0].first->name());
-    EXPECT_EQ("bb", variable.constraint_sensitivities()[1].first->name());
-
-    variable.reset_constraint_sensitivities();
-    EXPECT_TRUE(variable.constraint_sensitivities().empty());
-}
-
-/*****************************************************************************/
-TEST_F(TestVariable, reset_constraint_sensitivities) {
-    /// This test is covered by register_constraint_sensitivity().
-}
-
-/*****************************************************************************/
-TEST_F(TestVariable, sort_constraint_sensitivities) {
-    /// This test is covered by register_related_constraint_ptr().
-}
-
-/*****************************************************************************/
-TEST_F(TestVariable, constraint_sensitivities) {
-    /// This test is covered by register_constraint_sensitivity().
 }
 
 /*****************************************************************************/
@@ -786,14 +728,6 @@ TEST_F(TestVariable, setup_hash) {
 /*****************************************************************************/
 TEST_F(TestVariable, hash) {
     /// This test is covered by setup_hash().
-}
-
-/*****************************************************************************/
-TEST_F(TestVariable, reset_related_selection_constraint_ptr_index) {
-    auto variable = model_component::Variable<int, double>::create_instance();
-    variable.reset_related_selection_constraint_ptr_index();
-    EXPECT_EQ(-1, variable.related_selection_constraint_ptr_index_min());
-    EXPECT_EQ(-1, variable.related_selection_constraint_ptr_index_max());
 }
 
 /*****************************************************************************/

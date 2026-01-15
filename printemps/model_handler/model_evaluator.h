@@ -150,35 +150,41 @@ class ModelEvaluator {
         const auto &variable_ptr = a_MOVE.alterations.front().first;
         const auto  variable_value_diff =
             a_MOVE.alterations.front().second - variable_ptr->value();
-        const auto &constraint_sensitivities =
-            variable_ptr->constraint_sensitivities();
+        const auto &constraint_sensitivities_compact =
+            variable_ptr->constraint_sensitivities_compact();
 
-        for (const auto &sensitivity : constraint_sensitivities) {
-            const auto &constraint_ptr = sensitivity.first;
-            if (constraint_ptr->is_evaluation_ignorable()) {
+        for (const auto &sensitivity : constraint_sensitivities_compact) {
+            const auto constraint_compact = *sensitivity.first;
+            if (constraint_compact.flags &
+                model_component::CONSTRAINT_COMPACT_EVALUATION_IGNORABLE) {
                 continue;
             }
-            constraint_value = constraint_ptr->constraint_value() +
+
+            constraint_value = constraint_compact.constraint_value +
                                sensitivity.second * variable_value_diff;
 
-            if (constraint_ptr->is_less_or_equal()) {
+            if (constraint_compact.flags &
+                model_component::CONSTRAINT_COMPACT_LESS_OR_EQUAL) {
                 total_violation +=
-                    (violation_diff = std::max(constraint_value, 0.0) -
-                                      constraint_ptr->positive_part());
+                    (violation_diff =
+                         std::max(constraint_value, 0.0) -
+                         std::max(constraint_compact.constraint_value, 0.0));
 
                 local_penalty +=
                     violation_diff *
-                    constraint_ptr->local_penalty_coefficient_less();
+                    constraint_compact.local_penalty_coefficient_less;
             }
 
-            if (constraint_ptr->is_greater_or_equal()) {
+            if (constraint_compact.flags &
+                model_component::CONSTRAINT_COMPACT_GREATER_OR_EQUAL) {
                 total_violation -=
-                    (violation_diff = std::min(constraint_value, 0.0) +
-                                      constraint_ptr->negative_part());
+                    (violation_diff =
+                         std::min(constraint_value, 0.0) -
+                         std::min(constraint_compact.constraint_value, 0.0));
 
                 local_penalty -=
                     violation_diff *
-                    constraint_ptr->local_penalty_coefficient_greater();
+                    constraint_compact.local_penalty_coefficient_greater;
             }
         }
 
@@ -221,10 +227,12 @@ class ModelEvaluator {
         const auto &variable_ptr = a_MOVE.alterations.front().first;
         const auto  variable_value_diff =
             a_MOVE.alterations.front().second - variable_ptr->value();
-        const auto &constraint_sensitivities =
-            variable_ptr->constraint_sensitivities();
+        const auto &constraint_sensitivities_compact =
+            variable_ptr->constraint_sensitivities_compact();
 
-        for (const auto &sensitivity : constraint_sensitivities) {
+        for (const auto &sensitivity : constraint_sensitivities_compact) {
+            const auto constraint_compact = *sensitivity.first;
+
             /**
              * NOTE: The difference from evaluate_single() is that this method
              * does not skip the evaluation of constraint function values based
@@ -234,34 +242,37 @@ class ModelEvaluator {
              * For such combined moves,constraint_ptr->is_evaluation_ignorable()
              * does not function correctly.
              */
-            const auto &constraint_ptr = sensitivity.first;
-            if (!constraint_ptr->is_enabled()) {
+            if ((constraint_compact.flags &
+                 model_component::CONSTRAINT_COMPACT_ENABLED) == 0) {
                 continue;
             }
-            constraint_value = constraint_ptr->constraint_value() +
+            constraint_value = constraint_compact.constraint_value +
                                sensitivity.second * variable_value_diff;
 
-            if (constraint_ptr->is_less_or_equal()) {
+            if (constraint_compact.flags &
+                model_component::CONSTRAINT_COMPACT_LESS_OR_EQUAL) {
                 total_violation +=
-                    (violation_diff = std::max(constraint_value, 0.0) -
-                                      constraint_ptr->positive_part());
+                    (violation_diff =
+                         std::max(constraint_value, 0.0) -
+                         std::max(constraint_compact.constraint_value, 0.0));
 
                 local_penalty +=
                     violation_diff *
-                    constraint_ptr->local_penalty_coefficient_less();
+                    constraint_compact.local_penalty_coefficient_less;
             }
 
-            if (constraint_ptr->is_greater_or_equal()) {
+            if (constraint_compact.flags &
+                model_component::CONSTRAINT_COMPACT_GREATER_OR_EQUAL) {
                 total_violation -=
-                    (violation_diff = std::min(constraint_value, 0.0) +
-                                      constraint_ptr->negative_part());
+                    (violation_diff =
+                         std::min(constraint_value, 0.0) -
+                         std::min(constraint_compact.constraint_value, 0.0));
 
                 local_penalty -=
                     violation_diff *
-                    constraint_ptr->local_penalty_coefficient_greater();
+                    constraint_compact.local_penalty_coefficient_greater;
             }
         }
-
         const double OBJECTIVE =
             MODEL.m_is_defined_objective
                 ? MODEL.m_objective.evaluate(a_MOVE) * MODEL.sign()
@@ -341,40 +352,50 @@ class ModelEvaluator {
                     const auto &variable_ptr = alteration.first;
                     const auto  variable_value_diff =
                         alteration.second - variable_ptr->value();
-                    const auto &constraint_sensitivities =
-                        variable_ptr->constraint_sensitivities();
+                    const auto &constraint_sensitivities_compact =
+                        variable_ptr->constraint_sensitivities_compact();
 
-                    for (const auto &sensitivity : constraint_sensitivities) {
-                        const auto &constraint_ptr = sensitivity.first;
-                        if (!constraint_ptr->is_enabled()) {
+                    for (const auto &sensitivity :
+                         constraint_sensitivities_compact) {
+                        const auto constraint_compact = *sensitivity.first;
+                        if ((constraint_compact.flags &
+                             model_component::CONSTRAINT_COMPACT_ENABLED) ==
+                            0) {
                             continue;
                         }
                         constraint_value =
-                            constraint_ptr->constraint_value() +
+                            constraint_compact.constraint_value +
                             sensitivity.second * variable_value_diff;
 
-                        if (constraint_ptr->is_less_or_equal()) {
+                        if (constraint_compact.flags &
+                            model_component::CONSTRAINT_COMPACT_LESS_OR_EQUAL) {
                             total_violation +=
                                 (violation_diff =
                                      std::max(constraint_value, 0.0) -
-                                     constraint_ptr->positive_part());
+                                     std::max(
+                                         constraint_compact.constraint_value,
+                                         0.0));
 
                             local_penalty +=
                                 violation_diff *
-                                constraint_ptr
-                                    ->local_penalty_coefficient_less();
+                                constraint_compact
+                                    .local_penalty_coefficient_less;
                         }
 
-                        if (constraint_ptr->is_greater_or_equal()) {
+                        if (constraint_compact.flags &
+                            model_component::
+                                CONSTRAINT_COMPACT_GREATER_OR_EQUAL) {
                             total_violation -=
                                 (violation_diff =
-                                     std::min(constraint_value, 0.0) +
-                                     constraint_ptr->negative_part());
+                                     std::min(constraint_value, 0.0) -
+                                     std::min(
+                                         constraint_compact.constraint_value,
+                                         0.0));
 
                             local_penalty -=
                                 violation_diff *
-                                constraint_ptr
-                                    ->local_penalty_coefficient_greater();
+                                constraint_compact
+                                    .local_penalty_coefficient_greater;
                         }
                     }
                 }

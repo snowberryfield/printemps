@@ -277,31 +277,29 @@ class ModelUpdater {
                 continue;
             }
 
+            auto &expression = constraint_ptr->expression();
+
             if (constraint_ptr->constraint_value() > 0) {
                 for (const auto &variable_ptr :
-                     constraint_ptr->expression()
-                         .positive_coefficient_mutable_variable_ptrs()) {
+                     expression.positive_coefficient_mutable_variable_ptrs()) {
                     variable_ptr
                         ->set_is_feasibility_improvable_if_has_lower_bound_margin();
                 }
 
                 for (const auto &variable_ptr :
-                     constraint_ptr->expression()
-                         .negative_coefficient_mutable_variable_ptrs()) {
+                     expression.negative_coefficient_mutable_variable_ptrs()) {
                     variable_ptr
                         ->set_is_feasibility_improvable_if_has_upper_bound_margin();
                 }
             } else {
                 for (const auto &variable_ptr :
-                     constraint_ptr->expression()
-                         .negative_coefficient_mutable_variable_ptrs()) {
+                     expression.negative_coefficient_mutable_variable_ptrs()) {
                     variable_ptr
                         ->set_is_feasibility_improvable_if_has_lower_bound_margin();
                 }
 
                 for (const auto &variable_ptr :
-                     constraint_ptr->expression()
-                         .positive_coefficient_mutable_variable_ptrs()) {
+                     expression.positive_coefficient_mutable_variable_ptrs()) {
                     variable_ptr
                         ->set_is_feasibility_improvable_if_has_upper_bound_margin();
                 }

@@ -207,11 +207,6 @@ class ModelBuilder {
         this->setup_positive_and_negative_coefficient_mutable_variable_ptrs();
 
         /**
-         * Set up the constraint sensitivities of variables.
-         */
-        this->setup_variable_constraint_sensitivities();
-
-        /**
          * Set up the indices of related constraints for selection variables.
          */
         this->setup_variable_related_selection_constraint_ptr_index();
@@ -248,23 +243,23 @@ class ModelBuilder {
     /*************************************************************************/
     inline void setup_structure(void) {
         auto &model = *m_model_ptr;
-
         for (auto &&proxy : model.constraint_proxies()) {
             for (auto &&constraint : proxy.flat_indexed_constraints()) {
                 constraint.update_structure();
                 constraint.update_constraint_type();
             }
         }
-
         model.reference().update_variable_reference();
         model.reference().update_constraint_reference();
         model.reference().update_variable_name_map();
         model.reference().update_contraint_name_map();
 
-        this->setup_variable_related_constraints();
-        this->setup_variable_related_binary_coefficient_constraints();
+        this->setup_constraint_compacts();
         this->setup_variable_objective_sensitivities();
         this->setup_variable_constraint_sensitivities();
+        this->setup_variable_related_constraint_ptrs();
+        this->setup_variable_constraint_sensitivities_compact();
+        this->setup_variable_related_binary_coefficient_constraint_ptrs();
     }
 
     /*************************************************************************/
@@ -344,33 +339,26 @@ class ModelBuilder {
     }
 
     /*************************************************************************/
-    inline void setup_variable_related_constraints(void) {
+    inline void setup_constraint_compacts(void) {
         /**
          * NOTE: In this method, m_reference is not referred because
-         * the object would not be set up at the stage when this method is
+         * the object may not have been set up at the stage this method is
          * called.
          */
         auto &model = *m_model_ptr;
+        int   number_of_constraints = 0;
 
-        for (auto &&proxy : model.variable_proxies()) {
-            for (auto &&variable : proxy.flat_indexed_variables()) {
-                variable.reset_related_constraint_ptrs();
-            }
+        for (auto &&proxy : model.constraint_proxies()) {
+            number_of_constraints += proxy.number_of_elements();
         }
+
+        model.m_constraint_compacts.resize(number_of_constraints);
+        int count = 0;
 
         for (auto &&proxy : model.constraint_proxies()) {
             for (auto &&constraint : proxy.flat_indexed_constraints()) {
-                for (auto &&sensitivity :
-                     constraint.expression().sensitivities()) {
-                    sensitivity.first->register_related_constraint_ptr(
-                        &constraint);
-                }
-            }
-        }
-
-        for (auto &&proxy : model.variable_proxies()) {
-            for (auto &&variable : proxy.flat_indexed_variables()) {
-                variable.sort_and_unique_related_constraint_ptrs();
+                constraint.set_compact_ptr(
+                    &model.m_constraint_compacts[count++]);
             }
         }
     }
@@ -416,6 +404,32 @@ class ModelBuilder {
     }
 
     /*************************************************************************/
+    inline void setup_variable_related_constraint_ptrs(void) {
+        auto &model = *m_model_ptr;
+
+        for (auto &&proxy : model.variable_proxies()) {
+            for (auto &&variable : proxy.flat_indexed_variables()) {
+                variable.setup_related_constraint_ptrs();
+            }
+        }
+    }
+
+    /*************************************************************************/
+    inline void setup_variable_constraint_sensitivities_compact(void) {
+        /**
+         * NOTE: In this method, m_reference is not referred because
+         * the object may not have been set up at the stage this method is
+         * called.
+         */
+        auto &model = *m_model_ptr;
+        for (auto &&proxy : model.variable_proxies()) {
+            for (auto &&variable : proxy.flat_indexed_variables()) {
+                variable.setup_constraint_sensitivities_compact();
+            }
+        }
+    }
+
+    /*************************************************************************/
     inline void setup_variable_related_selection_constraint_ptr_index(void) {
         auto &model = *m_model_ptr;
 
@@ -428,7 +442,8 @@ class ModelBuilder {
     }
 
     /*************************************************************************/
-    inline void setup_variable_related_binary_coefficient_constraints(void) {
+    inline void setup_variable_related_binary_coefficient_constraint_ptrs(
+        void) {
         /**
          * NOTE: In this method, m_reference is not referred because
          * the object may not have been set up at the stage this method is
@@ -438,7 +453,6 @@ class ModelBuilder {
 
         for (auto &&proxy : model.variable_proxies()) {
             for (auto &&variable : proxy.flat_indexed_variables()) {
-                variable.reset_related_binary_coefficient_constraint_ptrs();
                 variable.setup_related_binary_coefficient_constraint_ptrs();
             }
         }
