@@ -205,7 +205,7 @@ class TabuSearchControllerStateManager {
             m_state.improvability_screening_mode;
         option.tabu_search.iteration_max = m_state.iteration_max;
         option.tabu_search.time_offset   = m_state.total_elapsed_time;
-        option.tabu_search.seed          = m_state.iteration;
+        option.tabu_search.seed = m_option.tabu_search.seed + m_state.iteration;
         option.tabu_search.number_of_initial_modification =
             m_state.number_of_initial_modification;
         option.tabu_search.initial_tabu_tenure = m_state.initial_tabu_tenure;
