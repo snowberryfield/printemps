@@ -102,9 +102,9 @@ class ModelPrinter {
         for (const auto &row : TABLE) {
             utility::print_info(
                 " -- " + row.name + ": " +
-                    utility::to_string(compute_number_of_mutable_variables(
-                                           *row.original_ptrs_ptr),
-                                       "%d") +
+                    utility::to_string(
+                        compute_number_of_all_variables(*row.original_ptrs_ptr),
+                        "%d") +
                     utility::to_string(compute_number_of_mutable_variables(
                                            *row.presolved_ptrs_ptr),
                                        " (%d)"),
