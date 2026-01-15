@@ -524,10 +524,7 @@ class ModelBuilder {
 
         auto      &model    = *m_model_ptr;
         const auto ORIGINAL = model.global_penalty_coefficient();
-        const auto MODIFIED =
-            std::min(model.global_penalty_coefficient(),
-                     model.objective().expression().upper_bound() -
-                         model.objective().expression().lower_bound() + 1.0);
+        const auto MODIFIED = model.objective().expression().range() + 1.0;
 
         if (MODIFIED < ORIGINAL) {
             model.set_global_penalty_coefficient(MODIFIED);

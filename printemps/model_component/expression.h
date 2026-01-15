@@ -378,6 +378,11 @@ class Expression : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
+    inline T_Expression range(void) {
+        return this->upper_bound() - this->lower_bound();
+    }
+
+    /*************************************************************************/
     inline T_Expression fixed_term_value(void) {
         T_Expression fixed_term_value = 0;
         for (const auto &sensitivity : m_sensitivities) {
