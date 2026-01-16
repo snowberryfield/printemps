@@ -341,7 +341,7 @@ class ModelBuilder {
          * the object may not have been set up at the stage this method is
          * called.
          */
-        auto &model = *m_model_ptr;
+        auto &model                 = *m_model_ptr;
         int   number_of_constraints = 0;
 
         for (auto &&proxy : model.constraint_proxies()) {

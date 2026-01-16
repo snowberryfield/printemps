@@ -21,8 +21,8 @@ class DependentVariableExtractor {
                        int>
         m_candidate_dependent_variable_ptr_counts;
 
-    utility::BinaryMatrix m_constraint_adjacency;
-    std::vector<bool>     m_extractable_flags;
+    std::vector<std::vector<int>> m_constraint_graph;
+    std::vector<bool>             m_extractable_flags;
 
     std::vector<model_component::Variable<T_Variable, T_Expression> *>
         m_dependent_variable_ptrs;
@@ -64,7 +64,7 @@ class DependentVariableExtractor {
     inline void clear_work_buffers(void) {
         m_candidate_constraint_ptrs.clear();
         m_candidate_dependent_variable_ptr_counts.clear();
-        m_constraint_adjacency.initialize();
+        m_constraint_graph.clear();
         m_extractable_flags.clear();
         m_dependent_variable_ptrs.clear();
         m_target_constraint_ptrs.clear();
@@ -104,144 +104,207 @@ class DependentVariableExtractor {
     }
 
     /*************************************************************************/
-    inline std::vector<model_component::Constraint<T_Variable, T_Expression> *>
-    collect_candidate_constraint_ptrs(void) const {
+    inline void collect_candidate_constraint_ptrs(void) {
         auto &reference = m_model_ptr->reference().constraint_type;
 
         std::vector<std::vector<
-            model_component::Constraint<T_Variable, T_Expression> *>>
-            constraint_ptrs_list = {reference.exclusive_or_ptrs,
-                                    reference.exclusive_nor_ptrs,
-                                    reference.inverted_integers_ptrs,
-                                    reference.balanced_integers_ptrs,
-                                    reference.constant_sum_integers_ptrs,
-                                    reference.constant_difference_integers_ptrs,
-                                    reference.constant_ratio_integers_ptrs,
-                                    reference.trinomial_exclusive_nor_ptrs,
-                                    reference.all_or_nothing_ptrs,
-                                    reference.intermediate_ptrs};
+            model_component::Constraint<T_Variable, T_Expression> *> *>
+            constraint_ptrs_ptrs = {
+                &reference.exclusive_or_ptrs,
+                &reference.exclusive_nor_ptrs,
+                &reference.inverted_integers_ptrs,
+                &reference.balanced_integers_ptrs,
+                &reference.constant_sum_integers_ptrs,
+                &reference.constant_difference_integers_ptrs,
+                &reference.constant_ratio_integers_ptrs,
+                &reference.trinomial_exclusive_nor_ptrs,
+                &reference.all_or_nothing_ptrs,
+                &reference.intermediate_ptrs};
 
         std::vector<model_component::Constraint<T_Variable, T_Expression> *>
             candidate_constraint_ptrs;
 
-        for (auto &&constraint_ptrs : constraint_ptrs_list) {
-            for (auto &&constraint_ptr : constraint_ptrs) {
-                if (!constraint_ptr->is_enabled()) {
-                    continue;
-                }
-                candidate_constraint_ptrs.push_back(constraint_ptr);
+        int expected_size = 0;
+        for (auto &&constraint_ptrs_ptr : constraint_ptrs_ptrs) {
+            expected_size += constraint_ptrs_ptr->size();
+        }
+        candidate_constraint_ptrs.reserve(expected_size);
+
+        for (auto &&constraint_ptrs_ptr : constraint_ptrs_ptrs) {
+            for (auto &&constraint_ptr : *constraint_ptrs_ptr) {
+                if (constraint_ptr->is_enabled())
+                    candidate_constraint_ptrs.push_back(constraint_ptr);
             }
         }
-
-        return candidate_constraint_ptrs;
+        m_candidate_constraint_ptrs = candidate_constraint_ptrs;
     }
 
     /*************************************************************************/
-    inline std::unordered_map<
-        model_component::Variable<T_Variable, T_Expression> *, int>
-    count_candidate_dependent_variable_ptrs(
-        const std::vector<model_component::Constraint<T_Variable, T_Expression>
-                              *> &a_CONSTRAINT_PTRS) const {
+    inline void count_candidate_dependent_variable_ptrs(void) {
         std::unordered_map<
             model_component::Variable<T_Variable, T_Expression> *, int>
             counts;
 
-        for (const auto &constraint_ptr : a_CONSTRAINT_PTRS) {
-            auto key_variable_ptr = constraint_ptr->key_variable_ptr();
+        for (auto *constraint_ptr : m_candidate_constraint_ptrs) {
+            auto key = constraint_ptr->key_variable_ptr();
             if (constraint_ptr->has_representative_variable()) {
-                const auto &sensitivities =
-                    constraint_ptr->expression().sensitivities();
-                for (const auto &sensitivity : sensitivities) {
-                    auto variable_ptr = sensitivity.first;
-                    if (variable_ptr == key_variable_ptr) {
-                        continue;
+                for (auto &&sensitivity :
+                     constraint_ptr->expression().sensitivities()) {
+                    if (sensitivity.first != key) {
+                        counts[sensitivity.first]++;
                     }
-                    counts[variable_ptr]++;
                 }
             } else {
-                counts[key_variable_ptr]++;
+                counts[key]++;
             }
         }
-        return counts;
+        m_candidate_dependent_variable_ptr_counts = counts;
     }
 
     /*************************************************************************/
-    inline utility::BinaryMatrix create_constraint_adjacency(
-        const std::vector<model_component::Constraint<T_Variable, T_Expression>
-                              *> &a_CONSTRAINT_PTRS) const {
-        const int SIZE = a_CONSTRAINT_PTRS.size();
-        auto      adj  = utility::BinaryMatrix::identity(SIZE);
+    inline void build_constraint_graph(void) {
+        const int SIZE = m_candidate_constraint_ptrs.size();
+        m_constraint_graph.assign(SIZE, {});
 
         std::unordered_map<
             model_component::Variable<T_Variable, T_Expression> *,
             std::vector<int>>
-            variable_to_constraint_indices;
+            variable_to_constraints;
 
-        for (int j = 0; j < SIZE; ++j) {
-            const auto &sensitivities =
-                a_CONSTRAINT_PTRS[j]->expression().sensitivities();
-            for (const auto &sensitivity : sensitivities) {
-                variable_to_constraint_indices[sensitivity.first].push_back(j);
+        for (int i = 0; i < SIZE; i++) {
+            auto &sensitivities =
+                m_candidate_constraint_ptrs[i]->expression().sensitivities();
+            for (auto &&sensitivity : sensitivities) {
+                variable_to_constraints[sensitivity.first].push_back(i);
             }
         }
 
         for (int i = 0; i < SIZE; i++) {
-            auto constraint_ptr   = a_CONSTRAINT_PTRS[i];
+            auto constraint_ptr   = m_candidate_constraint_ptrs[i];
             auto key_variable_ptr = constraint_ptr->key_variable_ptr();
 
             if (constraint_ptr->has_representative_variable()) {
-                const auto &sensitivities =
+                auto &sensitivities =
                     constraint_ptr->expression().sensitivities();
-                for (const auto &sensitivity : sensitivities) {
+                for (auto &&sensitivity : sensitivities) {
                     auto variable_ptr = sensitivity.first;
                     if (variable_ptr == key_variable_ptr ||
                         variable_ptr->is_fixed()) {
                         continue;
                     }
-                    auto it = variable_to_constraint_indices.find(variable_ptr);
-                    if (it == variable_to_constraint_indices.end()) {
+
+                    auto it = variable_to_constraints.find(variable_ptr);
+                    if (it == variable_to_constraints.end()) {
                         continue;
                     }
+
                     for (int j : it->second) {
-                        if (i != j) {
-                            adj[i][j] = 1;
-                        }
+                        if (i != j)
+                            m_constraint_graph[i].push_back(j);
                     }
                 }
             } else {
-                for (int j = 0; j < SIZE; j++) {
-                    if (i == j) {
-                        continue;
-                    }
-                    const auto &sensitivities =
-                        a_CONSTRAINT_PTRS[j]->expression().sensitivities();
-                    if (sensitivities.find(key_variable_ptr) !=
-                        sensitivities.end()) {
-                        adj[i][j] = 1;
+                auto it = variable_to_constraints.find(key_variable_ptr);
+                if (it != variable_to_constraints.end()) {
+                    for (int j : it->second) {
+                        if (i != j)
+                            m_constraint_graph[i].push_back(j);
                     }
                 }
             }
         }
-
-        return adj;
     }
 
     /*************************************************************************/
-    inline std::vector<bool> create_extractable_flags(
-        const utility::BinaryMatrix &a_ADJ) const {
-        const int         SIZE = a_ADJ.number_of_rows();
-        std::vector<bool> flags(SIZE, true);
+    inline void build_extractable_flags(void) {
+        const int         SIZE = m_constraint_graph.size();
+        std::vector<int>  dfs_order(SIZE, -1);
+        std::vector<int>  lowlink(SIZE, 0);
+        std::vector<bool> is_on_stack(SIZE, false);
+        std::vector<int>  scc_id(SIZE, -1);
+        int               scc_count = 0;
 
-        const auto REACHABILITY = a_ADJ.reachability();
-        for (int i = 0; i < SIZE; i++) {
-            for (int j = i + 1; j < SIZE; j++) {
-                if (REACHABILITY[i][j] > 0 && REACHABILITY[j][i] > 0) {
-                    flags[i] = false;
-                    flags[j] = false;
+        std::vector<int> dfs_stack;
+        dfs_stack.reserve(SIZE);
+
+        int current_order = 0;
+
+        std::function<void(int)> dfs = [&](int node) {
+            dfs_order[node] = lowlink[node] = current_order++;
+            dfs_stack.push_back(node);
+            is_on_stack[node] = true;
+
+            for (int next : m_constraint_graph[node]) {
+                if (dfs_order[next] < 0) {
+                    dfs(next);
+                    lowlink[node] = std::min(lowlink[node], lowlink[next]);
+                } else if (is_on_stack[next]) {
+                    lowlink[node] = std::min(lowlink[node], dfs_order[next]);
                 }
             }
+
+            if (lowlink[node] == dfs_order[node]) {
+                while (true) {
+                    int v = dfs_stack.back();
+                    dfs_stack.pop_back();
+                    is_on_stack[v] = false;
+                    scc_id[v]      = scc_count;
+                    if (v == node) {
+                        break;
+                    }
+                }
+                scc_count++;
+            }
+        };
+
+        for (int i = 0; i < SIZE; ++i) {
+            if (dfs_order[i] < 0) {
+                dfs(i);
+            }
         }
-        return flags;
+
+        std::vector<int> scc_size(scc_count, 0);
+        for (int i = 0; i < SIZE; i++) {
+            scc_size[scc_id[i]]++;
+        }
+
+        m_extractable_flags.assign(SIZE, true);
+        for (int i = 0; i < SIZE; ++i) {
+            if (scc_size[scc_id[i]] > 1) {
+                m_extractable_flags[i] = false;
+            }
+        }
+    }
+    /*************************************************************************/
+    inline int extract(const option::Option &a_OPTION,
+                       const bool            a_IS_ENABLED_PRINT) {
+        utility::print_single_line(a_IS_ENABLED_PRINT);
+        utility::print_message("Extracting dependent variables...",
+                               a_IS_ENABLED_PRINT);
+
+        this->clear_work_buffers();
+        this->collect_candidate_constraint_ptrs();
+
+        if (m_candidate_constraint_ptrs.empty()) {
+            utility::print_message(
+                "No candidate constraints for extracting dependent variables "
+                "were found.",
+                a_IS_ENABLED_PRINT);
+            return 0;
+        }
+
+        this->count_candidate_dependent_variable_ptrs();
+        this->build_constraint_graph();
+        this->build_extractable_flags();
+
+        auto enable_map = create_enable_map(a_OPTION);
+
+        int number_of_newly_extracted_dependent_variables =
+            this->extract_dependent_variables(enable_map, a_IS_ENABLED_PRINT);
+
+        this->reflect_to_model(a_IS_ENABLED_PRINT);
+        utility::print_message("Done.", a_IS_ENABLED_PRINT);
+        return number_of_newly_extracted_dependent_variables;
     }
 
     /*************************************************************************/
@@ -399,46 +462,6 @@ class DependentVariableExtractor {
     }
 
     /*************************************************************************/
-    inline int extract(const option::Option &a_OPTION,
-                       const bool            a_IS_ENABLED_PRINT) {
-        utility::print_single_line(a_IS_ENABLED_PRINT);
-        utility::print_message("Extracting dependent variables...",
-                               a_IS_ENABLED_PRINT);
-
-        this->clear_work_buffers();
-
-        m_candidate_constraint_ptrs = this->collect_candidate_constraint_ptrs();
-
-        if (m_candidate_constraint_ptrs.empty()) {
-            utility::print_message(
-                "No candidate constraints for extracting dependent "
-                "variables were found.",
-                a_IS_ENABLED_PRINT);
-            return 0;
-        }
-
-        m_candidate_dependent_variable_ptr_counts =
-            this->count_candidate_dependent_variable_ptrs(
-                m_candidate_constraint_ptrs);
-
-        m_constraint_adjacency =
-            this->create_constraint_adjacency(m_candidate_constraint_ptrs);
-
-        m_extractable_flags =
-            this->create_extractable_flags(m_constraint_adjacency);
-
-        auto enable_map = this->create_enable_map(a_OPTION);
-
-        int number_of_newly_extracted_dependent_variables =
-            this->extract_dependent_variables(enable_map, a_IS_ENABLED_PRINT);
-
-        this->reflect_to_model(a_IS_ENABLED_PRINT);
-
-        utility::print_message("Done.", a_IS_ENABLED_PRINT);
-        return number_of_newly_extracted_dependent_variables;
-    }
-
-    /*************************************************************************/
     inline const std::vector<
         model_component::Constraint<T_Variable, T_Expression> *> &
     candidate_constraint_ptrs(void) const noexcept {
@@ -450,12 +473,6 @@ class DependentVariableExtractor {
         model_component::Variable<T_Variable, T_Expression> *, int> &
     candidate_dependent_variable_ptr_counts(void) const noexcept {
         return m_candidate_dependent_variable_ptr_counts;
-    }
-
-    /*************************************************************************/
-    inline const utility::BinaryMatrix &constraint_adjacency(
-        void) const noexcept {
-        return m_constraint_adjacency;
     }
 
     /*************************************************************************/
