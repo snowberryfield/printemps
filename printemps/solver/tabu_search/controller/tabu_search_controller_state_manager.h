@@ -978,7 +978,7 @@ class TabuSearchControllerStateManager {
             if (m_global_state_ptr->incumbent_holder
                     .local_augmented_incumbent_score()
                     .is_feasible) {
-                constexpr double MARGIN = 1.0;
+                constexpr double MARGIN = 10.0;
                 corrected_penalty_coefficient_relaxing_rate =
                     std::min(m_state.penalty_coefficient_relaxing_rate,
                              RESULT.objective_constraint_rate * MARGIN);
