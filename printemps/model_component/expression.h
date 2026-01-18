@@ -341,6 +341,14 @@ class Expression : public multi_array::AbstractMultiArrayElement {
         const Expression<T_Variable, T_Expression> &a_EXPRESSION) {
         *this += m_sensitivities[a_variable_ptr] * a_EXPRESSION;
         m_sensitivities.erase(a_variable_ptr);
+
+        for (auto it = m_sensitivities.begin(); it != m_sensitivities.end();) {
+            if (std::abs(it->second) < constant::EPSILON_10) {
+                it = m_sensitivities.erase(it);
+            } else {
+                ++it;
+            }
+        }
     }
 
     /*************************************************************************/
