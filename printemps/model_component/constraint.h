@@ -281,7 +281,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
                 break;
             }
         }
-        m_has_margin = m_structure->has_only_binary_or_selection_variable &
+        m_has_margin = m_structure->has_only_binary_or_selection_variable &&
                        (m_margin_value >= m_structure->max_abs_coefficient -
                                               constant::EPSILON_10);
 
@@ -338,7 +338,7 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
                     "Constraint sense is invalid."));
             }
         }
-        m_has_margin = m_structure->has_only_binary_or_selection_variable &
+        m_has_margin = m_structure->has_only_binary_or_selection_variable &&
                        (m_margin_value >= m_structure->max_abs_coefficient -
                                               constant::EPSILON_10);
         m_expression.update(a_MOVE);
