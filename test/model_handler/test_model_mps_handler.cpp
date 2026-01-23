@@ -22,7 +22,7 @@ class TestModelMPSHandler : public ::testing::Test {
 /*****************************************************************************/
 TEST_F(TestModelMPSHandler, import) {
     mps::MPS mps;
-    mps.read_mps("./test/dat/mps/test_00.mps");
+    mps.read_mps("./dat/mps/test_00.mps");
 
     model::Model<int, double> model;
     model.mps_handler().import(mps, true);

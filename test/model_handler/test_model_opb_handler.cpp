@@ -22,7 +22,7 @@ class TestModelOPBHandler : public ::testing::Test {
 /*****************************************************************************/
 TEST_F(TestModelOPBHandler, import) {
     opb::OPB opb;
-    opb.read_opb("./test/dat/pb/test_00a.pb");
+    opb.read_opb("./dat/pb/test_00a.pb");
 
     model::Model<int, double> model;
     model.opb_handler().import(opb);

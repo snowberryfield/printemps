@@ -25,7 +25,7 @@ TEST_F(TestOption, setup) {
 
     {
         Option option;
-        option.setup("./test/dat/option/option_00.json");
+        option.setup("./dat/option/option_00.json");
 
         /// general
         EXPECT_EQ(  //
@@ -559,7 +559,7 @@ TEST_F(TestOption, setup) {
 
     {
         Option option;
-        option.setup("./test/dat/option/option_01.json");
+        option.setup("./dat/option/option_01.json");
 
         /// restart
         EXPECT_EQ(                 //
@@ -589,7 +589,7 @@ TEST_F(TestOption, setup) {
 
     {
         Option option;
-        option.setup("./test/dat/option/option_02.json");
+        option.setup("./dat/option/option_02.json");
 
         /// restart
         EXPECT_EQ(                //
@@ -623,7 +623,7 @@ TEST_F(TestOption, to_json) {
     using namespace printemps::option;
 
     Option option;
-    option.setup("./test/dat/option/option_00.json");
+    option.setup("./dat/option/option_00.json");
     auto obj = option.to_json();
 
     auto to_int    = [](auto v) { return std::any_cast<int>(v); };

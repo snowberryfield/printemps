@@ -320,7 +320,7 @@ TEST_F(TestOPB, setup_variable_information) {
 TEST_F(TestOPB, read_opb_00) {
     {
         opb::OPB pb;
-        pb.read_opb("./test/dat/pb/test_00a.pb");
+        pb.read_opb("./dat/pb/test_00a.pb");
         EXPECT_EQ(0, static_cast<int>(pb.soft_constraints.size()));
         EXPECT_EQ(4, static_cast<int>(pb.hard_constraints.size()));
         EXPECT_EQ(5, static_cast<int>(pb.variable_names.size()));
@@ -330,7 +330,7 @@ TEST_F(TestOPB, read_opb_00) {
 
     {
         opb::OPB pb;
-        pb.read_opb("./test/dat/pb/test_00b.pb");
+        pb.read_opb("./dat/pb/test_00b.pb");
         EXPECT_EQ(0, static_cast<int>(pb.soft_constraints.size()));
         EXPECT_EQ(4, static_cast<int>(pb.hard_constraints.size()));
         EXPECT_EQ(5, static_cast<int>(pb.variable_names.size()));
@@ -340,7 +340,7 @@ TEST_F(TestOPB, read_opb_00) {
 
     {
         opb::OPB pb;
-        pb.read_opb("./test/dat/pb/test_00c.pb");
+        pb.read_opb("./dat/pb/test_00c.pb");
         EXPECT_EQ(0, static_cast<int>(pb.soft_constraints.size()));
         EXPECT_EQ(3, static_cast<int>(pb.hard_constraints.size()));
         EXPECT_EQ(6, static_cast<int>(pb.variable_names.size()));
@@ -350,7 +350,7 @@ TEST_F(TestOPB, read_opb_00) {
 
     {
         opb::OPB pb;
-        pb.read_opb("./test/dat/pb/test_00d.pb");
+        pb.read_opb("./dat/pb/test_00d.pb");
         EXPECT_EQ(4, static_cast<int>(pb.soft_constraints.size()));
         EXPECT_EQ(2, static_cast<int>(pb.hard_constraints.size()));
         EXPECT_EQ(4, static_cast<int>(pb.variable_names.size()));

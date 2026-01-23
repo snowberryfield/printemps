@@ -22,7 +22,7 @@ class TestAuxiliaryFileReader : public ::testing::Test {
 /*****************************************************************************/
 TEST_F(TestAuxiliaryFileReader, read_names_and_values) {
     auto names_and_values =
-        helper::read_names_and_values("./test/dat/helper/names_and_values.txt");
+        helper::read_names_and_values("./dat/helper/names_and_values.txt");
     EXPECT_EQ(1.0, names_and_values["a"]);
     EXPECT_EQ(2.0, names_and_values["b"]);
     EXPECT_EQ(3.0, names_and_values["c"]);
@@ -31,7 +31,7 @@ TEST_F(TestAuxiliaryFileReader, read_names_and_values) {
 
 /*****************************************************************************/
 TEST_F(TestAuxiliaryFileReader, read_names) {
-    auto names = helper::read_names("./test/dat/helper/names.txt");
+    auto names = helper::read_names("./dat/helper/names.txt");
     EXPECT_TRUE(names.find("a") != names.end());
     EXPECT_TRUE(names.find("b") != names.end());
     EXPECT_TRUE(names.find("c") != names.end());
@@ -40,8 +40,7 @@ TEST_F(TestAuxiliaryFileReader, read_names) {
 
 /*****************************************************************************/
 TEST_F(TestAuxiliaryFileReader, read_name_pairs) {
-    auto name_pairs =
-        helper::read_name_pairs("./test/dat/helper/name_pairs.txt");
+    auto name_pairs = helper::read_name_pairs("./dat/helper/name_pairs.txt");
     EXPECT_EQ("a", name_pairs[0].first);
     EXPECT_EQ("b", name_pairs[0].second);
     EXPECT_EQ("c", name_pairs[1].first);

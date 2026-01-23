@@ -52,8 +52,19 @@ jobs:
         Add-Content $env:GITHUB_PATH "${{ steps.msys2.outputs.msys2-location }}\${{matrix.cfg.msys2_system}}\bin"
         Add-Content $env:GITHUB_PATH "${{ steps.msys2.outputs.msys2-location }}\usr\bin"
 
-    - name: Install googletest
-      run: make -f makefile/Makefile.external CC=${{ matrix.cfg.cc }} CXX=${{ matrix.cfg.cxx }}
-
     - name: Run tests. 
-      run: make -f makefile/Makefile.test CC=${{ matrix.cfg.cc }} CXX=${{ matrix.cfg.cxx }}
+      run: make test CC=${{ matrix.cfg.cc }} CXX=${{ matrix.cfg.cxx }}
+
+    - name: Upload test reports.
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-reports
+        path: build/test/Release/result/*.xml
+
+    - name: Publish test results.
+      uses: dorny/test-reporter@v1
+      with:
+        name: GoogleTest
+        path: build/test/Release/result/*.xml
+        reporter: junit
+        fail-on-error: true
