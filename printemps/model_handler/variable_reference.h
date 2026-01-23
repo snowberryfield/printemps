@@ -4,7 +4,7 @@
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
 #ifndef PRINTEMPS_MODEL_HANDLER_VARIABLE_REFERENCE_H__
-#define PRINTEMPS_MODEL_COMPONENT_VARIABLE_REFERENCE_H__
+#define PRINTEMPS_MODEL_HANDLER_VARIABLE_REFERENCE_H__
 
 namespace printemps::model_handler {
 /*****************************************************************************/
