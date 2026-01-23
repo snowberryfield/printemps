@@ -61,17 +61,18 @@ struct MPS {
                 break;
         }
 
-        double value  = 0.0;
-        auto   result = std::from_chars(
-            a_VALUE_SV.data(), a_VALUE_SV.data() + a_VALUE_SV.size(), value);
+        char       *end   = nullptr;
+        const char *begin = a_VALUE_SV.data();
 
-        if (result.ec != std::errc()) [[unlikely]] {
-            throw std::runtime_error(utility::format_error_location(
-                __FILE__, __LINE__, __func__,
-                "The MPS file has something wrong in a numeric value."));
+        double value = std::strtod(begin, &end);
+
+        if (end == begin + a_VALUE_SV.size()) {
+            return value;
         }
 
-        return value;
+        throw std::runtime_error(utility::format_error_location(
+            __FILE__, __LINE__, __func__,
+            "The MPS file has something wrong in a numeric value."));
     }
 
     /*************************************************************************/
