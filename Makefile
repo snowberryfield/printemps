@@ -2,17 +2,10 @@
 # User-configurable options
 # ==============================================================================
 CONFIG ?= Release
-
-# Linuxならデフォルトで静的リンクON
-ifeq ($(shell uname -s),Linux)
-    STATIC ?= ON
-else
-    STATIC ?= OFF
-endif
-
-TOP_DIR := $(CURDIR)
+STATIC ?= OFF
 CXX ?= g++
 CC  ?= gcc
+TOP_DIR := $(CURDIR)
 
 # ==============================================================================
 # Supported targets

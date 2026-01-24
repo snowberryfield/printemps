@@ -6,16 +6,6 @@ cmake_minimum_required(VERSION 3.15)
 project(printemps LANGUAGES C CXX)
 
 # ------------------------------------------------------------------------------
-# Static link option
-# Enable static linking on Linux by default. Disabled on macOS and other platforms.
-# ------------------------------------------------------------------------------
-if(UNIX AND NOT APPLE)
-    option(LINK_STATIC "Enable static linking on Linux" ON)
-else()
-    option(LINK_STATIC "Enable static linking on Linux" OFF)
-endif()
-
-# ------------------------------------------------------------------------------
 # C++ language standard
 # ------------------------------------------------------------------------------
 set(CMAKE_CXX_STANDARD 17)
@@ -24,9 +14,17 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 # ------------------------------------------------------------------------------
 # OpenMP support
-# Find the OpenMP package and make it available for linking
 # ------------------------------------------------------------------------------
-find_package(OpenMP REQUIRED)
+find_package(OpenMP)
+
+if(OpenMP_FOUND)
+    message(STATUS "OpenMP found, enabling flags")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+else()
+    message(STATUS "OpenMP not found, building without OpenMP")
+endif()
+
 
 # ------------------------------------------------------------------------------
 # Common compiler options
@@ -65,8 +63,9 @@ function(configure_printemps_target target)
     # Apply common compiler options
     target_compile_options(${target} PRIVATE ${COMMON_COMPILE_OPTIONS})
 
-    # Link OpenMP library
-    target_link_libraries(${target} PRIVATE OpenMP::OpenMP_CXX)
+    if(OpenMP_FOUND)
+        target_link_libraries(${target} PRIVATE OpenMP::OpenMP_CXX)
+    endif()
 
     # On Linux, optionally enable full static linking
     if(LINK_STATIC AND UNIX AND NOT APPLE)
