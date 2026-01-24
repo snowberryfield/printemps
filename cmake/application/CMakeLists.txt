@@ -2,7 +2,7 @@
 # CMakeLists for building the standalone Printemps applications
 # Targets: printemps, mps_solver, opb_solver
 # ==============================================================================
-cmake_minimum_required(VERSION 3.31)
+cmake_minimum_required(VERSION 3.15)
 project(application)
 
 # ------------------------------------------------------------------------------

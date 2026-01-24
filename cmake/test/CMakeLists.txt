@@ -1,7 +1,7 @@
 # ==============================================================================
 # CMakeLists for building unit tests
 # ==============================================================================
-cmake_minimum_required(VERSION 3.31)
+cmake_minimum_required(VERSION 3.15)
 project(test)
 
 # ------------------------------------------------------------------------------
@@ -30,6 +30,7 @@ include(FetchContent)
 FetchContent_Declare(
     googletest
     URL https://github.com/google/googletest/archive/refs/tags/v1.17.0.tar.gz
+    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
 )
 
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
@@ -67,7 +68,6 @@ foreach(group ${TEST_GROUP_DIRS})
     # Link GoogleTest libraries
     target_link_libraries(${test_target}
         PRIVATE
-            GTest::gtest
             GTest::gtest_main
             pthread
     )
