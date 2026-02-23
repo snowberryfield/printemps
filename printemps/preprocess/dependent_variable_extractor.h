@@ -287,8 +287,7 @@ class DependentVariableExtractor {
 
         if (m_candidate_constraint_ptrs.empty()) {
             utility::print_message(
-                "No candidate constraints for extracting dependent variables "
-                "were found.",
+                "No constraints for extracting dependent variables were found.",
                 a_IS_ENABLED_PRINT);
             return 0;
         }
@@ -299,12 +298,12 @@ class DependentVariableExtractor {
 
         auto enable_map = create_enable_map(a_OPTION);
 
-        int number_of_newly_extracted_dependent_variables =
+        int number_of_extracted_dependent_variables =
             this->extract_dependent_variables(enable_map, a_IS_ENABLED_PRINT);
 
         this->reflect_to_model(a_IS_ENABLED_PRINT);
         utility::print_message("Done.", a_IS_ENABLED_PRINT);
-        return number_of_newly_extracted_dependent_variables;
+        return number_of_extracted_dependent_variables;
     }
 
     /*************************************************************************/
@@ -426,17 +425,17 @@ class DependentVariableExtractor {
             constraint_ptr->set_is_defining_dependent_variable(true);
         }
 
-        const int NEWLY_EXTRACTED_DEPENDENT_VARIABLES_SIZE =
+        const int EXTRACTED_DEPENDENT_VARIABLES_SIZE =
             m_dependent_variable_ptrs.size();
 
-        if (NEWLY_EXTRACTED_DEPENDENT_VARIABLES_SIZE == 0) {
+        if (EXTRACTED_DEPENDENT_VARIABLES_SIZE == 0) {
             return;
         }
 
         auto &proxy = m_model_ptr->component_creator().create_expressions(
-            "additional", NEWLY_EXTRACTED_DEPENDENT_VARIABLES_SIZE);
+            "additional", EXTRACTED_DEPENDENT_VARIABLES_SIZE);
 
-        for (int i = 0; i < NEWLY_EXTRACTED_DEPENDENT_VARIABLES_SIZE; i++) {
+        for (int i = 0; i < EXTRACTED_DEPENDENT_VARIABLES_SIZE; i++) {
             proxy(i) = m_additional_expressions[i];
             proxy(i).set_name(m_additional_expressions[i].name());
             m_dependent_variable_ptrs[i]->set_dependent_expression_ptr(
