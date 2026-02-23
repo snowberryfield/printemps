@@ -94,6 +94,11 @@ TEST_F(TestNeighborhoodOption, initialize) {
         NeighborhoodOptionConstant::DEFAULT_IS_ENABLED_TWO_FLIP_MOVE,  //
         option.is_enabled_two_flip_move);
 
+    EXPECT_EQ(  //
+        NeighborhoodOptionConstant::
+            DEFAULT_IS_ENABLED_PARTIAL_FEASIBLE_ENUMERATION_MOVE,  //
+        option.is_enabled_partial_feasible_enumeration_move);
+
     EXPECT_EQ(                                                    //
         NeighborhoodOptionConstant::DEFAULT_CHAIN_MOVE_CAPACITY,  //
         option.chain_move_capacity);

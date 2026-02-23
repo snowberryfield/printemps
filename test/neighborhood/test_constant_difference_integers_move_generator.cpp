@@ -27,7 +27,7 @@ TEST_F(TestConstantDifferenceIntegersMoveGenerator, setup) {
     auto& c = model.create_constraint("c", x[0] - x[1] == 5);
 
     model.builder().setup_unique_names();
-    model.builder().setup_structure();
+    model.builder().update_derived_components();
 
     auto& constant_difference_integers_ptrs =
         model.reference().constraint_type.constant_difference_integers_ptrs;

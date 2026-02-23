@@ -53,10 +53,10 @@ TEST_F(TestSelectionExtractor, extract_by_defined_order) {
      */
     model.create_constraint("c_3", x_2.selection());
 
-    model.builder().setup_structure();
+    model.builder().update_derived_components();
     preprocess::SelectionExtractor<int, double> selection_extractor(&model);
     selection_extractor.extract_by_defined_order(false);
-    model.builder().setup_structure();
+    model.builder().update_derived_components();
 
     EXPECT_EQ(2, static_cast<int>(model.selections().size()));
 
@@ -151,11 +151,11 @@ TEST_F(TestSelectionExtractor, extract_by_number_of_variables_smaller_order) {
      */
     model.create_constraint("c_3", x_2.selection());
 
-    model.builder().setup_structure();
+    model.builder().update_derived_components();
 
     preprocess::SelectionExtractor<int, double> selection_extractor(&model);
     selection_extractor.extract_by_number_of_variables_order(true, false);
-    model.builder().setup_structure();
+    model.builder().update_derived_components();
 
     EXPECT_EQ(2, static_cast<int>(model.selections().size()));
 
@@ -254,12 +254,12 @@ TEST_F(TestSelectionExtractor, extract_by_number_of_variables_larger_order) {
      */
     model.create_constraint("c_3", x_2.selection());
 
-    model.builder().setup_structure();
+    model.builder().update_derived_components();
     preprocess::SelectionExtractor<int, double> selection_extractor(&model);
     selection_extractor.extract_by_number_of_variables_order(false, false);
-    model.builder().setup_structure();
+    model.builder().update_derived_components();
 
-    model.builder().setup_structure();
+    model.builder().update_derived_components();
 
     EXPECT_EQ(2, static_cast<int>(model.selections().size()));
 
@@ -351,10 +351,10 @@ TEST_F(TestSelectionExtractor, extract_by_independent) {
      */
     model.create_constraint("c_3", x_2.selection());
 
-    model.builder().setup_structure();
+    model.builder().update_derived_components();
     preprocess::SelectionExtractor<int, double> selection_extractor(&model);
     selection_extractor.extract_by_independent(false);
-    model.builder().setup_structure();
+    model.builder().update_derived_components();
 
     EXPECT_EQ(1, static_cast<int>(model.selections().size()));
 
@@ -433,10 +433,10 @@ TEST_F(TestSelectionExtractor, extract_by_user_defined) {
 
     c_1[0].set_is_user_defined_selection(true);
 
-    model.builder().setup_structure();
+    model.builder().update_derived_components();
     preprocess::SelectionExtractor<int, double> selection_extractor(&model);
     selection_extractor.extract_by_user_defined(false);
-    model.builder().setup_structure();
+    model.builder().update_derived_components();
 
     EXPECT_EQ(1, static_cast<int>(model.selections().size()));
 

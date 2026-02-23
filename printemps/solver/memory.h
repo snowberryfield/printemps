@@ -104,6 +104,10 @@ class Memory {
         const int                                           a_RANDOM_WIDTH,  //
         std::mt19937 *get_rand_mt) noexcept {
         for (const auto &alteration : a_MOVE.alterations) {
+            if (alteration.first->value() == alteration.second) {
+                continue;
+            }
+
             int randomness = 0;
             if (a_RANDOM_WIDTH > 0) {
                 randomness =

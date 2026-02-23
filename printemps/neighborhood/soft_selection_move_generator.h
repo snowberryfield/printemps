@@ -58,18 +58,6 @@ class SoftSelectionMoveGenerator
                 move_first.is_available                 = true;
                 move_first.overlap_rate                 = 0.0;
 
-                move_first.related_constraint_ptrs.insert(
-                    move_first.related_constraint_ptrs.end(),
-                    variable_ptr->related_constraint_ptrs().begin(),
-                    variable_ptr->related_constraint_ptrs().end());
-
-                move_first.related_constraint_ptrs.insert(
-                    move_first.related_constraint_ptrs.end(),
-                    key_variable_ptr->related_constraint_ptrs().begin(),
-                    key_variable_ptr->related_constraint_ptrs().end());
-
-                move_first.sort_and_unique_related_constraint_ptrs();
-
                 move_second = move_first;
 
                 move_first.alterations.emplace_back(variable_ptr, 0);
@@ -77,6 +65,9 @@ class SoftSelectionMoveGenerator
 
                 move_second.alterations.emplace_back(variable_ptr, 1);
                 move_second.alterations.emplace_back(key_variable_ptr, 1);
+
+                move_first.setup_related_constraint_ptrs();
+                move_second.setup_related_constraint_ptrs();
                 moves.push_back(move_first);
                 moves.push_back(move_second);
             }

@@ -32,7 +32,7 @@ TEST_F(TestIntegerMoveGenerator, setup) {
     x(9).fix();
 
     model.builder().setup_unique_names();
-    model.builder().setup_structure();
+    model.builder().update_derived_components();
 
     auto integer_variable_ptrs =
         model.reference().variable_type.integer_variable_ptrs;

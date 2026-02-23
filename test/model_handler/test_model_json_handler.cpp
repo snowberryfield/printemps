@@ -37,10 +37,10 @@ TEST_F(TestModelJSONHandler, create_json_object) {
     model.minimize(x.sum() + 2 * y);
 
     model.builder().setup_unique_names();
-    model.builder().setup_structure();
+    model.builder().update_derived_components();
     preprocess::SelectionExtractor<int, double> selection_extractor(&model);
     selection_extractor.extract_by_defined_order(false);
-    model.builder().setup_structure();
+    model.builder().update_derived_components();
 
     auto json_object = model.json_handler().create_json_object();
     EXPECT_EQ("untitled", json_object.get<std::string>("name"));

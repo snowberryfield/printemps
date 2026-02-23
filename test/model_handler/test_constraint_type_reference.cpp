@@ -65,7 +65,7 @@ TEST_F(TestConstraintTypeReference, has_chain_move_effective_constraints) {
         model::Model<int, double> model;
 
         [[maybe_unused]] auto& x = model.create_variables("x", 10, 0, 1);
-        model.builder().setup_structure();
+        model.builder().update_derived_components();
         EXPECT_FALSE(
             model.reference()
                 .constraint_type.has_chain_move_effective_constraints());
@@ -78,7 +78,7 @@ TEST_F(TestConstraintTypeReference, has_chain_move_effective_constraints) {
         auto&                  x = model.create_variables("x", 10, 0, 1);
         [[maybe_unused]] auto& f = model.create_constraint("f", x.sum() == 1);
 
-        model.builder().setup_structure();
+        model.builder().update_derived_components();
         EXPECT_TRUE(
             model.reference()
                 .constraint_type.has_chain_move_effective_constraints());
@@ -91,7 +91,7 @@ TEST_F(TestConstraintTypeReference, has_chain_move_effective_constraints) {
         auto&                  x = model.create_variables("x", 10, 0, 1);
         [[maybe_unused]] auto& f = model.create_constraint("f", x.sum() <= 1);
 
-        model.builder().setup_structure();
+        model.builder().update_derived_components();
         EXPECT_TRUE(
             model.reference()
                 .constraint_type.has_chain_move_effective_constraints());
@@ -104,7 +104,7 @@ TEST_F(TestConstraintTypeReference, has_chain_move_effective_constraints) {
         auto&                  x = model.create_variables("x", 10, 0, 1);
         [[maybe_unused]] auto& f = model.create_constraint("f", x.sum() >= 1);
 
-        model.builder().setup_structure();
+        model.builder().update_derived_components();
         EXPECT_TRUE(
             model.reference()
                 .constraint_type.has_chain_move_effective_constraints());
@@ -117,7 +117,7 @@ TEST_F(TestConstraintTypeReference, has_chain_move_effective_constraints) {
         auto&                  x = model.create_variables("x", 10, 0, 1);
         [[maybe_unused]] auto& f = model.create_constraint("f", x.sum() == 5);
 
-        model.builder().setup_structure();
+        model.builder().update_derived_components();
         EXPECT_TRUE(
             model.reference()
                 .constraint_type.has_chain_move_effective_constraints());
@@ -130,7 +130,7 @@ TEST_F(TestConstraintTypeReference, has_chain_move_effective_constraints) {
         auto&                  x = model.create_variables("x", 10, 0, 1);
         [[maybe_unused]] auto& f = model.create_constraint("f", x.sum() <= 5);
 
-        model.builder().setup_structure();
+        model.builder().update_derived_components();
         EXPECT_TRUE(
             model.reference()
                 .constraint_type.has_chain_move_effective_constraints());
@@ -143,7 +143,7 @@ TEST_F(TestConstraintTypeReference, has_chain_move_effective_constraints) {
         auto&                  x = model.create_variables("x", 10, 0, 1);
         [[maybe_unused]] auto& f = model.create_constraint("f", x.sum() >= 5);
 
-        model.builder().setup_structure();
+        model.builder().update_derived_components();
         EXPECT_TRUE(
             model.reference()
                 .constraint_type.has_chain_move_effective_constraints());

@@ -111,6 +111,33 @@ struct Move {
     }
 
     /*************************************************************************/
+    inline bool has_objective_improvable_variable_with_value_check(void) const {
+        for (const auto &alteration : this->alterations) {
+            if (alteration.first->value() == alteration.second) {
+                continue;
+            }
+            if (alteration.first->is_objective_improvable()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /*************************************************************************/
+    inline bool has_feasibility_improvable_variable_with_value_check(
+        void) const {
+        for (const auto &alteration : this->alterations) {
+            if (alteration.first->value() == alteration.second) {
+                continue;
+            }
+            if (alteration.first->is_feasibility_improvable()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /*************************************************************************/
     inline bool has_duplicate_variable(void) const {
         const int ALTERATIONS_SIZE = this->alterations.size();
         for (auto i = 0; i < ALTERATIONS_SIZE; i++) {
@@ -121,17 +148,6 @@ struct Move {
             }
         }
         return false;
-    }
-
-    /*************************************************************************/
-    inline std::vector<model_component::Variable<T_Variable, T_Expression> *>
-    related_variable_ptrs_vector(void) const {
-        std::vector<model_component::Variable<T_Variable, T_Expression> *>
-            result;
-        for (const auto &alteration : this->alterations) {
-            result.push_back(alteration.first);
-        }
-        return result;
     }
 
     /*************************************************************************/
@@ -195,6 +211,32 @@ struct Move {
                 hash ^ reinterpret_cast<std::uint_fast64_t>(alteration.first);
         }
         this->hash = hash;
+    }
+
+    /*************************************************************************/
+    inline void setup_related_constraint_ptrs(void) {
+        std::vector<model_component::Constraint<T_Variable, T_Expression> *>
+            related_constraint_ptrs;
+        for (const auto &alteration : this->alterations) {
+            const auto &variable_ptr = alteration.first;
+            related_constraint_ptrs.insert(
+                related_constraint_ptrs.end(),
+                variable_ptr->related_constraint_ptrs().begin(),
+                variable_ptr->related_constraint_ptrs().end());
+        }
+        this->related_constraint_ptrs = related_constraint_ptrs;
+        this->sort_and_unique_related_constraint_ptrs();
+    }
+
+    /*************************************************************************/
+    inline std::vector<model_component::Variable<T_Variable, T_Expression> *>
+    related_variable_ptrs_vector(void) const {
+        std::vector<model_component::Variable<T_Variable, T_Expression> *>
+            result;
+        for (const auto &alteration : this->alterations) {
+            result.push_back(alteration.first);
+        }
+        return result;
     }
 
     /*************************************************************************/

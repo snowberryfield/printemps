@@ -27,7 +27,7 @@ TEST_F(TestExclusiveORMoveGenerator, setup) {
     auto& c = model.create_constraint("c", x[0] + x[1] == 1);
 
     model.builder().setup_unique_names();
-    model.builder().setup_structure();
+    model.builder().update_derived_components();
 
     auto& exclusive_or_ptrs =
         model.reference().constraint_type.exclusive_or_ptrs;

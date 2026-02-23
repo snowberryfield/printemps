@@ -693,6 +693,11 @@ class LocalSearchCore {
                 CURRENT_SOLUTION_SCORE);
 
             /**
+             * Update the memory.
+             */
+            this->update_memory(&move);
+
+            /**
              * Update the model by the selected move.
              */
             m_model_ptr->updater().update(move);
@@ -704,11 +709,6 @@ class LocalSearchCore {
                     alteration.first->select();
                 }
             }
-
-            /**
-             * Update the memory.
-             */
-            this->update_memory(&move);
 
             /**
              * Update the state.

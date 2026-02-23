@@ -41,7 +41,7 @@ TEST_F(TestModelEvaluator, evaluate) {
         model.minimize(p);
         model.set_global_penalty_coefficient(10000);
         model.builder().setup_unique_names();
-        model.builder().setup_structure();
+        model.builder().update_derived_components();
         preprocess::SelectionExtractor<int, double> selection_extractor(&model);
         selection_extractor.extract_by_independent(false);
         model.builder().setup_fixed_sensitivities(false);
@@ -224,7 +224,7 @@ TEST_F(TestModelEvaluator, evaluate) {
         model.maximize(p);
         model.set_global_penalty_coefficient(10000);
         model.builder().setup_unique_names();
-        model.builder().setup_structure();
+        model.builder().update_derived_components();
         preprocess::SelectionExtractor<int, double> selection_extractor(&model);
         selection_extractor.extract_by_independent(false);
         model.builder().setup_fixed_sensitivities(false);
@@ -398,7 +398,7 @@ TEST_F(TestModelEvaluator, compute_lagrangian) {
     [[maybe_unused]] auto& h = model.create_constraint("h", x(0) + x(1) <= 1);
 
     model.minimize(p);
-    model.builder().setup_structure();
+    model.builder().update_derived_components();
 
     multi_array::ValueProxy<double> dual_value_proxy(1);
     dual_value_proxy.value() = 100;
@@ -424,7 +424,7 @@ TEST_F(TestModelEvaluator, compute_naive_dual_bound) {
         auto& x = model.create_variables("x", 10, -1, 1);
 
         model.minimize(x.sum() + 1);
-        model.builder().setup_structure();
+        model.builder().update_derived_components();
 
         EXPECT_EQ(-10 + 1, model.evaluator().compute_naive_dual_bound());
     }
@@ -435,7 +435,7 @@ TEST_F(TestModelEvaluator, compute_naive_dual_bound) {
         auto& x = model.create_variables("x", 10, -1, 1);
 
         model.maximize(x.sum() + 1);
-        model.builder().setup_structure();
+        model.builder().update_derived_components();
 
         EXPECT_EQ(10 + 1, model.evaluator().compute_naive_dual_bound());
     }

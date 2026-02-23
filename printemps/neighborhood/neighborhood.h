@@ -28,6 +28,7 @@
 #include "trinomial_exclusive_nor_move_generator.h"
 #include "chain_move_generator.h"
 #include "two_flip_move_generator.h"
+#include "partial_feasible_enumeration_move_generator.h"
 #include "user_defined_move_generator.h"
 
 namespace printemps::neighborhood {
@@ -58,10 +59,15 @@ class Neighborhood {
                                                    m_trinomial_exclusive_nor;
     ChainMoveGenerator<T_Variable, T_Expression>   m_chain;
     TwoFlipMoveGenerator<T_Variable, T_Expression> m_two_flip;
+    PartialFeasibleEnumerationMoveGenerator<T_Variable, T_Expression>
+        m_partial_feasible_enumeration;
     UserDefinedMoveGenerator<T_Variable, T_Expression> m_user_defined;
 
     std::vector<AbstractMoveGenerator<T_Variable, T_Expression> *>
-                                                  m_move_generator_ptrs;
+        m_move_generator_ptrs;
+    std::vector<AbstractMoveGenerator<T_Variable, T_Expression> *>
+        m_special_move_generator_ptrs;
+
     std::vector<Move<T_Variable, T_Expression> *> m_move_ptrs;
 
     int m_number_of_updated_moves;
@@ -91,6 +97,7 @@ class Neighborhood {
         m_trinomial_exclusive_nor.initialize();
         m_chain.initialize();
         m_two_flip.initialize();
+        m_partial_feasible_enumeration.initialize();
         m_user_defined.initialize();
 
         m_move_generator_ptrs = {&m_binary,                        //
@@ -110,7 +117,24 @@ class Neighborhood {
                                  &m_trinomial_exclusive_nor,       //
                                  &m_chain,                         //
                                  &m_two_flip,                      //
+                                 &m_partial_feasible_enumeration,  //
                                  &m_user_defined};
+
+        m_special_move_generator_ptrs = {&m_exclusive_or,                  //
+                                         &m_exclusive_nor,                 //
+                                         &m_inverted_integers,             //
+                                         &m_balanced_integers,             //
+                                         &m_constant_sum_integers,         //
+                                         &m_constant_difference_integers,  //
+                                         &m_constant_ratio_integers,       //
+                                         &m_aggregation,                   //
+                                         &m_precedence,                    //
+                                         &m_variable_bound,                //
+                                         &m_soft_selection,                //
+                                         &m_trinomial_exclusive_nor,       //
+                                         &m_chain,                         //
+                                         &m_two_flip,                      //
+                                         &m_partial_feasible_enumeration};
 
         m_move_ptrs.clear();
 
@@ -189,6 +213,13 @@ class Neighborhood {
             m_two_flip.setup(a_model_ptr->flippable_variable_ptr_pairs());
         }
 
+        if (a_OPTION.neighborhood
+                .is_enabled_partial_feasible_enumeration_move) {
+            m_partial_feasible_enumeration.setup(
+                a_model_ptr->partial_feasible_enumerator()
+                    .small_constraint_groups());
+        }
+
         if (a_OPTION.neighborhood.is_enabled_user_defined_move) {
             m_user_defined.setup();
         }
@@ -216,8 +247,8 @@ class Neighborhood {
         }
         auto &move_ptrs = m_move_ptrs;
         move_ptrs.resize(number_of_candidate_moves);
-        auto index                = 0;
-        m_number_of_updated_moves = 0;
+        auto index                   = 0;
+        int  number_of_updated_moves = 0;
         for (const auto &move_generator_ptr : m_move_generator_ptrs) {
             if (move_generator_ptr->is_enabled()) {
                 auto     &moves     = move_generator_ptr->moves();
@@ -229,9 +260,10 @@ class Neighborhood {
                         move_ptrs[index++] = &moves[i];
                     }
                 }
-                m_number_of_updated_moves += moves.size();
+                number_of_updated_moves += moves.size();
             }
         }
+        m_number_of_updated_moves = number_of_updated_moves;
     }
 
     /*************************************************************************/
@@ -253,81 +285,36 @@ class Neighborhood {
 
     /*************************************************************************/
     inline void reset_special_neighborhood_moves_availability(void) noexcept {
-        m_exclusive_or.reset_availability();
-        m_exclusive_nor.reset_availability();
-        m_inverted_integers.reset_availability();
-        m_balanced_integers.reset_availability();
-        m_constant_sum_integers.reset_availability();
-        m_constant_difference_integers.reset_availability();
-        m_constant_ratio_integers.reset_availability();
-        m_aggregation.reset_availability();
-        m_precedence.reset_availability();
-        m_variable_bound.reset_availability();
-        m_soft_selection.reset_availability();
-        m_trinomial_exclusive_nor.reset_availability();
-        m_chain.reset_availability();
-        m_two_flip.reset_availability();
+        for (auto &&move_generator_ptr : m_special_move_generator_ptrs) {
+            move_generator_ptr->reset_availability();
+        }
     }
 
     /*************************************************************************/
     inline bool is_enabled_special_neighborhood_move(void) const {
-        if (m_precedence.is_enabled()) {
-            return true;
+        for (auto &&move_generator_ptr : m_special_move_generator_ptrs) {
+            if (move_generator_ptr->is_enabled()) {
+                return true;
+            }
         }
-
-        if (m_exclusive_or.is_enabled()) {
-            return true;
-        }
-
-        if (m_exclusive_nor.is_enabled()) {
-            return true;
-        }
-
-        if (m_inverted_integers.is_enabled()) {
-            return true;
-        }
-
-        if (m_balanced_integers.is_enabled()) {
-            return true;
-        }
-
-        if (m_constant_sum_integers.is_enabled()) {
-            return true;
-        }
-
-        if (m_constant_difference_integers.is_enabled()) {
-            return true;
-        }
-
-        if (m_constant_ratio_integers.is_enabled()) {
-            return true;
-        }
-
-        if (m_aggregation.is_enabled()) {
-            return true;
-        }
-
-        if (m_variable_bound.is_enabled()) {
-            return true;
-        }
-
-        if (m_soft_selection.is_enabled()) {
-            return true;
-        }
-
-        if (m_trinomial_exclusive_nor.is_enabled()) {
-            return true;
-        }
-
-        if (m_chain.is_enabled()) {
-            return true;
-        }
-
-        if (m_two_flip.is_enabled()) {
-            return true;
-        }
-
         return false;
+    }
+
+    /*************************************************************************/
+    inline void disable_special_neighborhood_moves(void) {
+        for (auto &&move_generator_ptr : m_special_move_generator_ptrs) {
+            move_generator_ptr->disable();
+        }
+    }
+
+    /*************************************************************************/
+    inline void enable_special_neighborhood_moves(void) {
+        for (auto &&move_generator_ptr : m_special_move_generator_ptrs) {
+            if (move_generator_ptr->moves().size() > 0) {
+                move_generator_ptr->enable();
+                move_generator_ptr->reset_availability();
+            }
+        }
     }
 
     /*************************************************************************/
@@ -569,6 +556,20 @@ class Neighborhood {
     }
 
     /*************************************************************************/
+    inline PartialFeasibleEnumerationMoveGenerator  //
+        <T_Variable, T_Expression>                  //
+            &partial_feasible_enumeration(void) noexcept {
+        return m_partial_feasible_enumeration;
+    }
+
+    /*************************************************************************/
+    inline const PartialFeasibleEnumerationMoveGenerator  //
+        <T_Variable, T_Expression>                        //
+            &partial_feasible_enumeration(void) const noexcept {
+        return m_partial_feasible_enumeration;
+    }
+
+    /*************************************************************************/
     inline UserDefinedMoveGenerator  //
         <T_Variable, T_Expression>   //
             &user_defined(void) noexcept {
@@ -580,24 +581,6 @@ class Neighborhood {
         <T_Variable, T_Expression> &
         user_defined(void) const noexcept {
         return m_user_defined;
-    }
-
-    /*************************************************************************/
-    inline int number_of_special_neighborhood_moves(void) const {
-        return m_exclusive_or.moves().size()                    //
-               + m_exclusive_nor.moves().size()                 //
-               + m_inverted_integers.moves().size()             //
-               + m_balanced_integers.moves().size()             //
-               + m_constant_sum_integers.moves().size()         //
-               + m_constant_difference_integers.moves().size()  //
-               + m_constant_ratio_integers.moves().size()       //
-               + m_aggregation.moves().size()                   //
-               + m_precedence.moves().size()                    //
-               + m_variable_bound.moves().size()                //
-               + m_soft_selection.moves().size()                //
-               + m_trinomial_exclusive_nor.moves().size()       //
-               + m_chain.moves().size()                         //
-               + m_two_flip.moves().size();
     }
 
     /*************************************************************************/

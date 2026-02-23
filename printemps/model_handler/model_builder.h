@@ -52,9 +52,9 @@ class ModelBuilder {
         this->setup_unique_names();
 
         /**
-         * Initial structure analysis.
+         * Initialize the derived components.
          */
-        this->setup_structure();
+        this->update_derived_components();
 
         /**
          * Store original categorization results. The final categorization would
@@ -70,25 +70,35 @@ class ModelBuilder {
         if (a_OPTION.preprocess.is_enabled_presolve) {
             if (a_OPTION.preprocess
                     .is_enabled_extract_implicit_equality_constraints) {
-                model.problem_size_reducer()
-                    .extract_implicit_equality_constraints(a_IS_ENABLED_PRINT);
+                const auto RESULT = model.problem_size_reducer_special()
+                                        .extract_implicit_equality_constraints(
+                                            a_IS_ENABLED_PRINT);
+                if (RESULT.is_reduced()) {
+                    this->update_derived_components();
+                }
             }
 
             if (a_OPTION.preprocess
                     .is_enabled_remove_redundant_set_constraints) {
-                model.problem_size_reducer().remove_redundant_set_constraints(
-                    a_IS_ENABLED_PRINT);
+                const auto RESULT =
+                    model.problem_size_reducer_special()
+                        .remove_redundant_set_constraints(a_IS_ENABLED_PRINT);
+                if (RESULT.is_reduced()) {
+                    this->update_derived_components();
+                }
             }
 
-            model.problem_size_reducer().reduce_problem_size(
-                a_IS_ENABLED_PRINT);
+            const auto RESULT =
+                model.problem_size_reducer_basic().reduce_problem_size(
+                    a_IS_ENABLED_PRINT);
+            if (RESULT.is_reduced()) {
+                this->update_derived_components();
+            }
         }
 
         /**
          * Extract and eliminate the intermediate variables.
          */
-        this->setup_structure();
-
         if (a_OPTION.preprocess.is_enabled_presolve &&
             a_OPTION.preprocess.is_enabled_extract_dependent()) {
             preprocess::DependentVariableExtractor<T_Variable, T_Expression>
@@ -100,50 +110,92 @@ class ModelBuilder {
                         a_OPTION, a_IS_ENABLED_PRINT) == 0) {
                     break;
                 }
+                this->update_derived_components();
 
                 while (true) {
-                    this->setup_structure();
                     if (dependent_variable_eliminator.eliminate(
                             a_IS_ENABLED_PRINT) == 0) {
                         break;
                     }
+                    this->update_derived_components();
                 }
 
-                model.problem_size_reducer().reduce_problem_size(
-                    a_IS_ENABLED_PRINT);
-                this->setup_structure();
+                const auto RESULT =
+                    model.problem_size_reducer_basic().reduce_problem_size(
+                        a_IS_ENABLED_PRINT);
+                if (RESULT.is_reduced()) {
+                    this->update_derived_components();
+                }
+                /**
+                 * NOTE: update_derived_components() is called inside
+                 * reduce_problem_size().
+                 */
             }
         }
 
         /**
          * Remove redundant set variables.
          */
-        int number_of_fixed_variables = 0;
         if (a_OPTION.preprocess.is_enabled_presolve &&
             a_OPTION.preprocess.is_enabled_remove_redundant_set_variables) {
-            number_of_fixed_variables =
-                model.problem_size_reducer().remove_redundant_set_variables(
-                    a_IS_ENABLED_PRINT);
+            const auto RESULT =
+                model.problem_size_reducer_special()
+                    .remove_redundant_set_variables(a_IS_ENABLED_PRINT);
+            if (RESULT.is_reduced()) {
+                this->update_derived_components();
+            }
         }
 
         /**
          * Remove duplicated constraints.
          */
-        int number_of_removed_constraints = 0;
         if (a_OPTION.preprocess.is_enabled_presolve &&
             a_OPTION.preprocess.is_enabled_remove_duplicated_constraints) {
-            number_of_removed_constraints =
-                model.problem_size_reducer().remove_duplicated_constraints(
-                    a_IS_ENABLED_PRINT);
+            const auto RESULT =
+                model.problem_size_reducer_special()
+                    .remove_duplicated_constraints(a_IS_ENABLED_PRINT);
+            if (RESULT.is_reduced()) {
+                this->update_derived_components();
+            }
         }
 
         /**
-         * Perform setup_structure again if there are new removed(disabled)
-         * variables or constraints.
+         * Run partial feasible enumerator.
          */
-        if (number_of_fixed_variables > 0 ||
-            number_of_removed_constraints > 0) {
-            this->setup_structure();
+        if (a_OPTION.preprocess.is_enabled_partial_feasible_enumeration) {
+            model.partial_feasible_enumerator().enumerate(a_IS_ENABLED_PRINT);
+        }
+
+        /**
+         * Remove implicitly fixed variables by checking precence and set
+         * partitioning/packing constraints.
+         */
+        if (a_OPTION.preprocess.is_enabled_presolve &&
+            a_OPTION.preprocess.is_enabled_remove_implicit_fixed_variables) {
+            const auto RESULT =
+                model.problem_size_reducer_special()
+                    .remove_implicit_fixed_variables_from_precedence_constraints(
+                        a_IS_ENABLED_PRINT);
+            if (RESULT.is_reduced()) {
+                this->update_derived_components();
+            }
+        }
+
+        /**
+         * Remove implicitly fixed variables by partial feasible enumeration.
+         */
+        if (a_OPTION.preprocess.is_enabled_presolve &&
+            a_OPTION.preprocess.is_enabled_partial_feasible_enumeration &&
+            a_OPTION.preprocess.is_enabled_remove_implicit_fixed_variables) {
+            const auto RESULT =
+                model.problem_size_reducer_special()
+                    .remove_implicit_fixed_variables_from_small_constraint_groups(
+                        model.partial_feasible_enumerator()
+                            .small_constraint_groups(),
+                        a_IS_ENABLED_PRINT);
+            if (RESULT.is_reduced()) {
+                this->update_derived_components();
+            }
         }
 
         /**
@@ -155,24 +207,8 @@ class ModelBuilder {
                 selection_extractor(m_model_ptr);
             selection_extractor.extract(a_OPTION.neighborhood.selection_mode,
                                         a_IS_ENABLED_PRINT);
+            this->update_derived_components();
         }
-
-        /**
-         * Final structure analysis.
-         */
-        this->setup_structure();
-
-        /**
-         * Setup the neighborhood generators.
-         */
-        this->setup_neighborhood(a_OPTION, a_IS_ENABLED_PRINT);
-
-        /**
-         * Verify and correct the initial values.
-         */
-        model.verifier().verify_and_correct(
-            a_OPTION.preprocess.is_enabled_initial_value_correction,
-            a_IS_ENABLED_PRINT);
 
         /**
          * Solve GF(2) equations if needed.
@@ -187,9 +223,21 @@ class ModelBuilder {
              * Update fixed variables.
              */
             if (IS_SOLVED) {
-                model.reference().update_variable_reference();
+                this->update_derived_components();
             }
         }
+
+        /**
+         * Setup the neighborhood generators.
+         */
+        this->setup_neighborhood(a_OPTION, a_IS_ENABLED_PRINT);
+
+        /**
+         * Verify and correct the initial values.
+         */
+        model.verifier().verify_and_correct(
+            a_OPTION.preprocess.is_enabled_initial_value_correction,
+            a_IS_ENABLED_PRINT);
 
         /**
          * Set up the fixed sensitivities.
@@ -233,11 +281,11 @@ class ModelBuilder {
             }
         }
 
-        model.problem_size_reducer().set_is_preprocess(false);
+        model.problem_size_reducer_basic().set_is_preprocess(false);
     }
 
     /*************************************************************************/
-    inline void setup_structure(void) {
+    inline void update_derived_components(void) {
         auto &model = *m_model_ptr;
         for (auto &&proxy : model.constraint_proxies()) {
             for (auto &&constraint : proxy.flat_indexed_constraints()) {
@@ -317,9 +365,8 @@ class ModelBuilder {
     /*************************************************************************/
     inline void setup_is_integer(void) {
         /**
-         * NOTE: In this method, m_reference is not referred because
-         * the object may not have been set up at the stage this method is
-         * called.
+         * NOTE: In this method, m_reference is not referred because　the object
+         * may not have been set up at the stage this method is called.
          */
         auto &model = *m_model_ptr;
 
@@ -337,9 +384,8 @@ class ModelBuilder {
     /*************************************************************************/
     inline void setup_constraint_compacts(void) {
         /**
-         * NOTE: In this method, m_reference is not referred because
-         * the object may not have been set up at the stage this method is
-         * called.
+         * NOTE: In this method, m_reference is not referred because　the object
+         * may not have been set up at the stage this method is called.
          */
         auto &model                 = *m_model_ptr;
         int   number_of_constraints = 0;
@@ -372,9 +418,8 @@ class ModelBuilder {
     /*************************************************************************/
     inline void setup_variable_constraint_sensitivities(void) {
         /**
-         * NOTE: In this method, m_reference is not referred because
-         * the object may not have been set up at the stage this method is
-         * called.
+         * NOTE: In this method, m_reference is not referred because　the object
+         * may not have been set up at the stage this method is called.
          */
         auto &model = *m_model_ptr;
 
@@ -413,9 +458,8 @@ class ModelBuilder {
     /*************************************************************************/
     inline void setup_variable_constraint_sensitivities_compact(void) {
         /**
-         * NOTE: In this method, m_reference is not referred because
-         * the object may not have been set up at the stage this method is
-         * called.
+         * NOTE: In this method, m_reference is not referred because　the object
+         * may not have been set up at the stage this method is called.
          */
         auto &model = *m_model_ptr;
         for (auto &&proxy : model.variable_proxies()) {
@@ -441,9 +485,8 @@ class ModelBuilder {
     inline void setup_variable_related_binary_coefficient_constraint_ptrs(
         void) {
         /**
-         * NOTE: In this method, m_reference is not referred because
-         * the object may not have been set up at the stage this method is
-         * called.
+         * NOTE: In this method, m_reference is not referred because　the object
+         * may not have been set up at the stage this method is called.
          */
         auto &model = *m_model_ptr;
 
@@ -529,17 +572,18 @@ class ModelBuilder {
         if (MODIFIED < ORIGINAL) {
             model.set_global_penalty_coefficient(MODIFIED);
             utility::print_message(
-                "Done (New global penalty coefficient is " +
-                    utility::to_string(model.global_penalty_coefficient(),
-                                       "%.5e") +
-                    ")",
+                "The global penalty coefficient is modified from " +
+                    utility::to_string(ORIGINAL, "%.2e") + " to " +
+                    utility::to_string(MODIFIED, "%.2e") + ".",
                 a_IS_ENABLED_PRINT);
         } else {
             utility::print_message(
-                "Done (global penalty coefficient remains at the original "
-                "value).",
+                "The global penalty coefficient remains at the original "
+                "value.",
                 a_IS_ENABLED_PRINT);
         }
+
+        utility::print_message("Done.", a_IS_ENABLED_PRINT);
     }
 
     /*************************************************************************/
@@ -549,13 +593,13 @@ class ModelBuilder {
         auto &model        = *m_model_ptr;
         model.m_selections = a_SELECTIONS;
 
+        /**
+         * Register the selection object to the variables which is covered by
+         * the corresponding selection constraint, and categorize the variable
+         * into "Selection".
+         */
         for (auto &&selection : model.m_selections) {
             for (auto &&variable_ptr : selection.variable_ptrs) {
-                /**
-                 * Register the selection object to the variables which is
-                 * covered by the corresponding selection constraint, and
-                 * categorize the variable into "Selection".
-                 */
                 variable_ptr->set_selection_ptr(&selection);
             }
             selection.constraint_ptr->set_is_selection(true);

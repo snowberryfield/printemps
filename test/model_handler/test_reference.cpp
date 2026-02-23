@@ -34,7 +34,7 @@ TEST_F(TestReference, update_variable_reference) {
     model.create_constraint("f", y.selection());
     model.create_constraint("g", w == 2 * x + 3 * z(0, 0) + 5 * z(0, 1));
 
-    model.builder().setup_structure();
+    model.builder().update_derived_components();
 
     preprocess::DependentVariableExtractor<int, double>
                    dependent_variable_extractor(&model);
@@ -43,7 +43,7 @@ TEST_F(TestReference, update_variable_reference) {
     preprocess::SelectionExtractor<int, double> selection_extractor(&model);
     selection_extractor.extract_by_independent(false);
 
-    model.builder().setup_structure();
+    model.builder().update_derived_components();
 
     EXPECT_EQ(1 + 10 + 20 * 30 + 1, model.reference().number_of_variables());
     EXPECT_EQ(3, model.reference().number_of_fixed_variables());
@@ -135,10 +135,10 @@ TEST_F(TestReference, update_constraint_reference) {
 
     singleton.disable();
 
-    model.builder().setup_structure();
+    model.builder().update_derived_components();
     preprocess::SelectionExtractor<int, double> selection_extractor(&model);
     selection_extractor.extract_by_defined_order(false);
-    model.builder().setup_structure();
+    model.builder().update_derived_components();
 
     EXPECT_EQ(27, model.reference().number_of_constraints());
     EXPECT_EQ(1, static_cast<int>(model.selections().size()));
@@ -175,7 +175,8 @@ TEST_F(TestReference, update_variable_name_map) {
     auto& y = model.create_variable("y");
 
     model.builder().setup_unique_names();
-    model.builder().setup_structure();  // include update_variable_name_map()
+    model.builder()
+        .update_derived_components();  // include update_variable_name_map()
 
     EXPECT_EQ(&x(0), model.reference().variable_name_map.at("x"));
     EXPECT_EQ(&y(0), model.reference().variable_name_map.at("y"));
@@ -189,7 +190,8 @@ TEST_F(TestReference, update_contraint_name_map) {
     auto& c_2 = model.create_constraint("c_2");
 
     model.builder().setup_unique_names();
-    model.builder().setup_structure();  // include update_contraint_name_map()
+    model.builder()
+        .update_derived_components();  // include update_contraint_name_map()
 
     EXPECT_EQ(&c_1(0), model.reference().constraint_name_map.at("c_1"));
     EXPECT_EQ(&c_2(0), model.reference().constraint_name_map.at("c_2"));

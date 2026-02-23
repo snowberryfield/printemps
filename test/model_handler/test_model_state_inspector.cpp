@@ -525,7 +525,7 @@ TEST_F(TestModelStateInspector, export_named_solution) {
         }
     }
 
-    model.builder().setup_structure();
+    model.builder().update_derived_components();
     model.updater().update();
 
     auto named_solution = model.state_inspector().export_named_solution();

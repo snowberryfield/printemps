@@ -347,8 +347,9 @@ class TabuSearchCore {
                                     *selected_move_ptr,    //
                                     0, 0);
 
-            m_model_ptr->updater().update(*selected_move_ptr);
             this->update_memory(selected_move_ptr);
+
+            m_model_ptr->updater().update(*selected_move_ptr);
 
             m_state_manager.update(selected_move_ptr, 0, false,
                                    {selected_move_score},
@@ -1072,12 +1073,12 @@ class TabuSearchCore {
                     CURRENT_SOLUTION_SCORE);
             }
 
-            m_model_ptr->updater().update(*move_ptr);
-
             /**
              * Update the memory.
              */
             this->update_memory(move_ptr);
+
+            m_model_ptr->updater().update(*move_ptr);
 
             /**
              * Update the state.

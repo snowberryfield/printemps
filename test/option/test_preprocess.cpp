@@ -34,6 +34,11 @@ TEST_F(TestPreprocessOption, initialize) {
 
     EXPECT_EQ(  //
         PreprocessOptionConstant::
+            DEFAULT_IS_ENABLED_REMOVE_IMPLICIT_FIXED_VARIABLES,  //
+        option.is_enabled_remove_implicit_fixed_variables);
+
+    EXPECT_EQ(  //
+        PreprocessOptionConstant::
             DEFAULT_IS_ENABLED_REMOVE_REDUNDANT_SET_VARIABLES,  //
         option.is_enabled_remove_redundant_set_variables);
 
@@ -105,6 +110,11 @@ TEST_F(TestPreprocessOption, initialize) {
         PreprocessOptionConstant::
             DEFAULT_IS_ENABLED_EXTRACT_DEPENDENT_INTERMEDIATE,  //
         option.is_enabled_extract_dependent_intermediate);
+
+    EXPECT_EQ(  //
+        PreprocessOptionConstant::
+            DEFAULT_IS_ENABLED_PARTIAL_FEASIBLE_ENUMERATION,  //
+        option.is_enabled_partial_feasible_enumeration);
 }
 
 }  // namespace

@@ -60,8 +60,7 @@ class IntegerMoveGenerator
             move.is_special_neighborhood_move = false;
             move.is_available                 = true;
             move.overlap_rate                 = 0.0;
-            move.related_constraint_ptrs =
-                mutable_variable_ptrs[i]->related_constraint_ptrs();
+            move.setup_related_constraint_ptrs();
 
             this->m_moves[4 * i + 1] = move;
             this->m_moves[4 * i + 2] = move;

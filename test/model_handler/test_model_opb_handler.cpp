@@ -26,7 +26,7 @@ TEST_F(TestModelOPBHandler, import) {
 
     model::Model<int, double> model;
     model.opb_handler().import(opb);
-    model.builder().setup_structure();
+    model.builder().update_derived_components();
 
     EXPECT_EQ(5, model.reference().number_of_variables());
     EXPECT_EQ(4, model.reference().number_of_constraints());

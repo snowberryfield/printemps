@@ -161,36 +161,41 @@ class ModelUpdater {
             constraint = model.objective().expression() >= a_OBJECTIVE;
         }
 
-        const auto &[is_constraint_disabled, is_variable_bound_updated] =
-            model.problem_size_reducer()
-                .remove_redundant_constraint_with_tightening_variable_bound(
-                    &constraint, a_IS_ENABLED_PRINT);
+        {
+            const auto RESULT =
+                model.problem_size_reducer_basic()
+                    .remove_redundant_constraint_with_tightening_variable_bound(
+                        &constraint, a_IS_ENABLED_PRINT);
 
-        if (!is_variable_bound_updated) {
-            return;
+            if (RESULT.number_of_updated_variable_bounds == 0) {
+                return;
+            }
         }
 
-        const int NUMBER_OF_NEWLY_FIXED_VARIABLES =
-            model.problem_size_reducer().remove_implicit_fixed_variables(
-                a_IS_ENABLED_PRINT);
+        {
+            const auto RESULT =
+                model.problem_size_reducer_basic()
+                    .remove_implicit_fixed_variables(a_IS_ENABLED_PRINT);
 
-        /**
-         * If there is new fixed variable, setup the variable category
-         * and the binary/integer neighborhood again.
-         */
-        if (NUMBER_OF_NEWLY_FIXED_VARIABLES > 0) {
-            model.reference().update_variable_reference();
-            auto       &neighborhood  = model.neighborhood();
-            const auto &VARIABLE_TYPE = model.reference().variable_type;
+            /**
+             * If there is new fixed variable, setup the variable category
+             * and the binary/integer neighborhood again.
+             */
+            if (RESULT.number_of_fixed_variables > 0) {
+                model.reference().update_variable_reference();
+                auto       &neighborhood  = model.neighborhood();
+                const auto &VARIABLE_TYPE = model.reference().variable_type;
 
-            neighborhood.binary().setup(VARIABLE_TYPE.binary_variable_ptrs);
-            neighborhood.integer().setup(VARIABLE_TYPE.integer_variable_ptrs);
-            neighborhood.selection().setup(
-                VARIABLE_TYPE.selection_variable_ptrs);
-            neighborhood.chain().remove_moves_on_fixed_variables();
+                neighborhood.binary().setup(VARIABLE_TYPE.binary_variable_ptrs);
+                neighborhood.integer().setup(
+                    VARIABLE_TYPE.integer_variable_ptrs);
+                neighborhood.selection().setup(
+                    VARIABLE_TYPE.selection_variable_ptrs);
+                neighborhood.chain().remove_moves_on_fixed_variables();
 
-            model.builder()
-                .setup_positive_and_negative_coefficient_mutable_variable_ptrs();
+                model.builder()
+                    .setup_positive_and_negative_coefficient_mutable_variable_ptrs();
+            }
         }
     }
 

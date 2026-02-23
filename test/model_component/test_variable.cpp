@@ -710,7 +710,7 @@ TEST_F(TestVariable, setup_hash) {
     g(0) = x(0) + x(1) == 1;
     g(1) = x(0) == 1;
 
-    model.builder().setup_structure();
+    model.builder().update_derived_components();
     {
         x(0).setup_hash();
         std::uint64_t hash = reinterpret_cast<std::uint64_t>(&g(0)) +

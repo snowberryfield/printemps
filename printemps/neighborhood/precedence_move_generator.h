@@ -33,7 +33,7 @@ class PrecedenceMoveGenerator
         /**
          * Convert constraint objects to BinomialConstraint objects.
          */
-        auto binomials = convert_to_binomial_constraints(constraint_ptrs);
+        auto binomials = convert_to_binomial_constraints(constraint_ptrs, true);
 
         /**
          * Setup move objects.
@@ -49,7 +49,7 @@ class PrecedenceMoveGenerator
         for (auto i = 0; i < BINOMIALS_SIZE; i++) {
             auto &move = this->m_moves[2 * i];
 
-            move.associated_constraint_ptr = constraint_ptrs[i];
+            move.associated_constraint_ptr = binomials[i].constraint_ptr;
             move.type                      = MoveType::Precedence;
             move.alterations.emplace_back(binomials[i].variable_ptr_first, 0);
             move.alterations.emplace_back(binomials[i].variable_ptr_second, 0);
@@ -58,26 +58,7 @@ class PrecedenceMoveGenerator
             move.is_special_neighborhood_move = true;
             move.is_available                 = true;
             move.overlap_rate                 = 0.0;
-
-            move.related_constraint_ptrs.insert(
-                move.related_constraint_ptrs.end(),
-                binomials[i]
-                    .variable_ptr_first->related_constraint_ptrs()
-                    .begin(),
-                binomials[i]
-                    .variable_ptr_first->related_constraint_ptrs()
-                    .end());
-
-            move.related_constraint_ptrs.insert(
-                move.related_constraint_ptrs.end(),
-                binomials[i]
-                    .variable_ptr_second->related_constraint_ptrs()
-                    .begin(),
-                binomials[i]
-                    .variable_ptr_second->related_constraint_ptrs()
-                    .end());
-
-            move.sort_and_unique_related_constraint_ptrs();
+            move.setup_related_constraint_ptrs();
 
             this->m_moves[2 * i + 1] = move;
         }

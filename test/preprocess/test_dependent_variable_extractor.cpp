@@ -100,7 +100,7 @@ TEST_F(TestDependentVariableExtractor, extract) {
         auto& h = model.create_constraint("h", v == 6 * z + 7 * w);
         model.minimize(w);
         model.builder().setup_unique_names();
-        model.builder().setup_structure();
+        model.builder().update_derived_components();
 
         EXPECT_TRUE(
             f(0).is_type(model_component::ConstraintType::Intermediate));
@@ -119,7 +119,7 @@ TEST_F(TestDependentVariableExtractor, extract) {
             option::Option option;
             dependent_variable_extractor.extract(option, false);
 
-            model.builder().setup_structure();
+            model.builder().update_derived_components();
 
             EXPECT_EQ(model_component::VariableType::DependentInteger,
                       z(0).type());
@@ -138,7 +138,7 @@ TEST_F(TestDependentVariableExtractor, extract) {
         {
             dependent_variable_eliminator.eliminate(false);
 
-            model.builder().setup_structure();
+            model.builder().update_derived_components();
 
             auto& sensitivities_objective =
                 model.objective().expression().sensitivities();
@@ -152,7 +152,7 @@ TEST_F(TestDependentVariableExtractor, extract) {
         {
             dependent_variable_eliminator.eliminate(false);
 
-            model.builder().setup_structure();
+            model.builder().update_derived_components();
 
             auto& sensitivities_objective =
                 model.objective().expression().sensitivities();
@@ -187,7 +187,7 @@ TEST_F(TestDependentVariableExtractor, extract) {
         auto& g = model.create_constraint("g", w == 3 * x + 4 * y + 5 * z);
         model.minimize(w);
         model.builder().setup_unique_names();
-        model.builder().setup_structure();
+        model.builder().update_derived_components();
 
         EXPECT_TRUE(
             f(0).is_type(model_component::ConstraintType::Intermediate));
@@ -204,7 +204,7 @@ TEST_F(TestDependentVariableExtractor, extract) {
             option::Option option;
             dependent_variable_extractor.extract(option, false);
 
-            model.builder().setup_structure();
+            model.builder().update_derived_components();
 
             EXPECT_EQ(model_component::VariableType::DependentInteger,
                       z(0).type());
@@ -245,7 +245,7 @@ TEST_F(TestDependentVariableExtractor, extract) {
         {
             dependent_variable_eliminator.eliminate(false);
 
-            model.builder().setup_structure();
+            model.builder().update_derived_components();
 
             auto& sensitivities_objective =
                 model.objective().expression().sensitivities();
@@ -292,7 +292,7 @@ TEST_F(TestDependentVariableExtractor, extract) {
         auto& f = model.create_constraint("f", 5 * y == x.sum());
         model.minimize(x.sum());
         model.builder().setup_unique_names();
-        model.builder().setup_structure();
+        model.builder().update_derived_components();
 
         EXPECT_TRUE(
             f(0).is_type(model_component::ConstraintType::AllOrNothing));
@@ -309,7 +309,7 @@ TEST_F(TestDependentVariableExtractor, extract) {
                 true;
             dependent_variable_extractor.extract(option, false);
 
-            model.builder().setup_structure();
+            model.builder().update_derived_components();
 
             EXPECT_EQ(model_component::VariableType::DependentBinary,
                       x(0).type());
@@ -328,7 +328,7 @@ TEST_F(TestDependentVariableExtractor, extract) {
         {
             dependent_variable_eliminator.eliminate(false);
 
-            model.builder().setup_structure();
+            model.builder().update_derived_components();
 
             auto& sensitivities_objective =
                 model.objective().expression().sensitivities();

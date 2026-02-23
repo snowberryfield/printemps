@@ -25,7 +25,7 @@ TEST_F(TestModelBuilder, build) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModelBuilder, setup_structure) {
+TEST_F(TestModelBuilder, update_derived_components) {
     /// This test is covered by the following submethods.
 }
 
@@ -257,10 +257,10 @@ TEST_F(TestModelBuilder, setup_related_selection_constraint_ptr_index) {
     auto& c_0 = model.create_constraint("c_0", x(0) + x(1) <= 1);
 
     model.builder().setup_unique_names();
-    model.builder().setup_structure();
+    model.builder().update_derived_components();
     preprocess::SelectionExtractor<int, double> selection_extractor(&model);
     selection_extractor.extract_by_defined_order(false);
-    model.builder().setup_structure();
+    model.builder().update_derived_components();
     model.builder().setup_variable_related_selection_constraint_ptr_index();
 
     EXPECT_EQ(1, static_cast<int>(model.selections().size()));
@@ -334,11 +334,11 @@ TEST_F(TestModelBuilder, setup_selections) {
     model.create_constraint("c_1", y.selection());
 
     model.builder().setup_unique_names();
-    model.builder().setup_structure();
+    model.builder().update_derived_components();
     preprocess::SelectionExtractor<int, double> selection_extractor(&model);
     selection_extractor.extract_by_defined_order(false);
     auto& selections = selection_extractor.selections();
-    model.builder().setup_structure();
+    model.builder().update_derived_components();
 
     model.builder().setup_selections(selections);
 

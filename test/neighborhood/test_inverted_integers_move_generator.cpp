@@ -27,7 +27,7 @@ TEST_F(TestInvertedIntegersMoveGenerator, setup) {
     auto& c = model.create_constraint("c", x[0] + x[1] == 0);
 
     model.builder().setup_unique_names();
-    model.builder().setup_structure();
+    model.builder().update_derived_components();
 
     auto& inverted_integers_ptrs =
         model.reference().constraint_type.inverted_integers_ptrs;

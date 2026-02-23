@@ -27,7 +27,7 @@ TEST_F(TestBinaryMoveGenerator, setup) {
     x(0).fix_by(0);
 
     model.builder().setup_unique_names();
-    model.builder().setup_structure();
+    model.builder().update_derived_components();
 
     auto binary_variable_ptrs =
         model.reference().variable_type.binary_variable_ptrs;

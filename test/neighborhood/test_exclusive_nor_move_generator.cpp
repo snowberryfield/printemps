@@ -27,7 +27,7 @@ TEST_F(TestExclusiveNORMoveGenerator, setup) {
     auto& c = model.create_constraint("c", x[0] - x[1] == 0);
 
     model.builder().setup_unique_names();
-    model.builder().setup_structure();
+    model.builder().update_derived_components();
 
     auto& exclusive_nor_ptrs =
         model.reference().constraint_type.exclusive_nor_ptrs;

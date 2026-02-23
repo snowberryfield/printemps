@@ -10,8 +10,9 @@ namespace printemps::neighborhood {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 struct BinomialConstraint {
-    model_component::Variable<T_Variable, T_Expression>* variable_ptr_first;
-    model_component::Variable<T_Variable, T_Expression>* variable_ptr_second;
+    model_component::Constraint<T_Variable, T_Expression>* constraint_ptr;
+    model_component::Variable<T_Variable, T_Expression>*   variable_ptr_first;
+    model_component::Variable<T_Variable, T_Expression>*   variable_ptr_second;
 
     T_Expression sensitivity_first;
     T_Expression sensitivity_second;
@@ -20,7 +21,8 @@ struct BinomialConstraint {
     model_component::ConstraintSense sense;
     /*************************************************************************/
     BinomialConstraint(void)
-        : variable_ptr_first(nullptr),
+        : constraint_ptr(nullptr),
+          variable_ptr_first(nullptr),
           variable_ptr_second(nullptr),
           sensitivity_first(0),
           sensitivity_second(0),

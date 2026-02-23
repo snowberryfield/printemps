@@ -64,8 +64,12 @@ class Model {
 
     neighborhood::Neighborhood<T_Variable, T_Expression> m_neighborhood;
 
-    preprocess::ProblemSizeReducer<T_Variable, T_Expression>
-        m_problem_size_reducer;
+    preprocess::ProblemSizeReducerBasic<T_Variable, T_Expression>
+        m_problem_size_reducer_basic;
+    preprocess::ProblemSizeReducerSpecial<T_Variable, T_Expression>
+        m_problem_size_reducer_special;
+    preprocess::PartialFeasibleEnumerator<T_Variable, T_Expression>
+        m_partial_feasible_enumerator;
 
     preprocess::Verifier<T_Variable, T_Expression> m_verifier;
 
@@ -142,7 +146,9 @@ class Model {
         m_flippable_variable_ptr_pairs.clear();
 
         m_neighborhood.initialize();
-        m_problem_size_reducer.setup(this);
+        m_problem_size_reducer_basic.setup(this);
+        m_problem_size_reducer_special.setup(this);
+        m_partial_feasible_enumerator.setup(this);
         m_verifier.setup(this);
 
         m_reference_original.setup(this);
@@ -533,9 +539,21 @@ class Model {
     }
 
     /*************************************************************************/
-    inline preprocess::ProblemSizeReducer<T_Variable, T_Expression> &
-    problem_size_reducer(void) noexcept {
-        return m_problem_size_reducer;
+    inline preprocess::ProblemSizeReducerBasic<T_Variable, T_Expression> &
+    problem_size_reducer_basic(void) noexcept {
+        return m_problem_size_reducer_basic;
+    }
+
+    /*************************************************************************/
+    inline preprocess::ProblemSizeReducerSpecial<T_Variable, T_Expression> &
+    problem_size_reducer_special(void) noexcept {
+        return m_problem_size_reducer_special;
+    }
+
+    /*************************************************************************/
+    inline preprocess::PartialFeasibleEnumerator<T_Variable, T_Expression> &
+    partial_feasible_enumerator(void) noexcept {
+        return m_partial_feasible_enumerator;
     }
 
     /*************************************************************************/

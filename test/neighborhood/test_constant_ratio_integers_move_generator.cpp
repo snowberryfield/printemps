@@ -28,7 +28,7 @@ TEST_F(TestConstantRatioIntegersMoveGenerator, setup) {
         auto& c = model.create_constraint("c", 2 * x[0] - x[1] == 0);
 
         model.builder().setup_unique_names();
-        model.builder().setup_structure();
+        model.builder().update_derived_components();
 
         auto& constant_ratio_integers_ptrs =
             model.reference().constraint_type.constant_ratio_integers_ptrs;
@@ -77,7 +77,7 @@ TEST_F(TestConstantRatioIntegersMoveGenerator, setup) {
         auto& c = model.create_constraint("c", 2 * x[0] + x[1] == 0);
 
         model.builder().setup_unique_names();
-        model.builder().setup_structure();
+        model.builder().update_derived_components();
 
         auto& constant_ratio_integers_ptrs =
             model.reference().constraint_type.constant_ratio_integers_ptrs;

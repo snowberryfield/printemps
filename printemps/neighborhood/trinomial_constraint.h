@@ -10,9 +10,10 @@ namespace printemps::neighborhood {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 struct TrinomialConstraint {
-    model_component::Variable<T_Variable, T_Expression>* variable_ptr_first;
-    model_component::Variable<T_Variable, T_Expression>* variable_ptr_second;
-    model_component::Variable<T_Variable, T_Expression>* variable_ptr_third;
+    model_component::Constraint<T_Variable, T_Expression>* constraint_ptrs;
+    model_component::Variable<T_Variable, T_Expression>*   variable_ptr_first;
+    model_component::Variable<T_Variable, T_Expression>*   variable_ptr_second;
+    model_component::Variable<T_Variable, T_Expression>*   variable_ptr_third;
 
     T_Expression sensitivity_first;
     T_Expression sensitivity_second;

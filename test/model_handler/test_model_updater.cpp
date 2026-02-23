@@ -54,7 +54,7 @@ TEST_F(TestModelUpdater, update_arg_move) {
     x(0) = 1;
 
     model.minimize(p);
-    model.builder().setup_structure();
+    model.builder().update_derived_components();
     preprocess::SelectionExtractor<int, double> selection_extractor(&model);
     selection_extractor.extract_by_independent(false);
     model.builder().setup_fixed_sensitivities(false);
@@ -87,11 +87,11 @@ TEST_F(TestModelUpdater, update_dependent_variables_and_disabled_constraints) {
 
     h.disable();
 
-    model.builder().setup_structure();
+    model.builder().update_derived_components();
     preprocess::DependentVariableExtractor<int, double>
         dependent_variable_extractor(&model);
     dependent_variable_extractor.extract(option, false);
-    model.builder().setup_structure();
+    model.builder().update_derived_components();
 
     x(0) = 0;
     y(0) = 10;
@@ -110,7 +110,7 @@ TEST_F(TestModelUpdater, update_variable_bounds) {
         auto& x = model.create_variable("x", 0, 200);
         auto& y = model.create_variable("y", 0, 200);
         model.minimize(x + 3 * y);
-        model.problem_size_reducer().setup(&model);
+        model.problem_size_reducer_basic().setup(&model);
         model.updater().update_variable_bounds(100, true, false);
 
         EXPECT_EQ(100, x(0).upper_bound());
@@ -123,7 +123,7 @@ TEST_F(TestModelUpdater, update_variable_bounds) {
         auto& x = model.create_variable("x", 0, 200);
         auto& y = model.create_variable("y", 0, 200);
         model.minimize(x - 3 * y);
-        model.problem_size_reducer().setup(&model);
+        model.problem_size_reducer_basic().setup(&model);
         model.updater().update_variable_bounds(100, true, false);
 
         EXPECT_EQ(200, x(0).upper_bound());
@@ -136,7 +136,7 @@ TEST_F(TestModelUpdater, update_variable_bounds) {
         auto& x = model.create_variable("x", 0, 200);
         auto& y = model.create_variable("y", 0, 200);
         model.maximize(x + 3 * y);
-        model.problem_size_reducer().setup(&model);
+        model.problem_size_reducer_basic().setup(&model);
         model.updater().update_variable_bounds(100, true, false);
 
         EXPECT_EQ(0, x(0).lower_bound());
@@ -149,7 +149,7 @@ TEST_F(TestModelUpdater, update_variable_bounds) {
         auto& x = model.create_variable("x", 0, 200);
         auto& y = model.create_variable("y", 0, 200);
         model.maximize(x - 3 * y);
-        model.problem_size_reducer().setup(&model);
+        model.problem_size_reducer_basic().setup(&model);
         model.updater().update_variable_bounds(100, true, false);
 
         EXPECT_EQ(100, x(0).lower_bound());
@@ -164,7 +164,7 @@ TEST_F(TestModelUpdater, update_violative_constraint_ptrs_and_feasibility) {
     auto&                  x = model.create_variable("x", 0, 10);
     [[maybe_unused]] auto& g = model.create_constraint("g", x <= 5);
 
-    model.builder().setup_structure();
+    model.builder().update_derived_components();
 
     x = 4;
     model.updater().update();  // include update_feasibility()
@@ -201,7 +201,7 @@ TEST_F(TestModelUpdater, update_variable_improvability) {
         [[maybe_unused]] auto& g = model.create_constraint("g", x - y <= 0);
 
         model.minimize(-x + y);
-        model.builder().setup_structure();
+        model.builder().update_derived_components();
         model.builder().setup_fixed_sensitivities(false);
         model.builder()
             .setup_positive_and_negative_coefficient_mutable_variable_ptrs();
@@ -245,7 +245,7 @@ TEST_F(TestModelUpdater, update_variable_improvability) {
         [[maybe_unused]] auto& g = model.create_constraint("g", x - y == 0);
 
         model.minimize(-x + y);
-        model.builder().setup_structure();
+        model.builder().update_derived_components();
         model.builder().setup_fixed_sensitivities(false);
         model.builder()
             .setup_positive_and_negative_coefficient_mutable_variable_ptrs();
@@ -289,7 +289,7 @@ TEST_F(TestModelUpdater, update_variable_improvability) {
         [[maybe_unused]] auto& g = model.create_constraint("g", x - y >= 0);
 
         model.minimize(-x + y);
-        model.builder().setup_structure();
+        model.builder().update_derived_components();
         model.builder().setup_fixed_sensitivities(false);
         model.builder()
             .setup_positive_and_negative_coefficient_mutable_variable_ptrs();
@@ -333,7 +333,7 @@ TEST_F(TestModelUpdater, update_variable_improvability) {
         [[maybe_unused]] auto& g = model.create_constraint("g", x - y <= 0);
 
         model.maximize(-x + y);
-        model.builder().setup_structure();
+        model.builder().update_derived_components();
         model.builder().setup_fixed_sensitivities(false);
         model.builder()
             .setup_positive_and_negative_coefficient_mutable_variable_ptrs();
@@ -378,7 +378,7 @@ TEST_F(TestModelUpdater, update_variable_improvability) {
         [[maybe_unused]] auto& g = model.create_constraint("g", x - y == 0);
 
         model.maximize(-x + y);
-        model.builder().setup_structure();
+        model.builder().update_derived_components();
         model.builder().setup_fixed_sensitivities(false);
         model.builder()
             .setup_positive_and_negative_coefficient_mutable_variable_ptrs();
@@ -423,7 +423,7 @@ TEST_F(TestModelUpdater, update_variable_improvability) {
         [[maybe_unused]] auto& g = model.create_constraint("g", x - y >= 0);
 
         model.maximize(-x + y);
-        model.builder().setup_structure();
+        model.builder().update_derived_components();
         model.builder().setup_fixed_sensitivities(false);
         model.builder()
             .setup_positive_and_negative_coefficient_mutable_variable_ptrs();
@@ -467,7 +467,7 @@ TEST_F(TestModelUpdater, reset_variable_objective_improvabilities_arg_void) {
 
     auto& x = model.create_variable("x", 0, 1);
     auto& y = model.create_variables("y", 10, 0, 1);
-    model.builder().setup_structure();
+    model.builder().update_derived_components();
 
     x(0).set_is_objective_improvable(true);
     EXPECT_TRUE(x(0).is_objective_improvable());
@@ -490,7 +490,7 @@ TEST_F(TestModelUpdater,
 
     auto& x = model.create_variable("x", 0, 1);
     auto& y = model.create_variables("y", 10, 0, 1);
-    model.builder().setup_structure();
+    model.builder().update_derived_components();
 
     x(0).set_is_objective_improvable(true);
     EXPECT_TRUE(x(0).is_objective_improvable());
@@ -515,7 +515,7 @@ TEST_F(TestModelUpdater, reset_variable_feasibility_improvabilities_arg_void) {
 
     auto& x = model.create_variable("x", 0, 1);
     auto& y = model.create_variables("y", 10, 0, 1);
-    model.builder().setup_structure();
+    model.builder().update_derived_components();
 
     x(0).set_is_feasibility_improvable(true);
     EXPECT_TRUE(x(0).is_feasibility_improvable());
@@ -538,7 +538,7 @@ TEST_F(TestModelUpdater,
 
     auto& x = model.create_variable("x", 0, 1);
     auto& y = model.create_variables("y", 10, 0, 1);
-    model.builder().setup_structure();
+    model.builder().update_derived_components();
 
     x(0).set_is_feasibility_improvable(true);
     EXPECT_TRUE(x(0).is_feasibility_improvable());
@@ -569,7 +569,7 @@ TEST_F(TestModelUpdater,
     g(0) = x <= y(0);
     g(1) = y(1) == y(9);
 
-    model.builder().setup_structure();
+    model.builder().update_derived_components();
 
     x(0).set_is_feasibility_improvable(true);
     EXPECT_TRUE(x(0).is_feasibility_improvable());

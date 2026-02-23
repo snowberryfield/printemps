@@ -26,6 +26,7 @@ enum class MoveType {
     TrinomialExclusiveNOR,       //
     Chain,                       //
     TwoFlip,                     //
+    PartialFeasibleEnumeration,  //
     UserDefined,                 //
     General,
 };
@@ -49,6 +50,7 @@ static std::unordered_map<std::string, MoveType> MoveTypeMap = {
     {"Trinomial Exclusive NOR", MoveType::TrinomialExclusiveNOR},
     {"Chain", MoveType::Chain},
     {"Two Flip", MoveType::TwoFlip},
+    {"Partial Feasible Enumeration", MoveType::PartialFeasibleEnumeration},
     {"User Defined", MoveType::UserDefined},
     {"General", MoveType::General}};
 
@@ -71,6 +73,7 @@ static std::unordered_map<MoveType, std::string> MoveTypeInverseMap = {
     {MoveType::TrinomialExclusiveNOR, "Trinomial Exclusive NOR"},
     {MoveType::Chain, "Chain"},
     {MoveType::TwoFlip, "Two Flip"},
+    {MoveType::PartialFeasibleEnumeration, "Partial Feasible Enumeration"},
     {MoveType::UserDefined, "User Defined"},
     {MoveType::General, "General"}};
 }  // namespace printemps::neighborhood

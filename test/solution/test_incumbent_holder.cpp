@@ -75,7 +75,7 @@ TEST_F(TestIncumbentHolder, try_update_incumbent_arg_model_ptr) {
     g(0) = x(0) + x(1) <= 1;
     g(1) = x(0) - x(1) == 1;
     model.minimize(x(0) + x(1));
-    model.builder().setup_structure();
+    model.builder().update_derived_components();
 
     {
         x(0) = 1;

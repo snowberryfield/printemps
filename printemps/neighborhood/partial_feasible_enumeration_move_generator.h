@@ -3,71 +3,59 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_NEIGHBORHOOD_EXCLUSIVE_OR_MOVE_GENERATOR_H__
-#define PRINTEMPS_NEIGHBORHOOD_EXCLUSIVE_OR_MOVE_GENERATOR_H__
+#ifndef PRINTEMPS_NEIGHBORHOOD_PARTIAL_FEASIBLE_ENUMERATION_MOVE_GENERATOR_H__
+#define PRINTEMPS_NEIGHBORHOOD_PARTIAL_FEASIBLE_ENUMERATION_MOVE_GENERATOR_H__
 
 #include "abstract_move_generator.h"
 
 namespace printemps::neighborhood {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-class ExclusiveORMoveGenerator
+class PartialFeasibleEnumerationMoveGenerator
     : public AbstractMoveGenerator<T_Variable, T_Expression> {
    private:
    public:
     /*************************************************************************/
-    ExclusiveORMoveGenerator(void) {
+    PartialFeasibleEnumerationMoveGenerator(void) {
         /// nothing to do
     }
 
     /*************************************************************************/
-    void setup(const std::vector<model_component::Constraint<
-                   T_Variable, T_Expression> *> &a_RAW_CONSTRAINT_PTRS) {
-        /**
-         * Exclude constraints which contain fixed variables or selection
-         * variables.
-         */
-        auto constraint_ptrs =
-            extract_effective_constraint_ptrs(a_RAW_CONSTRAINT_PTRS);
-
-        /**
-         * Convert constraint objects to BinomialConstraint objects.
-         */
-        auto binomials =
-            convert_to_binomial_constraints(constraint_ptrs, false);
-
+    void setup(const std::vector<model_component::ConstraintGroup<
+                   T_Variable, T_Expression>> &a_SMALL_CONSTRAINT_GROUPS) {
         /**
          * Setup move objects.
          */
-        const int BINOMIALS_SIZE = binomials.size();
+        int moves_size = 0;
+        for (const auto &constraint_group : a_SMALL_CONSTRAINT_GROUPS) {
+            moves_size += constraint_group.solutions.size();
+        }
 
         this->m_moves.clear();
         this->m_flags.clear();
 
-        this->m_moves.resize(2 * BINOMIALS_SIZE);
-        this->m_flags.resize(2 * BINOMIALS_SIZE);
+        this->m_moves.resize(moves_size);
+        this->m_flags.resize(moves_size);
 
-        for (auto i = 0; i < BINOMIALS_SIZE; i++) {
-            auto &move = this->m_moves[2 * i];
+        int index = 0;
+        for (const auto &constraint_group : a_SMALL_CONSTRAINT_GROUPS) {
+            for (const auto &solution : constraint_group.solutions) {
+                auto &move = this->m_moves[index++];
 
-            move.associated_constraint_ptr = constraint_ptrs[i];
-            move.type                      = MoveType::ExclusiveOR;
-            move.alterations.emplace_back(binomials[i].variable_ptr_first, 0);
-            move.alterations.emplace_back(binomials[i].variable_ptr_second, 1);
-            move.is_univariable_move          = false;
-            move.is_selection_move            = false;
-            move.is_special_neighborhood_move = true;
-            move.is_available                 = true;
-            move.overlap_rate                 = 0.0;
-            move.setup_related_constraint_ptrs();
-
-            this->m_moves[2 * i + 1]                       = move;
-            this->m_moves[2 * i + 1].alterations[0].second = 1;
-            this->m_moves[2 * i + 1].alterations[1].second = 0;
+                move.associated_constraint_ptr = nullptr;
+                move.type                = MoveType::PartialFeasibleEnumeration;
+                move.alterations         = solution;
+                move.is_univariable_move = false;
+                move.is_selection_move   = false;
+                move.is_special_neighborhood_move = true;
+                move.is_available                 = true;
+                move.overlap_rate                 = 0.0;
+                move.setup_related_constraint_ptrs();
+            }
         }
 
         /**
-         * Setup move updater.
+         * Setup move objects.
          */
         auto move_updater =                                 //
             [](auto      *a_moves_ptr,                      //
@@ -89,12 +77,6 @@ class ExclusiveORMoveGenerator
     num_threads(a_NUMBER_OF_THREADS)
 #endif
                 for (auto i = 0; i < MOVES_SIZE; i++) {
-                    if (!(*a_moves_ptr)[i]
-                             .associated_constraint_ptr->is_feasible()) {
-                        (*a_flags)[i] = 0;
-                        continue;
-                    }
-
                     (*a_flags)[i] = 1;
 
                     if (!(*a_moves_ptr)[i].is_available) {
@@ -102,22 +84,14 @@ class ExclusiveORMoveGenerator
                         continue;
                     }
 
+                    if ((*a_moves_ptr)[i].has_selection_variable()) {
+                        (*a_flags)[i] = 0;
+                        continue;
+                    }
+
                     if ((*a_moves_ptr)[i].has_fixed_variable()) {
                         (*a_flags)[i] = 0;
                         continue;
-                    }
-
-                    if ((*a_moves_ptr)[i].has_bound_violation()) {
-                        (*a_flags)[i] = 0;
-                        continue;
-                    }
-
-                    for (const auto &alteration :
-                         (*a_moves_ptr)[i].alterations) {
-                        if (alteration.first->value() == alteration.second) {
-                            (*a_flags)[i] = 0;
-                            break;
-                        }
                     }
 
                     if ((*a_flags)[i] == 0) {
@@ -129,13 +103,13 @@ class ExclusiveORMoveGenerator
                     } else {
                         if (a_ACCEPT_OBJECTIVE_IMPROVABLE &&
                             (*a_moves_ptr)[i]
-                                .has_objective_improvable_variable()) {
+                                .has_objective_improvable_variable_with_value_check()) {
                             continue;
                         }
 
                         if (a_ACCEPT_FEASIBILITY_IMPROVABLE &&
                             (*a_moves_ptr)[i]
-                                .has_feasibility_improvable_variable()) {
+                                .has_feasibility_improvable_variable_with_value_check()) {
                             continue;
                         }
                         (*a_flags)[i] = 0;

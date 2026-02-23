@@ -31,12 +31,12 @@ TEST_F(TestSelectionMoveGenerator, setup) {
     x(0) = 1;
 
     model.builder().setup_unique_names();
-    model.builder().setup_structure();
+    model.builder().update_derived_components();
 
     preprocess::SelectionExtractor<int, double> selection_extractor(&model);
     selection_extractor.extract_by_number_of_variables_order(false, false);
     x(0).select();
-    model.builder().setup_structure();
+    model.builder().update_derived_components();
 
     auto selection_variable_ptrs =
         model.reference().variable_type.selection_variable_ptrs;

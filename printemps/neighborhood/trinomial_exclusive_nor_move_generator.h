@@ -33,12 +33,12 @@ class TrinomialExclusiveNORMoveGenerator
         /**
          * Convert constraint objects to TrinomialConstraint objects.
          */
-        auto trinomial = convert_to_trinomial_constraints(constraint_ptrs);
+        auto trinomials = convert_to_trinomial_constraints(constraint_ptrs);
 
         /**
          * Setup move objects.
          */
-        const int TRINOMIALS_SIZE = trinomial.size();
+        const int TRINOMIALS_SIZE = trinomials.size();
 
         this->m_moves.clear();
         this->m_flags.clear();
@@ -49,45 +49,17 @@ class TrinomialExclusiveNORMoveGenerator
         for (auto i = 0; i < TRINOMIALS_SIZE; i++) {
             auto &move = this->m_moves[2 * i];
 
-            move.associated_constraint_ptr = constraint_ptrs[i];
+            move.associated_constraint_ptr = trinomials[i].constraint_ptrs;
             move.type                      = MoveType::TrinomialExclusiveNOR;
-            move.alterations.emplace_back(trinomial[i].variable_ptr_first, 0);
-            move.alterations.emplace_back(trinomial[i].variable_ptr_second, 0);
-            move.alterations.emplace_back(trinomial[i].variable_ptr_third, 0);
+            move.alterations.emplace_back(trinomials[i].variable_ptr_first, 0);
+            move.alterations.emplace_back(trinomials[i].variable_ptr_second, 0);
+            move.alterations.emplace_back(trinomials[i].variable_ptr_third, 0);
             move.is_univariable_move          = false;
             move.is_selection_move            = false;
             move.is_special_neighborhood_move = true;
             move.is_available                 = true;
             move.overlap_rate                 = 0.0;
-
-            move.related_constraint_ptrs.insert(
-                move.related_constraint_ptrs.end(),
-                trinomial[i]
-                    .variable_ptr_first->related_constraint_ptrs()
-                    .begin(),
-                trinomial[i]
-                    .variable_ptr_first->related_constraint_ptrs()
-                    .end());
-
-            move.related_constraint_ptrs.insert(
-                move.related_constraint_ptrs.end(),
-                trinomial[i]
-                    .variable_ptr_second->related_constraint_ptrs()
-                    .begin(),
-                trinomial[i]
-                    .variable_ptr_second->related_constraint_ptrs()
-                    .end());
-
-            move.related_constraint_ptrs.insert(
-                move.related_constraint_ptrs.end(),
-                trinomial[i]
-                    .variable_ptr_third->related_constraint_ptrs()
-                    .begin(),
-                trinomial[i]
-                    .variable_ptr_third->related_constraint_ptrs()
-                    .end());
-
-            move.sort_and_unique_related_constraint_ptrs();
+            move.setup_related_constraint_ptrs();
 
             this->m_moves[2 * i + 1] = move;
 

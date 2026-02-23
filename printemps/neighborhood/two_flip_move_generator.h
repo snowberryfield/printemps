@@ -50,26 +50,7 @@ class TwoFlipMoveGenerator
             move.is_special_neighborhood_move = true;
             move.is_available                 = true;
             move.overlap_rate                 = 0.0;
-
-            move.related_constraint_ptrs.insert(
-                move.related_constraint_ptrs.end(),
-                a_FLIPPABLE_VARIABLE_PTR_PAIRS[i]
-                    .first->related_constraint_ptrs()
-                    .begin(),
-                a_FLIPPABLE_VARIABLE_PTR_PAIRS[i]
-                    .first->related_constraint_ptrs()
-                    .end());
-
-            move.related_constraint_ptrs.insert(
-                move.related_constraint_ptrs.end(),
-                a_FLIPPABLE_VARIABLE_PTR_PAIRS[i]
-                    .second->related_constraint_ptrs()
-                    .begin(),
-                a_FLIPPABLE_VARIABLE_PTR_PAIRS[i]
-                    .second->related_constraint_ptrs()
-                    .end());
-
-            move.sort_and_unique_related_constraint_ptrs();
+            move.setup_related_constraint_ptrs();
 
             this->m_moves[2 * i + 1] = move;
 

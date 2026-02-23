@@ -37,7 +37,7 @@ TEST_F(TestMove, constructor) {
 }
 
 /*****************************************************************************/
-TEST_F(TestMove, sense_label) {
+TEST_F(TestMove, type_label) {
     /// This test is covered by other methods.
 }
 
@@ -134,6 +134,34 @@ TEST_F(TestMove, has_objective_improvable_variable) {
 }
 
 /*****************************************************************************/
+TEST_F(TestMove, has_objective_improvable_variable_with_value_check) {
+    auto variable_0 = model_component::Variable<int, double>::create_instance();
+    auto variable_1 = model_component::Variable<int, double>::create_instance();
+    variable_0.set_is_objective_improvable(false);
+    variable_1.set_is_objective_improvable(true);
+
+    /// The move does not have an objective improvable variable.
+    {
+        neighborhood::Move<int, double> move;
+        variable_0 = 0;
+        variable_1 = 1;
+        move.alterations.emplace_back(&variable_0, 1);
+        move.alterations.emplace_back(&variable_1, 1);
+        EXPECT_FALSE(move.has_objective_improvable_variable_with_value_check());
+    }
+
+    /// The move has an objective improvable variable.
+    {
+        neighborhood::Move<int, double> move;
+        variable_0 = 0;
+        variable_1 = 0;
+        move.alterations.emplace_back(&variable_0, 1);
+        move.alterations.emplace_back(&variable_1, 1);
+        EXPECT_TRUE(move.has_objective_improvable_variable_with_value_check());
+    }
+}
+
+/*****************************************************************************/
 TEST_F(TestMove, has_feasibility_improvable_variable) {
     auto variable_0 = model_component::Variable<int, double>::create_instance();
     auto variable_1 = model_component::Variable<int, double>::create_instance();
@@ -153,6 +181,36 @@ TEST_F(TestMove, has_feasibility_improvable_variable) {
         move.alterations.emplace_back(&variable_0, 1);
         move.alterations.emplace_back(&variable_1, 1);
         EXPECT_TRUE(move.has_feasibility_improvable_variable());
+    }
+}
+
+/*****************************************************************************/
+TEST_F(TestMove, has_feasibility_improvable_variable_with_value_check) {
+    auto variable_0 = model_component::Variable<int, double>::create_instance();
+    auto variable_1 = model_component::Variable<int, double>::create_instance();
+    variable_0.set_is_feasibility_improvable(false);
+    variable_1.set_is_feasibility_improvable(true);
+
+    /// The move does not have a feasibility improvable variable.
+    {
+        neighborhood::Move<int, double> move;
+        variable_0 = 0;
+        variable_1 = 1;
+        move.alterations.emplace_back(&variable_0, 1);
+        move.alterations.emplace_back(&variable_1, 1);
+        EXPECT_FALSE(
+            move.has_feasibility_improvable_variable_with_value_check());
+    }
+
+    /// The move has a feasibility improvable variable.
+    {
+        neighborhood::Move<int, double> move;
+        variable_0 = 0;
+        variable_1 = 0;
+        move.alterations.emplace_back(&variable_0, 1);
+        move.alterations.emplace_back(&variable_1, 1);
+        EXPECT_TRUE(
+            move.has_feasibility_improvable_variable_with_value_check());
     }
 }
 
@@ -179,7 +237,7 @@ TEST_F(TestMove, has_duplicate_variable) {
 }
 
 /*****************************************************************************/
-TEST_F(TestMove, compute_overlap_rate) {
+TEST_F(TestMove, setup_overlap_rate) {
     model::Model<int, double> model;
     auto&                     x = model.create_variables("x", 4, 0, 1);
     auto&                     g = model.create_constraints("g", 3);
@@ -228,11 +286,11 @@ TEST_F(TestMove, compute_overlap_rate) {
 }
 
 /*****************************************************************************/
-TEST_F(TestMove, compute_hash) {
+TEST_F(TestMove, setup_hash) {
     model::Model<int, double> model;
     auto&                     x = model.create_variables("x", 4, 0, 1);
 
-    model.builder().setup_structure();
+    model.builder().update_derived_components();
 
     /// Case 1
     {
@@ -287,6 +345,57 @@ TEST_F(TestMove, compute_hash) {
 }
 
 /*****************************************************************************/
+TEST_F(TestMove, setup_related_constraint_ptrs) {
+    model::Model<int, double> model;
+
+    auto& x = model.create_variables("x", 3, 0, 1);
+    auto& g = model.create_constraints("g", 3);
+
+    g(0) = x(2) <= 1;
+    g(1) = x(1) + x(2) <= 1;
+    g(2) = x(0) + x(1) + x(2) <= 1;
+
+    model.builder().setup_unique_names();
+    model.builder().update_derived_components();
+
+    neighborhood::Move<int, double> move;
+    move.alterations.emplace_back(&x(0), 1);
+    move.alterations.emplace_back(&x(1), 1);
+    move.alterations.emplace_back(&x(2), 1);
+
+    move.setup_related_constraint_ptrs();
+
+    EXPECT_EQ(3, static_cast<int>(move.related_constraint_ptrs.size()));
+    EXPECT_EQ(&g(0), move.related_constraint_ptrs[0]);
+    EXPECT_EQ(&g(1), move.related_constraint_ptrs[1]);
+    EXPECT_EQ(&g(2), move.related_constraint_ptrs[2]);
+}
+
+/*****************************************************************************/
+TEST_F(TestMove, related_variable_ptrs_vector) {
+    model::Model<int, double> model;
+
+    auto& x = model.create_variables("x", 3, 0, 1);
+
+    neighborhood::Move<int, double> move;
+    move.alterations.emplace_back(&x(0), 1);
+    move.alterations.emplace_back(&x(1), 1);
+    move.alterations.emplace_back(&x(2), 1);
+
+    auto related_variable_ptrs_vector = move.related_variable_ptrs_vector();
+
+    EXPECT_EQ(3, static_cast<int>(related_variable_ptrs_vector.size()));
+    EXPECT_EQ(&x(0), related_variable_ptrs_vector[0]);
+    EXPECT_EQ(&x(1), related_variable_ptrs_vector[1]);
+    EXPECT_EQ(&x(2), related_variable_ptrs_vector[2]);
+}
+
+/*****************************************************************************/
+TEST_F(TestMove, sort_and_unique_related_constraint_ptrs) {
+    /// This test is covered by setup_related_constraint_ptrs().
+}
+
+/*****************************************************************************/
 TEST_F(TestMove, operator_plus) {
     model::Model<int, double> model;
 
@@ -299,7 +408,7 @@ TEST_F(TestMove, operator_plus) {
     [[maybe_unused]] auto& v = model.create_constraint("v", x + z <= 10);
 
     model.builder().setup_unique_names();
-    model.builder().setup_structure();
+    model.builder().update_derived_components();
 
     auto variable_ptrs = model.reference().variable.variable_ptrs;
 

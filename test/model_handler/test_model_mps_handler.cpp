@@ -26,7 +26,7 @@ TEST_F(TestModelMPSHandler, import) {
 
     model::Model<int, double> model;
     model.mps_handler().import(mps, true);
-    model.builder().setup_structure();
+    model.builder().update_derived_components();
 
     EXPECT_EQ(60, model.reference().number_of_variables());
     EXPECT_EQ(3, model.reference().number_of_constraints());

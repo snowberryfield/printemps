@@ -234,16 +234,18 @@ struct Status {
             "averaged_number_of_threads_move_evaluation",  //
             this->averaged_number_of_threads_move_evaluation);
 
-        const auto &PROBLEM_SIZE_REDUCER =
-            this->model_ptr->problem_size_reducer();
+        const auto &PROBLEM_SIZE_REDUCER_BASIC =
+            this->model_ptr->problem_size_reducer_basic();
 
         a_object->emplace_back(                           //
             "variable_bound_update_count_in_preprocess",  //
-            PROBLEM_SIZE_REDUCER.variable_bound_update_count_in_preprocess());
+            PROBLEM_SIZE_REDUCER_BASIC
+                .variable_bound_update_count_in_preprocess());
 
         a_object->emplace_back(                             //
             "variable_bound_update_count_in_optimization",  //
-            PROBLEM_SIZE_REDUCER.variable_bound_update_count_in_optimization());
+            PROBLEM_SIZE_REDUCER_BASIC
+                .variable_bound_update_count_in_optimization());
     }
 
     /*************************************************************************/

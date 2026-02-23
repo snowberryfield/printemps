@@ -166,8 +166,9 @@ template <class T_Variable, class T_Expression>
 inline std::vector<BinomialConstraint<T_Variable, T_Expression>>
 convert_to_binomial_constraints(
     const std::vector<model_component::Constraint<T_Variable, T_Expression> *>
-        &a_CONSTRAINT_PTRS) {
-    std::vector<BinomialConstraint<T_Variable, T_Expression>> results;
+              &a_CONSTRAINT_PTRS,
+    const bool a_IS_ENABLED_EXCLUDE_OVERLAPPING) {
+    std::vector<BinomialConstraint<T_Variable, T_Expression>> results_raw;
     for (const auto &constraint_ptr : a_CONSTRAINT_PTRS) {
         auto &expression = constraint_ptr->expression();
 
@@ -186,16 +187,44 @@ convert_to_binomial_constraints(
 
         BinomialConstraint<T_Variable, T_Expression> binomial;
 
+        binomial.constraint_ptr      = constraint_ptr;
         binomial.variable_ptr_first  = vector_pair.first[0];
         binomial.variable_ptr_second = vector_pair.first[1];
         binomial.sensitivity_first   = vector_pair.second[0];
         binomial.sensitivity_second  = vector_pair.second[1];
         binomial.constant_value      = expression.constant_value();
         binomial.sense               = constraint_ptr->sense();
-        results.push_back(binomial);
+        results_raw.push_back(binomial);
     }
 
-    return results;
+    if (!a_IS_ENABLED_EXCLUDE_OVERLAPPING) {
+        return results_raw;
+    }
+
+    const int BINOMIALS_RAW_SIZE = static_cast<int>(results_raw.size());
+    std::unordered_map<model_component::Variable<T_Variable, T_Expression> *,
+                       int>
+        variable_count;
+
+    variable_count.reserve(2 * BINOMIALS_RAW_SIZE);
+
+    for (const auto &binomial : results_raw) {
+        variable_count[binomial.variable_ptr_first]++;
+        variable_count[binomial.variable_ptr_second]++;
+    }
+
+    std::vector<BinomialConstraint<T_Variable, T_Expression>>
+        results_exlude_overlapping;
+    results_exlude_overlapping.reserve(BINOMIALS_RAW_SIZE);
+    for (const auto &binomial : results_raw) {
+        if (variable_count[binomial.variable_ptr_first] > 1 ||
+            variable_count[binomial.variable_ptr_second] > 1) {
+            continue;
+        }
+        results_exlude_overlapping.push_back(binomial);
+    }
+
+    return results_exlude_overlapping;
 }
 
 /*****************************************************************************/
@@ -218,6 +247,7 @@ convert_to_trinomial_constraints(
 
         TrinomialConstraint<T_Variable, T_Expression> trinomial;
 
+        trinomial.constraint_ptrs     = constraint_ptr;
         trinomial.variable_ptr_first  = vector_pair.first[0];
         trinomial.variable_ptr_second = vector_pair.first[1];
         trinomial.variable_ptr_third  = vector_pair.first[2];

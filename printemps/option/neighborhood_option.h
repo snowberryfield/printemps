@@ -28,8 +28,10 @@ struct NeighborhoodOptionConstant {
     static constexpr bool DEFAULT_IS_ENABLED_SOFT_SELECTION_MOVE = true;
     static constexpr bool DEFAULT_IS_ENABLED_CHAIN_MOVE          = true;
     static constexpr bool DEFAULT_IS_ENABLED_TWO_FLIP_MOVE       = false;
-    static constexpr bool DEFAULT_IS_ENABLED_USER_DEFINED_MOVE   = false;
-    static constexpr int  DEFAULT_CHAIN_MOVE_CAPACITY            = 100000;
+    static constexpr bool DEFAULT_IS_ENABLED_PARTIAL_FEASIBLE_ENUMERATION_MOVE =
+        false;
+    static constexpr bool DEFAULT_IS_ENABLED_USER_DEFINED_MOVE = false;
+    static constexpr int  DEFAULT_CHAIN_MOVE_CAPACITY          = 100000;
     static constexpr chain_move_reduce_mode::ChainMoveReduceMode
         DEFAULT_CHAIN_MOVE_REDUCE_MODE = chain_move_reduce_mode::OverlapRate;
 
@@ -62,6 +64,7 @@ struct NeighborhoodOption {
     bool is_enabled_soft_selection_move;
     bool is_enabled_chain_move;
     bool is_enabled_two_flip_move;
+    bool is_enabled_partial_feasible_enumeration_move;
     bool is_enabled_user_defined_move;
 
     int                                         chain_move_capacity;
@@ -122,6 +125,9 @@ struct NeighborhoodOption {
             NeighborhoodOptionConstant::DEFAULT_IS_ENABLED_CHAIN_MOVE;
         this->is_enabled_two_flip_move =
             NeighborhoodOptionConstant::DEFAULT_IS_ENABLED_TWO_FLIP_MOVE;
+        this->is_enabled_partial_feasible_enumeration_move =
+            NeighborhoodOptionConstant::
+                DEFAULT_IS_ENABLED_PARTIAL_FEASIBLE_ENUMERATION_MOVE;
         this->is_enabled_user_defined_move =
             NeighborhoodOptionConstant::DEFAULT_IS_ENABLED_USER_DEFINED_MOVE;
         this->chain_move_capacity =
@@ -220,6 +226,11 @@ struct NeighborhoodOption {
             " -- neighborhood.is_enabled_two_flip_move: " +  //
             utility::to_true_or_false(                       //
                 this->is_enabled_two_flip_move));
+
+        utility::print(  //
+            " -- neighborhood.is_enabled_partial_feasible_enumeration_move: " +  //
+            utility::to_true_or_false(  //
+                this->is_enabled_partial_feasible_enumeration_move));
 
         utility::print(                                          //
             " -- neighborhood.is_enabled_user_defined_move: " +  //
@@ -324,6 +335,10 @@ struct NeighborhoodOption {
             &this->is_enabled_two_flip_move,  //
             "is_enabled_two_flip_move", a_OBJECT);
 
+        read_json(                                                //
+            &this->is_enabled_partial_feasible_enumeration_move,  //
+            "is_enabled_partial_feasible_enumeration_move", a_OBJECT);
+
         read_json(                                //
             &this->is_enabled_user_defined_move,  //
             "is_enabled_user_defined_move", a_OBJECT);
@@ -419,6 +434,10 @@ struct NeighborhoodOption {
         obj.emplace_back(                //
             "is_enabled_two_flip_move",  //
             this->is_enabled_two_flip_move);
+
+        obj.emplace_back(                                    //
+            "is_enabled_partial_feasible_enumeration_move",  //
+            this->is_enabled_partial_feasible_enumeration_move);
 
         obj.emplace_back(                    //
             "is_enabled_user_defined_move",  //

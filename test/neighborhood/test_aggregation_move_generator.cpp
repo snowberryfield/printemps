@@ -27,7 +27,7 @@ TEST_F(TestAggregationMoveGenerator, setup) {
     auto& c = model.create_constraint("c", 2 * x[0] + 4 * x[1] == 10);
 
     model.builder().setup_unique_names();
-    model.builder().setup_structure();
+    model.builder().update_derived_components();
 
     auto aggregation_ptrs = model.reference().constraint_type.aggregation_ptrs;
 

@@ -33,7 +33,7 @@ class VariableBoundMoveGenerator
         /**
          * Convert constraint objects to BinomialConstraint objects.
          */
-        auto binomials = convert_to_binomial_constraints(constraint_ptrs);
+        auto binomials = convert_to_binomial_constraints(constraint_ptrs, true);
 
         /**
          * Setup move objects.
@@ -58,26 +58,7 @@ class VariableBoundMoveGenerator
             move.is_special_neighborhood_move = true;
             move.is_available                 = true;
             move.overlap_rate                 = 0.0;
-
-            move.related_constraint_ptrs.insert(
-                move.related_constraint_ptrs.end(),
-                binomials[i]
-                    .variable_ptr_first->related_constraint_ptrs()
-                    .begin(),
-                binomials[i]
-                    .variable_ptr_first->related_constraint_ptrs()
-                    .end());
-
-            move.related_constraint_ptrs.insert(
-                move.related_constraint_ptrs.end(),
-                binomials[i]
-                    .variable_ptr_second->related_constraint_ptrs()
-                    .begin(),
-                binomials[i]
-                    .variable_ptr_second->related_constraint_ptrs()
-                    .end());
-
-            move.sort_and_unique_related_constraint_ptrs();
+            move.setup_related_constraint_ptrs();
 
             this->m_moves[4 * i + 1] = move;
             this->m_moves[4 * i + 2] = move;

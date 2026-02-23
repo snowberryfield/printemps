@@ -42,6 +42,8 @@ TEST_F(TestMoveType, MoveTypeMap) {
               MoveTypeMap.at("Trinomial Exclusive NOR"));
     EXPECT_EQ(MoveType::Chain, MoveTypeMap.at("Chain"));
     EXPECT_EQ(MoveType::TwoFlip, MoveTypeMap.at("Two Flip"));
+    EXPECT_EQ(MoveType::PartialFeasibleEnumeration,
+              MoveTypeMap.at("Partial Feasible Enumeration"));
     EXPECT_EQ(MoveType::UserDefined, MoveTypeMap.at("User Defined"));
     EXPECT_EQ(MoveType::General, MoveTypeMap.at("General"));
 }
@@ -73,6 +75,8 @@ TEST_F(TestMoveType, MoveTypeInverseMap) {
               MoveTypeInverseMap.at(MoveType::TrinomialExclusiveNOR));
     EXPECT_EQ("Chain", MoveTypeInverseMap.at(MoveType::Chain));
     EXPECT_EQ("Two Flip", MoveTypeInverseMap.at(MoveType::TwoFlip));
+    EXPECT_EQ("Partial Feasible Enumeration",
+              MoveTypeInverseMap.at(MoveType::PartialFeasibleEnumeration));
     EXPECT_EQ("User Defined", MoveTypeInverseMap.at(MoveType::UserDefined));
     EXPECT_EQ("General", MoveTypeInverseMap.at(MoveType::General));
 }

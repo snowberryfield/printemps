@@ -110,7 +110,6 @@ TEST_F(TestOption, setup) {
             option.penalty.is_enabled_shrink_penalty_coefficient);
 
         /// parallel
-
         EXPECT_EQ(  //
             false,  //
             option.parallel.is_enabled_move_update_parallelization);
@@ -143,6 +142,10 @@ TEST_F(TestOption, setup) {
         EXPECT_EQ(  //
             false,  //
             option.preprocess.is_enabled_remove_duplicated_constraints);
+
+        EXPECT_EQ(  //
+            false,  //
+            option.preprocess.is_enabled_remove_implicit_fixed_variables);
 
         EXPECT_EQ(  //
             false,  //
@@ -206,6 +209,9 @@ TEST_F(TestOption, setup) {
         EXPECT_EQ(  //
             false, option.preprocess.is_enabled_extract_dependent_intermediate);
 
+        EXPECT_EQ(  //
+            false, option.preprocess.is_enabled_partial_feasible_enumeration);
+
         /// neighborhood
         EXPECT_EQ(  //
             false,  //
@@ -256,7 +262,7 @@ TEST_F(TestOption, setup) {
             option.neighborhood.is_enabled_variable_bound_move);
 
         EXPECT_EQ(  //
-            true,   //
+            false,  //
             option.neighborhood.is_enabled_soft_selection_move);
 
         EXPECT_EQ(  //
@@ -266,6 +272,10 @@ TEST_F(TestOption, setup) {
         EXPECT_EQ(  //
             true,   //
             option.neighborhood.is_enabled_two_flip_move);
+
+        EXPECT_EQ(  //
+            true,   //
+            option.neighborhood.is_enabled_partial_feasible_enumeration_move);
 
         EXPECT_EQ(  //
             1,      //
@@ -719,6 +729,10 @@ TEST_F(TestOption, to_json) {
 
     EXPECT_EQ(  //
         false,  //
+        to_bool(preprocess.at("is_enabled_remove_implicit_fixed_variables")));
+
+    EXPECT_EQ(  //
+        false,  //
         to_bool(preprocess.at("is_enabled_remove_redundant_set_variables")));
 
     EXPECT_EQ(  //
@@ -784,6 +798,10 @@ TEST_F(TestOption, to_json) {
         false,  //
         to_bool(preprocess.at("is_enabled_extract_dependent_intermediate")));
 
+    EXPECT_EQ(  //
+        false,  //
+        to_bool(preprocess.at("is_enabled_partial_feasible_enumeration")));
+
     /// neighborhood
     auto neighborhood =
         std::any_cast<utility::json::JsonObject>(obj.at("neighborhood"));
@@ -838,7 +856,7 @@ TEST_F(TestOption, to_json) {
         to_bool(neighborhood.at("is_enabled_variable_bound_move")));
 
     EXPECT_EQ(  //
-        true,   //
+        false,  //
         to_bool(neighborhood.at("is_enabled_soft_selection_move")));
 
     EXPECT_EQ(  //
@@ -848,6 +866,11 @@ TEST_F(TestOption, to_json) {
     EXPECT_EQ(  //
         true,   //
         to_bool(neighborhood.at("is_enabled_two_flip_move")));
+
+    EXPECT_EQ(  //
+        true,   //
+        to_bool(
+            neighborhood.at("is_enabled_partial_feasible_enumeration_move")));
 
     EXPECT_EQ(  //
         1,      //

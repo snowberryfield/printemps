@@ -14,6 +14,8 @@ struct PreprocessOptionConstant {
     static constexpr bool  //
         DEFAULT_IS_ENABLED_REMOVE_DUPLICATED_CONSTRAINTS = true;
     static constexpr bool  //
+        DEFAULT_IS_ENABLED_REMOVE_IMPLICIT_FIXED_VARIABLES = true;
+    static constexpr bool  //
         DEFAULT_IS_ENABLED_REMOVE_REDUNDANT_SET_VARIABLES = true;
     static constexpr bool  //
         DEFAULT_IS_ENABLED_REMOVE_REDUNDANT_SET_CONSTRAINTS = true;
@@ -44,12 +46,15 @@ struct PreprocessOptionConstant {
         DEFAULT_IS_ENABLED_EXTRACT_DEPENDENT_ALL_OR_NOTHING = true;
     static constexpr bool  //
         DEFAULT_IS_ENABLED_EXTRACT_DEPENDENT_INTERMEDIATE = true;
+    static constexpr bool  //
+        DEFAULT_IS_ENABLED_PARTIAL_FEASIBLE_ENUMERATION = true;
 };
 
 /*****************************************************************************/
 struct PreprocessOption {
     bool is_enabled_presolve;
     bool is_enabled_remove_duplicated_constraints;
+    bool is_enabled_remove_implicit_fixed_variables;
     bool is_enabled_remove_redundant_set_variables;
     bool is_enabled_remove_redundant_set_constraints;
     bool is_enabled_extract_implicit_equality_constraints;
@@ -65,6 +70,7 @@ struct PreprocessOption {
     bool is_enabled_extract_dependent_trinomial_exclusive_nor;
     bool is_enabled_extract_dependent_all_or_nothing;
     bool is_enabled_extract_dependent_intermediate;
+    bool is_enabled_partial_feasible_enumeration;
 
     /*************************************************************************/
     PreprocessOption(void) {
@@ -84,6 +90,10 @@ struct PreprocessOption {
         this->is_enabled_remove_duplicated_constraints =
             PreprocessOptionConstant::
                 DEFAULT_IS_ENABLED_REMOVE_DUPLICATED_CONSTRAINTS;
+
+        this->is_enabled_remove_implicit_fixed_variables =
+            PreprocessOptionConstant::
+                DEFAULT_IS_ENABLED_REMOVE_IMPLICIT_FIXED_VARIABLES;
 
         this->is_enabled_remove_redundant_set_variables =
             PreprocessOptionConstant::
@@ -142,6 +152,10 @@ struct PreprocessOption {
         this->is_enabled_extract_dependent_intermediate =
             PreprocessOptionConstant::
                 DEFAULT_IS_ENABLED_EXTRACT_DEPENDENT_INTERMEDIATE;
+
+        this->is_enabled_partial_feasible_enumeration =
+            PreprocessOptionConstant::
+                DEFAULT_IS_ENABLED_PARTIAL_FEASIBLE_ENUMERATION;
     }
 
     /*************************************************************************/
@@ -155,6 +169,11 @@ struct PreprocessOption {
             " -- preprocess.is_enabled_remove_duplicated_constraints: " +  //
             utility::to_true_or_false(                                     //
                 this->is_enabled_remove_duplicated_constraints));
+
+        utility::print(                                                      //
+            " -- preprocess.is_enabled_remove_implicit_fixed_variables: " +  //
+            utility::to_true_or_false(                                       //
+                this->is_enabled_remove_implicit_fixed_variables));
 
         utility::print(                                                     //
             " -- preprocess.is_enabled_remove_redundant_set_variables: " +  //
@@ -242,6 +261,11 @@ struct PreprocessOption {
             " -- preprocess.is_enabled_extract_dependent_intermediate: " +  //
             utility::to_true_or_false(                                      //
                 this->is_enabled_extract_dependent_intermediate));
+
+        utility::print(                                                   //
+            " -- preprocess.is_enabled_partial_feasible_enumeration: " +  //
+            utility::to_true_or_false(                                    //
+                this->is_enabled_partial_feasible_enumeration));
     }
 
     /**************************************************************************/
@@ -255,6 +279,10 @@ struct PreprocessOption {
         read_json(                                            //
             &this->is_enabled_remove_duplicated_constraints,  //
             "is_enabled_remove_duplicated_constraints", a_OBJECT);
+
+        read_json(                                              //
+            &this->is_enabled_remove_implicit_fixed_variables,  //
+            "is_enabled_remove_implicit_fixed_variables", a_OBJECT);
 
         read_json(                                             //
             &this->is_enabled_remove_redundant_set_variables,  //
@@ -316,6 +344,10 @@ struct PreprocessOption {
         read_json(                                             //
             &this->is_enabled_extract_dependent_intermediate,  //
             "is_enabled_extract_dependent_intermediate", a_OBJECT);
+
+        read_json(                                           //
+            &this->is_enabled_partial_feasible_enumeration,  //
+            "is_enabled_partial_feasible_enumeration", a_OBJECT);
     }
 
     /**************************************************************************/
@@ -328,6 +360,10 @@ struct PreprocessOption {
         obj.emplace_back(                                //
             "is_enabled_remove_duplicated_constraints",  //
             this->is_enabled_remove_duplicated_constraints);
+
+        obj.emplace_back(                                  //
+            "is_enabled_remove_implicit_fixed_variables",  //
+            this->is_enabled_remove_implicit_fixed_variables);
 
         obj.emplace_back(                                 //
             "is_enabled_remove_redundant_set_variables",  //
@@ -388,6 +424,10 @@ struct PreprocessOption {
         obj.emplace_back(                                 //
             "is_enabled_extract_dependent_intermediate",  //
             this->is_enabled_extract_dependent_intermediate);
+
+        obj.emplace_back(                               //
+            "is_enabled_partial_feasible_enumeration",  //
+            this->is_enabled_partial_feasible_enumeration);
 
         return obj;
     }

@@ -34,6 +34,7 @@
     "preprocess": {
         "is_enabled_presolve": false,
         "is_enabled_remove_duplicated_constraints": false,
+        "is_enabled_remove_implicit_fixed_variables": false,
         "is_enabled_remove_redundant_set_variables": false,
         "is_enabled_remove_redundant_set_constraints": false,
         "is_enabled_extract_implicit_equality_constraints": false,
@@ -48,7 +49,8 @@
         "is_enabled_extract_dependent_constant_ratio_integers": false,
         "is_enabled_extract_dependent_trinomial_exclusive_nor" : false,
         "is_enabled_extract_dependent_all_or_nothing" : false,
-        "is_enabled_extract_dependent_intermediate": false
+        "is_enabled_extract_dependent_intermediate": false,
+        "is_enabled_partial_feasible_enumeration": false
     },
     "neighborhood": {
         "is_enabled_binary_move": false,
@@ -64,9 +66,10 @@
         "is_enabled_precedence_move": true,
         "is_enabled_variable_bound_move": true,
         "is_enabled_trinomial_exclusive_nor_move": false,
-        "is_enabled_soft_selection_move": true,
+        "is_enabled_soft_selection_move": false,
         "is_enabled_chain_move": false,
         "is_enabled_two_flip_move": true,
+        "is_enabled_partial_feasible_enumeration_move": true,
         "is_enabled_user_defined_move": true,
         "chain_move_capacity": 1,
         "chain_move_reduce_mode": 1,
