@@ -28,7 +28,7 @@ class ModelComponentCreator {
    public:
     /*************************************************************************/
     ModelComponentCreator(void) {
-        m_model_ptr = nullptr;
+        this->initialize();
     }
 
     /*************************************************************************/

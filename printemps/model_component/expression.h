@@ -498,7 +498,7 @@ class Expression : public multi_array::AbstractMultiArrayElement {
         structure.is_integer                             = true;
         structure.has_only_binary_coefficient            = true;
         structure.has_only_binary_or_selection_variable  = true;
-        structure.has_only_integer_variables             = true;
+        structure.has_only_integer_variable              = true;
         structure.has_only_plus_or_minus_one_coefficient = true;
         structure.has_bin_packing_variable               = false;
         structure.max_abs_coefficient                    = 0;
@@ -535,7 +535,7 @@ class Expression : public multi_array::AbstractMultiArrayElement {
             }
 
             if (variable_ptr->type() != VariableType::Integer) {
-                structure.has_only_integer_variables = false;
+                structure.has_only_integer_variable = false;
             }
 
             if (std::abs(coefficient) != 1) {

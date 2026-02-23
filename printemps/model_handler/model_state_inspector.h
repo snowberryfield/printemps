@@ -16,7 +16,7 @@ class ModelStateInspector {
    public:
     /*************************************************************************/
     ModelStateInspector(void) {
-        m_model_ptr = nullptr;
+        this->initialize();
     }
 
     /*************************************************************************/

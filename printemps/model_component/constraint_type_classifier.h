@@ -586,7 +586,7 @@ class ConstraintTypeClassifier {
             return false;
         }
 
-        if (!m_structure_ptr->has_only_integer_variables) {
+        if (!m_structure_ptr->has_only_integer_variable) {
             return false;
         }
 

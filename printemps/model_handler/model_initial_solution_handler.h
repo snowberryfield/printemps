@@ -16,7 +16,7 @@ class ModelInitialSolutionHandler {
    public:
     /*************************************************************************/
     ModelInitialSolutionHandler(void) {
-        m_model_ptr = nullptr;
+        this->initialize();
     }
 
     /*************************************************************************/

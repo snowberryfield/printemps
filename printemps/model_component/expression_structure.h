@@ -20,7 +20,7 @@ struct ExpressionStructure {
     bool is_integer;
     bool has_only_binary_coefficient;
     bool has_only_binary_or_selection_variable;
-    bool has_only_integer_variables;
+    bool has_only_integer_variable;
     bool has_only_plus_or_minus_one_coefficient;
     bool has_bin_packing_variable;
 
@@ -62,7 +62,7 @@ struct ExpressionStructure {
         this->is_integer                             = false;
         this->has_only_binary_coefficient            = false;
         this->has_only_binary_or_selection_variable  = false;
-        this->has_only_integer_variables             = false;
+        this->has_only_integer_variable              = false;
         this->has_only_plus_or_minus_one_coefficient = false;
         this->has_bin_packing_variable               = false;
         this->max_abs_coefficient                    = 0.0;
