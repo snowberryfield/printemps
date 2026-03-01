@@ -29,7 +29,7 @@ TEST_F(TestPartialFeasibleEnumerationMoveGenerator, setup) {
     f(1)    = x(0) + x(1) + x(2) + x(3) == 3;
     model.builder().setup_unique_names();
     model.builder().update_derived_components();
-    model.partial_feasible_enumerator().enumerate(true);
+    model.partial_feasible_enumerator().enumerate(false);
 
     const auto small_constraint_groups =
         model.partial_feasible_enumerator().small_constraint_groups();

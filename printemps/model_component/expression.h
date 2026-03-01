@@ -479,12 +479,46 @@ class Expression : public multi_array::AbstractMultiArrayElement {
     }
 
     /*********************************************************************/
+    inline std::vector<
+        std::pair<Variable<T_Variable, T_Expression> *, T_Expression> >
+    sensitivities_pair_vector(
+        const bool a_IS_ENABLED_EXCLUDE_FIXED_VARIABLE) const noexcept {
+        auto pair_vector = utility::to_pair_vector(m_sensitivities);
+
+        if (a_IS_ENABLED_EXCLUDE_FIXED_VARIABLE) {
+            std::vector<
+                std::pair<Variable<T_Variable, T_Expression> *, T_Expression> >
+                filtered;
+
+            filtered.reserve(pair_vector.size());
+
+            for (auto &&pair : pair_vector) {
+                if (!pair.first->is_fixed()) {
+                    filtered.emplace_back(std::move(pair));
+                }
+            }
+
+            pair_vector = std::move(filtered);
+        }
+
+        std::sort(pair_vector.begin(), pair_vector.end(),
+                  [](const auto &a_FIRST, const auto &a_SECOND) {
+                      return a_FIRST.first->name() < a_SECOND.first->name();
+                  });
+
+        return pair_vector;
+    }
+
+    /*********************************************************************/
     inline ExpressionStructure<T_Variable, T_Expression> structure(void) const {
         ExpressionStructure<T_Variable, T_Expression> structure;
 
         structure.constant_value      = m_constant_value;
         structure.number_of_variables = 0;
-        for (const auto &sensitivity : m_sensitivities) {
+
+        auto SENSITIVITIES_PAIR_VECTOR = this->sensitivities_pair_vector(false);
+
+        for (const auto &sensitivity : SENSITIVITIES_PAIR_VECTOR) {
             auto variable_ptr = sensitivity.first;
             auto coefficient  = sensitivity.second;
 

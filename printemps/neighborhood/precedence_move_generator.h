@@ -51,8 +51,8 @@ class PrecedenceMoveGenerator
 
             move.associated_constraint_ptr = binomials[i].constraint_ptr;
             move.type                      = MoveType::Precedence;
-            move.alterations.emplace_back(binomials[i].variable_ptr_first, 0);
-            move.alterations.emplace_back(binomials[i].variable_ptr_second, 0);
+            move.alterations.emplace_back(binomials[i].variable_ptrs[0], 0);
+            move.alterations.emplace_back(binomials[i].variable_ptrs[1], 0);
             move.is_univariable_move          = false;
             move.is_selection_move            = false;
             move.is_special_neighborhood_move = true;
@@ -91,18 +91,18 @@ class PrecedenceMoveGenerator
                         auto &alterations = (*a_moves_ptr)[index].alterations;
 
                         alterations[0].second =
-                            binomials[i].variable_ptr_first->value() + 1;
+                            binomials[i].variable_ptrs[0]->value() + 1;
                         alterations[1].second =
-                            binomials[i].variable_ptr_second->value() + 1;
+                            binomials[i].variable_ptrs[1]->value() + 1;
                     }
                     {
                         auto  index       = 2 * i + 1;
                         auto &alterations = (*a_moves_ptr)[index].alterations;
 
                         alterations[0].second =
-                            binomials[i].variable_ptr_first->value() - 1;
+                            binomials[i].variable_ptrs[0]->value() - 1;
                         alterations[1].second =
-                            binomials[i].variable_ptr_second->value() - 1;
+                            binomials[i].variable_ptrs[1]->value() - 1;
                     }
                 }
 

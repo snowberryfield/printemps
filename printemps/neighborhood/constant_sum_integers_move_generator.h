@@ -54,8 +54,8 @@ class ConstantSumIntegersMoveGenerator
 
             move.associated_constraint_ptr = constraint_ptrs[i];
             move.type                      = MoveType::ConstantSumIntegers;
-            move.alterations.emplace_back(binomials[i].variable_ptr_first, 0);
-            move.alterations.emplace_back(binomials[i].variable_ptr_second, 0);
+            move.alterations.emplace_back(binomials[i].variable_ptrs[0], 0);
+            move.alterations.emplace_back(binomials[i].variable_ptrs[1], 0);
             move.is_univariable_move          = false;
             move.is_selection_move            = false;
             move.is_special_neighborhood_move = true;
@@ -97,7 +97,7 @@ class ConstantSumIntegersMoveGenerator
                         auto &alterations = (*a_moves_ptr)[index].alterations;
 
                         alterations[0].second =
-                            binomials[i].variable_ptr_first->value() + 1;
+                            binomials[i].variable_ptrs[0]->value() + 1;
                         alterations[1].second =
                             -constant_values[i] - alterations[0].second;
                     }
@@ -106,7 +106,7 @@ class ConstantSumIntegersMoveGenerator
                         auto &alterations = (*a_moves_ptr)[index].alterations;
 
                         alterations[0].second =
-                            binomials[i].variable_ptr_first->value() - 1;
+                            binomials[i].variable_ptrs[0]->value() - 1;
                         alterations[1].second =
                             -constant_values[i] - alterations[0].second;
                     }

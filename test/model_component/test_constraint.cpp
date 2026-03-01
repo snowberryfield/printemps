@@ -398,7 +398,7 @@ TEST_F(TestConstraint, setup_arg_expression) {
 
 /*****************************************************************************/
 TEST_F(TestConstraint, update_structure) {
-    /// This test is covered by setup_arg_expression().
+    /// This test is covered by ≈().
 }
 
 /*****************************************************************************/
@@ -427,7 +427,7 @@ TEST_F(TestConstraint, update_constraint_type) {
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraint, evaluate_constraint_arg_void) {
+TEST_F(TestConstraint, update_arg_void) {
     auto expression =
         model_component::Expression<int, double>::create_instance();
     auto variable = model_component::Variable<int, double>::create_instance();
@@ -457,7 +457,7 @@ TEST_F(TestConstraint, evaluate_constraint_arg_void) {
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraint, evaluate_expression_arg_move) {
+TEST_F(TestConstraint, update_arg_move) {
     auto expression =
         model_component::Expression<int, double>::create_instance();
     auto variable = model_component::Variable<int, double>::create_instance();
@@ -505,13 +505,144 @@ TEST_F(TestConstraint, evaluate_expression_arg_move) {
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraint, update_arg_void) {
-    /// This test is covered by evaluate_expression_arg_void().
+TEST_F(TestConstraint, to_binomial_constraint) {
+    {
+        model::Model<int, double> model;
+
+        auto& x = model.create_variables("x", 2, 0, 1);
+        auto& f = model.create_constraint("f", x(0) - x(1) <= 1);
+
+        model.builder().setup_unique_names();
+        auto binomial = f(0).to_binomial_constraint();
+
+        EXPECT_EQ(&f(0), binomial.constraint_ptr);
+        EXPECT_EQ(&x(0), binomial.variable_ptrs[0]);
+        EXPECT_EQ(&x(1), binomial.variable_ptrs[1]);
+
+        EXPECT_EQ(1, binomial.coefficients[0]);
+        EXPECT_EQ(-1, binomial.coefficients[1]);
+
+        EXPECT_EQ(-1, binomial.constant_value);
+    }
+
+    {
+        model::Model<int, double> model;
+
+        auto& x = model.create_variables("x", 3, 0, 1);
+        auto& f = model.create_constraint("f", x(0) - x(1) + 2 * x(2) <= 1);
+
+        model.builder().setup_unique_names();
+        ASSERT_THROW(f(0).to_binomial_constraint(), std::runtime_error);
+    }
+
+    {
+        model::Model<int, double> model;
+
+        auto& x = model.create_variables("x", 3, 0, 1);
+        auto& f = model.create_constraint("f", x(0) - x(1) + 2 * x(2) <= 1);
+        x(2).fix_by(0);
+
+        model.builder().setup_unique_names();
+        auto binomial = f(0).to_binomial_constraint();
+
+        EXPECT_EQ(&f(0), binomial.constraint_ptr);
+        EXPECT_EQ(&x(0), binomial.variable_ptrs[0]);
+        EXPECT_EQ(&x(1), binomial.variable_ptrs[1]);
+
+        EXPECT_EQ(1, binomial.coefficients[0]);
+        EXPECT_EQ(-1, binomial.coefficients[1]);
+        EXPECT_EQ(-1, binomial.constant_value);
+    }
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraint, update_arg_move) {
-    /// This test is covered by evaluate_expression_arg_move().
+TEST_F(TestConstraint, to_trinomial_constraint) {
+    {
+        model::Model<int, double> model;
+
+        auto& x = model.create_variables("x", 3, 0, 1);
+        auto& f = model.create_constraint("f", x(0) - x(1) + 2 * x(2) <= 1);
+
+        model.builder().setup_unique_names();
+        auto trinomial = f(0).to_trinomial_constraint();
+
+        EXPECT_EQ(&f(0), trinomial.constraint_ptr);
+        EXPECT_EQ(&x(0), trinomial.variable_ptrs[0]);
+        EXPECT_EQ(&x(1), trinomial.variable_ptrs[1]);
+        EXPECT_EQ(&x(2), trinomial.variable_ptrs[2]);
+
+        EXPECT_EQ(1, trinomial.coefficients[0]);
+        EXPECT_EQ(-1, trinomial.coefficients[1]);
+        EXPECT_EQ(2, trinomial.coefficients[2]);
+
+        EXPECT_EQ(-1, trinomial.constant_value);
+    }
+
+    {
+        model::Model<int, double> model;
+
+        auto& x = model.create_variables("x", 4, 0, 1);
+        auto& f = model.create_constraint(
+            "f", x(0) - x(1) + 2 * x(2) - 3 * x(3) <= 1);
+
+        model.builder().setup_unique_names();
+        ASSERT_THROW(f(0).to_trinomial_constraint(), std::runtime_error);
+    }
+
+    {
+        model::Model<int, double> model;
+
+        auto& x = model.create_variables("x", 4, 0, 1);
+        auto& f = model.create_constraint(
+            "f", x(0) - x(1) + 2 * x(2) - 3 * x(3) <= 1);
+        x(3).fix_by(0);
+
+        model.builder().setup_unique_names();
+        auto trinomial = f(0).to_trinomial_constraint();
+
+        EXPECT_EQ(&f(0), trinomial.constraint_ptr);
+        EXPECT_EQ(&x(0), trinomial.variable_ptrs[0]);
+        EXPECT_EQ(&x(1), trinomial.variable_ptrs[1]);
+        EXPECT_EQ(&x(2), trinomial.variable_ptrs[2]);
+
+        EXPECT_EQ(1, trinomial.coefficients[0]);
+        EXPECT_EQ(-1, trinomial.coefficients[1]);
+        EXPECT_EQ(2, trinomial.coefficients[2]);
+
+        EXPECT_EQ(-1, trinomial.constant_value);
+    }
+}
+
+/*****************************************************************************/
+TEST_F(TestConstraint, set_compact_ptr) {
+    model::Model<int, double> model;
+
+    auto& x = model.create_variables("x", 2, 0, 1);
+    auto& f = model.create_constraint("f", x(0) + x(1) <= 1);
+
+    model_component::ConstraintCompact<int, double> constraint_compact;
+
+    EXPECT_EQ(nullptr, f(0).compact_ptr());
+    auto flags = constraint_compact.flags;
+
+    f(0).set_compact_ptr(&constraint_compact);
+
+    using namespace model_component;
+
+    flags = (flags & ~CONSTRAINT_COMPACT_LESS_OR_EQUAL) |
+            (f(0).is_less_or_equal() ? CONSTRAINT_COMPACT_LESS_OR_EQUAL : 0);
+
+    flags =
+        (flags & ~CONSTRAINT_COMPACT_GREATER_OR_EQUAL) |
+        (f(0).is_greater_or_equal() ? CONSTRAINT_COMPACT_GREATER_OR_EQUAL : 0);
+
+    EXPECT_EQ(flags, f(0).compact_ptr()->flags);
+    EXPECT_EQ(flags, constraint_compact.flags);
+}
+
+/*****************************************************************************/
+TEST_F(TestConstraint, compact_ptr) {
+    /// This test is covered by set_compact_ptr().
 }
 
 /*****************************************************************************/

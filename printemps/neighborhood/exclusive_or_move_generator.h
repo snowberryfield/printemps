@@ -52,8 +52,8 @@ class ExclusiveORMoveGenerator
 
             move.associated_constraint_ptr = constraint_ptrs[i];
             move.type                      = MoveType::ExclusiveOR;
-            move.alterations.emplace_back(binomials[i].variable_ptr_first, 0);
-            move.alterations.emplace_back(binomials[i].variable_ptr_second, 1);
+            move.alterations.emplace_back(binomials[i].variable_ptrs[0], 0);
+            move.alterations.emplace_back(binomials[i].variable_ptrs[1], 1);
             move.is_univariable_move          = false;
             move.is_selection_move            = false;
             move.is_special_neighborhood_move = true;

@@ -163,38 +163,17 @@ extract_effective_constraint_ptrs(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-inline std::vector<BinomialConstraint<T_Variable, T_Expression>>
+inline std::vector<
+    model_component::ConstraintMultinomial<T_Variable, T_Expression>>
 convert_to_binomial_constraints(
     const std::vector<model_component::Constraint<T_Variable, T_Expression> *>
               &a_CONSTRAINT_PTRS,
     const bool a_IS_ENABLED_EXCLUDE_OVERLAPPING) {
-    std::vector<BinomialConstraint<T_Variable, T_Expression>> results_raw;
+    std::vector<
+        model_component::ConstraintMultinomial<T_Variable, T_Expression>>
+        results_raw;
     for (const auto &constraint_ptr : a_CONSTRAINT_PTRS) {
-        auto &expression = constraint_ptr->expression();
-
-        if (expression.number_of_mutable_variables() != 2) {
-            throw std::runtime_error(utility::format_error_location(
-                __FILE__, __LINE__, __func__,
-                "The constraint is not binomial."));
-        }
-
-        auto vector_pair = utility::to_vector_pair(expression.sensitivities());
-
-        if (vector_pair.first[0] > vector_pair.first[1]) {
-            std::swap(vector_pair.first[0], vector_pair.first[1]);
-            std::swap(vector_pair.second[0], vector_pair.second[1]);
-        }
-
-        BinomialConstraint<T_Variable, T_Expression> binomial;
-
-        binomial.constraint_ptr      = constraint_ptr;
-        binomial.variable_ptr_first  = vector_pair.first[0];
-        binomial.variable_ptr_second = vector_pair.first[1];
-        binomial.sensitivity_first   = vector_pair.second[0];
-        binomial.sensitivity_second  = vector_pair.second[1];
-        binomial.constant_value      = expression.constant_value();
-        binomial.sense               = constraint_ptr->sense();
-        results_raw.push_back(binomial);
+        results_raw.push_back(constraint_ptr->to_binomial_constraint());
     }
 
     if (!a_IS_ENABLED_EXCLUDE_OVERLAPPING) {
@@ -209,16 +188,17 @@ convert_to_binomial_constraints(
     variable_count.reserve(2 * BINOMIALS_RAW_SIZE);
 
     for (const auto &binomial : results_raw) {
-        variable_count[binomial.variable_ptr_first]++;
-        variable_count[binomial.variable_ptr_second]++;
+        variable_count[binomial.variable_ptrs[0]]++;
+        variable_count[binomial.variable_ptrs[1]]++;
     }
 
-    std::vector<BinomialConstraint<T_Variable, T_Expression>>
+    std::vector<
+        model_component::ConstraintMultinomial<T_Variable, T_Expression>>
         results_exlude_overlapping;
     results_exlude_overlapping.reserve(BINOMIALS_RAW_SIZE);
     for (const auto &binomial : results_raw) {
-        if (variable_count[binomial.variable_ptr_first] > 1 ||
-            variable_count[binomial.variable_ptr_second] > 1) {
+        if (variable_count[binomial.variable_ptrs[0]] > 1 ||
+            variable_count[binomial.variable_ptrs[1]] > 1) {
             continue;
         }
         results_exlude_overlapping.push_back(binomial);
@@ -229,34 +209,16 @@ convert_to_binomial_constraints(
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-inline std::vector<TrinomialConstraint<T_Variable, T_Expression>>
+inline std::vector<
+    model_component::ConstraintMultinomial<T_Variable, T_Expression>>
 convert_to_trinomial_constraints(
     const std::vector<model_component::Constraint<T_Variable, T_Expression> *>
         &a_CONSTRAINT_PTRS) {
-    std::vector<TrinomialConstraint<T_Variable, T_Expression>> results;
+    std::vector<
+        model_component::ConstraintMultinomial<T_Variable, T_Expression>>
+        results;
     for (const auto &constraint_ptr : a_CONSTRAINT_PTRS) {
-        auto &expression = constraint_ptr->expression();
-
-        if (expression.number_of_mutable_variables() != 3) {
-            throw std::runtime_error(utility::format_error_location(
-                __FILE__, __LINE__, __func__,
-                "The constraint is not trinomial."));
-        }
-
-        auto vector_pair = utility::to_vector_pair(expression.sensitivities());
-
-        TrinomialConstraint<T_Variable, T_Expression> trinomial;
-
-        trinomial.constraint_ptrs     = constraint_ptr;
-        trinomial.variable_ptr_first  = vector_pair.first[0];
-        trinomial.variable_ptr_second = vector_pair.first[1];
-        trinomial.variable_ptr_third  = vector_pair.first[2];
-        trinomial.sensitivity_first   = vector_pair.second[0];
-        trinomial.sensitivity_second  = vector_pair.second[1];
-        trinomial.sensitivity_third   = vector_pair.second[2];
-        trinomial.constant_value      = expression.constant_value();
-        trinomial.sense               = constraint_ptr->sense();
-        results.push_back(trinomial);
+        results.push_back(constraint_ptr->to_trinomial_constraint());
     }
 
     return results;

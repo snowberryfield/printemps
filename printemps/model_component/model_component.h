@@ -13,6 +13,7 @@
 #include "constraint_type_classifier.h"
 #include "constraint_compact.h"
 #include "constraint_group.h"
+#include "constraint_multinomial.h"
 
 #include "range.h"
 

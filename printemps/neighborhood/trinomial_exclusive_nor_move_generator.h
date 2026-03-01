@@ -49,11 +49,11 @@ class TrinomialExclusiveNORMoveGenerator
         for (auto i = 0; i < TRINOMIALS_SIZE; i++) {
             auto &move = this->m_moves[2 * i];
 
-            move.associated_constraint_ptr = trinomials[i].constraint_ptrs;
+            move.associated_constraint_ptr = trinomials[i].constraint_ptr;
             move.type                      = MoveType::TrinomialExclusiveNOR;
-            move.alterations.emplace_back(trinomials[i].variable_ptr_first, 0);
-            move.alterations.emplace_back(trinomials[i].variable_ptr_second, 0);
-            move.alterations.emplace_back(trinomials[i].variable_ptr_third, 0);
+            move.alterations.emplace_back(trinomials[i].variable_ptrs[0], 0);
+            move.alterations.emplace_back(trinomials[i].variable_ptrs[1], 0);
+            move.alterations.emplace_back(trinomials[i].variable_ptrs[2], 0);
             move.is_univariable_move          = false;
             move.is_selection_move            = false;
             move.is_special_neighborhood_move = true;

@@ -50,8 +50,8 @@ class AggregationMoveGenerator
             auto &move                     = this->m_moves[4 * i];
             move.associated_constraint_ptr = constraint_ptrs[i];
             move.type                      = MoveType::Aggregation;
-            move.alterations.emplace_back(binomials[i].variable_ptr_first, 0);
-            move.alterations.emplace_back(binomials[i].variable_ptr_second, 0);
+            move.alterations.emplace_back(binomials[i].variable_ptrs[0], 0);
+            move.alterations.emplace_back(binomials[i].variable_ptrs[1], 0);
             move.is_univariable_move          = false;
             move.is_selection_move            = false;
             move.is_special_neighborhood_move = true;
@@ -92,14 +92,14 @@ class AggregationMoveGenerator
                         auto &alterations = (*a_moves_ptr)[index].alterations;
 
                         alterations[0].second =
-                            binomials[i].variable_ptr_first->value() + 1;
+                            binomials[i].variable_ptrs[0]->value() + 1;
                         alterations[1].second =
                             static_cast<T_Variable>(std::floor(
                                 (-binomials[i].constant_value -
-                                 binomials[i].sensitivity_first *
-                                     (binomials[i].variable_ptr_first->value() +
+                                 binomials[i].coefficients[0] *
+                                     (binomials[i].variable_ptrs[0]->value() +
                                       1)) /
-                                    binomials[i].sensitivity_second +
+                                    binomials[i].coefficients[1] +
                                 0.5));
                     }
                     {
@@ -107,45 +107,45 @@ class AggregationMoveGenerator
                         auto &alterations = (*a_moves_ptr)[index].alterations;
 
                         alterations[0].second =
-                            binomials[i].variable_ptr_first->value() - 1;
+                            binomials[i].variable_ptrs[0]->value() - 1;
                         alterations[1].second =
                             static_cast<T_Variable>(std::floor(
                                 (-binomials[i].constant_value -
-                                 binomials[i].sensitivity_first *
-                                     (binomials[i].variable_ptr_first->value() -
+                                 binomials[i].coefficients[0] *
+                                     (binomials[i].variable_ptrs[0]->value() -
                                       1)) /
-                                    binomials[i].sensitivity_second +
+                                    binomials[i].coefficients[1] +
                                 0.5));
                     }
                     {
                         auto  index       = 4 * i + 2;
                         auto &alterations = (*a_moves_ptr)[index].alterations;
 
-                        alterations[0]
-                            .second = static_cast<T_Variable>(std::floor(
-                            (-binomials[i].constant_value -
-                             binomials[i].sensitivity_second *
-                                 (binomials[i].variable_ptr_second->value() +
-                                  1)) /
-                                binomials[i].sensitivity_first +
-                            0.5));
+                        alterations[0].second =
+                            static_cast<T_Variable>(std::floor(
+                                (-binomials[i].constant_value -
+                                 binomials[i].coefficients[1] *
+                                     (binomials[i].variable_ptrs[1]->value() +
+                                      1)) /
+                                    binomials[i].coefficients[0] +
+                                0.5));
                         alterations[1].second =
-                            binomials[i].variable_ptr_second->value() + 1;
+                            binomials[i].variable_ptrs[1]->value() + 1;
                     }
                     {
                         auto  index       = 4 * i + 3;
                         auto &alterations = (*a_moves_ptr)[index].alterations;
 
-                        alterations[0]
-                            .second = static_cast<T_Variable>(std::floor(
-                            (-binomials[i].constant_value -
-                             binomials[i].sensitivity_second *
-                                 (binomials[i].variable_ptr_second->value() -
-                                  1)) /
-                                binomials[i].sensitivity_first +
-                            0.5));
+                        alterations[0].second =
+                            static_cast<T_Variable>(std::floor(
+                                (-binomials[i].constant_value -
+                                 binomials[i].coefficients[1] *
+                                     (binomials[i].variable_ptrs[1]->value() -
+                                      1)) /
+                                    binomials[i].coefficients[0] +
+                                0.5));
                         alterations[1].second =
-                            binomials[i].variable_ptr_second->value() - 1;
+                            binomials[i].variable_ptrs[1]->value() - 1;
                     }
                 }
                 const int MOVES_SIZE = a_moves_ptr->size();

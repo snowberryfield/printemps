@@ -220,7 +220,6 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
 
             m_compact_ptr->flags = flags;
         }
-
     }
 
     /*************************************************************************/
@@ -360,6 +359,28 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
                      ? CONSTRAINT_COMPACT_EVALUATION_IGNORABLE
                      : 0);
         }
+    }
+
+    /*************************************************************************/
+    inline ConstraintMultinomial<T_Variable, T_Expression>
+    to_binomial_constraint(void) {
+        if (m_expression.number_of_mutable_variables() != 2) {
+            throw std::runtime_error(utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "The constraint is not binomial."));
+        }
+        return ConstraintMultinomial(this);
+    }
+
+    /*************************************************************************/
+    inline ConstraintMultinomial<T_Variable, T_Expression>
+    to_trinomial_constraint(void) {
+        if (m_expression.number_of_mutable_variables() != 3) {
+            throw std::runtime_error(utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "The constraint is not trinomial."));
+        }
+        return ConstraintMultinomial(this);
     }
 
     /*************************************************************************/

@@ -59,22 +59,22 @@ class ConstantRatioIntegersMoveGenerator
                 constraint_ptrs[i]->expression().sensitivities();
 
             if (constraint_ptrs[i]->key_variable_ptr() ==
-                binomials[i].variable_ptr_first) {
+                binomials[i].variable_ptrs[0]) {
                 move.alterations.emplace_back(  //
-                    binomials[i].variable_ptr_second, 0);
+                    binomials[i].variable_ptrs[1], 0);
                 move.alterations.emplace_back(  //
-                    binomials[i].variable_ptr_first, 0);
+                    binomials[i].variable_ptrs[0], 0);
                 coefficients[i] =
-                    -sensitivities.at(binomials[i].variable_ptr_second) /
-                    sensitivities.at(binomials[i].variable_ptr_first);
+                    -sensitivities.at(binomials[i].variable_ptrs[1]) /
+                    sensitivities.at(binomials[i].variable_ptrs[0]);
             } else {
                 move.alterations.emplace_back(  //
-                    binomials[i].variable_ptr_first, 0);
+                    binomials[i].variable_ptrs[0], 0);
                 move.alterations.emplace_back(  //
-                    binomials[i].variable_ptr_second, 0);
+                    binomials[i].variable_ptrs[1], 0);
                 coefficients[i] =
-                    -sensitivities.at(binomials[i].variable_ptr_first) /
-                    sensitivities.at(binomials[i].variable_ptr_second);
+                    -sensitivities.at(binomials[i].variable_ptrs[0]) /
+                    sensitivities.at(binomials[i].variable_ptrs[1]);
             }
 
             move.is_univariable_move          = false;
@@ -115,7 +115,7 @@ class ConstantRatioIntegersMoveGenerator
                         auto &alterations = (*a_moves_ptr)[index].alterations;
 
                         alterations[0].second =
-                            binomials[i].variable_ptr_first->value() + 1;
+                            binomials[i].variable_ptrs[0]->value() + 1;
                         alterations[1].second =
                             alterations[0].second * coefficients[i];
                     }
@@ -124,7 +124,7 @@ class ConstantRatioIntegersMoveGenerator
                         auto &alterations = (*a_moves_ptr)[index].alterations;
 
                         alterations[0].second =
-                            binomials[i].variable_ptr_first->value() - 1;
+                            binomials[i].variable_ptrs[0]->value() - 1;
                         alterations[1].second =
                             alterations[0].second * coefficients[i];
                     }

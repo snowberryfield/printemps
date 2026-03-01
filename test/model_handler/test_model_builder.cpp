@@ -34,7 +34,7 @@ TEST_F(TestModelBuilder, setup_unique_names) {
     model::Model<int, double> model;
 
     auto& x = model.create_variable("x");
-    auto& p = model.create_variables("p", {10});
+    auto& p = model.create_variables("p", 10);
     auto& g = model.create_variables("g", {20, 30});
 
     x.set_name("_x");

@@ -8,8 +8,6 @@
 
 #include "move_type.h"
 #include "move.h"
-#include "binomial_constraint.h"
-#include "trinomial_constraint.h"
 
 #include "binary_move_generator.h"
 #include "integer_move_generator.h"
