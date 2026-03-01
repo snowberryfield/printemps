@@ -90,9 +90,10 @@ class Graph {
                 return a_EDGE_PTR_FIRST->weight() < a_EDGE_PTR_SECOND->weight();
             });
 
-        std::unordered_set<T> total_node_keys;
+        std::vector<T> total_node_keys;
+        total_node_keys.reserve(m_nodes.size());
         for (const auto &node : m_nodes) {
-            total_node_keys.insert(node.first);
+            total_node_keys.push_back(node.first);
         }
 
         UnionFind uf(total_node_keys);
@@ -103,7 +104,7 @@ class Graph {
         for (const auto &edge_ptr : edge_ptrs) {
             auto &node_keys = edge_ptr->node_keys();
 
-            if (uf.is_same(node_keys.first, node_keys.second)) {
+            if (uf.has_same_root(node_keys.first, node_keys.second)) {
                 continue;
             } else {
                 added_edge_ptrs.push_back(edge_ptr);

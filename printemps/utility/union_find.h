@@ -11,9 +11,76 @@ namespace printemps::utility {
 template <class T>
 class UnionFind {
    private:
-    std::unordered_map<T, T>    m_parents;
-    std::unordered_map<T, bool> m_has_parent;
-    std::unordered_map<T, int>  m_sizes;
+    std::vector<int> m_parents;
+    std::vector<int> m_sizes;
+    std::vector<int> m_parities;
+
+    std::vector<T>             m_elements;
+    std::unordered_map<T, int> m_index;
+
+    /*************************************************************************/
+    inline int add_node_if_absent(const T& a_ELEMENT) {
+        auto it = m_index.find(a_ELEMENT);
+        if (it != m_index.end()) {
+            return it->second;
+        }
+
+        const int ID = static_cast<int>(m_parents.size());
+
+        m_index[a_ELEMENT] = ID;
+        m_elements.push_back(a_ELEMENT);
+
+        m_parents.push_back(ID);
+        m_sizes.push_back(1);
+        m_parities.push_back(0);
+
+        return ID;
+    }
+
+    /*************************************************************************/
+    inline std::pair<int, int> root_with_id_and_parity(const int a_ID) {
+        int current_id = a_ID;
+        int parity     = 0;
+
+        // 1st pass: find root and total parity
+        while (m_parents[current_id] != current_id) {
+            parity ^= m_parities[current_id];
+            current_id = m_parents[current_id];
+        }
+
+        int root_id = current_id;
+
+        // 2nd pass: path compression
+        current_id             = a_ID;
+        int accumulated_parity = 0;
+
+        while (m_parents[current_id] != root_id) {
+            int parent_id     = m_parents[current_id];
+            int parent_parity = m_parities[current_id];
+
+            m_parents[current_id]  = root_id;
+            m_parities[current_id] = parity ^ accumulated_parity;
+
+            accumulated_parity ^= parent_parity;
+            current_id = parent_id;
+        }
+
+        return {root_id, parity};
+    }
+
+    /*************************************************************************/
+    inline std::pair<int, int> root_with_id_and_parity_const(
+        const int a_ID) const {
+        int current_id = a_ID;
+        int parity     = 0;
+
+        while (m_parents[current_id] != current_id) {
+            parity ^= m_parities[current_id];
+            current_id = m_parents[current_id];
+        }
+
+        return {current_id, parity};
+    }
 
    public:
     /*************************************************************************/
@@ -22,72 +89,159 @@ class UnionFind {
     }
 
     /*************************************************************************/
-    UnionFind(const std::unordered_set<T> &a_ELEMENTS) {
+    UnionFind(const std::vector<T>& a_ELEMENTS) {
+        this->initialize();
         this->setup(a_ELEMENTS);
     }
 
     /*************************************************************************/
     inline void initialize(void) {
         m_parents.clear();
-        m_has_parent.clear();
         m_sizes.clear();
+        m_parities.clear();
+        m_elements.clear();
+        m_index.clear();
     }
 
     /*************************************************************************/
-    inline void setup(const std::unordered_set<T> &a_ELEMENTS) {
-        for (const auto &element : a_ELEMENTS) {
-            m_parents[element]    = element;
-            m_has_parent[element] = false;
-            m_sizes[element]      = 1;
+    inline void setup(const std::vector<T>& a_ELEMENTS) {
+        for (const auto& element : a_ELEMENTS) {
+            this->add_node_if_absent(element);
         }
     }
 
     /*************************************************************************/
-    inline T root(const T &a_ELEMENT) {
-        if (!m_has_parent[a_ELEMENT]) {
-            return a_ELEMENT;
+    inline std::pair<T, int> root_with_parity(const T& a_ELEMENT) {
+        int id                 = this->add_node_if_absent(a_ELEMENT);
+        auto [root_id, parity] = this->root_with_id_and_parity(id);
+        return {m_elements[root_id], parity};
+    }
+
+    /*************************************************************************/
+    inline T root(const T& a_ELEMENT) {
+        return this->root_with_parity(a_ELEMENT).first;
+    }
+
+    /*************************************************************************/
+    inline bool unite(const T& a_FIRST, const T& a_SECOND,
+                      const int a_PARITY = 0) {
+        const int ID_FIRST  = this->add_node_if_absent(a_FIRST);
+        const int ID_SECOND = this->add_node_if_absent(a_SECOND);
+
+        const auto [ROOT_FIRST, PARITY_FIRST] =
+            this->root_with_id_and_parity(ID_FIRST);
+
+        const auto [ROOT_SECOND, PARITY_SECOND] =
+            this->root_with_id_and_parity(ID_SECOND);
+
+        if (ROOT_FIRST == ROOT_SECOND) {
+            return ((PARITY_FIRST ^ PARITY_SECOND) == a_PARITY);
+        }
+
+        int parent_root;
+        int child_root;
+        int parent_parity;
+        int child_parity;
+
+        if (m_sizes[ROOT_FIRST] > m_sizes[ROOT_SECOND] ||
+            (m_sizes[ROOT_FIRST] == m_sizes[ROOT_SECOND] &&
+             ROOT_FIRST < ROOT_SECOND)) {
+            parent_root   = ROOT_FIRST;
+            child_root    = ROOT_SECOND;
+            parent_parity = PARITY_FIRST;
+            child_parity  = PARITY_SECOND;
         } else {
-            return m_parents[a_ELEMENT] = this->root(m_parents[a_ELEMENT]);
-        }
-    }
-
-    /*************************************************************************/
-    inline bool is_same(const T &a_ELEMENT_FIRST, const T &a_ELEMENT_SECOND) {
-        return this->root(a_ELEMENT_FIRST) == this->root(a_ELEMENT_SECOND);
-    }
-
-    /*************************************************************************/
-    inline bool unite(const T &a_ELEMENT_FIRST, const T &a_ELEMENT_SECOND) {
-        auto root_first  = this->root(a_ELEMENT_FIRST);
-        auto root_second = this->root(a_ELEMENT_SECOND);
-
-        if (root_first == root_second) {
-            return false;
+            parent_root   = ROOT_SECOND;
+            child_root    = ROOT_FIRST;
+            parent_parity = PARITY_SECOND;
+            child_parity  = PARITY_FIRST;
         }
 
-        if (m_sizes[a_ELEMENT_FIRST] < m_sizes[a_ELEMENT_SECOND]) {
-            std::swap(root_first, root_second);
-        }
+        m_parents[child_root]  = parent_root;
+        m_parities[child_root] = parent_parity ^ child_parity ^ a_PARITY;
+        m_sizes[parent_root] += m_sizes[child_root];
 
-        m_parents[root_second]    = root_first;
-        m_has_parent[root_second] = true;
-        m_sizes[a_ELEMENT_FIRST] += m_sizes[a_ELEMENT_SECOND];
         return true;
     }
 
     /*************************************************************************/
-    inline const std::unordered_map<T, T> &parents(void) const {
-        return m_parents;
+    inline bool has_same_root(const T& a_FIRST, const T& a_SECOND) const {
+        if (m_index.find(a_FIRST) == m_index.end() ||
+            m_index.find(a_SECOND) == m_index.end()) {
+            throw std::runtime_error(utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "Specified element is not included."));
+        }
+
+        const int ID_FIRST  = m_index.at(a_FIRST);
+        const int ID_SECOND = m_index.at(a_SECOND);
+
+        return this->root_with_id_and_parity_const(ID_FIRST).first ==
+               this->root_with_id_and_parity_const(ID_SECOND).first;
     }
 
     /*************************************************************************/
-    inline const std::unordered_map<T, int> &sizes(void) const {
-        return m_sizes;
+    inline int parity_between(const T& a_FIRST, const T& a_SECOND) const {
+        if (m_index.find(a_FIRST) == m_index.end() ||
+            m_index.find(a_SECOND) == m_index.end()) {
+            throw std::runtime_error(utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "Specified element is not included."));
+        }
+
+        const int ID_FIRST  = m_index.at(a_FIRST);
+        const int ID_SECOND = m_index.at(a_SECOND);
+
+        const auto [ROOT_ID_FIRST, PARITY_FIRST] =
+            this->root_with_id_and_parity_const(ID_FIRST);
+
+        auto [ROOT_ID_SECOND, PARITY_SECOND] =
+            this->root_with_id_and_parity_const(ID_SECOND);
+
+        if (ROOT_ID_FIRST != ROOT_ID_SECOND) {
+            throw std::runtime_error(utility::format_error_location(
+                __FILE__, __LINE__, __func__, "Elements are not connected."));
+        }
+
+        return PARITY_FIRST ^ PARITY_SECOND;
     }
+
+    /*************************************************************************/
+    inline std::vector<std::vector<std::pair<T, int>>> groups(void) const {
+        std::vector<std::vector<std::pair<T, int>>> groups;
+        std::vector<int> root_to_group(m_elements.size(), -1);
+
+        const int ELEMENTS_SIZE = m_elements.size();
+        for (auto i = 0; i < ELEMENTS_SIZE; i++) {
+            auto [root_id, parity] = this->root_with_id_and_parity_const(i);
+
+            if (root_to_group[root_id] == -1) {
+                root_to_group[root_id] = static_cast<int>(groups.size());
+                groups.emplace_back();
+            }
+
+            groups[root_to_group[root_id]].emplace_back(m_elements[i], parity);
+        }
+
+        return groups;
+    }
+
+    /*************************************************************************/
+    inline const std::vector<int>& parents(void) const noexcept {
+        return m_parents;
+    };
+
+    /*************************************************************************/
+    inline const std::vector<int>& sizes(void) const noexcept {
+        return m_sizes;
+    };
+
+    /*************************************************************************/
+    inline const std::vector<int>& parities(void) const noexcept {
+        return m_parities;
+    };
 };
 }  // namespace printemps::utility
-
-#endif
 /*****************************************************************************/
-// END
+#endif
 /*****************************************************************************/
