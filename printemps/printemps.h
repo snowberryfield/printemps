@@ -9,6 +9,7 @@
 #include "std.h"
 
 #include "constant/constant.h"
+#include "error_handler/error_handler.h"
 #include "utility/utility.h"
 #include "multi_array/multi_array.h"
 #include "helper/helper.h"

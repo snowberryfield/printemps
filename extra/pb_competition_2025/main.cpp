@@ -8,7 +8,7 @@
 
 static void print_comment_lines(const char *msg) {
     std::istringstream iss(msg);
-    std::string line;
+    std::string        line;
     while (std::getline(iss, line)) {
         std::cout << "c " << line << std::endl;
     }
@@ -19,7 +19,7 @@ int main(const int argc, const char *argv[]) {
         printemps::extra::pb_competition_2025::PBCompetition2025Solver(argc,
                                                                        argv)
             .run();
-    } catch (const printemps::model::InfeasibleError &e) {
+    } catch (const printemps::error_handler::InfeasibleError &e) {
         print_comment_lines(e.what());
         std::cout << "s UNSATISFIABLE" << std::endl;
     } catch (const std::exception &e) {

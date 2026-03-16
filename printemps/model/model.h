@@ -655,7 +655,6 @@ class Model {
     }
 };
 using IPModel         = Model<int, double>;
-using InfeasibleError = printemps::model_component::InfeasibleError;
 }  // namespace printemps::model
 #endif
 /*****************************************************************************/
