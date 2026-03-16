@@ -742,7 +742,7 @@ TEST_F(TestConstraint, reset_local_penalty_coefficient) {
 
     constraint.reset_local_penalty_coefficient();
     EXPECT_EQ(100.0, constraint.local_penalty_coefficient_less());
-    EXPECT_EQ(100.0, constraint.local_penalty_coefficient_greater());
+    EXPECT_EQ(0.0, constraint.local_penalty_coefficient_greater());
     EXPECT_EQ(100.0, constraint.global_penalty_coefficient());
 }
 

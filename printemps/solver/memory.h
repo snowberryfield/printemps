@@ -129,7 +129,7 @@ class Memory {
              m_model_ptr->current_violative_constraint_ptrs()) {
             m_dual_intensity_numerator +=
                 2.0 * constraint_ptr->violation_count() + 1;
-            constraint_ptr->increment_violation_count();
+            constraint_ptr->update_violation_count();
             m_total_violation_count++;
         }
 

@@ -279,24 +279,41 @@ TEST_F(TestModelStateInspector, export_update_count_proxies) {
 TEST_F(TestModelStateInspector, export_violation_count_proxies) {
     model::Model<int, double> model;
 
+    auto& x = model.create_variable("x");
+
     auto& g = model.create_constraint("g");
     auto& h = model.create_constraints("h", 10);
     auto& v = model.create_constraints("v", {10, 10});
 
     model.builder().setup_unique_names();
 
-    g(0).increment_violation_count();
+    x = 0;
 
+    g(0) = x >= 1.0;
     for (auto i = 0; i < 10; i++) {
-        h(i).increment_violation_count();
-        h(i).increment_violation_count();
+        h(i) = x <= -1.0;
     }
 
     for (auto i = 0; i < 10; i++) {
         for (auto j = 0; j < 10; j++) {
-            v(i, j).increment_violation_count();
-            v(i, j).increment_violation_count();
-            v(i, j).increment_violation_count();
+            v(i, j) = x == 1.0;
+        }
+    }
+
+    model.updater().update();
+
+    g(0).update_violation_count();
+
+    for (auto i = 0; i < 10; i++) {
+        h(i).update_violation_count();
+        h(i).update_violation_count();
+    }
+
+    for (auto i = 0; i < 10; i++) {
+        for (auto j = 0; j < 10; j++) {
+            v(i, j).update_violation_count();
+            v(i, j).update_violation_count();
+            v(i, j).update_violation_count();
         }
     }
 
@@ -705,24 +722,40 @@ TEST_F(TestModelStateInspector, export_named_update_counts) {
 TEST_F(TestModelStateInspector, export_named_violation_counts) {
     model::Model<int, double> model;
 
+    auto& x = model.create_variable("x");
     auto& g = model.create_constraint("g");
     auto& h = model.create_constraints("h", 10);
     auto& v = model.create_constraints("v", {10, 10});
 
     model.builder().setup_unique_names();
 
-    g(0).increment_violation_count();
+    x = 0;
 
+    g(0) = x >= 1.0;
     for (auto i = 0; i < 10; i++) {
-        h(i).increment_violation_count();
-        h(i).increment_violation_count();
+        h(i) = x <= -1.0;
     }
 
     for (auto i = 0; i < 10; i++) {
         for (auto j = 0; j < 10; j++) {
-            v(i, j).increment_violation_count();
-            v(i, j).increment_violation_count();
-            v(i, j).increment_violation_count();
+            v(i, j) = x == 1.0;
+        }
+    }
+
+    model.updater().update();
+
+    g(0).update_violation_count();
+
+    for (auto i = 0; i < 10; i++) {
+        h(i).update_violation_count();
+        h(i).update_violation_count();
+    }
+
+    for (auto i = 0; i < 10; i++) {
+        for (auto j = 0; j < 10; j++) {
+            v(i, j).update_violation_count();
+            v(i, j).update_violation_count();
+            v(i, j).update_violation_count();
         }
     }
 

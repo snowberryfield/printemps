@@ -876,13 +876,20 @@ class TabuSearchControllerStateManager {
 
         for (auto&& proxy : this->m_model_ptr->constraint_proxies()) {
             for (auto&& constraint : proxy.flat_indexed_constraints()) {
+                const double CONSTRAINT_VALUE =
+                    CONSTRAINT_VALUE_PROXIES[proxy.index()]
+                                            [constraint.flat_index()];
                 const double VIOLATION_VALUE =
                     VIOLATION_VALUE_PROXIES[proxy.index()]
                                            [constraint.flat_index()];
-                const long VIOLATION_COUNT = constraint.violation_count();
-                total_violation += VIOLATION_VALUE * (VIOLATION_COUNT + 1);
-                total_squared_violation += VIOLATION_VALUE * VIOLATION_VALUE *
-                                           std::log((VIOLATION_COUNT + 1.0));
+                const long VIOLATION_COUNT =
+                    constraint.violation_count(CONSTRAINT_VALUE);
+
+                const double WEIGHT = 1.0 + std::log(1.0 + VIOLATION_COUNT);
+
+                total_violation += VIOLATION_VALUE;
+                total_squared_violation +=
+                    WEIGHT * VIOLATION_VALUE * VIOLATION_VALUE;
             }
         }
 
@@ -899,34 +906,76 @@ class TabuSearchControllerStateManager {
                     [proxy.index()][constraint.flat_index()];
                 const double VIOLATION_VALUE = VIOLATION_VALUE_PROXIES  //
                     [proxy.index()][constraint.flat_index()];
-                const long VIOLATION_COUNT = constraint.violation_count();
+                const long   VIOLATION_COUNT = constraint.violation_count();
+                const double WEIGHT = 1.0 + std::log(1.0 + VIOLATION_COUNT);
 
                 const double DELTA_PENALTY_COEFFICIENT_CONSTANT =
                     std::max(0.0, GAP) / total_violation;
                 const double DELTA_PENALTY_COEFFICIENT_PROPORTIONAL =
-                    std::max(0.0, GAP) / total_squared_violation *
-                    std::log((VIOLATION_COUNT + 1.0)) * VIOLATION_VALUE;
+                    std::max(0.0, GAP) / total_squared_violation * WEIGHT *
+                    VIOLATION_VALUE;
 
-                const double POSITIVE_PART = std::max(CONSTRAINT_VALUE, 0.0);
-                const double NEGATIVE_PART = std::max(-CONSTRAINT_VALUE, 0.0);
-                const double DELTA_PENALTY_COEFFICIENT =
-                    (BALANCE * DELTA_PENALTY_COEFFICIENT_CONSTANT +
-                     (1.0 - BALANCE) * DELTA_PENALTY_COEFFICIENT_PROPORTIONAL);
+                switch (constraint.sense()) {
+                    case model_component::ConstraintSense::Less: {
+                        const double DELTA_PENALTY_COEFFICIENT =
+                            (BALANCE * DELTA_PENALTY_COEFFICIENT_CONSTANT +
+                             (1.0 - BALANCE) *
+                                 DELTA_PENALTY_COEFFICIENT_PROPORTIONAL);
+                        constraint.local_penalty_coefficient_less() +=
+                            m_state.penalty_coefficient_tightening_rate *
+                            DELTA_PENALTY_COEFFICIENT;
+                        break;
+                    }
+                    case model_component::ConstraintSense::Greater: {
+                        const double DELTA_PENALTY_COEFFICIENT =
+                            (BALANCE * DELTA_PENALTY_COEFFICIENT_CONSTANT +
+                             (1.0 - BALANCE) *
+                                 DELTA_PENALTY_COEFFICIENT_PROPORTIONAL);
+                        constraint.local_penalty_coefficient_greater() +=
+                            m_state.penalty_coefficient_tightening_rate *
+                            DELTA_PENALTY_COEFFICIENT;
+                        break;
+                    }
+                    case model_component::ConstraintSense::Equal: {
+                        double delta_penalty_coefficient_less    = 0.0;
+                        double delta_penalty_coefficient_greater = 0.0;
+                        if (CONSTRAINT_VALUE > 0) {
+                            delta_penalty_coefficient_less =
+                                (BALANCE * DELTA_PENALTY_COEFFICIENT_CONSTANT +
+                                 (1.0 - BALANCE) *
+                                     DELTA_PENALTY_COEFFICIENT_PROPORTIONAL);
+                            delta_penalty_coefficient_greater =
+                                BALANCE * DELTA_PENALTY_COEFFICIENT_CONSTANT;
 
-                if (constraint.is_less_or_equal() &&
-                    POSITIVE_PART > constant::EPSILON) {
-                    constraint.local_penalty_coefficient_less() +=
-                        m_state.penalty_coefficient_tightening_rate *
-                        DELTA_PENALTY_COEFFICIENT;
-                } else if (constraint.is_greater_or_equal() &&
-                           NEGATIVE_PART > constant::EPSILON) {
-                    constraint.local_penalty_coefficient_greater() +=
-                        m_state.penalty_coefficient_tightening_rate *
-                        DELTA_PENALTY_COEFFICIENT;
+                        } else {
+                            delta_penalty_coefficient_less =
+                                BALANCE * DELTA_PENALTY_COEFFICIENT_CONSTANT;
+
+                            delta_penalty_coefficient_greater =
+                                (BALANCE * DELTA_PENALTY_COEFFICIENT_CONSTANT +
+                                 (1.0 - BALANCE) *
+                                     DELTA_PENALTY_COEFFICIENT_PROPORTIONAL);
+                        }
+
+                        constraint.local_penalty_coefficient_less() +=
+                            m_state.penalty_coefficient_tightening_rate *
+                            delta_penalty_coefficient_less;
+                        constraint.local_penalty_coefficient_greater() +=
+                            m_state.penalty_coefficient_tightening_rate *
+                            delta_penalty_coefficient_greater;
+                        break;
+                    }
+                    default: {
+                        throw std::logic_error(utility::format_error_location(
+                            __FILE__, __LINE__, __func__,
+                            "Invalid constraint sense."));
+                    }
                 }
             }
+        }
 
-            if (m_option.penalty.is_enabled_group_penalty_coefficient) {
+        if (m_option.penalty.is_enabled_group_penalty_coefficient) {
+            for (auto&& proxy : this->m_model_ptr->constraint_proxies()) {
                 double max_local_penalty_coefficient = 0;
                 for (auto&& constraint : proxy.flat_indexed_constraints()) {
                     max_local_penalty_coefficient =
@@ -943,13 +992,15 @@ class TabuSearchControllerStateManager {
                         max_local_penalty_coefficient;
                 }
             }
+        }
 
-            /**
-             * Penalty coefficients are bounded by the initial penalty
-             * coefficient specified in option.
-             */
-            const double INITIAL_PENALTY_COEFFICIENT =
-                this->m_option.penalty.initial_penalty_coefficient;
+        /**
+         * Penalty coefficients are bounded by the initial penalty
+         * coefficient specified in option.
+         */
+        const double INITIAL_PENALTY_COEFFICIENT =
+            this->m_model_ptr->global_penalty_coefficient();
+        for (auto&& proxy : this->m_model_ptr->constraint_proxies()) {
             for (auto&& constraint : proxy.flat_indexed_constraints()) {
                 if (constraint.local_penalty_coefficient_less() >
                     INITIAL_PENALTY_COEFFICIENT) {
@@ -1017,6 +1068,9 @@ class TabuSearchControllerStateManager {
         m_state.local_penalty_coefficient_range.initialize();
         for (auto&& proxy : m_model_ptr->constraint_proxies()) {
             for (auto&& constraint : proxy.flat_indexed_constraints()) {
+                if (!constraint.is_enabled()) {
+                    continue;
+                }
                 if (constraint.is_less_or_equal()) {
                     m_state.local_penalty_coefficient_range.update(
                         constraint.local_penalty_coefficient_less());

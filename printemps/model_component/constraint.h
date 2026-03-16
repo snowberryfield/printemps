@@ -47,7 +47,8 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
 
     Variable<T_Variable, T_Expression> *m_key_variable_ptr;
 
-    long m_violation_count;
+    long m_violation_count_less;
+    long m_violation_count_greater;
 
     bool m_is_integer;
     bool m_is_enabled;
@@ -148,7 +149,8 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
 
         m_key_variable_ptr = nullptr;
 
-        m_violation_count = 0;
+        m_violation_count_less    = 0;
+        m_violation_count_greater = 0;
 
         m_is_enabled                     = true;
         m_is_less_or_equal               = false;
@@ -479,8 +481,26 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
 
     /*************************************************************************/
     inline void reset_local_penalty_coefficient(void) noexcept {
-        m_local_penalty_coefficient_less    = m_global_penalty_coefficient;
-        m_local_penalty_coefficient_greater = m_global_penalty_coefficient;
+        switch (m_sense) {
+            case ConstraintSense::Less: {
+                m_local_penalty_coefficient_less = m_global_penalty_coefficient;
+                m_local_penalty_coefficient_greater = 0.0;
+                break;
+            }
+            case ConstraintSense::Equal: {
+                m_local_penalty_coefficient_less = m_global_penalty_coefficient;
+                m_local_penalty_coefficient_greater =
+                    m_global_penalty_coefficient;
+                break;
+            }
+            case ConstraintSense::Greater: {
+                m_local_penalty_coefficient_less = 0.0;
+                m_local_penalty_coefficient_greater =
+                    m_global_penalty_coefficient;
+
+                break;
+            }
+        }
     }
 
     /*************************************************************************/
@@ -498,18 +518,63 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline void increment_violation_count(void) noexcept {
-        m_violation_count++;
+    inline void update_violation_count(void) noexcept {
+        if (m_is_less_or_equal && m_positive_part > constant::EPSILON) {
+            m_violation_count_less++;
+        }
+        if (m_is_greater_or_equal && m_negative_part > constant::EPSILON) {
+            m_violation_count_greater++;
+        }
     }
 
     /*************************************************************************/
     inline void reset_violation_count(void) noexcept {
-        m_violation_count = 0;
+        m_violation_count_less    = 0;
+        m_violation_count_greater = 0;
+    }
+
+    /*************************************************************************/
+    inline long violation_count_less(void) const noexcept {
+        return m_violation_count_less;
+    }
+
+    /*************************************************************************/
+    inline long violation_count_greater(void) const noexcept {
+        return m_violation_count_greater;
     }
 
     /*************************************************************************/
     inline long violation_count(void) const noexcept {
-        return m_violation_count;
+        return m_violation_count_less + m_violation_count_greater;
+    }
+
+    /*************************************************************************/
+    inline long violation_count(const T_Expression &a_CONSTRAINT_VALUE) const {
+        /**
+         * NOTE: For an equality constraint, the violation count is determined
+         * by the sign of the constraint value.
+         */
+        switch (m_sense) {
+            case ConstraintSense::Less: {
+                return m_violation_count_less;
+            }
+            case ConstraintSense::Greater: {
+                return m_violation_count_greater;
+            }
+            case ConstraintSense::Equal: {
+                if (a_CONSTRAINT_VALUE > 0) {
+                    return m_violation_count_less;
+                } else
+                    return m_violation_count_greater;
+            }
+
+            default: {
+                throw std::logic_error(utility::format_error_location(
+                    __FILE__, __LINE__, __func__,
+                    "The specified constraint type is invalid."));
+            }
+        }
+        return 0L;
     }
 
     /*************************************************************************/
