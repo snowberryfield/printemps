@@ -28,10 +28,6 @@ class Model {
 
     model_component::Objective<T_Variable, T_Expression> m_objective;
 
-    std::unordered_map<model_component::Variable<T_Variable, T_Expression> *,
-                       model_component::Expression<T_Variable, T_Expression> *>
-        m_dependent_expression_map;
-
     std::vector<model_component::ConstraintCompact<T_Variable, T_Expression>>
         m_constraint_compacts;
 
@@ -123,7 +119,6 @@ class Model {
             model_handler::ModelComponentCreatorConstant::
                 MAX_NUMBER_OF_CONSTRAINT_PROXIES);
         m_objective.initialize();
-        m_dependent_expression_map.clear();
         m_constraint_compacts.clear();
 
         m_variable_names.clear();
@@ -387,22 +382,6 @@ class Model {
     inline const model_component::Objective<T_Variable, T_Expression> &
     objective(void) const noexcept {
         return m_objective;
-    }
-
-    /*************************************************************************/
-    inline const std::unordered_map<
-        model_component::Variable<T_Variable, T_Expression> *,
-        model_component::Expression<T_Variable, T_Expression> *> &
-    dependent_expression_map(void) const noexcept {
-        return m_dependent_expression_map;
-    }
-
-    /*************************************************************************/
-    inline std::unordered_map<
-        model_component::Variable<T_Variable, T_Expression> *,
-        model_component::Expression<T_Variable, T_Expression> *> &
-    dependent_expression_map(void) noexcept {
-        return m_dependent_expression_map;
     }
 
     /*************************************************************************/
