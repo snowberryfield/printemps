@@ -7,10 +7,10 @@
 #define PRINTEMPS_UTILITY_H__
 
 #include "console_utility.h"
+#include "string_utility.h"
 #include "vector_utility.h"
 #include "unordered_map_utility.h"
 #include "unordered_set_utility.h"
-#include "string_utility.h"
 #include "date_time_utility.h"
 #include "integer_utility.h"
 #include "random.h"

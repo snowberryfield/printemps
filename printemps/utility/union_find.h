@@ -9,6 +9,13 @@
 namespace printemps::utility {
 /*****************************************************************************/
 template <class T>
+struct UnionFindRootGroup {
+    T                              root;
+    std::vector<std::pair<T, int>> members;
+};
+
+/*************************************************************************/
+template <class T>
 class UnionFind {
    private:
     std::vector<int> m_parents;
@@ -166,8 +173,10 @@ class UnionFind {
 
     /*************************************************************************/
     inline bool has_same_root(const T& a_FIRST, const T& a_SECOND) const {
-        if (m_index.find(a_FIRST) == m_index.end() ||
-            m_index.find(a_SECOND) == m_index.end()) {
+        auto it_first  = m_index.find(a_FIRST);
+        auto it_second = m_index.find(a_SECOND);
+
+        if (it_first == m_index.end() || it_second == m_index.end()) {
             throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "Specified element is not included."));
@@ -182,8 +191,10 @@ class UnionFind {
 
     /*************************************************************************/
     inline int parity_between(const T& a_FIRST, const T& a_SECOND) const {
-        if (m_index.find(a_FIRST) == m_index.end() ||
-            m_index.find(a_SECOND) == m_index.end()) {
+        auto it_first  = m_index.find(a_FIRST);
+        auto it_second = m_index.find(a_SECOND);
+
+        if (it_first == m_index.end() || it_second == m_index.end()) {
             throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "Specified element is not included."));
@@ -207,23 +218,26 @@ class UnionFind {
     }
 
     /*************************************************************************/
-    inline std::vector<std::vector<std::pair<T, int>>> groups(void) const {
-        std::vector<std::vector<std::pair<T, int>>> groups;
-        std::vector<int> root_to_group(m_elements.size(), -1);
+    inline std::vector<UnionFindRootGroup<T>> groups(void) const {
+        std::vector<UnionFindRootGroup<T>> result;
+        const int        ELEMENTS_SIZE = static_cast<int>(m_elements.size());
+        std::vector<int> root_to_group(ELEMENTS_SIZE, -1);
+        for (int i = 0; i < ELEMENTS_SIZE; ++i) {
+            const auto [ROOT_ID, PARITY] =
+                this->root_with_id_and_parity_const(i);
 
-        const int ELEMENTS_SIZE = m_elements.size();
-        for (auto i = 0; i < ELEMENTS_SIZE; i++) {
-            auto [root_id, parity] = this->root_with_id_and_parity_const(i);
-
-            if (root_to_group[root_id] == -1) {
-                root_to_group[root_id] = static_cast<int>(groups.size());
-                groups.emplace_back();
+            if (root_to_group[ROOT_ID] == -1) {
+                root_to_group[ROOT_ID] = static_cast<int>(result.size());
+                UnionFindRootGroup<T> group;
+                group.root = m_elements[ROOT_ID];
+                result.push_back(group);
             }
 
-            groups[root_to_group[root_id]].emplace_back(m_elements[i], parity);
+            result[root_to_group[ROOT_ID]].members.emplace_back(m_elements[i],
+                                                                PARITY);
         }
 
-        return groups;
+        return result;
     }
 
     /*************************************************************************/

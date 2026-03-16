@@ -42,7 +42,7 @@ class BinaryMatrix {
 
     /*************************************************************************/
     inline int number_of_columns(void) const {
-        return m_rows.front().size();
+        return m_rows.empty() ? 0 : m_rows.front().size();
     }
 
     /*************************************************************************/
@@ -69,8 +69,14 @@ class BinaryMatrix {
 
     /*************************************************************************/
     inline std::pair<BinaryMatrix, int> inverse_and_rank(void) const {
-        const int    SIZE = this->number_of_rows();
-        BinaryMatrix A    = *this;
+        const int SIZE = this->number_of_rows();
+
+        if (SIZE != this->number_of_columns()) {
+            throw std::logic_error(utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "Matrix must be square to compute inverse and rank."));
+        }
+        BinaryMatrix A = *this;
         BinaryMatrix B(SIZE, SIZE);
         int          rank = 0;
 
@@ -127,6 +133,13 @@ class BinaryMatrix {
         std::vector<int> result(m_rows.size(), 0);
         const int        NUMBER_OF_ROWS    = this->number_of_rows();
         const int        NUMBER_OF_COLUMNS = this->number_of_columns();
+
+        if (a_VECTOR.size() != static_cast<size_t>(NUMBER_OF_COLUMNS)) {
+            throw std::logic_error(utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "Vector size must match the number of columns in the matrix."));
+        }
+
         for (auto i = 0; i < NUMBER_OF_ROWS; i++) {
             for (auto j = 0; j < NUMBER_OF_COLUMNS; j++) {
                 result[i] += m_rows[i][j] * a_VECTOR[j];
@@ -141,6 +154,13 @@ class BinaryMatrix {
         const int NUMBER_OF_ROWS           = this->number_of_rows();
         const int NUMBER_OF_COLUMNS        = this->number_of_columns();
         const int RESULT_NUMBER_OF_COLUMNS = a_MATRIX.number_of_columns();
+
+        if (NUMBER_OF_COLUMNS != a_MATRIX.number_of_rows()) {
+            throw std::logic_error(utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "The number of columns in the first matrix must match the "
+                "number of rows in the second matrix."));
+        }
 
         BinaryMatrix result(NUMBER_OF_ROWS, RESULT_NUMBER_OF_COLUMNS);
 
@@ -159,6 +179,12 @@ class BinaryMatrix {
     inline BinaryMatrix reachability(void) const {
         auto      reachability = *this;
         const int SIZE         = m_rows.size();
+
+        if (SIZE != this->number_of_columns()) {
+            throw std::logic_error(utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "Matrix must be square to compute reachability."));
+        }
 
         std::vector<std::unordered_set<int>> nonzeros(SIZE);
         for (auto i = 0; i < SIZE; i++) {

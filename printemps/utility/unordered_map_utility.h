@@ -39,25 +39,19 @@ inline std::vector<std::pair<T1, T2>> to_pair_vector(
 template <class T1, class T2>
 inline T2 distance_l1(const std::unordered_map<T1, T2>& a_FIRST,
                       const std::unordered_map<T1, T2>& a_SECOND) {
-    T2 result = static_cast<T2>(0);
-
-    const auto& shorter =
-        (a_FIRST.size() < a_SECOND.size()) ? a_FIRST : a_SECOND;
-    const auto& longer =
-        (a_FIRST.size() < a_SECOND.size()) ? a_SECOND : a_FIRST;
-
-    for (const auto& [key, val_long] : longer) {
-        result += std::abs(val_long);
+    T2                     result = static_cast<T2>(0);
+    std::unordered_set<T1> all_keys;
+    for (const auto& [k, _] : a_FIRST) {
+        all_keys.insert(k);
+    }
+    for (const auto& [k, _] : a_SECOND) {
+        all_keys.insert(k);
     }
 
-    for (const auto& [key, val_short] : shorter) {
-        if (auto it = longer.find(key); it != longer.end()) {
-            const auto val_long = it->second;
-            result -= std::abs(val_long);
-            result += std::abs(val_long - val_short);
-        } else {
-            result += std::abs(val_short);
-        }
+    for (const auto& k : all_keys) {
+        T2 v1 = a_FIRST.count(k) ? a_FIRST.at(k) : static_cast<T2>(0);
+        T2 v2 = a_SECOND.count(k) ? a_SECOND.at(k) : static_cast<T2>(0);
+        result += std::abs(v1 - v2);
     }
 
     return result;
@@ -67,20 +61,20 @@ inline T2 distance_l1(const std::unordered_map<T1, T2>& a_FIRST,
 template <class T1, class T2>
 inline int distance_l0(const std::unordered_map<T1, T2>& a_FIRST,
                        const std::unordered_map<T1, T2>& a_SECOND) {
-    const auto& shorter =
-        (a_FIRST.size() < a_SECOND.size()) ? a_FIRST : a_SECOND;
-    const auto& longer =
-        (a_FIRST.size() < a_SECOND.size()) ? a_SECOND : a_FIRST;
+    int                    result = static_cast<T2>(0);
+    std::unordered_set<T1> all_keys;
+    for (const auto& [k, _] : a_FIRST) {
+        all_keys.insert(k);
+    }
+    for (const auto& [k, _] : a_SECOND) {
+        all_keys.insert(k);
+    }
 
-    int result = static_cast<int>(longer.size());
-
-    for (const auto& [key, val_short] : shorter) {
-        if (auto it = longer.find(key); it != longer.end()) {
-            if (val_short == it->second) {
-                result--;  // 一致するキー・値は距離ゼロ
-            }
-        } else {
-            result++;  // 存在しないキーは +1
+    for (const auto& k : all_keys) {
+        T2 v1 = a_FIRST.count(k) ? a_FIRST.at(k) : static_cast<T2>(0);
+        T2 v2 = a_SECOND.count(k) ? a_SECOND.at(k) : static_cast<T2>(0);
+        if (v1 != v2) {
+            result++;
         }
     }
 
