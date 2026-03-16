@@ -384,6 +384,12 @@ class Constraint : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
+    inline ConstraintMultinomial<T_Variable, T_Expression>
+    to_multinomial_constraint(void) {
+        return ConstraintMultinomial(this);
+    }
+
+    /*************************************************************************/
     inline void set_compact_ptr(
         ConstraintCompact<T_Variable, T_Expression> *a_compact_ptr) noexcept {
         m_compact_ptr = a_compact_ptr;

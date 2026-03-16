@@ -36,10 +36,10 @@ TEST_F(TestReference, update_variable_reference) {
 
     model.builder().update_derived_components();
 
-    preprocess::DependentVariableExtractor<int, double>
-                   dependent_variable_extractor(&model);
+    preprocess::DependentIntegerVariableExtractor<int, double>
+                   dependent_integer_variable_extractor(&model);
     option::Option option;
-    dependent_variable_extractor.extract(option, false);
+    dependent_integer_variable_extractor.run(option, false);
     preprocess::SelectionExtractor<int, double> selection_extractor(&model);
     selection_extractor.extract_by_independent(false);
 

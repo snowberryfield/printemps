@@ -47,7 +47,7 @@ class ConstraintTypeClassifier {
 
     /**************************************************************************/
     inline bool check_empty(void) {
-        if (m_structure_ptr->number_of_variables > 0) {
+        if (m_structure_ptr->number_of_mutable_variables > 0) {
             return false;
         }
 
@@ -59,7 +59,7 @@ class ConstraintTypeClassifier {
 
     /**************************************************************************/
     inline bool check_singleton(void) {
-        if (m_structure_ptr->number_of_variables != 1) {
+        if (m_structure_ptr->number_of_mutable_variables != 1) {
             return false;
         }
 
@@ -71,7 +71,7 @@ class ConstraintTypeClassifier {
 
     /**************************************************************************/
     inline bool check_exclusive_or(void) {
-        if (m_structure_ptr->number_of_variables != 2 ||
+        if (m_structure_ptr->number_of_mutable_variables != 2 ||
             m_sense != ConstraintSense::Equal) {
             return false;
         }
@@ -89,8 +89,7 @@ class ConstraintTypeClassifier {
             (coefficients[0] == -1 && coefficients[1] == -1 &&
              m_structure_ptr->constant_value == 1)) {
             m_type             = ConstraintType::ExclusiveOR;
-            m_key_variable_ptr = this->determine_key_variable_ptr(
-                variable_ptrs[0], variable_ptrs[1]);
+            m_key_variable_ptr = nullptr;
             return true;
         }
 
@@ -99,7 +98,7 @@ class ConstraintTypeClassifier {
 
     /**************************************************************************/
     inline bool check_exclusive_nor(void) {
-        if (m_structure_ptr->number_of_variables != 2 ||
+        if (m_structure_ptr->number_of_mutable_variables != 2 ||
             m_sense != ConstraintSense::Equal) {
             return false;
         }
@@ -117,8 +116,7 @@ class ConstraintTypeClassifier {
             (coefficients[0] == -1 && coefficients[1] == 1 &&
              m_structure_ptr->constant_value == 0)) {
             m_type             = ConstraintType::ExclusiveNOR;
-            m_key_variable_ptr = this->determine_key_variable_ptr(
-                variable_ptrs[0], variable_ptrs[1]);
+            m_key_variable_ptr = nullptr;
             return true;
         }
 
@@ -127,7 +125,7 @@ class ConstraintTypeClassifier {
 
     /**************************************************************************/
     inline bool check_inverted_integers(void) {
-        if (m_structure_ptr->number_of_variables != 2 ||
+        if (m_structure_ptr->number_of_mutable_variables != 2 ||
             m_sense != ConstraintSense::Equal) {
             return false;
         }
@@ -154,7 +152,7 @@ class ConstraintTypeClassifier {
 
     /**************************************************************************/
     inline bool check_balanced_integers(void) {
-        if (m_structure_ptr->number_of_variables != 2 ||
+        if (m_structure_ptr->number_of_mutable_variables != 2 ||
             m_sense != ConstraintSense::Equal) {
             return false;
         }
@@ -180,7 +178,7 @@ class ConstraintTypeClassifier {
 
     /**************************************************************************/
     inline bool check_constant_sum_integers(void) {
-        if (m_structure_ptr->number_of_variables != 2 ||
+        if (m_structure_ptr->number_of_mutable_variables != 2 ||
             m_sense != ConstraintSense::Equal) {
             return false;
         }
@@ -207,7 +205,7 @@ class ConstraintTypeClassifier {
 
     /**************************************************************************/
     inline bool check_constant_difference_integers(void) {
-        if (m_structure_ptr->number_of_variables != 2 ||
+        if (m_structure_ptr->number_of_mutable_variables != 2 ||
             m_sense != ConstraintSense::Equal)
             return false;
 
@@ -233,7 +231,7 @@ class ConstraintTypeClassifier {
 
     /**************************************************************************/
     inline bool check_constant_ratio_integers(void) {
-        if (m_structure_ptr->number_of_variables != 2 ||
+        if (m_structure_ptr->number_of_mutable_variables != 2 ||
             m_sense != ConstraintSense::Equal) {
             return false;
         }
@@ -266,7 +264,7 @@ class ConstraintTypeClassifier {
 
     /**************************************************************************/
     inline bool check_intermediate_two_term(void) {
-        if (m_structure_ptr->number_of_variables != 2 ||
+        if (m_structure_ptr->number_of_mutable_variables != 2 ||
             m_sense != ConstraintSense::Equal) {
             return false;
         }
@@ -299,7 +297,7 @@ class ConstraintTypeClassifier {
 
     /**************************************************************************/
     inline bool check_aggregation(void) {
-        if (m_structure_ptr->number_of_variables != 2 ||
+        if (m_structure_ptr->number_of_mutable_variables != 2 ||
             m_sense != ConstraintSense::Equal) {
             return false;
         }
@@ -312,7 +310,7 @@ class ConstraintTypeClassifier {
 
     /**************************************************************************/
     inline bool check_precedence(void) {
-        if (m_structure_ptr->number_of_variables != 2 ||
+        if (m_structure_ptr->number_of_mutable_variables != 2 ||
             m_sense == ConstraintSense::Equal) {
             return false;
         }
@@ -332,7 +330,7 @@ class ConstraintTypeClassifier {
 
     /**************************************************************************/
     inline bool check_variable_bound(void) {
-        if (m_structure_ptr->number_of_variables != 2 ||
+        if (m_structure_ptr->number_of_mutable_variables != 2 ||
             m_sense == ConstraintSense::Equal) {
             return false;
         }
@@ -343,7 +341,7 @@ class ConstraintTypeClassifier {
 
     /**************************************************************************/
     inline bool check_trinomial_exclusive_nor(void) {
-        if (m_structure_ptr->number_of_variables != 3 ||
+        if (m_structure_ptr->number_of_mutable_variables != 3 ||
             m_sense != ConstraintSense::Equal) {
             return false;
         }
@@ -358,25 +356,21 @@ class ConstraintTypeClassifier {
 
         if (static_cast<int>(
                 m_structure_ptr->plus_one_coefficient_variable_ptrs.size()) ==
-                m_structure_ptr->number_of_variables - 1 &&
+                m_structure_ptr->number_of_mutable_variables - 1 &&
             m_structure_ptr->minus_n_minus_one_coefficient_integer_variable_ptrs
                     .size() == 1) {
-            m_type = ConstraintType::TrinomialExclusiveNOR;
-            m_key_variable_ptr =
-                m_structure_ptr
-                    ->minus_n_minus_one_coefficient_integer_variable_ptrs[0];
+            m_type             = ConstraintType::TrinomialExclusiveNOR;
+            m_key_variable_ptr = nullptr;
             return true;
         }
 
         if (static_cast<int>(
                 m_structure_ptr->minus_one_coefficient_variable_ptrs.size()) ==
-                m_structure_ptr->number_of_variables - 1 &&
+                m_structure_ptr->number_of_mutable_variables - 1 &&
             m_structure_ptr->plus_n_minus_one_coefficient_integer_variable_ptrs
                     .size() == 1) {
-            m_type = ConstraintType::TrinomialExclusiveNOR;
-            m_key_variable_ptr =
-                m_structure_ptr
-                    ->plus_n_minus_one_coefficient_integer_variable_ptrs[0];
+            m_type             = ConstraintType::TrinomialExclusiveNOR;
+            m_key_variable_ptr = nullptr;
             return true;
         }
 
@@ -399,25 +393,21 @@ class ConstraintTypeClassifier {
 
         if (static_cast<int>(
                 m_structure_ptr->plus_one_coefficient_variable_ptrs.size()) ==
-                m_structure_ptr->number_of_variables - 1 &&
+                m_structure_ptr->number_of_mutable_variables - 1 &&
             m_structure_ptr->minus_n_minus_one_coefficient_integer_variable_ptrs
                     .size() == 1) {
-            m_type = ConstraintType::AllOrNothing;
-            m_key_variable_ptr =
-                m_structure_ptr
-                    ->minus_n_minus_one_coefficient_integer_variable_ptrs[0];
+            m_type             = ConstraintType::AllOrNothing;
+            m_key_variable_ptr = nullptr;
             return true;
         }
 
         if (static_cast<int>(
                 m_structure_ptr->minus_one_coefficient_variable_ptrs.size()) ==
-                m_structure_ptr->number_of_variables - 1 &&
+                m_structure_ptr->number_of_mutable_variables - 1 &&
             m_structure_ptr->plus_n_minus_one_coefficient_integer_variable_ptrs
                     .size() == 1) {
-            m_type = ConstraintType::AllOrNothing;
-            m_key_variable_ptr =
-                m_structure_ptr
-                    ->plus_n_minus_one_coefficient_integer_variable_ptrs[0];
+            m_type             = ConstraintType::AllOrNothing;
+            m_key_variable_ptr = nullptr;
             return true;
         }
 
@@ -798,7 +788,8 @@ class ConstraintTypeClassifier {
         auto &variable_ptrs = m_structure_ptr->variable_ptrs;
         auto &coefficients  = m_structure_ptr->coefficients;
 
-        for (auto i = 0; i < m_structure_ptr->number_of_variables; i++) {
+        for (auto i = 0; i < m_structure_ptr->number_of_mutable_variables;
+             i++) {
             auto variable_ptr = variable_ptrs[i];
             auto coefficient  = coefficients[i];
 

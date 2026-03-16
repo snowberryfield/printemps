@@ -41,8 +41,8 @@ class FlippableVariablePairExtractor {
     }
 
     /*************************************************************************/
-    inline void extract_pairs(const int  a_MINIMUM_COMMON_ELEMENT,  //
-                              const bool a_IS_ENABLED_PRINT) {
+    inline void run(const int  a_MINIMUM_COMMON_ELEMENT,  //
+                    const bool a_IS_ENABLED_PRINT) {
         utility::print_single_line(a_IS_ENABLED_PRINT);
         utility::print_message("Extracting flippable variable pairs...",
                                a_IS_ENABLED_PRINT);

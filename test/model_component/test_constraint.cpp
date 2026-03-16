@@ -422,7 +422,7 @@ TEST_F(TestConstraint, update_constraint_type) {
 
         EXPECT_TRUE(
             constraint.is_type(model_component::ConstraintType::ExclusiveOR));
-        EXPECT_EQ(&x(0), constraint.key_variable_ptr());
+        EXPECT_EQ(nullptr, constraint.key_variable_ptr());
     }
 }
 
@@ -772,27 +772,72 @@ TEST_F(TestConstraint, key_variable_ptr) {
 }
 
 /*****************************************************************************/
-TEST_F(TestConstraint, increment_violation_count) {
-    auto constraint =
-        model_component::Constraint<int, double>::create_instance();
+TEST_F(TestConstraint, update_violation_count) {
+    model::Model<int, double> model;
 
-    EXPECT_EQ(0, constraint.violation_count());
-    constraint.increment_violation_count();
-    EXPECT_EQ(1, constraint.violation_count());
-    constraint.increment_violation_count();
-    EXPECT_EQ(2, constraint.violation_count());
-    constraint.reset_violation_count();
-    EXPECT_EQ(0, constraint.violation_count());
+    auto& x = model.create_variable("x", 0, 1);
+    auto& f = model.create_constraint("f", x == 0);
+    x       = 0;
+    model.updater().update();
+    f(0).update_violation_count();
+
+    EXPECT_EQ(0, f(0).violation_count_less());
+    EXPECT_EQ(0, f(0).violation_count_greater());
+    EXPECT_EQ(0, f(0).violation_count());
+
+    x = 1;
+    model.updater().update();
+    f(0).update_violation_count();
+    EXPECT_EQ(1, f(0).violation_count_less());
+    EXPECT_EQ(0, f(0).violation_count_greater());
+    EXPECT_EQ(1, f(0).violation_count());
+
+    x = -1;
+    model.updater().update();
+    f(0).update_violation_count();
+    EXPECT_EQ(1, f(0).violation_count_less());
+    EXPECT_EQ(1, f(0).violation_count_greater());
+    EXPECT_EQ(2, f(0).violation_count());
+
+    x = 1;
+    model.updater().update();
+    f(0).update_violation_count();
+    EXPECT_EQ(2, f(0).violation_count_less());
+    EXPECT_EQ(1, f(0).violation_count_greater());
+    EXPECT_EQ(3, f(0).violation_count());
+
+    EXPECT_EQ(2, f(0).violation_count(1));
+    EXPECT_EQ(1, f(0).violation_count(-1));
+
+    f(0).reset_violation_count();
+    EXPECT_EQ(0, f(0).violation_count_less());
+    EXPECT_EQ(0, f(0).violation_count_greater());
+    EXPECT_EQ(0, f(0).violation_count());
 }
 
 /*****************************************************************************/
 TEST_F(TestConstraint, reset_violation_count) {
-    /// This test is covered by increment_violation_count().
+    /// This test is covered by update_violation_count().
+}
+
+/*****************************************************************************/
+TEST_F(TestConstraint, violation_count_less) {
+    /// This test is covered by update_violation_count().
+}
+
+/*****************************************************************************/
+TEST_F(TestConstraint, violation_count_greater) {
+    /// This test is covered by update_violation_count().
 }
 
 /*****************************************************************************/
 TEST_F(TestConstraint, violation_count) {
-    /// This test is covered by increment_violation_count().
+    /// This test is covered by update_violation_count().
+}
+
+/*****************************************************************************/
+TEST_F(TestConstraint, violation_count_arg_constraint_value) {
+    /// This test is covered by update_violation_count().
 }
 
 /*****************************************************************************/

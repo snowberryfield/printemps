@@ -71,7 +71,7 @@ TEST_F(TestConstraintTypeClassifier, check_exclusive_or) {
         EXPECT_EQ(model_component::ConstraintType::ExclusiveOR,
                   constraint.type());
         EXPECT_EQ("Exclusive OR", constraint.type_label());
-        EXPECT_EQ(&x(0), constraint.key_variable_ptr());
+        EXPECT_EQ(nullptr, constraint.key_variable_ptr());
     }
 
     {
@@ -86,7 +86,7 @@ TEST_F(TestConstraintTypeClassifier, check_exclusive_or) {
         EXPECT_EQ(model_component::ConstraintType::ExclusiveOR,
                   constraint.type());
         EXPECT_EQ("Exclusive OR", constraint.type_label());
-        EXPECT_EQ(&x(0), constraint.key_variable_ptr());
+        EXPECT_EQ(nullptr, constraint.key_variable_ptr());
     }
 }
 
@@ -106,7 +106,7 @@ TEST_F(TestConstraintTypeClassifier, check_exclusive_nor) {
         EXPECT_EQ(model_component::ConstraintType::ExclusiveNOR,
                   constraint.type());
         EXPECT_EQ("Exclusive NOR", constraint.type_label());
-        EXPECT_EQ(&x(0), constraint.key_variable_ptr());
+        EXPECT_EQ(nullptr, constraint.key_variable_ptr());
     }
 
     {
@@ -121,7 +121,7 @@ TEST_F(TestConstraintTypeClassifier, check_exclusive_nor) {
         EXPECT_EQ(model_component::ConstraintType::ExclusiveNOR,
                   constraint.type());
         EXPECT_EQ("Exclusive NOR", constraint.type_label());
-        EXPECT_EQ(&x(0), constraint.key_variable_ptr());
+        EXPECT_EQ(nullptr, constraint.key_variable_ptr());
     }
 }
 
@@ -453,7 +453,7 @@ TEST_F(TestConstraintTypeClassifier, check_trinomial_exclusive_nor) {
         EXPECT_EQ(model_component::ConstraintType::TrinomialExclusiveNOR,
                   constraint.type());
         EXPECT_EQ("Trinomial Exclusive NOR", constraint.type_label());
-        EXPECT_EQ(&z(0), constraint.key_variable_ptr());
+        EXPECT_EQ(nullptr, constraint.key_variable_ptr());
     }
     {
         auto constraint =
@@ -468,7 +468,7 @@ TEST_F(TestConstraintTypeClassifier, check_trinomial_exclusive_nor) {
         EXPECT_EQ(model_component::ConstraintType::TrinomialExclusiveNOR,
                   constraint.type());
         EXPECT_EQ("Trinomial Exclusive NOR", constraint.type_label());
-        EXPECT_EQ(&z(0), constraint.key_variable_ptr());
+        EXPECT_EQ(nullptr, constraint.key_variable_ptr());
     }
 }
 
@@ -492,7 +492,7 @@ TEST_F(TestConstraintTypeClassifier, check_all_or_nothing) {
         EXPECT_EQ(model_component::ConstraintType::AllOrNothing,
                   constraint.type());
         EXPECT_EQ("All Or Nothing", constraint.type_label());
-        EXPECT_EQ(&y(0), constraint.key_variable_ptr());
+        EXPECT_EQ(nullptr, constraint.key_variable_ptr());
     }
     {
         auto constraint =
@@ -507,7 +507,7 @@ TEST_F(TestConstraintTypeClassifier, check_all_or_nothing) {
         EXPECT_EQ(model_component::ConstraintType::AllOrNothing,
                   constraint.type());
         EXPECT_EQ("All Or Nothing", constraint.type_label());
-        EXPECT_EQ(&y(0), constraint.key_variable_ptr());
+        EXPECT_EQ(nullptr, constraint.key_variable_ptr());
     }
 }
 

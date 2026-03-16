@@ -155,7 +155,7 @@ class DependentVariableEliminator {
     }
 
     /*************************************************************************/
-    inline int eliminate(const bool a_IS_ENABLED_PRINT) {
+    inline int run(const bool a_IS_ENABLED_PRINT) {
         utility::print_single_line(a_IS_ENABLED_PRINT);
         utility::print_message("Eliminating dependent variables...",
                                a_IS_ENABLED_PRINT);

@@ -89,8 +89,7 @@ class ModelBuilder {
             }
 
             const auto RESULT =
-                model.problem_size_reducer_basic().reduce_problem_size(
-                    a_IS_ENABLED_PRINT);
+                model.problem_size_reducer_basic().run(a_IS_ENABLED_PRINT);
             if (RESULT.is_reduced()) {
                 this->update_derived_components();
             }
@@ -101,35 +100,44 @@ class ModelBuilder {
          */
         if (a_OPTION.preprocess.is_enabled_presolve &&
             a_OPTION.preprocess.is_enabled_extract_dependent()) {
-            preprocess::DependentVariableExtractor<T_Variable, T_Expression>
-                dependent_variable_extractor(m_model_ptr);
+            preprocess::DependentIntegerVariableExtractor<T_Variable,
+                                                          T_Expression>
+                dependent_integer_variable_extractor(m_model_ptr);
+
+            preprocess::DependentBinaryVariableExtractor<T_Variable,
+                                                         T_Expression>
+                dependent_binary_variable_extractor(m_model_ptr);
+
             preprocess::DependentVariableEliminator<T_Variable, T_Expression>
                 dependent_variable_eliminator(m_model_ptr);
             while (true) {
-                if (dependent_variable_extractor.extract(
-                        a_OPTION, a_IS_ENABLED_PRINT) == 0) {
+                const auto NUMBER_OF_EXTRACTED_DEPENDENT_BINARY_VARIABLES =
+                    dependent_binary_variable_extractor.run(a_OPTION,
+                                                            a_IS_ENABLED_PRINT);
+
+                const auto NUMBER_OF_EXTRACTED_DEPENDENT_INTEGER_VARIABLES =
+                    dependent_integer_variable_extractor.run(
+                        a_OPTION, a_IS_ENABLED_PRINT);
+
+                if (NUMBER_OF_EXTRACTED_DEPENDENT_BINARY_VARIABLES == 0 &&
+                    NUMBER_OF_EXTRACTED_DEPENDENT_INTEGER_VARIABLES == 0) {
                     break;
                 }
                 this->update_derived_components();
 
                 while (true) {
-                    if (dependent_variable_eliminator.eliminate(
-                            a_IS_ENABLED_PRINT) == 0) {
+                    if (dependent_variable_eliminator.run(a_IS_ENABLED_PRINT) ==
+                        0) {
                         break;
                     }
                     this->update_derived_components();
                 }
 
                 const auto RESULT =
-                    model.problem_size_reducer_basic().reduce_problem_size(
-                        a_IS_ENABLED_PRINT);
+                    model.problem_size_reducer_basic().run(a_IS_ENABLED_PRINT);
                 if (RESULT.is_reduced()) {
                     this->update_derived_components();
                 }
-                /**
-                 * NOTE: update_derived_components() is called inside
-                 * reduce_problem_size().
-                 */
             }
         }
 
@@ -163,7 +171,7 @@ class ModelBuilder {
          * Run partial feasible enumerator.
          */
         if (a_OPTION.preprocess.is_enabled_partial_feasible_enumeration) {
-            model.partial_feasible_enumerator().enumerate(a_IS_ENABLED_PRINT);
+            model.partial_feasible_enumerator().run(a_IS_ENABLED_PRINT);
         }
 
         /**
@@ -205,8 +213,8 @@ class ModelBuilder {
             option::selection_mode::Off) {
             preprocess::SelectionExtractor<T_Variable, T_Expression>
                 selection_extractor(m_model_ptr);
-            selection_extractor.extract(a_OPTION.neighborhood.selection_mode,
-                                        a_IS_ENABLED_PRINT);
+            selection_extractor.run(a_OPTION.neighborhood.selection_mode,
+                                    a_IS_ENABLED_PRINT);
             this->update_derived_components();
         }
 

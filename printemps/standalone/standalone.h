@@ -274,7 +274,7 @@ class Standalone {
 
         printemps::preprocess::IPFlippableVariablePairExtractor extractor(
             solver.model_ptr());
-        extractor.extract_pairs(
+        extractor.run(
             m_argparser.minimum_common_element,
             m_option.output.verbose >= printemps::option::verbose::Outer);
         extractor.write_pairs("flip.txt");

@@ -82,16 +82,19 @@ TEST_F(TestModelUpdater, update_dependent_variables_and_disabled_constraints) {
     auto& x = model.create_variable("x", 0, 10);
     auto& y = model.create_variable("y", 0, 10);
 
-    model.create_constraint("g", x == 2 * y);
+    auto& g = model.create_constraint("g", x == 2 * y);
     auto& h = model.create_constraint("h", x + y <= 100);
-
     h.disable();
 
     model.builder().update_derived_components();
-    preprocess::DependentVariableExtractor<int, double>
-        dependent_variable_extractor(&model);
-    dependent_variable_extractor.extract(option, false);
+    std::cout << g(0).type_label() << std::endl;
+    preprocess::DependentIntegerVariableExtractor<int, double>
+        dependent_integer_variable_extractor(&model);
+    dependent_integer_variable_extractor.run(option, true);
     model.builder().update_derived_components();
+
+    model.printer().print_number_of_variables();
+    model.printer().print_number_of_constraints();
 
     x(0) = 0;
     y(0) = 10;

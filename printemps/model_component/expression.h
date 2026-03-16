@@ -513,8 +513,8 @@ class Expression : public multi_array::AbstractMultiArrayElement {
     inline ExpressionStructure<T_Variable, T_Expression> structure(void) const {
         ExpressionStructure<T_Variable, T_Expression> structure;
 
-        structure.constant_value      = m_constant_value;
-        structure.number_of_variables = 0;
+        structure.constant_value              = m_constant_value;
+        structure.number_of_mutable_variables = 0;
 
         auto SENSITIVITIES_PAIR_VECTOR = this->sensitivities_pair_vector(false);
 
@@ -525,7 +525,7 @@ class Expression : public multi_array::AbstractMultiArrayElement {
             if (sensitivity.first->is_fixed()) {
                 structure.constant_value += coefficient * variable_ptr->value();
             } else {
-                structure.number_of_variables++;
+                structure.number_of_mutable_variables++;
             }
         }
 
@@ -540,8 +540,8 @@ class Expression : public multi_array::AbstractMultiArrayElement {
         structure.variable_ptrs.clear();
         structure.coefficients.clear();
 
-        structure.variable_ptrs.reserve(structure.number_of_variables);
-        structure.coefficients.reserve(structure.number_of_variables);
+        structure.variable_ptrs.reserve(structure.number_of_mutable_variables);
+        structure.coefficients.reserve(structure.number_of_mutable_variables);
 
         if (!utility::is_integer(m_constant_value)) {
             structure.is_integer = false;
@@ -599,10 +599,11 @@ class Expression : public multi_array::AbstractMultiArrayElement {
                 }
             }
 
-            if (coefficient == structure.number_of_variables - 1) {
+            if (coefficient == structure.number_of_mutable_variables - 1) {
                 structure.plus_n_minus_one_coefficient_integer_variable_ptrs
                     .push_back(variable_ptr);
-            } else if (coefficient == -(structure.number_of_variables - 1)) {
+            } else if (coefficient ==
+                       -(structure.number_of_mutable_variables - 1)) {
                 structure.minus_n_minus_one_coefficient_integer_variable_ptrs
                     .push_back(variable_ptr);
             }

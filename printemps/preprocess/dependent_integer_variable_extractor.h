@@ -3,17 +3,17 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_PREPROCESS_DEPENDENT_VARIABLE_EXTRACTOR_H__
-#define PRINTEMPS_PREPROCESS_DEPENDENT_VARIABLE_EXTRACTOR_H__
+#ifndef PRINTEMPS_PREPROCESS_DEPENDENT_INTEGER_VARIABLE_EXTRACTOR_H__
+#define PRINTEMPS_PREPROCESS_DEPENDENT_INTEGER_VARIABLE_EXTRACTOR_H__
 
 namespace printemps::preprocess {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-class DependentVariableExtractor {
+class DependentIntegerVariableExtractor {
    private:
     model::Model<T_Variable, T_Expression> *m_model_ptr;
 
-    /* Work buffers (valid only during extract()) */
+    /* Work buffers (valid only during run()) */
     std::vector<model_component::Constraint<T_Variable, T_Expression> *>
         m_candidate_constraint_ptrs;
 
@@ -24,11 +24,11 @@ class DependentVariableExtractor {
     std::vector<std::vector<int>> m_constraint_graph;
     std::vector<bool>             m_extractable_flags;
 
-    std::vector<model_component::Variable<T_Variable, T_Expression> *>
-        m_dependent_variable_ptrs;
-
     std::vector<model_component::Constraint<T_Variable, T_Expression> *>
         m_target_constraint_ptrs;
+
+    std::vector<model_component::Variable<T_Variable, T_Expression> *>
+        m_dependent_variable_ptrs;
 
     std::vector<model_component::Expression<T_Variable, T_Expression>>
         m_additional_expressions;
@@ -38,12 +38,12 @@ class DependentVariableExtractor {
 
    public:
     /*************************************************************************/
-    DependentVariableExtractor(void) {
+    DependentIntegerVariableExtractor(void) {
         this->initialize();
     }
 
     /*************************************************************************/
-    DependentVariableExtractor(
+    DependentIntegerVariableExtractor(
         model::Model<T_Variable, T_Expression> *a_model_ptr) {
         this->setup(a_model_ptr);
     }
@@ -66,8 +66,8 @@ class DependentVariableExtractor {
         m_candidate_dependent_variable_ptr_counts.clear();
         m_constraint_graph.clear();
         m_extractable_flags.clear();
-        m_dependent_variable_ptrs.clear();
         m_target_constraint_ptrs.clear();
+        m_dependent_variable_ptrs.clear();
         m_additional_expressions.clear();
         m_additional_constraints.clear();
     }
@@ -79,10 +79,6 @@ class DependentVariableExtractor {
         using namespace model_component;
         auto &option = a_OPTION.preprocess;
 
-        enable_map[ConstraintType::ExclusiveOR] =
-            option.is_enabled_extract_dependent_exclusive_or;
-        enable_map[ConstraintType::ExclusiveNOR] =
-            option.is_enabled_extract_dependent_exclusive_nor;
         enable_map[ConstraintType::InvertedIntegers] =
             option.is_enabled_extract_dependent_inverted_integers;
         enable_map[ConstraintType::BalancedIntegers] =
@@ -93,10 +89,6 @@ class DependentVariableExtractor {
             option.is_enabled_extract_dependent_constant_difference_integers;
         enable_map[ConstraintType::ConstantRatioIntegers] =
             option.is_enabled_extract_dependent_constant_ratio_integers;
-        enable_map[ConstraintType::TrinomialExclusiveNOR] =
-            option.is_enabled_extract_dependent_trinomial_exclusive_nor;
-        enable_map[ConstraintType::AllOrNothing] =
-            option.is_enabled_extract_dependent_all_or_nothing;
         enable_map[ConstraintType::Intermediate] =
             option.is_enabled_extract_dependent_intermediate;
 
@@ -110,15 +102,11 @@ class DependentVariableExtractor {
         std::vector<std::vector<
             model_component::Constraint<T_Variable, T_Expression> *> *>
             constraint_ptrs_ptrs = {
-                &reference.exclusive_or_ptrs,
-                &reference.exclusive_nor_ptrs,
                 &reference.inverted_integers_ptrs,
                 &reference.balanced_integers_ptrs,
                 &reference.constant_sum_integers_ptrs,
                 &reference.constant_difference_integers_ptrs,
                 &reference.constant_ratio_integers_ptrs,
-                &reference.trinomial_exclusive_nor_ptrs,
-                &reference.all_or_nothing_ptrs,
                 &reference.intermediate_ptrs};
 
         std::vector<model_component::Constraint<T_Variable, T_Expression> *>
@@ -132,8 +120,11 @@ class DependentVariableExtractor {
 
         for (auto &&constraint_ptrs_ptr : constraint_ptrs_ptrs) {
             for (auto &&constraint_ptr : *constraint_ptrs_ptr) {
-                if (constraint_ptr->is_enabled())
-                    candidate_constraint_ptrs.push_back(constraint_ptr);
+                if (!constraint_ptr->is_enabled() ||
+                    constraint_ptr->is_defining_dependent_variable()) {
+                    continue;
+                }
+                candidate_constraint_ptrs.push_back(constraint_ptr);
             }
         }
         m_candidate_constraint_ptrs = candidate_constraint_ptrs;
@@ -182,34 +173,11 @@ class DependentVariableExtractor {
         for (int i = 0; i < SIZE; i++) {
             auto constraint_ptr   = m_candidate_constraint_ptrs[i];
             auto key_variable_ptr = constraint_ptr->key_variable_ptr();
-
-            if (constraint_ptr->has_representative_variable()) {
-                auto &sensitivities =
-                    constraint_ptr->expression().sensitivities();
-                for (auto &&sensitivity : sensitivities) {
-                    auto variable_ptr = sensitivity.first;
-                    if (variable_ptr == key_variable_ptr ||
-                        variable_ptr->is_fixed()) {
-                        continue;
-                    }
-
-                    auto it = variable_to_constraints.find(variable_ptr);
-                    if (it == variable_to_constraints.end()) {
-                        continue;
-                    }
-
-                    for (int j : it->second) {
-                        if (i != j)
-                            m_constraint_graph[i].push_back(j);
-                    }
-                }
-            } else {
-                auto it = variable_to_constraints.find(key_variable_ptr);
-                if (it != variable_to_constraints.end()) {
-                    for (int j : it->second) {
-                        if (i != j)
-                            m_constraint_graph[i].push_back(j);
-                    }
+            auto it = variable_to_constraints.find(key_variable_ptr);
+            if (it != variable_to_constraints.end()) {
+                for (int j : it->second) {
+                    if (i != j)
+                        m_constraint_graph[i].push_back(j);
                 }
             }
         }
@@ -276,10 +244,10 @@ class DependentVariableExtractor {
         }
     }
     /*************************************************************************/
-    inline int extract(const option::Option &a_OPTION,
-                       const bool            a_IS_ENABLED_PRINT) {
+    inline int run(const option::Option &a_OPTION,
+                   const bool            a_IS_ENABLED_PRINT) {
         utility::print_single_line(a_IS_ENABLED_PRINT);
-        utility::print_message("Extracting dependent variables...",
+        utility::print_message("Extracting dependent integer variables...",
                                a_IS_ENABLED_PRINT);
 
         this->clear_work_buffers();
@@ -287,7 +255,8 @@ class DependentVariableExtractor {
 
         if (m_candidate_constraint_ptrs.empty()) {
             utility::print_message(
-                "No constraints for extracting dependent variables were found.",
+                "No constraints for extracting dependent integer variables "
+                "were found.",
                 a_IS_ENABLED_PRINT);
             return 0;
         }
@@ -314,8 +283,8 @@ class DependentVariableExtractor {
         const int CANDIDATE_CONSTRAINTS_SIZE =
             m_candidate_constraint_ptrs.size();
 
-        m_dependent_variable_ptrs.clear();
         m_target_constraint_ptrs.clear();
+        m_dependent_variable_ptrs.clear();
         m_additional_constraints.clear();
         m_additional_expressions.clear();
 
@@ -331,88 +300,40 @@ class DependentVariableExtractor {
                 continue;
             }
 
-            if (constraint_ptr->has_representative_variable()) {
-                const auto &sensitivities =
-                    constraint_ptr->expression().sensitivities();
+            if (m_candidate_dependent_variable_ptr_counts[key_variable_ptr] !=
+                1) {
+                continue;
+            }
 
-                bool is_extractable = true;
-                for (const auto &sensitivity : sensitivities) {
-                    auto variable_ptr = sensitivity.first;
-                    if (variable_ptr == key_variable_ptr ||
-                        variable_ptr->is_fixed()) {
-                        continue;
-                    }
-                    if (m_candidate_dependent_variable_ptr_counts
-                            [variable_ptr] != 1) {
-                        is_extractable = false;
-                        break;
-                    }
-                }
+            utility::print_message(
+                "The variable " + key_variable_ptr->name() +
+                    " in the constraint " + constraint_ptr->name() +
+                    " was extracted as a dependent integer variable. ",
+                a_IS_ENABLED_PRINT);
 
-                if (!is_extractable) {
-                    continue;
-                }
+            m_target_constraint_ptrs.push_back(constraint_ptr);
 
-                m_target_constraint_ptrs.push_back(constraint_ptr);
+            m_dependent_variable_ptrs.push_back(key_variable_ptr);
+            m_additional_expressions.emplace_back(
+                constraint_ptr->expression().solve(key_variable_ptr));
 
-                for (const auto &sensitivity : sensitivities) {
-                    auto variable_ptr = sensitivity.first;
-                    if (variable_ptr == key_variable_ptr ||
-                        variable_ptr->is_fixed()) {
-                        continue;
-                    }
+            auto &expression = m_additional_expressions.back();
+            expression.set_name(key_variable_ptr->name() + "_dependent");
 
-                    utility::print_message(
-                        "The variable " + variable_ptr->name() +
-                            " in the constraint " + constraint_ptr->name() +
-                            " was extracted as a dependent variable. ",
-                        a_IS_ENABLED_PRINT);
+            if (key_variable_ptr->lower_bound() != constant::INT_HALF_MIN &&
+                key_variable_ptr->lower_bound() > expression.lower_bound()) {
+                m_additional_constraints.emplace_back(
+                    expression >= key_variable_ptr->lower_bound());
+                m_additional_constraints.back().set_name(
+                    constraint_ptr->name() + "_greater");
+            }
 
-                    m_dependent_variable_ptrs.push_back(variable_ptr);
-                    m_additional_expressions.emplace_back(
-                        key_variable_ptr->to_expression());
-
-                    m_additional_expressions.back().set_name(
-                        variable_ptr->name() + "_dependent");
-                }
-            } else {
-                if (m_candidate_dependent_variable_ptr_counts
-                        [key_variable_ptr] != 1) {
-                    continue;
-                }
-
-                utility::print_message(
-                    "The variable " + key_variable_ptr->name() +
-                        " in the constraint " + constraint_ptr->name() +
-                        " was extracted as a dependent variable. ",
-                    a_IS_ENABLED_PRINT);
-
-                m_target_constraint_ptrs.push_back(constraint_ptr);
-
-                m_dependent_variable_ptrs.push_back(key_variable_ptr);
-                m_additional_expressions.emplace_back(
-                    constraint_ptr->expression().solve(key_variable_ptr));
-
-                auto &expression = m_additional_expressions.back();
-                expression.set_name(key_variable_ptr->name() + "_dependent");
-
-                if (key_variable_ptr->lower_bound() != constant::INT_HALF_MIN &&
-                    key_variable_ptr->lower_bound() >
-                        expression.lower_bound()) {
-                    m_additional_constraints.emplace_back(
-                        expression >= key_variable_ptr->lower_bound());
-                    m_additional_constraints.back().set_name(
-                        constraint_ptr->name() + "_greater");
-                }
-
-                if (key_variable_ptr->upper_bound() != constant::INT_HALF_MAX &&
-                    key_variable_ptr->upper_bound() <
-                        expression.upper_bound()) {
-                    m_additional_constraints.emplace_back(
-                        expression <= key_variable_ptr->upper_bound());
-                    m_additional_constraints.back().set_name(
-                        constraint_ptr->name() + "_less");
-                }
+            if (key_variable_ptr->upper_bound() != constant::INT_HALF_MAX &&
+                key_variable_ptr->upper_bound() < expression.upper_bound()) {
+                m_additional_constraints.emplace_back(
+                    expression <= key_variable_ptr->upper_bound());
+                m_additional_constraints.back().set_name(
+                    constraint_ptr->name() + "_less");
             }
         }
         return m_dependent_variable_ptrs.size();
@@ -438,6 +359,7 @@ class DependentVariableExtractor {
         for (int i = 0; i < EXTRACTED_DEPENDENT_VARIABLES_SIZE; i++) {
             proxy(i) = m_additional_expressions[i];
             proxy(i).set_name(m_additional_expressions[i].name());
+            proxy(i).set_flat_index(i);
             m_dependent_variable_ptrs[i]->set_dependent_expression_ptr(
                 &proxy(i));
         }
@@ -452,52 +374,13 @@ class DependentVariableExtractor {
             for (int i = 0; i < ADDITIONAL_CONSTRAINTS_SIZE; i++) {
                 proxy(i) = m_additional_constraints[i];
                 proxy(i).set_name(m_additional_constraints[i].name());
+                proxy(i).set_flat_index(i);
                 utility::print_message("An extra constraint " +
                                            m_additional_constraints[i].name() +
                                            " was added.",
                                        a_IS_ENABLED_PRINT);
             }
         }
-    }
-
-    /*************************************************************************/
-    inline const std::vector<
-        model_component::Constraint<T_Variable, T_Expression> *> &
-    candidate_constraint_ptrs(void) const noexcept {
-        return m_candidate_constraint_ptrs;
-    }
-
-    /*************************************************************************/
-    inline const std::unordered_map<
-        model_component::Variable<T_Variable, T_Expression> *, int> &
-    candidate_dependent_variable_ptr_counts(void) const noexcept {
-        return m_candidate_dependent_variable_ptr_counts;
-    }
-
-    /*************************************************************************/
-    inline const std::vector<bool> &extractable_flags(void) const noexcept {
-        return m_extractable_flags;
-    }
-
-    /*************************************************************************/
-    inline const std::vector<
-        model_component::Variable<T_Variable, T_Expression> *> &
-    dependent_variable_ptrs(void) const noexcept {
-        return m_dependent_variable_ptrs;
-    }
-
-    /*************************************************************************/
-    inline const std::vector<
-        model_component::Expression<T_Variable, T_Expression>> &
-    additional_expressions(void) const noexcept {
-        return m_additional_expressions;
-    }
-
-    /*************************************************************************/
-    inline const std::vector<
-        model_component::Constraint<T_Variable, T_Expression>> &
-    additional_constraints(void) const noexcept {
-        return m_additional_constraints;
     }
 };
 }  // namespace printemps::preprocess

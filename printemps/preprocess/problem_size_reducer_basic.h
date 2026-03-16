@@ -44,8 +44,7 @@ class ProblemSizeReducerBasic {
     }
 
     /*************************************************************************/
-    inline ProblemSizeReducerResult reduce_problem_size(
-        const bool a_IS_ENABLED_PRINT) {
+    inline ProblemSizeReducerResult run(const bool a_IS_ENABLED_PRINT) {
         utility::print_single_line(a_IS_ENABLED_PRINT);
         utility::print_message("Reducing problem size...", a_IS_ENABLED_PRINT);
 

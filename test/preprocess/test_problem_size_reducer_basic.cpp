@@ -20,7 +20,7 @@ class TestProblemSizeReducerBasic : public ::testing::Test {
 };
 
 /*****************************************************************************/
-TEST_F(TestProblemSizeReducerBasic, reduce_problem_size) {
+TEST_F(TestProblemSizeReducerBasic, run) {
     model::Model<int, double> model;
 
     auto& x = model.create_variables("x", 10, -10, 10);
@@ -34,7 +34,7 @@ TEST_F(TestProblemSizeReducerBasic, reduce_problem_size) {
 
     preprocess::ProblemSizeReducerBasic<int, double>  //
         problem_size_reducer_basic(&model);
-    problem_size_reducer_basic.reduce_problem_size(false);
+    problem_size_reducer_basic.run(false);
     model.builder().update_derived_components();
 
     EXPECT_EQ(10, model.reference().number_of_fixed_variables());

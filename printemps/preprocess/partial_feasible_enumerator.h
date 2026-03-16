@@ -15,7 +15,6 @@ class PartialFeasibleEnumerator {
     std::vector<model_component::ConstraintGroup<T_Variable, T_Expression>>
         m_small_constraint_groups;
 
-   private:
     /*************************************************************************/
     inline T_Expression evaluate_violation(
         const model_component::Constraint<T_Variable, T_Expression>*
@@ -225,7 +224,7 @@ class PartialFeasibleEnumerator {
     }
 
     /*************************************************************************/
-    inline void enumerate(const bool a_IS_ENABLED_PRINT) {
+    inline void run(const bool a_IS_ENABLED_PRINT) {
         utility::print_single_line(a_IS_ENABLED_PRINT);
         utility::print_message(
             "Enumerating partial feasible solutions for small constraint "

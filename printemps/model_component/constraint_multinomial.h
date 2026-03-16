@@ -57,13 +57,20 @@ struct ConstraintMultinomial {
             EXPRESSION.sensitivities_pair_vector(true);
 
         const int SENSITIVITIES_SIZE = SENSITIVITIES_PAIR_VECTOR.size();
+        this->constant_value         = EXPRESSION.constant_value();
+
         for (auto i = 0; i < SENSITIVITIES_SIZE; i++) {
+            if (SENSITIVITIES_PAIR_VECTOR[i].first->is_fixed()) {
+                this->constant_value +=
+                    SENSITIVITIES_PAIR_VECTOR[i].second *
+                    SENSITIVITIES_PAIR_VECTOR[i].first->value();
+                continue;
+            }
             this->variable_ptrs.push_back(SENSITIVITIES_PAIR_VECTOR[i].first);
             this->coefficients.push_back(SENSITIVITIES_PAIR_VECTOR[i].second);
         }
 
-        this->constant_value = EXPRESSION.constant_value();
-        this->sense          = this->constraint_ptr->sense();
+        this->sense = this->constraint_ptr->sense();
     }
 };
 

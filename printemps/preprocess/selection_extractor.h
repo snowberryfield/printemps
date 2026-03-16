@@ -70,7 +70,7 @@ class SelectionExtractor {
     }
 
     /*************************************************************************/
-    inline void extract(
+    inline void run(
         const option::selection_mode::SelectionMode &a_SELECTION_MODE,
         const bool                                   a_IS_ENABLED_PRINT) {
         switch (a_SELECTION_MODE) {

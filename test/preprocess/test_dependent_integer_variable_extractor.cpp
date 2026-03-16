@@ -9,7 +9,7 @@
 namespace {
 using namespace printemps;
 /*****************************************************************************/
-class TestDependentVariableExtractor : public ::testing::Test {
+class TestDependentIntegerVariableExtractor : public ::testing::Test {
    protected:
     virtual void SetUp(void) {
         /// nothing to do
@@ -20,7 +20,7 @@ class TestDependentVariableExtractor : public ::testing::Test {
 };
 
 /*****************************************************************************/
-TEST_F(TestDependentVariableExtractor, create_enable_map) {
+TEST_F(TestDependentIntegerVariableExtractor, create_enable_map) {
     using namespace model_component;
     {
         option::Option option;
@@ -37,7 +37,7 @@ TEST_F(TestDependentVariableExtractor, create_enable_map) {
         preprocess.is_enabled_extract_dependent_all_or_nothing          = false;
         preprocess.is_enabled_extract_dependent_intermediate            = false;
 
-        auto enable_map = preprocess::DependentVariableExtractor<
+        auto enable_map = preprocess::DependentIntegerVariableExtractor<
             int, double>::create_enable_map(option);
 
         EXPECT_FALSE(enable_map[ConstraintType::ExclusiveOR]);
@@ -55,36 +55,28 @@ TEST_F(TestDependentVariableExtractor, create_enable_map) {
     {
         option::Option option;
         auto&          preprocess = option.preprocess;
-        preprocess.is_enabled_extract_dependent_exclusive_or          = true;
-        preprocess.is_enabled_extract_dependent_exclusive_nor         = true;
         preprocess.is_enabled_extract_dependent_inverted_integers     = true;
         preprocess.is_enabled_extract_dependent_balanced_integers     = true;
         preprocess.is_enabled_extract_dependent_constant_sum_integers = true;
         preprocess.is_enabled_extract_dependent_constant_difference_integers =
             true;
         preprocess.is_enabled_extract_dependent_constant_ratio_integers = true;
-        preprocess.is_enabled_extract_dependent_trinomial_exclusive_nor = true;
-        preprocess.is_enabled_extract_dependent_all_or_nothing          = true;
         preprocess.is_enabled_extract_dependent_intermediate            = true;
 
-        auto enable_map = preprocess::DependentVariableExtractor<
+        auto enable_map = preprocess::DependentIntegerVariableExtractor<
             int, double>::create_enable_map(option);
 
-        EXPECT_TRUE(enable_map[ConstraintType::ExclusiveOR]);
-        EXPECT_TRUE(enable_map[ConstraintType::ExclusiveNOR]);
         EXPECT_TRUE(enable_map[ConstraintType::InvertedIntegers]);
         EXPECT_TRUE(enable_map[ConstraintType::BalancedIntegers]);
         EXPECT_TRUE(enable_map[ConstraintType::ConstantSumIntegers]);
         EXPECT_TRUE(enable_map[ConstraintType::ConstantDifferenceIntegers]);
         EXPECT_TRUE(enable_map[ConstraintType::ConstantRatioIntegers]);
-        EXPECT_TRUE(enable_map[ConstraintType::TrinomialExclusiveNOR]);
-        EXPECT_TRUE(enable_map[ConstraintType::AllOrNothing]);
         EXPECT_TRUE(enable_map[ConstraintType::Intermediate]);
     }
 }
 
 /*****************************************************************************/
-TEST_F(TestDependentVariableExtractor, extract) {
+TEST_F(TestDependentIntegerVariableExtractor, run) {
     /// case 01
     {
         model::Model<int, double> model;
@@ -109,15 +101,15 @@ TEST_F(TestDependentVariableExtractor, extract) {
         EXPECT_TRUE(
             h(0).is_type(model_component::ConstraintType::Intermediate));
 
-        preprocess::DependentVariableExtractor<int, double>
-            dependent_variable_extractor(&model);
+        preprocess::DependentIntegerVariableExtractor<int, double>
+            dependent_integer_variable_extractor(&model);
         preprocess::DependentVariableEliminator<int, double>
             dependent_variable_eliminator(&model);
 
         /// Extracting (Round 1)
         {
             option::Option option;
-            dependent_variable_extractor.extract(option, false);
+            dependent_integer_variable_extractor.run(option, false);
 
             model.builder().update_derived_components();
 
@@ -136,7 +128,7 @@ TEST_F(TestDependentVariableExtractor, extract) {
 
         /// Eliminating (Round 1-1)
         {
-            dependent_variable_eliminator.eliminate(false);
+            dependent_variable_eliminator.run(false);
 
             model.builder().update_derived_components();
 
@@ -150,7 +142,7 @@ TEST_F(TestDependentVariableExtractor, extract) {
 
         /// Eliminating (Round 1-2)
         {
-            dependent_variable_eliminator.eliminate(false);
+            dependent_variable_eliminator.run(false);
 
             model.builder().update_derived_components();
 
@@ -194,15 +186,15 @@ TEST_F(TestDependentVariableExtractor, extract) {
         EXPECT_TRUE(
             g(0).is_type(model_component::ConstraintType::Intermediate));
 
-        preprocess::DependentVariableExtractor<int, double>
-            dependent_variable_extractor(&model);
+        preprocess::DependentIntegerVariableExtractor<int, double>
+            dependent_integer_variable_extractor(&model);
         preprocess::DependentVariableEliminator<int, double>
             dependent_variable_eliminator(&model);
 
         /// Extracting (Round 1)
         {
             option::Option option;
-            dependent_variable_extractor.extract(option, false);
+            dependent_integer_variable_extractor.run(option, false);
 
             model.builder().update_derived_components();
 
@@ -243,7 +235,7 @@ TEST_F(TestDependentVariableExtractor, extract) {
 
         /// Eliminating (Round 1-1)
         {
-            dependent_variable_eliminator.eliminate(false);
+            dependent_variable_eliminator.run(false);
 
             model.builder().update_derived_components();
 
@@ -281,66 +273,6 @@ TEST_F(TestDependentVariableExtractor, extract) {
             }
         }
     }
-
-    /// case 03
-    {
-        model::Model<int, double> model;
-
-        auto& x = model.create_variables("x", 5, 0, 1);
-        auto& y = model.create_variable("y", 0, 1);
-
-        auto& f = model.create_constraint("f", 5 * y == x.sum());
-        model.minimize(x.sum());
-        model.builder().setup_unique_names();
-        model.builder().update_derived_components();
-
-        EXPECT_TRUE(
-            f(0).is_type(model_component::ConstraintType::AllOrNothing));
-
-        preprocess::DependentVariableExtractor<int, double>
-            dependent_variable_extractor(&model);
-        preprocess::DependentVariableEliminator<int, double>
-            dependent_variable_eliminator(&model);
-
-        /// Extracting
-        {
-            option::Option option;
-            option.preprocess.is_enabled_extract_dependent_all_or_nothing =
-                true;
-            dependent_variable_extractor.extract(option, false);
-
-            model.builder().update_derived_components();
-
-            EXPECT_EQ(model_component::VariableType::DependentBinary,
-                      x(0).type());
-            EXPECT_EQ(model_component::VariableType::DependentBinary,
-                      x(1).type());
-            EXPECT_EQ(model_component::VariableType::DependentBinary,
-                      x(2).type());
-            EXPECT_EQ(model_component::VariableType::DependentBinary,
-                      x(3).type());
-            EXPECT_EQ(model_component::VariableType::DependentBinary,
-                      x(4).type());
-            EXPECT_FALSE(f.is_enabled());
-        }
-
-        /// Eliminating
-        {
-            dependent_variable_eliminator.eliminate(false);
-
-            model.builder().update_derived_components();
-
-            auto& sensitivities_objective =
-                model.objective().expression().sensitivities();
-
-            EXPECT_EQ(5, sensitivities_objective.at(&y(0)));
-        }
-    }
-}
-
-/*****************************************************************************/
-TEST_F(TestDependentVariableExtractor, eliminate) {
-    /// This test is covered by extract_integer_variables().
 }
 }  // namespace
 /*****************************************************************************/

@@ -14,7 +14,7 @@ class Variable;
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 struct ExpressionStructure {
-    int          number_of_variables;
+    int          number_of_mutable_variables;
     T_Expression constant_value;
 
     bool is_integer;
@@ -56,8 +56,8 @@ struct ExpressionStructure {
 
     /**************************************************************************/
     inline void initialize(void) noexcept {
-        this->number_of_variables = 0;
-        this->constant_value      = 0;
+        this->number_of_mutable_variables = 0;
+        this->constant_value              = 0;
 
         this->is_integer                             = false;
         this->has_only_binary_coefficient            = false;
