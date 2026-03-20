@@ -168,6 +168,9 @@ TEST_F(TestOption, setup) {
             option.preprocess.is_enabled_initial_value_correction);
 
         EXPECT_EQ(  //
+            false, option.preprocess.is_enabled_partial_feasible_enumeration);
+
+        EXPECT_EQ(  //
             false,  //
             option.preprocess.is_enabled_extract_dependent_exclusive_or);
 
@@ -210,7 +213,9 @@ TEST_F(TestOption, setup) {
             false, option.preprocess.is_enabled_extract_dependent_intermediate);
 
         EXPECT_EQ(  //
-            false, option.preprocess.is_enabled_partial_feasible_enumeration);
+            false,
+            option.preprocess
+                .is_enabled_extract_dependent_using_partial_feasible_enumeration);
 
         /// neighborhood
         EXPECT_EQ(  //
@@ -254,12 +259,16 @@ TEST_F(TestOption, setup) {
             option.neighborhood.is_enabled_aggregation_move);
 
         EXPECT_EQ(  //
-            true,   //
+            false,  //
             option.neighborhood.is_enabled_precedence_move);
 
         EXPECT_EQ(  //
-            true,   //
+            false,  //
             option.neighborhood.is_enabled_variable_bound_move);
+
+        EXPECT_EQ(  //
+            false,  //
+            option.neighborhood.is_enabled_trinomial_exclusive_nor_move);
 
         EXPECT_EQ(  //
             false,  //
@@ -274,7 +283,7 @@ TEST_F(TestOption, setup) {
             option.neighborhood.is_enabled_two_flip_move);
 
         EXPECT_EQ(  //
-            true,   //
+            false,  //
             option.neighborhood.is_enabled_partial_feasible_enumeration_move);
 
         EXPECT_EQ(  //
@@ -848,12 +857,16 @@ TEST_F(TestOption, to_json) {
         to_bool(neighborhood.at("is_enabled_aggregation_move")));
 
     EXPECT_EQ(  //
-        true,   //
+        false,  //
         to_bool(neighborhood.at("is_enabled_precedence_move")));
 
     EXPECT_EQ(  //
-        true,   //
+        false,  //
         to_bool(neighborhood.at("is_enabled_variable_bound_move")));
+
+    EXPECT_EQ(  //
+        false,  //
+        to_bool(neighborhood.at("is_enabled_trinomial_exclusive_nor_move")));
 
     EXPECT_EQ(  //
         false,  //
@@ -868,7 +881,7 @@ TEST_F(TestOption, to_json) {
         to_bool(neighborhood.at("is_enabled_two_flip_move")));
 
     EXPECT_EQ(  //
-        true,   //
+        false,  //
         to_bool(
             neighborhood.at("is_enabled_partial_feasible_enumeration_move")));
 

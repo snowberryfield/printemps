@@ -21,15 +21,15 @@ struct NeighborhoodOptionConstant {
     static constexpr bool DEFAULT_IS_ENABLED_CONSTANT_RATIO_INTEGERS_MOVE =
         true;
     static constexpr bool DEFAULT_IS_ENABLED_AGGREGATION_MOVE    = true;
-    static constexpr bool DEFAULT_IS_ENABLED_PRECEDENCE_MOVE     = false;
-    static constexpr bool DEFAULT_IS_ENABLED_VARIABLE_BOUND_MOVE = false;
+    static constexpr bool DEFAULT_IS_ENABLED_PRECEDENCE_MOVE     = true;
+    static constexpr bool DEFAULT_IS_ENABLED_VARIABLE_BOUND_MOVE = true;
     static constexpr bool DEFAULT_IS_ENABLED_TRINOMIAL_EXCLUSIVE_NOR_MOVE =
-        false;
+        true;
     static constexpr bool DEFAULT_IS_ENABLED_SOFT_SELECTION_MOVE = true;
     static constexpr bool DEFAULT_IS_ENABLED_CHAIN_MOVE          = true;
     static constexpr bool DEFAULT_IS_ENABLED_TWO_FLIP_MOVE       = false;
     static constexpr bool DEFAULT_IS_ENABLED_PARTIAL_FEASIBLE_ENUMERATION_MOVE =
-        false;
+        true;
     static constexpr bool DEFAULT_IS_ENABLED_USER_DEFINED_MOVE = false;
     static constexpr int  DEFAULT_CHAIN_MOVE_CAPACITY          = 100000;
     static constexpr chain_move_reduce_mode::ChainMoveReduceMode

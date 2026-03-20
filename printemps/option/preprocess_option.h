@@ -30,11 +30,11 @@ struct PreprocessOptionConstant {
     static constexpr bool  //
         DEFAULT_IS_ENABLED_EXTRACT_DEPENDENT_EXCLUSIVE_OR = true;
     static constexpr bool  //
-        DEFAULT_IS_ENABLED_EXTRACT_DEPENDENT_EXCLUSIVE_NOR = false;
+        DEFAULT_IS_ENABLED_EXTRACT_DEPENDENT_EXCLUSIVE_NOR = true;
     static constexpr bool  //
         DEFAULT_IS_ENABLED_EXTRACT_DEPENDENT_INVERTED_INTEGERS = true;
     static constexpr bool  //
-        DEFAULT_IS_ENABLED_EXTRACT_DEPENDENT_BALANCED_INTEGERS = false;
+        DEFAULT_IS_ENABLED_EXTRACT_DEPENDENT_BALANCED_INTEGERS = true;
     static constexpr bool  //
         DEFAULT_IS_ENABLED_EXTRACT_DEPENDENT_CONSTANT_SUM_INTEGERS = true;
     static constexpr bool  //
@@ -275,11 +275,11 @@ struct PreprocessOption {
             utility::to_true_or_false(                                      //
                 this->is_enabled_extract_dependent_intermediate));
 
-        utility::print(                                                   //
+        utility::print(  //
             " -- "
             "preprocess.is_enabled_extract_dependent_using_partial_feasible_"
             "enumeration: " +           //
-            utility::to_true_or_false(                                    //
+            utility::to_true_or_false(  //
                 this->is_enabled_extract_dependent_using_partial_feasible_enumeration));
     }
 
@@ -364,7 +364,7 @@ struct PreprocessOption {
             &this->is_enabled_extract_dependent_intermediate,  //
             "is_enabled_extract_dependent_intermediate", a_OBJECT);
 
-        read_json(                                           //
+        read_json(  //
             &this->is_enabled_extract_dependent_using_partial_feasible_enumeration,  //
             "is_enabled_extract_dependent_using_partial_feasible_enumeration",
             a_OBJECT);
@@ -449,7 +449,7 @@ struct PreprocessOption {
             "is_enabled_extract_dependent_intermediate",  //
             this->is_enabled_extract_dependent_intermediate);
 
-        obj.emplace_back(                               //
+        obj.emplace_back(  //
             "is_enabled_extract_dependent_using_partial_feasible_enumeration",  //
             this->is_enabled_extract_dependent_using_partial_feasible_enumeration);
 

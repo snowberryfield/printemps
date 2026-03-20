@@ -40,6 +40,7 @@
         "is_enabled_extract_implicit_equality_constraints": false,
         "is_enabled_online_bounding": false,
         "is_enabled_initial_value_correction": false,
+        "is_enabled_partial_feasible_enumeration": false,
         "is_enabled_extract_dependent_exclusive_or": false,
         "is_enabled_extract_dependent_exclusive_nor": true,
         "is_enabled_extract_dependent_inverted_integers": false,
@@ -50,7 +51,7 @@
         "is_enabled_extract_dependent_trinomial_exclusive_nor" : false,
         "is_enabled_extract_dependent_all_or_nothing" : false,
         "is_enabled_extract_dependent_intermediate": false,
-        "is_enabled_partial_feasible_enumeration": false
+        "is_enabled_extract_dependent_using_partial_feasible_enumeration": false
     },
     "neighborhood": {
         "is_enabled_binary_move": false,
@@ -63,13 +64,13 @@
         "is_enabled_constant_difference_integers_move": false,
         "is_enabled_constant_ratio_integers_move": false,
         "is_enabled_aggregation_move": false,
-        "is_enabled_precedence_move": true,
-        "is_enabled_variable_bound_move": true,
+        "is_enabled_precedence_move": false,
+        "is_enabled_variable_bound_move": false,
         "is_enabled_trinomial_exclusive_nor_move": false,
         "is_enabled_soft_selection_move": false,
         "is_enabled_chain_move": false,
         "is_enabled_two_flip_move": true,
-        "is_enabled_partial_feasible_enumeration_move": true,
+        "is_enabled_partial_feasible_enumeration_move": false,
         "is_enabled_user_defined_move": true,
         "chain_move_capacity": 1,
         "chain_move_reduce_mode": 1,

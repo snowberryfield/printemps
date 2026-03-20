@@ -63,6 +63,11 @@ TEST_F(TestPreprocessOption, initialize) {
 
     EXPECT_EQ(  //
         PreprocessOptionConstant::
+            DEFAULT_IS_ENABLED_PARTIAL_FEASIBLE_ENUMERATION,  //
+        option.is_enabled_partial_feasible_enumeration);
+
+    EXPECT_EQ(  //
+        PreprocessOptionConstant::
             DEFAULT_IS_ENABLED_EXTRACT_DEPENDENT_EXCLUSIVE_OR,  //
         option.is_enabled_extract_dependent_exclusive_or);
 
@@ -113,8 +118,8 @@ TEST_F(TestPreprocessOption, initialize) {
 
     EXPECT_EQ(  //
         PreprocessOptionConstant::
-            DEFAULT_IS_ENABLED_PARTIAL_FEASIBLE_ENUMERATION,  //
-        option.is_enabled_partial_feasible_enumeration);
+            DEFAULT_IS_ENABLED_EXTRACT_DEPENDENT_USING_PARTIAL_FEASIBLE_ENUMERATION,
+        option.is_enabled_extract_dependent_using_partial_feasible_enumeration);
 }
 
 }  // namespace
