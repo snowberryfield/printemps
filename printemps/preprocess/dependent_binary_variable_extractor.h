@@ -176,6 +176,29 @@ class DependentBinaryVariableExtractor {
                 }
             }
         }
+
+        if (a_OPTION.preprocess
+                .is_enabled_extract_dependent_using_partial_feasible_enumeration) {
+            auto &constraint_groups = m_model_ptr->partial_feasible_enumerator()
+                                          .small_constraint_groups();
+            for (const auto &constraint_group : constraint_groups) {
+                const auto &equal_variable_pairs =
+                    constraint_group.equal_variable_pairs;
+                for (const auto &equal_variable_pair : equal_variable_pairs) {
+                    is_consistent &= uf.unite(equal_variable_pair.first,
+                                              equal_variable_pair.second, 0);
+                }
+                const auto &not_equal_variable_pairs =
+                    constraint_group.not_equal_variable_pairs;
+                for (const auto &not_equal_variable_pair :
+                     not_equal_variable_pairs) {
+                    is_consistent &=
+                        uf.unite(not_equal_variable_pair.first,
+                                 not_equal_variable_pair.second, 1);
+                }
+            }
+        }
+
         if (!is_consistent) {
             throw error_handler::InfeasibleError(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -201,7 +224,7 @@ class DependentBinaryVariableExtractor {
                 }
                 utility::print_message(
                     "The variable " + variable_ptr->name() +
-                        " was extracted as a dependent binary variable. ",
+                        " was extracted as a dependent binary variable.",
                     a_IS_ENABLED_PRINT);
 
                 m_dependent_variable_ptrs.push_back(variable_ptr);
@@ -214,6 +237,8 @@ class DependentBinaryVariableExtractor {
                     m_additional_expressions.emplace_back(
                         1 - *representative_variable_ptr);
                 }
+                m_additional_expressions.back().set_name(variable_ptr->name() +
+                                                         "_dependent");
             }
         }
         return m_dependent_variable_ptrs.size();
@@ -223,17 +248,14 @@ class DependentBinaryVariableExtractor {
     inline int run(const option::Option &a_OPTION,
                    const bool            a_IS_ENABLED_PRINT) {
         utility::print_single_line(a_IS_ENABLED_PRINT);
-        utility::print_message("Extracting dependent integer variables...",
+        utility::print_message("Extracting dependent binary variables...",
                                a_IS_ENABLED_PRINT);
 
         this->clear_work_buffers();
         this->build_binary_equivalent_groups(a_OPTION);
 
         if (m_groups.empty()) {
-            utility::print_message(
-                "No constraints for extracting dependent binary variables "
-                "were found.",
-                a_IS_ENABLED_PRINT);
+            utility::print_message("Done.", a_IS_ENABLED_PRINT);
             return 0;
         }
 

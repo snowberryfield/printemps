@@ -66,6 +66,12 @@ class Model {
         m_problem_size_reducer_special;
     preprocess::PartialFeasibleEnumerator<T_Variable, T_Expression>
         m_partial_feasible_enumerator;
+    preprocess::DependentIntegerVariableExtractor<T_Variable, T_Expression>
+        m_dependent_integer_variable_extractor;
+    preprocess::DependentBinaryVariableExtractor<T_Variable, T_Expression>
+        m_dependent_binary_variable_extractor;
+    preprocess::DependentVariableEliminator<T_Variable, T_Expression>
+        m_dependent_variable_eliminator;
 
     preprocess::Verifier<T_Variable, T_Expression> m_verifier;
 
@@ -144,6 +150,10 @@ class Model {
         m_problem_size_reducer_basic.setup(this);
         m_problem_size_reducer_special.setup(this);
         m_partial_feasible_enumerator.setup(this);
+        m_dependent_integer_variable_extractor.setup(this);
+        m_dependent_binary_variable_extractor.setup(this);
+        m_dependent_variable_eliminator.setup(this);
+
         m_verifier.setup(this);
 
         m_reference_original.setup(this);
@@ -536,6 +546,26 @@ class Model {
     }
 
     /*************************************************************************/
+    inline preprocess::DependentIntegerVariableExtractor<T_Variable,
+                                                         T_Expression> &
+    dependent_integer_variable_extractor(void) noexcept {
+        return m_dependent_integer_variable_extractor;
+    }
+
+    /*************************************************************************/
+    inline preprocess::DependentBinaryVariableExtractor<T_Variable,
+                                                        T_Expression> &
+    dependent_binary_variable_extractor(void) noexcept {
+        return m_dependent_binary_variable_extractor;
+    }
+
+    /*************************************************************************/
+    inline preprocess::DependentVariableEliminator<T_Variable, T_Expression> &
+    dependent_variable_eliminator(void) noexcept {
+        return m_dependent_variable_eliminator;
+    }
+
+    /*************************************************************************/
     inline preprocess::Verifier<T_Variable, T_Expression> &verifier(
         void) noexcept {
         return m_verifier;
@@ -633,7 +663,7 @@ class Model {
         return m_state_inspector;
     }
 };
-using IPModel         = Model<int, double>;
+using IPModel = Model<int, double>;
 }  // namespace printemps::model
 #endif
 /*****************************************************************************/

@@ -36,17 +36,12 @@ TEST_F(TestDependentBinaryVariableExtractor, run) {
         EXPECT_TRUE(
             f(0).is_type(model_component::ConstraintType::AllOrNothing));
 
-        preprocess::DependentBinaryVariableExtractor<int, double>
-            dependent_binary_variable_extractor(&model);
-        preprocess::DependentVariableEliminator<int, double>
-            dependent_variable_eliminator(&model);
-
         /// Extracting
         {
             option::Option option;
             option.preprocess.is_enabled_extract_dependent_all_or_nothing =
                 true;
-            dependent_binary_variable_extractor.run(option, true);
+            model.dependent_binary_variable_extractor().run(option, false);
             model.builder().update_derived_components();
 
             EXPECT_EQ(model_component::VariableType::Binary, x(0).type());
@@ -65,8 +60,7 @@ TEST_F(TestDependentBinaryVariableExtractor, run) {
 
         /// Eliminating
         {
-            dependent_variable_eliminator.run(false);
-
+            model.dependent_variable_eliminator().run(false);
             model.builder().update_derived_components();
 
             auto& sensitivities_objective =
@@ -76,7 +70,52 @@ TEST_F(TestDependentBinaryVariableExtractor, run) {
         }
     }
 
-    // case 02 (Infeasible)
+    // case 02 (with partial feasible enumeration)
+    {
+        model::Model<int, double> model;
+
+        auto& x = model.create_variables("x", 3, 0, 1);
+
+        auto& f = model.create_constraint("f", x(0) + x(1) + x(2) <= 1);
+        auto& g =
+            model.create_constraint("g", 2 * x(0) + 3 * x(1) + 4 * x(2) >= 3);
+
+        model.minimize(x.sum());
+        model.builder().setup_unique_names();
+        model.builder().update_derived_components();
+        model.partial_feasible_enumerator().run(false);
+
+        /// Extracting
+        {
+            option::Option option;
+            model.dependent_binary_variable_extractor().run(option, false);
+            model.builder().update_derived_components();
+
+            EXPECT_EQ(model_component::VariableType::Binary, x(0).type());
+            EXPECT_EQ(model_component::VariableType::Binary, x(1).type());
+            EXPECT_EQ(model_component::VariableType::DependentBinary,
+                      x(2).type());
+            EXPECT_TRUE(f.is_enabled());
+            EXPECT_TRUE(g.is_enabled());
+        }
+
+        /// Eliminating
+        {
+            model.dependent_variable_eliminator().run(false);
+            model.builder().update_derived_components();
+
+            auto& sensitivities_objective =
+                model.objective().expression().sensitivities();
+
+            EXPECT_EQ(1, sensitivities_objective.at(&x(0)));
+            EXPECT_TRUE(sensitivities_objective.find(&x(1)) ==
+                        sensitivities_objective.end());
+            EXPECT_TRUE(sensitivities_objective.find(&x(2)) ==
+                        sensitivities_objective.end());
+        }
+    }
+
+    // case 03 (Infeasible)
     {
         model::Model<int, double> model;
 
@@ -92,16 +131,14 @@ TEST_F(TestDependentBinaryVariableExtractor, run) {
         model.builder().setup_unique_names();
         model.builder().update_derived_components();
 
-        preprocess::DependentBinaryVariableExtractor<int, double>
-            dependent_binary_variable_extractor(&model);
-
         /// Extracting
         {
             option::Option option;
             option.preprocess.is_enabled_extract_dependent_all_or_nothing =
                 true;
-            EXPECT_THROW(dependent_binary_variable_extractor.run(option, false),
-                         error_handler::InfeasibleError);
+            EXPECT_THROW(
+                model.dependent_binary_variable_extractor().run(option, false),
+                error_handler::InfeasibleError);
         }
     }
 }

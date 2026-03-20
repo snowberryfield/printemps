@@ -13,6 +13,163 @@ class ModelBuilder {
    private:
     model::Model<T_Variable, T_Expression> *m_model_ptr;
 
+    /*************************************************************************/
+    inline void presolve(const option::Option &a_OPTION,
+                         const bool            a_IS_ENABLED_PRINT) {
+        auto &model = *m_model_ptr;
+
+        bool continue_flag = true;
+        while (continue_flag) {
+            continue_flag = false;
+            const auto RESULT =
+                model.problem_size_reducer_basic().run(a_IS_ENABLED_PRINT);
+
+            if (RESULT.is_reduced()) {
+                this->update_derived_components();
+            }
+
+            /**
+             * Extract implicit equality constraints.
+             */
+            if (a_OPTION.preprocess
+                    .is_enabled_extract_implicit_equality_constraints) {
+                const auto RESULT = model.problem_size_reducer_special()
+                                        .extract_implicit_equality_constraints(
+                                            a_IS_ENABLED_PRINT);
+                if (RESULT.is_reduced()) {
+                    this->update_derived_components();
+                    continue_flag = true;
+                }
+            }
+
+            /**
+             * Remove redundant set partitioning/covering/packing constraints.
+             */
+            if (a_OPTION.preprocess
+                    .is_enabled_remove_redundant_set_constraints) {
+                const auto RESULT =
+                    model.problem_size_reducer_special()
+                        .remove_redundant_set_constraints(a_IS_ENABLED_PRINT);
+                if (RESULT.is_reduced()) {
+                    this->update_derived_components();
+                    continue_flag = true;
+                }
+            }
+
+            /**
+             * Remove redundant set variables.
+             */
+            if (a_OPTION.preprocess.is_enabled_remove_redundant_set_variables) {
+                const auto RESULT =
+                    model.problem_size_reducer_special()
+                        .remove_redundant_set_variables(a_IS_ENABLED_PRINT);
+                if (RESULT.is_reduced()) {
+                    this->update_derived_components();
+                    continue_flag = true;
+                }
+            }
+
+            /**
+             * Remove duplicated constraints.
+             */
+            if (a_OPTION.preprocess.is_enabled_remove_duplicated_constraints) {
+                const auto RESULT =
+                    model.problem_size_reducer_special()
+                        .remove_duplicated_constraints(a_IS_ENABLED_PRINT);
+                if (RESULT.is_reduced()) {
+                    this->update_derived_components();
+                    continue_flag = true;
+                }
+            }
+
+            /**
+             * Run partial feasible enumerator.
+             */
+            if (a_OPTION.preprocess.is_enabled_partial_feasible_enumeration) {
+                model.partial_feasible_enumerator().run(a_IS_ENABLED_PRINT);
+            }
+
+            /**
+             * Remove implicitly fixed variables by checking precence and set
+             * partitioning/packing constraints.
+             */
+            if (a_OPTION.preprocess
+                    .is_enabled_remove_implicit_fixed_variables) {
+                const auto RESULT =
+                    model.problem_size_reducer_special()
+                        .remove_implicit_fixed_variables_from_precedence_constraints(
+                            a_IS_ENABLED_PRINT);
+                if (RESULT.is_reduced()) {
+                    this->update_derived_components();
+                    continue_flag = true;
+                }
+            }
+
+            /**
+             * Remove implicitly fixed variables by partial feasible
+             * enumeration.
+             */
+            if (a_OPTION.preprocess.is_enabled_partial_feasible_enumeration &&
+                a_OPTION.preprocess
+                    .is_enabled_remove_implicit_fixed_variables) {
+                const auto RESULT =
+                    model.problem_size_reducer_special()
+                        .remove_implicit_fixed_variables_from_small_constraint_groups(
+                            model.partial_feasible_enumerator()
+                                .small_constraint_groups(),
+                            a_IS_ENABLED_PRINT);
+                if (RESULT.is_reduced()) {
+                    this->update_derived_components();
+                    continue_flag = true;
+                }
+            }
+
+            /**
+             * Extract and eliminate the intermediate variables.
+             */
+            if (a_OPTION.preprocess.is_enabled_extract_dependent()) {
+                while (true) {
+                    if (a_OPTION.preprocess
+                            .is_enabled_partial_feasible_enumeration) {
+                        model.partial_feasible_enumerator().run(
+                            a_IS_ENABLED_PRINT);
+                    }
+
+                    const auto NUMBER_OF_EXTRACTED_DEPENDENT_BINARY_VARIABLES =
+                        model.dependent_binary_variable_extractor().run(
+                            a_OPTION, a_IS_ENABLED_PRINT);
+
+                    const auto NUMBER_OF_EXTRACTED_DEPENDENT_INTEGER_VARIABLES =
+                        model.dependent_integer_variable_extractor().run(
+                            a_OPTION, a_IS_ENABLED_PRINT);
+
+                    if (NUMBER_OF_EXTRACTED_DEPENDENT_BINARY_VARIABLES == 0 &&
+                        NUMBER_OF_EXTRACTED_DEPENDENT_INTEGER_VARIABLES == 0) {
+                        break;
+                    }
+                    this->update_derived_components();
+                    continue_flag = true;
+
+                    while (true) {
+                        if (model.dependent_variable_eliminator().run(
+                                a_IS_ENABLED_PRINT) == 0) {
+                            break;
+                        }
+                        this->update_derived_components();
+                        continue_flag = true;
+                    }
+
+                    const auto RESULT = model.problem_size_reducer_basic().run(
+                        a_IS_ENABLED_PRINT);
+                    if (RESULT.is_reduced()) {
+                        this->update_derived_components();
+                        continue_flag = true;
+                    }
+                }
+            }
+        }
+    }
+
    public:
     /*************************************************************************/
     ModelBuilder(void) {
@@ -64,146 +221,11 @@ class ModelBuilder {
         model.m_reference_original = model.m_reference;
 
         /**
-         * Presolve the problem by removing redundant constraints and fixing
-         * variables implicitly fixed.
+         * Presolve the instance by removing redundant constraints and fixing
+         * variables.
          */
         if (a_OPTION.preprocess.is_enabled_presolve) {
-            if (a_OPTION.preprocess
-                    .is_enabled_extract_implicit_equality_constraints) {
-                const auto RESULT = model.problem_size_reducer_special()
-                                        .extract_implicit_equality_constraints(
-                                            a_IS_ENABLED_PRINT);
-                if (RESULT.is_reduced()) {
-                    this->update_derived_components();
-                }
-            }
-
-            if (a_OPTION.preprocess
-                    .is_enabled_remove_redundant_set_constraints) {
-                const auto RESULT =
-                    model.problem_size_reducer_special()
-                        .remove_redundant_set_constraints(a_IS_ENABLED_PRINT);
-                if (RESULT.is_reduced()) {
-                    this->update_derived_components();
-                }
-            }
-
-            const auto RESULT =
-                model.problem_size_reducer_basic().run(a_IS_ENABLED_PRINT);
-            if (RESULT.is_reduced()) {
-                this->update_derived_components();
-            }
-        }
-
-        /**
-         * Extract and eliminate the intermediate variables.
-         */
-        if (a_OPTION.preprocess.is_enabled_presolve &&
-            a_OPTION.preprocess.is_enabled_extract_dependent()) {
-            preprocess::DependentIntegerVariableExtractor<T_Variable,
-                                                          T_Expression>
-                dependent_integer_variable_extractor(m_model_ptr);
-
-            preprocess::DependentBinaryVariableExtractor<T_Variable,
-                                                         T_Expression>
-                dependent_binary_variable_extractor(m_model_ptr);
-
-            preprocess::DependentVariableEliminator<T_Variable, T_Expression>
-                dependent_variable_eliminator(m_model_ptr);
-            while (true) {
-                const auto NUMBER_OF_EXTRACTED_DEPENDENT_BINARY_VARIABLES =
-                    dependent_binary_variable_extractor.run(a_OPTION,
-                                                            a_IS_ENABLED_PRINT);
-
-                const auto NUMBER_OF_EXTRACTED_DEPENDENT_INTEGER_VARIABLES =
-                    dependent_integer_variable_extractor.run(
-                        a_OPTION, a_IS_ENABLED_PRINT);
-
-                if (NUMBER_OF_EXTRACTED_DEPENDENT_BINARY_VARIABLES == 0 &&
-                    NUMBER_OF_EXTRACTED_DEPENDENT_INTEGER_VARIABLES == 0) {
-                    break;
-                }
-                this->update_derived_components();
-
-                while (true) {
-                    if (dependent_variable_eliminator.run(a_IS_ENABLED_PRINT) ==
-                        0) {
-                        break;
-                    }
-                    this->update_derived_components();
-                }
-
-                const auto RESULT =
-                    model.problem_size_reducer_basic().run(a_IS_ENABLED_PRINT);
-                if (RESULT.is_reduced()) {
-                    this->update_derived_components();
-                }
-            }
-        }
-
-        /**
-         * Remove redundant set variables.
-         */
-        if (a_OPTION.preprocess.is_enabled_presolve &&
-            a_OPTION.preprocess.is_enabled_remove_redundant_set_variables) {
-            const auto RESULT =
-                model.problem_size_reducer_special()
-                    .remove_redundant_set_variables(a_IS_ENABLED_PRINT);
-            if (RESULT.is_reduced()) {
-                this->update_derived_components();
-            }
-        }
-
-        /**
-         * Remove duplicated constraints.
-         */
-        if (a_OPTION.preprocess.is_enabled_presolve &&
-            a_OPTION.preprocess.is_enabled_remove_duplicated_constraints) {
-            const auto RESULT =
-                model.problem_size_reducer_special()
-                    .remove_duplicated_constraints(a_IS_ENABLED_PRINT);
-            if (RESULT.is_reduced()) {
-                this->update_derived_components();
-            }
-        }
-
-        /**
-         * Run partial feasible enumerator.
-         */
-        if (a_OPTION.preprocess.is_enabled_partial_feasible_enumeration) {
-            model.partial_feasible_enumerator().run(a_IS_ENABLED_PRINT);
-        }
-
-        /**
-         * Remove implicitly fixed variables by checking precence and set
-         * partitioning/packing constraints.
-         */
-        if (a_OPTION.preprocess.is_enabled_presolve &&
-            a_OPTION.preprocess.is_enabled_remove_implicit_fixed_variables) {
-            const auto RESULT =
-                model.problem_size_reducer_special()
-                    .remove_implicit_fixed_variables_from_precedence_constraints(
-                        a_IS_ENABLED_PRINT);
-            if (RESULT.is_reduced()) {
-                this->update_derived_components();
-            }
-        }
-
-        /**
-         * Remove implicitly fixed variables by partial feasible enumeration.
-         */
-        if (a_OPTION.preprocess.is_enabled_presolve &&
-            a_OPTION.preprocess.is_enabled_partial_feasible_enumeration &&
-            a_OPTION.preprocess.is_enabled_remove_implicit_fixed_variables) {
-            const auto RESULT =
-                model.problem_size_reducer_special()
-                    .remove_implicit_fixed_variables_from_small_constraint_groups(
-                        model.partial_feasible_enumerator()
-                            .small_constraint_groups(),
-                        a_IS_ENABLED_PRINT);
-            if (RESULT.is_reduced()) {
-                this->update_derived_components();
-            }
+            this->presolve(a_OPTION, a_IS_ENABLED_PRINT);
         }
 
         /**
@@ -233,6 +255,13 @@ class ModelBuilder {
             if (IS_SOLVED) {
                 this->update_derived_components();
             }
+        }
+
+        /**
+         * Run final partial feasible enumerator.
+         */
+        if (a_OPTION.preprocess.is_enabled_partial_feasible_enumeration) {
+            model.partial_feasible_enumerator().run(a_IS_ENABLED_PRINT);
         }
 
         /**

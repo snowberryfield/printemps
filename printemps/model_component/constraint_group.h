@@ -17,6 +17,14 @@ struct ConstraintGroup {
     std::vector<std::vector<
         std::pair<model_component::Variable<T_Variable, T_Expression>*, int>>>
         solutions;
+
+    std::vector<std::pair<model_component::Variable<T_Variable, T_Expression>*,
+                          model_component::Variable<T_Variable, T_Expression>*>>
+        equal_variable_pairs;
+
+    std::vector<std::pair<model_component::Variable<T_Variable, T_Expression>*,
+                          model_component::Variable<T_Variable, T_Expression>*>>
+        not_equal_variable_pairs;
 };
 }  // namespace printemps::model_component
 #endif

@@ -145,10 +145,10 @@ class UnionFind {
             return ((PARITY_FIRST ^ PARITY_SECOND) == a_PARITY);
         }
 
-        int parent_root;
-        int child_root;
-        int parent_parity;
-        int child_parity;
+        int parent_root   = 0;
+        int child_root    = 0;
+        int parent_parity = 0;
+        int child_parity  = 0;
 
         if (m_sizes[ROOT_FIRST] > m_sizes[ROOT_SECOND] ||
             (m_sizes[ROOT_FIRST] == m_sizes[ROOT_SECOND] &&

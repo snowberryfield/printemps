@@ -254,10 +254,7 @@ class DependentIntegerVariableExtractor {
         this->collect_candidate_constraint_ptrs();
 
         if (m_candidate_constraint_ptrs.empty()) {
-            utility::print_message(
-                "No constraints for extracting dependent integer variables "
-                "were found.",
-                a_IS_ENABLED_PRINT);
+            utility::print_message("Done.", a_IS_ENABLED_PRINT);
             return 0;
         }
 
@@ -308,7 +305,7 @@ class DependentIntegerVariableExtractor {
             utility::print_message(
                 "The variable " + key_variable_ptr->name() +
                     " in the constraint " + constraint_ptr->name() +
-                    " was extracted as a dependent integer variable. ",
+                    " was extracted as a dependent integer variable.",
                 a_IS_ENABLED_PRINT);
 
             m_target_constraint_ptrs.push_back(constraint_ptr);

@@ -26,6 +26,8 @@ struct PreprocessOptionConstant {
     static constexpr bool  //
         DEFAULT_IS_ENABLED_INITIAL_VALUE_CORRECTION = true;
     static constexpr bool  //
+        DEFAULT_IS_ENABLED_PARTIAL_FEASIBLE_ENUMERATION = true;
+    static constexpr bool  //
         DEFAULT_IS_ENABLED_EXTRACT_DEPENDENT_EXCLUSIVE_OR = true;
     static constexpr bool  //
         DEFAULT_IS_ENABLED_EXTRACT_DEPENDENT_EXCLUSIVE_NOR = false;
@@ -47,7 +49,8 @@ struct PreprocessOptionConstant {
     static constexpr bool  //
         DEFAULT_IS_ENABLED_EXTRACT_DEPENDENT_INTERMEDIATE = true;
     static constexpr bool  //
-        DEFAULT_IS_ENABLED_PARTIAL_FEASIBLE_ENUMERATION = true;
+        DEFAULT_IS_ENABLED_EXTRACT_DEPENDENT_USING_PARTIAL_FEASIBLE_ENUMERATION =
+            true;
 };
 
 /*****************************************************************************/
@@ -60,6 +63,7 @@ struct PreprocessOption {
     bool is_enabled_extract_implicit_equality_constraints;
     bool is_enabled_online_bounding;
     bool is_enabled_initial_value_correction;
+    bool is_enabled_partial_feasible_enumeration;
     bool is_enabled_extract_dependent_exclusive_or;
     bool is_enabled_extract_dependent_exclusive_nor;
     bool is_enabled_extract_dependent_inverted_integers;
@@ -70,7 +74,7 @@ struct PreprocessOption {
     bool is_enabled_extract_dependent_trinomial_exclusive_nor;
     bool is_enabled_extract_dependent_all_or_nothing;
     bool is_enabled_extract_dependent_intermediate;
-    bool is_enabled_partial_feasible_enumeration;
+    bool is_enabled_extract_dependent_using_partial_feasible_enumeration;
 
     /*************************************************************************/
     PreprocessOption(void) {
@@ -113,6 +117,10 @@ struct PreprocessOption {
         this->is_enabled_initial_value_correction = PreprocessOptionConstant::
             DEFAULT_IS_ENABLED_INITIAL_VALUE_CORRECTION;
 
+        this->is_enabled_partial_feasible_enumeration =
+            PreprocessOptionConstant::
+                DEFAULT_IS_ENABLED_PARTIAL_FEASIBLE_ENUMERATION;
+
         this->is_enabled_extract_dependent_exclusive_or =
             PreprocessOptionConstant::
                 DEFAULT_IS_ENABLED_EXTRACT_DEPENDENT_EXCLUSIVE_OR;
@@ -153,9 +161,9 @@ struct PreprocessOption {
             PreprocessOptionConstant::
                 DEFAULT_IS_ENABLED_EXTRACT_DEPENDENT_INTERMEDIATE;
 
-        this->is_enabled_partial_feasible_enumeration =
+        this->is_enabled_extract_dependent_using_partial_feasible_enumeration =
             PreprocessOptionConstant::
-                DEFAULT_IS_ENABLED_PARTIAL_FEASIBLE_ENUMERATION;
+                DEFAULT_IS_ENABLED_EXTRACT_DEPENDENT_USING_PARTIAL_FEASIBLE_ENUMERATION;
     }
 
     /*************************************************************************/
@@ -201,6 +209,11 @@ struct PreprocessOption {
             " -- preprocess.is_enabled_initial_value_correction: " +  //
             utility::to_true_or_false(                                //
                 this->is_enabled_initial_value_correction));
+
+        utility::print(                                                   //
+            " -- preprocess.is_enabled_partial_feasible_enumeration: " +  //
+            utility::to_true_or_false(                                    //
+                this->is_enabled_partial_feasible_enumeration));
 
         utility::print(                                                     //
             " -- preprocess.is_enabled_extract_dependent_exclusive_or: " +  //
@@ -263,9 +276,11 @@ struct PreprocessOption {
                 this->is_enabled_extract_dependent_intermediate));
 
         utility::print(                                                   //
-            " -- preprocess.is_enabled_partial_feasible_enumeration: " +  //
+            " -- "
+            "preprocess.is_enabled_extract_dependent_using_partial_feasible_"
+            "enumeration: " +           //
             utility::to_true_or_false(                                    //
-                this->is_enabled_partial_feasible_enumeration));
+                this->is_enabled_extract_dependent_using_partial_feasible_enumeration));
     }
 
     /**************************************************************************/
@@ -303,6 +318,10 @@ struct PreprocessOption {
         read_json(                                       //
             &this->is_enabled_initial_value_correction,  //
             "is_enabled_initial_value_correction", a_OBJECT);
+
+        read_json(                                           //
+            &this->is_enabled_partial_feasible_enumeration,  //
+            "is_enabled_partial_feasible_enumeration", a_OBJECT);
 
         read_json(                                             //
             &this->is_enabled_extract_dependent_exclusive_or,  //
@@ -346,8 +365,9 @@ struct PreprocessOption {
             "is_enabled_extract_dependent_intermediate", a_OBJECT);
 
         read_json(                                           //
-            &this->is_enabled_partial_feasible_enumeration,  //
-            "is_enabled_partial_feasible_enumeration", a_OBJECT);
+            &this->is_enabled_extract_dependent_using_partial_feasible_enumeration,  //
+            "is_enabled_extract_dependent_using_partial_feasible_enumeration",
+            a_OBJECT);
     }
 
     /**************************************************************************/
@@ -384,6 +404,10 @@ struct PreprocessOption {
         obj.emplace_back(                           //
             "is_enabled_initial_value_correction",  //
             this->is_enabled_initial_value_correction);
+
+        obj.emplace_back(                               //
+            "is_enabled_partial_feasible_enumeration",  //
+            this->is_enabled_partial_feasible_enumeration);
 
         obj.emplace_back(                                 //
             "is_enabled_extract_dependent_exclusive_or",  //
@@ -426,8 +450,8 @@ struct PreprocessOption {
             this->is_enabled_extract_dependent_intermediate);
 
         obj.emplace_back(                               //
-            "is_enabled_partial_feasible_enumeration",  //
-            this->is_enabled_partial_feasible_enumeration);
+            "is_enabled_extract_dependent_using_partial_feasible_enumeration",  //
+            this->is_enabled_extract_dependent_using_partial_feasible_enumeration);
 
         return obj;
     }
@@ -444,7 +468,9 @@ struct PreprocessOption {
             this->is_enabled_extract_dependent_constant_ratio_integers,
             this->is_enabled_extract_dependent_trinomial_exclusive_nor,
             this->is_enabled_extract_dependent_all_or_nothing,
-            this->is_enabled_extract_dependent_intermediate};
+            this->is_enabled_extract_dependent_intermediate,
+            this->is_enabled_extract_dependent_using_partial_feasible_enumeration,
+        };
 
         for (auto flag : flags) {
             if (flag) {

@@ -244,6 +244,9 @@ class Expression : public multi_array::AbstractMultiArrayElement {
          */
         std::uint64_t hash = 0;
         for (const auto &sensitivity : m_sensitivities) {
+            if (sensitivity.first->is_fixed()) {
+                continue;
+            }
             hash += reinterpret_cast<std::uint64_t>(sensitivity.first);
         }
         m_hash = hash;

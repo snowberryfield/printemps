@@ -170,6 +170,73 @@ class PartialFeasibleEnumerator {
     }
 
     /*************************************************************************/
+    inline void extract_variable_relationships(void) {
+        for (auto& constraint_group : m_small_constraint_groups) {
+            const auto& VARIABLE_PTRS  = constraint_group.variable_ptrs;
+            const auto& SOLUTIONS      = constraint_group.solutions;
+            const int   VARIABLES_SIZE = VARIABLE_PTRS.size();
+
+            constraint_group.equal_variable_pairs.clear();
+            constraint_group.not_equal_variable_pairs.clear();
+
+            if (SOLUTIONS.empty()) {
+                continue;
+            }
+
+            for (int i = 0; i < VARIABLES_SIZE; i++) {
+                for (int j = i + 1; j < VARIABLES_SIZE; j++) {
+                    bool is_always_equal     = true;
+                    bool is_always_not_equal = true;
+
+                    for (const auto& solution : SOLUTIONS) {
+                        int value_first  = 0;
+                        int value_second = 0;
+
+                        for (const auto& p : solution) {
+                            if (p.first == VARIABLE_PTRS[i])
+                                value_first = p.second;
+                            if (p.first == VARIABLE_PTRS[j])
+                                value_second = p.second;
+                        }
+
+                        if (value_first != value_second) {
+                            is_always_equal = false;
+                        }
+                        if (value_first == value_second) {
+                            is_always_not_equal = false;
+                        }
+
+                        if (!is_always_equal && !is_always_not_equal)
+                            break;
+                    }
+
+                    if (is_always_equal) {
+                        if (VARIABLE_PTRS[i]->name() <
+                            VARIABLE_PTRS[j]->name()) {
+                            constraint_group.equal_variable_pairs.emplace_back(
+                                VARIABLE_PTRS[i], VARIABLE_PTRS[j]);
+                        } else {
+                            constraint_group.equal_variable_pairs.emplace_back(
+                                VARIABLE_PTRS[j], VARIABLE_PTRS[i]);
+                        }
+                    } else if (is_always_not_equal) {
+                        if (VARIABLE_PTRS[i]->name() <
+                            VARIABLE_PTRS[j]->name()) {
+                            constraint_group.not_equal_variable_pairs
+                                .emplace_back(VARIABLE_PTRS[i],
+                                              VARIABLE_PTRS[j]);
+                        } else {
+                            constraint_group.not_equal_variable_pairs
+                                .emplace_back(VARIABLE_PTRS[j],
+                                              VARIABLE_PTRS[i]);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /*************************************************************************/
     inline void print_statistics(void) const {
         const int SMALL_CONSTRAINT_GROUPS_SIZE =
             m_small_constraint_groups.size();
@@ -193,9 +260,6 @@ class PartialFeasibleEnumerator {
                                            "%d"),
                     true);
             }
-        } else {
-            utility::print_message("No constraint groups were are found.",
-                                   true);
         }
     }
 
@@ -234,6 +298,8 @@ class PartialFeasibleEnumerator {
         this->build_small_constraint_groups();
         this->enumerate_feasible_solutions();
         this->filter_target_small_constraint_groups();
+        this->extract_variable_relationships();
+
         if (a_IS_ENABLED_PRINT) {
             this->print_statistics();
         }

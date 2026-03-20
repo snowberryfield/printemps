@@ -45,13 +45,36 @@ class ProblemSizeReducerSpecial {
             "paritioning/covering/packing constraints...",
             a_IS_ENABLED_PRINT);
 
-        const int SET_PARTITIONINGS_SIZE =
-            m_model_ptr->reference()
-                .constraint_type.set_partitioning_ptrs.size();
-        const int SET_COVERINGS_SIZE =
-            m_model_ptr->reference().constraint_type.set_covering_ptrs.size();
-        const int SET_PACKINGS_SIZE =
-            m_model_ptr->reference().constraint_type.set_packing_ptrs.size();
+        std::vector<model_component::Constraint<T_Variable, T_Expression> *>
+            constraint_ptrs;
+
+        auto &set_partitioning_ptrs =
+            m_model_ptr->reference().constraint_type.set_partitioning_ptrs;
+        auto &set_covering_ptrs =
+            m_model_ptr->reference().constraint_type.set_covering_ptrs;
+        auto &set_packing_ptrs =
+            m_model_ptr->reference().constraint_type.set_packing_ptrs;
+
+        constraint_ptrs.reserve(set_covering_ptrs.size() +
+                                set_partitioning_ptrs.size() +
+                                set_packing_ptrs.size());
+        for (auto &&constraint_ptr : set_partitioning_ptrs) {
+            if (constraint_ptr->is_enabled()) {
+                constraint_ptrs.push_back(constraint_ptr);
+            }
+        }
+
+        for (auto &&constraint_ptr : set_covering_ptrs) {
+            if (constraint_ptr->is_enabled()) {
+                constraint_ptrs.push_back(constraint_ptr);
+            }
+        }
+
+        for (auto &&constraint_ptr : set_packing_ptrs) {
+            if (constraint_ptr->is_enabled()) {
+                constraint_ptrs.push_back(constraint_ptr);
+            }
+        }
 
         int number_of_fixed_variables = 0;
 
@@ -59,7 +82,8 @@ class ProblemSizeReducerSpecial {
          * If the problem is unconstrained, the following procedures will be
          * skipped.
          */
-        if (m_model_ptr->reference().number_of_constraints() == 0) {
+        if (m_model_ptr->reference()
+                .constraint.enabled_constraint_ptrs.size() == 0) {
             return ProblemSizeReducerResult(0, 0, 0);
         }
 
@@ -67,12 +91,15 @@ class ProblemSizeReducerSpecial {
          * If the problem is not pure set partitioning/covering/packing problem,
          * the following procedures will be skipped.
          */
-        if (m_model_ptr->reference().number_of_constraints() !=
-            (SET_PARTITIONINGS_SIZE + SET_COVERINGS_SIZE + SET_PACKINGS_SIZE)) {
+        if (m_model_ptr->reference()
+                .constraint.enabled_constraint_ptrs.size() !=
+            (set_covering_ptrs.size() + set_partitioning_ptrs.size() +
+             set_packing_ptrs.size())) {
             return ProblemSizeReducerResult(0, 0, 0);
         }
 
-        auto variable_ptrs = m_model_ptr->reference().variable.variable_ptrs;
+        auto variable_ptrs =
+            m_model_ptr->reference().variable.mutable_variable_ptrs;
         const int VARIABLES_SIZE = variable_ptrs.size();
 
         /**
@@ -189,14 +216,26 @@ class ProblemSizeReducerSpecial {
             "and included variables... ",
             a_IS_ENABLED_PRINT);
 
+        std::vector<model_component::Constraint<T_Variable, T_Expression> *>
+            constraint_ptrs;
+
         auto &exclusive_or_ptrs =
             m_model_ptr->reference().constraint_type.exclusive_or_ptrs;
         auto &set_partitioning_constraint_ptrs =
             m_model_ptr->reference().constraint_type.set_partitioning_ptrs;
-        auto constraint_ptrs = exclusive_or_ptrs;
-        constraint_ptrs.insert(constraint_ptrs.end(),
-                               set_partitioning_constraint_ptrs.begin(),
-                               set_partitioning_constraint_ptrs.end());
+
+        constraint_ptrs.reserve(exclusive_or_ptrs.size() +
+                                set_partitioning_constraint_ptrs.size());
+        for (auto &&constraint_ptr : exclusive_or_ptrs) {
+            if (constraint_ptr->is_enabled()) {
+                constraint_ptrs.push_back(constraint_ptr);
+            }
+        }
+        for (auto &&constraint_ptr : set_partitioning_constraint_ptrs) {
+            if (constraint_ptr->is_enabled()) {
+                constraint_ptrs.push_back(constraint_ptr);
+            }
+        }
 
         int number_of_disabled_constraints = 0;
         int number_of_fixed_variables      = 0;
