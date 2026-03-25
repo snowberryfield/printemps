@@ -98,7 +98,7 @@ class ProblemSizeReducerSpecial {
             return ProblemSizeReducerResult(0, 0, 0);
         }
 
-        auto variable_ptrs =
+        auto &variable_ptrs =
             m_model_ptr->reference().variable.mutable_independent_variable_ptrs;
         const int VARIABLES_SIZE = variable_ptrs.size();
 

@@ -55,7 +55,7 @@ class ProblemSizeReducerBasic {
             inner_result.reset();
 
             inner_result +=
-                this->remove_independent_variables(a_IS_ENABLED_PRINT);
+                this->remove_insensitive_variables(a_IS_ENABLED_PRINT);
 
             inner_result +=
                 this->remove_inactive_binary_variables(a_IS_ENABLED_PRINT);
@@ -81,12 +81,30 @@ class ProblemSizeReducerBasic {
     }
 
     /*************************************************************************/
-    inline ProblemSizeReducerResult remove_independent_variable(
+    inline ProblemSizeReducerResult remove_insensitive_variables(
+        const bool a_IS_ENABLED_PRINT) {
+        ProblemSizeReducerResult result;
+        for (auto &&proxy : m_model_ptr->variable_proxies()) {
+            for (auto &&variable : proxy.flat_indexed_variables()) {
+                if (variable.is_fixed()) {
+                    continue;
+                }
+
+                result += this->remove_insensitive_variable(
+                    &variable, m_model_ptr->is_minimization(),
+                    a_IS_ENABLED_PRINT);
+            }
+        }
+        return result;
+    }
+
+    /*************************************************************************/
+    inline ProblemSizeReducerResult remove_insensitive_variable(
         model_component::Variable<T_Variable, T_Expression> *a_variable_ptr,  //
         const bool a_IS_MINIMIZATION, const bool a_IS_ENABLED_PRINT) {
         /**
          * NOTE: This function should be called from
-         * remove_independent_variables().
+         * remove_insensitive_variables().
          */
         if (a_variable_ptr->related_constraint_ptrs().size() != 0) {
             return ProblemSizeReducerResult(0, 0, 0);
@@ -285,24 +303,6 @@ class ProblemSizeReducerBasic {
             }
         }
         return ProblemSizeReducerResult(0, 0, 0);
-    }
-
-    /*************************************************************************/
-    inline ProblemSizeReducerResult remove_independent_variables(
-        const bool a_IS_ENABLED_PRINT) {
-        ProblemSizeReducerResult result;
-        for (auto &&proxy : m_model_ptr->variable_proxies()) {
-            for (auto &&variable : proxy.flat_indexed_variables()) {
-                if (variable.is_fixed()) {
-                    continue;
-                }
-
-                result += this->remove_independent_variable(
-                    &variable, m_model_ptr->is_minimization(),
-                    a_IS_ENABLED_PRINT);
-            }
-        }
-        return result;
     }
 
     /*************************************************************************/

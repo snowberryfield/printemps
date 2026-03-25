@@ -53,7 +53,7 @@ TEST_F(TestProblemSizeReducerBasic, run) {
 }
 
 /*****************************************************************************/
-TEST_F(TestProblemSizeReducerBasic, remove_independent_variables) {
+TEST_F(TestProblemSizeReducerBasic, remove_insensitive_variables) {
     {
         model::Model<int, double> model;
 
@@ -63,7 +63,7 @@ TEST_F(TestProblemSizeReducerBasic, remove_independent_variables) {
 
         preprocess::ProblemSizeReducerBasic<int, double>
             problem_size_reducer_basic(&model);
-        problem_size_reducer_basic.remove_independent_variables(false);
+        problem_size_reducer_basic.remove_insensitive_variables(false);
 
         for (auto i = 0; i < 10; i++) {
             EXPECT_TRUE(x(i).is_fixed());
@@ -79,7 +79,7 @@ TEST_F(TestProblemSizeReducerBasic, remove_independent_variables) {
 
         preprocess::ProblemSizeReducerBasic<int, double>
             problem_size_reducer_basic(&model);
-        problem_size_reducer_basic.remove_independent_variables(false);
+        problem_size_reducer_basic.remove_insensitive_variables(false);
 
         for (auto i = 0; i < 10; i++) {
             EXPECT_TRUE(x(i).is_fixed());
@@ -95,7 +95,7 @@ TEST_F(TestProblemSizeReducerBasic, remove_independent_variables) {
 
         preprocess::ProblemSizeReducerBasic<int, double>
             problem_size_reducer_basic(&model);
-        problem_size_reducer_basic.remove_independent_variables(false);
+        problem_size_reducer_basic.remove_insensitive_variables(false);
 
         for (auto i = 0; i < 10; i++) {
             EXPECT_TRUE(x(i).is_fixed());
@@ -111,7 +111,7 @@ TEST_F(TestProblemSizeReducerBasic, remove_independent_variables) {
 
         preprocess::ProblemSizeReducerBasic<int, double>
             problem_size_reducer_basic(&model);
-        problem_size_reducer_basic.remove_independent_variables(false);
+        problem_size_reducer_basic.remove_insensitive_variables(false);
 
         for (auto i = 0; i < 10; i++) {
             EXPECT_TRUE(x(i).is_fixed());
