@@ -39,48 +39,75 @@ inline std::vector<std::pair<T1, T2>> to_pair_vector(
 template <class T1, class T2>
 inline T2 distance_l1(const std::unordered_map<T1, T2>& a_FIRST,
                       const std::unordered_map<T1, T2>& a_SECOND) {
-    T2                     result = static_cast<T2>(0);
-    std::unordered_set<T1> all_keys;
-    for (const auto& [k, _] : a_FIRST) {
-        all_keys.insert(k);
-    }
-    for (const auto& [k, _] : a_SECOND) {
-        all_keys.insert(k);
-    }
+    T2 result = static_cast<T2>(0);
 
-    for (const auto& k : all_keys) {
-        T2 v1 = a_FIRST.count(k) ? a_FIRST.at(k) : static_cast<T2>(0);
-        T2 v2 = a_SECOND.count(k) ? a_SECOND.at(k) : static_cast<T2>(0);
-        result += std::abs(v1 - v2);
-    }
+    if (a_FIRST.size() < a_SECOND.size()) {
+        for (const auto& item : a_SECOND) {
+            result += std::abs(item.second);
+        }
 
-    return result;
+        for (const auto& item : a_FIRST) {
+            const auto SHORTER_VALUE = item.second;
+            if (a_SECOND.find(item.first) != a_SECOND.end()) {
+                const auto LONGER_VALUE = a_SECOND.at(item.first);
+                result -= std::abs(LONGER_VALUE);
+                result += std::abs(LONGER_VALUE - SHORTER_VALUE);
+            } else {
+                result += std::abs(SHORTER_VALUE);
+            }
+        }
+        return result;
+    } else {
+        for (const auto& item : a_FIRST) {
+            result += std::abs(item.second);
+        }
+
+        for (const auto& item : a_SECOND) {
+            const auto SHORTER_VALUE = item.second;
+            if (a_FIRST.find(item.first) != a_FIRST.end()) {
+                const auto LONGER_VALUE = a_FIRST.at(item.first);
+                result -= std::abs(LONGER_VALUE);
+                result += std::abs(LONGER_VALUE - SHORTER_VALUE);
+            } else {
+                result += std::abs(SHORTER_VALUE);
+            }
+        }
+        return result;
+    }
 }
 
 /*****************************************************************************/
 template <class T1, class T2>
 inline int distance_l0(const std::unordered_map<T1, T2>& a_FIRST,
                        const std::unordered_map<T1, T2>& a_SECOND) {
-    int                    result = static_cast<T2>(0);
-    std::unordered_set<T1> all_keys;
-    for (const auto& [k, _] : a_FIRST) {
-        all_keys.insert(k);
-    }
-    for (const auto& [k, _] : a_SECOND) {
-        all_keys.insert(k);
-    }
+    int result = 0;
 
-    for (const auto& k : all_keys) {
-        T2 v1 = a_FIRST.count(k) ? a_FIRST.at(k) : static_cast<T2>(0);
-        T2 v2 = a_SECOND.count(k) ? a_SECOND.at(k) : static_cast<T2>(0);
-        if (v1 != v2) {
-            result++;
+    if (a_FIRST.size() < a_SECOND.size()) {
+        result += a_SECOND.size();
+        for (const auto& item : a_FIRST) {
+            if (a_SECOND.find(item.first) == a_SECOND.end()) {
+                result++;
+                continue;
+            }
+            if (item.second == a_SECOND.at(item.first)) {
+                result--;
+            }
         }
+        return result;
+    } else {
+        result += a_FIRST.size();
+        for (const auto& item : a_SECOND) {
+            if (a_FIRST.find(item.first) == a_FIRST.end()) {
+                result++;
+                continue;
+            }
+            if (item.second == a_FIRST.at(item.first)) {
+                result--;
+            }
+        }
+        return result;
     }
-
-    return result;
 }
-
 }  // namespace printemps::utility
 
 #endif
