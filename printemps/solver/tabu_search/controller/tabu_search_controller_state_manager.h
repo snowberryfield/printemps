@@ -852,10 +852,10 @@ class TabuSearchControllerStateManager {
 
     /*************************************************************************/
     inline void reset_local_penalty_coefficient(void) {
-        for (auto&& proxy : m_model_ptr->constraint_proxies()) {
-            for (auto&& constraint : proxy.flat_indexed_constraints()) {
-                constraint.reset_local_penalty_coefficient();
-            }
+        const auto& enabled_constraint_ptrs =
+            m_model_ptr->reference().constraint.enabled_constraint_ptrs;
+        for (auto&& constraint_ptr : enabled_constraint_ptrs) {
+            constraint_ptr->reset_local_penalty_coefficient();
         }
     }
 
@@ -875,13 +875,17 @@ class TabuSearchControllerStateManager {
         m_state.is_exceeded_initial_penalty_coefficient = false;
 
         for (auto&& proxy : this->m_model_ptr->constraint_proxies()) {
+            const int PROXY_INDEX = proxy.index();
             for (auto&& constraint : proxy.flat_indexed_constraints()) {
+                if (!constraint.is_enabled()) {
+                    continue;
+                }
+                const int CONSTRAINT_INDEX = constraint.flat_index();
+
                 const double CONSTRAINT_VALUE =
-                    CONSTRAINT_VALUE_PROXIES[proxy.index()]
-                                            [constraint.flat_index()];
+                    CONSTRAINT_VALUE_PROXIES[PROXY_INDEX][CONSTRAINT_INDEX];
                 const double VIOLATION_VALUE =
-                    VIOLATION_VALUE_PROXIES[proxy.index()]
-                                           [constraint.flat_index()];
+                    VIOLATION_VALUE_PROXIES[PROXY_INDEX][CONSTRAINT_INDEX];
                 const long VIOLATION_COUNT =
                     constraint.violation_count(CONSTRAINT_VALUE);
 
@@ -901,11 +905,18 @@ class TabuSearchControllerStateManager {
                                .local_augmented_incumbent_objective();
 
         for (auto&& proxy : this->m_model_ptr->constraint_proxies()) {
+            const int PROXY_INDEX = proxy.index();
             for (auto&& constraint : proxy.flat_indexed_constraints()) {
-                const double CONSTRAINT_VALUE = CONSTRAINT_VALUE_PROXIES  //
-                    [proxy.index()][constraint.flat_index()];
-                const double VIOLATION_VALUE = VIOLATION_VALUE_PROXIES  //
-                    [proxy.index()][constraint.flat_index()];
+                if (!constraint.is_enabled()) {
+                    continue;
+                }
+
+                const int CONSTRAINT_INDEX = constraint.flat_index();
+
+                const double CONSTRAINT_VALUE =
+                    CONSTRAINT_VALUE_PROXIES[PROXY_INDEX][CONSTRAINT_INDEX];
+                const double VIOLATION_VALUE =
+                    VIOLATION_VALUE_PROXIES[PROXY_INDEX][CONSTRAINT_INDEX];
                 const long   VIOLATION_COUNT = constraint.violation_count();
                 const double WEIGHT = 1.0 + std::log(1.0 + VIOLATION_COUNT);
 
@@ -978,6 +989,9 @@ class TabuSearchControllerStateManager {
             for (auto&& proxy : this->m_model_ptr->constraint_proxies()) {
                 double max_local_penalty_coefficient = 0;
                 for (auto&& constraint : proxy.flat_indexed_constraints()) {
+                    if (!constraint.is_enabled()) {
+                        continue;
+                    }
                     max_local_penalty_coefficient =
                         std::max(max_local_penalty_coefficient,
                                  constraint.local_penalty_coefficient_less());
@@ -986,6 +1000,9 @@ class TabuSearchControllerStateManager {
                         constraint.local_penalty_coefficient_greater());
                 }
                 for (auto&& constraint : proxy.flat_indexed_constraints()) {
+                    if (!constraint.is_enabled()) {
+                        continue;
+                    }
                     constraint.local_penalty_coefficient_less() =
                         max_local_penalty_coefficient;
                     constraint.local_penalty_coefficient_greater() =
@@ -999,22 +1016,22 @@ class TabuSearchControllerStateManager {
          * coefficient specified in option.
          */
         const double INITIAL_PENALTY_COEFFICIENT =
-            this->m_model_ptr->global_penalty_coefficient();
-        for (auto&& proxy : this->m_model_ptr->constraint_proxies()) {
-            for (auto&& constraint : proxy.flat_indexed_constraints()) {
-                if (constraint.local_penalty_coefficient_less() >
-                    INITIAL_PENALTY_COEFFICIENT) {
-                    m_state.is_exceeded_initial_penalty_coefficient = true;
-                    constraint.local_penalty_coefficient_less() =
-                        INITIAL_PENALTY_COEFFICIENT;
-                }
+            m_option.penalty.initial_penalty_coefficient;
+        const auto& enabled_constraint_ptrs =
+            m_model_ptr->reference().constraint.enabled_constraint_ptrs;
+        for (auto&& constraint_ptr : enabled_constraint_ptrs) {
+            if (constraint_ptr->local_penalty_coefficient_less() >
+                INITIAL_PENALTY_COEFFICIENT) {
+                m_state.is_exceeded_initial_penalty_coefficient = true;
+                constraint_ptr->local_penalty_coefficient_less() =
+                    INITIAL_PENALTY_COEFFICIENT;
+            }
 
-                if (constraint.local_penalty_coefficient_greater() >
-                    INITIAL_PENALTY_COEFFICIENT) {
-                    m_state.is_exceeded_initial_penalty_coefficient = true;
-                    constraint.local_penalty_coefficient_greater() =
-                        INITIAL_PENALTY_COEFFICIENT;
-                }
+            if (constraint_ptr->local_penalty_coefficient_greater() >
+                INITIAL_PENALTY_COEFFICIENT) {
+                m_state.is_exceeded_initial_penalty_coefficient = true;
+                constraint_ptr->local_penalty_coefficient_greater() =
+                    INITIAL_PENALTY_COEFFICIENT;
             }
         }
     }
@@ -1036,16 +1053,18 @@ class TabuSearchControllerStateManager {
             }
         }
 
-        for (auto&& proxy : m_model_ptr->constraint_proxies()) {
-            const auto& CONSTRAINT_VALUES =
-                m_global_state_ptr->incumbent_holder
-                    .local_augmented_incumbent_solution()
-                    .constraint_value_proxies[proxy.index()]
-                    .flat_indexed_values();
+        const auto& LOCAL_AUGMENTED_INCUMBENT_SOLUTION =
+            m_global_state_ptr->incumbent_holder
+                .local_augmented_incumbent_solution();
+        const auto& CONSTRAINT_VALUE_PROXIES =
+            LOCAL_AUGMENTED_INCUMBENT_SOLUTION.constraint_value_proxies;
 
+        for (auto&& proxy : m_model_ptr->constraint_proxies()) {
+            const int PROXY_INDEX = proxy.index();
             for (auto&& constraint : proxy.flat_indexed_constraints()) {
+                const int    CONSTRAINT_INDEX = constraint.flat_index();
                 const double CONSTRAINT_VALUE =
-                    CONSTRAINT_VALUES[constraint.flat_index()];
+                    CONSTRAINT_VALUE_PROXIES[PROXY_INDEX][CONSTRAINT_INDEX];
                 const double POSITIVE_PART = std::max(CONSTRAINT_VALUE, 0.0);
                 const double NEGATIVE_PART = std::max(-CONSTRAINT_VALUE, 0.0);
 
@@ -1066,20 +1085,17 @@ class TabuSearchControllerStateManager {
     /*************************************************************************/
     inline void update_local_penalty_coefficient_range(void) {
         m_state.local_penalty_coefficient_range.initialize();
-        for (auto&& proxy : m_model_ptr->constraint_proxies()) {
-            for (auto&& constraint : proxy.flat_indexed_constraints()) {
-                if (!constraint.is_enabled()) {
-                    continue;
-                }
-                if (constraint.is_less_or_equal()) {
-                    m_state.local_penalty_coefficient_range.update(
-                        constraint.local_penalty_coefficient_less());
-                }
+        const auto& enabled_constraint_ptrs =
+            m_model_ptr->reference().constraint.enabled_constraint_ptrs;
+        for (auto&& constraint_ptr : enabled_constraint_ptrs) {
+            if (constraint_ptr->is_less_or_equal()) {
+                m_state.local_penalty_coefficient_range.update(
+                    constraint_ptr->local_penalty_coefficient_less());
+            }
 
-                if (constraint.is_greater_or_equal()) {
-                    m_state.local_penalty_coefficient_range.update(
-                        constraint.local_penalty_coefficient_greater());
-                }
+            if (constraint_ptr->is_greater_or_equal()) {
+                m_state.local_penalty_coefficient_range.update(
+                    constraint_ptr->local_penalty_coefficient_greater());
             }
         }
     }
