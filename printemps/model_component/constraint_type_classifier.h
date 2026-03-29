@@ -112,9 +112,11 @@ class ConstraintTypeClassifier {
         }
 
         if ((coefficients[0] == 1 && coefficients[1] == -1 &&
-             m_structure_ptr->constant_value == 0) ||
+             std::fabs(m_structure_ptr->constant_value) <
+                 constant::EPSILON_10) ||
             (coefficients[0] == -1 && coefficients[1] == 1 &&
-             m_structure_ptr->constant_value == 0)) {
+             std::fabs(m_structure_ptr->constant_value) <
+                 constant::EPSILON_10)) {
             m_type             = ConstraintType::ExclusiveNOR;
             m_key_variable_ptr = nullptr;
             return true;
@@ -140,7 +142,7 @@ class ConstraintTypeClassifier {
 
         if (((coefficients[0] == 1 && coefficients[1] == 1) ||
              (coefficients[0] == -1 && coefficients[1] == -1)) &&
-            m_structure_ptr->constant_value == 0) {
+            std::fabs(m_structure_ptr->constant_value) < constant::EPSILON_10) {
             m_type             = ConstraintType::InvertedIntegers;
             m_key_variable_ptr = this->determine_key_variable_ptr(
                 variable_ptrs[0], variable_ptrs[1]);
@@ -167,7 +169,7 @@ class ConstraintTypeClassifier {
 
         if (((coefficients[0] == 1 && coefficients[1] == -1) ||
              (coefficients[0] == -1 && coefficients[1] == 1)) &&
-            m_structure_ptr->constant_value == 0) {
+            std::fabs(m_structure_ptr->constant_value) < constant::EPSILON_10) {
             m_type             = ConstraintType::BalancedIntegers;
             m_key_variable_ptr = this->determine_key_variable_ptr(
                 variable_ptrs[0], variable_ptrs[1]);
@@ -244,7 +246,7 @@ class ConstraintTypeClassifier {
             return false;
         }
 
-        if (m_structure_ptr->constant_value == 0) {
+        if (std::fabs(m_structure_ptr->constant_value) < constant::EPSILON_10) {
             if (std::abs(coefficients[0]) == 1 &&
                 std::abs(coefficients[1]) != 1) {
                 m_type             = ConstraintType::ConstantRatioIntegers;
