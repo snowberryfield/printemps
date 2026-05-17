@@ -160,6 +160,17 @@ class PBCompetition2025Solver {
             m_model.import_solution(INITIAL_SOLUTION);
         }
 
+        /**
+         * If the fixed variable file is given, the values of the variables will
+         * be fixed at the specified values.
+         */
+        if (!m_argparser.fixed_variable_file_name.empty()) {
+            const auto FIXED_VARIABLES_AND_VALUES =
+                printemps::helper::read_names_and_values(
+                    m_argparser.fixed_variable_file_name);
+            m_model.fix_variables(FIXED_VARIABLES_AND_VALUES);
+        }
+
         if (m_argparser.is_specified_iteration_max) {
             m_option.general.iteration_max = m_argparser.iteration_max;
         }

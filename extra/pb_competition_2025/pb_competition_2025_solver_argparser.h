@@ -17,6 +17,7 @@ struct PBCompetition2025SolverArgparserConstant {
 struct PBCompetition2025SolverArgparser {
     std::string pb_file_name;
     std::string initial_solution_file_name;
+    std::string fixed_variable_file_name;
 
     double iteration_max;
     double time_max;
@@ -37,6 +38,7 @@ struct PBCompetition2025SolverArgparser {
     inline void initialize(void) {
         this->pb_file_name.clear();
         this->initial_solution_file_name.clear();
+        this->fixed_variable_file_name.clear();
 
         this->iteration_max =
             option::GeneralOptionConstant::DEFAULT_ITERATION_MAX;
@@ -65,6 +67,7 @@ struct PBCompetition2025SolverArgparser {
                   << "[-j NUMBER_OF_THREADS] "
                   << "[-r SEED] "
                   << "[-i INITIAL_SOLUTION_FILE] "
+                  << "[-f FIXED_VARIABLE_FILE] "
                   << "opb_file" << std::endl;
         std::cout << std::endl;
         std::cout  //
@@ -90,6 +93,10 @@ struct PBCompetition2025SolverArgparser {
         std::cout  //
             << "  -i INITIAL_SOLUTION_FILE: Specify the file name of an "
                "initial solution."
+            << std::endl;
+        std::cout  //
+            << "  -f FIXED_VARIABLE_FILE: Specify the file name of fixed "
+               "variables and their values."
             << std::endl;
     }
 
@@ -117,6 +124,9 @@ struct PBCompetition2025SolverArgparser {
                 i += 2;
             } else if (args[i] == "-i") {
                 this->initial_solution_file_name = args[i + 1];
+                i += 2;
+            } else if (args[i] == "-f") {
+                this->fixed_variable_file_name = args[i + 1];
                 i += 2;
             } else {
                 this->pb_file_name = args[i];
