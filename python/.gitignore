@@ -1,0 +1,12 @@
+build/
+dist/
+*.egg-info/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+*.so
+
+# Vendored copy of the printemps headers; populated by tools/vendor.py at
+# release time and bundled into the sdist tarball. Not tracked in git.
+_vendor/

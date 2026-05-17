@@ -47,6 +47,8 @@ jobs:
           make
           mingw-w64-${{matrix.cfg.msys2_arch}}-gcc
           mingw-w64-${{matrix.cfg.msys2_arch}}-cmake
+          mingw-w64-${{matrix.cfg.msys2_arch}}-python
+          mingw-w64-${{matrix.cfg.msys2_arch}}-python-pip
     - if: matrix.cfg.msys2_system != ''
       run: |
         Add-Content $env:GITHUB_PATH "${{ steps.msys2.outputs.msys2-location }}\${{matrix.cfg.msys2_system}}\bin"
@@ -57,6 +59,29 @@ jobs:
 
     - name: Run tests.
       run: make -f makefile/Makefile.test CC=${{ matrix.cfg.cc }} CXX=${{ matrix.cfg.cxx }}
+
+    # For MSYS2-based builds, use the msys shell to avoid contamination with the system's Python.
+    # We want to write "shell: ${{ matrix.cfg.msys2_system && 'msys2 {0}' || 'bash' }}" to unify
+    # the following two steps, but 'matrix' is not available in the context.
+
+    - name: Test Python bindings
+      if: matrix.cfg.msys2_system == ''
+      run: |
+        python -m venv .venv
+        . .venv/bin/activate
+        CC=${{ matrix.cfg.cc }} CXX=${{ matrix.cfg.cxx }} python -m pip install ./python
+        python -m pip install pytest
+        pytest python/tests
+
+    - name: Test Python bindings (MSYS)
+      if: matrix.cfg.msys2_system != ''
+      run: |
+        python -m venv .venv
+        . .venv/bin/activate
+        CC=${{ matrix.cfg.cc }} CXX=${{ matrix.cfg.cxx }} python -m pip install ./python
+        python -m pip install pytest
+        pytest python/tests
+      shell: msys2 {0}
 
   build-msvc:
     runs-on: windows-2022
@@ -109,3 +134,18 @@ jobs:
           cmake -S cmake/example -B build/example/Release -G "Ninja Multi-Config" `
                 -DTOP_DIR="$top" -DCMAKE_BUILD_TYPE=Release
           cmake --build build/example/Release --config Release -j
+
+      - name: Set up Python (MSVC)
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Test Python bindings (MSVC)
+        shell: pwsh
+        run: |
+          python -m venv .venv
+          .\.venv\Scripts\Activate.ps1
+          python -m pip install --upgrade pip
+          python -m pip install ./python
+          python -m pip install pytest
+          pytest python/tests

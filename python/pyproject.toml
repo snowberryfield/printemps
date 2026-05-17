@@ -1,0 +1,49 @@
+[build-system]
+requires = ["scikit-build-core>=0.10", "pybind11>=2.13"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "printemps"
+version = "2.8.0"
+description = "Python bindings for the printemps integer linear programming solver"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [
+    { name = "Yuji KOGUMA" },
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: C++",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS",
+    "Topic :: Scientific/Engineering :: Mathematics",
+]
+dependencies = [
+    "pytest>=8.4.2",
+]
+
+[project.scripts]
+printemps = "printemps._cli:main"
+
+[project.urls]
+Homepage = "https://snowberryfield.github.io/printemps/"
+
+[tool.scikit-build]
+minimum-version = "0.10"
+cmake.version = ">=3.15"
+cmake.source-dir = "."
+cmake.build-type = "Release"
+wheel.packages = ["printemps"]
+build-dir = "build/{wheel_tag}"
+# Bundle the vendored printemps headers (populated by tools/vendor.py before
+# `python -m build --sdist`) into the source distribution so that wheels can
+# be built from the tarball without the surrounding repository.
+sdist.include = ["_vendor/printemps/**"]
+
+[tool.scikit-build.cmake.define]
+CMAKE_POSITION_INDEPENDENT_CODE = "ON"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
