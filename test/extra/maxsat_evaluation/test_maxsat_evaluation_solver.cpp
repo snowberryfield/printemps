@@ -105,6 +105,86 @@ TEST_F(TestMaxSATEvaluationSolver, solve_test_00a) {
     }
 }
 
+/*****************************************************************************/
+TEST_F(TestMaxSATEvaluationSolver, solve_test_00e_precision) {
+    /**
+     * test_00e: precision stress. Soft clauses carry weights ~2^60 so that
+     * the double-typed internal objective can no longer distinguish costs
+     * that differ by 1. The o-line must still match the exact uint64_t
+     * cost of the returned assignment.
+     *
+     * Layout:
+     *   hard:  (x1 OR ~x1)             -- always satisfied
+     *   soft:  w=2^60  (~x1)
+     *   soft:  w=1     (~x1)
+     *   soft:  w=2^60  ( x1)
+     *
+     *   x1 = 0  ->  violated weight = 2^60       (= 1152921504606846976)
+     *   x1 = 1  ->  violated weight = 2^60 + 1   (= 1152921504606846977)
+     *
+     * Under double accumulation 2^60 + 1 rounds to 2^60, so a
+     * double-derived o-line would print 1152921504606846976 for x1 = 1.
+     * The exact uint64_t recomputation must print 1152921504606846977.
+     */
+    std::string captured;
+    const int   EXIT_CODE =
+        run_and_capture("./test/dat/wcnf/test_00e.wcnf", "2", &captured);
+
+    EXPECT_EQ(10, EXIT_CODE);
+    EXPECT_NE(std::string::npos, captured.find("s SATISFIABLE"));
+
+    /**
+     * Parse the final (last) o-line and v-line and verify their mutual
+     * consistency in uint64_t, since the solver is free to settle on
+     * either x1 = 0 or x1 = 1 (the double objective sees them as equal).
+     */
+    auto find_last_line_starting_with =
+        [&captured](const std::string &a_PREFIX) -> size_t {
+        size_t pos     = std::string::npos;
+        size_t cursor  = 0;
+        while (true) {
+            const size_t HIT = captured.find(a_PREFIX, cursor);
+            if (HIT == std::string::npos) break;
+            if (HIT == 0 || captured[HIT - 1] == '\n') {
+                pos = HIT;
+            }
+            cursor = HIT + 1;
+        }
+        return pos;
+    };
+
+    const auto LAST_O = find_last_line_starting_with("o ");
+    const auto LAST_V = find_last_line_starting_with("v ");
+    ASSERT_NE(std::string::npos, LAST_O);
+    ASSERT_NE(std::string::npos, LAST_V);
+
+    const auto O_END = captured.find('\n', LAST_O);
+    const auto V_END = captured.find('\n', LAST_V);
+    ASSERT_NE(std::string::npos, O_END);
+    ASSERT_NE(std::string::npos, V_END);
+
+    const std::string O_VALUE =
+        captured.substr(LAST_O + 2, O_END - (LAST_O + 2));
+    const std::string V_BITS =
+        captured.substr(LAST_V + 2, V_END - (LAST_V + 2));
+
+    ASSERT_EQ(1u, V_BITS.size());
+    ASSERT_TRUE(V_BITS[0] == '0' || V_BITS[0] == '1');
+
+    const uint64_t W       = static_cast<uint64_t>(1) << 60;
+    const uint64_t EXPECTED = (V_BITS[0] == '1') ? (W + 1) : W;
+
+    EXPECT_EQ(std::to_string(EXPECTED), O_VALUE);
+
+    /**
+     * Sanity: ensure the printed o-value is not the double-truncated
+     * version (this is the exact bug the test is guarding against).
+     */
+    if (V_BITS[0] == '1') {
+        EXPECT_NE(std::to_string(W), O_VALUE);
+    }
+}
+
 }  // namespace
 /*****************************************************************************/
 // END
