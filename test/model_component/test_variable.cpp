@@ -64,7 +64,6 @@ TEST_F(TestVariable, initialize) {
     EXPECT_EQ(0.0, variable.lagrangian_coefficient());
     EXPECT_EQ(nullptr, variable.selection_ptr());
     EXPECT_TRUE(variable.related_constraint_ptrs().empty());
-    EXPECT_TRUE(variable.related_binary_coefficient_constraint_ptrs().empty());
     EXPECT_EQ(nullptr, variable.dependent_expression_ptr());
     EXPECT_TRUE(variable.constraint_sensitivities().empty());
     EXPECT_EQ(0.0, variable.objective_sensitivity());
@@ -640,12 +639,6 @@ TEST_F(TestVariable, setup_related_constraint_ptr) {
 /*****************************************************************************/
 TEST_F(TestVariable, related_constraint_ptrs) {
     /// This test is covered by register_related_constraint_ptr().
-}
-
-/*****************************************************************************/
-TEST_F(TestVariable, setup_related_binary_coefficient_constraint_ptrs) {
-    /// This test is covered by
-    /// Model.setup_variable_related_binary_coefficient_constraint_ptrs().
 }
 
 /*****************************************************************************/

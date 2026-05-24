@@ -13,9 +13,6 @@ class DependentBinaryVariableExtractor {
    private:
     model::Model<T_Variable, T_Expression> *m_model_ptr;
 
-    std::vector<model_component::Constraint<T_Variable, T_Expression> *>
-        m_candidate_constraint_ptrs;
-
     std::vector<model_component::Variable<T_Variable, T_Expression> *>
         m_target_variable_ptrs;
 

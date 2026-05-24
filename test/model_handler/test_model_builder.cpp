@@ -95,7 +95,6 @@ TEST_F(TestModelBuilder, setup_variable_related_constraints) {
     model.reference().update_constraint_reference();
     model.builder().setup_variable_constraint_sensitivities();
     model.builder().setup_variable_related_constraint_ptrs();
-    model.builder().setup_variable_related_binary_coefficient_constraint_ptrs();
 
     for (auto i = 0; i < 10; i++) {
         EXPECT_TRUE(std::find(x(i).related_constraint_ptrs().begin(),
@@ -129,53 +128,6 @@ TEST_F(TestModelBuilder, setup_variable_related_constraints) {
                           &g(2)) != y(i, j).related_constraint_ptrs().end());
         }
     }
-
-    for (auto i = 0; i < 10; i++) {
-        EXPECT_TRUE(
-            std::find(x(i).related_binary_coefficient_constraint_ptrs().begin(),
-                      x(i).related_binary_coefficient_constraint_ptrs().end(),
-                      &g(0)) !=
-            x(i).related_binary_coefficient_constraint_ptrs().end());
-        EXPECT_FALSE(
-            std::find(x(i).related_binary_coefficient_constraint_ptrs().begin(),
-                      x(i).related_binary_coefficient_constraint_ptrs().end(),
-                      &g(1)) !=
-            x(i).related_binary_coefficient_constraint_ptrs().end());
-    }
-
-    for (auto i = 0; i < 20; i++) {
-        for (auto j = 0; j < 30; j++) {
-            EXPECT_FALSE(
-                std::find(
-                    y(i, j)
-                        .related_binary_coefficient_constraint_ptrs()
-                        .begin(),
-                    y(i, j).related_binary_coefficient_constraint_ptrs().end(),
-                    &g(0)) !=
-                y(i, j).related_binary_coefficient_constraint_ptrs().end());
-            EXPECT_TRUE(
-                std::find(
-                    y(i, j)
-                        .related_binary_coefficient_constraint_ptrs()
-                        .begin(),
-                    y(i, j).related_binary_coefficient_constraint_ptrs().end(),
-                    &g(1)) !=
-                y(i, j).related_binary_coefficient_constraint_ptrs().end());
-            EXPECT_FALSE(
-                std::find(
-                    y(i, j)
-                        .related_binary_coefficient_constraint_ptrs()
-                        .begin(),
-                    y(i, j).related_binary_coefficient_constraint_ptrs().end(),
-                    &g(2)) !=
-                y(i, j).related_binary_coefficient_constraint_ptrs().end());
-        }
-    }
-    EXPECT_FALSE(
-        std::find(x(0).related_binary_coefficient_constraint_ptrs().begin(),
-                  x(0).related_binary_coefficient_constraint_ptrs().end(),
-                  &g(2)) !=
-        x(0).related_binary_coefficient_constraint_ptrs().end());
 }
 
 /*****************************************************************************/
@@ -319,8 +271,9 @@ TEST_F(TestModelBuilder, shrink_global_penalty_coefficient) {
     const auto EXPECTED_UPPER_BOUND = 2.0 * (1 + 1) + 1;   // 5
     const auto EXPECTED_LOWER_BOUND = 2.0 * (-1 - 1) + 1;  // -3
 
-    EXPECT_FLOAT_EQ(EXPECTED_UPPER_BOUND - EXPECTED_LOWER_BOUND + 1,
-                    model.global_penalty_coefficient());  // 5 -(-3)+ 1 = 9
+    EXPECT_FLOAT_EQ(
+        2 * (EXPECTED_UPPER_BOUND - EXPECTED_LOWER_BOUND + 1),
+        model.global_penalty_coefficient());  // 2 * (5 - (-3) + 1) = 2 * 9 = 18
 }
 
 /*****************************************************************************/

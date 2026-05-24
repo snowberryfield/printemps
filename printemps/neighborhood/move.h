@@ -153,8 +153,7 @@ struct Move {
     /*************************************************************************/
     inline void setup_overlap_rate(void) {
         auto &union_ptrs_vector =
-            this->alterations.front()
-                .first->related_binary_coefficient_constraint_ptrs();
+            this->alterations.front().first->related_constraint_ptrs();
 
         std::unordered_set<
             model_component::Constraint<T_Variable, T_Expression> *>
@@ -170,8 +169,7 @@ struct Move {
         const int ALTERATIONS_SIZE = this->alterations.size();
         for (auto i = 1; i < ALTERATIONS_SIZE; i++) {
             auto &related_constraint_ptrs_vector =
-                this->alterations[i]
-                    .first->related_binary_coefficient_constraint_ptrs();
+                this->alterations[i].first->related_constraint_ptrs();
             std::unordered_set<
                 model_component::Constraint<T_Variable, T_Expression> *>
                 related_constraint_ptrs(related_constraint_ptrs_vector.begin(),

@@ -40,8 +40,6 @@ struct VariableExtension {
     std::vector<std::pair<Constraint<T_Variable, T_Expression> *, T_Expression>>
         constraint_sensitivities;
     std::vector<Constraint<T_Variable, T_Expression> *> related_constraint_ptrs;
-    std::vector<Constraint<T_Variable, T_Expression> *>
-        related_binary_coefficient_constraint_ptrs;
     Expression<T_Variable, T_Expression> *dependent_expression_ptr;
 
     T_Expression objective_sensitivity;
@@ -152,7 +150,6 @@ class Variable : public multi_array::AbstractMultiArrayElement {
         m_extension->lagrangian_coefficient = 0.0;
         m_extension->selection_ptr          = nullptr;
         m_extension->related_constraint_ptrs.clear();
-        m_extension->related_binary_coefficient_constraint_ptrs.clear();
         m_extension->dependent_expression_ptr = nullptr;
         m_extension->constraint_sensitivities.clear();
         m_extension->objective_sensitivity                      = 0.0;
@@ -535,32 +532,6 @@ class Variable : public multi_array::AbstractMultiArrayElement {
     inline const std::vector<Constraint<T_Variable, T_Expression> *> &
     related_constraint_ptrs(void) const {
         return m_extension->related_constraint_ptrs;
-    }
-
-    /*************************************************************************/
-    inline void setup_related_binary_coefficient_constraint_ptrs(void) {
-        /**
-         * NOTE: This method must be called after constraint categorization.
-         */
-        m_extension->related_binary_coefficient_constraint_ptrs.clear();
-        for (const auto &sensitivity : m_extension->constraint_sensitivities) {
-            auto &constraint_ptr = sensitivity.first;
-            if (constraint_ptr->is_type(ConstraintType::SetPartitioning) ||
-                constraint_ptr->is_type(ConstraintType::SetPacking) ||
-                constraint_ptr->is_type(ConstraintType::SetCovering) ||
-                constraint_ptr->is_type(ConstraintType::Cardinality) ||
-                constraint_ptr->is_type(ConstraintType::InvariantKnapsack) ||
-                constraint_ptr->is_type(ConstraintType::MultipleCovering)) {
-                m_extension->related_binary_coefficient_constraint_ptrs
-                    .push_back(constraint_ptr);
-            }
-        }
-    }
-
-    /*************************************************************************/
-    inline const std::vector<Constraint<T_Variable, T_Expression> *> &
-    related_binary_coefficient_constraint_ptrs(void) const {
-        return m_extension->related_binary_coefficient_constraint_ptrs;
     }
 
     /*************************************************************************/

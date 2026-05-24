@@ -249,7 +249,6 @@ TEST_F(TestMove, setup_overlap_rate) {
     model.reference().update_constraint_reference();
     model.builder().setup_variable_constraint_sensitivities();
     model.builder().setup_variable_related_constraint_ptrs();
-    model.builder().setup_variable_related_binary_coefficient_constraint_ptrs();
 
     /// x(0) and x(1) have two common constraints.
     {

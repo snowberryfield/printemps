@@ -341,23 +341,6 @@ class Solver {
         }
 
         /**
-         * Disable the Chain move for the problem with no zero one_coefficient
-         * constraints (set partitioning, set packing, set covering,
-         * cardinality, and invariant knapsack).
-         */
-        if (m_option.neighborhood.is_enabled_chain_move &&
-            !m_model_ptr->reference()
-                 .constraint_type.has_chain_move_effective_constraints()) {
-            m_option.neighborhood.is_enabled_chain_move = false;
-            utility::print_warning(
-                "Chain move was disabled because the problem does not include "
-                "any zero-one coefficient constraints (set "
-                "partitioning/packing/covering, cardinality, invariant "
-                "knapsack, and multiple covering).",
-                m_option.output.verbose >= option::verbose::Warning);
-        }
-
-        /**
          * Set the maximum number of threads for OpenMP.
          */
 
